@@ -67,19 +67,21 @@ void initPostEffectBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initPostEffectBindings(void*)
 {
   class_<BND_File3dmPostEffect>("PostEffect")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmPostEffect&>()
     .property("localName", &BND_File3dmPostEffect::LocalName)
     .property("isVisible", &BND_File3dmPostEffect::IsVisible)
     .property("isActive", &BND_File3dmPostEffect::IsActive)
     .function("getParameter", &BND_File3dmPostEffect::GetParameter)
     .function("setParameter", &BND_File3dmPostEffect::SetParameter)
+    */
     ;
 }
 #endif

@@ -18,13 +18,14 @@ void initLinearWorkflowBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initLinearWorkflowBindings(void*)
 {
   class_<BND_File3dmLinearWorkflow>("LinearWorkflow")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmLinearWorkflow&>()
     .property("preProcessTexturesOn", &BND_File3dmLinearWorkflow::GetPreProcessTexturesOn, &BND_File3dmLinearWorkflow::SetPreProcessTexturesOn)
     .property("preProcessColorsOn", &BND_File3dmLinearWorkflow::GetPreProcessColorsOn, &BND_File3dmLinearWorkflow::SetPreProcessColorsOn)
@@ -32,6 +33,7 @@ void initLinearWorkflowBindings(void*)
     .property("preProcessGammaOn", &BND_File3dmLinearWorkflow::GetPreProcessGammaOn, &BND_File3dmLinearWorkflow::SetPreProcessGammaOn)
     .property("postProcessGamma", &BND_File3dmLinearWorkflow::GetPostProcessGamma, &BND_File3dmLinearWorkflow::SetPostProcessGamma)
     .property("postProcessGammaOn", &BND_File3dmLinearWorkflow::GetPostProcessGammaOn, &BND_File3dmLinearWorkflow::SetPostProcessGammaOn)
+    */
     ;
 }
 #endif

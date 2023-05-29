@@ -23,13 +23,14 @@ void initGroundPlaneBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initGroundPlaneBindings(void*)
 {
   class_<BND_File3dmGroundPlane>("GroundPlane")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmGroundPlane&>()
     .property("on", &BND_File3dmGroundPlane::GetOn, &BND_File3dmGroundPlane::SetOn)
     .property("showUnderside", &BND_File3dmGroundPlane::GetShowUnderside, &BND_File3dmGroundPlane::SetShowUnderside)
@@ -42,6 +43,7 @@ void initGroundPlaneBindings(void*)
     .property("textureRepeatLocked", &BND_File3dmGroundPlane::GetTextureRepeatLocked, &BND_File3dmGroundPlane::SetTextureRepeatLocked)
     .property("textureSize", &BND_File3dmGroundPlane::GetTextureSize, &BND_File3dmGroundPlane::SetTextureSize)
     .property("textureRotation", &BND_File3dmGroundPlane::GetTextureRotation, &BND_File3dmGroundPlane::SetTextureRotation)
+    */
     ;
 }
 #endif

@@ -24,13 +24,14 @@ void initSafeFrameBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initSafeFrameBindings(void*)
 {
   class_<BND_File3dmSafeFrame>("SafeFrame")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmSafeFrame&>()
     .property("on", &BND_File3dmSafeFrame::GetOn, &BND_File3dmSafeFrame::SetOn)
     .property("perspectiveOnly", &BND_File3dmSafeFrame::GetPerspectiveOnly, &BND_File3dmSafeFrame::SetPerspectiveOnly)
@@ -44,6 +45,7 @@ void initSafeFrameBindings(void*)
     .property("titleFrameLinked", &BND_File3dmSafeFrame::GetTitleFrameLinked, &BND_File3dmSafeFrame::SetTitleFrameLinked)
     .property("titleFrameXScale", &BND_File3dmSafeFrame::GetTitleFrameXScale, &BND_File3dmSafeFrame::SetTitleFrameXScale)
     .property("titleFrameYScale", &BND_File3dmSafeFrame::GetTitleFrameYScale, &BND_File3dmSafeFrame::SetTitleFrameYScale)
+    */
     ;
 }
 #endif

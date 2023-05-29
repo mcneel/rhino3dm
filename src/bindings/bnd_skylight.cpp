@@ -14,16 +14,18 @@ void initSkylightBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initSkylightBindings(void*)
 {
   class_<BND_File3dmSkylight>("Skylight")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmSkylight&>()
     .property("on", &BND_File3dmSkylight::GetOn, &BND_File3dmSkylight::SetOn)
     .property("shadowIntensity", &BND_File3dmSkylight::GetShadowIntensity, &BND_File3dmSkylight::SetShadowIntensity)
+    */
     ;
 }
 #endif

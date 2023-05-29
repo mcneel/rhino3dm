@@ -72,19 +72,21 @@ void initRenderEnvironmentsBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initRenderEnvironmentsBindings(void*)
 {
   class_<BND_File3dmRenderEnvironments>("RenderEnvironments")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmRenderEnvironments&>()
     .property("backgroundId", &BND_File3dmRenderEnvironments::GetBackgroundId, &BND_File3dmRenderEnvironments::SetBackgroundId)
     .property("skylightingId", &BND_File3dmRenderEnvironments::GetSkylightingId, &BND_File3dmRenderEnvironments::SetSkylightingId)
     .property("skylightingOverride", &BND_File3dmRenderEnvironments::GetSkylightingOverride, &BND_File3dmRenderEnvironments::SetSkylightingOverride)
     .property("reflectionId", &BND_File3dmRenderEnvironments::GetReflectionId, &BND_File3dmRenderEnvironments::SetReflectionId)
     .property("reflectionOverride", &BND_File3dmRenderEnvironments::GetReflectionOverride, &BND_File3dmRenderEnvironments::SetReflectionOverride)
+    */
    ;
 }
 #endif

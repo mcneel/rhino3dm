@@ -53,7 +53,7 @@ void initEmbeddedFileBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE__TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initEmbeddedFileBindings(void*)
@@ -63,8 +63,9 @@ void initEmbeddedFileBindings(void*)
     .constructor<const BND_File3dmEmbeddedFile&>()
     .class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
-    .property("filename", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
-    .function("write", &BND_File3dmEmbeddedFile::SaveToFile, allow_raw_pointers())
+    //.function("write", &BND_File3dmEmbeddedFile::SaveToFile, allow_raw_pointers())
+    //.property("filename", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
+    .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers())
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }

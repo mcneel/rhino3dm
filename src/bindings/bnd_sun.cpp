@@ -1,7 +1,7 @@
 
 #include "bindings.h"
 
-int BND_File3dmSun::GetYear(void) const
+int BND_File3dmSun::GetYear() const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -15,7 +15,7 @@ void BND_File3dmSun::SetYear(int v) const
   _sun->SetLocalDateTime(v, m, d, h);
 }
 
-int BND_File3dmSun::GetMonth(void) const
+int BND_File3dmSun::GetMonth() const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -29,7 +29,7 @@ void BND_File3dmSun::SetMonth(int v) const
   _sun->SetLocalDateTime(y, v, d, h);
 }
 
-int BND_File3dmSun::GetDay(void) const
+int BND_File3dmSun::GetDay() const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -43,7 +43,7 @@ void BND_File3dmSun::SetDay(int v) const
   _sun->SetLocalDateTime(y, m, v, h);
 }
 
-double BND_File3dmSun::GetHours(void) const
+double BND_File3dmSun::GetHours() const
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -57,7 +57,7 @@ void BND_File3dmSun::SetHours(double v) const
   _sun->SetLocalDateTime(y, m, d, v);
 }
 
-BND_Light BND_File3dmSun::GetLight(void) const
+BND_Light BND_File3dmSun::GetLight() const
 {
   auto* light = new ON_Light(_sun->Light());
   return BND_Light(light, nullptr);
@@ -112,16 +112,16 @@ void initSunBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initSunBindings(void*)
 {
   class_<BND_File3dmSun>("Sun")
     .constructor<>()
-    .constructor<const BND_File3dmSun&>()
-    .property("minYear", &BND_File3dmSun::&BND_File3dmSun::GetMinYear)
-    .property("maxYear", &BND_File3dmSun::&BND_File3dmSun::GetMaxYear)
+    //.constructor<const BND_File3dmSun&>()
+    .property("minYear", &BND_File3dmSun::GetMinYear)
+    .property("maxYear", &BND_File3dmSun::GetMaxYear)
     .property("vector", &BND_File3dmSun::GetVector)
     .property("enableAllowed", &BND_File3dmSun::GetEnableAllowed, &BND_File3dmSun::SetEnableAllowed)
     .property("enableOn", &BND_File3dmSun::GetEnableOn, &BND_File3dmSun::SetEnableOn)

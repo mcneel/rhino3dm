@@ -16,14 +16,18 @@ private:
   bool _owned = false;
 
 public:
+  BND_File3dmDithering() = default;
+  BND_File3dmDithering(ON_Dithering* dit) : _dit(dit) { }
+
+  /*
   BND_File3dmDithering() { _dit = new ON_Dithering; _owned = true; }
   BND_File3dmDithering(const BND_File3dmDithering& dit) { _dit = new ON_Dithering(*dit._dit); _owned = true; }
-  BND_File3dmDithering(ON_Dithering* dit) : _dit(dit) { }
   ~BND_File3dmDithering() { if (_owned) delete _dit; }
+  */
 
-  bool GetOn(void) const { return _dit->On(); }
+  bool GetOn() const { return _dit->On(); }
   void SetOn(bool v) const { _dit->SetOn(v); }
 
-  ON_Dithering::Methods GetMethod(void) const { return _dit->Method(); }
+  ON_Dithering::Methods GetMethod() const { return _dit->Method(); }
   void SetMethod(ON_Dithering::Methods v) const { _dit->SetMethod(v); }
 };

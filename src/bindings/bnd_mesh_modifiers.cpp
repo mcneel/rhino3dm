@@ -249,13 +249,14 @@ void initMeshModifierBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initMeshModifierBindings(void*)
 {
   class_<BND_File3dmDisplacement>("Displacement")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmDisplacement&>()
     .property("on", &BND_File3dmDisplacement::On, &BND_File3dmDisplacement::SetOn)
     .property("texture", &BND_File3dmDisplacement::Texture, &BND_File3dmDisplacement::SetTexture)
@@ -272,10 +273,12 @@ void initMeshModifierBindings(void*)
     .property("refineSteps", &BND_File3dmDisplacement::RefineSteps, &BND_File3dmDisplacement::SetRefineSteps)
     .property("refineSensitivity", &BND_File3dmDisplacement::RefineSensitivity, &BND_File3dmDisplacement::SetRefineSensitivity)
     .property("sweepResolutionFormula", &BND_File3dmDisplacement::SweepResolutionFormula, &BND_File3dmDisplacement::SweepResolutionFormula)
+    */
     ;
 
   class_<BND_File3dmEdgeSoftening>("EdgeSoftening")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmEdgeSoftening&>()
     .property("on", &BND_File3dmEdgeSoftening::On, &BND_File3dmEdgeSoftening::SetOn)
     .property("softening", &BND_File3dmEdgeSoftening::Softening, &BND_File3dmEdgeSoftening::SetSoftening)
@@ -283,20 +286,24 @@ void initMeshModifierBindings(void*)
     .property("faceted", &BND_File3dmEdgeSoftening::Faceted, &BND_File3dmEdgeSoftening::SetFaceted)
     .property("edgeAngleThreshold", &BND_File3dmEdgeSoftening::EdgeAngleThreshold, &BND_File3dmEdgeSoftening::SetEdgeAngleThreshold)
     .property("forceSoftening", &BND_File3dmEdgeSoftening::ForceSoftening, &BND_File3dmEdgeSoftening::SetForceSoftening)
+    */
     ;
 
   class_<BND_File3dmThickening>("Thickening")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmThickening&>()
     .property("on", &BND_File3dmThickening::On, &BND_File3dmThickening::SetOn)
     .property("distance", &BND_File3dmThickening::Distance, &BND_File3dmThickening::SetDistance)
     .property("solid", &BND_File3dmThickening::Solid, &BND_File3dmThickening::SetSolid)
     .property("offsetOnly", &BND_File3dmThickening::OffsetOnly, &BND_File3dmThickening::SetOffsetOnly)
     .property("bothSides", &BND_File3dmThickening::BothSides, &BND_File3dmThickening::SetBothSides)
+    */
     ;
 
   class_<BND_File3dmCurvePiping>("CurvePiping")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmCurvePiping&>()
     .property("on", &BND_File3dmCurvePiping::On, &BND_File3dmCurvePiping::SetOn)
     .property("radius", &BND_File3dmCurvePiping::Radius, &BND_File3dmCurvePiping::SetRadius)
@@ -304,10 +311,12 @@ void initMeshModifierBindings(void*)
     .property("faceted", &BND_File3dmCurvePiping::Faceted, &BND_File3dmCurvePiping::SetFaceted)
     .property("accuracy", &BND_File3dmCurvePiping::Accuracy, &BND_File3dmCurvePiping::SetAccuracy)
     .property("capType", &BND_File3dmCurvePiping::CapType, &BND_File3dmCurvePiping::SetCapType)
+    */
     ;
 
-  class_<BND_File3dmShutLiningCurve>(m, "ShutLiningCurve")
+  class_<BND_File3dmShutLiningCurve>("ShutLiningCurve")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmShutLiningCurve&>()
     .property("id", &BND_File3dmShutLiningCurve::Id, &BND_File3dmShutLiningCurve::SetId)
     .property("radius", &BND_File3dmShutLiningCurve::Radius, &BND_File3dmShutLiningCurve::SetRadius)
@@ -315,10 +324,12 @@ void initMeshModifierBindings(void*)
     .property("enabled", &BND_File3dmShutLiningCurve::Enabled, &BND_File3dmShutLiningCurve::SetEnabled)
     .property("pull", &BND_File3dmShutLiningCurve::Pull, &BND_File3dmShutLiningCurve::SetPull)
     .property("isBump", &BND_File3dmShutLiningCurve::IsBump, &BND_File3dmShutLiningCurve::SetIsBump)
+    */
     ;
 
   class_<BND_File3dmShutLining>("ShutLining")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmShutLining&>()
     .property("on", &BND_File3dmShutLining::On, &BND_File3dmShutLining::SetOn)
     .property("faceted", &BND_File3dmShutLining::Faceted, &BND_File3dmShutLining::SetFaceted)
@@ -326,6 +337,7 @@ void initMeshModifierBindings(void*)
     .property("forceUpdate", &BND_File3dmShutLining::ForceUpdate, &BND_File3dmShutLining::SetForceUpdate)
     .property("curves", &BND_File3dmShutLining::Curves)
     .function("deleteAllCurves", &BND_File3dmShutLining::DeleteAllCurves)
+    */
     ;
 }
 #endif

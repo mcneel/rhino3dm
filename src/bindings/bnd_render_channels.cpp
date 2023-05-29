@@ -47,16 +47,18 @@ void initRenderChannelsBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initRenderChannelsBindings(void*)
 {
   class_<BND_File3dmRenderChannels>("RenderChannels")
     .constructor<>()
+    /*
     .constructor<const BND_File3dmRenderChannels&>()
     .property("mode", &BND_File3dmRenderChannels::GetMode, &BND_File3dmRenderChannels::SetMode)
     .property("customIds", &BND_File3dmRenderChannels::GetCustomList, &BND_File3dmRenderChannels::SetCustomList)
+    */
     ;
 }
 #endif

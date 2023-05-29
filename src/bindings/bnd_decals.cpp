@@ -1,56 +1,114 @@
 
 #include "bindings.h"
 
-double BND_File3dmDecal::HorzSweepStart(void) const
+BND_File3dmDecal::BND_File3dmDecal(ON_Decal* d)
+{
+  _decal = d;
+}
+
+Mappings BND_File3dmDecal::Mapping() const 
+{
+  int rc = (int)_decal->Mapping();
+
+  switch(rc)
+  {
+    case -1:
+      return Mappings::None;
+      break;
+    case 0:
+      return Mappings::Planar;
+      break;
+    case 1:
+      return Mappings::Cylindrical;
+      break;
+    case 2:
+      return Mappings::Spherical;
+      break;
+    case 3:
+      return Mappings::UV;
+      break;
+    default:
+      return Mappings::None;
+      break;
+  }
+
+}
+
+void BND_File3dmDecal::SetMapping(Mappings mapping) 
+{
+  int map = (int)mapping;
+  switch(map)
+  {
+    case -1:
+      _decal->SetMapping(ON_Decal::Mappings::None);
+      break;
+    case 0:
+      _decal->SetMapping(ON_Decal::Mappings::Planar);
+      break;
+    case 1:
+      _decal->SetMapping(ON_Decal::Mappings::Cylindrical);
+      break;
+    case 2:
+      _decal->SetMapping(ON_Decal::Mappings::Spherical);
+      break;
+    case 3:
+      _decal->SetMapping(ON_Decal::Mappings::UV);
+      break;
+  }
+  
+}
+
+/*
+double BND_File3dmDecal::HorzSweepStart() const
 {
   double sta = 0.0, end = 0.0;
   _decal->GetHorzSweep(sta, end);
   return sta;
 }
 
-double BND_File3dmDecal::HorzSweepEnd(void) const
+double BND_File3dmDecal::HorzSweepEnd() const
 {
   double sta = 0.0, end = 0.0;
   _decal->GetHorzSweep(sta, end);
   return end;
 }
 
-double BND_File3dmDecal::VertSweepStart(void) const
+double BND_File3dmDecal::VertSweepStart() const
 {
   double sta = 0.0, end = 0.0;
   _decal->GetVertSweep(sta, end);
   return sta;
 }
 
-double BND_File3dmDecal::VertSweepEnd(void) const
+double BND_File3dmDecal::VertSweepEnd() const
 {
   double sta = 0.0, end = 0.0;
   _decal->GetVertSweep(sta, end);
   return end;
 }
 
-double BND_File3dmDecal::BoundsMinU(void) const
+double BND_File3dmDecal::BoundsMinU() const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return min_u;
 }
 
-double BND_File3dmDecal::BoundsMinV(void) const
+double BND_File3dmDecal::BoundsMinV() const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return min_v;
 }
 
-double BND_File3dmDecal::BoundsMaxU(void) const
+double BND_File3dmDecal::BoundsMaxU() const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   return max_u;
 }
 
-double BND_File3dmDecal::BoundsMaxV(void) const
+double BND_File3dmDecal::BoundsMaxV() const
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
@@ -104,7 +162,7 @@ void BND_File3dmDecal::SetBoundsMaxV(double v) const
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   _decal->SetUVBounds(min_u, min_v, max_u, v);
 }
-
+*/
 BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
 {
   _attr = a;
@@ -167,16 +225,33 @@ void initDecalBindings(pybind11::module& m)
 }
 #endif
 
-#if defined(ON_WASM_COMPILE____TEMP)
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initDecalBindings(void*)
 {
+
+  enum_<Mappings>("Mappings")
+    .value("None", Mappings::None)
+    .value("Planar", Mappings::Planar)
+    .value("Cylindrical", Mappings::Cylindrical)
+    .value("Spherical", Mappings::Spherical)
+    .value("UV", Mappings::UV)
+    ;
+
+  enum_<Projections>("Projections")
+    .value("None", Projections::None)
+    .value("Forward", Projections::Forward)
+    .value("Backward", Projections::Backward)
+    .value("Both", Projections::Both)
+    ;
+
   class_<BND_File3dmDecal>("Decal")
     .constructor<>()
-    .constructor<const BND_File3dmDecal&>()
+    //.constructor<const BND_File3dmDecal&>()
     .property("textureInstanceId", &BND_File3dmDecal::TextureInstanceId, &BND_File3dmDecal::SetTextureInstanceId)
     .property("mapping", &BND_File3dmDecal::Mapping, &BND_File3dmDecal::SetMapping)
+    /*
     .property("projection", &BND_File3dmDecal::Projection, &BND_File3dmDecal::SetProjection)
     .property("mapToInside", &BND_File3dmDecal::MapToInside, &BND_File3dmDecal::SetMapToInside)
     .property("transparency", &BND_File3dmDecal::Transparency, &BND_File3dmDecal::SetTransparency)
@@ -193,6 +268,7 @@ void initDecalBindings(void*)
     .property("boundsMinV", &BND_File3dmDecal::BoundsMinV, &BND_File3dmDecal::SetBoundsMinV)
     .property("boundsMaxU", &BND_File3dmDecal::BoundsMaxU, &BND_File3dmDecal::SetBoundsMaxU)
     .property("boundsMaxV", &BND_File3dmDecal::BoundsMaxV, &BND_File3dmDecal::SetBoundsMaxV)
+    */
     ;
 }
 #endif
