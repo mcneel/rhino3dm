@@ -1219,6 +1219,49 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, worldPoint1, worldPoint2, false);
     }
 
+    public enum WireThicknessMode : byte
+    {
+      UsePlotWeight = 0,
+      UseLinetypeWidth = 1,
+    }
+
+    public WireThicknessMode WireThicknessUsage
+    {
+      get
+      {
+        bool useplotweight = GetBool(UnsafeNativeMethods.PrintInfoBool.UsePlotWeight);
+        return useplotweight ? WireThicknessMode.UsePlotWeight : WireThicknessMode.UseLinetypeWidth;
+      }
+      set
+      {
+        bool useplotweight = value == WireThicknessMode.UsePlotWeight;
+        SetBool(UnsafeNativeMethods.PrintInfoBool.UsePlotWeight, useplotweight);
+      }
+    }
+
+    public bool LinetypeWidthUnitsArePageLengths
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.PrintInfoBool.LinetypeWidthUnitsArePageLengths);
+      }
+      set
+      {
+        SetBool(UnsafeNativeMethods.PrintInfoBool.LinetypeWidthUnitsArePageLengths, value);
+      }
+    }
+
+    public double PixelToMillimeterLinetypeScale
+    {
+      get
+      {
+        return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PixelToMillimeterLinetypeScale);
+      }
+      set
+      {
+        SetDouble(UnsafeNativeMethods.PrintInfoDouble.PixelToMillimeterLinetypeScale, value);
+      }
+    }
 
 #region IDisposable implementation
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>

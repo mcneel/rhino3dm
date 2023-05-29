@@ -18,6 +18,7 @@ namespace Rhino.Runtime
       // the advanced options dialog
     }
 
+    static bool RunningOnOSX { get; } = Rhino.Runtime.HostUtils.RunningOnOSX;
     public static bool DarkModeWhenRhinoStarted { get; } = UnsafeNativeMethods.RHC_RhOSInDarkMode();
     public static bool HasSystemDarKModeChanged => DarkModeWhenRhinoStarted != UnsafeNativeMethods.RHC_RhOSInDarkMode();
 
@@ -25,6 +26,10 @@ namespace Rhino.Runtime
     {
       get
       {
+        // Return the current OS value when running on Mac since Rhino always follows
+        // the OS value on Mac
+        if (RunningOnOSX)
+          return UnsafeNativeMethods.RHC_RhOSInDarkMode();
         var darkmode = Settings.GetBool("DarkMode", DarkModeWhenRhinoStarted);
         return darkmode;
       }

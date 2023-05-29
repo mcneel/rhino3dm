@@ -847,19 +847,20 @@ namespace Rhino.Geometry
     /// Joins a collection of curve segments together.
     /// </summary>
     /// <param name="inputCurves">Curve segments to join.</param>
-    /// <returns>An array of curves which contains.</returns>
+    /// <returns>An array of joined curves. This array can be empty.</returns>
     /// <since>5.0</since>
     public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves)
     {
       return JoinCurves(inputCurves, 0.0, false);
     }
+
     /// <summary>
     /// Joins a collection of curve segments together.
     /// </summary>
     /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
     /// <param name="joinTolerance">Joining tolerance, 
     /// i.e. the distance between segment end-points that is allowed.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of joined curves. This array can be empty.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_dividebylength.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_dividebylength.cs' lang='cs'/>
@@ -871,6 +872,7 @@ namespace Rhino.Geometry
     {
       return JoinCurves(inputCurves, joinTolerance, false);
     }
+
     /// <summary>
     /// Joins a collection of curve segments together.
     /// </summary>
@@ -881,7 +883,7 @@ namespace Rhino.Geometry
     /// <para>If true, curve endpoints will be compared to curve start points.</para>
     /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
     /// </param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of joined curves. This array can be empty.</returns>
     /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
     /// <since>5.0</since>
     public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection)
@@ -1633,7 +1635,7 @@ namespace Rhino.Geometry
     /// Creates outline curves created from a text string. The functionality is similar to what you find in Rhino's TextObject command or TextEntity.Explode() in RhinoCommon.
     /// </summary>
     /// <param name="text">The text from which to create outline curves.</param>
-    /// <param name="font">The text font.</param>
+    /// <param name="font">The text font. If the font does not exist on the system. Rhino will use a substitute with similar properties.</param>
     /// <param name="textHeight">The text height.</param>
     /// <param name="textStyle">The font style. The font style can be any number of the following: 0 - Normal, 1 - Bold, 2 - Italic</param>
     /// <param name="closeLoops">Set this value to True when dealing with normal fonts and when you expect closed loops. You may want to set this to False when specifying a single-stroke font where you don't want closed loops.</param>

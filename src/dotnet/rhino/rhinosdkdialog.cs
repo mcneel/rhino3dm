@@ -118,7 +118,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Standard Rhino panel Id's
+    /// Standard Rhino panel ids.
     /// </summary>
     public static class PanelIds
     {
@@ -183,10 +183,15 @@ namespace Rhino
       /// <since>6.0</since>
       public static Guid Rendering { get { return new Guid("{ 0xd9ac0269, 0x811b, 0x47d1, { 0xaa, 0x33, 0x77, 0x79, 0x86, 0xb1, 0x37, 0x15 } }"); } }
       /// <summary>
-      /// Rhino Render Properties panel.
+      /// Rhino Render Libraries panel.
       /// </summary>
       /// <since>5.9</since>
       public static Guid Libraries { get { return new Guid("{ 0xb70a4973, 0x99ca, 0x40c0, { 0xb2, 0xb2, 0xf0, 0x34, 0x17, 0xa5, 0xff, 0x1d } }"); } }
+      /// <summary>
+      /// Rhino File Explorer panel.
+      /// </summary>
+      /// <since>8.0</since>
+      public static Guid FileExplorer { get { return new Guid("{ 0xcd3ab54f, 0x0213, 0x4d30, { 0xb4, 0xf5, 0x39, 0xa0, 0x18, 0xe3, 0x96, 0x04 } }"); } }
       /// <summary>
       /// Rhino BoxEdit panel.
       /// </summary>

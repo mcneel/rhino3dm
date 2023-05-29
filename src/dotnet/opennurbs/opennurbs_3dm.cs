@@ -37,7 +37,6 @@ namespace Rhino.FileIO
   ///</summary>
   public static class File3dmTypeCodes
   {
-    // ReSharper disable InconsistentNaming
     ///<summary>
     /// (0x00000001)
     /// The TCODE_COMMENTBLOCK is the first chunk in the file, starts 32 bytes into
@@ -712,6 +711,5 @@ namespace Rhino.FileIO
     public const uint TCODE_DICTIONARY_ENTRY = (TCODE_USER | TCODE_CRC | 0x0012);
     [CLSCompliant(false)]
     public const uint TCODE_DICTIONARY_END = (TCODE_USER | TCODE_SHORT | 0x0013);
-    // ReSharper restore InconsistentNaming
   }
 }
