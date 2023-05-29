@@ -4640,6 +4640,7 @@ namespace Rhino.ApplicationSettings
     }
     static void SetInt(int which, int value, IntPtr pCursorTooltipSettings)
     {
+
       UnsafeNativeMethods.CRhinoAppCursorToolTipSettings_SetInt(pCursorTooltipSettings, which, value);
     }
   }
@@ -5493,6 +5494,398 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppSettings_SetPackageManagerSources(value); }
     }
   }
+
+
+  /// <summary>
+  /// Represents a snapshot of <see cref="ChooseOneObjectSettings"/>.
+  /// </summary>
+  /// <since>8.0</since>
+  public class ChooseOneObjectSettingsState
+  {
+    internal ChooseOneObjectSettingsState() { }
+
+    /// <summary>FollowCursor</summary>
+    /// <since>8.0</since>
+    public bool FollowCursor { get; set; } = true;
+
+    /// <summary>XOffset</summary>
+    /// <since>8.0</since>
+    public int XOffset { get; set; } = 22;
+
+    /// <summary>YOffset</summary>
+    /// <since>8.0</since>
+    public int YOffset { get; set; } = 15;
+
+    /// <summary>AutomaticResize</summary>
+    /// <since>8.0</since>
+    public bool AutomaticResize { get; set; } = true;
+
+    /// <summary>MaxAutoResizeItems</summary>
+    /// <since>8.0</since>
+    public int MaxAutoResizeItems { get; set; } = 20;
+
+    /// <summary>ShowTitlebarAndBorder</summary>
+    /// <since>8.0</since>
+    public bool ShowTitlebarAndBorder { get; set; } = true;
+
+    /// <summary>ShowObjectName</summary>
+    /// <since>8.0</since>
+    public bool ShowObjectName { get; set; } = true;
+
+    /// <summary>ShowObjectType</summary>
+    /// <since>8.0</since>
+    public bool ShowObjectType { get; set; } = true;
+
+    /// <summary>ShowObjectColor</summary>
+    /// <since>8.0</since>
+    public bool ShowObjectColor { get; set; } = true;
+
+    /// <summary>ShowObjectLayer</summary>
+    /// <since>8.0</since>
+    public bool ShowObjectLayer { get; set; } = false;
+
+    /// <summary>DynamicHighlight</summary>
+    /// <since>8.0</since>
+    public bool DynamicHighlight { get; set; } = true;
+
+    /// <summary>UseCustomColor</summary>
+    /// <since>8.0</since>
+    public bool UseCustomColor { get; set; } = true;
+
+    /// <summary>HighlightColor</summary>
+    /// <since>8.0</since>
+    public System.Drawing.Color HighlightColor { get; set; } = System.Drawing.Color.FromArgb(255, 214, 237);
+
+    /// <summary>ShowAllOption</summary>
+    /// <since>8.0</since>
+    public bool ShowAllOption { get; set; } = false;
+
+    /// <summary>ShowObjectTypeDetails</summary>
+    /// <since>8.0</since>
+    public bool ShowObjectTypeDetails { get; set; } = false;
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify "choose one object" settings.
+  /// </summary>
+  /// <since>8.0</since>
+  public static class ChooseOneObjectSettings
+  {
+    private static ChooseOneObjectSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_New(current);
+      ChooseOneObjectSettingsState rc = new ChooseOneObjectSettingsState();
+
+      // bool values
+      const int idxFollowCursor = 0;
+      const int idxAutomaticResize = 1;
+      const int idxShowTitlebarAndBorder = 2;
+      const int idxShowObjectName = 3;
+      const int idxShowObjectType = 4;
+      const int idxShowObjectColor = 5;
+      const int idxShowObjectLayer = 6;
+      const int idxDynamicHighlight = 7;
+      const int idxUseCustomColor = 8;
+      const int idxShowAllOption = 9;
+      const int idxShowObjectTypeDetails = 10;
+
+      rc.FollowCursor = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxFollowCursor, false, false, ptr_settings);
+      rc.AutomaticResize = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxAutomaticResize, false, false, ptr_settings);
+      rc.ShowTitlebarAndBorder = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowTitlebarAndBorder, false, false, ptr_settings);
+      rc.ShowObjectName = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowObjectName, false, false, ptr_settings);
+      rc.ShowObjectType = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowObjectType, false, false, ptr_settings);
+      rc.ShowObjectColor = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowObjectColor, false, false, ptr_settings);
+      rc.ShowObjectLayer = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowObjectLayer, false, false, ptr_settings);
+      rc.DynamicHighlight = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxDynamicHighlight, false, false, ptr_settings);
+      rc.UseCustomColor = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxUseCustomColor, false, false, ptr_settings);
+      rc.ShowAllOption = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowAllOption, false, false, ptr_settings);
+      rc.ShowObjectTypeDetails = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(idxShowObjectTypeDetails, false, false, ptr_settings);
+
+      // int values
+      const int idxXoffset = 0;
+      const int idxYoffset = 1;
+      const int idxMax_autoresize_items = 2;
+
+      rc.XOffset = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(idxXoffset, false, 0, ptr_settings);
+      rc.YOffset = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(idxYoffset, false, 0, ptr_settings);
+      rc.MaxAutoResizeItems = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(idxMax_autoresize_items, false, 0, ptr_settings);
+
+      // color values
+      const int idxHighlight_color = 0;
+
+      int abgr = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetColor(idxHighlight_color, false, 0, ptr_settings);
+      rc.HighlightColor = Rhino.Runtime.Interop.ColorFromWin32(abgr);
+
+      UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>8.0</since>
+    public static ChooseOneObjectSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>8.0</since>
+    public static ChooseOneObjectSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>8.0</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>8.0</since>
+    public static void UpdateFromState(ChooseOneObjectSettingsState state)
+    {
+      FollowCursor = state.FollowCursor;
+      AutomaticResize = state.AutomaticResize;
+      ShowTitlebarAndBorder = state.ShowTitlebarAndBorder;
+      ShowObjectName = state.ShowObjectName;
+      ShowObjectType = state.ShowObjectType;
+      ShowObjectColor = state.ShowObjectColor;
+      ShowObjectLayer = state.ShowObjectLayer;
+      DynamicHighlight = state.DynamicHighlight;
+      UseCustomColor = state.UseCustomColor;
+      ShowAllOption = state.ShowAllOption;
+      ShowObjectTypeDetails = state.ShowObjectTypeDetails;
+      XOffset = state.XOffset;
+      YOffset = state.YOffset;
+      MaxAutoResizeItems = state.MaxAutoResizeItems;
+      HighlightColor = state.HighlightColor;
+    }
+
+    /// <summary>FollowCursor</summary>
+    /// <since>8.0</since>
+    public static bool FollowCursor 
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(0, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(0, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>XOffset</summary>
+    /// <since>8.0</since>
+    public static int XOffset
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(0, false, 0, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(0, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>YOffset</summary>
+    /// <since>8.0</since>
+    public static int YOffset
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(1, false, 0, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(1, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>AutomaticResize</summary>
+    /// <since>8.0</since>
+    public static bool AutomaticResize
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(1, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(1, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>MaxAutoResizeItems</summary>
+    /// <since>8.0</since>
+    public static int MaxAutoResizeItems
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(2, false, 0, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetInt(2, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowTitlebarAndBorder</summary>
+    /// <since>8.0</since>
+    public static bool ShowTitlebarAndBorder
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(2, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(2, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowObjectName</summary>
+    /// <since>8.0</since>
+    public static bool ShowObjectName
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(3, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(3, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowObjectType</summary>
+    /// <since>8.0</since>
+    public static bool ShowObjectType
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(4, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(4, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowObjectColor</summary>
+    /// <since>8.0</since>
+    public static bool ShowObjectColor
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(5, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(5, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowObjectLayer</summary>
+    /// <since>8.0</since>
+    public static bool ShowObjectLayer
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(6, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(6, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>DynamicHighlight</summary>
+    /// <since>8.0</since>
+    public static bool DynamicHighlight
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(7, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(7, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>UseCustomColor</summary>
+    /// <since>8.0</since>
+    public static bool UseCustomColor
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(8, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(8, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>HighlightColor</summary>
+    /// <since>8.0</since>
+    public static System.Drawing.Color HighlightColor
+    {
+      get
+      {
+        int argb = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetColor(0, false, 0, IntPtr.Zero);
+        return Color.FromArgb(argb);
+      }
+
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetColor(0, true, argb, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowAllOption</summary>
+    /// <since>8.0</since>
+    public static bool ShowAllOption
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(9, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(9, true, value, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>ShowObjectTypeDetails</summary>
+    /// <since>8.0</since>
+    public static bool ShowObjectTypeDetails
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(10, false, false, IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetBool(10, true, value, IntPtr.Zero);
+      }
+    }
+  }
+
+
 }
 
 #endif

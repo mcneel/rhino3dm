@@ -34,6 +34,30 @@ RH_C_FUNCTION const ON_PostEffects* ON_PostEffects_FromONX_Model(ONX_Model* ptrM
   return &ptrModel->m_settings.m_RenderSettings.PostEffects();
 }
 
+RH_C_FUNCTION bool ON_PostEffects_MovePostEffectBefore(ON_PostEffects* peps, ON_UUID* id_move, ON_UUID* id_before)
+{
+  if ((nullptr == peps) || (nullptr == id_move) || (nullptr == id_before))
+    return false;
+
+  return peps->MovePostEffectBefore(*id_move, *id_before);
+}
+
+RH_C_FUNCTION bool ON_PostEffects_GetSelectedPostEffect(const ON_PostEffects* peps, int type, ON_UUID* id)
+{
+  if ((nullptr == peps) || (nullptr == id))
+    return false;
+
+  return peps->GetSelectedPostEffect(ON_PostEffect::Types(type), *id);
+}
+
+RH_C_FUNCTION void ON_PostEffects_SetSelectedPostEffect(ON_PostEffects* peps, int type, ON_UUID* id)
+{
+  if ((nullptr != peps) && (nullptr != id))
+  {
+    peps->SetSelectedPostEffect(ON_PostEffect::Types(type), *id);
+  }
+}
+
 RH_C_FUNCTION ON_PostEffects* ON_PostEffects_New()
 {
   return new ON_PostEffects;

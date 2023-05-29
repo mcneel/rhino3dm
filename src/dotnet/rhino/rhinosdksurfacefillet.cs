@@ -35,6 +35,25 @@ namespace Rhino.Geometry
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="FaceA"></param>
+    /// <param name="uvA"></param>
+    /// <param name="FaceB"></param>
+    /// <param name="uvB"></param>
+    /// <param name="radius"></param>
+    /// <param name="allowExtend"></param>
+    /// <param name="tolerance"></param>
+    protected SurfaceFilletBase(BrepFace FaceA, Point2d uvA, BrepFace FaceB, Point2d uvB,
+      double radius, bool allowExtend, double tolerance)
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoSurfaceFillet_New2(FaceA.ConstPointer(), ref uvA, FaceB.ConstPointer(), ref uvB, radius, 
+        allowExtend, tolerance);
+      // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
+      //     "this case is really never going to happen."
+      if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceFillet.");
+    }
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="RailFace"></param>
     /// <param name="Rail3d"></param>
     /// <param name="Face"></param>
@@ -692,6 +711,20 @@ namespace Rhino.Geometry
     /// <param name="tolerance"></param>
     public SurfaceFillet(BrepFace FaceA, Point2d uvA, BrepFace FaceB, Point2d uvB,
       double radius, double tolerance) : base(FaceA, uvA, FaceB, uvB, radius, tolerance)
+    { }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="FaceA"></param>
+    /// <param name="uvA"></param>
+    /// <param name="FaceB"></param>
+    /// <param name="uvB"></param>
+    /// <param name="radius"></param>
+    /// <param name="allowExtend"></param>
+    /// <param name="tolerance"></param>
+    public SurfaceFillet(BrepFace FaceA, Point2d uvA, BrepFace FaceB, Point2d uvB,
+      double radius, bool allowExtend, double tolerance) : base(FaceA, uvA, FaceB, uvB, radius, allowExtend, tolerance)
     { }
 
     /// <summary>

@@ -13,6 +13,7 @@ RH_C_FUNCTION void ON_InstanceDefinition_GetString(const ON_InstanceDefinition* 
   const int IDX_DESCRIPTION = 1;
   const int IDX_URL = 2;
   const int IDX_URLTAG = 3;
+  const int IDX_SOURCEARCHIVE = 4;
 
   if (pConstInstanceDefinition && pStringHolder)
   {
@@ -24,6 +25,8 @@ RH_C_FUNCTION void ON_InstanceDefinition_GetString(const ON_InstanceDefinition* 
       pStringHolder->Set(pConstInstanceDefinition->URL());
     else if (IDX_URLTAG == which)
       pStringHolder->Set(pConstInstanceDefinition->URL_Tag());
+    else if (IDX_SOURCEARCHIVE == which)
+      pStringHolder->Set(pConstInstanceDefinition->LinkedFilePath());
   }
 }
 
