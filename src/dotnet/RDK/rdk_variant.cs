@@ -11,7 +11,6 @@ using Rhino.FileIO;
 
 namespace Rhino.Render
 {
-#if RHINO_SDK
   public sealed class NamedValue
   {
     /// <since>5.1</since>
@@ -45,6 +44,7 @@ namespace Rhino.Render
     }
   }
 
+#if RHINO_SDK
   internal class XMLSectionUtilities
   {
     //Push the List<Rhino.Render.NamedValue> values into the IRhRdk_XMLSection
@@ -53,7 +53,7 @@ namespace Rhino.Render
       if ((pXmlSection == IntPtr.Zero) || (null == list))
         return;
 
-      foreach (var item in list)
+      foreach (var item in list) // [MARKER]
       {
         var variant = new Variant(item.Value);
         UnsafeNativeMethods.Rdk_XmlSection_SetParam(pXmlSection, item.Name, variant.ConstPointer());
