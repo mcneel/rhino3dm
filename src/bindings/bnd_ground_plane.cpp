@@ -30,8 +30,7 @@ void initGroundPlaneBindings(void*)
 {
   class_<BND_File3dmGroundPlane>("GroundPlane")
     .constructor<>()
-    /*
-    .constructor<const BND_File3dmGroundPlane&>()
+    //.constructor<const BND_File3dmGroundPlane&>()
     .property("on", &BND_File3dmGroundPlane::GetOn, &BND_File3dmGroundPlane::SetOn)
     .property("showUnderside", &BND_File3dmGroundPlane::GetShowUnderside, &BND_File3dmGroundPlane::SetShowUnderside)
     .property("altitude", &BND_File3dmGroundPlane::GetAltitude, &BND_File3dmGroundPlane::SetAltitude)
@@ -40,10 +39,10 @@ void initGroundPlaneBindings(void*)
     .property("materialInstanceId", &BND_File3dmGroundPlane::GetMaterialInstanceId, &BND_File3dmGroundPlane::SetMaterialInstanceId)
     .property("textureOffset", &BND_File3dmGroundPlane::GetTextureOffset, &BND_File3dmGroundPlane::SetTextureOffset)
     .property("textureOffsetLocked", &BND_File3dmGroundPlane::GetTextureOffsetLocked, &BND_File3dmGroundPlane::SetTextureOffsetLocked)
-    .property("textureRepeatLocked", &BND_File3dmGroundPlane::GetTextureRepeatLocked, &BND_File3dmGroundPlane::SetTextureRepeatLocked)
+    //John C - Not Implemented
+    //.property("textureRepeatLocked", &BND_File3dmGroundPlane::GetTextureRepeatLocked, &BND_File3dmGroundPlane::SetTextureRepeatLocked)
     .property("textureSize", &BND_File3dmGroundPlane::GetTextureSize, &BND_File3dmGroundPlane::SetTextureSize)
     .property("textureRotation", &BND_File3dmGroundPlane::GetTextureRotation, &BND_File3dmGroundPlane::SetTextureRotation)
-    */
     ;
 }
 #endif

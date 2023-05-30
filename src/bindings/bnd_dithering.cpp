@@ -20,11 +20,9 @@ void initDitheringBindings(void*)
 {
   class_<BND_File3dmDithering>("Dithering")
     .constructor<>()
-    /*
-    .constructor<const BND_File3dmDithering&>()
+    //.constructor<const BND_File3dmDithering&>()
     .property("on", &BND_File3dmDithering::GetOn, &BND_File3dmDithering::SetOn)
     .property("method", &BND_File3dmDithering::GetMethod, &BND_File3dmDithering::SetMethod)
-    */
     ;
 }
 #endif

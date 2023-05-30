@@ -13,14 +13,18 @@ class BND_File3dmLinearWorkflow
 {
 private:
   ON_LinearWorkflow* _lw = nullptr;
-  bool _owned = false;
+  //bool _owned = false;
 
 public:
+  BND_File3dmLinearWorkflow() = default;
+  BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw);
+  /*
   BND_File3dmLinearWorkflow() { _lw = new ON_LinearWorkflow; _owned = true; }
   BND_File3dmLinearWorkflow(const BND_File3dmLinearWorkflow& lw) { _lw = new ON_LinearWorkflow(*lw._lw); _owned = true; }
   BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw) : _lw(lw) { }
   ~BND_File3dmLinearWorkflow() { if (_owned) delete _lw; }
-
+  */
+ 
   bool GetPreProcessTexturesOn(void) const { return _lw->PreProcessTexturesOn(); }
   void SetPreProcessTexturesOn(bool v) { _lw->SetPreProcessTexturesOn(v); }
 

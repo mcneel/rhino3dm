@@ -55,6 +55,7 @@ BND_RenderSettings::~BND_RenderSettings()
 
 void BND_RenderSettings::Construct()
 {
+  /*
   m_ground_plane        = new BND_File3dmGroundPlane       (&m_render_settings->GroundPlane());
   m_safe_frame          = new BND_File3dmSafeFrame         (&m_render_settings->SafeFrame());
   m_dithering           = new BND_File3dmDithering         (&m_render_settings->Dithering());
@@ -64,6 +65,7 @@ void BND_RenderSettings::Construct()
   m_render_environments = new BND_File3dmRenderEnvironments( m_render_settings);
   m_sun                 = new BND_File3dmSun               (&m_render_settings->Sun());
   m_post_effects        = new BND_File3dmPostEffectTable   (&m_render_settings->PostEffects());
+  */
 }
 
 void BND_RenderSettings::SetTrackedPointer(ON_3dmRenderSettings* rs, const ON_ModelComponentReference* compref)

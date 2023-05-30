@@ -13,22 +13,31 @@ class BND_File3dmRenderEnvironments
 {
 private:
   ON_3dmRenderSettings* _rs = nullptr;
-  bool _owned = false;
+  //bool _owned = false;
 
 public:
+  BND_File3dmRenderEnvironments() = default;
+  BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs);
+
+  /*
   BND_File3dmRenderEnvironments() { _rs = new ON_3dmRenderSettings; _owned = true; }
   BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re) { _rs = new ON_3dmRenderSettings(*re._rs); _owned = true; }
   BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs) : _rs(rs) { }
   ~BND_File3dmRenderEnvironments() { if (_owned) delete _rs; }
+  */
 
   BND_UUID GetBackgroundId(void) const;
-  void SetBackgroundId(const BND_UUID& id) const;
+  void SetBackgroundId(const BND_UUID& id);
+
   bool GetSkylightingOverride(void) const;
-  void SetSkylightingOverride(bool on) const;
+  void SetSkylightingOverride(bool on);
+
   BND_UUID GetSkylightingId(void) const;
-  void SetSkylightingId(const BND_UUID& id) const;
+  void SetSkylightingId(const BND_UUID& id);
+
   bool GetReflectionOverride(void) const;
-  void SetReflectionOverride(bool on) const;
+  void SetReflectionOverride(bool on);
+
   BND_UUID GetReflectionId(void) const;
-  void SetReflectionId(const BND_UUID& id) const;
+  void SetReflectionId(const BND_UUID& id);
 };

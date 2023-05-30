@@ -130,6 +130,7 @@ public:
   void SetSpecificViewport(const std::wstring& s) { m_render_settings->SetSpecificViewport(s.c_str()); }
   //RenderSource
 
+/*
   BND_File3dmGroundPlane& GetGroundPlane() { return *m_ground_plane; }
   BND_File3dmSafeFrame& GetSafeFrame() { return *m_safe_frame; }
   BND_File3dmDithering& GetDithering() { return *m_dithering; }
@@ -139,6 +140,7 @@ public:
   BND_File3dmRenderEnvironments& GetRenderEnvironments() { return *m_render_environments; }
   BND_File3dmSun& GetSun() { return *m_sun; }
   BND_File3dmPostEffectTable& GetPostEffects(void) { return *m_post_effects; }
+  */
 };
 
 class BND_EarthAnchorPoint

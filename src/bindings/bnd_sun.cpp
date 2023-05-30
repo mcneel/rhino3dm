@@ -8,7 +8,7 @@ int BND_File3dmSun::GetYear() const
   return y;
 }
 
-void BND_File3dmSun::SetYear(int v) const
+void BND_File3dmSun::SetYear(int v)
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -22,7 +22,7 @@ int BND_File3dmSun::GetMonth() const
   return m;
 }
 
-void BND_File3dmSun::SetMonth(int v) const
+void BND_File3dmSun::SetMonth(int v)
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -36,7 +36,7 @@ int BND_File3dmSun::GetDay() const
   return d;
 }
 
-void BND_File3dmSun::SetDay(int v) const
+void BND_File3dmSun::SetDay(int v)
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);
@@ -50,7 +50,7 @@ double BND_File3dmSun::GetHours() const
   return h;
 }
 
-void BND_File3dmSun::SetHours(double v) const
+void BND_File3dmSun::SetHours(double v)
 {
   int y = 0, m = 0, d = 0; double h = 0.0;
   _sun->LocalDateTime(y, m, d, h);

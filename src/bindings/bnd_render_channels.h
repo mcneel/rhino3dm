@@ -13,18 +13,23 @@ class BND_File3dmRenderChannels
 {
 private:
   ON_RenderChannels* _rch = nullptr;
-  bool _owned = false;
+  //bool _owned = false;
 
 public:
+  BND_File3dmRenderChannels() = default;
+  BND_File3dmRenderChannels(ON_RenderChannels* rch);
+
+  /*
   BND_File3dmRenderChannels() { _rch = new ON_RenderChannels; _owned = true; }
   BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch) { _rch = new ON_RenderChannels(*rch._rch); _owned = true; }
   BND_File3dmRenderChannels(ON_RenderChannels* rch) : _rch(rch) { }
   ~BND_File3dmRenderChannels() { if (_owned) delete _rch; }
+  */
 
 public:
-  ON_RenderChannels::Modes GetMode(void) const { return _rch->Mode(); }
+  ON_RenderChannels::Modes GetMode() const { return _rch->Mode(); }
   void SetMode(ON_RenderChannels::Modes v) { _rch->SetMode(v); }
 
-  BND_TUPLE GetCustomList(void) const;
+  BND_TUPLE GetCustomList() const;
   void SetCustomList(BND_TUPLE v);
 };

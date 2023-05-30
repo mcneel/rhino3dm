@@ -43,10 +43,10 @@ public:
   void SetTextureInstanceId(BND_UUID v) { _decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
 
   Mappings Mapping() const;
-  void SetMapping(Mappings m);
-/*
-  ON_Decal::Projections Projection() const { return _decal->Projection(); }
-  void SetProjection(ON_Decal::Projections p) { _decal->SetProjection(p); }
+  void SetMapping(Mappings mapping);
+
+  Projections Projection() const;
+  void SetProjection(Projections projection);
 
   bool MapToInside() const { return _decal->MapToInside(); }
   void SetMapToInside(bool v) { _decal->SetMapToInside(v); }
@@ -63,8 +63,8 @@ public:
   ON_3dVector VectorAcross() const { return _decal->VectorAcross(); }
   void SetVectorAcross(ON_3dVector v) { _decal->SetVectorAcross(v); }
 
-  double Height() const { return _decal.Height(); }
-  void SetHeight(double v) { _decal.SetHeight(v); }
+  double Height() const { return _decal->Height(); }
+  void SetHeight(double v) { _decal->SetHeight(v); }
 
   double Radius() const { return _decal->Radius(); }
   void SetRadius(double v) { _decal->SetRadius(v); }
@@ -92,7 +92,7 @@ public:
 
   double BoundsMaxV() const;
   void SetBoundsMaxV(double v);
-  */
+
 };
 
 class BND_File3dmDecalTable

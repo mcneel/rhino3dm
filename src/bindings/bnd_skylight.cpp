@@ -21,11 +21,9 @@ void initSkylightBindings(void*)
 {
   class_<BND_File3dmSkylight>("Skylight")
     .constructor<>()
-    /*
-    .constructor<const BND_File3dmSkylight&>()
+    //.constructor<const BND_File3dmSkylight&>()
     .property("on", &BND_File3dmSkylight::GetOn, &BND_File3dmSkylight::SetOn)
     .property("shadowIntensity", &BND_File3dmSkylight::GetShadowIntensity, &BND_File3dmSkylight::SetShadowIntensity)
-    */
     ;
 }
 #endif

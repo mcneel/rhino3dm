@@ -8,9 +8,9 @@ BND_File3dmDecal::BND_File3dmDecal(ON_Decal* d)
 
 Mappings BND_File3dmDecal::Mapping() const 
 {
-  int rc = (int)_decal->Mapping();
+  int i = (int)_decal->Mapping();
 
-  switch(rc)
+  switch(i)
   {
     case -1:
       return Mappings::None;
@@ -36,8 +36,8 @@ Mappings BND_File3dmDecal::Mapping() const
 
 void BND_File3dmDecal::SetMapping(Mappings mapping) 
 {
-  int map = (int)mapping;
-  switch(map)
+  int i = (int)mapping;
+  switch(i)
   {
     case -1:
       _decal->SetMapping(ON_Decal::Mappings::None);
@@ -54,11 +54,64 @@ void BND_File3dmDecal::SetMapping(Mappings mapping)
     case 3:
       _decal->SetMapping(ON_Decal::Mappings::UV);
       break;
+    default:
+      _decal->SetMapping(ON_Decal::Mappings::None);
+      break;
   }
   
 }
 
-/*
+Projections BND_File3dmDecal::Projection() const 
+{
+  int i = (int)_decal->Projection();
+
+  switch(i)
+  {
+    case -1:
+      return Projections::None;
+      break;
+    case 0:
+      return Projections::Forward;
+      break;
+    case 1:
+      return Projections::Backward;
+      break;
+    case 2:
+      return Projections::Both;
+      break;
+    default:
+      return Projections::None;
+      break;
+  }
+
+}
+
+void BND_File3dmDecal::SetProjection(Projections projection) 
+{
+  int i = (int)projection;
+  switch(i)
+  {
+    case -1:
+      _decal->SetProjection(ON_Decal::Projections::None);
+      break;
+    case 0:
+      _decal->SetProjection(ON_Decal::Projections::Forward);
+      break;
+    case 1:
+      _decal->SetProjection(ON_Decal::Projections::Backward);
+      break;
+    case 2:
+      _decal->SetProjection(ON_Decal::Projections::Both);
+      break;
+    default:
+      _decal->SetProjection(ON_Decal::Projections::None);
+      break;
+
+  }
+  
+}
+
+
 double BND_File3dmDecal::HorzSweepStart() const
 {
   double sta = 0.0, end = 0.0;
@@ -115,54 +168,54 @@ double BND_File3dmDecal::BoundsMaxV() const
   return max_v;
 }
 
-void BND_File3dmDecal::SetHorzSweepStart(double v) const
+void BND_File3dmDecal::SetHorzSweepStart(double v)
 {
   _decal->SetHorzSweep(v, HorzSweepEnd());
 }
 
-void BND_File3dmDecal::SetHorzSweepEnd(double v) const
+void BND_File3dmDecal::SetHorzSweepEnd(double v)
 {
   _decal->SetHorzSweep(HorzSweepStart(), v);
 }
 
-void BND_File3dmDecal::SetVertSweepStart(double v) const
+void BND_File3dmDecal::SetVertSweepStart(double v)
 {
   _decal->SetVertSweep(v, VertSweepEnd());
 }
 
-void BND_File3dmDecal::SetVertSweepEnd(double v) const
+void BND_File3dmDecal::SetVertSweepEnd(double v)
 {
   _decal->SetVertSweep(VertSweepStart(), v);
 }
 
-void BND_File3dmDecal::SetBoundsMinU(double v) const
+void BND_File3dmDecal::SetBoundsMinU(double v)
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   _decal->SetUVBounds(v, min_v, max_u, max_v);
 }
 
-void BND_File3dmDecal::SetBoundsMinV(double v) const
+void BND_File3dmDecal::SetBoundsMinV(double v)
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   _decal->SetUVBounds(min_u, v, max_u, max_v);
 }
 
-void BND_File3dmDecal::SetBoundsMaxU(double v) const
+void BND_File3dmDecal::SetBoundsMaxU(double v)
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   _decal->SetUVBounds(min_u, min_v, v, max_v);
 }
 
-void BND_File3dmDecal::SetBoundsMaxV(double v) const
+void BND_File3dmDecal::SetBoundsMaxV(double v)
 {
   double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
   _decal->GetUVBounds(min_u, min_v, max_u, max_v);
   _decal->SetUVBounds(min_u, min_v, max_u, v);
 }
-*/
+
 BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
 {
   _attr = a;
@@ -200,6 +253,22 @@ BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
 namespace py = pybind11;
 void initDecalBindings(pybind11::module& m)
 {
+
+  py::enum_<Mappings>(m, "Mappings")
+    .value("None", Mappings::None)
+    .value("Planar", Mappings::Planar)
+    .value("Cylindrical", Mappings::Cylindrical)
+    .value("Spherical", Mappings::Spherical)
+    .value("UV", Mappings::UV)
+    ;
+
+  py::enum_<Projections>(m, "Projections")
+    .value("None", Projections::None)
+    .value("Forward", Projections::Forward)
+    .value("Backward", Projections::Backward)
+    .value("Both", Projections::Both)
+    ;
+
   py::class_<BND_File3dmDecal>(m, "Decal")
     .def(py::init<>())
     .def(py::init<const BND_File3dmDecal&>(), py::arg("other"))
@@ -251,10 +320,10 @@ void initDecalBindings(void*)
     //.constructor<const BND_File3dmDecal&>()
     .property("textureInstanceId", &BND_File3dmDecal::TextureInstanceId, &BND_File3dmDecal::SetTextureInstanceId)
     .property("mapping", &BND_File3dmDecal::Mapping, &BND_File3dmDecal::SetMapping)
-    /*
     .property("projection", &BND_File3dmDecal::Projection, &BND_File3dmDecal::SetProjection)
     .property("mapToInside", &BND_File3dmDecal::MapToInside, &BND_File3dmDecal::SetMapToInside)
     .property("transparency", &BND_File3dmDecal::Transparency, &BND_File3dmDecal::SetTransparency)
+  
     .property("origin", &BND_File3dmDecal::Origin, &BND_File3dmDecal::SetOrigin)
     .property("vectorUp", &BND_File3dmDecal::VectorUp, &BND_File3dmDecal::SetVectorUp)
     .property("vectorAcross", &BND_File3dmDecal::VectorAcross, &BND_File3dmDecal::SetVectorAcross)
@@ -268,7 +337,7 @@ void initDecalBindings(void*)
     .property("boundsMinV", &BND_File3dmDecal::BoundsMinV, &BND_File3dmDecal::SetBoundsMinV)
     .property("boundsMaxU", &BND_File3dmDecal::BoundsMaxU, &BND_File3dmDecal::SetBoundsMaxU)
     .property("boundsMaxV", &BND_File3dmDecal::BoundsMaxV, &BND_File3dmDecal::SetBoundsMaxV)
-    */
+  
     ;
 }
 #endif

@@ -1,9 +1,9 @@
 
 #include "bindings.h"
 
-#if !defined ON_WASM_COMPILE // Why do I need this?
+//#if !defined ON_WASM_COMPILE // Why do I need this?
 
-BND_TUPLE BND_File3dmRenderChannels::GetCustomList(void) const
+BND_TUPLE BND_File3dmRenderChannels::GetCustomList() const
 {
   ON_SimpleArray<ON_UUID> list;
   _rch->GetCustomList(list);
@@ -22,15 +22,18 @@ void BND_File3dmRenderChannels::SetCustomList(BND_TUPLE tuple)
 {
   ON_SimpleArray<ON_UUID> list;
 
+  // John C - compiler complaining here. are you trying to use BND_Tuple?
+  /*
   for (auto elem: tuple)
   {
     list.Append(Binding_to_ON_UUID(elem.cast<BND_UUID>()));
   }
 
   _rch->SetCustomList(list);
+  */
 }
 
-#endif
+//#endif
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -54,11 +57,9 @@ void initRenderChannelsBindings(void*)
 {
   class_<BND_File3dmRenderChannels>("RenderChannels")
     .constructor<>()
-    /*
-    .constructor<const BND_File3dmRenderChannels&>()
+    //.constructor<const BND_File3dmRenderChannels&>()
     .property("mode", &BND_File3dmRenderChannels::GetMode, &BND_File3dmRenderChannels::SetMode)
     .property("customIds", &BND_File3dmRenderChannels::GetCustomList, &BND_File3dmRenderChannels::SetCustomList)
-    */
     ;
 }
 #endif

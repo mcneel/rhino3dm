@@ -13,44 +13,48 @@ class BND_File3dmGroundPlane
 {
 private:
   ON_GroundPlane* _gp = nullptr;
-  bool _owned = false;
+  //bool _owned = false;
 
 public:
+  BND_File3dmGroundPlane() = default;
+  BND_File3dmGroundPlane(ON_GroundPlane* gp);
+  /*
   BND_File3dmGroundPlane() { _gp = new ON_GroundPlane; _owned = true; }
   BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp) { _gp = new ON_GroundPlane(*gp._gp); _owned = true; }
   BND_File3dmGroundPlane(ON_GroundPlane* gp) : _gp(gp) { }
   ~BND_File3dmGroundPlane() { if (_owned) delete _gp; }
+  */
 
   bool GetOn(void) const { return _gp->On(); }
-  void SetOn(bool v) const { _gp->SetOn(v); }
+  void SetOn(bool v) { _gp->SetOn(v); }
 
   bool GetShowUnderside(void) const { return _gp->ShowUnderside(); }
-  void SetShowUnderside(bool b) const { _gp->SetShowUnderside(b); }
+  void SetShowUnderside(bool b) { _gp->SetShowUnderside(b); }
 
   double GetAltitude(void) const { return _gp->Altitude(); }
-  void SetAltitude(double d) const { _gp->SetAltitude(d); }
+  void SetAltitude(double d) { _gp->SetAltitude(d); }
 
   bool GetAutoAltitude(void) const { return _gp->AutoAltitude(); }
-  void SetAutoAltitude(bool b) const { _gp->SetAutoAltitude(b); }
+  void SetAutoAltitude(bool b) { _gp->SetAutoAltitude(b); }
 
   bool GetShadowOnly(void) const { return _gp->ShadowOnly(); }
-  void SetShadowOnly(bool b) const { _gp->SetShadowOnly(b); }
+  void SetShadowOnly(bool b) { _gp->SetShadowOnly(b); }
 
   BND_UUID GetMaterialInstanceId(void) const { return ON_UUID_to_Binding(_gp->MaterialInstanceId()); }
-  void SetMaterialInstanceId(BND_UUID u) const { _gp->SetMaterialInstanceId(Binding_to_ON_UUID(u)); }
+  void SetMaterialInstanceId(BND_UUID u) { _gp->SetMaterialInstanceId(Binding_to_ON_UUID(u)); }
 
   ON_2dVector GetTextureOffset(void) const { return _gp->TextureOffset(); }
-  void SetTextureOffset(ON_2dVector v) const { _gp->SetTextureOffset(v); }
+  void SetTextureOffset(ON_2dVector v) { _gp->SetTextureOffset(v); }
 
   bool GetTextureOffsetLocked(void) const { return _gp->TextureOffsetLocked(); }
-  void SetTextureOffsetLocked(bool b) const { _gp->SetTextureOffsetLocked(b); }
+  void SetTextureOffsetLocked(bool b) { _gp->SetTextureOffsetLocked(b); }
 
   bool GetTextureSizeLocked(void) const { return _gp->TextureSizeLocked(); }
-  void SetTextureSizeLocked(bool b) const { _gp->SetTextureSizeLocked(b); }
+  void SetTextureSizeLocked(bool b) { _gp->SetTextureSizeLocked(b); }
 
   ON_2dVector GetTextureSize(void) const { return _gp->TextureSize(); }
-  void SetTextureSize(ON_2dVector v) const { _gp->SetTextureSize(v); }
+  void SetTextureSize(ON_2dVector v) { _gp->SetTextureSize(v); }
 
   double GetTextureRotation(void) const { return _gp->TextureRotation(); }
-  void SetTextureRotation(double d) const { _gp->SetTextureRotation(d); }
+  void SetTextureRotation(double d) { _gp->SetTextureRotation(d); }
 };
