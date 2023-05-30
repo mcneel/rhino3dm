@@ -2438,6 +2438,56 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Compute the Boolean Union of a set of Breps.
+    /// </summary>
+    /// <param name="breps">Breps to union.</param>
+    /// <param name="tolerance">Tolerance to use for union operation.</param>
+    /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
+    /// <param name="nakedEdgePoints">
+    /// If Boolean failed because the intersection hit a naked edge, a point will be added where the intersection hits the edge.
+    /// </param>
+    /// <param name="badIntersectionPoints">
+    /// If Boolean failed because an intersection ends on the interior of both surfaces, a point is added.This happens when the surface intersector fails.
+    /// </param>
+    /// <param name="nonManifoldEdgePoints">
+    /// If Boolean failed because the intersection hit a non-manifold edge, a point will be added where the intersection hits the edge.
+    /// </param>
+    /// <returns>An array of Brep results or null on failure.</returns>
+    /// <since>8.0</since>
+    public static Brep[] CreateBooleanUnion(IEnumerable<Brep> breps, double tolerance, bool manifoldOnly, out Point3d[] nakedEdgePoints, out Point3d[] badIntersectionPoints, out Point3d[] nonManifoldEdgePoints)
+    {
+      nakedEdgePoints = Array.Empty<Point3d>();
+      badIntersectionPoints = Array.Empty<Point3d>();
+      nonManifoldEdgePoints = Array.Empty<Point3d>();
+
+      using (var input = new SimpleArrayBrepPointer())
+      using (var output = new SimpleArrayBrepPointer())
+      using (var outNakedEdgePoints = new SimpleArrayPoint3d())
+      using (var outBadIntersectionPoints = new SimpleArrayPoint3d())
+      using (var outNonmanifoldEdgePoints = new SimpleArrayPoint3d())
+      {
+        foreach (var brep in breps)
+          input.Add(brep, true);
+
+        IntPtr const_ptr_input = input.ConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+        IntPtr ptr_nakedEdgePoints = outNakedEdgePoints.NonConstPointer();
+        IntPtr ptr_badIntersectionPoints = outBadIntersectionPoints.NonConstPointer();
+        IntPtr ptr_nonManifoldEdgePoints = outNonmanifoldEdgePoints.NonConstPointer();
+
+        int join_count = UnsafeNativeMethods.RHC_RhinoBooleanUnion2(const_ptr_input, ptr_output, tolerance, manifoldOnly, ptr_nakedEdgePoints, ptr_badIntersectionPoints, ptr_nonManifoldEdgePoints);
+
+        // Always return
+        nakedEdgePoints = outNakedEdgePoints.ToArray();
+        badIntersectionPoints = outBadIntersectionPoints.ToArray();
+        nonManifoldEdgePoints = outNonmanifoldEdgePoints.ToArray();
+
+        GC.KeepAlive(breps);
+        return join_count > 0 ? output.ToNonConstArray() : null;
+      }
+    }
+
     static Brep[] BooleanIntDiffHelper(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool intersection, bool manifoldOnly)
     {
       // 30-Mar-2016 Dale Fugier http://mcneel.myjetbrains.com/youtrack/issue/RH-31606

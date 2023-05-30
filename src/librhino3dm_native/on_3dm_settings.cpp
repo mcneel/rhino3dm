@@ -797,6 +797,7 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetColor(ON_3dmRenderSettings* pRenderSe
   }
 }
 
+#ifdef RDK_RENDER_PRESETS
 RH_C_FUNCTION ON_UUID ON_3dmRenderSettings_GetCurrentRenderPreset(ON_3dmRenderSettings* pSettings)
 {
   if (nullptr != pSettings)
@@ -812,6 +813,7 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetCurrentRenderPreset(ON_3dmRenderSetti
     pSettings->SetCurrentRenderPreset(uuid);
   }
 }
+#endif
 
 RH_C_FUNCTION ON::LengthUnitSystem ON_3dmRenderSettings_GetUnitSystem(ON_3dmRenderSettings* pSettings)
 {

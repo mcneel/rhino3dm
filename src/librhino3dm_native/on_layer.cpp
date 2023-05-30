@@ -112,11 +112,9 @@ enum LayerBool : int
   idxIsExpanded = 2,
   idxPersistentVisibility = 3,
   idxPersistentLocking = 4,
-  idxClipParticipationForAll = 5,
-  idxClipParticipationForNone = 6,
-  idxModelIsVisible = 7,
-  idxModelPersistentVisibility = 8,
-  idxPerViewportIsVisibleInNewDetails = 9
+  idxModelIsVisible = 5,
+  idxModelPersistentVisibility = 6,
+  idxPerViewportIsVisibleInNewDetails = 7
 };
 
 RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, bool set, bool val)
@@ -155,18 +153,6 @@ RH_C_FUNCTION bool ON_Layer_GetSetBool(ON_Layer* pLayer, enum LayerBool which, b
         rc = pLayer->PersistentVisibility();
       else if (idxPersistentLocking == which)
         rc = pLayer->PersistentLocking();
-      else if (idxClipParticipationForAll == which || idxClipParticipationForNone == which)
-      {
-        bool forall = false;
-        bool fornone = false;
-        ON_UuidList uuidlist;
-        bool isParticipation = false;
-        pLayer->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
-        if (idxClipParticipationForAll == which)
-          rc = forall;
-        else
-          rc = fornone;
-      }
       else if (idxModelIsVisible == which)
         rc = pLayer->ModelIsVisible();
       else if (idxModelPersistentVisibility == which)
@@ -337,38 +323,6 @@ RH_C_FUNCTION void ON_Layer_SetPerViewportVisibility(ON_Layer* pLayer, ON_UUID v
       pLayer->SetPerViewportVisible(viewportId, visible);
     else
       pLayer->SetPerViewportPersistentVisibility(viewportId, visible);
-  }
-}
-
-RH_C_FUNCTION void ON_Layer_SetClipParticipation(ON_Layer* pLayer, bool forAll, bool forNone, const ON_SimpleArray<ON_UUID>* pIds)
-{
-  if (pLayer)
-  {
-    if (forAll)
-    {
-      pLayer->SetClipParticipationForAll();
-    }
-    else if (forNone)
-    {
-      pLayer->SetClipParticipationForNone();
-    }
-    else if (pIds)
-    {
-      pLayer->SetClipParticipationList(pIds->Array(), pIds->Count(), true);
-    }
-  }
-}
-
-RH_C_FUNCTION void ON_Layer_ClipParticipationList(const ON_Layer* pConstLayer, ON_SimpleArray<ON_UUID>* uuids)
-{
-  if (pConstLayer && uuids)
-  {
-    bool forall = true;
-    bool fornone = true;
-    ON_UuidList uuidlist;
-    bool isParticipation = false;
-    pConstLayer->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
-    uuidlist.GetUuids(*uuids);
   }
 }
 

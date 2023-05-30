@@ -94,7 +94,7 @@ RH_C_FUNCTION int ON_Sun_Accuracy(const ON_Sun* sun)
 {
   if (sun)
   {
-    return 0;//int(sun->Accuracy()); // Waiting for new OpenNURBS publishing.
+    return int(sun->Accuracy());
   }
   return -1;
 }
@@ -103,7 +103,7 @@ RH_C_FUNCTION void ON_Sun_SetAccuracy(ON_Sun* sun, int acc)
 {
   if (sun)
   {
-//    sun->SetAccuracy(ON_SunEngine::Accuracy(acc));
+    sun->SetAccuracy(ON_SunEngine::Accuracy(acc));
   }
 }
 

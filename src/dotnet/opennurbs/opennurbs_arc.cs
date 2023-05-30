@@ -321,7 +321,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the start angle (in Radians) for this arc segment.
+    /// Gets or sets the start angle (in Degrees) for this arc segment.
     /// </summary>
     /// <since>5.0</since>
     public double StartAngleDegrees
@@ -331,7 +331,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the end angle (in Radians) for this arc segment.
+    /// Gets or sets the end angle (in Degrees) for this arc segment.
     /// </summary>
     /// <since>5.0</since>
     public double EndAngleDegrees
@@ -341,7 +341,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment.
+    /// Gets or sets the sweep -or subtended- angle (in Degrees) for this arc segment.
     /// </summary>
     /// <since>5.0</since>
     public double AngleDegrees
@@ -351,7 +351,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sets arc's angle domain (in radians) as a sub-domain of the circle.
+    /// Sets arc's angle domain (in Radians) as a sub-domain of the circle.
     /// </summary>
     /// <param name="domain">
     /// 0 &lt; domain[1] - domain[0] &lt;= 2.0 * RhinoMath.Pi.

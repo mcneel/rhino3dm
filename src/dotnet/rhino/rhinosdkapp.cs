@@ -2257,6 +2257,26 @@ namespace Rhino
         return sh.ToString();
       }
     }
+    /// <summary>
+    /// Post an enter event to the command line
+    /// </summary>
+    /// <param name="runtimeDocSerialNumber">Unique serialNumber for the document to post the event to.</param>
+    /// <param name="bRepeatedEnter">if true, allow multiple enter events to be posted simultaneouslyt.</param>
+    [CLSCompliant(false)]
+    public static void PostEnterEvent(uint runtimeDocSerialNumber, bool bRepeatedEnter)
+    {
+      UnsafeNativeMethods.CRhinoApp_PostEnterEvent(runtimeDocSerialNumber, bRepeatedEnter);
+    }
+
+    /// <summary>
+    /// Post a cancel event to the command line
+    /// </summary>
+    /// <param name="runtimeDocSerialNumber">Unique serialNumber for the document to post the event to.</param>
+    [CLSCompliant(false)]
+    public static void PostCancelEvent(uint runtimeDocSerialNumber)
+    {
+      UnsafeNativeMethods.CRhinoApp_PostCancelEvent(runtimeDocSerialNumber);
+    }
   }
 }
 
