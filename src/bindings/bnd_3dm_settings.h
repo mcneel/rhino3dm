@@ -128,19 +128,18 @@ public:
   void SetSnapShot(const std::wstring& s) { m_render_settings->SetSnapshot(s.c_str()); }
   std::wstring GetSpecificViewport() const { return std::wstring(m_render_settings->SpecificViewport().Array()); }
   void SetSpecificViewport(const std::wstring& s) { m_render_settings->SetSpecificViewport(s.c_str()); }
-  //RenderSource
 
-/*
-  BND_File3dmGroundPlane& GetGroundPlane() { return *m_ground_plane; }
-  BND_File3dmSafeFrame& GetSafeFrame() { return *m_safe_frame; }
-  BND_File3dmDithering& GetDithering() { return *m_dithering; }
-  BND_File3dmSkylight& GetSkylight() { return *m_skylight; }
-  BND_File3dmLinearWorkflow& GetLinearWorkflow() { return *m_linear_workflow; }
-  BND_File3dmRenderChannels& GetRenderChannels() { return *m_render_channels; }
-  BND_File3dmRenderEnvironments& GetRenderEnvironments() { return *m_render_environments; }
-  BND_File3dmSun& GetSun() { return *m_sun; }
-  BND_File3dmPostEffectTable& GetPostEffects(void) { return *m_post_effects; }
-  */
+  //RenderSource
+  BND_File3dmGroundPlane& GetGroundPlane() const { return *m_ground_plane; }
+  BND_File3dmSafeFrame& GetSafeFrame() const { return *m_safe_frame; }
+  BND_File3dmDithering& GetDithering() const { return *m_dithering; }
+  BND_File3dmSkylight& GetSkylight() const { return *m_skylight; }
+  BND_File3dmLinearWorkflow& GetLinearWorkflow() const { return *m_linear_workflow; }
+  BND_File3dmRenderChannels& GetRenderChannels() const { return *m_render_channels; }
+  BND_File3dmRenderEnvironments& GetRenderEnvironments() const { return *m_render_environments; }
+  BND_File3dmSun& GetSun() const { return *m_sun; }
+  BND_File3dmPostEffectTable& GetPostEffects() const { return *m_post_effects; }
+
 };
 
 class BND_EarthAnchorPoint
