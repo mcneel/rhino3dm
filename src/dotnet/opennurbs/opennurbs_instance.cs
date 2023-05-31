@@ -71,6 +71,7 @@ namespace Rhino.Geometry
     const int IDX_DESCRIPTION = 1;
     const int IDX_URL = 2;
     const int IDX_URLTAG = 3;
+    const int IDX_SOURCEARCHIVE = 4;
 
     /// <summary>
     /// Gets or sets the description of the definition.
@@ -138,6 +139,23 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_URLTAG, value);
+      }
+    }
+
+    /// <summary>
+    /// Gets the full file path for linked instance definitions.
+    /// </summary>
+    public string SourceArchive
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_SOURCEARCHIVE, ptr_string);
+          return sh.ToString();
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Rhino.Runtime;
 
 #if RHINO_SDK
 
@@ -270,7 +271,8 @@ namespace Rhino.UI
         // Use the IStackedDialogPageService to create the native control to embed in the page host
         object control_object = null;
         object control_host = null;
-        page_instance.PageControlPointer = StackedDialogPage.Service?.GetNativePageWindow(page_instance.PageObject, true, false, out control_object, out control_host) ?? IntPtr.Zero;
+        bool useRhinoColors = UnsafeNativeMethods.CRhAdvancedSettings_GetBool(AdvancedSetting.UseRhinoColorsForModalDialogs);
+        page_instance.PageControlPointer = StackedDialogPage.Service?.GetNativePageWindow(page_instance.PageObject, true, useRhinoColors, out control_object, out control_host) ?? IntPtr.Zero;
         page_instance.PageControlObject = control_object;
         page_instance.PageHost = control_host;
         return page_instance.PageControlPointer;

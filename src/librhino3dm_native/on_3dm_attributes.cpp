@@ -29,8 +29,8 @@ enum ObjectAttrsInteger : int
   oaiSpace = 12,
   oaiGroupCount = 13,
   oaiDisplayOrder = 14,
-  oaiClipParticipationSource = 15,
-  oaiSectionAttributesSource = 16,
+  oaiSectionAttributesSource = 15,
+  oaiClippingPlaneLabelStyle = 16,
 };
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr, enum ObjectAttrsInteger which, bool set, int setValue )
@@ -95,11 +95,11 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiDisplayOrder:
         ptr->m_display_order = setValue;
         break;
-      case oaiClipParticipationSource:
-        ptr->SetClipParticipationSource(ON::ClipParticipationSourceFromUnsigned(setValue));
-        break;
       case oaiSectionAttributesSource:
         ptr->SetSectionAttributesSource(ON::SectionAttributesSourceFromUnsigned(setValue));
+        break;
+      case oaiClippingPlaneLabelStyle:
+        ptr->SetClippingPlaneLabelStyle(ON::SectionLabelStyleFromUnsigned(setValue));
         break;
       }
     }
@@ -152,11 +152,11 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiDisplayOrder:
         rc = ptr->m_display_order;
         break;
-      case oaiClipParticipationSource:
-        rc = (int)ptr->ClipParticipationSource();
-        break;
       case oaiSectionAttributesSource:
         rc = (int)ptr->SectionAttributesSource();
+        break;
+      case oaiClippingPlaneLabelStyle:
+        rc = (int)ptr->ClippingPlaneLabelStyle();
         break;
       }
     }
@@ -170,9 +170,7 @@ enum ObjectAttrsBool : int
   oabIsVisible = 1,
   oabCastsShadows = 2,
   oabReceivesShadows = 3,
-  oabClipParticipationForAll = 4,
-  oabClipParticipationForNone = 5,
-  oabHatchBoundaryVisible = 6,
+  oabHatchBoundaryVisible = 4,
 };
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Transform(ON_3dmObjectAttributes* ptr, ON_Xform* xform)
@@ -205,9 +203,6 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
       case oabHatchBoundaryVisible:
         ptr->SetHatchBoundaryVisible(setValue);
         break;
-      case oabClipParticipationForAll:
-      case oabClipParticipationForNone:
-        break; // do nothing
       }
     }
     else
@@ -225,20 +220,6 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
         break;
       case oabReceivesShadows:
         rc = ptr->m_rendering_attributes.m_bReceivesShadows;
-        break;
-      case oabClipParticipationForAll:
-      case oabClipParticipationForNone:
-        {
-          bool forall = false;
-          bool fornone = false;
-          ON_UuidList uuidlist;
-          bool isParticipation = false;
-          ptr->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
-          if (oabClipParticipationForAll == which)
-            rc = forall;
-          else
-            rc = fornone;
-        }
         break;
       case oabHatchBoundaryVisible:
         rc = ptr->HatchBoundaryVisible();
@@ -759,38 +740,6 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ON_3dmOb
     {
       pObjectAttributes->DeleteCustomRenderMeshParameters();
     }
-  }
-}
-
-RH_C_FUNCTION void ON_3dmObjectAttributes_SetClipParticipation(ON_3dmObjectAttributes* pObjectAttributes, bool forAll, bool forNone, const ON_SimpleArray<ON_UUID>* pIds)
-{
-  if (pObjectAttributes)
-  {
-    if (forAll)
-    {
-      pObjectAttributes->SetClipParticipationForAll();
-    }
-    else if (forNone)
-    {
-      pObjectAttributes->SetClipParticipationForNone();
-    }
-    else if (pIds)
-    {
-      pObjectAttributes->SetClipParticipationList(pIds->Array(), pIds->Count(), true);
-    }
-  }
-}
-
-RH_C_FUNCTION void ON_3dmObjectAttributes_ClipParticipationList(const ON_3dmObjectAttributes* pConstAttr, ON_SimpleArray<ON_UUID>* uuids)
-{
-  if (pConstAttr && uuids)
-  {
-    bool forall = true;
-    bool fornone = true;
-    ON_UuidList uuidlist;
-    bool isParticipation = false;
-    pConstAttr->GetClipParticipation(forall, fornone, uuidlist, isParticipation);
-    uuidlist.GetUuids(*uuids);
   }
 }
 

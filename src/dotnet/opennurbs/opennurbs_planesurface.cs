@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
 
@@ -208,6 +209,73 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.ON_ClippingPlaneSurface_RemoveClipViewport(ptr_this, viewportId);
+    }
+
+    /// <summary>
+    /// Should the object and layer participation lists be used when determining clipping
+    /// </summary>
+    public bool ParticipationListsEnabled
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_ClippingPlaneSurce_ParticipationEnabled(ptr_const_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetParticipationEnabled(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// Set a list of specific object ids and layers that this clipping plane surface clips.
+    /// </summary>
+    /// <param name="objectIds"></param>
+    /// <param name="layerIndices"></param>
+    /// <param name="isExclusionList">Is the list a set of ids to not clip or a set to clip</param>
+    public void SetClipParticipation(IEnumerable<Guid> objectIds, IEnumerable<int> layerIndices, bool isExclusionList)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      using(var idlist = new Rhino.Runtime.InteropWrappers.SimpleArrayGuid(objectIds))
+      using(var layerlist = new Rhino.Runtime.InteropWrappers.SimpleArrayInt(layerIndices))
+      {
+        IntPtr idListPtr = idlist.ConstPointer();
+        IntPtr layerListPtr = layerlist.ConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetClipList(ptr_this, idListPtr, layerListPtr, isExclusionList);
+      }
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="objectIds"></param>
+    /// <param name="layerIndices"></param>
+    /// <param name="isExclusionList"></param>
+    public void GetClipParticipation(out IEnumerable<Guid> objectIds, out IEnumerable<int> layerIndices, out bool isExclusionList)
+    {
+      objectIds = null;
+      layerIndices = null;
+      isExclusionList = true;
+      using (var idlist = new Rhino.Runtime.InteropWrappers.SimpleArrayGuid(objectIds))
+      using (var layerlist = new Rhino.Runtime.InteropWrappers.SimpleArrayInt(layerIndices))
+      {
+        IntPtr constPtrThis = ConstPointer();
+        IntPtr idListPtr = idlist.NonConstPointer();
+        IntPtr layerListPtr = layerlist.NonConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_GetClipList(constPtrThis, idListPtr, layerListPtr, ref isExclusionList);
+        objectIds = idlist.ToArray();
+        layerIndices = layerlist.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Remove list of object ids that this clipping plane surface clips. This causes the clipping
+    /// plane surface to clip all objects
+    /// </summary>
+    public void ClearClipParticipationLists()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_ClippingPlaneSurface_ClearParticipationLists(ptr_this);
     }
   }
 }

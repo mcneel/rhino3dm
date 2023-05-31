@@ -3055,19 +3055,25 @@ namespace Rhino.Render
     [CLSCompliant(false)]
     public virtual object GetParameter(String parameterName)
     {
-      Variant value = new Variant();
+      var value = new Variant();
 
       if (IsNativeWrapper())
       {
-        UnsafeNativeMethods.Rdk_RenderContent_GetVariantParameter(ConstPointer(), parameterName, value.NonConstPointer());
+        UnsafeNativeMethods.Rdk_RenderContent_GetVariantParameter(ConstPointer(),
+                                              parameterName, value.NonConstPointer());
       }
       else
       {
         string key = BindingKey(parameterName, null);
         if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+        {
           value.SetValue(bound_field.Field.ValueAsObject());
+        }
         else
-          UnsafeNativeMethods.Rdk_RenderContent_CallGetVariantParameterBase(ConstPointer(), parameterName, value.NonConstPointer());
+        {
+          UnsafeNativeMethods.Rdk_RenderContent_CallGetVariantParameterBase(ConstPointer(),
+                                                parameterName, value.NonConstPointer());
+        }
       }
 
       return value.IsNull ? null : value;
@@ -3137,18 +3143,17 @@ namespace Rhino.Render
     {
       get
       {
-        var pointer = ConstPointer();
-        var value = UnsafeNativeMethods.Rdk_RenderContent_GetSetLocked(pointer, 0);
-        return (value != 0);
+        return UnsafeNativeMethods.Rdk_RenderContent_GetLocked(ConstPointer()) != 0;
       }
       set
       {
         if (InDocument)
-          throw new Exception("IsLocked must be called prior to adding content to the document");
-        if (!value)
-          return;
-        var pointer = NonConstPointer();
-        UnsafeNativeMethods.Rdk_RenderContent_GetSetLocked(pointer, 1);
+          throw new Exception("IsLocked setter must be called prior to adding content to the document");
+
+        if (value)
+        {
+          UnsafeNativeMethods.Rdk_RenderContent_SetLocked(NonConstPointer());
+        }
       }
     }
 
@@ -3170,9 +3175,11 @@ namespace Rhino.Render
     public virtual object GetChildSlotParameter(String contentParameterName, String extraRequirementParameter)
     {
       var value = new Variant();
+
       if (IsNativeWrapper())
       {
-        UnsafeNativeMethods.Rdk_RenderContent_GetExtraRequirementParameter(ConstPointer(), contentParameterName, extraRequirementParameter, value.NonConstPointer());
+        UnsafeNativeMethods.Rdk_RenderContent_GetExtraRequirementParameter(ConstPointer(),
+                            contentParameterName, extraRequirementParameter, value.NonConstPointer());
       }
       else
       {
@@ -3183,7 +3190,8 @@ namespace Rhino.Render
         }
         else
         {
-          UnsafeNativeMethods.Rdk_RenderContent_CallGetExtraRequirementParameterBase(ConstPointer(), contentParameterName, extraRequirementParameter, value.NonConstPointer());
+          UnsafeNativeMethods.Rdk_RenderContent_CallGetExtraRequirementParameterBase(ConstPointer(),
+                              contentParameterName, extraRequirementParameter, value.NonConstPointer());
         }
       }
       return value;
@@ -3600,10 +3608,12 @@ namespace Rhino.Render
     public bool CreateDynamicField(string internalName, string localName, string englishName, object value, object minValue, object maxValue, int sectionId)
     {
       var varValue = new Variant(value);
-      var varMin = new Variant(minValue);
-      var varMax = new Variant(maxValue);
+      var varMin   = new Variant(minValue);
+      var varMax   = new Variant(maxValue);
 
-      return UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(), internalName, localName, englishName, varValue.ConstPointer(), varMin.ConstPointer(), varMax.ConstPointer(), sectionId);
+      return UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(),
+             internalName, localName, englishName,
+             varValue.ConstPointer(), varMin.ConstPointer(), varMax.ConstPointer(), sectionId);
     }
 
     /// <summary>

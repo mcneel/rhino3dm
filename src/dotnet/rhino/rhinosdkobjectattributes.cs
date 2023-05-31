@@ -298,103 +298,6 @@ namespace Rhino.DocObjects
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.PlotWeightSource, (int)value); }
     }
 
-    /// <summary>
-    /// Where clipping plane participation values are read from
-    /// </summary>
-    /// <since>8.0</since>
-    public ObjectClipParticipationSource ClipParticipationSource
-    {
-      get
-      {
-        int rc = GetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClipParticipationSource);
-        return (ObjectClipParticipationSource)rc;
-      }
-      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClipParticipationSource, (int)value); }
-    }
-
-    /// <summary>
-    /// Attributes set to participate with all clipping planes
-    /// </summary>
-    /// <since>8.0</since>
-    public bool ClipParticipationForAll
-    {
-      get
-      {
-        return GetBool(UnsafeNativeMethods.ObjectAttrsBool.ClipParticipationForAll);
-      }
-    }
-
-    /// <summary>
-    /// Attributes set to participate with no clipping planes
-    /// </summary>
-    /// <since>8.0</since>
-    public bool ClipParticipationForNone
-    {
-      get
-      {
-        return GetBool(UnsafeNativeMethods.ObjectAttrsBool.ClipParticipationForNone);
-      }
-    }
-
-    /// <summary>
-    /// Gets the clipping plane participation list for these attributes.
-    /// </summary>
-    /// <returns>
-    /// null if an object participates with all clipping planes.
-    /// An empty array if an object participates with no clipping planes.
-    /// A list of ids if an object participates with a specific set of ids
-    /// </returns>
-    /// <since>8.0</since>
-    public Guid[] ClipParticipationList()
-    {
-      if (ClipParticipationForAll)
-        return null;
-      if (ClipParticipationForNone)
-        return new Guid[0];
-      using (var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid())
-      {
-        IntPtr constPtrThis = ConstPointer();
-        IntPtr ptrIds = guidArray.NonConstPointer();
-        UnsafeNativeMethods.ON_3dmObjectAttributes_ClipParticipationList(constPtrThis, ptrIds);
-        return guidArray.ToArray();
-      }
-    }
-
-    /// <summary>
-    /// The object will participate in all clipping planes
-    /// </summary>
-    /// <since>8.0</since>
-    public void SetClipParticipationForAll()
-    {
-      IntPtr ptrThis = NonConstPointer();
-      UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, true, false, IntPtr.Zero);
-    }
-
-    /// <summary>
-    /// Object is immune to the effects of all clipping planes
-    /// </summary>
-    /// <since>8.0</since>
-    public void SetClipParticipationForNone()
-    {
-      IntPtr ptrThis = NonConstPointer();
-      UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, false, true, IntPtr.Zero);
-    }
-
-    /// <summary>
-    /// Object interacts with a specific list of clipping planes
-    /// </summary>
-    /// <param name="planeIds"></param>
-    /// <since>8.0</since>
-    public void SetClipParticipationList(System.Collections.Generic.IEnumerable<Guid> planeIds)
-    {
-      using(var guidArray = new Runtime.InteropWrappers.SimpleArrayGuid(planeIds))
-      {
-        IntPtr ptrThis = NonConstPointer();
-        IntPtr ptrIds = guidArray.ConstPointer();
-        UnsafeNativeMethods.ON_3dmObjectAttributes_SetClipParticipation(ptrThis, false, false, ptrIds);
-      }
-    }
-
     ///<summary>
     /// Get an optional custom section style associated with these attributes.
     ///</summary>
@@ -471,6 +374,15 @@ namespace Rhino.DocObjects
     {
       get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible); }
       set { SetBool(UnsafeNativeMethods.ObjectAttrsBool.HatchBoundaryVisible, value); }
+    }
+
+    /// <summary>
+    /// Defines how a label for a clipping plane object should be shown
+    /// </summary>
+    public SectionLabelStyle ClippingPlaneLabelStyle
+    {
+      get { return (SectionLabelStyle)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClippingPlaneLabelStyle); }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClippingPlaneLabelStyle, (int)value); }
     }
 
     ///<summary>
@@ -913,7 +825,6 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, true, argb);
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Gets all object decals associated with this object.
     /// </summary>
@@ -925,9 +836,10 @@ namespace Rhino.DocObjects
         if (m_decals == null)
         {
           uint doc_sn = 0;
+#if RHINO_SDK
           if ((m__parent is RhinoObject obj) && (obj.Document != null))
             doc_sn = obj.Document.RuntimeSerialNumber;
-
+#endif
           m_decals = new Render.Decals(this, false, doc_sn);
         }
 
@@ -936,7 +848,6 @@ namespace Rhino.DocObjects
     }
 
     private Render.Decals m_decals;
-#endif
 
     /// <summary>
     /// The mapping channel id to use when calling MappingChannel to retrieve the OCS mapping if there is one.
@@ -1111,38 +1022,6 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectAttributes_PlotWeight(const_ptr_this, document.RuntimeSerialNumber, viewportId);
-    }
-
-    /// <summary>
-    /// Get the clip participation based on an object attributes settings and document
-    /// values based on clip participation source
-    /// </summary>
-    /// <param name="document"></param>
-    /// <param name="forAll"></param>
-    /// <param name="forNone"></param>
-    /// <param name="specificPlaneIds"></param>
-    /// <since>8.0</since>
-    public void ComputedClipParticipation(RhinoDoc document, out bool forAll, out bool forNone, out Guid[] specificPlaneIds)
-    {
-      forAll = true;
-      forNone = false;
-      specificPlaneIds = new Guid[0];
-      IntPtr constPtrThis = ConstPointer();
-      int specificPlaneIdCount = UnsafeNativeMethods.CRhinoObjectAttributes_ClipParticipation(
-        constPtrThis,
-        document.RuntimeSerialNumber,
-        ref forAll, ref forNone, 0, null);
-
-      if (forAll)
-        specificPlaneIds = null;
-      if (specificPlaneIdCount > 0)
-      {
-        specificPlaneIds = new Guid[specificPlaneIdCount];
-        UnsafeNativeMethods.CRhinoObjectAttributes_ClipParticipation(
-          constPtrThis,
-          document.RuntimeSerialNumber,
-          ref forAll, ref forNone, specificPlaneIdCount, specificPlaneIds);
-      }
     }
 #endif
 

@@ -79,6 +79,19 @@ RH_C_FUNCTION bool ON_ClippingPlaneSurface_RemoveClipViewport(ON_ClippingPlaneSu
   return rc;
 }
 
+RH_C_FUNCTION bool ON_ClippingPlaneSurce_ParticipationEnabled(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
+{
+  if (pConstClippingPlaneSurface)
+    return pConstClippingPlaneSurface->m_clipping_plane.ParticipationListsEnabled();
+  return true;
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetParticipationEnabled(ON_ClippingPlaneSurface* pClippingPlaneSurface, bool enabled)
+{
+  if (pClippingPlaneSurface)
+    pClippingPlaneSurface->m_clipping_plane.SetParticipationListsEnabled(enabled);
+}
+
 RH_C_FUNCTION double ON_ClippingPlaneSurface_GetDepth(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
 {
   if (pConstClippingPlaneSurface)
@@ -103,4 +116,57 @@ RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDepth(ON_ClippingPlaneSurface* pCl
 {
   if (pClippingPlaneSurface)
     pClippingPlaneSurface->m_clipping_plane.SetDepth(depth);
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetClipList(
+  ON_ClippingPlaneSurface* pClippingPlaneSurface,
+  const ON_SimpleArray<ON_UUID>* idArray,
+  const ON_SimpleArray<int>* layerIndexArray,
+  bool isExclusionList)
+{
+  if (pClippingPlaneSurface)
+  {
+    pClippingPlaneSurface->m_clipping_plane.SetParticipationLists(idArray, layerIndexArray, isExclusionList);
+  }
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_GetClipList(
+  const ON_ClippingPlaneSurface* pClippingPlaneSurface,
+  ON_SimpleArray<ON_UUID>* idArray,
+  ON_SimpleArray<int>* layerIndexArray,
+  bool* isExclusionList)
+{
+  if (pClippingPlaneSurface)
+  {
+    if (idArray)
+    {
+      idArray->Empty();
+      const ON_UuidList* list = pClippingPlaneSurface->m_clipping_plane.ObjectClipParticipationList();
+      if (list)
+      {
+        idArray->Append(list->Count(), list->Array());
+      }
+    }
+    if (layerIndexArray)
+    {
+      layerIndexArray->Empty();
+      const ON_SimpleArray<int>* list = pClippingPlaneSurface->m_clipping_plane.LayerClipParticipationList();
+      if (list)
+      {
+        *layerIndexArray = *list;
+      }
+    }
+    if (isExclusionList)
+    {
+      *isExclusionList = pClippingPlaneSurface->m_clipping_plane.ClipParticipationListsAreExclusionLists();
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_ClearParticipationLists(ON_ClippingPlaneSurface* pClippingPlaneSurface)
+{
+  if (pClippingPlaneSurface)
+  {
+    pClippingPlaneSurface->m_clipping_plane.SetParticipationLists(nullptr, nullptr, true);
+  }
 }

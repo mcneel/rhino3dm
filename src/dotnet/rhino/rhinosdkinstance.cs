@@ -568,38 +568,6 @@ namespace Rhino.DocObjects
       }
     }
 
-    //[skipping]
-    //BOOL CRhinoInstanceDefinition::GetBBox(
-    //bool UsesLayer( int layer_index ) const;
-    //bool UsesLinetype( int linetype_index) const;
-    //bool CRhinoInstanceDefinition::RemoveLinetypeReference( int linetype_index);
-
-    ////////////////////////////////////////////////////////
-    //from ON_InstanceDefinition
-    string GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts which)
-    {
-      using (StringHolder sh = new StringHolder())
-      {
-        IntPtr ptr_holder = sh.NonConstPointer();
-        IntPtr const_ptr = ConstPointer();
-
-        if (!UnsafeNativeMethods.CRhinoInstanceDefinition_GetString(const_ptr, which, ptr_holder))
-        {
-          throw new InvalidProgramException("An invalid argument was provided to CRhinoInstanceDefinition_GetString.");
-        }
-        return sh.ToString();
-      }
-    }
-
-    /// <summary>
-    /// Gets the full file path for linked instance definitions.
-    /// </summary>
-    /// <since>5.0</since>
-    public string SourceArchive
-    {
-      get { return GetString(UnsafeNativeMethods.InstanceDefinitionStringConsts.SourceArchive); }
-    }
-
     /// <summary>
     /// Creates a preview bitmap of the instance definition.
     /// </summary>
@@ -1183,7 +1151,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Destroys all source archive information.
     /// Specifically:
-    /// * <see cref="InstanceDefinition.SourceArchive"/> is set to the empty string.
+    /// * <see cref="InstanceDefinitionGeometry.SourceArchive"/> is set to the empty string.
     /// * SourceRelativePath is set to false
     /// * The alternative source archive path is set to the empty string.
     /// * Checksum.Zero() is used to private destroy all checksum information.
