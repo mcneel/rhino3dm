@@ -18,6 +18,7 @@ private:
 public:
   BND_File3dmPostEffect() = default;
   BND_File3dmPostEffect(ON_PostEffect* pep);
+  BND_File3dmPostEffect(const BND_File3dmPostEffect& pep);
   //BND_File3dmPostEffect(ON_PostEffect* pep) : _pep(pep) { } // TODO implement in .cpp
 
   /*

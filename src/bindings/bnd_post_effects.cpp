@@ -1,10 +1,10 @@
 
 #include "bindings.h"
 
-BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep)
-: _pep(pep)
+BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) 
 { 
- 
+  _pep = new ON_PostEffect(*pep._pep); 
+  //_owned = true; 
 }
 
 void BND_File3dmPostEffectTable::Add(const BND_File3dmPostEffect& pep)
