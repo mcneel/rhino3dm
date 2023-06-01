@@ -1,6 +1,11 @@
 
 #include "bindings.h"
 
+BND_File3dmPostEffect::BND_File3dmPostEffect(ON_PostEffect* pep)
+: _pep(pep)
+{
+
+}
 BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) 
 { 
   _pep = new ON_PostEffect(*pep._pep); 
