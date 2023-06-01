@@ -12,12 +12,13 @@ void initPostEffectBindings(void* m);
 class BND_File3dmPostEffect
 {
 private:
-  ON_PostEffect* _pep = nullptr;
+  class ON_PostEffect* _pep = nullptr;
   //bool _owned = false;
 
 public:
   BND_File3dmPostEffect() = default;
   BND_File3dmPostEffect(ON_PostEffect* pep);
+  //BND_File3dmPostEffect(ON_PostEffect* pep) : _pep(pep) { } // TODO implement in .cpp
 
   /*
   BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) { _pep = new ON_PostEffect(*pep._pep); _owned = true; }

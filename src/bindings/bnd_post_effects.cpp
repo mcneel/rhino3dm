@@ -1,6 +1,12 @@
 
 #include "bindings.h"
 
+BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep)
+: _pep(pep)
+{ 
+ 
+}
+
 void BND_File3dmPostEffectTable::Add(const BND_File3dmPostEffect& pep)
 {
   ON_PostEffectParams params;
@@ -54,7 +60,7 @@ void initPostEffectBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmPostEffect>(m, "PostEffect")
     .def(py::init<>())
-    .def(py::init<const BND_File3dmPostEffect&>(), py::arg("other"))
+    //.def(py::init<const BND_File3dmPostEffect&>(), py::arg("other"))
     .def_property_readonly("Id", &BND_File3dmPostEffect::Id)
     .def_property_readonly("Type", &BND_File3dmPostEffect::Type)
     .def_property_readonly("LocalName", &BND_File3dmPostEffect::LocalName)
