@@ -93,7 +93,7 @@ macos setup
 1. Install vscode: https://code.visualstudio.com/
 2. Install Docker desktop: https://docs.docker.com/get-docker/ and start the docker app
 3. Install vscode extension for containers: https://code.visualstudio.com/docs/containers/overview
-4. Open the rhino3dm project in vscode and open a terminal. 
+4. Open the rhino3dm folder in vscode and open a terminal. 
 5. In the terminal, run the following command:
 
     `docker run --rm -dit -v $(pwd):/src emscripten/emsdk:3.1.30`
@@ -102,7 +102,9 @@ macos setup
     
     `-dit` runs the container as a daemon (in the background) but still allows interaction
     
-    `-v $(pwd):/src` maps the current directory (rhino3dm) to /src in the container
+    `-v $(pwd):/src` maps the current directory (rhino3dm) to /src in the container. Note, this works fine in zsh or bash on macos, but not powershell on windows. For that environment, try to include the full path to the rhino3dm folder:
+
+    `-v c:/dev/mcneel/rhino3dm:/src`
 
     `emsdk:3.1.30` is the version of emscripten we are using.
 
