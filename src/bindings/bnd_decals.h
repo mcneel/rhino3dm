@@ -27,9 +27,9 @@ void initDecalBindings(void* m);
 
 class BND_File3dmDecal
 {
-public:
+private:
   ON_Decal* _decal = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
   BND_File3dmDecal() = default;

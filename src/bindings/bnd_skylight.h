@@ -13,7 +13,7 @@ class BND_File3dmSkylight
 {
 private:
   ON_Skylight* _sl = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
   BND_File3dmSkylight() = default;
