@@ -13,16 +13,13 @@ class BND_File3dmSun
 {
 private:
   ON_Sun* _sun = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmSun() = default;
+  BND_File3dmSun();
   BND_File3dmSun(ON_Sun* s);
-  //BND_File3dmSun(ON_Sun* s) : _sun(s) {}
-  //BND_File3dmSun() { _sun = new ON_Sun; _owned = true; }
-  //BND_File3dmSun(const BND_File3dmSun& sun) { _sun = new ON_Sun(*sun._sun); _owned = true; }
-  //
-  //~BND_File3dmSun() { if (_owned) delete _sun; }
+  BND_File3dmSun(const BND_File3dmSun& sun);
+  ~BND_File3dmSun() { if (_owned) delete _sun; }
 
   int GetMinYear() const { return ON_Sun::MinYear(); }
   int GetMaxYear() const { return ON_Sun::MaxYear(); }

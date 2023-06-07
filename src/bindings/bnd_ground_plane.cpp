@@ -1,6 +1,20 @@
 
 #include "bindings.h"
 
+BND_File3dmGroundPlane::BND_File3dmGroundPlane() 
+{ 
+  _gp = new ON_GroundPlane; 
+  _owned = true; 
+}
+
+BND_File3dmGroundPlane::BND_File3dmGroundPlane(ON_GroundPlane* gp) : _gp(gp) { }
+
+BND_File3dmGroundPlane::BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp) 
+{ 
+  _gp = new ON_GroundPlane(*gp._gp); 
+  _owned = true; 
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initGroundPlaneBindings(pybind11::module& m)

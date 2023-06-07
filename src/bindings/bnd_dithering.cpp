@@ -1,5 +1,22 @@
 #include "bindings.h"
 
+BND_File3dmDithering::BND_File3dmDithering() 
+{
+  _dit = new ON_Dithering();
+  _owned = true;
+}
+
+BND_File3dmDithering::BND_File3dmDithering(ON_Dithering* dit) 
+{
+  _dit = dit;
+}
+
+BND_File3dmDithering::BND_File3dmDithering(const BND_File3dmDithering& dit) 
+{ 
+  _dit = new ON_Dithering(*dit._dit); 
+  _owned = true; 
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDitheringBindings(pybind11::module& m)

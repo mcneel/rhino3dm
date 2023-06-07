@@ -1,7 +1,19 @@
 
 #include "bindings.h"
 
-//#if !defined ON_WASM_COMPILE // Why do I need this?
+BND_File3dmRenderChannels::BND_File3dmRenderChannels() 
+{ 
+  _rch = new ON_RenderChannels; 
+  _owned = true; 
+}
+
+BND_File3dmRenderChannels::BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch) 
+{ 
+  _rch = new ON_RenderChannels(*rch._rch); 
+  _owned = true; 
+}
+
+BND_File3dmRenderChannels::BND_File3dmRenderChannels(ON_RenderChannels* rch) : _rch(rch) { }
 
 BND_TUPLE BND_File3dmRenderChannels::GetCustomList() const
 {

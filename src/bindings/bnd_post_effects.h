@@ -13,19 +13,13 @@ class BND_File3dmPostEffect
 {
 private:
   class ON_PostEffect* _pep = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmPostEffect() = default;
+  BND_File3dmPostEffect();
   BND_File3dmPostEffect(ON_PostEffect* pep);
   BND_File3dmPostEffect(const BND_File3dmPostEffect& pep);
-  //BND_File3dmPostEffect(ON_PostEffect* pep) : _pep(pep) { } // TODO implement in .cpp
-
-  /*
-  BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) { _pep = new ON_PostEffect(*pep._pep); _owned = true; }
-  BND_File3dmPostEffect(ON_PostEffect* pep) : _pep(pep) { }
   ~BND_File3dmPostEffect() { if (_owned) delete _pep; }
-  */
 
   BND_UUID Id(void) const { return ON_UUID_to_Binding(_pep ? _pep->Id() : ON_nil_uuid); }
   ON_PostEffect::Types Type(void) const { return _pep ? _pep->Type() : ON_PostEffect::Types::Unset; }
@@ -46,15 +40,9 @@ private:
   bool _owned = false;
 
 public:
-  BND_File3dmPostEffectTable() = default;
+  BND_File3dmPostEffectTable();
   BND_File3dmPostEffectTable(ON_PostEffects* peps);
-
-  /*
-  BND_File3dmPostEffectTable() { _peps = new ON_PostEffects; _owned = true; }
-  BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet) { _peps = new ON_PostEffects(*pet._peps); _owned = true; }
-  BND_File3dmPostEffectTable(ON_PostEffects* peps) : _peps(peps) { }
   ~BND_File3dmPostEffectTable() { if (_owned) delete _peps; }
-  */
 
   int Count() const;
   void Add(const BND_File3dmPostEffect& pep);

@@ -1,16 +1,37 @@
 
 #include "bindings.h"
 
+BND_File3dmPostEffect::BND_File3dmPostEffect()
+{
+  _pep = new ON_PostEffect;
+  _owned = true;
+}
+
 BND_File3dmPostEffect::BND_File3dmPostEffect(ON_PostEffect* pep)
 : _pep(pep)
 {
 
 }
+
 BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) 
 { 
   _pep = new ON_PostEffect(*pep._pep); 
-  //_owned = true; 
+  _owned = true; 
 }
+
+BND_File3dmPostEffectTable::BND_File3dmPostEffectTable() 
+{ 
+  _peps = new ON_PostEffects(); 
+  _owned = true; 
+}
+
+BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet) 
+{ 
+  _peps = new ON_PostEffects(*pet._peps); 
+  _owned = true; 
+}
+
+BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(ON_PostEffects* peps) : _peps(peps) { }
 
 void BND_File3dmPostEffectTable::Add(const BND_File3dmPostEffect& pep)
 {

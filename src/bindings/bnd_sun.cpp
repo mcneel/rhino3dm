@@ -1,5 +1,18 @@
-
 #include "bindings.h"
+
+BND_File3dmSun::BND_File3dmSun() 
+{ 
+  _sun = new ON_Sun; 
+  _owned = true; 
+}
+
+BND_File3dmSun::BND_File3dmSun(ON_Sun* s) : _sun(s) {}
+
+BND_File3dmSun::BND_File3dmSun(const BND_File3dmSun& sun) 
+{ 
+  _sun = new ON_Sun(*sun._sun); 
+  _owned = true; 
+}
 
 int BND_File3dmSun::GetYear() const
 {

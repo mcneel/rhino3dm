@@ -16,14 +16,10 @@ private:
   bool _owned = false;
 
 public:
-  BND_File3dmSkylight() = default;
+  BND_File3dmSkylight();
   BND_File3dmSkylight(ON_Skylight* sl);
-
-
-  //BND_File3dmSkylight(ON_Skylight* sl) : _sl(sl) { }
-  //BND_File3dmSkylight() { _sl = new ON_Skylight; _owned = true; }
-  //BND_File3dmSkylight(const BND_File3dmSkylight& sl) { _sl = new ON_Skylight(*sl._sl); _owned = true; }
-  //~BND_File3dmSkylight() { if (_owned) delete _sl; }
+  BND_File3dmSkylight(const BND_File3dmSkylight& sl);
+  ~BND_File3dmSkylight() { if (_owned) delete _sl; }
 
   bool GetOn() const { return _sl->On(); }
   void SetOn(bool v) { _sl->SetOn(v); }

@@ -13,17 +13,13 @@ class BND_File3dmGroundPlane
 {
 private:
   ON_GroundPlane* _gp = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmGroundPlane() = default;
+  BND_File3dmGroundPlane();
   BND_File3dmGroundPlane(ON_GroundPlane* gp);
-  /*
-  BND_File3dmGroundPlane() { _gp = new ON_GroundPlane; _owned = true; }
-  BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp) { _gp = new ON_GroundPlane(*gp._gp); _owned = true; }
-  BND_File3dmGroundPlane(ON_GroundPlane* gp) : _gp(gp) { }
+  BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp);
   ~BND_File3dmGroundPlane() { if (_owned) delete _gp; }
-  */
 
   bool GetOn(void) const { return _gp->On(); }
   void SetOn(bool v) { _gp->SetOn(v); }

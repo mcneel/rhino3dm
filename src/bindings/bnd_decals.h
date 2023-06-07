@@ -32,12 +32,10 @@ private:
   bool _owned = false;
 
 public:
-  BND_File3dmDecal() = default;
-  BND_File3dmDecal(ON_Decal* d);
-  //BND_File3dmDecal() { _decal = new ON_Decal; _owned = true; }
-  //BND_File3dmDecal(const BND_File3dmDecal& d) { _decal = new ON_Decal(*d._decal); _owned = true; }
-  //BND_File3dmDecal(ON_Decal* d) : _decal(d) { }
-  //~BND_File3dmDecal() { if (_owned) delete _decal; }
+  BND_File3dmDecal();               //BND_File3dmDecal() { _decal = new ON_Decal; _owned = true; }
+  BND_File3dmDecal(ON_Decal* d);    //BND_File3dmDecal(ON_Decal* d) : _decal(d) { }
+  BND_File3dmDecal(const BND_File3dmDecal& d);
+  ~BND_File3dmDecal() { if (_owned) delete _decal; }
 
   BND_UUID TextureInstanceId() const { return ON_UUID_to_Binding(_decal->TextureInstanceId()); }
   void SetTextureInstanceId(BND_UUID v) { _decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
@@ -99,14 +97,13 @@ class BND_File3dmDecalTable
 {
 private:
   ON_3dmObjectAttributes* _attr = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmDecalTable() = default; 
+  BND_File3dmDecalTable();
   BND_File3dmDecalTable(ON_3dmObjectAttributes* a);
-  //BND_File3dmDecalTable() { _attr = new ON_3dmObjectAttributes; _owned = true; }
-  //BND_File3dmDecalTable(const BND_File3dmDecalTable& d) { _attr = new ON_3dmObjectAttributes(*d._attr); _owned = true; }
-  //~BND_File3dmDecalTable() { if (_owned) delete _attr; }
+  BND_File3dmDecalTable(const BND_File3dmDecalTable& d);
+  ~BND_File3dmDecalTable() { if (_owned) delete _attr; };
 
   int Count() const;
   class BND_File3dmDecal* FindIndex(int index);

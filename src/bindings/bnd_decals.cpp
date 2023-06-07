@@ -1,9 +1,22 @@
 
 #include "bindings.h"
 
+BND_File3dmDecal::BND_File3dmDecal()
+{
+  _decal = new ON_Decal();
+  _owned = true;
+}
+
 BND_File3dmDecal::BND_File3dmDecal(ON_Decal* d)
 {
   _decal = d;
+  _owned = true;
+}
+
+BND_File3dmDecal::BND_File3dmDecal(const BND_File3dmDecal& d)
+{ 
+  _decal = new ON_Decal(*d._decal); 
+  _owned = true; 
 }
 
 Mappings BND_File3dmDecal::Mapping() const 
@@ -111,7 +124,6 @@ void BND_File3dmDecal::SetProjection(Projections projection)
   
 }
 
-
 double BND_File3dmDecal::HorzSweepStart() const
 {
   double sta = 0.0, end = 0.0;
@@ -216,9 +228,21 @@ void BND_File3dmDecal::SetBoundsMaxV(double v)
   _decal->SetUVBounds(min_u, min_v, max_u, v);
 }
 
+BND_File3dmDecalTable::BND_File3dmDecalTable() 
+{ 
+  _attr = new ON_3dmObjectAttributes; 
+  _owned = true; 
+}
+
 BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
 {
   _attr = a;
+}
+
+BND_File3dmDecalTable::BND_File3dmDecalTable(const BND_File3dmDecalTable& d) 
+{ 
+  _attr = new ON_3dmObjectAttributes(*d._attr);
+  _owned = true; 
 }
 
 int BND_File3dmDecalTable::Count() const

@@ -13,18 +13,13 @@ class BND_File3dmRenderEnvironments
 {
 private:
   ON_3dmRenderSettings* _rs = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmRenderEnvironments() = default;
+  BND_File3dmRenderEnvironments();
   BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs);
-
-  /*
-  BND_File3dmRenderEnvironments() { _rs = new ON_3dmRenderSettings; _owned = true; }
-  BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re) { _rs = new ON_3dmRenderSettings(*re._rs); _owned = true; }
-  BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs) : _rs(rs) { }
+  BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re);
   ~BND_File3dmRenderEnvironments() { if (_owned) delete _rs; }
-  */
 
   BND_UUID GetBackgroundId(void) const;
   void SetBackgroundId(const BND_UUID& id);

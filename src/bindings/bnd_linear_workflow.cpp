@@ -1,6 +1,20 @@
 
 #include "bindings.h"
 
+BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow() 
+{ 
+  _lw = new ON_LinearWorkflow; 
+  _owned = true; 
+}
+
+BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw) : _lw(lw) { }
+
+BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(const BND_File3dmLinearWorkflow& lw) 
+{ 
+  _lw = new ON_LinearWorkflow(*lw._lw); 
+  _owned = true; 
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initLinearWorkflowBindings(pybind11::module& m)

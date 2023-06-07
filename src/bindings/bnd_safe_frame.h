@@ -13,10 +13,10 @@ class BND_File3dmSafeFrame
 {
 private:
   ON_SafeFrame* _sf = nullptr;
-  //bool _owned = false;
+  bool _owned = false;
 
 public:
-  BND_File3dmSafeFrame() = default;
+  BND_File3dmSafeFrame();
   BND_File3dmSafeFrame(ON_SafeFrame* sf);
 
   /*
