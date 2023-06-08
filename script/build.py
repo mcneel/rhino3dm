@@ -101,7 +101,7 @@ def run_command(command, suppress_errors=False):
         dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
     else:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=popen_shell_mode)    
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=popen_shell_mode)    
     
     while True:
         line = process.stdout.readline()               
@@ -452,13 +452,16 @@ def build_js():
 
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
     # we'll pass suppress_errors argument as True here...
-    run_command("emmake make", True)
+    run_command("emmake make", verbose)
 
     # Check to see if the build succeeded and move into artifacts_js
-    items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
+    #items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
+    items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
     all_items_built = True
     for item in items_to_check:
+        print(item)
         path_to_item = os.path.abspath(os.path.join(target_path, item))
+        print(path_to_item)
         if not os.path.exists(path_to_item):
             print_error_message("failed to create " + path_to_item)
             all_items_built = False

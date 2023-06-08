@@ -18,13 +18,8 @@ private:
 public:
   BND_File3dmSafeFrame();
   BND_File3dmSafeFrame(ON_SafeFrame* sf);
-
-  /*
-  BND_File3dmSafeFrame() { _sf = new ON_SafeFrame; _owned = true; }
-  BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf) { _sf = new ON_SafeFrame(*sf._sf); _owned = true; }
-  BND_File3dmSafeFrame(ON_SafeFrame* sf) : _sf(sf) { }
+  BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf);
   ~BND_File3dmSafeFrame() { if (_owned) delete _sf; }
-  */
 
   bool GetOn(void) const { return _sf->On(); }
   void SetOn(bool v) { _sf->SetOn(v); }
