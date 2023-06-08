@@ -452,7 +452,8 @@ def build_js():
 
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
     # we'll pass suppress_errors argument as True here...
-    run_command("emmake make", verbose)
+
+    run_command("emmake make", not verbose)
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
