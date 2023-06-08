@@ -42,6 +42,7 @@ private:
 public:
   BND_File3dmPostEffectTable();
   BND_File3dmPostEffectTable(ON_PostEffects* peps);
+  BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet);
   ~BND_File3dmPostEffectTable() { if (_owned) delete _peps; }
 
   int Count() const;

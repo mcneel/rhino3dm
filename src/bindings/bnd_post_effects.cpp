@@ -3,8 +3,6 @@
 
 BND_File3dmPostEffect::BND_File3dmPostEffect()
 {
-  _pep = new ON_PostEffect;
-  _owned = true;
 }
 
 BND_File3dmPostEffect::BND_File3dmPostEffect(ON_PostEffect* pep)
