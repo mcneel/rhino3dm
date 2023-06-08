@@ -112,19 +112,9 @@ macos setup
 
     `python3 script/setup.py --platform js`
 
-9. Run the following command to build rhino3dm.js:
+9. Run the following command to build rhino3dm.js (use `--verbose` to get verbose output while compiling):
 
-    `python3 script/build.py --platform js --overwrite`
-
-Notes: 
-- the `--verbose` option is intercepted in build.py for js because the way we pipe the output doesn't work past a certain point. To be able to get more information while compiling rhino3dm.js, you can run the following: 
-
-    ```bash
-    cd src/build/javascript
-    emcmake make --VERBOSE=1
-    ```
-
-    You might need to create the build/javascript directories.
+    `python3 script/build.py --platform js --overwrite --verbose`
 
 ## Related Topics
 
