@@ -5,7 +5,7 @@ namespace Rhino.DocObjects
   /// <summary>
   /// Represents an environment.
   /// </summary>
-  public class SimEnvironment : Runtime.CommonObject
+  public class Environment : Runtime.CommonObject
   {
     /// <summary>
     /// The available background projections.
@@ -40,7 +40,7 @@ namespace Rhino.DocObjects
     /// Initializes a new environment.
     /// </summary>
     /// <since>8.0</since>
-    public SimEnvironment()
+    public Environment()
     {
       var ptr = UnsafeNativeMethods.ON_Environment_New();
       ConstructNonConstObject(ptr);

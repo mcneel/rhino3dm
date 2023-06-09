@@ -262,7 +262,7 @@ RH_C_FUNCTION bool ON_RenderContent_SetParameter(ON_RenderContent* rc, const RHM
   return true;
 }
 
-RH_C_FUNCTION bool ON_RenderMaterial_SimulatedMaterial(const ON_RenderMaterial* rm, ON_Material* mat)
+RH_C_FUNCTION bool ON_RenderMaterial_To_ON_Material(const ON_RenderMaterial* rm, ON_Material* mat)
 {
   if ((nullptr != rm) && (nullptr != mat))
   {
@@ -273,7 +273,7 @@ RH_C_FUNCTION bool ON_RenderMaterial_SimulatedMaterial(const ON_RenderMaterial* 
   return false;
 }
 
-RH_C_FUNCTION bool ON_RenderEnvironment_SimulatedEnvironment(const ON_RenderEnvironment* re, ON_Environment* env)
+RH_C_FUNCTION bool ON_RenderEnvironment_To_ON_Environment(const ON_RenderEnvironment* re, ON_Environment* env)
 {
   if ((nullptr != re) && (nullptr != env))
   {
@@ -284,7 +284,7 @@ RH_C_FUNCTION bool ON_RenderEnvironment_SimulatedEnvironment(const ON_RenderEnvi
   return false;
 }
 
-RH_C_FUNCTION bool ON_RenderTexture_SimulatedTexture(const ON_RenderTexture* rt, ON_Texture* tex)
+RH_C_FUNCTION bool ON_RenderTexture_To_ON_Texture(const ON_RenderTexture* rt, ON_Texture* tex)
 {
   if ((nullptr != rt) && (nullptr != tex))
   {

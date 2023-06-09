@@ -1401,7 +1401,7 @@ namespace Rhino.Runtime
   }
 
   /// <summary>
-  /// Contains static methods to deal with teh runtime environment.
+  /// Contains static methods to deal with the runtime environment.
   /// </summary>
   public static class HostUtils
   {
@@ -1643,8 +1643,7 @@ namespace Rhino.Runtime
         //RH-56630
         if (RunningOnWindows)
         {
-          return Environment.OSVersion.Version.Major.ToString();
-
+          return System.Environment.OSVersion.Version.Major.ToString();
         }
         else
         {
@@ -2004,7 +2003,7 @@ namespace Rhino.Runtime
     /// supports dark mode.
     /// </summary>
     /// <since>6.19</since>
-    public static bool RunningInDarkMode => UnsafeNativeMethods.RHC_RhRunningInDarkMode();
+    public static bool RunningInDarkMode => AdvancedSettings.DarkMode;
 
     private static string m_device_name;
     /// <summary>
@@ -2018,8 +2017,8 @@ namespace Rhino.Runtime
       {
         if (string.IsNullOrEmpty(m_device_name))
         {
-          var machineName = Environment.MachineName;
-          var userDomain = Environment.UserDomainName;
+          var machineName = System.Environment.MachineName;
+          var userDomain = System.Environment.UserDomainName;
 
           if (string.Equals(machineName, userDomain, StringComparison.InvariantCultureIgnoreCase))
           {
@@ -2051,7 +2050,6 @@ namespace Rhino.Runtime
       }
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Get the current operating system language.
     /// </summary>
@@ -2061,7 +2059,6 @@ namespace Rhino.Runtime
     /// <since>6.8</since>
     [CLSCompliant(false)]
     public static uint CurrentOSLanguage => UnsafeNativeMethods.RHC_RhCurrentOSLanguage();
-#endif
 
     private static Guid m_device_id = Guid.Empty;
     /// <summary>
@@ -2256,7 +2253,7 @@ namespace Rhino.Runtime
       {
         if (m_running_in_net_core == null)
         {
-          m_running_in_net_core = Environment.Version.Major >= 5 || RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
+          m_running_in_net_core = System.Environment.Version.Major >= 5 || RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
         }
         return m_running_in_net_core.Value;
       }
@@ -3695,7 +3692,7 @@ namespace Rhino.Runtime
       // Curtis 2018.09.04:
       // Any changes to the output of this file should be reflected on Mac in RhinoDotNet_Mono.mm
 
-      var path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+      var path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory);
       path = System.IO.Path.Combine(path, "RhinoDotNetCrash.txt");
       System.IO.StreamWriter text_file = null;
       try
@@ -3709,7 +3706,7 @@ namespace Rhino.Runtime
         else
         {
           text_file.WriteLine("[ERROR] .NET STACK TRACE:");
-          text_file.WriteLine(Environment.StackTrace);
+          text_file.WriteLine(System.Environment.StackTrace);
         }
 
         text_file.WriteLine("[END ERROR]");
@@ -3889,7 +3886,7 @@ namespace Rhino.Runtime
       if (RunningOnWindows)
         return UnsafeNativeMethods.RHC_GetSystemCpuThreadCount();
       else
-        return Environment.ProcessorCount;
+        return System.Environment.ProcessorCount;
     }
 #endif
 

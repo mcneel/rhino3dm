@@ -60,6 +60,16 @@ namespace DotNetTester
         foreach (var c in m.Children)
         {
           DisplayRenderContent(c);
+
+          if (c is File3dmRenderTexture tex)
+          {
+            IConvertible p = tex.GetParameter("color-one");
+            if (p != null)
+            {
+              var s = Convert.ToString(p);
+              Console.WriteLine(s);
+            }
+          }
         }
 
         // Can't do this because constructors are internal.
