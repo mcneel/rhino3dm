@@ -1,19 +1,22 @@
 
 #include "bindings.h"
 
-BND_File3dmRenderChannels::BND_File3dmRenderChannels() 
-{ 
-  _rch = new ON_RenderChannels; 
-  _owned = true; 
+BND_File3dmRenderChannels::BND_File3dmRenderChannels()
+{
+  _rch = new ON_RenderChannels;
+  _owned = true;
 }
 
-BND_File3dmRenderChannels::BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch) 
-{ 
-  _rch = new ON_RenderChannels(*rch._rch); 
-  _owned = true; 
+BND_File3dmRenderChannels::BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch)
+{
+  _rch = new ON_RenderChannels(*rch._rch);
+  _owned = true;
 }
 
-BND_File3dmRenderChannels::BND_File3dmRenderChannels(ON_RenderChannels* rch) : _rch(rch) { }
+BND_File3dmRenderChannels::BND_File3dmRenderChannels(ON_RenderChannels* rch)
+: _rch(rch)
+{
+}
 
 BND_TUPLE BND_File3dmRenderChannels::GetCustomList() const
 {

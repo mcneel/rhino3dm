@@ -1,18 +1,22 @@
+
 #include "bindings.h"
 
-BND_File3dmSafeFrame::BND_File3dmSafeFrame() 
-{ 
-  _sf = new ON_SafeFrame; 
-  _owned = true; 
+BND_File3dmSafeFrame::BND_File3dmSafeFrame()
+{
+  _sf = new ON_SafeFrame;
+  _owned = true;
 }
 
-BND_File3dmSafeFrame::BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf) 
-{ 
-  _sf = new ON_SafeFrame(*sf._sf); 
-  _owned = true; 
+BND_File3dmSafeFrame::BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf)
+{
+  _sf = new ON_SafeFrame(*sf._sf);
+  _owned = true;
 }
 
-BND_File3dmSafeFrame::BND_File3dmSafeFrame(ON_SafeFrame* sf) : _sf(sf) { }
+BND_File3dmSafeFrame::BND_File3dmSafeFrame(ON_SafeFrame* sf)
+: _sf(sf)
+{
+}
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;

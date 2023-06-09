@@ -80,16 +80,16 @@ bool BND_File3dmPostEffect::SetParameter(const wchar_t* n, const std::wstring& v
   return _pep ? _pep->SetParameter(n, v.c_str()) : false;
 }
 
-BND_File3dmPostEffectTable::BND_File3dmPostEffectTable() 
-{ 
+BND_File3dmPostEffectTable::BND_File3dmPostEffectTable()
+{
   _peps = new ON_PostEffects();
-  _owned = true; 
+  _owned = true;
 }
 
-BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet) 
-{ 
+BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet)
+{
   _peps = new ON_PostEffects(*pet._peps);
-  _owned = true; 
+  _owned = true;
 }
 
 BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(ON_PostEffects* peps)

@@ -4,19 +4,22 @@
 using U = ON_3dmRenderSettings::EnvironmentUsage;
 using P = ON_3dmRenderSettings::EnvironmentPurpose;
 
-BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments() 
-{ 
-  _rs = new ON_3dmRenderSettings; 
-  _owned = true; 
+BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments()
+{
+  _rs = new ON_3dmRenderSettings;
+  _owned = true;
 }
 
-BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re) 
-{ 
-  _rs = new ON_3dmRenderSettings(*re._rs); 
-  _owned = true; 
+BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re)
+{
+  _rs = new ON_3dmRenderSettings(*re._rs);
+  _owned = true;
 }
 
-BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs) : _rs(rs) { }
+BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs)
+: _rs(rs)
+{
+}
 
 BND_UUID BND_File3dmRenderEnvironments::GetBackgroundId(void) const
 {

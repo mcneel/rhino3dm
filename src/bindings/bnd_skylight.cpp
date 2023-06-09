@@ -1,17 +1,21 @@
+
 #include "bindings.h"
 
-BND_File3dmSkylight::BND_File3dmSkylight() 
-{ 
+BND_File3dmSkylight::BND_File3dmSkylight()
+{
   _sl = new ON_Skylight; 
   _owned = true; 
 }
 
-BND_File3dmSkylight::BND_File3dmSkylight(ON_Skylight* sl) : _sl(sl) { }
-
-BND_File3dmSkylight::BND_File3dmSkylight(const BND_File3dmSkylight& sl) 
-{ 
+BND_File3dmSkylight::BND_File3dmSkylight(const BND_File3dmSkylight& sl)
+{
   _sl = new ON_Skylight(*sl._sl); 
   _owned = true; 
+}
+
+BND_File3dmSkylight::BND_File3dmSkylight(ON_Skylight* sl)
+: _sl(sl)
+{
 }
 
 #if defined(ON_PYTHON_COMPILE)
