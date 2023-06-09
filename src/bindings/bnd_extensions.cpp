@@ -1734,7 +1734,7 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
     ;
 
-  class_<BND_ONXModel>("File3dmDecalTable")
+  class_<BND_File3dmDecalTable>("File3dmDecalTable")
     .function("count", &BND_File3dmDecalTable::Count)
     .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
     .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
