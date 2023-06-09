@@ -19,18 +19,18 @@ public:
   BND_File3dmPostEffect();
   BND_File3dmPostEffect(ON_PostEffect* pep);
   BND_File3dmPostEffect(const BND_File3dmPostEffect& pep);
-  ~BND_File3dmPostEffect() { if (_owned) delete _pep; }
+  ~BND_File3dmPostEffect();
 
-  BND_UUID Id(void) const { return ON_UUID_to_Binding(_pep ? _pep->Id() : ON_nil_uuid); }
-  ON_PostEffect::Types Type(void) const { return _pep ? _pep->Type() : ON_PostEffect::Types::Unset; }
-  std::wstring LocalName(void) const { return std::wstring(_pep ? static_cast<const wchar_t*>(_pep->LocalName()) : L""); }
-  bool Listable(void) const { return _pep ? _pep->Type() != ON_PostEffect::Types::ToneMapping : false; }
-  bool On(void) const { return _pep ? _pep->On() : false; }
-  void SetOn(bool b) { if (_pep) _pep->SetOn(b); }
-  bool Shown(void) const { return _pep ? _pep->Shown() : false; }
-  void SetShown(bool b) { if (_pep) _pep->SetShown(b); }
-  std::wstring GetParameter(const wchar_t* n) const { return _pep ? static_cast<const wchar_t*>(_pep->GetParameter(n).AsString()) : L""; }
-  bool SetParameter(const wchar_t* n, const std::wstring& v) { return _pep ? _pep->SetParameter(n, v.c_str()) : false; }
+  BND_UUID Id(void) const;
+  ON_PostEffect::Types Type(void) const;
+  std::wstring LocalName(void) const;
+  bool Listable(void) const;
+  bool On(void) const;
+  void SetOn(bool b);
+  bool Shown(void) const;
+  void SetShown(bool b);
+  std::wstring GetParameter(const wchar_t* n) const;
+  bool SetParameter(const wchar_t* n, const std::wstring& v);
 };
 
 class BND_File3dmPostEffectTable
@@ -43,7 +43,7 @@ public:
   BND_File3dmPostEffectTable();
   BND_File3dmPostEffectTable(ON_PostEffects* peps);
   BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet);
-  ~BND_File3dmPostEffectTable() { if (_owned) delete _peps; }
+  ~BND_File3dmPostEffectTable();
 
   int Count() const;
   void Add(const BND_File3dmPostEffect& pep);

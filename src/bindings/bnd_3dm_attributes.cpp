@@ -186,13 +186,12 @@ void init3dmAttributesBindings(void*)
     .property("viewportId", &BND_3dmObjectAttributes::GetViewportId, &BND_3dmObjectAttributes::SetViewportId)
     .property("activeSpace", &BND_3dmObjectAttributes::GetSpace, &BND_3dmObjectAttributes::SetSpace)
     .property("groupCount", &BND_3dmObjectAttributes::GroupCount)
-//    .property("decals", &BND_3dmObjectAttributes::Decals)
-//    .property("meshModifiers", &BND_3dmObjectAttributes::MeshModifiers)
+    .function("decals", &BND_3dmObjectAttributes::Decals)
+    .function("meshModifiers", &BND_3dmObjectAttributes::MeshModifiers)
     .function("getGroupList", &BND_3dmObjectAttributes::GetGroupList)
     .function("addToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .function("removeFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
     .function("removeFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)
-  ;
-
+    ;
 }
 #endif

@@ -277,7 +277,6 @@ BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
 namespace py = pybind11;
 void initDecalBindings(pybind11::module& m)
 {
-
   py::enum_<Mappings>(m, "Mappings")
     .value("None", Mappings::None)
     .value("Planar", Mappings::Planar)
@@ -323,7 +322,6 @@ using namespace emscripten;
 
 void initDecalBindings(void*)
 {
-
   enum_<Mappings>("Mappings")
     .value("None", Mappings::None)
     .value("Planar", Mappings::Planar)
@@ -347,7 +345,6 @@ void initDecalBindings(void*)
     .property("projection", &BND_File3dmDecal::Projection, &BND_File3dmDecal::SetProjection)
     .property("mapToInside", &BND_File3dmDecal::MapToInside, &BND_File3dmDecal::SetMapToInside)
     .property("transparency", &BND_File3dmDecal::Transparency, &BND_File3dmDecal::SetTransparency)
-  
     .property("origin", &BND_File3dmDecal::Origin, &BND_File3dmDecal::SetOrigin)
     .property("vectorUp", &BND_File3dmDecal::VectorUp, &BND_File3dmDecal::SetVectorUp)
     .property("vectorAcross", &BND_File3dmDecal::VectorAcross, &BND_File3dmDecal::SetVectorAcross)
@@ -361,7 +358,6 @@ void initDecalBindings(void*)
     .property("boundsMinV", &BND_File3dmDecal::BoundsMinV, &BND_File3dmDecal::SetBoundsMinV)
     .property("boundsMaxU", &BND_File3dmDecal::BoundsMaxU, &BND_File3dmDecal::SetBoundsMaxU)
     .property("boundsMaxV", &BND_File3dmDecal::BoundsMaxV, &BND_File3dmDecal::SetBoundsMaxV)
-  
     ;
 }
 #endif

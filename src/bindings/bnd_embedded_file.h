@@ -25,8 +25,6 @@ public:
   static BND_File3dmEmbeddedFile* Read(const std::wstring& f);
 
   std::wstring GetFilename(void) const { return std::wstring(static_cast<const wchar_t*>(_ef->Filename())); }
-  //void SetFileName(const std::wstring& filename) const {}
-  //bool SaveToFile(const std::wstring& filename) const {}
   size_t GetLength(void) const { return _ef->Length(); }
   bool Write(const std::wstring& f) const { return _ef->SaveToFile(f.c_str()); }
   bool Clear(void) const { return _ef->Clear(); }
