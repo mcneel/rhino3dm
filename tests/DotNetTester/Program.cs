@@ -296,7 +296,7 @@ namespace DotNetTester
 
       Console.WriteLine("END Post Effect collection");
     }
-    
+
     static void PostEffectTest(PostEffectData pep)
     {
       var ci = CultureInfo.InvariantCulture;
@@ -309,7 +309,7 @@ namespace DotNetTester
       Console.WriteLine("    On:        {0}", pep.On);
       Console.WriteLine("    Shown:     {0}", pep.Shown);
       Console.WriteLine("    DataCRC:   {0}", pep.DataCRC(0));
-    
+
       var p = pep.GetParameter("radius");
       if (p != null) Console.WriteLine("    Radius:    {0}", p.ToDouble(ci));
 
@@ -317,13 +317,13 @@ namespace DotNetTester
 
       p = pep.GetParameter("radius");
       if (p != null) Console.WriteLine("    New Radius:{0}", p.ToDouble(ci));
-    
+
       p = pep.GetParameter("brightness");
       if (p != null) Console.WriteLine("    Brightness:{0}", p.ToDouble(ci));
-    
+
       p = pep.GetParameter("bias");
       if (p != null) Console.WriteLine("    Bias:      {0}", p.ToDouble(ci));
-    
+
       Console.WriteLine("  END Post Effect");
     }
 
