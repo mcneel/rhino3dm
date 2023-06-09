@@ -768,7 +768,7 @@ namespace Rhino.Geometry
     public static string PlainTextToRtf(string str) => 
       @"{\rtf1{\ltrch " 
       + str.Replace("\n", Ph)
-      .Replace(Environment.NewLine, Ph)
+      .Replace(System.Environment.NewLine, Ph)
       .Replace(@"\", @"\\")
       .Replace("{", @"\{")
       .Replace("}", @"\}")

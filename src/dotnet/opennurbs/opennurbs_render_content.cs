@@ -243,7 +243,6 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool AutoDelete => UnsafeNativeMethods.ON_RenderContent_AutoDelete(ConstPointer());
 
-#if RHINO_SDK
     /// <summary>
     /// Gets a named parameter.
     /// <return>The parameter value or null if not found.</return>
@@ -273,7 +272,6 @@ namespace Rhino.FileIO
         return UnsafeNativeMethods.ON_RenderContent_SetParameter(ConstPointer(), param, v.ConstPointer());
       }
     }
-#endif
 
     /// <summary>
     /// <return>The parent File3dm of the entire hierarchy.</return>
@@ -488,10 +486,10 @@ namespace Rhino.FileIO
     /// Get a simulated material that approximates this material's appearance.
     /// </summary>
     /// <since>8.0</since>
-    public Material SimulatedMaterial()
+    public Material ToMaterial()
     {
       var m = new Material();
-      UnsafeNativeMethods.ON_RenderMaterial_SimulatedMaterial(ConstPointer(), m.NonConstPointer());
+      UnsafeNativeMethods.ON_RenderMaterial_To_ON_Material(ConstPointer(), m.NonConstPointer());
       return m;
     }
   }
@@ -517,10 +515,10 @@ namespace Rhino.FileIO
     /// Get a simulated environment that approximates this environment's appearance.
     /// </summary>
     /// <since>8.0</since>
-    public SimEnvironment SimulatedEnvironment()
+    public Rhino.DocObjects.Environment ToEnvironment()
     {
-      var e = new SimEnvironment();
-      UnsafeNativeMethods.ON_RenderEnvironment_SimulatedEnvironment(ConstPointer(), e.NonConstPointer());
+      var e = new Rhino.DocObjects.Environment();
+      UnsafeNativeMethods.ON_RenderEnvironment_To_ON_Environment(ConstPointer(), e.NonConstPointer());
       return e;
     }
   }
@@ -546,10 +544,10 @@ namespace Rhino.FileIO
     /// Get a simulated texture that approximates this texture's appearance.
     /// </summary>
     /// <since>8.0</since>
-    public Texture SimulatedTexture()
+    public Texture ToTexture()
     {
       var t = new Texture();
-      UnsafeNativeMethods.ON_RenderTexture_SimulatedTexture(ConstPointer(), t.NonConstPointer());
+      UnsafeNativeMethods.ON_RenderTexture_To_ON_Texture(ConstPointer(), t.NonConstPointer());
       return t;
     }
   }
