@@ -38,12 +38,10 @@ void initSubDBindings(void*)
 {
   class_<BND_SubD, base<BND_GeometryBase>>("SubD")
     .constructor<>()
-    /*
-    .property("IsSolid", &BND_SubD::IsSolid)
+    .property("isSolid", &BND_SubD::IsSolid)
     .function("clearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .function("updateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .function("subdivide", &BND_SubD::Subdivide)
-    */
     ;
 }
 #endif
