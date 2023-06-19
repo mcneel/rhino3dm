@@ -93,6 +93,10 @@ public:
   bool Supported() const;
   //public void SynchronizeLegacyMaterial()
   //public Rhino.Display.Color4f BaseColor{ get; set; }
+  BND_Color4f BaseColor() const { return m_material->PhysicallyBased()->BaseColor(); }
+  void SetBaseColor(const BND_Color4f& c) const { return m_material->PhysicallyBased()->SetBaseColor(c); }
+  BND_Color4f EmissionColor() const { return m_material->PhysicallyBased()->Emission(); }
+  void SetEmissionColor(const BND_Color4f& c) const { return m_material->PhysicallyBased()->SetEmission(c); }
   //public BRDFs BRDF{ get; set; }
   //public Rhino.Display.Color4f SubsurfaceScatteringColor{ get; set; }
   double Subsurface() const { return m_material->PhysicallyBased()->Subsurface(); }
