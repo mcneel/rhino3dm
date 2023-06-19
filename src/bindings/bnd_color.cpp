@@ -46,7 +46,7 @@ BND_Color4f ON_4fColor_to_Binding(const ON_4fColor& color)
   v.set("r", emscripten::val(color.Red()));
   v.set("g", emscripten::val(color.Green()));
   v.set("b", emscripten::val(color.Blue()));
-  v.set("a", emscripten::val(255 - color.Alpha()));
+  v.set("a", emscripten::val(color.Alpha()));
   return v;
 
 }
@@ -54,10 +54,10 @@ BND_Color4f ON_4fColor_to_Binding(const ON_4fColor& color)
 ON_4fColor Binding_to_ON_4fColor(const BND_Color4f& color)
 {
 
-  int r = color["r"].as<int>();
-  int g = color["g"].as<int>();
-  int b = color["b"].as<int>();
-  int a = color["a"].as<int>();
+  float r = color["r"].as<float>();
+  float g = color["g"].as<float>();
+  float b = color["b"].as<float>();
+  float a = color["a"].as<float>();
   return ON_4fColor(r,g,b,a);
 
 }
