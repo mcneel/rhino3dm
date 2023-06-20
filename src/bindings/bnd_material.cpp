@@ -212,7 +212,7 @@ void initMaterialBindings(void*)
     .property("opacityIOR", &BND_PhysicallyBasedMaterial::OpacityIOR, &BND_PhysicallyBasedMaterial::SetOpacityIOR)
     .property("opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
     .property("opacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
-    .property("baseColor", &BND_PhysicallyBasedMaterial::BaseColor, &BND_PhysicallyBasedMaterial::SetColor)
+    .property("baseColor", &BND_PhysicallyBasedMaterial::BaseColor, &BND_PhysicallyBasedMaterial::SetBaseColor)
     .property("emissionColor", &BND_PhysicallyBasedMaterial::EmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
     ;
 
