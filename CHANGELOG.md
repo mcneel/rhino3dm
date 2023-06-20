@@ -4,18 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.0.0-beta.3] - unreleased
-### Added
-- (.net) Added RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals.
-
 ## [8.0.0-beta.2] - unreleased
 ### Added
+- (.net, js, py) Added RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals, render environments.
 - (js, py) Polyline GetSegments and SegmentAt
 - (js, py) NurbsCurve ConvertSpanToBezier
 - (js, py) BrepVertex Index, EdgeCount, EdgeIndices
 - (js, py) BrepVertexList Count, GetVertex
 - (js, py) Brep Vertices
 - (js, py) NurbsSurface OrderU, OrderV, KnotsU, KnotsV, Control Points, Points
+- (js, py) ON_4fColor bindings
+- (js, py) PBR BaseColor and EmissionColor get and set
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
