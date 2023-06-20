@@ -146,6 +146,7 @@ void initMaterialBindings(pybind11::module& m)
     .def_property("OpacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
     .def_property("BaseColor", &BND_PhysicallyBasedMaterial::BaseColor, &BND_PhysicallyBasedMaterial::SetBaseColor)
     .def_property("EmissionColor", &BND_PhysicallyBasedMaterial::EmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
+    .def_property("SubsurfaceScatteringColor", &BND_PhysicallyBasedMaterial::SubsurfaceScatteringColor, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringColor)
     ;
 
   py::class_<BND_Material, BND_ModelComponent>(m, "Material")
@@ -213,7 +214,8 @@ void initMaterialBindings(void*)
     .property("opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
     .property("opacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
     .property("baseColor", &BND_PhysicallyBasedMaterial::BaseColor, &BND_PhysicallyBasedMaterial::SetBaseColor)
-    .property("emissionColor", &BND_PhysicallyBasedMaterial::EmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
+    //.property("emissionColor", &BND_PhysicallyBasedMaterial::EmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
+    //.property("subsurfaceScatteringColor", &BND_PhysicallyBasedMaterial::SubsurfaceScatteringColor, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringColor)
     ;
 
   class_<BND_Material, base<BND_ModelComponent>>("Material")

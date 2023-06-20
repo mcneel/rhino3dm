@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js, py) Brep Vertices
 - (js, py) NurbsSurface OrderU, OrderV, KnotsU, KnotsV, Control Points, Points
 - (js, py) ON_4fColor bindings
-- (js, py) PBR BaseColor and EmissionColor get and set
+- (js, py) PBR BaseColor, EmissionColor, subsurfaceScatteringColor getter and setter
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
