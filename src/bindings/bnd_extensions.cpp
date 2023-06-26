@@ -1741,11 +1741,16 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
-    .property("displacement", &BND_File3dmMeshModifiers::Displacement, &BND_File3dmMeshModifiers::CreateDisplacement)
-    .property("edgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening, &BND_File3dmMeshModifiers::CreateEdgeSoftening)
-    .property("thickening", &BND_File3dmMeshModifiers::Thickening, &BND_File3dmMeshModifiers::CreateThickening)
-    .property("curvePiping", &BND_File3dmMeshModifiers::CurvePiping, &BND_File3dmMeshModifiers::CreateCurvePiping)
-    .property("shutLining", &BND_File3dmMeshModifiers::ShutLining, &BND_File3dmMeshModifiers::CreateShutLining)
+    .function("displacement", &BND_File3dmMeshModifiers::Displacement, allow_raw_pointers())
+    .function("edgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening, allow_raw_pointers())
+    .function("thickening", &BND_File3dmMeshModifiers::Thickening, allow_raw_pointers())
+    .function("curvePiping", &BND_File3dmMeshModifiers::CurvePiping, allow_raw_pointers())
+    .function("shutLining", &BND_File3dmMeshModifiers::ShutLining, allow_raw_pointers())
+    .function("createDisplacement", &BND_File3dmMeshModifiers::CreateDisplacement)
+    .function("createEdgeSoftening", &BND_File3dmMeshModifiers::CreateEdgeSoftening)
+    .function("createThickening ", &BND_File3dmMeshModifiers::CreateThickening)
+    .function("createCurvePiping", &BND_File3dmMeshModifiers::CreateCurvePiping)
+    .function("createShutLining ", &BND_File3dmMeshModifiers::CreateShutLining)
     ;
 
   class_<BND_File3dmShutLiningCurveTable>("File3dmShutLiningCurveTable")
