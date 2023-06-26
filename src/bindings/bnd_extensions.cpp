@@ -1612,7 +1612,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmPlugInDataTable>("File3dmPlugInDataTable")
-    .function("count", &BND_File3dmPlugInDataTable::Count)
+    .property("count", &BND_File3dmPlugInDataTable::Count)
     .function("get", &BND_File3dmPlugInDataTable::GetPlugInData, allow_raw_pointers())
     ;
 
@@ -1646,7 +1646,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmMaterialTable>("File3dmMaterialTable")
-    .function("count", &BND_File3dmMaterialTable::Count)
+    .property("count", &BND_File3dmMaterialTable::Count)
     .function("get", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmMaterialTable::Add)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
@@ -1655,7 +1655,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmBitmapTable>("File3dmBitmapTable")
-    .function("count", &BND_File3dmBitmapTable::Count)
+    .property("count", &BND_File3dmBitmapTable::Count)
     .function("get", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmBitmapTable::Add)
     .function("findIndex", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
@@ -1663,7 +1663,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmLayerTable>("File3dmLayerTable")
-    .function("count", &BND_File3dmLayerTable::Count)
+    .property("count", &BND_File3dmLayerTable::Count)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLayerTable::Add)
     .function("addLayer", &BND_File3dmLayerTable::AddLayer)
@@ -1673,7 +1673,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmGroupTable>("File3dmGroupTable")
-    .function("count", &BND_File3dmGroupTable::Count)
+    .property("count", &BND_File3dmGroupTable::Count)
     .function("get", &BND_File3dmGroupTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmGroupTable::Add)
     .function("findIndex", &BND_File3dmGroupTable::FindIndex, allow_raw_pointers())
@@ -1681,7 +1681,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmDimStyleTable>("File3dmDimStyleTable")
-    .function("count", &BND_File3dmDimStyleTable::Count)
+    .property("count", &BND_File3dmDimStyleTable::Count)
     .function("get", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmDimStyleTable::Add)
     .function("findIndex", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
@@ -1690,7 +1690,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmInstanceDefinitionTable>("File3dmInstanceDefinitionTable")
-    .function("count", &BND_File3dmInstanceDefinitionTable::Count)
+    .property("count", &BND_File3dmInstanceDefinitionTable::Count)
     .function("get", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmInstanceDefinitionTable::Add)
     .function("findIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
@@ -1698,14 +1698,14 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmViewTable>("File3dmViewTable")
-    .function("count", &BND_File3dmViewTable::Count)
+    .property("count", &BND_File3dmViewTable::Count)
     .function("get", &BND_File3dmViewTable::GetItem, allow_raw_pointers())
     .function("set", &BND_File3dmViewTable::SetItem)
     .function("add", &BND_File3dmViewTable::Add)
     ;
 
   class_<BND_File3dmStringTable>("File3dmStringTable")
-    .function("count", &BND_File3dmStringTable::Count)
+    .property("count", &BND_File3dmStringTable::Count)
     .function("get", &BND_File3dmStringTable::GetKeyValue)
     .function("getvalue", &BND_File3dmStringTable::GetValueFromKey)
     .function("set", &BND_File3dmStringTable::SetString)
@@ -1720,7 +1720,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmEmbeddedFileTable>("File3dmEmbeddedFileTable")
-    .function("count", &BND_File3dmEmbeddedFileTable::Count)
+    .property("count", &BND_File3dmEmbeddedFileTable::Count)
     .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmEmbeddedFileTable::Add)
     .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
@@ -1735,13 +1735,13 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmDecalTable>("File3dmDecalTable")
-    .function("count", &BND_File3dmDecalTable::Count)
+    .property("count", &BND_File3dmDecalTable::Count)
     .function("get", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
     .function("findIndex", &BND_File3dmDecalTable::FindIndex, allow_raw_pointers())
     ;
 
   class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
-    .function("Displacement", &BND_File3dmMeshModifiers::Displacement, allow_raw_pointers())
+    .property("Displacement", &BND_File3dmMeshModifiers::Displacement, allow_raw_pointers())
     .function("EdgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening, allow_raw_pointers())
     .function("Thickening", &BND_File3dmMeshModifiers::Thickening, allow_raw_pointers())
     .function("CurvePiping", &BND_File3dmMeshModifiers::CurvePiping, allow_raw_pointers())
@@ -1754,7 +1754,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmShutLiningCurveTable>("File3dmShutLiningCurveTable")
-    .function("count", &BND_File3dmShutLiningCurveTable::Count)
+    .property("count", &BND_File3dmShutLiningCurveTable::Count)
     .function("get", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmShutLiningCurveTable::Add)
     .function("findIndex", &BND_File3dmShutLiningCurveTable::FindIndex, allow_raw_pointers())
