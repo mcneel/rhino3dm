@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js, py) NurbsSurface OrderU, OrderV, KnotsU, KnotsV, Control Points, Points
 - (js, py) ON_4fColor bindings
 - (js, py) PBR BaseColor, EmissionColor, subsurfaceScatteringColor getter and setter
+- (js) Vector2d bindings
+
+### Changed
+- (js) All File3dm table count are properties whereas before they were functions
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
