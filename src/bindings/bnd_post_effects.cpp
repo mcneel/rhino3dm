@@ -200,9 +200,9 @@ void initPostEffectBindings(void*)
   class_<BND_File3dmPostEffectTable>("PostEffectTable")
     .constructor<>()
     .property("count", &BND_File3dmPostEffectTable::Count)
-    .function("add", &BND_File3dmPostEffectTable::Add)
-    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex)
-    .function("findId", &BND_File3dmPostEffectTable::FindId)
+    .function("add", &BND_File3dmPostEffectTable::Add, allow_raw_pointers())
+    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
     ;
 
 }
