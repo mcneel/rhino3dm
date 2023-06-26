@@ -215,7 +215,7 @@ protected:
 class BND_File3dmMeshModifiers
 {
 private:
-  mutable BND_File3dmDisplacement  m_displacement;
+  BND_File3dmDisplacement  m_displacement;
   BND_File3dmEdgeSoftening m_edge_softening;
   BND_File3dmThickening    m_thickening;
   BND_File3dmCurvePiping   m_curve_piping;
@@ -225,7 +225,7 @@ public:
   BND_File3dmMeshModifiers() = default;
   BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr);
 
-  BND_File3dmDisplacement*  Displacement()  const { return m_displacement  .Exists() ? &m_displacement   : nullptr; }
+  BND_File3dmDisplacement*  Displacement()  { return m_displacement  .Exists() ? &m_displacement   : nullptr; }
   BND_File3dmEdgeSoftening* EdgeSoftening() { return m_edge_softening.Exists() ? &m_edge_softening : nullptr; }
   BND_File3dmThickening*    Thickening()    { return m_thickening    .Exists() ? &m_thickening     : nullptr; }
   BND_File3dmCurvePiping*   CurvePiping()   { return m_curve_piping  .Exists() ? &m_curve_piping   : nullptr; }

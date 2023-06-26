@@ -1741,7 +1741,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmMeshModifiers>("File3dmMeshModifiers")
-    .property("displacement", &BND_File3dmMeshModifiers::Displacement)
+    .function("displacement", &BND_File3dmMeshModifiers::Displacement, allow_raw_pointers())
     .function("edgeSoftening", &BND_File3dmMeshModifiers::EdgeSoftening, allow_raw_pointers())
     .function("thickening", &BND_File3dmMeshModifiers::Thickening, allow_raw_pointers())
     .function("curvePiping", &BND_File3dmMeshModifiers::CurvePiping, allow_raw_pointers())
