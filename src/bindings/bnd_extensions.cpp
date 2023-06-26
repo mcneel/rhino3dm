@@ -1728,7 +1728,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
-    .function("count", &BND_File3dmPostEffectTable::Count)
+    .property("count", &BND_File3dmPostEffectTable::Count)
     .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
     .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
