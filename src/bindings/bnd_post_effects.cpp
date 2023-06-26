@@ -169,13 +169,6 @@ void initPostEffectBindings(pybind11::module& m)
     .def("SetParameter", &BND_File3dmPostEffect::SetParameter)
     ;
 
-  py::class_<BND_File3dmPostEffectTable>(m, "PostEffectTable")
-    .def(py::init<>())
-    .def("__len__", &BND_File3dmPostEffectTable::Count)
-    .def("Add", &BND_File3dmPostEffectTable::Add)
-    .def("FindIndex", &BND_File3dmPostEffectTable::FindIndex)
-    .def("FindId", &BND_File3dmPostEffectTable::FindId)
-    ;
 }
 #endif
 
@@ -195,14 +188,6 @@ void initPostEffectBindings(void*)
     .property("shown", &BND_File3dmPostEffect::Shown, &BND_File3dmPostEffect::SetShown)
     .function("getParameter", &BND_File3dmPostEffect::GetParameter, allow_raw_pointers())
     .function("setParameter", &BND_File3dmPostEffect::SetParameter, allow_raw_pointers())
-    ;
-  
-  class_<BND_File3dmPostEffectTable>("PostEffectTable")
-    .constructor<>()
-    .property("count", &BND_File3dmPostEffectTable::Count)
-    .function("add", &BND_File3dmPostEffectTable::Add, allow_raw_pointers())
-    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
-    .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
     ;
 
 }
