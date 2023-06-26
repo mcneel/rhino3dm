@@ -168,6 +168,14 @@ void initPostEffectBindings(pybind11::module& m)
     .def("GetParameter", &BND_File3dmPostEffect::GetParameter)
     .def("SetParameter", &BND_File3dmPostEffect::SetParameter)
     ;
+
+  py::class_<BND_File3dmPostEffectTable>(m, "PostEffectTable")
+    .def(py::init<>())
+    .def("__len__", &BND_File3dmPostEffectTable::Count)
+    .def("Add", &BND_File3dmPostEffectTable::Add)
+    .def("FindIndex", &BND_File3dmPostEffectTable::FindIndex)
+    .def("FindId", &BND_File3dmPostEffectTable::FindId)
+    ;
 }
 #endif
 
@@ -179,8 +187,8 @@ void initPostEffectBindings(void*)
   class_<BND_File3dmPostEffect>("PostEffect")
     .constructor<>()
     //.constructor<const BND_File3dmPostEffect&>()
-    .property("Id", &BND_File3dmPostEffect::Id)
-    .property("Type", &BND_File3dmPostEffect::Type)
+    .property("id", &BND_File3dmPostEffect::Id)
+    .property("type", &BND_File3dmPostEffect::Type)
     .property("localName", &BND_File3dmPostEffect::LocalName)
     .property("listable", &BND_File3dmPostEffect::Listable)
     .property("on", &BND_File3dmPostEffect::On, &BND_File3dmPostEffect::SetOn)
@@ -188,5 +196,14 @@ void initPostEffectBindings(void*)
     .function("getParameter", &BND_File3dmPostEffect::GetParameter, allow_raw_pointers())
     .function("setParameter", &BND_File3dmPostEffect::SetParameter, allow_raw_pointers())
     ;
+  
+  class_<BND_File3dmPostEffectTable>("PostEffectTable")
+    .constructor<>()
+    .property("count", &BND_File3dmPostEffectTable::Count)
+    .function("add", &BND_File3dmPostEffectTable::Add)
+    .function("findIndex", &BND_File3dmPostEffectTable::FindIndex)
+    .function("findId", &BND_File3dmPostEffectTable::FindId)
+    ;
+
 }
 #endif
