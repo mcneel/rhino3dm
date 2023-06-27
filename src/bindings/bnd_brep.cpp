@@ -261,6 +261,16 @@ BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
   return new BND_Mesh(mesh, &m_component_ref);
 }
 
+bool BND_BrepFace::SetMesh(const class BNC_Mesh* mesh, ON::mesh_type mt)
+{
+  bool rc = false;
+  if( mesh )
+  {
+    rc = m_brepface->SetMesh( mt, mesh );
+  }
+  return rc;
+}
+
 
 BND_BrepSurfaceList BND_Brep::GetSurfaces()
 {
