@@ -70,6 +70,9 @@ void initTextureBindings(pybind11::module& m)
     .def_property_readonly("WrapW", &BND_Texture::WrapW)
     .def_property_readonly("UvwTransform", &BND_Texture::UvwTransform)
     .def("FileReference", &BND_Texture::GetFileReference)
+    .def_property_readonly("Id", &BND_Texture::Id)
+    .def_property("Enabled", &BND_Texture::Enabled,  &BND_Texture::SetEnabled)
+    .def_property("TextureType", &BND_Texture::TextureType,  &BND_Texture::SetTextureType)
     ;
 }
 #endif
@@ -121,6 +124,9 @@ void initTextureBindings(void*)
     .property("wrapV", &BND_Texture::WrapV)
     .property("wrapW", &BND_Texture::WrapW)
     .property("uvwTransform", &BND_Texture::UvwTransform)
+    .property("id", &BND_Texture::Id)
+    .property("enabled", &BND_Texture::Enabled,  &BND_Texture::SetEnabled)
+    .property("textureType", &BND_Texture::TextureType,  &BND_Texture::SetTextureType)
     .function("fileReference", &BND_Texture::GetFileReference, allow_raw_pointers())
     ;
 }

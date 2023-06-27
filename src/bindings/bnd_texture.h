@@ -20,9 +20,15 @@ public:
   void SetFileName(std::wstring path) { m_texture->m_image_file_reference.SetFullPath(path.c_str(), true); }
   class BND_FileReference* GetFileReference() const;
   //public Guid Id
+  BND_UUID Id() const { return ON_UUID_to_Binding(m_texture->m_texture_id); }
   //public bool Enabled
+  bool Enabled() const { return m_texture->m_bOn; }
+  void SetEnabled(bool enabled) { m_texture->m_bOn = enabled; }
   //public TextureType TextureType
+  int TextureType() const { return (int)m_texture->m_type; }
+  void SetTextureType(int textureType) { m_texture->m_type = ON_Texture::TypeFromUnsigned(textureType);  }
   //public int MappingChannelId
+  
   //public TextureCombineMode TextureCombineMode
   int WrapU() const { return (unsigned int) m_texture->m_wrapu; }
   int WrapV() const { return (unsigned int) m_texture->m_wrapv; }
