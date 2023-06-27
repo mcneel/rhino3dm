@@ -399,6 +399,22 @@ namespace Rhino.Render
       return list;
     }
 
+    /// <summary>
+    /// Gets decal custom data for a specified renderer. See Rhino.Plugins.RenderPlugIn.ShowDecalProperties.
+    /// </summary>
+    /// <returns>A list of name-value pairs for the custom data properties. If there is no
+    /// custom data on the decal for the specified renderer, the list will be empty.</returns>
+    /// <since>8.0</since>
+    public List<Rhino.Render.NamedValue> CustomData(Guid renderer)
+    {
+      var param_block = UnsafeNativeMethods.ON_XMLParameters_NewParamBlock();
+      UnsafeNativeMethods.ON_Decal_CustomData(ConstPointer(), param_block, ref renderer);
+      var list = ConvertToNamedValueList(param_block);
+      UnsafeNativeMethods.ON_XMLParameters_Delete(param_block);
+
+      return list;
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Gets decal custom data for the current renderer. See Rhino.Plugins.RenderPlugIn.ShowDecalProperties.
@@ -433,6 +449,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.Rdk_ON_Decal_GetColor(m_rhino_doc_serial, ConstPointer(), ref point, ref normal, ref colInOut, ref uvOut);
     }
 #else
+<<<<<<< HEAD
     /// <summary>
     /// Gets decal custom data for a specified renderer. See Rhino.Plugins.RenderPlugIn.ShowDecalProperties.
     /// </summary>
@@ -448,6 +465,8 @@ namespace Rhino.Render
 
       return list;
     }
+=======
+>>>>>>> main
 #endif
 
     #region internals
@@ -514,7 +533,14 @@ namespace Rhino.Render
     }
 
     /// <since>5.10</since>
-    public void Clear()
+    [Obsolete("Use RemoveAllDecals")]
+    public void Clear() { RemoveAllDecals(); }
+
+    /// <summary>
+    /// Remove all the decals from the collection.
+    /// </summary>
+    /// <since>8.0</since>
+    public void RemoveAllDecals()
     {
       if (m_read_only)
         throw new DecalReadOnlyException();
@@ -523,6 +549,9 @@ namespace Rhino.Render
       UnsafeNativeMethods.ON_3dmObjectAttributes_RemoveAllDecals(non_const_pointer);
     }
 
+    /// <summary>
+    /// Remove a single decal from the collection.
+    /// </summary>
     /// <since>5.10</since>
     public bool Remove(Decal decal)
     {

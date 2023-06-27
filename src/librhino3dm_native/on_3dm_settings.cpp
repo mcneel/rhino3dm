@@ -602,95 +602,6 @@ RH_C_FUNCTION const ON_3dmRenderSettings* ON_3dmRenderSettings_ConstPointer(unsi
   return nullptr;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// This is shared with all 8 document objects.
-
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn)
-{
-#if defined(RHINO3DM_BUILD)
-  return nullptr;
-#else
-  const auto* doc = CRhinoDoc::FromRuntimeSerialNumber(rhino_doc_sn);
-  if (nullptr == doc)
-    return nullptr;
-
-  return &doc->Properties().RenderSettings();
-#endif
-}
-
-RH_C_FUNCTION const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial(unsigned int rhino_doc_sn)
-{
-  return ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-}
-
-static std::recursive_mutex _mutex;
-static int _rs_write_count = 0;
-static ON_3dmRenderSettings _rs_write;
-
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs)
-{
-  std::lock_guard<std::recursive_mutex> lg(_mutex);
-
-  if (0 == _rs_write_count++)
-  {
-    if (nullptr != rs)
-    {
-      _rs_write = *rs;
-    }
-  }
-
-  return _rs_write;
-}
-
-RH_C_FUNCTION const ON_RenderChannels* ON_3dmRenderSettings_GetRenderChannels(const ON_3dmRenderSettings* rs)
-{
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
-}
-
-RH_C_FUNCTION ON_RenderChannels* ON_3dmRenderSettings_BeginChange_ON_RenderChannels(const ON_3dmRenderSettings* rs)
-{
-  return &ON_3dmRenderSettings_BeginChange(rs).RenderChannels();
-}
-
-RH_C_FUNCTION const ON_RenderChannels* ON_RenderChannels_FromDocSerial(unsigned int rhino_doc_sn)
-{
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->RenderChannels();
-}
-
-
-RH_C_FUNCTION bool ON_3dmRenderSettings_EndChange(unsigned int rhino_doc_sn)
-{
-#if defined(RHINO3DM_BUILD)
-  return true;
-#else
-  if (0 == rhino_doc_sn)
-    return true; // Non-document case; just return true.
-
-  std::lock_guard<std::recursive_mutex> lg(_mutex);
-
-  if (0 == --_rs_write_count)
-  {
-    auto* doc = CRhinoDoc::FromRuntimeSerialNumber(rhino_doc_sn);
-    if (nullptr != doc)
-    {
-      doc->Properties().SetRenderSettings(_rs_write);
-	    return true;
-	  }
-  }
-
-  return false;
-#endif
-}
-
 RH_C_FUNCTION bool ON_3dmRenderSettings_GetRenderEnvironmentOverride(const ON_3dmRenderSettings* rs, int u)
 {
   if (nullptr == rs)
@@ -727,6 +638,46 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetRenderEnvironment(ON_3dmRenderSetting
     const auto usage = ON_3dmRenderSettings::EnvironmentUsage(u);
     rs->SetRenderEnvironmentId(usage, *id);
   }
+}
+
+RH_C_FUNCTION const ON_GroundPlane* ON_3dmRenderSettings_GetGroundPlane(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->GroundPlane() : nullptr;
+}
+
+RH_C_FUNCTION const ON_Dithering* ON_3dmRenderSettings_GetDithering(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->Dithering() : nullptr;
+}
+
+RH_C_FUNCTION const ON_SafeFrame* ON_3dmRenderSettings_GetSafeFrame(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->SafeFrame() : nullptr;
+}
+
+RH_C_FUNCTION const ON_Skylight* ON_3dmRenderSettings_GetSkylight(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->Skylight() : nullptr;
+}
+
+RH_C_FUNCTION const ON_RenderChannels* ON_3dmRenderSettings_GetRenderChannels(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->RenderChannels() : nullptr;
+}
+
+RH_C_FUNCTION const ON_LinearWorkflow* ON_3dmRenderSettings_GetLinearWorkflow(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->LinearWorkflow() : nullptr;
+}
+
+RH_C_FUNCTION const ON_Sun* ON_3dmRenderSettings_GetSun(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->Sun() : nullptr;
+}
+
+RH_C_FUNCTION const ON_PostEffects* ON_3dmRenderSettings_GetPostEffects(const ON_3dmRenderSettings* rs)
+{
+  return rs ? &rs->PostEffects() : nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -798,21 +749,21 @@ RH_C_FUNCTION void ON_3dmRenderSettings_SetColor(ON_3dmRenderSettings* pRenderSe
 }
 
 #ifdef RDK_RENDER_PRESETS
-RH_C_FUNCTION ON_UUID ON_3dmRenderSettings_GetCurrentRenderPreset(ON_3dmRenderSettings* pSettings)
-{
-  if (nullptr != pSettings)
-    return pSettings->CurrentRenderPreset();
-
-  return ON_nil_uuid;
-}
-
-RH_C_FUNCTION void ON_3dmRenderSettings_SetCurrentRenderPreset(ON_3dmRenderSettings* pSettings, const ON_UUID uuid)
-{
-  if (nullptr != pSettings)
-  {
-    pSettings->SetCurrentRenderPreset(uuid);
-  }
-}
+//RH_C_FUNCTION ON_UUID ON_3dmRenderSettings_GetCurrentRenderPreset(ON_3dmRenderSettings* pSettings)
+//{
+//  if (nullptr != pSettings)
+//    return pSettings->CurrentRenderPreset();
+//
+//  return ON_nil_uuid;
+//}
+//
+//RH_C_FUNCTION void ON_3dmRenderSettings_SetCurrentRenderPreset(ON_3dmRenderSettings* pSettings, const ON_UUID uuid)
+//{
+//  if (nullptr != pSettings)
+//  {
+//    pSettings->SetCurrentRenderPreset(uuid);
+//  }
+//}
 #endif
 
 RH_C_FUNCTION ON::LengthUnitSystem ON_3dmRenderSettings_GetUnitSystem(ON_3dmRenderSettings* pSettings)

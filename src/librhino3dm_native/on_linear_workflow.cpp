@@ -1,29 +1,59 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_LinearWorkflow* ON_3dmRenderSettings_GetLinearWorkflow(const ON_3dmRenderSettings* rs)
+enum class LinearWorkflowSetting : int
 {
-  if (nullptr == rs)
-    return nullptr;
+  PreProcessTexturesOn,
+  PreProcessColorsOn,
+  PostProcessFrameBufferOn,
+  PreProcessGammaOn,
+  PreProcessGamma,
+  PostProcessGammaOn,
+  PostProcessGamma,
+};
 
-  return &rs->LinearWorkflow();
+RH_C_FUNCTION void ON_LinearWorkflow_GetValue(const ON_LinearWorkflow* lw, LinearWorkflowSetting which, ON_XMLVariant* v)
+{
+  if (lw && v)
+  {
+    switch (which)
+    {
+    case LinearWorkflowSetting::PreProcessTexturesOn:     *v = lw->PreProcessTexturesOn();     break;
+    case LinearWorkflowSetting::PreProcessColorsOn:       *v = lw->PreProcessColorsOn();       break;
+    case LinearWorkflowSetting::PostProcessFrameBufferOn: *v = lw->PostProcessFrameBufferOn(); break;
+    case LinearWorkflowSetting::PreProcessGammaOn:        *v = lw->PreProcessGammaOn();        break;
+    case LinearWorkflowSetting::PreProcessGamma:          *v = lw->PreProcessGamma();          break;
+    case LinearWorkflowSetting::PostProcessGammaOn:       *v = lw->PostProcessGammaOn();       break;
+    case LinearWorkflowSetting::PostProcessGamma:         *v = lw->PostProcessGamma();         break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION ON_LinearWorkflow* ON_3dmRenderSettings_BeginChange_ON_LinearWorkflow(const ON_3dmRenderSettings* rs)
+RH_C_FUNCTION void ON_LinearWorkflow_SetValue(ON_LinearWorkflow* lw, LinearWorkflowSetting which, const ON_XMLVariant* v)
 {
-  return &ON_3dmRenderSettings_BeginChange(rs).LinearWorkflow();
+  if (lw && v)
+  {
+    switch (which)
+    {
+    case LinearWorkflowSetting::PreProcessTexturesOn:     lw->SetPreProcessTexturesOn(v->AsBool());     break;
+    case LinearWorkflowSetting::PreProcessColorsOn:       lw->SetPreProcessColorsOn(v->AsBool());       break;
+    case LinearWorkflowSetting::PostProcessFrameBufferOn: lw->SetPostProcessFrameBufferOn(v->AsBool()); break;
+    case LinearWorkflowSetting::PreProcessGammaOn:        lw->SetPreProcessGammaOn(v->AsBool());        break;
+    case LinearWorkflowSetting::PreProcessGamma:          lw->SetPreProcessGamma(v->AsFloat());         break;
+    case LinearWorkflowSetting::PostProcessGammaOn:       lw->SetPostProcessGammaOn(v->AsBool());       break;
+    case LinearWorkflowSetting::PostProcessGamma:         lw->SetPostProcessGamma(v->AsFloat());        break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION const ON_LinearWorkflow* ON_LinearWorkflow_FromDocSerial(unsigned int rhino_doc_sn)
+RH_C_FUNCTION void ON_3dmRenderSettings_LinearWorkflow_SetValue(ON_3dmRenderSettings* rs, LinearWorkflowSetting which, const ON_XMLVariant* v)
 {
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->LinearWorkflow();
+  if (nullptr != rs)
+  {
+    ON_LinearWorkflow_SetValue(&rs->LinearWorkflow(), which, v);
+  }
 }
 
 RH_C_FUNCTION const ON_LinearWorkflow* ON_LinearWorkflow_FromONX_Model(ONX_Model* ptrModel)
@@ -32,109 +62,6 @@ RH_C_FUNCTION const ON_LinearWorkflow* ON_LinearWorkflow_FromONX_Model(ONX_Model
     return nullptr;
 
   return &ptrModel->m_settings.m_RenderSettings.LinearWorkflow();
-}
-
-RH_C_FUNCTION bool ON_LinearWorkflow_PreProcessColorsOn(const ON_LinearWorkflow* p)
-{
-  return p ? p->PreProcessColorsOn() : false;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPreProcessColorsOn(ON_LinearWorkflow* p, bool value)
-{
-  if (p)
-  {
-    p->SetPreProcessColorsOn(value);
-  }
-}
-
-RH_C_FUNCTION bool ON_LinearWorkflow_PreProcessTexturesOn(const ON_LinearWorkflow* p)
-{
-  if (p)
-  {
-    return p->PreProcessTexturesOn();
-  }
-
-  return false;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPreProcessTexturesOn(ON_LinearWorkflow* p, bool value)
-{
-  if (p)
-  {
-    p->SetPreProcessTexturesOn(value);
-  }
-}
-
-RH_C_FUNCTION bool ON_LinearWorkflow_PostProcessFrameBufferOn(const ON_LinearWorkflow* p)
-{
-  if (p)
-  {
-    return p->PostProcessFrameBufferOn();
-  }
-
-  return false;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPostProcessFrameBufferOn(ON_LinearWorkflow* p, bool value)
-{
-  if (p)
-  {
-    p->SetPostProcessFrameBufferOn(value);
-  }
-}
-
-RH_C_FUNCTION bool ON_LinearWorkflow_PostProcessGammaOn(ON_LinearWorkflow* p)
-{
-  if (p)
-  {
-    return p->PostProcessGammaOn();
-  }
-
-  return true;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPostProcessGammaOn(ON_LinearWorkflow* p, bool bOn)
-{
-  if (p)
-  {
-    p->SetPostProcessGammaOn(bOn);
-  }
-}
-
-RH_C_FUNCTION float ON_LinearWorkflow_PreProcessGamma(const ON_LinearWorkflow* p)
-{
-  if (p)
-  {
-    return p->PreProcessGamma();
-  }
-
-  return 1.0f;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPreProcessGamma(ON_LinearWorkflow* p, float value)
-{
-  if (p)
-  {
-    p->SetPreProcessGamma(value);
-  }
-}
-
-RH_C_FUNCTION float ON_LinearWorkflow_PostProcessGamma(const ON_LinearWorkflow* p)
-{
-  if (p)
-  {
-    return p->PostProcessGamma();
-  }
-
-  return 1.0f;
-}
-
-RH_C_FUNCTION void ON_LinearWorkflow_SetPostProcessGamma(ON_LinearWorkflow* p, float value)
-{
-  if (p)
-  {
-    p->SetPostProcessGamma(value);
-  }
 }
 
 RH_C_FUNCTION unsigned int ON_LinearWorkflow_ComputeCRC(ON_LinearWorkflow* p)

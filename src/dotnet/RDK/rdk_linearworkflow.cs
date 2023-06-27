@@ -9,52 +9,33 @@ namespace Rhino.Render
   /// </summary>
   public sealed class LinearWorkflow : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal LinearWorkflow(IntPtr native)             : base(native) { } // ON_LinearWorkflow
-    internal LinearWorkflow(IntPtr native, bool write) : base(native, write) { }
-    internal LinearWorkflow(FileIO.File3dm f)          : base(f) { }
+    internal LinearWorkflow(IntPtr native)    : base(native) { } // ON_LinearWorkflow
+    internal LinearWorkflow(FileIO.File3dm f) : base(f) { }
+                                              
+#if RHINO_SDK                                 
+    internal LinearWorkflow(uint doc_sn)      : base(doc_sn) { }
+    internal LinearWorkflow(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
 
-#if RHINO_SDK
-    internal LinearWorkflow(uint doc_serial)           : base(doc_serial) { }
-    internal LinearWorkflow(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
-#endif
-
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
     {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetLinearWorkflow(rs.ConstPointer());
     }
+
+#endif
 
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_LinearWorkflow_New();
     }
 
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_LinearWorkflow_FromDocSerial(sn);
-    }
-
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
       return UnsafeNativeMethods.ON_LinearWorkflow_FromONX_Model(f.ConstPointer());
     }
-
-#if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_LinearWorkflow(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-#endif
 
     internal override void DeleteCpp()
     {
@@ -101,21 +82,46 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.LinearWorkflowSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.LinearWorkflowSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_LinearWorkflow_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.LinearWorkflowSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_LinearWorkflow_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_LinearWorkflow_SetValue(CppPointer, which, v.ConstPointer());
+      }
+    }
+
     /// <summary>
     /// Linear workflow pre-process colors enabled state.
     /// </summary>
     /// <since>6.0</since>
     public bool PreProcessColors
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PreProcessColorsOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPreProcessColorsOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn, new Variant(value));
     }
 
     /// <summary>
@@ -124,15 +130,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PreProcessTextures
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PreProcessTexturesOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPreProcessTexturesOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn, new Variant(value));
     }
 
     /// <summary>
@@ -141,15 +140,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PostProcessFrameBuffer
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PostProcessFrameBufferOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPostProcessFrameBufferOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn, new Variant(value));
     }
 
     /// <summary>
@@ -158,15 +150,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public float PreProcessGamma
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PreProcessGamma(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPreProcessGamma(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma).ToFloat();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma, new Variant(value));
     }
 
     /// <summary>
@@ -175,15 +160,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public float PostProcessGamma
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PostProcessGamma(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPostProcessGamma(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma).ToFloat();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma, new Variant(value));
     }
 
     /// <summary>
@@ -192,15 +170,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PostProcessGammaOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_LinearWorkflow_PostProcessGammaOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_LinearWorkflow_SetPostProcessGammaOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn, new Variant(value));
     }
 
     /// <summary>

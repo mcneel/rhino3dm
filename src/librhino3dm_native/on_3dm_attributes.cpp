@@ -295,7 +295,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
       else if (idxPlotColor == which)
         pAttributes->m_plot_color = color;
       else if (idxHatchBackgroundFill == which)
-        pAttributes->SetHatchBackgrounFillColor(color);
+        pAttributes->SetHatchBackgroundFillColor(color);
     }
     else
     {

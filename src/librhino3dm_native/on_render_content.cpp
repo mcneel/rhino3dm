@@ -295,6 +295,17 @@ RH_C_FUNCTION bool ON_RenderTexture_To_ON_Texture(const ON_RenderTexture* rt, ON
   return false;
 }
 
+RH_C_FUNCTION bool ON_RenderTexture_Filename(const ON_RenderTexture* rt, ON_wString* filename)
+{
+  if ((nullptr != rt) && (nullptr != filename))
+  {
+    *filename = rt->Filename();
+    return true;
+  }
+
+  return false;
+}
+
 RH_C_FUNCTION ON_Environment* ON_Environment_New()
 {
   return new ON_Environment;
@@ -337,6 +348,14 @@ RH_C_FUNCTION void ON_XMLVariant_Copy(const ON_XMLVariant* pVS, ON_XMLVariant* p
   {
     *pVD = *pVS;
   }
+}
+
+RH_C_FUNCTION bool ON_XMLVariant_IsEqual(const ON_XMLVariant* pV1, ON_XMLVariant* pV2)
+{
+  if (pV1 && pV2)
+    return *pV1 == *pV2;
+
+  return false;
 }
 
 RH_C_FUNCTION int ON_XMLVariant_GetUnits(const ON_XMLVariant* pV)

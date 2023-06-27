@@ -1,29 +1,50 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_Skylight* ON_3dmRenderSettings_GetSkylight(const ON_3dmRenderSettings* rs)
+enum class SkylightSetting : int
 {
-  if (nullptr == rs)
-    return nullptr;
+  On,
+  ShadowIntensity,
+  EnvironmentId,       // Obsolete; kept for backward compatibility only.
+  EnvironmentOverride, // Obsolete; kept for backward compatibility only.
+};
 
-  return &rs->Skylight();
+RH_C_FUNCTION void ON_Skylight_GetValue(const ON_Skylight* sl, SkylightSetting which, ON_XMLVariant* v)
+{
+  if (sl && v)
+  {
+    switch (which)
+    {
+    case SkylightSetting::On:                  *v = sl->On();                  break;
+    case SkylightSetting::ShadowIntensity:     *v = sl->ShadowIntensity();     break;
+    case SkylightSetting::EnvironmentId:       *v = sl->EnvironmentId();       break;
+    case SkylightSetting::EnvironmentOverride: *v = sl->EnvironmentOverride(); break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION ON_Skylight* ON_3dmRenderSettings_BeginChange_ON_Skylight(const ON_3dmRenderSettings* rs)
+RH_C_FUNCTION void ON_Skylight_SetValue(ON_Skylight* sl, SkylightSetting which, const ON_XMLVariant* v)
 {
-  return &ON_3dmRenderSettings_BeginChange(rs).Skylight();
+  if (sl && v)
+  {
+    switch (which)
+    {
+    case SkylightSetting::On:                  sl->SetOn(v->AsBool());                  break;
+    case SkylightSetting::ShadowIntensity:     sl->SetShadowIntensity(v->AsDouble());   break;
+    case SkylightSetting::EnvironmentId:       sl->SetEnvironmentId(v->AsUuid());       break;
+    case SkylightSetting::EnvironmentOverride: sl->SetEnvironmentOverride(v->AsBool()); break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION const ON_Skylight* ON_Skylight_FromDocSerial(unsigned int rhino_doc_sn)
+RH_C_FUNCTION void ON_3dmRenderSettings_Skylight_SetValue(ON_3dmRenderSettings* rs, SkylightSetting which, const ON_XMLVariant* v)
 {
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->Skylight();
+  if (nullptr != rs)
+  {
+    ON_Skylight_SetValue(&rs->Skylight(), which, v);
+  }
 }
 
 RH_C_FUNCTION const ON_Skylight* ON_Skylight_FromONX_Model(ONX_Model* ptrModel)
@@ -34,77 +55,6 @@ RH_C_FUNCTION const ON_Skylight* ON_Skylight_FromONX_Model(ONX_Model* ptrModel)
   return &ptrModel->m_settings.m_RenderSettings.Skylight();
 }
 
-RH_C_FUNCTION bool ON_Skylight_GetOn(ON_Skylight* p)
-{
-  if (p)
-  {
-    return p->On();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_Skylight_SetOn(ON_Skylight* p, bool v)
-{
-  if (p)
-  {
-    p->SetOn(v);
-  }
-}
-
-RH_C_FUNCTION double ON_Skylight_GetShadowIntensity(ON_Skylight* p)
-{
-  // 14th April 2021 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-63734
-  // ShadowIntensity is an unused red herring.
-  if (p)
-  {
-    return p->ShadowIntensity();
-  }
-  return 1.0;
-}
-
-RH_C_FUNCTION void ON_Skylight_SetShadowIntensity(ON_Skylight* p, double v)
-{
-  // 14th April 2021 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-63734
-  // ShadowIntensity is an unused red herring.
-  if (p)
-  {
-    p->SetShadowIntensity(v);
-  }
-}
-
-RH_C_FUNCTION bool ON_Skylight_GetEnvironmentOverride(ON_Skylight* p)
-{
-  if (p)
-  {
-    return p->EnvironmentOverride();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_Skylight_SetEnvironmentOverride(ON_Skylight* p, bool v)
-{
-  if (p)
-  {
-    p->SetEnvironmentOverride(v);
-  }
-}
-
-RH_C_FUNCTION ON_UUID ON_Skylight_GetEnvironmentId(ON_Skylight* p)
-{
-  if (p)
-  {
-    return p->EnvironmentId();
-  }
-  return ON_nil_uuid;
-}
-
-RH_C_FUNCTION void ON_Skylight_SetEnvironmentId(ON_Skylight* p, ON_UUID v)
-{
-  if (p)
-  {
-    p->SetEnvironmentId(v);
-  }
-}
 
 RH_C_FUNCTION ON_Skylight* ON_Skylight_New()
 {

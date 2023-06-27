@@ -52,20 +52,27 @@ namespace Rhino.Render
     private readonly Guid m_event_type;
   }*/
 #endif
-
   /// <summary>
   /// Represents an infinite plane for implementation by renderers.
   /// See <see cref="Rhino.PlugIns.RenderPlugIn.SupportsFeature">SupportsFeature</see>.
   /// </summary>
   public sealed class GroundPlane : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal GroundPlane(IntPtr native)             : base(native) { } // ON_GroundPlane
-    internal GroundPlane(IntPtr native, bool write) : base(native, write) { }
-    internal GroundPlane(FileIO.File3dm f)          : base(f) { }
+    internal GroundPlane(IntPtr native)    : base(native) { } // ON_GroundPlane
+    internal GroundPlane(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal GroundPlane(uint doc_serial)           : base(doc_serial) { }
-    internal GroundPlane(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
+    internal GroundPlane(uint doc_sn)      : base(doc_sn) { }
+    internal GroundPlane(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
+
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
+    {
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetGroundPlane(rs.ConstPointer());
+    }
 #endif
 
     /// <summary>
@@ -81,20 +88,9 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public GroundPlane(GroundPlane g) : base(g) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
-    {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
-    }
-
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_GroundPlane_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_GroundPlane_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
@@ -102,23 +98,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_GroundPlane_FromONX_Model(f.ConstPointer());
     }
 
-
 #if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_GroundPlane(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-
     /// <summary>
     /// This event is raised when a GroundPlane property value is changed.
     /// </summary>
@@ -188,18 +168,46 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.GroundPlaneSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.GroundPlaneSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_GroundPlane_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.GroundPlaneSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_GroundPlane_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_GroundPlane_SetValue(CppPointer, which, v.ConstPointer());
+      }
+    }
+
     /// <summary>
     /// Determines whether the document ground plane is enabled.
     /// </summary>
     /// <since>5.0</since>
     public bool Enabled
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetOn(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.On).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.On, new Variant(value));
     }
 
     /// <summary>
@@ -208,12 +216,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool ShadowOnly
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetShadowOnly(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetShadowOnly(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly, new Variant(value));
     }
 
     /// <summary>
@@ -222,12 +226,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool AutoAltitude
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetAutoAltitude(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetAutoAltitude(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude, new Variant(value));
     }
 
     /// <summary>
@@ -236,12 +236,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool ShowUnderside
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetShowUnderside(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetShowUnderside(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside, new Variant(value));
     }
 
     /// <summary>
@@ -250,12 +246,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Altitude
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetAltitude(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetAltitude(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude).ToDouble();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude, new Variant(value));
     }
 
     /// <summary>
@@ -264,12 +256,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Guid MaterialInstanceId
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetMaterialInstanceId(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetMaterialInstanceId(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId).ToGuid();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId, new Variant(value));
     }
 
     /// <summary>
@@ -278,17 +266,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Rhino.Geometry.Vector2d TextureOffset
     {
-      get
-      {
-        var v = new Rhino.Geometry.Vector2d();
-        UnsafeNativeMethods.ON_GroundPlane_GetTextureOffset(CppPointer, ref v);
-        return v;
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetTextureOffset(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset).ToVector2d();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset, new Variant(value));
     }
 
     /// <summary>
@@ -297,17 +276,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Rhino.Geometry.Vector2d TextureSize
     {
-      get
-      {
-        var v = new Rhino.Geometry.Vector2d();
-        UnsafeNativeMethods.ON_GroundPlane_GetTextureSize(CppPointer, ref v);
-        return v;
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetTextureSize(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize).ToVector2d();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize, new Variant(value));
     }
 
     /// <summary>
@@ -316,12 +286,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double TextureRotation
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetTextureRotation(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetTextureRotation(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation).ToDouble();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation, new Variant(value));
     }
 
     /// <summary>
@@ -330,12 +296,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool TextureSizeLocked
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetTextureSizeLocked(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetTextureSizeLocked(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked, new Variant(value));
     }
 
     /// <summary>
@@ -344,12 +306,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool TextureOffsetLocked
     {
-      get => UnsafeNativeMethods.ON_GroundPlane_GetTextureOffsetLocked(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_GroundPlane_SetTextureOffsetLocked(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked, new Variant(value));
     }
   }
 
@@ -358,52 +316,32 @@ namespace Rhino.Render
   /// </summary>
   public sealed partial class RenderChannels : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal RenderChannels(IntPtr p)             : base(p) { } // ON_RenderChannels.
-    internal RenderChannels(IntPtr p, bool write) : base(p, write) { }
-    internal RenderChannels(FileIO.File3dm f)     : base(f) { }
+    internal RenderChannels(IntPtr native)    : base(native) { } // ON_RenderChannels.
+    internal RenderChannels(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal RenderChannels(uint doc_serial)      : base(doc_serial) { }
-    internal RenderChannels(RhinoDoc doc)         : base(doc.RuntimeSerialNumber) { }
-#endif
+    internal RenderChannels(uint doc_sn)      : base(doc_sn) { }
+    internal RenderChannels(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
     {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderChannels(rs.ConstPointer());
     }
+#endif
 
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_RenderChannels_New();
     }
 
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_RenderChannels_FromDocSerial(sn);
-    }
-
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
       return UnsafeNativeMethods.ON_RenderChannels_FromONX_Model(f.ConstPointer());
     }
-
-#if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_RenderChannels(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-#endif
 
     internal override void DeleteCpp()
     {
@@ -489,37 +427,72 @@ namespace Rhino.Render
     {
     }
 
+    private Modes GetMode()
+    {
+      var m = UnsafeNativeMethods.ON_RenderChannels_GetMode(CppPointer);
+      return (m == 0) ? Modes.Automatic : Modes.Custom;
+    }
+
+    private void SetMode(Modes m)
+    {
+      if (GetMode() == m)
+        return;
+
+      var v = (Modes.Automatic == m) ? 0 : 1;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_RenderChannels_SetMode(ptr, v);
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_RenderChannels_SetMode(CppPointer, v);
+      }
+    }
+
+    private Guid[] GetCustomList()
+    {
+      var array = new SimpleArrayGuid();
+      UnsafeNativeMethods.ON_RenderChannels_GetCustomList(CppPointer, array.NonConstPointer());
+      return array.ToArray();
+    }
+
+    private void SetCustomList(Guid[] list)
+    {
+      var array = new SimpleArrayGuid(list);
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_RenderChannels_SetCustomList(ptr, array.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_RenderChannels_SetCustomList(CppPointer, array.ConstPointer());
+      }
+    }
+
     /// <since>7.0</since>
     public Modes Mode
     {
-      get
-      {
-        var m = UnsafeNativeMethods.ON_RenderChannels_Mode(CppPointer);
-        return (m == 0) ? Modes.Automatic : Modes.Custom;
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        var v = (Modes.Automatic == value) ? 0 : 1;
-        UnsafeNativeMethods.ON_RenderChannels_SetMode(CppPointer, v);
-      }
+      get => GetMode();
+      set => SetMode(value);
     }
 
     /// <since>7.0</since>
     public Guid[] CustomList
     {
-      get
-      {
-        var array = new SimpleArrayGuid();
-        UnsafeNativeMethods.ON_RenderChannels_GetCustomList(CppPointer, array.NonConstPointer());
-        return array.ToArray();
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        var array = new SimpleArrayGuid(value);
-        UnsafeNativeMethods.ON_RenderChannels_SetCustomList(CppPointer, array.ConstPointer());
-      }
+      get => GetCustomList();
+      set => SetCustomList(value);
     }
   }
 }

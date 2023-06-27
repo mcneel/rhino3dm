@@ -1,31 +1,6 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_PostEffects* ON_3dmRenderSettings_GetPostEffects(const ON_3dmRenderSettings* rs)
-{
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->PostEffects();
-}
-
-RH_C_FUNCTION ON_PostEffects* ON_3dmRenderSettings_BeginChange_ON_PostEffects(const ON_3dmRenderSettings* rs)
-{
-  return &ON_3dmRenderSettings_BeginChange(rs).PostEffects();
-}
-
-RH_C_FUNCTION const ON_PostEffects* ON_PostEffects_FromDocSerial(unsigned int rhino_doc_sn)
-{
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->PostEffects();
-}
-
 RH_C_FUNCTION const ON_PostEffects* ON_PostEffects_FromONX_Model(ONX_Model* ptrModel)
 {
   if (nullptr == ptrModel)
@@ -83,11 +58,6 @@ RH_C_FUNCTION ON_PostEffect* ON_PostEffects_PostEffectFromId(ON_PostEffects* pep
 
   return peps->PostEffectFromId(id);
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION void ON_PostEffect_GetId(const ON_PostEffect* pep, ON_UUID* id)
 {
