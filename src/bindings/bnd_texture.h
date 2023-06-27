@@ -25,7 +25,7 @@ public:
   bool Enabled() const { return m_texture->m_bOn; }
   void SetEnabled(bool enabled) { m_texture->m_bOn = enabled; }
   //public TextureType TextureType
-  int TextureType() const { return (int)m_texture->m_type; }
+  ON_Texture::TYPE TextureType() const { return m_texture->m_type; }
   void SetTextureType(int textureType) { m_texture->m_type = ON_Texture::TypeFromUnsigned(textureType);  }
   //public int MappingChannelId
   
