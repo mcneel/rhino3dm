@@ -2073,6 +2073,17 @@ namespace Rhino.Render
       return NonConstPointer();
     }
 
+    /// <summary>
+    /// Makes a free-floating copy of the object.
+    /// </summary>
+    /// <since>8.0</since>
+    public RenderSettings Duplicate()
+    {
+      var const_ptr_this = ConstPointer();
+      var native = UnsafeNativeMethods.ON_3dmRenderSettings_New(const_ptr_this);
+      return new RenderSettings(native);
+    }
+
     internal override IntPtr _InternalDuplicate(out bool applymempressure)
     {
       applymempressure = false;
@@ -2080,7 +2091,7 @@ namespace Rhino.Render
       return UnsafeNativeMethods.ON_3dmRenderSettings_New(const_ptr_this);
     }
 
-    void Commit()
+    internal void Commit()
     {
       // If this class is already const then bail.
       if (!IsNonConst)
@@ -2686,25 +2697,6 @@ namespace Rhino.Render
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(cpp);
         return new PostEffectCollection(native_ptr);
-      }
-    }
-
-    /// <summary>
-    /// Get or set the current Render Preset.
-    /// </summary>
-    /// <since>8.0</since>
-    public Guid CurrentRenderPreset
-    {
-      get
-      {
-        var pointer = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmRenderSettings_GetCurrentRenderPreset(pointer);
-      }
-      set
-      {
-        var pointer = NonConstPointer();
-        UnsafeNativeMethods.ON_3dmRenderSettings_SetCurrentRenderPreset(pointer, value);
-        Commit();
       }
     }
 
