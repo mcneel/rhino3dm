@@ -449,24 +449,6 @@ namespace Rhino.Render
       return UnsafeNativeMethods.Rdk_ON_Decal_GetColor(m_rhino_doc_serial, ConstPointer(), ref point, ref normal, ref colInOut, ref uvOut);
     }
 #else
-<<<<<<< HEAD
-    /// <summary>
-    /// Gets decal custom data for a specified renderer. See Rhino.Plugins.RenderPlugIn.ShowDecalProperties.
-    /// </summary>
-    /// <returns>A list of name-value pairs for the custom data properties. If there is no
-    /// custom data on the decal for the current renderer, the list will be empty.</returns>
-    /// <since>8.0</since>
-    public List<Rhino.Render.NamedValue> CustomData(Guid renderer)
-    {
-      var param_block = UnsafeNativeMethods.ON_XMLParameters_NewParamBlock();
-      UnsafeNativeMethods.ON_Decal_CustomData(ConstPointer(), param_block, ref renderer);
-      var list = ConvertToNamedValueList(param_block);
-      UnsafeNativeMethods.ON_XMLParameters_Delete(param_block);
-
-      return list;
-    }
-=======
->>>>>>> main
 #endif
 
     #region internals
