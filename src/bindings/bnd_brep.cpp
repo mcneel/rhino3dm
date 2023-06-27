@@ -262,11 +262,12 @@ BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
 }
 
 
-bool BND_BrepFace::SetMesh(const class BND_Mesh* mesh, ON::mesh_type mt)
+bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
 {
   bool rc = false;
-  if( mesh )
+  if( m )
   {
+    const ON_Mesh* mesh = m->m_mesh;
     rc = m_brepface->SetMesh( mt, mesh );
   }
   return rc;

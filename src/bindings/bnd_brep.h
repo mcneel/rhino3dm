@@ -23,7 +23,6 @@ class BND_BrepFaceList {
   class BND_BrepFace* GetFace(int i);
 };
 
-
 class BND_BrepVertex: public BND_Point {
   ON_BrepVertex* m_vertex;
 public:
@@ -33,7 +32,6 @@ public:
   BND_TUPLE EdgeIndices() const;
   int EdgeCount() const { return m_vertex->m_ei.Count();}
 };
-
 
 class BND_BrepVertexList {
 
@@ -164,7 +162,7 @@ public:
   class BND_Surface* UnderlyingSurface();
   class BND_Mesh* GetMesh(ON::mesh_type mt);
   //bool SetMesh(MeshType meshType, Mesh mesh)
-  bool SetMesh(const class BND_Mesh* mesh, ON::mesh_type mt) const;
+  bool SetMesh(const class BND_Mesh* m, ON::mesh_type mt) const;
   //int[] AdjacentEdges()
   //int[] AdjacentFaces()
 
