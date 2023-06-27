@@ -295,7 +295,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAt
       else if (idxPlotColor == which)
         pAttributes->m_plot_color = color;
       else if (idxHatchBackgroundFill == which)
-        pAttributes->SetHatchBackgrounFillColor(color);
+        pAttributes->SetHatchBackgroundFillColor(color);
     }
     else
     {
@@ -790,7 +790,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveDecal(ON_3dmObjectAttributes* at
   if ((nullptr == attr) || (nullptr == decal))
     return false;
 
-  return attr->DeleteDecal(*decal);
+  return attr->RemoveDecal(*decal);
 }
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveAllDecals(ON_3dmObjectAttributes* attr)
@@ -798,7 +798,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveAllDecals(ON_3dmObjectAttributes
   if (nullptr == attr)
     return false;
 
-  attr->DeleteAllDecals();
+  attr->RemoveAllDecals();
 
   return true;
 }

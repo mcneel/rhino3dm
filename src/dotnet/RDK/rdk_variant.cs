@@ -20,7 +20,7 @@ namespace Rhino.Render
       m_value = new Rhino.Render.Variant(value);
     }
 
-    private string m_name = String.Empty;
+    private string m_name = string.Empty;
     private readonly Variant m_value = new Variant();
 
     /// <since>5.1</since>
@@ -424,23 +424,109 @@ namespace Rhino.Render
       return TypeCode.Object;
     }
 
-    public bool ToBoolean(IFormatProvider provider)
+    public bool ToBool()
     {
-      IntPtr const_ptr_this = ConstPointer();
-      return 1 == UnsafeNativeMethods.ON_XMLVariant_GetBoolValue(const_ptr_this);
+      return UnsafeNativeMethods.ON_XMLVariant_GetBoolValue(ConstPointer()) != 0;
+    }
+
+    public int ToInt()
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_GetIntValue(ConstPointer());
+    }
+
+    public float ToFloat()
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_GetFloatValue(ConstPointer());
+    }
+
+    public double ToDouble()
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_GetDoubleValue(ConstPointer());
     }
 
     public byte ToByte(IFormatProvider provider)
     {
-      throw new NotImplementedException();
+      return (byte)ToInt32(provider);
+    }
+
+    public sbyte ToSByte(IFormatProvider provider)
+    {
+      return (sbyte)ToInt32(provider);
     }
 
     public char ToChar(IFormatProvider provider)
     {
-      throw new NotImplementedException();
+      return (char)ToInt32(provider);
     }
 
-    public DateTime ToDateTime(IFormatProvider provider)
+    public short ToInt16(IFormatProvider provider)
+    {
+      return (short)ToInt32(provider);
+    }
+
+    public long ToInt64(IFormatProvider provider)
+    {
+      // TODO: support longs
+      return (long)ToInt32(provider);
+    }
+
+    public decimal ToDecimal(IFormatProvider provider)
+    {
+      return (decimal)ToInt32(provider);
+    }
+
+    public string ToString(IFormatProvider provider)
+    {
+      return ToString();
+    }
+
+    public bool ToBoolean(IFormatProvider provider)
+    {
+      return ToBool();
+    }
+
+    public float ToSingle(IFormatProvider provider)
+    {
+      return ToFloat();
+    }
+
+    public double ToDouble(IFormatProvider provider)
+    {
+      return ToDouble();
+    }
+
+    public int ToInt32(IFormatProvider provider)
+    {
+      return ToInt();
+    }
+
+    public ushort ToUInt16(IFormatProvider provider)
+    {
+      return (ushort)ToInt16(provider);
+    }
+
+    public uint ToUInt32(IFormatProvider provider)
+    {
+      //TODO: support unsigned ints
+      return (uint)ToInt32(provider);
+    }
+
+    public ulong ToUInt64(IFormatProvider provider)
+    {
+      //TODO: support unsigned long
+      return (ulong)ToInt64(provider);
+    }
+
+    public new string ToString()
+    {
+      using (var sh = new StringHolder())
+      {
+        UnsafeNativeMethods.ON_XMLVariant_GetStringValue(ConstPointer(), sh.NonConstPointer());
+        return sh.ToString();
+      }
+    }
+
+    public DateTime ToDateTime()
     {
       // 22nd March 2023 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-73674
       // This variant is used by the automatic UI to interoperate with the C++ RDK code.
@@ -459,52 +545,9 @@ namespace Rhino.Render
       return TimeHelpers.FromUnixEpoch(time_t);
     }
 
-    public decimal ToDecimal(IFormatProvider provider)
+    public DateTime ToDateTime(IFormatProvider provider)
     {
-      throw new NotImplementedException();
-    }
-
-    public double ToDouble(IFormatProvider provider)
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_XMLVariant_GetDoubleValue(const_ptr_this);
-    }
-
-    public short ToInt16(IFormatProvider provider)
-    {
-      throw new NotImplementedException();
-    }
-
-    public int ToInt32(IFormatProvider provider)
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_XMLVariant_GetIntValue(const_ptr_this);
-    }
-
-    public long ToInt64(IFormatProvider provider)
-    {
-      // TODO: support longs
-      return (long)ToInt32(provider);
-    }
-
-    public sbyte ToSByte(IFormatProvider provider)
-    {
-      throw new NotImplementedException();
-    }
-
-    public float ToSingle(IFormatProvider provider)
-    {
-      IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_XMLVariant_GetFloatValue(const_ptr_this);
-    }
-
-    public string ToString(IFormatProvider provider)
-    {
-      using (var sh = new StringHolder())
-      {
-        UnsafeNativeMethods.ON_XMLVariant_GetStringValue(ConstPointer(), sh.NonConstPointer());
-        return sh.ToString();
-      }
+      return ToDateTime();
     }
 
     public object ToType(Type type, IFormatProvider provider)
@@ -524,22 +567,6 @@ namespace Rhino.Render
       throw new NotImplementedException();
     }
 
-    public ushort ToUInt16(IFormatProvider provider)
-    {
-      throw new NotImplementedException();
-    }
-
-    public uint ToUInt32(IFormatProvider provider)
-    {
-      //TODO: support unsigned ints
-      return (uint)ToInt32(provider);
-    }
-
-    public ulong ToUInt64(IFormatProvider provider)
-    {
-      //TODO: support unsigned long
-      return (ulong)ToInt64(provider);
-    }
     #endregion
   }
 }

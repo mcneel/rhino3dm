@@ -1,6 +1,5 @@
 
 using System;
-using System.Diagnostics;
 
 namespace Rhino.Render
 {
@@ -9,12 +8,20 @@ namespace Rhino.Render
   /// </summary>
   public sealed class SafeFrame : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal SafeFrame(IntPtr native)             : base(native) { } // ON_SafeFrame
-    internal SafeFrame(IntPtr native, bool write) : base(native, write) { }
-    internal SafeFrame(FileIO.File3dm f)          : base(f) { }
+    internal SafeFrame(IntPtr native)    : base(native) { } // ON_SafeFrame
+    internal SafeFrame(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal SafeFrame(uint doc_serial)           : base(doc_serial) { }
+    internal SafeFrame(uint doc_sn)      : base(doc_sn) { }
+
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
+    {
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetSafeFrame(rs.ConstPointer());
+    }
 
     /// <summary>
     /// Create the SafeFrame object which is associated with the document
@@ -36,20 +43,9 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public SafeFrame(SafeFrame sf) : base(sf) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
-    {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
-    }
-
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_SafeFrame_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_SafeFrame_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
@@ -58,21 +54,6 @@ namespace Rhino.Render
     }
 
 #if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_SafeFrame(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-
     /// <summary>
     /// This event is raised when a SafeFrame property value is changed.
     /// </summary>
@@ -140,21 +121,46 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.SafeFrameSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.SafeFrameSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_SafeFrame_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.SafeFrameSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_SafeFrame_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_SafeFrame_SetValue(CppPointer, which, v.ConstPointer());
+      }
+    }
+
     /// <summary>
-    /// Determines whether the safeframe is enabled.
+    /// Determines whether the safe-frame is enabled.
     /// </summary>
     /// <since>7.12</since>
     public bool Enabled
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_Enabled(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetEnabled(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.On).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.On, new Variant(value));
     }
 
     ///<summary>
@@ -163,32 +169,18 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool PerspectiveOnly
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_PerspectiveOnly(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetPerspectiveOnly(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly, new Variant(value));
     }
 
     ///<summary>
-    /// Show a 4 by 3 grid in the safe-frame.
+    /// Show the 4 by 3 field grid in the safe-frame.
     ///</summary>
     /// <since>7.12</since>
     public bool FieldsOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_FieldsOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetFieldsOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn, new Variant(value));
     }
 
     ///<summary>
@@ -198,15 +190,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool LiveFrameOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_LiveFrameOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetLiveFrameOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn, new Variant(value));
     }
 
     ///<summary>
@@ -215,15 +200,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool ActionFrameOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_ActionFrameOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetActionFrameOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn, new Variant(value));
     }
 
     ///<summary>
@@ -233,15 +211,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool ActionFrameLinked
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_ActionFrameLinked(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetActionFrameLinked(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked, new Variant(value));
     }
 
     ///<summary>
@@ -252,15 +223,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double ActionFrameXScale
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_ActionFrameXScale(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetActionFrameXScale(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale, new Variant(value));
     }
 
     ///<summary>
@@ -271,15 +235,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double ActionFrameYScale
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_ActionFrameYScale(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetActionFrameYScale(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale, new Variant(value));
     }
 
     ///<summary>
@@ -288,15 +245,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool TitleFrameOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_TitleFrameOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetTitleFrameOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn, new Variant(value));
     }
 
     ///<summary>
@@ -306,15 +256,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool TitleFrameLinked
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_TitleFrameLinked(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetTitleFrameLinked(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked, new Variant(value));
     }
 
     ///<summary>
@@ -325,15 +268,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double TitleFrameXScale
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_TitleFrameXScale(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetTitleFrameXScale(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale, new Variant(value));
     }
 
     ///<summary>
@@ -344,15 +280,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double TitleFrameYScale
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_SafeFrame_TitleFrameYScale(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_SafeFrame_SetTitleFrameYScale(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale, new Variant(value));
     }
   }
 }

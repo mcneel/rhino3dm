@@ -1,29 +1,6 @@
 
 #include "stdafx.h"
 
-// TEMP
-class ON_XMLParamBlock : public ON_XMLParameters
-{
-public:
-  ON_XMLParamBlock();
-  virtual ~ON_XMLParamBlock();
-
-private:
-  ON_XMLRootNode _node;
-  ON__UINT64 _reserved;
-};
-
-ON_XMLParamBlock::ON_XMLParamBlock()
-  :
-  _reserved(0),
-  ON_XMLParameters(_node)
-{
-}
-
-ON_XMLParamBlock::~ON_XMLParamBlock()
-{
-}
-
 enum ON_DecalMapping : int
 {
   // Same as ON_Decal::Mappings

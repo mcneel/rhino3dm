@@ -266,7 +266,7 @@ RH_C_FUNCTION bool ON_RenderMaterial_To_ON_Material(const ON_RenderMaterial* rm,
 {
   if ((nullptr != rm) && (nullptr != mat))
   {
-    *mat = rm->SimulatedMaterial();
+    *mat = rm->ToOnMaterial();
     return true;
   }
 
@@ -277,7 +277,7 @@ RH_C_FUNCTION bool ON_RenderEnvironment_To_ON_Environment(const ON_RenderEnviron
 {
   if ((nullptr != re) && (nullptr != env))
   {
-    *env = re->SimulatedEnvironment();
+    *env = re->ToOnEnvironment();
     return true;
   }
 
@@ -288,7 +288,18 @@ RH_C_FUNCTION bool ON_RenderTexture_To_ON_Texture(const ON_RenderTexture* rt, ON
 {
   if ((nullptr != rt) && (nullptr != tex))
   {
-    *tex = rt->SimulatedTexture();
+    *tex = rt->ToOnTexture();
+    return true;
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_RenderTexture_Filename(const ON_RenderTexture* rt, ON_wString* filename)
+{
+  if ((nullptr != rt) && (nullptr != filename))
+  {
+    *filename = rt->Filename();
     return true;
   }
 
@@ -337,6 +348,14 @@ RH_C_FUNCTION void ON_XMLVariant_Copy(const ON_XMLVariant* pVS, ON_XMLVariant* p
   {
     *pVD = *pVS;
   }
+}
+
+RH_C_FUNCTION bool ON_XMLVariant_IsEqual(const ON_XMLVariant* pV1, ON_XMLVariant* pV2)
+{
+  if (pV1 && pV2)
+    return *pV1 == *pV2;
+
+  return false;
 }
 
 RH_C_FUNCTION int ON_XMLVariant_GetUnits(const ON_XMLVariant* pV)

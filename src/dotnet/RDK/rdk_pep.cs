@@ -12,13 +12,11 @@ using Rhino.Runtime.InteropWrappers;
 #if RHINO_SDK
 using DE = Rhino.RDK.Delegates;
 using static Rhino.Render.RenderContent;
-using System.Diagnostics;
 using Rhino.UI.Controls;
 #endif
 
 using Rhino.FileIO;
 using System.Collections;
-using System.Linq;
 
 namespace Rhino.Render.PostEffects
 {
@@ -1668,25 +1666,14 @@ namespace Rhino.Render.PostEffects
     PostEffect[] GetPostEffects(PostEffectType type);
   }
 
-  /// <summary>
-  /// This is the interface to PostEffects.
-  /// </summary>
   internal sealed class PostEffectsImpl : DocumentOrFreeFloatingBase, IPostEffects
   {
-    internal override IntPtr CppFromDocSerial(uint sn)
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
     {
-      return UnsafeNativeMethods.IRhRdkPostEffects_FromDocSerial(sn);
+      return UnsafeNativeMethods.IRhRdkPostEffects_FromDocSerial(doc_sn);
     }
 
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      return UnsafeNativeMethods.IRhRdkPostEffects_BeginChange(const_ptr, (int)cc);
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.IRhRdkPostEffects_EndChange(non_const_ptr);
-    }
+    internal override IntPtr CppFromFile3dm(FileIO.File3dm f) { return IntPtr.Zero; }
 
     internal override IntPtr DefaultCppConstructor()
     {
@@ -1710,11 +1697,9 @@ namespace Rhino.Render.PostEffects
     public PostEffect PostEffectFromId(Guid uuid)
     {
       IntPtr pPEP = UnsafeNativeMethods.IRhRdkPostEffects_PostEffectFromId(CppPointer, uuid);
-
       if (pPEP != IntPtr.Zero)
       {
-        PostEffectNative pep = new PostEffectNative(pPEP);
-        return pep;
+        return new PostEffectNative(pPEP);
       }
       return null;
     }
@@ -1722,9 +1707,8 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public PostEffect[] GetPostEffects(PostEffectType type)
     {
-      PostEffectArray array = new PostEffectArray();
+      var array = new PostEffectArray();
       UnsafeNativeMethods.IRhRdkPostEffects_GetPostEffects(CppPointer, (uint)type, array.CppPointer);
-
       return array.ToArray();
     }
   }
@@ -1910,9 +1894,10 @@ namespace Rhino.Render.PostEffects
   /// <summary>
   /// This is a wrapper around the data ('on', 'shown', 'state' parameters, etc.) of a post effect.
   /// </summary>
+  /// <since>8.0</since>
   public class PostEffectData : IDisposable
   {
-    private Guid _pep_id;
+    private readonly Guid _pep_id;
 
     internal IntPtr CppPointer // ON_PostEffect
     {
@@ -1933,26 +1918,6 @@ namespace Rhino.Render.PostEffects
       Collection = c;
       _pep_id = pep_id;
     }
-
-#if RHINO_SDK
-    private int _begin_change = 0;
-
-    public void BeginChange(ChangeContexts cc)
-    {
-      if (0 == _begin_change++)
-      {
-        Collection.BeginChange(cc);
-      }
-    }
-
-    public void EndChange()
-    {
-      if (0 == --_begin_change)
-      {
-        Collection.EndChange();
-      }
-    }
-#endif
 
     ~PostEffectData()
     {
@@ -2122,8 +2087,17 @@ namespace Rhino.Render.PostEffects
     internal PostEffectCollection(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal PostEffectCollection(uint doc_serial)  : base(doc_serial) { }
+    internal PostEffectCollection(uint doc_sn)      : base(doc_sn) { }
     internal PostEffectCollection(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
+
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
+    {
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(rs.ConstPointer());
+    }
 #endif
 
     /// <summary>
@@ -2139,20 +2113,9 @@ namespace Rhino.Render.PostEffects
     /// <since>8.0</since>
     public PostEffectCollection(PostEffectCollection c) : base(c) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
-    {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
-    }
-
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_PostEffects_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_PostEffects_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(File3dm f)
@@ -2174,23 +2137,6 @@ namespace Rhino.Render.PostEffects
     void Dispose(bool disposing)
     {
     }
-
-#if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_PostEffects(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-#endif
 
     /// <summary>
     /// Get a post effect data for an id.
