@@ -172,29 +172,26 @@ namespace Rhino.Render
   /// </summary>
   public sealed class Sun : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal Sun(IntPtr native)             : base(native)        { GC.SuppressFinalize(this); } // ON_Sun
-    internal Sun(IntPtr native, bool write) : base(native, write) { GC.SuppressFinalize(this); }
-    internal Sun(FileIO.File3dm f)          : base(f) { }
+    internal Sun(IntPtr native)    : base(native) { GC.SuppressFinalize(this); } // ON_Sun
+    internal Sun(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal Sun(uint doc_serial)           : base(doc_serial)    { GC.SuppressFinalize(this); }
-    internal Sun(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
-#endif
+    internal Sun(uint doc_serial)  : base(doc_serial) { GC.SuppressFinalize(this); }
+    internal Sun(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
     {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetSun(rs.ConstPointer());
     }
+#endif
 
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_Sun_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_Sun_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
@@ -203,21 +200,6 @@ namespace Rhino.Render
     }
 
 #if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_Sun(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-
     /// <summary>
     /// This event is raised when a Sun property value is changed.
     /// </summary>
@@ -289,16 +271,44 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.SunSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.SunSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_Sun_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.SunSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_Sun_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_Sun_SetValue(CppPointer, which, v.ConstPointer());
+      }
+    }
+
     /// <summary>Turn the sun on/off in this document.</summary>
     /// <since>5.0</since>
     public bool Enabled
     {
-      get => UnsafeNativeMethods.ON_Sun_Enabled(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetEnabled(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.EnableOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SunSetting.EnableOn, new Variant(value));
     }
 
     /// <since>5.10</since>
@@ -315,12 +325,8 @@ namespace Rhino.Render
     /// <since>8.0</since>
     public bool ManualControlOn
     {
-      get => UnsafeNativeMethods.ON_Sun_ManualControlOn(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetManualControlOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.ManualControlOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SunSetting.ManualControlOn, new Variant(value));
     }
 
     public enum Accuracies { Minimum, Maximum };
@@ -329,12 +335,8 @@ namespace Rhino.Render
     /// <since>8.0</since>
     public Accuracies Accuracy
     {
-      get => (Accuracies)UnsafeNativeMethods.ON_Sun_Accuracy(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetAccuracy(CppPointer, (int)value);
-      }
+      get => (Accuracies)GetValue(UnsafeNativeMethods.SunSetting.Accuracy).ToInt();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Accuracy, new Variant((int)value));
     }
 
 #if RHINO_SDK
@@ -359,9 +361,7 @@ namespace Rhino.Render
         if (doc != null)
         {
           var sky = new Skylight(doc.RuntimeSerialNumber);
-          sky.BeginChange(RenderContent.ChangeContexts.Program);
           sky.Enabled = value;
-          sky.EndChange();
         }
       }
     }
@@ -380,24 +380,16 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public bool DaylightSavingOn
     {
-      get => UnsafeNativeMethods.ON_Sun_DaylightSavingOn(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetDaylightSavingOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn).ToBool();
+      set => SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn, new Variant(value));
     }
 
     /// <summary>Daylight saving time in minutes</summary>
     /// <since>6.0</since>
     public int DaylightSavingMinutes
     {
-      get => UnsafeNativeMethods.ON_Sun_DaylightSavingMinutes(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetDaylightSavingMinutes(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes).ToInt();
+      set => SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes, new Variant(value));
     }
 
     /// <summary>
@@ -406,12 +398,8 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public double TimeZone
     {
-      get => UnsafeNativeMethods.ON_Sun_TimeZone(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetTimeZone(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.TimeZone).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.TimeZone, new Variant(value));
     }
 
     /// <summary>
@@ -422,12 +410,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double North
     {
-      get => UnsafeNativeMethods.ON_Sun_North(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetNorth(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.North).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.North, new Variant(value));
     }
 
     /// <summary>
@@ -436,28 +420,15 @@ namespace Rhino.Render
     /// <since>7.0</since>
     public double Intensity
     {
-      get => UnsafeNativeMethods.ON_Sun_Intensity(CppPointer);
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetIntensity(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.Intensity).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Intensity, new Variant(value));
     }
 
     /// <since>5.0</since>
     public Geometry.Vector3d Vector
     {
-      get
-      {
-        var v = new Geometry.Vector3d();
-        UnsafeNativeMethods.ON_Sun_Vector(CppPointer, ref v);
-        return v;
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Sun_SetVector(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SunSetting.Vector).ToVector3d();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Vector, new Variant(value));
     }
 
     /// <summary>
@@ -479,38 +450,26 @@ namespace Rhino.Render
     }
 
     /// <summary>
-    /// Sets position of the Sun based on azimuth and altitude values.
-    /// Calling this function will also set the sun to manual control mode.
     /// </summary>
-    /// <param name="azimuthDegrees">The azimuth sun angle in degrees.</param>
-    /// <param name="altitudeDegrees">The altitude sun angle in degrees.</param>
     /// <since>5.0</since>
+    /// <obsolete>8.0</obsolete>
+    [Obsolete("Use Azimuth and Altitude properties instead")]
     public void SetPosition(double azimuthDegrees, double altitudeDegrees)
     {
-      Debug.Assert(CanChange);
-      UnsafeNativeMethods.ON_Sun_SetAzimuth(CppPointer, azimuthDegrees);
-      UnsafeNativeMethods.ON_Sun_SetAltitude(CppPointer, altitudeDegrees);
+      Azimuth = azimuthDegrees;
+      Altitude = altitudeDegrees;
     }
 
     /// <summary>
-    /// Sets position of the sun based on physical location and time.
     /// </summary>
-    /// <param name="when">A <see cref="DateTime"/> instance.
-    /// <para>If the date <see cref="System.DateTime.Kind">Kind</see> is <see cref="System.DateTimeKind.Local">DateTimeKind.Local</see>,
-    /// or <see cref="System.DateTimeKind.Unspecified">DateTimeKind.Unspecified</see>, the date is considered local.</para></param>
-    /// <param name="latitudeDegrees">The latitude, in degrees, of the location on Earth.</param>
-    /// <param name="longitudeDegrees">The longitude, in degrees, of the location on Earth.</param>
     /// <since>5.0</since>
+    /// <obsolete>8.0</obsolete>
+    [Obsolete("Use SetDateTime() and Latitude / Longitude properties instead")]
     public void SetPosition(DateTime when, double latitudeDegrees, double longitudeDegrees)
     {
-      Debug.Assert(CanChange);
-
-      UnsafeNativeMethods.ON_Sun_SetLatitude(CppPointer, latitudeDegrees);
-      UnsafeNativeMethods.ON_Sun_SetLongitude(CppPointer, longitudeDegrees);
-
-      var local = (when.Kind != DateTimeKind.Utc) ? 1 : 0;
-      UnsafeNativeMethods.ON_Sun_SetDateTime(CppPointer, local,
-                          when.Year, when.Month, when.Day, when.Hour, when.Minute, when.Second);
+      Latitude = latitudeDegrees;
+      Longitude = longitudeDegrees;
+      SetDateTime(when, DateTimeKind.Local);
     }
 
     /// <summary>
@@ -521,8 +480,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Azimuth
     {
-      get => UnsafeNativeMethods.ON_Sun_Azimuth(CppPointer);
-      set => UnsafeNativeMethods.ON_Sun_SetAzimuth(CppPointer, value);
+      get => GetValue(UnsafeNativeMethods.SunSetting.Azimuth).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Azimuth, new Variant(value));
     }
 
     /// <summary>
@@ -532,8 +491,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Altitude
     {
-      get => UnsafeNativeMethods.ON_Sun_Altitude(CppPointer);
-      set => UnsafeNativeMethods.ON_Sun_SetAltitude(CppPointer, value);
+      get => GetValue(UnsafeNativeMethods.SunSetting.Altitude).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Altitude, new Variant(value));
     }
 
     /// <summary>
@@ -542,8 +501,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Latitude
     {
-      get => UnsafeNativeMethods.ON_Sun_Latitude(CppPointer);
-      set => UnsafeNativeMethods.ON_Sun_SetLatitude(CppPointer, value);
+      get => GetValue(UnsafeNativeMethods.SunSetting.Latitude).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Latitude, new Variant(value));
     }
 
     /// <summary>
@@ -552,19 +511,36 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Longitude
     {
-      get => UnsafeNativeMethods.ON_Sun_Longitude(CppPointer);
-      set => UnsafeNativeMethods.ON_Sun_SetLongitude(CppPointer, value);
+      get => GetValue(UnsafeNativeMethods.SunSetting.Longitude).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SunSetting.Longitude, new Variant(value));
+    }
+
+    private UnsafeNativeMethods.SunSetting SunSettingFromDateTimeKind(DateTimeKind kind)
+    {
+      if (kind == DateTimeKind.Utc)
+        return UnsafeNativeMethods.SunSetting.UTCDateTime;
+
+      return UnsafeNativeMethods.SunSetting.LocalDateTime;
     }
 
     /// <summary>
-    /// Get the observer's date and time.
-    /// Param 'kind' specifies the kind of the returned DateTime:
-    /// - If DateTimeKind.Local, the DateTime will be local and it will contain the local sun time,
+    /// Get the observer's date and time as a DateTime with kind DateTimeKind.Local.
+    /// 
+    /// Param 'kind' specifies the kind of date and time to retrieve from the sun.
+    /// 
+    /// - If DateTimeKind.Local, the returned DateTime will contain the local sun time,
     ///   i.e., the time you see in the UI under 'Local'.
-    /// - If DateTimeKind.Utc, the DateTime will be UTC and it will contain the UTC sun time,
-    ///   i.e., the time you see in the UI under 'UTC', which is the Sun's local time adjusted for its
-    ///   time zone and daylight saving (if any).
-    /// NOTE: Local sun time is to do with the Sun's time zone and not the time zone of the computer.
+    ///
+    /// - If DateTimeKind.Utc, the returned DateTime will contain the UTC sun time,
+    ///   i.e., the time you see in the UI under 'UTC', which is the Sun's local time adjusted
+    ///   for its time zone and daylight saving (if any).
+    ///
+    /// **** Local sun time is to do with the Sun's time zone and not the time zone of the computer.
+    ///
+    /// **** The returned DateTime object always has a kind of Local even if you requested the sun's
+    ///      UTC date and time. This is because the Sun's time zone is nothing to do with the actual
+    ///      computer's time zone and converting the result would cause further confusion.
+    ///
     /// </summary>
     /// <since>5.0</since>
     public DateTime GetDateTime(DateTimeKind kind)
@@ -572,33 +548,37 @@ namespace Rhino.Render
       if (kind == DateTimeKind.Unspecified)
         throw new ArgumentException("DateTimeKind must be specified");
 
-      int year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0;
-      var local = (kind == DateTimeKind.Local ? 1 : 0);
-      UnsafeNativeMethods.ON_Sun_DateTime(CppPointer, local, ref year, ref mon, ref day, ref hour, ref min, ref sec);
-      return new DateTime(year, mon, day, hour, min, sec, kind);
+      var s = SunSettingFromDateTimeKind(kind);
+      return GetValue(s).ToDateTime();
     }
 
     /// <summary>
     /// Set the observer's date and time.
-    /// Param 'kind_unused' is ignored. The time parameter already has a kind.
+    /// <param>kind specifies the kind of date and time to set to the sun. Note that this is distinct
+    /// from the DateTimeKind of 'time' which has nothing to do with the sun's local/UTC scenario.
+    /// 
+    /// - If 'kind' is DateTimeKind.Local, the sun's local time will be set, i.e., the time you see
+    ///   in the UI under 'Local'. This is the preferred way to use this function.
+    ///
+    /// - If 'kind' is DateTimeKind.Utc, the sun's UTC time will be set, i.e., the time you see
+    ///   in the UI under 'UTC'. This is only for completeness; it's not likely to be useful,
+    ///   but if you do use it, be aware that the sun will convert this time to local using its
+    ///   currently set time zone and daylight saving information (not the locale's information).
+    ///</param>
+    /// Caveat: Local sun time is to do with the Sun's time zone and not the time zone of the computer.
+    ///
+    /// Caveat: If the supplied DateTime object has a kind of Local, it will be used verbatim.
+    ///         If, however, it has a kind of Utc, it will be converted to local time on the computer
+    ///         using the computer's time zone and daylight saving locale information before being
+    ///         passed to the sun. To avoid confusion, it's best to always use DateTimes with Kind
+    ///         'Local' when setting the sun's date and time. This is because the Sun's time zone
+    ///         is nothing to do with the actual computer's time zone.
     /// </summary>
     /// <since>6.0</since>
-    public void SetDateTime(DateTime time, DateTimeKind kind_unused)
+    public void SetDateTime(DateTime time, DateTimeKind kind)
     {
-      Debug.Assert(CanChange);
-
-      // Providing a separate kind doesn't make sense. The kind of the 'time' parameter is used for
-      // deciding what kind of time to return (local or UTC), so I renamed it 'kind_unused'.
-
-      // There is a potential for confusion here.
-      // 'Local' in the C++ Sun means 'the local time in the sun's time zone'.
-      // 'Local' in DateTime means 'the local time in the time zone where Rhino is running'.
-      // In normal use this doesn't make any difference, but it will if someone tries to get
-      // the sun's UTC time by calling time.ToUniversalTime(). It won't work unless the computer
-      // is in the same time zone as the sun's observer time zone.
-
-      var local = (time.Kind == DateTimeKind.Local) ? 1 : 0;
-      UnsafeNativeMethods.ON_Sun_SetDateTime(CppPointer, local, time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
+      var s = SunSettingFromDateTimeKind(kind);
+      SetValue(s, new Variant(time));
     }
 
     /// <summary>Get sun color based on altitude.</summary>
@@ -685,13 +665,21 @@ namespace Rhino.Render
 
   public sealed class Skylight : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal Skylight(IntPtr native)             : base(native) { } // ON_Skylight
-    internal Skylight(IntPtr native, bool write) : base(native, write) { }
-    internal Skylight(FileIO.File3dm f)          : base(f) { }
+    internal Skylight(IntPtr native)    : base(native) { } // ON_Skylight
+    internal Skylight(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal Skylight(uint doc_serial)           : base(doc_serial) { }
-    internal Skylight(RhinoDoc doc)              : base(doc.RuntimeSerialNumber) { }
+    internal Skylight(uint doc_serial)  : base(doc_serial) { }
+    internal Skylight(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
+
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
+    {
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetSkylight(rs.ConstPointer());
+    }
 #endif
 
     /// <summary>
@@ -707,20 +695,9 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public Skylight(Skylight src) : base(src) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
-    {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
-    }
-
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_Skylight_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_Skylight_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
@@ -729,21 +706,6 @@ namespace Rhino.Render
     }
 
 #if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
-      {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_Skylight(const_ptr);
-      }
-
-      return const_ptr;
-    }
-
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-
     /// <summary>
     /// This event is raised when a Skylight property value is changed.
     /// </summary>
@@ -810,32 +772,50 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.SkylightSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.SkylightSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_Skylight_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.SkylightSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
+#if RHINO_SDK
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_3dmRenderSettings_Skylight_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
+      }
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_Skylight_SetValue(CppPointer, which, v.ConstPointer());
+      }
+    }
+
     /// <since>6.0</since>
     public bool Enabled
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_Skylight_GetOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Skylight_SetOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SkylightSetting.On).ToBool();
+      set => SetValue(UnsafeNativeMethods.SkylightSetting.On, new Variant(value));
     }
 
     /// <since>6.0</since>
     public double ShadowIntensity
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_Skylight_GetShadowIntensity(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Skylight_SetShadowIntensity(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity).ToDouble();
+      set => SetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity, new Variant(value));
     }
 
     /// <since>6.0</since>
@@ -843,15 +823,8 @@ namespace Rhino.Render
     [Obsolete("Use RenderSettings methods")]
     public bool CustomEnvironmentOn
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_Skylight_GetEnvironmentOverride(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Skylight_SetEnvironmentOverride(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride).ToBool();
+      set => SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride, new Variant(value));
     }
 
     /// <since>6.0</since>
@@ -859,15 +832,8 @@ namespace Rhino.Render
     [Obsolete("Use RenderSettings methods")]
     public Guid CustomEnvironment
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_Skylight_GetEnvironmentId(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Skylight_SetEnvironmentId(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId).ToGuid();
+      set => SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId, new Variant(value));
     }
   }
 }

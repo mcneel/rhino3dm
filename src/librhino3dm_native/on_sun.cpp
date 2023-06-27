@@ -1,51 +1,160 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
 static double DecimalHoursFromHMS(int iHour, int iMinute, int iSecond)
 {
-	return iHour + (iMinute / 60.0) + (iSecond / 3600.0);
+  return iHour + (iMinute / 60.0) + (iSecond / 3600.0);
 }
 
 static void DecimalHoursToHMS(double dHours, int& iHour, int& iMinute, int& iSecond)
 {
-	while (dHours >= 24.0)
-		dHours -= 24.0;
+  while (dHours >= 24.0)
+    dHours -= 24.0;
 
-	while (dHours < 0.0)
-		dHours += 24.0;
+  while (dHours < 0.0)
+    dHours += 24.0;
 
-	iHour = (int)dHours;
+  iHour = (int)dHours;
 
-	const double dMinute = (dHours - iHour) * 60.0;
-	iMinute = (int)dMinute;
+  const double dMinute = (dHours - iHour) * 60.0;
+  iMinute = (int)dMinute;
 
-	const double dSecond = (dMinute - iMinute) * 60.0;
-	iSecond = (int)dSecond;
+  const double dSecond = (dMinute - iMinute) * 60.0;
+  iSecond = (int)dSecond;
 }
 
-RH_C_FUNCTION const ON_Sun* ON_3dmRenderSettings_GetSun(const ON_3dmRenderSettings* rs)
+static time_t TimeFromYMDH(int y, int m, int d, double dh)
 {
-  if (nullptr == rs)
-    return nullptr;
+  int h = 0, n = 0, s = 0;
+  DecimalHoursToHMS(dh, h, n, s);
 
-  return &rs->Sun();
+  tm ttm = { 0 };
+  ttm.tm_sec = s;
+  ttm.tm_min = n;
+  ttm.tm_hour = h;
+  ttm.tm_mday = d;
+  ttm.tm_mon = m - 1;
+  ttm.tm_year = y - 1900;
+  ttm.tm_isdst = -1;
+  return mktime(&ttm);
 }
 
-RH_C_FUNCTION ON_Sun* ON_3dmRenderSettings_BeginChange_ON_Sun(const ON_3dmRenderSettings* rs)
+static void GetYMDH(const ON_XMLVariant& v, int& y, int& m, int& d, double& h)
 {
-  return &ON_3dmRenderSettings_BeginChange(rs).Sun();
+  const time_t time = v.AsTime();
+
+  tm ttm = { 0 };
+
+#ifdef ON_RUNTIME_WIN
+  _localtime64_s(&ttm, &time);
+#else
+  ttm = *localtime(&time);
+#endif
+
+  y = ttm.tm_year + 1900;
+  m = ttm.tm_mon + 1;
+  d = ttm.tm_mday;
+  h = DecimalHoursFromHMS(ttm.tm_hour, ttm.tm_min, ttm.tm_sec);
 }
 
-RH_C_FUNCTION const ON_Sun* ON_Sun_FromDocSerial(unsigned int rhino_doc_sn)
+static time_t TimeFromSun(const ON_Sun& sun, bool local)
 {
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
+  int y = 0, m = 0, d = 0; double dh = 0.0;
 
-  return &rs->Sun();
+  if (local) sun.LocalDateTime(y, m, d, dh);
+  else       sun.UTCDateTime  (y, m, d, dh);
+
+  return TimeFromYMDH(y, m, d, dh);
+}
+
+enum class SunSetting : int
+{
+  Accuracy,
+  EnableAllowed,
+  EnableOn,
+  ManualControlAllowed,
+  ManualControlOn,
+  North,
+  Azimuth,
+  Altitude,
+  Latitude,
+  Longitude,
+  TimeZone,
+  DaylightSavingOn,
+  DaylightSavingMinutes,
+  Intensity,
+  ShadowIntensity,
+  Vector,
+  LocalDateTime,
+  UTCDateTime,
+};
+
+RH_C_FUNCTION void ON_Sun_GetValue(const ON_Sun* sun, SunSetting which, ON_XMLVariant* v)
+{
+  if (sun && v)
+  {
+    switch (which)
+    {
+    case SunSetting::Accuracy             : *v = int(sun->Accuracy());         break;
+    case SunSetting::EnableAllowed        : *v = sun->EnableAllowed();         break;
+    case SunSetting::EnableOn             : *v = sun->EnableOn();              break;
+    case SunSetting::ManualControlAllowed : *v = sun->ManualControlAllowed();  break;
+    case SunSetting::ManualControlOn      : *v = sun->ManualControlOn();       break;
+    case SunSetting::North                : *v = sun->North();                 break;
+    case SunSetting::Azimuth              : *v = sun->Azimuth();               break;
+    case SunSetting::Altitude             : *v = sun->Altitude();              break;
+    case SunSetting::Latitude             : *v = sun->Latitude();              break;
+    case SunSetting::Longitude            : *v = sun->Longitude();             break;
+    case SunSetting::TimeZone             : *v = sun->TimeZone();              break;
+    case SunSetting::DaylightSavingOn     : *v = sun->DaylightSavingOn();      break;
+    case SunSetting::DaylightSavingMinutes: *v = sun->DaylightSavingMinutes(); break;
+    case SunSetting::Intensity            : *v = sun->Intensity();             break;
+    case SunSetting::ShadowIntensity      : *v = sun->ShadowIntensity();       break;
+    case SunSetting::LocalDateTime        : *v = TimeFromSun(*sun, true);      break;
+    case SunSetting::UTCDateTime          : *v = TimeFromSun(*sun, false);     break;
+    case SunSetting::Vector               : *v = ON_3dPoint(sun->CalculateVectorFromAzimuthAndAltitude()); break;
+    default: break;
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_Sun_SetValue(ON_Sun* sun, SunSetting which, const ON_XMLVariant* v)
+{
+  if (sun && v)
+  {
+    int y = 0, m = 0, d = 0; double h = 0.0;
+
+    switch (which)
+    {
+    case SunSetting::Accuracy             : sun->SetAccuracy(ON_SunEngine::Accuracy(v->AsInteger())); break;
+    case SunSetting::EnableAllowed        : sun->SetEnableAllowed(v->AsBool());                       break;
+    case SunSetting::EnableOn             : sun->SetEnableOn(v->AsBool());                            break;
+    case SunSetting::ManualControlAllowed : sun->SetManualControlAllowed(v->AsBool());                break;
+    case SunSetting::ManualControlOn      : sun->SetManualControlOn(v->AsBool());                     break;
+    case SunSetting::North                : sun->SetNorth(v->AsDouble());                             break;
+    case SunSetting::Azimuth              : sun->SetAzimuth(v->AsDouble());                           break;
+    case SunSetting::Altitude             : sun->SetAltitude(v->AsDouble());                          break;
+    case SunSetting::Latitude             : sun->SetLatitude(v->AsDouble());                          break;
+    case SunSetting::Longitude            : sun->SetLongitude(v->AsDouble());                         break;
+    case SunSetting::TimeZone             : sun->SetTimeZone(v->AsDouble());                          break;
+    case SunSetting::DaylightSavingOn     : sun->SetDaylightSavingOn(v->AsBool());                    break;
+    case SunSetting::DaylightSavingMinutes: sun->SetDaylightSavingMinutes(v->AsInteger());            break;
+    case SunSetting::Intensity            : sun->SetIntensity(v->AsDouble());                         break;
+    case SunSetting::ShadowIntensity      : sun->SetShadowIntensity(v->AsDouble());                   break;
+    case SunSetting::Vector               : sun->SetAzimuthAndAltitudeFromVector(v->As3dPoint());     break;
+    case SunSetting::LocalDateTime: GetYMDH(*v, y, m, d, h); sun->SetLocalDateTime(y, m, d, h);       break;
+    case SunSetting::UTCDateTime:   GetYMDH(*v, y, m, d, h); sun->SetUTCDateTime  (y, m, d, h);       break;
+    default: break;
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_3dmRenderSettings_Sun_SetValue(ON_3dmRenderSettings* rs, SunSetting which, const ON_XMLVariant* v)
+{
+  if (nullptr != rs)
+  {
+    ON_Sun_SetValue(&rs->Sun(), which, v);
+  }
 }
 
 RH_C_FUNCTION const ON_Sun* ON_Sun_FromONX_Model(ONX_Model* ptrModel)
@@ -54,269 +163,6 @@ RH_C_FUNCTION const ON_Sun* ON_Sun_FromONX_Model(ONX_Model* ptrModel)
     return nullptr;
 
   return &ptrModel->m_settings.m_RenderSettings.Sun();
-}
-
-RH_C_FUNCTION bool ON_Sun_Enabled(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->EnableOn();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_Sun_SetEnabled(ON_Sun* sun, bool value)
-{
-  if (sun)
-  {
-    sun->SetEnableOn(value);
-  }
-}
-
-RH_C_FUNCTION bool ON_Sun_ManualControlOn(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->ManualControlOn();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_Sun_SetManualControlOn(ON_Sun* sun, bool value)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(value);
-  }
-}
-
-RH_C_FUNCTION int ON_Sun_Accuracy(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return int(sun->Accuracy());
-  }
-  return -1;
-}
-
-RH_C_FUNCTION void ON_Sun_SetAccuracy(ON_Sun* sun, int acc)
-{
-  if (sun)
-  {
-    sun->SetAccuracy(ON_SunEngine::Accuracy(acc));
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_North(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->North();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetNorth(ON_Sun* sun, double value)
-{
-  if (sun)
-  {
-    sun->SetNorth(value);
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_Intensity(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->Intensity();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetIntensity(ON_Sun* sun, double value)
-{
-  if (sun)
-  {
-    sun->SetIntensity(value);
-  }
-}
-
-RH_C_FUNCTION void ON_Sun_Vector(const ON_Sun* sun, ON_3dVector* pValue)
-{
-  if (sun && pValue)
-  {
-    *pValue = sun->CalculateVectorFromAzimuthAndAltitude();
-  }
-}
-
-RH_C_FUNCTION void ON_Sun_SetVector(ON_Sun* sun, ON_3DVECTOR_STRUCT value)
-{
-  if (sun)
-  {
-    sun->SetAzimuthAndAltitudeFromVector(ON_3dVector(value.val));
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_Azimuth(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->Azimuth();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetAzimuth(ON_Sun* sun, double v)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(true);
-    sun->SetAzimuth(v);
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_Altitude(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->Altitude();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetAltitude(ON_Sun* sun, double v)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(true);
-    sun->SetAltitude(v);
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_Latitude(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->Latitude();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetLatitude(ON_Sun* sun, double v)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(false);
-    sun->SetLatitude(v);
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_Longitude(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->Longitude();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetLongitude(ON_Sun* sun, double v)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(false);
-    sun->SetLongitude(v);
-  }
-}
-
-RH_C_FUNCTION double ON_Sun_TimeZone(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->TimeZone();
-  }
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetTimeZone(ON_Sun* sun, double value)
-{
-  if (sun)
-  {
-    sun->SetTimeZone(value);
-  }
-}
-
-RH_C_FUNCTION bool ON_Sun_DaylightSavingOn(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->DaylightSavingOn();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_Sun_SetDaylightSavingOn(ON_Sun* sun, bool value)
-{
-  if (sun)
-  {
-    sun->SetDaylightSavingOn(value);
-  }
-}
-
-RH_C_FUNCTION int ON_Sun_DaylightSavingMinutes(const ON_Sun* sun)
-{
-  if (sun)
-  {
-    return sun->DaylightSavingMinutes();
-  }
-  return 0;
-}
-
-RH_C_FUNCTION void ON_Sun_SetDaylightSavingMinutes(ON_Sun* sun, int value)
-{
-  if (sun)
-  {
-    sun->SetDaylightSavingMinutes(value);
-  }
-}
-
-RH_C_FUNCTION void ON_Sun_DateTime(const ON_Sun* sun, int local, int* y, int* m, int* d, int* h, int* n, int* s)
-{
-  if (sun == nullptr)
-    return;
-
-  if (y && m && d && h && n && s)
-  {
-    double hours = 0.0;
-    if (local != 0)
-    {
-      sun->LocalDateTime(*y, *m, *d, hours);
-    }
-    else
-    {
-      sun->UTCDateTime(*y, *m, *d, hours);
-    }
-
-    DecimalHoursToHMS(hours, *h, *n, *s);
-  }
-}
-
-RH_C_FUNCTION void ON_Sun_SetDateTime(ON_Sun* sun, int local, int y, int m, int d, int h, int n, int s)
-{
-  if (sun)
-  {
-    sun->SetManualControlOn(false);
-
-    const auto hours = DecimalHoursFromHMS(h, n, s);
-    if (local != 0)
-    {
-      sun->SetLocalDateTime(y, m, d, hours);
-    }
-    else
-    {
-      sun->SetUTCDateTime(y, m, d, hours);
-    }
-  }
 }
 
 RH_C_FUNCTION void ON_Sun_Light(const ON_Sun* sun, ON_Light* light)
@@ -359,9 +205,6 @@ RH_C_FUNCTION unsigned int ON_Sun_GetDataCRC(const ON_Sun* sun)
 
 RH_C_FUNCTION ON_Sun* ON_Sun_New()
 {
-  // The default ON_Sun is smart enough to do the automatic azimuth and altitude calculations
-  // but it stores lat/lon/north in XML -- it doesn't use an earth anchor point because that's
-  // only used when the sun is in render settings or a Rhino document.
   return new ON_Sun;
 }
 

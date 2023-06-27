@@ -1,29 +1,71 @@
 
 #include "stdafx.h"
 
-ON_3dmRenderSettings& ON_3dmRenderSettings_BeginChange(const ON_3dmRenderSettings* rs);
-const ON_3dmRenderSettings* ON_3dmRenderSettings_FromDocSerial_Internal(unsigned int rhino_doc_sn);
-
-RH_C_FUNCTION const ON_GroundPlane* ON_3dmRenderSettings_GetGroundPlane(const ON_3dmRenderSettings* rs)
+enum class GroundPlaneSetting : int
 {
-  if (nullptr == rs)
-    return nullptr;
+  On,
+  ShowUnderside,
+  AutoAltitude,
+  Altitude,
+  ShadowOnly,
+  TextureOffsetLocked,
+  TextureOffset,
+  TextureSizeLocked,
+  TextureSize,
+  TextureRotation,
+  MaterialInstanceId,
+};
 
-  return &rs->GroundPlane();
+RH_C_FUNCTION void ON_GroundPlane_GetValue(const ON_GroundPlane* gp, GroundPlaneSetting which, ON_XMLVariant* v)
+{
+  if (gp && v)
+  {
+    switch (which)
+    {
+    case GroundPlaneSetting::On:                  *v = gp->On();                        break;
+    case GroundPlaneSetting::ShowUnderside:       *v = gp->ShowUnderside();             break;
+    case GroundPlaneSetting::AutoAltitude:        *v = gp->AutoAltitude();              break;
+    case GroundPlaneSetting::Altitude:            *v = gp->Altitude();                  break;
+    case GroundPlaneSetting::ShadowOnly:          *v = gp->ShadowOnly();                break;
+    case GroundPlaneSetting::TextureOffsetLocked: *v = gp->TextureOffsetLocked();       break;
+    case GroundPlaneSetting::TextureSizeLocked:   *v = gp->TextureSizeLocked();         break;
+    case GroundPlaneSetting::TextureRotation:     *v = gp->TextureRotation();           break;
+    case GroundPlaneSetting::MaterialInstanceId:  *v = gp->MaterialInstanceId();        break;
+    case GroundPlaneSetting::TextureOffset:       *v = ON_2dPoint(gp->TextureOffset()); break;
+    case GroundPlaneSetting::TextureSize:         *v = ON_2dPoint(gp->TextureSize());   break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION ON_GroundPlane* ON_3dmRenderSettings_BeginChange_ON_GroundPlane(const ON_3dmRenderSettings* rs)
+RH_C_FUNCTION void ON_GroundPlane_SetValue(ON_GroundPlane* gp, GroundPlaneSetting which, const ON_XMLVariant* v)
 {
-  return &ON_3dmRenderSettings_BeginChange(rs).GroundPlane();
+  if (gp && v)
+  {
+    switch (which)
+    {
+    case GroundPlaneSetting::On:                  gp->SetOn(v->AsBool());                  break;
+    case GroundPlaneSetting::ShowUnderside:       gp->SetShowUnderside(v->AsBool());       break;
+    case GroundPlaneSetting::AutoAltitude:        gp->SetAutoAltitude(v->AsBool());        break;
+    case GroundPlaneSetting::Altitude:            gp->SetAltitude(v->AsDouble());          break;
+    case GroundPlaneSetting::ShadowOnly:          gp->SetShadowOnly(v->AsBool());          break;
+    case GroundPlaneSetting::TextureOffsetLocked: gp->SetTextureOffsetLocked(v->AsBool()); break;
+    case GroundPlaneSetting::TextureOffset:       gp->SetTextureOffset(v->As2dPoint());    break;
+    case GroundPlaneSetting::TextureSizeLocked:   gp->SetTextureSizeLocked(v->AsBool());   break;
+    case GroundPlaneSetting::TextureSize:         gp->SetTextureSize(v->As2dPoint());      break;
+    case GroundPlaneSetting::TextureRotation:     gp->SetTextureRotation(v->AsDouble());   break;
+    case GroundPlaneSetting::MaterialInstanceId:  gp->SetMaterialInstanceId(v->AsUuid());  break;
+    default: break;
+    }
+  }
 }
 
-RH_C_FUNCTION const ON_GroundPlane* ON_GroundPlane_FromDocSerial(unsigned int rhino_doc_sn)
+RH_C_FUNCTION void ON_3dmRenderSettings_GroundPlane_SetValue(ON_3dmRenderSettings* rs, GroundPlaneSetting which, const ON_XMLVariant* v)
 {
-  const auto* rs = ON_3dmRenderSettings_FromDocSerial_Internal(rhino_doc_sn);
-  if (nullptr == rs)
-    return nullptr;
-
-  return &rs->GroundPlane();
+  if (nullptr != rs)
+  {
+    ON_GroundPlane_SetValue(&rs->GroundPlane(), which, v);
+  }
 }
 
 RH_C_FUNCTION const ON_GroundPlane* ON_GroundPlane_FromONX_Model(ONX_Model* ptrModel)
@@ -32,194 +74,6 @@ RH_C_FUNCTION const ON_GroundPlane* ON_GroundPlane_FromONX_Model(ONX_Model* ptrM
     return nullptr;
 
   return &ptrModel->m_settings.m_RenderSettings.GroundPlane();
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetOn(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->On();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetOn(ON_GroundPlane* p, bool v)
-{
-  if (nullptr != p)
-  {
-    p->SetOn(v);
-  }
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetShadowOnly(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->ShadowOnly();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetShadowOnly(ON_GroundPlane* p, bool v)
-{
-  if (nullptr != p)
-  {
-    p->SetShadowOnly(v);
-  }
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetAutoAltitude(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->AutoAltitude();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetAutoAltitude(ON_GroundPlane* p, bool v)
-{
-  if (nullptr != p)
-  {
-    p->SetAutoAltitude(v);
-  }
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetShowUnderside(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->ShowUnderside();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetShowUnderside(ON_GroundPlane* p, bool v)
-{
-  if (nullptr != p)
-  {
-    p->SetShowUnderside(v);
-  }
-}
-
-RH_C_FUNCTION double ON_GroundPlane_GetAltitude(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->Altitude();
-  }
-
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetAltitude(ON_GroundPlane* p, double v)
-{
-  if (nullptr != p)
-  {
-    p->SetAltitude(v);
-  }
-}
-
-RH_C_FUNCTION ON_UUID ON_GroundPlane_GetMaterialInstanceId(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->MaterialInstanceId();
-  }
-
-  return ON_nil_uuid;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetMaterialInstanceId(ON_GroundPlane* p, ON_UUID v)
-{
-  if (nullptr != p)
-  {
-    p->SetMaterialInstanceId(v);
-  }
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetTextureOffsetLocked(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->TextureOffsetLocked();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetTextureOffsetLocked(ON_GroundPlane* p, bool locked)
-{
-  if (nullptr != p)
-  {
-    p->SetTextureOffsetLocked(locked);
-  }
-}
-
-RH_C_FUNCTION bool ON_GroundPlane_GetTextureSizeLocked(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->TextureSizeLocked();
-  }
-  return false;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetTextureSizeLocked(ON_GroundPlane* p, bool locked)
-{
-  if (nullptr != p)
-  {
-    p->SetTextureSizeLocked(locked);
-  }
-}
-
-RH_C_FUNCTION void ON_GroundPlane_GetTextureOffset(const ON_GroundPlane* p, ON_2dVector* pVector)
-{
-  if ((nullptr != p) && (nullptr != pVector))
-  {
-    *pVector = p->TextureOffset();
-  }
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetTextureOffset(ON_GroundPlane* p, ON_2DVECTOR_STRUCT v)
-{
-  if (nullptr != p)
-  {
-    p->SetTextureOffset(ON_2dVector(v.val));
-  }
-}
-
-RH_C_FUNCTION void ON_GroundPlane_GetTextureSize(const ON_GroundPlane* p, ON_2dVector* pVector)
-{
-  if ((nullptr != p) && (nullptr != pVector))
-  {
-    *pVector = p->TextureSize();
-  }
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetTextureSize(ON_GroundPlane* p, ON_2DVECTOR_STRUCT v)
-{
-  if (nullptr != p)
-  {
-    p->SetTextureSize(ON_2dVector(v.val));
-  }
-}
-
-RH_C_FUNCTION double ON_GroundPlane_GetTextureRotation(const ON_GroundPlane* p)
-{
-  if (nullptr != p)
-  {
-    return p->TextureRotation();
-  }
-
-  return 0.0;
-}
-
-RH_C_FUNCTION void ON_GroundPlane_SetTextureRotation(ON_GroundPlane* p, double v)
-{
-  if (nullptr != p)
-  {
-    p->SetTextureRotation(v);
-  }
 }
 
 RH_C_FUNCTION ON_GroundPlane* ON_GroundPlane_New()

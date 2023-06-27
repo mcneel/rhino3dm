@@ -11,13 +11,21 @@ namespace Rhino.Render
   /// </summary>
   public sealed partial class Dithering : DocumentOrFreeFloatingBase, IDisposable
   {
-    internal Dithering(IntPtr p)             : base(p) { } // ON_Dithering.
-    internal Dithering(IntPtr p, bool write) : base(p, write) { }
-    internal Dithering(FileIO.File3dm f)     : base(f) { }
+    internal Dithering(IntPtr native)    : base(native) { } // ON_Dithering.
+    internal Dithering(FileIO.File3dm f) : base(f) { }
 
 #if RHINO_SDK
-    internal Dithering(uint doc_serial)      : base(doc_serial) { }
-    internal Dithering(RhinoDoc doc)         : base(doc.RuntimeSerialNumber) { }
+    internal Dithering(uint doc_sn)      : base(doc_sn) { }
+    internal Dithering(RhinoDoc doc)     : base(doc.RuntimeSerialNumber) { }
+
+    internal override IntPtr CppFromDocSerial(uint doc_sn)
+    {
+      var rs = GetRenderSettings(doc_sn);
+      if (rs == null)
+        return IntPtr.Zero;
+
+      return UnsafeNativeMethods.ON_3dmRenderSettings_GetDithering(rs.ConstPointer());
+    }
 #endif
 
     /// <summary>
@@ -33,20 +41,9 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public Dithering(Dithering d) : base(d) { }
 
-    internal override IntPtr RS_CppFromDocSerial(uint sn, out bool returned_ptr_is_rs)
-    {
-      returned_ptr_is_rs = true;
-      return UnsafeNativeMethods.ON_3dmRenderSettings_FromDocSerial(sn);
-    }
-
     internal override IntPtr DefaultCppConstructor()
     {
       return UnsafeNativeMethods.ON_Dithering_New();
-    }
-
-    internal override IntPtr CppFromDocSerial(uint sn)
-    {
-      return UnsafeNativeMethods.ON_Dithering_FromDocSerial(sn);
     }
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
@@ -71,22 +68,39 @@ namespace Rhino.Render
     {
     }
 
+    private bool IsValueEqual(UnsafeNativeMethods.DitheringSetting which, Variant v)
+    {
+      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+    }
+
+    private Variant GetValue(UnsafeNativeMethods.DitheringSetting which)
+    {
+      var v = new Variant();
+      UnsafeNativeMethods.ON_Dithering_GetValue(CppPointer, which, v.NonConstPointer());
+      return v;
+    }
+
+    private void SetValue(UnsafeNativeMethods.DitheringSetting which, Variant v)
+    {
+      if (IsValueEqual(which, v))
+        return;
+
 #if RHINO_SDK
-    internal override IntPtr BeginChangeImpl(IntPtr const_ptr, RenderContent.ChangeContexts cc, bool const_ptr_is_rs)
-    {
-      if (const_ptr_is_rs)
+      var rs = GetDocumentRenderSettings();
+      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+      if (ptr != IntPtr.Zero)
       {
-        return UnsafeNativeMethods.ON_3dmRenderSettings_BeginChange_ON_Dithering(const_ptr);
+        UnsafeNativeMethods.ON_3dmRenderSettings_Dithering_SetValue(ptr, which, v.ConstPointer());
+        rs.Commit();
       }
-
-      return const_ptr;
+      else
+#endif
+      {
+        UnsafeNativeMethods.ON_Dithering_SetValue(CppPointer, which, v.ConstPointer());
+      }
     }
 
-    internal override bool EndChangeImpl(IntPtr non_const_ptr, uint rhino_doc_sn)
-    {
-      return UnsafeNativeMethods.ON_3dmRenderSettings_EndChange(rhino_doc_sn);
-    }
-#else
+#if !RHINO_SDK
     /// <summary>
     /// Dithering algorithm.
     /// </summary>
@@ -117,29 +131,21 @@ namespace Rhino.Render
     {
       get
       {
-        var m = UnsafeNativeMethods.ON_Dithering_GetMethod(CppPointer);
+        var m = GetValue(UnsafeNativeMethods.DitheringSetting.Method).ToInt();
         return (m == 0) ? Methods.SimpleNoise : Methods.FloydSteinberg;
       }
       set
       {
-        Debug.Assert(CanChange);
         var v = (Methods.SimpleNoise == value) ? 0 : 1;
-        UnsafeNativeMethods.ON_Dithering_SetMethod(CppPointer, v);
+        SetValue(UnsafeNativeMethods.DitheringSetting.Method, new Variant(v));
       }
     }
 
     /// <since>7.0</since>
     public bool On
     {
-      get
-      {
-        return UnsafeNativeMethods.ON_Dithering_GetOn(CppPointer);
-      }
-      set
-      {
-        Debug.Assert(CanChange);
-        UnsafeNativeMethods.ON_Dithering_SetOn(CppPointer, value);
-      }
+      get => GetValue(UnsafeNativeMethods.DitheringSetting.On).ToBool();
+      set => SetValue(UnsafeNativeMethods.DitheringSetting.On, new Variant(value));
     }
   }
 }
