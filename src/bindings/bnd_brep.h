@@ -162,7 +162,7 @@ public:
   class BND_Surface* UnderlyingSurface();
   class BND_Mesh* GetMesh(ON::mesh_type mt);
   //bool SetMesh(MeshType meshType, Mesh mesh)
-  bool SetMesh(const class BND_Mesh* m, ON::mesh_type mt) const;
+  //bool SetMesh(const class BND_Mesh* m, ON::mesh_type mt) const;
   //int[] AdjacentEdges()
   //int[] AdjacentFaces()
 
