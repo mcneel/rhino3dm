@@ -268,6 +268,7 @@ public:
   void SetApplicationUrl(std::wstring url);
   std::wstring GetApplicationDetails() const;
   void SetApplicationDetails(std::wstring details);
+  int GetArchiveVersion() const;
   std::wstring GetCreatedBy() const;
   std::wstring GetLastEditedBy() const;
   //public DateTime Created | get;
