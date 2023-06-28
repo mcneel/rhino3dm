@@ -48,6 +48,7 @@ public:
   class BND_LineCurve* PathLineCurve() const;
   int ProfileIndex(double profileParameter) const;
   class BND_Mesh* GetMesh(ON::mesh_type meshType);
+  bool SetMesh(const class BND_Mesh* m, ON::mesh_type mt);
 
   BND_Extrusion(ON_Extrusion* extrusion, const ON_ModelComponentReference* compref);
 };
