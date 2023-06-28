@@ -261,18 +261,19 @@ BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
   return new BND_Mesh(mesh, &m_component_ref);
 }
 
-/*
-bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt) const
+bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
 {
   bool rc = false;
-  if( m )
-  {
-    const ON_Mesh* mesh = m->m_mesh;
-    rc = m_brepface->SetMesh( mt, mesh );
-  }
+
+  if (nullptr == m)
+    return rc;
+
+  ON_Mesh* mesh = m->m_mesh;
+  
+  rc = m_brepface->SetMesh( mt, mesh );
+
   return rc;
 }
-*/
 
 
 
@@ -394,7 +395,7 @@ void initBrepBindings(pybind11::module& m)
     .def("DuplicateFace", &BND_BrepFace::DuplicateFace, py::arg("duplicateMeshes"))
     .def("DuplicateSurface", &BND_BrepFace::DuplicateSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
-    //.def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
+    .def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
@@ -462,7 +463,7 @@ void initBrepBindings(void*)
     .function("duplicateFace", &BND_BrepFace::DuplicateFace, allow_raw_pointers())
     .function("duplicateSurface", &BND_BrepFace::DuplicateSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
-    //.function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
+    .function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
