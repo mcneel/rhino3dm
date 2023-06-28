@@ -27,7 +27,7 @@ ON_4fColor Binding_to_ON_4fColor(const BND_Color4f& color)
   float g = color[1].cast<float>();
   float b = color[2].cast<float>();
   float a = color[3].cast<float>();
-  return ON_Color(r, g, b, a);
+  return ON_4fColor(r, g, b, a);
 }
 
 #endif
