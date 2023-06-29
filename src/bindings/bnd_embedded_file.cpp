@@ -35,6 +35,26 @@ void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_Mo
   BND_ModelComponent::SetTrackedPointer(ef, compref);
 }
 
+std::wstring BND_File3dmEmbeddedFile::GetFilename(void) const
+{
+  return std::wstring(static_cast<const wchar_t*>(_ef->Filename()));
+}
+
+size_t BND_File3dmEmbeddedFile::GetLength(void) const
+{
+  return _ef->Length();
+}
+
+bool BND_File3dmEmbeddedFile::Write(const std::wstring& f) const
+{
+  return _ef->SaveToFile(f.c_str());
+}
+
+bool BND_File3dmEmbeddedFile::Clear(void) const
+{
+  return _ef->Clear();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
