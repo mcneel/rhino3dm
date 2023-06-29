@@ -129,4 +129,3 @@ public:
   void SetOpacityRoughness(double o) { m_material->PhysicallyBased()->SetOpacityRoughness(o); }
   //public Rhino.Display.Color4f Emission{ get; set; }
 };
-

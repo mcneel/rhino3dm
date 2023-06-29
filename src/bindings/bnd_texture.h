@@ -1,10 +1,13 @@
-#include "bindings.h"
 
 #pragma once
 
+#include "bindings.h"
+
 #if defined(ON_PYTHON_COMPILE)
+void initEnvironmentBindings(pybind11::module& m);
 void initTextureBindings(pybind11::module& m);
 #else
+void initEnvironmentBindings(void* m);
 void initTextureBindings(void* m);
 #endif
 
@@ -34,4 +37,26 @@ public:
 
 protected:
   void SetTrackedPointer(ON_Texture* texture, const ON_ModelComponentReference* compref);
+};
+
+class BND_Environment : public BND_CommonObject
+{
+public:
+  ON_Environment* m_env = nullptr;
+
+public:
+  BND_Environment();
+  BND_Environment(ON_Environment* env, const ON_ModelComponentReference* compref);
+
+  BND_Color BackgroundColor() const;
+  void SetBackgroundColor(BND_Color col);
+
+  BND_Texture* BackgroundImage() const;
+  void SetBackgroundImage(const BND_Texture& tex);
+
+  ON_Environment::BackgroundProjections BackgroundProjection() const;
+  void SetBackgroundProjection(int p);
+
+protected:
+  void SetTrackedPointer(ON_Environment* env, const ON_ModelComponentReference* compref);
 };

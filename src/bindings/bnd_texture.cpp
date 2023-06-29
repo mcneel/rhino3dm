@@ -1,8 +1,9 @@
+
 #include "bindings.h"
 
 BND_Texture::BND_Texture()
 {
-  SetTrackedPointer(new ON_Texture(), nullptr);
+  SetTrackedPointer(new ON_Texture, nullptr);
 }
 
 BND_Texture::BND_Texture(ON_Texture* texture, const ON_ModelComponentReference* compref)
@@ -20,6 +21,88 @@ BND_FileReference* BND_Texture::GetFileReference() const
 {
   return new BND_FileReference(m_texture->m_image_file_reference);
 }
+
+
+BND_Environment::BND_Environment()
+{
+  SetTrackedPointer(new ON_Environment, nullptr);
+}
+
+BND_Environment::BND_Environment(ON_Environment* env, const ON_ModelComponentReference* compref)
+{
+  SetTrackedPointer(env, compref);
+}
+
+BND_Color BND_Environment::BackgroundColor() const
+{
+  return ON_Color_to_Binding(m_env->BackgroundColor());
+}
+ 
+void BND_Environment::SetBackgroundColor(BND_Color col)
+{
+  m_env->SetBackgroundColor(Binding_to_ON_Color(col));
+}
+
+BND_Texture* BND_Environment::BackgroundImage() const
+{
+  const auto& tex = m_env->BackgroundImage();
+
+  return new BND_Texture(new ON_Texture(tex), nullptr);
+}
+
+void BND_Environment::SetBackgroundImage(const BND_Texture& tex)
+{
+  if (nullptr != tex.m_texture)
+  {
+    m_env->SetBackgroundImage(*tex.m_texture);
+  }
+}
+
+ON_Environment::BackgroundProjections BND_Environment::BackgroundProjection() const
+{
+  return m_env->BackgroundProjection();
+}
+
+void BND_Environment::SetBackgroundProjection(int p)
+{
+  const auto proj = ON_Environment::BackgroundProjections(p);
+  m_env->SetBackgroundProjection(proj);
+}
+
+void BND_Environment::SetTrackedPointer(ON_Environment* env, const ON_ModelComponentReference* compref)
+{
+  m_env = env;
+  BND_CommonObject::SetTrackedPointer(env, compref);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+#if defined(ON_PYTHON_COMPILE)
+namespace py = pybind11;
+void initEnvironmentBindings(pybind11::module& m)
+{
+  py::class_<BND_Environment>(m, "Environment")
+    .def(py::init<>())
+    .def_property("BackgroundColor", &BND_Environment::BackgroundColor, &BND_Environment::SetBackgroundColor)
+    .def_property("BackgroundImage", &BND_Environment::BackgroundImage, &BND_Environment::SetBackgroundImage)
+    .def_property("BackgroundProjection", &BND_Environment::BackgroundProjection, &BND_Environment::SetBackgroundProjection)
+    ;
+}
+#endif
+
+#if defined(ON_WASM_COMPILE)
+using namespace emscripten;
+
+void initEnvironmentBindings(void*)
+{
+  class_<BND_Environment>("Environment")
+    .constructor<>()
+    .property("backgroundColor", &BND_Environment::BackgroundColor, &BND_Environment::SetBackgroundColor)
+    .property("backgroundImage", &BND_Environment::BackgroundImage, &BND_Environment::SetBackgroundImage)
+    .property("backgroundProjection", &BND_Environment::BackgroundProjection, &BND_Environment::SetBackgroundProjection)
+    ;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 
