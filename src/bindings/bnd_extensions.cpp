@@ -1129,42 +1129,6 @@ void BND_File3dmStringTable::Delete(std::wstring key)
   m_model->SetDocumentUserString(key.c_str(), nullptr);
 }
 
-void BND_File3dmEmbeddedFileTable::Add(const BND_File3dmEmbeddedFile& ef)
-{
-  if (nullptr != ef._ef)
-  {
-    m_model->AddModelComponent(*ef._ef);
-  }
-}
-
-BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindIndex(int index)
-{
-  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::EmbeddedFile, index);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
-  if (nullptr != model_ef)
-    return new BND_File3dmEmbeddedFile(model_ef, &compref); // I don't understand the ownership around this object.
-
-  return nullptr;
-}
-
-BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::IterIndex(int index)
-{
-  return FindIndex(index);
-}
-
-BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
-{
-  const ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::EmbeddedFile, _id);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
-  if (nullptr != model_ef)
-    return new BND_File3dmEmbeddedFile(model_ef, &compref); // I don't understand the ownership around this object.
-
-  return nullptr;
-}
-
 #if defined(ON_WASM_COMPILE)
 BND_ONXModel* BND_ONXModel::WasmFromByteArray(std::string sbuffer)
 {
@@ -1502,6 +1466,19 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*> >(m, "__RenderContentIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*> &it) -> PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*>::next)
+    ;
+  py::class_<BND_File3dmRenderContentTable>(m, "File3dmRenderContentTable")
+    .def("__len__", &BND_File3dmRenderContentTable::Count)
+    .def("__getitem__", &BND_File3dmRenderContentTable::FindIndex)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*>(s.cast<BND_File3dmRenderContentTable &>(), s); })
+    .def("Add", &BND_File3dmRenderContentTable::Add, py::arg("render_content"))
+    .def("FindIndex", &BND_File3dmRenderContentTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmRenderContentTable::FindId, py::arg("id"))
+    ;
+
   py::class_<PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*> >(m, "__PostEffectIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*> &it) -> PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>& { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>::next)
@@ -1588,6 +1565,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("PlugInData", &BND_ONXModel::PlugInData)
     .def_property_readonly("Strings", &BND_ONXModel::Strings)
     .def_property_readonly("EmbeddedFiles", &BND_ONXModel::EmbeddedFiles)
+    .def_property_readonly("RenderContent", &BND_ONXModel::RenderContent)
     .def("Encode", &BND_ONXModel::Encode)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
@@ -1728,6 +1706,15 @@ void initExtensionsBindings(void*)
 //    .function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
 //    ;
 //
+//  class_<BND_File3dmRenderContentTable>("File3dmRenderContentTable")
+//    .constructor<>()
+//    .function("count", &BND_File3dmRenderContentTable::Count)
+//    .function("get", &BND_File3dmRenderContentTable::FindIndex, allow_raw_pointers())
+//    .function("add", &BND_File3dmRenderContentTable::Add)
+//    .function("findIndex", &BND_File3dmRenderContentTable::FindIndex, allow_raw_pointers())
+//    .function("findId", &BND_File3dmRenderContentTable::FindId, allow_raw_pointers())
+//    ;
+//
 //  class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
 //    .constructor<>()
 //    .function("count", &BND_File3dmPostEffectTable::Count)
@@ -1790,6 +1777,7 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("embeddedFiles", &BND_ONXModel::EmbeddedFiles)
+    .function("RenderContent", &BND_ONXModel::RenderContent)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)

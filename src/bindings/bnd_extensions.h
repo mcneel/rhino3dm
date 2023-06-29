@@ -293,6 +293,7 @@ public:
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
   BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
+  BND_File3dmRenderContentTable RenderContent() { return BND_File3dmRenderContentTable(m_model); }
 
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;

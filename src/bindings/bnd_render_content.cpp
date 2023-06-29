@@ -42,6 +42,21 @@ void BND_File3dmRenderContent::SetTypeName(const std::wstring& s)
   _rc->SetTypeName(s.c_str());
 }
 
+BND_UUID BND_File3dmRenderContent::Id() const
+{
+  return ON_UUID_to_Binding(_rc->Id());
+}
+
+std::wstring BND_File3dmRenderContent::Name() const
+{
+  return std::wstring(static_cast<const wchar_t*>(_rc->Name()));
+}
+
+void BND_File3dmRenderContent::SetName(const std::wstring& s)
+{
+  _rc->SetName(s.c_str());
+}
+
 BND_UUID BND_File3dmRenderContent::TypeId(void) const
 {
   return ON_UUID_to_Binding(_rc->TypeId());
@@ -340,6 +355,43 @@ void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
   }
 }
 
+
+void BND_File3dmRenderContentTable::Add(const BND_File3dmRenderContent& rc)
+{
+  if (nullptr != rc._rc)
+  {
+    m_model->AddModelComponent(*rc._rc);
+  }
+}
+
+BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::RenderContent, index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_RenderContent* model_ef = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
+  if (nullptr != model_ef)
+    return new BND_File3dmRenderContent(model_ef, &compref);
+
+  return nullptr;
+}
+
+BND_File3dmRenderContent* BND_File3dmRenderContentTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
+BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindId(BND_UUID id)
+{
+  const ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::RenderContent, _id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_RenderContent* model_ef = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
+  if (nullptr != model_ef)
+    return new BND_File3dmRenderContent(model_ef, &compref);
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
@@ -356,6 +408,8 @@ void initRenderContentBindings(pybind11::module& m)
     .def_property_readonly("NextSibling", &BND_File3dmRenderContent::NextSibling)
     .def_property_readonly("TopLevel", &BND_File3dmRenderContent::TopLevel)
     .def_property_readonly("IsTopLevel", &BND_File3dmRenderContent::IsTopLevel)
+    .def_property_readonly("Id", &BND_File3dmRenderContent::Id)
+    .def_property("Name", &BND_File3dmRenderContent::Name, &BND_File3dmRenderContent::SetName)
     .def_property("TypeName", &BND_File3dmRenderContent::TypeName, &BND_File3dmRenderContent::SetTypeName)
     .def_property("TypeId", &BND_File3dmRenderContent::TypeId, &BND_File3dmRenderContent::SetTypeId)
     .def_property("RenderEngineId", &BND_File3dmRenderContent::RenderEngineId, &BND_File3dmRenderContent::SetRenderEngineId)
@@ -402,51 +456,51 @@ using namespace emscripten;
 
 void initRenderContentBindings(void*)
 {
-// Commented out for now so as not to cause unexpected errors for Luis.
-//
-//  class_<BND_File3dmRenderContent>("RenderContent")
-//    .constructor<>()
-//    .property("kind", &BND_File3dmRenderContent::Kind)
-//    .property("parent", &BND_File3dmRenderContent::Parent)
-//    .property("isChild", &BND_File3dmRenderContent::IsChild)
-//    .property("firstChild", &BND_File3dmRenderContent::FirstChild)
-//    .property("nextSibling", &BND_File3dmRenderContent::NextSibling)
-//    .property("topLevel", &BND_File3dmRenderContent::TopLevel)
-//    .property("isTopLevel", &BND_File3dmRenderContent::IsTopLevel)
-//    .property("typeName", &BND_File3dmRenderContent::TypeName, &BND_File3dmRenderContent::SetTypeName)
-//    .property("typeId", &BND_File3dmRenderContent::TypeId, &BND_File3dmRenderContent::SetTypeId)
-//    .property("renderEngineId", &BND_File3dmRenderContent::RenderEngineId, &BND_File3dmRenderContent::SetRenderEngineId)
-//    .property("plugInId", &BND_File3dmRenderContent::PlugInId, &BND_File3dmRenderContent::SetPlugInId)
-//    .property("notes", &BND_File3dmRenderContent::Notes, &BND_File3dmRenderContent::SetNotes)
-//    .property("tags", &BND_File3dmRenderContent::Tags, &BND_File3dmRenderContent::SetTags)
-//    .property("groupId", &BND_File3dmRenderContent::GroupId, &BND_File3dmRenderContent::SetGroupId)
-//    .property("hidden", &BND_File3dmRenderContent::Hidden, &BND_File3dmRenderContent::SetHidden)
-//    .property("reference", &BND_File3dmRenderContent::Reference, &BND_File3dmRenderContent::SetReference)
-//    .property("autoDelete", &BND_File3dmRenderContent::AutoDelete, &BND_File3dmRenderContent::SetAutoDelete)
-//    .property("childSlotName", &BND_File3dmRenderContent::ChildSlotName, &BND_File3dmRenderContent::SetChildSlotName)
-//    .property("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, &BND_File3dmRenderContent::SetChildSlotOn)
-//    .property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
-////  .function("SetChild", &BND_File3dmRenderContent::SetChild,       // I'm not sure about this. allow_raw_pointers())
-////  .function("FindChild", &BND_File3dmRenderContent::FindChild,     // I'm not sure about this. allow_raw_pointers())
-////  .function("DeleteChild", &BND_File3dmRenderContent::DeleteChild, // I'm not sure about this. allow_raw_pointers())
-//    .function("getParameter", &BND_File3dmRenderContent::GetParameter)
-//    .function("setParameter", &BND_File3dmRenderContent::SetParameter)
-//    ;
-//
-//  class_<BND_File3dmRenderMaterial>("RenderMaterial")
-//    .constructor<>()
-//    .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
-//    ;
-//
-//  class_<BND_File3dmRenderEnvironment>("RenderEnvironment")
-//    .constructor<>()
-//    .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
-//    ;
-//
-//  class_<BND_File3dmRenderTexture>("RenderTexture")
-//    .constructor<>()
-//    .function("toTexture", &BND_File3dmRenderTexture::ToTexture)
-//    .property("filename", &BND_File3dmRenderTexture::Filename)
-//    ;
+  class_<BND_File3dmRenderContent>("RenderContent")
+    .constructor<>()
+    .property("kind", &BND_File3dmRenderContent::Kind)
+    .property("parent", &BND_File3dmRenderContent::Parent)
+    .property("isChild", &BND_File3dmRenderContent::IsChild)
+    .property("firstChild", &BND_File3dmRenderContent::FirstChild)
+    .property("nextSibling", &BND_File3dmRenderContent::NextSibling)
+    .property("topLevel", &BND_File3dmRenderContent::TopLevel)
+    .property("isTopLevel", &BND_File3dmRenderContent::IsTopLevel)
+    .property("id", &BND_File3dmRenderContent::Id)
+    .property("name", &BND_File3dmRenderContent::Name, &BND_File3dmRenderContent::SetName)
+    .property("typeName", &BND_File3dmRenderContent::TypeName, &BND_File3dmRenderContent::SetTypeName)
+    .property("typeId", &BND_File3dmRenderContent::TypeId, &BND_File3dmRenderContent::SetTypeId)
+    .property("renderEngineId", &BND_File3dmRenderContent::RenderEngineId, &BND_File3dmRenderContent::SetRenderEngineId)
+    .property("plugInId", &BND_File3dmRenderContent::PlugInId, &BND_File3dmRenderContent::SetPlugInId)
+    .property("notes", &BND_File3dmRenderContent::Notes, &BND_File3dmRenderContent::SetNotes)
+    .property("tags", &BND_File3dmRenderContent::Tags, &BND_File3dmRenderContent::SetTags)
+    .property("groupId", &BND_File3dmRenderContent::GroupId, &BND_File3dmRenderContent::SetGroupId)
+    .property("hidden", &BND_File3dmRenderContent::Hidden, &BND_File3dmRenderContent::SetHidden)
+    .property("reference", &BND_File3dmRenderContent::Reference, &BND_File3dmRenderContent::SetReference)
+    .property("autoDelete", &BND_File3dmRenderContent::AutoDelete, &BND_File3dmRenderContent::SetAutoDelete)
+    .property("childSlotName", &BND_File3dmRenderContent::ChildSlotName, &BND_File3dmRenderContent::SetChildSlotName)
+    .property("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, &BND_File3dmRenderContent::SetChildSlotOn)
+    .property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
+//  .function("SetChild", &BND_File3dmRenderContent::SetChild,       // I'm not sure about this. allow_raw_pointers())
+//  .function("FindChild", &BND_File3dmRenderContent::FindChild,     // I'm not sure about this. allow_raw_pointers())
+//  .function("DeleteChild", &BND_File3dmRenderContent::DeleteChild, // I'm not sure about this. allow_raw_pointers())
+    .function("getParameter", &BND_File3dmRenderContent::GetParameter)
+    .function("setParameter", &BND_File3dmRenderContent::SetParameter)
+    ;
+
+  class_<BND_File3dmRenderMaterial>("RenderMaterial")
+    .constructor<>()
+    .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
+    ;
+
+  class_<BND_File3dmRenderEnvironment>("RenderEnvironment")
+    .constructor<>()
+    .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
+    ;
+
+  class_<BND_File3dmRenderTexture>("RenderTexture")
+    .constructor<>()
+    .function("toTexture", &BND_File3dmRenderTexture::ToTexture)
+    .property("filename", &BND_File3dmRenderTexture::Filename)
+    ;
 }
 #endif

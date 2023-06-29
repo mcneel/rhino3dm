@@ -18,7 +18,7 @@ protected:
   void SetTrackedPointer(ON_RenderContent* rc, const ON_ModelComponentReference* compref);
 
 public:
-  BND_File3dmRenderContent() { } // This is to keep the compiler happy but it can't work as render content is abstract.
+  BND_File3dmRenderContent() { }
   BND_File3dmRenderContent(ON_RenderContent* rc);
   BND_File3dmRenderContent(ON_RenderContent* rc, const ON_ModelComponentReference* compref);
   BND_File3dmRenderContent(const BND_File3dmRenderContent& other);
@@ -27,6 +27,9 @@ public:
   std::wstring Kind() const;
   std::wstring TypeName() const;
   void SetTypeName(const std::wstring&);
+  BND_UUID Id() const;
+  std::wstring Name() const;
+  void SetName(const std::wstring&);
   BND_UUID TypeId() const;
   void SetTypeId(const BND_UUID&);
   BND_UUID RenderEngineId() const;
@@ -95,4 +98,19 @@ public:
 
   std::wstring Filename() const;
   void SetFilename(const std::wstring&);
+};
+
+class BND_File3dmRenderContentTable
+{
+private:
+  std::shared_ptr<ONX_Model> m_model;
+
+public:
+  BND_File3dmRenderContentTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::RenderContent); }
+  void Add(const BND_File3dmRenderContent& rc);
+  BND_File3dmRenderContent* FindIndex(int index);
+  BND_File3dmRenderContent* IterIndex(int index); // helper function for iterator
+  BND_File3dmRenderContent* FindId(BND_UUID id);
 };
