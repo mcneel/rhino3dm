@@ -488,6 +488,7 @@ void initBrepBindings(void*)
 
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")
     .constructor<>()
+    .class_function("tryConvertBrep", &BND_Brep::TryConvertBrep, allow_raw_pointers())
     .class_function("createFromMesh", &BND_Brep::CreateFromMesh, allow_raw_pointers())
     .class_function("createFromBox", &BND_Brep::CreateFromBox, allow_raw_pointers())
     //.class_function("CreateFromBox", &BND_Brep::CreateFromBox2, allow_raw_pointers())
