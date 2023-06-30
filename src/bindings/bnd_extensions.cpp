@@ -372,6 +372,30 @@ std::wstring BND_ONXModel::GetLastEditedBy() const
   return std::wstring(s);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+pybind11::handle toPyDateTime(struct tm t)
+{
+  if (!PyDateTimeAPI) {
+    PyDateTime_IMPORT;
+  }
+  return PyDateTime_FromDateAndTime(t.tm_year + 1900,
+                                    t.tm_mon + 1,
+                                    t.tm_mday,
+                                    t.tm_hour,
+                                    t.tm_min,
+                                    t.tm_sec,
+                                    0);
+}
+pybind11::handle BND_ONXModel::GetCreated() const
+{
+  return toPyDateTime(m_model->m_properties.m_RevisionHistory.m_create_time);
+}
+pybind11::handle BND_ONXModel::GetLastEdited() const
+{
+  return toPyDateTime(m_model->m_properties.m_RevisionHistory.m_last_edit_time);
+}
+#endif
+
 RH_C_FUNCTION int ONX_Model_GetRevision(const ONX_Model* pConstModel)
 {
   int rc = 0;
@@ -1473,7 +1497,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property("ApplicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
     .def_property("ApplicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
     .def_property_readonly("ArchiveVersion", &BND_ONXModel::GetArchiveVersion)
+    .def_property_readonly("Created", &BND_ONXModel::GetCreated)
     .def_property_readonly("CreatedBy", &BND_ONXModel::GetCreatedBy)
+    .def_property_readonly("LastEdited", &BND_ONXModel::GetLastEdited)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Settings", &BND_ONXModel::Settings)

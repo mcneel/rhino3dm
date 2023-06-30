@@ -1,4 +1,5 @@
 #include "bindings.h"
+#include "datetime.h"
 
 #pragma once
 
@@ -271,8 +272,10 @@ public:
   int GetArchiveVersion() const;
   std::wstring GetCreatedBy() const;
   std::wstring GetLastEditedBy() const;
-  //public DateTime Created | get;
-  //public DateTime LastEdited | get;
+  #if defined(ON_PYTHON_COMPILE)
+  pybind11::handle GetCreated() const;
+  pybind11::handle GetLastEdited() const;
+  #endif
   int GetRevision() const;
   void SetRevision(int r);
   BND_File3dmSettings Settings() { return BND_File3dmSettings(m_model); }
