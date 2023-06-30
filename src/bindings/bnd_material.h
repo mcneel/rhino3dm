@@ -49,6 +49,7 @@ public:
   void SetDisableLighting(bool b) { m_material->SetDisableLighting(b); }
   //public bool AlphaTransparency | get; set;
   class BND_PhysicallyBasedMaterial* PhysicallyBased();
+  void ToPhysicallyBased();
   double GetReflectivity() const { return m_material->Reflectivity(); }
   void SetReflectivity(double r) { m_material->SetReflectivity(r); }
   BND_Color GetPreviewColor() const { return ON_Color_to_Binding(m_material->PreviewColor()); }

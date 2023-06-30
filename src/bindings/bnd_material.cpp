@@ -36,6 +36,16 @@ BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
   return pbr;
 }
 
+void BND_Material::ToPhysicallyBased() 
+{
+
+  if(m_material)
+  {
+    m_material->ToPhysicallyBased();
+  }
+
+}
+
 static BND_Texture* GetTextureHelper(const ON_Material* mat, ON_Texture::TYPE t)
 {
   int index = mat->FindTexture(nullptr, t);
@@ -186,6 +196,7 @@ void initMaterialBindings(pybind11::module& m)
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture, py::arg("filename"))
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2, py::arg("texture"))
     .def_property_readonly("PhysicallyBased", &BND_Material::PhysicallyBased)
+    .def("toPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
 #endif
@@ -255,6 +266,7 @@ void initMaterialBindings(void*)
     .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture)
     //.function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
     .function("physicallyBased", &BND_Material::PhysicallyBased, allow_raw_pointers())
+    .function("toPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
 #endif
