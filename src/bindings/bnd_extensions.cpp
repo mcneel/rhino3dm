@@ -371,30 +371,14 @@ std::wstring BND_ONXModel::GetLastEditedBy() const
   ONX_Model_GetString(m_model.get(), idxLastCreatedBy, &s);
   return std::wstring(s);
 }
-
-#if defined(ON_PYTHON_COMPILE)
-pybind11::handle toPyDateTime(struct tm t)
+BND_DateTime BND_ONXModel::GetCreated() const
 {
-  if (!PyDateTimeAPI) {
-    PyDateTime_IMPORT;
-  }
-  return PyDateTime_FromDateAndTime(t.tm_year + 1900,
-                                    t.tm_mon + 1,
-                                    t.tm_mday,
-                                    t.tm_hour,
-                                    t.tm_min,
-                                    t.tm_sec,
-                                    0);
+  return CreateDateTime(m_model->m_properties.m_RevisionHistory.m_create_time);
 }
-pybind11::handle BND_ONXModel::GetCreated() const
+BND_DateTime BND_ONXModel::GetLastEdited() const
 {
-  return toPyDateTime(m_model->m_properties.m_RevisionHistory.m_create_time);
+  return CreateDateTime(m_model->m_properties.m_RevisionHistory.m_last_edit_time);
 }
-pybind11::handle BND_ONXModel::GetLastEdited() const
-{
-  return toPyDateTime(m_model->m_properties.m_RevisionHistory.m_last_edit_time);
-}
-#endif
 
 RH_C_FUNCTION int ONX_Model_GetRevision(const ONX_Model* pConstModel)
 {
@@ -1653,7 +1637,10 @@ void initExtensionsBindings(void*)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
     .property("applicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    .property("archiveVersion", &BND_ONXModel::GetArchiveVersion)
+    .property("created", &BND_ONXModel::GetCreated)
     .property("createdBy", &BND_ONXModel::GetCreatedBy)
+    .property("lastEdited", &BND_ONXModel::GetLastEdited)
     .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("settings", &BND_ONXModel::Settings)
