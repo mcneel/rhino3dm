@@ -34,10 +34,12 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initLinearWorkflowBindings(m);
   initRenderEnvironmentsBindings(m);
   initRenderChannelsBindings(m);
+  initRenderContentBindings(m);
   initSunBindings(m);
   initPostEffectBindings(m);
   initDecalBindings(m);
   initMeshModifierBindings(m);
+  initEnvironmentBindings(m);
   initTextureBindings(m);
   initTextureMappingBindings(m);
   initPointBindings(m);

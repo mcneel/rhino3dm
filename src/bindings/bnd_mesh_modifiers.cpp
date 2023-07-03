@@ -149,7 +149,7 @@ BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::FindId(BND_UUID id)
   {
     if (c->Id() == Binding_to_ON_UUID(id))
     {
-      return new BND_File3dmShutLiningCurve(c); // I don't understand the ownership around this object.
+      return new BND_File3dmShutLiningCurve(c);
     }
   }
 

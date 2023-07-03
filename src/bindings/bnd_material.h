@@ -133,4 +133,3 @@ public:
   double OpacityRoughness() const { return m_material->PhysicallyBased()->OpacityRoughness(); }
   void SetOpacityRoughness(double o) { m_material->PhysicallyBased()->SetOpacityRoughness(o); }
 };
-

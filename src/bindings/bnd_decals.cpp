@@ -263,7 +263,7 @@ BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
   if ((index < 0) || (index >= decals.Count()))
     return nullptr;
 
-  return new BND_File3dmDecal(decals[index]); // I don't understand the ownership around this object.
+  return new BND_File3dmDecal(decals[index]);
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)

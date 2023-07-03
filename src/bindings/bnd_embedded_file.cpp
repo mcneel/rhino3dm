@@ -36,6 +36,61 @@ void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_Mo
   BND_ModelComponent::SetTrackedPointer(ef, compref);
 }
 
+std::wstring BND_File3dmEmbeddedFile::GetFilename(void) const
+{
+  return std::wstring(static_cast<const wchar_t*>(_ef->Filename()));
+}
+
+size_t BND_File3dmEmbeddedFile::GetLength(void) const
+{
+  return _ef->Length();
+}
+
+bool BND_File3dmEmbeddedFile::Write(const std::wstring& f) const
+{
+  return _ef->SaveToFile(f.c_str());
+}
+
+bool BND_File3dmEmbeddedFile::Clear(void) const
+{
+  return _ef->Clear();
+}
+void BND_File3dmEmbeddedFileTable::Add(const BND_File3dmEmbeddedFile& ef)
+{
+  if (nullptr != ef._ef)
+  {
+    m_model->AddModelComponent(*ef._ef);
+  }
+}
+
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::EmbeddedFile, index);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
+  if (nullptr != model_ef)
+    return new BND_File3dmEmbeddedFile(model_ef, &compref);
+
+  return nullptr;
+}
+
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
+{
+  const ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::EmbeddedFile, _id);
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
+  if (nullptr != model_ef)
+    return new BND_File3dmEmbeddedFile(model_ef, &compref);
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
