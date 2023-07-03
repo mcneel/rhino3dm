@@ -11,10 +11,12 @@ BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc, const O
   SetTrackedPointer(rc, compref);
 }
 
+/*
 BND_File3dmRenderContent::BND_File3dmRenderContent(const BND_File3dmRenderContent& other)
 {
   SetTrackedPointer(other._rc->NewRenderContent(), nullptr);
 }
+*/
 
 BND_File3dmRenderContent::~BND_File3dmRenderContent()
 {
@@ -147,6 +149,7 @@ void BND_File3dmRenderContent::SetAutoDelete(bool b)
   return _rc->SetAutoDelete(b);
 }
 
+/*
 static BND_File3dmRenderContent* NewRenderContent(ON_RenderContent* rc)
 {
   if (nullptr == rc)
@@ -154,7 +157,8 @@ static BND_File3dmRenderContent* NewRenderContent(ON_RenderContent* rc)
 
   return new BND_File3dmRenderContent(rc->NewRenderContent(), nullptr);
 }
-
+*/
+/*
 BND_File3dmRenderContent* BND_File3dmRenderContent::Parent(void)
 {
   return NewRenderContent(_rc->Parent());
@@ -174,6 +178,7 @@ BND_File3dmRenderContent* BND_File3dmRenderContent::TopLevel(void)
 {
   return NewRenderContent(&_rc->TopLevel());
 }
+*/
 
 bool BND_File3dmRenderContent::IsTopLevel(void) const
 {
@@ -346,6 +351,7 @@ std::wstring BND_File3dmRenderTexture::Filename() const
   return s;
 }
 
+/*
 void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
 {
   auto* tex = dynamic_cast<ON_RenderTexture*>(_rc);
@@ -354,6 +360,7 @@ void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
     tex->SetFilename(f.c_str());
   }
 }
+*/
 
 
 void BND_File3dmRenderContentTable::Add(const BND_File3dmRenderContent& rc)
@@ -400,13 +407,13 @@ void initRenderContentBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmRenderContent>(m, "RenderContent")
     .def(py::init<>())
-    .def(py::init<const BND_File3dmRenderContent&>(), py::arg("other"))
+    //.def(py::init<const BND_File3dmRenderContent&>(), py::arg("other"))
     .def_property_readonly("Kind", &BND_File3dmRenderContent::Kind)
-    .def_property_readonly("Parent", &BND_File3dmRenderContent::Parent)
+    //.def_property_readonly("Parent", &BND_File3dmRenderContent::Parent)
     .def_property_readonly("IsChild", &BND_File3dmRenderContent::IsChild)
-    .def_property_readonly("FirstChild", &BND_File3dmRenderContent::FirstChild)
-    .def_property_readonly("NextSibling", &BND_File3dmRenderContent::NextSibling)
-    .def_property_readonly("TopLevel", &BND_File3dmRenderContent::TopLevel)
+    //.def_property_readonly("FirstChild", &BND_File3dmRenderContent::FirstChild)
+    //.def_property_readonly("NextSibling", &BND_File3dmRenderContent::NextSibling)
+    //.def_property_readonly("TopLevel", &BND_File3dmRenderContent::TopLevel)
     .def_property_readonly("IsTopLevel", &BND_File3dmRenderContent::IsTopLevel)
     .def_property_readonly("Id", &BND_File3dmRenderContent::Id)
     .def_property("Name", &BND_File3dmRenderContent::Name, &BND_File3dmRenderContent::SetName)
@@ -446,7 +453,7 @@ void initRenderContentBindings(pybind11::module& m)
     .def(py::init<>())
     .def(py::init<const BND_File3dmRenderTexture&>(), py::arg("other"))
     .def("ToTexture", &BND_File3dmRenderTexture::ToTexture)
-    .def_property("Filename", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
+    //.def_property("Filename", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
     ;
 }
 #endif
@@ -459,11 +466,11 @@ void initRenderContentBindings(void*)
   class_<BND_File3dmRenderContent>("RenderContent")
     .constructor<>()
     .property("kind", &BND_File3dmRenderContent::Kind)
-    .property("parent", &BND_File3dmRenderContent::Parent)
+    //.property("parent", &BND_File3dmRenderContent::Parent)
     .property("isChild", &BND_File3dmRenderContent::IsChild)
-    .property("firstChild", &BND_File3dmRenderContent::FirstChild)
-    .property("nextSibling", &BND_File3dmRenderContent::NextSibling)
-    .property("topLevel", &BND_File3dmRenderContent::TopLevel)
+    //.property("firstChild", &BND_File3dmRenderContent::FirstChild)
+    //.property("nextSibling", &BND_File3dmRenderContent::NextSibling)
+    //.property("topLevel", &BND_File3dmRenderContent::TopLevel)
     .property("isTopLevel", &BND_File3dmRenderContent::IsTopLevel)
     .property("id", &BND_File3dmRenderContent::Id)
     .property("name", &BND_File3dmRenderContent::Name, &BND_File3dmRenderContent::SetName)
@@ -500,7 +507,7 @@ void initRenderContentBindings(void*)
   class_<BND_File3dmRenderTexture>("RenderTexture")
     .constructor<>()
     .function("toTexture", &BND_File3dmRenderTexture::ToTexture)
-    .property("filename", &BND_File3dmRenderTexture::Filename)
+    //.property("filename", &BND_File3dmRenderTexture::Filename)
     ;
 }
 #endif
