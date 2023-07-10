@@ -21,8 +21,8 @@ public:
   BND_File3dmGroundPlane(ON_GroundPlane* gp) : _gp(gp) { }
   ~BND_File3dmGroundPlane() { if (_owned) delete _gp; }
 
-  bool GetOn(void) const { return _gp->On(); }
-  void SetOn(bool v) const { _gp->SetOn(v); }
+  bool GetEnabled(void) const { return _gp->Enabled(); }
+  void SetEnabled(bool v) const { _gp->SetEnabled(v); }
 
   bool GetShowUnderside(void) const { return _gp->ShowUnderside(); }
   void SetShowUnderside(bool b) const { _gp->SetShowUnderside(b); }

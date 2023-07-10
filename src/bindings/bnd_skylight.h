@@ -21,8 +21,8 @@ public:
   BND_File3dmSkylight(ON_Skylight* sl) : _sl(sl) { }
   ~BND_File3dmSkylight() { if (_owned) delete _sl; }
 
-  bool GetOn(void) const { return _sl->On(); }
-  void SetOn(bool v) const { _sl->SetOn(v); }
+  bool GetEnabled(void) const { return _sl->Enabled(); }
+  void SetEnabled(bool v) const { _sl->SetEnabled(v); }
 
   double GetShadowIntensity(void) const { return _sl->ShadowIntensity(); }
   void SetShadowIntensity(double v) const { _sl->SetShadowIntensity(v); }

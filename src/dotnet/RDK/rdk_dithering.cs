@@ -144,8 +144,8 @@ namespace Rhino.Render
     /// <since>7.0</since>
     public bool On
     {
-      get => GetValue(UnsafeNativeMethods.DitheringSetting.On).ToBool();
-      set => SetValue(UnsafeNativeMethods.DitheringSetting.On, new Variant(value));
+      get => GetValue(UnsafeNativeMethods.DitheringSetting.Enabled).ToBool();
+      set => SetValue(UnsafeNativeMethods.DitheringSetting.Enabled, new Variant(value));
     }
   }
 }

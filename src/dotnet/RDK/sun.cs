@@ -807,8 +807,8 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.SkylightSetting.On).ToBool();
-      set => SetValue(UnsafeNativeMethods.SkylightSetting.On, new Variant(value));
+      get => GetValue(UnsafeNativeMethods.SkylightSetting.Enabled).ToBool();
+      set => SetValue(UnsafeNativeMethods.SkylightSetting.Enabled, new Variant(value));
     }
 
     /// <since>6.0</since>
