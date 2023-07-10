@@ -142,7 +142,16 @@ namespace Rhino.Render
     }
 
     /// <since>7.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete("Use Enabled")]
     public bool On
+    {
+      get => Enabled;
+      set {  Enabled = value; }
+    }
+
+    /// <since>8.0</since>
+    public bool Enabled
     {
       get => GetValue(UnsafeNativeMethods.DitheringSetting.Enabled).ToBool();
       set => SetValue(UnsafeNativeMethods.DitheringSetting.Enabled, new Variant(value));
