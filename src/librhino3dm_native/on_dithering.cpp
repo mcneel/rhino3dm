@@ -3,7 +3,7 @@
 
 enum class DitheringSetting : int
 {
-  On,
+  Enabled,
   Method,
 };
 
@@ -13,8 +13,8 @@ RH_C_FUNCTION void ON_Dithering_GetValue(const ON_Dithering* dit, DitheringSetti
   {
     switch (which)
     {
-    case DitheringSetting::On:     *v = dit->On();          break;
-    case DitheringSetting::Method: *v = int(dit->Method()); break;
+    case DitheringSetting::Enabled: *v = dit->Enabled();     break;
+    case DitheringSetting::Method:  *v = int(dit->Method()); break;
     default: break;
     }
   }
@@ -26,8 +26,8 @@ RH_C_FUNCTION void ON_Dithering_SetValue(ON_Dithering* dit, DitheringSetting whi
   {
     switch (which)
     {
-    case DitheringSetting::On:     dit->SetOn(v->AsBool());                               break;
-    case DitheringSetting::Method: dit->SetMethod(ON_Dithering::Methods(v->AsInteger())); break;
+    case DitheringSetting::Enabled: dit->SetEnabled(v->AsBool());                          break;
+    case DitheringSetting::Method:  dit->SetMethod(ON_Dithering::Methods(v->AsInteger())); break;
     default: break;
     }
   }

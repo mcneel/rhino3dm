@@ -21,8 +21,8 @@ public:
   BND_File3dmDithering(const BND_File3dmDithering& dit);
   ~BND_File3dmDithering() { if (_owned) delete _dit; }
 
-  bool GetOn() const { return _dit->On(); }
-  void SetOn(bool v) { _dit->SetOn(v); }
+  bool GetEnabled(void) const { return _dit->Enabled(); }
+  void SetEnabled(bool v) const { _dit->SetEnabled(v); }
 
   ON_Dithering::Methods GetMethod() const { return _dit->Method(); }
   void SetMethod(ON_Dithering::Methods v) { _dit->SetMethod(v); }

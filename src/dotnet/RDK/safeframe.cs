@@ -159,8 +159,8 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.On).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.On, new Variant(value));
+      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled).ToBool();
+      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled, new Variant(value));
     }
 
     ///<summary>

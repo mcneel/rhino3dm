@@ -21,8 +21,8 @@ public:
   BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf);
   ~BND_File3dmSafeFrame() { if (_owned) delete _sf; }
 
-  bool GetOn(void) const { return _sf->On(); }
-  void SetOn(bool v) { _sf->SetOn(v); }
+  bool GetEnabled(void) const { return _sf->Enabled(); }
+  void SetEnabled(bool v) const { _sf->SetEnabled(v); }
 
   bool GetPerspectiveOnly(void) const { return _sf->PerspectiveOnly(); }
   void SetPerspectiveOnly(bool b) { _sf->SetPerspectiveOnly(b); }

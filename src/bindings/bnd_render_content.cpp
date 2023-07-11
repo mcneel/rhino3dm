@@ -149,34 +149,60 @@ void BND_File3dmRenderContent::SetAutoDelete(bool b)
   return _rc->SetAutoDelete(b);
 }
 
-/*
-static BND_File3dmRenderContent* NewRenderContent(ON_RenderContent* rc)
+static BND_File3dmRenderContent* NewRenderContentBinding(ON_RenderContent* rc)
 {
   if (nullptr == rc)
     return nullptr;
 
-  return new BND_File3dmRenderContent(rc->NewRenderContent(), nullptr);
+  // I can't figure out the ownership again. If I don't make a copy it crashes later (double delete).
+  // So -- I make a copy. No problem, except that now setters have no effect. So my question is:
+  // what is the correct way to do this so that:
+  // 1. It doesn't crash
+  // 2. Setting data persists in the original object.
+
+  auto* copy = rc->NewRenderContent();
+  if (nullptr != copy)
+  {
+    *copy = *rc;
+
+    if (rc->Kind() == ON_KIND_MATERIAL)
+    {
+      return new BND_File3dmRenderMaterial(copy, nullptr);
+    }
+    else
+    if (rc->Kind() == ON_KIND_ENVIRONMENT)
+    {
+      return new BND_File3dmRenderEnvironment(copy, nullptr);
+    }
+    else
+    if (rc->Kind() == ON_KIND_TEXTURE)
+    {
+      return new BND_File3dmRenderTexture(copy, nullptr);
+    }
+  }
+
+  return nullptr;
 }
 */
 /*
 BND_File3dmRenderContent* BND_File3dmRenderContent::Parent(void)
 {
-  return NewRenderContent(_rc->Parent());
+  return NewRenderContentBinding(_rc->Parent());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::FirstChild(void)
 {
-  return NewRenderContent(_rc->FirstChild());
+  return NewRenderContentBinding(_rc->FirstChild());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::NextSibling(void)
 {
-  return NewRenderContent(_rc->NextSibling());
+  return NewRenderContentBinding(_rc->NextSibling());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::TopLevel(void)
 {
-  return NewRenderContent(&_rc->TopLevel());
+  return NewRenderContentBinding(&_rc->TopLevel());
 }
 */
 
@@ -258,7 +284,7 @@ BND_File3dmRenderMaterial::BND_File3dmRenderMaterial(const BND_File3dmRenderMate
 {
 }
 
-BND_File3dmRenderMaterial::BND_File3dmRenderMaterial(ON_RenderMaterial* rm, const ON_ModelComponentReference* compref)
+BND_File3dmRenderMaterial::BND_File3dmRenderMaterial(ON_RenderContent* rm, const ON_ModelComponentReference* compref)
   :
   BND_File3dmRenderContent(rm, compref)
 {
@@ -289,7 +315,7 @@ BND_File3dmRenderEnvironment::BND_File3dmRenderEnvironment(const BND_File3dmRend
 {
 }
 
-BND_File3dmRenderEnvironment::BND_File3dmRenderEnvironment(ON_RenderEnvironment* re, const ON_ModelComponentReference* compref)
+BND_File3dmRenderEnvironment::BND_File3dmRenderEnvironment(ON_RenderContent* re, const ON_ModelComponentReference* compref)
   :
   BND_File3dmRenderContent(re, compref)
 {
@@ -320,7 +346,7 @@ BND_File3dmRenderTexture::BND_File3dmRenderTexture(const BND_File3dmRenderTextur
 {
 }
 
-BND_File3dmRenderTexture::BND_File3dmRenderTexture(ON_RenderTexture* rt, const ON_ModelComponentReference* compref)
+BND_File3dmRenderTexture::BND_File3dmRenderTexture(ON_RenderContent* rt, const ON_ModelComponentReference* compref)
   :
   BND_File3dmRenderContent(rt, compref)
 {
@@ -375,9 +401,9 @@ BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindIndex(int index)
 {
   ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::RenderContent, index);
   const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_RenderContent* model_ef = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
-  if (nullptr != model_ef)
-    return new BND_File3dmRenderContent(model_ef, &compref);
+  ON_RenderContent* model_rc = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
+  if (nullptr != model_rc)
+    return NewRenderContentBinding(model_rc);
 
   return nullptr;
 }
@@ -392,9 +418,9 @@ BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindId(BND_UUID id)
   const ON_UUID _id = Binding_to_ON_UUID(id);
   ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::RenderContent, _id);
   const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_RenderContent* model_ef = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
-  if (nullptr != model_ef)
-    return new BND_File3dmRenderContent(model_ef, &compref);
+  ON_RenderContent* model_rc = const_cast<ON_RenderContent*>(ON_RenderContent::Cast(model_component));
+  if (nullptr != model_rc)
+    return NewRenderContentBinding(model_rc);
 
   return nullptr;
 }
@@ -437,19 +463,19 @@ void initRenderContentBindings(pybind11::module& m)
     .def("SetParameter", &BND_File3dmRenderContent::SetParameter)
     ;
 
-  py::class_<BND_File3dmRenderMaterial>(m, "RenderMaterial")
+  py::class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>(m, "RenderMaterial")
     .def(py::init<>())
     .def(py::init<const BND_File3dmRenderMaterial&>(), py::arg("other"))
     .def("ToMaterial", &BND_File3dmRenderMaterial::ToMaterial)
     ;
 
-  py::class_<BND_File3dmRenderEnvironment>(m, "RenderEnvironment")
+  py::class_<BND_File3dmRenderEnvironment, BND_File3dmRenderContent>(m, "RenderEnvironment")
     .def(py::init<>())
     .def(py::init<const BND_File3dmRenderEnvironment&>(), py::arg("other"))
     .def("ToEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
     ;
 
-  py::class_<BND_File3dmRenderTexture>(m, "RenderTexture")
+  py::class_<BND_File3dmRenderTexture, BND_File3dmRenderContent>(m, "RenderTexture")
     .def(py::init<>())
     .def(py::init<const BND_File3dmRenderTexture&>(), py::arg("other"))
     .def("ToTexture", &BND_File3dmRenderTexture::ToTexture)
@@ -494,17 +520,17 @@ void initRenderContentBindings(void*)
     .function("setParameter", &BND_File3dmRenderContent::SetParameter)
     ;
 
-  class_<BND_File3dmRenderMaterial>("RenderMaterial")
+  class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>("RenderMaterial")
     .constructor<>()
     .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
     ;
 
-  class_<BND_File3dmRenderEnvironment>("RenderEnvironment")
+  class_<BND_File3dmRenderEnvironment, BND_File3dmRenderContent>("RenderEnvironment")
     .constructor<>()
     .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
     ;
 
-  class_<BND_File3dmRenderTexture>("RenderTexture")
+  class_<BND_File3dmRenderTexture, BND_File3dmRenderContent>("RenderTexture")
     .constructor<>()
     .function("toTexture", &BND_File3dmRenderTexture::ToTexture)
     //.property("filename", &BND_File3dmRenderTexture::Filename)

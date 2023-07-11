@@ -206,8 +206,8 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.On).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.On, new Variant(value));
+      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled).ToBool();
+      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled, new Variant(value));
     }
 
     /// <summary>

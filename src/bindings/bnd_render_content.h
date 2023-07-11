@@ -72,7 +72,7 @@ class BND_File3dmRenderMaterial : public BND_File3dmRenderContent
 public:
   BND_File3dmRenderMaterial();
   BND_File3dmRenderMaterial(const BND_File3dmRenderMaterial& other);
-  BND_File3dmRenderMaterial(ON_RenderMaterial* rm, const ON_ModelComponentReference* compref);
+  BND_File3dmRenderMaterial(ON_RenderContent* rm, const ON_ModelComponentReference* compref);
 
   BND_Material* ToMaterial() const;
 };
@@ -82,7 +82,7 @@ class BND_File3dmRenderEnvironment : public BND_File3dmRenderContent
 public:
   BND_File3dmRenderEnvironment();
   BND_File3dmRenderEnvironment(const BND_File3dmRenderEnvironment& other);
-  BND_File3dmRenderEnvironment(ON_RenderEnvironment* re, const ON_ModelComponentReference* compref);
+  BND_File3dmRenderEnvironment(ON_RenderContent* re, const ON_ModelComponentReference* compref);
 
   BND_Environment* ToEnvironment() const;
 };
@@ -92,7 +92,7 @@ class BND_File3dmRenderTexture : public BND_File3dmRenderContent
 public:
   BND_File3dmRenderTexture();
   BND_File3dmRenderTexture(const BND_File3dmRenderTexture& other);
-  BND_File3dmRenderTexture(ON_RenderTexture* rt, const ON_ModelComponentReference* compref);
+  BND_File3dmRenderTexture(ON_RenderContent* rt, const ON_ModelComponentReference* compref);
 
   BND_Texture* ToTexture() const;
 
