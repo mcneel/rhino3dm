@@ -22,7 +22,7 @@ public:
   ~BND_File3dmSafeFrame() { if (_owned) delete _sf; }
 
   bool GetEnabled(void) const { return _sf->Enabled(); }
-  void SetEnabled(bool v) const { _sf->SetEnabled(v); }
+  void SetEnabled(bool v) { _sf->SetEnabled(v); }
 
   bool GetPerspectiveOnly(void) const { return _sf->PerspectiveOnly(); }
   void SetPerspectiveOnly(bool b) { _sf->SetPerspectiveOnly(b); }

@@ -183,7 +183,7 @@ static BND_File3dmRenderContent* NewRenderContentBinding(ON_RenderContent* rc)
 
   return nullptr;
 }
-*/
+
 /*
 BND_File3dmRenderContent* BND_File3dmRenderContent::Parent(void)
 {
@@ -511,29 +511,31 @@ void initRenderContentBindings(void*)
     .property("reference", &BND_File3dmRenderContent::Reference, &BND_File3dmRenderContent::SetReference)
     .property("autoDelete", &BND_File3dmRenderContent::AutoDelete, &BND_File3dmRenderContent::SetAutoDelete)
     .property("childSlotName", &BND_File3dmRenderContent::ChildSlotName, &BND_File3dmRenderContent::SetChildSlotName)
-    .property("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, &BND_File3dmRenderContent::SetChildSlotOn)
-    .property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
+    //**.property("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, &BND_File3dmRenderContent::SetChildSlotOn)
+    .function("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, allow_raw_pointers())
+    //**.property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
 //  .function("SetChild", &BND_File3dmRenderContent::SetChild,       // I'm not sure about this. allow_raw_pointers())
 //  .function("FindChild", &BND_File3dmRenderContent::FindChild,     // I'm not sure about this. allow_raw_pointers())
 //  .function("DeleteChild", &BND_File3dmRenderContent::DeleteChild, // I'm not sure about this. allow_raw_pointers())
-    .function("getParameter", &BND_File3dmRenderContent::GetParameter)
-    .function("setParameter", &BND_File3dmRenderContent::SetParameter)
+    //**.function("getParameter", &BND_File3dmRenderContent::GetParameter)
+    //**.function("setParameter", &BND_File3dmRenderContent::SetParameter)
     ;
-
+/*
   class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>("RenderMaterial")
     .constructor<>()
-    .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
+    //**.function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
     ;
 
   class_<BND_File3dmRenderEnvironment, BND_File3dmRenderContent>("RenderEnvironment")
     .constructor<>()
-    .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
+    //**.function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
     ;
 
   class_<BND_File3dmRenderTexture, BND_File3dmRenderContent>("RenderTexture")
     .constructor<>()
-    .function("toTexture", &BND_File3dmRenderTexture::ToTexture)
+    //**.function("toTexture", &BND_File3dmRenderTexture::ToTexture)
     //.property("filename", &BND_File3dmRenderTexture::Filename)
     ;
+    */
 }
 #endif
