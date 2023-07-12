@@ -487,7 +487,7 @@ using namespace emscripten;
 
 void initRenderContentBindings(void*)
 {
-  class_<BND_File3dmRenderContent>("RenderContent")
+  class_<BND_File3dmRenderContent, base<BND_ModelComponent>>("RenderContent")
     .constructor<>()
     .property("kind", &BND_File3dmRenderContent::Kind)
     //.property("parent", &BND_File3dmRenderContent::Parent)
@@ -518,22 +518,21 @@ void initRenderContentBindings(void*)
     //**.function("getParameter", &BND_File3dmRenderContent::GetParameter)
     //**.function("setParameter", &BND_File3dmRenderContent::SetParameter)
     ;
-/*
-  class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>("RenderMaterial")
+
+  class_<BND_File3dmRenderMaterial, base<BND_File3dmRenderContent>>("RenderMaterial")
     .constructor<>()
-    //**.function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial)
+    .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial, allow_raw_pointers())
     ;
 
-  class_<BND_File3dmRenderEnvironment, BND_File3dmRenderContent>("RenderEnvironment")
+  class_<BND_File3dmRenderEnvironment, base<BND_File3dmRenderContent>>("RenderEnvironment")
     .constructor<>()
-    //**.function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment)
+    .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment, allow_raw_pointers())
     ;
 
-  class_<BND_File3dmRenderTexture, BND_File3dmRenderContent>("RenderTexture")
+  class_<BND_File3dmRenderTexture, base<BND_File3dmRenderContent>>("RenderTexture")
     .constructor<>()
-    //**.function("toTexture", &BND_File3dmRenderTexture::ToTexture)
+    .function("toTexture", &BND_File3dmRenderTexture::ToTexture, allow_raw_pointers())
     //.property("filename", &BND_File3dmRenderTexture::Filename)
     ;
-    */
 }
 #endif
