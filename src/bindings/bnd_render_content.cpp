@@ -375,7 +375,6 @@ std::wstring BND_File3dmRenderTexture::Filename() const
   return s;
 }
 
-/*
 void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
 {
   auto* tex = dynamic_cast<ON_RenderTexture*>(_rc);
@@ -384,8 +383,6 @@ void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
     tex->SetFilename(f.c_str());
   }
 }
-*/
-
 
 void BND_File3dmRenderContentTable::Add(const BND_File3dmRenderContent& rc)
 {
@@ -477,7 +474,7 @@ void initRenderContentBindings(pybind11::module& m)
     .def(py::init<>())
     .def(py::init<const BND_File3dmRenderTexture&>(), py::arg("other"))
     .def("ToTexture", &BND_File3dmRenderTexture::ToTexture)
-    //.def_property("Filename", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
+    .def_property("Filename", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
     ;
 }
 #endif
@@ -532,7 +529,8 @@ void initRenderContentBindings(void*)
   class_<BND_File3dmRenderTexture, base<BND_File3dmRenderContent>>("RenderTexture")
     .constructor<>()
     .function("toTexture", &BND_File3dmRenderTexture::ToTexture, allow_raw_pointers())
-    //.property("filename", &BND_File3dmRenderTexture::Filename)
+    .property("filename", &BND_File3dmRenderTexture::Filename)
+    .function("setFilename", &BND_File3dmRenderTexture::SetFilename, allow_raw_pointers())
     ;
 }
 #endif
