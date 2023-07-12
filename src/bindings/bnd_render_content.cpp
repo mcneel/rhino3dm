@@ -11,12 +11,10 @@ BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc, const O
   SetTrackedPointer(rc, compref);
 }
 
-/*
 BND_File3dmRenderContent::BND_File3dmRenderContent(const BND_File3dmRenderContent& other)
 {
   SetTrackedPointer(other._rc->NewRenderContent(), nullptr);
 }
-*/
 
 BND_File3dmRenderContent::~BND_File3dmRenderContent()
 {
@@ -433,7 +431,7 @@ void initRenderContentBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmRenderContent>(m, "RenderContent")
     .def(py::init<>())
-    //.def(py::init<const BND_File3dmRenderContent&>(), py::arg("other"))
+    .def(py::init<const BND_File3dmRenderContent&>(), py::arg("other"))
     .def_property_readonly("Kind", &BND_File3dmRenderContent::Kind)
     //.def_property_readonly("Parent", &BND_File3dmRenderContent::Parent)
     .def_property_readonly("IsChild", &BND_File3dmRenderContent::IsChild)
