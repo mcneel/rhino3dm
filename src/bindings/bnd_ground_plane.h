@@ -22,7 +22,7 @@ public:
   ~BND_File3dmGroundPlane() { if (_owned) delete _gp; }
 
   bool GetEnabled(void) const { return _gp->Enabled(); }
-  void SetEnabled(bool v) const { _gp->SetEnabled(v); }
+  void SetEnabled(bool v) { _gp->SetEnabled(v); }
 
   bool GetShowUnderside(void) const { return _gp->ShowUnderside(); }
   void SetShowUnderside(bool b) { _gp->SetShowUnderside(b); }
