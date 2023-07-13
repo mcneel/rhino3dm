@@ -78,18 +78,6 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::IterIndex(int index)
   return FindIndex(index);
 }
 
-BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
-{
-  const ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->ComponentFromId(ON_ModelComponent::Type::EmbeddedFile, _id);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_EmbeddedFile* model_ef = const_cast<ON_EmbeddedFile*>(ON_EmbeddedFile::Cast(model_component));
-  if (nullptr != model_ef)
-    return new BND_File3dmEmbeddedFile(model_ef, &compref);
-
-  return nullptr;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)

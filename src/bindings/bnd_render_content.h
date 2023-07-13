@@ -59,6 +59,8 @@ public:
   void SetChildSlotName(const std::wstring& child_slot_name);
   bool ChildSlotOn(const std::wstring& child_slot_name) const;
   bool SetChildSlotOn(bool on, const std::wstring& child_slot_name);
+  double ChildSlotAmount(const wchar_t* child_slot_name) const;
+  bool SetChildSlotAmount(double amount, const wchar_t* child_slot_name);
   bool DeleteChild(const std::wstring& child_slot_name);
   const ON_RenderContent* FindChild(const std::wstring& child_slot_name) const;
   std::wstring XML(bool recursive) const;

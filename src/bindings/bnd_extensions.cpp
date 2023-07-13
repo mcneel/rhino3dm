@@ -1463,7 +1463,6 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmEmbeddedFileTable&, BND_File3dmEmbeddedFile*>(s.cast<BND_File3dmEmbeddedFileTable &>(), s); })
     .def("Add", &BND_File3dmEmbeddedFileTable::Add, py::arg("embedded_file"))
     .def("FindIndex", &BND_File3dmEmbeddedFileTable::FindIndex, py::arg("index"))
-    .def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*> >(m, "__RenderContentIterator")

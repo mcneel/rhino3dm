@@ -42,5 +42,4 @@ public:
   void Add(const BND_File3dmEmbeddedFile& ef);
   BND_File3dmEmbeddedFile* FindIndex(int index);
   BND_File3dmEmbeddedFile* IterIndex(int index); // helper function for iterator
-  BND_File3dmEmbeddedFile* FindId(BND_UUID id);
 };
