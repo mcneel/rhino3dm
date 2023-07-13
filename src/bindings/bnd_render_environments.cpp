@@ -21,7 +21,7 @@ BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(ON_3dmRenderSetting
 {
 }
 
-BND_UUID BND_File3dmRenderEnvironments::GetBackgroundId(void) const
+BND_UUID BND_File3dmRenderEnvironments::GetBackgroundId() const
 {
   return ON_UUID_to_Binding(_rs->RenderEnvironmentId(U::Background, P::Standard));
 }
@@ -31,7 +31,7 @@ void BND_File3dmRenderEnvironments::SetBackgroundId(const BND_UUID& id)
   _rs->SetRenderEnvironmentId(U::Background, Binding_to_ON_UUID(id));
 }
 
-bool BND_File3dmRenderEnvironments::GetSkylightingOverride(void) const
+bool BND_File3dmRenderEnvironments::GetSkylightingOverride() const
 {
   return _rs->RenderEnvironmentOverride(U::Skylighting);
 }
@@ -41,7 +41,7 @@ void BND_File3dmRenderEnvironments::SetSkylightingOverride(bool on)
   _rs->SetRenderEnvironmentOverride(U::Skylighting, on);
 }
 
-BND_UUID BND_File3dmRenderEnvironments::GetSkylightingId(void) const
+BND_UUID BND_File3dmRenderEnvironments::GetSkylightingId() const
 {
   return ON_UUID_to_Binding(_rs->RenderEnvironmentId(U::Skylighting, P::Standard));
 }
@@ -51,7 +51,7 @@ void BND_File3dmRenderEnvironments::SetSkylightingId(const BND_UUID& id)
   _rs->SetRenderEnvironmentId(U::Skylighting, Binding_to_ON_UUID(id));
 }
 
-bool BND_File3dmRenderEnvironments::GetReflectionOverride(void) const
+bool BND_File3dmRenderEnvironments::GetReflectionOverride() const
 {
   return _rs->RenderEnvironmentOverride(U::Reflection);
 }
@@ -61,7 +61,7 @@ void BND_File3dmRenderEnvironments::SetReflectionOverride(bool on)
   _rs->SetRenderEnvironmentOverride(U::Reflection, on);
 }
 
-BND_UUID BND_File3dmRenderEnvironments::GetReflectionId(void) const
+BND_UUID BND_File3dmRenderEnvironments::GetReflectionId() const
 {
   return ON_UUID_to_Binding(_rs->RenderEnvironmentId(U::Reflection, P::Standard));
 }

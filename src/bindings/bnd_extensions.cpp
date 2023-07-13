@@ -1739,6 +1739,13 @@ void initExtensionsBindings(void*)
     .function("findId", &BND_File3dmShutLiningCurveTable::FindId, allow_raw_pointers())
     ;
 
+  class_<BND_File3dmRenderContentTable>("File3dmRenderContentTable")
+    .property("count", &BND_File3dmRenderContentTable::Count)
+    .function("add", &BND_File3dmRenderContentTable::Add)
+    .function("get", &BND_File3dmRenderContentTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmRenderContentTable::FindId, allow_raw_pointers())
+    ;
+
   class_<BND_ONXModel>("File3dm")
     .constructor<>()
     .function("destroy", &BND_ONXModel::Destroy)
@@ -1763,7 +1770,7 @@ void initExtensionsBindings(void*)
     .function("plugInData", &BND_ONXModel::PlugInData)
     .function("strings", &BND_ONXModel::Strings)
     .function("embeddedFiles", &BND_ONXModel::EmbeddedFiles)
-    .function("RenderContent", &BND_ONXModel::RenderContent)
+    .function("renderContent", &BND_ONXModel::RenderContent)
     .function("encode", &BND_ONXModel::Encode)
     .function("encode", &BND_ONXModel::Encode2, allow_raw_pointers())
     .function("toByteArray", &BND_ONXModel::ToByteArray)
