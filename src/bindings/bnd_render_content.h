@@ -48,10 +48,10 @@ public:
   void SetReference(bool);
   bool AutoDelete() const;
   void SetAutoDelete(bool);
-  BND_File3dmRenderContent* Parent();
-  BND_File3dmRenderContent* FirstChild();
-  BND_File3dmRenderContent* NextSibling();
-  BND_File3dmRenderContent* TopLevel();
+  BND_File3dmRenderContent* Parent() const;
+  BND_File3dmRenderContent* FirstChild() const;
+  BND_File3dmRenderContent* NextSibling() const;
+  BND_File3dmRenderContent* TopLevel() const;
   bool IsTopLevel() const;
   bool IsChild() const;
   bool SetChild(const ON_RenderContent& child, const std::wstring& child_slot_name);

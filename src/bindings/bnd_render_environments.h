@@ -21,18 +21,18 @@ public:
   BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re);
   ~BND_File3dmRenderEnvironments() { if (_owned) delete _rs; }
 
-  BND_UUID GetBackgroundId(void) const;
+  BND_UUID GetBackgroundId() const;
   void SetBackgroundId(const BND_UUID& id);
 
-  bool GetSkylightingOverride(void) const;
+  bool GetSkylightingOverride() const;
   void SetSkylightingOverride(bool on);
 
-  BND_UUID GetSkylightingId(void) const;
+  BND_UUID GetSkylightingId() const;
   void SetSkylightingId(const BND_UUID& id);
 
-  bool GetReflectionOverride(void) const;
+  bool GetReflectionOverride() const;
   void SetReflectionOverride(bool on);
 
-  BND_UUID GetReflectionId(void) const;
+  BND_UUID GetReflectionId() const;
   void SetReflectionId(const BND_UUID& id);
 };
