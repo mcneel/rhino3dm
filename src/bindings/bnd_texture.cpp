@@ -146,6 +146,19 @@ void initTextureBindings(pybind11::module& m)
     .value("Clamp", ON_Texture::WRAP::clamp_wrap)
     ;
 
+  py::enum_<ON_Environment::BackgroundProjections>(m, "EnvironmentBackgroundProjections")
+    .value("Planar",ON_Environment::BackgroundProjections::Planar)//Planar = 0,
+    .value("Spherical",ON_Environment::BackgroundProjections::Spherical)//Spherical = 1, // Equirectangular projection.
+    .value("Emap",ON_Environment::BackgroundProjections::Emap)//Emap = 2,      // Mirror ball.
+    .value("Box",ON_Environment::BackgroundProjections::Box)//Box = 3,
+    .value("Automatic",ON_Environment::BackgroundProjections::Automatic)//Automatic = 4,
+    .value("LightProbe",ON_Environment::BackgroundProjections::LightProbe)//LightProbe = 5,
+    .value("CubeMap",ON_Environment::BackgroundProjections::CubeMap)//CubeMap = 6,
+    .value("VerticalCrossCubeMap",ON_Environment::BackgroundProjections::VerticalCrossCubeMap)//VerticalCrossCubeMap = 7,
+    .value("HorizontalCrossCubeMap",ON_Environment::BackgroundProjections::HorizontalCrossCubeMap)//HorizontalCrossCubeMap = 8,
+    .value("Hemispherical",ON_Environment::BackgroundProjections::Hemispherical)//Hemispherical = 9,
+    ;
+
   py::class_<BND_Texture>(m, "Texture")
     .def(py::init<>())
     .def_property("FileName", &BND_Texture::GetFileName, &BND_Texture::SetFileName)
@@ -199,6 +212,19 @@ void initTextureBindings(void*)
   enum_<ON_Texture::WRAP>("TextureUvwWrapping")
     .value("Repeat", ON_Texture::WRAP::repeat_wrap)
     .value("Clamp", ON_Texture::WRAP::clamp_wrap)
+    ;
+
+  enum_<ON_Environment::BackgroundProjections>("EnvironmentBackgroundProjections")
+    .value("Planar",ON_Environment::BackgroundProjections::Planar)//Planar = 0,
+    .value("Spherical",ON_Environment::BackgroundProjections::Spherical)//Spherical = 1, // Equirectangular projection.
+    .value("Emap",ON_Environment::BackgroundProjections::Emap)//Emap = 2,      // Mirror ball.
+    .value("Box",ON_Environment::BackgroundProjections::Box)//Box = 3,
+    .value("Automatic",ON_Environment::BackgroundProjections::Automatic)//Automatic = 4,
+    .value("LightProbe",ON_Environment::BackgroundProjections::LightProbe)//LightProbe = 5,
+    .value("CubeMap",ON_Environment::BackgroundProjections::CubeMap)//CubeMap = 6,
+    .value("VerticalCrossCubeMap",ON_Environment::BackgroundProjections::VerticalCrossCubeMap)//VerticalCrossCubeMap = 7,
+    .value("HorizontalCrossCubeMap",ON_Environment::BackgroundProjections::HorizontalCrossCubeMap)//HorizontalCrossCubeMap = 8,
+    .value("Hemispherical",ON_Environment::BackgroundProjections::Hemispherical)//Hemispherical = 9,
     ;
 
   class_<BND_Texture>("Texture")
