@@ -96,7 +96,7 @@ void initRenderEnvironmentsBindings(void*)
 {
   class_<BND_File3dmRenderEnvironments>("RenderEnvironments")
     .constructor<>()
-    //.constructor<const BND_File3dmRenderEnvironments&>()
+    .constructor<const BND_File3dmRenderEnvironments&>()
     .property("backgroundId", &BND_File3dmRenderEnvironments::GetBackgroundId, &BND_File3dmRenderEnvironments::SetBackgroundId)
     .property("skylightingId", &BND_File3dmRenderEnvironments::GetSkylightingId, &BND_File3dmRenderEnvironments::SetSkylightingId)
     .property("skylightingOverride", &BND_File3dmRenderEnvironments::GetSkylightingOverride, &BND_File3dmRenderEnvironments::SetSkylightingOverride)

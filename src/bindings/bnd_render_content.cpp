@@ -535,16 +535,19 @@ void initRenderContentBindings(void*)
 
   class_<BND_File3dmRenderMaterial, base<BND_File3dmRenderContent>>("RenderMaterial")
     .constructor<>()
+    .constructor<const BND_File3dmRenderMaterial&>()
     .function("toMaterial", &BND_File3dmRenderMaterial::ToMaterial, allow_raw_pointers())
     ;
 
   class_<BND_File3dmRenderEnvironment, base<BND_File3dmRenderContent>>("RenderEnvironment")
     .constructor<>()
+    .constructor<const BND_File3dmRenderEnvironment&>()
     .function("toEnvironment", &BND_File3dmRenderEnvironment::ToEnvironment, allow_raw_pointers())
     ;
 
   class_<BND_File3dmRenderTexture, base<BND_File3dmRenderContent>>("RenderTexture")
     .constructor<>()
+    .constructor<const BND_File3dmRenderTexture&>()
     .function("toTexture", &BND_File3dmRenderTexture::ToTexture, allow_raw_pointers())
     .property("filename", &BND_File3dmRenderTexture::Filename)
     .function("setFilename", &BND_File3dmRenderTexture::SetFilename, allow_raw_pointers())

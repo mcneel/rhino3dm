@@ -339,7 +339,7 @@ void initDecalBindings(void*)
 
   class_<BND_File3dmDecal>("Decal")
     .constructor<>()
-    //.constructor<const BND_File3dmDecal&>()
+    .constructor<const BND_File3dmDecal&>()
     .property("textureInstanceId", &BND_File3dmDecal::TextureInstanceId, &BND_File3dmDecal::SetTextureInstanceId)
     .property("mapping", &BND_File3dmDecal::Mapping, &BND_File3dmDecal::SetMapping)
     .property("projection", &BND_File3dmDecal::Projection, &BND_File3dmDecal::SetProjection)

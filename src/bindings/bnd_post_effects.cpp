@@ -179,7 +179,7 @@ void initPostEffectBindings(void*)
 {
   class_<BND_File3dmPostEffect>("PostEffect")
     .constructor<>()
-    //.constructor<const BND_File3dmPostEffect&>()
+    .constructor<const BND_File3dmPostEffect&>()
     .property("id", &BND_File3dmPostEffect::Id)
     .property("type", &BND_File3dmPostEffect::Type)
     .property("localName", &BND_File3dmPostEffect::LocalName)
