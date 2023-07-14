@@ -65,8 +65,8 @@ public:
   const ON_RenderContent* FindChild(const std::wstring& child_slot_name) const;
   std::wstring XML(bool recursive) const;
   bool SetXML(const std::wstring& xml);
-  std::wstring GetParameter(const wchar_t* n) const;
-  bool SetParameter(const wchar_t* n, const std::wstring& v);
+  std::wstring GetParameter(const std::wstring& n) const;
+  bool SetParameter(const std::wstring& n, const std::wstring& v);
 };
 
 class BND_File3dmRenderMaterial : public BND_File3dmRenderContent 

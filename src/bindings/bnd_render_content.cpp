@@ -267,14 +267,14 @@ bool BND_File3dmRenderContent::SetXML(const std::wstring& xml)
   return _rc->SetXML(xml.c_str());
 }
 
-std::wstring BND_File3dmRenderContent::GetParameter(const wchar_t* name) const
+std::wstring BND_File3dmRenderContent::GetParameter(const std::wstring& name) const
 {
-  return static_cast<const wchar_t*>(_rc->GetParameter(name).AsString());
+  return static_cast<const wchar_t*>(_rc->GetParameter(name.c_str()).AsString());
 }
 
-bool BND_File3dmRenderContent::SetParameter(const wchar_t* name, const std::wstring& val)
+bool BND_File3dmRenderContent::SetParameter(const std::wstring& name, const std::wstring& val)
 {
-  return _rc->SetParameter(name, val.c_str());
+  return _rc->SetParameter(name.c_str(), val.c_str());
 }
 
 
@@ -462,12 +462,12 @@ void initRenderContentBindings(pybind11::module& m)
     .def("SetChildSlotOn", &BND_File3dmRenderContent::SetChildSlotOn, py::arg("on"), py::arg("child_slot_name"))
     .def("ChildSlotAmount", &BND_File3dmRenderContent::ChildSlotAmount, py::arg("child_slot_name"))
     .def("SetChildSlotAmount", &BND_File3dmRenderContent::SetChildSlotAmount, py::arg("amount"), py::arg("child_slot_name"))
-    .def_property("XML", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
     .def("SetChild", &BND_File3dmRenderContent::SetChild, py::arg("child"), py::arg("child_slot_name"))
     .def("FindChild", &BND_File3dmRenderContent::FindChild, py::arg("child_slot_name"))
     .def("DeleteChild", &BND_File3dmRenderContent::DeleteChild, py::arg("child_slot_name"))
-    .def("GetParameter", &BND_File3dmRenderContent::GetParameter)
-    .def("SetParameter", &BND_File3dmRenderContent::SetParameter)
+    .def("GetParameter", &BND_File3dmRenderContent::GetParameter, py::arg("param_name"))
+    .def("SetParameter", &BND_File3dmRenderContent::SetParameter, py::arg("param_name"), py::arg("param_value"))
+    .def_property("XML", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
     ;
 
   py::class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>(m, "RenderMaterial")
@@ -522,12 +522,12 @@ void initRenderContentBindings(void*)
     .function("setChildSlotOn", &BND_File3dmRenderContent::SetChildSlotOn)
     .function("childSlotAmount", &BND_File3dmRenderContent::ChildSlotAmount)
     .function("setChildSlotAmount", &BND_File3dmRenderContent::SetChildSlotAmount)
-    .property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
 //  .function("SetChild", &BND_File3dmRenderContent::SetChild,       // I'm not sure about this. allow_raw_pointers())
 //  .function("FindChild", &BND_File3dmRenderContent::FindChild,     // I'm not sure about this. allow_raw_pointers())
 //  .function("DeleteChild", &BND_File3dmRenderContent::DeleteChild, // I'm not sure about this. allow_raw_pointers())
     .function("getParameter", &BND_File3dmRenderContent::GetParameter)
     .function("setParameter", &BND_File3dmRenderContent::SetParameter)
+    .property("xml", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
     ;
 
   class_<BND_File3dmRenderMaterial, BND_File3dmRenderContent>("RenderMaterial")
