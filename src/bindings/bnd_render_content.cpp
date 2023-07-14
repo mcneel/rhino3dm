@@ -237,6 +237,16 @@ bool BND_File3dmRenderContent::SetChildSlotOn(bool on, const std::wstring& csn)
   return _rc->SetChildSlotOn(on, csn.c_str());
 }
 
+double BND_File3dmRenderContent::ChildSlotAmount(const wchar_t* child_slot_name) const
+{
+  return _rc->ChildSlotAmount(child_slot_name, 100.0);
+}
+
+bool BND_File3dmRenderContent::SetChildSlotAmount(double amount, const wchar_t* child_slot_name)
+{
+  return _rc->SetChildSlotAmount(amount, child_slot_name);
+}
+
 bool BND_File3dmRenderContent::DeleteChild(const std::wstring& csn)
 {
   return _rc->DeleteChild(csn.c_str());
@@ -246,7 +256,7 @@ const ON_RenderContent* BND_File3dmRenderContent::FindChild(const std::wstring& 
 {
   return _rc->FindChild(csn.c_str());
 }
-//--//
+
 std::wstring BND_File3dmRenderContent::XML(bool recursive) const
 {
   return std::wstring(static_cast<const wchar_t*>(_rc->XML(recursive)));
@@ -257,14 +267,14 @@ bool BND_File3dmRenderContent::SetXML(const std::wstring& xml)
   return _rc->SetXML(xml.c_str());
 }
 
-std::wstring BND_File3dmRenderContent::GetParameter(const wchar_t* name) const
+std::wstring BND_File3dmRenderContent::GetParameter(const std::wstring& name) const
 {
-  return static_cast<const wchar_t*>(_rc->GetParameter(name).AsString());
+  return static_cast<const wchar_t*>(_rc->GetParameter(name.c_str()).AsString());
 }
 
-bool BND_File3dmRenderContent::SetParameter(const wchar_t* name, const std::wstring& val)
+bool BND_File3dmRenderContent::SetParameter(const std::wstring& name, const std::wstring& val)
 {
-  return _rc->SetParameter(name, val.c_str());
+  return _rc->SetParameter(name.c_str(), val.c_str());
 }
 
 
@@ -446,8 +456,10 @@ void initRenderContentBindings(pybind11::module& m)
     .def_property("Reference", &BND_File3dmRenderContent::Reference, &BND_File3dmRenderContent::SetReference)
     .def_property("AutoDelete", &BND_File3dmRenderContent::AutoDelete, &BND_File3dmRenderContent::SetAutoDelete)
     .def_property("ChildSlotName", &BND_File3dmRenderContent::ChildSlotName, &BND_File3dmRenderContent::SetChildSlotName)
-    .def_property("ChildSlotOn", &BND_File3dmRenderContent::ChildSlotOn, &BND_File3dmRenderContent::SetChildSlotOn)
-    .def_property("XML", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
+    .def("ChildSlotOn", &BND_File3dmRenderContent::ChildSlotOn, py::arg("child_slot_name"))
+    .def("SetChildSlotOn", &BND_File3dmRenderContent::SetChildSlotOn, py::arg("on"), py::arg("child_slot_name"))
+    .def("ChildSlotAmount", &BND_File3dmRenderContent::ChildSlotAmount, py::arg("child_slot_name"))
+    .def("SetChildSlotAmount", &BND_File3dmRenderContent::SetChildSlotAmount, py::arg("amount"), py::arg("child_slot_name"))    .def_property("XML", &BND_File3dmRenderContent::XML, &BND_File3dmRenderContent::SetXML)
     .def("SetChild", &BND_File3dmRenderContent::SetChild, py::arg("child"), py::arg("child_slot_name"))
     .def("FindChild", &BND_File3dmRenderContent::FindChild, py::arg("child_slot_name"))
     .def("DeleteChild", &BND_File3dmRenderContent::DeleteChild, py::arg("child_slot_name"))
@@ -497,6 +509,8 @@ void initRenderContentBindings(void*)
     .function("setTypeName", &BND_File3dmRenderContent::SetTypeName, allow_raw_pointers())
     .function("childSlotOn", &BND_File3dmRenderContent::ChildSlotOn, allow_raw_pointers())
     .function("setChildSlotOn", &BND_File3dmRenderContent::SetChildSlotOn, allow_raw_pointers())
+    .function("childSlotAmount", &BND_File3dmRenderContent::ChildSlotAmount, allow_raw_pointers())
+    .function("setChildSlotAmount", &BND_File3dmRenderContent::SetChildSlotAmount, allow_raw_pointers())
     .function("getXML", &BND_File3dmRenderContent::XML)
     .function("setXML",&BND_File3dmRenderContent::SetXML, allow_raw_pointers())
     .function("setChild", &BND_File3dmRenderContent::SetChild, allow_raw_pointers())       // I'm not sure about this. allow_raw_pointers())

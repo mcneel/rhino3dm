@@ -59,12 +59,14 @@ public:
   void SetChildSlotName(const std::wstring& child_slot_name);
   bool ChildSlotOn(const std::wstring& child_slot_name) const;
   bool SetChildSlotOn(bool on, const std::wstring& child_slot_name);
+  double ChildSlotAmount(const wchar_t* child_slot_name) const;
+  bool SetChildSlotAmount(double amount, const wchar_t* child_slot_name);
   bool DeleteChild(const std::wstring& child_slot_name);
   const ON_RenderContent* FindChild(const std::wstring& child_slot_name) const;
   std::wstring XML(bool recursive) const;
   bool SetXML(const std::wstring& xml);
-  std::wstring GetParameter(const wchar_t* n) const;
-  bool SetParameter(const wchar_t* n, const std::wstring& v);
+  std::wstring GetParameter(const std::wstring& n) const;
+  bool SetParameter(const std::wstring& n, const std::wstring& v);
 };
 
 class BND_File3dmRenderMaterial : public BND_File3dmRenderContent 

@@ -1463,7 +1463,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmEmbeddedFileTable&, BND_File3dmEmbeddedFile*>(s.cast<BND_File3dmEmbeddedFileTable &>(), s); })
     .def("Add", &BND_File3dmEmbeddedFileTable::Add, py::arg("embedded_file"))
     .def("FindIndex", &BND_File3dmEmbeddedFileTable::FindIndex, py::arg("index"))
-    .def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
+    //.def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*> >(m, "__RenderContentIterator")
@@ -1702,7 +1702,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmEmbeddedFileTable::Add)
     .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
-    .function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
+    //.function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")

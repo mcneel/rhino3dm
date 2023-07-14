@@ -79,6 +79,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::IterIndex(int index)
   return FindIndex(index);
 }
 
+/*
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
 {
   const ON_UUID _id = Binding_to_ON_UUID(id);
@@ -90,6 +91,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
 
   return nullptr;
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
