@@ -187,6 +187,19 @@ using namespace emscripten;
 
 void initXformBindings(void*)
 {
+
+  enum_<TransformSimilarityType>("TransformSimilarityType")
+    .value("OrientationReversing", TransformSimilarityType::OrientationReversing)
+    .value("NotSimilarity", TransformSimilarityType::NotSimilarity)
+    .value("OrientationPreserving", TransformSimilarityType::OrientationPreserving)
+    ;
+
+  enum_<TransformRigidType>("TransformRigidType")
+    .value("RigidReversing", TransformRigidType::RigidReversing)
+    .value("NotRigid", TransformRigidType::NotRigid)
+    .value("Rigid", TransformRigidType::Rigid)
+    ;
+
   class_<BND_Transform>("Transform")
     .constructor<double>()
     //.constructor<const BND_Transform&>()
@@ -196,12 +209,22 @@ void initXformBindings(void*)
     .class_function("translation", &BND_Transform::Translation)
     .class_function("scale", &BND_Transform::Scale)
     .class_function("rotation", &BND_Transform::Rotation)
+    .class_function("rotation", &BND_Transform::RotationFromTwoVectors)
+    .class_function("mirror", &BND_Transform::Mirror)
+    .class_function("mirror", &BND_Transform::Mirror2)
+    .class_function("planeToPlane", &BND_Transform::PlaneToPlane)
+    .class_function("shear", &BND_Transform::Shear)
     .class_function("multiply", &BND_Transform::Multiply)
+    .property("isAffine", &BND_Transform::IsAffine)
     .property("isIdentity", &BND_Transform::IsIdentity)
+    .property("isLinear", &BND_Transform::IsLinear)
+    .property("isRotation", &BND_Transform::IsRotation)
     .property("isValid", &BND_Transform::IsValid)
     .property("isZero", &BND_Transform::IsZero)
     .property("isZero4x4", &BND_Transform::IsZero4x4)
     .property("isZeroTransformation", &BND_Transform::IsZeroTransformation)
+    .property("rigidType", &BND_Transform::RigidType)
+    .property("similarityType", &BND_Transform::SimilarityType)
     .function("determinant", &BND_Transform::Determinant)
     .function("tryGetInverse", &BND_Transform::TryGetInverse, allow_raw_pointers())
     .function("transformBoundingBox", &BND_Transform::TransformBoundingBox, allow_raw_pointers())
