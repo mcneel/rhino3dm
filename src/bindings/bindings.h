@@ -121,3 +121,4 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_3dm_attributes.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"
+#include "bnd_linetype.h"

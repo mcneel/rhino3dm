@@ -718,6 +718,117 @@ BND_Material* BND_File3dmMaterialTable::FromAttributes(const BND_3dmObjectAttrib
   return nullptr;
 }
 
+
+void BND_File3dmLinetypeTable::Add(const BND_Linetype& linetype)
+{
+  const ON_Linetype* l = linetype.m_linetype;
+  m_model->AddModelComponent(*l);
+}
+
+void BND_File3dmLinetypeTable::Delete(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  m_model->RemoveModelComponent(ON_ModelComponent::Type::LinePattern, _id);
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::IterIndex(int index)
+{
+  return FindIndex(index);
+}
+
+template<typename ON_Type, typename BND_Type>
+BND_Type* bindingFromCompRef(ON_ModelComponentReference compref)
+{
+  const ON_ModelComponent* model_component = compref.ModelComponent();
+  if (compref.IsEmpty())
+    return nullptr;
+  ON_Type* model_object = const_cast<ON_Type*>(ON_Type::Cast(model_component));
+  if (model_object)
+    return new BND_Type(model_object, &compref);
+  return nullptr;
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::FindIndex(int index)
+{
+  if (index >= 0)
+  {
+    ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::LinePattern, index); //no specific method in ON Extensions, therefore getting component here
+    return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+  }
+  if (index == ON_Linetype::Continuous.Index()) // -1
+    return new BND_Linetype(ON_Linetype::Continuous);
+  if (index == ON_Linetype::ByLayer.Index()) // -2
+    return new BND_Linetype(ON_Linetype::ByLayer);
+  if (index == ON_Linetype::ByParent.Index()) // -3
+    return new BND_Linetype(ON_Linetype::ByParent);
+  if (index == ON_Linetype::Hidden.Index()) // -4
+    return new BND_Linetype(ON_Linetype::Hidden);
+  if (index == ON_Linetype::Dashed.Index()) // -5
+    return new BND_Linetype(ON_Linetype::Dashed);
+  if (index == ON_Linetype::DashDot.Index()) // -6
+    return new BND_Linetype(ON_Linetype::DashDot);
+  if (index == ON_Linetype::Center.Index()) // -7
+    return new BND_Linetype(ON_Linetype::Center);
+  if (index == ON_Linetype::Border.Index()) // -8
+    return new BND_Linetype(ON_Linetype::Border);
+  if (index == ON_Linetype::Dots.Index()) // -9
+    return new BND_Linetype(ON_Linetype::Dots);
+  return nullptr;
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::FindId(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->LinePatternFromId(_id);
+  return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::FindName(std::wstring name)
+{
+  ON_ModelComponentReference compref = m_model->LinePatternFromName(name.c_str());
+  return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::FromAttributes(const BND_3dmObjectAttributes* attributes)
+{
+  ON_ModelComponentReference compref = m_model->LinePatternFromAttributes(*attributes->m_attributes);
+  return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::FromLayerIndex(int index)
+{
+  ON_ModelComponentReference compref = m_model->LinePatternFromLayerIndex(index);
+  return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+}
+
+BND_Linetype* BND_File3dmLinetypeTable::GetCurrent()
+{
+  // V6 and later stores the ID of the current linetype
+  ON_UUID _id = m_model->m_settings.CurrentLinePatternId();
+  if (_id != ON_nil_uuid)
+  {
+    ON_ModelComponentReference compref = m_model->LinePatternFromId(_id);
+    return bindingFromCompRef<ON_Linetype, BND_Linetype>(compref);
+  }
+  // V5 and earlier store the index of the current linetype
+  int _index = m_model->m_settings.CurrentLinePatternIndex();
+  if (_index != ON_UNSET_INT_INDEX)
+  {
+    return FindIndex(_index);
+  }
+  return nullptr;
+}
+
+void BND_File3dmLinetypeTable::SetCurrent(BND_Linetype* linetype)
+{
+  if (linetype->IsValid() && linetype->GetIndex() >= 0)
+  {
+    ON_UUID _id = linetype->m_linetype->Id();
+    m_model->m_settings.SetCurrentLinePatternId(_id);
+  }
+}
+
+
 void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
 {
   const ON_Bitmap* b = bitmap.m_bitmap;
@@ -1351,6 +1462,28 @@ void initExtensionsBindings(pybind11::module& m)
     .def("FindFromAttributes", &BND_File3dmMaterialTable::FromAttributes)
     ;
 
+  py::class_<PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*> >(m, "__LinetypeIterator")
+    .def("__iter__", [](PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*> &it) -> PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*>::next)
+    ;
+
+  py::class_<BND_File3dmLinetypeTable>(m, "File3dmLinetypeTable")
+    .def("__len__", &BND_File3dmLinetypeTable::Count)
+    .def("__getitem__", static_cast<BND_Linetype* (BND_File3dmLinetypeTable::*)(int)>(&BND_File3dmLinetypeTable::FindIndex))
+    .def("__getitem__", static_cast<BND_Linetype* (BND_File3dmLinetypeTable::*)(BND_UUID)>(&BND_File3dmLinetypeTable::FindId))
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*>(s.cast<BND_File3dmLinetypeTable &>(), s); })
+    .def("Add", &BND_File3dmLinetypeTable::Add, py::arg("linetype"))
+    .def("Delete", &BND_File3dmLinetypeTable::Delete, py::arg("id"))
+    .def("FindIndex", &BND_File3dmLinetypeTable::FindIndex, py::arg("index"))
+    .def("FindId", &BND_File3dmLinetypeTable::FindId, py::arg("id"))
+    .def("FindName", &BND_File3dmLinetypeTable::FindName, py::arg("name"))
+    .def("FromAttributes", &BND_File3dmLinetypeTable::FromAttributes, py::arg("attributes"))
+    .def("FromLayerIndex", &BND_File3dmLinetypeTable::FromLayerIndex, py::arg("index"))
+    .def_property("Current", &BND_File3dmLinetypeTable::GetCurrent, &BND_File3dmLinetypeTable::SetCurrent)
+    .def_property("CurrentSource", &BND_File3dmLinetypeTable::GetCurrentSource, &BND_File3dmLinetypeTable::SetCurrentSource)
+    .def_property("Scale", &BND_File3dmLinetypeTable::GetScale, &BND_File3dmLinetypeTable::SetScale)
+    ;
+
   py::class_<PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> >(m, "__ImageIterator")
     .def("__iter__", [](PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>  &it) -> PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> & { return it; })
     .def("__next__", &PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*> ::next)
@@ -1555,6 +1688,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("Settings", &BND_ONXModel::Settings)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
     .def_property_readonly("Materials", &BND_ONXModel::Materials)
+    .def_property_readonly("Linetypes", &BND_ONXModel::Linetypes)
     .def_property_readonly("Bitmaps", &BND_ONXModel::Bitmaps)
     .def_property_readonly("Layers", &BND_ONXModel::Layers)
     .def_property_readonly("Groups", &BND_ONXModel::AllGroups)
@@ -1630,6 +1764,18 @@ void initExtensionsBindings(void*)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
     .function("findFromAttributes", &BND_File3dmMaterialTable::FromAttributes, allow_raw_pointers())
+    ;
+
+  class_<BND_File3dmLinetypeTable>("File3dmLinetypeTable")
+    .function("count", &BND_File3dmLinetypeTable::Count)
+    .function("get", &BND_File3dmLinetypeTable::FindIndex, allow_raw_pointers())
+    .function("add", &BND_File3dmLinetypeTable::Add)
+    .function("delete", &BND_File3dmLinetypeTable::Delete)
+    .function("findIndex", &BND_File3dmLinetypeTable::FindIndex, allow_raw_pointers())
+    .function("findId", &BND_File3dmLinetypeTable::FindId, allow_raw_pointers())
+    .function("findName", &BND_File3dmLinetypeTable::FindName, allow_raw_pointers())
+    .function("fromAttributes", &BND_File3dmLinetypeTable::FromAttributes, allow_raw_pointers())
+    .function("fromLayerIndex", &BND_File3dmLinetypeTable::FromLayerIndex, allow_raw_pointers())
     ;
 
   class_<BND_File3dmBitmapTable>("File3dmBitmapTable")
@@ -1760,6 +1906,7 @@ void initExtensionsBindings(void*)
     .function("settings", &BND_ONXModel::Settings)
     .function("objects", &BND_ONXModel::Objects)
     .function("materials", &BND_ONXModel::Materials)
+    .function("linetypes", &BND_ONXModel::Linetypes)
     .function("bitmaps", &BND_ONXModel::Bitmaps)
     .function("layers", &BND_ONXModel::Layers)
     .function("groups", &BND_ONXModel::AllGroups)

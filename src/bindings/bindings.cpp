@@ -83,6 +83,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initExtensionsBindings(m);
   initDracoBindings(m);
   initRTreeBindings(m);
+  initLinetypeBindings(m);
 }
 
 BND_TUPLE CreateTuple(int count)
