@@ -16,6 +16,11 @@ BND_Linetype::BND_Linetype(ON_Linetype* linetype, const ON_ModelComponentReferen
   SetTrackedPointer(linetype, compref);
 }
 
+BND_Linetype::~BND_Linetype()
+{
+    delete m_linetype;
+}
+
 void BND_Linetype::SetTrackedPointer(ON_Linetype* linetype, const ON_ModelComponentReference* compref)
 {
   m_linetype = linetype;

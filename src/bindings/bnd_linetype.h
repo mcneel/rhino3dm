@@ -30,6 +30,20 @@ public:
   int AppendSegment(double length, bool isSolid);
   bool RemoveSegment(int index) { return m_linetype->RemoveSegment(index); }
   bool ClearPattern() { return m_linetype->ClearPattern(); }
+  //public Rhino.DocObjects.LineCapStyle LineCapStyle
+  //public Rhino.DocObjects.LineJoinStyle LineJoinStyle
+  //public double Width
+  //public UnitSystem WidthUnits
+  //public Point2d[] GetTaperPoints()
+  //public void SetTaper(double startWidth, double endWidth)
+  //public void SetTaper(double startWidth, Point2d taperPoint, double endWidth) 
+  //public void RemoveTaper()
+  //public bool SetSegments(IEnumerable<double> segments)
+
+
+
+
+
 
 #if defined(ON_PYTHON_COMPILE)
   static BND_Linetype* Border(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Border); }
