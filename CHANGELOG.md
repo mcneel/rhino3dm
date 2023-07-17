@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js, py) SetMesh Breps
 - (js) tryConvertBrep for Brep
 - (js, py) ToPhysicallyBased
+- (js, net, py) Added RenderContent
+- (js, py) Added LineType bindings (@coditect)
+- (js, py) Added BND_GroupTable Delete (@coditect)
+- (js, py) Added BND_Xform methods and properties (@coditect)
+- (js, py) Added additional file3dm properties (@coditect)
 
 ### Changed
 - (js) All File3dm table count are properties whereas before they were functions

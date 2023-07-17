@@ -14,6 +14,7 @@
 #if defined(ON_PYTHON_COMPILE)
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include "datetime.h"
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")
 #endif
@@ -28,12 +29,14 @@ typedef pybind11::dict BND_DICT;
 typedef pybind11::tuple BND_Color;
 typedef pybind11::tuple BND_Color4f;
 typedef pybind11::tuple BND_TUPLE;
+typedef pybind11::handle BND_DateTime;
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
 typedef emscripten::val BND_Color;
 typedef emscripten::val BND_Color4f;
 typedef emscripten::val BND_TUPLE;
+typedef emscripten::val BND_DateTime;
 #endif
 
 BND_TUPLE CreateTuple(int count);
@@ -47,6 +50,8 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
   tuple.set(index, value);
 #endif
 }
+
+BND_DateTime CreateDateTime(struct tm t);
 
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
@@ -121,3 +126,4 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_3dm_attributes.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"
+#include "bnd_linetype.h"
