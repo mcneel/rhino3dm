@@ -294,10 +294,11 @@ public:
   void SetApplicationUrl(std::wstring url);
   std::wstring GetApplicationDetails() const;
   void SetApplicationDetails(std::wstring details);
+  int GetArchiveVersion() const;
   std::wstring GetCreatedBy() const;
   std::wstring GetLastEditedBy() const;
-  //public DateTime Created | get;
-  //public DateTime LastEdited | get;
+  BND_DateTime GetCreated() const;
+  BND_DateTime GetLastEdited() const;
   int GetRevision() const;
   void SetRevision(int r);
   BND_File3dmSettings Settings() { return BND_File3dmSettings(m_model); }

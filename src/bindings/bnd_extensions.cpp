@@ -355,6 +355,10 @@ void BND_ONXModel::SetApplicationDetails(std::wstring s)
 {
   ONX_Model_SetString(m_model.get(), idxApplicationDetails, s.c_str());
 }
+int BND_ONXModel::GetArchiveVersion() const
+{
+  return m_model->m_3dm_file_version;
+}
 std::wstring BND_ONXModel::GetCreatedBy() const
 {
   ON_wString s;
@@ -366,6 +370,14 @@ std::wstring BND_ONXModel::GetLastEditedBy() const
   ON_wString s;
   ONX_Model_GetString(m_model.get(), idxLastCreatedBy, &s);
   return std::wstring(s);
+}
+BND_DateTime BND_ONXModel::GetCreated() const
+{
+  return CreateDateTime(m_model->m_properties.m_RevisionHistory.m_create_time);
+}
+BND_DateTime BND_ONXModel::GetLastEdited() const
+{
+  return CreateDateTime(m_model->m_properties.m_RevisionHistory.m_last_edit_time);
 }
 
 RH_C_FUNCTION int ONX_Model_GetRevision(const ONX_Model* pConstModel)
@@ -1706,7 +1718,10 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .def_property("ApplicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
     .def_property("ApplicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    .def_property_readonly("ArchiveVersion", &BND_ONXModel::GetArchiveVersion)
+    .def_property_readonly("Created", &BND_ONXModel::GetCreated)
     .def_property_readonly("CreatedBy", &BND_ONXModel::GetCreatedBy)
+    .def_property_readonly("LastEdited", &BND_ONXModel::GetLastEdited)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Settings", &BND_ONXModel::Settings)
@@ -1927,7 +1942,10 @@ void initExtensionsBindings(void*)
     .property("applicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
     .property("applicationUrl", &BND_ONXModel::GetApplicationUrl, &BND_ONXModel::SetApplicationUrl)
     .property("applicationDetails", &BND_ONXModel::GetApplicationDetails, &BND_ONXModel::SetApplicationDetails)
+    .property("archiveVersion", &BND_ONXModel::GetArchiveVersion)
+    .property("created", &BND_ONXModel::GetCreated)
     .property("createdBy", &BND_ONXModel::GetCreatedBy)
+    .property("lastEdited", &BND_ONXModel::GetLastEdited)
     .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("settings", &BND_ONXModel::Settings)

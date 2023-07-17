@@ -106,3 +106,27 @@ BND_TUPLE NullTuple()
 #endif
 }
 
+BND_DateTime CreateDateTime(struct tm t)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (!PyDateTimeAPI) {
+    PyDateTime_IMPORT;
+  }
+  return PyDateTime_FromDateAndTime(t.tm_year + 1900,
+                                    t.tm_mon + 1,
+                                    t.tm_mday,
+                                    t.tm_hour,
+                                    t.tm_min,
+                                    t.tm_sec,
+                                    0);
+#else
+  emscripten::val Date = emscripten::val::global("Date");
+  return Date.new_(t.tm_year + 1900,
+                   t.tm_mon,
+                   t.tm_mday,
+                   t.tm_hour,
+                   t.tm_min,
+                   t.tm_sec,
+                   0);
+#endif
+}
