@@ -1767,7 +1767,7 @@ void initExtensionsBindings(void*)
     ;
 
   class_<BND_File3dmLinetypeTable>("File3dmLinetypeTable")
-    .function("count", &BND_File3dmLinetypeTable::Count)
+    .property("count", &BND_File3dmLinetypeTable::Count)
     .function("get", &BND_File3dmLinetypeTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLinetypeTable::Add)
     .function("delete", &BND_File3dmLinetypeTable::Delete)

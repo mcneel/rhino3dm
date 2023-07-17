@@ -18,6 +18,7 @@ public:
   BND_Linetype();
   BND_Linetype(const ON_Linetype&);
   BND_Linetype(ON_Linetype* linetype, const ON_ModelComponentReference* compref);
+  virtual ~BND_Linetype();
 
   std::wstring GetName() const { return std::wstring(m_linetype->NameAsPointer()); }
   void SetName(const std::wstring& name) { m_linetype->SetName(name.c_str()); }
