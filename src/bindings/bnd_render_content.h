@@ -52,6 +52,7 @@ public:
   BND_File3dmRenderContent* FirstChild() const;
   BND_File3dmRenderContent* NextSibling() const;
   BND_File3dmRenderContent* TopLevel() const;
+  BND_File3dmRenderContent* FindChild(const std::wstring& child_slot_name) const;
   bool IsTopLevel() const;
   bool IsChild() const;
   bool SetChild(const ON_RenderContent& child, const std::wstring& child_slot_name);
@@ -62,7 +63,6 @@ public:
   double ChildSlotAmount(const wchar_t* child_slot_name) const;
   bool SetChildSlotAmount(double amount, const wchar_t* child_slot_name);
   bool DeleteChild(const std::wstring& child_slot_name);
-  const ON_RenderContent* FindChild(const std::wstring& child_slot_name) const;
   std::wstring XML(bool recursive) const;
   bool SetXML(const std::wstring& xml);
   std::wstring GetParameter(const std::wstring& n) const;
