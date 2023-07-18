@@ -121,7 +121,7 @@ void initEmbeddedFileBindings(void*)
     .constructor<const BND_File3dmEmbeddedFile&>()
     .class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
-    .property("filename", &BND_File3dmEmbeddedFile::GetFilename)
+    .property("fileName", &BND_File3dmEmbeddedFile::GetFilename)
     .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers())
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
