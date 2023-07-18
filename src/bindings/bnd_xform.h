@@ -38,6 +38,8 @@ public:
   static BND_Transform Translation(double dx, double dy, double dz);
   static BND_Transform Scale(ON_3dPoint anchor, double scaleFactor);
   static BND_Transform Scale2(BND_Plane plane, double xScaleFactor, double yScaleFactor, double zScaleFactor);
+  //    public static Transform Diagonal(Vector3d diagonal)
+  //    public static Transform Diagonal(double d0, double d1, double d2)
   //static BND_Transform Rotation(double sinAngle, double cosAngle, Vector3d rotationAxis, Point3d rotationCenter)
   //static BND_Transform Rotation(double angleRadians, Point3d rotationCenter)
   static BND_Transform Rotation(double angleRadians, ON_3dVector rotationAxis, ON_3dPoint rotationCenter);

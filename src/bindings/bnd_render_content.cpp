@@ -550,7 +550,7 @@ void initRenderContentBindings(void*)
     .constructor<>()
     .constructor<const BND_File3dmRenderTexture&>()
     .function("toTexture", &BND_File3dmRenderTexture::ToTexture, allow_raw_pointers())
-    .property("filename", &BND_File3dmRenderTexture::Filename)
+    .property("fileName", &BND_File3dmRenderTexture::Filename)
     .function("setFilename", &BND_File3dmRenderTexture::SetFilename, allow_raw_pointers())
     ;
     
