@@ -252,9 +252,9 @@ bool BND_File3dmRenderContent::DeleteChild(const std::wstring& csn)
   return _rc->DeleteChild(csn.c_str());
 }
 
-const ON_RenderContent* BND_File3dmRenderContent::FindChild(const std::wstring& csn) const
+BND_File3dmRenderContent* BND_File3dmRenderContent::FindChild(const std::wstring& csn) const
 {
-  return _rc->FindChild(csn.c_str());
+  return NewRenderContentBinding(_rc->FindChild(csn.c_str()));
 }
 
 std::wstring BND_File3dmRenderContent::XML(bool recursive) const
