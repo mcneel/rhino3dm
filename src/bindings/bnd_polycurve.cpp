@@ -39,17 +39,17 @@ std::vector<BND_Curve*> BND_PolyCurve::Explode() const
   return rc;
 }
 
-bool BND_PolyCurve::Append(const ON_Line& line)
+bool BND_PolyCurve::Append1(const ON_Line& line)
 {
   return m_polycurve->AppendAndMatch(new ON_LineCurve(line));
 }
 
-bool BND_PolyCurve::Append(BND_Arc& arc)
+bool BND_PolyCurve::Append2(BND_Arc& arc)
 {
   return m_polycurve->AppendAndMatch(new ON_ArcCurve(arc.m_arc));
 }
 
-bool BND_PolyCurve::Append(const BND_Curve& curve)
+bool BND_PolyCurve::Append3(const BND_Curve& curve)
 {
   ON_Curve* crv = curve.m_curve->DuplicateCurve();
   return m_polycurve->AppendAndMatch(crv);
@@ -123,9 +123,9 @@ void initPolyCurveBindings(void*)
     .property("hasGap", &BND_PolyCurve::HasGap)
     .function("removeNesting", &BND_PolyCurve::RemoveNesting)
     .function("explode", &BND_PolyCurve::Explode)
-    .function("append", select_overload<bool(const ON_Line&)>(&BND_PolyCurve::Append))
-    .function("append", select_overload<bool(BND_Arc&)>(&BND_PolyCurve::Append))
-    .function("append", select_overload<bool(const BND_Curve&)>(&BND_PolyCurve::Append))
+    .function("appendLine", &BND_PolyCurve::Append1)
+    .function("appendArc", &BND_PolyCurve::Append2)
+    .function("appendCurve", &BND_PolyCurve::Append3)
     .function("appendSegment", &BND_PolyCurve::AppendSegment)
     .function("segmentCurveParameter", &BND_PolyCurve::SegmentCurveParameter)
     .function("polyCurveParameter", &BND_PolyCurve::PolyCurveParameter)

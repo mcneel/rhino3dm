@@ -21,9 +21,9 @@ public:
   bool HasGap() const { return m_polycurve->FindNextGap(0); }
   bool RemoveNesting() { return m_polycurve->RemoveNesting(); }
   std::vector<BND_Curve*> Explode() const;
-  bool Append(const ON_Line& line);
-  bool Append(BND_Arc& arc);
-  bool Append(const BND_Curve& curve);
+  bool Append1(const ON_Line& line);
+  bool Append2(BND_Arc& arc);
+  bool Append3(const BND_Curve& curve);
   bool AppendSegment(const BND_Curve& curve);
   double SegmentCurveParameter(double polycurveParameter) const;
   double PolyCurveParameter(int segmentIndex, double segmentCurveParameter) const;
