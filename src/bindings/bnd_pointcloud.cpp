@@ -230,7 +230,7 @@ void BND_PointCloud::Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color)
     m_pointcloud->m_N[index] = normal;
   }
 
-  if (m_pointcloud->m_.Count() > 0)
+  if (m_pointcloud->m_C.Count() > 0)
   {
     int index = m_pointcloud->m_C.Count() - 1;
     m_pointcloud->m_C[index] = Binding_to_ON_Color(color);
