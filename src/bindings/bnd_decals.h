@@ -41,6 +41,7 @@ public:
   void SetTextureInstanceId(BND_UUID v) { _decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }
 
   Mappings Mapping() const;
+  ON_Decal::Mappings GetMapping() const;
   void SetMapping(Mappings mapping);
 
   Projections Projection() const;
