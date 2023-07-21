@@ -27,7 +27,27 @@ BND_RenderSettings::BND_RenderSettings(std::shared_ptr<ONX_Model> m)
 
 BND_RenderSettings::BND_RenderSettings(const BND_RenderSettings& other)
 {
-  SetTrackedPointer(new ON_3dmRenderSettings(*other.m_render_settings), nullptr);
+  if (other.m_model.get())
+  {
+    m_model = other.m_model;
+    m_render_settings = &m_model->m_settings.m_RenderSettings;
+  }
+  else
+  {
+    ON_3dmRenderSettings* rs = nullptr;
+
+    if (nullptr != other.m_render_settings)
+    {
+      rs = new ON_3dmRenderSettings(*other.m_render_settings);
+    }
+    else
+    {
+      rs = new ON_3dmRenderSettings();
+    }
+
+    SetTrackedPointer(rs, nullptr);
+  }
+
   Construct();
 }
 
