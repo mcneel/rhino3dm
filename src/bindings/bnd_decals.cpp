@@ -18,6 +18,11 @@ BND_File3dmDecal::BND_File3dmDecal(const BND_File3dmDecal& d)
   _decal = new ON_Decal(*d._decal); 
   _owned = true; 
 }
+//ON_Dithering::Methods GetMethod() const { return _dit->Method(); }
+ON_Decal::Mappings BND_File3dmDecal::GetMapping() const 
+{
+  return _decal->Mapping();
+}
 
 Mappings BND_File3dmDecal::Mapping() const 
 {
@@ -341,7 +346,7 @@ void initDecalBindings(void*)
     .constructor<>()
     .constructor<const BND_File3dmDecal&>()
     .property("textureInstanceId", &BND_File3dmDecal::TextureInstanceId, &BND_File3dmDecal::SetTextureInstanceId)
-    .property("mapping", &BND_File3dmDecal::Mapping, &BND_File3dmDecal::SetMapping)
+    .property("mapping", &BND_File3dmDecal::GetMapping, &BND_File3dmDecal::SetMapping)
     .property("projection", &BND_File3dmDecal::Projection, &BND_File3dmDecal::SetProjection)
     .property("mapToInside", &BND_File3dmDecal::MapToInside, &BND_File3dmDecal::SetMapToInside)
     .property("transparency", &BND_File3dmDecal::Transparency, &BND_File3dmDecal::SetTransparency)
