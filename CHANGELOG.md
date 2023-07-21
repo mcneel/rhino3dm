@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - (js) All File3dm table count are properties whereas before they were functions
+- (js) PolyCurve Append methods are now appendArc, appendLine, and appendCurve
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added

@@ -136,7 +136,7 @@ void initSunBindings(void*)
 {
   class_<BND_File3dmSun>("Sun")
     .constructor<>()
-    //.constructor<const BND_File3dmSun&>()
+    .constructor<const BND_File3dmSun&>()
     .property("minYear", &BND_File3dmSun::GetMinYear)
     .property("maxYear", &BND_File3dmSun::GetMaxYear)
     .property("vector", &BND_File3dmSun::GetVector)
