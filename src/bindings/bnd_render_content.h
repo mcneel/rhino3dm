@@ -12,7 +12,7 @@ void initRenderContentBindings(void* m);
 class BND_File3dmRenderContent : public BND_ModelComponent
 {
 public:
-  ON_RenderContent* _rc = nullptr;
+  ON_RenderContent* m_rc = nullptr;
 
 protected:
   void SetTrackedPointer(ON_RenderContent* rc, const ON_ModelComponentReference* compref);
