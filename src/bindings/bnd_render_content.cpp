@@ -1,8 +1,18 @@
 
 #include "bindings.h"
 
+BND_File3dmRenderContent::BND_File3dmRenderContent()
+{
+  throw pybind11::type_error("Unable to create an instance of RenderContent. Try creating RenderMaterial, RenderEnvironment, or RenderTexture");
+}
+
 BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc)
 {
+  if (nullptr == rc)
+    throw pybind11::value_error("NULL RenderContent");
+
+  rc->SetId();
+
   SetTrackedPointer(rc, nullptr);
 }
 
@@ -393,15 +403,8 @@ void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
 
 void BND_File3dmRenderContentTable::Add(const BND_File3dmRenderContent& rc)
 {
-  /*
-  if (nullptr != rc.m_rc)
-  {
-    m_model->AddModelComponent(*rc.m_rc);
-  }
-  */
   const ON_RenderContent* r = rc.m_rc;
   m_model->AddModelComponent(*r);
-
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindIndex(int index)

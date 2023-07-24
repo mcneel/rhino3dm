@@ -18,7 +18,7 @@ protected:
   void SetTrackedPointer(ON_RenderContent* rc, const ON_ModelComponentReference* compref);
 
 public:
-  BND_File3dmRenderContent() { }
+  BND_File3dmRenderContent();
   BND_File3dmRenderContent(ON_RenderContent* rc);
   BND_File3dmRenderContent(ON_RenderContent* rc, const ON_ModelComponentReference* compref);
   BND_File3dmRenderContent(const BND_File3dmRenderContent& other);
