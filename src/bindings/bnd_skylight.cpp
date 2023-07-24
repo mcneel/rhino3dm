@@ -37,8 +37,8 @@ using namespace emscripten;
 void initSkylightBindings(void*)
 {
   class_<BND_File3dmSkylight>("Skylight")
-    .constructor<>()
-    .constructor<const BND_File3dmSkylight&>()
+    //.constructor<>()
+    //.constructor<const BND_File3dmSkylight&>()
     .property("enabled", &BND_File3dmSkylight::GetEnabled, &BND_File3dmSkylight::SetEnabled)
     .property("shadowIntensity", &BND_File3dmSkylight::GetShadowIntensity, &BND_File3dmSkylight::SetShadowIntensity)
     ;

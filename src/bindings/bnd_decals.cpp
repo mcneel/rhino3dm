@@ -18,7 +18,7 @@ BND_File3dmDecal::BND_File3dmDecal(const BND_File3dmDecal& d)
   _decal = new ON_Decal(*d._decal); 
   _owned = true; 
 }
-//ON_Dithering::Methods GetMethod() const { return _dit->Method(); }
+
 ON_Decal::Mappings BND_File3dmDecal::GetMapping() const 
 {
   return _decal->Mapping();
