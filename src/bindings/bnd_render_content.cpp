@@ -13,7 +13,7 @@ BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc, const O
 
 BND_File3dmRenderContent::BND_File3dmRenderContent(const BND_File3dmRenderContent& other)
 {
-  SetTrackedPointer(other._rc->NewRenderContent(), nullptr);
+  SetTrackedPointer(other.m_rc->NewRenderContent(), nullptr);
 }
 
 BND_File3dmRenderContent::~BND_File3dmRenderContent()
@@ -22,129 +22,129 @@ BND_File3dmRenderContent::~BND_File3dmRenderContent()
 
 void BND_File3dmRenderContent::SetTrackedPointer(ON_RenderContent* rc, const ON_ModelComponentReference* compref)
 {
-  _rc = rc;
+  m_rc = rc;
 
   BND_ModelComponent::SetTrackedPointer(rc, compref);
 }
 
 std::wstring BND_File3dmRenderContent::Kind() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->Kind()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->Kind()));
 }
 
 std::wstring BND_File3dmRenderContent::TypeName() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->TypeName()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->TypeName()));
 }
 
 void BND_File3dmRenderContent::SetTypeName(const std::wstring& s)
 {
-  _rc->SetTypeName(s.c_str());
+  m_rc->SetTypeName(s.c_str());
 }
 
 BND_UUID BND_File3dmRenderContent::Id() const
 {
-  return ON_UUID_to_Binding(_rc->Id());
+  return ON_UUID_to_Binding(m_rc->Id());
 }
 
 std::wstring BND_File3dmRenderContent::Name() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->Name()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->Name()));
 }
 
 void BND_File3dmRenderContent::SetName(const std::wstring& s)
 {
-  _rc->SetName(s.c_str());
+  m_rc->SetName(s.c_str());
 }
 
 BND_UUID BND_File3dmRenderContent::TypeId() const
 {
-  return ON_UUID_to_Binding(_rc->TypeId());
+  return ON_UUID_to_Binding(m_rc->TypeId());
 }
 
 void BND_File3dmRenderContent::SetTypeId(const BND_UUID& u)
 {
-  _rc->SetTypeId(Binding_to_ON_UUID(u));
+  m_rc->SetTypeId(Binding_to_ON_UUID(u));
 }
 
 BND_UUID BND_File3dmRenderContent::RenderEngineId() const
 {
-  return ON_UUID_to_Binding(_rc->RenderEngineId());
+  return ON_UUID_to_Binding(m_rc->RenderEngineId());
 }
 
 void BND_File3dmRenderContent::SetRenderEngineId(const BND_UUID& u)
 {
-  _rc->SetRenderEngineId(Binding_to_ON_UUID(u));
+  m_rc->SetRenderEngineId(Binding_to_ON_UUID(u));
 }
 
 BND_UUID BND_File3dmRenderContent::PlugInId() const
 {
-  return ON_UUID_to_Binding(_rc->PlugInId());
+  return ON_UUID_to_Binding(m_rc->PlugInId());
 }
 
 void BND_File3dmRenderContent::SetPlugInId(const BND_UUID& u)
 {
-  _rc->SetPlugInId(Binding_to_ON_UUID(u));
+  m_rc->SetPlugInId(Binding_to_ON_UUID(u));
 }
 
 std::wstring BND_File3dmRenderContent::Notes() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->Notes()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->Notes()));
 }
 
 void BND_File3dmRenderContent::SetNotes(const std::wstring& s)
 {
-  _rc->SetNotes(s.c_str());
+  m_rc->SetNotes(s.c_str());
 }
 
 std::wstring BND_File3dmRenderContent::Tags() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->Tags()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->Tags()));
 }
 
 void BND_File3dmRenderContent::SetTags(const std::wstring& s)
 {
-  _rc->SetTags(s.c_str());
+  m_rc->SetTags(s.c_str());
 }
 
 BND_UUID BND_File3dmRenderContent::GroupId() const
 {
-  return ON_UUID_to_Binding(_rc->GroupId());
+  return ON_UUID_to_Binding(m_rc->GroupId());
 }
 
 void BND_File3dmRenderContent::SetGroupId(const BND_UUID& u)
 {
-  _rc->SetGroupId(Binding_to_ON_UUID(u));
+  m_rc->SetGroupId(Binding_to_ON_UUID(u));
 }
 
 bool BND_File3dmRenderContent::Hidden(void) const
 {
-  return _rc->Hidden();
+  return m_rc->Hidden();
 }
 
 void BND_File3dmRenderContent::SetHidden(bool b)
 {
-  _rc->SetHidden(b);
+  m_rc->SetHidden(b);
 }
 
 bool BND_File3dmRenderContent::Reference() const
 {
-  return _rc->Reference();
+  return m_rc->Reference();
 }
 
 void BND_File3dmRenderContent::SetReference(bool b)
 {
-  _rc->SetReference(b);
+  m_rc->SetReference(b);
 }
 
 bool BND_File3dmRenderContent::AutoDelete() const
 {
-  return _rc->AutoDelete();
+  return m_rc->AutoDelete();
 }
 
 void BND_File3dmRenderContent::SetAutoDelete(bool b)
 {
-  return _rc->SetAutoDelete(b);
+  return m_rc->SetAutoDelete(b);
 }
 
 static BND_File3dmRenderContent* NewRenderContentBinding(ON_RenderContent* rc)
@@ -184,98 +184,98 @@ static BND_File3dmRenderContent* NewRenderContentBinding(ON_RenderContent* rc)
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::Parent() const
 {
-  return NewRenderContentBinding(_rc->Parent());
+  return NewRenderContentBinding(m_rc->Parent());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::FirstChild() const
 {
-  return NewRenderContentBinding(_rc->FirstChild());
+  return NewRenderContentBinding(m_rc->FirstChild());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::NextSibling() const
 {
-  return NewRenderContentBinding(_rc->NextSibling());
+  return NewRenderContentBinding(m_rc->NextSibling());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::TopLevel() const
 {
-  return NewRenderContentBinding(&_rc->TopLevel());
+  return NewRenderContentBinding(&m_rc->TopLevel());
 }
 
 bool BND_File3dmRenderContent::IsTopLevel() const
 {
-  return _rc->IsTopLevel();
+  return m_rc->IsTopLevel();
 }
 
 bool BND_File3dmRenderContent::IsChild() const
 {
-  return _rc->IsChild();
+  return m_rc->IsChild();
 }
 
 bool BND_File3dmRenderContent::SetChild(const ON_RenderContent& child, const std::wstring& csn)
 {
-  return _rc->SetChild(child, csn.c_str());
+  return m_rc->SetChild(child, csn.c_str());
 }
 
 std::wstring BND_File3dmRenderContent::ChildSlotName() const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->ChildSlotName()));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->ChildSlotName()));
 }
 
 void BND_File3dmRenderContent::SetChildSlotName(const std::wstring& csn)
 {
-  _rc->SetChildSlotName(csn.c_str());
+  m_rc->SetChildSlotName(csn.c_str());
 }
 
 bool BND_File3dmRenderContent::ChildSlotOn(const std::wstring& csn) const
 {
-  return _rc->ChildSlotOn(csn.c_str());
+  return m_rc->ChildSlotOn(csn.c_str());
 }
 
 bool BND_File3dmRenderContent::SetChildSlotOn(bool on, const std::wstring& csn)
 {
-  return _rc->SetChildSlotOn(on, csn.c_str());
+  return m_rc->SetChildSlotOn(on, csn.c_str());
 }
 
 double BND_File3dmRenderContent::ChildSlotAmount(const wchar_t* child_slot_name) const
 {
-  return _rc->ChildSlotAmount(child_slot_name, 100.0);
+  return m_rc->ChildSlotAmount(child_slot_name, 100.0);
 }
 
 bool BND_File3dmRenderContent::SetChildSlotAmount(double amount, const wchar_t* child_slot_name)
 {
-  return _rc->SetChildSlotAmount(amount, child_slot_name);
+  return m_rc->SetChildSlotAmount(amount, child_slot_name);
 }
 
 bool BND_File3dmRenderContent::DeleteChild(const std::wstring& csn)
 {
-  return _rc->DeleteChild(csn.c_str());
+  return m_rc->DeleteChild(csn.c_str());
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContent::FindChild(const std::wstring& csn) const
 {
-  ON_RenderContent* rc = const_cast<ON_RenderContent*>(_rc->FindChild(csn.c_str()));
+  ON_RenderContent* rc = const_cast<ON_RenderContent*>(m_rc->FindChild(csn.c_str()));
   return NewRenderContentBinding(rc);
 }
 
 std::wstring BND_File3dmRenderContent::XML(bool recursive) const
 {
-  return std::wstring(static_cast<const wchar_t*>(_rc->XML(recursive)));
+  return std::wstring(static_cast<const wchar_t*>(m_rc->XML(recursive)));
 }
 
 bool BND_File3dmRenderContent::SetXML(const std::wstring& xml)
 {
-  return _rc->SetXML(xml.c_str());
+  return m_rc->SetXML(xml.c_str());
 }
 
 std::wstring BND_File3dmRenderContent::GetParameter(const std::wstring& name) const
 {
-  return static_cast<const wchar_t*>(_rc->GetParameter(name.c_str()).AsString());
+  return static_cast<const wchar_t*>(m_rc->GetParameter(name.c_str()).AsString());
 }
 
 bool BND_File3dmRenderContent::SetParameter(const std::wstring& name, const std::wstring& val)
 {
-  return _rc->SetParameter(name.c_str(), val.c_str());
+  return m_rc->SetParameter(name.c_str(), val.c_str());
 }
 
 
@@ -299,7 +299,7 @@ BND_File3dmRenderMaterial::BND_File3dmRenderMaterial(ON_RenderContent* rm, const
 
 BND_Material* BND_File3dmRenderMaterial::ToMaterial() const
 {
-  const auto* mat = dynamic_cast<const ON_RenderMaterial*>(_rc);
+  const auto* mat = dynamic_cast<const ON_RenderMaterial*>(m_rc);
   if (nullptr == mat)
     return nullptr;
 
@@ -329,7 +329,7 @@ BND_File3dmRenderEnvironment::BND_File3dmRenderEnvironment(ON_RenderContent* re,
 
 BND_Environment* BND_File3dmRenderEnvironment::ToEnvironment() const
 {
-  const auto* env = dynamic_cast<const ON_RenderEnvironment*>(_rc);
+  const auto* env = dynamic_cast<const ON_RenderEnvironment*>(m_rc);
   if (nullptr == env)
     return nullptr;
 
@@ -359,7 +359,7 @@ BND_File3dmRenderTexture::BND_File3dmRenderTexture(ON_RenderContent* rt, const O
 
 BND_Texture* BND_File3dmRenderTexture::ToTexture() const
 {
-  const auto* tex = dynamic_cast<const ON_RenderTexture*>(_rc);
+  const auto* tex = dynamic_cast<const ON_RenderTexture*>(m_rc);
   if (nullptr == tex)
     return nullptr;
 
@@ -373,7 +373,7 @@ std::wstring BND_File3dmRenderTexture::Filename() const
 {
   std::wstring s;
 
-  const auto* tex = dynamic_cast<const ON_RenderTexture*>(_rc);
+  const auto* tex = dynamic_cast<const ON_RenderTexture*>(m_rc);
   if (nullptr != tex)
   {
     s = static_cast<const wchar_t*>(tex->Filename());
@@ -384,7 +384,7 @@ std::wstring BND_File3dmRenderTexture::Filename() const
 
 void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
 {
-  auto* tex = dynamic_cast<ON_RenderTexture*>(_rc);
+  auto* tex = dynamic_cast<ON_RenderTexture*>(m_rc);
   if (nullptr != tex)
   {
     tex->SetFilename(f.c_str());
@@ -393,10 +393,15 @@ void BND_File3dmRenderTexture::SetFilename(const std::wstring& f)
 
 void BND_File3dmRenderContentTable::Add(const BND_File3dmRenderContent& rc)
 {
-  if (nullptr != rc._rc)
+  /*
+  if (nullptr != rc.m_rc)
   {
-    m_model->AddModelComponent(*rc._rc);
+    m_model->AddModelComponent(*rc.m_rc);
   }
+  */
+  const ON_RenderContent* r = rc.m_rc;
+  m_model->AddModelComponent(*r);
+
 }
 
 BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindIndex(int index)
