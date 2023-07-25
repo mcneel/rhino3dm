@@ -3,13 +3,19 @@
 
 BND_File3dmRenderContent::BND_File3dmRenderContent()
 {
-  throw pybind11::type_error("Unable to create an instance of RenderContent. Try creating RenderMaterial, RenderEnvironment, or RenderTexture");
+  #if defined(ON_PYTHON_COMPILE)
+    throw pybind11::type_error("Unable to create an instance of RenderContent. Try creating RenderMaterial, RenderEnvironment, or RenderTexture");
+  #endif
 }
 
 BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc)
 {
   if (nullptr == rc)
+  {
+  #if defined(ON_PYTHON_COMPILE)
     throw pybind11::value_error("NULL RenderContent");
+  #endif
+  }
 
   rc->SetId();
 
