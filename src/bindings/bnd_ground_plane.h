@@ -12,14 +12,12 @@ void initGroundPlaneBindings(void* m);
 class BND_File3dmGroundPlane
 {
 private:
-  ON_GroundPlane* _gp = nullptr;
-  bool _owned = false;
+  std::shared_ptr<ON_GroundPlane> _gp;
 
 public:
   BND_File3dmGroundPlane();
-  BND_File3dmGroundPlane(ON_GroundPlane* gp);
+  BND_File3dmGroundPlane(std::shared_ptr<ON_GroundPlane> gp);
   BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp);
-  ~BND_File3dmGroundPlane() { if (_owned) delete _gp; }
 
   bool GetEnabled(void) const { return _gp->Enabled(); }
   void SetEnabled(bool v) { _gp->SetEnabled(v); }

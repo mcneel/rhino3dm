@@ -75,7 +75,7 @@ BND_RenderSettings::~BND_RenderSettings()
 
 void BND_RenderSettings::Construct()
 {
-  m_ground_plane        = new BND_File3dmGroundPlane       (&m_render_settings->GroundPlane());
+  m_ground_plane        = new BND_File3dmGroundPlane       (std::shared_ptr<ON_GroundPlane>(&m_render_settings->GroundPlane()));
   m_safe_frame          = new BND_File3dmSafeFrame         (&m_render_settings->SafeFrame());
   m_dithering           = new BND_File3dmDithering         (&m_render_settings->Dithering());
   m_skylight            = new BND_File3dmSkylight          (&m_render_settings->Skylight());
