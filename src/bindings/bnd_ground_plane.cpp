@@ -22,11 +22,14 @@ BND_File3dmGroundPlane::BND_File3dmGroundPlane(const BND_File3dmGroundPlane& gp)
   // Steal the pointer to the native object.
   _gp = gp._gp;
 
-  // Tell the original owner that it no longer owns it.
-  const_cast<BND_File3dmGroundPlane&>(gp)._owned = false;
+  if (gp._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmGroundPlane&>(gp)._owned = false;
 
-  // This object now owns it.
-  _owned = true;
+    // This object now owns it instead.
+    _owned = true;
+  }
 
 // Old code makes an actual copy of the native object -- which means changes don't stick.
 //  _gp = new ON_GroundPlane(*gp._gp);
