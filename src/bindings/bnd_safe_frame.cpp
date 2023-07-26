@@ -15,7 +15,7 @@ BND_File3dmSafeFrame::BND_File3dmSafeFrame(const BND_File3dmSafeFrame& sf)
   if (sf._owned)
   {
     // Tell the original owner that it no longer owns it.
-    const_cast<BND_File3dmSafeFrame&>(sf._owned = false;
+    const_cast<BND_File3dmSafeFrame&>(sf)._owned = false;
 
     // This object now owns it instead.
     _owned = true;
