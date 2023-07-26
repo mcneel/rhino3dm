@@ -11,9 +11,22 @@ BND_File3dmPostEffect::BND_File3dmPostEffect(ON_PostEffect* pep)
 }
 
 BND_File3dmPostEffect::BND_File3dmPostEffect(const BND_File3dmPostEffect& pep) 
-{ 
-  _pep = new ON_PostEffect(*pep._pep);
-  _owned = true;
+{
+   // see bnd_ground_plane.cpp for justification
+  _pep = pep._pep;
+
+  if (pep._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmPostEffect&>(pep)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_pep = new ON_PostEffect(*pep._pep);
+  //_owned = true;
 }
 
 BND_File3dmPostEffect::~BND_File3dmPostEffect()
@@ -88,8 +101,21 @@ BND_File3dmPostEffectTable::BND_File3dmPostEffectTable()
 
 BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(const BND_File3dmPostEffectTable& pet)
 {
-  _peps = new ON_PostEffects(*pet._peps);
-  _owned = true;
+   // see bnd_ground_plane.cpp for justification
+  _peps = pet._peps;
+
+  if (pet._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmPostEffectTable&>(pet)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_peps = new ON_PostEffects(*pet._peps);
+  //_owned = true;
 }
 
 BND_File3dmPostEffectTable::BND_File3dmPostEffectTable(ON_PostEffects* peps)

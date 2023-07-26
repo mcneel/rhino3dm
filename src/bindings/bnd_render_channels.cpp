@@ -9,8 +9,21 @@ BND_File3dmRenderChannels::BND_File3dmRenderChannels()
 
 BND_File3dmRenderChannels::BND_File3dmRenderChannels(const BND_File3dmRenderChannels& rch)
 {
-  _rch = new ON_RenderChannels(*rch._rch);
-  _owned = true;
+   // see bnd_ground_plane.cpp for justification
+  _rch = rch._rch;
+
+  if (rch._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmRenderChannels&>(rch)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_rch = new ON_RenderChannels(*rch._rch);
+  //_owned = true;
 }
 
 BND_File3dmRenderChannels::BND_File3dmRenderChannels(ON_RenderChannels* rch)

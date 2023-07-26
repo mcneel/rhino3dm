@@ -12,8 +12,21 @@ BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments()
 
 BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(const BND_File3dmRenderEnvironments& re)
 {
-  _rs = new ON_3dmRenderSettings(*re._rs);
-  _owned = true;
+   // see bnd_ground_plane.cpp for justification
+  _rs = re._rs;
+
+  if (re._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmRenderEnvironments&>(re)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_rs = new ON_3dmRenderSettings(*re._rs);
+  //_owned = true;
 }
 
 BND_File3dmRenderEnvironments::BND_File3dmRenderEnvironments(ON_3dmRenderSettings* rs)

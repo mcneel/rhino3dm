@@ -9,8 +9,21 @@ BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow()
 
 BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(const BND_File3dmLinearWorkflow& lw)
 {
-  _lw = new ON_LinearWorkflow(*lw._lw); 
-  _owned = true; 
+   // see bnd_ground_plane.cpp for justification
+  _lw = lw._lw;
+
+  if (lw._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmLinearWorkflow&>(lw)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_lw = new ON_LinearWorkflow(*lw._lw); 
+  //_owned = true; 
 }
 
 BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw)

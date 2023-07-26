@@ -9,8 +9,21 @@ BND_File3dmSun::BND_File3dmSun()
 
 BND_File3dmSun::BND_File3dmSun(const BND_File3dmSun& sun)
 {
-  _sun = new ON_Sun(*sun._sun);
-  _owned = true;
+   // see bnd_ground_plane.cpp for justification
+  _sun = sun._sun;
+
+  if (sun._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmSun&>(sun)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_sun = new ON_Sun(*sun._sun);
+  //_owned = true;
 }
 
 BND_File3dmSun::BND_File3dmSun(ON_Sun* s)

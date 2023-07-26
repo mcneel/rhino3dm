@@ -9,8 +9,21 @@ BND_File3dmSkylight::BND_File3dmSkylight()
 
 BND_File3dmSkylight::BND_File3dmSkylight(const BND_File3dmSkylight& sl)
 {
-  _sl = new ON_Skylight(*sl._sl); 
-  _owned = true; 
+   // see bnd_ground_plane.cpp for justification
+  _sl = sl._sl;
+
+  if (sl._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmSkylight&>(sl)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_sl = new ON_Skylight(*sl._sl); 
+  //_owned = true; 
 }
 
 BND_File3dmSkylight::BND_File3dmSkylight(ON_Skylight* sl)

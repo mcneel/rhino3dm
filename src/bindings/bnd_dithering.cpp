@@ -9,8 +9,22 @@ BND_File3dmDithering::BND_File3dmDithering()
 
 BND_File3dmDithering::BND_File3dmDithering(const BND_File3dmDithering& dit)
 {
-  _dit = new ON_Dithering(*dit._dit); 
-  _owned = true; 
+  // see bnd_ground_plane.cpp for justification
+  _dit = dit._dit;
+
+  if (dit._owned)
+  {
+    // Tell the original owner that it no longer owns it.
+    const_cast<BND_File3dmDithering&>(dit)._owned = false;
+
+    // This object now owns it instead.
+    _owned = true;
+  }
+
+  // Old code makes an actual copy of the native object -- which means changes don't stick.
+  //_dit = new ON_Dithering(*dit._dit); 
+  //_owned = true; 
+
 }
 
 BND_File3dmDithering::BND_File3dmDithering(ON_Dithering* dit)
