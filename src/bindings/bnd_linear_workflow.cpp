@@ -54,8 +54,8 @@ using namespace emscripten;
 void initLinearWorkflowBindings(void*)
 {
   class_<BND_File3dmLinearWorkflow>("LinearWorkflow")
-    .constructor<>()
-    .constructor<const BND_File3dmLinearWorkflow&>()
+    //.constructor<>()
+    //.constructor<const BND_File3dmLinearWorkflow&>()
     .property("preProcessTexturesOn", &BND_File3dmLinearWorkflow::GetPreProcessTexturesOn, &BND_File3dmLinearWorkflow::SetPreProcessTexturesOn)
     .property("preProcessColorsOn", &BND_File3dmLinearWorkflow::GetPreProcessColorsOn, &BND_File3dmLinearWorkflow::SetPreProcessColorsOn)
     .property("preProcessGamma", &BND_File3dmLinearWorkflow::GetPreProcessGamma, &BND_File3dmLinearWorkflow::SetPreProcessGamma)

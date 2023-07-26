@@ -60,8 +60,8 @@ using namespace emscripten;
 void initSafeFrameBindings(void*)
 {
   class_<BND_File3dmSafeFrame>("SafeFrame")
-    .constructor<>()
-    .constructor<const BND_File3dmSafeFrame&>()
+    //.constructor<>()
+    //.constructor<const BND_File3dmSafeFrame&>()
     .property("enabled", &BND_File3dmSafeFrame::GetEnabled, &BND_File3dmSafeFrame::SetEnabled)
     .property("perspectiveOnly", &BND_File3dmSafeFrame::GetPerspectiveOnly, &BND_File3dmSafeFrame::SetPerspectiveOnly)
     .property("fieldGridOn", &BND_File3dmSafeFrame::GetFieldGridOn, &BND_File3dmSafeFrame::SetFieldGridOn)

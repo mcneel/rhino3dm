@@ -140,6 +140,8 @@ public:
   BND_File3dmSun& GetSun() const { return *m_sun; }
   BND_File3dmPostEffectTable& GetPostEffects() const { return *m_post_effects; }
 
+  //void SetGroundPlane(BND_File3dmGroundPlane& gp) { m_render_settings->GroundPlane = gp; }
+
 };
 
 class BND_EarthAnchorPoint

@@ -51,8 +51,8 @@ using namespace emscripten;
 void initDitheringBindings(void*)
 {
   class_<BND_File3dmDithering>("Dithering")
-    .constructor<>()
-    .constructor<const BND_File3dmDithering&>()
+    //.constructor<>()
+    //.constructor<const BND_File3dmDithering&>()
     .property("enabled", &BND_File3dmDithering::GetEnabled, &BND_File3dmDithering::SetEnabled)
     .property("method", &BND_File3dmDithering::GetMethod, &BND_File3dmDithering::SetMethod)
     ;
