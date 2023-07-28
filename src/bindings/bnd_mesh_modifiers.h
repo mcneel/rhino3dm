@@ -27,44 +27,45 @@ protected:
 
 class BND_File3dmDisplacement : public BND_File3dmMeshModifier
 {
-private:
-  ON_Displacement* m_ds = nullptr;
-
 public:
   BND_File3dmDisplacement(ON_3dmObjectAttributes* attr=nullptr);
 
   using SRF = ON_Displacement::SweepResolutionFormulas;
-  bool     On()                 const { return (nullptr != m_ds) ? m_ds->On()                : false; }
-  double   BlackPoint()         const { return (nullptr != m_ds) ? m_ds->BlackPoint()        : 0.0; }
-  double   WhitePoint()         const { return (nullptr != m_ds) ? m_ds->WhitePoint()        : 0.0; }
-  double   PostWeldAngle()      const { return (nullptr != m_ds) ? m_ds->PostWeldAngle()     : 0.0; }
-  bool     FairingOn()          const { return (nullptr != m_ds) ? m_ds->FairingOn()         : false; }
-  int      Fairing()            const { return (nullptr != m_ds) ? m_ds->Fairing()           : 0; }
-  int      FinalMaxFaces()      const { return (nullptr != m_ds) ? m_ds->FinalMaxFaces()     : 0; }
-  bool     FinalMaxFacesOn()    const { return (nullptr != m_ds) ? m_ds->FinalMaxFacesOn()   : false; }
-  int      InitialQuality()     const { return (nullptr != m_ds) ? m_ds->InitialQuality()    : 0; }
-  int      MappingChannel()     const { return (nullptr != m_ds) ? m_ds->MappingChannel()    : 0; }
-  int      MeshMemoryLimit()    const { return (nullptr != m_ds) ? m_ds->MeshMemoryLimit()   : 0; }
-  int      RefineSteps()        const { return (nullptr != m_ds) ? m_ds->RefineSteps()       : 0; }
-  double   RefineSensitivity()  const { return (nullptr != m_ds) ? m_ds->RefineSensitivity() : 0.0; }
-  SRF  SweepResolutionFormula() const { return (nullptr != m_ds) ? m_ds->SweepResolutionFormula() : SRF::Default; }
-  BND_UUID Texture()            const { return ON_UUID_to_Binding((nullptr != m_ds) ? m_ds->Texture() : ON_nil_uuid); }
+  bool     On()                 const { return (nullptr != DSP()) ? DSP()->On()                : false; }
+  double   BlackPoint()         const { return (nullptr != DSP()) ? DSP()->BlackPoint()        : 0.0; }
+  double   WhitePoint()         const { return (nullptr != DSP()) ? DSP()->WhitePoint()        : 0.0; }
+  double   PostWeldAngle()      const { return (nullptr != DSP()) ? DSP()->PostWeldAngle()     : 0.0; }
+  bool     FairingOn()          const { return (nullptr != DSP()) ? DSP()->FairingOn()         : false; }
+  int      Fairing()            const { return (nullptr != DSP()) ? DSP()->Fairing()           : 0; }
+  int      FinalMaxFaces()      const { return (nullptr != DSP()) ? DSP()->FinalMaxFaces()     : 0; }
+  bool     FinalMaxFacesOn()    const { return (nullptr != DSP()) ? DSP()->FinalMaxFacesOn()   : false; }
+  int      InitialQuality()     const { return (nullptr != DSP()) ? DSP()->InitialQuality()    : 0; }
+  int      MappingChannel()     const { return (nullptr != DSP()) ? DSP()->MappingChannel()    : 0; }
+  int      MeshMemoryLimit()    const { return (nullptr != DSP()) ? DSP()->MeshMemoryLimit()   : 0; }
+  int      RefineSteps()        const { return (nullptr != DSP()) ? DSP()->RefineSteps()       : 0; }
+  double   RefineSensitivity()  const { return (nullptr != DSP()) ? DSP()->RefineSensitivity() : 0.0; }
+  SRF  SweepResolutionFormula() const { return (nullptr != DSP()) ? DSP()->SweepResolutionFormula() : SRF::Default; }
+  BND_UUID Texture()            const { return ON_UUID_to_Binding((nullptr != DSP()) ? DSP()->Texture() : ON_nil_uuid); }
 
-  void SetOn(bool v)                     { if (nullptr != m_ds) m_ds->SetOn(v); }
-  void SetBlackPoint(double v)           { if (nullptr != m_ds) m_ds->SetBlackPoint(v); }
-  void SetWhitePoint(double v)           { if (nullptr != m_ds) m_ds->SetWhitePoint(v); }
-  void SetFairing(int v)                 { if (nullptr != m_ds) m_ds->SetFairing(v); }
-  void SetFairingOn(bool v)              { if (nullptr != m_ds) m_ds->SetFairingOn(v); }
-  void SetFinalMaxFaces(int v)           { if (nullptr != m_ds) m_ds->SetFinalMaxFaces(v); }
-  void SetFinalMaxFacesOn(bool v)        { if (nullptr != m_ds) m_ds->SetFinalMaxFacesOn(v); }
-  void SetInitialQuality(int v)          { if (nullptr != m_ds) m_ds->SetInitialQuality(v); }
-  void SetMappingChannel(int v)          { if (nullptr != m_ds) m_ds->SetMappingChannel(v); }
-  void SetMeshMemoryLimit(int v)         { if (nullptr != m_ds) m_ds->SetMeshMemoryLimit(v); }
-  void SetPostWeldAngle(double v)        { if (nullptr != m_ds) m_ds->SetPostWeldAngle(v); }
-  void SetRefineSteps(int v)             { if (nullptr != m_ds) m_ds->SetRefineSteps(v); }
-  void SetRefineSensitivity(double v)    { if (nullptr != m_ds) m_ds->SetRefineSensitivity(v); }
-  void SetSweepResolutionFormula(SRF v)  { if (nullptr != m_ds) m_ds->SetSweepResolutionFormula(v); }
-  void SetTexture(const BND_UUID& v)     { if (nullptr != m_ds) m_ds->SetTexture(Binding_to_ON_UUID(v)); }
+  void SetOn(bool v)                     { if (nullptr != DSP()) DSP()->SetOn(v); }
+  void SetBlackPoint(double v)           { if (nullptr != DSP()) DSP()->SetBlackPoint(v); }
+  void SetWhitePoint(double v)           { if (nullptr != DSP()) DSP()->SetWhitePoint(v); }
+  void SetFairing(int v)                 { if (nullptr != DSP()) DSP()->SetFairing(v); }
+  void SetFairingOn(bool v)              { if (nullptr != DSP()) DSP()->SetFairingOn(v); }
+  void SetFinalMaxFaces(int v)           { if (nullptr != DSP()) DSP()->SetFinalMaxFaces(v); }
+  void SetFinalMaxFacesOn(bool v)        { if (nullptr != DSP()) DSP()->SetFinalMaxFacesOn(v); }
+  void SetInitialQuality(int v)          { if (nullptr != DSP()) DSP()->SetInitialQuality(v); }
+  void SetMappingChannel(int v)          { if (nullptr != DSP()) DSP()->SetMappingChannel(v); }
+  void SetMeshMemoryLimit(int v)         { if (nullptr != DSP()) DSP()->SetMeshMemoryLimit(v); }
+  void SetPostWeldAngle(double v)        { if (nullptr != DSP()) DSP()->SetPostWeldAngle(v); }
+  void SetRefineSteps(int v)             { if (nullptr != DSP()) DSP()->SetRefineSteps(v); }
+  void SetRefineSensitivity(double v)    { if (nullptr != DSP()) DSP()->SetRefineSensitivity(v); }
+  void SetSweepResolutionFormula(SRF v)  { if (nullptr != DSP()) DSP()->SetSweepResolutionFormula(v); }
+  void SetTexture(const BND_UUID& v)     { if (nullptr != DSP()) DSP()->SetTexture(Binding_to_ON_UUID(v)); }
+
+private:
+        ON_Displacement* DSP()       { return dynamic_cast<ON_Displacement*>(m_mm); }
+  const ON_Displacement* DSP() const { return dynamic_cast<ON_Displacement*>(m_mm); }
 
 protected:
   virtual void CreateNew(void) override;
@@ -72,25 +73,26 @@ protected:
 
 class BND_File3dmEdgeSoftening : public BND_File3dmMeshModifier
 {
-private:
-  ON_EdgeSoftening* m_es = nullptr;
-
 public:
   BND_File3dmEdgeSoftening(ON_3dmObjectAttributes* attr=nullptr);
 
-  bool    On()                 const { return (nullptr != m_es) ? m_es->On()                 : false; }
-  double  Softening()          const { return (nullptr != m_es) ? m_es->Softening()          : 0.0; }
-  bool    Chamfer()            const { return (nullptr != m_es) ? m_es->Chamfer()            : false; }
-  bool    Faceted()            const { return (nullptr != m_es) ? m_es->Faceted()            : false; }
-  double  EdgeAngleThreshold() const { return (nullptr != m_es) ? m_es->EdgeAngleThreshold() : 0.0; }
-  bool    ForceSoftening()     const { return (nullptr != m_es) ? m_es->ForceSoftening()     : false; }
+  bool    On()                 const { return (nullptr != ES()) ? ES()->On()                 : false; }
+  double  Softening()          const { return (nullptr != ES()) ? ES()->Softening()          : 0.0; }
+  bool    Chamfer()            const { return (nullptr != ES()) ? ES()->Chamfer()            : false; }
+  bool    Faceted()            const { return (nullptr != ES()) ? ES()->Faceted()            : false; }
+  double  EdgeAngleThreshold() const { return (nullptr != ES()) ? ES()->EdgeAngleThreshold() : 0.0; }
+  bool    ForceSoftening()     const { return (nullptr != ES()) ? ES()->ForceSoftening()     : false; }
 
-  void SetOn(bool v)                    { if (nullptr != m_es) m_es->SetOn(v); }
-  void SetSoftening(double v)           { if (nullptr != m_es) m_es->SetSoftening(v); }
-  void SetChamfer(bool v)               { if (nullptr != m_es) m_es->SetChamfer(v); }
-  void SetFaceted(bool v)               { if (nullptr != m_es) m_es->SetFaceted(v); }
-  void SetEdgeAngleThreshold(double v)  { if (nullptr != m_es) m_es->SetEdgeAngleThreshold(v); }
-  void SetForceSoftening(bool v)        { if (nullptr != m_es) m_es->SetForceSoftening(v); }
+  void SetOn(bool v)                   { if (nullptr != ES()) ES()->SetOn(v); }
+  void SetSoftening(double v)          { if (nullptr != ES()) ES()->SetSoftening(v); }
+  void SetChamfer(bool v)              { if (nullptr != ES()) ES()->SetChamfer(v); }
+  void SetFaceted(bool v)              { if (nullptr != ES()) ES()->SetFaceted(v); }
+  void SetEdgeAngleThreshold(double v) { if (nullptr != ES()) ES()->SetEdgeAngleThreshold(v); }
+  void SetForceSoftening(bool v)       { if (nullptr != ES()) ES()->SetForceSoftening(v); }
+
+private:
+        ON_EdgeSoftening* ES()       { return dynamic_cast<ON_EdgeSoftening*>(m_mm); }
+  const ON_EdgeSoftening* ES() const { return dynamic_cast<ON_EdgeSoftening*>(m_mm); }
 
 protected:
   virtual void CreateNew() override;
@@ -98,23 +100,24 @@ protected:
 
 class BND_File3dmThickening : public BND_File3dmMeshModifier
 {
-private:
-  ON_Thickening* m_th = nullptr;
-
 public:
   BND_File3dmThickening(ON_3dmObjectAttributes* attr=nullptr);
 
-  bool   On()         const { return (nullptr != m_th) ? m_th->On()         : false; }
-  double Distance()   const { return (nullptr != m_th) ? m_th->Distance()   : 0.0;   }
-  bool   Solid()      const { return (nullptr != m_th) ? m_th->Solid()      : false; }
-  bool   OffsetOnly() const { return (nullptr != m_th) ? m_th->OffsetOnly() : false; }
-  bool   BothSides()  const { return (nullptr != m_th) ? m_th->BothSides()  : false; }
+  bool   On()         const { return (nullptr != TH()) ? TH()->On()         : false; }
+  double Distance()   const { return (nullptr != TH()) ? TH()->Distance()   : 0.0;   }
+  bool   Solid()      const { return (nullptr != TH()) ? TH()->Solid()      : false; }
+  bool   OffsetOnly() const { return (nullptr != TH()) ? TH()->OffsetOnly() : false; }
+  bool   BothSides()  const { return (nullptr != TH()) ? TH()->BothSides()  : false; }
 
-  void SetOn(bool v)          { if (nullptr != m_th) m_th->SetOn(v); }
-  void SetDistance(double v)  { if (nullptr != m_th) m_th->SetDistance(v); }
-  void SetSolid(bool v)       { if (nullptr != m_th) m_th->SetSolid(v); }
-  void SetOffsetOnly(bool v)  { if (nullptr != m_th) m_th->SetOffsetOnly(v); }
-  void SetBothSides(bool v)   { if (nullptr != m_th) m_th->SetBothSides(v) ; }
+  void SetOn(bool v)          { if (nullptr != TH()) TH()->SetOn(v); }
+  void SetDistance(double v)  { if (nullptr != TH()) TH()->SetDistance(v); }
+  void SetSolid(bool v)       { if (nullptr != TH()) TH()->SetSolid(v); }
+  void SetOffsetOnly(bool v)  { if (nullptr != TH()) TH()->SetOffsetOnly(v); }
+  void SetBothSides(bool v)   { if (nullptr != TH()) TH()->SetBothSides(v) ; }
+
+private:
+        ON_Thickening* TH()       { return dynamic_cast<ON_Thickening*>(m_mm); }
+  const ON_Thickening* TH() const { return dynamic_cast<ON_Thickening*>(m_mm); }
 
 protected:
   virtual void CreateNew(void) override;
@@ -122,27 +125,29 @@ protected:
 
 class BND_File3dmCurvePiping : public BND_File3dmMeshModifier
 {
-private:
-  ON_CurvePiping* m_cp = nullptr;
-
 public:
   BND_File3dmCurvePiping(ON_3dmObjectAttributes* attr=nullptr);
+  BND_File3dmCurvePiping(const BND_File3dmCurvePiping&);
 
   using CT = ON_CurvePiping::CapTypes;
 
-  bool   On()       const { return (nullptr != m_cp) ? m_cp->On()       : false; }
-  double Radius()   const { return (nullptr != m_cp) ? m_cp->Radius()   : 0.0; }
-  int    Segments() const { return (nullptr != m_cp) ? m_cp->Segments() : 0; }
-  bool   Faceted()  const { return (nullptr != m_cp) ? m_cp->Faceted()  : false; }
-  int    Accuracy() const { return (nullptr != m_cp) ? m_cp->Accuracy() : 0; }
-  CT     CapType()  const { return (nullptr != m_cp) ? m_cp->CapType()  : CT::None; }
+  bool   On()       const { return (nullptr != CP()) ? CP()->On()       : false; }
+  double Radius()   const { return (nullptr != CP()) ? CP()->Radius()   : 0.0; }
+  int    Segments() const { return (nullptr != CP()) ? CP()->Segments() : 0; }
+  bool   Faceted()  const { return (nullptr != CP()) ? CP()->Faceted()  : false; }
+  int    Accuracy() const { return (nullptr != CP()) ? CP()->Accuracy() : 0; }
+  CT     CapType()  const { return (nullptr != CP()) ? CP()->CapType()  : CT::None; }
 
-  void SetOn(bool v)        { if (nullptr != m_cp) m_cp->SetOn(v); }
-  void SetRadius(double v)  { if (nullptr != m_cp) m_cp->SetRadius(v); }
-  void SetSegments(int v)   { if (nullptr != m_cp) m_cp->SetSegments(v); }
-  void SetFaceted(bool v)   { if (nullptr != m_cp) m_cp->SetFaceted(v); }
-  void SetAccuracy(int v)   { if (nullptr != m_cp) m_cp->SetAccuracy(v); }
-  void SetCapType(CT v)     { if (nullptr != m_cp) m_cp->SetCapType(v); }
+  void SetOn(bool v)        { if (nullptr != CP()) CP()->SetOn(v); }
+  void SetRadius(double v)  { if (nullptr != CP()) CP()->SetRadius(v); }
+  void SetSegments(int v)   { if (nullptr != CP()) CP()->SetSegments(v); }
+  void SetFaceted(bool v)   { if (nullptr != CP()) CP()->SetFaceted(v); }
+  void SetAccuracy(int v)   { if (nullptr != CP()) CP()->SetAccuracy(v); }
+  void SetCapType(CT v)     { if (nullptr != CP()) CP()->SetCapType(v); }
+
+private:
+        ON_CurvePiping* CP()       { return dynamic_cast<ON_CurvePiping*>(m_mm); }
+  const ON_CurvePiping* CP() const { return dynamic_cast<ON_CurvePiping*>(m_mm); }
 
 protected:
   virtual void CreateNew(void) override;
@@ -188,25 +193,26 @@ public:
 
 class BND_File3dmShutLining : public BND_File3dmMeshModifier
 {
-private:
-  ON_ShutLining* m_sl = nullptr;
-
 public:
   BND_File3dmShutLining(ON_3dmObjectAttributes* attr=nullptr);
 
-  bool On()          const { return (nullptr != m_sl) ? m_sl->On()          : false; }
-  bool Faceted()     const { return (nullptr != m_sl) ? m_sl->Faceted()     : false; }
-  bool AutoUpdate()  const { return (nullptr != m_sl) ? m_sl->AutoUpdate()  : false; }
-  bool ForceUpdate() const { return (nullptr != m_sl) ? m_sl->ForceUpdate() : false; }
+  bool On()          const { return (nullptr != SL()) ? SL()->On()          : false; }
+  bool Faceted()     const { return (nullptr != SL()) ? SL()->Faceted()     : false; }
+  bool AutoUpdate()  const { return (nullptr != SL()) ? SL()->AutoUpdate()  : false; }
+  bool ForceUpdate() const { return (nullptr != SL()) ? SL()->ForceUpdate() : false; }
 
-  void SetOn(bool v)           { if (nullptr != m_sl) m_sl->SetOn(v); }
-  void SetFaceted(bool v)      { if (nullptr != m_sl) m_sl->SetFaceted(v); }
-  void SetAutoUpdate(bool v)   { if (nullptr != m_sl) m_sl->SetAutoUpdate(v); }
-  void SetForceUpdate(bool v)  { if (nullptr != m_sl) m_sl->SetForceUpdate(v); }
+  void SetOn(bool v)           { if (nullptr != SL()) SL()->SetOn(v); }
+  void SetFaceted(bool v)      { if (nullptr != SL()) SL()->SetFaceted(v); }
+  void SetAutoUpdate(bool v)   { if (nullptr != SL()) SL()->SetAutoUpdate(v); }
+  void SetForceUpdate(bool v)  { if (nullptr != SL()) SL()->SetForceUpdate(v); }
 
-  BND_File3dmShutLiningCurveTable Curves() const { return BND_File3dmShutLiningCurveTable(m_sl); }
+  BND_File3dmShutLiningCurveTable Curves() { return BND_File3dmShutLiningCurveTable(SL()); }
 
-  void DeleteAllCurves() const { if (nullptr != m_sl) m_sl->DeleteAllCurves(); }
+  void DeleteAllCurves() { if (nullptr != SL()) SL()->DeleteAllCurves(); }
+
+private:
+        ON_ShutLining* SL()       { return dynamic_cast<ON_ShutLining*>(m_mm); }
+  const ON_ShutLining* SL() const { return dynamic_cast<ON_ShutLining*>(m_mm); }
 
 protected:
   virtual void CreateNew() override;
@@ -220,10 +226,12 @@ private:
   BND_File3dmThickening    m_thickening;
   BND_File3dmCurvePiping   m_curve_piping;
   BND_File3dmShutLining    m_shutlining;
+  ON_3dmObjectAttributes*  m_attr;
 
 public:
   BND_File3dmMeshModifiers() = default;
   BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr);
+  BND_File3dmMeshModifiers(const BND_File3dmMeshModifiers&);
 
   BND_File3dmDisplacement*  Displacement()  { return m_displacement  .Exists() ? &m_displacement   : nullptr; }
   BND_File3dmEdgeSoftening* EdgeSoftening() { return m_edge_softening.Exists() ? &m_edge_softening : nullptr; }

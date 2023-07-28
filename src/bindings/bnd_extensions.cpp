@@ -1700,7 +1700,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmShutLiningCurveTable::Count)
     .def("__getitem__", &BND_File3dmShutLiningCurveTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmShutLiningCurveTable&, BND_File3dmShutLiningCurve*>(s.cast<BND_File3dmShutLiningCurveTable&>(), s); })
-    .def("Add", &BND_File3dmShutLiningCurveTable::Add)
+    .def("Add", &BND_File3dmShutLiningCurveTable::Add, py::arg("id"))
     .def("FindIndex", &BND_File3dmShutLiningCurveTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmShutLiningCurveTable::FindId, py::arg("id"))
     ;
