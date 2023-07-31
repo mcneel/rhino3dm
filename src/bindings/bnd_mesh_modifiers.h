@@ -206,7 +206,7 @@ public:
   void SetAutoUpdate(bool v)   { if (nullptr != SL()) SL()->SetAutoUpdate(v); }
   void SetForceUpdate(bool v)  { if (nullptr != SL()) SL()->SetForceUpdate(v); }
 
-  BND_File3dmShutLiningCurveTable Curves() const { return BND_File3dmShutLiningCurveTable(SL()); }
+  BND_File3dmShutLiningCurveTable Curves() { return BND_File3dmShutLiningCurveTable(SL()); }
 
   void DeleteAllCurves() { if (nullptr != SL()) SL()->DeleteAllCurves(); }
 
