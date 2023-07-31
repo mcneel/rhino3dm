@@ -69,8 +69,8 @@ using namespace emscripten;
 void initGroundPlaneBindings(void*)
 {
   class_<BND_File3dmGroundPlane>("GroundPlane")
-    .constructor<>()
-    .constructor<const BND_File3dmGroundPlane&>()
+    //.constructor<>()
+    //.constructor<const BND_File3dmGroundPlane&>()
     .property("enabled", &BND_File3dmGroundPlane::GetEnabled, &BND_File3dmGroundPlane::SetEnabled)
     .property("showUnderside", &BND_File3dmGroundPlane::GetShowUnderside, &BND_File3dmGroundPlane::SetShowUnderside)
     .property("altitude", &BND_File3dmGroundPlane::GetAltitude, &BND_File3dmGroundPlane::SetAltitude)

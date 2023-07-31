@@ -196,7 +196,7 @@ void initMaterialBindings(pybind11::module& m)
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture, py::arg("fileName"))
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2, py::arg("texture"))
     .def_property_readonly("PhysicallyBased", &BND_Material::PhysicallyBased)
-    .def("toPhysicallyBased", &BND_Material::ToPhysicallyBased)
+    .def("ToPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
 #endif
