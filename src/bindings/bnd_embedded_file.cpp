@@ -117,12 +117,18 @@ using namespace emscripten;
 void initEmbeddedFileBindings(void*)
 {
   class_<BND_File3dmEmbeddedFile>("EmbeddedFile")
-    .constructor<>()
-    .constructor<const BND_File3dmEmbeddedFile&>()
-    .class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
+    //commented ctors, read and write 
+    //we don't yet have the add method on the embedded file table.
+    //reading an embedded file thus makes little sense.
+    //writing seems to have issues
+
+    //.constructor<>()
+    //.constructor<const BND_File3dmEmbeddedFile&>()
+    //.class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
     .property("fileName", &BND_File3dmEmbeddedFile::GetFilename)
-    .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers())
+    //.function("setFileName", &BND_File3dmEmbeddedFile::SetFilename) //TODO
+    //.function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }
