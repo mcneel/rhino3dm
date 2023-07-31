@@ -165,23 +165,23 @@ BND_File3dmShutLiningCurve* BND_File3dmShutLiningCurveTable::FindId(BND_UUID id)
 
 BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(ON_3dmObjectAttributes* attr)
   :
-  m_attr(attr),
   m_displacement(attr),
   m_edge_softening(attr),
   m_thickening(attr),
   m_curve_piping(attr),
-  m_shutlining(attr)
+  m_shutlining(attr),
+  m_attr(attr)
 {
 }
 
 BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(const BND_File3dmMeshModifiers& mm)
   :
-  m_attr(mm.m_attr),
   m_displacement(mm.m_attr),
   m_edge_softening(mm.m_attr),
   m_thickening(mm.m_attr),
   m_curve_piping(mm.m_attr),
-  m_shutlining(mm.m_attr)
+  m_shutlining(mm.m_attr),
+  m_attr(mm.m_attr)
 {
 }
 

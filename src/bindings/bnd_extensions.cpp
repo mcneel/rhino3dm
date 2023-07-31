@@ -8,9 +8,8 @@ static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
     return false;
 
   bool rc = false;
-  unsigned int buffer_crc0 = 0;
-  unsigned int buffer_crc1 = 0;
   char method = 0;
+  unsigned int buffer_crc0 = 0;
 
   size_t sizeof__outbuffer;
   if (!archive.ReadCompressedBufferSize(&sizeof__outbuffer))

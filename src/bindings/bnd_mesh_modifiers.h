@@ -11,6 +11,9 @@ void initMeshModifierBindings(void* m);
 
 class BND_File3dmMeshModifier
 {
+public:
+  virtual ~BND_File3dmMeshModifier() { }
+
 protected:
   ON_MeshModifier* m_mm = nullptr;
   ON_3dmObjectAttributes* m_attr = nullptr;
@@ -182,7 +185,7 @@ private:
   ON_ShutLining* m_sl = nullptr;
 
 public:
-  BND_File3dmShutLiningCurveTable(ON_ShutLining* sl=nullptr) : m_sl(sl) { }
+  BND_File3dmShutLiningCurveTable(const ON_ShutLining* sl=nullptr) : m_sl(const_cast<ON_ShutLining*>(sl)) { }
 
   int Count() const;
   void Add(BND_UUID id);
@@ -206,7 +209,7 @@ public:
   void SetAutoUpdate(bool v)   { if (nullptr != SL()) SL()->SetAutoUpdate(v); }
   void SetForceUpdate(bool v)  { if (nullptr != SL()) SL()->SetForceUpdate(v); }
 
-  BND_File3dmShutLiningCurveTable Curves() { return BND_File3dmShutLiningCurveTable(SL()); }
+  BND_File3dmShutLiningCurveTable Curves() const { return BND_File3dmShutLiningCurveTable(SL()); }
 
   void DeleteAllCurves() { if (nullptr != SL()) SL()->DeleteAllCurves(); }
 
