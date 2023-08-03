@@ -141,11 +141,11 @@ namespace DotNetTester
     static void DitheringTest(Dithering dit)
     {
       Console.WriteLine("BEGIN Dithering");
-      Console.WriteLine("On:      {0}", dit.On);
+      Console.WriteLine("On:      {0}", dit.Enabled);
       Console.WriteLine("Method:  {0}", dit.Method);
 
       Console.WriteLine("Dithering set Method FloydSteinberg");
-      dit.On = true;
+      dit.Enabled = true;
       dit.Method = Dithering.Methods.FloydSteinberg;
       Console.WriteLine("Method:  {0}", dit.Method);
       Console.WriteLine("Dithering set Method SimpleNoise");
