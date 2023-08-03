@@ -55,6 +55,10 @@ namespace DotNetTester
 
       foreach (var m in file3dm.RenderMaterials)
       {
+        var k  = m.Kind;
+        var tn = m.TypeName;
+        var tl = m.TopLevel;
+
         DisplayRenderContent(m);
 
         foreach (var c in m.Children)
