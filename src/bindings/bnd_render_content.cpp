@@ -568,6 +568,8 @@ void initRenderContentBindings(void*)
     .property("fileName", &BND_File3dmRenderTexture::Filename)
     .function("setFilename", &BND_File3dmRenderTexture::SetFilename, allow_raw_pointers())
     ;
+
+    
     
 }
 #endif
