@@ -75,8 +75,10 @@ public:
   double GetIntensity() const { return _sun->Intensity(); }
   void SetIntensity(double v) { return _sun->SetIntensity(v); }
 
+/*
   double GetShadowIntensity() const { return _sun->ShadowIntensity(); }
   void SetShadowIntensity(double v) { return _sun->SetShadowIntensity(v); }
+*/
 
   bool GetIsValid() const { return _sun->IsValid(); }
 
