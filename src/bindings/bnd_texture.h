@@ -40,6 +40,13 @@ public:
   //public void SetAlphaBlendValues(double constant, double a0, double a1, double a2, double a3)
   //public void SetRGBBlendValues(Color color, double a0, double a1, double a2, double a3)
 
+  ON_2dVector Repeat() const { return m_texture->Repeat(); }
+  void SetRepeat(ON_2dVector repeat) { m_texture->SetRepeat( repeat ); }
+  ON_2dVector Offset() const { return m_texture->Offset(); }
+  void SetOffset(ON_2dVector offset) { m_texture->SetOffset( offset); }
+  double Rotation() const { return m_texture->Rotation(); }
+  void SetRotation(double rotation) { m_texture->SetRotation( rotation ); }
+
 protected:
   void SetTrackedPointer(ON_Texture* texture, const ON_ModelComponentReference* compref);
 };

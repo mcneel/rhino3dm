@@ -170,6 +170,9 @@ void initTextureBindings(pybind11::module& m)
     .def_property_readonly("Id", &BND_Texture::Id)
     .def_property("Enabled", &BND_Texture::Enabled,  &BND_Texture::SetEnabled)
     .def_property("TextureType", &BND_Texture::TextureType,  &BND_Texture::SetTextureType)
+    .def_property("Repeat", &BND_Texture::Repeat, &BND_Texture::SetRepeat)
+    .def_property("Offset", &BND_Texture::Offset, &BND_Texture::SetOffset)
+    .def_property("Rotation", &BND_Texture::Rotation, &BND_Texture::SetRotation)
     ;
 }
 #endif
@@ -237,6 +240,9 @@ void initTextureBindings(void*)
     .property("id", &BND_Texture::Id)
     .property("enabled", &BND_Texture::Enabled,  &BND_Texture::SetEnabled)
     .property("textureType", &BND_Texture::TextureType,  &BND_Texture::SetTextureType)
+    .property("repeat", &BND_Texture::Repeat, &BND_Texture::SetRepeat)
+    .property("offset", &BND_Texture::Offset, &BND_Texture::SetOffset)
+    .property("rotation", &BND_Texture::Rotation, &BND_Texture::SetRotation)
     .function("fileReference", &BND_Texture::GetFileReference, allow_raw_pointers())
     ;
 }
