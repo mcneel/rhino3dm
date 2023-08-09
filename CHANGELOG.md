@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js, py) Added BND_GroupTable Delete (@coditect)
 - (js, py) Added BND_Xform methods and properties (@coditect)
 - (js, py) Added additional file3dm properties (@coditect)
+- (.net, js, py) Added Texture Repeat, Offset, and Rotation properties
 
 ### Changed
 - (js) All File3dm table count are properties whereas before they were functions
