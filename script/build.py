@@ -294,7 +294,7 @@ def build_macos():
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build -f net45 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    command = 'dotnet build -f net7.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
