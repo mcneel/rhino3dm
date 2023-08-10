@@ -19,11 +19,11 @@ BND_Extrusion* BND_Extrusion::CreateBoxExtrusion(const BND_Box& box, bool cap)
   if (!box.m_box.IsValid()) return nullptr;
 
   ON_Polyline pl;
-  pl.Append(box.m_box.PointAt(0, 0, 0));
-  pl.Append(box.m_box.PointAt(1, 0, 0));
-  pl.Append(box.m_box.PointAt(1, 1, 0));
-  pl.Append(box.m_box.PointAt(0, 1, 0));
-  pl.Append(box.m_box.PointAt(0, 0, 0));
+  pl.Append(box.PointAt(0, 0, 0));
+  pl.Append(box.PointAt(1, 0, 0));
+  pl.Append(box.PointAt(1, 1, 0));
+  pl.Append(box.PointAt(0, 1, 0));
+  pl.Append(box.PointAt(0, 0, 0));
   ON_PolylineCurve plc(pl);
   ON_3dPoint p0 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[0]);
   ON_3dPoint p1 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[1]);

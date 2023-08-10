@@ -76,14 +76,13 @@ BND_Brep* BND_Brep::CreateFromBox(const BND_BoundingBox& box)
 
 BND_Brep* BND_Brep::CreateFromBox2(const BND_Box& box)
 {
-  ON_SimpleArray<ON_3dPoint> points;
-  if (!box.m_box.GetCorners(points))
-    return nullptr;
+  //extract BB and call CreateFromBox
+  ON_3dPoint minPt = box.PointAt(0,0,0);
+  ON_3dPoint maxPt = box.PointAt(1,1,1);
 
-  ON_Brep* brep = ::ON_BrepBox(points.Array());
-  if (nullptr == brep)
-    return nullptr;
-  return new BND_Brep(brep, nullptr);
+  BND_BoundingBox bbox = BND_BoundingBox( minPt, maxPt);
+  return CreateFromBox(bbox);
+
 }
 
 BND_Brep* BND_Brep::CreateFromCylinder(const BND_Cylinder& cylinder, bool capBottom, bool capTop)
