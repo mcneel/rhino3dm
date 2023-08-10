@@ -116,17 +116,18 @@ def run_command(command, suppress_errors=False):
                     line = line.decode('utf-8').strip()
                     print(line)
         elif suppress_errors == False:
-            error = process.stderr.readline()                
-            if error:
-                if sys.version_info[0] < 3:
-                    print_error_message(error.strip())
-                    delete_cache_file()
-                    sys.exit(1)
-                else:
-                    error = error.decode('utf-8').strip()
-                    print_error_message(error)
-                    delete_cache_file()
-                    sys.exit(1)
+            if process.stderr != None: 
+                error = process.stderr.readline()                
+                if error:
+                    if sys.version_info[0] < 3:
+                        print_error_message(error.strip())
+                        delete_cache_file()
+                        sys.exit(1)
+                    else:
+                        error = error.decode('utf-8').strip()
+                        print_error_message(error)
+                        delete_cache_file()
+                        sys.exit(1)
             else:
                 continue
 
