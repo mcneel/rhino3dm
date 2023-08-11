@@ -105,7 +105,7 @@ void initEmbeddedFileBindings(pybind11::module& m)
     //.def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
     .def_property_readonly("FileName", &BND_File3dmEmbeddedFile::GetFilename)
-    //.def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
+    .def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
     .def("Clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }
@@ -128,7 +128,7 @@ void initEmbeddedFileBindings(void*)
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
     .property("fileName", &BND_File3dmEmbeddedFile::GetFilename)
     //.function("setFileName", &BND_File3dmEmbeddedFile::SetFilename) //TODO
-    //.function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
+    .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }

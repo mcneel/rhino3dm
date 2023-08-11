@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - (js) All File3dm table count are properties whereas before they were functions
 - (js) PolyCurve Append methods are now appendArc, appendLine, and appendCurve
+- (py) Updated PyBind11 from 2.9.1 to 2.11.1
+
+### Fixed
+- (js, py) BND_Box.PointAt returned incorrect coordinates. #556
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
