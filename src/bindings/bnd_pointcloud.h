@@ -73,11 +73,11 @@ public:
   BND_PointCloudItem AppendNew();
   BND_PointCloudItem InsertNew(int index);
   void Merge(const BND_PointCloud& other);
-  void Add1(ON_3dPoint point);
-  void Add2(ON_3dPoint point, ON_3dVector normal);
-  void Add3(ON_3dPoint point, BND_Color color);
-  void Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color);
-  void Add5(ON_3dPoint point, double value);
+  void Add(ON_3dPoint point);
+  void Add(ON_3dPoint point, ON_3dVector normal);
+  void Add(ON_3dPoint point, BND_Color color);
+  void Add(ON_3dPoint point, ON_3dVector normal, BND_Color color);
+  void Add(ON_3dPoint point, double value);
   void AddRange1(const std::vector<ON_3dPoint>& points);
   void AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
   void AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);

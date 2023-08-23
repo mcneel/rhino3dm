@@ -160,7 +160,7 @@ BND_PointCloudItem BND_PointCloud::GetItem(int index)
 
 BND_PointCloudItem BND_PointCloud::AppendNew()
 {
-  Add1(ON_3dPoint::Origin);
+  Add(ON_3dPoint::Origin);
   int index = m_pointcloud->m_P.Count() - 1;
   return BND_PointCloudItem(index, m_pointcloud, m_component_ref);
 }
@@ -216,14 +216,14 @@ void BND_PointCloud::Merge(const BND_PointCloud& other)
   m_pointcloud->InvalidateBoundingBox();
 }
 
-void BND_PointCloud::Add1(ON_3dPoint point)
+void BND_PointCloud::Add(ON_3dPoint point)
 {
   m_pointcloud->m_P.Append(point);
   ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
   m_pointcloud->InvalidateBoundingBox();
 }
 
-void BND_PointCloud::Add2(ON_3dPoint point, ON_3dVector normal)
+void BND_PointCloud::Add(ON_3dPoint point, ON_3dVector normal)
 {
   m_pointcloud->m_P.Append(point);
   ON_PointCloud_FixPointCloud(m_pointcloud, true, false, false, false);
@@ -236,7 +236,7 @@ void BND_PointCloud::Add2(ON_3dPoint point, ON_3dVector normal)
   }
 }
 
-void BND_PointCloud::Add3(ON_3dPoint point, BND_Color color)
+void BND_PointCloud::Add(ON_3dPoint point, BND_Color color)
 {
   m_pointcloud->m_P.Append(point);
   ON_PointCloud_FixPointCloud(m_pointcloud, false, true, false, false);
@@ -249,7 +249,7 @@ void BND_PointCloud::Add3(ON_3dPoint point, BND_Color color)
   }
 }
 
-void BND_PointCloud::Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color)
+void BND_PointCloud::Add(ON_3dPoint point, ON_3dVector normal, BND_Color color)
 {
   m_pointcloud->m_P.Append(point);
   ON_PointCloud_FixPointCloud(m_pointcloud, true, true, false, false);
@@ -268,7 +268,7 @@ void BND_PointCloud::Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color)
   }
 }
 
-void BND_PointCloud::Add5(ON_3dPoint point, double value)
+void BND_PointCloud::Add(ON_3dPoint point, double value)
 {
   m_pointcloud->m_P.Append(point);
   ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, true);
@@ -690,11 +690,11 @@ void initPointCloudBindings(pybind11::module& m)
     .def("AppendNew", &BND_PointCloud::AppendNew)
     .def("InsertNew", &BND_PointCloud::InsertNew, py::arg("index"))
     .def("Merge", &BND_PointCloud::Merge, py::arg("other"))
-    .def("Add", &BND_PointCloud::Add1, py::arg("point"))
-    .def("Add", &BND_PointCloud::Add2, py::arg("point"), py::arg("normal"))
-    .def("Add", &BND_PointCloud::Add3, py::arg("point"), py::arg("color"))
-    .def("Add", &BND_PointCloud::Add4, py::arg("point"), py::arg("normal"), py::arg("normal"))
-    .def("Add", &BND_PointCloud::Add5, py::arg("point"), py::arg("value"))
+    .def("Add", py::overload_cast<ON_3dPoint>(&BND_PointCloud::Add), py::arg("point"))
+    .def("Add", py::overload_cast<ON_3dPoint, ON_3dVector>(&BND_PointCloud::Add), py::arg("point"), py::arg("normal"))
+    .def("Add", py::overload_cast<ON_3dPoint, BND_Color>(&BND_PointCloud::Add), py::arg("point"), py::arg("color"))
+    .def("Add", py::overload_cast<ON_3dPoint, ON_3dVector, BND_Color>(&BND_PointCloud::Add), py::arg("point"), py::arg("normal"), py::arg("normal"))
+    .def("Add", py::overload_cast<ON_3dPoint, double>(&BND_PointCloud::Add), py::arg("point"), py::arg("value"))
     .def("AddRange", &BND_PointCloud::AddRange1, py::arg("points"))
     .def("AddRange", &BND_PointCloud::AddRange2, py::arg("points"), py::arg("normals"))
     .def("AddRange", &BND_PointCloud::AddRange3, py::arg("points"), py::arg("colors"))
@@ -751,11 +751,11 @@ void initPointCloudBindings(void*)
     .function("appendNew", &BND_PointCloud::AppendNew)
     .function("insertNew", &BND_PointCloud::InsertNew)
     .function("merge", &BND_PointCloud::Merge)
-    .function("add", &BND_PointCloud::Add1)
-    .function("add", &BND_PointCloud::Add2)
-    .function("add", &BND_PointCloud::Add3)
-    .function("add", &BND_PointCloud::Add4)
-    .function("add", &BND_PointCloud::Add5)
+    .function("add", select_overload<void(ON_3dPoint)>(&BND_PointCloud::Add))
+    .function("add", select_overload<void(ON_3dPoint, ON_3dVector)>(&BND_PointCloud::Add))
+    .function("add", select_overload<void(ON_3dPoint, BND_Color)>(&BND_PointCloud::Add))
+    .function("add", select_overload<void(ON_3dPoint, ON_3dVector, BND_Color)>(&BND_PointCloud::Add))
+    .function("add", select_overload<void(ON_3dPoint, double)>(&BND_PointCloud::Add))
     .function("addRange", &BND_PointCloud::AddRange1)
     .function("addRange", &BND_PointCloud::AddRange2)
     .function("addRange", &BND_PointCloud::AddRange3)
