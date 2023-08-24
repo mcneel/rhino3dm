@@ -53,6 +53,7 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 
 BND_DateTime CreateDateTime(struct tm t);
 
+#include "bnd_point.h"
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
@@ -60,7 +61,6 @@ BND_DateTime CreateDateTime(struct tm t);
 #include "bnd_intersect.h"
 #include "bnd_boundingbox.h"
 #include "bnd_box.h"
-#include "bnd_point.h"
 #include "bnd_object.h"
 #include "bnd_geometry.h"
 #include "bnd_curve.h"
