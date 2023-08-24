@@ -13,7 +13,6 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 #endif
 
   ON::Begin();
-  initPointBindings(m);
   initFileUtilitiesBindings(m);
   initDefines(m);
   initIntersectBindings(m);
@@ -43,6 +42,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initEnvironmentBindings(m);
   initTextureBindings(m);
   initTextureMappingBindings(m);
+  initPointBindings(m);
   initXformBindings(m);
   initArcBindings(m);
   initBoundingBoxBindings(m);
