@@ -23,8 +23,30 @@ BND_Curve* BND_PolyCurve::SegmentCurve(int index) const
   return rc;
 }
 
-std::vector<BND_Curve*> BND_PolyCurve::Explode() const
+BND_TUPLE BND_PolyCurve::Explode() const
 {
+
+  int count =  SegmentCount();
+  if( count > 0) {
+    BND_TUPLE rc = CreateTuple(count);
+    for (int i = 0; i < count; i++) {
+
+      BND_Curve* curve = SegmentCurve(i);
+
+      if (curve)
+      {
+        ON_Curve* crv = curve->m_curve->DuplicateCurve();
+        SetTuple(rc, i, dynamic_cast<BND_Curve*>(BND_CommonObject::CreateWrapper(crv, nullptr)));
+      }
+
+    }
+
+    return rc;
+  }
+
+  return NullTuple();
+
+/*
   int count = SegmentCount();
   std::vector<BND_Curve*> rc;
   for (int i = 0; i < count; i++)
@@ -37,6 +59,7 @@ std::vector<BND_Curve*> BND_PolyCurve::Explode() const
     }
   }
   return rc;
+  */
 }
 
 bool BND_PolyCurve::Append1(const ON_Line& line)

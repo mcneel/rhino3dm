@@ -84,11 +84,25 @@ void BND_NurbsSurfaceKnotList::SetKnot(int index, double k)
   m_surface->SetKnot(m_direction, index, k);
 }
 
-std::vector<double> BND_NurbsSurfaceKnotList::ToList()
+BND_TUPLE BND_NurbsSurfaceKnotList::ToList()
 {
+
+  int count =  m_surface->KnotCount(m_direction);
+  if( count > 0) {
+    BND_TUPLE rc = CreateTuple(count);
+    for (int i = 0; i < count; i++)
+      SetTuple(rc, i, m_surface->Knot(m_direction, i));
+
+    return rc;
+  }
+
+  return NullTuple();
+
+/*
   return std::vector<double>(
       m_surface->m_knot[m_direction],
       m_surface->m_knot[m_direction] + m_surface->KnotCount(m_direction));
+      */
 }
 
 BND_NurbsSurface::BND_NurbsSurface(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference* compref)

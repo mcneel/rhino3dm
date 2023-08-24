@@ -54,11 +54,24 @@ void BND_NurbsCurveKnotList::SetKnot(int index, double k)
   m_nurbs_curve->SetKnot(index, k);
 }
 
-std::vector<double> BND_NurbsCurveKnotList::ToList()
+BND_TUPLE BND_NurbsCurveKnotList::ToList()
 {
+  int count = m_nurbs_curve->KnotCount();
+  if( count > 0) {
+    BND_TUPLE rc = CreateTuple(count);
+    for (int i = 0; i < count; i++)
+      SetTuple(rc, i, m_nurbs_curve->Knot(i));
+
+    return rc;
+  }
+
+  return NullTuple();
+
+/*
   return std::vector<double>(
       m_nurbs_curve->m_knot,
       m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
+      */
 }
 
 BND_NurbsCurve::BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref)
