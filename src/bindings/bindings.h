@@ -26,15 +26,15 @@
 
 #if defined(ON_PYTHON_COMPILE)
 typedef pybind11::dict BND_DICT;
-typedef pybind11::tuple BND_Color;
-typedef pybind11::tuple BND_Color4f;
+//typedef pybind11::tuple BND_Color;
+//typedef pybind11::tuple BND_Color4f;
 typedef pybind11::tuple BND_TUPLE;
 typedef pybind11::handle BND_DateTime;
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
-typedef emscripten::val BND_Color;
-typedef emscripten::val BND_Color4f;
+//typedef emscripten::val BND_Color;
+//typedef emscripten::val BND_Color4f;
 typedef emscripten::val BND_TUPLE;
 typedef emscripten::val BND_DateTime;
 #endif
@@ -54,6 +54,14 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 BND_DateTime CreateDateTime(struct tm t);
 
 #include "bnd_point.h"
+#if defined(ON_PYTHON_COMPILE)
+typedef pybind11::tuple BND_Color;
+typedef pybind11::tuple BND_Color4f;
+#endif
+#if defined(ON_WASM_COMPILE)
+typedef emscripten::val BND_Color;
+typedef emscripten::val BND_Color4f;
+#endif
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
