@@ -509,7 +509,7 @@ using namespace emscripten;
 
 void initRenderContentBindings(void*)
 {
-  class_<BND_File3dmRenderContent, base<BND_ModelComponent>>("RenderContent")
+  class_<BND_File3dmRenderContent, base<BND_ModelComponent>>("File3dmRenderContent")
     .constructor<>()
     .constructor<const BND_File3dmRenderContent&>()
     .property("kind", &BND_File3dmRenderContent::Kind)

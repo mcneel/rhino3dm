@@ -202,7 +202,7 @@ void initXformBindings(void*)
 
   class_<BND_Transform>("Transform")
     .constructor<double>()
-    .constructor<const BND_Transform&>()
+    //.constructor<const BND_Transform&>()
     .class_function("identity", &BND_Transform::Identity)
     .class_function("zeroTransformation", &BND_Transform::ZeroTransformation)
     .class_function("unset", &BND_Transform::Unset)
