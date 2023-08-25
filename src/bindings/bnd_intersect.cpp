@@ -317,7 +317,7 @@ void initIntersectBindings(void*)
 
   class_<BND_Intersection>("Intersection")
     .class_function("lineLine", &BND_Intersection::LineLine)
-    .class_function("lineLine", &BND_Intersection::LineLine2)
+    .class_function("lineLineTolerance", &BND_Intersection::LineLine2)
     .class_function("linePlane", &BND_Intersection::LinePlane)
     .class_function("planePlane", &BND_Intersection::PlanePlane)
     .class_function("planePlanePlane", &BND_Intersection::PlanePlanePlane)
