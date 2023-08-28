@@ -458,7 +458,7 @@ def build_js():
 
     # Check to see if the build succeeded and move into artifacts_js
     #items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
-    items_to_check = ['rhino3dm.wasm']
+    items_to_check = ['rhino3dm.wasm', 'rhino3dm.module.js']
     all_items_built = True
     for item in items_to_check:
         print(item)
