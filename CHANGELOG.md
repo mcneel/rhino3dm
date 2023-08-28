@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.0.0-beta.2] - unreleased
 ### Added
-- (.net, js, py) Added RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals, render environments.
-- (js, py) Polyline GetSegments and SegmentAt
+- (.net, js, py) RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals, render environments, render content
+- (js, py) Polyline GetSegments and SegmentAt #534
 - (js, py) NurbsCurve ConvertSpanToBezier
 - (js, py) BrepVertex Index, EdgeCount, EdgeIndices
 - (js, py) BrepVertexList Count, GetVertex
@@ -20,13 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js, py) SetMesh Breps
 - (js) tryConvertBrep for Brep
 - (js, py) ToPhysicallyBased
-- (js, net, py) Added RenderContent
-- (js, py) Added LineType bindings (@coditect)
-- (js, py) Added BND_GroupTable Delete (@coditect)
-- (js, py) Added BND_Xform methods and properties (@coditect)
-- (js, py) Added additional file3dm properties (@coditect)
-- (.net, js, py) Added Texture Repeat, Offset, and Rotation properties
-- (js, py) Added several methods related to PointClouds and values (Add(point, value), etc)
+- (js, py) LineType bindings (@coditect)
+- (js, py) BND_GroupTable Delete (@coditect)
+- (js, py) BND_Xform methods and properties (@coditect)
+- (js, py) additional file3dm properties (@coditect)
+- (.net, js, py) Texture Repeat, Offset, and Rotation properties
+- (js, py) Several methods related to PointClouds and values (Add(point, value), etc)
+- (js) toList() for NurbsSurfaceKnotList and NurbsCurveKnotList
+- (js, py) BND_PointCloud::Add4 add color twice and does nothing with normal #551 
 
 ### Changed
 - (js) All File3dm table count are properties whereas before they were functions
@@ -35,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - (js, py) BND_Box.PointAt returned incorrect coordinates. #556
+- (js) any method returning std::vector would be undefined. This was switched to return BND_TUPLE. No adverse effects on python build. #553
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
@@ -59,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - (js, py) Use draco 1.5.4
-- (js) Fixed some issues in typescript binding generationcd sel
+- (js) Fixed some issues in typescript binding generation
 
 ## [7.15.0] - 2022-03-23
 ### Added
