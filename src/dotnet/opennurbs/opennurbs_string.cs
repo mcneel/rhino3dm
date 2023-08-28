@@ -8,6 +8,13 @@ namespace Rhino.Runtime.InteropWrappers
   /// </summary>
   public class StringWrapper : IDisposable
   {
+    static bool _createStringHolder;
+    static StringWrapper()
+    {
+      System.PlatformID pid = System.Environment.OSVersion.Platform;
+      _createStringHolder = (System.PlatformID.MacOSX == pid || System.PlatformID.Unix == pid);
+    }
+
     IntPtr m_ptr; //ON_wString*
 
     /// <summary>
@@ -110,14 +117,15 @@ namespace Rhino.Runtime.InteropWrappers
     public static string GetStringFromPointer(IntPtr pConstON_wString)
     {
       IntPtr ptr_string_holder = IntPtr.Zero;
-#if MONO_BUILD
+      if (_createStringHolder)
       ptr_string_holder = UnsafeNativeMethods.StringHolder_New();
-#endif
+
       IntPtr ptrstr = UnsafeNativeMethods.ON_wString_Get(pConstON_wString, ptr_string_holder );
       string rc = System.Runtime.InteropServices.Marshal.PtrToStringUni(ptrstr);
-#if MONO_BUILD
+
+      if (ptr_string_holder!=IntPtr.Zero)
       UnsafeNativeMethods.StringHolder_Delete(ptr_string_holder);
-#endif
+
       return rc ?? String.Empty;
     }
   }
