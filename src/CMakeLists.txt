@@ -43,9 +43,9 @@ if(${RHINO3DM_JS})
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("debug mode")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -Oz")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -g")
   else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -Oz")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm")
   endif()
   
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --bind")
@@ -117,14 +117,14 @@ if(${RHINO3DM_JS})
 endif()
 
 # patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
- #if(${RHINO3DM_JS})
- #  find_program(PATCH patch)
-  # if(NOT PATCH)
-   #    message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
-  # endif()
-   #add_custom_command(TARGET rhino3dm POST_BUILD
-     #COMMENT "Generating ${CMAKE_BINARY_DIR}/rhino3dm.module.js"
-     #COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
-     #COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
-   #)
-#endif()
+ if(${RHINO3DM_JS})
+   find_program(PATCH patch)
+   if(NOT PATCH)
+       message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
+   endif()
+   add_custom_command(TARGET rhino3dm POST_BUILD
+     COMMENT "Generating ${CMAKE_BINARY_DIR}/rhino3dm.module.js"
+     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
+     COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
+   )
+endif()
