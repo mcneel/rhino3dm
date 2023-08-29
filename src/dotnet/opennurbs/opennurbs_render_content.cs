@@ -40,6 +40,20 @@ namespace Rhino.FileIO
       return false;
     }
 
+    internal static File3dmRenderContent Find(IEnumerable en, Guid g)
+    {
+      foreach (var obj in en)
+      {
+        if (obj is File3dmRenderContent rc)
+        {
+          if (rc.Id == g)
+            return rc;
+        }
+      }
+
+      return null;
+    }
+
     public void Dispose() { Dispose(true); }
     protected void Dispose(bool b) { }
   }
@@ -58,6 +72,15 @@ namespace Rhino.FileIO
     public IEnumerator<File3dmRenderMaterial> GetEnumerator()
     {
       return new File3dmRenderContentEnumerator<File3dmRenderMaterial>(_file3dm);
+    }
+
+    /// <summary>
+    /// Finds a material by its id, if possible. Returns null on failure.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderMaterial Find(Guid g)
+    {
+      return File3dmRenderContentEnumerator<File3dmRenderMaterial>.Find(this, g) as File3dmRenderMaterial;
     }
 
     /// <summary></summary>
@@ -81,6 +104,15 @@ namespace Rhino.FileIO
       return new File3dmRenderContentEnumerator<File3dmRenderEnvironment>(_file3dm);
     }
 
+    /// <summary>
+    /// Finds an environment by its id, if possible. Returns null on failure.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderEnvironment Find(Guid g)
+    {
+      return File3dmRenderContentEnumerator<File3dmRenderEnvironment>.Find(this, g) as File3dmRenderEnvironment;
+    }
+
     /// <summary></summary>
     /// <since>8.0</since>
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
@@ -100,6 +132,15 @@ namespace Rhino.FileIO
     public IEnumerator<File3dmRenderTexture> GetEnumerator()
     {
       return new File3dmRenderContentEnumerator<File3dmRenderTexture>(_file3dm);
+    }
+
+    /// <summary>
+    /// Finds a texture by its id, if possible. Returns null on failure.
+    /// </summary>
+    /// <since>8.0</since>
+    public File3dmRenderTexture Find(Guid g)
+    {
+      return File3dmRenderContentEnumerator<File3dmRenderTexture>.Find(this, g) as File3dmRenderTexture;
     }
 
     /// <summary></summary>
@@ -325,7 +366,7 @@ namespace Rhino.FileIO
           return parent;
         }
 
-        return null;
+        return this;
       }
     }
 
@@ -550,6 +591,21 @@ namespace Rhino.FileIO
       UnsafeNativeMethods.ON_RenderTexture_To_ON_Texture(ConstPointer(), t.NonConstPointer());
       return t;
     }
-  }
 
+    /// <summary>
+    /// If the texture has a file name, returns that file name. Otherwise returns an empty string.
+    /// </summary>
+    /// <since>8.0</since>
+    public string Filename
+    {
+      get
+      {
+        using (var sw = new StringWrapper())
+        {
+          UnsafeNativeMethods.ON_RenderTexture_Filename(ConstPointer(), sw.NonConstPointer);
+          return sw.ToString();
+        }
+      }
+    }
+  }
 }

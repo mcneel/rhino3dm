@@ -55,6 +55,10 @@ namespace DotNetTester
 
       foreach (var m in file3dm.RenderMaterials)
       {
+        var k  = m.Kind;
+        var tn = m.TypeName;
+        var tl = m.TopLevel;
+
         DisplayRenderContent(m);
 
         foreach (var c in m.Children)
@@ -87,6 +91,15 @@ namespace DotNetTester
       SunTest(rs.Sun);
       CurrentEnvTest(rs);
       PostEffectCollectionTest(rs.PostEffects);
+
+      var ge = file3dm.Manifest.GetEnumerator(Rhino.DocObjects.ModelComponentType.ModelGeometry);
+      while (ge.MoveNext())
+      {
+        if (ge.Current is File3dmObject obj)
+        {
+          DecalTest(obj.Attributes.Decals);
+        }
+      }
 
       return file3dm;
     }
@@ -128,11 +141,11 @@ namespace DotNetTester
     static void DitheringTest(Dithering dit)
     {
       Console.WriteLine("BEGIN Dithering");
-      Console.WriteLine("On:      {0}", dit.On);
+      Console.WriteLine("On:      {0}", dit.Enabled);
       Console.WriteLine("Method:  {0}", dit.Method);
-//      Console.WriteLine("DataCRC: {0}", dit.DataCRC(0));
 
       Console.WriteLine("Dithering set Method FloydSteinberg");
+      dit.Enabled = true;
       dit.Method = Dithering.Methods.FloydSteinberg;
       Console.WriteLine("Method:  {0}", dit.Method);
       Console.WriteLine("Dithering set Method SimpleNoise");
@@ -197,7 +210,6 @@ namespace DotNetTester
       var s = string.Format(CultureInfo.InvariantCulture, format, dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
       Console.WriteLine(s);
 
-      // Note: This works, but Rhino doesn't see it because it uses the Earth Anchor Point.
       Console.WriteLine("Sun set lat/long to Greenwich");
       sun.Latitude = 51.4934;
       sun.Longitude = 0.0098;
@@ -289,10 +301,37 @@ namespace DotNetTester
     {
       Console.WriteLine("BEGIN Post Effect collection");
 
+      var id1 = Guid.Empty;
+      var id2 = Guid.Empty;
+
       foreach (var pep in peps)
       {
         PostEffectTest(pep);
+        id2 = id1;
+        id1 = pep.Id;
       }
+
+      var data1 = peps.PostEffectDataFromId(id1);
+      var type1 = data1.Type;
+      Console.WriteLine("id1: {0}", data1.LocalName);
+
+      var data2 = peps.PostEffectDataFromId(id2);
+      Console.WriteLine("id2: {0}", data2.LocalName);
+
+      peps.MovePostEffectBefore(id1, id2);
+
+      peps.GetSelectedPostEffect(type1, out id1);
+      if (id1 != Guid.Empty)
+      {
+        data1 = peps.PostEffectDataFromId(id1);
+        Console.WriteLine("Early Post Effect selection is {0}", data1.LocalName);
+      }
+
+      peps.SetSelectedPostEffect(type1, id2);
+
+      peps.GetSelectedPostEffect(type1, out id1);
+      data1 = peps.PostEffectDataFromId(id1);
+      Console.WriteLine("{0} Post Effect selection is {1}", type1, data1.LocalName);
 
       Console.WriteLine("END Post Effect collection");
     }
@@ -302,7 +341,7 @@ namespace DotNetTester
       var ci = CultureInfo.InvariantCulture;
     
       Console.WriteLine("  BEGIN Post Effect");
-    
+
       Console.WriteLine("    Id:        {0}", pep.Id);
       Console.WriteLine("    Type:      {0}", pep.Type);
       Console.WriteLine("    LocalName: {0}", pep.LocalName);
@@ -325,6 +364,58 @@ namespace DotNetTester
       if (p != null) Console.WriteLine("    Bias:      {0}", p.ToDouble(ci));
 
       Console.WriteLine("  END Post Effect");
+    }
+
+    static void DecalTest(Decals decals)
+    {
+      foreach (var decal in decals)
+      {
+        Console.WriteLine("  CRC:          {0}", decal.CRC);
+        Console.WriteLine("  Mapping:      {0}", decal.DecalMapping);
+        Console.WriteLine("  Projection:   {0}", decal.DecalProjection);
+        Console.WriteLine("  Origin:       {0}", decal.Origin);
+        Console.WriteLine("  Transparency: {0}", decal.Transparency);
+        Console.WriteLine("  Texture Id:   {0}", decal.TextureInstanceId);
+        Console.WriteLine("  Radius:       {0}", decal.Radius);
+        Console.WriteLine("  Height:       {0}", decal.Height);
+        Console.WriteLine("  VectorUp:     {0}", decal.VectorUp);
+        Console.WriteLine("  VectorAcross: {0}", decal.VectorAcross);
+        Console.WriteLine("  MapToInside:  {0}", decal.MapToInside);
+
+        Console.WriteLine("  BEGIN Custom Data");
+
+        // This test Guid is a renderer (Toast) that is known to create custom decal data.
+        var render_engine_id  = Guid.Parse("BBBBBBAD-BBAD-BBAD-BBAD-BADBADBADBAD");
+        var list = decal.CustomData(render_engine_id);
+        foreach (var item in list)
+        {
+          if (item.Value is Rhino.Display.Color4f c4)
+          {
+            Console.WriteLine($"    {item.Name} = {c4.R}, {c4.G}, {c4.B}, {c4.A}");
+          }
+          else
+          {
+            Console.WriteLine($"    {item.Name} = {item.Value}");
+          }
+        }
+
+        Console.WriteLine("  END Custom Data");
+
+        double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
+        decal.UVBounds(ref min_u, ref min_v, ref max_u, ref max_v);
+        Console.WriteLine("  Min U:        {0}", min_u);
+        Console.WriteLine("  Min V:        {0}", min_v);
+        Console.WriteLine("  Max U:        {0}", max_u);
+        Console.WriteLine("  Max V:        {0}", max_v);
+
+        decal.HorzSweep(out var sta, out var end);
+        Console.WriteLine("  H-Sweep Sta:  {0}", sta);
+        Console.WriteLine("  H-Sweep End:  {0}", end);
+
+        decal.VertSweep(out sta, out end);
+        Console.WriteLine("  V-Sweep Sta:  {0}", sta);
+        Console.WriteLine("  V-Sweep End:  {0}", end);
+      }
     }
 
     static private void SunEphemeris()

@@ -612,6 +612,42 @@ RH_C_FUNCTION void ON_Texture_Setuvw(ON_Texture* pTexture, ON_Xform* instanceXfo
     pTexture->m_uvw = *instanceXform;
 }
 
+RH_C_FUNCTION void ON_Texture_Repeat(const ON_Texture* pConstTexture, ON_2dVector* repeat)
+{
+  if (pConstTexture && repeat)
+    *repeat = pConstTexture->Repeat();
+}
+
+RH_C_FUNCTION void ON_Texture_SetRepeat(ON_Texture* pTexture, ON_2dVector* repeat)
+{
+  if (pTexture && repeat)
+    pTexture->SetRepeat(*repeat);
+}
+
+
+RH_C_FUNCTION void ON_Texture_Offset(const ON_Texture* pConstTexture, ON_2dVector* offset)
+{
+  if (pConstTexture && offset)
+    *offset = pConstTexture->Offset();
+}
+
+RH_C_FUNCTION void ON_Texture_SetOffset(ON_Texture* pTexture, ON_2dVector* offset)
+{
+  if (pTexture && offset)
+    pTexture->SetOffset(*offset);
+}
+
+RH_C_FUNCTION double ON_Texture_Rotation(const ON_Texture* pConstTexture)
+{
+  return pConstTexture ? pConstTexture->Rotation() : 0.0;
+}
+
+RH_C_FUNCTION void ON_Texture_SetRotation(ON_Texture* pTexture, double rotation)
+{
+  if (pTexture)
+    pTexture->SetRotation(rotation);
+}
+
 RH_C_FUNCTION void ON_Texture_GetAlphaBlendValues(const ON_Texture* pConstTexture, double* c, double* a0, double* a1, double* a2, double* a3)
 {
   if( pConstTexture && c && a0 && a1 && a2 && a3 )

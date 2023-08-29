@@ -40,6 +40,8 @@ public:
   void SetNormal(const ON_3dVector& v);
   BND_Color GetColor() const;
   void SetColor(const BND_Color& color);
+  double GetValue() const;
+  void SetValue(double v);
   bool GetHidden() const;
   void SetHidden(bool b);
   int GetIndex() const { return m_index; }
@@ -63,6 +65,7 @@ public:
   int HiddenPointCount() const { return m_pointcloud->HiddenPointCount(); }
   bool ContainsColors() const { return m_pointcloud->HasPointColors(); }
   bool ContainsNormals() const { return m_pointcloud->HasPointNormals(); }
+  bool ContainsValues() const { return m_pointcloud->HasPointValues(); }
   bool ContainsHiddenFlags() const { return m_pointcloud->m_H.Count()>0; }
   void ClearColors() { m_pointcloud->m_C.Destroy(); }
   void ClearNormals() { m_pointcloud->m_N.Destroy(); }
@@ -74,20 +77,27 @@ public:
   void Add2(ON_3dPoint point, ON_3dVector normal);
   void Add3(ON_3dPoint point, BND_Color color);
   void Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color);
+  void Add5(ON_3dPoint point, double value);
+  void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
   void AddRange1(const std::vector<ON_3dPoint>& points);
   void AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
   void AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
   void AddRange4(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
+  void AddRange5(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
+  void AddRange6(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
   void Insert1(int index, const ON_3dPoint& point);
   void Insert2(int index, const ON_3dPoint& point, const ON_3dVector& normal);
   void Insert3(int index, const ON_3dPoint& point, const BND_Color& color);
   void Insert4(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color);
+  void Insert5(int index, const ON_3dPoint& point, const double& value);
+  void Insert6(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color, const double& value);
   void InsertRange(int index, const std::vector<ON_3dPoint>& points);
   void RemoveAt(int index);
-  std::vector<ON_3dPoint> GetPoints() const;
+  BND_TUPLE GetPoints() const;
   ON_3dPoint PointAt(int index) const;
-  std::vector<ON_3dVector> GetNormals() const;
-  std::vector<BND_Color> GetColors() const;
+  BND_TUPLE GetNormals() const;
+  BND_TUPLE GetColors() const;
+  BND_TUPLE GetValues() const;
   int ClosestPoint(const ON_3dPoint& testPoint);
 
 #if defined(ON_WASM_COMPILE)

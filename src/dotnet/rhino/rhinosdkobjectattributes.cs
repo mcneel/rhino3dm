@@ -825,7 +825,6 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, true, argb);
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Gets all object decals associated with this object.
     /// </summary>
@@ -837,9 +836,10 @@ namespace Rhino.DocObjects
         if (m_decals == null)
         {
           uint doc_sn = 0;
+#if RHINO_SDK
           if ((m__parent is RhinoObject obj) && (obj.Document != null))
             doc_sn = obj.Document.RuntimeSerialNumber;
-
+#endif
           m_decals = new Render.Decals(this, false, doc_sn);
         }
 
@@ -848,7 +848,6 @@ namespace Rhino.DocObjects
     }
 
     private Render.Decals m_decals;
-#endif
 
     /// <summary>
     /// The mapping channel id to use when calling MappingChannel to retrieve the OCS mapping if there is one.

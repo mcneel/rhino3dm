@@ -29,7 +29,8 @@ public:
   //BoundingBox BoundingBox
   double Area() const { return m_box.Area(); }
   double Volume() const { return m_box.Volume(); }
-  ON_3dPoint PointAt(double x, double y, double z) const { return m_box.PointAt(x, y, z); }
+  ON_3dPoint PointAt(double x, double y, double z) const;
+
   ON_3dPoint ClosestPoint(ON_3dPoint point) const { return m_box.ClosestPointTo(point); }
   //ON_3dPoint FurthestPoint(ON_3dPoint point)
   //void Inflate(double amount)

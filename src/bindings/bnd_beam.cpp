@@ -19,11 +19,11 @@ BND_Extrusion* BND_Extrusion::CreateBoxExtrusion(const BND_Box& box, bool cap)
   if (!box.m_box.IsValid()) return nullptr;
 
   ON_Polyline pl;
-  pl.Append(box.m_box.PointAt(0, 0, 0));
-  pl.Append(box.m_box.PointAt(1, 0, 0));
-  pl.Append(box.m_box.PointAt(1, 1, 0));
-  pl.Append(box.m_box.PointAt(0, 1, 0));
-  pl.Append(box.m_box.PointAt(0, 0, 0));
+  pl.Append(box.PointAt(0, 0, 0));
+  pl.Append(box.PointAt(1, 0, 0));
+  pl.Append(box.PointAt(1, 1, 0));
+  pl.Append(box.PointAt(0, 1, 0));
+  pl.Append(box.PointAt(0, 0, 0));
   ON_PolylineCurve plc(pl);
   ON_3dPoint p0 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[0]);
   ON_3dPoint p1 = box.m_box.PointAt(0, 0, box.m_box.dz.m_t[1]);
@@ -168,6 +168,20 @@ BND_Mesh* BND_Extrusion::GetMesh(ON::mesh_type meshType)
   return new BND_Mesh(mesh, &m_component_ref);
 }
 
+bool BND_Extrusion::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
+{
+
+  if (nullptr == m)
+    return false;
+
+  ON_Mesh* mesh = m->m_mesh;
+
+  m_extrusion->m_mesh_cache.SetMesh(mt,std::shared_ptr<ON_Mesh>(mesh));
+
+  return true;
+
+}
+
 
 BND_Extrusion::BND_Extrusion(ON_Extrusion* extrusion, const ON_ModelComponentReference* compref)
 {
@@ -213,6 +227,7 @@ void initExtrusionBindings(pybind11::module& m)
     .def("PathLineCurve", &BND_Extrusion::PathLineCurve)
     .def("ProfileIndex", &BND_Extrusion::ProfileIndex, py::arg("profileParameter"))
     .def("GetMesh", &BND_Extrusion::GetMesh, py::arg("meshType"))
+    .def("SetMesh", &BND_Extrusion::SetMesh, py::arg("mesh"), py::arg("meshType"))
     ;
 }
 #endif
@@ -254,6 +269,7 @@ void initExtrusionBindings(void*)
     .function("pathLineCurve", &BND_Extrusion::PathLineCurve, allow_raw_pointers())
     .function("profileIndex", &BND_Extrusion::ProfileIndex)
     .function("getMesh", &BND_Extrusion::GetMesh, allow_raw_pointers())
+    .function("setMesh", &BND_Extrusion::SetMesh, allow_raw_pointers())
     ;
 }
 #endif

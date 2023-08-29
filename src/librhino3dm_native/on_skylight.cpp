@@ -3,7 +3,7 @@
 
 enum class SkylightSetting : int
 {
-  On,
+  Enabled,
   ShadowIntensity,
   EnvironmentId,       // Obsolete; kept for backward compatibility only.
   EnvironmentOverride, // Obsolete; kept for backward compatibility only.
@@ -15,7 +15,7 @@ RH_C_FUNCTION void ON_Skylight_GetValue(const ON_Skylight* sl, SkylightSetting w
   {
     switch (which)
     {
-    case SkylightSetting::On:                  *v = sl->On();                  break;
+    case SkylightSetting::Enabled:             *v = sl->Enabled();             break;
     case SkylightSetting::ShadowIntensity:     *v = sl->ShadowIntensity();     break;
     case SkylightSetting::EnvironmentId:       *v = sl->EnvironmentId();       break;
     case SkylightSetting::EnvironmentOverride: *v = sl->EnvironmentOverride(); break;
@@ -30,7 +30,7 @@ RH_C_FUNCTION void ON_Skylight_SetValue(ON_Skylight* sl, SkylightSetting which, 
   {
     switch (which)
     {
-    case SkylightSetting::On:                  sl->SetOn(v->AsBool());                  break;
+    case SkylightSetting::Enabled:             sl->SetEnabled(v->AsBool());             break;
     case SkylightSetting::ShadowIntensity:     sl->SetShadowIntensity(v->AsDouble());   break;
     case SkylightSetting::EnvironmentId:       sl->SetEnvironmentId(v->AsUuid());       break;
     case SkylightSetting::EnvironmentOverride: sl->SetEnvironmentOverride(v->AsBool()); break;

@@ -132,6 +132,22 @@ RH_C_FUNCTION int ON_Xform_DecomposeSimilarity(const ON_Xform* xf, ON_3dVector* 
   return rc;
 }
 
+RH_C_FUNCTION void ON_Xform_DecomposeTextureMapping(const ON_Xform* xf, ON_3dVector* offset, ON_3dVector* repeat, ON_3dVector* rotation)
+{
+  if (xf && offset && repeat && rotation)
+  {
+    xf->DecomposeTextureMapping(*offset, *repeat, *rotation);
+  }
+}
+
+RH_C_FUNCTION void ON_Xform_ComposeTextureMapping(ON_Xform* xf, const ON_3dVector* offset, const ON_3dVector* repeat, const ON_3dVector* rotation)
+{
+  if (xf && offset && repeat && rotation)
+  {
+    *xf = ON_Xform::TextureMapping(*offset, *repeat, *rotation);
+  }
+}
+
 RH_C_FUNCTION int ON_Xform_IsRigid(const ON_Xform* xf, double tolerance)
 {
   int rc = 0;

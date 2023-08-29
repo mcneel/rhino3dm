@@ -10,15 +10,14 @@ void BND_ModelComponent::SetTrackedPointer(ON_ModelComponent* modelComponent, co
   BND_CommonObject::SetTrackedPointer(modelComponent, compref);
 }
 
-  BND_UUID BND_ModelComponent::GetId() const
-  {
-      return ON_UUID_to_Binding(m_model_component->Id());
-  }
-  void BND_ModelComponent::SetId(BND_UUID id)
-  {
-    m_model_component->SetId(Binding_to_ON_UUID(id));
-  }
-
+BND_UUID BND_ModelComponent::GetId() const
+{
+  return ON_UUID_to_Binding(m_model_component->Id());
+}
+void BND_ModelComponent::SetId(BND_UUID id)
+{
+  m_model_component->SetId(Binding_to_ON_UUID(id));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

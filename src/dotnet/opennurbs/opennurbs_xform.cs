@@ -388,6 +388,20 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Construct a UVW Transform from components.
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <param name="repeat"></param>
+    /// <param name="rotation"></param>
+    /// <returns></returns>
+    public static Transform TextureMapping(Vector3d offset, Vector3d repeat, Vector3d rotation)
+    {
+      Transform xf = new Transform();
+      UnsafeNativeMethods.ON_Xform_ComposeTextureMapping(ref xf, ref offset, ref repeat, ref rotation);
+      return xf;
+    }
+
+    /// <summary>
     /// Computes a change of basis transformation. A basis change is essentially a remapping 
     /// of geometry from one coordinate system to another.
     /// </summary>
@@ -970,6 +984,22 @@ namespace Rhino.Geometry
       rotation = Unset;
       int rc = UnsafeNativeMethods.ON_Xform_DecomposeSimilarity(ref this, ref translation, ref dilation, ref rotation, tolerance);
       return (TransformSimilarityType)rc;
+    }
+
+        /// <summary>
+    /// Decomposition of a uvw transform into components
+    /// </summary>
+    /// <param name="offset">Offset</param>
+    /// <param name="repeat">Repear</param>
+    /// <param name="rotation">Rotation</param>
+    [ConstOperation]
+    public void DecomposeTextureMapping(out Vector3d offset, out Vector3d repeat, out Vector3d rotation)
+    {
+      offset = Vector3d.Unset;
+      repeat = Vector3d.Unset;
+      rotation = Vector3d.Unset;
+
+      UnsafeNativeMethods.ON_Xform_DecomposeTextureMapping(ref this, ref offset, ref repeat, ref rotation);
     }
 
     /// <summary>

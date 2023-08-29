@@ -75,7 +75,6 @@ namespace Rhino.Render
     {
       // The document is only needed for rendering, specifically for calling Decal.TextureRenderCRC.
       m_rhino_doc_serial = doc_sn;
-
       m_decal  = decal; // Owned by attributes at the calling site.
       m_decals = decals;
     }
@@ -566,8 +565,8 @@ namespace Rhino.Render
   internal class DecalEnumerator : IEnumerator<Decal>
   {
     private int m_index = -1;
-    private readonly uint m_rhino_doc_serial = 0;
     private readonly ObjectAttributes m_attr;
+    private readonly uint m_rhino_doc_serial = 0;
 
     internal DecalEnumerator(ObjectAttributes attr, uint rhino_doc_sn)
     {

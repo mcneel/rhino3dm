@@ -3,7 +3,7 @@
 
 enum class GroundPlaneSetting : int
 {
-  On,
+  Enabled,
   ShowUnderside,
   AutoAltitude,
   Altitude,
@@ -22,7 +22,7 @@ RH_C_FUNCTION void ON_GroundPlane_GetValue(const ON_GroundPlane* gp, GroundPlane
   {
     switch (which)
     {
-    case GroundPlaneSetting::On:                  *v = gp->On();                        break;
+    case GroundPlaneSetting::Enabled:             *v = gp->Enabled();                   break;
     case GroundPlaneSetting::ShowUnderside:       *v = gp->ShowUnderside();             break;
     case GroundPlaneSetting::AutoAltitude:        *v = gp->AutoAltitude();              break;
     case GroundPlaneSetting::Altitude:            *v = gp->Altitude();                  break;
@@ -44,7 +44,7 @@ RH_C_FUNCTION void ON_GroundPlane_SetValue(ON_GroundPlane* gp, GroundPlaneSettin
   {
     switch (which)
     {
-    case GroundPlaneSetting::On:                  gp->SetOn(v->AsBool());                  break;
+    case GroundPlaneSetting::Enabled:             gp->SetEnabled(v->AsBool());             break;
     case GroundPlaneSetting::ShowUnderside:       gp->SetShowUnderside(v->AsBool());       break;
     case GroundPlaneSetting::AutoAltitude:        gp->SetAutoAltitude(v->AsBool());        break;
     case GroundPlaneSetting::Altitude:            gp->SetAltitude(v->AsDouble());          break;

@@ -4,18 +4,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.0.0-beta.3] - unreleased
-### Added
-- (.net) Added RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals.
-
 ## [8.0.0-beta.2] - unreleased
 ### Added
-- (js, py) Polyline GetSegments and SegmentAt
+- (.net, js, py) RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals, render environments, render content, mesh modifiers
+- (js, py) Polyline GetSegments and SegmentAt #534
 - (js, py) NurbsCurve ConvertSpanToBezier
 - (js, py) BrepVertex Index, EdgeCount, EdgeIndices
 - (js, py) BrepVertexList Count, GetVertex
 - (js, py) Brep Vertices
 - (js, py) NurbsSurface OrderU, OrderV, KnotsU, KnotsV, Control Points, Points
+- (js, py) ON_4fColor bindings
+- (js, py) PBR BaseColor, EmissionColor, subsurfaceScatteringColor getter and setter
+- (js) Vector2d bindings
+- (js, py) Texture Id, Type, and Enabled getter and setter
+- (js, py) SetMesh BrepFace and Extrusions
+- (js) tryConvertBrep for Brep
+- (js, py) Material.ToPhysicallyBased()
+- (js, py) LineType bindings (@coditect)
+- (js, py) BND_GroupTable Delete (@coditect)
+- (js, py) BND_Xform methods and properties (@coditect)
+- (js, py) additional file3dm properties (@coditect)
+- (js, py) DateTime bindings (@coditect)
+- (.net, js, py) Texture Repeat, Offset, and Rotation properties
+- (js, py) Several methods related to PointClouds and values ( Add(point, value), etc )
+- (js) toList() for NurbsSurfaceKnotList and NurbsCurveKnotList
+- (js, py) BND_PointCloud::Add4 add color twice and does nothing with normal #551 
+
+### Changed
+- (js) All File3dm table count are properties whereas before they were functions
+- (js) PolyCurve Append methods are now appendArc, appendLine, and appendCurve. Related to #550
+- (py) Updated PyBind11 from 2.9.1 to 2.11.1
+- (js) CI builds for rhino3dm.js include debug information for debugging with Chrome. Hence, the resulting wasm file is much larger (40+mb) than the release build. This is triggered in the setup step with the -d or --debug flag: `python3 script/setup.py -p js -d`
+- (js, py) bnd_anotationbase.cpp renamed to bnd_anotationbase.cpp
+
+
+### Fixed
+- (js, py) BND_Box.PointAt returned incorrect coordinates. #556
+- (js) any method returning std::vector would be undefined. This was switched to return BND_TUPLE. No adverse effects on python build. #553
+- (js) emscripten does not support overloaded ctors or methods that have the same number of arguments. This means many of the bindings had unusable ctors or methods. We've fixed this by giving each element a unique name (in the case of methods) or creating uniquely named static ctors. This will create some additional challenges for the documentation, but will result in more available ctors and methods. Meshes, ArcCurve, PolyCurve, Transforms, and several other objects were affected by this change. #550
 
 ## [8.0.0-beta.1] - 2023-04-17
 ### Added
@@ -40,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - (js, py) Use draco 1.5.4
-- (js) Fixed some issues in typescript binding generationcd sel
+- (js) Fixed some issues in typescript binding generation
 
 ## [7.15.0] - 2022-03-23
 ### Added

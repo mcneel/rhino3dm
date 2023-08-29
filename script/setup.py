@@ -512,7 +512,12 @@ def setup_js():
 
     os.chdir(target_path)
     try:
-        command = "emcmake cmake " + src_folder
+        if debug:
+            print("generating debug build")
+            command = "emcmake cmake -D CMAKE_BUILD_TYPE=Debug " + src_folder
+        else:
+            print("generating release build")
+            command = "emcmake cmake " + src_folder
         if _platform == "win32" or _platform == "win64":
             p = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
         else:
@@ -586,6 +591,8 @@ def main():
                         help="overwrite existing configurations (if found)")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
+    parser.add_argument('--debug', '-d', action='store_true',
+                        help="generate a debug build (wasm only)")
     
     args = parser.parse_args()
 
@@ -608,6 +615,9 @@ def main():
 
     global overwrite
     overwrite = args.overwrite
+
+    global debug
+    debug = args.debug
 
     os.chdir(script_folder)
 

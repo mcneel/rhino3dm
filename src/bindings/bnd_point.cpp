@@ -424,6 +424,10 @@ void initPointBindings(void*)
     .element(&ON_3dVector::y)
     .element(&ON_3dVector::z);
 
+  value_array<ON_2dVector>("Vector2dSimple")
+    .element(&ON_2dVector::x)
+    .element(&ON_2dVector::y);
+
   value_array<ON_2fPoint>("Point2fSimple")
     .element(&ON_2fPoint::x)
     .element(&ON_2fPoint::y);

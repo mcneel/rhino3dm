@@ -76,14 +76,13 @@ BND_Brep* BND_Brep::CreateFromBox(const BND_BoundingBox& box)
 
 BND_Brep* BND_Brep::CreateFromBox2(const BND_Box& box)
 {
-  ON_SimpleArray<ON_3dPoint> points;
-  if (!box.m_box.GetCorners(points))
-    return nullptr;
+  //extract BB and call CreateFromBox
+  ON_3dPoint minPt = box.PointAt(0,0,0);
+  ON_3dPoint maxPt = box.PointAt(1,1,1);
 
-  ON_Brep* brep = ::ON_BrepBox(points.Array());
-  if (nullptr == brep)
-    return nullptr;
-  return new BND_Brep(brep, nullptr);
+  BND_BoundingBox bbox = BND_BoundingBox( minPt, maxPt);
+  return CreateFromBox(bbox);
+
 }
 
 BND_Brep* BND_Brep::CreateFromCylinder(const BND_Cylinder& cylinder, bool capBottom, bool capTop)
@@ -261,6 +260,21 @@ BND_Mesh* BND_BrepFace::GetMesh(ON::mesh_type mt)
   return new BND_Mesh(mesh, &m_component_ref);
 }
 
+bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
+{
+  bool rc = false;
+
+  if (nullptr == m)
+    return rc;
+
+  ON_Mesh* mesh = m->m_mesh;
+  
+  rc = m_brepface->SetMesh( mt, mesh );
+
+  return rc;
+}
+
+
 
 BND_BrepSurfaceList BND_Brep::GetSurfaces()
 {
@@ -380,6 +394,7 @@ void initBrepBindings(pybind11::module& m)
     .def("DuplicateFace", &BND_BrepFace::DuplicateFace, py::arg("duplicateMeshes"))
     .def("DuplicateSurface", &BND_BrepFace::DuplicateSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
+    .def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
@@ -406,7 +421,7 @@ void initBrepBindings(pybind11::module& m)
     .def(py::init<>())
     .def_static("TryConvertBrep", &BND_Brep::TryConvertBrep, py::arg("geometry"))
     .def_static("CreateFromMesh", &BND_Brep::CreateFromMesh, py::arg("mesh"), py::arg("trimmedTriangles"))
-    .def_static("CreateFromBox", &BND_Brep::CreateFromBox, py::arg("box"))
+    .def_static("CreateFromBoundingBox", &BND_Brep::CreateFromBox, py::arg("bbox"))
     .def_static("CreateFromBox", &BND_Brep::CreateFromBox2, py::arg("box"))
     .def_static("CreateFromCylinder", &BND_Brep::CreateFromCylinder, py::arg("cylinder"), py::arg("capBottom"), py::arg("capTop"))
     .def_static("CreateFromSphere", &BND_Brep::CreateFromSphere, py::arg("sphere"))
@@ -447,6 +462,7 @@ void initBrepBindings(void*)
     .function("duplicateFace", &BND_BrepFace::DuplicateFace, allow_raw_pointers())
     .function("duplicateSurface", &BND_BrepFace::DuplicateSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
+    .function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
@@ -471,9 +487,10 @@ void initBrepBindings(void*)
 
   class_<BND_Brep, base<BND_GeometryBase>>("Brep")
     .constructor<>()
+    .class_function("tryConvertBrep", &BND_Brep::TryConvertBrep, allow_raw_pointers())
     .class_function("createFromMesh", &BND_Brep::CreateFromMesh, allow_raw_pointers())
-    .class_function("createFromBox", &BND_Brep::CreateFromBox, allow_raw_pointers())
-    //.class_function("CreateFromBox", &BND_Brep::CreateFromBox2, allow_raw_pointers())
+    .class_function("createFromBoundingBox", &BND_Brep::CreateFromBox, allow_raw_pointers())
+    .class_function("CreateFromBox", &BND_Brep::CreateFromBox2, allow_raw_pointers())
     .class_function("createFromCylinder", &BND_Brep::CreateFromCylinder, allow_raw_pointers())
     .class_function("createFromSphere", &BND_Brep::CreateFromSphere, allow_raw_pointers())
     .class_function("createQuadSphere", &BND_Brep::CreateQuadSphere, allow_raw_pointers())

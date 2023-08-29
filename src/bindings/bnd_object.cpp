@@ -1521,6 +1521,7 @@ void initObjectBindings(pybind11::module& m)
   py::class_<BND_ArchivableDictionary>(m, "ArchivableDictionary")
     .def_static("EncodeDict", &BND_ArchivableDictionary::EncodeFromDictionary)
     .def_static("DecodeDict", &BND_ArchivableDictionary::DecodeToDictionary)
+    //.def_static("WriteGeometry", &BND_ArchivableDictionary::WriteGeometry)
     ;
 }
 #endif

@@ -101,7 +101,7 @@ def run_command(command, suppress_errors=False):
         dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
     else:
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=popen_shell_mode)    
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=popen_shell_mode)    
     
     while True:
         line = process.stdout.readline()               
@@ -116,17 +116,18 @@ def run_command(command, suppress_errors=False):
                     line = line.decode('utf-8').strip()
                     print(line)
         elif suppress_errors == False:
-            error = process.stderr.readline()                
-            if error:
-                if sys.version_info[0] < 3:
-                    print_error_message(error.strip())
-                    delete_cache_file()
-                    sys.exit(1)
-                else:
-                    error = error.decode('utf-8').strip()
-                    print_error_message(error)
-                    delete_cache_file()
-                    sys.exit(1)
+            if process.stderr != None: 
+                error = process.stderr.readline()                
+                if error:
+                    if sys.version_info[0] < 3:
+                        print_error_message(error.strip())
+                        delete_cache_file()
+                        sys.exit(1)
+                    else:
+                        error = error.decode('utf-8').strip()
+                        print_error_message(error)
+                        delete_cache_file()
+                        sys.exit(1)
             else:
                 continue
 
@@ -293,7 +294,7 @@ def build_macos():
     csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
     output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build -f net45 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+    command = 'dotnet build -f net7.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
     run_command(command)
 
     item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -452,13 +453,16 @@ def build_js():
 
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
     # we'll pass suppress_errors argument as True here...
-    run_command("emmake make", True)
+
+    run_command("emmake make", not verbose)
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
     all_items_built = True
     for item in items_to_check:
+        print(item)
         path_to_item = os.path.abspath(os.path.join(target_path, item))
+        print(path_to_item)
         if not os.path.exists(path_to_item):
             print_error_message("failed to create " + path_to_item)
             all_items_built = False

@@ -93,7 +93,7 @@ macos setup
 1. Install vscode: https://code.visualstudio.com/
 2. Install Docker desktop: https://docs.docker.com/get-docker/ and start the docker app
 3. Install vscode extension for containers: https://code.visualstudio.com/docs/containers/overview
-4. Open the rhino3dm folder in vscode and open a terminal. 
+4. Open the rhino3dm directory in vscode and open a terminal. 
 5. In the terminal, run the following command:
 
     `docker run --rm -dit -v $(pwd):/src emscripten/emsdk:3.1.30`
@@ -102,31 +102,21 @@ macos setup
     
     `-dit` runs the container as a daemon (in the background) but still allows interaction
     
-    `-v $(pwd):/src` maps the current directory (rhino3dm) to /src in the container. Note, this works fine in zsh or bash on macos, but not powershell on windows. For that environment, try to include the full path to the rhino3dm folder:
+    `-v $(pwd):/src` maps the current directory (rhino3dm) to /src in the container. On Windows you should include the full path to the rhino3dm directory. For example:
 
-    `-v c:/dev/mcneel/rhino3dm:/src`
+    `docker run --rm -dit -v c:\dev\rhino3dm:/src emscripten/emsdk:3.1.30`
 
     `emsdk:3.1.30` is the version of emscripten we are using.
 
 6. In vs code, open Docker explorer
 7. You should see a container in the list. Right-click on it and select "Attach shell" which will open a new terminal from the container.
-8. Make sure the terminal is in the rhino3dm project folder. Run the following command to setup the rhino3dm.js build:
+8. Make sure the terminal is in the rhino3dm directory. Run the following command to setup the rhino3dm.js build:
 
     `python3 script/setup.py --platform js`
 
-9. Run the following command to build rhino3dm.js:
+9. Run the following command to build rhino3dm.js (use `--verbose` to get verbose output while compiling):
 
-    `python3 script/build.py --platform js --verbose --overwrite`
-
-Notes: 
-- the `--verbose` option is intercepted in build.py for js because the way we pipe the output doesn't work past a certain point. To be able to get more information while compiling rhino3dm.js, you can run the following: 
-
-    ```bash
-    cd src/build/javascript
-    emcmake make --VERBOSE=1
-    ```
-
-    You might need to create the build/javascript directories.
+    `python3 script/build.py --platform js --overwrite --verbose`
 
 ## Related Topics
 

@@ -3,7 +3,7 @@
 
 enum class SafeFrameSetting : int
 {
-  On,
+  Enabled,
   PerspectiveOnly,
   FieldGridOn,
   LiveFrameOn,
@@ -23,7 +23,7 @@ RH_C_FUNCTION void ON_SafeFrame_GetValue(const ON_SafeFrame* sf, SafeFrameSettin
   {
     switch (which)
     {
-    case SafeFrameSetting::On:                *v = sf->On();                break;
+    case SafeFrameSetting::Enabled:           *v = sf->Enabled();           break;
     case SafeFrameSetting::PerspectiveOnly:   *v = sf->PerspectiveOnly();   break;
     case SafeFrameSetting::FieldGridOn:       *v = sf->FieldGridOn();       break;
     case SafeFrameSetting::LiveFrameOn:       *v = sf->LiveFrameOn();       break;
@@ -46,7 +46,7 @@ RH_C_FUNCTION void ON_SafeFrame_SetValue(ON_SafeFrame* sf, SafeFrameSetting whic
   {
     switch (which)
     {
-    case SafeFrameSetting::On:                sf->SetOn(v->AsBool());                  break;
+    case SafeFrameSetting::Enabled:           sf->SetEnabled(v->AsBool());             break;
     case SafeFrameSetting::PerspectiveOnly:   sf->SetPerspectiveOnly(v->AsBool());     break;
     case SafeFrameSetting::FieldGridOn:       sf->SetFieldGridOn(v->AsBool());         break;
     case SafeFrameSetting::LiveFrameOn:       sf->SetLiveFrameOn(v->AsBool());         break;

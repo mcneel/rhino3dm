@@ -12,6 +12,9 @@ class BND_3dmObjectAttributes : public BND_CommonObject
 {
 public:
   ON_3dmObjectAttributes* m_attributes = nullptr;
+  BND_File3dmDecalTable m_decals;
+  BND_File3dmMeshModifiers m_mesh_modifiers;
+
 public:
   BND_3dmObjectAttributes();
   BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref);
@@ -91,6 +94,9 @@ public:
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }
   void RemoveFromAllGroups() { m_attributes->RemoveFromAllGroups(); }
+
+  BND_File3dmDecalTable& Decals() { return m_decals; }
+  BND_File3dmMeshModifiers MeshModifiers() { return m_mesh_modifiers; }
 
 protected:
   void SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref);

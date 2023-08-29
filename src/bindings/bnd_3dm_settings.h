@@ -1,3 +1,4 @@
+
 #include "bindings.h"
 
 #pragma once
@@ -57,8 +58,22 @@ public:
 
 class BND_RenderSettings : public BND_CommonObject
 {
+private:
   std::shared_ptr<ONX_Model> m_model;
   ON_3dmRenderSettings* m_render_settings = nullptr;
+
+  BND_File3dmGroundPlane* m_ground_plane = nullptr;
+  BND_File3dmSafeFrame* m_safe_frame = nullptr;
+  BND_File3dmDithering* m_dithering = nullptr;
+  BND_File3dmSkylight* m_skylight = nullptr;
+  BND_File3dmLinearWorkflow* m_linear_workflow = nullptr;
+  BND_File3dmRenderChannels* m_render_channels = nullptr;
+  BND_File3dmRenderEnvironments* m_render_environments = nullptr;
+  BND_File3dmSun* m_sun = nullptr;
+  BND_File3dmPostEffectTable* m_post_effects = nullptr;
+
+  void Construct();
+
 protected:
   void SetTrackedPointer(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref);
 
@@ -113,7 +128,20 @@ public:
   void SetSnapShot(const std::wstring& s) { m_render_settings->SetSnapshot(s.c_str()); }
   std::wstring GetSpecificViewport() const { return std::wstring(m_render_settings->SpecificViewport().Array()); }
   void SetSpecificViewport(const std::wstring& s) { m_render_settings->SetSpecificViewport(s.c_str()); }
+
   //RenderSource
+  BND_File3dmGroundPlane& GetGroundPlane() const { return *m_ground_plane; }
+  BND_File3dmSafeFrame& GetSafeFrame() const { return *m_safe_frame; }
+  BND_File3dmDithering& GetDithering() const { return *m_dithering; }
+  BND_File3dmSkylight& GetSkylight() const { return *m_skylight; }
+  BND_File3dmLinearWorkflow& GetLinearWorkflow() const { return *m_linear_workflow; }
+  BND_File3dmRenderChannels& GetRenderChannels() const { return *m_render_channels; }
+  BND_File3dmRenderEnvironments& GetRenderEnvironments() const { return *m_render_environments; }
+  BND_File3dmSun& GetSun() const { return *m_sun; }
+  BND_File3dmPostEffectTable& GetPostEffects() const { return *m_post_effects; }
+
+  //void SetGroundPlane(BND_File3dmGroundPlane& gp) { m_render_settings->GroundPlane = gp; }
+
 };
 
 class BND_EarthAnchorPoint

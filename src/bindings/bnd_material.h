@@ -49,6 +49,7 @@ public:
   void SetDisableLighting(bool b) { m_material->SetDisableLighting(b); }
   //public bool AlphaTransparency | get; set;
   class BND_PhysicallyBasedMaterial* PhysicallyBased();
+  void ToPhysicallyBased();
   double GetReflectivity() const { return m_material->Reflectivity(); }
   void SetReflectivity(double r) { m_material->SetReflectivity(r); }
   BND_Color GetPreviewColor() const { return ON_Color_to_Binding(m_material->PreviewColor()); }
@@ -92,9 +93,13 @@ public:
   //public DocObjects.Texture[] GetTextures()
   bool Supported() const;
   //public void SynchronizeLegacyMaterial()
-  //public Rhino.Display.Color4f BaseColor{ get; set; }
+  BND_Color4f GetBaseColor() const { return ON_4fColor_to_Binding(m_material->PhysicallyBased()->BaseColor()); }
+  void SetBaseColor(const BND_Color4f& c) { m_material->PhysicallyBased()->SetBaseColor(Binding_to_ON_4fColor(c)); }
+  BND_Color4f GetEmissionColor() const { return ON_4fColor_to_Binding(m_material->PhysicallyBased()->Emission()); }
+  void SetEmissionColor(const BND_Color4f& c) { m_material->PhysicallyBased()->SetEmission(Binding_to_ON_4fColor(c)); }
+  BND_Color4f GetSubsurfaceScatteringColor() const { return ON_4fColor_to_Binding(m_material->PhysicallyBased()->SubsurfaceScatteringColor()); }
+  void SetSubsurfaceScatteringColor(const BND_Color4f& c) { m_material->PhysicallyBased()->SetSubsurfaceScatteringColor(Binding_to_ON_4fColor(c)); }
   //public BRDFs BRDF{ get; set; }
-  //public Rhino.Display.Color4f SubsurfaceScatteringColor{ get; set; }
   double Subsurface() const { return m_material->PhysicallyBased()->Subsurface(); }
   void SetSubsurface(double s) { m_material->PhysicallyBased()->SetSubsurface(s); }
   double SubsurfaceScatteringRadius() const { return m_material->PhysicallyBased()->SubsurfaceScatteringRadius(); }
@@ -127,6 +132,4 @@ public:
   void SetOpacity(double o) { m_material->PhysicallyBased()->SetOpacity(o); }
   double OpacityRoughness() const { return m_material->PhysicallyBased()->OpacityRoughness(); }
   void SetOpacityRoughness(double o) { m_material->PhysicallyBased()->SetOpacityRoughness(o); }
-  //public Rhino.Display.Color4f Emission{ get; set; }
 };
-

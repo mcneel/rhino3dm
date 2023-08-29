@@ -1,5 +1,5 @@
-#include "bindings.h"
 
+#include "bindings.h"
 
 BND_Viewport* BND_ViewInfo::GetViewport() const
 {
@@ -11,39 +11,86 @@ void BND_ViewInfo::SetViewport(const BND_Viewport& viewport)
   m_view.m_vp = *viewport.m_viewport;
 }
 
+BND_RenderSettings::BND_RenderSettings()
+{
+  SetTrackedPointer(new ON_3dmRenderSettings, nullptr);
+  Construct();
+}
+
 BND_RenderSettings::BND_RenderSettings(std::shared_ptr<ONX_Model> m)
 {
   m_model = m;
-  m_render_settings = &(m_model->m_settings.m_RenderSettings);
-}
+  m_render_settings = &m_model->m_settings.m_RenderSettings;
 
-
-void BND_RenderSettings::SetTrackedPointer(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref)
-{
-  m_render_settings = renderSettings;
-  BND_CommonObject::SetTrackedPointer(renderSettings, compref);
-}
-
-BND_RenderSettings::BND_RenderSettings()
-{
-  SetTrackedPointer(new ON_3dmRenderSettings(), nullptr);
+  Construct();
 }
 
 BND_RenderSettings::BND_RenderSettings(const BND_RenderSettings& other)
 {
-  SetTrackedPointer(new ON_3dmRenderSettings(*other.m_render_settings), nullptr);
-}
+  if (other.m_model.get())
+  {
+    m_model = other.m_model;
+    m_render_settings = &m_model->m_settings.m_RenderSettings;
+  }
+  else
+  {
+    ON_3dmRenderSettings* rs = nullptr;
 
+    if (nullptr != other.m_render_settings)
+    {
+      rs = new ON_3dmRenderSettings(*other.m_render_settings);
+    }
+    else
+    {
+      rs = new ON_3dmRenderSettings();
+    }
+
+    SetTrackedPointer(rs, nullptr);
+  }
+
+  Construct();
+}
 
 BND_RenderSettings::BND_RenderSettings(ON_3dmRenderSettings* renderSettings, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(renderSettings, compref);
+  Construct();
 }
 
 BND_RenderSettings::~BND_RenderSettings()
 {
+  delete m_ground_plane;
+  delete m_safe_frame;
+  delete m_dithering;
+  delete m_skylight;
+  delete m_linear_workflow;
+  delete m_render_channels;
+  delete m_render_environments;
+  delete m_sun;
+  delete m_post_effects;
+
   if (m_model)
     m_render_settings = nullptr;
+}
+
+void BND_RenderSettings::Construct()
+{
+  m_ground_plane        = new BND_File3dmGroundPlane       (&m_render_settings->GroundPlane());
+  m_safe_frame          = new BND_File3dmSafeFrame         (&m_render_settings->SafeFrame());
+  m_dithering           = new BND_File3dmDithering         (&m_render_settings->Dithering());
+  m_skylight            = new BND_File3dmSkylight          (&m_render_settings->Skylight());
+  m_linear_workflow     = new BND_File3dmLinearWorkflow    (&m_render_settings->LinearWorkflow());
+  m_render_channels     = new BND_File3dmRenderChannels    (&m_render_settings->RenderChannels());
+  m_render_environments = new BND_File3dmRenderEnvironments( m_render_settings);
+  m_sun                 = new BND_File3dmSun               (&m_render_settings->Sun());
+  m_post_effects        = new BND_File3dmPostEffectTable   (&m_render_settings->PostEffects());
+}
+
+void BND_RenderSettings::SetTrackedPointer(ON_3dmRenderSettings* rs, const ON_ModelComponentReference* compref)
+{
+  m_render_settings = rs;
+
+  BND_CommonObject::SetTrackedPointer(rs, compref);
 }
 
 BND_Plane BND_EarthAnchorPoint::GetModelCompass() const
@@ -73,8 +120,6 @@ void BND_File3dmSettings::SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchor
 {
   m_model->m_settings.m_earth_anchor_point = anchorPoint.m_anchor_point;
 }
-
-
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -127,6 +172,15 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property("NamedView", &BND_RenderSettings::GetNamedView, &BND_RenderSettings::SetNamedView)
     .def_property("SnapShot", &BND_RenderSettings::GetSnapShot, &BND_RenderSettings::SetSnapShot)
     .def_property("SpecificViewport", &BND_RenderSettings::GetSpecificViewport, &BND_RenderSettings::SetSpecificViewport)
+    .def_property_readonly("GroundPlane", &BND_RenderSettings::GetGroundPlane)
+    .def_property_readonly("SafeFrame", &BND_RenderSettings::GetSafeFrame)
+    .def_property_readonly("Dithering", &BND_RenderSettings::GetDithering)
+    .def_property_readonly("Skylight", &BND_RenderSettings::GetSkylight)
+    .def_property_readonly("LinearWorkflow", &BND_RenderSettings::GetLinearWorkflow)
+    .def_property_readonly("RenderChannels", &BND_RenderSettings::GetRenderChannels)
+    .def_property_readonly("Sun", &BND_RenderSettings::GetSun)
+    .def_property_readonly("RenderEnvironments", &BND_RenderSettings::GetRenderEnvironments)
+    .def_property_readonly("PostEffects", &BND_RenderSettings::GetPostEffects)
     ;
 
   py::class_<BND_EarthAnchorPoint>(m, "EarthAnchorPoint")
@@ -213,6 +267,15 @@ void init3dmSettingsBindings(void*)
     .property("namedView", &BND_RenderSettings::GetNamedView, &BND_RenderSettings::SetNamedView)
     .property("snapShot", &BND_RenderSettings::GetSnapShot, &BND_RenderSettings::SetSnapShot)
     .property("specificViewport", &BND_RenderSettings::GetSpecificViewport, &BND_RenderSettings::SetSpecificViewport)
+    .property("groundPlane", &BND_RenderSettings::GetGroundPlane)
+    .property("safeFrame", &BND_RenderSettings::GetSafeFrame)
+    .property("dithering", &BND_RenderSettings::GetDithering)
+    .property("skylight", &BND_RenderSettings::GetSkylight)
+    .property("linearWorkflow", &BND_RenderSettings::GetLinearWorkflow)
+    .property("renderChannels", &BND_RenderSettings::GetRenderChannels)
+    .property("sun", &BND_RenderSettings::GetSun)
+    .property("renderEnvironments", &BND_RenderSettings::GetRenderEnvironments)
+    .property("postEffects", &BND_RenderSettings::GetPostEffects)
     ;
 
   class_<BND_EarthAnchorPoint>("EarthAnchorPoint")

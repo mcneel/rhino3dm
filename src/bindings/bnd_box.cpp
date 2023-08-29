@@ -10,6 +10,15 @@ bool BND_Box::Transform(const BND_Transform& xform)
   return m_box.Transform(xform.m_xform);
 }
 
+ON_3dPoint BND_Box::PointAt(double x, double y, double z) const 
+{ 
+  x = m_box.dx.ParameterAt(x);
+  y = m_box.dy.ParameterAt(y);
+  z = m_box.dz.ParameterAt(z);
+  return m_box.plane.PointAt(x, y, z); 
+}
+
+
 //BND_Brep* BND_Box::ToBrep() const
 //{
 //

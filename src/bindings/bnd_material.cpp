@@ -36,6 +36,16 @@ BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
   return pbr;
 }
 
+void BND_Material::ToPhysicallyBased() 
+{
+
+  if(m_material)
+  {
+    m_material->ToPhysicallyBased();
+  }
+
+}
+
 static BND_Texture* GetTextureHelper(const ON_Material* mat, ON_Texture::TYPE t)
 {
   int index = mat->FindTexture(nullptr, t);
@@ -144,6 +154,9 @@ void initMaterialBindings(pybind11::module& m)
     .def_property("OpacityIOR", &BND_PhysicallyBasedMaterial::OpacityIOR, &BND_PhysicallyBasedMaterial::SetOpacityIOR)
     .def_property("Opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
     .def_property("OpacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
+    .def_property("BaseColor", &BND_PhysicallyBasedMaterial::GetBaseColor, &BND_PhysicallyBasedMaterial::SetBaseColor)
+    .def_property("EmissionColor", &BND_PhysicallyBasedMaterial::GetEmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
+    .def_property("SubsurfaceScatteringColor", &BND_PhysicallyBasedMaterial::GetSubsurfaceScatteringColor, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringColor)
     ;
 
   py::class_<BND_Material, BND_ModelComponent>(m, "Material")
@@ -171,18 +184,19 @@ void initMaterialBindings(pybind11::module& m)
     .def("Default", &BND_Material::Default)
     .def("GetTexture", &BND_Material::GetTexture, py::arg("which"))
     .def("GetBitmapTexture", &BND_Material::GetBitmapTexture)
-    .def("SetBitmapTexture", &BND_Material::SetBitmapTexture, py::arg("filename"))
+    .def("SetBitmapTexture", &BND_Material::SetBitmapTexture, py::arg("fileName"))
     .def("SetBitmapTexture", &BND_Material::SetBitmapTexture2, py::arg("texture"))
     .def("GetBumpTexture", &BND_Material::GetBumpTexture)
-    .def("SetBumpTexture", &BND_Material::SetBumpTexture, py::arg("filename"))
+    .def("SetBumpTexture", &BND_Material::SetBumpTexture, py::arg("fileName"))
     .def("SetBumpTexture", &BND_Material::SetBumpTexture2, py::arg("texture"))
     .def("GetEnvironmentTexture", &BND_Material::GetEnvironmentTexture)
-    .def("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture, py::arg("filename"))
+    .def("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture, py::arg("fileName"))
     .def("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2, py::arg("texture"))
     .def("GetTransparencyTexture", &BND_Material::GetTransparencyTexture)
-    .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture, py::arg("filename"))
+    .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture, py::arg("fileName"))
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2, py::arg("texture"))
     .def_property_readonly("PhysicallyBased", &BND_Material::PhysicallyBased)
+    .def("ToPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
 #endif
@@ -210,6 +224,9 @@ void initMaterialBindings(void*)
     .property("opacityIOR", &BND_PhysicallyBasedMaterial::OpacityIOR, &BND_PhysicallyBasedMaterial::SetOpacityIOR)
     .property("opacity", &BND_PhysicallyBasedMaterial::Opacity, &BND_PhysicallyBasedMaterial::SetOpacity)
     .property("opacityRoughness", &BND_PhysicallyBasedMaterial::OpacityRoughness, &BND_PhysicallyBasedMaterial::SetOpacityRoughness)
+    .property("baseColor", &BND_PhysicallyBasedMaterial::GetBaseColor, &BND_PhysicallyBasedMaterial::SetBaseColor)
+    .property("emissionColor", &BND_PhysicallyBasedMaterial::GetEmissionColor, &BND_PhysicallyBasedMaterial::SetEmissionColor)
+    .property("subsurfaceScatteringColor", &BND_PhysicallyBasedMaterial::GetSubsurfaceScatteringColor, &BND_PhysicallyBasedMaterial::SetSubsurfaceScatteringColor)
     ;
 
   class_<BND_Material, base<BND_ModelComponent>>("Material")
@@ -237,18 +254,19 @@ void initMaterialBindings(void*)
     .function("default", &BND_Material::Default)
     .function("getTexture", &BND_Material::GetTexture, allow_raw_pointers())
     .function("getBitmapTexture", &BND_Material::GetBitmapTexture, allow_raw_pointers())
-    .function("setBitmapTexture", &BND_Material::SetBitmapTexture)
-    //.function("setBitmapTexture", &BND_Material::SetBitmapTexture2)
+    .function("setBitmapTextureFilename", &BND_Material::SetBitmapTexture)
+    .function("setBitmapTexture", &BND_Material::SetBitmapTexture2)
     .function("getBumpTexture", &BND_Material::GetBumpTexture, allow_raw_pointers())
-    .function("setBumpTexture", &BND_Material::SetBumpTexture)
-    //.function("SetBumpTexture", &BND_Material::SetBumpTexture2)
+    .function("setBumpTextureFilename", &BND_Material::SetBumpTexture)
+    .function("SetBumpTexture", &BND_Material::SetBumpTexture2)
     .function("getEnvironmentTexture", &BND_Material::GetEnvironmentTexture, allow_raw_pointers())
-    .function("setEnvironmentTexture", &BND_Material::SetEnvironmentTexture)
-    //.function("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2)
+    .function("setEnvironmentTextureFilename", &BND_Material::SetEnvironmentTexture)
+    .function("SetEnvironmentTexture", &BND_Material::SetEnvironmentTexture2)
     .function("getTransparencyTexture", &BND_Material::GetTransparencyTexture, allow_raw_pointers())
-    .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture)
-    //.function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
+    .function("setTransparencyTextureFilename", &BND_Material::SetTransparencyTexture)
+    .function("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2)
     .function("physicallyBased", &BND_Material::PhysicallyBased, allow_raw_pointers())
+    .function("toPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
 #endif

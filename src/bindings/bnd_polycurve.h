@@ -20,7 +20,7 @@ public:
   bool IsNested() const { return m_polycurve->IsNested(); }
   bool HasGap() const { return m_polycurve->FindNextGap(0); }
   bool RemoveNesting() { return m_polycurve->RemoveNesting(); }
-  std::vector<BND_Curve*> Explode() const;
+  BND_TUPLE Explode() const;
   bool Append1(const ON_Line& line);
   bool Append2(BND_Arc& arc);
   bool Append3(const BND_Curve& curve);

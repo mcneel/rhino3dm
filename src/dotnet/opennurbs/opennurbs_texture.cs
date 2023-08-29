@@ -500,6 +500,61 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Helper for access to the repeat value encoded in UvwTransform
+    /// </summary>
+    public Vector2d Repeat
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        Vector2d value = new Vector2d();
+        UnsafeNativeMethods.ON_Texture_Repeat(const_ptr_this, ref value);
+        return value;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Texture_SetRepeat(ptr_this, ref value);
+      }
+    }
+
+    /// <summary>
+    /// Helper for access to the offset value encoded in UvwTransform
+    /// </summary>
+    public Vector2d Offset
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        Vector2d value = new Vector2d();
+        UnsafeNativeMethods.ON_Texture_Offset(const_ptr_this, ref value);
+        return value;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Texture_SetOffset(ptr_this, ref value);
+      }
+    }
+
+    /// <summary>
+    /// Helper for access to the rotation value encoded in UvwTransform
+    /// </summary>
+    public double Rotation
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Texture_Rotation(const_ptr_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Texture_SetRotation(ptr_this, value);
+      }
+    }
+
     // skipping for now
     //  ON_Color m_border_color;
     //  ON_Color m_transparent_color;

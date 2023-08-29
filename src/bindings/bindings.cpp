@@ -26,6 +26,20 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initDimensionStyleBindings(m);
   initLayerBindings(m);
   initMaterialBindings(m);
+  initEmbeddedFileBindings(m);
+  initSkylightBindings(m);
+  initGroundPlaneBindings(m);
+  initSafeFrameBindings(m);
+  initDitheringBindings(m);
+  initLinearWorkflowBindings(m);
+  initRenderEnvironmentsBindings(m);
+  initRenderChannelsBindings(m);
+  initRenderContentBindings(m);
+  initSunBindings(m);
+  initPostEffectBindings(m);
+  initDecalBindings(m);
+  initMeshModifierBindings(m);
+  initEnvironmentBindings(m);
   initTextureBindings(m);
   initTextureMappingBindings(m);
   initPointBindings(m);
@@ -69,6 +83,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initExtensionsBindings(m);
   initDracoBindings(m);
   initRTreeBindings(m);
+  initLinetypeBindings(m);
 }
 
 BND_TUPLE CreateTuple(int count)
@@ -91,3 +106,27 @@ BND_TUPLE NullTuple()
 #endif
 }
 
+BND_DateTime CreateDateTime(struct tm t)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (!PyDateTimeAPI) {
+    PyDateTime_IMPORT;
+  }
+  return PyDateTime_FromDateAndTime(t.tm_year + 1900,
+                                    t.tm_mon + 1,
+                                    t.tm_mday,
+                                    t.tm_hour,
+                                    t.tm_min,
+                                    t.tm_sec,
+                                    0);
+#else
+  emscripten::val Date = emscripten::val::global("Date");
+  return Date.new_(t.tm_year + 1900,
+                   t.tm_mon,
+                   t.tm_mday,
+                   t.tm_hour,
+                   t.tm_min,
+                   t.tm_sec,
+                   0);
+#endif
+}

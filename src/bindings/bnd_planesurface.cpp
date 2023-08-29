@@ -47,6 +47,7 @@ void initPlaneSurfaceBindings(void*)
 {
   class_<BND_PlaneSurface, base<BND_Surface>>("PlaneSurface")
     .constructor<>()
+    .constructor<const BND_Plane&, const BND_Interval&, const BND_Interval&>()
     ;
 }
 #endif

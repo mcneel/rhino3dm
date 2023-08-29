@@ -14,6 +14,7 @@
 #if defined(ON_PYTHON_COMPILE)
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include "datetime.h"
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")
 #endif
@@ -26,12 +27,16 @@
 #if defined(ON_PYTHON_COMPILE)
 typedef pybind11::dict BND_DICT;
 typedef pybind11::tuple BND_Color;
+typedef pybind11::tuple BND_Color4f;
 typedef pybind11::tuple BND_TUPLE;
+typedef pybind11::handle BND_DateTime;
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
 typedef emscripten::val BND_Color;
+typedef emscripten::val BND_Color4f;
 typedef emscripten::val BND_TUPLE;
+typedef emscripten::val BND_DateTime;
 #endif
 
 BND_TUPLE CreateTuple(int count);
@@ -45,6 +50,8 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
   tuple.set(index, value);
 #endif
 }
+
+BND_DateTime CreateDateTime(struct tm t);
 
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
@@ -66,16 +73,29 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_cylinder.h"
 #include "bnd_ellipse.h"
 #include "bnd_font.h"
-#include "bnd_3dm_settings.h"
+#include "bnd_object.h"
 #include "bnd_model_component.h"
-#include "bnd_3dm_attributes.h"
+#include "bnd_geometry.h"
+#include "bnd_light.h"
+#include "bnd_material.h"
+#include "bnd_embedded_file.h"
+#include "bnd_skylight.h"
+#include "bnd_ground_plane.h"
+#include "bnd_safe_frame.h"
+#include "bnd_dithering.h"
+#include "bnd_linear_workflow.h"
+#include "bnd_texture.h"
+#include "bnd_render_channels.h"
+#include "bnd_render_content.h"
+#include "bnd_render_environments.h"
+#include "bnd_post_effects.h"
+#include "bnd_sun.h"
+#include "bnd_decals.h"
+#include "bnd_3dm_settings.h"
 #include "bnd_bitmap.h"
 #include "bnd_dimensionstyle.h"
 #include "bnd_layer.h"
-#include "bnd_material.h"
-#include "bnd_texture.h"
 #include "bnd_texture_mapping.h"
-#include "bnd_geometry.h"
 #include "bnd_annotationbase.h"
 #include "bnd_instance.h"
 #include "bnd_hatch.h"
@@ -98,10 +118,12 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #include "bnd_brep.h"
 #include "bnd_beam.h"
 #include "bnd_nurbssurface.h"
-#include "bnd_light.h"
 #include "bnd_sphere.h"
 #include "bnd_viewport.h"
 #include "bnd_group.h"
+#include "bnd_mesh_modifiers.h"
 #include "bnd_extensions.h"
+#include "bnd_3dm_attributes.h"
 #include "bnd_draco.h"
 #include "bnd_rtree.h"
+#include "bnd_linetype.h"

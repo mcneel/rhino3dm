@@ -1,3 +1,4 @@
+
 #include "bindings.h"
 
 #pragma once
@@ -11,8 +12,8 @@ void initExtensionsBindings(void* m);
 class BND_FileObject
 {
 public:
-  BND_GeometryBase* m_geometry = nullptr;
-  BND_3dmObjectAttributes* m_attributes = nullptr;
+  class BND_GeometryBase* m_geometry = nullptr;
+  class BND_3dmObjectAttributes* m_attributes = nullptr;
 
   BND_GeometryBase* GetGeometry() { return m_geometry; };
   BND_3dmObjectAttributes* GetAttributes() { return m_attributes; }
@@ -102,6 +103,28 @@ public:
   class BND_Material* FromAttributes(const class BND_3dmObjectAttributes* attributes);
 };
 
+class BND_File3dmLinetypeTable
+{
+  std::shared_ptr<ONX_Model> m_model;
+public:
+  BND_File3dmLinetypeTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
+  int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::LinePattern); }
+  void Add(const class BND_Linetype& linetype);
+  void Delete(BND_UUID id);
+  class BND_Linetype* FindIndex(int index);
+  class BND_Linetype* IterIndex(int index); // helper function for iterator
+  class BND_Linetype* FindId(BND_UUID id);
+  class BND_Linetype* FindName(std::wstring name);
+  class BND_Linetype* FromAttributes(const BND_3dmObjectAttributes*);
+  class BND_Linetype* FromLayerIndex(int index);
+  class BND_Linetype* GetCurrent();
+  void SetCurrent(BND_Linetype* linetype);
+  ON::object_linetype_source GetCurrentSource() { return m_model->m_settings.m_current_linetype_source; }
+  void SetCurrentSource(ON::object_linetype_source source) { m_model->m_settings.m_current_linetype_source = source; }
+  double GetScale() const { return m_model->m_settings.m_linetype_display_scale; }
+  void SetScale(double scale) { m_model->m_settings.m_linetype_display_scale = scale; }
+};
+
 class BND_File3dmBitmapTable
 {
   std::shared_ptr<ONX_Model> m_model;
@@ -131,11 +154,14 @@ public:
 
 class BND_File3dmGroupTable
 {
-	std::shared_ptr<ONX_Model> m_model;
+  std::shared_ptr<ONX_Model> m_model;
 public:
 	BND_File3dmGroupTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
 	int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Group); }
 	void Add(const class BND_Group& group);
+  bool Delete(const class BND_Group& group);
+  bool DeleteId(BND_UUID id);
+  bool DeleteIndex(int index);
 	class BND_Group* FindIndex(int index);
 	class BND_Group* IterIndex(int index); // helper function for iterator
   class BND_Group* FindName(std::wstring name);
@@ -268,10 +294,11 @@ public:
   void SetApplicationUrl(std::wstring url);
   std::wstring GetApplicationDetails() const;
   void SetApplicationDetails(std::wstring details);
+  int GetArchiveVersion() const;
   std::wstring GetCreatedBy() const;
   std::wstring GetLastEditedBy() const;
-  //public DateTime Created | get;
-  //public DateTime LastEdited | get;
+  BND_DateTime GetCreated() const;
+  BND_DateTime GetLastEdited() const;
   int GetRevision() const;
   void SetRevision(int r);
   BND_File3dmSettings Settings() { return BND_File3dmSettings(m_model); }
@@ -279,7 +306,7 @@ public:
 
   BND_ONXModel_ObjectTable Objects() { return BND_ONXModel_ObjectTable(m_model); }
   BND_File3dmMaterialTable Materials() { return BND_File3dmMaterialTable(m_model); }
-  //public File3dmLinetypeTable AllLinetypes
+  BND_File3dmLinetypeTable Linetypes() { return BND_File3dmLinetypeTable(m_model); }
   BND_File3dmBitmapTable Bitmaps() { return BND_File3dmBitmapTable(m_model); }
   BND_File3dmLayerTable Layers() { return BND_File3dmLayerTable(m_model); }
   BND_File3dmGroupTable AllGroups() { return BND_File3dmGroupTable(m_model); }
@@ -291,6 +318,9 @@ public:
   //public File3dmNamedConstructionPlanes AllNamedConstructionPlanes | get;
   BND_File3dmPlugInDataTable PlugInData() { return BND_File3dmPlugInDataTable(m_model); }
   BND_File3dmStringTable Strings() { return BND_File3dmStringTable(m_model); }
+  BND_File3dmEmbeddedFileTable EmbeddedFiles() { return BND_File3dmEmbeddedFileTable(m_model); }
+  BND_File3dmRenderContentTable RenderContent() { return BND_File3dmRenderContentTable(m_model); }
+
   //std::wstring Dump() const;
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)
@@ -298,6 +328,7 @@ public:
   std::string GetEmbeddedFileAsBase64(std::wstring path);
   std::string GetEmbeddedFileAsBase64Strict(std::wstring path, bool strict);
   std::wstring RdkXml() const;
+
 public:
   static bool ReadTest(std::wstring filepath);
 };

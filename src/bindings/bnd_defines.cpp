@@ -229,6 +229,49 @@ void initDefines(pybind11::module& m)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
     ;
+
+  py::enum_<ON_Dithering::Methods>(m, "DitheringMethods")
+    .value("SimpleNoise", ON_Dithering::Methods::SimpleNoise)
+    .value("FloydSteinberg", ON_Dithering::Methods::FloydSteinberg)
+    ;
+
+  py::enum_<ON_RenderChannels::Modes>(m, "RenderChannelsModes")
+    .value("Automatic", ON_RenderChannels::Modes::Automatic)
+    .value("Custom", ON_RenderChannels::Modes::Custom)
+    ;
+
+  py::enum_<ON_PostEffect::Types>(m, "PostEffectTypes")
+    .value("Early", ON_PostEffect::Types::Early)
+    .value("ToneMapping", ON_PostEffect::Types::ToneMapping)
+    .value("Late", ON_PostEffect::Types::Late)
+    ;
+
+  py::enum_<ON_Decal::Mappings>(m, "DecalMappings")
+    .value("None", ON_Decal::Mappings::None)
+    .value("Planar", ON_Decal::Mappings::Planar)
+    .value("Cylindrical", ON_Decal::Mappings::Cylindrical)
+    .value("Spherical", ON_Decal::Mappings::Spherical)
+    .value("UV", ON_Decal::Mappings::UV)
+    ;
+
+  py::enum_<ON_Decal::Projections>(m, "DecalProjections")
+    .value("None", ON_Decal::Projections::None)
+    .value("Forward", ON_Decal::Projections::Forward)
+    .value("Backward", ON_Decal::Projections::Backward)
+    .value("Both", ON_Decal::Projections::Both)
+    ;
+
+  py::enum_<ON_Displacement::SweepResolutionFormulas>(m, "DisplacementSweepResolutionFormulas")
+    .value("Default", ON_Displacement::SweepResolutionFormulas::Default)
+    .value("AbsoluteToleranceDependent", ON_Displacement::SweepResolutionFormulas::AbsoluteToleranceDependent)
+    ;
+
+  py::enum_<ON_CurvePiping::CapTypes>(m, "CurvePipingCapTypes")
+    .value("None", ON_CurvePiping::CapTypes::None)
+    .value("Flat", ON_CurvePiping::CapTypes::Flat)
+    .value("Box" , ON_CurvePiping::CapTypes::Box)
+    .value("Dome", ON_CurvePiping::CapTypes::Dome)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
@@ -484,6 +527,49 @@ void initDefines(void*)
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
     .value("CenterOfEarth", ON::EarthCoordinateSystem::CenterOfEarth)
+    ;
+
+  enum_<ON_Dithering::Methods>("DitheringMethods")
+    .value("SimpleNoise", ON_Dithering::Methods::SimpleNoise)
+    .value("FloydSteinberg", ON_Dithering::Methods::FloydSteinberg)
+    ;
+
+  enum_<ON_RenderChannels::Modes>("RenderChannelsModes")
+    .value("Automatic", ON_RenderChannels::Modes::Automatic)
+    .value("Custom", ON_RenderChannels::Modes::Custom)
+    ;
+
+  enum_<ON_PostEffect::Types>("PostEffectTypes")
+    .value("Early", ON_PostEffect::Types::Early)
+    .value("ToneMapping", ON_PostEffect::Types::ToneMapping)
+    .value("Late", ON_PostEffect::Types::Late)
+    ;
+
+  enum_<ON_Decal::Mappings>("DecalMappings")
+    .value("None", ON_Decal::Mappings::None)
+    .value("Planar", ON_Decal::Mappings::Planar)
+    .value("Cylindrical", ON_Decal::Mappings::Cylindrical)
+    .value("Spherical", ON_Decal::Mappings::Spherical)
+    .value("UV", ON_Decal::Mappings::UV)
+    ;
+
+  enum_<ON_Decal::Projections>("DecalProjections")
+    .value("None", ON_Decal::Projections::None)
+    .value("Forward", ON_Decal::Projections::Forward)
+    .value("Backward", ON_Decal::Projections::Backward)
+    .value("Both", ON_Decal::Projections::Both)
+    ;
+
+  enum_<ON_Displacement::SweepResolutionFormulas>("DisplacementSweepResolutionFormulas")
+    .value("Default", ON_Displacement::SweepResolutionFormulas::Default)
+    .value("AbsoluteToleranceDependent", ON_Displacement::SweepResolutionFormulas::AbsoluteToleranceDependent)
+    ;
+
+  enum_<ON_CurvePiping::CapTypes>("CurvePipingCapTypes")
+    .value("None", ON_CurvePiping::CapTypes::None)
+    .value("Flat", ON_CurvePiping::CapTypes::Flat)
+    .value("Box" , ON_CurvePiping::CapTypes::Box)
+    .value("Dome", ON_CurvePiping::CapTypes::Dome)
     ;
 }
 
