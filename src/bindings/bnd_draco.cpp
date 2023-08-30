@@ -449,7 +449,7 @@ void initDracoBindings(void*)
 
   class_<BND_Draco>("DracoCompression")
     .class_function("compress", &BND_Draco::CompressMesh, allow_raw_pointers())
-    .class_function("compress", &BND_Draco::CompressMesh2, allow_raw_pointers())
+    .class_function("compressOptions", &BND_Draco::CompressMesh2, allow_raw_pointers())
     .class_function("decompressByteArray", &BND_Draco::DecompressByteArray2, allow_raw_pointers())
     .class_function("decompressBase64String", &BND_Draco::DecompressBase64, allow_raw_pointers())
     .function("toBase64String", &BND_Draco::ToBase64String)

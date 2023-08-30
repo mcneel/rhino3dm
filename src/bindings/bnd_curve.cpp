@@ -387,7 +387,7 @@ void initCurveBindings(void*)
     .function("trim", &BND_Curve::Trim, allow_raw_pointers())
     .function("split", &BND_Curve::Split, allow_raw_pointers())
     .function("toNurbsCurve", &BND_Curve::ToNurbsCurve, allow_raw_pointers())
-    .function("ToNurbsCurveSubDomain", &BND_Curve::ToNurbsCurve2, allow_raw_pointers())
+    .function("toNurbsCurveSubDomain", &BND_Curve::ToNurbsCurve2, allow_raw_pointers())
     ;
 }
 #endif
