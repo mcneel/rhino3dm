@@ -262,7 +262,7 @@ jobs:
           ./docgen
           cd ../../../../
           #patch src/docgen/out/js_tsdef/rhino3dm.d.ts < src/rhino3dm.d.ts.diff
-          #cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
+          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
       - name: copy files
         shell: bash
         run: |
