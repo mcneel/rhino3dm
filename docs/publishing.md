@@ -68,6 +68,8 @@ Python packages can be uploaded to the corresponding `pypi.org` project: https:/
 ```bash
 python3 -m twine upload dist/*
 ```
+5. when prompted for the username, enter in `__token__`
+6. When prompted for password, use API key obtained from pypi
 
 #### Requirements
 

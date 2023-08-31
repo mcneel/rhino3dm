@@ -3,10 +3,8 @@
 
 #### Supported Python platforms:
 
-- Python 2.7 - Windows (32 and 64 bit)
-- Python 3.7 - Windows (32 and 64 bit)
-- Python 2.7 - OSX (installed through homebrew)
-- Python 3.7 - OSX (installed through homebrew)
+- Windows (32 and 64 bit): Python 3.7 - 3.11
+- macOS: Python 3.7 - 3.10 (x86_64), Python 3.11 (Universal)
 - Linux and other python versions are supported through source distributions on PyPi
 
 ## Install using pip

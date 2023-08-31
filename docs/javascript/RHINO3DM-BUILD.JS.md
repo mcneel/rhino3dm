@@ -1,7 +1,7 @@
 # rhino3dm.js build instructions
 ### Get the Source
 
-If the pre-compiled libraries above do not work in your situation, you can compile the libraries from their source, the repo uses OpenNURBS as a submodule, so you need to run a couple more git commands after you have cloned. `cd` into the new repository directory and run
+If the pre-compiled libraries do not work in your situation, you can compile the libraries from their source, the repo uses OpenNURBS as a submodule, so you need to run a couple more git commands after you have cloned. `cd` into the new repository directory and run
 
 ```commandline
 git submodule update --init

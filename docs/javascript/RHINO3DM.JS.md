@@ -4,6 +4,8 @@
 
 **rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
 
+For browser based applications, we also develop a 3dmLoader for the popular three.js WebGL library: https://threejs.org/examples/?q=3dm#webgl_loader_3dm
+
 
 ## Usage
 
@@ -11,19 +13,32 @@ The easiest way to get started is to reference a specific version of the library
 
 ```html
 <!DOCTYPE html>
-<html>
-  <!-- stuff -->
-  <body>
-    <script src="https://cdn.jsdelivr.net/npm/rhino3dm@0.13.0/rhino3dm.min.js"></script>
-    <script>
-      rhino3dm().then((rhino) => {
-        sphere = new rhino.Sphere([1,2,3], 12)
-        // more stuff
-      })
-      // even more stuff
-    </script>
-    <!-- you get the idea -->
-  </body>
+
+<body>
+
+  <!-- Import maps polyfill -->
+  <!-- Remove this when import maps will be widely supported -->
+  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
+      {
+          "imports": {
+            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.0.0-beta2/rhino3dm.module.min.js"
+          }
+      }
+  </script>
+
+  <script type="module">
+
+    import rhino3dm from 'rhino3dm'
+    const rhino = await rhino3dm()
+    const sphere = new rhino.Sphere( [1,2,3,], 12 )
+    console.log(sphere.diameter)
+
+  </script>
+
+</body>
+
 </html>
 ```
 
@@ -32,28 +47,16 @@ You can also [download the files](https://www.jsdelivr.com/package/npm/rhino3dm)
 
 ### Node.js
 
-**rhino3dm.js** is available on [npm](https://www.npmjs.com/package/rhino3dm); try `npm install rhino3dm`.
+**rhino3dm.js** is available on [npm](https://www.npmjs.com/package/rhino3dm); try `npm install rhino3dm`. Note: the resulting webassembly binary (rhino3dm.wasm) is fairly large for browser based applications. We are working on ways to make this smaller.
+
+Example node.js script:
 
 ```js
-$ node
-> rhino3dm = require('rhino3dm')() // note the trailing "()"
-> sphere = new rhino3dm.Sphere([1,2,3,], 12)
-> sphere.radius
-12
+import rhino3dm from 'rhino3dm'
+const rhino = await rhino3dm()
+const sphere = new rhino.Sphere([1,2,3,], 12)
+console.log(sphere.diameter)
 ```
-
-It takes a moment to load the ~5 MB wasm file – this happens asycnhronously. Unlike interactive usage, when scripting with `rhino3dm` you can use the fact that the `rhino3dm()` function returns a `Promise`.
-
-```js
-// script.js
-const rhino3dm = require('rhino3dm')
-
-rhino3dm().then((rhino) => {
-  const sphere = new rhino.Sphere([1,2,3,], 12)
-  console.log(sphere.radius)
-})
-```
-
 
 ### React.js
 
@@ -69,7 +72,7 @@ import App from "./App";
 const rootElement = document.getElementById("root");
 
 const script = document.createElement("script");
-script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@0.12.0/rhino3dm.min.js";
+script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/rhino3dm.min.js";
 script.addEventListener("load", () => {
   ReactDOM.render(
     <StrictMode>
@@ -113,7 +116,7 @@ The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/jav
 
 ## Examples
 
-There a few samples are available in the [Rhino Developer Samples repository](https://github.com/mcneel/rhino-developer-samples/tree/7/rhino3dm#samples)
+There a few samples are available in the [Rhino Developer Samples repository](https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm#samples)
 
 An advanced sample creates a 3dm file viewer in a web browser.  The html+javascript to create the viewer is around 300 lines (including comments) and runs on all browsers including mobile devices.  
 
