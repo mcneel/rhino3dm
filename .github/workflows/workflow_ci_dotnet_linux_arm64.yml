@@ -1,0 +1,40 @@
+# for a list of available software on the different virtual environments, please see:
+# https://github.com/actions/virtual-environments/tree/main/images
+
+name: workflow experiment dotnet linux arm64
+on: [push, pull_request]
+
+
+env:
+  RETENTION_DAYS: 15
+
+jobs:
+
+  build_dotnet:
+    name: build dotnet linux arm64
+    runs-on: ubuntu-latest
+    container:
+      image: mcneel/rhino3dm-dev-arm64:latest
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v3.3.0
+      - name: safe directory
+        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p linux
+      - name: setup
+        run: python3 script/setup.py -p linux -v
+      - name: build dotnet
+        run: python3 script/build.py -p linux -v
+      - name: artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          path: |
+            src/build/linux/dotnet/Rhino3dm.dll
+            src/build/linux/librhino3dm_native.so
+          name: rhino3dm.net
+          retention-days: ${{ env.RETENTION_DAYS }}
