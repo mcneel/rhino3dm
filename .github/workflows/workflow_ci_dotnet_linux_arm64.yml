@@ -13,9 +13,12 @@ jobs:
   build_dotnet:
     name: build dotnet linux arm64
     runs-on: ubuntu-latest
-    container:
-      image: mcneel/rhino3dm-dev-arm64:latest
     steps:
+      - name: docker
+        run: |
+          docker run --name rhino3dm --rm -dit -v $(pwd):/src mcneel/rhino3dm-dev-arm64
+          docker exec -it rhino3dm /bin/bash
+          cd src
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
