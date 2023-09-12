@@ -4,7 +4,6 @@
 name: workflow experiment dotnet linux arm64
 on: [push, pull_request]
 
-
 env:
   RETENTION_DAYS: 15
 
@@ -13,12 +12,11 @@ jobs:
   build_dotnet:
     name: build dotnet linux arm64
     runs-on: ubuntu-latest
+    container:
+        image: mcneel/rhino3dm-dev-arm64:latest
     steps:
       - name: docker
         run: |
-          docker run --name rhino3dm-dev --rm -dit -v $(pwd):/src mcneel/rhino3dm-dev-arm64
-          docker ps -a
-          docker ps -a
           docker ps -a
           docker exec -t rhino3dm-dev /bin/bash
           cd src
