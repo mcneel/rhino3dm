@@ -18,6 +18,8 @@ jobs:
         run: |
           docker run --name rhino3dm-dev --rm -dit -v $(pwd):/src mcneel/rhino3dm-dev-arm64
           docker ps -a
+          docker ps -a
+          docker ps -a
           docker exec -t rhino3dm-dev /bin/bash
           cd src
       - name: info
