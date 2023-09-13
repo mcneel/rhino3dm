@@ -13,16 +13,17 @@ jobs:
     name: build dotnet linux arm64
     runs-on: ubuntu-latest
     steps:
-      - name: qemu setup
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'arm64'
+      #- name: qemu setup
+      #  uses: docker/setup-qemu-action@v2
+      #  with:
+      #    platforms: 'arm64'
       - name: docker
         run: |
           uname -a
-          docker run --rm -dit -v $(pwd):/src arm64v8/ubuntu
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          apt-get install qemu binfmt-support qemu-user-static
+          docker run --rm -dit -v $(pwd):/src -it arm64v8/ubuntu /bin/bash
           docker ps -a
-          docker exec -t rhino3dm-dev /bin/bash
           cd src
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
