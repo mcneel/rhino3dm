@@ -15,8 +15,13 @@ jobs:
     container:
         image: mcneel/rhino3dm-dev-arm64:latest
     steps:
+      - name: qemu setup
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64'
       - name: docker
         run: |
+          uname -a
           docker ps -a
           docker exec -t rhino3dm-dev /bin/bash
           cd src
