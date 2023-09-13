@@ -188,9 +188,9 @@ jobs:
       - name: bootstrap dotnet ${{ matrix.target }}
         run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
-        run: python3 script/setup.py -p ${{ matrix.target }} -v
+        run: python3 script/setup.py -p ${{ matrix.target }} -v -l
       - name: build dotnet ${{ matrix.target }}
-        run: python3 script/build.py -p ${{ matrix.target }} -v
+        run: python3 script/build.py -p ${{ matrix.target }} -v -l
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
       - name: code-sign native libraries
