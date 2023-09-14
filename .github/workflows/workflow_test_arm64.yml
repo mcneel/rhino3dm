@@ -31,19 +31,20 @@ jobs:
           options: -v ${{ github.workspace }}:/src
           run: |
             uname -a
+            cd src
             ls
-      - name: info
-        run: python3 --version && cmake --version && dotnet --version && git --version
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p linux
-      - name: setup
-        run: python3 script/setup.py -p linux -v -l
-      - name: build dotnet
-        run: python3 script/build.py -p linux -v -l
-      - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          path: |
-            src/build/linux/librhino3dm_native.so
-          name: rhino3dm.net arm64
-          retention-days: ${{ env.RETENTION_DAYS }}
+      # - name: info
+      #   run: python3 --version && cmake --version && dotnet --version && git --version
+      # - name: bootstrap
+      #   run: python3 script/bootstrap.py -p linux
+      # - name: setup
+      #   run: python3 script/setup.py -p linux -v -l
+      # - name: build dotnet
+      #   run: python3 script/build.py -p linux -v -l
+      # - name: artifacts
+      #   uses: actions/upload-artifact@v3.1.2
+      #   with:
+      #     path: |
+      #       src/build/linux/librhino3dm_native.so
+      #     name: rhino3dm.net arm64
+      #     retention-days: ${{ env.RETENTION_DAYS }}
