@@ -211,9 +211,10 @@ def build_windows():
     
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
 
-    if not build_did_succeed(item_to_check):                
+    if not build_did_succeed(item_to_check):             
         return False
 
+    all_items_built = True
     if not lib:
         print(" Building Rhino3dm.dll...")
         csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
@@ -221,8 +222,9 @@ def build_windows():
 
         command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release'
         rv = run_command(command)
+        all_items_built = rv == 0
 
-    return 0 # two target frameworks built, so just use the dotnet return value
+    return all_items_built # two target frameworks built, so just use the dotnet return value
 
 
 def build_linux():
