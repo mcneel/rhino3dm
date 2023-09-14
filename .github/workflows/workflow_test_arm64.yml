@@ -43,13 +43,13 @@ jobs:
             ldd src/build/linux/librhino3dm_native.so
       - name: check output
         run: |
-          ls
-          ls /src
+          ls src
       - name: artifacts
+        if: success() || failure()
         uses: actions/upload-artifact@v3.1.2
         with:
           path: |
-            src/src/build/linux/librhino3dm_native.so
+            src/build/linux/librhino3dm_native.so
           name: rhino3dm.net arm64
           retention-days: ${{ env.RETENTION_DAYS }}
             
