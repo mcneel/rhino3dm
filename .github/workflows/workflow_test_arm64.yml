@@ -20,8 +20,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install qemu binfmt-support qemu-user-static
           docker run -v $(pwd)/qemu-aarch64-static:/usr/bin/qemu-aarch64-static -i mcneel/rhino3dm-dev-arm64 bash
-          uname -a
-          ls
+          sudo uname -a
+          sudo ls
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
