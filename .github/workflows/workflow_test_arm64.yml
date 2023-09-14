@@ -40,6 +40,7 @@ jobs:
             python3 script/setup.py -p linux -v -l
             echo 'build'
             python3 script/build.py -p linux -v -l
+            ldd src/build/linux/librhino3dm_native.so
       - name: check output
         run: ls /src/build/linux
       - name: artifacts
