@@ -350,6 +350,7 @@ using namespace emscripten;
 void initCurveBindings(void*)
 {
   class_<BND_Curve, base<BND_GeometryBase>>("Curve")
+    .class_function("createControlPointCurve", &BND_Curve::CreateControlPointCurve, allow_raw_pointers())
     .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
     .property("dimension", &BND_GeometryBase::Dimension)
     .function("changeDimension", &BND_Curve::ChangeDimension)

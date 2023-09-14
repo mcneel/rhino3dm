@@ -7,6 +7,15 @@ BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
   m_polyline.Append(count, pts);
 }
 
+BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& points)
+{
+  int count = (int)points.size();
+  const ON_3dPoint* pts = points.data();
+  BND_Polyline* rc = new BND_Polyline();
+  rc->m_polyline.Append(count, pts);
+  return rc;
+}
+
 ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
@@ -126,7 +135,16 @@ BND_LineCurve* BND_Polyline::SegmentAt(int index) const
   return new BND_LineCurve(m_polyline[index], m_polyline[index+1]);
 
 }
-
+#if defined(ON_PYTHON_COMPILE)
+void BND_Point3dList::Append2 (int count, pybind11::object points)
+{
+  for (auto item : points)
+  {
+    ON_3dPoint point = item.cast<ON_3dPoint>();
+    m_polyline.Append(point)
+  }
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -152,6 +170,7 @@ void initPolylineBindings(pybind11::module& m)
     .def("SetAllX", &BND_Point3dList::SetAllX, py::arg("x"))
     .def("SetAllY", &BND_Point3dList::SetAllY, py::arg("y"))
     .def("SetAllZ", &BND_Point3dList::SetAllZ, py::arg("z"))
+    .def("Append", &BND_Point3dList::Append2, py::arg("count"), py::arg("points"))
     ;
 
   py::class_<BND_Polyline,BND_Point3dList>(m, "Polyline")
@@ -200,6 +219,7 @@ void initPolylineBindings(void*)
     .function("setAllX", &BND_Point3dList::SetAllX)
     .function("setAllY", &BND_Point3dList::SetAllY)
     .function("setAllZ", &BND_Point3dList::SetAllZ)
+    .function("append", &BND_Point3dList::Append)
     ;
 
   class_<BND_Polyline, base<BND_Point3dList>>("Polyline")
@@ -222,6 +242,7 @@ void initPolylineBindings(void*)
     .class_function("createInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, allow_raw_pointers())
     .class_function("createCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, allow_raw_pointers())
     .class_function("createStarPolygon", &BND_Polyline::CreateStarPolygon, allow_raw_pointers())
+    .class_function("createFromPoints", &BND_Polyline::CreateFromPoints, allow_raw_pointers()) 
     ;
 }
 #endif

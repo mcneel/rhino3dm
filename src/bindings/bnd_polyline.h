@@ -33,8 +33,13 @@ public:
   void SetAllX(double xValue);
   void SetAllY(double yValue);
   void SetAllZ(double zValue);
+  void Append(int count, const std::vector<ON_3dPoint>& points) { m_polyline.Append(count, points); }
+  #if defined(ON_PYTHON_COMPILE)
+  void Append2(int count, const std::vector<ON_3dPoint>& points)
+  #endif
   //public static int ClosestIndexInList(IList<Point3d> list, Point3d testPoint)
   //public static Point3d ClosestPointInList(IList<Point3d> list, Point3d testPoint)
+  
 };
 
 class BND_Polyline : public BND_Point3dList
@@ -69,4 +74,5 @@ public:
   static BND_Polyline* CreateInscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateCircumscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateStarPolygon(class BND_Circle& circle, double radius, int cornerCount);
+  static BND_Polyline* CreateFromPoints(const std::vector<ON_3dPoint>& points)
 };
