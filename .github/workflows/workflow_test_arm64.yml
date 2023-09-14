@@ -19,7 +19,7 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static:register
           sudo apt-get update
           sudo apt-get install qemu binfmt-support qemu-user-static
-          docker run -v $(pwd)/qemu-aarch64-static:/usr/bin/qemu-aarch64-static -i mcneel/rhino3dm-v-arm64 bash
+          docker run -v $(pwd)/qemu-aarch64-static:/usr/bin/qemu-aarch64-static -i mcneel/rhino3dm-dev-arm64 bash
           uname -a
           ls
       - name: info
