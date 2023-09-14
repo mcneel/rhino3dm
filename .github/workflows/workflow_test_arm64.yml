@@ -14,14 +14,12 @@ jobs:
     name: build dotnet
     runs-on: ubuntu-latest
     steps:
-      - name: setup environment
-        run: |
-          docker run --rm --privileged multiarch/qemu-user-static:register
-          sudo apt-get update
-          sudo apt-get install qemu binfmt-support qemu-user-static
-          docker run -v $(pwd)/qemu-aarch64-static:/usr/bin/qemu-aarch64-static -i mcneel/rhino3dm-dev-arm64 bash
-          sudo uname -a
-          sudo ls
+      - name: setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - name: get platform arch
+        run: uname -a
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
