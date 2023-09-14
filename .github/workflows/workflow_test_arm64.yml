@@ -22,7 +22,7 @@ jobs:
         run: uname -a
       - name: run docker
         run: |
-          docker run -t mcneel/rhino3dm-dev-arm64 /bin/bash
+          docker run -t mcneel/rhino3dm-dev-arm64 bash
           uname -a
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
