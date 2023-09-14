@@ -20,6 +20,10 @@ jobs:
           platforms: arm64
       - name: get platform arch
         run: uname -a
+      - name: run docker
+        run: |
+          docker run -t mcneel/rhino3dm-dev-arm64 /bin/bash
+          uname -a
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
