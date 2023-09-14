@@ -28,7 +28,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: mcneel/rhino3dm-dev-arm64
-          options: -v $(pwd):/src
+          options: -v ${{ github.workspace }}:/src
           run: |
             uname -a
             ls
