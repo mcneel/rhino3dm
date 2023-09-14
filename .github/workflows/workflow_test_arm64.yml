@@ -44,7 +44,7 @@ jobs:
       - name: check output
         run: |
           ls
-          ls /src/src/build/linux
+          ls /src
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
