@@ -17,7 +17,8 @@ jobs:
       - name: setup environment
         run: |
           docker run --rm --privileged multiarch/qemu-user-static:register
-          apt-get install qemu binfmt-support qemu-user-static
+          sudo apt-get update
+          sudo apt-get install qemu binfmt-support qemu-user-static
           docker run -v $(pwd)/qemu-aarch64-static:/usr/bin/qemu-aarch64-static -it mcneel/rhino3dm-v-arm64 bash
           uname -a
           ls
