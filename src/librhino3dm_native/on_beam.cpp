@@ -264,3 +264,13 @@ RH_C_FUNCTION const ON_Mesh* ON_Extrusion_GetMesh(const ON_Extrusion* pConstExtr
     ? pConstExtrusion->m_mesh_cache.Mesh(ON::MeshType(meshtype))
     : nullptr;
 }
+
+RH_C_FUNCTION bool ON_Extrusion_SetMesh( ON_Extrusion* pExtrusion, ON_Mesh* mesh, int meshtype)
+{
+  bool rc = false;
+  if (pExtrusion && mesh)
+  {
+    rc = pExtrusion->SetMesh(ON::MeshType(meshtype), mesh);
+  }
+  return rc;
+}

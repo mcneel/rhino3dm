@@ -557,6 +557,25 @@ namespace Rhino.Geometry
       return CreateGeometryHelper(ptr_const_mesh, new MeshHolder(this, meshType)) as Mesh;
     }
 
+    /// <summary>
+    /// Sets a specified type of mesh for this extrusion.
+    /// </summary>
+    /// <param name="mesh">The mesh.</param>
+    /// <param name="meshType">The mesh type.</param>
+    /// <returns>A bool.</returns>
+    [ConstOperation]
+    public bool SetMesh(Mesh mesh, MeshType meshType)
+    {
+      if (null == mesh ) return false;
+
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_mesh = mesh.ConstPointer();
+      
+      bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_const_this, ptr_const_mesh, (int)meshType );
+      GC.KeepAlive(mesh);
+      return result;
+    }
+
     //skipping
     //  const ON_PolyCurve* PolyProfile() const;
     //  int GetProfileCurves( ON_SimpleArray<const ON_Curve*>& profile_curves ) const;
