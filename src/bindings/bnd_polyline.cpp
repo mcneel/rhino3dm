@@ -141,7 +141,7 @@ void BND_Point3dList::Append2 (int count, pybind11::object points)
   for (auto item : points)
   {
     ON_3dPoint point = item.cast<ON_3dPoint>();
-    m_polyline.Append(point)
+    m_polyline.Append(point);
   }
 }
 #endif

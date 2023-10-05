@@ -395,6 +395,7 @@ void initBrepBindings(pybind11::module& m)
     .def("DuplicateSurface", &BND_BrepFace::DuplicateSurface)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
     .def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
+    .def_property("OrientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
@@ -463,6 +464,7 @@ void initBrepBindings(void*)
     .function("duplicateSurface", &BND_BrepFace::DuplicateSurface, allow_raw_pointers())
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
     .function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
+    .property("orientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
