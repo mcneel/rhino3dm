@@ -136,12 +136,6 @@ BND_LineCurve* BND_Polyline::SegmentAt(int index) const
 
 }
 
-void BND_Point3dList::Append (const std::vector<ON_3dPoint>& points)
-{
-  int count = (int)points.size();
-  const ON_3dPoint* pts = points.data();
-  m_polyline.Append(count, pts);
-}
 #if defined(ON_PYTHON_COMPILE)
 void BND_Point3dList::Append2 (pybind11::object points)
 {
@@ -150,6 +144,13 @@ void BND_Point3dList::Append2 (pybind11::object points)
     ON_3dPoint point = item.cast<ON_3dPoint>();
     m_polyline.Append(point);
   }
+}
+#else
+void BND_Point3dList::Append (const std::vector<ON_3dPoint>& points)
+{
+  int count = (int)points.size();
+  const ON_3dPoint* pts = points.data();
+  m_polyline.Append(count, pts);
 }
 #endif
 
