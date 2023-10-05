@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (dotnet) Added Extrusion.SetMesh()
 - (js) Added Curve.createControlPointCurve static function
 - (js) Added File3dm.Objects.AddPolyline
-- (js, py) Added Polyline.Append()
+- (js, py) Added Polyline.Append(points)
 - (js, py) Added BrepFace.OrientationIsReversed property
 
 ## [8.0.0-beta2] - 2023.08.31
