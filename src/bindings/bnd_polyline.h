@@ -35,9 +35,9 @@ public:
   void SetAllZ(double zValue);
   
   #if defined(ON_PYTHON_COMPILE)
-  void Append2(int count, pybind11::object points);
+  void Append2(pybind11::object points);
   #else
-  void Append(int count, const std::vector<ON_3dPoint>& points);
+  void Append(const std::vector<ON_3dPoint>& points);
   #endif
   //public static int ClosestIndexInList(IList<Point3d> list, Point3d testPoint)
   //public static Point3d ClosestPointInList(IList<Point3d> list, Point3d testPoint)
