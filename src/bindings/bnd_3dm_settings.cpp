@@ -242,7 +242,7 @@ void init3dmSettingsBindings(void*)
     .property("focalBlurAperture", &BND_ViewInfo::GetFocalBlurAperture, &BND_ViewInfo::SetFocalBlurAperture)
     .property("focalBlurJitter", &BND_ViewInfo::GetFocalBlurJitter, &BND_ViewInfo::SetFocalBlurJitter)
     .property("focalBlurSampleCount", &BND_ViewInfo::GetFocalBlurSampleCount, &BND_ViewInfo::SetFocalBlurSampleCount)
-    .property("viewport", &BND_ViewInfo::GetViewport),
+    .function("getViewport", &BND_ViewInfo::GetViewport, allow_raw_pointers())
     .function("setViewport", &BND_ViewInfo::SetViewport, allow_raw_pointers())
     ;
 
