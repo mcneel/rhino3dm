@@ -9,13 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - (dotnet) Added -l/--library flag to the build scripts for building only the native library.
 - (dotnet) Added linux arm64 build in release workflow
+- (dotnet) Build now generates XML documentation (#425)
 - (dotnet) Added Extrusion.SetMesh()
 - (js) Added Curve.createControlPointCurve static function
 - (js) Added File3dm.Objects.AddPolyline
 - (js, py) Added Polyline.Append(points)
 - (js, py) Added BrepFace.OrientationIsReversed property
 
-## [8.0.0-beta2] - 2023.08.31
+## [8.0.0-beta2] - 2023-08-31
 diff: https://github.com/mcneel/rhino3dm/pull/561/files
 ### Added
 - (.net, js, py) RDK objects for ground plane, dithering, linear workflow, safe frame, skylight, sun, render channels, post effects, decals, render environments, render content, mesh modifiers
@@ -32,11 +33,11 @@ diff: https://github.com/mcneel/rhino3dm/pull/561/files
 - (js, py) SetMesh BrepFace and Extrusions
 - (js) tryConvertBrep for Brep
 - (js, py) Material.ToPhysicallyBased()
-- (js, py) LineType bindings (@coditect)
-- (js, py) BND_GroupTable Delete (@coditect)
-- (js, py) BND_Xform methods and properties (@coditect)
-- (js, py) additional file3dm properties (@coditect)
-- (js, py) DateTime bindings (@coditect)
+- (js, py) LineType bindings [@coditect](https://github.com/coditect)
+- (js, py) BND_GroupTable Delete [@coditect](https://github.com/coditect)
+- (js, py) BND_Xform methods and properties [@coditect](https://github.com/coditect)
+- (js, py) additional file3dm properties [@coditect](https://github.com/coditect)
+- (js, py) DateTime bindings [@coditect](https://github.com/coditect)
 - (.net, js, py) Texture Repeat, Offset, and Rotation properties
 - (js, py) Several methods related to PointClouds and values ( Add(point, value), etc )
 - (js) toList() for NurbsSurfaceKnotList and NurbsCurveKnotList
