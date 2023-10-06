@@ -1,7 +1,7 @@
-diff --git a/rhino3dm.d.ts b/rhino3dm_mod.d.ts
-index b3afd2c..37879b0 100644
+diff --git a/rhino3dm.d.ts b/rhino3dm.copy.d.ts
+index c638fd2..990e33f 100644
 --- a/rhino3dm.d.ts
-+++ b/rhino3dm_mod.d.ts
++++ b/rhino3dm.copy.d.ts
 @@ -54,6 +54,18 @@ declare module 'rhino3dm' {
  		Screen
  	}
@@ -264,7 +264,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Reverses entire brep orientation of all faces.
  		 * @returns {void}
-@@ -1049,8 +1128,11 @@ declare module 'rhino3dm' {
+@@ -1049,15 +1128,14 @@ declare module 'rhino3dm' {
  		 * Gets the number of brep edges.
  		 */
  		count: number;
@@ -278,7 +278,14 @@ index b3afd2c..37879b0 100644
  	}
  
  	class BrepFace extends SurfaceProxy {
-@@ -1097,8 +1179,11 @@ declare module 'rhino3dm' {
+-		/**
+-		 * true if face orientation is opposite of natural surface orientation.
+-		 */
+-		orientationIsReversed: boolean;
+ 		/**
+ 		 * @description Gets the untrimmed surface that is the base of this face.
+ 		 * @returns {Surface} A surface, or null on error.
+@@ -1101,8 +1179,11 @@ declare module 'rhino3dm' {
  		 * Gets the number of brep faces.
  		 */
  		count: number;
@@ -292,7 +299,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class BrepSurfaceList {
-@@ -1106,8 +1191,11 @@ declare module 'rhino3dm' {
+@@ -1110,8 +1191,11 @@ declare module 'rhino3dm' {
  		 * Gets the number of surfaces in a brep.
  		 */
  		count: number;
@@ -306,7 +313,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class BrepVertex extends Point {
-@@ -1116,11 +1204,15 @@ declare module 'rhino3dm' {
+@@ -1120,11 +1204,15 @@ declare module 'rhino3dm' {
  		 */
  		vertexIndex: number;
  		/**
@@ -324,7 +331,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class BrepVertexList {
-@@ -1128,8 +1220,11 @@ declare module 'rhino3dm' {
+@@ -1132,8 +1220,11 @@ declare module 'rhino3dm' {
  		 * Gets the number of brep vertices.
  		 */
  		count: number;
@@ -338,7 +345,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Circle {
-@@ -1167,9 +1262,16 @@ declare module 'rhino3dm' {
+@@ -1171,9 +1262,16 @@ declare module 'rhino3dm' {
  		 * Gets or sets the circumference of this circle.
  		 */
  		circumference: number;
@@ -357,7 +364,7 @@ index b3afd2c..37879b0 100644
  		constructor(center: number[], radius: number);
  		/**
  		 * @description Evaluates whether or not this circle is co-planar with a given plane.
-@@ -1246,8 +1348,9 @@ declare module 'rhino3dm' {
+@@ -1250,8 +1348,9 @@ declare module 'rhino3dm' {
  		 */
  		isValid: boolean;
  		/**
@@ -368,7 +375,7 @@ index b3afd2c..37879b0 100644
  		/** ... */
  		encode(): void;
  		/**
-@@ -1257,14 +1360,26 @@ declare module 'rhino3dm' {
+@@ -1261,14 +1360,26 @@ declare module 'rhino3dm' {
  		toJSON(): string;
  		/** ... */
  		static decode(): void;
@@ -402,7 +409,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class ComponentIndex {
-@@ -1341,10 +1456,10 @@ declare module 'rhino3dm' {
+@@ -1345,10 +1456,10 @@ declare module 'rhino3dm' {
  		axis: number[];
  		/**
  		 */
@@ -415,7 +422,16 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Constructs a Nurbs surface representation of this Cone.
  		This is synonymous with calling NurbsSurface.CreateFromCone().
-@@ -1526,8 +1641,12 @@ declare module 'rhino3dm' {
+@@ -1446,7 +1557,7 @@ declare module 'rhino3dm' {
+ 		 * Evaluate unit tangent vector at the end of the curve.
+ 		 */
+ 		tangentAtEnd: number[];
+-		/**
++/**
+ 		 * @description Constructs a curve from a set of control-point locations.
+ 		 * @param {Point3d[]} points Control points.
+ 		 * @param {number} degree Degree of curve. The number of control points must be at least degree+1.
+@@ -1537,8 +1648,12 @@ declare module 'rhino3dm' {
  		 * @returns {CurveOrientation} The orientation of this curve with respect to world XY plane.
  		 */
  		closedCurveOrientation(): CurveOrientation;
@@ -430,7 +446,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Evaluates point at a curve parameter.
  		 * @param {number} t Evaluation parameter.
-@@ -1572,11 +1691,17 @@ declare module 'rhino3dm' {
+@@ -1583,11 +1698,17 @@ declare module 'rhino3dm' {
  		 * @description Evaluate the derivatives at the specified curve parameter.
  		 * @param {number} t Curve parameter to evaluate.
  		 * @param {number} derivativeCount Number of derivatives to evaluate, must be at least 0.
@@ -452,7 +468,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Convert a NURBS curve parameter to a curve parameter.
  		 * @param {number} nurbsParameter NURBS form parameter.
-@@ -1612,29 +1737,45 @@ declare module 'rhino3dm' {
+@@ -1623,29 +1744,45 @@ declare module 'rhino3dm' {
  		 * @returns {NurbsCurve} NURBS representation of the curve on success, null on failure.
  		 */
  		toNurbsCurve(): NurbsCurve;
@@ -506,7 +522,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class CurveProxy extends Curve {
-@@ -1716,11 +1857,13 @@ declare module 'rhino3dm' {
+@@ -1727,11 +1864,13 @@ declare module 'rhino3dm' {
  		 */
  		textureInstanceId: string;
  		/**
@@ -522,7 +538,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Used only when mapping is cylindrical or spherical.
  		 */
-@@ -1732,15 +1875,15 @@ declare module 'rhino3dm' {
+@@ -1743,15 +1882,15 @@ declare module 'rhino3dm' {
  		/**
  		 * Gets the origin of the decal in world space.
  		 */
@@ -541,7 +557,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets the height of the decal. Only used when mapping is cylindrical.
  		 */
-@@ -1750,35 +1893,43 @@ declare module 'rhino3dm' {
+@@ -1761,35 +1900,43 @@ declare module 'rhino3dm' {
  		 */
  		radius: number;
  		/**
@@ -594,7 +610,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 */
  		arrowBlockId1: string;
-@@ -1871,14 +2022,14 @@ declare module 'rhino3dm' {
+@@ -1882,14 +2029,14 @@ declare module 'rhino3dm' {
  		 */
  		parentId: string;
  		/** ... */
@@ -612,7 +628,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Sets all the fields in this DimensionStyle to be not overridden
  		Does not change any dimstyle_id's or parent_id's
-@@ -1890,55 +2041,70 @@ declare module 'rhino3dm' {
+@@ -1901,55 +2048,70 @@ declare module 'rhino3dm' {
  		 * @returns {boolean} True if this is a child of the DimensionStyle with Parent
  		False otherwise.
  		 */
@@ -699,7 +715,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Dithering {
-@@ -1947,44 +2113,44 @@ declare module 'rhino3dm' {
+@@ -1958,44 +2120,44 @@ declare module 'rhino3dm' {
  		enabled: boolean;
  		/**
  		 */
@@ -757,7 +773,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class EarthAnchorPoint {
-@@ -2049,23 +2215,29 @@ declare module 'rhino3dm' {
+@@ -2060,23 +2222,29 @@ declare module 'rhino3dm' {
  
  	class EdgeSoftening {
  		/**
@@ -793,7 +809,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Ellipse {
-@@ -2074,29 +2246,37 @@ declare module 'rhino3dm' {
+@@ -2085,29 +2253,37 @@ declare module 'rhino3dm' {
  	class EmbeddedFile {
  		/**
  		 */
@@ -842,16 +858,23 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Extrusion extends Surface {
-@@ -2290,7 +2470,7 @@ declare module 'rhino3dm' {
+@@ -2300,13 +2476,8 @@ declare module 'rhino3dm' {
+ 		 * @returns {Mesh} A mesh.
  		 */
  		getMesh(meshType:MeshType): Mesh;
- 		/** ... */
--		setMesh(): void;
+-		/**
+-		 * @description Sets a specified type of mesh for this extrusion.
+-		 * @param {Mesh} mesh The mesh.
+-		 * @param {MeshType} meshType The mesh type.
+-		 * @returns {boolean} A bool.
+-		 */
+-		setMesh(mesh:Mesh,meshType:MeshType): boolean;
++		/** ... */
 +		setMesh(mesh:Mesh, meshType:MeshType): boolean;
  	}
  
  	class File3dm {
-@@ -2318,7 +2498,7 @@ declare module 'rhino3dm' {
+@@ -2334,7 +2505,7 @@ declare module 'rhino3dm' {
  		 * Get the DateTime that this file was originally created. If the
  		 * value is not set in the 3dm file, then DateTime.MinValue is returned
  		 */
@@ -860,7 +883,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets a string that names the user who created the file.
  		 */
-@@ -2327,7 +2507,7 @@ declare module 'rhino3dm' {
+@@ -2343,7 +2514,7 @@ declare module 'rhino3dm' {
  		 * Get the DateTime that this file was last edited. If the
  		 * value is not set in the 3dm file, then DateTime.MinValue is returned
  		 */
@@ -869,7 +892,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets a string that names the user who last edited the file.
  		 */
-@@ -2342,92 +2522,92 @@ declare module 'rhino3dm' {
+@@ -2358,92 +2529,92 @@ declare module 'rhino3dm' {
  		 * @description Read a 3dm file from a byte array
  		 * @returns {File3dm} New File3dm on success, null on error.
  		 */
@@ -997,7 +1020,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
  		We are moving towards using only IDs for all tables.
-@@ -2436,35 +2616,35 @@ declare module 'rhino3dm' {
+@@ -2452,35 +2623,35 @@ declare module 'rhino3dm' {
  		 */
  		findIndex(index:number): DimensionStyle;
  		/** ... */
@@ -1044,7 +1067,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Retrieves a Group object based on an index. This search type of search is discouraged.
  		We are moving towards using only IDs for all tables.
-@@ -2483,43 +2663,33 @@ declare module 'rhino3dm' {
+@@ -2499,43 +2670,33 @@ declare module 'rhino3dm' {
  	class File3dmInstanceDefinitionTable {
  		/**
  		 */
@@ -1099,7 +1122,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Finds a Layer given its name.
  		 * @param {string} name The name of the Layer to be searched.
-@@ -2535,19 +2705,19 @@ declare module 'rhino3dm' {
+@@ -2551,19 +2712,19 @@ declare module 'rhino3dm' {
  		 */
  		findIndex(index:number): Layer;
  		/** ... */
@@ -1124,7 +1147,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Retrieves a Linetype object based on Index. This search type of search is discouraged.
  		We are moving towards using only IDs for all tables.
-@@ -2556,7 +2726,7 @@ declare module 'rhino3dm' {
+@@ -2572,7 +2733,7 @@ declare module 'rhino3dm' {
  		 */
  		findIndex(index:number): Linetype;
  		/** ... */
@@ -1133,7 +1156,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Finds a Linetype given its name.
  		 * @param {string} name The name of the Linetype to be searched.
-@@ -2564,19 +2734,19 @@ declare module 'rhino3dm' {
+@@ -2580,19 +2741,19 @@ declare module 'rhino3dm' {
  		 */
  		findName(name:string): Linetype;
  		/** ... */
@@ -1158,7 +1181,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Retrieves a material based on Index. This search type of search is discouraged.
  		We are moving towards using only IDs for all tables.
-@@ -2585,39 +2755,39 @@ declare module 'rhino3dm' {
+@@ -2601,39 +2762,39 @@ declare module 'rhino3dm' {
  		 */
  		findIndex(index:number): Material;
  		/** ... */
@@ -1212,7 +1235,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class File3dmObjectTable {
-@@ -2626,9 +2796,7 @@ declare module 'rhino3dm' {
+@@ -2642,9 +2803,7 @@ declare module 'rhino3dm' {
  		 */
  		count: number;
  		/** ... */
@@ -1223,7 +1246,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Adds a point object to the table.
  		 * @param {number} x X component of point coordinate.
-@@ -2636,7 +2804,9 @@ declare module 'rhino3dm' {
+@@ -2652,7 +2811,9 @@ declare module 'rhino3dm' {
  		 * @param {number} z Z component of point coordinate.
  		 * @returns {string} id of new object.
  		 */
@@ -1234,7 +1257,16 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Adds a point cloud object to the document.
  		 * @param {PointCloud} cloud PointCloud to add.
-@@ -2713,19 +2883,20 @@ declare module 'rhino3dm' {
+@@ -2666,7 +2827,7 @@ declare module 'rhino3dm' {
+ 		 * @returns {string} A unique identifier of new rhino object.
+ 		 */
+ 		addLine(from:number[],to:number[]): string;
+-		/**
++/**
+ 		 * @description Adds a polyline object to Rhino.
+ 		 * @param {Point3d[]} points A list, an array or any enumerable set of .
+ 		 * @returns {string} A unique identifier for the object.
+@@ -2735,19 +2896,20 @@ declare module 'rhino3dm' {
  		addBrep(brep:Brep): string;
  		/**
  		 * @description Duplicates the object, then adds a copy of the object to the document.
@@ -1260,7 +1292,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class File3dmPlugInData {
-@@ -2737,36 +2908,36 @@ declare module 'rhino3dm' {
+@@ -2759,36 +2921,36 @@ declare module 'rhino3dm' {
  		 */
  		count: number;
  		/** ... */
@@ -1307,7 +1339,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class File3dmSettings {
-@@ -2781,7 +2952,7 @@ declare module 'rhino3dm' {
+@@ -2803,7 +2965,7 @@ declare module 'rhino3dm' {
  		modelBasePoint: number[];
  		/**
  		 */
@@ -1316,7 +1348,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets or sets the model space absolute tolerance.
  		 */
-@@ -2823,21 +2994,21 @@ declare module 'rhino3dm' {
+@@ -2845,21 +3007,21 @@ declare module 'rhino3dm' {
  		 */
  		pageUnitSystem: UnitSystem;
  		/** ... */
@@ -1344,7 +1376,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class File3dmStringTable {
-@@ -2846,7 +3017,7 @@ declare module 'rhino3dm' {
+@@ -2868,7 +3030,7 @@ declare module 'rhino3dm' {
  		 */
  		count: number;
  		/** ... */
@@ -1353,7 +1385,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Returns a string value at a given index.
  		 * @param {number} i The index at which to get the value.
-@@ -2854,9 +3025,9 @@ declare module 'rhino3dm' {
+@@ -2876,9 +3038,9 @@ declare module 'rhino3dm' {
  		 */
  		getvalue(i:number): string;
  		/** ... */
@@ -1365,7 +1397,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Removes document strings from the 3dm file.
  		 * @param {string} section name of section to delete. If null, all sections will be deleted.
-@@ -2872,14 +3043,14 @@ declare module 'rhino3dm' {
+@@ -2894,14 +3056,14 @@ declare module 'rhino3dm' {
  		 */
  		count: number;
  		/** ... */
@@ -1384,7 +1416,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class File3dmWriteOptions {
-@@ -3064,7 +3235,7 @@ declare module 'rhino3dm' {
+@@ -3086,7 +3248,7 @@ declare module 'rhino3dm' {
  		/**
  		 * Texture mapping offset in world units.
  		 */
@@ -1393,7 +1425,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Texture offset locked.
  		 */
-@@ -3076,7 +3247,7 @@ declare module 'rhino3dm' {
+@@ -3098,7 +3260,7 @@ declare module 'rhino3dm' {
  		/**
  		 * Texture mapping single UV span size in world units.
  		 */
@@ -1402,7 +1434,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Texture mapping rotation around world origin + offset in degrees.
  		 */
-@@ -3086,13 +3257,13 @@ declare module 'rhino3dm' {
+@@ -3108,13 +3270,13 @@ declare module 'rhino3dm' {
  	class Group extends CommonObject {
  		/**
  		 */
@@ -1419,7 +1451,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Hatch extends GeometryBase {
-@@ -3126,35 +3297,47 @@ declare module 'rhino3dm' {
+@@ -3148,35 +3310,47 @@ declare module 'rhino3dm' {
  	class InstanceDefinition extends CommonObject {
  		/**
  		 */
@@ -1476,7 +1508,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Intersects two lines.
  		 * @param {Line} lineA First line for intersection.
-@@ -3170,9 +3353,7 @@ declare module 'rhino3dm' {
+@@ -3192,9 +3366,7 @@ declare module 'rhino3dm' {
  		 * (number) Parameter on lineB that is closest to LineA.
  		The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b)
  		 */
@@ -1487,7 +1519,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Intersects a line and a plane. This function only returns true if the
  		intersection result is a single point (i.e. if the line is coincident with
-@@ -3306,13 +3487,13 @@ declare module 'rhino3dm' {
+@@ -3328,13 +3500,13 @@ declare module 'rhino3dm' {
  		 */
  		igesLevel: number;
  		/**
@@ -1505,7 +1537,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets or sets the weight of the plotting pen in millimeters.
  		 * A weight of 0.0 indicates the "default" pen weight should be used.
-@@ -3333,13 +3514,13 @@ declare module 'rhino3dm' {
+@@ -3355,13 +3527,13 @@ declare module 'rhino3dm' {
  		renderMaterialIndex: number;
  		/**
  		 */
@@ -1522,7 +1554,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Verifies that a layer has per viewport settings.
  		 * @param {string} viewportId If not Guid.Empty, then checks for settings for that specific viewport.
-@@ -3357,16 +3538,16 @@ declare module 'rhino3dm' {
+@@ -3379,16 +3551,16 @@ declare module 'rhino3dm' {
  		/**
  		 * @description Gets the display color for this layer.
  		 * @param {string} viewportId If not Guid.Empty, then the setting applies only to the viewport with the specified id.
@@ -1543,7 +1575,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Remove any per viewport layer color setting so the layer's overall setting will be used for all viewports.
  		 * @param {string} viewportId If not Guid.Empty, then the setting for this viewport will be deleted.
-@@ -3478,17 +3659,17 @@ declare module 'rhino3dm' {
+@@ -3500,17 +3672,17 @@ declare module 'rhino3dm' {
  		 */
  		powerCandela: number;
  		/**
@@ -1567,7 +1599,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets or Sets the attenuation vector.
  		 */
-@@ -3584,17 +3765,17 @@ declare module 'rhino3dm' {
+@@ -3606,17 +3778,17 @@ declare module 'rhino3dm' {
  	class LinearWorkflow {
  		/**
  		 */
@@ -1588,7 +1620,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Linear workflow post-process gamma value.
  		 */
-@@ -3621,7 +3802,7 @@ declare module 'rhino3dm' {
+@@ -3643,7 +3815,7 @@ declare module 'rhino3dm' {
  		name: string;
  		/**
  		 */
@@ -1597,7 +1629,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Total length of one repeat of the pattern.
  		 */
-@@ -3664,25 +3845,25 @@ declare module 'rhino3dm' {
+@@ -3686,25 +3858,25 @@ declare module 'rhino3dm' {
  		 */
  		removeSegment(index:number): boolean;
  		/** ... */
@@ -1633,7 +1665,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Material extends ModelComponent {
-@@ -3754,7 +3935,7 @@ declare module 'rhino3dm' {
+@@ -3776,7 +3948,7 @@ declare module 'rhino3dm' {
  		 */
  		transparentColor: number[];
  		/** ... */
@@ -1642,7 +1674,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Set material to default settings.
  		 * @returns {void}
-@@ -3764,50 +3945,50 @@ declare module 'rhino3dm' {
+@@ -3786,50 +3958,50 @@ declare module 'rhino3dm' {
  		 * @description Get the texture that corresponds with the specified texture type for this material.
  		 * @returns {Texture}
  		 */
@@ -1703,7 +1735,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @returns {void}
  		 */
-@@ -3838,25 +4019,30 @@ declare module 'rhino3dm' {
+@@ -3860,25 +4032,30 @@ declare module 'rhino3dm' {
  		 * @returns {Mesh} mesh representing control net on success, null on failure
  		 */
  		static createFromSubDControlNet(): Mesh;
@@ -1744,7 +1776,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Removes all texture coordinate information from this mesh.
  		 * @returns {void}
-@@ -3911,12 +4097,23 @@ declare module 'rhino3dm' {
+@@ -3933,12 +4110,23 @@ declare module 'rhino3dm' {
  		 * @returns {boolean} true on success
  		 */
  		createPartitions(): boolean;
@@ -1774,7 +1806,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class MeshFaceList {
-@@ -3937,7 +4134,7 @@ declare module 'rhino3dm' {
+@@ -3959,7 +4147,7 @@ declare module 'rhino3dm' {
  		 */
  		capacity: number;
  		/** ... */
@@ -1783,7 +1815,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Gets the 3D location of the vertices forming a face.
  		 * @param {number} faceIndex A face index.
-@@ -3968,13 +4165,13 @@ declare module 'rhino3dm' {
+@@ -3990,13 +4178,13 @@ declare module 'rhino3dm' {
  		 */
  		destroy(): void;
  		/** ... */
@@ -1801,7 +1833,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Splits all quads along the short diagonal.
  		 * @returns {boolean} true on success, false on failure.
-@@ -4130,39 +4327,39 @@ declare module 'rhino3dm' {
+@@ -4152,39 +4340,39 @@ declare module 'rhino3dm' {
  
  		constructor(density: number, minimumEdgeLength: number);
  		/** ... */
@@ -1854,7 +1886,7 @@ index b3afd2c..37879b0 100644
  		/** ... */
  		flip(): void;
  	}
-@@ -4173,9 +4370,9 @@ declare module 'rhino3dm' {
+@@ -4195,9 +4383,9 @@ declare module 'rhino3dm' {
  		 */
  		count: number;
  		/** ... */
@@ -1866,7 +1898,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Adds a new texture coordinate to the end of the Texture list.
  		 * @param {number} s S component of new texture coordinate.
-@@ -4208,9 +4405,9 @@ declare module 'rhino3dm' {
+@@ -4230,9 +4418,9 @@ declare module 'rhino3dm' {
  		 */
  		capacity: number;
  		/** ... */
@@ -1878,7 +1910,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Clears the vertex color list on the mesh.
  		 * @returns {void}
-@@ -4236,11 +4433,11 @@ declare module 'rhino3dm' {
+@@ -4258,11 +4446,11 @@ declare module 'rhino3dm' {
  		 */
  		useDoublePrecisionVertices: boolean;
  		/** ... */
@@ -1893,7 +1925,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Clears the Vertex list on the mesh.
  		 * @returns {void}
-@@ -4353,14 +4550,14 @@ declare module 'rhino3dm' {
+@@ -4375,14 +4563,14 @@ declare module 'rhino3dm' {
  		 * @description Gets a non-rational, degree 1 NURBS curve representation of the line.
  		 * @returns {NurbsCurve} Curve on success, null on failure.
  		 */
@@ -1910,7 +1942,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Gets a rational degree 2 NURBS curve representation
  		of the circle. Note that the parameterization of NURBS curve
-@@ -4370,14 +4567,14 @@ declare module 'rhino3dm' {
+@@ -4392,14 +4580,14 @@ declare module 'rhino3dm' {
  		parameter and the transcendental parameter.
  		 * @returns {NurbsCurve} Curve on success, null on failure.
  		 */
@@ -1927,7 +1959,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Constructs a 3D NURBS curve from a list of control points.
  		 * @param {boolean} periodic If true, create a periodic uniform curve. If false, create a clamped uniform curve.
-@@ -4434,9 +4631,9 @@ declare module 'rhino3dm' {
+@@ -4456,9 +4644,9 @@ declare module 'rhino3dm' {
  		 */
  		convertSpanToBezier(spanIndex:number): BezierCurve;
  		/** ... */
@@ -1939,7 +1971,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class NurbsCurveKnotList {
-@@ -4455,11 +4652,11 @@ declare module 'rhino3dm' {
+@@ -4477,11 +4665,11 @@ declare module 'rhino3dm' {
  		 */
  		isClampedEnd: boolean;
  		/** ... */
@@ -1954,7 +1986,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Inserts a knot and update control point locations.
  		Does not change parameterization or locus of curve.
-@@ -4509,9 +4706,9 @@ declare module 'rhino3dm' {
+@@ -4531,9 +4719,9 @@ declare module 'rhino3dm' {
  		 */
  		controlPolygonLength: number;
  		/** ... */
@@ -1966,7 +1998,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Use a combination of scaling and reparameterization to change the end weights to the specified values.
  		 * @param {number} w0 Weight for first control point.
-@@ -4605,11 +4802,11 @@ declare module 'rhino3dm' {
+@@ -4627,11 +4815,11 @@ declare module 'rhino3dm' {
  		 */
  		increaseDegreeV(desiredDegree:number): boolean;
  		/** ... */
@@ -1981,7 +2013,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class NurbsSurfaceKnotList {
-@@ -4619,16 +4816,16 @@ declare module 'rhino3dm' {
+@@ -4641,16 +4829,16 @@ declare module 'rhino3dm' {
  		count: number;
  		/**
  		 */
@@ -2003,7 +2035,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Inserts a knot and update control point locations.
  		Does not change parameterization or locus of curve.
-@@ -4671,7 +4868,7 @@ declare module 'rhino3dm' {
+@@ -4693,7 +4881,7 @@ declare module 'rhino3dm' {
  	class NurbsSurfacePointList {
  		/**
  		 */
@@ -2012,7 +2044,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets the number of control points in the U direction of this surface.
  		 */
-@@ -4680,8 +4877,6 @@ declare module 'rhino3dm' {
+@@ -4702,8 +4890,6 @@ declare module 'rhino3dm' {
  		 * Gets the number of control points in the V direction of this surface.
  		 */
  		countV: number;
@@ -2021,7 +2053,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Gets a world 3-D, or Euclidean, control point at the given (u, v) index.
  		The 4-D representation is (x, y, z, 1.0).
-@@ -4691,13 +4886,22 @@ declare module 'rhino3dm' {
+@@ -4713,13 +4899,22 @@ declare module 'rhino3dm' {
  		 * (boolean) true on success, false on failure.
  		 * (number[]) Coordinate of control point.
  		 */
@@ -2048,7 +2080,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class ObjectAttributes extends CommonObject {
-@@ -4757,7 +4961,7 @@ declare module 'rhino3dm' {
+@@ -4779,7 +4974,7 @@ declare module 'rhino3dm' {
  		plotWeightSource: ObjectPlotWeightSource;
  		/**
  		 */
@@ -2057,7 +2089,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Objects may have an URL. There are no restrictions on what value this
  		 * URL may have. As an example, if the object came from a commercial part
-@@ -4784,13 +4988,13 @@ declare module 'rhino3dm' {
+@@ -4806,13 +5001,13 @@ declare module 'rhino3dm' {
  		 */
  		materialSource: ObjectMaterialSource;
  		/**
@@ -2075,7 +2107,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Display order used to force objects to be drawn on top or behind each other.
  		 * Larger numbers draw on top of smaller numbers.
-@@ -4826,7 +5030,7 @@ declare module 'rhino3dm' {
+@@ -4848,7 +5043,7 @@ declare module 'rhino3dm' {
  		viewportId: string;
  		/**
  		 */
@@ -2084,7 +2116,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * number of groups object belongs to.
  		 */
-@@ -4844,11 +5048,11 @@ declare module 'rhino3dm' {
+@@ -4866,11 +5061,11 @@ declare module 'rhino3dm' {
  		 */
  		hasDisplayModeOverride(viewportId:string): boolean;
  		/** ... */
@@ -2099,7 +2131,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.
  		 * @returns {number[]} An array of group indices. null might be returned in place of an empty array.
-@@ -4879,7 +5083,7 @@ declare module 'rhino3dm' {
+@@ -4901,7 +5096,7 @@ declare module 'rhino3dm' {
  	class PhysicallyBasedMaterial {
  		/**
  		 */
@@ -2108,7 +2140,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 */
  		subsurface: number;
-@@ -4929,19 +5133,22 @@ declare module 'rhino3dm' {
+@@ -4951,19 +5146,22 @@ declare module 'rhino3dm' {
  		 */
  		opacityRoughness: number;
  		/**
@@ -2135,7 +2167,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class PlaneSurface extends Surface {
-@@ -4969,10 +5176,10 @@ declare module 'rhino3dm' {
+@@ -4991,10 +5189,10 @@ declare module 'rhino3dm' {
  	class Point3dList {
  		/**
  		 */
@@ -2148,7 +2180,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Even though this is a property, it is not a "fast" calculation. Every point is
  		 * evaluated in order to get the bounding box of the list.
-@@ -4981,15 +5188,15 @@ declare module 'rhino3dm' {
+@@ -5003,15 +5201,15 @@ declare module 'rhino3dm' {
  
  		constructor(initialCapacity: number);
  		/** ... */
@@ -2168,7 +2200,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Adds a Point3d to the end of the list with given x,y,z coordinates.
  		 * @param {number} x The X coordinate.
-@@ -5008,17 +5215,17 @@ declare module 'rhino3dm' {
+@@ -5030,19 +5228,17 @@ declare module 'rhino3dm' {
  		 * @description Set all the X values for the points to a single value
  		 * @returns {void}
  		 */
@@ -2185,11 +2217,13 @@ index b3afd2c..37879b0 100644
  		 * @returns {void}
  		 */
 -		setAllZ(): void;
+-		/** ... */
+-		append(): void;
 +		setAllZ(zValue:number): void;
  	}
  
  	class PointCloud extends GeometryBase {
-@@ -5042,7 +5249,7 @@ declare module 'rhino3dm' {
+@@ -5066,7 +5262,7 @@ declare module 'rhino3dm' {
  		containsNormals: boolean;
  		/**
  		 */
@@ -2198,7 +2232,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets a value indicating whether or not the points in this
  		 * point cloud have hidden flags assigned to them.
-@@ -5087,31 +5294,31 @@ declare module 'rhino3dm' {
+@@ -5111,31 +5307,31 @@ declare module 'rhino3dm' {
  		 */
  		add(point:number[]): void;
  		/** ... */
@@ -2241,7 +2275,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Inserts a new point into the point list.
  		 * @param {number} index Insertion index.
-@@ -5120,15 +5327,15 @@ declare module 'rhino3dm' {
+@@ -5144,15 +5340,15 @@ declare module 'rhino3dm' {
  		 */
  		insert(index:number,point:number[]): void;
  		/** ... */
@@ -2262,7 +2296,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Append a collection of points to this point cloud.
  		 * @param {number} index Index at which to insert the new collection.
-@@ -5144,9 +5351,9 @@ declare module 'rhino3dm' {
+@@ -5168,9 +5364,9 @@ declare module 'rhino3dm' {
  		removeAt(index:number): void;
  		/**
  		 * @description Copy all the point coordinates in this point cloud to an array.
@@ -2274,7 +2308,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Returns the location of the point at a specific index.
  		 * @param {number} index The index.
-@@ -5155,24 +5362,27 @@ declare module 'rhino3dm' {
+@@ -5179,24 +5375,27 @@ declare module 'rhino3dm' {
  		pointAt(index:number): number[];
  		/**
  		 * @description Copy all the normal vectors in this point cloud to an array.
@@ -2309,7 +2343,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class PointCloudItem {
-@@ -5199,10 +5409,10 @@ declare module 'rhino3dm' {
+@@ -5223,10 +5422,10 @@ declare module 'rhino3dm' {
  		 */
  		normal: number[];
  		/**
@@ -2322,7 +2356,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets or sets the hidden flag of this point cloud item.
  		 * If this point cloud item does not have a hidden flag, false is returned.
-@@ -5210,7 +5420,7 @@ declare module 'rhino3dm' {
+@@ -5234,7 +5433,7 @@ declare module 'rhino3dm' {
  		hidden: boolean;
  		/**
  		 */
@@ -2331,7 +2365,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets the index of this point cloud item.
  		 */
-@@ -5253,11 +5463,11 @@ declare module 'rhino3dm' {
+@@ -5277,11 +5476,11 @@ declare module 'rhino3dm' {
  		 */
  		explode(): Curve[];
  		/** ... */
@@ -2346,7 +2380,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Appends the curve to the polycurve without changing the new segment's geometry.
  		This function will fail if the PolyCurve is closed or if SegmentCount > 0 and the new segment is closed.
-@@ -5340,7 +5550,7 @@ declare module 'rhino3dm' {
+@@ -5364,7 +5563,7 @@ declare module 'rhino3dm' {
  		 */
  		tangentAt(t:number): number[];
  		/** ... */
@@ -2355,7 +2389,16 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Gets the parameter along the polyline which is closest to a test-point.
  		 * @param {number[]} testPoint Point to approximate.
-@@ -5421,177 +5631,162 @@ declare module 'rhino3dm' {
+@@ -5415,8 +5614,6 @@ declare module 'rhino3dm' {
+ 		 * @returns {Polyline} A closed polyline if successful, null otherwise.
+ 		 */
+ 		static createStarPolygon(circle:Circle,radius:number,cornerCount:number): Polyline;
+-		/** ... */
+-		static createFromPoints(): void;
+ 	}
+ 
+ 	class PolylineCurve extends Curve {
+@@ -5447,177 +5644,162 @@ declare module 'rhino3dm' {
  	class PostEffect {
  		/**
  		 */
@@ -2532,30 +2575,30 @@ index b3afd2c..37879b0 100644
 -		/**
 -		 */
 -		skylightingOverride: any;
--		/**
--		 */
--		reflectionId: any;
--		/**
--		 */
--		reflectionOverride: any;
--		/**
--		 */
--		backgroundId: any;
 +		backgroundId: string;
  		/**
  		 */
--		skylightingId: any;
+-		reflectionId: any;
 +		skylightingId: string;
  		/**
  		 */
--		skylightingOverride: any;
+-		reflectionOverride: any;
 +		skylightingOverride: boolean;
  		/**
  		 */
--		reflectionId: any;
+-		backgroundId: any;
 +		reflectionId: string;
  		/**
  		 */
+-		skylightingId: any;
+-		/**
+-		 */
+-		skylightingOverride: any;
+-		/**
+-		 */
+-		reflectionId: any;
+-		/**
+-		 */
 -		reflectionOverride: any;
 +		reflectionOverride: boolean;
  	}
@@ -2590,7 +2633,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Gets or sets a value indicating whether to render using lights that are on layers that are off.
  		 */
-@@ -5709,23 +5904,23 @@ declare module 'rhino3dm' {
+@@ -5735,23 +5917,23 @@ declare module 'rhino3dm' {
  		sun: Sun;
  		/**
  		 */
@@ -2620,7 +2663,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class RevSurface extends Surface {
-@@ -5752,7 +5947,7 @@ declare module 'rhino3dm' {
+@@ -5778,7 +5960,7 @@ declare module 'rhino3dm' {
  		perspectiveOnly: boolean;
  		/**
  		 */
@@ -2629,7 +2672,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Turn on the live area, which shows the size of the rendered view as a yellow frame
  		 * in the viewport.
-@@ -5805,19 +6000,19 @@ declare module 'rhino3dm' {
+@@ -5831,19 +6013,19 @@ declare module 'rhino3dm' {
  	class ShutLining {
  		/**
  		 */
@@ -2654,7 +2697,7 @@ index b3afd2c..37879b0 100644
  		/** ... */
  		deleteAllCurves(): void;
  	}
-@@ -5825,22 +6020,22 @@ declare module 'rhino3dm' {
+@@ -5851,22 +6033,22 @@ declare module 'rhino3dm' {
  	class ShutLiningCurve {
  		/**
  		 */
@@ -2683,7 +2726,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Skylight {
-@@ -5952,11 +6147,11 @@ declare module 'rhino3dm' {
+@@ -5978,11 +6160,11 @@ declare module 'rhino3dm' {
  		 */
  		toNurbsSurface(): NurbsSurface;
  		/** ... */
@@ -2698,7 +2741,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class SubD extends GeometryBase {
-@@ -5989,22 +6184,22 @@ declare module 'rhino3dm' {
+@@ -6015,22 +6197,22 @@ declare module 'rhino3dm' {
  	class Sun {
  		/**
  		 */
@@ -2727,7 +2770,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Manual control 'on' state. When true, allows the user to set the sun
  		 * azimuth and altitude directly. When false, the values are computed.
-@@ -6049,23 +6244,23 @@ declare module 'rhino3dm' {
+@@ -6075,23 +6257,23 @@ declare module 'rhino3dm' {
  		daylightSavingMinutes: number;
  		/**
  		 */
@@ -2756,7 +2799,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * Get a Light which represents the sun. If manual control is in effect, no sun calculation
  		 * is performed; the function uses the last known values of azimuth and altitude.
-@@ -6074,7 +6269,7 @@ declare module 'rhino3dm' {
+@@ -6100,7 +6282,7 @@ declare module 'rhino3dm' {
  		 */
  		light: Light;
  		/** ... */
@@ -2765,7 +2808,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Surface extends GeometryBase {
-@@ -6196,7 +6391,7 @@ declare module 'rhino3dm' {
+@@ -6222,7 +6404,7 @@ declare module 'rhino3dm' {
  		 */
  		toNurbsSurface(): NurbsSurface;
  		/** ... */
@@ -2774,7 +2817,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Tests a surface to see if it is planar to zero tolerance.
  		 * @returns {boolean} true if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
-@@ -6314,26 +6509,26 @@ declare module 'rhino3dm' {
+@@ -6340,26 +6522,26 @@ declare module 'rhino3dm' {
  		/**
  		 * Helper for access to the repeat value encoded in UvwTransform
  		 */
@@ -2806,7 +2849,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.
  		 * @returns {TextureMapping} TextureMapping instance or null if failed.
-@@ -6388,18 +6583,18 @@ declare module 'rhino3dm' {
+@@ -6414,18 +6596,18 @@ declare module 'rhino3dm' {
  		 * @description Get a cylindrical projection parameters from this texture mapping.
  		 * @returns {boolean} Returns true if a valid cylinder is returned.
  		 */
@@ -2830,7 +2873,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Evaluate the mapping to get a texture coordinate
  		 * @param {number[]} p Vertex location
-@@ -6418,19 +6613,19 @@ declare module 'rhino3dm' {
+@@ -6444,19 +6626,19 @@ declare module 'rhino3dm' {
  	class Thickening {
  		/**
  		 */
@@ -2855,7 +2898,7 @@ index b3afd2c..37879b0 100644
  	}
  
  	class Transform {
-@@ -6552,15 +6747,15 @@ declare module 'rhino3dm' {
+@@ -6578,15 +6760,15 @@ declare module 'rhino3dm' {
  
  		constructor(diagonalValue: number);
  		/** ... */
@@ -2876,7 +2919,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Constructs a new uniform scaling transformation with a specified scaling anchor point.
  		 * @param {number[]} anchor Defines the anchor point of the scaling operation.
-@@ -6578,7 +6773,7 @@ declare module 'rhino3dm' {
+@@ -6604,7 +6786,7 @@ declare module 'rhino3dm' {
  		 */
  		static rotation(sinAngle:number,cosAngle:number,rotationAxis:number[],rotationCenter:number[]): Transform;
  		/** ... */
@@ -2885,7 +2928,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Create mirror transformation matrix
  		The mirror transform maps a point Q to
-@@ -6590,7 +6785,7 @@ declare module 'rhino3dm' {
+@@ -6616,7 +6798,7 @@ declare module 'rhino3dm' {
  		 */
  		static mirror(pointOnMirrorPlane:number[],normalToMirrorPlane:number[]): Transform;
  		/** ... */
@@ -2894,7 +2937,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Create a rotation transformation that orients plane0 to plane1. If you want to orient objects from
  		one plane to another, use this form of transformation.
-@@ -6618,7 +6813,7 @@ declare module 'rhino3dm' {
+@@ -6644,7 +6826,7 @@ declare module 'rhino3dm' {
  		 */
  		static multiply(a:Transform,b:Transform): Transform;
  		/** ... */
@@ -2903,7 +2946,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Attempts to get the inverse transform of this transform.
  		 * @returns {Array} [boolean, Transform]
-@@ -6627,7 +6822,7 @@ declare module 'rhino3dm' {
+@@ -6653,7 +6835,7 @@ declare module 'rhino3dm' {
  		If false is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
  		 * (Transform) The inverse transform. This out reference will be assigned during this call.
  		 */
@@ -2912,7 +2955,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Computes a new bounding box that is the smallest axis aligned
  		bounding box that contains the transformed result of its 8 original corner
-@@ -6656,7 +6851,7 @@ declare module 'rhino3dm' {
+@@ -6682,7 +6864,7 @@ declare module 'rhino3dm' {
  		name: string;
  		/**
  		 */
@@ -2921,7 +2964,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * True if wallpaper (if any) is to be shown in gray scale in this view.
  		 */
-@@ -6686,9 +6881,8 @@ declare module 'rhino3dm' {
+@@ -6712,9 +6894,8 @@ declare module 'rhino3dm' {
  	class ViewportInfo extends CommonObject {
  		/**
  		 */
@@ -2932,7 +2975,7 @@ index b3afd2c..37879b0 100644
  		 */
  		isValidCamera: boolean;
  		/**
-@@ -6772,9 +6966,9 @@ declare module 'rhino3dm' {
+@@ -6798,9 +6979,9 @@ declare module 'rhino3dm' {
  		 */
  		id: string;
  		/** ... */
@@ -2944,7 +2987,7 @@ index b3afd2c..37879b0 100644
  		/**
  		 * @description Use this function to change projections of valid viewports
  		from parallel to perspective.  It will make common additional
-@@ -6835,7 +7029,7 @@ declare module 'rhino3dm' {
+@@ -6861,7 +7042,7 @@ declare module 'rhino3dm' {
  		 * @description Sets the camera location (position) point.
  		 * @returns {boolean} true if the operation succeeded; otherwise, false.
  		 */

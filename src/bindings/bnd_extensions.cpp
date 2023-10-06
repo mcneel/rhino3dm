@@ -1123,11 +1123,20 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindId(BND_UUID id) const
   return nullptr;
 }
 
+
 void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometry& idef)
 {
   const ON_InstanceDefinition* _idef = idef.m_idef;
   m_model->AddModelComponent(*_idef);
 }
+
+/*
+void BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring description, std::wstring url, std::wstring urlTag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes)
+{
+
+}
+*/
+
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
   ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, index);
