@@ -148,7 +148,8 @@ public:
   BND_BrepFace(ON_BrepFace* brepface, const ON_ModelComponentReference* compref);
 
   //Brep Brep = > m_brep;
-  //bool OrientationIsReversed
+  bool GetOrientationIsReversed() const { return m_brepface->m_bRev; }
+  void SetOrientationIsReversed(bool reversed) { m_brepface->m_bRev = reversed; }
   //bool IsSurface
   //int FaceIndex{ get; }
   //int SurfaceIndex

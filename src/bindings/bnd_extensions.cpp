@@ -1123,11 +1123,20 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindId(BND_UUID id) const
   return nullptr;
 }
 
+
 void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometry& idef)
 {
   const ON_InstanceDefinition* _idef = idef.m_idef;
   m_model->AddModelComponent(*_idef);
 }
+
+/*
+void BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring description, std::wstring url, std::wstring urlTag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes)
+{
+
+}
+*/
+
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
   ON_ModelComponentReference compref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, index);
@@ -1779,7 +1788,7 @@ void initExtensionsBindings(void*)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint2)
     .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
-    //.function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, allow_raw_pointers())
+    .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline, allow_raw_pointers())
     .function("addArc", &BND_ONXModel_ObjectTable::AddArc, allow_raw_pointers())
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
     .function("addEllipse", &BND_ONXModel_ObjectTable::AddEllipse, allow_raw_pointers())

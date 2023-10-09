@@ -332,8 +332,9 @@ def setup_windows():
     #   print(line.replace("WIN32;", "WIN64;"))
 
     # methogen
-    build_methodgen()
-    run_methodgen()
+    if not lib:
+        build_methodgen()
+        run_methodgen()
 
     return setup_did_succeed(item_to_check)
 
@@ -363,8 +364,9 @@ def setup_linux():
     run_command(command)
     
     # methogen
-    build_methodgen()
-    run_methodgen()
+    if not lib:
+        build_methodgen()
+        run_methodgen()
 
     return setup_did_succeed(item_to_check)
 
@@ -395,8 +397,9 @@ def setup_macos():
     
     #print(command)
     # methogen
-    build_methodgen()
-    run_methodgen()
+    if not lib:
+        build_methodgen()
+        run_methodgen()
 
     return setup_did_succeed(item_to_check)
 
@@ -426,8 +429,9 @@ def setup_ios():
     run_command(command)
 
     # methogen
-    build_methodgen()
-    run_methodgen()
+    if not lib:
+        build_methodgen()
+        run_methodgen()
 
     return setup_did_succeed(item_to_check)
 
@@ -593,6 +597,8 @@ def main():
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
     parser.add_argument('--debug', '-d', action='store_true',
                         help="generate a debug build (wasm only)")
+    parser.add_argument('--library', '-l', action='store_true',
+                        help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     
     args = parser.parse_args()
 
@@ -618,6 +624,9 @@ def main():
 
     global debug
     debug = args.debug
+
+    global lib
+    lib = args.library
 
     os.chdir(script_folder)
 

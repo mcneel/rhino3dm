@@ -211,17 +211,20 @@ def build_windows():
     
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
 
-    if not build_did_succeed(item_to_check):                
+    if not build_did_succeed(item_to_check):             
         return False
 
-    print(" Building Rhino3dm.dll...")
-    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
-    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
+    all_items_built = True
+    if not lib:
+        print(" Building Rhino3dm.dll...")
+        csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj")).replace('\\', '//')
+        target_path = os.path.join(build_folder, platform_full_names.get("windows").lower())
 
-    command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release'
-    rv = run_command(command)
+        command = 'dotnet build ' + csproj_path + ' /p:Configuration=Release'
+        rv = run_command(command)
+        all_items_built = rv == 0
 
-    return rv == 0 # two target frameworks built, so just use the dotnet return value
+    return all_items_built # two target frameworks built, so just use the dotnet return value
 
 
 def build_linux():
@@ -252,15 +255,16 @@ def build_linux():
     if not build_did_succeed(item_to_check):                
         return False
 
-    print(" Building Rhino3dm.dll...")
-    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
-    target_path = os.path.join(build_folder, platform_full_names.get("linux").lower())
-    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    if not lib:
+        print(" Building Rhino3dm.dll...")
+        csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
+        target_path = os.path.join(build_folder, platform_full_names.get("linux").lower())
+        output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build -f netstandard2.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
-    run_command(command)
+        command = 'dotnet build -f netstandard2.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+        run_command(command)
 
-    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
+        item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -290,14 +294,15 @@ def build_macos():
     if not build_did_succeed(item_to_check):                
         return False
 
-    print(" Building Rhino3dm.dll...")
-    csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
-    output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
+    if not lib:
+        print(" Building Rhino3dm.dll...")
+        csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
+        output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-    command = 'dotnet build -f net7.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
-    run_command(command)
+        command = 'dotnet build -f net7.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+        run_command(command)
 
-    item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
+        item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
 
     return build_did_succeed(item_to_check)
 
@@ -523,6 +528,8 @@ def main():
                         help="show verbose logging messages")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
+    parser.add_argument('--library', '-l', action='store_true',
+                        help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     args = parser.parse_args()
 
     # User has not entered any arguments...
@@ -544,6 +551,9 @@ def main():
 
     global overwrite
     overwrite = args.overwrite
+
+    global lib
+    lib = args.library
 
     # build platform(s)
     did_succeed = []
