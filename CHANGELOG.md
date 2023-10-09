@@ -10,11 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (dotnet) Added -l/--library flag to the build scripts for building only the native library.
 - (dotnet) Added linux arm64 build in release workflow
 - (dotnet) Build now generates XML documentation (#425)
-- (dotnet) Added Extrusion.SetMesh()
-- (js) Added Curve.createControlPointCurve static function
-- (js) Added File3dm.Objects.AddPolyline
+- (dotnet) Added Extrusion.SetMesh() (#544)
 - (js, py) Added Polyline.Append(points)
-- (js, py) Added BrepFace.OrientationIsReversed property
+- (js, py) Added BrepFace.OrientationIsReversed property (#419)
+- (js) Added Curve.createControlPointCurve static function
+- (js) Added File3dm.Objects.AddPolyline (#559)
+- (js) Added ViewInfo.Viewport (#302)
+
+### Changed
+- (py) Pypi release now includes linux bdist wheels (#565)
+
+### Fixed
+- (dotnet) some runtime native libraries were corrupted (not dynamic libraries) due to packaging process. This should be fixed
+
 
 ## [8.0.0-beta2] - 2023-08-31
 diff: https://github.com/mcneel/rhino3dm/pull/561/files
