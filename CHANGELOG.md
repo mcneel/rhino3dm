@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.0.0-beta3] - UNRELEASED
+## [8.0.0-beta3] - 2023-09-10
+diff: https://github.com/mcneel/rhino3dm/pull/567/files
 
 ### Added
 - (dotnet) Added -l/--library flag to the build scripts for building only the native library.
@@ -18,11 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (js) Added ViewInfo.Viewport (#302)
 
 ### Changed
-- (py) Pypi release now includes linux bdist wheels (#565)
+- (py) Pypi release now includes manylinux bdist wheels cp38 - cp311 (#565)
 
 ### Fixed
 - (dotnet) some runtime native libraries were corrupted (not dynamic libraries) due to packaging process. This should be fixed
-
 
 ## [8.0.0-beta2] - 2023-08-31
 diff: https://github.com/mcneel/rhino3dm/pull/561/files
