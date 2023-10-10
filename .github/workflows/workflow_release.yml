@@ -96,8 +96,6 @@ jobs:
         os: [windows-2019, macos-11]
         python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
         include:
-          - os: ubuntu-latest
-            target: linux
           - os: windows-2019
             target: windows
           - os: macos-11
