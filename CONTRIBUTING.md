@@ -2,11 +2,12 @@
 
 #### Reporting Bugs and Requesting Features
 
-* We do not use github issues, but instead track all bugs and feature requests through the [McNeel YouTrack Application](https://mcneel.myjetbrains.com/youtrack/issues?q=project:%20Rhino3dm)
-* Feel free to add issues under the "Rhino3dm" project for any bug you may find or feature you would like to see added.
+* We track issues and feature requests with rhino3dm on github issues. Feel free to add issues for any bug you may find or feature you would like to see added.
 
 #### Fixing bugs and adding Features
 
+* Fork the `dev` branch of this repository.
+  
 * Open a new GitHub pull request with your changes.
 
 * Please try to keep your pull request focused on a specific feature or bug. A single PR with a bunch of changes is much harder to review than many smaller and focused PRs.
