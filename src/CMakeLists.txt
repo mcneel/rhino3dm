@@ -116,7 +116,8 @@ if(${RHINO3DM_JS})
 endif()
 
 # patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
- if(${RHINO3DM_JS})
+# do not do this for debug build
+ if(${RHINO3DM_JS} AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
    find_program(PATCH patch)
    if(NOT PATCH)
        message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
