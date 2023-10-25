@@ -117,7 +117,8 @@ endif()
 
 # patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
 # do not do this for debug build
- if(${RHINO3DM_JS} AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+ if(${RHINO3DM_JS})
+  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
    find_program(PATCH patch)
    if(NOT PATCH)
        message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
@@ -127,4 +128,5 @@ endif()
      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
      COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
    )
+   endif()
 endif()
