@@ -463,6 +463,8 @@ def build_js():
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
+    if debug:
+        items_to_check = ['rhino3dm.wasm', 'rhino3dm.js']
     all_items_built = True
     for item in items_to_check:
         print(item)
@@ -528,6 +530,8 @@ def main():
                         help="show verbose logging messages")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
+    parser.add_argument('--debug', '-d', action='store_true',
+                        help="generate a debug build (wasm only)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     args = parser.parse_args()
@@ -551,6 +555,9 @@ def main():
 
     global overwrite
     overwrite = args.overwrite
+
+    global debug
+    debug = args.debug
 
     global lib
     lib = args.library
