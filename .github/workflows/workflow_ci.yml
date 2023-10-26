@@ -125,7 +125,10 @@ jobs:
         run: |
           cp package.json src/build/javascript/artifacts_js
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/*.js src/build/javascript/artifacts_js/
+          cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
+          cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
+          cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
+          cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:

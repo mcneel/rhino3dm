@@ -528,8 +528,6 @@ def main():
                         help="show verbose logging messages")
     parser.add_argument('--xcodelog', '-x', action='store_true',
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
-    parser.add_argument('--debug', '-d', action='store_true',
-                        help="generate a debug build (wasm only)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     args = parser.parse_args()
@@ -553,9 +551,6 @@ def main():
 
     global overwrite
     overwrite = args.overwrite
-
-    global debug
-    debug = args.debug
 
     global lib
     lib = args.library

@@ -43,11 +43,11 @@ if(${RHINO3DM_JS})
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("debug mode")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g") # -g retains debug info
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz") # -Oz reduces wasm file size
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4gb --bind") #had no max memory. consider Initial Memory
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH=1 --bind")
 endif()
 
 add_definitions(-D_GNU_SOURCE)
