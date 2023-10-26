@@ -43,11 +43,11 @@ if(${RHINO3DM_JS})
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("debug mode")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -g")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g") # -g retains debug info
   else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -Oz")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz") # -Oz reduces wasm file size
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4gb --bind") #had no max memory. consider Initial Memory
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4gb --bind") #had no max memory. consider Initial Memory
 endif()
 
 add_definitions(-D_GNU_SOURCE)
@@ -102,31 +102,4 @@ if (${RHINO3DM_PY})
   else()
     target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
   endif()
-endif()
-
-
-# I plan to mode the following install phase out of this file and into the top
-# level python script for generating wasm 
-# dan@mcneel.com: this is already in the build.py -p js (this can be deleted as soon
-# as the scripts are used in the build process)
-if(${RHINO3DM_JS})
-  install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-endif()
-
-# patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
-# do not do this for debug build
- if(${RHINO3DM_JS})
-  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-   find_program(PATCH patch)
-   if(NOT PATCH)
-       message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
-   endif()
-   add_custom_command(TARGET rhino3dm POST_BUILD
-     COMMENT "Generating ${CMAKE_BINARY_DIR}/rhino3dm.module.js"
-     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
-     COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
-   )
-   endif()
 endif()
