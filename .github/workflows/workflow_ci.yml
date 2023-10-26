@@ -106,7 +106,7 @@ jobs:
       - name: setup
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
-        run: python3 script/build.py -p js -o -v -d
+        run: python3 script/build.py -p js -o -v
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
