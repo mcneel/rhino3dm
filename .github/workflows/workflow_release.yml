@@ -263,55 +263,6 @@ jobs:
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 
-  build_nodejs:
-    name: build rhino3dm.nodejs
-    runs-on: ubuntu-latest
-    container:
-      image: emscripten/emsdk:3.1.30
-    steps:
-      - name: info
-        run: python3 --version && emcc --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v3.3.0
-      - name: safe dir
-        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
-      - name: update submodules
-        run: git submodule update --init
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p js
-      - name: setup
-        run: python3 script/setup.py -p nodejs -o -v
-      - name: build js
-        run: python3 script/build.py -p nodejs -o -v
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0.x
-      - name: docgen
-        shell: bash
-        run: |
-          dotnet build src/docgen
-          cd src/docgen/bin/Debug
-          ./docgen
-          cd ../../../../
-          patch src/docgen/out/js_tsdef/rhino3dm.d.ts < src/js/rhino3dm.d.ts.diff
-          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
-      - name: copy files
-        shell: bash
-        run: |
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/rhino3dm.release.js src/build/javascript/artifacts_js/rhino3dm.js
-          cp src/js/rhino3dm.release.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          cp src/js/rhino3dm.release.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp src/js/rhino3dm.release.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-      - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          path: src/build/javascript/artifacts_js
-          name: rhino3dm.nodejs
-          retention-days: ${{ env.RETENTION_DAYS }}
-
   build_dotnet_arm64:
     name: build dotnet arm 64
     runs-on: ubuntu-latest
