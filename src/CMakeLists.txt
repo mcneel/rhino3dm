@@ -18,6 +18,11 @@ if (${RHINO3DM_PY})
   add_subdirectory(lib/pybind11)
 endif()
 
+message("NODE=${NODE}")
+if( NODE ) 
+    message("NODE evaluates to True")
+endif()
+
 # Add draco add_library
 include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
 
@@ -47,6 +52,9 @@ if(${RHINO3DM_JS})
   else()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
+  if(NODE)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MEMORY64=1")
+  endif()
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH=1 --bind")
 endif()
 
@@ -59,7 +67,11 @@ add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})
   # temporary until we adjust opennurbs to be emscripten aware
-  add_definitions(-DON_32BIT_RUNTIME)
+  if(NODE)
+    add_definitions(-DON_64BIT_RUNTIME)
+  else()
+    add_definitions(-DON_32BIT_RUNTIME)
+  endif()
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
 
