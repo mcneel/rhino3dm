@@ -303,6 +303,20 @@ namespace Rhino.DocObjects
 
     private readonly bool m_dontdelete;
 
+    /// <summary>
+    /// Create a default ViewInfo instance
+    /// </summary>
+    public ViewInfo()
+    {
+      m_parent = null;
+      m_named_view_table = false;
+      m_ptr = UnsafeNativeMethods.ON_3dmView_New(IntPtr.Zero);
+      // 02 Nov 2023 S. Baer (RH-70610)
+      // TODO: I hate double negatives like m_dontdelete. They are hard to quickly
+      // grasp. We should switch this to a variable like m_performDelete.
+      m_dontdelete = false;
+    }
+
 #if RHINO_SDK
     private int m_index = -1;
     internal ViewInfo(RhinoDoc doc, int index)
