@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_subd.h")
-RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_plus_subd.h")
 
 
 RH_C_FUNCTION ON_SubDRef* ON_SubDRef_New()
