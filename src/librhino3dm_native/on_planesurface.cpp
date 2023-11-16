@@ -69,6 +69,7 @@ RH_C_FUNCTION void ON_PlaneSurface_SetPlane(ON_PlaneSurface* pPlaneSurface, cons
   }
 }
 
+/*
 RH_C_FUNCTION void ON_PlaneSurface_GetExtents(const ON_PlaneSurface* pPlaneSurface, int direction, ON_Interval* pExtents)
 {
   if (pPlaneSurface && pExtents)
@@ -87,6 +88,7 @@ RH_C_FUNCTION void ON_PlaneSurface_SetExtents(ON_PlaneSurface* pPlaneSurface, in
     pPlaneSurface->SetExtents(direction, *pExtents, bSyncDomain);
   }
 }
+*/
 
 RH_C_FUNCTION ON_Mesh* ON_PlaneSurface_CreateMesh(const ON_PlaneSurface* pPlaneSurface)
 {

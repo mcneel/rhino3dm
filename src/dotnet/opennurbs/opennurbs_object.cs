@@ -582,6 +582,7 @@ namespace Rhino.Runtime
       }
     }
 
+#if RHINO_SDK
     /// <summary>
     /// Dictionary of custom information attached to this class. The dictionary is actually user
     /// data provided as an easy to use shareable set of information.
@@ -602,7 +603,7 @@ namespace Rhino.Runtime
       }
     }
 
-
+#endif
 
     #region user strings
     /// <summary>

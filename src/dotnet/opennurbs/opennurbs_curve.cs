@@ -809,7 +809,6 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
-#endif //RHINO_SDK
 
     /// <summary>
     /// Constructs a curve from a set of control-point locations.
@@ -833,6 +832,8 @@ namespace Rhino.Geometry
       IntPtr ptr = UnsafeNativeMethods.ON_NurbsCurve_CreateControlPointCurve(count, ptArray, degree);
       return GeometryBase.CreateGeometryHelper(ptr, null) as NurbsCurve;
     }
+
+
     /// <summary>
     /// Constructs a control-point of degree=3 (or less).
     /// </summary>
@@ -842,7 +843,7 @@ namespace Rhino.Geometry
     {
       return CreateControlPointCurve(points, 3);
     }
-
+#endif //RHINO_SDK
     /// <summary>
     /// Joins a collection of curve segments together.
     /// </summary>

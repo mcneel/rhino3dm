@@ -6,6 +6,7 @@ using System.IO;
 
 namespace Rhino.Runtime
 {
+#if RHINO_SDK
   /// <summary> Assembly Resolver for the Rhino App Domain. </summary>
   public static class AssemblyResolver
   {
@@ -502,4 +503,5 @@ namespace Rhino.Runtime
     }
 #endregion
   }
+#endif
 }

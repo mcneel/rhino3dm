@@ -538,7 +538,7 @@ namespace Rhino.DocObjects.Custom
         return UnsafeNativeMethods.ON_Object_UserDataCount(const_ptr_onobject);
       }
     }
-
+#if RHINO_SDK
     /// <summary>
     /// If the user-data is already in a different UserDataList, it
     /// will be removed from that list and added to this list.
@@ -571,7 +571,8 @@ namespace Rhino.DocObjects.Custom
         UserData.StoreInRuntimeList(userdata);
       return rc;
     }
-    
+#endif //RHINO_SDK
+
     /// <summary>
     /// Remove the user-data from this list
     /// </summary>

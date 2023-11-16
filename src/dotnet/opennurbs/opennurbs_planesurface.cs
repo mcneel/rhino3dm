@@ -92,6 +92,7 @@ namespace Rhino.Geometry
       }
     }
 
+#if RHINO_SDK
     /// <summary>
     /// Gets the extents of the plane surface.
     /// </summary>
@@ -127,6 +128,8 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PlaneSurface_SetExtents(ptr_this, direction, extents, syncDomain);
     }
+
+#endif //RhHINO_SDK
 
     /// <summary>
     /// Computes a polygon mesh of the surface made of one quad.
