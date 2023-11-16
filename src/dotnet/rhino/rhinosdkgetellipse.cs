@@ -37,6 +37,7 @@ namespace Rhino.Input.Custom
     /// <summary>
     /// Actively releases the unmanaged object.
     /// </summary>
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);

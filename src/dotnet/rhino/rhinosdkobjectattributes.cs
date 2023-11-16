@@ -379,6 +379,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Defines how a label for a clipping plane object should be shown
     /// </summary>
+    /// <since>8.0</since>
     public SectionLabelStyle ClippingPlaneLabelStyle
     {
       get { return (SectionLabelStyle)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClippingPlaneLabelStyle); }
@@ -791,7 +792,7 @@ namespace Rhino.DocObjects
           throw new ArgumentException("The material is not attached to a document.");
         }
 
-        var material = value.SimulatedMaterial(Render.RenderTexture.TextureGeneration.Allow);
+        var material = value.ToMaterial(Render.RenderTexture.TextureGeneration.Allow);
 
         material.RenderMaterialInstanceId = value.Id;
 

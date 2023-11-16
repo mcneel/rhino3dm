@@ -548,12 +548,20 @@ namespace Rhino.DocObjects.Custom
     /// <since>5.0</since>
     public bool Add(UserData userdata)
     {
+      // 22-Jun-2023 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-48844
+      // 27-Sep-2023 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-48844
+      if (m_parent is RhinoObject)
+      {
+        //throw new InvalidOperationException("Cannot add user data to RhinoObject. Add user data to Attributes or Geometry.");
+        return false;
+      }
+
       if (!(userdata is SharedUserDictionary))
       {
         Type t = userdata.GetType();
         System.Reflection.ConstructorInfo constructor = t.GetConstructor(Type.EmptyTypes);
         if (!t.IsPublic || constructor == null)
-          throw new ArgumentException("user-data must be a public class and have a parameterless constructor");
+          throw new ArgumentException("UserData must be a public class and have a parameterless constructor");
       }
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
       IntPtr ptr_userdata = userdata.NonConstPointer(true);

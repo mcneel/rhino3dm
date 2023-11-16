@@ -435,57 +435,97 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Intersects a mesh with an (infinite) plane.
+    /// Intersects a mesh with an infinite plane.
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="plane">Plane to intersect with.</param>
-    /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
     /// <since>5.0</since>
     public static Polyline[] MeshPlane(Mesh mesh, Plane plane)
     {
-      Rhino.Collections.RhinoList<Plane> planes = new Rhino.Collections.RhinoList<Plane>(1, plane);
-      return MeshPlane(mesh, planes);
+      return MeshPlane(mesh, null, plane, RhinoMath.ZeroTolerance);
     }
+
     /// <summary>
-    /// Intersects a mesh with a collection of (infinite) planes.
+    /// Intersects a mesh with an infinite plane.
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="cache">Intersection cache for mesh.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <param name="tolerance">Intersection tolerance.</param>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
+    /// <since>8.0</since>
+    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, Plane plane, double tolerance)
+    {
+      Rhino.Collections.RhinoList<Plane> planes = new Rhino.Collections.RhinoList<Plane>(1, plane);
+      return MeshPlane(mesh, cache, planes, tolerance);
+    }
+
+    /// <summary>
+    /// Intersects a mesh with a collection of infinite planes.
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="planes">Planes to intersect with.</param>
-    /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
-    /// <exception cref="ArgumentNullException">If planes is null.</exception>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
     /// <since>5.0</since>
     public static Polyline[] MeshPlane(Mesh mesh, IEnumerable<Plane> planes)
     {
-      if (planes == null) throw new ArgumentNullException("planes");
+      return MeshPlane(mesh, null, planes, RhinoMath.ZeroTolerance);
+    }
 
-      Rhino.Collections.RhinoList<Plane> list = planes as Rhino.Collections.RhinoList<Plane> ??
-                                                new Rhino.Collections.RhinoList<Plane>(planes);
+    /// <summary>
+    /// Intersects a mesh with a collection of infinite planes.
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="cache">Intersection cache for the mesh.</param>
+    /// <param name="planes">Planes to intersect with.</param>
+    /// <param name="tolerance">Intersection tolerance.</param>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
+    /// <since>8.0</since>
+    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, IEnumerable<Plane> planes,  double tolerance)
+    {
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-67504
+
+      if (null == mesh || null == planes)
+        return null;
+
+      Rhino.Collections.RhinoList<Plane> list = planes as Rhino.Collections.RhinoList<Plane> ?? new Rhino.Collections.RhinoList<Plane>(planes);
       if (list.Count < 1)
         return null;
 
       IntPtr pMesh = mesh.ConstPointer();
-      int polylines_created = 0;
-      IntPtr pPolys = UnsafeNativeMethods.TL_Intersect_MeshPlanes1(pMesh, list.Count, list.m_items, ref polylines_created);
+      IntPtr pCache = (null != cache) ? cache.NonConstPointer() : IntPtr.Zero;
+
+      var out_points = new SimpleArrayArrayPoint3d();
+      IntPtr pOutPoints = out_points.NonConstPointer();
+
+      int count = UnsafeNativeMethods.ON_Mesh_GetIntersections(pMesh, pCache, list.Count, list.m_items, tolerance, pOutPoints);
       GC.KeepAlive(mesh);
-      if (polylines_created < 1 || IntPtr.Zero == pPolys)
-        return null;
-
-      // convert the C++ polylines created into .NET polylines
-      Polyline[] rc = new Polyline[polylines_created];
-      for (int i = 0; i < polylines_created; i++)
+      if (count > 0)
       {
-        int point_count = UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_itemI_count(pPolys, i);
-        Polyline pl = new Polyline(point_count);
-        if (point_count > 0)
+        List<Polyline> out_polylines = new List<Polyline>(out_points.Count);
+        for (int i = 0; i < out_points.Count; i++)
         {
-          pl.m_size = point_count;
-          UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_memcpy_del(pPolys, i, point_count, pl.m_items);
+          Polyline pline = out_points.PolylineAt(i);
+          if (null != pline)
+            out_polylines.Add(pline);
         }
-        rc[i] = pl;
+        return out_polylines.ToArray();
       }
-      UnsafeNativeMethods.ON_SimpleArray_ON_Polyline_delete(pPolys);
 
-      return rc;
+      return null;
     }
 
     /// <summary>

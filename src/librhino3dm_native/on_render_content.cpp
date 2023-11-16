@@ -511,14 +511,12 @@ RH_C_FUNCTION float ON_XMLVariant_GetFloatValue(const ON_XMLVariant* pV)
   return 0.0f;
 }
 
-RH_C_FUNCTION int ON_XMLVariant_GetStringValue(const ON_XMLVariant* pV, CRhCmnStringHolder* pSH)
+RH_C_FUNCTION void ON_XMLVariant_GetStringValue(const ON_XMLVariant* pV, ON_wString* s)
 {
-  if (pV && pSH)
+  if (pV && s)
   {
-    pSH->Set(pV->AsString());
-    return 1;
+    *s = pV->AsString();
   }
-  return 0;
 }
 
 RH_C_FUNCTION int ON_XMLVariant_GetOnColorValue(const ON_XMLVariant* pV)

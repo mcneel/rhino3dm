@@ -329,6 +329,7 @@ namespace Rhino.Render
       set => SetValue(UnsafeNativeMethods.SunSetting.ManualControlOn, new Variant(value));
     }
 
+    /// <since>8.0</since>
     public enum Accuracies { Minimum, Maximum };
 
     /// <summary>Accuracy.</summary>
@@ -453,6 +454,7 @@ namespace Rhino.Render
     /// </summary>
     /// <since>5.0</since>
     /// <obsolete>8.0</obsolete>
+    /// <deprecated>8.0</deprecated>
     [Obsolete("Use Azimuth and Altitude properties instead")]
     public void SetPosition(double azimuthDegrees, double altitudeDegrees)
     {
@@ -464,6 +466,7 @@ namespace Rhino.Render
     /// </summary>
     /// <since>5.0</since>
     /// <obsolete>8.0</obsolete>
+    /// <deprecated>8.0</deprecated>
     [Obsolete("Use SetDateTime() and Latitude / Longitude properties instead")]
     public void SetPosition(DateTime when, double latitudeDegrees, double longitudeDegrees)
     {
@@ -762,6 +765,7 @@ namespace Rhino.Render
       Dispose(false);
     }
 
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -811,6 +815,9 @@ namespace Rhino.Render
       set => SetValue(UnsafeNativeMethods.SkylightSetting.Enabled, new Variant(value));
     }
 
+    /// <summary>
+    /// ShadowIntensity is currently unused.
+    /// </summary>
     /// <since>6.0</since>
     public double ShadowIntensity
     {

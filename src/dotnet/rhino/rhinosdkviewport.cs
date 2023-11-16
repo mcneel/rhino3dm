@@ -3,6 +3,7 @@ using System;
 using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects;
+using System.Drawing;
 
 namespace Rhino.Display
 {
@@ -727,6 +728,21 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.RHC_RhZoomExtentsHelper(ptr_this, box.m_min, box.m_max);
+    }
+
+    /// <summary>
+    /// Zooms the viewport to the given rectangle.
+    /// </summary>
+    /// <param name="rect">
+    /// A 2d screen rectangle in client coordinates of the parent Rhino view,
+    /// where 0,0 is the upper left corner of the view window.
+    /// </param>
+    /// <returns>true if operation succeeded; otherwise false.</returns>
+    /// <since>7.33</since>
+    public bool ZoomWindow(Rectangle rect)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhZoomWindowsHelper(ptr_this, rect.Left, rect.Top, rect.Right, rect.Bottom);
     }
 
     #region mouse

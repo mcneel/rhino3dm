@@ -24,12 +24,14 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Light CreateSunLight(double northAngleDegrees, double azimuthDegrees, double altitudeDegrees)
     {
-      Runtime.HostUtils.CheckForRdk(true, true);
+      HostUtils.CheckForRdk(true, true);
 
-      var sun = new Rhino.Render.Sun();
-
-      sun.North = northAngleDegrees;
-      sun.SetPosition(azimuthDegrees, altitudeDegrees);
+      var sun = new Rhino.Render.Sun()
+      {
+        North = northAngleDegrees,
+        Azimuth = azimuthDegrees,
+        Altitude = altitudeDegrees
+      };
 
       return sun.Light;
     }
@@ -39,7 +41,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="northAngleDegrees">The angle of North in degrees. North is the angle between positive World Y axis and model North, as measured on World XY plane.</param>
     /// <param name="when">The time of the measurement. The Kind property of DateTime specifies whether this is in local or universal time.
-    /// <para>Local and Undefined <see cref="DateTimeKind">daytime kinds</see> in this argument are considered local.</para></param>
+    /// <para>Local and Undefined <see cref="DateTimeKind">date-time kinds</see> in this argument are considered local.</para></param>
     /// <param name="latitudeDegrees">The latitude, in degrees, of the location on Earth.</param>
     /// <param name="longitudeDegrees">The longitude, in degrees, of the location on Earth.</param>
     /// <returns>A newly constructed light object.</returns>
@@ -47,12 +49,16 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Light CreateSunLight(double northAngleDegrees, DateTime when, double latitudeDegrees, double longitudeDegrees)
     {
-      Runtime.HostUtils.CheckForRdk(true, true);
+      HostUtils.CheckForRdk(true, true);
 
-      var sun = new Rhino.Render.Sun();
+      var sun = new Rhino.Render.Sun
+      {
+        North = northAngleDegrees,
+        Latitude  = latitudeDegrees,
+        Longitude = longitudeDegrees
+      };
 
-      sun.North = northAngleDegrees;
-      sun.SetPosition(when, latitudeDegrees, longitudeDegrees);
+      sun.SetDateTime(when, DateTimeKind.Local);
 
       return sun.Light;
     }

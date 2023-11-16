@@ -1238,13 +1238,27 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets immediate children of this layer. Note that child layers may have their own children.
     /// </summary>
-    /// <returns>Array of child layers, or null if this layer does not have any children.</returns>
+    /// <returns>Array of child layers, sorted by layer index, or null if this layer does not have any children.</returns>
     /// <since>5.0</since>
     public Layer[] GetChildren()
     {
+      return GetChildren(false);
+    }
+
+    /// <summary>
+    /// Gets the children of this layer.
+    /// </summary>
+    /// <param name="allChildren">
+    /// If false, the immediate children are returned.
+    /// If true, immediate children, their children, and so on, are returned.
+    /// </param>
+    /// <returns>Array of child layers, sorted by layer index, or null if this layer does not have any children.</returns>
+    /// <since>8.0</since>
+    public Layer[] GetChildren(bool allChildren)
+    {
       SimpleArrayInt child_indices = new SimpleArrayInt();
       int index = Index;
-      int count = UnsafeNativeMethods.CRhinoLayerNode_GetChildren(m_doc.RuntimeSerialNumber, index, child_indices.m_ptr);
+      int count = UnsafeNativeMethods.CRhinoLayerNode_GetChildren(m_doc.RuntimeSerialNumber, index, allChildren, child_indices.m_ptr);
       Layer[] rc = null;
       if (count > 0)
       {
@@ -1588,6 +1602,20 @@ namespace Rhino.DocObjects.Tables
       get
       {
         return ModelComponentType.Layer;
+      }
+    }
+
+    /// <summary>
+    /// Gets an array of layer indices that are sorted by the values of <see cref="Layer.SortIndex"/>.
+    /// </summary>
+    /// <returns>An array of layer indices.</returns>
+    /// <since>7.34</since>
+    public int[] GetSorted()
+    {
+      using (var layerIndices = new SimpleArrayInt())
+      {
+        int rc = UnsafeNativeMethods.CRhinoLayerTable_GetSortedList(m_doc.RuntimeSerialNumber, layerIndices.m_ptr);
+        return rc == 0 ? new int[0] : layerIndices.ToArray();
       }
     }
 

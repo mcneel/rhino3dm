@@ -42,6 +42,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoLight_InternalCommitChanges;
     }
 
+    /// <since>8.0</since>
     public override int Index
     {
       get

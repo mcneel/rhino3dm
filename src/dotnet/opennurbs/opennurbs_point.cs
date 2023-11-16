@@ -4292,6 +4292,20 @@ namespace Rhino.Geometry
     {
       return UnsafeNativeMethods.ON_3dVector_PerpendicularTo(ref this, other);
     }
+
+    /// <summary>
+    /// Set this vector to be perpendicular to a plane defined by 3 points.
+    /// </summary>
+    /// <param name="point0">The first point.</param>
+    /// <param name="point1">The second point.</param>
+    /// <param name="point2">The third point.</param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public bool PerpendicularTo(Point3d point0, Point3d point1, Point3d point2)
+    {
+      return UnsafeNativeMethods.ON_3dVector_PerpendicularTo2(ref this, point0, point1, point2);
+    }
+
     internal static double GetLengthHelper(double dx, double dy, double dz)
     {
       if (!RhinoMath.IsValidDouble(dx) ||

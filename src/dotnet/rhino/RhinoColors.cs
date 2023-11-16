@@ -7,10 +7,10 @@ using System.Security.Permissions;
 namespace Rhino.Display
 {
   /// <summary>
-  /// Represents a RGBA (Red, Green, Blue, Alpha) color with double precision floating point channel.
+  /// Represents a sRGBA (Red, Green, Blue, Alpha) color with double precision floating point channel.
   /// </summary>
   [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 32)]
-  [DebuggerDisplay("{R}, {G}, {B}, {A}")]
+  [DebuggerDisplay("R={R}, G={G}, B={B}, A={A}")]
   [Serializable]
   public struct ColorRGBA : ISerializable, IFormattable, IComparable, IComparable<ColorRGBA>, IEquatable<ColorRGBA>, IEpsilonComparable<ColorRGBA>
   {
@@ -77,6 +77,15 @@ namespace Rhino.Display
       _a = color._a;
     }
 
+    /// <since>8.0</since>
+    public ColorRGBA(ColorRGBA color, double alpha)
+    {
+      _r = color._r;
+      _g = color._g;
+      _b = color._b;
+      _a = alpha;
+    }
+
     /// <since>7.0</since>
     public ColorRGBA(double red, double green, double blue)
     {
@@ -115,20 +124,58 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public ColorRGBA(int argb)
     {
-      _a = ((argb >> 0) & 255) / 255.0;
-      _r = ((argb >> 8) & 255) / 255.0;
-      _g = ((argb >> 16) & 255) / 255.0;
-      _b = ((argb >> 24) & 255) / 255.0;
+      _b = ((argb >> 0) & 255) / 255.0;
+      _g = ((argb >> 8) & 255) / 255.0;
+      _r = ((argb >> 16) & 255) / 255.0;
+      _a = ((argb >> 24) & 255) / 255.0;
     }
     #endregion
 
     #region conversions
     /// <summary>
+    /// Converts this color to a 32-bit ARGB value.
+    /// </summary>
+    /// <returns>The 32-bit ARGB value that corresponds to this color</returns>
+    /// <since>7.35</since>
+    public int ToArgb()
+    {
+      return (int)((uint)(B * byte.MaxValue) | (uint)(G * byte.MaxValue) << 8 | (uint)(R * byte.MaxValue) << 16 | (uint)(A * byte.MaxValue) << 24);
+    }
+
+    /// <summary>
+    /// Constructs a RGBA color from the specified 8-bit components (red, green, and blue) values.
+    /// The alpha value is implicitly 1.0 (fully opaque).
+    /// </summary>
+    /// <param name="red">The red component. Valid values are 0 through 255.</param>
+    /// <param name="green">The green component. Valid values are 0 through 255.</param>
+    /// <param name="blue">The blue component. Valid values are 0 through 255.</param>
+    /// <returns>A RGBA color with the specified component values.</returns>
+    /// <since>8.0</since>
+    public static ColorRGBA CreateFromArgb(byte red, byte green, byte blue)
+    {
+      return new ColorRGBA(red / 255.0, green / 255.0, blue / 255.0, 1.0);
+    }
+    
+    /// <summary>
+    /// Constructs a RGBA color from the four ARGB components (alpha, red, green, and blue) values.
+    /// </summary>
+    /// <param name="alpha">The alpha component. Valid values are 0 through 255.</param>
+    /// <param name="red">The red component. Valid values are 0 through 255.</param>
+    /// <param name="green">The green component. Valid values are 0 through 255.</param>
+    /// <param name="blue">The blue component. Valid values are 0 through 255.</param>
+    /// <returns>A RGBA color with the specified component values.</returns>
+    /// <since>8.0</since>
+    public static ColorRGBA CreateFromArgb(byte alpha, byte red, byte green, byte blue)
+    {
+      return new ColorRGBA(red / 255.0, green / 255.0, blue / 255.0, alpha / 255.0);
+    }
+
+    /// <summary>
     /// Constructs the nearest RGBA equivalent of an HSL color.
     /// </summary>
     /// <param name="hsv">Target color in HSL space.</param>
     /// <returns>The RGBA equivalent of the HSL color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromHSV(ColorHSV hsv)
     {
       ColorConverter.HSV_To_RGB(hsv.H, hsv.S, hsv.V, out double r, out double g, out double b);
@@ -140,7 +187,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="hsl">Target color in HSL space.</param>
     /// <returns>The RGBA equivalent of the HSL color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromHSL(ColorHSL hsl)
     {
       ColorConverter.HSL_To_RGB(hsl.H, hsl.S, hsl.L, out double r, out double g, out double b);
@@ -152,7 +199,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="cmyk">Target color in CMYK space.</param>
     /// <returns>The RGBA equivalent of the CMYK color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromCMYK(ColorCMYK cmyk)
     {
       ColorConverter.CMYK_To_CMY(cmyk.m_c, cmyk.m_m, cmyk.m_y, cmyk.m_k, out double c0, out double m0, out double y0);
@@ -164,7 +211,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="xyz">Target color in XYZ space.</param>
     /// <returns>The RGBA equivalent of the XYZ color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromXYZ(ColorXYZ xyz)
     {
       ColorConverter.XYZ_To_RGB(xyz.X, xyz.Y, xyz.Z, out double r, out double g, out double b);
@@ -176,7 +223,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lab">Target color in LAB space.</param>
     /// <returns>The RGBA equivalent of the LAB color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromLAB(ColorLAB lab)
     {
       return CreateFromXYZ(ColorXYZ.CreateFromLAB(lab));
@@ -187,7 +234,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="lch">Target color in LCH space.</param>
     /// <returns>The RGBA equivalent of the LCH color.</returns>
-    /// <since>6.0</since>
+    /// <since>7.0</since>
     public static ColorRGBA CreateFromLCH(ColorLCH lch)
     {
       return CreateFromLAB(ColorLAB.CreateFromLCH(lch));
@@ -381,7 +428,7 @@ namespace Rhino.Display
 
     #region casting operators
     /// <summary>
-    /// Explicitly converts a ColorRGBA in a <see cref="System.Drawing.Color"/>.
+    /// Converts a ColorRGBA in a <see cref="System.Drawing.Color"/>.
     /// </summary>
     /// <param name="value">A RGBA color.</param>
     /// <returns>An ARGB <see cref="System.Drawing.Color"/>.</returns>
@@ -1061,8 +1108,8 @@ namespace Rhino.Display
     public ColorLAB(double lightness, double a, double b)
     {
       m_l = Clip(lightness);
-      m_a = Clip(a);
-      m_b = Clip(b);
+      m_a = ClipAB(a);
+      m_b = ClipAB(b);
       m_alpha = 0.0;
     }
     /// <summary>
@@ -1072,8 +1119,8 @@ namespace Rhino.Display
     public ColorLAB(double alpha, double lightness, double a, double b)
     {
       m_l = Clip(lightness);
-      m_a = Clip(a);
-      m_b = Clip(b);
+      m_a = ClipAB(a);
+      m_b = ClipAB(b);
       m_alpha = 1.0 - Clip(alpha);
     }
 
@@ -1169,22 +1216,22 @@ namespace Rhino.Display
       set { m_l = Clip(value); }
     }
     /// <summary>
-    /// Gets or sets the Base channel. The channel is limited to 0~1.
+    /// Gets or sets the Base channel. The channel is limited to -1~+1.
     /// </summary>
     /// <since>5.0</since>
     public double A
     {
       get { return m_a; }
-      set { m_a = Clip(value); }
+      set { m_a = ClipAB(value); }
     }
     /// <summary>
-    /// Gets or sets the Opponent channel. The channel is limited to 0~1.
+    /// Gets or sets the Opponent channel. The channel is limited to -1~+1.
     /// </summary>
     /// <since>5.0</since>
     public double B
     {
       get { return m_b; }
-      set { m_b = Clip(value); }
+      set { m_b = ClipAB(value); }
     }
     /// <summary>
     /// Gets or sets the Alpha channel. The channel is limited to 0~1.
@@ -1201,7 +1248,14 @@ namespace Rhino.Display
     internal static double Clip(double n)
     {
       if (n < 0.0) { return 0.0; }
-      if (n > 1.0) { return 1.0; }
+      if (n > +1.0) { return +1.0; }
+      return n;
+    }
+
+    internal static double ClipAB(double n)
+    {
+      if (n < -1.0) { return -1.0; }
+      if (n > +1.0) { return +1.0; }
       return n;
     }
     #endregion
@@ -1738,13 +1792,17 @@ namespace Rhino.Display
     /// <param name="b">Blue channel (0.0~1.0)</param>
     internal static void XYZ_To_RGB(double x, double y, double z, out double r, out double g, out double b)
     {
-      x *= (0.01 * 95.047);
-      y *= (0.01 * 100.0);
-      z *= (0.01 * 108.883);
+      x *= 100.0;
+      y *= 100.0;
+      z *= 100.0;
 
-      double vR = x * +3.2406 + y * -1.5372 + z * -0.4986;
-      double vG = x * -0.9689 + y * +1.8758 + z * +0.0415;
-      double vB = x * +0.0557 + y * -0.2040 + z * +1.0570;
+      double vR = x * +3.2404542 + y * -1.5371385 + z * -0.4985314;
+      double vG = x * -0.9692660 + y * +1.8760108 + z * +0.0415560;
+      double vB = x * +0.0556434 + y * -0.2040259 + z * +1.0572252;
+
+      vR *= 0.01;
+      vG *= 0.01;
+      vB *= 0.01;
 
       r = xyzrgb_map(vR);
       g = xyzrgb_map(vG);
@@ -1770,21 +1828,17 @@ namespace Rhino.Display
     /// <param name="z">Z channel (0.0~1.0)</param>
     internal static void RGB_To_XYZ(double r, double g, double b, out double x, out double y, out double z)
     {
-      double vR = r;
-      double vG = g;
-      double vB = b;
-
-      vR = rgbxyz_map(vR);
-      vG = rgbxyz_map(vG);
-      vB = rgbxyz_map(vB);
+      double vR = rgbxyz_map(r);
+      double vG = rgbxyz_map(g);
+      double vB = rgbxyz_map(b);
 
       vR *= 100.0;
       vG *= 100.0;
       vB *= 100.0;
 
-      x = vR * 0.4124 + vG * 0.3576 + vB * 0.1805;
-      y = vR * 0.2126 + vG * 0.7152 + vB * 0.0722;
-      z = vR * 0.0193 + vG * 0.1192 + vB * 0.9505;
+      x = vR * 0.4124564 + vG * 0.3575761 + vB * 0.1804375;
+      y = vR * 0.2126729 + vG * 0.7151522 + vB * 0.0721750;
+      z = vR * 0.0193339 + vG * 0.1191920 + vB * 0.9503041;
 
       x *= 0.01;
       y *= 0.01;

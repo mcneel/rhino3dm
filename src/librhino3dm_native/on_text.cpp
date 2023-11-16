@@ -1363,14 +1363,14 @@ RH_C_FUNCTION void ON_V6_Annotation_SetDecimalSeparator(ON_Annotation* annotatio
 
 RH_C_FUNCTION ON::TextVerticalAlignment ON_Text_GetTextVerticalAlignment(const ON_Text* text, const ON_DimStyle* parent_style)
 {
-  if (text && parent_style)
+  if (text)
     return text->TextVerticalAlignment(parent_style);
   return ON::TextVerticalAlignment::Top;
 }
 
 RH_C_FUNCTION void ON_Text_SetTextVerticalAlignment(ON_Text* text, const ON_DimStyle* parent_style, ON::TextVerticalAlignment v_alignment)
 {
-  if (text && parent_style)
+  if (text)
   {
     text->SetTextVerticalAlignment(parent_style, v_alignment);
   }
@@ -1378,14 +1378,14 @@ RH_C_FUNCTION void ON_Text_SetTextVerticalAlignment(ON_Text* text, const ON_DimS
 
 RH_C_FUNCTION ON::TextVerticalAlignment ON_Leader_GetLeaderTextVerticalAlignment(const ON_Leader* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->LeaderTextVerticalAlignment(parent_style);
   return ON::TextVerticalAlignment::Top;
 }
 
 RH_C_FUNCTION void ON_Leader_SetLeaderTextVerticalAlignment(ON_Leader* dim, const ON_DimStyle* parent_style, ON::TextVerticalAlignment v_alignment)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetLeaderTextVerticalAlignment(parent_style, v_alignment);
   }
@@ -1393,14 +1393,14 @@ RH_C_FUNCTION void ON_Leader_SetLeaderTextVerticalAlignment(ON_Leader* dim, cons
 
 RH_C_FUNCTION ON::TextHorizontalAlignment ON_Text_GetTextHorizontalAlignment(const ON_Text* text, const ON_DimStyle* parent_style)
 {
-  if (text && parent_style)
+  if (text)
     return text->TextHorizontalAlignment(parent_style);
   return ON::TextHorizontalAlignment::Left;
 }
 
 RH_C_FUNCTION void ON_Text_SetTextHorizontalAlignment(ON_Text* text, const ON_DimStyle* parent_style, ON::TextHorizontalAlignment h_alignment)
 {
-  if (text && parent_style)
+  if (text)
   {
     text->SetTextHorizontalAlignment(parent_style, h_alignment);
   }
@@ -1408,14 +1408,14 @@ RH_C_FUNCTION void ON_Text_SetTextHorizontalAlignment(ON_Text* text, const ON_Di
 
 RH_C_FUNCTION ON::TextHorizontalAlignment ON_Leader_GetLeaderTextHorizontalAlignment(const ON_Leader* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->LeaderTextHorizontalAlignment(parent_style);
   return ON::TextHorizontalAlignment::Left;
 }
 
 RH_C_FUNCTION void ON_Leader_SetLeaderTextHorizontalAlignment(ON_Leader* dim, const ON_DimStyle* parent_style, ON::TextHorizontalAlignment h_alignment)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetLeaderTextHorizontalAlignment(parent_style, h_alignment);
   }
@@ -1423,14 +1423,14 @@ RH_C_FUNCTION void ON_Leader_SetLeaderTextHorizontalAlignment(ON_Leader* dim, co
 
 RH_C_FUNCTION ON_DimStyle::TextLocation ON_Dim_GetDimTextocation(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimTextLocation(parent_style);
   return ON_DimStyle::TextLocation::AboveDimLine;
 }
 
 RH_C_FUNCTION void ON_Dim_SetDimTextLocation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON_DimStyle::TextLocation loc)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimTextLocation(parent_style, loc);
   }
@@ -1438,14 +1438,14 @@ RH_C_FUNCTION void ON_Dim_SetDimTextLocation(ON_Dimension* dim, const ON_DimStyl
 
 RH_C_FUNCTION ON_DimStyle::TextLocation ON_Dim_GetDimRadialTextocation(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimRadialTextLocation(parent_style);
   return ON_DimStyle::TextLocation::InDimLine;
 }
 
 RH_C_FUNCTION void ON_Dim_SetDimRadialTextLocation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON_DimStyle::TextLocation loc)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimRadialTextLocation(parent_style, loc);
   }
@@ -1453,14 +1453,14 @@ RH_C_FUNCTION void ON_Dim_SetDimRadialTextLocation(ON_Dimension* dim, const ON_D
 
 RH_C_FUNCTION ON_DimStyle::ContentAngleStyle ON_Leader_GetLeaderContentAngleStyle(const ON_Leader* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->LeaderContentAngleStyle(parent_style);
   return ON_DimStyle::ContentAngleStyle::Horizontal;
 }
 
 RH_C_FUNCTION void ON_Leader_SetLeaderContentAngleStyle(ON_Leader* dim, const ON_DimStyle* parent_style, ON_DimStyle::ContentAngleStyle angle_style)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetLeaderContentAngleStyle(parent_style, angle_style);
   }
@@ -1468,14 +1468,14 @@ RH_C_FUNCTION void ON_Leader_SetLeaderContentAngleStyle(ON_Leader* dim, const ON
 
 RH_C_FUNCTION ON_DimStyle::ContentAngleStyle ON_Dim_GetDimTextAngleStyle(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimTextAngleStyle(parent_style);
   return ON_DimStyle::ContentAngleStyle::Aligned;
 }
 
 RH_C_FUNCTION void ON_Dim_SetDimTextAngleStyle(ON_Dimension* dim, const ON_DimStyle* parent_style, ON_DimStyle::ContentAngleStyle angle_style)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimTextAngleStyle(parent_style, angle_style);
   }
@@ -1483,14 +1483,14 @@ RH_C_FUNCTION void ON_Dim_SetDimTextAngleStyle(ON_Dimension* dim, const ON_DimSt
 
 RH_C_FUNCTION ON_DimStyle::ContentAngleStyle ON_Dim_GetDimRadialTextAngleStyle(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimRadialTextAngleStyle(parent_style);
   return ON_DimStyle::ContentAngleStyle::Horizontal;
 }
 
 RH_C_FUNCTION void ON_Leader_SetDimRadialTextAngleStyle(ON_Dimension* dim, const ON_DimStyle* parent_style, ON_DimStyle::ContentAngleStyle angle_style)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimRadialTextAngleStyle(parent_style, angle_style);
   }
@@ -1498,14 +1498,14 @@ RH_C_FUNCTION void ON_Leader_SetDimRadialTextAngleStyle(ON_Dimension* dim, const
 
 RH_C_FUNCTION ON::TextOrientation ON_Text_GetTextOrientation(const ON_Text* text, const ON_DimStyle* parent_style)
 {
-  if (text && parent_style)
+  if (text)
     return text->TextOrientation(parent_style);
   return ON::TextOrientation::InPlane;
 }
 
 RH_C_FUNCTION void ON_Text_SetTextOrientation(ON_Text* text, const ON_DimStyle* parent_style, ON::TextOrientation orientation)
 {
-  if (text && parent_style)
+  if (text)
   {
     text->SetTextOrientation(parent_style, orientation);
   }
@@ -1513,14 +1513,14 @@ RH_C_FUNCTION void ON_Text_SetTextOrientation(ON_Text* text, const ON_DimStyle* 
 
 RH_C_FUNCTION ON::TextOrientation ON_Leader_GetTextOrientation(const ON_Leader* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->LeaderTextOrientation(parent_style);
   return ON::TextOrientation::InPlane;
 }
 
 RH_C_FUNCTION void ON_Leader_SetTextOrientation(ON_Leader* dim, const ON_DimStyle* parent_style, ON::TextOrientation orientation)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetLeaderTextOrientation(parent_style, orientation);
   }
@@ -1528,14 +1528,14 @@ RH_C_FUNCTION void ON_Leader_SetTextOrientation(ON_Leader* dim, const ON_DimStyl
 
 RH_C_FUNCTION ON::TextOrientation ON_Dim_GetDimTextOrientation(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimTextOrientation(parent_style);
   return ON::TextOrientation::InPlane;
 }
 
 RH_C_FUNCTION void ON_Dim_SetDimTextOrientation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON::TextOrientation orientation)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimTextOrientation(parent_style, orientation);
   }
@@ -1543,14 +1543,14 @@ RH_C_FUNCTION void ON_Dim_SetDimTextOrientation(ON_Dimension* dim, const ON_DimS
 
 RH_C_FUNCTION ON::TextOrientation ON_Dim_GetDimRadialTextOrientation(const ON_Dimension* dim, const ON_DimStyle* parent_style)
 {
-  if (dim && parent_style)
+  if (dim)
     return dim->DimRadialTextOrientation(parent_style);
   return ON::TextOrientation::InPlane;
 }
 
 RH_C_FUNCTION void ON_Dim_SetDimRadialTextOrientation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON::TextOrientation orientation)
 {
-  if (dim && parent_style)
+  if (dim)
   {
     dim->SetDimRadialTextOrientation(parent_style, orientation);
   }
@@ -1559,14 +1559,14 @@ RH_C_FUNCTION void ON_Dim_SetDimRadialTextOrientation(ON_Dimension* dim, const O
 
 RH_C_FUNCTION bool ON_Annotation_GetTextUnderlined(const ON_Annotation* anno, const ON_DimStyle* parent_style)
 {
-  if (anno && parent_style)
+  if (anno)
     return anno->TextUnderlined(parent_style);
   return false;
 }
 
 RH_C_FUNCTION void ON_Dim_SetTextUnderlined(ON_Annotation* anno, const ON_DimStyle* parent_style, bool underlined)
 {
-  if (anno && parent_style)
+  if (anno)
   {
     anno->SetTextUnderlined(parent_style, underlined);
   }

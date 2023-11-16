@@ -18,6 +18,7 @@ using Rhino.PlugIns;
 using System.Management;
 using System.Reflection.Metadata;
 using System.Reflection;
+using Rhino.FileIO;
 #endif
 
 namespace Rhino.Runtime
@@ -1680,6 +1681,40 @@ namespace Rhino.Runtime
         return names.ToArray();
       }
     }
+
+    /// <summary>
+    /// Get list of form names available for a given printer
+    /// </summary>
+    /// <param name="printerName">name or printer to query</param>
+    /// <returns></returns>
+    /// <since>8.0</since>
+    public static string[] GetPrinterFormNames(string printerName)
+    {
+      using (var names = new InteropWrappers.ClassArrayString())
+      {
+        IntPtr ptrNames = names.NonConstPointer();
+        UnsafeNativeMethods.RHC_GetPrinterFormNames(printerName, ptrNames);
+        return names.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Get the size of a sheet for a given form name / printer combination
+    /// </summary>
+    /// <param name="printerName"></param>
+    /// <param name="formName"></param>
+    /// <param name="widthMillimeters"></param>
+    /// <param name="heightMillimeters"></param>
+    /// <returns>true on success</returns>
+    /// <since>8.0</since>
+    public static bool GetPrinterFormSize(string printerName, string formName, out double widthMillimeters, out double heightMillimeters)
+    {
+      widthMillimeters = 0.0;
+      heightMillimeters = 0.0;
+      UnsafeNativeMethods.RHC_GetPrinterFormSize(printerName, formName, ref widthMillimeters, ref heightMillimeters);
+      return widthMillimeters > 0.0;
+    }
+
 #endif
 
     static Dictionary<string, IPlatformServiceLocator> g_platform_locator = new Dictionary<string, IPlatformServiceLocator>();
@@ -1998,6 +2033,7 @@ namespace Rhino.Runtime
         return psl.IsRunningInWindowsContainer;
       }
     }
+
     /// <summary>
     /// Returns true if the host operating system is in dark mode and Rhino
     /// supports dark mode.
@@ -2761,6 +2797,25 @@ namespace Rhino.Runtime
     }
 
 #if RHINO_SDK
+    /// <summary>
+    /// Returns a description that is similar to the one in the _What command, except for not mentioning units and other attribute data.
+    /// This description is translated in the current Rhino version.
+    /// </summary>
+    /// <since>8.0</since>
+    public static string DescribeGeometry(Rhino.Geometry.GeometryBase geometry)
+    {
+      if (geometry == null) return null;
+
+      IntPtr ptr = geometry.ConstPointer();
+      var log = new TextLog();
+
+      UnsafeNativeMethods.RH_RhinoDescribeGeometry(ptr, 0, log.NonConstPointer());
+
+      return log.ToString();
+    }
+#endif
+
+#if RHINO_SDK
 
     /// <summary>
     /// Used to help record times at startup with the -stopwatch flag to help
@@ -2917,6 +2972,9 @@ namespace Rhino.Runtime
         string state = StringHolder.GetString(statementsAsStringHolder);
         string expr = StringHolder.GetString(expressionAsStringHolder);
         PythonScript py = PythonScript.Create();
+        if (py == null)
+          return 0;
+        
         object eval_result = py.EvaluateExpression(state, expr);
         System.Threading.Thread.CurrentThread.CurrentCulture = current;
         if (null != eval_result)
@@ -3101,10 +3159,14 @@ namespace Rhino.Runtime
         if (doc == null)
           doc = RhinoDoc.ActiveDoc;
         TextFields.Setup(doc, rhinoObject, topLevelRhinoObject, immediateParentObject);
-        // Force the culture to invarient while running the evaluation
+        // Force the culture to invariant while running the evaluation
         var current = System.Threading.Thread.CurrentThread.CurrentCulture;
         System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         PythonScript py = PythonScript.Create();
+        if (py == null)
+          return 0;
+        
+
         string statements = "import clr\nfrom math import *\nfrom Rhino.Runtime.TextFields import *\n";
         object eval_result = py.EvaluateExpression(statements, formula);
         System.Threading.Thread.CurrentThread.CurrentCulture = current;
@@ -3150,7 +3212,8 @@ namespace Rhino.Runtime
                   return stringResult;
               }
 
-              if (annotation != null && formula.StartsWith("Area", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
+              //format area if it doesn't contain a comma which means there's a unit system already being specified in the formula
+              if (annotation != null && formula.StartsWith("Area", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1) && !formula.Contains("\","))
               {
                 string stringResult = Rhino.UI.Localization.FormatArea(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
 

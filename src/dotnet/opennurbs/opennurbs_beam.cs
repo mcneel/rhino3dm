@@ -62,6 +62,35 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Create an extrusion from a 3d curve, a plane and a height.
+    /// </summary>
+    /// <param name="curve">A continuous 3d curve.</param>
+    /// <param name="plane">A plane. The 3d curve is projected to this plane
+    /// and the result is passed to <see cref="Extrusion.SetOuterProfile"/>.
+    /// </param>
+    /// <param name="height">
+    /// If the height &gt; 0, the bottom of the extrusion will be in plane and
+    /// the top will be height units above the plane.
+    /// If the height &lt; 0, the top of the extrusion will be in plane and
+    /// the bottom will be height units below the plane.
+    /// The plane used is the one that is returned from the curve's TryGetPlane function.
+    /// </param>
+    /// <param name="cap">
+    /// If the curve is closed and cap is true, then the resulting extrusion is capped.
+    /// </param>
+    /// <returns>
+    /// If the input is valid, then a new extrusion is returned. Otherwise null is returned
+    /// </returns>
+    /// <since>8.0</since>
+    public static Extrusion Create(Curve curve, Plane plane, double height, bool cap)
+    {
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr ptr_new_extrusion = UnsafeNativeMethods.ON_Extrusion_CreateFrom3dCurve2(ptr_const_curve, ref plane, height, cap);
+      GC.KeepAlive(curve);
+      return IntPtr.Zero == ptr_new_extrusion ? null : new Extrusion(ptr_new_extrusion, null);
+    }
+
+    /// <summary>
     /// Gets an extrusion from a box.
     /// </summary>
     /// <param name="box">IsValid must be true.</param>
@@ -72,17 +101,30 @@ namespace Rhino.Geometry
     {
       if (!box.IsValid) return null;
 
-      var pl = new Polyline(5)
+      var plane = box.Plane;
+      var polyline = new Polyline(5)
       {
-        box.PointAt(0,0,0),
-        box.PointAt(1,0,0),
-        box.PointAt(1,1,0),
-        box.PointAt(0,1,0),
-        box.PointAt(0,0,0),
-      }.ToPolylineCurve();
+        new Point3d(box.X.T1, box.Y.T1, 0.0),
+        new Point3d(box.X.T0, box.Y.T1, 0.0),
+        new Point3d(box.X.T0, box.Y.T0, 0.0),
+        new Point3d(box.X.T1, box.Y.T0, 0.0),
+        new Point3d(box.X.T1, box.Y.T1, 0.0),
+      };
 
-      double height = box.m_dz.Length;
-      return Create(pl, height, cap);
+      using (var pl = polyline.ToPolylineCurve())
+      {
+        pl.SetParameter(0, -box.Y.Length - box.X.Length);
+        pl.SetParameter(1, -box.Y.Length);
+        pl.SetParameter(2, 0.0);
+        pl.SetParameter(3, +box.X.Length);
+        pl.SetParameter(4, +box.X.Length + box.Y.Length);
+
+        var extrusion = new Extrusion();
+        if (!extrusion.SetPathAndUp(plane.Origin + plane.ZAxis * box.Z.T0, plane.Origin + plane.ZAxis * box.Z.T1, plane.YAxis)) return null;
+        if (!extrusion.SetOuterProfile(pl, cap)) return null;
+        if (!extrusion.SetDomain(1, box.Z)) return null;
+        return extrusion;
+      }
     }
 
     /// <summary>

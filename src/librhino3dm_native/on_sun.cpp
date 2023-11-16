@@ -83,7 +83,7 @@ enum class SunSetting : int
   DaylightSavingOn,
   DaylightSavingMinutes,
   Intensity,
-  ShadowIntensity,
+  ShadowIntensity, // ShadowIntensity is currently unused. See [SHADOW_INTENSITY_UNUSED]
   Vector,
   LocalDateTime,
   UTCDateTime,

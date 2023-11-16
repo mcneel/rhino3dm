@@ -938,9 +938,13 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     RenderMaterial = 0x800,
     /// <summary>
-    /// Unused flag
+    /// Section style
     /// </summary>
-    Unused = 0x1000,
+    SectionStyle = 0x1000,
+    /// <summary>
+    /// New Detail On
+    /// </summary>
+    NewDetailOn = 0x2000,
     /// <summary>
     /// Restore all layer properties
     /// </summary>

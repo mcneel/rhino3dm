@@ -7,7 +7,7 @@ namespace Rhino.Geometry
 {
   /// <summary>
   /// </summary>
-  public partial class NurbsMultiMatcher : IDisposable
+  internal partial class NurbsMultiMatcher : IDisposable
   {
     IntPtr m_ptr; // RhinoNurbsMultiMatcher
 

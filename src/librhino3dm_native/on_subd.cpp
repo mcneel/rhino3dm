@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_subd.h")
+RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_plus_subd.h")
 
 
 RH_C_FUNCTION ON_SubDRef* ON_SubDRef_New()
@@ -161,6 +162,167 @@ RH_C_FUNCTION bool ON_SubD_InterpolateSurfacePoints(ON_SubD* subd, int count, /*
   }
   return false;
 }
+#endif
+
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION bool ON_SubD_SetVertexSurfacePoint(ON_SubD* ptrSubD, unsigned int index, ON_3DPOINT_STRUCT value)
+{
+  if (ptrSubD && index > 0)
+    return ptrSubD->SetVertexSurfacePoint(index, ON_3dPoint(value.val));
+  return false;
+}
+#endif
+
+#if !defined(RHINO3DM_BUILD)
+////////////////////////////////////////
+///////////// ON_SubDSurfaceInterpolator
+
+RH_C_FUNCTION ON_SubDSurfaceInterpolator* ON_SubD_SubDSurfaceInterpolator_New()
+{
+  ON_SubDSurfaceInterpolator* pSubDSrfInter = new ON_SubDSurfaceInterpolator();
+  return pSubDSrfInter;
+}
+
+RH_C_FUNCTION void ON_SubD_SubDSurfaceInterpolator_Delete(ON_SubDSurfaceInterpolator* pSubDSrfInter)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    delete pSubDSrfInter;
+  }
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_CreateFromSubD(ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_SubD* subd)
+{
+  if (nullptr != pSubDSrfInter && nullptr != subd)
+  {
+    return pSubDSrfInter->CreateFromSubD(*subd);
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_CreateFromMarkedVertices(ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_SubD* subd, bool bInterplatedVertexRuntimeMark)
+{
+  if (nullptr != pSubDSrfInter && nullptr != subd)
+  {
+    return pSubDSrfInter->CreateFromMarkedVertices(*subd, bInterplatedVertexRuntimeMark);
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_CreateFromSelectedVertices(ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_SubD* subd)
+{
+  if (nullptr != pSubDSrfInter && nullptr != subd)
+  {
+    return pSubDSrfInter->CreateFromSelectedVertices(*subd);
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_CreateFromVertexIdList(ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_SubD* subd, const ON_SimpleArray<unsigned int>* vertexIndices)
+{
+  if (nullptr != pSubDSrfInter && nullptr != subd && nullptr != vertexIndices)
+  {
+    return pSubDSrfInter->CreateFromVertexList(*subd, *vertexIndices);
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION void ON_SubD_SubDSurfaceInterpolator_Clear(ON_SubDSurfaceInterpolator* pSubDSrfInter)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    pSubDSrfInter->Clear();
+  }
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_InterpolatedVertexCount(const ON_SubDSurfaceInterpolator* pSubDSrfInter)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->InterpolatedVertexCount();
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_FixedVertexCount(const ON_SubDSurfaceInterpolator* pSubDSrfInter)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->FixedVertexCount();
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION bool ON_SubD_SubDSurfaceInterpolator_IsInterpolatedVertex(const ON_SubDSurfaceInterpolator* pSubDSrfInter, unsigned int vertexId)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->IsInterpolatedVertex(vertexId);
+  }
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubD_SubDSurfaceInterpolator_Solve(ON_SubDSurfaceInterpolator* pSubDSrfInter, /*ARRAY*/const ON_3dPoint* pSurfacePoints)
+{
+  if (nullptr != pSubDSrfInter && nullptr != pSurfacePoints)
+  {
+    return pSubDSrfInter->Solve(pSurfacePoints);
+  }
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_SubDSurfaceInterpolator_InterpolatedVertexIndex(const ON_SubDSurfaceInterpolator* pSubDSrfInter, unsigned int vertexId)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->InterpolatedVertexIndex(vertexId);
+  }
+  return 0U;
+}
+
+RH_C_FUNCTION ON_UUID ON_SubD_SubDSurfaceInterpolator_ContextId(const ON_SubDSurfaceInterpolator* pSubDSrfInter)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->ContextId();
+  }
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_SubD_SubDSurfaceInterpolator_SetContextId(ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_UUID uuid)
+{
+  if (nullptr != pSubDSrfInter)
+  {
+    return pSubDSrfInter->SetContextId(uuid);
+  }
+}
+
+RH_C_FUNCTION void ON_SubD_SubDSurfaceInterpolator_VertexIdList(const ON_SubDSurfaceInterpolator* pSubDSrfInter, ON_SimpleArray<unsigned int>* pOutVertexIds)
+{
+  if (nullptr != pSubDSrfInter && nullptr != pOutVertexIds)
+  {
+    const ON_SubDComponentList& vCompList{pSubDSrfInter->VertexList()};
+    const unsigned int vCompListCount{vCompList.Count()};
+    pOutVertexIds->SetCount(0);
+    pOutVertexIds->Reserve(vCompListCount);
+    for (unsigned int i = 0; i < vCompListCount; ++i)
+    {
+      pOutVertexIds[i].Append(vCompList[i].VertexPtr().VertexId());
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_SubD_SubDSurfaceInterpolator_Transform(ON_SubDSurfaceInterpolator* pSubDSrfInter, const ON_Xform* xform)
+{
+  if (nullptr != pSubDSrfInter && nullptr != xform)
+  {
+    return pSubDSrfInter->Transform(*xform);
+  }
+}
+
+
+///////////// ON_SubDSurfaceInterpolator
+////////////////////////////////////////
 #endif
 
 enum SubDIntConst : int
@@ -412,16 +574,13 @@ enum OnSubDMeshParameterTypeConsts : int
 {
   smpSmooth = 0,
   smpInteriorCreases = 1,
-  smpConvexCornersAndInteriorCreases = 2
+  smpConvexCornersAndInteriorCreases = 2,
+  smpConvexAndConcaveCornersAndInteriorCreases = 3
 };
 
 RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(enum OnSubDMeshParameterTypeConsts which)
 {
-  // July 28, 2020 Dale Lear writes:
-  //   This function is not right.
-  //   There should not be two values (1 and 2) that return ON_SubDFromMeshParameters::InteriorCreases.
-  //   There is no documentation for the function that calls this, so I cannot determine what the correct fix is.
-  ON_SubDFromMeshParameters* rc = new ON_SubDFromMeshParameters();
+    ON_SubDFromMeshParameters* rc = new ON_SubDFromMeshParameters();
   switch (which)
   {
   case smpSmooth:
@@ -433,6 +592,8 @@ RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(enum OnSubDMesh
   case smpConvexCornersAndInteriorCreases:
     *rc = ON_SubDFromMeshParameters::ConvexCornersAndInteriorCreases;
     break;
+case smpConvexAndConcaveCornersAndInteriorCreases:
+    *rc = ON_SubDFromMeshParameters::ConvexAndConcaveCornersAndInteriorCreases;
   }
   return rc;
 }
@@ -628,8 +789,16 @@ RH_C_FUNCTION void ON_SubDVertex_ControlNetPoint(const ON_SubDVertex* constVerte
 
 RH_C_FUNCTION void ON_SubDVertex_SetControlNetPoint(ON_SubDVertex* vertexPtr, ON_3DPOINT_STRUCT value)
 {
+// 2023-08-24, Pierre, RH-76565: A simple setter should refresh caches everytime.
+  // Use ON_SubDVertex_SetControlNetPoint_ClearCache(ON_SubDVertex* vertexPtr, ON_3DPOINT_STRUCT value, bool bClearNeighborhoodCache) for more control
   if( vertexPtr )
-    vertexPtr->SetControlNetPoint(ON_3dPoint(value.val), false);
+    vertexPtr->SetControlNetPoint(ON_3dPoint(value.val), true);
+}
+
+RH_C_FUNCTION void ON_SubDVertex_SetControlNetPoint_ClearCache(ON_SubDVertex* vertexPtr, ON_3DPOINT_STRUCT value, bool bClearNeighborhoodCache)
+{
+  if( vertexPtr )
+    vertexPtr->SetControlNetPoint(ON_3dPoint(value.val), bClearNeighborhoodCache);
 }
 
 RH_C_FUNCTION int ON_SubDVertex_EdgeCount(const ON_SubDVertex* constVertexPtr)
@@ -694,13 +863,11 @@ RH_C_FUNCTION void ON_SubDVertex_SetVertexTag(ON_SubDVertex* vertexPtr, const ON
     vertexPtr->m_vertex_tag = tag;
 }
 
-
 RH_C_FUNCTION void ON_SubDVertex_SurfacePoint(const ON_SubDVertex* constVertexPtr, ON_3dPoint* value)
 {
   if (value && constVertexPtr)
     *value = constVertexPtr->SurfacePoint();
 }
-
 
 
 ///////////////////// ON_SubDEdge
@@ -881,6 +1048,30 @@ RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constF
   if (constFace && pPointOut)
   {
     *pPointOut = constFace->SurfaceCenterPoint();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_ControlNetCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
+{
+  if (constFace && pPointOut)
+  {
+    *pPointOut = constFace->ControlNetCenterPoint();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_SurfaceCenterNormal(const ON_SubDFace* constFace, ON_3dVector* vNormalOut)
+{
+  if (constFace && vNormalOut)
+  {
+    *vNormalOut = constFace->SurfaceCenterNormal();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_ControlNetCenterNormal(const ON_SubDFace* constFace, ON_3dVector* vNormalOut)
+{
+  if (constFace && vNormalOut)
+  {
+    *vNormalOut = constFace->ControlNetCenterNormal();
   }
 }
 

@@ -738,10 +738,13 @@ namespace Rhino.Geometry
     /// equal to surface_points[]
     /// </summary>
     /// <param name="surfacePoints">
-    /// point for limit surface to interpolate. surface_points[i] is the
+    /// Points for limit surface to interpolate. surface_points[i] is the
     /// location for the i-th vertex returned by SubVertexIterator vit(this)
     /// </param>
-    /// <returns></returns>
+    /// <returns>True on success</returns>
+    /// <seealso cref="SubD.SetVertexSurfacePoint(uint, Point3d)"/>
+    /// <seealso cref="SubDVertex.SurfacePoint()"/>
+    /// <seealso cref="SubDSurfaceInterpolator"/>
     /// <since>7.1</since>
     public bool InterpolateSurfacePoints(Point3d[] surfacePoints)
     {
@@ -749,7 +752,364 @@ namespace Rhino.Geometry
       return UnsafeNativeMethods.ON_SubD_InterpolateSurfacePoints(ptrThis, surfacePoints.Length, surfacePoints);
     }
 #endif
+
+#if RHINO_SDK
+    /// <summary>
+    /// Modifies the SubD so that the SubD vertex limit surface points of the listed vertices are
+    /// equal to surface_points[].
+    /// </summary>
+    /// <param name="vertexIndices">
+    /// Ids of the vertices to interpolate. Other vertices remain fixed.
+    /// </param>
+    /// <param name="surfacePoints">
+    /// Points for limit surface to interpolate. surface_points[i] is the
+    /// location for the vertex returned by this.Vertices.Find(vertexIndices[i]).
+    /// </param>
+    /// <returns>True on success</returns>
+    /// <seealso cref="SubD.SetVertexSurfacePoint(uint, Point3d)"/>
+    /// <seealso cref="SubDVertex.SurfacePoint()"/>
+    /// <seealso cref="SubDSurfaceInterpolator"/>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public bool InterpolateSurfacePoints(uint[] vertexIndices, Point3d[] surfacePoints)
+    {
+      SubDSurfaceInterpolator interpolator = SubDSurfaceInterpolator.CreateFromVertexIdList(this, vertexIndices, out uint freeVertexCount);
+      if (freeVertexCount != vertexIndices.Length)
+        return false;
+      return interpolator.Solve(surfacePoints);
+    }
+
+    /// <summary>
+    /// Set the location of a single vertex surface point.
+    /// This function is not suitable for setting the locations of multiple vertex surface points that are topologically near to each other.
+    /// </summary>
+    /// <param name="vertexIndex">
+    /// Index of the vertex to modify
+    /// </param>
+    /// <param name="surfacePoint">
+    /// New surface point location for that vertex
+    /// </param>
+    /// <returns>
+    /// True if a vertex was modified, false otherwise.
+    /// </returns>
+    /// <seealso cref="SubD.InterpolateSurfacePoints(Point3d[])"/>
+    /// <seealso cref="SubD.InterpolateSurfacePoints(uint[], Point3d[])"/>
+    /// <seealso cref="SubDVertex.SurfacePoint()"/>
+    /// <seealso cref="SubDSurfaceInterpolator"/>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public bool SetVertexSurfacePoint(uint vertexIndex, Point3d surfacePoint)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SetVertexSurfacePoint(ptrThis, vertexIndex, surfacePoint);
+    }
+#endif
   }
+
+#if RHINO_SDK
+  /// <summary>
+  /// Interpolate some or all of the vertices limit surface positions in a SubD to specified locations.
+  /// NB: It is recommended not to use these methods to interpolate more than 1000 vertices.
+  /// <seealso cref="SubD.SetVertexSurfacePoint(uint, Point3d)"/>
+  /// <seealso cref="SubD.InterpolateSurfacePoints(Point3d[])"/>
+  /// <seealso cref="SubD.InterpolateSurfacePoints(uint[], Point3d[])"/>
+  /// <seealso cref="SubDVertex.SurfacePoint()"/>
+  /// </summary>
+  public partial class SubDSurfaceInterpolator : IDisposable
+  {
+    IntPtr m_ptr;  // ON_SubDSurfaceInterpolator
+    internal IntPtr ConstPointer() { return m_ptr; }
+    internal IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initialize an empty SubDSurfaceInterpolator.
+    /// </summary>
+    /// <since>8.0</since>
+    public SubDSurfaceInterpolator()
+    {
+      m_ptr = UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_New();
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    /// <since>8.0</since>
+    ~SubDSurfaceInterpolator()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    /// <since>8.0</since>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Interpolation requires building a solver.
+    /// We estimate that this solver will work in reasonnable time if the number of
+    /// interplolated vertices is smaller than MaximumInterpolatedVertexCount.
+    /// However, given sufficient time, memory, and CPU resources, the code will work with
+    /// any value.
+    /// In version 8.0, this value is 1000.
+    /// </summary>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public static uint MaximumRecommendedInterpolatedVertexCount
+    {
+      get
+      {
+        return (uint)(SubDSurfaceInterpolator.MaximumCounts.MaximumRecommendedInterpolatedVertexCount); 
+      } 
+    }
+
+    /// <summary>
+    /// Create an interpolator where all the vertices in the SubD are free vertices in the
+    /// linear system used for interpolation (i.e. can move as a result of the
+    /// interpolation, and can receive an interpolation target location).
+    /// </summary>
+    /// <param name="subd">The SubD to use for interpolation</param>
+    /// <param name="freeVertexCount">The number of free vertices in the system</param>
+    /// <returns>A new SubDSurfaceInterpolator</returns>
+    /// <remarks>
+    /// Sets <see cref="ContextId"/> to the Guid of the Rhino SubD object for subd.
+    /// </remarks>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public static SubDSurfaceInterpolator CreateFromSubD(SubD subd, out uint freeVertexCount)
+    {
+      SubDSurfaceInterpolator interpolator = new SubDSurfaceInterpolator();
+      IntPtr nonConstPtrThis = interpolator.NonConstPointer();
+      interpolator.ContextId = subd.ParentRhinoObject().Id;
+      freeVertexCount = UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_CreateFromSubD(nonConstPtrThis, subd.NonConstPointer());
+      return interpolator;
+    }
+
+    /// <summary>
+    /// Create an interpolator where all the marked vertices (unmarked if
+    /// interpolatedVerticesMark is false) in the SubD are free vertices in the linear
+    /// system used for interpolation, and the unmarked (marked if interpolatedVerticesMark
+    /// is false) are fixed to their initial positions. Free vertices are can move as a
+    /// result of the interpolation, and can receive an interpolation target location.
+    /// </summary>
+    /// <param name="subd">The SubD to use for interpolation</param>
+    /// <param name="interpolatedVerticesMark">If True, marked vertices will be considered free, and unmarked vertices will be fixed.</param>
+    /// <param name="freeVertexCount">The number of free vertices in the system</param>
+    /// <returns>A new SubDSurfaceInterpolator</returns>
+    /// <remarks>
+    /// Sets <see cref="ContextId"/> to the Guid of the Rhino SubD object for subd.
+    /// </remarks>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public static SubDSurfaceInterpolator CreateFromMarkedVertices(SubD subd, bool interpolatedVerticesMark, out uint freeVertexCount)
+    {
+      SubDSurfaceInterpolator interpolator = new SubDSurfaceInterpolator();
+      IntPtr nonConstPtrThis = interpolator.NonConstPointer();
+      interpolator.ContextId = subd.ParentRhinoObject().Id;
+      freeVertexCount = UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_CreateFromMarkedVertices(nonConstPtrThis, subd.NonConstPointer(), interpolatedVerticesMark);
+      return interpolator;
+    }
+
+    /// <summary>
+    /// Create an interpolator where all the selected vertices in the SubD are free
+    /// vertices in the linear system used for interpolation, and the unselected are fixed
+    /// to their initial positions. Free vertices are can move as a result of the
+    /// interpolation, and can receive an interpolation target location.
+    /// </summary>
+    /// <param name="subd">The SubD to use for interpolation</param>
+    /// <param name="freeVertexCount">The number of free vertices in the system</param>
+    /// <returns>A new SubDSurfaceInterpolator</returns>
+    /// <remarks>
+    /// Sets <see cref="ContextId"/> to the Guid of the Rhino SubD object for subd.
+    /// </remarks>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public static SubDSurfaceInterpolator CreateFromSelectedVertices(SubD subd, out uint freeVertexCount)
+    {
+      SubDSurfaceInterpolator interpolator = new SubDSurfaceInterpolator();
+      IntPtr nonConstPtrThis = interpolator.NonConstPointer();
+      interpolator.ContextId = subd.ParentRhinoObject().Id;
+      freeVertexCount = UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_CreateFromSelectedVertices(nonConstPtrThis, subd.NonConstPointer());
+      return interpolator;
+    }
+
+    /// <summary>
+    /// Create an interpolator where all the listed vertices in the SubD are free
+    /// vertices in the linear system used for interpolation, and the unselected are fixed
+    /// to their initial positions. Free vertices are can move as a result of the
+    /// interpolation, and can receive an interpolation target location.
+    /// </summary>
+    /// <param name="subd">The SubD to use for interpolation</param>
+    /// <param name="vertexIndices">Indices of the vertices to be interpolated</param>
+    /// <param name="freeVertexCount">The number of free vertices in the system</param>
+    /// <returns>A new SubDSurfaceInterpolator</returns>
+    /// <remarks>
+    /// Sets <see cref="ContextId"/> to the Guid of the Rhino SubD object for subd.
+    /// </remarks>
+    /// <since>8.0</since>
+    [CLSCompliant(false)]
+    public static SubDSurfaceInterpolator CreateFromVertexIdList(SubD subd, IEnumerable<uint> vertexIndices, out uint freeVertexCount)
+    {
+      SubDSurfaceInterpolator interpolator = new SubDSurfaceInterpolator();
+      IntPtr nonConstPtrThis = interpolator.NonConstPointer();
+      interpolator.ContextId = subd.ParentRhinoObject().Id;
+      using (var simpleArray = new SimpleArrayUint(vertexIndices))
+      {
+        IntPtr ptrConstArray = simpleArray.ConstPointer();
+        freeVertexCount = UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_CreateFromVertexIdList(nonConstPtrThis, subd.NonConstPointer(), ptrConstArray);
+      }
+      return interpolator;
+    }
+
+    /// <summary>
+    /// Destroys the information needed to solve the interpolation.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Clear()
+    {
+      IntPtr nonConstPtrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_Clear(nonConstPtrThis);
+    }
+
+    /// <returns>Number of vertices with interpolated surface points.</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public uint InterpolatedVertexCount()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_InterpolatedVertexCount(constPtrThis);
+    }
+
+    /// <returns>Number of vertices with fixed surface points.</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public uint FixedVertexCount()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_FixedVertexCount(constPtrThis);
+    }
+
+    /// <returns>True if the vertex surface point is being interpolated.</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public bool IsInterpolatedVertex(uint vertexId)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_IsInterpolatedVertex(constPtrThis, vertexId);
+    }
+
+    /// <returns>True if the vertex surface point is being interpolated.</returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public bool IsInterpolatedVertex(SubDVertex vertex)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_IsInterpolatedVertex(constPtrThis, vertex.Id);
+    }
+
+    /// <summary>
+    /// Solve the interpolation system, given target interpolation locations for the free
+    /// vertices in the system. Updates the subd referenced by this system so the corresponding
+    /// surface points are at the locations given by surfacePoints.
+    /// </summary>
+    /// <param name="surfacePoints">
+    /// The limit surface locations for the interpolated vertices. The number of desired locations
+    /// needs to match the <see cref="InterpolatedVertexCount()"/>.
+    /// </param>
+    /// <returns>True if a solution was found.</returns>
+    /// <since>8.0</since>
+    public bool Solve(Point3d[] surfacePoints)
+    {
+      IntPtr nonConstPtrThis = NonConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_Solve(nonConstPtrThis, surfacePoints);
+    }
+
+    /// <returns>
+    /// If vertex is an interpolated vertex, returns the index of the vertex in the array returned
+    /// by <see cref="VertexIdList()"/>. Otherwise, returns ON_UNSET_UINT_INDEX.
+    /// </returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public uint InterpolatedVertexIndex(uint vertexId)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_InterpolatedVertexIndex(constPtrThis, vertexId);
+    }
+
+    /// <summary>
+    /// The context assigned id. This id is provided for applications using
+    /// ON_SubDSurfaceInterpolator. It is not inspected or used in any part of the interpolation
+    /// setup or calculations.
+    /// </summary>
+    /// <remarks>
+    /// In Rhino, when an interpolator is being used to modify a CRhinoSubDObject, this id
+    /// is often the Rhino object id.
+    /// </remarks>
+    /// <since>8.0</since>
+    public Guid ContextId
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_ContextId(constPtrThis);
+      }
+      set
+      {
+        IntPtr nonConstPtrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_SetContextId(nonConstPtrThis, value);
+      }
+    }
+
+    /// <returns>
+    /// List of indices of the vertices with interpolated surface points. Vertices that are not in
+    /// this vertex list have unchanged control net points.
+    /// </returns>
+    /// <since>8.0</since>
+    [CLSCompliant(false), ConstOperation]
+    public uint[] VertexIdList()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      SimpleArrayUint vertexIds = new SimpleArrayUint();
+      UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_VertexIdList(constPtrThis, vertexIds.NonConstPointer());
+      return vertexIds.ToArray();
+    }
+
+    /// <summary>
+    /// Apply an arbitrary transformation to the target interpolation points.
+    /// </summary>
+    /// <param name="transform">The transformation to apply.</param>
+    /// <since>8.0</since>
+    public void Transform(Transform transform)
+    {
+      IntPtr nonConstPtrThis = NonConstPointer();
+      UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_Transform(nonConstPtrThis, ref transform);
+    }
+  }
+#endif
+
+
 
   /// <summary>
   /// Options used for creating a SubD
@@ -808,6 +1168,21 @@ namespace Rhino.Geometry
       get
       {
         return new SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts.ConvexCornersAndInteriorCreases);
+      }
+    }
+
+    /// <summary>
+    /// Look for convex corners at sub-D vertices with 2 edges that have an
+    /// included angle &lt;= 90 degrees.
+    /// Look for concave corners at sub-D vertices with 3 edge that have an
+    /// included angle &gt;= 270 degrees.
+    /// </summary>
+    /// <since>8.0</since>
+    public static SubDCreationOptions ConvexAndConcaveCornersAndInteriorCreases
+    {
+      get
+      {
+        return new SubDCreationOptions(UnsafeNativeMethods.OnSubDMeshParameterTypeConsts.ConvexAndConcaveCornersAndInteriorCreases);
       }
     }
 
@@ -1362,8 +1737,74 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// 
+    /// The face's control net center point is the average of the face's
+    /// vertex control net points. This is the same point as the face's
+    /// subdivision point.
     /// </summary>
+    /// <returns>
+    /// The average of the face's vertex control net points
+    /// </returns>
+    /// <since>8.0</since>
+    public Point3d ControlNetCenterPoint
+    {
+      get
+      {
+        Point3d res = Point3d.Unset;
+        var const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_ControlNetCenterPoint(const_face_ptr, ref res);
+        return res;
+      }
+    }
+
+    /// <summary>
+    /// Get the limit surface normal vector at the center of the face.
+    /// </summary>
+    /// <returns>
+    /// Limit surface normal vector at the face's center. 
+    /// </returns>
+    /// <since>8.0</since>
+    public Vector3d SurfaceCenterNormal
+    {
+      get
+      {
+        Vector3d res = Vector3d.Unset;
+        var const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterNormal(const_face_ptr, ref res);
+        return res;
+      }
+    }
+
+    /// <summary>
+    /// When the face's control net polygon is planar, the face's
+    /// control net normal is a unit vector perpendicular to the plane
+    /// that points outwards. If the control net polygon is not
+    /// planar, the control net normal is control net normal is a unit
+    /// vector that is the average of the control polygon's corner normals.
+    /// </summary>
+    /// <returns>
+    /// A unit vector that is normal to planar control net polygons and a good
+    /// compromise for nonplanar control net polygons.
+    /// </returns> 
+    /// <since>8.0</since>
+    public Vector3d ControlNetCenterNormal
+    {
+      get
+      {
+        Vector3d res = Vector3d.Unset;
+        var const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_ControlNetCenterNormal(const_face_ptr, ref res);
+        return res;
+      }
+    }
+
+    /// <summary>
+    /// Get the limit surface tangent plane at the center of the face. 
+    /// The plane's origin is the point on the limit surface at the center of the face.
+    /// The plane's z axis is the limit surface normal vector at the center of the face.
+    /// </summary>
+    /// <returns>
+    /// Limit surface tanget plane at the face's center. 
+    /// </returns>
     /// <since>8.0</since>
     public Plane SurfaceCenterFrame
     {
@@ -1377,8 +1818,16 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// 
+    /// The face's control net center frame is a plane 
+    /// with normal equal to ControlNetCenterNormal
+    /// and origin equal to ControlNetCenterPoint. 
+    /// The x and y axes of the frame have no predictable relationship 
+    /// to the face or SubD control net topology.
     /// </summary>
+    /// <returns>
+    /// A plane with unit normal equal to ControlNetCenterNormal
+    /// and origin equal to ControlNetCenterPoint.
+    /// </returns> 
     /// <since>8.0</since>
     public Plane ControlNetCenterFrame
     {
@@ -1465,6 +1914,12 @@ namespace Rhino.Geometry
     /// <summary>
     /// Location of the "control net" point that this SubDVertex represents
     /// </summary>
+    /// <remarks>
+    /// The setter of this property will refresh the neighborhood cache around the vertex 
+    /// everytime it is called. This is not efficient if you have multiple vertices to
+    /// modify. In that case, call vertex.SetControlNetPoint(position, false) for all the
+    /// vertices you want to modify, then call subd.ClearEvaluationCache()
+    /// </remarks>
     /// <since>7.0</since>
     public Point3d ControlNetPoint
     {
@@ -1625,6 +2080,10 @@ namespace Rhino.Geometry
     /// The SubD surface point
     /// </summary>
     /// <returns></returns>
+    /// <seealso cref="SubD.SetVertexSurfacePoint(uint, Point3d)"/>
+    /// <seealso cref="SubD.InterpolateSurfacePoints(Point3d[])"/>
+    /// <seealso cref="SubD.InterpolateSurfacePoints(uint[], Point3d[])"/>
+    /// <seealso cref="SubDSurfaceInterpolator"/>
     /// <since>7.1</since>
     public Point3d SurfacePoint()
     {
@@ -1632,6 +2091,40 @@ namespace Rhino.Geometry
       Point3d rc = default(Point3d);
       UnsafeNativeMethods.ON_SubDVertex_SurfacePoint(const_vertex_ptr, ref rc);
       return rc;
+    }
+
+
+    /// <summary>
+    /// Change the location of the "control net" point that this SubDVertex represents
+    /// </summary>
+    /// <param name="position">
+    /// New position for the vertex' control net point.
+    /// </param>
+    /// <param name="bClearNeighborhoodCache">
+    /// If true, clear the evaluation cache in the faces around the modified vertex.
+    /// </param>
+    /// <returns>
+    /// true if the vertex' control net point was modified.
+    /// </returns>
+    /// <remarks>
+    /// This method is provided to be able to set multiple control vertices, without clearing
+    /// the neighborhood cache everytime as the ControlNetPoint property setter does. When you
+    /// are done modifying your SubD, call subd.ClearEvaluationCache() to refresh
+    /// all caches.
+    /// </remarks>
+    /// <since>8.0</since>
+    public bool SetControlNetPoint(Point3d position, bool bClearNeighborhoodCache)
+    {
+      if (ControlNetPoint != position)
+      {
+        IntPtr ptr_vertex = NonConstPointer();
+        UnsafeNativeMethods.ON_SubDVertex_SetControlNetPoint_ClearCache(ptr_vertex, position, bClearNeighborhoodCache);
+        return true;
+      }
+      else
+      {
+        return false;
+      }
     }
   }
 
@@ -1776,7 +2269,7 @@ namespace Rhino.Geometry
 namespace Rhino.Geometry.Collections
 {
   /// <summary>
-  /// Provides access to the vertices and vertex-related functionality of a SubD
+  /// Provides access to all the vertices and vertex-related functionality of a SubD
   /// </summary>
   public class SubDVertexList
   {

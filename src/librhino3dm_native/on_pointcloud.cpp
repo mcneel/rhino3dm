@@ -425,58 +425,13 @@ RH_C_FUNCTION bool ON_PointCloud_RemovePoint(ON_PointCloud* pPointCloud, int ind
 }
 
 // 24-Feb-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-62983
+// 22-Aug-2023 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-76488
 RH_C_FUNCTION int ON_PointCloud_RemoveRange(ON_PointCloud* pPointCloud, const ON_SimpleArray<int>* pConstIndices)
 {
   int rc = 0;
   if (pPointCloud && pConstIndices && pConstIndices->Count() > 0)
-  {
-    // Sort and cull
-    ON_SimpleArray<int> indices(pConstIndices->Count());
-    indices.Append(pConstIndices->Count(), pConstIndices->Array());
-    indices.QuickSortAndRemoveDuplicates(ON_CompareDecreasing<int>);
-
-    for (int i = 0; i < indices.Count(); i++)
-    {
-      const int index = indices[i];
-      if (index >= 0 && index < pPointCloud->m_P.Count())
-      {
-        // Remove point
-        const int old_count = pPointCloud->m_P.Count();
-        pPointCloud->m_P.Remove(index);
-        rc++;
-
-        // Remove normal
-        if (old_count == pPointCloud->m_N.Count())
-          pPointCloud->m_N.Remove(index);
-
-        // Remove color
-        if (old_count == pPointCloud->m_C.Count())
-          pPointCloud->m_C.Remove(index);
-
-        // Remove extra
-        if (old_count == pPointCloud->m_V.Count())
-          pPointCloud->m_V.Remove(index);
-
-        // Remove hidden
-        if (old_count == pPointCloud->m_H.Count())
-          pPointCloud->m_H.Remove(index);
-      }
-    }
-
-    if (rc > 0)
-    {
-      pPointCloud->m_hidden_count = 0;
-      for (int i = 0; i < pPointCloud->m_H.Count(); i++)
-      {
-        if (pPointCloud->m_H[i])
-          pPointCloud->m_hidden_count++;
-      }
-
-      pPointCloud->InvalidateBoundingBox();
-    }
-  }
-
-  return rc;
+  rc = pPointCloud->RemoveRange(pConstIndices->Count(), pConstIndices->Array());
+      return rc;
 }
 
 RH_C_FUNCTION bool ON_PointCloud_AppendPoint1(ON_PointCloud* pPointCloud, ON_3DPOINT_STRUCT point)

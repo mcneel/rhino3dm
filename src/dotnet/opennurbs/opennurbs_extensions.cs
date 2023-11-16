@@ -2916,6 +2916,58 @@ namespace Rhino.FileIO
       return UnsafeNativeMethods.ONX_Model_ObjectTable_AddAngularDimension(ptr_this, ptr_const_dim, ptr_const_atts);
     }
 
+    /// <summary>
+    /// Adds an ordinate dimension object to the 3dm file object table.
+    /// </summary>
+    /// <param name="dimension">Dimension object to add.</param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.32</since>
+    public Guid AddOrdinateDimension(OrdinateDimension dimension)
+    {
+      return AddOrdinateDimension(dimension, null);
+    }
+
+    /// <summary>
+    /// Adds an ordinate dimension object to the 3dm file object table.
+    /// </summary>
+    /// <param name="dimension">Dimension object to add.</param>
+    /// <param name="attributes">Attributes to apply to dimension.</param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.32</since>
+    public Guid AddOrdinateDimension(OrdinateDimension dimension, ObjectAttributes attributes)
+    {
+      IntPtr ptr_const_dim = dimension.ConstPointer();
+      IntPtr ptr_const_atts = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr ptr_this = m_parent.NonConstPointer();
+      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddOrdinateDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+    }
+
+    /// <summary>
+    /// Adds a radial dimension object to the 3dm file object table.
+    /// </summary>
+    /// <param name="dimension">Dimension object to add.</param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.32</since>
+    public Guid AddRadialDimension(RadialDimension dimension)
+    {
+      return AddRadialDimension(dimension, null);
+    }
+
+    /// <summary>
+    /// Adds a radial dimension object to the 3dm file object table.
+    /// </summary>
+    /// <param name="dimension">Dimension object to add.</param>
+    /// <param name="attributes">Attributes to apply to dimension.</param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>7.32</since>
+    public Guid AddRadialDimension(RadialDimension dimension, ObjectAttributes attributes)
+    {
+      IntPtr ptr_const_dim = dimension.ConstPointer();
+      IntPtr ptr_const_atts = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr ptr_this = m_parent.NonConstPointer();
+      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddRadialDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+    }
+
     /// <summary>Adds a line object to Rhino.</summary>
     /// <param name="from">A line start point.</param>
     /// <param name="to">A line end point.</param>
@@ -3866,19 +3918,57 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Easy way to add a layer to the model
+    /// Easy way to add a new layer to the model.
     /// </summary>
-    /// <param name="name">new layer name</param>
-    /// <param name="color">new layer color</param>
+    /// <param name="name">Layer name.</param>
+    /// <param name="color">Layer color.</param>
     /// <returns>
-    /// If layer_name is valid, the layer's index (>=0) is returned. Otherwise,
-    /// RhinoMath.UnsetIntIndex is returned.
+    /// The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
     /// </returns>
+    /// <remarks>
+    /// Note, the layer name will be modified as needed in the model and manifest.
+    /// </remarks>
     /// <since>7.6</since>
     public int AddLayer(string name, System.Drawing.Color color)
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
-      int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb());
+      int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb(), false);
+      return index;
+    }
+
+    /// <summary>
+    /// Add a new layer to the model.
+    /// </summary>
+    /// <param name="name">Layer name.</param>
+    /// <param name="color">Layer color.</param>
+    /// <param name="parentId">The id of the parent layer, can be Guid.Empty.</param>
+    /// <returns>
+    /// The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+    /// </returns>
+    /// <since>7.30</since>
+    public int AddLayer(string name, System.Drawing.Color color, System.Guid parentId)
+    {
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      int index = UnsafeNativeMethods.ONX_Model_AddLayer2(ptrFile3dm, name, color.ToArgb(), parentId);
+      return index;
+    }
+
+    /// <summary>
+    /// Easy way to add a default layer to the model.
+    /// </summary>
+    /// <param name="name">Layer name.</param>
+    /// <param name="color">Layer color.</param>
+    /// <returns>
+    /// The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+    /// </returns>
+    /// <remarks>
+    /// Note, the layer name will be modified as needed in the model and manifest.
+    /// </remarks>
+    /// <since>7.30</since>
+    public int AddDefaultLayer(string name, System.Drawing.Color color)
+    {
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb(), true);
       return index;
     }
 

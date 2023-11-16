@@ -31,6 +31,7 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(pLinetype);
     }
 
+    /// <since>8.0</since>
     public Linetype(Linetype other) : base()
     {
       IntPtr pOther = other.ConstPointer();
@@ -706,8 +707,10 @@ namespace Rhino.DocObjects.Tables
       get
       {
         var rc = FindIndex(index);
-        if (null == rc)
-          throw new IndexOutOfRangeException();
+        // https://mcneel.myjetbrains.com/youtrack/issue/RH-77124
+        // Commenting out for now
+        //if (null == rc)
+        //  throw new IndexOutOfRangeException();
         return rc;
       }
     }

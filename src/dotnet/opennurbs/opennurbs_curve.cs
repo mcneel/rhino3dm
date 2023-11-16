@@ -4480,7 +4480,7 @@ namespace Rhino.Geometry
       double cLength = GetLength();
       if (IsClosed || length >= cLength)
         return null;
-      if (side == CurveEnd.Both && length >= 2.0 * cLength)
+      if (side == CurveEnd.Both && 2.0 * length >= cLength)
         return null;
 
       double t0 = Domain[0];

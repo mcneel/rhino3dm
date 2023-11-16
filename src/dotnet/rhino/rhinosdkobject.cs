@@ -2554,7 +2554,7 @@ namespace Rhino.DocObjects
         }
 
         m_edited_material_index = Attributes.MaterialIndex;
-        m_edited_material = value.SimulatedMaterial(RenderTexture.TextureGeneration.Allow);
+        m_edited_material = value.ToMaterial(RenderTexture.TextureGeneration.Allow);
 
         m_edited_material.RenderMaterialInstanceId = value.Id;
 
@@ -3000,6 +3000,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="history">The history record to set for the object</param>
     /// <returns>true if successful</returns>
+    /// <since>8.0</since>
     public bool SetHistory(HistoryRecord history)
     {
       var p_this = NonConstPointer();

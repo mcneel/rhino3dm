@@ -503,6 +503,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Helper for access to the repeat value encoded in UvwTransform
     /// </summary>
+    /// <since>8.0</since>
     public Vector2d Repeat
     {
       get
@@ -522,6 +523,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Helper for access to the offset value encoded in UvwTransform
     /// </summary>
+    /// <since>8.0</since>
     public Vector2d Offset
     {
       get
@@ -541,6 +543,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Helper for access to the rotation value encoded in UvwTransform
     /// </summary>
+    /// <since>8.0</since>
     public double Rotation
     {
       get

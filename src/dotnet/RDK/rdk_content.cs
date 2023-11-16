@@ -3320,7 +3320,7 @@ namespace Rhino.Render
     {
       IntPtr pPreviewSceneServer = UnsafeNativeMethods.Rdk_RenderContent_NewPreviewSceneServer(ConstPointer(), ssd.CppPointer);
       if (pPreviewSceneServer != IntPtr.Zero)
-        return new PreviewSceneServer(pPreviewSceneServer);
+        return new PreviewSceneServer(ssd, pPreviewSceneServer);
 
       return null;
     }

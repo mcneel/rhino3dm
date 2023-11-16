@@ -61,11 +61,16 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static Bitmap CaptureToBitmap(ViewCaptureSettings settings)
     {
+      return CaptureToBitmap(settings, false, false);
+    }
+
+    internal static Bitmap CaptureToBitmap(ViewCaptureSettings settings, bool forPrinting, bool preview)
+    {
       using (var dib = new Runtime.InteropWrappers.RhinoDib())
       {
         IntPtr dib_pointer = dib.NonConstPointer;
         IntPtr ptrConstPrintInfo = settings.ConstPointer();
-        if (UnsafeNativeMethods.CRhinoPrintInfo_Capture(dib_pointer, ptrConstPrintInfo))
+        if (UnsafeNativeMethods.CRhinoPrintInfo_Capture(dib_pointer, ptrConstPrintInfo, forPrinting, preview))
         {
           var bitmap = dib.ToBitmap();
           return bitmap;
@@ -74,6 +79,7 @@ namespace Rhino.Display
       }
       return null;
     }
+
 
     /// <since>6.0</since>
     public static System.Xml.XmlDocument CaptureToSvg(ViewCaptureSettings settings)
@@ -121,13 +127,30 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public static bool SendToPrinter(string printerName, ViewCaptureSettings[] settings)
     {
+      return SendToPrinter(printerName, settings, 1);
+    }
+
+    /// <summary>
+    /// Send a list of view capture settings to a printer. Each setting
+    /// represents a single page.
+    /// </summary>
+    /// <param name="printerName"></param>
+    /// <param name="settings"></param>
+    /// <param name="copies">number of copies to print</param>
+    /// <returns>true on success</returns>
+    /// <since>8.0</since>
+    public static bool SendToPrinter(string printerName, ViewCaptureSettings[] settings, int copies)
+    {
+      if (copies < 1)
+        return false;
+
       IntPtr pPrintInfoArray = UnsafeNativeMethods.CRhinoPrintInfoArray_New();
-      foreach(var setting in settings)
+      foreach (var setting in settings)
       {
         IntPtr ptrSetting = setting.ConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfoArray_AddItem(pPrintInfoArray, ptrSetting);
       }
-      bool success = UnsafeNativeMethods.CRhinoPrintInfo_Print(printerName, pPrintInfoArray);
+      bool success = UnsafeNativeMethods.CRhinoPrintInfo_Print(printerName, pPrintInfoArray, copies);
       UnsafeNativeMethods.CRhinoPrintInfoArray_Delete(pPrintInfoArray);
       GC.KeepAlive(settings);
       return success;
@@ -544,8 +567,8 @@ namespace Rhino.Display
 
 
   /// <summary>
-  /// Holds the information required to generate high resolution output of a
-  /// RhinoViewport.  This is used for generating paper prints or image files
+  /// Holds information required to generate high resolution output of a
+  /// RhinoViewport. This is used for generating paper prints or image files
   /// </summary>
   public partial class ViewCaptureSettings : IDisposable
   {
@@ -1219,26 +1242,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, worldPoint1, worldPoint2, false);
     }
 
-    public enum WireThicknessMode : byte
-    {
-      UsePlotWeight = 0,
-      UseLinetypeWidth = 1,
-    }
-
-    public WireThicknessMode WireThicknessUsage
-    {
-      get
-      {
-        bool useplotweight = GetBool(UnsafeNativeMethods.PrintInfoBool.UsePlotWeight);
-        return useplotweight ? WireThicknessMode.UsePlotWeight : WireThicknessMode.UseLinetypeWidth;
-      }
-      set
-      {
-        bool useplotweight = value == WireThicknessMode.UsePlotWeight;
-        SetBool(UnsafeNativeMethods.PrintInfoBool.UsePlotWeight, useplotweight);
-      }
-    }
-
+    /// <since>8.0</since>
     public bool LinetypeWidthUnitsArePageLengths
     {
       get
@@ -1251,19 +1255,21 @@ namespace Rhino.Display
       }
     }
 
-    public double PixelToMillimeterLinetypeScale
+    public bool Load(string name, PersistentSettings settings)
     {
-      get
-      {
-        return GetDouble(UnsafeNativeMethods.PrintInfoDouble.PixelToMillimeterLinetypeScale);
-      }
-      set
-      {
-        SetDouble(UnsafeNativeMethods.PrintInfoDouble.PixelToMillimeterLinetypeScale, value);
-      }
+      IntPtr ptr_this = NonConstPointer();
+      string command_name = settings.Key;
+      return UnsafeNativeMethods.CRhinoPrintInfo_Load(ptr_this, command_name, name);
     }
 
-#region IDisposable implementation
+    public void Save(string name, PersistentSettings settings)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      string command_name = settings.Key;
+      UnsafeNativeMethods.CRhinoPrintInfo_Save(const_ptr_this, command_name, name);
+    }
+
+    #region IDisposable implementation
     /// <summary>Actively reclaims unmanaged resources that this instance uses.</summary>
     /// <since>6.0</since>
     public void Dispose()

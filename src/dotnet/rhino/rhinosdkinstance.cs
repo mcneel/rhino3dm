@@ -229,6 +229,7 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="ci"></param>
     /// <returns></returns>
+    /// <since>8.0</since>
     public RhinoObject SubObjectFromComponentIndex(ComponentIndex ci)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -567,6 +568,12 @@ namespace Rhino.DocObjects
         return UnsafeNativeMethods.CRhinoInstanceDefinition_UnitSystem(ptr_const_idef);
       }
     }
+
+    /// <summary>
+    /// Gets the full file path for linked instance definitions.
+    /// </summary>
+    /// <since>5.0</since>
+    public new string SourceArchive => base.SourceArchive;
 
     /// <summary>
     /// Creates a preview bitmap of the instance definition.

@@ -606,6 +606,11 @@ namespace Rhino.Runtime
 
     #region user strings
     /// <summary>
+    /// Returns the string " ". This is the string Rhino uses to empty out a user string entry.
+    /// </summary>
+    internal static string EmptyUserString { get; } = " ";
+
+    /// <summary>
     /// Attach a user string (key,value combination) to this geometry.
     /// </summary>
     /// <param name="key">id used to retrieve this string.</param>

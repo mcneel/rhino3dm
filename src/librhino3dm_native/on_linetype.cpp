@@ -427,3 +427,25 @@ RH_C_FUNCTION bool ON_SectionStyle_GetSetBool(ON_SectionStyle* pSectionStyle, en
   }
   return rc;
 }
+
+RH_C_FUNCTION ON_Linetype* ON_SectionStyle_GetCustomLinetype(const ON_SectionStyle* sectionStyle)
+{
+  if (sectionStyle)
+  {
+    const ON_Linetype* linetype = sectionStyle->BoundaryLinetype();
+    if (linetype)
+      return new ON_Linetype(*linetype);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_SectionStyle_SetCustomLinetype(ON_SectionStyle* sectionStyle, const ON_Linetype* linetype)
+{
+  if (sectionStyle)
+  {
+    if (linetype)
+      sectionStyle->SetBoundaryLinetype(*linetype);
+    else
+      sectionStyle->RemoveBoundaryLinetype();
+  }
+}

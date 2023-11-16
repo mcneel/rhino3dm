@@ -1581,6 +1581,17 @@ RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddAngularDimension(ONX_Model* pMode
   return Internal_ONX_Model_AddModelGeometry(pModel, pConstDimension, pConstAttributes);
 }
 
+RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddOrdinateDimension(ONX_Model* pModel, const ON_DimOrdinate* pConstDimension, const ON_3dmObjectAttributes* pConstAttributes)
+{
+  return Internal_ONX_Model_AddModelGeometry(pModel, pConstDimension, pConstAttributes);
+}
+
+RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddRadialDimension(ONX_Model* pModel, const ON_DimRadial* pConstDimension, const ON_3dmObjectAttributes* pConstAttributes)
+{
+  return Internal_ONX_Model_AddModelGeometry(pModel, pConstDimension, pConstAttributes);
+}
+
+
 RH_C_FUNCTION ON_UUID ONX_Model_ObjectTable_AddLine( ONX_Model* pModel, ON_3DPOINT_STRUCT pt0, ON_3DPOINT_STRUCT pt1, const ON_3dmObjectAttributes* pConstAttributes )
 {
   if( pModel )
@@ -2826,7 +2837,7 @@ RH_C_FUNCTION void ONX_Model_UserDataTable_Clear(ONX_Model* pModel)
     pModel->m_userdata_table.Empty();
 }
 
-RH_C_FUNCTION int ONX_Model_AddLayer(ONX_Model* pModel, const RHMONO_STRING* layerName, int argb)
+RH_C_FUNCTION int ONX_Model_AddLayer(ONX_Model* pModel, const RHMONO_STRING* layerName, int argb, bool bDefault)
 {
   if (nullptr == pModel)
     return ON_UNSET_INT_INDEX;
@@ -2834,8 +2845,37 @@ RH_C_FUNCTION int ONX_Model_AddLayer(ONX_Model* pModel, const RHMONO_STRING* lay
   INPUTSTRINGCOERCE(_layerName, layerName);
   unsigned int abgr = ARGB_to_ABGR(argb);
   ON_Color c(abgr);
-  int index = pModel->AddLayer(_layerName, c);
+  int index = bDefault
+    ? pModel->AddDefaultLayer(_layerName, c)
+    : pModel->AddLayer(_layerName, c);
   return index;
+}
+
+RH_C_FUNCTION int ONX_Model_AddLayer2(ONX_Model* pModel, const RHMONO_STRING* pLayerName, int argb, ON_UUID parentId)
+{
+  if (nullptr == pModel || nullptr == pLayerName)
+    return ON_UNSET_INT_INDEX;
+
+  INPUTSTRINGCOERCE(_layerName, pLayerName);
+  unsigned int abgr = ARGB_to_ABGR(argb);
+  ON_Color color(abgr);
+
+  ON_Layer layer;
+  layer.ClearId();
+  layer.ClearIndex();
+  layer.SetName(_layerName);
+  layer.SetColor(color);
+  layer.SetParentId(parentId);
+  layer.SetVisible(true);
+  layer.SetLocked(false);
+
+  // Do not automatically resolve conflicts
+  ON_ModelComponentReference rc = pModel->AddModelComponent(layer, false);
+  const ON_Layer* model_layer = ON_Layer::FromModelComponentRef(rc, nullptr);
+  if (model_layer)
+    return model_layer->Index();
+
+  return ON_UNSET_INT_INDEX;
 }
 
 #if !defined(RHINO3DM_BUILD)

@@ -41,16 +41,6 @@ namespace Rhino.Geometry
   public class Leader : AnnotationBase
   {
     /// <summary>
-    /// Protected serialization constructor for internal use.
-    /// </summary>
-    /// <param name="info">Serialization data.</param>
-    /// <param name="context">Serialization stream.</param>
-    protected Leader(SerializationInfo info, StreamingContext context)
-      : base(info, context)
-    {
-    }
-
-    /// <summary>
     /// internal constructor
     /// </summary>
     /// <param name="nativePointer"></param>
@@ -66,6 +56,21 @@ namespace Rhino.Geometry
     {
       var ptr = UnsafeNativeMethods.ON_V6_Leader_New();
       ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>
+    /// Protected serialization constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected Leader(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new LinearDimension(IntPtr.Zero, null);
     }
 
     /// <summary>
@@ -347,6 +352,63 @@ namespace Rhino.Geometry
       }
     }
     #endregion properties originating from dim style that can be overridden
+
+#if RHINO_SDK
+
+    /// <summary>
+    /// Explodes this leader into its geometric components.
+    /// </summary>
+    /// <returns>
+    /// An array of Curve and TextEntity objects. If the leader is using user-defined arrowheads, InstanceReferenceGeometry objects will be included.
+    /// </returns>
+    /// <since>8.0</since>
+    public GeometryBase[] Explode()
+    {
+      IntPtr ptr_const_parent = IntPtr.Zero;
+      IntPtr ptr_const_leader = IntPtr.Zero;
+      IntPtr ptr_const_dimstyle = IntPtr.Zero;
+
+      LeaderObject parent = _GetConstObjectParent() as LeaderObject;
+      if (null != parent)
+        ptr_const_parent = parent.ConstPointer();
+      else
+        ptr_const_leader = ConstPointer();
+
+      var dimstyle = DimensionStyle;
+      if (null == parent)
+        ptr_const_dimstyle = dimstyle.ConstPointer();
+
+      using (SimpleArrayCurvePointer curve_array = new SimpleArrayCurvePointer())
+      using (SimpleArrayGeometryPointer geometry_array = new SimpleArrayGeometryPointer())
+      {
+        IntPtr ptr_curves = curve_array.NonConstPointer();
+        IntPtr ptr_geometry = geometry_array.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoExplodeLeader(ptr_const_parent, ptr_const_leader, ptr_const_dimstyle, ptr_curves, ptr_geometry);
+
+        System.Collections.Generic.List<GeometryBase> out_geometry = new System.Collections.Generic.List<GeometryBase>();
+        if (rc)
+        {
+          var curves = curve_array.ToNonConstArray();
+          foreach (var c in curves)
+            out_geometry.Add(c);
+
+          var geometry = geometry_array.ToNonConstArray();
+          foreach (var g in geometry)
+          {
+            if (g is AnnotationBase annotation && null != parent)
+              annotation.SetParentDimensionStyle(ParentDimensionStyle);
+            out_geometry.Add(g);
+          }
+        }
+
+        GC.KeepAlive(dimstyle);
+        GC.KeepAlive(parent);
+
+        return out_geometry.ToArray();
+      }
+    }
+
+#endif // RHINO_SDK
   }
 }
 

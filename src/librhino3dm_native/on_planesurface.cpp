@@ -9,6 +9,7 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_New(const ON_PLANE_STRUCT* plane,
     const ON_Interval* _y = (const ON_Interval*)&yExtents;
 
     ON_Plane temp = FromPlaneStruct(*plane);
+    temp.UpdateEquation();
     rc = new ON_PlaneSurface(temp);
 
     if (rc)
@@ -20,24 +21,120 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_New(const ON_PLANE_STRUCT* plane,
   return rc;
 }
 
-////////////////////////////////////////////////////////////////
-
-RH_C_FUNCTION void ON_ClippingPlaneSurface_GetPlane(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface, ON_PLANE_STRUCT* plane)
+RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_New2(const ON_PLANE_STRUCT* plane)
 {
-  if( pConstClippingPlaneSurface && plane )
-  {
-    CopyToPlaneStruct(*plane, pConstClippingPlaneSurface->m_plane);
-  }
-}
-
-RH_C_FUNCTION void ON_ClippingPlaneSurface_SetPlane(ON_ClippingPlaneSurface* pClippingPlaneSurface, const ON_PLANE_STRUCT* plane)
-{
-  if( pClippingPlaneSurface && plane )
+  ON_PlaneSurface* rc = nullptr;
+  if (plane)
   {
     ON_Plane temp = FromPlaneStruct(*plane);
-    pClippingPlaneSurface->m_plane = temp;
+    temp.UpdateEquation();
+    rc = new ON_PlaneSurface(temp);
+    if (nullptr != rc)
+    {
+      ON_Interval extents(0.0, 1.0);
+      rc->SetExtents(0, extents, true);
+      rc->SetExtents(1, extents, true);
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_New3()
+{
+  ON_PlaneSurface* rc = new ON_PlaneSurface();
+  if (nullptr != rc)
+  {
+    ON_Interval extents(0.0, 1.0);
+    rc->SetExtents(0, extents, true);
+    rc->SetExtents(1, extents, true);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_PlaneSurface_GetPlane(const ON_PlaneSurface* pPlaneSurface, ON_PLANE_STRUCT* pPlane)
+{
+  if (pPlaneSurface && pPlane)
+  {
+    CopyToPlaneStruct(*pPlane, pPlaneSurface->m_plane);
   }
 }
+
+RH_C_FUNCTION void ON_PlaneSurface_SetPlane(ON_PlaneSurface* pPlaneSurface, const ON_PLANE_STRUCT* pPlane)
+{
+  if (pPlaneSurface && pPlane)
+  {
+    ON_Plane temp = FromPlaneStruct(*pPlane);
+    temp.UpdateEquation();
+    pPlaneSurface->m_plane = temp;
+  }
+}
+
+RH_C_FUNCTION void ON_PlaneSurface_GetExtents(const ON_PlaneSurface* pPlaneSurface, int direction, ON_Interval* pExtents)
+{
+  if (pPlaneSurface && pExtents)
+  {
+    direction = RHINO_CLAMP(direction, 0, 1);
+    *pExtents = pPlaneSurface->Extents(direction);
+  }
+}
+
+RH_C_FUNCTION void ON_PlaneSurface_SetExtents(ON_PlaneSurface* pPlaneSurface, int direction, ON_INTERVAL_STRUCT extents, bool bSyncDomain)
+{
+  if (pPlaneSurface)
+  {
+    direction = RHINO_CLAMP(direction, 0, 1);
+    const ON_Interval* pExtents = (const ON_Interval*)&extents;
+    pPlaneSurface->SetExtents(direction, *pExtents, bSyncDomain);
+  }
+}
+
+RH_C_FUNCTION ON_Mesh* ON_PlaneSurface_CreateMesh(const ON_PlaneSurface* pPlaneSurface)
+{
+  ON_Mesh* rc = nullptr;
+  if (pPlaneSurface)
+    rc = pPlaneSurface->CreateMesh(nullptr);
+  return rc;
+}
+
+RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox(ON_Line* pLine, ON_3DVECTOR_STRUCT normal, ON_BoundingBox* pBox)
+{
+  ON_PlaneSurface* rc = nullptr;
+  if (pLine && pBox)
+  {
+  if (pLine->Length() < ON_SQRT_EPSILON)
+      return nullptr;
+
+    ON_3dVector _normal(normal.val[0], normal.val[1], normal.val[2]);
+    if (_normal.Length() < ON_SQRT_EPSILON)
+      return nullptr;
+
+    _normal.Unitize();
+
+    if (_normal.IsParallelTo(pLine->Direction()))
+      return nullptr;
+
+    ON_Plane plane(pLine->from, _normal, pLine->Direction());
+
+    rc = new ON_PlaneSurface();
+    rc->CreatePlaneThroughBox(plane, *pBox); // use default padding
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox2(const ON_PLANE_STRUCT* pPlane, ON_BoundingBox* pBox)
+  {
+    ON_PlaneSurface* rc = nullptr;
+  if (pPlane && pBox)
+  {
+    ON_Plane _plane = FromPlaneStruct(*pPlane);
+    _plane.UpdateEquation();
+    rc = new ON_PlaneSurface();
+    rc->CreatePlaneThroughBox(_plane, *pBox); // use default padding
+  }
+  return rc;
+}
+
+////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION int ON_ClippingPlaneSurface_ViewportIdCount(const ON_ClippingPlaneSurface* pConstClippingPlaneSurface)
 {

@@ -121,6 +121,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// How the background should be filled
     /// </summary>
+    /// <since>8.0</since>
     public SectionBackgroundFillMode BackgroundFillMode
     {
       get { return (SectionBackgroundFillMode)GetInt(UnsafeNativeMethods.SectionStyleInt.BackgroundFillMode); }
@@ -132,6 +133,7 @@ namespace Rhino.DocObjects
     /// get the color from the source where this section style came from (object
     /// attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color BackgroundFillColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.BackgroundFill); }
@@ -143,6 +145,7 @@ namespace Rhino.DocObjects
     /// means get the color from the source where this section style came from
     /// (object attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color BackgroundFillPrintColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.BackgroundFillPrint); }
@@ -152,6 +155,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Should the boundary for this section be displayed
     /// </summary>
+    /// <since>8.0</since>
     public bool BoundaryVisible
     {
       get { return GetBool(UnsafeNativeMethods.SectionStyleBool.BoundaryVisible); }
@@ -161,6 +165,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Scale applied to the boundary wire thickness
     /// </summary>
+    /// <since>8.0</since>
     public double BoundaryWidthScale
     {
       get { return GetDouble(UnsafeNativeMethods.SectionStyleDouble.BoundaryWidthScale); }
@@ -172,6 +177,7 @@ namespace Rhino.DocObjects
     /// get the color from the source where this section style came from (object
     /// attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color BoundaryColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.Boundary); }
@@ -183,6 +189,7 @@ namespace Rhino.DocObjects
     /// means get the color from the source where this section style came from
     /// (object attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color BoundaryPrintColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.BoundaryPrint); }
@@ -192,6 +199,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Rule to determine when to generate a hatch pattern and fill
     /// </summary>
+    /// <since>8.0</since>
     public ObjectSectionFillRule SectionFillRule
     {
       get { return (ObjectSectionFillRule)GetInt(UnsafeNativeMethods.SectionStyleInt.SectionFillRule); }
@@ -201,6 +209,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Hatch pattern to use when drawing a fill pattern
     /// </summary>
+    /// <since>8.0</since>
     public int HatchIndex
     {
       get { return GetInt(UnsafeNativeMethods.SectionStyleInt.HatchIndex); }
@@ -210,6 +219,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Scale to apply to the hatch pattern
     /// </summary>
+    /// <since>8.0</since>
     public double HatchScale
     {
       get { return GetDouble(UnsafeNativeMethods.SectionStyleDouble.HatchScale); }
@@ -219,6 +229,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Rotation to apply to the hatch patterh
     /// </summary>
+    /// <since>8.0</since>
     public double HatchRotationRadians
     {
       get { return GetDouble(UnsafeNativeMethods.SectionStyleDouble.HatchRotation); }
@@ -230,6 +241,7 @@ namespace Rhino.DocObjects
     /// get the color from the source where this section style came from (object
     /// attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color HatchPatternColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.HatchPattern); }
@@ -241,11 +253,48 @@ namespace Rhino.DocObjects
     /// means get the color from the source where this section style came from
     /// (object attributes or layer)
     /// </summary>
+    /// <since>8.0</since>
     public Color HatchPatternPrintColor
     {
       get { return GetColor(UnsafeNativeMethods.SectionStyleColor.HatchPatternPrint); }
       set { SetColor(UnsafeNativeMethods.SectionStyleColor.HatchPatternPrint, value); }
     }
     #endregion
+
+    ///<summary>
+    /// Get an optional custom linetype associated with this section style. If null,
+    /// then the linetype will come from the parent attributes or layer
+    ///</summary>
+    /// <since>8.0</since>
+    public Linetype GetBoundaryLinetype()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_linetype = UnsafeNativeMethods.ON_SectionStyle_GetCustomLinetype(const_ptr_this);
+      if (ptr_linetype == IntPtr.Zero)
+        return null;
+      return new Linetype(ptr_linetype);
+    }
+
+    /// <since>8.0</since>
+    public void SetBoundaryLinetype(Linetype linetype)
+    {
+      if (linetype == null)
+      {
+        RemoveBoundaryLinetype();
+        return;
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_linetype = linetype.ConstPointer();
+      UnsafeNativeMethods.ON_SectionStyle_SetCustomLinetype(ptr_this, const_ptr_linetype);
+    }
+
+    /// <since>8.0</since>
+    public void RemoveBoundaryLinetype()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_SectionStyle_SetCustomLinetype(ptr_this, IntPtr.Zero);
+    }
+
   }
 }

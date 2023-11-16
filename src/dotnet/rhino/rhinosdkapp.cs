@@ -427,7 +427,7 @@ namespace Rhino
           return value;
         }
       }
-      var special_folder = Environment.GetFolderPath (localUser ? Environment.SpecialFolder.ApplicationData : Environment.SpecialFolder.CommonApplicationData);
+      var special_folder = System.Environment.GetFolderPath (localUser ? System.Environment.SpecialFolder.ApplicationData : System.Environment.SpecialFolder.CommonApplicationData);
       var version = Version;
       var result = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(special_folder, "McNeel"), "Rhinoceros"), string.Format("{0}.{1}", version.Major, 0));
       return result;
@@ -2262,6 +2262,7 @@ namespace Rhino
     /// </summary>
     /// <param name="runtimeDocSerialNumber">Unique serialNumber for the document to post the event to.</param>
     /// <param name="bRepeatedEnter">if true, allow multiple enter events to be posted simultaneouslyt.</param>
+    /// <since>8.0</since>
     [CLSCompliant(false)]
     public static void PostEnterEvent(uint runtimeDocSerialNumber, bool bRepeatedEnter)
     {
@@ -2272,6 +2273,7 @@ namespace Rhino
     /// Post a cancel event to the command line
     /// </summary>
     /// <param name="runtimeDocSerialNumber">Unique serialNumber for the document to post the event to.</param>
+    /// <since>8.0</since>
     [CLSCompliant(false)]
     public static void PostCancelEvent(uint runtimeDocSerialNumber)
     {

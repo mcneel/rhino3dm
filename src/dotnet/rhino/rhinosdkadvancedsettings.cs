@@ -16,22 +16,38 @@ namespace Rhino.Runtime
     {
       // Add default color values to the settings dictionary so they will appear in
       // the advanced options dialog
+      if (SlideDockSiteWhenClosing) { }
     }
 
     static bool RunningOnOSX { get; } = Rhino.Runtime.HostUtils.RunningOnOSX;
-    public static bool DarkModeWhenRhinoStarted { get; } = UnsafeNativeMethods.RHC_RhOSInDarkMode();
-    public static bool HasSystemDarKModeChanged => DarkModeWhenRhinoStarted != UnsafeNativeMethods.RHC_RhOSInDarkMode();
+    static bool? _DarkModeWhenRhinoStarted; // = UnsafeNativeMethods.RHC_RhOSInDarkMode();
 
     static public bool DarkMode
     {
       get
       {
-        // Return the current OS value when running on Mac since Rhino always follows
-        // the OS value on Mac
-        if (RunningOnOSX)
-          return UnsafeNativeMethods.RHC_RhOSInDarkMode();
-        var darkmode = Settings.GetBool("DarkMode", DarkModeWhenRhinoStarted);
-        return darkmode;
+      	// This code is called by Rhino, Rhino.Inside, and Zoo
+      	// In the Zoo's case, it can't call into rhcommon_c, so this call fails.
+      	// The try/catch block, as well as the change in initialization, above, should
+      	// prevent a crash.
+        try
+        {
+          if (!_DarkModeWhenRhinoStarted.HasValue)
+          {
+            _DarkModeWhenRhinoStarted = UnsafeNativeMethods.RHC_RhOSInDarkMode();
+          }
+
+          // Return the current OS value when running on Mac since Rhino always follows
+          // the OS value on Mac
+          if (RunningOnOSX)
+            return UnsafeNativeMethods.RHC_RhOSInDarkMode();
+          var darkmode = Settings.GetBool("DarkMode", _DarkModeWhenRhinoStarted.Value);
+          return darkmode;
+        }
+        catch
+        {
+          return false;
+        }
       }
       internal set
       {
@@ -45,6 +61,23 @@ namespace Rhino.Runtime
         }
         catch { }
       }
+    }
+    public static bool UseNewToolBarPopUps
+    {
+      get => Settings.GetBool(nameof(UseNewToolBarPopUps), false);
+      set => Settings.SetBool(nameof(UseNewToolBarPopUps), value);
+    }
+
+    static internal bool SlideDockSiteWhenClosing
+    {
+      get => Settings.GetBool(nameof(SlideDockSiteWhenClosing), false);
+      set => Settings.SetBool(nameof(SlideDockSiteWhenClosing), value);
+    }
+
+    static internal bool HideMacStatusBarPopUpTextOnMouseDown
+    {
+      get => Settings.GetBool(nameof(HideMacStatusBarPopUpTextOnMouseDown), false);
+      set => Settings.SetBool(nameof(HideMacStatusBarPopUpTextOnMouseDown), value);
     }
 
     static public void SetDarkModeToSystemValue() => DarkMode = UnsafeNativeMethods.RhColors_GetDefaultWindowsDarkMode();

@@ -740,6 +740,7 @@ namespace Rhino.Render.PostEffects
     /// Because post effects are now in the render settings, this function can no longer be called.
     /// </summary>
     /// <since>7.0</since>
+    /// <deprecated>8.0</deprecated>
     [Obsolete ("This function is no longer called")]
     public virtual bool ReadFromDocumentDefaults(RhinoDoc doc)
     {
@@ -750,6 +751,7 @@ namespace Rhino.Render.PostEffects
     /// Because post effects are now in the render settings, this function can no longer be called.
     /// </summary>
     /// <since>7.0</since>
+    /// <deprecated>8.0</deprecated>
     [Obsolete ("This function is no longer called")]
     public virtual bool WriteToDocumentDefaults(RhinoDoc doc)
     {
@@ -1911,6 +1913,7 @@ namespace Rhino.Render.PostEffects
       }
     }
 
+    /// <since>8.0</since>
     public PostEffectCollection Collection { get; private set; }
 
     internal PostEffectData(PostEffectCollection c, Guid pep_id)
@@ -1924,6 +1927,7 @@ namespace Rhino.Render.PostEffects
       Dispose(false);
     }
 
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2128,6 +2132,7 @@ namespace Rhino.Render.PostEffects
       Dispose(false);
     }
 
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2181,6 +2186,7 @@ namespace Rhino.Render.PostEffects
       UnsafeNativeMethods.ON_PostEffects_SetSelectedPostEffect(CppPointer, (int)type, ref id);
     }
 
+    /// <since>8.0</since>
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_PostEffects_CopyFrom(CppPointer, src.CppPointer);

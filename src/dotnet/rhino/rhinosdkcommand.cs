@@ -1447,6 +1447,7 @@ namespace Rhino.DocObjects
     /// array will be out of sync with this class.
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public ReplayHistoryResult AppendHistoryResult()
     {
       int index = UnsafeNativeMethods.CRhinoObjectPairArray_Append(m_pObjectPairArray);
@@ -1474,6 +1475,7 @@ namespace Rhino.DocObjects
     /// will result in empty ReplayHistoryResult elements
     /// </summary>
     /// <param name="newResults"></param>
+    /// <since>8.0</since>
     public void UpdateResultArray(IEnumerable<ReplayHistoryResult> newResults)
     {
       if (newResults == null)
@@ -1527,6 +1529,7 @@ namespace Rhino.DocObjects
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetPoint3d(m_pConstRhinoHistoryRecord, id, ref value);
     }
 
+    /// <since>8.0</since>
     public bool TryGetGuids(int id, out Guid[] values)
     {
       values = new Guid[] { };
@@ -1972,6 +1975,15 @@ namespace Rhino.DocObjects
       IntPtr pConstHatch = hatch.ConstPointer();
       return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToHatch(m_parent.m_pObjectPairArray, m_index, pConstHatch, pConstAttributes);
     }
+
+    /// <since>7.30</since>
+    public bool UpdateToInstanceReferenceGeometry(Geometry.InstanceReferenceGeometry instanceReference, DocObjects.ObjectAttributes attributes)
+    {
+      IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr pConstInstanceReference = instanceReference.ConstPointer();
+      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToInstanceReferenceGeometry(m_parent.m_pObjectPairArray, m_index, pConstInstanceReference, pConstAttributes);
+    }
+
   }
 }
 #endif

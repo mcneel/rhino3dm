@@ -889,7 +889,7 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     object ICloneable.Clone()
     {
-      return Clone();
+      return this;
     }
 
     /// <summary>
@@ -899,7 +899,7 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public Plane Clone()
     {
-      return new Plane(this);
+      return this;
     }
   }
 

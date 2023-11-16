@@ -6,7 +6,7 @@ using Rhino.Runtime;
 namespace Rhino.Geometry
 {
   /// <summary>
-  /// Represents a plane surface, with plane and two intervals.
+  /// Represents a plane surface.
   /// </summary>
   [Serializable]
   public class PlaneSurface : Surface
@@ -16,13 +16,33 @@ namespace Rhino.Geometry
     { }
 
     /// <summary>
-    /// Initializes a plane surface with x and y intervals.
+    /// Constructs a new plane surface.
+    /// </summary>
+    /// <since>8.0</since>
+    public PlaneSurface()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_New3();
+      ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>
+    /// Constructs a new plane surface.
     /// </summary>
     /// <param name="plane">The plane.</param>
-    /// <param name="xExtents">The x interval of the plane that defines the rectangle.
+    public PlaneSurface(Plane plane)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_New2(ref plane);
+      ConstructNonConstObject(ptr);
+    }
+
+    /// <summary>
+    /// Constructs a plane surface with x and y extents.
+    /// </summary>
+    /// <param name="plane">The plane.</param>
+    /// <param name="xExtents">The increasing x interval of the plane that defines the rectangle.
     /// The corresponding evaluation interval domain is set so that it matches the
     /// extents interval.</param>
-    /// <param name="yExtents">The y interval of the plane that defines the rectangle.
+    /// <param name="yExtents">The increasing y interval of the plane that defines the rectangle.
     /// The corresponding evaluation interval domain is set so that it matches the
     /// extents interval.</param>
     /// <example>
@@ -52,9 +72,78 @@ namespace Rhino.Geometry
       return new PlaneSurface(IntPtr.Zero, null);
     }
 
-#if RHINO_SDK
     /// <summary>
-    /// Makes a plane that includes a line and a vector and goes through a bounding box.
+    /// Gets or sets the plane surface's plane.
+    /// </summary>
+    /// <since>8.0</since>
+    public Plane Plane
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        Plane plane = new Plane();
+        UnsafeNativeMethods.ON_PlaneSurface_GetPlane(ptr_const_this, ref plane);
+        return plane;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_PlaneSurface_SetPlane(ptr_this, ref value);
+      }
+    }
+
+    /// <summary>
+    /// Gets the extents of the plane surface.
+    /// </summary>
+    /// <param name="direction">
+    /// The direction, where 0 gets plane surface's x coordinate extents
+    /// and 1 gets plane surface's y coordinate extents.
+    /// </param>
+    /// <returns>An increasing interval.</returns>
+    /// <since>8.0</since>
+    public Interval GetExtents(int direction)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      Interval extents = new Interval();
+      UnsafeNativeMethods.ON_PlaneSurface_GetExtents(ptr_const_this, direction, ref extents);
+      return extents;
+    }
+
+    /// <summary>
+    /// Sets the extents of the plane surface.
+    /// </summary>
+    /// <param name="direction">
+    /// The direction, where 0 sets plane surface's x coordinate extents
+    /// and 1 sets plane surface's y coordinate extents.
+    /// </param>
+    /// <param name="extents">An increasing interval.</param>
+    /// <param name="syncDomain">
+    /// If true, the corresponding evaluation interval domain is set so that it matches the extents interval.
+    /// If false, the corresponding evaluation interval domain is not changed.
+    /// </param>
+    /// <since>8.0</since>
+    public void SetExtents(int direction, Interval extents, bool syncDomain)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_PlaneSurface_SetExtents(ptr_this, direction, extents, syncDomain);
+    }
+
+    /// <summary>
+    /// Computes a polygon mesh of the surface made of one quad.
+    /// </summary>
+    /// <returns>A polygon mesh of the surface.</returns>
+    /// <since>8.0</since>
+    public Mesh ToMesh()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_mesh = UnsafeNativeMethods.ON_PlaneSurface_CreateMesh(ptr_const_this);
+      if (IntPtr.Zero != ptr_mesh)
+        return new Mesh(ptr_mesh, null);
+      return null;
+    }
+
+    /// <summary>
+    /// Create a plane that contains the intersection of a bounding box.
     /// </summary>
     /// <param name="lineInPlane">A line that will lie on the plane.</param>
     /// <param name="vectorInPlane">A vector the direction of which will be in plane.</param>
@@ -63,14 +152,14 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static PlaneSurface CreateThroughBox(Line lineInPlane, Vector3d vectorInPlane, BoundingBox box)
     {
-      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPlaneThroughBox(ref lineInPlane, vectorInPlane, ref box);
+      IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_CreatePlaneThroughBox(ref lineInPlane, vectorInPlane, ref box);
       if (IntPtr.Zero == ptr)
         return null;
       return new PlaneSurface(ptr, null);
     }
 
     /// <summary>
-    /// Extends a plane into a plane surface so that the latter goes through a bounding box.
+    /// Create a plane that contains the intersection of a bounding box.
     /// </summary>
     /// <param name="plane">An original plane value.</param>
     /// <param name="box">A box to use for extension boundary.</param>
@@ -83,12 +172,11 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static PlaneSurface CreateThroughBox(Plane plane, BoundingBox box)
     {
-      IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPlaneThroughBox2(ref plane, ref box);
+      IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_CreatePlaneThroughBox2(ref plane, ref box);
       if (IntPtr.Zero == ptr)
         return null;
       return new PlaneSurface(ptr, null);
     }
-#endif
   }
 
   /// <summary>
@@ -118,28 +206,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the clipping plane.
-    /// </summary>
-    /// <since>5.0</since>
-    public Plane Plane
-    {
-      get
-      {
-        IntPtr pConstThis = ConstPointer();
-        Plane p = new Plane();
-        UnsafeNativeMethods.ON_ClippingPlaneSurface_GetPlane(pConstThis, ref p);
-        return p;
-      }
-      set
-      {
-        IntPtr pThis = NonConstPointer();
-        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetPlane(pThis, ref value);
-      }
-    }
-
-    /// <summary>
     /// Distance that the clipping has an effect
     /// </summary>
+    /// <since>8.0</since>
     public double PlaneDepth
     {
       get
@@ -157,6 +226,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Determines if the PlaneDepth value should be used
     /// </summary>
+    /// <since>8.0</since>
     public bool PlaneDepthEnabled
     {
       get
@@ -214,6 +284,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Should the object and layer participation lists be used when determining clipping
     /// </summary>
+    /// <since>8.0</since>
     public bool ParticipationListsEnabled
     {
       get
@@ -234,6 +305,7 @@ namespace Rhino.Geometry
     /// <param name="objectIds"></param>
     /// <param name="layerIndices"></param>
     /// <param name="isExclusionList">Is the list a set of ids to not clip or a set to clip</param>
+    /// <since>8.0</since>
     public void SetClipParticipation(IEnumerable<Guid> objectIds, IEnumerable<int> layerIndices, bool isExclusionList)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -272,6 +344,7 @@ namespace Rhino.Geometry
     /// Remove list of object ids that this clipping plane surface clips. This causes the clipping
     /// plane surface to clip all objects
     /// </summary>
+    /// <since>8.0</since>
     public void ClearClipParticipationLists()
     {
       IntPtr ptr_this = NonConstPointer();

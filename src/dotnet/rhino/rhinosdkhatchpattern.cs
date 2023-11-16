@@ -66,6 +66,19 @@ namespace Rhino.DocObjects
     #region Properties
 
     /// <summary>
+    /// Verifies a hatch line is valid.
+    /// </summary>
+    /// <since>8.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchLine_IsValid(pConstThis);
+      }
+    }
+
+    /// <summary>
     /// Gets and sets the angle, in radians, of the hatch line.
     /// The angle is measured counter-clockwise from the x-axis.
     /// </summary>

@@ -482,6 +482,13 @@ RH_C_FUNCTION ON_HatchLine* ON_HatchLine_New(const ON_HatchLine* pHatchLine)
   return new ON_HatchLine();
 }
 
+RH_C_FUNCTION bool ON_HatchLine_IsValid(const ON_HatchLine* pHatchLine)
+{
+  if (nullptr != pHatchLine)
+    return pHatchLine->IsValid();
+  return false;
+}
+
 RH_C_FUNCTION void ON_HatchLine_Delete(ON_HatchLine* pHatchLine)
 {
   if (nullptr != pHatchLine)

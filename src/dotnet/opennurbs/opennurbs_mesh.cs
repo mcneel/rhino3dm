@@ -1336,6 +1336,7 @@ namespace Rhino.Geometry
     internal IntPtr ConstPointer() { return m_ptr; }
     internal IntPtr NonConstPointer() { return m_ptr; }
 
+    #region constructors
 
     /// <summary>
     /// Initializes a new instance with default values.
@@ -1399,6 +1400,8 @@ namespace Rhino.Geometry
     {
       Dispose(false);
     }
+    
+    #endregion
 
     #region ISerializable code
 
@@ -1490,6 +1493,8 @@ namespace Rhino.Geometry
 
     #endregion ISerializable code
 
+    #region IDisposable
+
     /// <summary>
     /// Actively reclaims unmanaged resources that this instance uses.
     /// </summary>
@@ -1516,6 +1521,65 @@ namespace Rhino.Geometry
         m_ptr = IntPtr.Zero;
       }
     }
+    #endregion
+
+    #region IEquatable
+    /// <summary>
+    /// Computes a hash number that represents the current MeshingParameters.
+    /// </summary>
+    /// <returns>A hash code for MeshingParameters.</returns>
+    public override int GetHashCode()
+    {
+      // MSDN docs recommend XOR'ing the internal values to get a hash code
+      return RelativeTolerance.GetHashCode() ^
+        Tolerance.GetHashCode() ^ MinimumTolerance.GetHashCode() ^
+        MinimumEdgeLength.GetHashCode() ^ MaximumEdgeLength.GetHashCode();
+    }
+
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="obj">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public override bool Equals(object obj) => Equals(obj as MeshingParameters);
+    
+    /// <summary>
+    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
+    /// </summary>
+    /// <param name="other">The specified MeshingParameters.</param>
+    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
+    /// <since>8.0</since>
+    public bool Equals(MeshingParameters other)
+    {
+      if (ReferenceEquals(this, other)) return true;
+      if (other is null) return false;
+
+      IntPtr const_ptr_this = this.ConstPointer();
+      IntPtr const_ptr_other = other.ConstPointer();
+      return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
+    }
+    #endregion
+
+    #region operators
+    /// <summary>
+    /// Determines whether the two MeshingParameters have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if all of components of the two MeshingParameters are equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator ==(MeshingParameters mp1, MeshingParameters mp2) => object.Equals(mp1, mp2);
+
+    /// <summary>
+    /// Determines whether the two MeshingParameters do not have equal values.
+    /// </summary>
+    /// <param name="mp1">The first MeshingParameters.</param>
+    /// <param name="mp2">The second MeshingParameters.</param>
+    /// <returns>true if any components of the two MeshingParameters are not equal; otherwise false.</returns>
+    /// <since>8.0</since>
+    public static bool operator !=(MeshingParameters mp1, MeshingParameters mp2) => !object.Equals(mp1, mp2);
+    #endregion
 
     #region constants
 #if RHINO_SDK
@@ -1981,48 +2045,6 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
-    /// </summary>
-    /// <param name="other">The specified MeshingParameters.</param>
-    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
-    /// <since>8.0</since>
-    public bool Equals(MeshingParameters other)
-    {
-      IntPtr const_ptr_this = this.ConstPointer();
-      IntPtr const_ptr_other = other.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
-    }
-
-    /// <summary>
-    /// Call this method to compare this parameters with another
-    /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    /// <since>8.0</since>
-    public int Compare(MeshingParameters other)
-    {
-      return UnsafeNativeMethods.ON_MeshParameters_OperatorCompare(ConstPointer(), other?.ConstPointer() ?? IntPtr.Zero);
-    }
-
-    /// <summary>
-    /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
-    /// </summary>
-    /// <param name="obj">The specified MeshingParameters.</param>
-    /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
-    /// <since>8.0</since>
-    public override bool Equals(Object obj)
-    {
-      if (obj == null)
-        return false;
-
-      MeshingParameters mpObj = obj as MeshingParameters;
-      if (mpObj == null)
-        return false;
-      else
-        return Equals(mpObj);
-    }
-
-    /// <summary>
     /// Call this method to copy MeshingParameters from another instance.
     /// </summary>
     /// <param name="source"></param>
@@ -2031,46 +2053,6 @@ namespace Rhino.Geometry
     {
       if (source != null)
         UnsafeNativeMethods.ON_MeshParameters_OperatorEqual(source.ConstPointer(), NonConstPointer());
-    }
-
-    /// <summary>
-    /// Computes a hash number that represents the current MeshingParameters.
-    /// </summary>
-    /// <returns>A hash code for MeshingParameters.</returns>    
-    public override int GetHashCode()
-    {
-      // MSDN docs recommend XOR'ing the internal values to get a hash code
-      return RelativeTolerance.GetHashCode() ^ MaximumEdgeLength.GetHashCode() ^ MinimumEdgeLength.GetHashCode() ^ MinimumTolerance.GetHashCode();
-    }
-
-    /// <summary>
-    /// Determines whether the two MeshingParameters have equal values.
-    /// </summary>
-    /// <param name="mp1">The first MeshingParameters.</param>
-    /// <param name="mp2">The second MeshingParameters.</param>
-    /// <returns>true if all of components of the two MeshingParameters are equal; otherwise false.</returns>
-    /// <since>8.0</since>
-    public static bool operator ==(MeshingParameters mp1, MeshingParameters mp2)
-    {
-      if (((object)mp1) == null || ((object)mp2) == null)
-        return Equals(mp1, mp2);
-
-      return mp1.Equals(mp2);
-    }
-
-    /// <summary>
-    /// Determines whether the two MeshingParameters do not have equal values.
-    /// </summary>
-    /// <param name="mp1">The first MeshingParameters.</param>
-    /// <param name="mp2">The second MeshingParameters.</param>
-    /// <returns>true if any components of the two MeshingParameters are not equal; otherwise false.</returns>
-    /// <since>8.0</since>
-    public static bool operator !=(MeshingParameters mp1, MeshingParameters mp2)
-    {
-      if (((object)mp1) == null || ((object)mp2) == null)
-        return !Object.Equals(mp1, mp2);
-
-      return !(mp1.Equals(mp2));
     }
   }
 
@@ -3317,21 +3299,16 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Constructs a mesh from an extruded curve.
+    /// This method is designed for projecting curves onto a mesh. 
+    /// In most cases, a better to use <see cref="Mesh.CreateExtrusion(Curve, Vector3d)"/>.
     /// </summary>
     /// <param name="curve">A curve to extrude.</param>
     /// <param name="direction">The direction of extrusion.</param>
     /// <param name="parameters">The parameters of meshing.</param>
     /// <param name="boundingBox">The bounding box controls the length of the extrusion.</param>
     /// <returns>A new mesh, or null on failure.</returns>
-    /// <remarks>
-    /// This method is designed to be used when projecting curves onto a mesh. In general,
-    /// a better solution is to use extrude the curve into a surface using <see cref="Surface.CreateExtrusion"/>,
-    /// and then create a mesh from the surface using <see cref="CreateFromSurface(Surface)"/>. The <see cref="Extrusion"/> and
-    /// <see cref="SumSurface"/> classes can also be used to create extrusions.
-    /// </remarks>
     /// <since>7.0</since>
-    public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters,
-      BoundingBox boundingBox)
+    public static Mesh CreateFromCurveExtrusion(Curve curve, Vector3d direction, MeshingParameters parameters, BoundingBox boundingBox)
     {
       if (curve == null)
         throw new ArgumentNullException(nameof(curve));
@@ -3349,6 +3326,38 @@ namespace Rhino.Geometry
       GC.KeepAlive(parameters);
 
       return IntPtr.Zero == ptr_mesh ? null : new Mesh(ptr_mesh, null);
+    }
+
+    /// <summary>
+    /// Constructs a mesh by extruding a curve along a vector.
+    /// </summary>
+    /// <param name="profile">Profile curve to extrude.</param>
+    /// <param name="direction">Direction and length of extrusion.</param>
+    /// <returns>A mesh on success or null on failure.</returns>
+    /// <since>8.0</since>
+    public static Mesh CreateExtrusion(Curve profile, Vector3d direction)
+    {
+      return Mesh.CreateExtrusion(profile, direction, MeshingParameters.Default);
+    }
+
+    /// <summary>
+    /// Constructs a mesh by extruding a curve along a vector.
+    /// </summary>
+    /// <param name="profile">Profile curve to extrude.</param>
+    /// <param name="direction">Direction and length of extrusion.</param>
+    /// <param name="parameters">Parameters used to create the mesh.</param>
+    /// <returns>A mesh on success or null on failure.</returns>
+    /// <since>8.0</since>
+    public static Mesh CreateExtrusion(Curve profile, Vector3d direction, MeshingParameters parameters)
+    {
+      Mesh rc = null;
+      if (null != profile && direction.IsValid && null != parameters)
+      {
+        Surface surface = Surface.CreateExtrusion(profile, direction);
+        if (null != surface)
+          rc = Mesh.CreateFromSurface(surface, parameters);
+      }
+      return rc;
     }
 
     /// <summary>Repairs meshes with vertices that are too near, using a tolerance value.</summary>
@@ -3988,6 +3997,7 @@ namespace Rhino.Geometry
     public double Volume()
     {
       IntPtr ptr_this = ConstPointer();
+      GC.KeepAlive(this); // https://mcneel.myjetbrains.com/youtrack/issue/RH-76654
       return UnsafeNativeMethods.ON_Mesh_Volume(ptr_this);
     }
 #endif
@@ -6323,10 +6333,6 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
   /// <summary>
-  /// Concentrates boolean operation information into a single object.
-  /// </summary>
-
-  /// <summary>
   /// Permits access to the underlying mesh raw data structures in an unsafe way.
   /// </summary>
   /// <remarks>This lock object needs to be disposed before using the Mesh in other calculations and this can 
@@ -6454,6 +6460,88 @@ namespace Rhino.Geometry
         length = 0;
 
       return (MeshFace*)ptr_array.ToPointer();
+    }
+
+
+    /// <summary>
+    /// Retrieves a pointer to the raw mesh vertex colors array, which uses RGBA integers
+    /// or throws an exception if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not have vertex normals.</exception>
+    [CLSCompliant(false)]
+    public unsafe int* VertexColorsArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      if (m_mesh.VertexColors.Count == 0) throw new InvalidOperationException("The mesh does not have vertex colors.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 4);
+
+      if (ptr_array != null)
+        length = m_mesh.VertexColors.Count;
+      else
+        length = 0;
+
+      return (int*)ptr_array.ToPointer();
+    }
+
+    /* [Giulio 2023/9/29 - The RDK team should decide if this is going to link with m_S or m_T, and this needs to be 
+     * also in sync with the Mesh.TextureCoordinates property
+    
+    /// <summary>
+    /// Retrieves a pointer to the raw mesh texture coordinates array, which uses 2d points,
+    /// or throws an exception if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not have vertex normals.</exception>
+    [CLSCompliant(false)]
+    public unsafe Point2d* TextureCoordinatesArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+      if (m_mesh.TextureCoordinates.Count == 0) throw new InvalidOperationException("The mesh does not have vertex colors.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 5);
+
+      if (ptr_array != null)
+        length = m_mesh.VertexColors.Count;
+      else
+        length = 0;
+
+      return (Point2d*)ptr_array.ToPointer();
+    }
+    */
+
+    /// <summary>
+    /// Retrieves a pointer to the raw mesh face normals array, which uses vectors
+    /// defined with single precision floating point numbers, or throws an exception if none is available.
+    /// </summary>
+    /// <param name="length">The length of the array. This value is returned by reference (out in C#).</param>
+    /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
+    /// and item length-1 is the last valid one.</returns>
+    /// <exception cref="InvalidOperationException">The mesh does not have face normals.</exception>
+    [CLSCompliant(false)]
+    public unsafe Vector3f* FaceNormalsArray(out int length)
+    {
+      if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
+
+      int fnc = m_mesh.FaceNormals.Count;
+      if (fnc == 0) throw new InvalidOperationException("The mesh does not have face normals.");
+
+      IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 6);
+
+      if (ptr_array != null)
+        length = fnc;
+      else
+        length = 0;
+
+      return (Vector3f*)ptr_array.ToPointer();
     }
 
     void IDisposable.Dispose()
@@ -13410,3 +13498,82 @@ namespace Rhino.Runtime
     Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters);
   }
 }
+
+#if RHINO_SDK
+namespace Rhino.Geometry.Intersect
+{
+  /// <summary>
+  /// Provides a mechanism for lazily evaluating mesh data.
+  /// </summary>
+  /// <since>8.0</since>
+  public class MeshIntersectionCache : IDisposable
+  {
+    // ON_MeshIntersectionCache*
+    IntPtr m_ptr = IntPtr.Zero;
+
+    /// <summary>
+    /// Gets the const (immutable) pointer of this class.
+    /// </summary>
+    /// <returns>The const pointer.</returns>
+    /// <since>8.0</since>
+    internal IntPtr ConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Gets the non-const pointer (for modification) of this class.
+    /// </summary>
+    /// <returns>The non-const pointer.</returns>
+    /// <since>8.0</since>
+    internal IntPtr NonConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Provides a mechanism for lazily evaluating mesh data.
+    /// The implementation is private and subject to change.
+    /// </summary>
+    /// <since>8.0</since>
+    public MeshIntersectionCache()
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshIntersectionCache_New();
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    /// <since>8.0</since>
+    ~MeshIntersectionCache()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>8.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes the mesh intersection cache.
+    /// </summary>
+    /// <param name="disposing">If set to <c>true</c> dispose was called explicitly,
+    /// otherwise specify false if calling from a finalizer.
+    /// </param>
+    /// <since>8.0</since>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (m_ptr != IntPtr.Zero)
+        UnsafeNativeMethods.ON_MeshIntersectionCache_Delete(m_ptr);
+      m_ptr = IntPtr.Zero;
+    }
+  }
+
+}
+#endif

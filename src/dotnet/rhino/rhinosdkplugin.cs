@@ -18,6 +18,8 @@ using Rhino.Render.PostEffects;
 using Rhino.Render.CustomRenderMeshes;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Rhino.PlugIns
 {
@@ -2503,35 +2505,56 @@ namespace Rhino.PlugIns
       var start = DateTime.Now;
 
       // run compat on rhp and all dlls in same dir (in parallel)
-      var task = System.Threading.Tasks.Task.Run(() => RunCompat(path));
-      var tasks = new System.Threading.Tasks.Task<CompatResult>[dlls.Length + 1];
-      tasks[0] = task;
+      var tasks = new List<Action>(dlls.Length + 1);
+      var results = new List<CompatResult>(dlls.Length + 1);
+      var completedCount = 0;
+
+      void DoCheck(string filePath)
+      {
+        try
+        {
+          var res = RunCompat(filePath);
+          lock (results)
+          {
+            results.Add(res);
+          }
+        }
+        finally
+        {
+          Interlocked.Increment(ref completedCount);
+        }
+      }
+
+      // add plugin
+      tasks.Add(() => DoCheck(path));
+
+      // add all other assemblies in the same path
       for (int i = 0; i < dlls.Length; i++)
       {
         var dll_path = dlls[i];
-        tasks[i + 1] = System.Threading.Tasks.Task.Run(() => RunCompat(dll_path));
+        tasks.Add(() => DoCheck(dll_path));
       }
 
-      var incomplete_tasks = new List<System.Threading.Tasks.Task>(tasks);
+      // limit to 3 checks at a time otherwise it could hang when there's a lot of assemblies to check
+      Task.Run(() =>
+      {
+        var options = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+        Parallel.Invoke(options, tasks.ToArray());
+      });
 
       // run tasks with progress meter and keep rhino alive
-      int lower = 0;
-      int upper = tasks.Length;
-      Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, msg, false, true);
-      while (!System.Threading.Tasks.Task.WaitAll(tasks, 250))
+      Rhino.UI.StatusBar.ShowProgressMeter(completedCount, tasks.Count, msg, false, true);
+      var lastCompleted = 0;
+      while (completedCount < tasks.Count)
       {
-        Rhino.UI.StatusBar.UpdateProgressMeter(lower, true);
+        Rhino.UI.StatusBar.UpdateProgressMeter(completedCount, true);
         RhinoApp.Wait();
-        for (int i = incomplete_tasks.Count - 1; i >= 0; i--)
+        var completed = completedCount; // store value since it could change after this point
+        if (completed != lastCompleted)
         {
-          var t = incomplete_tasks[i];
-          if (t.IsCompleted)
-          {
-            incomplete_tasks.RemoveAt(i);
-          }
+          lastCompleted = completed;
+          HostUtils.DebugString($"- Tested {completed} / {tasks.Count}");
         }
-        lower = tasks.Length - incomplete_tasks.Count;
-        HostUtils.DebugString($"- Tested {lower} / {tasks.Length}");
       }
       Rhino.UI.StatusBar.HideProgressMeter();
       var time = DateTime.Now - start; // end timer
@@ -2539,14 +2562,13 @@ namespace Rhino.PlugIns
       // fail if one or more of the dlls failed
       bool result = true;
       var output = new StringBuilder();
-      foreach (var t in tasks)
+      foreach (var t in results)
       {
-        if (!t.Result.Success)
+        if (!t.Success)
         {
           result = false;
-          output.AppendLine(t.Result.Output);
+          output.AppendLine(t.Output);
           output.AppendLine();
-          break;
         }
       }
 
@@ -2561,7 +2583,10 @@ namespace Rhino.PlugIns
         var outputFile = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path) + ".txt");
 
         File.WriteAllText(outputFile, output.ToString());
-        RhinoApp.WriteLine($"  Details written to {outputFile}");
+        RhinoApp.WriteLine(Localization.LocalizeString("  Details written to {0}", 68), outputFile);
+
+        if (HostUtils.RunningInNetCore)
+          RhinoApp.WriteLine(Localization.LocalizeString("Some plugins may not be compatible with .NET Core.  To use .NET Framework, use the SetDotNetRuntime command.", 69));
       }
 
       // cache result
@@ -2580,12 +2605,14 @@ namespace Rhino.PlugIns
       public string Output;
     }
 
+    static void DebugStringSafe(string str) => RhinoApp.InvokeOnUiThread(new Action(() => HostUtils.DebugString(str)));
+
     private static CompatResult RunCompat(string path)
     {
       // get path to rhinocommon.  This may be under netcore\ when running in .NET 7.
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
       if (!File.Exists (rhino_common_path)) {
-        HostUtils.DebugString ($"RhinoCommon.dll not found: {rhino_common_path}");
+        DebugStringSafe($"RhinoCommon.dll not found: {rhino_common_path}");
         throw new FileNotFoundException ("RhinoCommon.dll not found");
       }
       
@@ -2594,11 +2621,11 @@ namespace Rhino.PlugIns
       // get path to compat that's next to the RhinoCommon we're using
       string compat_path = Path.Combine(Path.GetDirectoryName(rhino_common_path), compat_exe);
       if (!File.Exists (compat_path)) {
-        HostUtils.DebugString ($"{compat_exe} not found: {compat_path}");
+        DebugStringSafe($"{compat_exe} not found: {compat_path}");
         throw new FileNotFoundException ($"{compat_exe} not found");
       }
 
-      HostUtils.DebugString(path);
+      DebugStringSafe(path);
 
       string rhino_dotnet_path = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Rhino_DotNet.dll");
       if (!File.Exists(rhino_dotnet_path)) rhino_dotnet_path = null;
@@ -2657,7 +2684,7 @@ namespace Rhino.PlugIns
 
       proc.WaitForExit();
 
-      //HostUtils.DebugString ($"Compat output: {output}");
+      //DebugStringSafe ($"Compat output: {output}");
 
       if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
         || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
@@ -2668,7 +2695,7 @@ namespace Rhino.PlugIns
       // write error stream if needed
       var errout = sbError.ToString();
       if (!string.IsNullOrWhiteSpace(errout))
-        HostUtils.DebugString("ERROR: " + errout);
+        DebugStringSafe("ERROR: " + errout);
 
       if (proc.ExitCode == 112 )
         System.Diagnostics.Debug.Write(output);

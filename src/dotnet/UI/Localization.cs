@@ -516,6 +516,9 @@ namespace Rhino.UI
           {
             // This code is commonly called while working in theVisual Studio designer
             // and we want to try and not throw exceptions in order to show the winform
+            var commandLineLocale = UnsafeNativeMethods.RHC_RhLocaleSpecifiedOnCommandLine();
+            if (commandLineLocale > 0)
+              return g_language_id = (int)commandLineLocale;
 
             // 11 Feb 2021 John Morse
             // https://mcneel.myjetbrains.com/youtrack/issue/RH-62744

@@ -257,6 +257,18 @@ RH_C_FUNCTION ON_Extrusion* ON_Extrusion_CreateFrom3dCurve(const ON_Curve* pCons
   return rc;
 }
 
+RH_C_FUNCTION ON_Extrusion* ON_Extrusion_CreateFrom3dCurve2(const ON_Curve* pConstCurve, const ON_PLANE_STRUCT* pPlane, double height, bool cap)
+{
+  ON_Extrusion* rc = nullptr;
+  if (pConstCurve && pPlane)
+  {
+    ON_Plane plane = FromPlaneStruct(*pPlane);
+    rc = ON_Extrusion::CreateFrom3dCurve(*pConstCurve, &plane, height, cap);
+  }
+  return rc;
+}
+
+
 RH_C_FUNCTION const ON_Mesh* ON_Extrusion_GetMesh(const ON_Extrusion* pConstExtrusion, int meshtype)
 {
   return 
