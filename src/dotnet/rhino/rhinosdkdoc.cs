@@ -387,6 +387,18 @@ namespace Rhino
 
     #endregion
 
+    /// <summary>
+    /// MAC ONLY, always returns false on Windows.
+    /// Check to see if this document is in the process of being reverted
+    /// indicating it will get closed when the revert is completed.
+    /// </summary>
+    /// <returns>
+    /// MAC ONLY, always returns false on Windows.
+    /// Returns true if running on Mac and the document is being reverted to a
+    /// previous revision.
+    /// </returns>
+    internal bool IsReverting => UnsafeNativeMethods.CRhinoDoc_IsReverting(RuntimeSerialNumber);
+
     /// <since>7.0</since>
     public bool IsHeadless => UnsafeNativeMethods.CRhinoDoc_IsHeadless(RuntimeSerialNumber) != 0;
 
@@ -2468,7 +2480,7 @@ namespace Rhino
       UnsafeNativeMethods.RdkSelectContentsInEditor(RuntimeSerialNumber, pointer_to_id_list, append);
     }
 
-    #pragma warning disable 0618
+#pragma warning disable 0618
 
     /// <summary>
     /// Determines if custom render meshes will be built for this document (i.e. - GH meshes).
@@ -3847,7 +3859,7 @@ namespace Rhino
           m_linetype_table_event -= value;
           if (m_linetype_table_event == null)
           {
-            UnsafeNativeMethods.CRhinoEventWatcher_SetDimStyleTableEventCallback(null, Runtime.HostUtils.m_ew_report);
+            UnsafeNativeMethods.CRhinoEventWatcher_SetLinetypeTableEventCallback(null, Runtime.HostUtils.m_ew_report);
             g_on_linetype_table_event_callback = null;
             if (g_linetype_callback_gchandle.IsAllocated)
             {
@@ -5393,24 +5405,24 @@ namespace Rhino.DocObjects.Tables
     /// <param name="includePageViews">true if page-related views should be included; false otherwise.</param>
     /// <returns>A array of Rhino views. This array can be empty, but not null.</returns>
     /// <since>5.0</since>
+    /// <deprecated>8.0</deprecated>
+    [Obsolete]
     public RhinoView[] GetViewList(bool includeStandardViews, bool includePageViews)
     {
-      if (!includeStandardViews && !includePageViews)
-        return new RhinoView[0];
+      var vtf = ViewTypeFilter.All;
 
-      int count = UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, includeStandardViews, includePageViews);
-      if (count < 1)
-        return new RhinoView[0];
-      var views = new List<RhinoView>(count);
-      for (int i = 0; i < count; i++)
+      if (!includeStandardViews && includePageViews)
+        vtf = ViewTypeFilter.Page;
+
+      if (includeStandardViews && !includePageViews)
+        vtf = ViewTypeFilter.ModelStyleViews;
+
+      if (!includeStandardViews && !includePageViews)
       {
-        IntPtr ptr_view = UnsafeNativeMethods.CRhinoDoc_ViewListGet(Document.RuntimeSerialNumber, i);
-        RhinoView view = RhinoView.FromIntPtr(ptr_view);
-        if (view != null)
-          views.Add(view);
+        vtf = ViewTypeFilter.None;
       }
-      UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, false, false); // calling with false empties the static list used by ViewListGet
-      return views.ToArray();
+
+      return GetViewList(vtf);
     }
 
     /// <summary>
@@ -5419,9 +5431,9 @@ namespace Rhino.DocObjects.Tables
     /// <param name="filter">View types to include</param>
     /// <returns>An array of Rhino views. This array can be empty, but not null.</returns>
     /// <since>8.0</since>
-    public RhinoView[] GetViewList(Rhino.DocObjects.Tables.ViewTypeFilter filter)
+    public RhinoView[] GetViewList(ViewTypeFilter filter)
     {
-      int count = UnsafeNativeMethods.CRhinoDoc_ViewListBuildFilter(Document.RuntimeSerialNumber, filter);
+      int count = UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, (int)filter);
       if (count < 1)
         return new RhinoView[0];
       var views = new List<RhinoView>(count);
@@ -5432,14 +5444,14 @@ namespace Rhino.DocObjects.Tables
         if (view != null)
           views.Add(view);
       }
-      UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, false, false); // calling with false empties the static list used by ViewListGet
+      UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, (int)ViewTypeFilter.None); // calling with None empties the static list used by ViewListGet
       return views.ToArray();
     }
 
     /// <since>5.0</since>
     public RhinoView[] GetStandardRhinoViews()
     {
-      return GetViewList(true, false);
+      return GetViewList(ViewTypeFilter.Model);
     }
     
     /// <summary>
@@ -5605,14 +5617,14 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public IEnumerator<RhinoView> GetEnumerator()
     {
-      RhinoView[] views = GetViewList(true, true);
+      RhinoView[] views = GetViewList(ViewTypeFilter.All);
       return new List<RhinoView>(views).GetEnumerator();
     }
 
     /// <since>5.0</since>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     {
-      RhinoView[] views = GetViewList(true, true);
+      RhinoView[] views = GetViewList(ViewTypeFilter.All);
       return new List<RhinoView>(views).GetEnumerator();
     }
     #endregion

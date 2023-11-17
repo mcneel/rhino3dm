@@ -169,6 +169,7 @@ namespace Rhino.Render
     public Variant(IntPtr native)
     {
       m_native_ptr = native;
+      m_auto_delete = false;
     }
 
     #region constructors
@@ -519,10 +520,10 @@ namespace Rhino.Render
 
     public new string ToString()
     {
-      using (var sh = new StringHolder())
+      using (var sw = new StringWrapper())
       {
-        UnsafeNativeMethods.ON_XMLVariant_GetStringValue(ConstPointer(), sh.NonConstPointer());
-        return sh.ToString();
+        UnsafeNativeMethods.ON_XMLVariant_GetStringValue(ConstPointer(), sw.NonConstPointer);
+        return sw.ToString();
       }
     }
 

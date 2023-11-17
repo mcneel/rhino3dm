@@ -209,10 +209,8 @@ RH_C_FUNCTION int ON_Object_UserStringCount(const ON_Object* pObject)
 {
   int rc = 0;
   if( pObject )
-  {
-    ON_ClassArray<ON_wString> list;
-    rc = pObject->GetUserStringKeys(list);
-  }
+    rc = pObject->UserStringCount();
+
   return rc;
 }
 

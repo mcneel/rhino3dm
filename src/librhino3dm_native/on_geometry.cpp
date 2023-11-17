@@ -64,11 +64,14 @@ RH_C_FUNCTION bool ON_Geometry_GetTightBoundingBox(const ON_Geometry* ptr, ON_Bo
     if (!useXform || (xform && xform->IsIdentity()))
       xform = nullptr;
 
-    // 4-Jan-2022 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-66874
-    // Now that there is an official ON_Brep::GetTightBoundingBox method, we should use it.
-    const ON_Surface* pSrf = ON_Surface::Cast(ptr);
-    if (pSrf)
+    // 2023-10-10 : kike@mcneel.com
+    // ON_Extrusion also inherits from ON_Surface but implements GetTightBoundingBox itself.
+    // So we can avoid create a full Brep out of it.
+    if (ptr->ObjectType() == ON::surface_object)
     {
+      // 4-Jan-2022 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-66874
+      // Now that there is an official ON_Brep::GetTightBoundingBox method, we should use it.
+      const ON_Surface* pSrf = ON_Surface::Cast(ptr);
       ON_Brep brep;
       if (pSrf->BrepForm(&brep))
         rc = brep.GetTightBoundingBox(*bbox, false, xform);

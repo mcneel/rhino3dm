@@ -4,7 +4,7 @@
 enum class SkylightSetting : int
 {
   Enabled,
-  ShadowIntensity,
+  ShadowIntensity,     // ShadowIntensity is currently unused. See [SHADOW_INTENSITY_UNUSED]
   EnvironmentId,       // Obsolete; kept for backward compatibility only.
   EnvironmentOverride, // Obsolete; kept for backward compatibility only.
 };

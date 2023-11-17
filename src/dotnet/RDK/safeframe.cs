@@ -111,6 +111,7 @@ namespace Rhino.Render
     }
 
     /// <summary></summary>
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);

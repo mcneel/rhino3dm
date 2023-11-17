@@ -97,38 +97,39 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets a value that indicates whether this polyline is closed. 
-    /// <para>The polyline is considered to be closed if its start is 
-    /// identical to its endpoint.</para>
+    /// Test a polyline to see if it is closed.
     /// </summary>
-    /// <seealso cref="IsClosedWithinTolerance"/>
     /// <since>5.0</since>
     public bool IsClosed
     {
       get
       {
-        if (m_size <= 2) { return false; }
-        return First == Last;
+        using (var points = new SimpleArrayPoint3d(GetRange(0, Count)))
+        {
+          IntPtr const_ptr = points.ConstPointer();
+          return UnsafeNativeMethods.ON_Polyline_IsClosed(const_ptr, 0.0);
+        }
       }
     }
 
     /// <summary>
-    /// Determines whether the polyline is closed, provided a tolerance value.
+    /// Test a polyline to see if it is closed.
     /// </summary>
-    /// <param name="tolerance">If the distance between the start and end point of the polyline 
-    /// is less than tolerance, the polyline is considered to be closed.</param>
-    /// <returns>true if the polyline is closed to within tolerance, false otherwise.</returns>
+    /// <param name="tolerance">The tolerance.</param>
+    /// <returns>
+    /// Returns true if polyline has 4 or more points, the distance between the
+    /// start and end points is &lt;= tolerance, and there is a
+    /// point in the polyline whose distance from the start and end
+    /// points is &gt; tolerance.
+    /// </returns>
     /// <since>5.0</since>
     public bool IsClosedWithinTolerance(double tolerance)
     {
-      if (m_size <= 2) { return false; }
-
-      if (tolerance <= 0.0)
+      using (var points = new SimpleArrayPoint3d(GetRange(0, Count)))
       {
-        int rc = UnsafeNativeMethods.ONC_ComparePoint(3, false, First, Last);
-        return (rc == 0);
+        IntPtr const_ptr = points.ConstPointer();
+        return UnsafeNativeMethods.ON_Polyline_IsClosed(const_ptr, tolerance);
       }
-      return (First.DistanceTo(Last) <= tolerance);
     }
 
     /// <summary>

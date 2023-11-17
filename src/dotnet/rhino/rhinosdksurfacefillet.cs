@@ -688,6 +688,7 @@ namespace Rhino.Geometry
     /// be adjusted in some way before creating the fillet
     /// </summary>
     /// <returns></returns>
+    /// <since>8.0</since>
     public bool IsInitialized()
     {
       return UnsafeNativeMethods.RhIsSurfaceFilletInitialized(m_ptr);

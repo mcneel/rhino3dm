@@ -1,6 +1,6 @@
 {
   "name": "rhino3dm",
-  "version": "8.0.0-beta3",
+  "version": "8.0.1",
   "description": "Node.js package based on OpenNURBS with a RhinoCommon style",
   "main": "rhino3dm.js",
   "types": "rhino3dm.d.ts",
@@ -14,10 +14,10 @@
   "keywords": [
     "rhino3d"
   ],
-  "author": "Robert McNeel & Associates",
+  "author": "Robert McNeel & Associates and contributors",
   "license": "MIT",
   "bugs": {
-    "url": "https://mcneel.myjetbrains.com/youtrack/issues/RH3DM"
+    "url": "https://github.com/mcneel/rhino3dm/issues"
   },
   "homepage": "https://github.com/mcneel/rhino3dm#readme"
 }

@@ -40,10 +40,10 @@ RH_C_FUNCTION bool ON_V6_Dimension_GetTextXform( const ON_Dimension* constDimens
   return rc;
 }
 
-RH_C_FUNCTION void ON_V6_Dimension_UpdateDimensionText(const ON_Dimension* constDimension, const ON_DimStyle* dimstyle, ON::LengthUnitSystem units)
+RH_C_FUNCTION void ON_V6_Dimension_UpdateDimensionText(ON_Dimension* pDim, const ON_DimStyle* pStyle, ON::LengthUnitSystem units)
 {
-  if (constDimension && dimstyle)
-    constDimension->UpdateDimensionText(units, dimstyle);
+  if (pDim && pStyle)
+    pDim->UpdateDimensionText(units, pStyle);
 }
 
 RH_C_FUNCTION void ON_V6_Dimension_GetUserText(const ON_Dimension* constDimension, ON_wString* wstring)

@@ -3,6 +3,7 @@
 #if !defined(__APPLE__) && !defined(__ANDROID__)
 
 #if defined(RHINO3DM_BUILD)
+
 #pragma message( " --- linking required Win libs" )
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Gdi32.lib")

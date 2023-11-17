@@ -118,13 +118,13 @@ namespace Rhino.Runtime.InteropWrappers
     {
       IntPtr ptr_string_holder = IntPtr.Zero;
       if (_createStringHolder)
-      ptr_string_holder = UnsafeNativeMethods.StringHolder_New();
+        ptr_string_holder = UnsafeNativeMethods.StringHolder_New();
 
       IntPtr ptrstr = UnsafeNativeMethods.ON_wString_Get(pConstON_wString, ptr_string_holder );
       string rc = System.Runtime.InteropServices.Marshal.PtrToStringUni(ptrstr);
 
       if (ptr_string_holder!=IntPtr.Zero)
-      UnsafeNativeMethods.StringHolder_Delete(ptr_string_holder);
+        UnsafeNativeMethods.StringHolder_Delete(ptr_string_holder);
 
       return rc ?? String.Empty;
     }

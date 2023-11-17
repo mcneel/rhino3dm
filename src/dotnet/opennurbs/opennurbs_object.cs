@@ -582,6 +582,7 @@ namespace Rhino.Runtime
       }
     }
 
+#if RHINO_SDK
     /// <summary>
     /// Dictionary of custom information attached to this class. The dictionary is actually user
     /// data provided as an easy to use shareable set of information.
@@ -602,9 +603,14 @@ namespace Rhino.Runtime
       }
     }
 
-
+#endif
 
     #region user strings
+    /// <summary>
+    /// Returns the string " ". This is the string Rhino uses to empty out a user string entry.
+    /// </summary>
+    internal static string EmptyUserString { get; } = " ";
+
     /// <summary>
     /// Attach a user string (key,value combination) to this geometry.
     /// </summary>

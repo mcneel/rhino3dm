@@ -418,15 +418,14 @@ namespace Rhino.UI
 
 
     /// <summary>
-    /// Returns true when running on Mac which requires only objects of 
-    /// SupportedTypes.  Returns false when running on Windows which only
+    /// Returns false which only
     /// requires a single item of SupportedTypes to be selected.
     /// 
     /// Override if you wish to change the above behavior.
     /// </summary>
     /// <since>6.7</since>
     [CLSCompliant (false)]
-    public virtual bool AllObjectsMustBeSupported => Runtime.HostUtils.RunningOnOSX;
+    public virtual bool AllObjectsMustBeSupported => false;
 
     /// <summary>
     /// The page navigation control adds buttons in the order the pages are 

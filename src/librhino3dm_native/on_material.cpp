@@ -612,6 +612,7 @@ RH_C_FUNCTION void ON_Texture_Setuvw(ON_Texture* pTexture, ON_Xform* instanceXfo
     pTexture->m_uvw = *instanceXform;
 }
 
+
 RH_C_FUNCTION void ON_Texture_Repeat(const ON_Texture* pConstTexture, ON_2dVector* repeat)
 {
   if (pConstTexture && repeat)
@@ -647,6 +648,8 @@ RH_C_FUNCTION void ON_Texture_SetRotation(ON_Texture* pTexture, double rotation)
   if (pTexture)
     pTexture->SetRotation(rotation);
 }
+
+
 
 RH_C_FUNCTION void ON_Texture_GetAlphaBlendValues(const ON_Texture* pConstTexture, double* c, double* a0, double* a1, double* a2, double* a3)
 {

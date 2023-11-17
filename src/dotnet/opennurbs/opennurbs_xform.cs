@@ -394,6 +394,7 @@ namespace Rhino.Geometry
     /// <param name="repeat"></param>
     /// <param name="rotation"></param>
     /// <returns></returns>
+    /// <since>8.0</since>
     public static Transform TextureMapping(Vector3d offset, Vector3d repeat, Vector3d rotation)
     {
       Transform xf = new Transform();
@@ -986,12 +987,13 @@ namespace Rhino.Geometry
       return (TransformSimilarityType)rc;
     }
 
-        /// <summary>
+    /// <summary>
     /// Decomposition of a uvw transform into components
     /// </summary>
     /// <param name="offset">Offset</param>
     /// <param name="repeat">Repear</param>
     /// <param name="rotation">Rotation</param>
+    /// <since>8.0</since>
     [ConstOperation]
     public void DecomposeTextureMapping(out Vector3d offset, out Vector3d repeat, out Vector3d rotation)
     {
@@ -1466,7 +1468,7 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     object ICloneable.Clone()
     {
-      return Clone();
+      return this;
     }
 
     /// <summary>
@@ -1478,7 +1480,7 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Transform Clone()
     {
-      return new Transform(this);
+      return this;
     }
 
     #endregion

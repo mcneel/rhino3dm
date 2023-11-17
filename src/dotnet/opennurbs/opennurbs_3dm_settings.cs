@@ -2580,6 +2580,7 @@ namespace Rhino.Render
     /// <summary>
     /// The usage of a render environment.
     /// </summary>
+    /// <since>8.0</since>
     public enum EnvironmentUsage // Matches ON_3dmRenderSettings::EnvironmentUsage
     {
       /// <summary>
@@ -2601,6 +2602,7 @@ namespace Rhino.Render
     /// <summary>
     /// The purpose a render environment is being used for.
     /// </summary>
+    /// <since>8.0</since>
     public enum EnvironmentPurpose // Matches ON_3dmRenderSettings::EnvironmentPurpose
     {
       /// <summary>

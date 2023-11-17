@@ -206,6 +206,17 @@ namespace Rhino.Display
       set { UnsafeNativeMethods.CRhinoView_EnableDrawing(true, ref value); }
     }
 
+    /// <summary>
+    /// true if the view is being dynamically changed by mouse moves, arrow keys, trackballs, etc.
+    /// </summary>
+    public bool InDynamicViewChange
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoView_InDynamicViewChange(m_runtime_serial_number);
+      }
+    }
+
     /// <since>5.8</since>
     public double SpeedTest(int frameCount, bool freezeDrawList, int direction, double angleDeltaRadians)
     {

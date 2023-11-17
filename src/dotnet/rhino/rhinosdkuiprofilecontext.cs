@@ -929,7 +929,7 @@ namespace Rhino
       if (string.IsNullOrEmpty(intValueAsString)) return false;
       // Check to see if the Value is an integer
       int i;
-      if (!int.TryParse(intValueAsString, SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out i))
+      if (!int.TryParse(intValueAsString, SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out i))
         return false;
       // Check to see if the integer value maps to a enum value
       if (!Enum.IsDefined(type, i)) return false;
@@ -1170,35 +1170,35 @@ namespace Rhino
       return TryGetBool(GetValue(isDefault), out value);
     }
 
-    public static bool TryGetByte(string str, out byte value) => byte.TryParse(str, ParseNumerStyle, ParseNumberFormat, out value);
+    public static bool TryGetByte(string str, out byte value) => byte.TryParse(str, ParseNumberStyle, ParseNumberFormat, out value);
     public bool TryGetByte(bool isDefault, out byte value)
     {
       RuntimeType = typeof(byte);
       return TryGetByte(GetValue(isDefault), out value);
     }
 
-    public static bool TryGetInteger(string str, out int value) => int.TryParse(str, ParseNumerStyle, ParseNumberFormat, out value);
+    public static bool TryGetInteger(string str, out int value) => int.TryParse(str, ParseNumberStyle, ParseNumberFormat, out value);
     public bool TryGetInteger(bool isDefault, out int value)
     {
       RuntimeType = typeof(int);
       return TryGetInteger(GetValue(isDefault), out value);
     }
 
-    public static bool TryGetUnsignedInteger(string str, out uint value) => uint.TryParse(str, ParseNumerStyle, ParseNumberFormat, out value);
+    public static bool TryGetUnsignedInteger(string str, out uint value) => uint.TryParse(str, ParseNumberStyle, ParseNumberFormat, out value);
     public bool TryGetUnsignedInteger(bool isDefault, out uint value)
     {
       RuntimeType = typeof(uint);
       return TryGetUnsignedInteger(GetValue(isDefault), out value);
     }
 
-    public static bool TryGetDouble(string str, out double value) => double.TryParse(str, ParseNumerStyle, ParseNumberFormat, out value);
+    public static bool TryGetDouble(string str, out double value) => double.TryParse(str, ParseNumberStyle, ParseNumberFormat, out value);
     public bool TryGetDouble(bool isDefault, out double value)
     {
       RuntimeType = typeof(double);
       return TryGetDouble(GetValue(isDefault), out value);
     }
 
-    public static NumberStyles ParseNumerStyle => NumberStyles.Any;
+    public static NumberStyles ParseNumberStyle => NumberStyles.Any;
     //15 Feb 2018 S. Baer (RH-43828)
     // Always use CultureInfo.InvariantCulture instead of attempting to construct a 1033 CultureInfo.
     // A 1033 CultureInfo on some people's computers appear to be able to have their OS tweaked in a
@@ -1316,10 +1316,10 @@ namespace Rhino
         return false;
 
       Int32 alpha, red, green, blue;
-      if (Int32.TryParse(argb[0], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out alpha)
-          && Int32.TryParse(argb[1], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out red)
-          && Int32.TryParse(argb[2], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out green)
-          && Int32.TryParse(argb[3], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out blue))
+      if (Int32.TryParse(argb[0], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out alpha)
+          && Int32.TryParse(argb[1], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out red)
+          && Int32.TryParse(argb[2], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out green)
+          && Int32.TryParse(argb[3], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out blue))
       {
         try
         {
@@ -1369,9 +1369,9 @@ namespace Rhino
         return false;
 
       double x, y, z;
-      if (double.TryParse(point[0], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out x)
-          && double.TryParse(point[1], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out y)
-          && double.TryParse(point[2], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out z))
+      if (double.TryParse(point[0], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out x)
+          && double.TryParse(point[1], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out y)
+          && double.TryParse(point[2], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out z))
       {
         value = new Point3d(x, y, z);
         return true;
@@ -1395,8 +1395,8 @@ namespace Rhino
         return false;
 
       int width, height;
-      if (int.TryParse(size[0], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out width)
-          && int.TryParse(size[1], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out height))
+      if (int.TryParse(size[0], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out width)
+          && int.TryParse(size[1], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out height))
       {
         value = new Size(width, height);
         return true;
@@ -1436,10 +1436,10 @@ namespace Rhino
 
       int x, y, width, height;
 
-      if (int.TryParse(rect[0], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out x)
-          && int.TryParse(rect[1], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out y)
-          && int.TryParse(rect[2], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out width)
-          && int.TryParse(rect[3], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out height))
+      if (int.TryParse(rect[0], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out x)
+          && int.TryParse(rect[1], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out y)
+          && int.TryParse(rect[2], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out width)
+          && int.TryParse(rect[3], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out height))
       {
         value = new Rectangle(x, y, width, height);
         return true;
@@ -1457,10 +1457,10 @@ namespace Rhino
 
       int l, t, b, r;
 
-      if (int.TryParse(rect[0], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out l)
-          && int.TryParse(rect[1], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out t)
-          && int.TryParse(rect[2], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out b)
-          && int.TryParse(rect[3], SettingValue.ParseNumerStyle, SettingValue.ParseNumberFormat, out r))
+      if (int.TryParse(rect[0], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out l)
+          && int.TryParse(rect[1], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out t)
+          && int.TryParse(rect[2], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out b)
+          && int.TryParse(rect[3], SettingValue.ParseNumberStyle, SettingValue.ParseNumberFormat, out r))
       {
         value = Rectangle.FromLTRB(l, t, b, r);
         return true;
@@ -1966,16 +1966,7 @@ namespace Rhino
   {
     private static Runtime.ISettingsService g_service_implementation;
     /// <since>6.1</since>
-    internal static Runtime.ISettingsService Service
-    {
-      get
-      {
-        if (g_service_implementation != null)
-          return g_service_implementation;
-        g_service_implementation = Runtime.HostUtils.GetPlatformService<Runtime.ISettingsService>();
-        return (g_service_implementation ?? (g_service_implementation = Runtime.FileSettingsService.Service));
-      }
-    }
+    internal static Runtime.ISettingsService Service => g_service_implementation ?? (g_service_implementation = Runtime.FileSettingsService.Service);
 
     readonly Dictionary<string, SettingValue> m_settings;
     readonly Dictionary<string, Delegate> m_settings_validators;
@@ -2325,6 +2316,26 @@ namespace Rhino
       if (pluginId == Guid.Empty)
         throw new System.ComponentModel.InvalidEnumArgumentException($"pluginId Can not be Guid.Empty");
       PersistentSettingsManager manager = PersistentSettingsManager.Create(pluginId);
+      // 2 August 2023 - John Morse
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-75991
+      // Settings on Mac no longer reference the preferences PLIST file. They
+      // use the same XML file scheme as on Windows. This will check to see
+      // if the settings system was previously initialized.
+      if (UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(pluginId) > 0)
+      {
+        var settings = manager.PluginSettings.AddChild("Private");
+        const string key = "SettingsInitialized";
+        if (!settings.GetBool(key, false))
+        {
+          // The settings system was not previously initialized or the XML files
+          // were deleted or reset so mark them as initilized now
+          settings.SetBool(key, true);
+          settings.HideSettingFromUserInterface(key);
+          // Since settings have been reset we should also reset the preferences
+          // PLIST file at this time
+          UnsafeNativeMethods.RHC_ResetPersistentSettings();
+        }
+      }
       return manager.PluginSettings;
 #else
       return null;

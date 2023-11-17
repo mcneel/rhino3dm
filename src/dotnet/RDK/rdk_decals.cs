@@ -75,6 +75,7 @@ namespace Rhino.Render
     {
       // The document is only needed for rendering, specifically for calling Decal.TextureRenderCRC.
       m_rhino_doc_serial = doc_sn;
+
       m_decal  = decal; // Owned by attributes at the calling site.
       m_decals = decals;
     }
@@ -197,10 +198,18 @@ namespace Rhino.Render
 #endif
 
     /// <summary>
-    /// Gets the mapping of the decal.
+    /// Gets the decal's mapping.
     /// </summary>
     /// <since>5.10</since>
-    public DecalMapping DecalMapping
+    /// <deprecated>8.0</deprecated>
+    [Obsolete ("Use Mapping instead")]
+    public DecalMapping DecalMapping { get => Mapping; }
+
+    /// <summary>
+    /// Gets the decal's mapping.
+    /// </summary>
+    /// <since>8.0</since>
+    public DecalMapping Mapping
     {
       get
       {
@@ -220,7 +229,15 @@ namespace Rhino.Render
     /// Gets the decal's projection. Used only when mapping is planar.
     /// </summary>
     /// <since>5.10</since>
-    public DecalProjection DecalProjection
+    /// <deprecated>8.0</deprecated>
+    [Obsolete ("Use Projection instead")]
+    public DecalProjection DecalProjection { get => Projection; }
+
+    /// <summary>
+    /// Gets the decal's projection. Used only when mapping is planar.
+    /// </summary>
+    /// <since>8.0</since>
+    public DecalProjection Projection
     {
       get
       {
@@ -496,7 +513,7 @@ namespace Rhino.Render
       var up_vector = decal.VectorUp;
       var across_vector = decal.VectorAcross;
       UnsafeNativeMethods.CDecalCreateParams_SetFrame(create_params_ptr, ref origin, ref up_vector, ref across_vector);
-      UnsafeNativeMethods.CDecalCreateParams_SetMap(create_params_ptr, decal.TextureInstanceId, (int)decal.DecalMapping, (int)decal.DecalProjection, decal.MapToInside, decal.Transparency);
+      UnsafeNativeMethods.CDecalCreateParams_SetMap(create_params_ptr, decal.TextureInstanceId, (int)decal.Mapping, (int)decal.Projection, decal.MapToInside, decal.Transparency);
       UnsafeNativeMethods.CDecalCreateParams_SetCylindricalAndSpherical(create_params_ptr, decal.Height, decal.Radius, decal.StartLatitude, decal.EndLatitude, decal.StartLongitude, decal.EndLongitude);
       double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
       decal.UVBounds(ref min_u, ref min_v, ref max_u, ref max_v);
@@ -515,6 +532,7 @@ namespace Rhino.Render
     }
 
     /// <since>5.10</since>
+    /// <deprecated>8.0</deprecated>
     [Obsolete("Use RemoveAllDecals")]
     public void Clear() { RemoveAllDecals(); }
 
@@ -565,8 +583,8 @@ namespace Rhino.Render
   internal class DecalEnumerator : IEnumerator<Decal>
   {
     private int m_index = -1;
-    private readonly ObjectAttributes m_attr;
     private readonly uint m_rhino_doc_serial = 0;
+    private readonly ObjectAttributes m_attr;
 
     internal DecalEnumerator(ObjectAttributes attr, uint rhino_doc_sn)
     {

@@ -158,6 +158,7 @@ namespace Rhino.Render
       Dispose(false);
     }
 
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);
@@ -417,6 +418,7 @@ namespace Rhino.Render
       Dispose(false);
     }
 
+    /// <since>8.0</since>
     public void Dispose()
     {
       Dispose(true);

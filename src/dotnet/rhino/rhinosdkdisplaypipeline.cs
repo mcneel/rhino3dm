@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 #if RHINO_SDK
 using System;
+using System.Linq;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.UI;
@@ -65,6 +66,19 @@ namespace Rhino.Display
     internal static void DeleteNativePointer(IntPtr ptrPen)
     {
       UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrPen);
+    }
+
+    /// <summary>
+    /// Create a duplicate of this display pen.
+    /// </summary>
+    /// <returns>An exact duplicate of this display pen.</returns>
+    /// <since>8.0</since>
+    public DisplayPen Duplicate()
+    {
+      // Since DisplayPen getters always return value types or copies of its values,
+      // and also setters never keep a reference to an external object.
+      // we can implement Duplicate like a MemberwiseClone.
+      return (DisplayPen) MemberwiseClone();
     }
 
     /// <summary>
@@ -142,20 +156,15 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public void SetPattern(System.Collections.Generic.IEnumerable<float> dashesAndGaps)
     {
-      if (dashesAndGaps==null)
+      if (dashesAndGaps != null)
       {
-        _pattern = null;
-        return;
+        _pattern = dashesAndGaps.ToArray();
+
+        if (_pattern.Length > 0)
+          return;
       }
 
-      var pattern = new System.Collections.Generic.List<float>(dashesAndGaps);
-      if (pattern.Count == 0)
-      {
-        _pattern = null;
-        return;
-      }
-
-      _pattern = pattern;
+      _pattern = null;
     }
 
     /// <summary>
@@ -165,9 +174,10 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public float[] PatternAsArray()
     {
-      if (_pattern == null)
-        return new float[0];
-      return _pattern.ToArray();
+      if (_pattern == null || _pattern.Length == 0)
+        return Array.Empty<float>();
+      else
+        return (float[]) _pattern.Clone();
     }
 
     /// <summary>
@@ -214,14 +224,16 @@ namespace Rhino.Display
     public Point2f[] TaperAsArray()
     {
       if (_taperThickness<0 && _endThickness<0)
-        return new Point2f[0];
+        return Array.Empty<Point2f>();
+
       if (_taperThickness<0 || _taperPosition<=0 || _taperPosition>=1)
         return new Point2f[2] { new Point2f(0,Thickness), new Point2f(1, _endThickness)};
+
       float end = _endThickness < 0 ? Thickness : _endThickness;
       return new Point2f[3] { new Point2f(0,Thickness), new Point2f(_taperPosition, _taperThickness), new Point2f(1, _endThickness) };
     }
 
-    System.Collections.Generic.List<float> _pattern;
+    float[] _pattern = null;
     float _taperPosition = 0.5f;
     float _taperThickness = -1;
     float _endThickness = -1;

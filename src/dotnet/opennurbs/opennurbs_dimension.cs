@@ -40,6 +40,19 @@ namespace Rhino.Geometry
       return xform;
     }
 
+    /// <summary>
+    /// Remakes dimension text geometry object and sets it on the dimension.
+    /// </summary>
+    /// <param name="style">The dimension style.</param>
+    /// <param name="units">The unit system.</param>
+    /// <since>7.34</since>
+    public void UpdateDimensionText(DimensionStyle style, UnitSystem units)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_const_dimstyle = style.ConstPointer();
+      UnsafeNativeMethods.ON_V6_Dimension_UpdateDimensionText(ptr_this, ptr_const_dimstyle, units);
+    }
+
     /// <since>6.0</since>
     public bool UseDefaultTextPoint
     {
@@ -1057,6 +1070,61 @@ namespace Rhino.Geometry
       GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
     }
     #endregion properties originating from dim style that can be overridden
+
+#if RHINO_SDK
+    /// <summary>
+    /// Explodes this dimension into its geometric components.
+    /// </summary>
+    /// <returns>
+    /// An array of Curve and TextEntity objects. If the leader is using user-defined arrowheads, InstanceReferenceGeometry objects will be included.
+    /// </returns>
+    /// <since>8.0</since>
+    public GeometryBase[] Explode()
+    {
+      IntPtr ptr_const_parent = IntPtr.Zero;
+      IntPtr ptr_const_leader = IntPtr.Zero;
+      IntPtr ptr_const_dimstyle = IntPtr.Zero;
+
+      DimensionObject parent = _GetConstObjectParent() as DimensionObject;
+      if (null != parent)
+        ptr_const_parent = parent.ConstPointer();
+      else
+        ptr_const_leader = ConstPointer();
+
+      var dimstyle = DimensionStyle;
+      if (null == parent)
+        ptr_const_dimstyle = dimstyle.ConstPointer();
+
+      using (SimpleArrayCurvePointer curve_array = new SimpleArrayCurvePointer())
+      using (SimpleArrayGeometryPointer geometry_array = new SimpleArrayGeometryPointer())
+      {
+        IntPtr ptr_curves = curve_array.NonConstPointer();
+        IntPtr ptr_geometry = geometry_array.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoExplodeDimension(ptr_const_parent, ptr_const_leader, ptr_const_dimstyle, ptr_curves, ptr_geometry);
+
+        List<GeometryBase> out_geometry = new List<GeometryBase>();
+        if (rc)
+        {
+          var curves = curve_array.ToNonConstArray();
+          foreach (var c in curves)
+            out_geometry.Add(c);
+
+          var geometry = geometry_array.ToNonConstArray();
+          foreach (var g in geometry)
+          {
+            if (g is AnnotationBase annotation && null != parent)
+              annotation.SetParentDimensionStyle(ParentDimensionStyle);
+            out_geometry.Add(g);
+          }
+        }
+
+        GC.KeepAlive(dimstyle);
+        GC.KeepAlive(parent);
+
+        return out_geometry.ToArray();
+      }
+    }
+#endif // RHINO_SDK
   }
 }
 
@@ -1396,6 +1464,11 @@ namespace Rhino.Geometry
     protected AngularDimension(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+    }
+
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new RadialDimension(IntPtr.Zero, null);
     }
 
     /// <summary>
@@ -2044,6 +2117,11 @@ namespace Rhino.Geometry
     {
     }
 
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new RadialDimension(IntPtr.Zero, null);
+    }
+
     /// <since>6.0</since>
     public new AnnotationType AnnotationType
     {
@@ -2417,6 +2495,11 @@ namespace Rhino.Geometry
     {
     }
 
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new OrdinateDimension(IntPtr.Zero, null);
+    }
+
     /// <summary>
     /// Constructs an ordinate dimension from parameters.
     /// </summary>
@@ -2666,6 +2749,11 @@ namespace Rhino.Geometry
     protected Centermark(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+    }
+
+    internal override GeometryBase DuplicateShallowHelper()
+    {
+      return new Centermark(IntPtr.Zero, null);
     }
 
     /// <summary>

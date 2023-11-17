@@ -1,9 +1,9 @@
-using System;
-using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Runtime;
-//don't make serializable yet.
+using Rhino.Runtime.InteropWrappers;
+using System;
+using System.Runtime.Serialization;
 
 namespace Rhino.Geometry
 {
@@ -145,6 +145,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the full file path for linked instance definitions.
     /// </summary>
+    /// <since>8.0</since>
     public string SourceArchive
     {
       get
@@ -225,6 +226,7 @@ namespace Rhino.Geometry
   /// <summary>
   /// Represents a reference to the geometry in a block definition.
   /// </summary>
+  [Serializable]
   public class InstanceReferenceGeometry : GeometryBase
   {
     /// <summary>
@@ -245,6 +247,16 @@ namespace Rhino.Geometry
     internal InstanceReferenceGeometry(IntPtr nativePointer, object parent)
       : base(nativePointer, parent, -1)
     { }
+
+    /// <summary>
+    /// Protected constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected InstanceReferenceGeometry(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
 
     /// <summary>
     /// The unique id for the parent instance definition of this instance reference.

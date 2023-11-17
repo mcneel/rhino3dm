@@ -28,8 +28,8 @@ xcode_logging = False
 verbose = False
 overwrite = False
 popen_shell_mode = False
-valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
-platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript' }
+valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python", "nodejs"]
+platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript', 'nodejs':'NodeJS' }
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
@@ -488,6 +488,7 @@ def setup_android():
 def setup_js():
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("js").lower()))
     item_to_check = os.path.abspath(os.path.join(target_path, "Makefile"))
+    print(item_to_check)
 
     if not overwrite_check(item_to_check):
         return False
@@ -515,13 +516,18 @@ def setup_js():
 
 
     os.chdir(target_path)
+    cmakecommand = "emcmake cmake "
+
+    if node:
+        print("generating node build")
+        cmakecommand = cmakecommand + "-D NODE=TRUE "
     try:
         if debug:
             print("generating debug build")
-            command = "emcmake cmake -D CMAKE_BUILD_TYPE=Debug " + src_folder
+            command = cmakecommand + "-D CMAKE_BUILD_TYPE=Debug " + src_folder
         else:
             print("generating release build")
-            command = "emcmake cmake " + src_folder
+            command = cmakecommand + src_folder
         if _platform == "win32" or _platform == "win64":
             p = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode)
         else:
@@ -549,6 +555,8 @@ def setup_js():
 
     return setup_did_succeed(item_to_check)
 
+def setup_nodejs():
+    return setup_js()
 
 def setup_handler(platform_target):
     if not os.path.exists(build_folder):
@@ -624,6 +632,11 @@ def main():
 
     global debug
     debug = args.debug
+
+    global node
+    node = False
+    if "nodejs" in args.platform:
+        node = True
 
     global lib
     lib = args.library

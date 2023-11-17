@@ -98,6 +98,8 @@ namespace Rhino.Runtime
       if (index > 0)
         return null;
 
+      List<string> potential_files;
+
       lock (context)
       {
         // The resolver is commonly called multiple times with the same search name.
@@ -127,9 +129,7 @@ namespace Rhino.Runtime
             return loaded_assembly;
         }
 
-
-
-        List<string> potential_files = new List<string>();
+        potential_files = new List<string>();
 
         // Collect all potential files in the plug-in directories.
 #if RHINO_SDK
@@ -221,27 +221,34 @@ namespace Rhino.Runtime
           // in case any other errors pop up (See RH-66941)
           HostUtils.ExceptionReport("FuzzyComparer", ex);
         }
+      }
+      
+      // Curtis: RH-75970
+      // Don't execute this within the context lock, we can find ourselves back
+      // here when loading from different threads.
 
-        // 23 August 2012 S. Baer
-        // Make sure that at least part of the searchname matches part of the filename
-        // Just use the first 5 characters as a required pattern in the filename
-        const int length_match = 5;
-        string must_be_in_filename = searchname.Substring(0, Math.Min(searchname.Length, length_match));
+      // 23 August 2012 S. Baer
+      // Make sure that at least part of the searchname matches part of the filename
+      // Just use the first 5 characters as a required pattern in the filename
+      const int length_match = 5;
+      string must_be_in_filename = searchname.Substring(0, Math.Min(searchname.Length, length_match));
 
-        Assembly asm = null;
-        foreach (string file in potential_files)
-        {
-          if (file.IndexOf(must_be_in_filename, StringComparison.InvariantCultureIgnoreCase) == -1)
-            continue;
+      Assembly asm = null;
+      foreach (string file in potential_files)
+      {
+        if (file.IndexOf(must_be_in_filename, StringComparison.InvariantCultureIgnoreCase) == -1)
+          continue;
 
-          asm = TryLoadAssembly(context, file, searchname);
-          if (asm != null)
-            break;
-        }
+        asm = TryLoadAssembly(context, file, searchname);
+        if (asm != null)
+          break;
+      }
+
+      lock (context)
+      {
 
         // Keep the results around so we don't keep doing the same job over and over.
-        context.Assemblies.Add(args.Name, asm);
-
+        context.Assemblies[args.Name] = asm;
         return asm;
       }
     }
@@ -249,8 +256,11 @@ namespace Rhino.Runtime
     private static Assembly TryLoadAssembly(ResolverContext context, string filename, string searchname)
     {
       // Don't try to load an assembly that already failed to load in the past.
-      if (context.LoadFailures.Contains(filename))
-        return null;
+      lock (context.LoadFailures)
+      {
+        if (context.LoadFailures.Contains(filename))
+          return null;
+      }
 
       // David: restrict loading to known file-types. Steve, you'll need to handle rhp loading as I have no idea how.
       if (filename.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) //TODO: implement .rhp loading
@@ -268,8 +278,11 @@ namespace Rhino.Runtime
         }
         catch
         {
-          // If the assembly fails to load, don't try again.
-          context.LoadFailures.Add(filename);
+          lock (context.LoadFailures)
+          {
+            // If the assembly fails to load, don't try again.
+            context.LoadFailures.Add(filename);
+          }
         }
       }
 
@@ -322,7 +335,7 @@ namespace Rhino.Runtime
           return Assembly.ReflectionOnlyLoad(File.ReadAllBytes(path));
         else
           return Rhino.Runtime.HostUtils.LoadAssemblyFrom(path);
-#else
+#else 
           return Rhino.Runtime.HostUtils.LoadAssemblyFrom(path);
 #endif
       }

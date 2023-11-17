@@ -186,6 +186,9 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.RenderPlugIn.RenderMaterialUiEventHandler materialUi
     );
 
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void RHC_Rdk_UiHolder_SetPlatformCallbacks(Rhino.UI.Controls.CollapsibleSectionHolderImpl.CREATEFROMCPPPROC cpp);
+
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoRenderPlugIn_SetRdkCallbacks(
     Rhino.PlugIns.RenderPlugIn.SupportsFeatureCallback supportsFeatureCallback,
@@ -918,7 +921,7 @@ internal partial class UnsafeNativeMethods
       Rhino.RDK.Delegates.GET_BOOL_PROC ish,
       Rhino.RDK.Delegates.GET_BOOL_PROC ien,
       Rhino.RDK.Delegates.SET_BOOL_PROC e,
-      Rhino.RDK.Delegates.VOID_PROC u,
+      Rhino.RDK.Delegates.FLAGS_PROC u,
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.ATTACHSECTIONPROC a,
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.ATTACHSECTIONPROC de,
       Rhino.RDK.Delegates.GET_INT_PROC sc,

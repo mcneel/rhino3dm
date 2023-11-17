@@ -623,7 +623,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Copies the point values of another point cloud into this one.
+    /// Merges, or appends, a specified point cloud into this one.
     /// </summary>
     /// <param name="other">PointCloud to merge with this one.</param>
     /// <since>5.0</since>
@@ -999,6 +999,107 @@ namespace Rhino.Geometry
 
       return mesh;
     }
+
+    /// <summary>
+    /// Creates planar curves by intersecting a plane with a point cloud.
+    /// </summary>
+    /// <param name="plane">The plane to intersect with</param>
+    /// <param name="absoluteTolerance">The document's model absolute tolerance</param>
+    /// <returns>The intersection curves if successful, an empty array if unsuccessful.</returns>
+    /// <since>8.0</since>
+    public Curve[] CreateSectionCurve(Plane plane, double absoluteTolerance)
+    {
+      return CreateSectionCurve(plane, absoluteTolerance, 0.1, 0.05, true, true, true, 0.01);
+    }
+
+    /// <summary>
+    /// Creates a planar curve by intersecting a plane with a point cloud.
+    /// </summary>
+    /// <param name="plane">The plane to intersect with</param>
+    /// <param name="absoluteTolerance">The document's model absolute tolerance</param>
+    /// <param name="maxDistance">
+    /// Maximum distance to plane. The thickness of the "slab" around the plane from which sample points are taken.
+    /// Those sample points are projected to the section plane and a polyline is found that connects them.
+    /// This distance depends on the size of the point cloud and the spacing of the points.
+    /// </param>
+    /// <param name="minDistance">
+    /// Minimum distance between points. A threshold for the minimum spacing between adjacent sample points.
+    /// If there are points closer than that, some are not used.
+    /// </param>
+    /// <param name="openCurves">True for open, false for closed.</param>
+    /// <param name="createSpline">Creates a smooth curve. You can create both a curve and a polyline.</param>
+    /// <param name="createPolyline">Creates a polyline. You can create both a curve and a polyline.</param>
+    /// <param name="fitTolerance">The tolerance used to fit the curve through the polyline.</param>
+    /// <returns>The intersection curves if successful, an empty array if unsuccessful.</returns>
+    /// <since>8.0</since>
+    public Curve[] CreateSectionCurve(Plane plane, double absoluteTolerance, double maxDistance, double minDistance, bool openCurves, bool createSpline, bool createPolyline, double fitTolerance)
+    {
+      if (!createSpline && !createPolyline)
+        return Array.Empty<Curve>();
+
+      using (var out_curves = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_this = ConstPointer();
+        IntPtr ptr_out_curves = out_curves.NonConstPointer();
+        int curve_count = UnsafeNativeMethods.RHC_RhinoCreatePointCloudSection(ptr_this, ref plane, absoluteTolerance, maxDistance, minDistance, openCurves, createSpline, createPolyline, fitTolerance, ptr_out_curves);
+        if (curve_count > 0)
+          return out_curves.ToNonConstArray();
+        return Array.Empty<Curve>();
+      }
+    }
+
+    /// <summary>
+    /// Creates a planar curves by intersecting a plane with a point cloud.
+    /// </summary>
+    /// <param name="contourStart">Start point for vector that is normal to contour plane.</param>
+    /// <param name="contourEnd">End point for vector that is normal to contour plane.</param>
+    /// <param name="interval">he interval or distance between contours.</param>
+    /// <param name="absoluteTolerance">The document's model absolute tolerance</param>
+    /// <returns>The intersection curves if successful, an empty array if unsuccessful.</returns>
+    /// <since>8.0</since>
+    public Curve[] CreateContourCurves(Point3d contourStart, Point3d contourEnd, double interval, double absoluteTolerance)
+    {
+      return CreateContourCurves(contourStart, contourEnd, interval, absoluteTolerance, 0.1, 0.05, true, true, true, 0.01);
+    }
+
+    /// <summary>
+    /// Creates a planar curves by intersecting a plane with a point cloud.
+    /// </summary>
+    /// <param name="startPoint">Start point for vector that is normal to contour plane.</param>
+    /// <param name="endPoint">End point for vector that is normal to contour plane.</param>
+    /// <param name="interval">he interval or distance between contours.</param>
+    /// <param name="absoluteTolerance">The document's model absolute tolerance</param>
+    /// <param name="maxDistance">
+    /// Maximum distance to plane. The thickness of the "slab" around the plane from which sample points are taken.
+    /// Those sample points are projected to the section plane and a polyline is found that connects them.
+    /// This distance depends on the size of the point cloud and the spacing of the points.
+    /// </param>
+    /// <param name="minDistance">
+    /// Minimum distance between points. A threshold for the minimum spacing between adjacent sample points.
+    /// If there are points closer than that, some are not used.
+    /// </param>
+    /// <param name="openCurves">True for open, false for closed.</param>
+    /// <param name="createSpline">Creates a smooth curve. You can create both a curve and a polyline.</param>
+    /// <param name="createPolyline">Creates a polyline. You can create both a curve and a polyline.</param>
+    /// <param name="fitTolerance">The tolerance used to fit the curve through the polyline.</param>
+    /// <returns>The intersection curves if successful, an empty array if unsuccessful.</returns>
+    /// <since>8.0</since>
+    public Curve[] CreateContourCurves(Point3d startPoint, Point3d endPoint, double interval, double absoluteTolerance, double maxDistance, double minDistance, bool openCurves, bool createSpline, bool createPolyline, double fitTolerance)
+    {
+      if (!createSpline && !createPolyline)
+        return Array.Empty<Curve>();
+
+      using (var out_curves = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_this = ConstPointer();
+        IntPtr ptr_out_curves = out_curves.NonConstPointer();
+        int curve_count = UnsafeNativeMethods.RHC_RhinoCreatePointCloudContours(ptr_this, startPoint, endPoint, interval, absoluteTolerance, maxDistance, minDistance, openCurves, createSpline, createPolyline, fitTolerance, ptr_out_curves);
+        if (curve_count > 0)
+          return out_curves.ToNonConstArray();
+        return Array.Empty<Curve>();
+      }
+    }
+
 #endif
 
     /// <summary>

@@ -140,6 +140,19 @@ RH_C_FUNCTION bool ON_3dVector_PerpendicularTo( ON_3dVector* v, ON_3DVECTOR_STRU
   return rc;
 }
 
+RH_C_FUNCTION bool ON_3dVector_PerpendicularTo2(ON_3dVector* v, ON_3DPOINT_STRUCT p0, ON_3DPOINT_STRUCT p1, ON_3DPOINT_STRUCT p2)
+{
+  bool rc = false;
+  if (v)
+  {
+    ON_3dPoint P0(p0.val);
+    ON_3dPoint P1(p1.val);
+    ON_3dPoint P2(p2.val);
+    rc = v->PerpendicularTo(P0, P1, P2);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION int ONC_ComparePoint(int dim, bool is_rat, ON_3DPOINT_STRUCT a, ON_3DPOINT_STRUCT b)
 {
   const ON_3dPoint* _a = (const ON_3dPoint*)&a;
@@ -147,8 +160,6 @@ RH_C_FUNCTION int ONC_ComparePoint(int dim, bool is_rat, ON_3DPOINT_STRUCT a, ON
   int rat = is_rat?1:0;
   return ON_ComparePoint(dim, rat, &(_a->x), &(_b->x));
 }
-
-
 
 // needs to get moved to on_line.cpp
 RH_C_FUNCTION bool ON_Line_ClosestPointTo( ON_3DPOINT_STRUCT testPoint, ON_3DPOINT_STRUCT from, ON_3DPOINT_STRUCT to, double* t)

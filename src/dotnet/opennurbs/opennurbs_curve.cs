@@ -809,7 +809,6 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
-#endif //RHINO_SDK
 
     /// <summary>
     /// Constructs a curve from a set of control-point locations.
@@ -842,7 +841,7 @@ namespace Rhino.Geometry
     {
       return CreateControlPointCurve(points, 3);
     }
-
+#endif //RHINO_SDK
     /// <summary>
     /// Joins a collection of curve segments together.
     /// </summary>
@@ -4480,7 +4479,7 @@ namespace Rhino.Geometry
       double cLength = GetLength();
       if (IsClosed || length >= cLength)
         return null;
-      if (side == CurveEnd.Both && length >= 2.0 * cLength)
+      if (side == CurveEnd.Both && 2.0 * length >= cLength)
         return null;
 
       double t0 = Domain[0];

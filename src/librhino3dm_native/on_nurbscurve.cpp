@@ -40,26 +40,59 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
     return false;
   return crv->CreatePeriodicUniformNurbs(dim, order, count, pts, knot_delta);
 }
-
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {
   if (count < 2 || nullptr == points)
     return nullptr;
 
-  int order = (count <= degree) ? count : degree + 1;
+  // 27-Apr-2023 Dale Fugier
+  // Made this work more-or-less like the CurveThroughPolyline command
+
+  ON_Polyline pline;
+  pline.Append(count, points);
+  bool bClosed = pline.IsClosed();
+  count = pline.Count();
+
+  // clamp
+  degree = RHINO_CLAMP(degree, 1, RhMaxNurbsDegree());
+  
+  // control point curve
+  degree = (count <= degree) ? count - 1 : degree;
+
   ON_NurbsCurve* pNC = ON_NurbsCurve::New();
-  if (points[0].DistanceTo(points[count - 1]) < ON_SQRT_EPSILON)
-    pNC->CreatePeriodicUniformNurbs(3, order, count - 1, points);
+  if (bClosed)
+  {
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-38978
+    ON_Polyline temp(pline);
+    for (int i = 0; i < (degree - 1) / 2; i++)
+    {
+      temp.Remove();
+      ON_3dPoint pt(temp[temp.Count() - 1]);
+      temp.Insert(0, pt);
+    }
+    pNC->CreatePeriodicUniformNurbs(3, degree + 1, count - 1, temp);
+  }
   else
-    pNC->CreateClampedUniformNurbs(3, order, count, points);
+  {
+    pNC->CreateClampedUniformNurbs(3, degree + 1, count, pline);
+  }
 
   if (!pNC->IsValid())
   {
     delete pNC;
     return nullptr;
   }
+
+  // 27-Apr-2023 Dale Fugier
+  // Set the domain to something reasonable
+  double length = 0.0;
+  if (pNC->GetLength(&length))
+    pNC->SetDomain(0.0, length);
+
   return pNC;
 }
+#endif
 
 RH_C_FUNCTION bool ON_NurbsCurve_GetBool(ON_NurbsCurve* pCurve, int which)
 {

@@ -290,6 +290,26 @@ RH_C_FUNCTION bool ON_3dPointArrayArray_Indexer(const ON_SimpleArray<ON_Polyline
   return rc;
 }
 
+RH_C_FUNCTION bool ON_3dPointArrayArray_PolylineAt(const ON_SimpleArray<ON_Polyline*>* pArray, int index, /*ARRAY*/ON_3dPoint* pPoints)
+{
+  bool rc = false;
+  if (pArray && index >= 0 && index < pArray->Count() && pPoints)
+  {
+    ON_Polyline* pPolyline = (*pArray)[index];
+    if (pPolyline)
+    {
+      const int count = pPolyline->Count();
+      if (count > 0)
+      {
+        const ON_3dPoint* source = pPolyline->Array();
+        ::memcpy(pPoints, source, count * sizeof(ON_3dPoint));
+        rc = true;
+      }
+    }
+  }
+  return rc;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 RH_C_FUNCTION ON_SimpleArray<int>* ON_IntArray_New(/*ARRAY*/const int* vals, int count)

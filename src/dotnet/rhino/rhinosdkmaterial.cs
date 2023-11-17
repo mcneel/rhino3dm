@@ -1619,6 +1619,22 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Finds a material index.
+    /// </summary>
+    /// <param name="material">Material to search for.</param>
+    /// <param name="ignoreDeletedMaterials">true means don't search deleted materials.</param>
+    /// <returns>
+    /// >=0 index of the material
+    /// -1  no material matchin material.
+    /// </returns>
+    /// <since>8.0</since>
+    public int Find(Material material, bool ignoreDeletedMaterials)
+    {
+      IntPtr ptr_const_material = material.ConstPointer();
+      return UnsafeNativeMethods.CRhinoMaterialTable_FindByMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, ignoreDeletedMaterials);
+    }
+
+    /// <summary>
     /// Finds a material with a given name.
     /// </summary>
     /// <param name="materialName">Name of the material to search for. The search ignores case.</param>

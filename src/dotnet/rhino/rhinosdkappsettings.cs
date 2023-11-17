@@ -4067,6 +4067,8 @@ namespace Rhino.ApplicationSettings
     AltCtrlHome,
     /// <summary>Alt + Ctrl + End</summary>
     AltCtrlEnd,
+    /// <summary>Tab</summary>
+    Tab,
     /// <summary>Page Up</summary>
     PageUp,
     /// <summary>Page Down</summary>
@@ -4086,7 +4088,83 @@ namespace Rhino.ApplicationSettings
     /// <summary>Alt + Ctrl + Page Up</summary>
     AltCtrlPageUp,
     /// <summary>Alt + Ctrl + Page Down</summary>
-    AltCtrlPageDown
+    AltCtrlPageDown,
+    /// <summary>Alt + Home</summary>
+    AltHome,
+    /// <summary>Alt + Home</summary>
+    AltEnd,
+    /// <summary>Alt + A</summary>
+    AltA,
+    /// <summary>Alt + B</summary>
+    AltB,
+    /// <summary>Alt + C</summary>
+    AltC,
+    /// <summary>Alt + D</summary>
+    AltD,
+    /// <summary>Alt + E</summary>
+    AltE,
+    /// <summary>Alt + F</summary>
+    AltF,
+    /// <summary>Alt + G</summary>
+    AltG,
+    /// <summary>Alt + H</summary>
+    AltH,
+    /// <summary>Alt + I</summary>
+    AltI,
+    /// <summary>Alt + J</summary>
+    AltJ,
+    /// <summary>Alt + K</summary>
+    AltK,
+    /// <summary>Alt + L</summary>
+    AltL,
+    /// <summary>Alt + M</summary>
+    AltM,
+    /// <summary>Alt + N</summary>
+    AltN,
+    /// <summary>Alt + O</summary>
+    AltO,
+    /// <summary>Alt + P</summary>
+    AltP,
+    /// <summary>Alt + Q</summary>
+    AltQ,
+    /// <summary>Alt + R</summary>
+    AltR,
+    /// <summary>Alt + S</summary>
+    AltS,
+    /// <summary>Alt + T</summary>
+    AltT,
+    /// <summary>Alt + U</summary>
+    AltU,
+    /// <summary>Alt + V</summary>
+    AltV,
+    /// <summary>Alt + W</summary>
+    AltW,
+    /// <summary>Alt + X</summary>
+    AltX,
+    /// <summary>Alt + Y</summary>
+    AltY,
+    /// <summary>Alt + Z</summary>
+    AltZ,
+    /// <summary>Alt + 0</summary>
+    Alt0,
+    /// <summary>Alt + 1</summary>
+    Alt1,
+    /// <summary>Alt + 2</summary>
+    Alt2,
+    /// <summary>Alt + 3</summary>
+    Alt3,
+    /// <summary>Alt + 4</summary>
+    Alt4,
+    /// <summary>Alt + 5</summary>
+    Alt5,
+    /// <summary>Alt + 6</summary>
+    Alt6,
+    /// <summary>Alt + 7</summary>
+    Alt7,
+    /// <summary>Alt + 8</summary>
+    Alt8,
+    /// <summary>Alt + 9</summary>
+    Alt9,
   }
 
   /// <summary>

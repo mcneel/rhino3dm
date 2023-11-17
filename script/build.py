@@ -33,8 +33,8 @@ xcode_logging = False
 verbose = False
 overwrite = False
 popen_shell_mode = False
-valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
-platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript' }
+valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python", "nodejs"]
+platform_full_names = {'windows':'Windows', 'linux':'Linux', 'macos': 'macOS', 'ios': 'iOS', 'android': 'Android', 'js': 'JavaScript', 'nodejs':'NodeJS' }
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 dotnet_folder = os.path.abspath(os.path.join(src_folder, "dotnet"))
@@ -462,7 +462,7 @@ def build_js():
     run_command("emmake make", not verbose)
 
     # Check to see if the build succeeded and move into artifacts_js
-    items_to_check = ['rhino3dm.wasm', 'rhino3dm.js', 'rhino3dm.module.js']
+    items_to_check = ['rhino3dm.wasm']
     all_items_built = True
     for item in items_to_check:
         print(item)
@@ -484,7 +484,9 @@ def build_js():
     else:
         print_error_message("failed to build all rhino3dm build artifacts.")
         return False
-    
+
+def build_nodejs():
+    return build_js()    
 
 def build_handler(platform_target):
     did_succeed = []
@@ -554,6 +556,11 @@ def main():
 
     global lib
     lib = args.library
+
+    global node
+    node = False
+    if "nodejs" in args.platform:
+        node = True
 
     # build platform(s)
     did_succeed = []

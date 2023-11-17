@@ -160,3 +160,11 @@ RH_C_FUNCTION bool ON_Polyline_CreateStarPolygon(const ON_CIRCLE_STRUCT* pCircle
   }
   return rc;
 }
+
+RH_C_FUNCTION bool ON_Polyline_IsClosed(const ON_Polyline* pPolyline, double tolerance)
+{
+  bool rc = false;
+  if (pPolyline)
+    rc = pPolyline->IsClosed(tolerance);
+  return rc;
+}

@@ -18,6 +18,11 @@ if (${RHINO3DM_PY})
   add_subdirectory(lib/pybind11)
 endif()
 
+message("NODE=${NODE}")
+if( NODE ) 
+    message("NODE evaluates to True")
+endif()
+
 # Add draco add_library
 include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
 
@@ -43,12 +48,14 @@ if(${RHINO3DM_JS})
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("debug mode")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -g")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
-  
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --bind")
+  if(NODE)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MEMORY64=1")
+  endif()
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH=1 --bind")
 endif()
 
 add_definitions(-D_GNU_SOURCE)
@@ -60,7 +67,11 @@ add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})
   # temporary until we adjust opennurbs to be emscripten aware
-  add_definitions(-DON_32BIT_RUNTIME)
+  if(NODE)
+    add_definitions(-DON_64BIT_RUNTIME)
+  else()
+    add_definitions(-DON_32BIT_RUNTIME)
+  endif()
   add_definitions(-DON_LITTLE_ENDIAN)
   add_definitions(-DON_RUNTIME_ANDROID)
 
@@ -103,28 +114,4 @@ if (${RHINO3DM_PY})
   else()
     target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
   endif()
-endif()
-
-
-# I plan to mode the following install phase out of this file and into the top
-# level python script for generating wasm 
-# dan@mcneel.com: this is already in the build.py -p js (this can be deleted as soon
-# as the scripts are used in the build process)
-if(${RHINO3DM_JS})
-  install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.js" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-  install(FILES "build/javascript/rhino3dm.wasm" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts_js")
-endif()
-
-# patch rhino3dm.js using the supplied diff to produce rhino3dm.module.js
- if(${RHINO3DM_JS})
-   find_program(PATCH patch)
-   if(NOT PATCH)
-       message(WARNING "rhino3dm.module.js generation will fail: patch not found!")
-   endif()
-   add_custom_command(TARGET rhino3dm POST_BUILD
-     COMMENT "Generating ${CMAKE_BINARY_DIR}/rhino3dm.module.js"
-     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rhino3dm> ${CMAKE_BINARY_DIR}/rhino3dm.module.js
-     COMMAND ${PATCH} ${CMAKE_BINARY_DIR}/rhino3dm.module.js ${CMAKE_CURRENT_SOURCE_DIR}/rhino3dm.module.js.diff
-   )
 endif()

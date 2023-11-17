@@ -8,7 +8,7 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>8.0.0-beta3</Version>
+    <Version>8.0.1</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
@@ -20,6 +20,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <Title>Rhino3dm</Title>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo> 
   </PropertyGroup>
 
   <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">

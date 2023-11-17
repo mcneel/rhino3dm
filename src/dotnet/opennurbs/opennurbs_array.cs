@@ -1804,6 +1804,28 @@ namespace Rhino.Runtime.InteropWrappers
     }
 
     /// <summary>
+    /// Gets a polyline at an index.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <returns>The polyline if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public Polyline PolylineAt(int index)
+    {
+      var point_count = PointCountAt(index);
+      if (point_count > 0)
+      {
+        Polyline pline = new Polyline(point_count);
+        IntPtr ptr = ConstPointer();
+        if (UnsafeNativeMethods.ON_3dPointArrayArray_PolylineAt(ptr, index, pline.m_items))
+        {
+          pline.m_size = point_count;
+          return pline;
+        }
+      }
+      return null;
+    }
+
+    /// <summary>
     /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
     /// </summary>
     ~SimpleArrayArrayPoint3d()

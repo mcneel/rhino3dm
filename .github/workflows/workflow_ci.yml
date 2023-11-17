@@ -107,38 +107,20 @@ jobs:
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
         run: python3 script/build.py -p js -o -v
-      - name: minify js
-        uses: tinpotnick/webpreprocessor@v1.13
-        with:
-          dir: src/build/javascript/artifacts_js
-          action: uglifyjs
-          filename: rhino3dm.js
-          output: src/build/javascript/artifacts_js/rhino3dm.min.js
-      - name: minify module
-        uses: tinpotnick/webpreprocessor@v1.13
-        with:
-          dir: src/build/javascript/artifacts_js
-          action: uglifyjs
-          filename: rhino3dm.module.js
-          output: src/build/javascript/artifacts_js/rhino3dm.module.min.js
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-      - name: docgen
-        shell: bash
-        run: |
-          dotnet build src/docgen
-          cd src/docgen/bin/Debug
-          ./docgen
-          cd ../../../../
-          patch src/docgen/out/js_tsdef/rhino3dm.d.ts < src/rhino3dm.d.ts.diff
-          cp src/docgen/out/js_tsdef/rhino3dm.d.ts src/build/javascript/artifacts_js
       - name: copy files
         shell: bash
         run: |
           cp package.json src/build/javascript/artifacts_js
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
+          cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
+          cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
+          cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
+          cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
       - name: artifacts
         uses: actions/upload-artifact@v3.1.2
         with:

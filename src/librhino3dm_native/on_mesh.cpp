@@ -961,6 +961,12 @@ RH_C_FUNCTION void* ON_Mesh_VertexArray_Pointer(ON_Mesh* pMesh, int which)
       return pMesh->m_N.Array();
     case 3:
       return pMesh->m_F.Array();
+    case 4:
+      return pMesh->m_C.Array();
+    case 5:
+      return pMesh->m_S.Array();
+    case 6:
+      return pMesh->m_FN.Array();
     }
   }
   return nullptr;
@@ -1403,7 +1409,11 @@ RH_C_FUNCTION double ON_Mesh_Volume(const ON_Mesh* pConstMesh)
 {
   if (nullptr != pConstMesh)
   {
-    ON_3dPoint base_point = pConstMesh->IsSolid() ? ON_3dPoint::UnsetPoint : pConstMesh->BoundingBox().Center();
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-76654
+    ON_3dPoint base_point = ON_3dPoint::Origin;
+    ON_BoundingBox bbox;
+    if (pConstMesh->GetBoundingBox(bbox, false))
+      base_point = bbox.Center();
     return pConstMesh->Volume(base_point);
   }
   return ON_UNSET_VALUE;
@@ -3092,6 +3102,7 @@ RH_C_FUNCTION bool ON_TextureMapping_SetMeshMappingPrimitive(ON_TextureMapping* 
   {
     pTextureMapping->SetCustomMappingPrimitive(new ON_Mesh(*mesh));
     pTextureMapping->m_type = ON_TextureMapping::TYPE::mesh_mapping_primitive;
+    pTextureMapping->m_projection = ON_TextureMapping::PROJECTION::clspt_projection;
     rc = true;
   }
   return rc;
@@ -4040,3 +4051,58 @@ RH_C_FUNCTION void ON_MeshParameters_OperatorEqual(const ON_MeshParameters* sour
   if (source && destination)
     *destination = *source;
 }
+
+
+#if !defined(RHINO3DM_BUILD)
+
+RH_C_FUNCTION ON_MeshIntersectionCache* ON_MeshIntersectionCache_New()
+{
+  return new ON_MeshIntersectionCache();
+}
+
+RH_C_FUNCTION void ON_MeshIntersectionCache_Delete(ON_MeshIntersectionCache* pCache)
+{
+  if (pCache)
+    delete pCache;
+}
+
+RH_C_FUNCTION int ON_Mesh_GetIntersections(
+  const ON_Mesh* pMesh, 
+  ON_MeshIntersectionCache* pCache, 
+  int plane_count, /*ARRAY*/const ON_PLANE_STRUCT* pPlanes, 
+  double tolerance, 
+  ON_SimpleArray<ON_Polyline*>* pOutPoints
+)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-67504
+  if (
+       nullptr == pMesh 
+    || 0 == plane_count
+    || nullptr == pPlanes 
+    || nullptr == pOutPoints
+    )
+    return 0;
+
+  ON_SimpleArray<const ON_Mesh*> meshes;
+  meshes.Append(pMesh);
+
+  ON_MeshIntersectionCache mx_cache;
+  ON_MeshIntersectionCache* pMxCache = (pCache) ? pCache : &mx_cache;
+
+  const ON_BoundingBox bbox = pMesh->BoundingBox();
+  for (int i = 0; i < plane_count; i++)
+  {
+    ON_Plane plane = FromPlaneStruct(pPlanes[i]);
+    ON_PlaneSurface plane_surface;
+    if (plane_surface.CreatePlaneThroughBox(plane, bbox))
+    {
+      ON_Mesh plane_mesh;
+      if (plane_surface.CreateMesh(&plane_mesh))
+        plane_mesh.GetIntersections(meshes, pMxCache, tolerance, pOutPoints, pOutPoints, nullptr, nullptr, nullptr, nullptr);
+    }
+  }
+
+  return pOutPoints->Count();
+}
+
+#endif // #if !defined(RHINO3DM_BUILD)

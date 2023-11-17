@@ -66,8 +66,12 @@ namespace Rhino.Geometry
       }
       set
       {
-        IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.ON_V6_Annotation_SetDimstyleId(ptr_this, value);
+        if (DimensionStyleId != value)
+        {
+          IntPtr ptr_this = NonConstPointer();
+          UnsafeNativeMethods.ON_V6_Annotation_SetDimstyleId(ptr_this, value);
+        }
+
         if (m_parent_dimstyle != null)
           m_parent_dimstyle.m_id = value;
       }
@@ -201,12 +205,20 @@ namespace Rhino.Geometry
       }
       set
       {
-        if (value.IsDocumentControlled)
-          m_parent_dimstyle = value.InternalLightCopy();
+        if (value is null)
+        {
+          m_parent_dimstyle = null;
+          DimensionStyleId = Guid.Empty;
+        }
         else
-          m_parent_dimstyle = value;
+        {
+          if (value.IsDocumentControlled)
+            m_parent_dimstyle = value.InternalLightCopy();
+          else
+            m_parent_dimstyle = value;
 
-        DimensionStyleId = value.Id;
+          DimensionStyleId = value.Id;
+        }
       }
     }
 
@@ -233,6 +245,11 @@ namespace Rhino.Geometry
         return m_parent_dimstyle.ConstPointer();
 
       return IntPtr.Zero;
+    }
+
+    internal void SetParentDimensionStyle(DimensionStyle dimStyle)
+    {
+      m_parent_dimstyle = dimStyle;
     }
 
     #endregion property overrides
