@@ -69,7 +69,7 @@ RH_C_FUNCTION void ON_PlaneSurface_SetPlane(ON_PlaneSurface* pPlaneSurface, cons
   }
 }
 
-/*
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION void ON_PlaneSurface_GetExtents(const ON_PlaneSurface* pPlaneSurface, int direction, ON_Interval* pExtents)
 {
   if (pPlaneSurface && pExtents)
@@ -88,7 +88,7 @@ RH_C_FUNCTION void ON_PlaneSurface_SetExtents(ON_PlaneSurface* pPlaneSurface, in
     pPlaneSurface->SetExtents(direction, *pExtents, bSyncDomain);
   }
 }
-*/
+#endif
 
 RH_C_FUNCTION ON_Mesh* ON_PlaneSurface_CreateMesh(const ON_PlaneSurface* pPlaneSurface)
 {
@@ -103,7 +103,7 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox(ON_Line* pL
   ON_PlaneSurface* rc = nullptr;
   if (pLine && pBox)
   {
-  if (pLine->Length() < ON_SQRT_EPSILON)
+    if (pLine->Length() < ON_SQRT_EPSILON)
       return nullptr;
 
     ON_3dVector _normal(normal.val[0], normal.val[1], normal.val[2]);
@@ -124,8 +124,8 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox(ON_Line* pL
 }
 
 RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox2(const ON_PLANE_STRUCT* pPlane, ON_BoundingBox* pBox)
-  {
-    ON_PlaneSurface* rc = nullptr;
+{
+  ON_PlaneSurface* rc = nullptr;
   if (pPlane && pBox)
   {
     ON_Plane _plane = FromPlaneStruct(*pPlane);

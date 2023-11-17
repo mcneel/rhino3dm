@@ -961,7 +961,7 @@ RH_C_FUNCTION void* ON_Mesh_VertexArray_Pointer(ON_Mesh* pMesh, int which)
       return pMesh->m_N.Array();
     case 3:
       return pMesh->m_F.Array();
-case 4:
+    case 4:
       return pMesh->m_C.Array();
     case 5:
       return pMesh->m_S.Array();
@@ -3102,7 +3102,7 @@ RH_C_FUNCTION bool ON_TextureMapping_SetMeshMappingPrimitive(ON_TextureMapping* 
   {
     pTextureMapping->SetCustomMappingPrimitive(new ON_Mesh(*mesh));
     pTextureMapping->m_type = ON_TextureMapping::TYPE::mesh_mapping_primitive;
-pTextureMapping->m_projection = ON_TextureMapping::PROJECTION::clspt_projection;
+    pTextureMapping->m_projection = ON_TextureMapping::PROJECTION::clspt_projection;
     rc = true;
   }
   return rc;

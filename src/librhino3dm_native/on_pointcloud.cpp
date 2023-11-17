@@ -430,8 +430,8 @@ RH_C_FUNCTION int ON_PointCloud_RemoveRange(ON_PointCloud* pPointCloud, const ON
 {
   int rc = 0;
   if (pPointCloud && pConstIndices && pConstIndices->Count() > 0)
-  rc = pPointCloud->RemoveRange(pConstIndices->Count(), pConstIndices->Array());
-      return rc;
+    rc = pPointCloud->RemoveRange(pConstIndices->Count(), pConstIndices->Array());
+  return rc;
 }
 
 RH_C_FUNCTION bool ON_PointCloud_AppendPoint1(ON_PointCloud* pPointCloud, ON_3DPOINT_STRUCT point)

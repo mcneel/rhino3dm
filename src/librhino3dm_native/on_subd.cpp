@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_subd.h")
-
+#if !defined(RHINO3DM_BUILD)
+RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_plus_subd.h")
+#endif
 
 RH_C_FUNCTION ON_SubDRef* ON_SubDRef_New()
 {
@@ -579,7 +581,7 @@ enum OnSubDMeshParameterTypeConsts : int
 
 RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(enum OnSubDMeshParameterTypeConsts which)
 {
-    ON_SubDFromMeshParameters* rc = new ON_SubDFromMeshParameters();
+  ON_SubDFromMeshParameters* rc = new ON_SubDFromMeshParameters();
   switch (which)
   {
   case smpSmooth:
@@ -591,7 +593,7 @@ RH_C_FUNCTION ON_SubDFromMeshParameters* ON_ToSubDParameters_New(enum OnSubDMesh
   case smpConvexCornersAndInteriorCreases:
     *rc = ON_SubDFromMeshParameters::ConvexCornersAndInteriorCreases;
     break;
-case smpConvexAndConcaveCornersAndInteriorCreases:
+  case smpConvexAndConcaveCornersAndInteriorCreases:
     *rc = ON_SubDFromMeshParameters::ConvexAndConcaveCornersAndInteriorCreases;
   }
   return rc;
@@ -788,7 +790,7 @@ RH_C_FUNCTION void ON_SubDVertex_ControlNetPoint(const ON_SubDVertex* constVerte
 
 RH_C_FUNCTION void ON_SubDVertex_SetControlNetPoint(ON_SubDVertex* vertexPtr, ON_3DPOINT_STRUCT value)
 {
-// 2023-08-24, Pierre, RH-76565: A simple setter should refresh caches everytime.
+  // 2023-08-24, Pierre, RH-76565: A simple setter should refresh caches everytime.
   // Use ON_SubDVertex_SetControlNetPoint_ClearCache(ON_SubDVertex* vertexPtr, ON_3DPOINT_STRUCT value, bool bClearNeighborhoodCache) for more control
   if( vertexPtr )
     vertexPtr->SetControlNetPoint(ON_3dPoint(value.val), true);

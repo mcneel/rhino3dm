@@ -832,8 +832,6 @@ namespace Rhino.Geometry
       IntPtr ptr = UnsafeNativeMethods.ON_NurbsCurve_CreateControlPointCurve(count, ptArray, degree);
       return GeometryBase.CreateGeometryHelper(ptr, null) as NurbsCurve;
     }
-
-
     /// <summary>
     /// Constructs a control-point of degree=3 (or less).
     /// </summary>

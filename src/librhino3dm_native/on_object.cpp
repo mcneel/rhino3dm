@@ -209,8 +209,8 @@ RH_C_FUNCTION int ON_Object_UserStringCount(const ON_Object* pObject)
 {
   int rc = 0;
   if( pObject )
-  rc = pObject->UserStringCount();
-  
+    rc = pObject->UserStringCount();
+
   return rc;
 }
 
