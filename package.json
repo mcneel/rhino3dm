@@ -3,7 +3,9 @@
   "version": "8.0.1",
   "description": "Node.js package based on OpenNURBS with a RhinoCommon style",
   "main": "rhino3dm.js",
+  "module": "rhino3d.module.js",
   "types": "rhino3dm.d.ts",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
