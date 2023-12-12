@@ -1159,8 +1159,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Look for convex corners at sub-D vertices with 2 edges that have an
-    /// included angle &lt;= 90 degrees.
+    /// Look for convex corners at sub-D vertices with 2 edges or fewer that have an
+    /// included angle ≤ 120 degrees.
     /// </summary>
     /// <since>7.0</since>
     public static SubDCreationOptions ConvexCornersAndInteriorCreases
@@ -1172,10 +1172,10 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Look for convex corners at sub-D vertices with 2 edges that have an
-    /// included angle &lt;= 90 degrees.
-    /// Look for concave corners at sub-D vertices with 3 edge that have an
-    /// included angle &gt;= 270 degrees.
+    /// Look for convex corners at sub-D vertices with 2 edges or fewer that have an
+    /// included angle ≤ 120 degrees.
+    /// Look for concave corners at sub-D vertices with 3 edge or more that have an
+    /// included angle ≥ 240 degrees.
     /// </summary>
     /// <since>8.0</since>
     public static SubDCreationOptions ConvexAndConcaveCornersAndInteriorCreases

@@ -1856,6 +1856,7 @@ namespace Rhino.Geometry.Collections
       IntPtr const_ptr_surface = m_surface.ConstPointer();
       return UnsafeNativeMethods.ON_NurbsSurface_SuperfluousKnot(const_ptr_surface, m_direction, start ? 0 : 1);
     }
+
 #if RHINO_SDK
     /// <summary>
     /// Gets the style of the knot vector.

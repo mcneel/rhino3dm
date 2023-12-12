@@ -4,7 +4,6 @@ using System.Drawing;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Geometry;
 using System.Collections.Generic;
-using static Rhino.ApplicationSettings.CurvatureAnalysisSettings;
 
 namespace Rhino.ApplicationSettings
 {
@@ -235,6 +234,57 @@ namespace Rhino.ApplicationSettings
   /// </summary>
   public static class AppearanceSettings
   {
+    /// <summary>Set UI to the default dark mode color scheme</summary>
+    /// <returns>true on sucess</returns>
+    public static bool SetToDarkMode()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      return service.SetToDefaultColorScheme(true);
+    }
+
+    /// <summary>Set UI to the default light mode color scheme</summary>
+    /// <returns>true on sucess</returns>
+    public static bool SetToLightMode()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      return service.SetToDefaultColorScheme(false);
+    }
+
+    /// <summary>
+    /// Determine if Rhino is running with default dark mode color settings
+    /// </summary>
+    /// <returns></returns>
+    public static bool UsingDefaultDarkModeColors()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      bool light;
+      bool dark;
+      service.DetectColorScheme(out light, out dark);
+      return dark;
+    }
+
+    /// <summary>
+    /// Determine if Rhino is running with default light mode color settings
+    /// </summary>
+    /// <returns></returns>
+    public static bool UsingDefaultLightModeColors()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      bool light;
+      bool dark;
+      service.DetectColorScheme(out light, out dark);
+      return light;
+    }
+
+
     static AppearanceSettingsState CreateState(bool current) => CreateState(current, Runtime.HostUtils.RunningInDarkMode);
 
     static AppearanceSettingsState CreateState(bool current, bool darkMode)
@@ -991,6 +1041,7 @@ namespace Rhino.ApplicationSettings
     const int idxShowViewportTitles = 9;
     const int idxShowTitleBar = 10;
     const int idxShowViewportTabs = 11;
+    const int idxShowSelectionFilterBar = 12;
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -1038,6 +1089,17 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowOsnapBar, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowOsnapBar, value); }
     }
+
+    /// <summary>
+    /// Shows or hides the selection filter user interface.
+    /// </summary>
+    /// <since>8.2</since>
+    public static bool ShowSelectionFilterBar
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowSelectionFilterBar, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowSelectionFilterBar, value); }
+    }
+
     /// <summary>
     /// Shows or hides the status bar user interface.
     /// </summary>
@@ -3295,6 +3357,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Represents a snapshot of <see cref="ViewSettings"/>.
   /// </summary>
+  /// <since>5.0</since>
   public class ViewSettingsState
   {
     internal ViewSettingsState() { }
@@ -3384,6 +3447,12 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>5.0</since>
     public bool LinkedViewports { get; set; }
+
+    /// <summary>
+    /// Gets or sets the view rotation value.
+    /// </summary>
+    /// <since>8.1</since>
+    public ViewSettings.ViewRotationStyle ViewRotation { get; set; }
   }
 
   /// <summary>
@@ -3394,20 +3463,23 @@ namespace Rhino.ApplicationSettings
     static ViewSettingsState CreateState(bool current)
     {
       IntPtr pViewSettings = UnsafeNativeMethods.CRhinoAppViewSettings_New(current);
-      ViewSettingsState rc = new ViewSettingsState();
-      rc.AlwaysPanParallelViews = GetBool(idxAlwaysPanParallelViews, pViewSettings);
-      rc.DefinedViewSetCPlane = GetBool(idxDefinedViewSetCPlane, pViewSettings);
-      rc.DefinedViewSetProjection = GetBool(idxDefinedViewSetProjection, pViewSettings);
-      rc.LinkedViewports = GetBool(idxLinkedViewports, pViewSettings);
-      rc.PanReverseKeyboardAction = GetBool(idxPanReverseKeyboardAction, pViewSettings);
-      rc.PanScreenFraction = GetDouble(UnsafeNativeMethods.AppViewSettings.PanScreenFraction, pViewSettings);
-      rc.RotateCircleIncrement = UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, pViewSettings);
-      rc.RotateReverseKeyboard = GetBool(idxRotateReverseKeyboard, pViewSettings);
-      rc.RotateToView = GetBool(idxRotateToView, pViewSettings);
-      rc.SingleClickMaximize = GetBool(idxSingleClickMaximize, pViewSettings);
-      rc.ZoomScale = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale, pViewSettings);
-      rc.ZoomExtentsParallelViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder, pViewSettings);
-      rc.ZoomExtentsPerspectiveViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder, pViewSettings);
+      ViewSettingsState rc = new ViewSettingsState
+      {
+        AlwaysPanParallelViews = GetBool(idxAlwaysPanParallelViews, pViewSettings),
+        DefinedViewSetCPlane = GetBool(idxDefinedViewSetCPlane, pViewSettings),
+        DefinedViewSetProjection = GetBool(idxDefinedViewSetProjection, pViewSettings),
+        LinkedViewports = GetBool(idxLinkedViewports, pViewSettings),
+        PanReverseKeyboardAction = GetBool(idxPanReverseKeyboardAction, pViewSettings),
+        PanScreenFraction = GetDouble(UnsafeNativeMethods.AppViewSettings.PanScreenFraction, pViewSettings),
+        RotateCircleIncrement = UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, pViewSettings),
+        RotateReverseKeyboard = GetBool(idxRotateReverseKeyboard, pViewSettings),
+        RotateToView = GetBool(idxRotateToView, pViewSettings),
+        SingleClickMaximize = GetBool(idxSingleClickMaximize, pViewSettings),
+        ZoomScale = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale, pViewSettings),
+        ZoomExtentsParallelViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder, pViewSettings),
+        ZoomExtentsPerspectiveViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder, pViewSettings),
+        ViewRotation = GetViewRotation(pViewSettings)
+      };
       UnsafeNativeMethods.CRhinoAppViewSettings_Delete(pViewSettings);
       return rc;
     }
@@ -3461,6 +3533,7 @@ namespace Rhino.ApplicationSettings
       ZoomScale = state.ZoomScale;
       ZoomExtentsParallelViewBorder = state.ZoomExtentsParallelViewBorder;
       ZoomExtentsPerspectiveViewBorder = state.ZoomExtentsPerspectiveViewBorder;
+      ViewRotation = state.ViewRotation;
     }
 
     // bool items
@@ -3492,10 +3565,21 @@ namespace Rhino.ApplicationSettings
     {
       UnsafeNativeMethods.CRhinoAppViewSettings_GetSetBool(which, true, b, pViewSettings);
     }
+    static ViewRotationStyle GetViewRotation(IntPtr pViewSettings)
+    {
+      return (ViewRotationStyle)UnsafeNativeMethods.CRhinoAppViewSettings_GetSetViewRotation(0, false, pViewSettings);
+    }
+    static void SetViewRotation(ViewRotationStyle viewRotationStyle, IntPtr pViewSettings)
+    {
+      UnsafeNativeMethods.CRhinoAppViewSettings_GetSetViewRotation((int)viewRotationStyle, true, pViewSettings);
+    }
+
     static bool GetBool(int which) { return GetBool(which, IntPtr.Zero); }
     static void SetBool(int which, bool b) { SetBool(which, b, IntPtr.Zero); }
     static double GetDouble(UnsafeNativeMethods.AppViewSettings which) { return GetDouble(which, IntPtr.Zero); }
     static void SetDouble(UnsafeNativeMethods.AppViewSettings which, double d) { SetDouble(which, d, IntPtr.Zero); }
+    static ViewRotationStyle GetViewRotation() { return GetViewRotation(IntPtr.Zero); }
+    static void SetViewRotation(ViewRotationStyle viewRotationStyle) { SetViewRotation(viewRotationStyle, IntPtr.Zero); }
 
     /// <summary>Gets or sets the faction used as multiplier to pan the screen.</summary>
     /// <since>5.0</since>
@@ -3563,14 +3647,8 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public static int RotateCircleIncrement
     {
-      get
-      {
-        return UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, IntPtr.Zero);
-      }
-      set
-      {
-        UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, true, value, IntPtr.Zero);
-      }
+      get => UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, true, value, IntPtr.Zero);
     }
 
     /// <summary>
@@ -3639,6 +3717,41 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetBool(idxLinkedViewports); }
       set { SetBool(idxLinkedViewports, value); }
+    }
+
+    /// <summary>
+    /// View rotation styles.
+    /// </summary>
+    /// <since>8.1</since>
+    public enum ViewRotationStyle
+    {
+      /// <summary>
+      /// Makes the view rotate relative to the world axes.
+      /// You can use the tilt keys to rotate the view around the view depth axis.
+      /// </summary>
+      RotateAroundWorldAxes = 0,
+      /// <summary>
+      /// Makes the view rotate relative to the view axes rather than the model x, y, and z axes.
+      /// </summary>
+      RotateRelativeToView = 1,
+      /// <summary>
+      /// The view rotation is always relative to the previous dynamic view.
+      /// </summary>
+      RotateRelativeToViewV2Style = 2,
+      /// <summary>
+      /// Makes the view (RotateView command) or camera (RotateCamera command) rotate around the construction plane z-axis.
+      /// </summary>
+      RotateAroundCplaneZaxis = 3
+    }
+
+    /// <summary>
+    /// Gets or sets the view rotation value.
+    /// </summary>
+    /// <since>8.1</since>
+    public static ViewRotationStyle ViewRotation
+    {
+      get => GetViewRotation();
+      set => SetViewRotation(value);
     }
   }
 

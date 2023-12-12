@@ -394,11 +394,11 @@ RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, 
 
 #endif
 
-RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr)
+RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr, bool bIncludeTextureCoordinates)
 {
   RHCHECK_LICENSE
   if (constSubDPtr)
-    return constSubDPtr->GetControlNetMesh(nullptr, ON_SubDGetControlNetMeshPriority::Geometry);
+    return constSubDPtr->GetControlNetMesh(nullptr, bIncludeTextureCoordinates ? ON_SubDGetControlNetMeshPriority::TextureCoordinates : ON_SubDGetControlNetMeshPriority::Geometry);
   return nullptr;
 }
 

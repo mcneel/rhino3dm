@@ -70,6 +70,7 @@ RH_C_FUNCTION void ON_PlaneSurface_SetPlane(ON_PlaneSurface* pPlaneSurface, cons
 }
 
 #if !defined(RHINO3DM_BUILD)
+
 RH_C_FUNCTION void ON_PlaneSurface_GetExtents(const ON_PlaneSurface* pPlaneSurface, int direction, ON_Interval* pExtents)
 {
   if (pPlaneSurface && pExtents)

@@ -399,6 +399,21 @@ RH_C_FUNCTION void ON_EarthAnchorPoint_GetModelToEarthTransform(const ON_EarthAn
   }
 }
 
+RH_C_FUNCTION void ON_3dmSettings_Delete(ON_3dmSettings* pSettings)
+{
+  if (pSettings)
+    delete pSettings;
+}
+
+// note: This object must be deleted with ON_EarthAnchorPoint_Delete
+RH_C_FUNCTION ON_EarthAnchorPoint* ON_3dmSettings_GetEarthAnchorPoint(const ON_3dmSettings* pConstSettings)
+{
+  ON_EarthAnchorPoint* rc = nullptr;
+  if (pConstSettings)
+    rc = new ON_EarthAnchorPoint(pConstSettings->m_earth_anchor_point);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_3dmSettings_GetModelUrl(const ON_3dmSettings* pConstSettings, CRhCmnStringHolder* pString)
 {
   if( pConstSettings && pString )

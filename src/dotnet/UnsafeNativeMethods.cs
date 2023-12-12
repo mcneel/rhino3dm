@@ -419,7 +419,7 @@ internal partial class UnsafeNativeMethods
                                                         Rhino.DocObjects.RhinoObject.RhinoObjectDeletedCallback deleted);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void CRhinoObject_SetPerObjectCallbacks(IntPtr ptrObject, IntPtr drawCallback);
+  internal static extern void CRhinoObject_SetPerObjectCallbacks(IntPtr ptrObject, IntPtr drawCallback, IntPtr boundingBoxCallback, IntPtr tightBoundingBoxCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoObject_SetPickCallbacks(Rhino.DocObjects.RhinoObject.RhinoObjectPickCallback pick,

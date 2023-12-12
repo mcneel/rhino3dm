@@ -1620,6 +1620,21 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Sort layers, in the layer table, by their name in either ascending or descending order.
+    /// This function sorts layers in the same manner as Rhino's Layers panel.
+    /// </summary>
+    /// <param name="bAscending">Sort in ascending (true) or descending (false) order.</param>
+    /// <remarks>
+    /// This function changes the value of <see cref="Layer.SortIndex"/>.
+    /// It does not change the index order of layers in the layer table.
+    /// </remarks>
+    /// <since>8.2</since>
+    public void SortByLayerName(bool bAscending)
+    {
+      UnsafeNativeMethods.CRhinoLayerTable_SortByLayerName(m_doc.RuntimeSerialNumber, bAscending);
+    }
+
+    /// <summary>
     /// Finds the layer with a given name. If multiple layers exist that have the same name, the
     /// first match layer index will be returned.
     /// <para>Deleted layers have no name.</para>

@@ -101,7 +101,7 @@ namespace Rhino.Geometry
     #region methods
     /// <summary>
     /// Converts this torus to its NURBS surface representation. 
-    /// This is synonymous with calling NurbsSurface.CreateFromTorus().
+    /// This is synonymous with calling <see cref="NurbsSurface.CreateFromTorus"/>.
     /// </summary>
     /// <returns>A NURBS surface representation of this torus, or null on error.</returns>
     /// <since>5.0</since>
@@ -112,8 +112,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Convert this torus to a surface of revolution representation. 
-    /// This is synonymous with calling RevSurface.CreateFromTorus().
+    /// Converts this torus to a surface of revolution representation. 
+    /// This is synonymous with calling <see cref="RevSurface.CreateFromTorus"/>.
     /// </summary>
     /// <returns>A surface of revolution representation of this torus, or null on error.</returns>
     /// <example>
@@ -127,6 +127,19 @@ namespace Rhino.Geometry
     {
       return RevSurface.CreateFromTorus(this);
     }
+
+    /// <summary>
+    /// Converts this torus to a Brep. 
+    /// This is synonymous with calling <see cref="Brep.CreateFromTorus"/>.
+    /// </summary>
+    /// <returns>A Brep representation of this torus, or null on error.</returns>
+    /// <since>8.1</since>
+    [ConstOperation]
+    public Brep ToBrep()
+    {
+      return Brep.CreateFromTorus(this);
+    }
+
     #endregion
 
     /// <summary>

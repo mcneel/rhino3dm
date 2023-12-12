@@ -30,6 +30,14 @@ RH_C_FUNCTION bool ON_Extrusion_SetPathAndUp( ON_Extrusion* pExtrusion, ON_3DPOI
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Extrusion_GetBrepFormComponentIndex(const ON_Extrusion* pExtrusion, ON_COMPONENT_INDEX* pExtrusionCi, ON_COMPONENT_INDEX* pBrepCi)
+{
+  bool rc = false;
+  if (pExtrusion && pExtrusionCi && pBrepCi)
+    rc = pExtrusion->GetBrepFormComponentIndex(*pExtrusionCi, *pBrepCi);
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Extrusion_GetPoint( const ON_Extrusion* pConstExtrusion, bool pathStart, ON_3dPoint* pt )
 {
   if( pConstExtrusion && pt )
@@ -268,7 +276,6 @@ RH_C_FUNCTION ON_Extrusion* ON_Extrusion_CreateFrom3dCurve2(const ON_Curve* pCon
   return rc;
 }
 
-
 RH_C_FUNCTION const ON_Mesh* ON_Extrusion_GetMesh(const ON_Extrusion* pConstExtrusion, int meshtype)
 {
   return 
@@ -286,3 +293,16 @@ RH_C_FUNCTION bool ON_Extrusion_SetMesh( ON_Extrusion* pExtrusion, ON_Mesh* mesh
   }
   return rc;
 }
+
+#if !defined(RHINO3DM_BUILD)
+
+RH_C_FUNCTION ON_Mesh* ON_Extrusion_CreateMesh(const ON_Extrusion* pConstExtrusion, const ON_MeshParameters* pConstMeshParameters)
+{
+  RHCHECK_LICENSE
+  if (pConstExtrusion && pConstMeshParameters)
+  {
+    return pConstExtrusion->CreateMesh(*pConstMeshParameters, nullptr);
+  }
+  return nullptr;
+}
+#endif

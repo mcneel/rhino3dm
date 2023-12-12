@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Rhino.Geometry.Intersect;
 using Rhino.Runtime;
 
 namespace Rhino.Geometry
@@ -62,7 +63,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Attempts to fit a sphere to a collection of points.
     /// </summary>
-    /// <param name="points">Points to fit. The collection must contain at least two points.</param>
+    /// <param name="points">Points to fit. The collection must contain at least three points.</param>
     /// <returns>The Sphere that best approximates the points or Sphere.Unset on failure.</returns>
     /// <since>5.0</since>
     public static Sphere FitSphereToPoints(System.Collections.Generic.IEnumerable<Point3d> points)
@@ -70,49 +71,39 @@ namespace Rhino.Geometry
       if (points == null) { throw new ArgumentNullException("points"); }
       Rhino.Collections.Point3dList pts = new Rhino.Collections.Point3dList(points);
 
-      if (pts.Count < 2) { return Sphere.Unset; }
+      if (pts.Count < 3) { return Sphere.Unset; }
 
-      Plane plane;
-      if (Plane.FitPlaneToPoints(points, out plane) == PlaneFitResult.Failure)
-      { return Sphere.Unset; }
-
-      Point3d meanP = new Point3d(0, 0, 0);
-      for (int i = 0; i < pts.Count; i++)
-      { meanP += pts[i]; }
-      meanP /= pts.Count;
-
-      Point3d center = meanP;
-      double radius = -1;
-
-      for (int k = 0; k < 2048; k++)
+      if (3 == pts.Count)
       {
-        double meanL = 0.0;
-        Vector3d meanD = new Vector3d(0, 0, 0);
-        Point3d current = center;
-
-        for (int i = 0; i < pts.Count; i++)
-        {
-          Vector3d diff = pts[i] - center;
-          double length = diff.Length;
-
-          if (length > RhinoMath.SqrtEpsilon)
-          {
-            meanL += length;
-            meanD -= (diff / length);
-          }
-        }
-
-        meanL /= pts.Count;
-        meanD /= pts.Count;
-
-        center = meanP + (meanD * meanL);
-        radius = meanL;
-
-        if (center.DistanceTo(current) < RhinoMath.SqrtEpsilon) { break; }
+        Circle circle = new Circle(pts[0], pts[1], pts[2]);
+        if (circle.IsValid)
+          return new Sphere(circle.Plane, circle.Radius);
       }
 
-      plane.Origin = center;
-      return new Sphere(plane, radius);
+      if (4 == pts.Count)
+      {
+        Circle c0 = new Circle(pts[0], pts[1], pts[2]);
+        Line l0 = new Line(c0.Center, c0.Center + c0.Normal);
+        Circle c1 = new Circle(pts[1], pts[2], pts[3]);
+        Line l1 = new Line(c1.Center, c1.Center + c1.Normal);
+        double t0, t1;
+        if (c0.IsValid && c1.IsValid && Intersection.LineLine(l0, l1, out t0, out t1))
+        {
+          Point3d cen = l0.PointAt(t0);
+          double r = cen.DistanceTo(pts[0]);
+          Sphere sphere = new Sphere(cen, r);
+          if (sphere.IsValid)
+            return sphere;
+        }
+      }
+
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-77868
+      Sphere out_sphere = new Sphere();
+      bool rc = UnsafeNativeMethods.RHC_FitSphereToPoints(pts.Count, pts.ToArray(), ref out_sphere);
+      if (rc && out_sphere.IsValid)
+        return out_sphere;
+
+      return Sphere.Unset;
     }
 #endif
     #endregion

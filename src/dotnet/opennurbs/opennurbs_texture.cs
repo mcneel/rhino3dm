@@ -174,6 +174,23 @@ namespace Rhino.DocObjects
   }
 
   /// <summary>
+  /// Determines how the color of the image pixel is calculated when the image
+  /// pixel corresponds to multiple texture bitmap pixels.
+  /// </summary>
+  /// <since>8.3</since>
+  public enum TextureFilter : int
+  {
+    /// <summary>
+    /// Nearest texture pixel is used.
+    /// </summary>
+    Nearest = 0,
+    /// <summary>
+    /// Weighted average of corresponding texture pixels.
+    /// </summary>
+    Linear = 1
+  }
+
+  /// <summary>
   /// Represents a texture that is mapped on objects.
   /// </summary>
   [Serializable]
@@ -369,6 +386,48 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// The MinFilter setting controls how the color
+    /// of the image pixel is calculated when the image pixel
+    /// corresponds to multiple texture bitmap pixels.
+    /// </summary>
+    /// <since>8.3</since>
+    public TextureFilter MinFilter
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_Texture_MinFilter(const_ptr_this);
+        return (TextureFilter)rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Texture_SetMinFilter(ptr_this, (int)value);
+      }
+    }
+
+    /// <summary>
+    /// The MagFilter setting controls how the color
+    /// of the image pixel is calculated when the image pixel
+    /// corresponds to a fraction of a texture bitmap pixel.
+    /// </summary>
+    /// <since>8.3</since>
+    public TextureFilter MagFilter
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_Texture_MagFilter(const_ptr_this);
+        return (TextureFilter)rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Texture_SetMagFilter(ptr_this, (int)value);
+      }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <since>5.10</since>
@@ -376,7 +435,48 @@ namespace Rhino.DocObjects
     {
       get { return UnsafeNativeMethods.ON_Texture_GetMappingChannelId(ConstPointer()); }
     }
-    
+
+    /// <summary>
+    /// How texture is projected onto geometry
+    /// </summary>
+    public TextureProjectionModes ProjectionMode
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_Texture_GetProjectionMode(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Texture_SetProjectionMode(NonConstPointer(), value);
+      }
+    }
+
+    /// <summary>
+    /// Is true if this texture uses world coordinate system (WCS) projection for texture mapping.
+    ///  Notice: If this texture is used by an object that has an object coordinate system (OCS) frame
+    ///  defined on a mapping channel then that OCS frame is used instead of the WCS.
+    /// </summary>
+    public bool WcsProjected
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_Texture_IsWcsProjected(ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Is true if this texture uses world coordinate system (WCS) box projection for texture mapping.
+    ///  Notice: If this texture is used by an object that has an object coordinate system (OCS) frame
+    ///  defined on a mapping channel then that OCS frame is used instead of the WCS.
+    /// </summary>
+    public bool WcsBoxProjected
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_Texture_IsWcsBoxProjected(ConstPointer());
+      }
+    }
+
     /// <summary>
     /// Determines how this texture is combined with others in a material's
     /// texture list.
@@ -459,7 +559,7 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_Texture_Set_wrapuvw(ptr_this, IDX_WRAPMODE_W, (int)value);
       }
     }
-    
+
     /// <summary>
     /// If true then the UVW transform is applied to the texture
     /// otherwise the UVW transform is ignored.

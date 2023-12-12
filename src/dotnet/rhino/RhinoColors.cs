@@ -435,10 +435,10 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public static explicit operator System.Drawing.Color(ColorRGBA value)
     {
-      var r = (int) Math.Round(value._r * 255.0);
-      var g = (int) Math.Round(value._g * 255.0);
-      var b = (int) Math.Round(value._b * 255.0);
-      var a = (int) Math.Round(value._a * 255.0);
+      var r = (int)Math.Round(value._r * 255.0);
+      var g = (int)Math.Round(value._g * 255.0);
+      var b = (int)Math.Round(value._b * 255.0);
+      var a = (int)Math.Round(value._a * 255.0);
 
       return System.Drawing.Color.FromArgb(a, r, g, b);
     }
@@ -818,7 +818,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorCMYK cmyk)
     {
-      return (System.Drawing.Color) ColorRGBA.CreateFromCMYK(cmyk);
+      return (System.Drawing.Color)ColorRGBA.CreateFromCMYK(cmyk);
     }
     #endregion
 
@@ -1201,7 +1201,7 @@ namespace Rhino.Display
     /// <returns>A ARGB .Net library color.</returns>
     public static implicit operator System.Drawing.Color(ColorLAB lab)
     {
-      return (System.Drawing.Color) ColorRGBA.CreateFromLAB(lab);
+      return (System.Drawing.Color)ColorRGBA.CreateFromLAB(lab);
     }
     #endregion
 
@@ -1664,7 +1664,7 @@ namespace Rhino.Display
     /// </summary>
     /// <returns>A .Net framework library color value.</returns>
     /// <since>6.0</since>
-    public System.Drawing.Color ToArgbColor() => (System.Drawing.Color) this;
+    public System.Drawing.Color ToArgbColor() => (System.Drawing.Color)this;
 
     #endregion
   }
@@ -2109,9 +2109,9 @@ namespace Rhino.Display
     /// <param name="b">Blue channel (0~255)</param>
     internal static void CMY_To_RGB(double c, double m, double y, out byte r, out byte g, out byte b)
     {
-      r = (byte) Math.Round(255.0 * (1.0 - c));
-      g = (byte) Math.Round(255.0 * (1.0 - m));
-      b = (byte) Math.Round(255.0 * (1.0 - y));
+      r = (byte)Math.Round(255.0 * (1.0 - c));
+      g = (byte)Math.Round(255.0 * (1.0 - m));
+      b = (byte)Math.Round(255.0 * (1.0 - y));
     }
 
     /// <summary>

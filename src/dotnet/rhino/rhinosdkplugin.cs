@@ -1907,14 +1907,40 @@ namespace Rhino.PlugIns
       return names.ToArray();
     }
 
+    static string ResolvePathHelper(string path)
+    {
+      if (!HostUtils.RunningOnOSX)
+        return path;
+
+      var file = new System.IO.FileInfo(path);
+#if NET
+      // 22 Nov 2023 S. Baer (RH-78149)
+      // Resolve plug-ins that use symbolic links to determine their
+      // true directory name
+      try
+      {
+        var resolved = file.ResolveLinkTarget(true);
+        if (resolved != null)
+          file = new System.IO.FileInfo(resolved.FullName);
+      }
+      catch(Exception)
+      {
+        return path;
+      }
+#endif
+      return file.FullName;
+    }
+
     /// <since>5.0</since>
     public static string[] GetInstalledPlugInFolders()
     {
       var dirs = new List<string>(32);
       foreach (PlugIn plugin in m_plugins)
       {
-        try {
-          var dir = System.IO.Path.GetDirectoryName(plugin.Assembly.Location);
+        try
+        {
+          string path = ResolvePathHelper(plugin.Assembly.Location);
+          var dir = System.IO.Path.GetDirectoryName(path);
 
           if (!dirs.Contains (dir))
             dirs.Add (dir);
@@ -2132,9 +2158,19 @@ namespace Rhino.PlugIns
 
     // Attempt to create a RhinoCommon plugin through reflection.
     // Taken from original Rhino.NET plug-in loading code
-    internal static UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts LoadPlugInHelper(string path, IntPtr pluginInfo, IntPtr errorMessage, bool displayDebugInfo)
+    internal static UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts LoadPlugInHelper(string path, IntPtr pluginInfo, IntPtr errorMessage, bool displayDebugInfo, bool bIsDirectoryInstall)
     {
-      if(HostUtils.RunningOnOSX) {
+      path = ResolvePathHelper(path);
+
+      if (!bIsDirectoryInstall)
+      {
+        // support multi-targeting for .rhp's loaded directly
+        // for directory installs (yak), this is already taken care of before we get here.
+        path = GetMultiTargetPath(path) ?? path;
+      }
+      
+      if(HostUtils.RunningOnOSX)
+      {
         // Mac plugins can be located inside of macOS plugin bundles (rhp directories) or
         // inside directories that contain rhp files
         // adjust 'path' to handle this case
@@ -2159,24 +2195,25 @@ namespace Rhino.PlugIns
               path = dllFullPath;
           }
         }
-
-        if (!string.IsNullOrWhiteSpace (MonoHost.AlternateBinDirectory)) {
-          var dllname = System.IO.Path.GetFileNameWithoutExtension (path) + ".dll";
-          var temp_path = System.IO.Path.Combine (MonoHost.AlternateBinDirectory, dllname);
-          if (System.IO.File.Exists (temp_path))
+        
+        if (!string.IsNullOrWhiteSpace(MonoHost.AlternateBinDirectory))
+        {
+          var dllname = System.IO.Path.GetFileNameWithoutExtension(path) + ".dll";
+          var temp_path = System.IO.Path.Combine(MonoHost.AlternateBinDirectory, dllname);
+          if (System.IO.File.Exists(temp_path))
             path = temp_path;
-          else {
-            dllname = System.IO.Path.GetFileNameWithoutExtension (path) + ".rhp";
-            temp_path = System.IO.Path.Combine (MonoHost.AlternateBinDirectory, dllname);
-            if (System.IO.File.Exists (temp_path))
+          else
+          {
+            dllname = System.IO.Path.GetFileNameWithoutExtension(path) + ".rhp";
+            temp_path = System.IO.Path.Combine(MonoHost.AlternateBinDirectory, dllname);
+            if (System.IO.File.Exists(temp_path))
               path = temp_path;
           }
         }
-
-        // On windows we check this in native code, so only check here on mac for now.
-        if (!HostUtils.IsManagedDll(path))
-          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
       }
+
+      if (!HostUtils.IsManagedDll(path))
+        return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
 
       // attempt to load the assembly
       // This plugin may be a standard C++ plug-in that uses .NET.
@@ -2387,7 +2424,44 @@ namespace Rhino.PlugIns
 
       return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Loaded;
     }
-    
+
+    // Match net4xx, net7.0, net7.0-windows10.17123.0
+    static readonly Regex targetPathRegex = new Regex(@"^net((4\d\d?)|(\d\.\d(-\w+((\d+\.)*\d+)?)?))$");
+
+    private static string GetMultiTargetPath(string path)
+    {
+      DirectoryInfo dir;
+      string pluginName;
+      if (HostUtils.RunningOnOSX && Directory.Exists(path))
+      {
+        // On Mac, we get a folder here instead of a path to a file
+        pluginName = Path.GetFileName(path); // plugin name is the name of the folder
+        dir = new DirectoryInfo(path);
+      }
+      else
+      {
+        pluginName = Path.GetFileName(path);
+        dir = new DirectoryInfo(Path.GetDirectoryName(path));
+        
+        // is the .rhp in a net* folder?
+        var isTargetPath = targetPathRegex.IsMatch(dir.Name);
+        if (!isTargetPath)
+          return path;
+
+        dir = dir.Parent;
+      }
+
+      // find the runtime specific folder
+      var runtimeSpecificFolder = HostUtils.GetRuntimeSpecificFolder(dir, useRootFiles: HostUtils.RunningOnOSX);
+      var runtimeSpecificPath = Path.Combine(runtimeSpecificFolder.FullName, pluginName);
+      
+      // if the plugin doesn't exist in the runtime specific folder, 
+      if (!File.Exists(runtimeSpecificPath))
+        return null;
+
+      return runtimeSpecificPath;
+    }
+
     static bool CheckPlugInVersioning( System.Reflection.AssemblyName dotnetAssemblyName )
     {
       var plugin_version = dotnetAssemblyName.Version;

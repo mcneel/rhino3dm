@@ -93,7 +93,6 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
   return pNC;
 }
 #endif
-
 RH_C_FUNCTION bool ON_NurbsCurve_GetBool(ON_NurbsCurve* pCurve, int which)
 {
   const int idxIsRational = 0;

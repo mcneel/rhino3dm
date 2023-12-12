@@ -1088,6 +1088,26 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Returns true if the currently drawn frame is part of a tiled capture. Tiled captures
+    /// are performed when creating large raster outputs.
+    /// </summary>
+    /// <param name="fullSize">Final full size area that is being created</param>
+    /// <param name="currentTile">What portion of the fullSize area that is currently being drawn</param>
+    /// <returns>
+    /// true if a tiled capture is being performed. If false, the fullSize parameter will have the
+    /// same size as currentTile
+    /// </returns>
+    public bool IsInTiledDraw(out System.Drawing.Size fullSize, out System.Drawing.Rectangle currentTile)
+    {
+      int fullWidth=0, fullHeight=0;
+      int left=0, top=0, width=0, height=0;
+      UnsafeNativeMethods.CRhinoDisplayPipeline_GetTiledFrameInfo(m_ptr, ref fullWidth, ref fullHeight, ref left, ref top, ref width, ref height);
+      fullSize = new System.Drawing.Size(fullWidth, fullHeight);
+      currentTile = System.Drawing.Rectangle.FromLTRB(left, top, left+width, top+height);
+      return fullWidth!=width || fullHeight!=height;
+    }
+
+    /// <summary>
     /// Gets the curve thickness as defined by the current display mode. 
     /// Note: this only applies to curve objects, Brep and Mesh wires may have different settings.
     /// </summary>

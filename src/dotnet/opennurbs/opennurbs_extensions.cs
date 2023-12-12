@@ -1,12 +1,12 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
+using Rhino.Collections;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
-using Rhino.DocObjects;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Rhino.Collections;
 
 namespace Rhino.FileIO
 {
@@ -309,6 +309,24 @@ namespace Rhino.FileIO
         }
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Reads only the earth anchor point from an existing 3dm file
+    /// </summary>
+    /// <param name="path">A location on disk or network.</param>
+    /// <returns>The earth anchor point.</returns>
+    public static EarthAnchorPoint ReadEarthAnchorPoint(string path)
+    {
+      EarthAnchorPoint rc = null;
+      IntPtr ptr_settings = UnsafeNativeMethods.ONX_Model_ReadSettings(path);
+      if (ptr_settings == IntPtr.Zero) return null;
+      IntPtr ptr_ea = UnsafeNativeMethods.ON_3dmSettings_GetEarthAnchorPoint(ptr_settings);
+      if (ptr_ea != IntPtr.Zero)
+        rc = new EarthAnchorPoint(ptr_ea);
+
+      UnsafeNativeMethods.ON_3dmSettings_Delete(ptr_settings);
+      return rc;
     }
 
     /// <summary>
@@ -844,6 +862,23 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ONX_Model_SetRevision(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// If set, this is the model's location on the earth.  This information is
+    /// used when the model is used with GIS information.
+    /// </summary>
+    public EarthAnchorPoint EarthAnchorPoint
+    {
+      get
+      {
+        // NOTE: This is how it works in Rhino.RhinoDoc, with get returning a copy and a seperate set function
+        return new EarthAnchorPoint(this);
+      }
+      set
+      {
+        UnsafeNativeMethods.ONX_Model_SetEarthAnchorPoint(NonConstPointer(), value.ConstPointer());
       }
     }
 

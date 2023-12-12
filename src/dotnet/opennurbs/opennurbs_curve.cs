@@ -809,6 +809,7 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
+#endif //RHINO_SDK
 
     /// <summary>
     /// Constructs a curve from a set of control-point locations.
@@ -841,7 +842,7 @@ namespace Rhino.Geometry
     {
       return CreateControlPointCurve(points, 3);
     }
-#endif //RHINO_SDK
+
     /// <summary>
     /// Joins a collection of curve segments together.
     /// </summary>
@@ -5707,9 +5708,9 @@ namespace Rhino.Geometry
         return false;
       }
       SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
-      using (var outputFillets = new SimpleArraySurfacePointer())
-      using (var outputBreps0 = new SimpleArraySurfacePointer())
-      using (var outputBreps1 = new SimpleArraySurfacePointer())
+      using (var outputFillets = new SimpleArrayBrepPointer())
+      using (var outputBreps0 = new SimpleArrayBrepPointer())
+      using (var outputBreps1 = new SimpleArrayBrepPointer())
       {
         IntPtr ptr_outputFillets = outputFillets.NonConstPointer();
         IntPtr ptr_outputBreps0 = outputBreps0.NonConstPointer();
@@ -5717,8 +5718,13 @@ namespace Rhino.Geometry
         rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceToRail(faceWithCurve.ConstPointer(), this.ConstPointer(), 
           secondFace.ConstPointer(), u1, v1, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
           numBezierSrfs, extend, split_type, tolerance, ptr_outputFillets, ptr_outputBreps0, ptr_outputBreps1, arr_fitResults.NonConstPointer());
+       
         fitResults = (rc) ? arr_fitResults.ToArray() : null;
+        out_fillets.AddRange(outputFillets.ToNonConstArray());
+        out_breps0.AddRange(outputBreps0.ToNonConstArray());
+        out_breps1.AddRange(outputBreps1.ToNonConstArray());
       }
+      
       return rc;
     }
 
@@ -5774,13 +5780,16 @@ namespace Rhino.Geometry
         return false;
       }
       SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
-      using (var outputFillets = new SimpleArraySurfacePointer())
-      using (var outputBreps0 = new SimpleArraySurfacePointer())
-      using (var outputBreps1 = new SimpleArraySurfacePointer())
+      using (var outputFillets = new SimpleArrayBrepPointer())
+      using (var outputBreps0 = new SimpleArrayBrepPointer())
+      using (var outputBreps1 = new SimpleArrayBrepPointer())
       {
         rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurve(face.ConstPointer(), this.ConstPointer(), t, u, v, radius, alignToCurve, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
           numBezierSrfs, tolerance, outputFillets.ConstPointer(), arr_fitResults.NonConstPointer());
         fitResults = (rc) ? arr_fitResults.ToArray() : null;
+        out_fillets.AddRange(outputFillets.ToNonConstArray());
+        //out_breps0.AddRange(outputBreps0.ToNonConstArray());
+        //out_breps1.AddRange(outputBreps1.ToNonConstArray());
       }
       return rc;
   }
@@ -5854,11 +5863,11 @@ namespace Rhino.Geometry
     /// The caller is responsible for ensuring that the curve lies on the input surface.
     /// </summary>
     /// <param name="surface">Surface from which normals are calculated.</param>
-    /// <param name="height">offset distance (distance from surface to result curve)</param>
+    /// <param name="height">Offset distance.</param>
     /// <returns>
-    /// Offset curve at distance height from the surface.  The offset curve is
-    /// interpolated through a small number of points so if the surface is irregular
-    /// or complicated, the result will not be a very accurate offset.
+    /// Curve offset normal to the surface, if successful, null otherwise.
+    /// The offset curve is interpolated through a small number of points so if the
+    /// surface is irregular or complicated, the result will not be a very accurate offset.
     /// </returns>
     /// <since>5.0</since>
     [ConstOperation]
@@ -5870,6 +5879,30 @@ namespace Rhino.Geometry
       GC.KeepAlive(surface);
       return GeometryBase.CreateGeometryHelper(pOffsetCurve, null) as Curve;
     }
+
+    /// <summary>
+    /// Finds a curve by offsetting an existing curve tangent to a surface.
+    /// The caller is responsible for ensuring that the curve lies on the input surface.
+    /// </summary>
+    /// <param name="surface">Surface from which tangents are calculated.</param>
+    /// <param name="height">Offset distance.</param>
+    /// <returns>
+    /// Curve offset tangent to the surface, if successful, null otherwise.
+    /// The offset curve is interpolated through a small number of points so if the
+    /// surface is irregular or complicated, the result will not be a very accurate offset.
+    /// </returns>
+    /// <since>8.3</since>
+    [ConstOperation]
+    public Curve OffsetTangentToSurface(Surface surface, double height)
+    {
+      IntPtr pConstThis = ConstPointer();
+      IntPtr pConstSurface = surface.ConstPointer();
+      IntPtr pOffsetCurve = UnsafeNativeMethods.RHC_RhinoOffsetCurveTangent(pConstThis, pConstSurface, height);
+      GC.KeepAlive(surface);
+      return GeometryBase.CreateGeometryHelper(pOffsetCurve, null) as Curve;
+    }
+
+
 #endif
     #endregion methods
   }

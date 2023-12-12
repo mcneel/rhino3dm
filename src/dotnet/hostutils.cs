@@ -19,6 +19,7 @@ using System.Management;
 using System.Reflection.Metadata;
 using System.Reflection;
 using Rhino.FileIO;
+using System.Text.RegularExpressions;
 #endif
 
 namespace Rhino.Runtime
@@ -888,6 +889,21 @@ namespace Rhino.Runtime
       get { return m_theSingleSkin; }
     }
 
+    internal static string SkinDllPath
+    {
+      get
+      {
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringHolder())
+        {
+          var pointer = sh.NonConstPointer();
+          var path = string.Empty;
+          if (UnsafeNativeMethods.CRhSkin_SkinDllPath(pointer))
+            path = sh.ToString();
+          return string.IsNullOrWhiteSpace(path) ? null : path;
+        }
+      }
+    }
+
     internal static void DeletePointer()
     {
       if( m_theSingleSkin!=null )
@@ -1442,11 +1458,23 @@ namespace Rhino.Runtime
           }
       }
 
+      // LoadFromAssemblyPath can generate an error so let's check for previous errors here.
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+
       // Curtis:
       // Load in the same context as Rhino vs. always the Default context.
       // this should be the default context when running Rhino normally,
       // however this will be a separate context when running Rhino.Inside on Mac.
-      return RhinoLoadContext.LoadFromAssemblyPath(fullPath);
+      Assembly assembly = RhinoLoadContext.LoadFromAssemblyPath(fullPath);
+
+      // Discard error produced by LoadFromAssemblyPath.
+      // Error: "The system cannot find the file specified."
+      // The error doesn't seem to be causing any problems so let's discard it.
+      // NOTE: Investigation into why this error happens in RH-78218.
+      UnsafeNativeMethods.RHC_MaskLastWindowsError(2); // ERROR_FILE_NOT_FOUND
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+
+      return assembly;
 #endif
     }
     
@@ -1715,6 +1743,19 @@ namespace Rhino.Runtime
       return widthMillimeters > 0.0;
     }
 
+    /// <summary>
+    /// Get the output resolution for a given printer.
+    /// </summary>
+    /// <param name="printerName"></param>
+    /// <param name="horizontal">get the horizontal or vertical resolution</param>
+    /// <returns>
+    /// Dot per inch resolution for a given printer on success. 0 if an error occurred
+    /// </returns>
+    public static double GetPrinterDPI(string printerName, bool horizontal)
+    {
+      return UnsafeNativeMethods.RHC_GetPrinterDPI(printerName, horizontal);
+    }
+
 #endif
 
     static Dictionary<string, IPlatformServiceLocator> g_platform_locator = new Dictionary<string, IPlatformServiceLocator>();
@@ -1836,9 +1877,11 @@ namespace Rhino.Runtime
         EventHandler<NamedParametersEventArgs> callback = null;
         if( _namedCallbacks.TryGetValue(_name, out callback) && callback != null)
         {
-          NamedParametersEventArgs e = new NamedParametersEventArgs(ptrNamedParams);
-          callback(null, e);
-          e.m_pNamedParams = IntPtr.Zero;
+          using (var e = new NamedParametersEventArgs(ptrNamedParams))
+          {
+            callback(null, e);
+            e.m_pNamedParams = IntPtr.Zero;
+          }
           return 1;
         }
       }
@@ -3056,28 +3099,36 @@ namespace Rhino.Runtime
 
 
 
-      //v7 requires proper casing of functions. Repair the casing of older files to ensure compatibility. 
+      //v8 and newer requires proper casing of functions. Please don't add new functions to this list
+      //Repair the casing of older files to ensure compatibility. 
       #region Repair Function Casing
       var function_name_list = new List<string>()
       {
         "Area",
+        "AttributeUserText",
+        "BlockAttributeText",
+        "BlockInstanceCount",
+        "BlockInstanceName",
         "CurveLength",
         "Date",
         "DateModified",
-        "DocumentText",
+        "DetailScale",
+        "DocumentUserText",
         "FileName",
         "LayerName",
+        "LayoutUserText",
         "ModelUnits",
         "Notes",
         "NumPages",
         "ObjectLayer",
         "ObjectName",
         "ObjectPage",
+        "PageHeight",
         "PageName",
         "PageNumber",
-        "PageHeight",
         "PageWidth",
         "PaperName",
+        "PointCoordinate",
         "UserText",
         "Volume"
       };
@@ -3385,6 +3436,28 @@ namespace Rhino.Runtime
     /// <since>7.17</since>
     public static IEnumerable<System.IO.DirectoryInfo> GetActivePlugInVersionFolders()
     {
+      // GetEnvironmentVariable can generate an error so let's check for previous errors here.
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+
+      var developmentDirs = System.Environment.GetEnvironmentVariable("RHINO_PACKAGE_DIRS")?.Split(';');
+
+      // Discard error produced by GetEnvironmentVariable.
+      // Error: "The system could not find the environment option that was entered."
+      // The error doesn't seem to be causing any problems so let's discard it.
+      UnsafeNativeMethods.RHC_MaskLastWindowsError(203); // ERROR_ENVVAR_NOT_FOUND
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+
+      if (developmentDirs?.Length > 0)
+      {
+        foreach (var developmentDir in developmentDirs)
+        {
+          if (Directory.Exists(developmentDir))
+          {
+            yield return GetRuntimeSpecificFolder(new DirectoryInfo(developmentDir));
+          }
+        }
+      }
+
       var userDirs = GetActivePlugInVersionFolders(true).ToList();
       var machineDirs = GetActivePlugInVersionFolders(false).ToList();
 
@@ -3410,11 +3483,87 @@ namespace Rhino.Runtime
           break;
         }
         if (pick)
-          yield return userDir;
+          yield return GetRuntimeSpecificFolder(userDir);
       }
 
       foreach (var machineDir in machineDirs)
-        yield return machineDir;
+        yield return GetRuntimeSpecificFolder(machineDir);
+    }
+
+    internal static DirectoryInfo GetRuntimeSpecificFolder(DirectoryInfo root, bool useRootFiles = true)
+    {
+      // if there are .rhp or .gha's in the top folder, use default behaviour
+      if (useRootFiles &&
+        (root.GetFiles("*.rhp").Length > 0
+        || root.GetFiles("*.gha").Length > 0)
+        )
+        return root;
+
+      // no plugins to load in this package, scan for framework-specific subfolders if they exist
+
+      if (RunningInNetCore)
+      {
+        // search from current .NET runtime down to 7 (for future proofing when we support .NET 8, 9, etc.)
+        const int minimumNetVersion = 7;
+        var currentRuntimeVersion = System.Environment.Version.Major;
+        for (int i = currentRuntimeVersion; i >= minimumNetVersion; i--)
+        {
+          var suffix = RunningOnWindows ? "-windows" :
+              RunningOnOSX ? "-macos" :
+              null; // -linux
+
+          Version GetOSVersion(string name)
+          {
+            var idx = name.IndexOf(suffix);
+            if (idx < 0)
+              return null;
+
+            var versionString = name.Substring(idx + suffix.Length);
+
+            return Version.TryParse(versionString, out var version) ? version : null;
+          }
+
+          // search for platform-specific directories first, ordered by os version if specified
+          var platformDirs = root
+            .GetDirectories($"net{i}.0{suffix}*")
+            .OrderByDescending(d => GetOSVersion(d.Name) ?? new Version());
+
+          var currentOSVersion = System.Environment.OSVersion.Version;
+
+          foreach (var platformDir in platformDirs)
+          {
+            var osVersion = GetOSVersion(platformDir.Name);
+
+            // no os version, just use it
+            if (osVersion == null)
+              return platformDir;
+
+            // and ensure the OS version, if specified, is greater or equal to package version
+            if (currentOSVersion >= osVersion)
+              return platformDir;
+          }
+
+          // search for platform-agnostic target
+          var targetDir = root.GetDirectories($"net{i}.0")?.FirstOrDefault();
+          if (targetDir != null)
+            return targetDir;
+        }
+      }
+
+      // fall back to the latest net4x folder
+      foreach (var net4xdir in root.EnumerateDirectories("net4*").OrderByDescending(r => r.Name))
+      {
+        var match = Regex.Match(net4xdir.Name, @"net(?<ver>4\d+)");
+        if (!match.Success)
+          continue;
+
+        // just return it.
+        return net4xdir;
+
+      }
+
+      // no match, return root folder
+      return root;
     }
 
     /// <summary>
@@ -3498,10 +3647,10 @@ namespace Rhino.Runtime
 #endif
     }
 
-    static int LoadPlugInHelper(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo)
+    static int LoadPlugInHelper(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, bool bIsDirectoryInstall)
     {
       string str_path = StringWrapper.GetStringFromPointer (path);
-      int rc = (int)PlugIn.LoadPlugInHelper(str_path, pluginInfo, errorMessage, displayDebugInfo != 0);
+      int rc = (int)PlugIn.LoadPlugInHelper(str_path, pluginInfo, errorMessage, displayDebugInfo != 0, bIsDirectoryInstall);
       return rc;
     }
 
@@ -3560,7 +3709,7 @@ namespace Rhino.Runtime
     internal delegate void ShutdownRDKCallback();
     static readonly ShutdownRDKCallback m_rdk_shutdown_callback = ShutDownRhinoCommon_RDK;
 
-    internal delegate int LoadPluginCallback(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo);
+    internal delegate int LoadPluginCallback(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, bool bIsDirectoryInstall);
     static readonly LoadPluginCallback m_loadplugin_callback = LoadPlugInHelper;
     internal delegate int LoadSkinCallback(IntPtr path, int displayDebugInfo);
     static readonly LoadSkinCallback m_loadskin_callback = LoadSkinHelper;

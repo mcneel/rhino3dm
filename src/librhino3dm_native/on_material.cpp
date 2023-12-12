@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+RH_C_SHARED_ENUM_PARSE_FILE("on_material.cpp")
+
 RH_C_FUNCTION ON_Material* ON_Material_New(const ON_Material* pConstOther)
 {
   ON_Material* rc = new ON_Material();
@@ -540,6 +542,32 @@ RH_C_FUNCTION void ON_Texture_SetEnabled(ON_Texture* pTexture, bool enabled)
   }
 }
 
+RH_C_FUNCTION int ON_Texture_MinFilter(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+    return (int)pConstTexture->m_minfilter;
+  return (int)ON_Texture::FILTER::nearest_filter;
+}
+
+RH_C_FUNCTION int ON_Texture_MagFilter(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+    return (int)pConstTexture->m_magfilter;
+  return (int)ON_Texture::FILTER::nearest_filter;
+}
+
+RH_C_FUNCTION void ON_Texture_SetMinFilter(ON_Texture* pTexture, int filter)
+{
+  if (pTexture)
+    pTexture->m_minfilter = ON_Texture::FilterFromUnsigned(filter);
+}
+
+RH_C_FUNCTION void ON_Texture_SetMagFilter(ON_Texture* pTexture, int filter)
+{
+  if (pTexture)
+    pTexture->m_magfilter = ON_Texture::FilterFromUnsigned(filter);
+}
+
 RH_C_FUNCTION int ON_Texture_TextureType(const ON_Texture* pConstTexture)
 {
   if( pConstTexture )
@@ -692,6 +720,190 @@ RH_C_FUNCTION int ON_Texture_GetMappingChannelId(const ON_Texture* pConstTexture
 {
   if (pConstTexture) return pConstTexture->m_mapping_channel_id;
   return 0;
+}
+
+RH_C_FUNCTION bool ON_Texture_IsWcsProjected(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+    return pConstTexture->IsWcsProjected();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Texture_IsWcsBoxProjected(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+    return pConstTexture->IsWcsBoxProjected();
+  return false;
+}
+
+#pragma region RH_C_SHARED_ENUM [TextureProjectionModes] [Rhino.DocObjects.TextureProjectionModes] [int]
+/// <summary>
+/// Enum describing how texture is projected onto geometry
+/// </summary>
+enum class TextureProjectionModes : int
+{
+  /// <summary>Not valid projection type</summary>
+  Undefined = 0,
+  /// <summary>Uses a texture mapping to generate texture coordinates</summary>
+  MappingChannel = 1,
+  /// <summary>Screen based</summary>
+  ScreenBased = 2,
+  /// <summary>World coordinate system projection</summary>
+  Wcs = 3,
+  /// <summary>Box type world coordinate system projection</summary>
+  WcsBox = 4,
+  /// <summary>Box type environtment mapping</summary>
+  EnvironmentMapBox = 5,
+  /// <summary>Light probe type environtment mapping</summary>
+  EnvironmentMapLightProbe = 6,
+  /// <summary>Spherical environtment mapping</summary>
+  EnvironmentMapSpherical = 7,
+  /// <summary>Cube type environtment mapping</summary>
+  EnvironmentMapCube = 8,
+  /// <summary>Vertical cross cube type environtment mapping</summary>
+  EnvironmentMapVCrossCube = 9,
+  /// <summary>Horizontal cross type environtment mapping</summary>
+  EnvironmentMapHCrossCube = 10,
+  /// <summary>Hemispherical environtment mapping</summary>
+  EnvironmentMapHemispherical = 11,
+  /// <summary>Emap type environtment mapping</summary>
+  EnvironmentMapEmap = 12,
+  /// <summary>Surface parameterization</summary>
+  SurfaceParameterization = 13,
+};
+#pragma endregion
+
+RH_C_FUNCTION TextureProjectionModes ON_Texture_GetProjectionMode(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+  {
+    if (ON_Texture::IsBuiltInMappingChannel(pConstTexture->m_mapping_channel_id))
+    {
+      TextureProjectionModes res = TextureProjectionModes::Undefined;
+      const ON_Texture::MAPPING_CHANNEL mc = ON_Texture::BuiltInMappingChannelFromUnsigned(pConstTexture->m_mapping_channel_id);
+      switch (mc)
+      {
+      case ON_Texture::MAPPING_CHANNEL::tc_channel:
+        res = TextureProjectionModes::MappingChannel;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::default_channel:
+        res = TextureProjectionModes::MappingChannel;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::screen_based_channel:
+        res = TextureProjectionModes::ScreenBased;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::wcs_channel:
+        res = TextureProjectionModes::Wcs;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::wcs_box_channel:
+        res = TextureProjectionModes::WcsBox;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_box_channel:
+        res = TextureProjectionModes::EnvironmentMapBox;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_light_probe_channel:
+        res = TextureProjectionModes::EnvironmentMapLightProbe;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_spherical_channel:
+        res = TextureProjectionModes::EnvironmentMapSpherical;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_cube_map_channel:
+        res = TextureProjectionModes::EnvironmentMapCube;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_vcross_cube_map_channel:
+        res = TextureProjectionModes::EnvironmentMapVCrossCube;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_hcross_cube_map_channel:
+        res = TextureProjectionModes::EnvironmentMapHCrossCube;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_hemispherical_channel:
+        res = TextureProjectionModes::EnvironmentMapHemispherical;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::environment_map_emap_channel:
+        res = TextureProjectionModes::EnvironmentMapEmap;
+        break;
+      case ON_Texture::MAPPING_CHANNEL::srfp_channel:
+        res = TextureProjectionModes::SurfaceParameterization;
+        break;
+      default:
+        res = TextureProjectionModes::Undefined;
+        break;
+      }
+      return res;
+    }
+    else
+    {
+      return TextureProjectionModes::MappingChannel;
+    }
+  }
+  return TextureProjectionModes::Undefined;
+}
+
+RH_C_FUNCTION void ON_Texture_SetProjectionMode(ON_Texture* pTexture, TextureProjectionModes projectionMode)
+{
+  if (pTexture)
+  {
+    if (projectionMode == TextureProjectionModes::MappingChannel)
+    {
+      if (pTexture->IsBuiltInMappingChannel(pTexture->m_mapping_channel_id))
+      {
+        pTexture->SetMappingChannel(1);
+      }
+      else
+      {
+        // Do not change the mapping channel if one already is set
+      }
+    }
+    else
+    {
+      switch (projectionMode)
+      {
+      case TextureProjectionModes::Undefined:
+        break;
+      case TextureProjectionModes::MappingChannel:
+        pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::default_channel);
+        break;
+          case TextureProjectionModes::ScreenBased:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::screen_based_channel);
+            break;
+          case TextureProjectionModes::Wcs:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::wcs_channel);
+            break;
+          case TextureProjectionModes::WcsBox:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::wcs_box_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapBox:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_box_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapLightProbe:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_light_probe_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapSpherical:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_spherical_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapCube:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_cube_map_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapVCrossCube:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_vcross_cube_map_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapHCrossCube:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_hcross_cube_map_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapHemispherical:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_hemispherical_channel);
+            break;
+          case TextureProjectionModes::EnvironmentMapEmap:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::environment_map_emap_channel);
+            break;
+          case TextureProjectionModes::SurfaceParameterization:
+            pTexture->SetBuiltInMappingChannel(ON_Texture::MAPPING_CHANNEL::srfp_channel);
+            break;
+          default:
+            break;
+      }
+    }
+  }
 }
 
 RH_C_FUNCTION ON_UUID ON_Material_PlugInId(const ON_Material* pConstMaterial)

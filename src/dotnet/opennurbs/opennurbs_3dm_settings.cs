@@ -707,6 +707,16 @@ namespace Rhino.DocObjects
       m_ptr = UnsafeNativeMethods.ON_EarthAnchorPoint_New();
     }
 
+    internal EarthAnchorPoint(IntPtr ptr)
+    {
+      m_ptr = ptr;
+    }
+
+    internal EarthAnchorPoint(Rhino.FileIO.File3dm file3dm)
+    {
+      m_ptr = UnsafeNativeMethods.ONX_Model_GetEarthAnchorPoint(file3dm.ConstPointer());
+    }
+
 #if RHINO_SDK
     internal EarthAnchorPoint(RhinoDoc doc)
     {
@@ -2863,12 +2873,12 @@ namespace Rhino.FileIO
       m_parent = parent;
     }
 
-    IntPtr ConstPointer()
+    internal IntPtr ConstPointer()
     {
       IntPtr ptr_const_parent = m_parent.ConstPointer();
       return UnsafeNativeMethods.ONX_Model_3dmSettingsPointer(ptr_const_parent);
     }
-    IntPtr NonConstPointer()
+    internal IntPtr NonConstPointer()
     {
       IntPtr ptr_parent = m_parent.NonConstPointer();
       return UnsafeNativeMethods.ONX_Model_3dmSettingsPointer(ptr_parent);
@@ -2917,27 +2927,6 @@ namespace Rhino.FileIO
         UnsafeNativeMethods.ON_3dmSettings_SetModelBasepoint(ptr_this, value);
       }
     }
-
-    /*
-    Rhino.DocObjects.EarthAnchorPoint m_earth_anchor;
-    /// <summary>
-    /// If set, this is the model's location on the earth.  This information is
-    /// used when the model is used with GIS information.
-    /// </summary>
-    Rhino.DocObjects.EarthAnchorPoint EarthAnchorPoint
-    {
-      get
-      {
-        return m_earth_anchor ?? (m_earth_anchor = new DocObjects.EarthAnchorPoint(this));
-      }
-      set
-      {
-        if (m_earth_anchor == null)
-          m_earth_anchor = new DocObjects.EarthAnchorPoint(this);
-        m_earth_anchor.CopyFrom(value);
-      }
-    }
-    */
 
     double GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble which)
     {
