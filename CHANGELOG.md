@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - (py) added macos-12 to python builds
+- (dotnet) File3dm.EarthAnchorPoint [#554](https://github.com/mcneel/rhino3dm/issues/554)
+
+### Changed
+- (py, js) Mesh::CreateFromSubDControlNet now has a second bool argument. If true, the resulting subd will include texture coordinates. [#573](https://github.com/mcneel/rhino3dm/issues/573)
+
+
 
 ## [8.0.1] - 2023-11-17
 
