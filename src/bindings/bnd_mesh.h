@@ -272,7 +272,7 @@ class BND_Mesh : public BND_GeometryBase
 public:
   ON_Mesh* m_mesh = nullptr;
 public:
-  static BND_Mesh* CreateFromSubDControlNet(class BND_SubD* subd);
+  static BND_Mesh* CreateFromSubDControlNet(class BND_SubD* subd, bool includeTextureCoordinates);
 
   BND_Mesh();
   BND_Mesh(ON_Mesh* mesh, const ON_ModelComponentReference* compref);
