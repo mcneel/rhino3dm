@@ -110,7 +110,7 @@ BND_Mesh* BND_Mesh::CreateFromSubDControlNet(class BND_SubD* subd, bool includeT
   if (subd)
   {
     const ON_SubD* _subd = ON_SubD::Cast(subd->GeometryPointer());
-    ON_Mesh* mesh = _subd->GetControlNetMesh(nullptr, bIncludeTextureCoordinates ? ON_SubDGetControlNetMeshPriority::TextureCoordinates : ON_SubDGetControlNetMeshPriority::Geometry;
+    ON_Mesh* mesh = _subd->GetControlNetMesh(nullptr, includeTextureCoordinates ? ON_SubDGetControlNetMeshPriority::TextureCoordinates : ON_SubDGetControlNetMeshPriority::Geometry;
     if (mesh)
       return new BND_Mesh(mesh, nullptr);
   }
