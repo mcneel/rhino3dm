@@ -2924,6 +2924,36 @@ RH_C_FUNCTION int ONX_Model_AddLayer2(ONX_Model* pModel, const RHMONO_STRING* pL
   return ON_UNSET_INT_INDEX;
 }
 
+RH_C_FUNCTION int ONX_Model_AddGroup(ONX_Model* pModel) 
+{
+
+  if (nullptr == pModel)
+    return ON_UNSET_INT_INDEX;
+
+  ON_Group group;
+  ON_ModelComponentReference mr = pModel->AddModelComponent(group);
+  const ON_Group* managed_group = ON_Group::FromModelComponentRef(mr, nullptr);
+  int group_index = (nullptr != managed_group) ? managed_group->Index() : ON_UNSET_INT_INDEX;
+  if ( group_index < 0 )
+  {
+    ON_ERROR("failed to add group.");
+  }
+  return group_index;
+
+}
+
+RH_C_FUNCTION int ONX_Model_AddMaterial(ONX_Model* pModel, ON_Material* material) 
+{
+  ON_ModelComponentReference mr = pModel->AddModelComponent(*material, true);
+  const ON_Material* managed_material = ON_Material::FromModelComponentRef(mr, nullptr);
+  int material_index = (nullptr != managed_material) ? managed_material->Index() : ON_UNSET_INT_INDEX;
+  if ( material_index < 0 )
+  {
+    ON_ERROR("failed to add group.");
+  }
+  return material_index;
+}
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ONX_Model_GetPreviewImage(const ONX_Model* constModel, CRhinoDib* pRhinoDib)
 {
