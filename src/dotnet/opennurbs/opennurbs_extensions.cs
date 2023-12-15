@@ -4114,6 +4114,18 @@ namespace Rhino.FileIO
       }
       return list.Count > 0 ? list.ToArray() : new File3dmObject[0];
     }
+
+    /// <summary>
+    /// Adds a new empty group to the group table. 
+    /// </summary>
+    /// <returns>>=0 index of new group or -1 on error.</returns>
+    public int AddGroup() {
+
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      int index = UnsafeNativeMethods.ONX_Model_AddGroup(ptrFile3dm);
+      return index;
+
+    }
   }
 
 

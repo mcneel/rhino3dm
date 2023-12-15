@@ -284,12 +284,12 @@ RH_C_FUNCTION const ON_Mesh* ON_Extrusion_GetMesh(const ON_Extrusion* pConstExtr
     : nullptr;
 }
 
-RH_C_FUNCTION bool ON_Extrusion_SetMesh( ON_Extrusion* pExtrusion, ON_Mesh* mesh, int meshtype)
+RH_C_FUNCTION bool ON_Extrusion_SetMesh( ON_Extrusion* pExtrusion, const ON_Mesh* mesh, int meshtype)
 {
   bool rc = false;
   if (pExtrusion && mesh)
   {
-    rc = pExtrusion->SetMesh(ON::MeshType(meshtype), mesh);
+    rc = pExtrusion->SetMesh(ON::MeshType(meshtype), new ON_Mesh(*mesh));
   }
   return rc;
 }
