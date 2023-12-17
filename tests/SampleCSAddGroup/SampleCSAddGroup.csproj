@@ -6,14 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\dotnet\Rhino3dm.csproj" />
+  </ItemGroup>
 <!---
   <ItemGroup>
     <PackageReference Include="Rhino3dm" Version="8.0.1" />
   </ItemGroup>
   -->
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\dotnet\Rhino3dm.csproj" />
-  </ItemGroup>
 
 </Project>

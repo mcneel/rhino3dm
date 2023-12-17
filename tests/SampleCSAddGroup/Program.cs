@@ -7,6 +7,8 @@ int rhino3dmIndex = pathThis.IndexOf("rhino3dm");
 string pathLibRhino3dm = pathThis.Substring(0, rhino3dmIndex);
 pathLibRhino3dm += "rhino3dm\\src\\build\\windows\\win64\\Debug\\librhino3dm_native.dll";
 
+Console.WriteLine("Path to native lib: {0}", pathLibRhino3dm);
+
 // Force load librhino3dm
 nint handleLibRhino3dm = System.Runtime.InteropServices.NativeLibrary.Load(pathLibRhino3dm);
 
