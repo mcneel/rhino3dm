@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SampleCSAddGroup": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
