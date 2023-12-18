@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 
+
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_New(ON_NurbsCurve* pOther)
 {
   RHCHECK_LICENSE
@@ -55,8 +56,13 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
   count = pline.Count();
 
   // clamp
+  //Luis 2023.12.18
+  //RhMaxNurbsDegree() isn't available in rhino3dm, but it is just a function that returns the number 11
+  #if !defined(RHINO3DM_BUILD)
   degree = RHINO_CLAMP(degree, 1, RhMaxNurbsDegree());
-  
+  #else
+  degree = RHINO_CLAMP(degree, 1, 11);
+  #endif
   // control point curve
   degree = (count <= degree) ? count - 1 : degree;
 

@@ -4158,6 +4158,7 @@ namespace Rhino.FileIO
     /// Adds a new empty group to the group table. 
     /// </summary>
     /// <returns>>=0 index of new group or -1 on error.</returns>
+    /// <sice>8.4</since>
     public int AddGroup() {
 
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
