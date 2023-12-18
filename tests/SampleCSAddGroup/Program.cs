@@ -21,7 +21,8 @@ for( int i = 1; i < 10; i ++ ) {
    var id = doc.Objects.AddCircle(circle);
    var ro = doc.Objects.FindId(id);
    ro.Attributes.AddToGroup(index);
-   Console.WriteLine(ro.Attributes.GroupCount);
+   Console.WriteLine("Group Count: {0}", ro.Attributes.GroupCount);
+   Console.WriteLine("Group List: {0}",ro.Attributes.GetGroupList());
 }
 
 var tmpPath = System.IO.Path.GetTempPath();

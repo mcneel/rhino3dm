@@ -180,10 +180,10 @@ namespace Rhino.Runtime
     {
       if (IntPtr.Zero != m_ptr)
       {
-        // m_ptr points ot an ON_Object.
+        // m_ptr points at an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bRepair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
         if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
