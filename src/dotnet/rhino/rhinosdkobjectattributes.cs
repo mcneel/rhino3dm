@@ -65,9 +65,10 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(pNonConstAttributes);
     }
 
-#if RHINO_SDK
+
     internal override IntPtr NonConstPointer()
     {
+#if RHINO_SDK
       var rhinoObjectParent = m__parent as RhinoObject;
       if (rhinoObjectParent != null && rhinoObjectParent.m_pRhinoObject != IntPtr.Zero)
       {
@@ -75,6 +76,7 @@ namespace Rhino.DocObjects
         if (ptr_this != IntPtr.Zero)
           return ptr_this;
       }
+#endif
       var file3dmParent = m__parent as FileIO.File3dmObject;
       if (file3dmParent!=null)
       {
@@ -82,6 +84,7 @@ namespace Rhino.DocObjects
       }
       return base.NonConstPointer();
     }
+#if RHINO_SDK
 
     internal ObjectAttributes(RhinoObject parentObject)
     {
