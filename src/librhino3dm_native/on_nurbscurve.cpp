@@ -42,6 +42,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
   return crv->CreatePeriodicUniformNurbs(dim, order, count, pts, knot_delta);
 }
 
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {
   if (count < 2 || nullptr == points)
@@ -56,13 +57,8 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
   count = pline.Count();
 
   // clamp
-  //Luis 2023.12.18
-  //RhMaxNurbsDegree() isn't available in rhino3dm, but it is just a function that returns the number 11
-  #if !defined(RHINO3DM_BUILD)
   degree = RHINO_CLAMP(degree, 1, RhMaxNurbsDegree());
-  #else
-  degree = RHINO_CLAMP(degree, 1, 11);
-  #endif
+
   // control point curve
   degree = (count <= degree) ? count - 1 : degree;
 
@@ -98,6 +94,7 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
 
   return pNC;
 }
+#endif
 
 RH_C_FUNCTION bool ON_NurbsCurve_GetBool(ON_NurbsCurve* pCurve, int which)
 {
