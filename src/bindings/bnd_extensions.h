@@ -77,6 +77,7 @@ public:
   //Guid AddLeader4(string text, Plane plane, IEnumerable<Point2d> points)
   BND_UUID AddHatch(const class BND_Hatch* hatch, const class BND_3dmObjectAttributes* attributes);
   BND_UUID Add(const class BND_GeometryBase* geometry, const class BND_3dmObjectAttributes* attributes);
+  BND_UUID AddObject(const class BND_FileObject* object);
 
   void Delete(BND_UUID objectId);
   //int Delete(IEnumerable<Guid> objectIds)
