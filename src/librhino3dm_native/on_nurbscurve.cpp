@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 
-
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_New(ON_NurbsCurve* pOther)
 {
   RHCHECK_LICENSE
@@ -58,7 +57,7 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
 
   // clamp
   degree = RHINO_CLAMP(degree, 1, RhMaxNurbsDegree());
-
+  
   // control point curve
   degree = (count <= degree) ? count - 1 : degree;
 
