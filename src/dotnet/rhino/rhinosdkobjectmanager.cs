@@ -25,6 +25,7 @@ namespace Rhino.ObjectManager
       public static Guid BlockInstances => UnsafeNativeMethods.RhinoObjectManager_GetNodeId(UnsafeNativeMethods.ObjectManager_NodeIds.NodeBlockInstances);
       public static Guid BlockInstance => UnsafeNativeMethods.RhinoObjectManager_GetNodeId(UnsafeNativeMethods.ObjectManager_NodeIds.NodeBlockInstance);
       public static Guid Geometry => UnsafeNativeMethods.RhinoObjectManager_GetNodeId(UnsafeNativeMethods.ObjectManager_NodeIds.NodeGeometry);
+      public static Guid SimilarBlockInstances => UnsafeNativeMethods.RhinoObjectManager_GetNodeId(UnsafeNativeMethods.ObjectManager_NodeIds.NodeSimilarBlockInstances);
     }
 
     internal static void CleanUp()

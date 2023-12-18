@@ -5634,7 +5634,7 @@ namespace Rhino.DocObjects.Tables
     RhinoDocCommonTable<RhinoObject>,
     ICollection<RhinoObject>
   {
-    internal ObjectTable(RhinoDoc doc) : base(doc){}
+    internal ObjectTable(RhinoDoc doc) : base(doc){ _nonIndexedTable = true; }
 
     /// <summary>
     /// Gets the document that owns this object table.

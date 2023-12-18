@@ -435,6 +435,127 @@ namespace Rhino.Geometry
       return null;
     }
 
+#if RHINO_SDK
+
+    /// <summary>
+    ///  Creates a SubD sphere made from quad faces.
+    /// </summary>
+    /// <param name="sphere">Location, size and orientation of the sphere.</param>
+    /// <param name="vertexLocation">
+    /// If vertexLocation = SubDComponentLocation::ControlNet, 
+    /// then the control net points will be on the surface of the sphere.
+    /// Otherwise the limit surface points will be on the sphere.
+    /// </param>
+    /// <param name="quadSubdivisionLevel">
+    /// The resulting sphere will have 6*4^subdivision level quads.
+    /// (0 for 6 quads, 1 for 24 quads, 2 for 96 quads, ...).
+    /// </param>
+    /// <returns>
+    /// If the input parameters are valid, a SubD quad sphere is returned. Otherwise null is returned.
+    /// </returns>
+    /// <since>8.4</since>
+    [CLSCompliant(false)]
+    public static SubD CreateQuadSphere(Sphere sphere, SubDComponentLocation vertexLocation, uint quadSubdivisionLevel)
+    {
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDQuadSphere(ref sphere, vertexLocation, quadSubdivisionLevel);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      return null;
+    }
+
+    /// <summary>
+    /// Creates a SubD sphere made from polar triangle fans and bands of quads.
+    /// The result resembles a globe with triangle fans at the poles and the
+    /// edges forming latitude parallels and longitude meridians.
+    /// </summary>
+    /// <param name="sphere">Location, size and orientation of the sphere.</param>
+    /// <param name="vertexLocation">
+    /// If vertexLocation = SubDComponentLocation::ControlNet, 
+    /// then the control net points will be on the surface of the sphere.
+    /// Otherwise the limit surface points will be on the sphere.
+    /// </param>
+    /// <param name="axialFaceCount">
+    /// Number of faces along the sphere's meridians. (axialFaceCount &gt;= 2)
+    /// For example, if you wanted each face to span 30 degrees of latitude, 
+    /// you would pass 6 (=180 degrees/30 degrees) for axialFaceCount.
+    /// </param>
+    /// <param name="equatorialFaceCount">
+    /// Number of faces around the sphere's parallels. (equatorialFaceCount &gt;= 3)
+    /// For example, if you wanted each face to span 30 degrees of longitude, 
+    /// you would pass 12 (=360 degrees/30 degrees) for equatorialFaceCount.
+    /// </param>
+    /// <returns>
+    /// If the input parameters are valid, a SubD globe sphere is returned. Otherwise null is returned.
+    /// </returns>
+    /// <since>8.4</since>
+    [CLSCompliant(false)]
+    public static SubD CreateGlobeSphere(Sphere sphere, SubDComponentLocation vertexLocation, uint axialFaceCount, uint equatorialFaceCount)
+    {
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDGlobeSphere(ref sphere, vertexLocation, axialFaceCount, equatorialFaceCount);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      return null;
+    }
+
+    /// <summary>
+    /// Creates a SubD sphere made from triangular faces.
+    /// This is a goofy topology for a Catmull-Clark subdivision surface
+    /// (all triangles and all vertices have 5 or 6 edges).
+    /// You may want to consider using the much behaved result from
+    /// CreateSubDQuadSphere() or even the result from CreateSubDGlobeSphere().
+    /// </summary>
+    /// <param name="sphere">Location, size and orientation of the sphere.</param>
+    /// <param name="vertexLocation">
+    /// If vertexLocation = SubDComponentLocation::ControlNet, 
+    /// then the control net points will be on the surface of the sphere.
+    /// Otherwise the limit surface points will be on the sphere.
+    /// </param>
+    /// <param name="triSubdivisionLevel">
+    /// The resulting sphere will have 20*4^subdivision level triangles.
+    /// (0 for 20 triangles, 1 for 80 triangles, 2 for 320 triangles, ...).
+    /// </param>
+    /// <returns>
+    /// If the input parameters are valid, a SubD tri sphere is returned. Otherwise null is returned.
+    /// </returns>
+    /// <since>8.4</since>
+    [CLSCompliant(false)]
+    public static SubD CreateTriSphere(Sphere sphere, SubDComponentLocation vertexLocation, uint triSubdivisionLevel)
+    {
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDTriSphere(ref sphere, vertexLocation, triSubdivisionLevel);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      return null;
+    }
+
+    /// <summary>
+    /// Creates a SubD sphere based on an icosohedron (20 triangular faces and 5 valent vertices).
+    /// This is a goofy topology for a Catmull-Clark subdivision surface
+    /// (all triangles, all vertices have 5 edges).
+    /// You may want to consider using the much behaved result from
+    /// CreateSubDQuadSphere(sphere, vertexLocation, 1) 
+    /// or even the result from CreateSubDGlobeSphere().
+    /// </summary>
+    /// <param name="sphere">Location, size and orientation of the sphere.</param>
+    /// <param name="vertexLocation">
+    /// If vertexLocation = SubDComponentLocation::ControlNet, 
+    /// then the control net points will be on the surface of the sphere.
+    /// Otherwise the limit surface points will be on the sphere.
+    /// </param>
+    /// <returns>
+    /// If the input parameters are valid, a SubD icosahedron is returned. Otherwise null is returned.
+    /// </returns>
+    /// <since>8.4</since>
+    [CLSCompliant(false)]
+    public static SubD CreateIcosahedron(Sphere sphere, SubDComponentLocation vertexLocation)
+    {
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDIcosahedron(ref sphere, vertexLocation);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      return null;
+    }
+
+#endif
+
     /// <summary>
     /// Resets the SubD to the default face packing if adding creases or deleting faces breaks the quad grids.
     /// It does not change the topology or geometry of the SubD. SubD face packs always stop at creases.

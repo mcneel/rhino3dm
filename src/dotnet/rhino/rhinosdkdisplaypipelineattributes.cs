@@ -966,6 +966,30 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPointClouds); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPointClouds, value); }
     }
+
+    /// <since>8.4</since>
+    public PointStyle PointCloudStyle
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        PointStyle rc = PointStyle.Simple;
+        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointCloudStyle(const_ptr_this, true, ref rc);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointCloudStyle(ptr_this, false, ref value);
+      }
+    }
+
+    /// <since>8.4</since>
+    public float PointCloudRadius
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.PointCloudSize); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.PointCloudSize, (int)value); }
+    }
     #endregion
 
 

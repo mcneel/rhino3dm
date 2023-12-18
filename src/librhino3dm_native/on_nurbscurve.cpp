@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 
+
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_New(ON_NurbsCurve* pOther)
 {
   RHCHECK_LICENSE
@@ -40,6 +41,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
     return false;
   return crv->CreatePeriodicUniformNurbs(dim, order, count, pts, knot_delta);
 }
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {
@@ -56,7 +58,7 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
 
   // clamp
   degree = RHINO_CLAMP(degree, 1, RhMaxNurbsDegree());
-  
+
   // control point curve
   degree = (count <= degree) ? count - 1 : degree;
 
@@ -93,6 +95,7 @@ RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*
   return pNC;
 }
 #endif
+
 RH_C_FUNCTION bool ON_NurbsCurve_GetBool(ON_NurbsCurve* pCurve, int which)
 {
   const int idxIsRational = 0;

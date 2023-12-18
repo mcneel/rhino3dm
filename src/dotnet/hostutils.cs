@@ -2629,7 +2629,8 @@ namespace Rhino.Runtime
 #if RHINO_SDK
       if (m_bSendDebugToRhino)
         RhinoApp.WriteLine(msg);
-      UnsafeNativeMethods.RHC_DebugPrint(msg);
+      else
+        UnsafeNativeMethods.RHC_DebugPrint(msg);
 #else
       Console.Write(msg);
 #endif
@@ -3761,7 +3762,7 @@ namespace Rhino.Runtime
       RegisterNamedCallback("FireLicenseStateChangedEvent", RhinoApp.FireLicenseStateChangedEvent);
       RegisterNamedCallback("RhinoView.ShowToast", Rhino.Display.RhinoView.FireShowToast);
 
-      DebugString("Initializing RhinoCommon");
+      //DebugString("Initializing RhinoCommon");
       UnsafeNativeMethods.RHC_SetGetNowProc(m_getnow_callback, m_getformattedtime_callback);
       UnsafeNativeMethods.RHC_SetPythonEvaluateCallback(m_evaluate_callback);
       UnsafeNativeMethods.RHC_SetTextFieldEvalCallback(m_eval_textfield_callback);
