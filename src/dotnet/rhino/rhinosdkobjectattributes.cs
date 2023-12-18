@@ -65,7 +65,6 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(pNonConstAttributes);
     }
 
-
     internal override IntPtr NonConstPointer()
     {
 #if RHINO_SDK

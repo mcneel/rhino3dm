@@ -620,7 +620,39 @@ namespace Rhino.DocObjects
         var ptr_mesh_parameters = parameters.NonConstPointer();
         var ptr_mesharray = mesh_array.NonConstPointer();
         var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
-        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray);
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, true);
+        meshes = mesh_array.ToNonConstArray();
+        var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
+        attributes = new ObjectAttributes[attrib_count];
+        for (var i = 0; i < attrib_count; i++)
+        {
+          var ptr_attribute = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Get(ptr_attributesarray, i);
+          attributes[i] = new ObjectAttributes(ptr_attribute);
+        }
+        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        return (Commands.Result)rc;
+      }
+    }
+
+    /// <summary>Meshes Rhino objects.</summary>
+    /// <param name="rhinoObjects">The Rhino objects to mesh.</param>
+    /// <param name="parameters">The parameters used to create the meshes.</param>
+    /// <param name="meshes">The created meshes are appended to this array.</param>
+    /// <param name="attributes">The object attributes that coincide with each created mesh are appended to this array.</param>
+    /// <param name="useWorkerThread">Set true to compute meshes in a worker thread.</param>
+    /// <returns>The results of the calculation.</returns>
+    /// <since>8.4</since>
+    public static Commands.Result MeshObjects(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, MeshingParameters parameters, out Mesh[] meshes, out ObjectAttributes[] attributes, bool useWorkerThread)
+    {
+      using (var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
+      using (var mesh_array = new SimpleArrayMeshPointer())
+      {
+        var ptr_rhinoobject_array = rhinoobject_array.NonConstPointer();
+        var ui_style = -1; //no user interface
+        var ptr_mesh_parameters = parameters.NonConstPointer();
+        var ptr_mesharray = mesh_array.NonConstPointer();
+        var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, useWorkerThread);
         meshes = mesh_array.ToNonConstArray();
         var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
         attributes = new ObjectAttributes[attrib_count];
@@ -652,7 +684,7 @@ namespace Rhino.DocObjects
         var ptr_mesh_parameters = parameters.NonConstPointer();
         var ptr_mesharray = mesh_array.NonConstPointer();
         var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
-        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray);
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, true);
         simpleDialog = ui_style == 0;
         meshes = mesh_array.ToNonConstArray();
         var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
