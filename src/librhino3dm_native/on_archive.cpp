@@ -2949,7 +2949,7 @@ RH_C_FUNCTION int ONX_Model_AddMaterial(ONX_Model* pModel, ON_Material* material
   int material_index = (nullptr != managed_material) ? managed_material->Index() : ON_UNSET_INT_INDEX;
   if ( material_index < 0 )
   {
-    ON_ERROR("failed to add group.");
+    ON_ERROR("failed to add material.");
   }
   return material_index;
 }

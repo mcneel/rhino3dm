@@ -695,7 +695,7 @@ int BND_File3dmMaterialTable::Add(const BND_Material& material)
   int material_index = (nullptr != managed_material) ? managed_material->Index() : ON_UNSET_INT_INDEX;
   if ( material_index < 0 )
   {
-    ON_ERROR("failed to add group.");
+    ON_ERROR("failed to add material.");
   }
   return material_index;
 }
