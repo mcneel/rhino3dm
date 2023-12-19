@@ -560,6 +560,13 @@ BND_UUID BND_ONXModel_ObjectTable::Add(const BND_GeometryBase* geometry, const B
   return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddObject(const class BND_FileObject* object)
+{
+  const ON_Geometry* g = object ? object->m_geometry->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, object->m_attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
 void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
@@ -1490,6 +1497,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep, py::arg("brep"), py::arg("attributes")=nullptr)
     .def("AddHatch", &BND_ONXModel_ObjectTable::AddHatch, py::arg("hatch"), py::arg("attributes")=nullptr)
     .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
+    .def("AddObject", &BND_ONXModel_ObjectTable::AddObject, py::arg("object"))
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
     .def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
@@ -1807,6 +1815,7 @@ void initExtensionsBindings(void*)
     .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh, allow_raw_pointers())
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
+    .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())

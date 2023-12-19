@@ -81,7 +81,11 @@ const wchar_t* _variablename = _parametername;
 #if !defined (RHINO3DM_BUILD)
 #if defined (__APPLE__)
 typedef CGImageRef HBITMAP_OR_CGIMAGE;
+#if defined (ON_RUNTIME_APPLE_IOS)
+typedef UIImage* HBITMAP_OR_NSIMAGE;
+#else
 typedef NSImage* HBITMAP_OR_NSIMAGE;
+#endif
 #else
 typedef HBITMAP HBITMAP_OR_CGIMAGE;
 typedef HBITMAP HBITMAP_OR_NSIMAGE;
@@ -273,4 +277,8 @@ static const ON_SHA1_Hash* ON_SHA1_Hash_From_Array_Reinterpret(const unsigned ch
 #define RHCHECK_LICENSE
 #else
 #define RHCHECK_LICENSE RhCheckLicenseAndThrow(true);
+#endif
+
+#if !defined(RHINO_CLAMP)
+#define RHINO_CLAMP(V,L,H) ( (V) < (L) ? (L) : ( (V) > (H) ? (H) : (V) ) )
 #endif

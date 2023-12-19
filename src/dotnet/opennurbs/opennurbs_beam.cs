@@ -606,16 +606,15 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mesh">The mesh.</param>
     /// <param name="meshType">The mesh type.</param>
-    /// <returns>A bool.</returns>
-    [ConstOperation]
+    /// <returns>True on success.</returns>
     public bool SetMesh(Mesh mesh, MeshType meshType)
     {
       if (null == mesh ) return false;
 
-      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       
-      bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_const_this, ptr_const_mesh, (int)meshType );
+      bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_this, ptr_const_mesh, (int)meshType );
       GC.KeepAlive(mesh);
       return result;
     }

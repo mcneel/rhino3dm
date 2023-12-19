@@ -98,3 +98,5 @@ node_modules/
 bin/
 obj/
 x64/
+Properties/
+*.3dm

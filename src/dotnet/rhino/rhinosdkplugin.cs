@@ -155,15 +155,15 @@ namespace Rhino.PlugIns
     {
       if (pluginAssembly == null)
         pluginAssembly = pluginType.Assembly;
-      HostUtils.DebugString("[PlugIn::Create] Start");
-      if (!string.IsNullOrEmpty(pluginName))
-        HostUtils.DebugString("  plugin_name = " + pluginName);
+      // HostUtils.DebugString("[PlugIn::Create] Start");
+      // if (!string.IsNullOrEmpty(pluginName))
+      //   HostUtils.DebugString("  plugin_name = " + pluginName);
       PlugIn rc;
       Guid plugin_id = Guid.Empty;
       m_bOkToConstruct = true;
       try
       {
-        HostUtils.DebugString("  Looking for plug-in's GuidAttribute");
+        //HostUtils.DebugString("  Looking for plug-in's GuidAttribute");
         object[] idAttr = pluginAssembly.GetCustomAttributes(typeof(GuidAttribute), false);
         if (idAttr.Length > 0)
         {
@@ -173,7 +173,7 @@ namespace Rhino.PlugIns
 
         if (string.IsNullOrEmpty(pluginName))
         {
-          HostUtils.DebugString("  Looking for plug-in's AssemblyTitleAttribute");
+          //HostUtils.DebugString("  Looking for plug-in's AssemblyTitleAttribute");
           object[] titleAttr = pluginAssembly.GetCustomAttributes(typeof(System.Reflection.AssemblyTitleAttribute), false);
           System.Reflection.AssemblyTitleAttribute title = (System.Reflection.AssemblyTitleAttribute)(titleAttr[0]);
           pluginName = title.Title;
@@ -196,7 +196,7 @@ namespace Rhino.PlugIns
       m_bOkToConstruct = false;
       if (rc != null)
       {
-        HostUtils.DebugString("  Created PlugIn Instance");
+        //HostUtils.DebugString("  Created PlugIn Instance");
         if (string.IsNullOrEmpty(pluginVersion))
         {
           pluginVersion = pluginAssembly.GetName().Version.ToString();
@@ -269,7 +269,7 @@ namespace Rhino.PlugIns
           }
         }
       }
-      HostUtils.DebugString("[PlugIn::Create] Finished");
+      //HostUtils.DebugString("[PlugIn::Create] Finished");
       return rc;
     }
 
@@ -2324,13 +2324,13 @@ namespace Rhino.PlugIns
         bool version_check_passed = false;
         if( index_rhinocommon>=0 )
           version_check_passed = CheckPlugInVersioning( referenced_assemblies[index_rhinocommon] );
-        if( !version_check_passed && !CheckPlugInCompatibility(path, displayDebugInfo) )
+        if( !version_check_passed && !CheckPlugInCompatibility(path) )
         {
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Incompatible;
         }
 
-        if(displayDebugInfo)
-          RhinoApp.Write("- plug-in passes RhinoCommon.DLL reference version check\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- plug-in passes RhinoCommon.DLL reference version check\n");
 
         // 15 August. 2008 S. Baer
         // Test to make sure plug-in developers didn't accidentally copy RhinoCommon.DLL
@@ -2364,8 +2364,8 @@ namespace Rhino.PlugIns
         // At this point, we have determined that this is a RhinoCommon plug-in
         // We've done all the checking that we can do without actually loading
         // the DLL ( and resolving links)
-        if(displayDebugInfo)
-          RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
         
         if(ironpython_referenced)
         {
@@ -2385,8 +2385,8 @@ namespace Rhino.PlugIns
 
         var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
         
-        if(displayDebugInfo)
-          RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
         // Fill out all of the info strings using Assembly attributes in the plugin
         ExtractPlugInAttributes( plugin_assembly, pluginInfo );
         if (UnsafeNativeMethods.CRhinoPlugInInfo_SilentBlock(pluginInfo))
@@ -2394,14 +2394,14 @@ namespace Rhino.PlugIns
         
         // All of the major tests have passed
         // Find and create the plug-in and command classes through reflection
-        if(displayDebugInfo)
-          RhinoApp.Write("- creating plug-in and command classes\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- creating plug-in and command classes\n");
 
         if( !CreateFromAssembly( plugin_assembly, displayDebugInfo, index_rhinocommon==-1) )
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
         
-        if(displayDebugInfo)
-          RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
       }
       catch (Exception ex)
       {
@@ -2502,7 +2502,7 @@ namespace Rhino.PlugIns
         return hash;
       }
     }
-    static bool CheckPlugInCompatibility(string path, bool displayDebugInfo)
+    static bool CheckPlugInCompatibility(string path)
     {
       // 10 June 2016 (S. Baer)
       // We will probably want to completely redo this caching scheme about
@@ -2549,7 +2549,7 @@ namespace Rhino.PlugIns
       // a given file. This way I'm not worrying about plug-in names or
       // versions which is in the spirit of using Compat in the first place!
       string hash = ComputeMd5Hash(path);
-      if (displayDebugInfo) RhinoApp.WriteLine("- MD5: {0}", hash);
+      // if (displayDebugInfo) RhinoApp.WriteLine("- MD5: {0}", hash);
 
       // check cache using md5 in case we've already checked this file
       // NOTE: cache should be destroyed when Rhino is updated
@@ -2646,10 +2646,10 @@ namespace Rhino.PlugIns
         }
       }
 
-      RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} {(result ? "succeeded" : "failed")} in {time.TotalSeconds:0.00}s");
-
       if (!result)
       {
+        RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
+
         var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
         if (!Directory.Exists(outputDir))
           Directory.CreateDirectory(outputDir);

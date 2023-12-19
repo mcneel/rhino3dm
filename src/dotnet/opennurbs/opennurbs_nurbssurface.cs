@@ -1857,7 +1857,6 @@ namespace Rhino.Geometry.Collections
       return UnsafeNativeMethods.ON_NurbsSurface_SuperfluousKnot(const_ptr_surface, m_direction, start ? 0 : 1);
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Gets the style of the knot vector.
     /// </summary>
@@ -1870,7 +1869,6 @@ namespace Rhino.Geometry.Collections
         return (KnotStyle)UnsafeNativeMethods.ON_NurbsSurface_KnotStyle(const_ptr_surface, m_direction);
       }
     }
-#endif //RHINO_SDK
 
     /// <summary>
     /// Gets or sets the knot vector value at the given index.
