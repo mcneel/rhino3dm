@@ -3910,6 +3910,18 @@ namespace Rhino.FileIO
     {
       return __FindIndexInternal(index);
     }
+
+    /// <summary>
+    /// Adds a material to the model material table
+    /// </summary>
+    /// <param name="material"></param>
+    /// <returns>The material's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.</returns>
+    /// <since>8.4</since>
+    public int AddMaterial(DocObjects.Material material) 
+    {
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      return UnsafeNativeMethods.ONX_Model_AddMaterial(ptrFile3dm, material.ConstPointer());
+    }
   }
 
   /// <summary>

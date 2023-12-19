@@ -687,10 +687,17 @@ BND_FileObject* BND_ONXModel_ObjectTable::FindId(BND_UUID id) const
 	return rc;
 }
 
-void BND_File3dmMaterialTable::Add(const BND_Material& material)
+int BND_File3dmMaterialTable::Add(const BND_Material& material)
 {
   const ON_Material* m = material.m_material;
-  m_model->AddModelComponent(*m);
+  ON_ModelComponentReference mr = m_model->AddModelComponent(*m);
+  const ON_Material* managed_material = ON_Material::FromModelComponentRef(mr, nullptr);
+  int material_index = (nullptr != managed_material) ? managed_material->Index() : ON_UNSET_INT_INDEX;
+  if ( material_index < 0 )
+  {
+    ON_ERROR("failed to add material.");
+  }
+  return material_index;
 }
 
 BND_Material* BND_File3dmMaterialTable::IterIndex(int index)

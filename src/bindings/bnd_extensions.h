@@ -97,7 +97,7 @@ class BND_File3dmMaterialTable
 public:
   BND_File3dmMaterialTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model->ActiveComponentCount(ON_ModelComponent::Type::RenderMaterial); }
-  void Add(const class BND_Material& material);
+  int Add(const class BND_Material& material);
   class BND_Material* FindIndex(int index);
   class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);
