@@ -1145,15 +1145,14 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
 }
 
 
-int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes)
+int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<BND_GeometryBase>& geometry, const std::vector<BND_3dmObjectAttributes>& attributes)
 {
+  int index = -1;
   const int count_g = (int)geometry.size();
   const int count_a = (int)attributes.size();
-  int index = -1;
 
-  if(m_model) 
+  if(m_model && count_g > 0) 
   {
-
     // Determine if we need to transform geometry to world origin
     ON_Xform xf;
     ON_Xform* pXform = nullptr;
@@ -1167,8 +1166,8 @@ int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name,
 
     for ( int i = 0; i < count_g; i ++ ) 
     {
-      const ON_Geometry* pConstGeom = &geometry[i];
-      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? &attributes[i] : &ON_3dmObjectAttributes::DefaultAttributes;
+      const ON_Geometry* pConstGeom = geometry[i].GeometryPointer();
+      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? attributes[i].m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
 
       if (pConstGeom && pConstAtts)
       {
@@ -1190,6 +1189,7 @@ int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name,
             pGeom->Transform(*pXform);
           }
 
+          //have to pass in BND_3dmObjectAttributes to Internal_ONX_Model_AddModelGeometry
           BND_3dmObjectAttributes _atts;
           _atts.m_attributes = &atts;
           ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(m_model.get(), pGeom, &_atts);
