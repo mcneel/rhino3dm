@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v35.5.6
+        uses: tj-actions/changed-files@v41.0.0
         id: changed-files
         with:
           files: .github/workflows/workflow_ci.yml
@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v35.5.6
+        uses: tj-actions/changed-files@v41.0.0
         id: changed-files
         with:
           files: |
@@ -59,7 +59,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v35.5.6
+        uses: tj-actions/changed-files@v41.0.0
         id: changed-files
         with:
           files: src/dotnet
@@ -76,7 +76,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v35.5.6
+        uses: tj-actions/changed-files@v41.0.0
         id: changed-files
         with:
           files: |
