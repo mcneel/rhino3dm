@@ -91,6 +91,7 @@ if (${RHINO3DM_PY})
   endif()
 
   pybind11_add_module(_rhino3dm ${bindings_SRC})
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   target_link_libraries(_rhino3dm PRIVATE opennurbsStatic)
   if (MSVC)
     target_link_libraries(_rhino3dm PRIVATE debug lib/draco/Debug/draco)
