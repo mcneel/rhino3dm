@@ -828,9 +828,12 @@ namespace Rhino.Geometry
   [Serializable]
   public struct Vector2f : IEquatable<Vector2f>, IComparable<Vector2f>, IComparable, IEpsilonFComparable<Vector2f>, IValidable, IFormattable
   {
+    #region members
     internal float m_x;
     internal float m_y;
+    #endregion
 
+    #region constructors
     /// <summary>
     /// Creates an instance.
     /// </summary>
@@ -842,7 +845,46 @@ namespace Rhino.Geometry
       m_x = x;
       m_y = y;
     }
+    #endregion
 
+    #region static properties
+    /// <summary>
+    /// Gets the value of the vector with components 0,0.
+    /// </summary>
+    /// <since>5.0</since>
+    public static Vector2f Zero
+    {
+      get { return new Vector2f(); }
+    }
+
+    /// <summary>
+    /// Gets the value of the vector with components 1,0.
+    /// </summary>
+    /// <since>5.0</since>
+    public static Vector2f XAxis
+    {
+      get { return new Vector2f(1f, 0f); }
+    }
+
+    /// <summary>
+    /// Gets the value of the vector with components 0,1.
+    /// </summary>
+    public static Vector2f YAxis
+    {
+      get { return new Vector2f(0f, 1f); }
+    }
+
+    /// <summary>
+    /// Gets the value of the vector with each component set to RhinoMath.UnsetValue.
+    /// </summary>
+    /// <since>5.0</since>
+    public static Vector2f Unset
+    {
+      get { return new Vector2f(RhinoMath.UnsetSingle, RhinoMath.UnsetSingle); }
+    }
+    #endregion static properties
+
+    #region properties
     /// <summary>
     /// Gets or sets the X (first) component of this vector.
     /// </summary>
@@ -856,17 +898,44 @@ namespace Rhino.Geometry
     public float Y { get { return m_y; } set { m_y = value; } }
 
     /// <summary>
-    /// Returns the square of the length of this vector.
-    /// This method does not check for the validity of its inputs.
+    /// Gets a value indicating whether the X, Y, and Z values are all equal to 0.0.
     /// </summary>
     /// <since>6.0</since>
-    public float SquareLength
+    public bool IsZero
     {
       get
       {
-        return m_x * m_x + m_y * m_y;
+        return (m_x == 0 && m_y == 0);
       }
     }
+
+    /// <summary>
+    /// Gets a value indicating whether or not this is a unit vector. 
+    /// A unit vector has length 1.
+    /// </summary>
+    /// <since>6.0</since>
+    public bool IsUnitVector
+    {
+      get
+      {
+        // checks for invalid values and returns 0.0 if there are any
+        double length = Vector2d.GetLengthHelper(m_x, m_y);
+        return Math.Abs(length - 1.0) <= RhinoMath.SqrtEpsilon;
+      }
+    }
+    /// <summary>
+    /// Returns an indication regarding the validity of this vector.
+    /// </summary>
+    /// <since>6.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        return RhinoMath.IsValidSingle(m_x) && RhinoMath.IsValidSingle(m_y);
+      }
+    }
+    #endregion
+
 
     /// <summary>
     /// Determines whether the specified System.Object is a Vector2f and has the same values as the present vector.
@@ -904,6 +973,7 @@ namespace Rhino.Geometry
       return RhinoMath.EpsilonEquals(m_x, other.m_x, epsilon) &&
              RhinoMath.EpsilonEquals(m_y, other.m_y, epsilon);
     }
+   
     /// <summary>
     /// Compares this <see cref="Vector2f" /> with another <see cref="Vector2f" />.
     /// <para>Components evaluation priority is first X, then Y.</para>
@@ -942,18 +1012,6 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Returns an indication regarding the validity of this vector.
-    /// </summary>
-    /// <since>6.0</since>
-    public bool IsValid
-    {
-      get
-      {
-        return RhinoMath.IsValidSingle(m_x) && RhinoMath.IsValidSingle(m_y);
-      }
-    }
-
-    /// <summary>
     /// Computes a hash number that represents the current vector.
     /// </summary>
     /// <returns>A hash code that is not unique for each vector.</returns>
@@ -974,12 +1032,54 @@ namespace Rhino.Geometry
       var culture = System.Globalization.CultureInfo.InvariantCulture;
       return String.Format("{0},{1}", m_x.ToString(culture), m_y.ToString(culture));
     }
+
     /// <inheritdoc />
     /// <since>7.0</since>
     [ConstOperation]
     public string ToString(string format, IFormatProvider formatProvider)
     {
       return Point3d.FormatCoordinates(format, formatProvider, m_x, m_y);
+    }
+
+
+    /// <summary>
+    /// Unitizes the vector in place. A unit vector has length 1 unit. 
+    /// <para>An invalid or zero length vector cannot be unitized.</para>
+    /// </summary>
+    /// <returns>true on success or false on failure.</returns>
+    public bool Unitize()
+    {
+      bool rc = UnsafeNativeMethods.ON_2fVector_Unitize(ref this);
+      return rc;
+    }
+
+    ///<summary>
+    /// Reverses this vector in place (reverses the direction).
+    /// <para>If this vector contains RhinoMath.UnsetValue, the 
+    /// reverse will also be invalid and false will be returned.</para>
+    ///</summary>
+    ///<remarks>Similar to <see cref="Negate">Negate</see>, that is only provided for CLR language compliance.</remarks>
+    ///<returns>true on success or false if the vector is invalid.</returns>
+    public bool Reverse()
+    {
+      bool rc = true;
+
+      if (RhinoMath.UnsetSingle != m_x) { m_x = -m_x; } else { rc = false; }
+      if (RhinoMath.UnsetSingle != m_y) { m_y = -m_y; } else { rc = false; }
+
+      return rc;
+    }
+
+    ///<summary>
+    /// Sets this vector to be perpendicular to another vector. 
+    /// Result is not unitized.
+    ///</summary>
+    /// <param name="other">Vector to use as guide.</param>
+    ///<returns>true on success, false if input vector is zero or invalid.</returns>
+    [ConstOperation]
+    public bool PerpendicularTo(Vector2f other)
+    {
+      return UnsafeNativeMethods.ON_2fVector_PerpendicularTo(ref this, other);
     }
 
     /// <summary>
@@ -1062,6 +1162,75 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Sums up two vectors.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector1">A vector.</param>
+    /// <param name="vector2">A second vector.</param>
+    /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
+    public static Vector2f Add(Vector2f vector1, Vector2f vector2)
+    {
+      return new Vector2f(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point2f operator +(Point2f point, Vector2f vector)
+    {
+      return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
+    }
+
+    /// <summary>
+    /// Computes the opposite vector.
+    /// </summary>
+    /// <param name="vector">A vector to negate.</param>
+    /// <returns>A new vector where all components were multiplied by -1.</returns>
+    public static Vector2f operator -(Vector2f vector)
+    {
+      return new Vector2f(-vector.m_x, -vector.m_y);
+    }
+
+    /// <summary>
+    /// Subtracts the second vector from the first one.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector1">A vector.</param>
+    /// <param name="vector2">A second vector.</param>
+    /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    public static Vector2f Subtract(Vector2f vector1, Vector2f vector2)
+    {
+      return new Vector2f(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y);
+    }
+
+    /// <summary>
+    /// Computes the reversed vector.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)</para>
+    /// </summary>
+    /// <remarks>This is similar to <see cref="Reverse">Reverse()</see>, but is static for CLR compliance, and with default name.</remarks>
+    /// <param name="vector">A vector to negate.</param>
+    /// <returns>A new vector where all components were multiplied by -1.</returns>
+    public static Vector2f Negate(Vector2f vector)
+    {
+      return new Vector2f(-vector.m_x, -vector.m_y);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point2f Add(Point2f point, Vector2f vector)
+    {
+      return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
+    }
+
+    /// <summary>
     /// Multiplies two <see cref="Vector2f"/> together, returning the dot (internal) product of the two.
     /// </summary>
     /// <param name="point1">The first point.</param>
@@ -1109,6 +1278,30 @@ namespace Rhino.Geometry
     {
       return new Vector2f(a.m_x + b.m_x, a.m_y + b.m_y);
     }
+
+    /// <summary>
+    /// Returns the square of the length of this vector.
+    /// This method does not check for the validity of its inputs.
+    /// </summary>
+    /// <since>6.0</since>
+    public float SquareLength
+    {
+      get
+      {
+        return m_x * m_x + m_y * m_y;
+      }
+    }
+
+    /// <summary>
+    /// Computes the length (or magnitude, or size) of this vector.
+    /// This is an application of Pythagoras' theorem.
+    /// If this vector is invalid, its length is considered 0.
+    /// </summary>
+    public double Length
+    {
+      get { return Vector2d.GetLengthHelper(m_x, m_y); }  // alternatively return UnsafeNativeMethods.ON_2dVector_Length(this). Avoid the thunk to improve performance
+    }
+
   }
 
   /// <summary>
@@ -1352,6 +1545,7 @@ namespace Rhino.Geometry
       return String.Format("{0},{1},{2}",
         m_x.ToString(culture), m_y.ToString(culture), m_z.ToString(culture));
     }
+   
     /// <inheritdoc />
     /// <since>7.0</since>
     [ConstOperation]
