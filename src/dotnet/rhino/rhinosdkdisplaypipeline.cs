@@ -3357,11 +3357,26 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawMarker(ptr_this, tip, direction, color.ToArgb(), thickness, size, rotation);
     }
 
-    /*
-      public void DrawConstructionPlane( bool depthBuffered, int transparency )
+    /// <summary>
+    /// Draws a light.
+    /// </summary>
+    /// <param name="light">The light to draw.</param>
+    /// <param name="wireframeColor">The wireframe color.</param>
+    /// <since>8.4</since>
+    public void DrawLight(Light light, System.Drawing.Color wireframeColor)
+    {
+      if (null != light)
       {
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr ptr_const_light = light.ConstPointer();
+        UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLight(ptr_this, ptr_const_light, wireframeColor.ToArgb());
       }
-    */
+    }
+
+    /// <summary>
+    /// Draws a construction plane.
+    /// </summary>
+    /// <param name="constructionPlane">The construction plane to draw.</param>
     /// <since>5.0</since>
     public void DrawConstructionPlane(DocObjects.ConstructionPlane constructionPlane)
     {

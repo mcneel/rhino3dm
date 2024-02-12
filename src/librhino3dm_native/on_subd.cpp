@@ -1207,4 +1207,3 @@ RH_C_FUNCTION ON_SubD* ON_SubD_CreateSubDIcosahedron(ON_Sphere* pSphere, ON_SubD
 }
 
 #endif
-

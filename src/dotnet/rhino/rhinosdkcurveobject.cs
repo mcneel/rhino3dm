@@ -1,6 +1,8 @@
 #pragma warning disable 1591
 using System;
+using Rhino.Display;
 using Rhino.Geometry;
+using Rhino.Runtime.InteropWrappers;
 
 #if RHINO_SDK
 namespace Rhino.DocObjects
@@ -37,6 +39,38 @@ namespace Rhino.DocObjects
     {
       Curve rc = DuplicateGeometry() as Curve;
       return rc;
+    }
+
+    /// <summary>
+    /// Converts the linetype pattern of the curve into curve segments and points
+    /// based on the active Rhino viewport.
+    /// </summary>
+    /// <returns>An array of curve and point objects if successful.</returns>
+    /// <since>8.4</since>
+    public GeometryBase[] GetLinetypeSegments()
+    {
+      return GetLinetypeSegments(null);
+    }
+
+    /// <summary>
+    /// Converts the linetype pattern of the curve into curve segments and points
+    /// based on the specified Rhino viewport.
+    /// </summary>
+    /// <param name="viewport">The Rhino viewport used to generate the curve segments and points.</param>
+    /// <returns>An array of curve and point objects if successful.</returns>
+    /// <since>8.4</since>
+    public GeometryBase[] GetLinetypeSegments(RhinoViewport viewport)
+    {
+      using (SimpleArrayGeometryPointer geometry_array = new SimpleArrayGeometryPointer())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        IntPtr ptr_viewport = (null != viewport) ? viewport.ConstPointer() : IntPtr.Zero;
+        IntPtr ptr_geometry_array = geometry_array.NonConstPointer();
+        int rc = UnsafeNativeMethods.CRhinoCurveObject_GetLinetypeSegments(ptr_const_this, ptr_viewport, ptr_geometry_array);
+        if (rc > 0)
+          return geometry_array.ToNonConstArray();
+        return new GeometryBase[0];
+      }
     }
 
     internal override RhinoObject.CommitGeometryChangesFunc GetCommitFunc()

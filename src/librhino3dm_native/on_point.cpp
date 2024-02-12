@@ -76,15 +76,6 @@ RH_C_FUNCTION bool ON_3fVector_Unitize( ON_3fVector* v )
   return rc;
 }
 
-RH_C_FUNCTION void ON_3fVector_Rotate( ON_3fVector* v, double angle, ON_3FVECTOR_STRUCT axis )
-{
-  if( v )
-  {
-    const ON_3fVector* _axis = (const ON_3fVector*)&axis;
-    v->Rotate(angle, *_axis);
-  }
-}
-
 RH_C_FUNCTION bool ON_3fVector_PerpendicularTo( ON_3fVector* v, ON_3FVECTOR_STRUCT other )
 {
   bool rc = false;
@@ -94,6 +85,15 @@ RH_C_FUNCTION bool ON_3fVector_PerpendicularTo( ON_3fVector* v, ON_3FVECTOR_STRU
     rc = v->PerpendicularTo(*_other);
   }
   return rc;
+}
+
+RH_C_FUNCTION void ON_3fVector_Rotate(ON_3fVector* v, double angle, ON_3FVECTOR_STRUCT axis)
+{
+  if (v)
+  {
+    const ON_3fVector* _axis = (const ON_3fVector*)&axis;
+    v->Rotate(angle, *_axis);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

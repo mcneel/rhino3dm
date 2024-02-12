@@ -727,8 +727,14 @@ namespace Rhino.Runtime
 
       uint length = 0;
       bool writeuserdata = true;
+      bool writerendermeshes = true;
+      bool writeanalysismeshes = true;
       if (options != null)
+      {
         writeuserdata = options.WriteUserData;
+        writerendermeshes = options.WriteRenderMeshes;
+        writeanalysismeshes = options.WriteAnalysisMeshes;
+      }
 #if RHINO_SDK
       int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
 #else
@@ -742,7 +748,7 @@ namespace Rhino.Runtime
       // NOTE: 
       //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
       //   if it is too big or the object type requires a different archive version.
-      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, ref length);
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, writerendermeshes, writeanalysismeshes, ref length);
 
       if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
       {
@@ -864,8 +870,14 @@ namespace Rhino.Runtime
       string json = null;
       uint length = 0;
       bool writeuserdata = true;
+      bool writerendermeshes = true;
+      bool writeanalysismeshes = true;
       if (options != null)
+      {
         writeuserdata = options.WriteUserData;
+        writerendermeshes = options.WriteRenderMeshes;
+        writeanalysismeshes = options.WriteAnalysisMeshes;
+      }
 #if RHINO_SDK
       int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
 #else
@@ -880,7 +892,7 @@ namespace Rhino.Runtime
       //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
       //   if it is too big or the object type requires a different archive version.
       IntPtr pConstOnObject = ConstPointer();
-      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, ref length);
+      IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, writerendermeshes, writeanalysismeshes, ref length);
       if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
       {
         int sz = (int)length;

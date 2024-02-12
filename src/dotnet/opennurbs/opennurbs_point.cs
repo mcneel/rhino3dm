@@ -1246,6 +1246,24 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Computes the square of the distance between two 2d points.
+    /// <para>This method is usually largely faster than DistanceTo().</para>
+    /// </summary>
+    /// <param name="other">Other point for squared distance measurement.</param>
+    /// <returns>The squared length of the line between this and the other point; or 0 if any of the points is not valid.</returns>
+    /// <since>8.4</since>
+    [ConstOperation]
+    public double DistanceToSquared(Point2d other) {
+      double d;
+      if (IsValid && other.IsValid) {
+        d = (this - other).SquareLength;
+      } else {
+        d = 0.0;
+      }
+      return d;
+    }
+
+    /// <summary>
     /// Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
     /// <para>result = transformation*point</para>
     /// </summary>

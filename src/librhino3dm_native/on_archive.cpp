@@ -783,10 +783,10 @@ RH_C_FUNCTION void ON_ReadBufferArchive_Delete(ON_Read3dmBufferArchive* pReadBuf
     delete pReadBufferArchive;
 }
 
-RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, unsigned int* length)
+RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, bool writerendermeshes, bool writeanalysismeshes, unsigned int* length)
 {
   ON_Write3dmBufferArchive* rc = nullptr;
-
+  
   if( pConstObject && length && nullptr != rhinoversion)
   {
     ON_UserDataHolder holder;

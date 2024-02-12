@@ -69,16 +69,26 @@ namespace Rhino.Geometry
     {
       get
       {
-        if (m_size < 2) { return false; }
-        if (!m_items[0].IsValid) { return false; }
+        if (m_size < 2) 
+          return false; 
+
+        if (!m_items[0].IsValid) 
+          return false; 
 
         for (int i = 1; i < m_size; i++)
         {
-          if (!m_items[i].IsValid) { return false; }
-          if (m_items[i] == m_items[i - 1]) { return false; }
+          if (!m_items[i].IsValid) 
+            return false; 
+
+          if (m_items[i] == m_items[i - 1]) 
+            return false; 
         }
 
-        if (m_size < 4) { if (IsClosed) { return false; } }
+        if (m_size < 4) 
+        {
+          if (IsClosed) 
+            return false;
+        }
 
         return true;
       }
