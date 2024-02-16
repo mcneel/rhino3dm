@@ -4,7 +4,6 @@ using System.Drawing;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Geometry;
 using System.Collections.Generic;
-using static Rhino.ApplicationSettings.CurvatureAnalysisSettings;
 
 namespace Rhino.ApplicationSettings
 {
@@ -235,6 +234,57 @@ namespace Rhino.ApplicationSettings
   /// </summary>
   public static class AppearanceSettings
   {
+    /// <summary>Set UI to the default dark mode color scheme</summary>
+    /// <returns>true on sucess</returns>
+    public static bool SetToDarkMode()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      return service.SetToDefaultColorScheme(true);
+    }
+
+    /// <summary>Set UI to the default light mode color scheme</summary>
+    /// <returns>true on sucess</returns>
+    public static bool SetToLightMode()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      return service.SetToDefaultColorScheme(false);
+    }
+
+    /// <summary>
+    /// Determine if Rhino is running with default dark mode color settings
+    /// </summary>
+    /// <returns></returns>
+    public static bool UsingDefaultDarkModeColors()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      bool light;
+      bool dark;
+      service.DetectColorScheme(out light, out dark);
+      return dark;
+    }
+
+    /// <summary>
+    /// Determine if Rhino is running with default light mode color settings
+    /// </summary>
+    /// <returns></returns>
+    public static bool UsingDefaultLightModeColors()
+    {
+      var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
+      if (null == service)
+        return false;
+      bool light;
+      bool dark;
+      service.DetectColorScheme(out light, out dark);
+      return light;
+    }
+
+
     static AppearanceSettingsState CreateState(bool current) => CreateState(current, Runtime.HostUtils.RunningInDarkMode);
 
     static AppearanceSettingsState CreateState(bool current, bool darkMode)
@@ -991,6 +1041,7 @@ namespace Rhino.ApplicationSettings
     const int idxShowViewportTitles = 9;
     const int idxShowTitleBar = 10;
     const int idxShowViewportTabs = 11;
+    const int idxShowSelectionFilterBar = 12;
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -1038,6 +1089,17 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowOsnapBar, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowOsnapBar, value); }
     }
+
+    /// <summary>
+    /// Shows or hides the selection filter user interface.
+    /// </summary>
+    /// <since>8.2</since>
+    public static bool ShowSelectionFilterBar
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowSelectionFilterBar, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowSelectionFilterBar, value); }
+    }
+
     /// <summary>
     /// Shows or hides the status bar user interface.
     /// </summary>
@@ -3295,6 +3357,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Represents a snapshot of <see cref="ViewSettings"/>.
   /// </summary>
+  /// <since>5.0</since>
   public class ViewSettingsState
   {
     internal ViewSettingsState() { }
@@ -3384,6 +3447,12 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>5.0</since>
     public bool LinkedViewports { get; set; }
+
+    /// <summary>
+    /// Gets or sets the view rotation value.
+    /// </summary>
+    /// <since>8.1</since>
+    public ViewSettings.ViewRotationStyle ViewRotation { get; set; }
   }
 
   /// <summary>
@@ -3394,20 +3463,23 @@ namespace Rhino.ApplicationSettings
     static ViewSettingsState CreateState(bool current)
     {
       IntPtr pViewSettings = UnsafeNativeMethods.CRhinoAppViewSettings_New(current);
-      ViewSettingsState rc = new ViewSettingsState();
-      rc.AlwaysPanParallelViews = GetBool(idxAlwaysPanParallelViews, pViewSettings);
-      rc.DefinedViewSetCPlane = GetBool(idxDefinedViewSetCPlane, pViewSettings);
-      rc.DefinedViewSetProjection = GetBool(idxDefinedViewSetProjection, pViewSettings);
-      rc.LinkedViewports = GetBool(idxLinkedViewports, pViewSettings);
-      rc.PanReverseKeyboardAction = GetBool(idxPanReverseKeyboardAction, pViewSettings);
-      rc.PanScreenFraction = GetDouble(UnsafeNativeMethods.AppViewSettings.PanScreenFraction, pViewSettings);
-      rc.RotateCircleIncrement = UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, pViewSettings);
-      rc.RotateReverseKeyboard = GetBool(idxRotateReverseKeyboard, pViewSettings);
-      rc.RotateToView = GetBool(idxRotateToView, pViewSettings);
-      rc.SingleClickMaximize = GetBool(idxSingleClickMaximize, pViewSettings);
-      rc.ZoomScale = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale, pViewSettings);
-      rc.ZoomExtentsParallelViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder, pViewSettings);
-      rc.ZoomExtentsPerspectiveViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder, pViewSettings);
+      ViewSettingsState rc = new ViewSettingsState
+      {
+        AlwaysPanParallelViews = GetBool(idxAlwaysPanParallelViews, pViewSettings),
+        DefinedViewSetCPlane = GetBool(idxDefinedViewSetCPlane, pViewSettings),
+        DefinedViewSetProjection = GetBool(idxDefinedViewSetProjection, pViewSettings),
+        LinkedViewports = GetBool(idxLinkedViewports, pViewSettings),
+        PanReverseKeyboardAction = GetBool(idxPanReverseKeyboardAction, pViewSettings),
+        PanScreenFraction = GetDouble(UnsafeNativeMethods.AppViewSettings.PanScreenFraction, pViewSettings),
+        RotateCircleIncrement = UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, pViewSettings),
+        RotateReverseKeyboard = GetBool(idxRotateReverseKeyboard, pViewSettings),
+        RotateToView = GetBool(idxRotateToView, pViewSettings),
+        SingleClickMaximize = GetBool(idxSingleClickMaximize, pViewSettings),
+        ZoomScale = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale, pViewSettings),
+        ZoomExtentsParallelViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder, pViewSettings),
+        ZoomExtentsPerspectiveViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder, pViewSettings),
+        ViewRotation = GetViewRotation(pViewSettings)
+      };
       UnsafeNativeMethods.CRhinoAppViewSettings_Delete(pViewSettings);
       return rc;
     }
@@ -3461,6 +3533,7 @@ namespace Rhino.ApplicationSettings
       ZoomScale = state.ZoomScale;
       ZoomExtentsParallelViewBorder = state.ZoomExtentsParallelViewBorder;
       ZoomExtentsPerspectiveViewBorder = state.ZoomExtentsPerspectiveViewBorder;
+      ViewRotation = state.ViewRotation;
     }
 
     // bool items
@@ -3492,10 +3565,21 @@ namespace Rhino.ApplicationSettings
     {
       UnsafeNativeMethods.CRhinoAppViewSettings_GetSetBool(which, true, b, pViewSettings);
     }
+    static ViewRotationStyle GetViewRotation(IntPtr pViewSettings)
+    {
+      return (ViewRotationStyle)UnsafeNativeMethods.CRhinoAppViewSettings_GetSetViewRotation(0, false, pViewSettings);
+    }
+    static void SetViewRotation(ViewRotationStyle viewRotationStyle, IntPtr pViewSettings)
+    {
+      UnsafeNativeMethods.CRhinoAppViewSettings_GetSetViewRotation((int)viewRotationStyle, true, pViewSettings);
+    }
+
     static bool GetBool(int which) { return GetBool(which, IntPtr.Zero); }
     static void SetBool(int which, bool b) { SetBool(which, b, IntPtr.Zero); }
     static double GetDouble(UnsafeNativeMethods.AppViewSettings which) { return GetDouble(which, IntPtr.Zero); }
     static void SetDouble(UnsafeNativeMethods.AppViewSettings which, double d) { SetDouble(which, d, IntPtr.Zero); }
+    static ViewRotationStyle GetViewRotation() { return GetViewRotation(IntPtr.Zero); }
+    static void SetViewRotation(ViewRotationStyle viewRotationStyle) { SetViewRotation(viewRotationStyle, IntPtr.Zero); }
 
     /// <summary>Gets or sets the faction used as multiplier to pan the screen.</summary>
     /// <since>5.0</since>
@@ -3563,14 +3647,8 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public static int RotateCircleIncrement
     {
-      get
-      {
-        return UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, IntPtr.Zero);
-      }
-      set
-      {
-        UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, true, value, IntPtr.Zero);
-      }
+      get => UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, false, 0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoAppViewSettings_GetSetInt(idxRotateCircleIncrement, true, value, IntPtr.Zero);
     }
 
     /// <summary>
@@ -3639,6 +3717,41 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetBool(idxLinkedViewports); }
       set { SetBool(idxLinkedViewports, value); }
+    }
+
+    /// <summary>
+    /// View rotation styles.
+    /// </summary>
+    /// <since>8.1</since>
+    public enum ViewRotationStyle
+    {
+      /// <summary>
+      /// Makes the view rotate relative to the world axes.
+      /// You can use the tilt keys to rotate the view around the view depth axis.
+      /// </summary>
+      RotateAroundWorldAxes = 0,
+      /// <summary>
+      /// Makes the view rotate relative to the view axes rather than the model x, y, and z axes.
+      /// </summary>
+      RotateRelativeToView = 1,
+      /// <summary>
+      /// The view rotation is always relative to the previous dynamic view.
+      /// </summary>
+      RotateRelativeToViewV2Style = 2,
+      /// <summary>
+      /// Makes the view (RotateView command) or camera (RotateCamera command) rotate around the construction plane z-axis.
+      /// </summary>
+      RotateAroundCplaneZaxis = 3
+    }
+
+    /// <summary>
+    /// Gets or sets the view rotation value.
+    /// </summary>
+    /// <since>8.1</since>
+    public static ViewRotationStyle ViewRotation
+    {
+      get => GetViewRotation();
+      set => SetViewRotation(value);
     }
   }
 
@@ -4089,6 +4202,8 @@ namespace Rhino.ApplicationSettings
     AltCtrlPageUp,
     /// <summary>Alt + Ctrl + Page Down</summary>
     AltCtrlPageDown,
+    /// <summary>No shortcut key</summary>
+    None,
     /// <summary>Alt + Home</summary>
     AltHome,
     /// <summary>Alt + Home</summary>
@@ -4165,6 +4280,313 @@ namespace Rhino.ApplicationSettings
     Alt8,
     /// <summary>Alt + 9</summary>
     Alt9,
+    /// <summary>Control + Home (Mac)</summary>
+    MacControlHome,
+    /// <summary>Control + End (Mac)</summary>
+    MacControlEnd,
+    /// <summary>Control + A (Mac)</summary>
+    MacControlA,
+    /// <summary>Control + B (Mac)</summary>
+    MacControlB,
+    /// <summary>Control + C (Mac)</summary>
+    MacControlC,
+    /// <summary>Control + D (Mac)</summary>
+    MacControlD,
+    /// <summary>Control + E (Mac)</summary>
+    MacControlE,
+    /// <summary>Control + F (Mac)</summary>
+    MacControlF,
+    /// <summary>Control + G (Mac)</summary>
+    MacControlG,
+    /// <summary>Control + H (Mac)</summary>
+    MacControlH,
+    /// <summary>Control + I (Mac)</summary>
+    MacControlI,
+    /// <summary>Control + J (Mac)</summary>
+    MacControlJ,
+    /// <summary>Control + K (Mac)</summary>
+    MacControlK,
+    /// <summary>Control + L (Mac)</summary>
+    MacControlL,
+    /// <summary>Control + M (Mac)</summary>
+    MacControlM,
+    /// <summary>Control + N (Mac)</summary>
+    MacControlN,
+    /// <summary>Control + O (Mac)</summary>
+    MacControlO,
+    /// <summary>Control + P (Mac)</summary>
+    MacControlP,
+    /// <summary>Control + Q (Mac)</summary>
+    MacControlQ,
+    /// <summary>Control + R (Mac)</summary>
+    MacControlR,
+    /// <summary>Control + S (Mac)</summary>
+    MacControlS,
+    /// <summary>Control + T (Mac)</summary>
+    MacControlT,
+    /// <summary>Control + U (Mac)</summary>
+    MacControlU,
+    /// <summary>Control + V (Mac)</summary>
+    MacControlV,
+    /// <summary>Control + W (Mac)</summary>
+    MacControlW,
+    /// <summary>Control + X (Mac)</summary>
+    MacControlX,
+    /// <summary>Control + Y (Mac)</summary>
+    MacControlY,
+    /// <summary>Control + Z (Mac)</summary>
+    MacControlZ,
+    /// <summary>Control + 0 (Mac)</summary>
+    MacControl0,
+    /// <summary>Control + 1 (Mac)</summary>
+    MacControl1,
+    /// <summary>Control + 2 (Mac)</summary>
+    MacControl2,
+    /// <summary>Control + 3 (Mac)</summary>
+    MacControl3,
+    /// <summary>Control + 4 (Mac)</summary>
+    MacControl4,
+    /// <summary>Control + 5 (Mac)</summary>
+    MacControl5,
+    /// <summary>Control + 6 (Mac)</summary>
+    MacControl6,
+    /// <summary>Control + 7 (Mac)</summary>
+    MacControl7,
+    /// <summary>Control + 8 (Mac)</summary>
+    MacControl8,
+    /// <summary>Control + 9 (Mac)</summary>
+    MacControl9,
+
+    /// <summary>Control + Alt + Home (Mac)</summary>
+    MacControlAltHome,
+    /// <summary>Control + Alt + End (Mac)</summary>
+    MacControlAltEnd,
+    /// <summary>Control + Alt + A (Mac)</summary>
+    MacControlAltA,
+    /// <summary>Control + Alt + B (Mac)</summary>
+    MacControlAltB,
+    /// <summary>Control + Alt + C (Mac)</summary>
+    MacControlAltC,
+    /// <summary>Control + Alt + D (Mac)</summary>
+    MacControlAltD,
+    /// <summary>Control + Alt + E (Mac)</summary>
+    MacControlAltE,
+    /// <summary>Control + Alt + F (Mac)</summary>
+    MacControlAltF,
+    /// <summary>Control + Alt + G (Mac)</summary>
+    MacControlAltG,
+    /// <summary>Control + Alt + H (Mac)</summary>
+    MacControlAltH,
+    /// <summary>Control + Alt + I (Mac)</summary>
+    MacControlAltI,
+    /// <summary>Control + Alt + J (Mac)</summary>
+    MacControlAltJ,
+    /// <summary>Control + Alt + K (Mac)</summary>
+    MacControlAltK,
+    /// <summary>Control + Alt + L (Mac)</summary>
+    MacControlAltL,
+    /// <summary>Control + Alt + M (Mac)</summary>
+    MacControlAltM,
+    /// <summary>Control + Alt + N (Mac)</summary>
+    MacControlAltN,
+    /// <summary>Control + Alt + O (Mac)</summary>
+    MacControlAltO,
+    /// <summary>Control + Alt + P (Mac)</summary>
+    MacControlAltP,
+    /// <summary>Control + Alt + Q (Mac)</summary>
+    MacControlAltQ,
+    /// <summary>Control + Alt + R (Mac)</summary>
+    MacControlAltR,
+    /// <summary>Control + Alt + S (Mac)</summary>
+    MacControlAltS,
+    /// <summary>Control + Alt + T (Mac)</summary>
+    MacControlAltT,
+    /// <summary>Control + Alt + U (Mac)</summary>
+    MacControlAltU,
+    /// <summary>Control + Alt + Alt + V (Mac)</summary>
+    MacControlAltV,
+    /// <summary>Control + Alt + W (Mac)</summary>
+    MacControlAltW,
+    /// <summary>Control + Alt + X (Mac)</summary>
+    MacControlAltX,
+    /// <summary>Control + Alt + Y (Mac)</summary>
+    MacControlAltY,
+    /// <summary>Control + Alt + Z (Mac)</summary>
+    MacControlAltZ,
+    /// <summary>Control + Alt + 0 (Mac)</summary>
+    MacControlAlt0,
+    /// <summary>Control + Alt + 1 (Mac)</summary>
+    MacControlAlt1,
+    /// <summary>Control + Alt + 2 (Mac)</summary>
+    MacControlAlt2,
+    /// <summary>Control + Alt + 3 (Mac)</summary>
+    MacControlAlt3,
+    /// <summary>Control + Alt + 4 (Mac)</summary>
+    MacControlAlt4,
+    /// <summary>Control + Alt + 5 (Mac)</summary>
+    MacControlAlt5,
+    /// <summary>Control + Alt + 6 (Mac)</summary>
+    MacControlAlt6,
+    /// <summary>Control + Alt + 7 (Mac)</summary>
+    MacControlAlt7,
+    /// <summary>Control + Alt + 8 (Mac)</summary>
+    MacControlAlt8,
+    /// <summary>Control + Alt + 9 (Mac)</summary>
+    MacControlAlt9,
+
+    /// <summary>Control + Option + Home (Mac)</summary>
+    MacControlOptionHome,
+    /// <summary>Control + Option + End (Mac)</summary>
+    MacControlOptionEnd,
+    /// <summary>Control + Option + A (Mac)</summary>
+    MacControlOptionA,
+    /// <summary>Control + Option + B (Mac)</summary>
+    MacControlOptionB,
+    /// <summary>Control + Option + C (Mac)</summary>
+    MacControlOptionC,
+    /// <summary>Control + Option + D (Mac)</summary>
+    MacControlOptionD,
+    /// <summary>Control + Option + E (Mac)</summary>
+    MacControlOptionE,
+    /// <summary>Control + Option + F (Mac)</summary>
+    MacControlOptionF,
+    /// <summary>Control + Option + G (Mac)</summary>
+    MacControlOptionG,
+    /// <summary>Control + Option + H (Mac)</summary>
+    MacControlOptionH,
+    /// <summary>Control + Option + I (Mac)</summary>
+    MacControlOptionI,
+    /// <summary>Control + Option + J (Mac)</summary>
+    MacControlOptionJ,
+    /// <summary>Control + Option + K (Mac)</summary>
+    MacControlOptionK,
+    /// <summary>Control + Option + L (Mac)</summary>
+    MacControlOptionL,
+    /// <summary>Control + Option + M (Mac)</summary>
+    MacControlOptionM,
+    /// <summary>Control + Option + N (Mac)</summary>
+    MacControlOptionN,
+    /// <summary>Control + Option + O (Mac)</summary>
+    MacControlOptionO,
+    /// <summary>Control + Option + P (Mac)</summary>
+    MacControlOptionP,
+    /// <summary>Control + Option + Q (Mac)</summary>
+    MacControlOptionQ,
+    /// <summary>Control + Option + R (Mac)</summary>
+    MacControlOptionR,
+    /// <summary>Control + Option + S (Mac)</summary>
+    MacControlOptionS,
+    /// <summary>Control + Option + T (Mac)</summary>
+    MacControlOptionT,
+    /// <summary>Control + Option + U (Mac)</summary>
+    MacControlOptionU,
+    /// <summary>Control + Option + V (Mac)</summary>
+    MacControlOptionV,
+    /// <summary>Control + Option + W (Mac)</summary>
+    MacControlOptionW,
+    /// <summary>Control + Option + X (Mac)</summary>
+    MacControlOptionX,
+    /// <summary>Control + Option + Y (Mac)</summary>
+    MacControlOptionY,
+    /// <summary>Control + Option + Z (Mac)</summary>
+    MacControlOptionZ,
+    /// <summary>Control + Option + 0 (Mac)</summary>
+    MacControlOption0,
+    /// <summary>Control + Option + 1 (Mac)</summary>
+    MacControlOption1,
+    /// <summary>Control + Option + 2 (Mac)</summary>
+    MacControlOption2,
+    /// <summary>Control + Option + 3 (Mac)</summary>
+    MacControlOption3,
+    /// <summary>Control + Option + 4 (Mac)</summary>
+    MacControlOption4,
+    /// <summary>Control + Option + 5 (Mac)</summary>
+    MacControlOption5,
+    /// <summary>Control + Option + 6 (Mac)</summary>
+    MacControlOption6,
+    /// <summary>Control + Option + 7 (Mac)</summary>
+    MacControlOption7,
+    /// <summary>Control + Option + 8 (Mac)</summary>
+    MacControlOption8,
+    /// <summary>Control + Option + 9 (Mac)</summary>
+    MacControlOption9,
+
+    /// <summary>Control + Shift + Home (Mac)</summary>
+    MacControlShiftHome,
+    /// <summary>Control + Shift + End (Mac)</summary>
+    MacControlShiftEnd,
+    /// <summary>Control + Shift + A (Mac)</summary>
+    MacControlShiftA,
+    /// <summary>Control + Shift + B (Mac)</summary>
+    MacControlShiftB,
+    /// <summary>Control + Shift + C (Mac)</summary>
+    MacControlShiftC,
+    /// <summary>Control + Shift + D (Mac)</summary>
+    MacControlShiftD,
+    /// <summary>Control + Shift + E (Mac)</summary>
+    MacControlShiftE,
+    /// <summary>Control + Shift + F (Mac)</summary>
+    MacControlShiftF,
+    /// <summary>Control + Shift + G (Mac)</summary>
+    MacControlShiftG,
+    /// <summary>Control + Shift + H (Mac)</summary>
+    MacControlShiftH,
+    /// <summary>Control + Shift + I (Mac)</summary>
+    MacControlShiftI,
+    /// <summary>Control + Shift + J (Mac)</summary>
+    MacControlShiftJ,
+    /// <summary>Control + Shift + K (Mac)</summary>
+    MacControlShiftK,
+    /// <summary>Control + Shift + L (Mac)</summary>
+    MacControlShiftL,
+    /// <summary>Control + Shift + M (Mac)</summary>
+    MacControlShiftM,
+    /// <summary>Control + Shift + N (Mac)</summary>
+    MacControlShiftN,
+    /// <summary>Control + Shift + O (Mac)</summary>
+    MacControlShiftO,
+    /// <summary>Control + Shift + P (Mac)</summary>
+    MacControlShiftP,
+    /// <summary>Control + Shift + Q (Mac)</summary>
+    MacControlShiftQ,
+    /// <summary>Control + Shift + R (Mac)</summary>
+    MacControlShiftR,
+    /// <summary>Control + Shift + S (Mac)</summary>
+    MacControlShiftS,
+    /// <summary>Control + Shift + T (Mac)</summary>
+    MacControlShiftT,
+    /// <summary>Control + Shift + U (Mac)</summary>
+    MacControlShiftU,
+    /// <summary>Control + Shift + V (Mac)</summary>
+    MacControlShiftV,
+    /// <summary>Control + Shift + W (Mac)</summary>
+    MacControlShiftW,
+    /// <summary>Control + Shift + X (Mac)</summary>
+    MacControlShiftX,
+    /// <summary>Control + Shift + Y (Mac)</summary>
+    MacControlShiftY,
+    /// <summary>Control + Shift + Z (Mac)</summary>
+    MacControlShiftZ,
+    /// <summary>Control + Shift + 0 (Mac)</summary>
+    MacControlShift0,
+    /// <summary>Control + Shift + 1 (Mac)</summary>
+    MacControlShift1,
+    /// <summary>Control + Shift + 2 (Mac)</summary>
+    MacControlShift2,
+    /// <summary>Control + Shift + 3 (Mac)</summary>
+    MacControlShift3,
+    /// <summary>Control + Shift + 4 (Mac)</summary>
+    MacControlShift4,
+    /// <summary>Control + Shift + 5 (Mac)</summary>
+    MacControlShift5,
+    /// <summary>Control + Shift + 6 (Mac)</summary>
+    MacControlShift6,
+    /// <summary>Control + Shift + 7 (Mac)</summary>
+    MacControlShift7,
+    /// <summary>Control + Shift + 8 (Mac)</summary>
+    MacControlShift8,
+    /// <summary>Control + Shift + 9 (Mac)</summary>
+    MacControlShift9,
   }
 
   /// <summary>

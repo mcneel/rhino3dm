@@ -1,0 +1,20 @@
+RenderMaterial
+==============
+
+.. py:module:: rhino3dm
+
+.. py:class:: RenderMaterial
+
+   .. py:method:: RenderMaterial()
+
+      RenderMaterial constructor
+
+
+   .. py:method:: RenderMaterial()
+
+      RenderMaterial constructor
+
+
+   .. py:method:: ToMaterial()
+
+      [todo] add documentation

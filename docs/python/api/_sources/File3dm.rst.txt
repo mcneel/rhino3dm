@@ -26,9 +26,23 @@ File3dm
 
       str: Gets or sets details for the application that wrote this file.
 
+   .. py:attribute:: ArchiveVersion
+
+      int: Gets the 3dm file archive version.
+
+   .. py:attribute:: Created
+
+      DateTime: Get the DateTime that this file was originally created. If the
+      value is not set in the 3dm file, then DateTime.MinValue is returned
+
    .. py:attribute:: CreatedBy
 
       str: Gets a string that names the user who created the file.
+
+   .. py:attribute:: LastEdited
+
+      DateTime: Get the DateTime that this file was last edited. If the
+      value is not set in the 3dm file, then DateTime.MinValue is returned
 
    .. py:attribute:: LastEditedBy
 
@@ -51,6 +65,10 @@ File3dm
    .. py:attribute:: Materials
 
       IList<Material>: Materials in this file.
+
+   .. py:attribute:: Linetypes
+
+      IList<Linetype>: Linetypes in this file.
 
    .. py:attribute:: Bitmaps
 
@@ -85,6 +103,13 @@ File3dm
    .. py:attribute:: Strings
 
       File3dmStringTable: Document user strings in this file
+
+   .. py:attribute:: EmbeddedFiles
+
+      File3dmEmbeddedFiles: The embedded files in this file.
+
+   .. py:attribute:: RenderContent
+
 
    .. py:staticmethod:: Read(path)
 

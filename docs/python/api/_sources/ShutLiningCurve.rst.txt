@@ -1,0 +1,34 @@
+ShutLiningCurve
+===============
+
+.. py:module:: rhino3dm
+
+.. py:class:: ShutLiningCurve
+
+   .. py:method:: ShutLiningCurve()
+
+      ShutLiningCurve constructor
+
+
+   .. py:method:: ShutLiningCurve()
+
+      ShutLiningCurve constructor
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Radius
+
+
+   .. py:attribute:: Profile
+
+
+   .. py:attribute:: Enabled
+
+
+   .. py:attribute:: Pull
+
+
+   .. py:attribute:: IsBump
+

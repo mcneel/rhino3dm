@@ -73,9 +73,16 @@ Sphere
 
       :rtype: Circle
 
-   .. py:method:: LongitureDegrees(degrees)
+   .. py:method:: LongitudeDegrees(degrees)
 
-      [todo] add documentation
+      Computes the meridian at a specific longitude angle.
+      The angle is specified in degrees.
+
+      :param float degrees: An angle in degrees.
+
+      :return: A circle.
+
+      :rtype: Circle
 
    .. py:method:: PointAt(longitudeRadians, latitudeRadians)
 
@@ -108,6 +115,20 @@ Sphere
       :return: Point on sphere surface closest to testPoint.
 
       :rtype: rhino3dm.Point3d
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Finds the angle parameters on this sphere that are closest to a test point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto the sphere.
+
+      :return: tuple (bool, float, float)
+
+         - True on success, False on failure. This function will fail if the point it coincident with the sphere center.
+         - The longitudinal angle (in radians; 0.0 to 2pi) where the sphere approaches testPoint best. \
+         - The latitudinal angle (in radians; -0.5pi to +0.5pi) where the sphere approaches testPoint best. \
+
+      :rtype: (bool, float, float)
 
    .. py:method:: ToBrep()
 

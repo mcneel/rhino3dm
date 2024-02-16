@@ -527,6 +527,18 @@ RH_C_FUNCTION ON_Brep* ON_Brep_FromCylinder(ON_Cylinder* cylinder, bool capBotto
   return rc;
 }
 
+RH_C_FUNCTION ON_Brep* ON_Brep_FromTorus(ON_Torus* pTorus)
+{
+  RHCHECK_LICENSE
+  ON_Brep* rc = nullptr;
+  if (pTorus)
+  {
+    pTorus->plane.UpdateEquation();
+    rc = ON_BrepTorus(*pTorus, nullptr);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION int ON_Brep_GetConnectedComponents(const ON_Brep* pConstBrep, ON_SimpleArray<ON_Brep*>* pOutBreps)
 {
   int rc = 0;

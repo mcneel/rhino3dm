@@ -40,3 +40,23 @@ RH_C_FUNCTION void ON_RevSurface_Angle(const ON_RevSurface* pConstSurface, ON_In
   if (nullptr != pConstSurface && nullptr != pAngle)
     *pAngle = pConstSurface->m_angle;
 }
+
+// https://mcneel.myjetbrains.com/youtrack/issue/RH-79529
+
+RH_C_FUNCTION bool ON_RevSurface_IsTransposed(const ON_RevSurface* pConstSurface)
+{
+  return (nullptr != pConstSurface) 
+    ? pConstSurface->m_bTransposed 
+    : false;
+}
+
+RH_C_FUNCTION bool ON_RevSurface_Interval(const ON_RevSurface* pConstSurface, ON_Interval* pInterval)
+{
+  bool rc = false;
+  if (pConstSurface && pInterval)
+  {
+    *pInterval = pConstSurface->m_t;
+    rc = true;
+  }
+  return rc;
+}

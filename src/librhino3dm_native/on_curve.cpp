@@ -594,13 +594,13 @@ RH_C_FUNCTION double ON_Curve_TorsionAt(const ON_Curve* pConstCurve, double t)
   return tau;
 }
 
-RH_C_FUNCTION bool ONC_JoinCurves(const ON_SimpleArray<const ON_Curve*>* pInCurves, ON_SimpleArray<ON_Curve*>* pOutCurves, double joinTolerance, bool bPreserveDirection)
+RH_C_FUNCTION bool ONC_JoinCurves(const ON_SimpleArray<const ON_Curve*>* pInCurves, ON_SimpleArray<ON_Curve*>* pOutCurves, double joinTolerance, bool bPreserveDirection, ON_SimpleArray<int>* key)
 {
   // 18-Jan-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-67058
   bool rc = false;
   if (pInCurves && pOutCurves)
   {
-    int count = ON_JoinCurves(*pInCurves, *pOutCurves, joinTolerance, bPreserveDirection, nullptr);
+    int count = ON_JoinCurves(*pInCurves, *pOutCurves, joinTolerance, bPreserveDirection, key);
     rc = (count > 0);
   }
   return rc;

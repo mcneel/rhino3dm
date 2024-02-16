@@ -9,6 +9,14 @@ RH_C_FUNCTION ON_Linetype* ON_Linetype_New(const ON_Linetype* pConstLinetype)
   return new ON_Linetype();
 }
 
+RH_C_FUNCTION ON_Linetype* ON_Linetype_DuplicateLinetype(const ON_Linetype* pConstLinetype)
+{
+  ON_Linetype* rc = nullptr;
+  if (pConstLinetype)
+    rc = pConstLinetype->DuplicateLinetype();
+  return rc;
+}
+
 RH_C_FUNCTION void ON_Linetype_Default(ON_Linetype* pLinetype)
 {
   if( pLinetype )

@@ -553,6 +553,18 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Constructs a Brep definition of a torus.
+    /// </summary>
+    /// <param name="torus">The torus.</param>
+    /// <returns>A Brep representation of the torus if successful, null otherwise.</returns>
+    /// <since>8.1</since>
+    public static Brep CreateFromTorus(Torus torus)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_Brep_FromTorus(ref torus);
+      return IntPtr.Zero == ptr ? null : new Brep(ptr, null);
+    }
+
+    /// <summary>
     /// Constructs a Brep definition of a sphere.
     /// </summary>
     /// <param name="sphere">The input sphere provides the orienting plane and radius.</param>
@@ -2782,6 +2794,50 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Joins the breps in the input array at any overlapping edges to form
+    /// as few as possible resulting breps. There may be more than one brep in the result array.
+    /// </summary>
+    /// <param name="brepsToJoin">A list, an array or any enumerable set of breps to join.</param>
+    /// <param name="tolerance">
+    /// 3d distance tolerance for detecting overlapping edges. 
+    /// When in doubt, use the document's model absolute tolerance.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, used for merging edges.
+    /// When in doubt, use the document's model angle toleance.
+    /// </param>
+    /// <returns></returns>
+    /// <since>8.3</since>
+    public static Brep[] JoinBreps(IEnumerable<Brep> brepsToJoin, double tolerance, double angleTolerance)
+    {
+      if (null == brepsToJoin)
+        return null;
+
+      using (var input = new SimpleArrayBrepPointer())
+      using (var output = new SimpleArrayBrepPointer())
+      {
+        foreach (Brep brep in brepsToJoin)
+          input.Add(brep, true);
+
+        IntPtr ptr_input = input.ConstPointer();
+        IntPtr ptr_output = output.NonConstPointer();
+
+        Brep[] rc = null;
+        if (UnsafeNativeMethods.RHC_RhinoJoinBreps3(ptr_input, tolerance, angleTolerance, ptr_output) > 0)
+        {
+          rc = output.ToNonConstArray();
+          for (int i = 0; i < rc.Length; i++)
+          {
+            if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
+              rc[i].Flip();
+          }
+        }
+        GC.KeepAlive(brepsToJoin);
+        return rc;
+      }
+    }
+
+    /// <summary>
     /// Combines two or more breps into one. A merge is like a boolean union that keeps the inside pieces. This
     /// function creates non-manifold Breps which in general are unusual in Rhino. You may want to consider using
     /// JoinBreps or CreateBooleanUnion functions instead.
@@ -2789,7 +2845,6 @@ namespace Rhino.Geometry
     /// <param name="brepsToMerge">must contain more than one Brep.</param>
     /// <param name="tolerance">the tolerance to use when merging.</param>
     /// <returns>Single merged Brep on success. Null on error.</returns>
-    /// <seealso cref="JoinBreps"/>
     /// <since>5.0</since>
     public static Brep MergeBreps(IEnumerable<Brep> brepsToMerge, double tolerance)
     {
@@ -6212,8 +6267,16 @@ namespace Rhino.Geometry
       out double[] fitResults
     )
     {
-      return curveOnFace.FilletSurfaceToRail(this, secondFace, u1, v1, railDegree, arcDegree, arcSliders, numBezierSrfs,
+      if (curveOnFace != null)
+        return curveOnFace.FilletSurfaceToRail(this, secondFace, u1, v1, railDegree, arcDegree, arcSliders, numBezierSrfs,
           extend, split_type, tolerance, out_fillets, out_breps0, out_breps1, out fitResults);
+      else
+      {
+        fitResults = new double[0];
+      }
+
+      return false;
+
     }
     /// <summary>
     /// Creates a constant-radius fillet surface between a surface and the curve.
@@ -6259,8 +6322,16 @@ namespace Rhino.Geometry
       out double[] fitResults
     )
     {
-      return curve.FilletSurfaceToCurve(this, t, u, v, radius, alignToCurve, railDegree, arcDegree, arcSliders, 
-        numBezierSrfs, tolerance, out_fillets, out fitResults);
+      if (curve != null)
+      {
+        return curve.FilletSurfaceToCurve(this, t, u, v, radius, alignToCurve, railDegree, arcDegree, arcSliders,
+          numBezierSrfs, tolerance, out_fillets, out fitResults);
+      }
+      else
+      {
+        fitResults = new double[0];
+      }
+      return false;
     }
 #endif
 #endregion

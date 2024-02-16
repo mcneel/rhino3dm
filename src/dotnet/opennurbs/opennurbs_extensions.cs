@@ -1,12 +1,12 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
+using Rhino.Collections;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
-using Rhino.DocObjects;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Rhino.Collections;
 
 namespace Rhino.FileIO
 {
@@ -312,6 +312,24 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// Reads only the earth anchor point from an existing 3dm file
+    /// </summary>
+    /// <param name="path">A location on disk or network.</param>
+    /// <returns>The earth anchor point.</returns>
+    public static EarthAnchorPoint ReadEarthAnchorPoint(string path)
+    {
+      EarthAnchorPoint rc = null;
+      IntPtr ptr_settings = UnsafeNativeMethods.ONX_Model_ReadSettings(path);
+      if (ptr_settings == IntPtr.Zero) return null;
+      IntPtr ptr_ea = UnsafeNativeMethods.ON_3dmSettings_GetEarthAnchorPoint(ptr_settings);
+      if (ptr_ea != IntPtr.Zero)
+        rc = new EarthAnchorPoint(ptr_ea);
+
+      UnsafeNativeMethods.ON_3dmSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
     /// Reads only the application information from an existing 3dm file.
     /// </summary>
     /// <param name="path">A location on disk or network.</param>
@@ -495,7 +513,7 @@ namespace Rhino.FileIO
       options = options ?? new File3dmWriteOptions();
 
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_WriteFile(ptr_this, path, options.Version,
+      return UnsafeNativeMethods.ONX_Model_WriteFile(ptr_this, path, options.File3dmValidVersion,
         (uint)options.RenderMeshFlags, 
         (uint)options.AnalysisMeshFlags, 
         options.SaveUserData, IntPtr.Zero);
@@ -844,6 +862,23 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ONX_Model_SetRevision(ptr_this, value);
+      }
+    }
+
+    /// <summary>
+    /// If set, this is the model's location on the earth.  This information is
+    /// used when the model is used with GIS information.
+    /// </summary>
+    public EarthAnchorPoint EarthAnchorPoint
+    {
+      get
+      {
+        // NOTE: This is how it works in Rhino.RhinoDoc, with get returning a copy and a seperate set function
+        return new EarthAnchorPoint(this);
+      }
+      set
+      {
+        UnsafeNativeMethods.ONX_Model_SetEarthAnchorPoint(NonConstPointer(), value.ConstPointer());
       }
     }
 
@@ -1388,6 +1423,16 @@ namespace Rhino.FileIO
     /// <since>5.9</since>
     public int Version { get; set; }
 
+    internal int File3dmValidVersion
+    {
+      get
+      {
+        int version = Version;
+        if (version >= 5 && version < 50)
+          version *= 10;
+        return version;
+      }
+    }
     /// <summary>
     /// Include Render meshes in the file. Default is true
     /// </summary>
@@ -1657,6 +1702,7 @@ namespace Rhino.FileIO
     where T : ModelComponent
   {
     internal ManifestTable m_manifest;
+    internal bool _nonIndexedTable = false;
 
     internal CommonComponentTable(ManifestTable manifest)
     {
@@ -1735,6 +1781,34 @@ namespace Rhino.FileIO
     /// </summary>
     internal T __FindIndexInternal(int index)
     {
+      if (_nonIndexedTable)
+      {
+        // Bill Cook 2023-12-15
+        // RH-75882 and RH-75883
+        // This class probably shouldn't have been an IList<T>, but it is. The current .Net implementations of First() and
+        // Last() check for Ilist<T> and if it's there they use an indexed accessor. Some things, like the ObjectTable,
+        // are non-indexed tables on the C++ side, so First() and Last() weren't working.
+        //
+        // NOTE: This is still a non-standard implementation of the indexer function Item[index], as it returns null when
+        // the index is out of range instead of throwing an exception. Doing otherwise here could break a lot of stuff.
+        // You could override Item[index] for a specific object if this functionality is desired. (Also RemoveAt, Insert,
+        // etc. - there are probably a bunch of them). Again, for now this was deemed dangerous/overkill to fix the issue.
+        //
+        // REMEMBER: you cannot call the First<T> and Last<T> functions here because they check to see if this class
+        // implements IList<T>, which it does, and will recurse back into this function. The only choice is to start
+        // at the beginning and trudge through it. It should be possible to optimize this more on the C++ side, because
+        // in C++ it is a doubly-linked list. For now it this is being done unidirectionally because it was a very
+        // narrow edge case.
+        using (IEnumerator<T> e = GetEnumerator())
+        {
+          int i = index;
+          while (i-- >= 0)
+          {
+            if (!e.MoveNext()) return null;
+          }
+          return (T)e.Current;
+        }
+      }
       return (T)m_manifest.FindIndex(index, ComponentType);
     }
 
@@ -3836,6 +3910,18 @@ namespace Rhino.FileIO
     {
       return __FindIndexInternal(index);
     }
+
+    /// <summary>
+    /// Adds a material to the model material table
+    /// </summary>
+    /// <param name="material"></param>
+    /// <returns>The material's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.</returns>
+    /// <since>8.4</since>
+    public int AddMaterial(DocObjects.Material material) 
+    {
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      return UnsafeNativeMethods.ONX_Model_AddMaterial(ptrFile3dm, material.ConstPointer());
+    }
   }
 
   /// <summary>
@@ -4078,6 +4164,19 @@ namespace Rhino.FileIO
         }
       }
       return list.Count > 0 ? list.ToArray() : new File3dmObject[0];
+    }
+
+    /// <summary>
+    /// Adds a new empty group to the group table. 
+    /// </summary>
+    /// <returns>>=0 index of new group or -1 on error.</returns>
+    /// <since>8.4</since>
+    public int AddGroup() {
+
+      IntPtr ptrFile3dm = m_parent.NonConstPointer();
+      int index = UnsafeNativeMethods.ONX_Model_AddGroup(ptrFile3dm);
+      return index;
+
     }
   }
 

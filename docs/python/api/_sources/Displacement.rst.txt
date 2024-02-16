@@ -1,0 +1,61 @@
+Displacement
+============
+
+.. py:module:: rhino3dm
+
+.. py:class:: Displacement
+
+   .. py:method:: Displacement()
+
+      Displacement constructor
+
+
+   .. py:method:: Displacement()
+
+      Displacement constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Texture
+
+
+   .. py:attribute:: BlackPoint
+
+
+   .. py:attribute:: WhitePoint
+
+
+   .. py:attribute:: PostWeldAngle
+
+
+   .. py:attribute:: FairingOn
+
+
+   .. py:attribute:: Fairing
+
+
+   .. py:attribute:: FinalMaxFaces
+
+
+   .. py:attribute:: FinalMaxFacesOn
+
+
+   .. py:attribute:: InitialQuality
+
+
+   .. py:attribute:: MappingChannel
+
+
+   .. py:attribute:: MeshMemoryLimit
+
+
+   .. py:attribute:: RefineSteps
+
+
+   .. py:attribute:: RefineSensitivity
+
+
+   .. py:attribute:: SweepResolutionFormula
+

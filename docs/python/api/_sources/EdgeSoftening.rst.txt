@@ -1,0 +1,34 @@
+EdgeSoftening
+=============
+
+.. py:module:: rhino3dm
+
+.. py:class:: EdgeSoftening
+
+   .. py:method:: EdgeSoftening()
+
+      EdgeSoftening constructor
+
+
+   .. py:method:: EdgeSoftening()
+
+      EdgeSoftening constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Softening
+
+
+   .. py:attribute:: Chamfer
+
+
+   .. py:attribute:: Faceted
+
+
+   .. py:attribute:: EdgeAngleThreshold
+
+
+   .. py:attribute:: ForceSoftening
+

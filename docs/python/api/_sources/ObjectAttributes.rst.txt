@@ -148,6 +148,13 @@ ObjectAttributes
 
       int: number of groups object belongs to.
 
+   .. py:attribute:: Decals
+
+      Render.Decals: Gets all object decals associated with this object.
+
+   .. py:attribute:: MeshModifiers
+
+
    .. py:method:: Transform(transform)
 
       Apply a transformation.

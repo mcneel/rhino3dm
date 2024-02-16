@@ -20,6 +20,48 @@ Texture
       for this user, use the BitmapTable.Find function using this
       property.
 
+   .. py:attribute:: WrapU
+
+      TextureUvwWrapping: Texture wrapping mode in the U direction
+
+   .. py:attribute:: WrapV
+
+      TextureUvwWrapping: Texture wrapping mode in the V direction
+
+   .. py:attribute:: WrapW
+
+      TextureUvwWrapping: Texture wrapping mode in the W direction
+
+   .. py:attribute:: UvwTransform
+
+      Transform: Transform to be applied to each instance of this texture
+      if ApplyUvw is true
+
+   .. py:attribute:: Id
+
+      Guid: Gets the globally unique identifier of this texture.
+
+   .. py:attribute:: Enabled
+
+      bool: If the texture is enabled then it will be visible in the rendered
+      display otherwise it will not.
+
+   .. py:attribute:: TextureType
+
+      TextureType: Controls how the pixels in the bitmap are interpreted
+
+   .. py:attribute:: Repeat
+
+      Vector2d: Helper for access to the repeat value encoded in UvwTransform
+
+   .. py:attribute:: Offset
+
+      Vector2d: Helper for access to the offset value encoded in UvwTransform
+
+   .. py:attribute:: Rotation
+
+      float: Helper for access to the rotation value encoded in UvwTransform
+
    .. py:method:: FileReference()
 
       [todo] add documentation

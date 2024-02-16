@@ -153,3 +153,13 @@ NurbsCurve
 
 
       :rtype: rhino3dm.Point3d
+
+   .. py:method:: ConvertSpanToBezier(index)
+
+      Converts a span of the NURBS curve into a Bezier.
+
+      :param int spanIndex: The span index, where (0 <= spanIndex <= Points.Count - Order).
+
+      :return: Bezier curve if successful, None otherwise.
+
+      :rtype: rhino3dm.BezierCurve

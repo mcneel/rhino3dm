@@ -1,0 +1,120 @@
+RenderContent
+=============
+
+.. py:module:: rhino3dm
+
+.. py:class:: RenderContent
+
+   .. py:method:: RenderContent()
+
+      RenderContent constructor
+
+
+   .. py:method:: RenderContent()
+
+      RenderContent constructor
+
+
+   .. py:attribute:: Kind
+
+
+   .. py:attribute:: Parent
+
+
+   .. py:attribute:: IsChild
+
+
+   .. py:attribute:: FirstChild
+
+
+   .. py:attribute:: NextSibling
+
+
+   .. py:attribute:: TopLevel
+
+
+   .. py:attribute:: IsTopLevel
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Name
+
+
+   .. py:attribute:: TypeName
+
+
+   .. py:attribute:: TypeId
+
+
+   .. py:attribute:: RenderEngineId
+
+
+   .. py:attribute:: PlugInId
+
+
+   .. py:attribute:: Notes
+
+
+   .. py:attribute:: Tags
+
+
+   .. py:attribute:: GroupId
+
+
+   .. py:attribute:: Hidden
+
+
+   .. py:attribute:: Reference
+
+
+   .. py:attribute:: AutoDelete
+
+
+   .. py:attribute:: ChildSlotName
+
+
+   .. py:method:: XML(recursive)
+
+      [todo] add documentation
+
+   .. py:method:: SetXML(xml)
+
+      [todo] add documentation
+
+   .. py:method:: ChildSlotOn(child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: SetChildSlotOn(on, child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: ChildSlotAmount(child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: SetChildSlotAmount(amount, child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: SetChild(child, child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: FindChild(child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: DeleteChild(child_slot_name)
+
+      [todo] add documentation
+
+   .. py:method:: GetParameter(param_name)
+
+      [todo] add documentation
+
+   .. py:method:: SetParameter(param_name, param_value)
+
+      [todo] add documentation

@@ -1,0 +1,42 @@
+PostEffect
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: PostEffect
+
+   .. py:method:: PostEffect()
+
+      PostEffect constructor
+
+
+   .. py:method:: PostEffect()
+
+      PostEffect constructor
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Type
+
+
+   .. py:attribute:: LocalName
+
+
+   .. py:attribute:: Listable
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Shown
+
+
+   .. py:method:: GetParameter()
+
+      [todo] add documentation
+
+   .. py:method:: SetParameter()
+
+      [todo] add documentation

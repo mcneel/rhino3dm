@@ -77,6 +77,7 @@ public:
   //Guid AddLeader4(string text, Plane plane, IEnumerable<Point2d> points)
   BND_UUID AddHatch(const class BND_Hatch* hatch, const class BND_3dmObjectAttributes* attributes);
   BND_UUID Add(const class BND_GeometryBase* geometry, const class BND_3dmObjectAttributes* attributes);
+  BND_UUID AddObject(const class BND_FileObject* object);
 
   void Delete(BND_UUID objectId);
   //int Delete(IEnumerable<Guid> objectIds)
@@ -96,7 +97,7 @@ class BND_File3dmMaterialTable
 public:
   BND_File3dmMaterialTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model->ActiveComponentCount(ON_ModelComponent::Type::RenderMaterial); }
-  void Add(const class BND_Material& material);
+  int Add(const class BND_Material& material);
   class BND_Material* FindIndex(int index);
   class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);

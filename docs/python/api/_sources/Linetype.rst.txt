@@ -1,0 +1,101 @@
+Linetype
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Linetype
+
+   .. py:method:: Linetype()
+
+      Linetype constructor
+
+
+   .. py:attribute:: Name
+
+      str: The name of this linetype.
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: PatternLength
+
+      float: Total length of one repeat of the pattern.
+
+   .. py:attribute:: SegmentCount
+
+      int: Number of segments in the pattern.
+
+   .. py:attribute:: Border
+
+
+   .. py:attribute:: ByLayer
+
+
+   .. py:attribute:: ByParent
+
+
+   .. py:attribute:: Center
+
+
+   .. py:attribute:: Continuous
+
+
+   .. py:attribute:: DashDot
+
+
+   .. py:attribute:: Dashed
+
+
+   .. py:attribute:: Dots
+
+
+   .. py:attribute:: Hidden
+
+
+   .. py:method:: GetSegment(index)
+
+      Gets the segment information at a index.
+
+      :param int index: Zero based index of the segment.
+
+
+      :rtype: (void, float, bool)
+
+   .. py:method:: SetSegment(index, length, isSolid)
+
+      Sets the length and type of the segment at index.
+
+      :param int index: Zero based index of the segment.
+      :param float length: The length of the segment to be added in millimeters.
+      :param bool isSolid: If true, the length is interpreted as a line. If false, \
+         then the length is interpreted as a space.
+
+      :return: True if the operation was successful; otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: AppendSegment(length, isSolid)
+
+      Adds a segment to the pattern.
+
+      :param float length: The length of the segment to be added.
+      :param bool isSolid: If true, the length is interpreted as a line. If false, \
+         then the length is interpreted as a space.
+
+      :return: Index of the added segment.
+
+      :rtype: int
+
+   .. py:method:: RemoveSegment(index)
+
+      Removes a segment in the linetype.
+
+      :param int index: Zero based index of the segment to remove.
+
+      :return: True if the segment index was removed.
+
+      :rtype: bool
+
+   .. py:method:: ClearPattern()
+
+      [todo] add documentation

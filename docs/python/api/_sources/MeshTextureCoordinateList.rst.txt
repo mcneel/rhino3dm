@@ -20,7 +20,3 @@ MeshTextureCoordinateList
    .. py:method:: __add__()
 
       [todo] add documentation
-
-   .. py:method:: __iter__()
-
-      [todo] add documentation

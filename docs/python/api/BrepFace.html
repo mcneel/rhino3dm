@@ -1,88 +1,53 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>BrepFace &mdash; rhino3dm 7.6.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrepFace &mdash; rhino3dm 8.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ea47c46f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="BrepFaceList" href="BrepFaceList.html" />
     <link rel="prev" title="BrepEdgeList" href="BrepEdgeList.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> rhino3dm
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
           </a>
-
-          
-            
-            
               <div class="version">
-                7.6.0
+                8.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AnnotationBase.html">AnnotationBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
@@ -95,42 +60,71 @@
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepEdge.html">BrepEdge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">BrepFace</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BrepFace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.BrepFace"><code class="docutils literal notranslate"><span class="pre">BrepFace</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.OrientationIsReversed"><code class="docutils literal notranslate"><span class="pre">BrepFace.OrientationIsReversed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.UnderlyingSurface"><code class="docutils literal notranslate"><span class="pre">BrepFace.UnderlyingSurface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.CreateExtrusion"><code class="docutils literal notranslate"><span class="pre">BrepFace.CreateExtrusion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.DuplicateFace"><code class="docutils literal notranslate"><span class="pre">BrepFace.DuplicateFace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.DuplicateSurface"><code class="docutils literal notranslate"><span class="pre">BrepFace.DuplicateSurface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.GetMesh"><code class="docutils literal notranslate"><span class="pre">BrepFace.GetMesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.BrepFace.SetMesh"><code class="docutils literal notranslate"><span class="pre">BrepFace.SetMesh()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurvePiping.html">CurvePiping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EdgeSoftening.html">EdgeSoftening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EmbeddedFile.html">EmbeddedFile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Environment.html">Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDecalTable.html">File3dmDecalTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmEmbeddedFileTable.html">File3dmEmbeddedFileTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmGroupTable.html">File3dmGroupTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLinetypeTable.html">File3dmLinetypeTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMeshModifiers.html">File3dmMeshModifiers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPostEffectTable.html">File3dmPostEffectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRenderContentTable.html">File3dmRenderContentTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmShutLiningCurveTable.html">File3dmShutLiningCurveTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmWriteOptions.html">File3dmWriteOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GroundPlane.html">GroundPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Group.html">Group</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -140,7 +134,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Linetype.html">Linetype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -174,15 +170,28 @@
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostEffect.html">PostEffect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderChannels.html">RenderChannels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">RenderContent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironment.html">RenderEnvironment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironments.html">RenderEnvironments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderMaterial.html">RenderMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Thickening.html">Thickening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
@@ -191,198 +200,172 @@
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">rhino3dm</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>BrepFace</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">BrepFace</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/BrepFace.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-rhino3dm">
-<span id="brepface"></span><h1>BrepFace<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="rhino3dm.BrepFace">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">BrepFace</code><a class="headerlink" href="#rhino3dm.BrepFace" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="rhino3dm.BrepFace.UnderlyingSurface">
-<code class="descname">UnderlyingSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.UnderlyingSurface" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-rhino3dm">
+<span id="brepface"></span><h1>BrepFace<a class="headerlink" href="#module-rhino3dm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">BrepFace</span></span><a class="headerlink" href="#rhino3dm.BrepFace" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.OrientationIsReversed">
+<span class="sig-name descname"><span class="pre">OrientationIsReversed</span></span><a class="headerlink" href="#rhino3dm.BrepFace.OrientationIsReversed" title="Link to this definition"></a></dt>
+<dd><p>bool: True if face orientation is opposite of natural surface orientation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.UnderlyingSurface">
+<span class="sig-name descname"><span class="pre">UnderlyingSurface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.UnderlyingSurface" title="Link to this definition"></a></dt>
 <dd><p>Gets the untrimmed surface that is the base of this face.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A surface, or None on error.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A surface, or None on error.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BrepFace.DuplicateFace">
-<code class="descname">DuplicateFace</code><span class="sig-paren">(</span><em>duplicateMeshes</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateFace" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.CreateExtrusion">
+<span class="sig-name descname"><span class="pre">CreateExtrusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathCurve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.CreateExtrusion" title="Link to this definition"></a></dt>
+<dd><p>Extrude a face in a Brep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pathCurve</strong> (<a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve"><em>rhino3dm.Curve</em></a>) – The path to extrude along. Note, the direction of the extrusion will follow the direction of the curve.</p></li>
+<li><p><strong>cap</strong> (<em>bool</em>) – If true, the extrusion is capped with a translation of the face being extruded</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Brep on success or None on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.DuplicateFace">
+<span class="sig-name descname"><span class="pre">DuplicateFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duplicateMeshes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateFace" title="Link to this definition"></a></dt>
 <dd><p>Duplicate a face from the brep to create new single face brep.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>duplicateMeshes</strong> (<em>bool</em>) – If true, shading meshes will be copied as well.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new single-face brep synonymous with the current Face.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>duplicateMeshes</strong> (<em>bool</em>) – If true, shading meshes will be copied as well.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new single-face brep synonymous with the current Face.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Brep.html#rhino3dm.Brep" title="rhino3dm.Brep">rhino3dm.Brep</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BrepFace.DuplicateSurface">
-<code class="descname">DuplicateSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateSurface" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.DuplicateSurface">
+<span class="sig-name descname"><span class="pre">DuplicateSurface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.DuplicateSurface" title="Link to this definition"></a></dt>
 <dd><p>Gets a copy to the untrimmed surface that this face is based on.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A copy of this face’s underlying surface.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A copy of this face’s underlying surface.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Surface.html#rhino3dm.Surface" title="rhino3dm.Surface">rhino3dm.Surface</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.BrepFace.GetMesh">
-<code class="descname">GetMesh</code><span class="sig-paren">(</span><em>meshType</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.GetMesh" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.GetMesh">
+<span class="sig-name descname"><span class="pre">GetMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.GetMesh" title="Link to this definition"></a></dt>
 <dd><p>Obtains a reference to a specified type of mesh for this brep face.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>meshType</strong> (<em>MeshType</em>) – The mesh type.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A mesh.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Mesh.html#rhino3dm.Mesh" title="rhino3dm.Mesh">rhino3dm.Mesh</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>meshType</strong> (<em>MeshType</em>) – The mesh type.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A mesh.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Mesh.html#rhino3dm.Mesh" title="rhino3dm.Mesh">rhino3dm.Mesh</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.BrepFace.SetMesh">
+<span class="sig-name descname"><span class="pre">SetMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.BrepFace.SetMesh" title="Link to this definition"></a></dt>
+<dd><p>Sets a reference to a specified type of mesh for this brep face.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meshType</strong> (<em>MeshType</em>) – The mesh type.</p></li>
+<li><p><strong>mesh</strong> (<a class="reference internal" href="Mesh.html#rhino3dm.Mesh" title="rhino3dm.Mesh"><em>rhino3dm.Mesh</em></a>) – The new mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation succeeded; otherwise false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="BrepFaceList.html" class="btn btn-neutral float-right" title="BrepFaceList" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="BrepEdgeList.html" class="btn btn-neutral" title="BrepEdgeList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="BrepEdgeList.html" class="btn btn-neutral float-left" title="BrepEdgeList" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BrepFaceList.html" class="btn btn-neutral float-right" title="BrepFaceList" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Robert McNeel &amp; Associates
-
-    </p>
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

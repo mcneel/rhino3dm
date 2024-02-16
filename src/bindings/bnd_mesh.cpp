@@ -105,12 +105,12 @@ BND_MeshingParameters* BND_MeshingParameters::Decode(emscripten::val jsonObject)
 
 #endif
 
-BND_Mesh* BND_Mesh::CreateFromSubDControlNet(class BND_SubD* subd)
+BND_Mesh* BND_Mesh::CreateFromSubDControlNet(class BND_SubD* subd, bool includeTextureCoordinates)
 {
   if (subd)
   {
     const ON_SubD* _subd = ON_SubD::Cast(subd->GeometryPointer());
-    ON_Mesh* mesh = _subd->GetControlNetMesh(nullptr, ON_SubDGetControlNetMeshPriority::Geometry);
+    ON_Mesh* mesh = _subd->GetControlNetMesh(nullptr, includeTextureCoordinates ? ON_SubDGetControlNetMeshPriority::TextureCoordinates : ON_SubDGetControlNetMeshPriority::Geometry);
     if (mesh)
       return new BND_Mesh(mesh, nullptr);
   }
@@ -972,7 +972,7 @@ void initMeshBindings(pybind11::module& m)
 
   py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
     .def(py::init<>())
-    .def_static("CreateFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, py::arg("subd"))
+    .def_static("CreateFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, py::arg("subd"), py::arg("includeTextureCoordinates"))
     .def_property_readonly("IsClosed", &BND_Mesh::IsClosed)
     .def("IsManifold", &BND_Mesh::IsManifold, py::arg("topologicalTest"))
     .def_property_readonly("HasCachedTextureCoordinates", &BND_Mesh::HasCachedTextureCoordinates)

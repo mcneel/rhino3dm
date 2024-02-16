@@ -1,0 +1,31 @@
+Thickening
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Thickening
+
+   .. py:method:: Thickening()
+
+      Thickening constructor
+
+
+   .. py:method:: Thickening()
+
+      Thickening constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Distance
+
+
+   .. py:attribute:: Solid
+
+
+   .. py:attribute:: OffsetOnly
+
+
+   .. py:attribute:: BothSides
+

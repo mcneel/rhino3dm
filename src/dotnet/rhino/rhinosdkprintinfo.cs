@@ -1078,6 +1078,24 @@ namespace Rhino.Display
       set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM, value); }
     }
 
+    /// <summary>
+    /// Horizontal stretch to be applied to output. Useful for calibrating printers
+    /// </summary>
+    public double HorizontalScale
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.HorizontalScale); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.HorizontalScale, value); }
+    }
+
+    /// <summary>
+    /// Vertical stretch to be applied to output. Useful for calibrating printers
+    /// </summary>
+    public double VerticalScale
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.VerticalScale); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.VerticalScale, value); }
+    }
+
     /// <since>6.8</since>
     public enum ColorMode
     {
@@ -1588,6 +1606,45 @@ namespace Rhino.Runtime
       CheckPath(pt, pen);
     }
 
+    static bool PensAreDifferent(Pen p1, Pen p2)
+    {
+      if (p1==null && p2==null) 
+        return false;
+      if (p1 == null || p2 == null)
+        return true;
+
+      bool pensDifferent = p1.Color != p2.Color ||
+        Math.Abs(p1.Width - p2.Width) > 0.1 ||
+        p1.Cap != p2.Cap ||
+        p1.Join != p2.Join;
+      // 04 Dec 2023 S. Baer (RH-78778)
+      // We were using Array.Equals which was always returning false because
+      // the pattern arrays were always different instances. This caused all
+      // segments to be drawn as individual paths with both SVG and PDF.
+      // Walk through the pattern arrays and do a more thorough comparison.
+      if (!pensDifferent)
+      {
+        float[] a = p1.Pattern;
+        float[] b = p2.Pattern;
+        if (a != null && b != null)
+        {
+          if (a == null || b == null)
+            pensDifferent = true;
+          else
+          {
+            if (a.Length != b.Length)
+              pensDifferent = true;
+            for (int i = 0; i < a.Length; i++)
+            {
+              if (Math.Abs(a[i] - b[i]) > 0.01f)
+                pensDifferent = true;
+            }
+          }
+        }
+      }
+      return pensDifferent;
+    }
+
     void CheckPath(Point2d pt, ViewCaptureWriter.Pen pen)
     {
       if (m_making_closed_path || pen==null)
@@ -1607,11 +1664,7 @@ namespace Rhino.Runtime
           gap_exists = true;
       }
 
-      bool pen_changed = m_pen.Color != pen.Color ||
-        Math.Abs(m_pen.Width - pen.Width) > 0.1 ||
-        m_pen.Cap != pen.Cap ||
-        m_pen.Join != pen.Join ||
-        !Array.Equals(m_pen.Pattern, pen.Pattern);
+      bool pen_changed = PensAreDifferent(m_pen, pen);
 
       if (gap_exists || pen_changed)
       {
@@ -1692,10 +1745,12 @@ namespace Rhino.Runtime
 
       // 5 Feb 2021 S. Baer (RH-62125)
       // Skip really short lines
+      // 4 Nov 2023 S. Baer (RH-73891)
+      // Allow for really short lines, but not really really short lines
       if (2 == count)
       {
         Vector2f v = pt[1] - pt[0];
-        if (v.SquareLength < 0.6)
+        if (v.SquareLength < 0.001)
           return;
       }
 
@@ -1808,12 +1863,7 @@ namespace Rhino.Runtime
       
       if (pen!=null)
       {
-        bool pen_changed = m_pen==null ||
-          m_pen.Color != pen.Color ||
-          Math.Abs(m_pen.Width - pen.Width) > 0.1 ||
-          m_pen.Cap != pen.Cap ||
-          m_pen.Join != pen.Join ||
-          !Array.Equals(m_pen.Pattern, pen.Pattern);
+        bool pen_changed = PensAreDifferent(m_pen, pen);
 
         if (pen_changed)
         {

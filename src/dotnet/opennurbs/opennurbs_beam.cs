@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
 
@@ -99,32 +100,17 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public static Extrusion CreateBoxExtrusion(Box box, bool cap=true)
     {
-      if (!box.IsValid) return null;
-
-      var plane = box.Plane;
-      var polyline = new Polyline(5)
+      var pl = new Polyline(5)
       {
-        new Point3d(box.X.T1, box.Y.T1, 0.0),
-        new Point3d(box.X.T0, box.Y.T1, 0.0),
-        new Point3d(box.X.T0, box.Y.T0, 0.0),
-        new Point3d(box.X.T1, box.Y.T0, 0.0),
-        new Point3d(box.X.T1, box.Y.T1, 0.0),
-      };
+        box.PointAt(0,0,0),
+        box.PointAt(1,0,0),
+        box.PointAt(1,1,0),
+        box.PointAt(0,1,0),
+        box.PointAt(0,0,0),
+      }.ToPolylineCurve();
 
-      using (var pl = polyline.ToPolylineCurve())
-      {
-        pl.SetParameter(0, -box.Y.Length - box.X.Length);
-        pl.SetParameter(1, -box.Y.Length);
-        pl.SetParameter(2, 0.0);
-        pl.SetParameter(3, +box.X.Length);
-        pl.SetParameter(4, +box.X.Length + box.Y.Length);
-
-        var extrusion = new Extrusion();
-        if (!extrusion.SetPathAndUp(plane.Origin + plane.ZAxis * box.Z.T0, plane.Origin + plane.ZAxis * box.Z.T1, plane.YAxis)) return null;
-        if (!extrusion.SetOuterProfile(pl, cap)) return null;
-        if (!extrusion.SetDomain(1, box.Z)) return null;
-        return extrusion;
-      }
+      double height = box.m_dz.Length;
+      return Create(pl, height, cap);
     }
 
     /// <summary>
@@ -188,7 +174,23 @@ namespace Rhino.Geometry
       IntPtr ptr_brep = UnsafeNativeMethods.ON_Extrusion_BrepForm(ptr_const_this, splitKinkyFaces);
       return CreateGeometryHelper(ptr_brep, null) as Brep;
     }
-    
+
+    /// <summary>
+    /// Convert a component index that identifies a part of this extrusion
+    /// to a component index that identifies a part of the Brep created
+    /// by Extrusion.ToBrep(false).
+    /// </summary>
+    /// <param name="extrusionComponentIndex">The extrusion component index.</param>
+    /// <returns>The Brep component index if successful. Otherwise, <see cref="ComponentIndex.Unset"/> is returned.</returns>
+    public ComponentIndex GetBrepFormComponentIndex(ComponentIndex extrusionComponentIndex)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      ComponentIndex rc = Rhino.Geometry.ComponentIndex.Unset;
+      if (UnsafeNativeMethods.ON_Extrusion_GetBrepFormComponentIndex(ptr_const_this, ref extrusionComponentIndex, ref rc))
+        return rc;
+      return Rhino.Geometry.ComponentIndex.Unset;
+    }
+
     /// <summary>
     /// Allows to set the two points at the extremes and the up vector.
     /// </summary>
@@ -604,16 +606,15 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="mesh">The mesh.</param>
     /// <param name="meshType">The mesh type.</param>
-    /// <returns>A bool.</returns>
-    [ConstOperation]
+    /// <returns>True on success.</returns>
     public bool SetMesh(Mesh mesh, MeshType meshType)
     {
       if (null == mesh ) return false;
 
-      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       
-      bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_const_this, ptr_const_mesh, (int)meshType );
+      bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_this, ptr_const_mesh, (int)meshType );
       GC.KeepAlive(mesh);
       return result;
     }

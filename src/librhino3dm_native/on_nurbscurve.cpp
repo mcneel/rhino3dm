@@ -40,6 +40,7 @@ RH_C_FUNCTION bool ON_NurbsCurve_CreatePeriodicUniformNurbs(ON_NurbsCurve* crv, 
     return false;
   return crv->CreatePeriodicUniformNurbs(dim, order, count, pts, knot_delta);
 }
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION ON_NurbsCurve* ON_NurbsCurve_CreateControlPointCurve(int count, /*ARRAY*/const ON_3dPoint* points, int degree)
 {

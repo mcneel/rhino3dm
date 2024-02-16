@@ -9,6 +9,7 @@ using Rhino.UI.Gumball;
 #if RHINO_SDK
 using Rhino.Render.CustomRenderMeshes;
 #endif
+using System.Runtime.InteropServices;
 
 namespace Rhino.DocObjects
 {
@@ -98,29 +99,43 @@ namespace Rhino.DocObjects
       m_rhinoobject_serial_number = sn;
     }
 
+    System.Runtime.InteropServices.GCHandle _bboxvpCallback;
     System.Runtime.InteropServices.GCHandle _drawCallback;
+    System.Runtime.InteropServices.GCHandle _tightBoundingBoxCallback;
     void RegisterPerObjectCallbacks(bool add, IntPtr ptrThis)
     {
       if (_drawCallback.IsAllocated)
         _drawCallback.Free();
+      if (_bboxvpCallback.IsAllocated)
+        _bboxvpCallback.Free();
+      if (_tightBoundingBoxCallback.IsAllocated)
+        _tightBoundingBoxCallback.Free();
 
       if (IntPtr.Zero == ptrThis)
         return;
 
       if (add)
       {
-        RhinoObjectDrawCallback callback = new RhinoObjectDrawCallback(OnRhinoObjectDraw);
-        _drawCallback = System.Runtime.InteropServices.GCHandle.Alloc(callback);
-        IntPtr drawfunc = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(callback);
-        UnsafeNativeMethods.CRhinoObject_SetPerObjectCallbacks(ptrThis, drawfunc);
+        RhinoObjectDrawCallback drawCallback = new RhinoObjectDrawCallback(OnRhinoObjectDraw);
+        _drawCallback = System.Runtime.InteropServices.GCHandle.Alloc(drawCallback);
+        IntPtr drawfunc = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(drawCallback);
+        RhinoObjectBoundingBoxViewportCallback bboxvpCallback = new RhinoObjectBoundingBoxViewportCallback(GetRhinoObjectBoundingBoxVp);
+        _bboxvpCallback = System.Runtime.InteropServices.GCHandle.Alloc(bboxvpCallback);
+        IntPtr bboxvpFunc = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(bboxvpCallback);
+        RhinoObjectGetTightBoundingBoxCallback tightBoundingBoxCallback = new RhinoObjectGetTightBoundingBoxCallback(GetRhinoObjectTightBoundingBox);
+        _tightBoundingBoxCallback = System.Runtime.InteropServices.GCHandle.Alloc(tightBoundingBoxCallback);
+        IntPtr tightBoundingBoxFunc = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(tightBoundingBoxCallback);
+        UnsafeNativeMethods.CRhinoObject_SetPerObjectCallbacks(ptrThis, drawfunc, bboxvpFunc, tightBoundingBoxFunc);
       }
       else
       {
-        UnsafeNativeMethods.CRhinoObject_SetPerObjectCallbacks(ptrThis, IntPtr.Zero);
+        UnsafeNativeMethods.CRhinoObject_SetPerObjectCallbacks(ptrThis, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
       }
     }
 
     internal delegate void RhinoObjectDrawCallback(IntPtr pConstRhinoObject, IntPtr pDisplayPipeline);
+    internal delegate void RhinoObjectBoundingBoxViewportCallback(IntPtr pConstRhinoObject, IntPtr pViewport, ref BoundingBox boundingBox);
+    internal delegate int RhinoObjectGetTightBoundingBoxCallback(IntPtr pConstRhinoObject, ref BoundingBox boundingBox, int bGrowBox, IntPtr xform);
     internal delegate void RhinoObjectDuplicateCallback(uint docSerialNumber, uint sourceObjectSerialNumber, uint newObjectSerialNumber, IntPtr newObjectPointer);
     internal delegate void RhinoObjectDocNotifyCallback(uint docSerialNumber, uint serialNumber, int add, Guid managedTypeId);
     internal delegate int RhinoObjectActiveInViewportCallback(uint docSerialNumber, uint serialNumber, IntPtr pRhinoViewport);
@@ -141,6 +156,40 @@ namespace Rhino.DocObjects
     static RhinoObjectPickedCallback g_the_picked_callback;
     static RhinoObjectDeletedCallback g_the_delete_callback;
 
+    void GetRhinoObjectBoundingBoxVp(IntPtr pConstRhinoObject, IntPtr pRhinoViewport, ref BoundingBox bbox)
+    {
+      try
+      {
+        bbox = GetBoundingBox((pRhinoViewport != null) ? new RhinoViewport(null, pRhinoViewport) : null);
+      }
+      catch (Exception ex) 
+      {
+        Runtime.HostUtils.ExceptionReport(ex);
+      }
+    }
+    int GetRhinoObjectTightBoundingBox(IntPtr pConstRhinoObject, ref BoundingBox tightBox, int growBox, IntPtr ptrXform)
+    {
+      int result = 0;
+      try
+      {
+        Transform xform;
+        if (IntPtr.Zero == ptrXform)
+        {
+          xform = Transform.Identity;
+          result = Convert.ToInt32(GetTightBoundingBox(ref tightBox, Convert.ToBoolean(growBox), xform));
+        }
+        else
+        {
+          xform = (Marshal.PtrToStructure(ptrXform, typeof(Transform)) as Transform?).Value;
+          result = Convert.ToInt32(GetTightBoundingBox(ref tightBox, Convert.ToBoolean(growBox), xform));
+        }
+      }
+      catch (Exception ex)
+      {
+        Runtime.HostUtils.ExceptionReport(ex);
+      }
+      return result;
+    }
     void OnRhinoObjectDraw(IntPtr pConstRhinoObject, IntPtr pDisplayPipeline)
     {
       // 8 Aug 2014 S. Baer (RH-28405)
@@ -571,7 +620,39 @@ namespace Rhino.DocObjects
         var ptr_mesh_parameters = parameters.NonConstPointer();
         var ptr_mesharray = mesh_array.NonConstPointer();
         var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
-        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray);
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, true);
+        meshes = mesh_array.ToNonConstArray();
+        var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
+        attributes = new ObjectAttributes[attrib_count];
+        for (var i = 0; i < attrib_count; i++)
+        {
+          var ptr_attribute = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Get(ptr_attributesarray, i);
+          attributes[i] = new ObjectAttributes(ptr_attribute);
+        }
+        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        return (Commands.Result)rc;
+      }
+    }
+
+    /// <summary>Meshes Rhino objects.</summary>
+    /// <param name="rhinoObjects">The Rhino objects to mesh.</param>
+    /// <param name="parameters">The parameters used to create the meshes.</param>
+    /// <param name="meshes">The created meshes are appended to this array.</param>
+    /// <param name="attributes">The object attributes that coincide with each created mesh are appended to this array.</param>
+    /// <param name="useWorkerThread">Set true to compute meshes in a worker thread.</param>
+    /// <returns>The results of the calculation.</returns>
+    /// <since>8.4</since>
+    public static Commands.Result MeshObjects(System.Collections.Generic.IEnumerable<RhinoObject> rhinoObjects, MeshingParameters parameters, out Mesh[] meshes, out ObjectAttributes[] attributes, bool useWorkerThread)
+    {
+      using (var rhinoobject_array = new Runtime.InternalRhinoObjectArray(rhinoObjects))
+      using (var mesh_array = new SimpleArrayMeshPointer())
+      {
+        var ptr_rhinoobject_array = rhinoobject_array.NonConstPointer();
+        var ui_style = -1; //no user interface
+        var ptr_mesh_parameters = parameters.NonConstPointer();
+        var ptr_mesharray = mesh_array.NonConstPointer();
+        var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, useWorkerThread);
         meshes = mesh_array.ToNonConstArray();
         var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
         attributes = new ObjectAttributes[attrib_count];
@@ -603,7 +684,7 @@ namespace Rhino.DocObjects
         var ptr_mesh_parameters = parameters.NonConstPointer();
         var ptr_mesharray = mesh_array.NonConstPointer();
         var ptr_attributesarray = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
-        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray);
+        var rc = UnsafeNativeMethods.RHC_RhinoMeshObjects(ptr_rhinoobject_array, ref ui_style, ptr_mesh_parameters, ptr_mesharray, ptr_attributesarray, true);
         simpleDialog = ui_style == 0;
         meshes = mesh_array.ToNonConstArray();
         var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributesarray);
@@ -2864,6 +2945,36 @@ namespace Rhino.DocObjects
     {
       var p_const_this = ConstPointer();
       UnsafeNativeMethods.CRhinoObject_Draw(p_const_this, e.m_ptr_display_pipeline);
+    }
+
+    /// <summary>
+    /// Called when Rhino wants the bounding box of this object. Viewpoert can be null.
+    /// This is the default base class version that will go through to the C++ base class if it is called from the custom object
+    /// </summary>
+    /// <param name="viewport">For objects like labels or lights, the viewport in which
+    /// the bounding box should be calculated. Otherwise null.</param>
+    /// <returns>The bounding box.</returns>
+    protected virtual BoundingBox GetBoundingBox(RhinoViewport viewport)
+    {
+      var p_const_this = ConstPointer();
+      BoundingBox bbox = new BoundingBox();
+
+      IntPtr ptrViewport = IntPtr.Zero;
+      if (viewport != null) ptrViewport = viewport.ConstPointer();
+      UnsafeNativeMethods.CRhinoObject_BoundingBoxViewport(p_const_this, ptrViewport, ref bbox);
+      return bbox;
+    }
+    /// <summary>
+    /// Get tight bounding box of this Rhino object. The Rhino object is not modified.
+    /// </summary>
+    /// <param name="tightBox">Beginning and resulting tight box</param>
+    /// <param name="growBox">If true and the input tight_bbox is valid, then returned tight_bbox is the union of the input tight_bbox and the tight bounding box of this Rhino object.</param>
+    /// <param name="xform"> If useXform==true, the tight bounding box of the transformed Rhino object is calculated.</param>
+    /// <returns>true if the returned tight_bbox is set to a valid bounding box.</returns>
+    protected virtual bool GetTightBoundingBox(ref BoundingBox tightBox, bool growBox, Transform xform)
+    {
+      var p_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoObject_GetTightBoundingBox2(p_const_this, ref tightBox, growBox, ref xform);
     }
 
     /// <summary>

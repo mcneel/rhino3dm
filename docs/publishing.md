@@ -11,6 +11,27 @@ There are several places where version numbers should be updated:
   - src/rhino3dm/\_\_init\_\_.py, line 7
 - src/version.txt, line 1
 
+## Updating Documentation with docgen
+
+### requirements:
+- javascript - jsdoc and docdash: `npm i -g docdash jsdoc`
+- python - 
+  - sphinx: `python3 -m pip install sphinx`
+  - theme: `python3 -m pip install sphinx-rtd-theme`
+
+### building api docs
+
+1. change to docgen folder: `cd src/docgen`
+2. build docgen: `dotnet build docgen.csproj`
+3. run docgen: `cd bin/Debug && ./docgen`
+4. generate docs:
+    1. javascript: `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
+    2. python: 
+        - `sphinx-build -M html out/py_apidocs out/py_apidocs/sphinxout`
+        - replace the docs in docs/python/api with the docs generated in src/docgen/out/py_apidocs/sphinxout/html
+5. commit these changes and merge with `main`
+
+
 ## JavaScript
 
 ### Node.js

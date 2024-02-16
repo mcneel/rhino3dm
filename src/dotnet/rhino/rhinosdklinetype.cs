@@ -39,6 +39,20 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(pLinetype);
     }
 
+    /// <summary>
+    /// Duplicates a linetype, clears the name, id, and locked bits.
+    /// </summary>
+    /// <returns>The duplicated linetype if successful, null otherwise.</returns>
+    /// <since>8.0</since>
+    public Linetype DuplicateLinetype()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_linetype = UnsafeNativeMethods.ON_Linetype_DuplicateLinetype(ptr_const_this);
+      if (ptr_linetype != IntPtr.Zero)
+        return new Linetype(ptr_linetype);
+      return null;
+    }
+
 #if RHINO_SDK
     internal Linetype(int index, Rhino.RhinoDoc doc) : base()
     {

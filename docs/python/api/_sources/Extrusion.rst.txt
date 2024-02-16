@@ -274,3 +274,14 @@ Extrusion
       :return: A mesh.
 
       :rtype: rhino3dm.Mesh
+
+   .. py:method:: SetMesh(mesh, meshType)
+
+      Sets a specified type of mesh for this extrusion.
+
+      :param rhino3dm.Mesh mesh: The mesh.
+      :param MeshType meshType: The mesh type.
+
+      :return: True on success.
+
+      :rtype: bool

@@ -2359,6 +2359,11 @@ namespace Rhino.Geometry
     /// </summary>
     /// <since>8.0</since>
     public int PolygonOptimization { get; set; } = 10;
+    /// <summary>
+    /// Inflate mesh vertices, points and point clouds
+    /// Mesh vertices will be inflated as though the mesh were a point cloud
+    /// </summary>
+    public bool InflateVerticesAndPoints { get; set; }
   }
 
   /// <summary>
@@ -2903,6 +2908,26 @@ namespace Rhino.Geometry
       GC.KeepAlive(subd);
       return null;
     }
+
+    /// <summary>
+    /// Constructs a mesh from a brep.
+    /// </summary>
+    /// <param name="extrusion">Brep to approximate.</param>
+    /// <param name="meshingParameters">Parameters to use during meshing.</param>
+    /// <returns>A mesh.</returns>
+    /// <since>8.3</since>
+    public static Mesh CreateFromExtrusion(Extrusion extrusion, MeshingParameters meshingParameters)
+    {
+      IntPtr ptr_const_brep = extrusion.ConstPointer();
+      IntPtr const_ptr_meshing_parameters = meshingParameters.ConstPointer();
+      IntPtr ptrMesh = UnsafeNativeMethods.ON_Extrusion_CreateMesh(ptr_const_brep, const_ptr_meshing_parameters);
+      if (IntPtr.Zero != ptrMesh)
+        return new Mesh(ptrMesh, null);
+
+      GC.KeepAlive(extrusion);
+      GC.KeepAlive(meshingParameters);
+      return null;
+    }
 #endif
 
     /// <summary>Create a mesh from a SubD control net</summary>
@@ -2912,7 +2937,20 @@ namespace Rhino.Geometry
     public static Mesh CreateFromSubDControlNet(SubD subd)
     {
       IntPtr constPtrSubD = subd.ConstPointer();
-      IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_GetControlNetMesh(constPtrSubD);
+      IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_GetControlNetMesh(constPtrSubD, false);
+      if (IntPtr.Zero != ptrMesh)
+        return new Mesh(ptrMesh, null);
+      GC.KeepAlive(subd);
+      return null;
+    }
+
+    /// <summary>Create a mesh from a SubD control net including texture coordinates</summary>
+    /// <param name="subd"></param>
+    /// <returns>mesh representing control net on success, null on failure</returns>
+    public static Mesh CreateFromSubDControlNetWithTextureCoordinates(SubD subd)
+    {
+      IntPtr constPtrSubD = subd.ConstPointer();
+      IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_GetControlNetMesh(constPtrSubD, true);
       if (IntPtr.Zero != ptrMesh)
         return new Mesh(ptrMesh, null);
       GC.KeepAlive(subd);
@@ -5941,6 +5979,19 @@ namespace Rhino.Geometry
     {
       var sw = GetShrinkWrapPluginService();
       return sw.ShrinkWrap(pointCloud, parameters) ?? null;
+    }
+
+    /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a collection of geometry base objects
+    /// </summary>
+    /// <param name="geometryBases"></param>
+    /// <param name="parameters"></param>
+    /// <param name="meshingParameters"></param>
+    /// <returns></returns>
+    public static Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters)
+    {
+      var sw = GetShrinkWrapPluginService();
+      return sw.ShrinkWrap(geometryBases, parameters,meshingParameters) ?? null;
     }
 
 
@@ -13496,6 +13547,16 @@ namespace Rhino.Runtime
     /// <returns></returns>
     /// <since>8.0</since>
     Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters);
+
+    /// <summary>
+    /// Create a mesh from a collection of geometry base objects
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="geometryBases"></param>
+    /// <param name="parameters"></param>
+    /// <param name="meshingParameters"></param>
+    /// <returns></returns>
+    Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters);
   }
 }
 

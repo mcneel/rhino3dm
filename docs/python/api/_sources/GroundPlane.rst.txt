@@ -1,0 +1,60 @@
+GroundPlane
+===========
+
+.. py:module:: rhino3dm
+
+.. py:class:: GroundPlane
+
+   .. py:method:: GroundPlane()
+
+      GroundPlane constructor
+
+
+   .. py:method:: GroundPlane()
+
+      GroundPlane constructor
+
+
+   .. py:attribute:: Enabled
+
+      bool: Determines whether the document ground plane is enabled.
+
+   .. py:attribute:: ShowUnderside
+
+      bool: If this is off, the ground plane will not be visible when seen from below.
+
+   .. py:attribute:: Altitude
+
+      float: Height above world XY plane in model units. Auto-altitude is computed if enabled.
+
+   .. py:attribute:: AutoAltitude
+
+      bool: Determines whether the ground plane is fixed by the Altitude property, or whether it is automatically placed at the lowest point in the model.
+
+   .. py:attribute:: ShadowOnly
+
+      bool: Determines whether the ground plane shows the material assigned, or whether it is transparent, but captures shadows.
+
+   .. py:attribute:: MaterialInstanceId
+
+      Guid: Id of material in material table for this ground plane.
+
+   .. py:attribute:: TextureOffset
+
+      Rhino.Geometry.Vector2d: Texture mapping offset in world units.
+
+   .. py:attribute:: TextureOffsetLocked
+
+      bool: Texture offset locked.
+
+   .. py:attribute:: TextureSizeLocked
+
+      bool: Texture size locked.
+
+   .. py:attribute:: TextureSize
+
+      Rhino.Geometry.Vector2d: Texture mapping single UV span size in world units.
+
+   .. py:attribute:: TextureRotation
+
+      float: Texture mapping rotation around world origin + offset in degrees.

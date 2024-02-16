@@ -234,8 +234,30 @@ Surface
 
    .. py:method:: GetSurfaceParameterFromNurbsFormParameter(nurbsS, nurbsT)
 
-      [todo] add documentation
+      Translates a parameter from a value on the surface returned by  to the current surface.
+
+      :param float nurbsS: The parameter in the S, or sometimes U, direction of the NURBS form surface.
+      :param float nurbsT: The parameter in the T, or sometimes V, direction of the NURBS form surface.
+
+      :return: tuple (bool, float, float)
+
+         - True if the operation succeeded; otherwise, false.
+         - S on this surface. \
+         - T o n this surface. \
+
+      :rtype: (bool, float, float)
 
    .. py:method:: GetNurbsFormParameterFromSurfaceParameter(surfaceS, surfaceT)
 
-      [todo] add documentation
+      Translates a parameter from the current surface to the parameter space of the surface returned by .
+
+      :param float surfaceS: The parameter in the S, or sometimes U, direction, of this surface.
+      :param float surfaceT: The parameter in the T, or sometimes V, direction of this surface.
+
+      :return: tuple (bool, float, float)
+
+         - True if the operation succeeded; otherwise, false.
+         - S on the NURBS form. \
+         - T on the NURBS form. \
+
+      :rtype: (bool, float, float)

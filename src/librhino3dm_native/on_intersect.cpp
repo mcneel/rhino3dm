@@ -819,6 +819,14 @@ RH_C_FUNCTION int ON_Intersect_MeshLine(const ON_Mesh* pConstMesh, ON_3DPOINT_ST
       *faceIds_out = (void**)faceIds_out_arr;
       rc = ts_arr.Count();
     }
+
+    if (rc == 0)
+    {
+      delete points_out_arr;
+      points_out = nullptr;
+      delete faceIds_out_arr;
+      faceIds_out = nullptr;
+    }
   }
   return rc;
 }
@@ -826,35 +834,35 @@ RH_C_FUNCTION int ON_Intersect_MeshLine(const ON_Mesh* pConstMesh, ON_3DPOINT_ST
 RH_C_FUNCTION void ON_Intersect_MeshPolyline_FillDelete(int count, void* points_out_now_in, void* faceIds_out_now_in, void* ts_out_now_in,
   /*ARRAY*/ON_3dPoint* points_out, /*ARRAY*/int* faceIds_out, /*ARRAY*/double* ts_out)
 {
-  if (points_out_now_in && points_out)
+  if (points_out_now_in)
   {
     auto smplarr = ((ON_SimpleArray<ON_3dPoint>*)points_out_now_in);
-    if (smplarr->Count() == count)
+    if (points_out && smplarr->Count() == count)
     {
       auto arr = smplarr->Array();
       memcpy(points_out, arr, sizeof(ON_3dPoint) * count);
-      delete smplarr;
     }
+    delete smplarr;
   }
-  if (faceIds_out_now_in && faceIds_out)
+  if (faceIds_out_now_in)
   {
     auto smplarr = ((ON_SimpleArray<int>*)faceIds_out_now_in);
-    if (smplarr->Count() == count)
+    if (faceIds_out && smplarr->Count() == count)
     {
       auto arr = smplarr->Array();
       memcpy(faceIds_out, arr, sizeof(int) * count);
-      delete smplarr;
     }
+    delete smplarr;
   }
-  if (ts_out_now_in && ts_out)
+  if (ts_out_now_in)
   {
     auto smplarr = ((ON_SimpleArray<double>*)ts_out_now_in);
-    if (smplarr->Count() == count)
+    if (ts_out && smplarr->Count() == count)
     {
       auto arr = smplarr->Array();
       memcpy(ts_out, arr, sizeof(double) * count);
-      delete smplarr;
     }
+    delete smplarr;
   }
 }
 

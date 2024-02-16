@@ -59,3 +59,4 @@ File3dmSettings
 
    .. py:attribute:: RenderSettings
 
+      Rhino.Render.RenderSettings: Gets or sets the render settings.

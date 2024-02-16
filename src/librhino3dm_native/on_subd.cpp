@@ -394,11 +394,11 @@ RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, 
 
 #endif
 
-RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr)
+RH_C_FUNCTION ON_Mesh* ON_SubD_GetControlNetMesh(const ON_SubD* constSubDPtr, bool bIncludeTextureCoordinates)
 {
   RHCHECK_LICENSE
   if (constSubDPtr)
-    return constSubDPtr->GetControlNetMesh(nullptr, ON_SubDGetControlNetMeshPriority::Geometry);
+    return constSubDPtr->GetControlNetMesh(nullptr, bIncludeTextureCoordinates ? ON_SubDGetControlNetMeshPriority::TextureCoordinates : ON_SubDGetControlNetMeshPriority::Geometry);
   return nullptr;
 }
 
@@ -1162,5 +1162,48 @@ RH_C_FUNCTION unsigned int ON_SubD_PackFaces(ON_SubD* subd)
   return rc;
 }
 
-#endif
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateSubDQuadSphere(ON_Sphere* pSphere, ON_SubDComponentLocation vertexLocation, unsigned int quadSubdivisionLevel)
+{
+  ON_SubD* rc = nullptr;
+  if (pSphere)
+  {
+    pSphere->plane.UpdateEquation();
+    rc = ON_SubD::CreateSubDQuadSphere(*pSphere, vertexLocation, quadSubdivisionLevel, nullptr);
+  }
+  return rc;
+}
 
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateSubDGlobeSphere(ON_Sphere* pSphere, ON_SubDComponentLocation vertexLocation, unsigned int axialFaceCount, unsigned int equatorialFaceCount)
+{
+  ON_SubD* rc = nullptr;
+  if (pSphere)
+  {
+    pSphere->plane.UpdateEquation();
+    rc = ON_SubD::CreateSubDGlobeSphere(*pSphere, vertexLocation, axialFaceCount, equatorialFaceCount, nullptr);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateSubDTriSphere(ON_Sphere* pSphere, ON_SubDComponentLocation vertexLocation, unsigned int triSubdivisionLevel)
+{
+  ON_SubD* rc = nullptr;
+  if (pSphere)
+  {
+    pSphere->plane.UpdateEquation();
+    rc = ON_SubD::CreateSubDTriSphere(*pSphere, vertexLocation, triSubdivisionLevel, nullptr);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_SubD* ON_SubD_CreateSubDIcosahedron(ON_Sphere* pSphere, ON_SubDComponentLocation vertexLocation)
+{
+  ON_SubD* rc = nullptr;
+  if (pSphere)
+  {
+    pSphere->plane.UpdateEquation();
+    rc = ON_SubD::CreateSubDIcosahedron(*pSphere, vertexLocation, nullptr);
+  }
+  return rc;
+}
+
+#endif

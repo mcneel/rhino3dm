@@ -155,15 +155,15 @@ namespace Rhino.PlugIns
     {
       if (pluginAssembly == null)
         pluginAssembly = pluginType.Assembly;
-      HostUtils.DebugString("[PlugIn::Create] Start");
-      if (!string.IsNullOrEmpty(pluginName))
-        HostUtils.DebugString("  plugin_name = " + pluginName);
+      // HostUtils.DebugString("[PlugIn::Create] Start");
+      // if (!string.IsNullOrEmpty(pluginName))
+      //   HostUtils.DebugString("  plugin_name = " + pluginName);
       PlugIn rc;
       Guid plugin_id = Guid.Empty;
       m_bOkToConstruct = true;
       try
       {
-        HostUtils.DebugString("  Looking for plug-in's GuidAttribute");
+        //HostUtils.DebugString("  Looking for plug-in's GuidAttribute");
         object[] idAttr = pluginAssembly.GetCustomAttributes(typeof(GuidAttribute), false);
         if (idAttr.Length > 0)
         {
@@ -173,7 +173,7 @@ namespace Rhino.PlugIns
 
         if (string.IsNullOrEmpty(pluginName))
         {
-          HostUtils.DebugString("  Looking for plug-in's AssemblyTitleAttribute");
+          //HostUtils.DebugString("  Looking for plug-in's AssemblyTitleAttribute");
           object[] titleAttr = pluginAssembly.GetCustomAttributes(typeof(System.Reflection.AssemblyTitleAttribute), false);
           System.Reflection.AssemblyTitleAttribute title = (System.Reflection.AssemblyTitleAttribute)(titleAttr[0]);
           pluginName = title.Title;
@@ -196,7 +196,7 @@ namespace Rhino.PlugIns
       m_bOkToConstruct = false;
       if (rc != null)
       {
-        HostUtils.DebugString("  Created PlugIn Instance");
+        //HostUtils.DebugString("  Created PlugIn Instance");
         if (string.IsNullOrEmpty(pluginVersion))
         {
           pluginVersion = pluginAssembly.GetName().Version.ToString();
@@ -269,7 +269,7 @@ namespace Rhino.PlugIns
           }
         }
       }
-      HostUtils.DebugString("[PlugIn::Create] Finished");
+      //HostUtils.DebugString("[PlugIn::Create] Finished");
       return rc;
     }
 
@@ -1907,14 +1907,40 @@ namespace Rhino.PlugIns
       return names.ToArray();
     }
 
+    static string ResolvePathHelper(string path)
+    {
+      if (!HostUtils.RunningOnOSX)
+        return path;
+
+      var file = new System.IO.FileInfo(path);
+#if NET
+      // 22 Nov 2023 S. Baer (RH-78149)
+      // Resolve plug-ins that use symbolic links to determine their
+      // true directory name
+      try
+      {
+        var resolved = file.ResolveLinkTarget(true);
+        if (resolved != null)
+          file = new System.IO.FileInfo(resolved.FullName);
+      }
+      catch(Exception)
+      {
+        return path;
+      }
+#endif
+      return file.FullName;
+    }
+
     /// <since>5.0</since>
     public static string[] GetInstalledPlugInFolders()
     {
       var dirs = new List<string>(32);
       foreach (PlugIn plugin in m_plugins)
       {
-        try {
-          var dir = System.IO.Path.GetDirectoryName(plugin.Assembly.Location);
+        try
+        {
+          string path = ResolvePathHelper(plugin.Assembly.Location);
+          var dir = System.IO.Path.GetDirectoryName(path);
 
           if (!dirs.Contains (dir))
             dirs.Add (dir);
@@ -2132,9 +2158,19 @@ namespace Rhino.PlugIns
 
     // Attempt to create a RhinoCommon plugin through reflection.
     // Taken from original Rhino.NET plug-in loading code
-    internal static UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts LoadPlugInHelper(string path, IntPtr pluginInfo, IntPtr errorMessage, bool displayDebugInfo)
+    internal static UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts LoadPlugInHelper(string path, IntPtr pluginInfo, IntPtr errorMessage, bool displayDebugInfo, bool bIsDirectoryInstall)
     {
-      if(HostUtils.RunningOnOSX) {
+      path = ResolvePathHelper(path);
+
+      if (!bIsDirectoryInstall)
+      {
+        // support multi-targeting for .rhp's loaded directly
+        // for directory installs (yak), this is already taken care of before we get here.
+        path = GetMultiTargetPath(path) ?? path;
+      }
+      
+      if(HostUtils.RunningOnOSX)
+      {
         // Mac plugins can be located inside of macOS plugin bundles (rhp directories) or
         // inside directories that contain rhp files
         // adjust 'path' to handle this case
@@ -2159,24 +2195,25 @@ namespace Rhino.PlugIns
               path = dllFullPath;
           }
         }
-
-        if (!string.IsNullOrWhiteSpace (MonoHost.AlternateBinDirectory)) {
-          var dllname = System.IO.Path.GetFileNameWithoutExtension (path) + ".dll";
-          var temp_path = System.IO.Path.Combine (MonoHost.AlternateBinDirectory, dllname);
-          if (System.IO.File.Exists (temp_path))
+        
+        if (!string.IsNullOrWhiteSpace(MonoHost.AlternateBinDirectory))
+        {
+          var dllname = System.IO.Path.GetFileNameWithoutExtension(path) + ".dll";
+          var temp_path = System.IO.Path.Combine(MonoHost.AlternateBinDirectory, dllname);
+          if (System.IO.File.Exists(temp_path))
             path = temp_path;
-          else {
-            dllname = System.IO.Path.GetFileNameWithoutExtension (path) + ".rhp";
-            temp_path = System.IO.Path.Combine (MonoHost.AlternateBinDirectory, dllname);
-            if (System.IO.File.Exists (temp_path))
+          else
+          {
+            dllname = System.IO.Path.GetFileNameWithoutExtension(path) + ".rhp";
+            temp_path = System.IO.Path.Combine(MonoHost.AlternateBinDirectory, dllname);
+            if (System.IO.File.Exists(temp_path))
               path = temp_path;
           }
         }
-
-        // On windows we check this in native code, so only check here on mac for now.
-        if (!HostUtils.IsManagedDll(path))
-          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
       }
+
+      if (!HostUtils.IsManagedDll(path))
+        return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
 
       // attempt to load the assembly
       // This plugin may be a standard C++ plug-in that uses .NET.
@@ -2287,13 +2324,13 @@ namespace Rhino.PlugIns
         bool version_check_passed = false;
         if( index_rhinocommon>=0 )
           version_check_passed = CheckPlugInVersioning( referenced_assemblies[index_rhinocommon] );
-        if( !version_check_passed && !CheckPlugInCompatibility(path, displayDebugInfo) )
+        if( !version_check_passed && !CheckPlugInCompatibility(path) )
         {
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Incompatible;
         }
 
-        if(displayDebugInfo)
-          RhinoApp.Write("- plug-in passes RhinoCommon.DLL reference version check\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- plug-in passes RhinoCommon.DLL reference version check\n");
 
         // 15 August. 2008 S. Baer
         // Test to make sure plug-in developers didn't accidentally copy RhinoCommon.DLL
@@ -2327,8 +2364,8 @@ namespace Rhino.PlugIns
         // At this point, we have determined that this is a RhinoCommon plug-in
         // We've done all the checking that we can do without actually loading
         // the DLL ( and resolving links)
-        if(displayDebugInfo)
-          RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
         
         if(ironpython_referenced)
         {
@@ -2348,8 +2385,8 @@ namespace Rhino.PlugIns
 
         var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
         
-        if(displayDebugInfo)
-          RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
         // Fill out all of the info strings using Assembly attributes in the plugin
         ExtractPlugInAttributes( plugin_assembly, pluginInfo );
         if (UnsafeNativeMethods.CRhinoPlugInInfo_SilentBlock(pluginInfo))
@@ -2357,14 +2394,14 @@ namespace Rhino.PlugIns
         
         // All of the major tests have passed
         // Find and create the plug-in and command classes through reflection
-        if(displayDebugInfo)
-          RhinoApp.Write("- creating plug-in and command classes\n");
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("- creating plug-in and command classes\n");
 
         if( !CreateFromAssembly( plugin_assembly, displayDebugInfo, index_rhinocommon==-1) )
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
         
-        if(displayDebugInfo)
-          RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
+        // if(displayDebugInfo)
+        //   RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
       }
       catch (Exception ex)
       {
@@ -2387,7 +2424,44 @@ namespace Rhino.PlugIns
 
       return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Loaded;
     }
-    
+
+    // Match net4xx, net7.0, net7.0-windows10.17123.0
+    static readonly Regex targetPathRegex = new Regex(@"^net((4\d\d?)|(\d\.\d(-\w+((\d+\.)*\d+)?)?))$");
+
+    private static string GetMultiTargetPath(string path)
+    {
+      DirectoryInfo dir;
+      string pluginName;
+      if (HostUtils.RunningOnOSX && Directory.Exists(path))
+      {
+        // On Mac, we get a folder here instead of a path to a file
+        pluginName = Path.GetFileName(path); // plugin name is the name of the folder
+        dir = new DirectoryInfo(path);
+      }
+      else
+      {
+        pluginName = Path.GetFileName(path);
+        dir = new DirectoryInfo(Path.GetDirectoryName(path));
+        
+        // is the .rhp in a net* folder?
+        var isTargetPath = targetPathRegex.IsMatch(dir.Name);
+        if (!isTargetPath)
+          return path;
+
+        dir = dir.Parent;
+      }
+
+      // find the runtime specific folder
+      var runtimeSpecificFolder = HostUtils.GetRuntimeSpecificFolder(dir, useRootFiles: HostUtils.RunningOnOSX);
+      var runtimeSpecificPath = Path.Combine(runtimeSpecificFolder.FullName, pluginName);
+      
+      // if the plugin doesn't exist in the runtime specific folder, 
+      if (!File.Exists(runtimeSpecificPath))
+        return null;
+
+      return runtimeSpecificPath;
+    }
+
     static bool CheckPlugInVersioning( System.Reflection.AssemblyName dotnetAssemblyName )
     {
       var plugin_version = dotnetAssemblyName.Version;
@@ -2428,7 +2502,7 @@ namespace Rhino.PlugIns
         return hash;
       }
     }
-    static bool CheckPlugInCompatibility(string path, bool displayDebugInfo)
+    static bool CheckPlugInCompatibility(string path)
     {
       // 10 June 2016 (S. Baer)
       // We will probably want to completely redo this caching scheme about
@@ -2475,7 +2549,7 @@ namespace Rhino.PlugIns
       // a given file. This way I'm not worrying about plug-in names or
       // versions which is in the spirit of using Compat in the first place!
       string hash = ComputeMd5Hash(path);
-      if (displayDebugInfo) RhinoApp.WriteLine("- MD5: {0}", hash);
+      // if (displayDebugInfo) RhinoApp.WriteLine("- MD5: {0}", hash);
 
       // check cache using md5 in case we've already checked this file
       // NOTE: cache should be destroyed when Rhino is updated
@@ -2572,10 +2646,10 @@ namespace Rhino.PlugIns
         }
       }
 
-      RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} {(result ? "succeeded" : "failed")} in {time.TotalSeconds:0.00}s");
-
       if (!result)
       {
+        RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
+
         var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
         if (!Directory.Exists(outputDir))
           Directory.CreateDirectory(outputDir);
@@ -3733,7 +3807,8 @@ namespace Rhino.PlugIns
         g_ui_content_types_callback,
         g_save_custom_render_file_callback,
         g_render_settings_sections_callback,
-        g_plugin_icon_callback
+        g_plugin_icon_callback,
+        g_initial_channel_to_display
         );
     }
 
@@ -3913,6 +3988,30 @@ namespace Rhino.PlugIns
 
       return true;
     }
+
+    internal delegate Guid InitialChannelToDisplayCallback(int serialNumber);
+    private static readonly InitialChannelToDisplayCallback g_initial_channel_to_display = PlugInInitialChannelToDisplay;
+    private static Guid PlugInInitialChannelToDisplay(int serialNumber)
+    {
+      // Get the runtime plug-in to call
+      var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
+      if (render_plug_in == null)
+        return Guid.Empty;
+
+      try
+      {
+        return render_plug_in.InitialChannelToDisplay;
+      }
+
+      catch (Exception exception)
+      {
+        Runtime.HostUtils.ExceptionReport(exception);
+      }
+
+      return Guid.Empty;
+    }
+
+    
 
     internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
     private static readonly SaveCusomtomRenderFileCallback g_save_custom_render_file_callback = OnSaveCusomtomRenderFile;
@@ -4204,6 +4303,20 @@ namespace Rhino.PlugIns
           rc.Add(new FileIO.FileType(shExt.ToString(), shDesc.ToString()));
         }
         return rc;
+      }
+    }
+
+    protected virtual Guid InitialChannelToDisplay
+    {
+      get
+      {
+        //Just hard code the default channel ID - it's easier than calling back into C++
+        //const UUID IRhRdkRenderWindow::chanRGBA =
+        //{
+        //  0x453a9a1c, 0x9307, 0x4976, { 0xb2, 0x82, 0x4e, 0xad, 0x4d, 0x53, 0x98, 0x79 }
+        //};
+
+        return new Guid("453a9a1c-9307-4976-b282-4ead4d539879");
       }
     }
 

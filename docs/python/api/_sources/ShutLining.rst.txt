@@ -1,0 +1,35 @@
+ShutLining
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: ShutLining
+
+   .. py:method:: ShutLining()
+
+      ShutLining constructor
+
+
+   .. py:method:: ShutLining()
+
+      ShutLining constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Faceted
+
+
+   .. py:attribute:: AutoUpdate
+
+
+   .. py:attribute:: ForceUpdate
+
+
+   .. py:attribute:: Curves
+
+
+   .. py:method:: DeleteAllCurves()
+
+      [todo] add documentation

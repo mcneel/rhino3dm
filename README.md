@@ -1,12 +1,15 @@
 # rhino3dm
 
 [![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml)
-[![Discourse users](https://img.shields.io/discourse/https/discourse.mcneel.com/users.svg?style=flat-square)](https://discourse.mcneel.com/c/rhino-developer/rhino3dm)
-[![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg?style=flat-square)](https://pypi.org/project/rhino3dm)
-[![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat-square)](https://www.nuget.org/profiles/McNeel)
-[![NuGet](https://img.shields.io/nuget/vpre/Rhino3dm.svg?style=flat-square)](https://www.nuget.org/profiles/McNeel)
-[![npm](https://img.shields.io/npm/v/rhino3dm.svg?style=flat-square)](https://www.npmjs.com/package/rhino3dm)
-[![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
+[![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml)
+
+
+[![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg?style=flat-square)](https://pypi.org/project/rhino3dm)![PyPI - Downloads](https://img.shields.io/pypi/dm/rhino3dm?style=flat-square)
+
+[![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat-square)](https://www.nuget.org/profiles/McNeel)[![NuGet Downloads](https://img.shields.io/nuget/dt/rhino3dm.svg?style=flat-square)](https://www.nuget.org/packages/rhino3dm/)
+
+[![npm](https://img.shields.io/npm/v/rhino3dm.svg?style=flat-square)](https://www.npmjs.com/package/rhino3dm)![npm](https://img.shields.io/npm/dm/rhino3dm?style=flat-square)
+
 
 **rhino3dm** is a set of libraries based on the [OpenNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/) geometry library with a ["RhinoCommon"](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.  
 
@@ -45,12 +48,12 @@ rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3d
 
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
-  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+  <script async src="https://unpkg.com/es-module-shims@1.8.2/dist/es-module-shims.js"></script>
 
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.0.0-beta2/rhino3dm.module.min.js"
+            "rhino3dm":"https://unpkg.com/rhino3dm@8.4.0/rhino3dm.module.min.js"
           }
       }
   </script>

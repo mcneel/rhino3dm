@@ -1,0 +1,30 @@
+EmbeddedFile
+============
+
+.. py:module:: rhino3dm
+
+.. py:class:: EmbeddedFile
+
+   .. py:method:: EmbeddedFile()
+
+      EmbeddedFile constructor
+
+
+   .. py:method:: EmbeddedFile()
+
+      EmbeddedFile constructor
+
+
+   .. py:attribute:: Length
+
+
+   .. py:attribute:: FileName
+
+
+   .. py:method:: Write(fileName)
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation

@@ -1,87 +1,52 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>ViewportInfo &mdash; rhino3dm 7.6.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ViewportInfo &mdash; rhino3dm 8.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ea47c46f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="ViewInfo" href="ViewInfo.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> rhino3dm
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
           </a>
-
-          
-            
-            
               <div class="version">
-                7.6.0
+                8.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AnnotationBase.html">AnnotationBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
@@ -97,39 +62,56 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurvePiping.html">CurvePiping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EdgeSoftening.html">EdgeSoftening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EmbeddedFile.html">EmbeddedFile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Environment.html">Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDecalTable.html">File3dmDecalTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmEmbeddedFileTable.html">File3dmEmbeddedFileTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmGroupTable.html">File3dmGroupTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLinetypeTable.html">File3dmLinetypeTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMeshModifiers.html">File3dmMeshModifiers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPostEffectTable.html">File3dmPostEffectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRenderContentTable.html">File3dmRenderContentTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmShutLiningCurveTable.html">File3dmShutLiningCurveTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmWriteOptions.html">File3dmWriteOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GroundPlane.html">GroundPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Group.html">Group</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -139,7 +121,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Linetype.html">Linetype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -173,182 +157,198 @@
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostEffect.html">PostEffect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderChannels.html">RenderChannels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">RenderContent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironment.html">RenderEnvironment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironments.html">RenderEnvironments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderMaterial.html">RenderMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Thickening.html">Thickening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3f.html">Vector3f</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewportInfo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewportInfo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.ViewportInfo"><code class="docutils literal notranslate"><span class="pre">ViewportInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.ViewportInfo"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ViewportInfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsValidCameraFrame"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsValidCameraFrame</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsValidCamera"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsValidCamera</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsValidFrustum"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsValidFrustum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsParallelProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsParallelProjection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsPerspectiveProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsPerspectiveProjection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.IsTwoPointPerspectiveProjection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraLocation"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraLocation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraDirection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraDirection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraUp"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraUp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraX"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraX</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraY"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraZ"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraZ</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.ScreenPortAspect"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ScreenPortAspect</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.CameraAngle"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.CameraAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.Camera35mmLensLength"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.Camera35mmLensLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.TargetPoint"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.TargetPoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.Id"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.Id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.DefaultTop"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.DefaultTop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.DefaultPerspective"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.DefaultPerspective()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.ChangeToParallelProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ChangeToParallelProjection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.ChangeToPerspectiveProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ChangeToPerspectiveProjection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.ChangeToTwoPointPerspectiveProjection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ChangeToTwoPointPerspectiveProjection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.SetCameraLocation"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.SetCameraLocation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.SetCameraDirection"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.SetCameraDirection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.SetCameraUp"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.SetCameraUp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.SetFrustum"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.SetFrustum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.GetFrustum"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.GetFrustum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.SetScreenPort"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.SetScreenPort()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.GetScreenPort"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.GetScreenPort()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.GetXform"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.GetXform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.Extents"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.Extents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.DollyExtents"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.DollyExtents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.FrustumCenterPoint"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.FrustumCenterPoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ViewportInfo.TargetDistance"><code class="docutils literal notranslate"><span class="pre">ViewportInfo.TargetDistance()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">rhino3dm</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>ViewportInfo</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ViewportInfo</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/ViewportInfo.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-rhino3dm">
-<span id="viewportinfo"></span><h1>ViewportInfo<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="rhino3dm.ViewportInfo">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">ViewportInfo</code><a class="headerlink" href="#rhino3dm.ViewportInfo" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="rhino3dm.ViewportInfo.ViewportInfo">
-<code class="descname">ViewportInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ViewportInfo" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-rhino3dm">
+<span id="viewportinfo"></span><h1>ViewportInfo<a class="headerlink" href="#module-rhino3dm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">ViewportInfo</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.ViewportInfo">
+<span class="sig-name descname"><span class="pre">ViewportInfo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ViewportInfo" title="Link to this definition"></a></dt>
 <dd><p>ViewportInfo constructor</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsValidCameraFrame">
-<code class="descname">IsValidCameraFrame</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidCameraFrame" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsValidCameraFrame">
+<span class="sig-name descname"><span class="pre">IsValidCameraFrame</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidCameraFrame" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.isValidCamer">
-<code class="descname">isValidCamer</code><a class="headerlink" href="#rhino3dm.ViewportInfo.isValidCamer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsValidCamera">
+<span class="sig-name descname"><span class="pre">IsValidCamera</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidCamera" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets a value that indicates whether the camera is valid.</p>
+</dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsValidFrustum">
-<code class="descname">IsValidFrustum</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidFrustum" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsValidFrustum">
+<span class="sig-name descname"><span class="pre">IsValidFrustum</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsValidFrustum" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets a value that indicates whether the frustum is valid.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsParallelProjection">
-<code class="descname">IsParallelProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsParallelProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsParallelProjection">
+<span class="sig-name descname"><span class="pre">IsParallelProjection</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsParallelProjection" title="Link to this definition"></a></dt>
 <dd><p>bool: Get or set whether this projection is parallel.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsPerspectiveProjection">
-<code class="descname">IsPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsPerspectiveProjection">
+<span class="sig-name descname"><span class="pre">IsPerspectiveProjection</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsPerspectiveProjection" title="Link to this definition"></a></dt>
 <dd><p>bool: Get or set whether this projection is perspective.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection">
-<code class="descname">IsTwoPointPerspectiveProjection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection">
+<span class="sig-name descname"><span class="pre">IsTwoPointPerspectiveProjection</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.IsTwoPointPerspectiveProjection" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets a value that indicates whether this projection is a two-point perspective.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraLocation">
-<code class="descname">CameraLocation</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraLocation" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraLocation">
+<span class="sig-name descname"><span class="pre">CameraLocation</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraLocation" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Point3d: Gets the camera location (position) point.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraDirection">
-<code class="descname">CameraDirection</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraDirection" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraDirection">
+<span class="sig-name descname"><span class="pre">CameraDirection</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraDirection" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Vector3d: Gets the direction that the camera faces.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraUp">
-<code class="descname">CameraUp</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraUp" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraUp">
+<span class="sig-name descname"><span class="pre">CameraUp</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraUp" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Vector3d: Gets the camera up vector.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraX">
-<code class="descname">CameraX</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraX" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraX">
+<span class="sig-name descname"><span class="pre">CameraX</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraX" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Vector3d: Gets the unit “to the right” vector.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraY">
-<code class="descname">CameraY</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraY" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraY">
+<span class="sig-name descname"><span class="pre">CameraY</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraY" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Vector3d: Gets the unit “up” vector.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraZ">
-<code class="descname">CameraZ</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraZ" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraZ">
+<span class="sig-name descname"><span class="pre">CameraZ</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraZ" title="Link to this definition"></a></dt>
 <dd><p>rhino3dm.Vector3d: Gets the unit vector in -CameraDirection.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.ScreenPortAspect">
-<code class="descname">ScreenPortAspect</code><a class="headerlink" href="#rhino3dm.ViewportInfo.ScreenPortAspect" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.ScreenPortAspect">
+<span class="sig-name descname"><span class="pre">ScreenPortAspect</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.ScreenPortAspect" title="Link to this definition"></a></dt>
 <dd><p>float: Gets the screen aspect ratio.
 This is width / height.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.CameraAngle">
-<code class="descname">CameraAngle</code><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraAngle" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.CameraAngle">
+<span class="sig-name descname"><span class="pre">CameraAngle</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.CameraAngle" title="Link to this definition"></a></dt>
 <dd><p>float: Gets or sets the 1/2 smallest angle. See  for more information.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.Camera35mmLensLength">
-<code class="descname">Camera35mmLensLength</code><a class="headerlink" href="#rhino3dm.ViewportInfo.Camera35mmLensLength" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.Camera35mmLensLength">
+<span class="sig-name descname"><span class="pre">Camera35mmLensLength</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.Camera35mmLensLength" title="Link to this definition"></a></dt>
 <dd><p>float: This property assumes the camera is horizontal and crop the
 film rather than the image when the aspect of the frustum
 is not 36/24.  (35mm film is 36mm wide and 24mm high.)
@@ -356,9 +356,21 @@ Setting preserves camera location,
 changes the frustum, but maintains the frustum’s aspect.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.ViewportInfo.Id">
-<code class="descname">Id</code><a class="headerlink" href="#rhino3dm.ViewportInfo.Id" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.TargetPoint">
+<span class="sig-name descname"><span class="pre">TargetPoint</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.TargetPoint" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Point3d: The current value of the target point.  This point does not play
+a role in the view projection calculations.  It can be used as a
+fixed point when changing the camera so the visible regions of the
+before and after frustums both contain the region of interest.
+The default constructor sets this point on ON_3dPoint::UnsetPoint.
+You must explicitly call one SetTargetPoint() functions to set
+the target point.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.Id">
+<span class="sig-name descname"><span class="pre">Id</span></span><a class="headerlink" href="#rhino3dm.ViewportInfo.Id" title="Link to this definition"></a></dt>
 <dd><p>Guid: Sets the viewport’s id to the value used to
 uniquely identify this viewport.
 There is no approved way to change the viewport
@@ -367,21 +379,21 @@ across multiple viewports and those routines that
 manage them.</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.ViewportInfo.DefaultTop">
-<em class="property">static </em><code class="descname">DefaultTop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultTop" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.DefaultTop">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultTop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultTop" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.ViewportInfo.DefaultPerspective">
-<em class="property">static </em><code class="descname">DefaultPerspective</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultPerspective" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.DefaultPerspective">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultPerspective</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DefaultPerspective" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.ChangeToParallelProjection">
-<code class="descname">ChangeToParallelProjection</code><span class="sig-paren">(</span><em>symmetricFrustum</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToParallelProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.ChangeToParallelProjection">
+<span class="sig-name descname"><span class="pre">ChangeToParallelProjection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symmetricFrustum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToParallelProjection" title="Link to this definition"></a></dt>
 <dd><p>Use this function to change projections of valid viewports
 from parallel to perspective.  It will make common additional
 adjustments to the frustum and camera location so the resulting
@@ -390,23 +402,22 @@ not be changed.
 If the current projection is parallel and symmetricFrustum,
 FrustumIsLeftRightSymmetric() and FrustumIsTopBottomSymmetric()
 are all equal, then no changes are made and True is returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.ChangeToPerspectiveProjection">
-<code class="descname">ChangeToPerspectiveProjection</code><span class="sig-paren">(</span><em>targetDistance</em>, <em>symmetricFrustum</em>, <em>lensLength</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.ChangeToPerspectiveProjection">
+<span class="sig-name descname"><span class="pre">ChangeToPerspectiveProjection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targetDistance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetricFrustum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lensLength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToPerspectiveProjection" title="Link to this definition"></a></dt>
 <dd><p>Use this function to change projections of valid viewports
 from parallel to perspective.  It will make common additional
 adjustments to the frustum and camera location so the resulting
@@ -415,30 +426,26 @@ not changed.
 If the current projection is perspective and symmetricFrustum,
 IsFrustumIsLeftRightSymmetric, and IsFrustumIsTopBottomSymmetric
 are all equal, then no changes are made and True is returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</li>
-<li><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</li>
-<li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</p></li>
+<li><p><strong>symmetricFrustum</strong> (<em>bool</em>) – True if you want the resulting frustum to be symmetric.</p></li>
+<li><p><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.ChangeToTwoPointPerspectiveProjection">
-<code class="descname">ChangeToTwoPointPerspectiveProjection</code><span class="sig-paren">(</span><em>targetDistance</em>, <em>up</em>, <em>lensLength</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToTwoPointPerspectiveProjection" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.ChangeToTwoPointPerspectiveProjection">
+<span class="sig-name descname"><span class="pre">ChangeToTwoPointPerspectiveProjection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targetDistance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lensLength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.ChangeToTwoPointPerspectiveProjection" title="Link to this definition"></a></dt>
 <dd><p>Changes projections of valid viewports
 to a two point perspective.  It will make common additional
 adjustments to the frustum and camera location and direction
@@ -447,118 +454,124 @@ If the current projection is perspective and
 IsFrustumIsLeftRightSymmetric is True and
 IsFrustumIsTopBottomSymmetric is false, then no changes are
 made and True is returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored.  Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</li>
-<li><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – The locked up direction. Pass Vector3d.Zero if you want to use the world axis direction that is closest to the current up direction. Pass CameraY() if you want to preserve the current up direction.</li>
-<li><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targetDistance</strong> (<em>float</em>) – If RhinoMath.UnsetValue this parameter is ignored.  Otherwise it must be &gt; 0 and indicates which plane in the current view frustum should be preserved.</p></li>
+<li><p><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – The locked up direction. Pass Vector3d.Zero if you want to use the world axis direction that is closest to the current up direction. Pass CameraY() if you want to preserve the current up direction.</p></li>
+<li><p><strong>lensLength</strong> (<em>float</em>) – (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens_length is &lt;= 0.0, then this parameter is ignored.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetCameraLocation">
-<code class="descname">SetCameraLocation</code><span class="sig-paren">(</span><em>location</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraLocation" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.SetCameraLocation">
+<span class="sig-name descname"><span class="pre">SetCameraLocation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraLocation" title="Link to this definition"></a></dt>
 <dd><p>Sets the camera location (position) point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the operation succeeded; otherwise, false.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetCameraDirection">
-<code class="descname">SetCameraDirection</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraDirection" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.SetCameraDirection">
+<span class="sig-name descname"><span class="pre">SetCameraDirection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraDirection" title="Link to this definition"></a></dt>
 <dd><p>Sets the direction that the camera faces.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the direction was set; otherwise false.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the direction was set; otherwise false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetCameraUp">
-<code class="descname">SetCameraUp</code><span class="sig-paren">(</span><em>up</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraUp" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.SetCameraUp">
+<span class="sig-name descname"><span class="pre">SetCameraUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">up</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetCameraUp" title="Link to this definition"></a></dt>
 <dd><p>Sets the camera up vector.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the direction was set; otherwise false.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>up</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – A new direction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the direction was set; otherwise false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetFrustum">
-<code class="descname">SetFrustum</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>bottom</em>, <em>top</em>, <em>near</em>, <em>far</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetFrustum" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.SetFrustum">
+<span class="sig-name descname"><span class="pre">SetFrustum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">near</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">far</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetFrustum" title="Link to this definition"></a></dt>
 <dd><p>Sets the view frustum. If FrustumSymmetryIsLocked() is true
 and left != -right or bottom != -top, then they will be
 adjusted so the resulting frustum is symmetric.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>left</strong> (<em>float</em>) – A new left value.</li>
-<li><strong>right</strong> (<em>float</em>) – A new right value.</li>
-<li><strong>bottom</strong> (<em>float</em>) – A new bottom value.</li>
-<li><strong>top</strong> (<em>float</em>) – A new top value.</li>
-<li><strong>nearDistance</strong> (<em>float</em>) – A new near distance value.</li>
-<li><strong>farDistance</strong> (<em>float</em>) – A new far distance value.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<em>float</em>) – A new left value.</p></li>
+<li><p><strong>right</strong> (<em>float</em>) – A new right value.</p></li>
+<li><p><strong>bottom</strong> (<em>float</em>) – A new bottom value.</p></li>
+<li><p><strong>top</strong> (<em>float</em>) – A new top value.</p></li>
+<li><p><strong>nearDistance</strong> (<em>float</em>) – A new near distance value.</p></li>
+<li><p><strong>farDistance</strong> (<em>float</em>) – A new far distance value.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if operation succeeded; otherwise, false.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.GetFrustum">
-<code class="descname">GetFrustum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetFrustum" title="Permalink to this definition">¶</a></dt>
-<dd><p>[todo] add documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.GetFrustum">
+<span class="sig-name descname"><span class="pre">GetFrustum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetFrustum" title="Link to this definition"></a></dt>
+<dd><p>Gets the view frustum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>tuple (bool, float, float, float, float, float, float)</p>
+<ul class="simple">
+<li><p>True if operation succeeded; otherwise, false.</p></li>
+<li><p>A left value that will be filled during the call. </p></li>
+<li><p>A right value that will be filled during the call. </p></li>
+<li><p>A bottom value that will be filled during the call. </p></li>
+<li><p>A top value that will be filled during the call. </p></li>
+<li><p>A near distance value that will be filled during the call. </p></li>
+<li><p>A far distance value that will be filled during the call. </p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool, float, float, float, float, float, float)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.SetScreenPort">
-<code class="descname">SetScreenPort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetScreenPort" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.SetScreenPort">
+<span class="sig-name descname"><span class="pre">SetScreenPort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.SetScreenPort" title="Link to this definition"></a></dt>
 <dd><p>Location of viewport in pixels.
 These are provided so you can set the port you are using
 and get the appropriate transformations to and from
@@ -575,210 +588,171 @@ screen space.
 /      SetScreenPort( port_left, port_right,
 /                     port_bottom, port_top,
 /                     port_near, port_far );</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>left</strong> (<em>int</em>) – A left value.</li>
-<li><strong>right</strong> (<em>int</em>) – A left value. (port_left != port_right)</li>
-<li><strong>bottom</strong> (<em>int</em>) – A bottom value.</li>
-<li><strong>top</strong> (<em>int</em>) – A top value. (port_top != port_bottom)</li>
-<li><strong>near</strong> (<em>int</em>) – A near value.</li>
-<li><strong>far</strong> (<em>int</em>) – A far value.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<em>int</em>) – A left value.</p></li>
+<li><p><strong>right</strong> (<em>int</em>) – A left value. (port_left != port_right)</p></li>
+<li><p><strong>bottom</strong> (<em>int</em>) – A bottom value.</p></li>
+<li><p><strong>top</strong> (<em>int</em>) – A top value. (port_top != port_bottom)</p></li>
+<li><p><strong>near</strong> (<em>int</em>) – A near value.</p></li>
+<li><p><strong>far</strong> (<em>int</em>) – A far value.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if input is valid.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if input is valid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.GetScreenPort">
-<code class="descname">GetScreenPort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetScreenPort" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.GetScreenPort">
+<span class="sig-name descname"><span class="pre">GetScreenPort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetScreenPort" title="Link to this definition"></a></dt>
 <dd><p>Gets the location of viewport in pixels.
-See documentation for SetScreenPort.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The rectangle, or Empty rectangle on error.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">System.Drawing.Rectangle</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.GetXform">
-<code class="descname">GetXform</code><span class="sig-paren">(</span><em>sourceCoordinateSystem</em>, <em>destinationCoordinateSystem</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetXform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes a transform from a coordinate system to another.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sourceSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map from.</li>
-<li><strong>destinationSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map into.</li>
+See value meanings in SetScreenPort.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>tuple (System.Drawing.Rectangle, int, int)</p>
+<ul class="simple">
+<li><p>The rectangle, or Empty rectangle on error.</p></li>
+<li><p>The near value. This out parameter is assigned during the call. </p></li>
+<li><p>The far value. This out parameter is assigned during the call. </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The 4x4 transformation matrix (acts on the left).</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(System.Drawing.Rectangle, int, int)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.Extents">
-<code class="descname">Extents</code><span class="sig-paren">(</span><em>halfViewAngleRadians</em>, <em>worldBbox</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.Extents" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.GetXform">
+<span class="sig-name descname"><span class="pre">GetXform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sourceCoordinateSystem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destinationCoordinateSystem</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.GetXform" title="Link to this definition"></a></dt>
+<dd><p>Computes a transform from a coordinate system to another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sourceSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map from.</p></li>
+<li><p><strong>destinationSystem</strong> (<em>CoordinateSystem</em>) – The coordinate system to map into.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The 4x4 transformation matrix (acts on the left).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.Extents">
+<span class="sig-name descname"><span class="pre">Extents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halfViewAngleRadians</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worldBbox</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.Extents" title="Link to this definition"></a></dt>
 <dd><p>Extends this viewport view to include a bounding box.
 Use Extents() as a quick way to set a viewport to so that bounding
 volume is inside of a viewports frustum.
 The view angle is used to determine the position of the camera.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>halfViewAngleRadians</strong> (<em>float</em>) – 1/2 smallest subtended view angle in radians.</li>
-<li><strong>bbox</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – A bounding box in 3d world coordinates.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>halfViewAngleRadians</strong> (<em>float</em>) – 1/2 smallest subtended view angle in radians.</p></li>
+<li><p><strong>bbox</strong> (<a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox"><em>rhino3dm.BoundingBox</em></a>) – A bounding box in 3d world coordinates.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if the operation succeeded; otherwise, false.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation succeeded; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.DollyExtents">
-<code class="descname">DollyExtents</code><span class="sig-paren">(</span><em>bbox</em>, <em>border</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DollyExtents" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.DollyExtents">
+<span class="sig-name descname"><span class="pre">DollyExtents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.DollyExtents" title="Link to this definition"></a></dt>
 <dd><p>Dolly the camera location and so that the view frustum contains
 all of the document objects that can be seen in view.
 If the projection is perspective, the camera angle is not changed.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if successful.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if successful.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.FrustumCenterPoint">
-<code class="descname">FrustumCenterPoint</code><span class="sig-paren">(</span><em>targetDistance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.FrustumCenterPoint" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.FrustumCenterPoint">
+<span class="sig-name descname"><span class="pre">FrustumCenterPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targetDistance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.FrustumCenterPoint" title="Link to this definition"></a></dt>
 <dd><p>Return a point on the central axis of the view frustum.
 This point is a good choice for a general purpose target point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targetDistance</strong> (<em>float</em>) – If targetDistance &gt; 0.0, then the distance from the returned point to the camera plane will be targetDistance. Note that if the frustum is not symmetric, the distance from the returned point to the camera location will be larger than targetDistance. If targetDistance == ON_UNSET_VALUE and the frustum is valid with near &gt; 0.0, then 0.5*(near + far) will be used as the targetDistance.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A point on the frustum’s central axis.  If the viewport or input is not valid, then ON_3dPoint::UnsetPoint is returned.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>targetDistance</strong> (<em>float</em>) – If targetDistance &gt; 0.0, then the distance from the returned point to the camera plane will be targetDistance. Note that if the frustum is not symmetric, the distance from the returned point to the camera location will be larger than targetDistance. If targetDistance == ON_UNSET_VALUE and the frustum is valid with near &gt; 0.0, then 0.5*(near + far) will be used as the targetDistance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A point on the frustum’s central axis.  If the viewport or input is not valid, then ON_3dPoint::UnsetPoint is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.ViewportInfo.TargetDistance">
-<code class="descname">TargetDistance</code><span class="sig-paren">(</span><em>useFrustumCenterFallback</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.TargetDistance" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ViewportInfo.TargetDistance">
+<span class="sig-name descname"><span class="pre">TargetDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">useFrustumCenterFallback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ViewportInfo.TargetDistance" title="Link to this definition"></a></dt>
 <dd><p>Gets the distance from the target point to the camera plane.
 Note that if the frustum is not symmetric, then this distance
 is shorter than the distance from the target to the camera location.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>useFrustumCenterFallback</strong> (<em>bool</em>) – If bUseFrustumCenterFallback is False and the target point is not valid, then ON_UNSET_VALUE is returned. If bUseFrustumCenterFallback is True and the frustum is valid and current target point is not valid or is behind the camera, then 0.5*(near + far) is returned.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Shortest signed distance from camera plane to target point. If the target point is on the visible side of the camera, a positive value is returned.  ON_UNSET_VALUE is returned when the input of view is not valid.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>useFrustumCenterFallback</strong> (<em>bool</em>) – If bUseFrustumCenterFallback is False and the target point is not valid, then ON_UNSET_VALUE is returned. If bUseFrustumCenterFallback is True and the frustum is valid and current target point is not valid or is behind the camera, then 0.5*(near + far) is returned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shortest signed distance from camera plane to target point. If the target point is on the visible side of the camera, a positive value is returned.  ON_UNSET_VALUE is returned when the input of view is not valid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="ViewInfo.html" class="btn btn-neutral" title="ViewInfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ViewInfo.html" class="btn btn-neutral float-left" title="ViewInfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Robert McNeel &amp; Associates
-
-    </p>
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

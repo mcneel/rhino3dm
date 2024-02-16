@@ -21,6 +21,18 @@ File3dmGroupTable
 
       [todo] add documentation
 
+   .. py:method:: Delete(group)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(index)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
    .. py:method:: FindIndex(index)
 
       Retrieves a Group object based on an index. This search type of search is discouraged.

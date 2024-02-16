@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#if defined(ON_RUNTIME_APPLE) && !defined(RHINO3DM_BUILD)
+#if defined(ON_RUNTIME_APPLE_MACOS) && !defined(RHINO3DM_BUILD)
 #import "../../../rhino4/MacOS/NSImage+QuickLook.h"
 #endif
 
@@ -783,10 +783,10 @@ RH_C_FUNCTION void ON_ReadBufferArchive_Delete(ON_Read3dmBufferArchive* pReadBuf
     delete pReadBufferArchive;
 }
 
-RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, unsigned int* length)
+RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, bool writerendermeshes, bool writeanalysismeshes, unsigned int* length)
 {
   ON_Write3dmBufferArchive* rc = nullptr;
-
+  
   if( pConstObject && length && nullptr != rhinoversion)
   {
     ON_UserDataHolder holder;
@@ -810,6 +810,8 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON
     unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
 
     rc = new ON_Write3dmBufferArchive(sz, 0, *rhinoversion, on_version__to_write);
+    rc->EnableSave3dmRenderMeshes((unsigned int)ON::object_type::any_object, writerendermeshes);
+    rc->EnableSave3dmAnalysisMeshes((unsigned int)ON::object_type::any_object, writeanalysismeshes);
     if( rc->WriteObject(pConstObject) )
     {
       *length = (unsigned int)rc->SizeOfArchive();
@@ -955,6 +957,52 @@ RH_C_FUNCTION bool ONX_Model_AddEmbeddedFile(ONX_Model* model, const RHMONO_STRI
   model->AddModelComponent(ef);
 
   return true;
+}
+
+// note: This object must be deleted with ON_3dmSettings_Delete
+RH_C_FUNCTION ON_3dmSettings* ONX_Model_ReadSettings(const RHMONO_STRING* path)
+{
+  ON_3dmSettings* rc = nullptr;
+  if (path)
+  {
+    INPUTSTRINGCOERCE(_path, path);
+
+    FILE* fp = ON::OpenFile(_path, L"rb");
+    if (fp)
+    {
+      ON_BinaryFile file(ON::archive_mode::read3dm, fp);
+      int version = 0;
+      ON_String comments;
+
+      if (file.Read3dmStartSection(&version, comments))
+      {
+        ON_3dmProperties prop;
+        if (file.Read3dmProperties(prop))
+        {
+          ON_3dmSettings settings;
+          file.Read3dmSettings(settings);
+
+          rc = new ON_3dmSettings(settings);
+        }
+      }
+      ON::CloseFile(fp);
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ON_EarthAnchorPoint* ONX_Model_GetEarthAnchorPoint(const ONX_Model* pConstModel)
+{
+  ON_EarthAnchorPoint* rc = nullptr;
+  if (pConstModel)
+    rc = new ON_EarthAnchorPoint(pConstModel->m_settings.m_earth_anchor_point);
+  return rc;
+}
+
+RH_C_FUNCTION void ONX_Model_SetEarthAnchorPoint(ONX_Model* pModel, const ON_EarthAnchorPoint* earthAnchorPt)
+{
+  if (nullptr != pModel && nullptr != earthAnchorPt)
+      pModel->m_settings.m_earth_anchor_point = *earthAnchorPt;
 }
 
 RH_C_FUNCTION ON_3dmRevisionHistory* ONX_Model_ReadRevisionHistory(const RHMONO_STRING* path, CRhCmnStringHolder* pStringCreated, CRhCmnStringHolder* pStringLastEdited, int* revision)
@@ -2878,6 +2926,36 @@ RH_C_FUNCTION int ONX_Model_AddLayer2(ONX_Model* pModel, const RHMONO_STRING* pL
   return ON_UNSET_INT_INDEX;
 }
 
+RH_C_FUNCTION int ONX_Model_AddGroup(ONX_Model* pModel) 
+{
+
+  if (nullptr == pModel)
+    return ON_UNSET_INT_INDEX;
+
+  ON_Group group;
+  ON_ModelComponentReference mr = pModel->AddModelComponent(group);
+  const ON_Group* managed_group = ON_Group::FromModelComponentRef(mr, nullptr);
+  int group_index = (nullptr != managed_group) ? managed_group->Index() : ON_UNSET_INT_INDEX;
+  if ( group_index < 0 )
+  {
+    ON_ERROR("failed to add group.");
+  }
+  return group_index;
+
+}
+
+RH_C_FUNCTION int ONX_Model_AddMaterial(ONX_Model* pModel, ON_Material* material) 
+{
+  ON_ModelComponentReference mr = pModel->AddModelComponent(*material, true);
+  const ON_Material* managed_material = ON_Material::FromModelComponentRef(mr, nullptr);
+  int material_index = (nullptr != managed_material) ? managed_material->Index() : ON_UNSET_INT_INDEX;
+  if ( material_index < 0 )
+  {
+    ON_ERROR("failed to add material.");
+  }
+  return material_index;
+}
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ONX_Model_GetPreviewImage(const ONX_Model* constModel, CRhinoDib* pRhinoDib)
 {
@@ -2958,7 +3036,7 @@ RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 // When librhino3dm_native included the AppKit framework we
 // can revisit this.
 #if !defined(RHINO3DM_BUILD)
-#if defined(ON_RUNTIME_APPLE)
+#if defined(ON_RUNTIME_APPLE_MACOS)
 RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
 {
   INPUTSTRINGCOERCE(_path, path);
@@ -2993,7 +3071,7 @@ RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
   NSImage* thumbnailImage = [NSImage imageWithPreviewOfFileAtPath : ns_path ofSize : maxThumbnailSize asIcon : NO];
   return thumbnailImage;
 }
-#endif // #if defined(ON_RUNTIME_APPLE)
+#endif // #if defined(ON_RUNTIME_APPLE_MACOS)
 #endif
 
 

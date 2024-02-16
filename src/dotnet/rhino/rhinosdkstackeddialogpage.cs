@@ -40,6 +40,19 @@ namespace Rhino.UI
     /// <since>6.1</since>
     IntPtr GetImageHandle(System.Drawing.Icon icon, bool canBeNull);
     /// <summary>
+    /// Sets the parent on a host returned from GetNativePageWindow
+    /// </summary>
+    /// <param name="hwndParent"></param>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    bool SetNativeParent(IntPtr hwndParent, object host);
+    /// <summary>
+    /// Gets the native window handle associated with the host object if there is one.
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    IntPtr NativeHandle(object host);
+    /// <summary>
     /// Get the unmanaged pointer associated with the pages content control
     /// </summary>
     /// <param name="nativeWindowObject"></param>
@@ -93,6 +106,14 @@ namespace Rhino.UI
     public IntPtr GetImageHandle (System.Drawing.Icon icon, bool canBeNull)
     {
       throw new NotImplementedException ();
+    }
+    public bool SetNativeParent(IntPtr hwndParent, object host)
+    {
+      throw new NotImplementedException();
+    }
+    public IntPtr NativeHandle(object host)
+    {
+      throw new NotImplementedException();
     }
     public IntPtr GetNativePageWindow(object nativeWindowObject, bool isRhinoPanel, bool applyPanelStyles, out object host)
     {

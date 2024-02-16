@@ -96,3 +96,7 @@ Point3dList
 
 
       :rtype: void
+
+   .. py:method:: Append(points)
+
+      [todo] add documentation

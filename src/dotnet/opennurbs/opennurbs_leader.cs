@@ -70,7 +70,7 @@ namespace Rhino.Geometry
 
     internal override GeometryBase DuplicateShallowHelper()
     {
-      return new LinearDimension(IntPtr.Zero, null);
+      return new Leader(IntPtr.Zero, null);
     }
 
     /// <summary>

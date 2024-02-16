@@ -56,6 +56,10 @@ Arc
 
       float: Gets or sets the Diameter of this arc.
 
+   .. py:attribute:: Plane
+
+      rhino3dm.Plane: Gets or sets the plane in which this arc lies.
+
    .. py:attribute:: Center
 
       rhino3dm.Point3d: Gets or sets the center point for this arc.
@@ -97,19 +101,19 @@ Arc
 
    .. py:attribute:: StartAngleDegrees
 
-      float: Gets or sets the start angle (in Radians) for this arc segment.
+      float: Gets or sets the start angle (in Degrees) for this arc segment.
 
    .. py:attribute:: EndAngleDegrees
 
-      float: Gets or sets the end angle (in Radians) for this arc segment.
+      float: Gets or sets the end angle (in Degrees) for this arc segment.
 
    .. py:attribute:: AngleDegrees
 
-      float: Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment.
+      float: Gets or sets the sweep -or subtended- angle (in Degrees) for this arc segment.
 
    .. py:method:: Trim(domain)
 
-      Sets arc's angle domain (in radians) as a sub-domain of the circle.
+      Sets arc's angle domain (in Radians) as a sub-domain of the circle.
 
       :param rhino3dm.Interval domain: 0 < domain[1] - domain[0] <= 2.0 * RhinoMath.Pi.
 

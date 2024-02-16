@@ -1,0 +1,22 @@
+Dithering
+=========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Dithering
+
+   .. py:method:: Dithering()
+
+      Dithering constructor
+
+
+   .. py:method:: Dithering()
+
+      Dithering constructor
+
+
+   .. py:attribute:: Enabled
+
+
+   .. py:attribute:: Method
+

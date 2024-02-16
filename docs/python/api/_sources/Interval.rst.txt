@@ -19,3 +19,7 @@ Interval
    .. py:attribute:: T1
 
       float: Gets or sets the upper bound of the Interval.
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation

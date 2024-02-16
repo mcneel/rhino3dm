@@ -109,7 +109,7 @@ Material
 
       :rtype: Texture
 
-   .. py:method:: SetBitmapTexture(filename)
+   .. py:method:: SetBitmapTexture(fileName)
 
 
 
@@ -129,7 +129,7 @@ Material
 
       :rtype: Texture
 
-   .. py:method:: SetBumpTexture(filename)
+   .. py:method:: SetBumpTexture(fileName)
 
 
 
@@ -147,7 +147,7 @@ Material
 
       :rtype: Texture
 
-   .. py:method:: SetEnvironmentTexture(filename)
+   .. py:method:: SetEnvironmentTexture(fileName)
 
 
 
@@ -165,7 +165,7 @@ Material
 
       :rtype: Texture
 
-   .. py:method:: SetTransparencyTexture(filename)
+   .. py:method:: SetTransparencyTexture(fileName)
 
 
 
@@ -176,3 +176,9 @@ Material
 
 
       :rtype: bool
+
+   .. py:method:: ToPhysicallyBased()
+
+
+
+      :rtype: void
