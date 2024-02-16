@@ -24,39 +24,56 @@ Welcome to rhino3dm's documentation!
    BrepFace
    BrepFaceList
    BrepSurfaceList
+   BrepVertex
+   BrepVertexList
    Circle
    CommonObject
    ComponentIndex
    Cone
    ConstructionPlane
    Curve
+   CurvePiping
    CurveProxy
    Cylinder
+   Decal
    DimensionStyle
+   Displacement
+   Dithering
    DracoCompression
    DracoCompressionOptions
    EarthAnchorPoint
+   EdgeSoftening
    Ellipse
+   EmbeddedFile
+   Environment
    Extrusion
    File3dm
    File3dmBitmapTable
+   File3dmDecalTable
    File3dmDimStyleTable
+   File3dmEmbeddedFileTable
    File3dmGroupTable
    File3dmInstanceDefinitionTable
    File3dmLayerTable
+   File3dmLinetypeTable
    File3dmMaterialTable
+   File3dmMeshModifiers
    File3dmObject
    File3dmObjectTable
    File3dmPlugInData
    File3dmPlugInDataTable
+   File3dmPostEffectTable
    File3dmRdkDocumentData
+   File3dmRenderContentTable
    File3dmSettings
+   File3dmShutLiningCurveTable
    File3dmStringTable
    File3dmViewTable
    File3dmWriteOptions
    FileReference
    Font
    GeometryBase
+   GroundPlane
    Group
    Hatch
    InstanceDefinition
@@ -66,7 +83,9 @@ Welcome to rhino3dm's documentation!
    Layer
    Light
    Line
+   LinearWorkflow
    LineCurve
+   Linetype
    Material
    Mesh
    MeshFaceList
@@ -100,15 +119,28 @@ Welcome to rhino3dm's documentation!
    PolyCurve
    Polyline
    PolylineCurve
+   PostEffect
+   RenderChannels
+   RenderContent
+   RenderEnvironment
+   RenderEnvironments
+   RenderMaterial
    RenderSettings
+   RenderTexture
    RevSurface
+   SafeFrame
+   ShutLining
+   ShutLiningCurve
+   Skylight
    Sphere
    SubD
+   Sun
    Surface
    SurfaceProxy
    TextDot
    Texture
    TextureMapping
+   Thickening
    Transform
    Vector2d
    Vector3d

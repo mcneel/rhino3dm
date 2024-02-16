@@ -1,88 +1,53 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Transform &mdash; rhino3dm 7.6.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transform &mdash; rhino3dm 8.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ea47c46f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Vector2d" href="Vector2d.html" />
-    <link rel="prev" title="TextureMapping" href="TextureMapping.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="prev" title="Thickening" href="Thickening.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> rhino3dm
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
           </a>
-
-          
-            
-            
               <div class="version">
-                7.6.0
+                8.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AnnotationBase.html">AnnotationBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
@@ -98,39 +63,56 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurvePiping.html">CurvePiping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EdgeSoftening.html">EdgeSoftening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EmbeddedFile.html">EmbeddedFile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Environment.html">Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDecalTable.html">File3dmDecalTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmEmbeddedFileTable.html">File3dmEmbeddedFileTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmGroupTable.html">File3dmGroupTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLinetypeTable.html">File3dmLinetypeTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMeshModifiers.html">File3dmMeshModifiers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPostEffectTable.html">File3dmPostEffectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRenderContentTable.html">File3dmRenderContentTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmShutLiningCurveTable.html">File3dmShutLiningCurveTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmWriteOptions.html">File3dmWriteOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GroundPlane.html">GroundPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Group.html">Group</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -140,7 +122,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Linetype.html">Linetype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -174,16 +158,81 @@
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostEffect.html">PostEffect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderChannels.html">RenderChannels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">RenderContent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironment.html">RenderEnvironment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironments.html">RenderEnvironments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderMaterial.html">RenderMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Thickening.html">Thickening</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transform</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Transform"><code class="docutils literal notranslate"><span class="pre">Transform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Transform"><code class="docutils literal notranslate"><span class="pre">Transform.Transform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Transform.Transform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsAffine"><code class="docutils literal notranslate"><span class="pre">Transform.IsAffine</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsIdentity"><code class="docutils literal notranslate"><span class="pre">Transform.IsIdentity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsLinear"><code class="docutils literal notranslate"><span class="pre">Transform.IsLinear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsRotation"><code class="docutils literal notranslate"><span class="pre">Transform.IsRotation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsValid"><code class="docutils literal notranslate"><span class="pre">Transform.IsValid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsZero"><code class="docutils literal notranslate"><span class="pre">Transform.IsZero</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsZero4x4"><code class="docutils literal notranslate"><span class="pre">Transform.IsZero4x4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.IsZeroTransformation"><code class="docutils literal notranslate"><span class="pre">Transform.IsZeroTransformation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.RigidType"><code class="docutils literal notranslate"><span class="pre">Transform.RigidType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.SimilarityType"><code class="docutils literal notranslate"><span class="pre">Transform.SimilarityType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M00"><code class="docutils literal notranslate"><span class="pre">Transform.M00</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M01"><code class="docutils literal notranslate"><span class="pre">Transform.M01</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M02"><code class="docutils literal notranslate"><span class="pre">Transform.M02</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M03"><code class="docutils literal notranslate"><span class="pre">Transform.M03</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M10"><code class="docutils literal notranslate"><span class="pre">Transform.M10</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M11"><code class="docutils literal notranslate"><span class="pre">Transform.M11</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M12"><code class="docutils literal notranslate"><span class="pre">Transform.M12</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M13"><code class="docutils literal notranslate"><span class="pre">Transform.M13</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M20"><code class="docutils literal notranslate"><span class="pre">Transform.M20</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M21"><code class="docutils literal notranslate"><span class="pre">Transform.M21</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M22"><code class="docutils literal notranslate"><span class="pre">Transform.M22</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M23"><code class="docutils literal notranslate"><span class="pre">Transform.M23</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M30"><code class="docutils literal notranslate"><span class="pre">Transform.M30</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M31"><code class="docutils literal notranslate"><span class="pre">Transform.M31</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M32"><code class="docutils literal notranslate"><span class="pre">Transform.M32</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.M33"><code class="docutils literal notranslate"><span class="pre">Transform.M33</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Identity"><code class="docutils literal notranslate"><span class="pre">Transform.Identity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.ZeroTransformation"><code class="docutils literal notranslate"><span class="pre">Transform.ZeroTransformation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Unset"><code class="docutils literal notranslate"><span class="pre">Transform.Unset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Translation"><code class="docutils literal notranslate"><span class="pre">Transform.Translation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Transform.Translation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Scale"><code class="docutils literal notranslate"><span class="pre">Transform.Scale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Transform.Scale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Rotation"><code class="docutils literal notranslate"><span class="pre">Transform.Rotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Transform.Rotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Mirror"><code class="docutils literal notranslate"><span class="pre">Transform.Mirror()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Transform.Mirror()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.PlaneToPlane"><code class="docutils literal notranslate"><span class="pre">Transform.PlaneToPlane()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Shear"><code class="docutils literal notranslate"><span class="pre">Transform.Shear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Multiply"><code class="docutils literal notranslate"><span class="pre">Transform.Multiply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Determinant"><code class="docutils literal notranslate"><span class="pre">Transform.Determinant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.TryGetInverse"><code class="docutils literal notranslate"><span class="pre">Transform.TryGetInverse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.TransformBoundingBox"><code class="docutils literal notranslate"><span class="pre">Transform.TransformBoundingBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.Transpose"><code class="docutils literal notranslate"><span class="pre">Transform.Transpose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Transform.ToFloatArray"><code class="docutils literal notranslate"><span class="pre">Transform.ToFloatArray()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3f.html">Vector3f</a></li>
@@ -191,426 +240,554 @@
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">rhino3dm</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Transform</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Transform</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/Transform.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-rhino3dm">
-<span id="transform"></span><h1>Transform<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="rhino3dm.Transform">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Transform</code><a class="headerlink" href="#rhino3dm.Transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="rhino3dm.Transform.Transform">
-<code class="descname">Transform</code><span class="sig-paren">(</span><em>diagonalValue</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Transform" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-rhino3dm">
+<span id="transform"></span><h1>Transform<a class="headerlink" href="#module-rhino3dm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Transform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Transform</span></span><a class="headerlink" href="#rhino3dm.Transform" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Transform">
+<span class="sig-name descname"><span class="pre">Transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diagonalValue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Transform" title="Link to this definition"></a></dt>
 <dd><p>Initializes a new transform matrix with a specified value along the diagonal.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>diagonalValue</strong> (<em>float</em>) – Value to assign to all diagonal cells except M33 which is set to 1.0.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>diagonalValue</strong> (<em>float</em>) – Value to assign to all diagonal cells except M33 which is set to 1.0.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt>
-<code class="descname">Transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">Transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>Transform constructor</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Transform.IsIdentity">
-<code class="descname">IsIdentity</code><a class="headerlink" href="#rhino3dm.Transform.IsIdentity" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsAffine">
+<span class="sig-name descname"><span class="pre">IsAffine</span></span><a class="headerlink" href="#rhino3dm.Transform.IsAffine" title="Link to this definition"></a></dt>
+<dd><p>bool: Tests for an affine transformation.
+A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
+An affine transformation can be broken into a linear transformation and a translation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsIdentity">
+<span class="sig-name descname"><span class="pre">IsIdentity</span></span><a class="headerlink" href="#rhino3dm.Transform.IsIdentity" title="Link to this definition"></a></dt>
 <dd><p>bool: Return True if this Transform is the identity transform</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Transform.IsValid">
-<code class="descname">IsValid</code><a class="headerlink" href="#rhino3dm.Transform.IsValid" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsLinear">
+<span class="sig-name descname"><span class="pre">IsLinear</span></span><a class="headerlink" href="#rhino3dm.Transform.IsLinear" title="Link to this definition"></a></dt>
+<dd><p>bool: Tests for a linear transformation.
+A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
+If in addition its last column is ( 0, 0, 0, 1)^T then it is linear.
+An affine transformation can be broken into a linear transformation and a translation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsRotation">
+<span class="sig-name descname"><span class="pre">IsRotation</span></span><a class="headerlink" href="#rhino3dm.Transform.IsRotation" title="Link to this definition"></a></dt>
+<dd><p>bool: Returns True if this is a proper rotation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsValid">
+<span class="sig-name descname"><span class="pre">IsValid</span></span><a class="headerlink" href="#rhino3dm.Transform.IsValid" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets a value indicating whether or not this Transform is a valid matrix.
 A valid transform matrix is not allowed to have any invalid numbers.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Transform.IsZero">
-<code class="descname">IsZero</code><a class="headerlink" href="#rhino3dm.Transform.IsZero" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsZero">
+<span class="sig-name descname"><span class="pre">IsZero</span></span><a class="headerlink" href="#rhino3dm.Transform.IsZero" title="Link to this definition"></a></dt>
 <dd><p>bool: True if matrix is Zero4x4, ZeroTransformation, or some other type of
 zero. The value xform[3][3] can be anything.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Transform.IsZero4x4">
-<code class="descname">IsZero4x4</code><a class="headerlink" href="#rhino3dm.Transform.IsZero4x4" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsZero4x4">
+<span class="sig-name descname"><span class="pre">IsZero4x4</span></span><a class="headerlink" href="#rhino3dm.Transform.IsZero4x4" title="Link to this definition"></a></dt>
 <dd><p>bool: True if all values are 0</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.Transform.IsZeroTransformation">
-<code class="descname">IsZeroTransformation</code><a class="headerlink" href="#rhino3dm.Transform.IsZeroTransformation" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.IsZeroTransformation">
+<span class="sig-name descname"><span class="pre">IsZeroTransformation</span></span><a class="headerlink" href="#rhino3dm.Transform.IsZeroTransformation" title="Link to this definition"></a></dt>
 <dd><p>bool: True if all values are 0, except for M33 which is 1.</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Identity">
-<em class="property">static </em><code class="descname">Identity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Identity" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.RigidType">
+<span class="sig-name descname"><span class="pre">RigidType</span></span><a class="headerlink" href="#rhino3dm.Transform.RigidType" title="Link to this definition"></a></dt>
+<dd><p>TransformRigidType: Gets a value indicating whether or not the Transform is rigid.
+A rigid transformation can be broken into  a proper rotation and a translation,
+while an isometry transformation could also include a reflection.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.SimilarityType">
+<span class="sig-name descname"><span class="pre">SimilarityType</span></span><a class="headerlink" href="#rhino3dm.Transform.SimilarityType" title="Link to this definition"></a></dt>
+<dd><p>TransformSimilarityType: Gets a value indicating whether or not the Transform maintains similarity.
+The easiest way to think of Similarity is that any circle, when transformed,
+remains a circle. Whereas a non-similarity Transform deforms circles into ellipses.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M00">
+<span class="sig-name descname"><span class="pre">M00</span></span><a class="headerlink" href="#rhino3dm.Transform.M00" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[0,0].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M01">
+<span class="sig-name descname"><span class="pre">M01</span></span><a class="headerlink" href="#rhino3dm.Transform.M01" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[0,1].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M02">
+<span class="sig-name descname"><span class="pre">M02</span></span><a class="headerlink" href="#rhino3dm.Transform.M02" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[0,2].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M03">
+<span class="sig-name descname"><span class="pre">M03</span></span><a class="headerlink" href="#rhino3dm.Transform.M03" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[0,3].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M10">
+<span class="sig-name descname"><span class="pre">M10</span></span><a class="headerlink" href="#rhino3dm.Transform.M10" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[1,0].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M11">
+<span class="sig-name descname"><span class="pre">M11</span></span><a class="headerlink" href="#rhino3dm.Transform.M11" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[1,1].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M12">
+<span class="sig-name descname"><span class="pre">M12</span></span><a class="headerlink" href="#rhino3dm.Transform.M12" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[1,2].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M13">
+<span class="sig-name descname"><span class="pre">M13</span></span><a class="headerlink" href="#rhino3dm.Transform.M13" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[1,3].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M20">
+<span class="sig-name descname"><span class="pre">M20</span></span><a class="headerlink" href="#rhino3dm.Transform.M20" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[2,0].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M21">
+<span class="sig-name descname"><span class="pre">M21</span></span><a class="headerlink" href="#rhino3dm.Transform.M21" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[2,1].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M22">
+<span class="sig-name descname"><span class="pre">M22</span></span><a class="headerlink" href="#rhino3dm.Transform.M22" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[2,2].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M23">
+<span class="sig-name descname"><span class="pre">M23</span></span><a class="headerlink" href="#rhino3dm.Transform.M23" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[2,3].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M30">
+<span class="sig-name descname"><span class="pre">M30</span></span><a class="headerlink" href="#rhino3dm.Transform.M30" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[3,0].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M31">
+<span class="sig-name descname"><span class="pre">M31</span></span><a class="headerlink" href="#rhino3dm.Transform.M31" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[3,1].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M32">
+<span class="sig-name descname"><span class="pre">M32</span></span><a class="headerlink" href="#rhino3dm.Transform.M32" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[3,2].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Transform.M33">
+<span class="sig-name descname"><span class="pre">M33</span></span><a class="headerlink" href="#rhino3dm.Transform.M33" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets this[3,3].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Identity">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Identity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Identity" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.ZeroTransformation">
-<em class="property">static </em><code class="descname">ZeroTransformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.ZeroTransformation" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.ZeroTransformation">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ZeroTransformation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.ZeroTransformation" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Unset">
-<em class="property">static </em><code class="descname">Unset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Unset" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Unset">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Unset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Unset" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Translation">
-<em class="property">static </em><code class="descname">Translation</code><span class="sig-paren">(</span><em>motion</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Translation" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Translation">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">motion</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Translation" title="Link to this definition"></a></dt>
 <dd><p>Constructs a new translation (move) transformation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>motion</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Translation (motion) vector.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A transform matrix which moves geometry along the motion vector.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>motion</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Translation (motion) vector.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transform matrix which moves geometry along the motion vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt>
-<em class="property">static </em><code class="descname">Translation</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>Constructs a new translation (move) transformation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transform matrix which moves geometry along the motion vector.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A transform matrix which moves geometry along the motion vector.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Scale">
-<em class="property">static </em><code class="descname">Scale</code><span class="sig-paren">(</span><em>anchor</em>, <em>scaleFactor</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Scale" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Scale">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anchor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleFactor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Scale" title="Link to this definition"></a></dt>
 <dd><p>Constructs a new uniform scaling transformation with a specified scaling anchor point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>anchor</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Defines the anchor point of the scaling operation.</li>
-<li><strong>scaleFactor</strong> (<em>float</em>) – Scaling factor in all directions.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>anchor</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Defines the anchor point of the scaling operation.</p></li>
+<li><p><strong>scaleFactor</strong> (<em>float</em>) – Scaling factor in all directions.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transform matrix which scales geometry uniformly around the anchor point.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transform matrix which scales geometry uniformly around the anchor point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt>
-<em class="property">static </em><code class="descname">Scale</code><span class="sig-paren">(</span><em>plane</em>, <em>xScaleFactor</em>, <em>yScaleFactor</em>, <em>zScaleFactor</em><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xScaleFactor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yScaleFactor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zScaleFactor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Constructs a new uniform scaling transformation with a specified scaling anchor point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A transform matrix which scales geometry uniformly around the anchor point.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A transform matrix which scales geometry uniformly around the anchor point.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Rotation">
-<em class="property">static </em><code class="descname">Rotation</code><span class="sig-paren">(</span><em>angleRadians</em>, <em>rotationAxis</em>, <em>rotationCenter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Rotation" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Rotation">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angleRadians</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotationAxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotationCenter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Rotation" title="Link to this definition"></a></dt>
 <dd><p>Constructs a new rotation transformation with specified angle, rotation center and rotation axis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sinAngle</strong> (<em>float</em>) – Sin of the rotation angle.</li>
-<li><strong>cosAngle</strong> (<em>float</em>) – Cos of the rotation angle.</li>
-<li><strong>rotationAxis</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Axis direction of rotation.</li>
-<li><strong>rotationCenter</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Center point of rotation.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sinAngle</strong> (<em>float</em>) – Sine of the rotation angle.</p></li>
+<li><p><strong>cosAngle</strong> (<em>float</em>) – Cosine of the rotation angle.</p></li>
+<li><p><strong>rotationAxis</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – 3D unit axis of rotation.</p></li>
+<li><p><strong>rotationCenter</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – 3D center of rotation.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which rotates geometry around an anchor point.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A rotation transformation matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="rhino3dm.Transform.Mirror">
-<em class="property">static </em><code class="descname">Mirror</code><span class="sig-paren">(</span><em>pointOnMirrorPlane</em>, <em>normalToMirrorPlane</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Mirror" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startDirection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endDirection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotationCenter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new rotation transformation with specified angle, rotation center and rotation axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sinAngle</strong> (<em>float</em>) – Sine of the rotation angle.</p></li>
+<li><p><strong>cosAngle</strong> (<em>float</em>) – Cosine of the rotation angle.</p></li>
+<li><p><strong>rotationAxis</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – 3D unit axis of rotation.</p></li>
+<li><p><strong>rotationCenter</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – 3D center of rotation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A rotation transformation matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Mirror">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pointOnMirrorPlane</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalToMirrorPlane</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Mirror" title="Link to this definition"></a></dt>
 <dd><p>Create mirror transformation matrix
 The mirror transform maps a point Q to
 Q - (2*(Q-P)oN)*N, where
 P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</li>
-<li><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</p></li>
+<li><p><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which mirrors geometry in a specified plane.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transformation matrix which mirrors geometry in a specified plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt>
-<em class="property">static </em><code class="descname">Mirror</code><span class="sig-paren">(</span><em>mirrorPlane</em><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mirrorPlane</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd><p>Create mirror transformation matrix
 The mirror transform maps a point Q to
 Q - (2*(Q-P)oN)*N, where
 P = pointOnMirrorPlane and N = normalToMirrorPlane.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</li>
-<li><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pointOnMirrorPlane</strong> (<a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – Point on the mirror plane.</p></li>
+<li><p><strong>normalToMirrorPlane</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Normal vector to the mirror plane.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A transformation matrix which mirrors geometry in a specified plane.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transformation matrix which mirrors geometry in a specified plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Transform.Determinant">
-<code class="descname">Determinant</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Determinant" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.PlaneToPlane">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlaneToPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.PlaneToPlane" title="Link to this definition"></a></dt>
+<dd><p>Create a rotation transformation that orients plane0 to plane1. If you want to orient objects from
+one plane to another, use this form of transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plane0</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – The plane to orient from.</p></li>
+<li><p><strong>plane1</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – the plane to orient to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The translation transformation if successful, Transform.Unset on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Shear">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Shear" title="Link to this definition"></a></dt>
+<dd><p>Constructs a Shear transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plane</strong> (<a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane"><em>rhino3dm.Plane</em></a>) – Base plane for shear.</p></li>
+<li><p><strong>x</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Shearing vector along plane x-axis.</p></li>
+<li><p><strong>y</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Shearing vector along plane y-axis.</p></li>
+<li><p><strong>z</strong> (<a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d"><em>rhino3dm.Vector3d</em></a>) – Shearing vector along plane z-axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transformation matrix which shear geometry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Multiply">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Multiply" title="Link to this definition"></a></dt>
+<dd><p>Multiplies (combines) two transformations.
+This is the same as the * operator between two transformations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – First transformation.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – Second transformation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A transformation matrix that combines the effect of both input transformations. The resulting Transform gives the same result as though you’d first apply B then A.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Determinant">
+<span class="sig-name descname"><span class="pre">Determinant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Determinant" title="Link to this definition"></a></dt>
 <dd><p>[todo] add documentation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Transform.TryGetInverse">
-<code class="descname">TryGetInverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.TryGetInverse" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.TryGetInverse">
+<span class="sig-name descname"><span class="pre">TryGetInverse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.TryGetInverse" title="Link to this definition"></a></dt>
 <dd><p>Attempts to get the inverse transform of this transform.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple (bool, Transform)<ul class="simple">
-<li>True on success. If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse. </li>
-<li>The inverse transform. This out reference will be assigned during this call. </li>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>tuple (bool, Transform)</p>
+<ul class="simple">
+<li><p>True on success. If False is returned and this Transform is Invalid, inserveTransform will be set to this Transform. If False is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse. </p></li>
+<li><p>The inverse transform. This out reference will be assigned during this call. </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, <a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a>)</td>
-</tr>
-</tbody>
-</table>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool, <a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Transform.TransformBoundingBox">
-<code class="descname">TransformBoundingBox</code><span class="sig-paren">(</span><em>bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.TransformBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.TransformBoundingBox">
+<span class="sig-name descname"><span class="pre">TransformBoundingBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.TransformBoundingBox" title="Link to this definition"></a></dt>
 <dd><p>Computes a new bounding box that is the smallest axis aligned
 bounding box that contains the transformed result of its 8 original corner
 points.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A new bounding box.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox">rhino3dm.BoundingBox</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new bounding box.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox">rhino3dm.BoundingBox</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Transform.Transpose">
-<code class="descname">Transpose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Transpose" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.Transpose">
+<span class="sig-name descname"><span class="pre">Transpose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.Transpose" title="Link to this definition"></a></dt>
 <dd><p>Flip row/column values</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Transform.ToFloatArray">
-<code class="descname">ToFloatArray</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.ToFloatArray" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the matrix as a linear array of 16 float values</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float[]</td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Transform.ToFloatArray">
+<span class="sig-name descname"><span class="pre">ToFloatArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Transform.ToFloatArray" title="Link to this definition"></a></dt>
+<dd><p>Return the matrix as a linear array of 16 float values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rowDominant</strong> (<em>bool</em>) – If true, returns { M00, M01, M02…}. If false, returns { M00, M10, M20…}.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array of 16 floats.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Vector2d.html" class="btn btn-neutral float-right" title="Vector2d" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="TextureMapping.html" class="btn btn-neutral" title="TextureMapping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Thickening.html" class="btn btn-neutral float-left" title="Thickening" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Vector2d.html" class="btn btn-neutral float-right" title="Vector2d" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Robert McNeel &amp; Associates
-
-    </p>
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

@@ -94,4 +94,10 @@ BezierCurve
 
    .. py:method:: Split(t)
 
-      [todo] add documentation
+      Divides the Bezier curve at the specified parameter.
+
+      :param float t: parameter must satisfy 0 < t < 1
+
+      :return: True on success
+
+      :rtype: bool

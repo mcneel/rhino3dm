@@ -100,3 +100,5 @@ obj/
 x64/
 Properties/
 *.3dm
+
+.venv/

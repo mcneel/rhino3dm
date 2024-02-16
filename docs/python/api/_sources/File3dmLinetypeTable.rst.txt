@@ -1,0 +1,72 @@
+File3dmLinetypeTable
+====================
+
+.. py:module:: rhino3dm
+
+.. py:class:: File3dmLinetypeTable
+
+   .. py:attribute:: Current
+
+
+   .. py:attribute:: CurrentSource
+
+
+   .. py:attribute:: Scale
+
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(linetype)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a Linetype object based on Index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A Linetype, or None if none was found.
+
+      :rtype: Linetype
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindName(name)
+
+      Finds a Linetype given its name.
+
+      :param str name: The name of the Linetype to be searched.
+
+      :return: A Linetype, or None on error.
+
+      :rtype: Linetype
+
+   .. py:method:: FromAttributes(attributes)
+
+      [todo] add documentation
+
+   .. py:method:: FromLayerIndex(index)
+
+      [todo] add documentation

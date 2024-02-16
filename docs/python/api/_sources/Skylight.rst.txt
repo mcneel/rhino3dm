@@ -1,0 +1,23 @@
+Skylight
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Skylight
+
+   .. py:method:: Skylight()
+
+      Skylight constructor
+
+
+   .. py:method:: Skylight()
+
+      Skylight constructor
+
+
+   .. py:attribute:: Enabled
+
+
+   .. py:attribute:: ShadowIntensity
+
+      float: ShadowIntensity is currently unused.

@@ -1,88 +1,53 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>RenderSettings &mdash; rhino3dm 7.6.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RenderSettings &mdash; rhino3dm 8.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ea47c46f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="RevSurface" href="RevSurface.html" />
-    <link rel="prev" title="PolylineCurve" href="PolylineCurve.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="next" title="RenderTexture" href="RenderTexture.html" />
+    <link rel="prev" title="RenderMaterial" href="RenderMaterial.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> rhino3dm
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
           </a>
-
-          
-            
-            
               <div class="version">
-                7.6.0
+                8.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AnnotationBase.html">AnnotationBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
@@ -98,39 +63,56 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurvePiping.html">CurvePiping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EdgeSoftening.html">EdgeSoftening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EmbeddedFile.html">EmbeddedFile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Environment.html">Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDecalTable.html">File3dmDecalTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmEmbeddedFileTable.html">File3dmEmbeddedFileTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmGroupTable.html">File3dmGroupTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLinetypeTable.html">File3dmLinetypeTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMeshModifiers.html">File3dmMeshModifiers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPostEffectTable.html">File3dmPostEffectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRenderContentTable.html">File3dmRenderContentTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmShutLiningCurveTable.html">File3dmShutLiningCurveTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmWriteOptions.html">File3dmWriteOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GroundPlane.html">GroundPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Group.html">Group</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -140,7 +122,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Linetype.html">Linetype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -174,15 +158,64 @@
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">RenderSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostEffect.html">PostEffect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderChannels.html">RenderChannels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">RenderContent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironment.html">RenderEnvironment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironments.html">RenderEnvironments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderMaterial.html">RenderMaterial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RenderSettings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.RenderSettings"><code class="docutils literal notranslate"><span class="pre">RenderSettings</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderSettings"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderSettings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderSettings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.AmbientLight"><code class="docutils literal notranslate"><span class="pre">RenderSettings.AmbientLight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.BackgroundColorTop"><code class="docutils literal notranslate"><span class="pre">RenderSettings.BackgroundColorTop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.BackgroundColorBottom"><code class="docutils literal notranslate"><span class="pre">RenderSettings.BackgroundColorBottom</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.UseHiddenLights"><code class="docutils literal notranslate"><span class="pre">RenderSettings.UseHiddenLights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.DepthCue"><code class="docutils literal notranslate"><span class="pre">RenderSettings.DepthCue</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.FlatShade"><code class="docutils literal notranslate"><span class="pre">RenderSettings.FlatShade</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderBackFaces"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderBackFaces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderPoints"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderPoints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderCurves"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderCurves</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderIsoParams"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderIsoParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderMeshEdges"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderMeshEdges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderAnnotations"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderAnnotations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.UseViewportSize"><code class="docutils literal notranslate"><span class="pre">RenderSettings.UseViewportSize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.ScaleBackgroundToFit"><code class="docutils literal notranslate"><span class="pre">RenderSettings.ScaleBackgroundToFit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.TransparentBackground"><code class="docutils literal notranslate"><span class="pre">RenderSettings.TransparentBackground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.ImageDpi"><code class="docutils literal notranslate"><span class="pre">RenderSettings.ImageDpi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.ShadowMapLevel"><code class="docutils literal notranslate"><span class="pre">RenderSettings.ShadowMapLevel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.NamedView"><code class="docutils literal notranslate"><span class="pre">RenderSettings.NamedView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.SnapShot"><code class="docutils literal notranslate"><span class="pre">RenderSettings.SnapShot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.SpecificViewport"><code class="docutils literal notranslate"><span class="pre">RenderSettings.SpecificViewport</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.GroundPlane"><code class="docutils literal notranslate"><span class="pre">RenderSettings.GroundPlane</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.SafeFrame"><code class="docutils literal notranslate"><span class="pre">RenderSettings.SafeFrame</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.Dithering"><code class="docutils literal notranslate"><span class="pre">RenderSettings.Dithering</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.Skylight"><code class="docutils literal notranslate"><span class="pre">RenderSettings.Skylight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.LinearWorkflow"><code class="docutils literal notranslate"><span class="pre">RenderSettings.LinearWorkflow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderChannels"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderChannels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.Sun"><code class="docutils literal notranslate"><span class="pre">RenderSettings.Sun</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.RenderEnvironments"><code class="docutils literal notranslate"><span class="pre">RenderSettings.RenderEnvironments</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.RenderSettings.PostEffects"><code class="docutils literal notranslate"><span class="pre">RenderSettings.PostEffects</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Thickening.html">Thickening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
@@ -191,269 +224,271 @@
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">rhino3dm</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>RenderSettings</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RenderSettings</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/RenderSettings.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-rhino3dm">
-<span id="rendersettings"></span><h1>RenderSettings<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="rhino3dm.RenderSettings">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">RenderSettings</code><a class="headerlink" href="#rhino3dm.RenderSettings" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="rhino3dm.RenderSettings.RenderSettings">
-<code class="descname">RenderSettings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderSettings" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-rhino3dm">
+<span id="rendersettings"></span><h1>RenderSettings<a class="headerlink" href="#module-rhino3dm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">RenderSettings</span></span><a class="headerlink" href="#rhino3dm.RenderSettings" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderSettings">
+<span class="sig-name descname"><span class="pre">RenderSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderSettings" title="Link to this definition"></a></dt>
 <dd><p>RenderSettings constructor</p>
 </dd></dl>
 
-<dl class="method">
-<dt>
-<code class="descname">RenderSettings</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">RenderSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>RenderSettings constructor</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.AmbientLight">
-<code class="descname">AmbientLight</code><a class="headerlink" href="#rhino3dm.RenderSettings.AmbientLight" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.AmbientLight">
+<span class="sig-name descname"><span class="pre">AmbientLight</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.AmbientLight" title="Link to this definition"></a></dt>
 <dd><p>System.Drawing.Color: Gets or sets the ambient light color used in rendering.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.BackgroundColorTop">
-<code class="descname">BackgroundColorTop</code><a class="headerlink" href="#rhino3dm.RenderSettings.BackgroundColorTop" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.BackgroundColorTop">
+<span class="sig-name descname"><span class="pre">BackgroundColorTop</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.BackgroundColorTop" title="Link to this definition"></a></dt>
 <dd><p>System.Drawing.Color: Gets or sets the background top color used in rendering.
 Sets also the background color if a solid background color is set.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.BackgroundColorBottom">
-<code class="descname">BackgroundColorBottom</code><a class="headerlink" href="#rhino3dm.RenderSettings.BackgroundColorBottom" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.BackgroundColorBottom">
+<span class="sig-name descname"><span class="pre">BackgroundColorBottom</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.BackgroundColorBottom" title="Link to this definition"></a></dt>
 <dd><p>System.Drawing.Color: Gets or sets the background bottom color used in rendering.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.UseHiddenLights">
-<code class="descname">UseHiddenLights</code><a class="headerlink" href="#rhino3dm.RenderSettings.UseHiddenLights" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.UseHiddenLights">
+<span class="sig-name descname"><span class="pre">UseHiddenLights</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.UseHiddenLights" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to render using lights that are on layers that are off.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.DepthCue">
-<code class="descname">DepthCue</code><a class="headerlink" href="#rhino3dm.RenderSettings.DepthCue" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.DepthCue">
+<span class="sig-name descname"><span class="pre">DepthCue</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.DepthCue" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to render using depth cues.
 These are clues to help the perception of position and orientation of objects in the image.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.FlatShade">
-<code class="descname">FlatShade</code><a class="headerlink" href="#rhino3dm.RenderSettings.FlatShade" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.FlatShade">
+<span class="sig-name descname"><span class="pre">FlatShade</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.FlatShade" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to render using flat shading.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderBackFaces">
-<code class="descname">RenderBackFaces</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderBackFaces" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderBackFaces">
+<span class="sig-name descname"><span class="pre">RenderBackFaces</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderBackFaces" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to render back faces.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderPoints">
-<code class="descname">RenderPoints</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderPoints" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderPoints">
+<span class="sig-name descname"><span class="pre">RenderPoints</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderPoints" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to instruct the rendering engine to show points.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderCurves">
-<code class="descname">RenderCurves</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderCurves" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderCurves">
+<span class="sig-name descname"><span class="pre">RenderCurves</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderCurves" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to instruct the rendering engine to show curves.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderIsoParams">
-<code class="descname">RenderIsoParams</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderIsoParams" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderIsoParams">
+<span class="sig-name descname"><span class="pre">RenderIsoParams</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderIsoParams" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to instruct the rendering engine to show isocurves.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderMeshEdges">
-<code class="descname">RenderMeshEdges</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderMeshEdges" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderMeshEdges">
+<span class="sig-name descname"><span class="pre">RenderMeshEdges</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderMeshEdges" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to instruct the rendering engine to show mesh edges.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.RenderAnnotations">
-<code class="descname">RenderAnnotations</code><a class="headerlink" href="#rhino3dm.RenderSettings.RenderAnnotations" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderAnnotations">
+<span class="sig-name descname"><span class="pre">RenderAnnotations</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderAnnotations" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to instruct the rendering engine to show annotations,
 such as linear dimensions or angular dimensions.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.UseViewportSize">
-<code class="descname">UseViewportSize</code><a class="headerlink" href="#rhino3dm.RenderSettings.UseViewportSize" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.UseViewportSize">
+<span class="sig-name descname"><span class="pre">UseViewportSize</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.UseViewportSize" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to use the resolution of the
 viewport being rendered or ImageSize when rendering</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.ScaleBackgroundToFit">
-<code class="descname">ScaleBackgroundToFit</code><a class="headerlink" href="#rhino3dm.RenderSettings.ScaleBackgroundToFit" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.ScaleBackgroundToFit">
+<span class="sig-name descname"><span class="pre">ScaleBackgroundToFit</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.ScaleBackgroundToFit" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets a value indicating whether to scale the wallpaper in the
 background or not. This is meaningful only if the viewport has a wallpaper
 and render settings are set to render Wallpaper into the background.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.TransparentBackground">
-<code class="descname">TransparentBackground</code><a class="headerlink" href="#rhino3dm.RenderSettings.TransparentBackground" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.TransparentBackground">
+<span class="sig-name descname"><span class="pre">TransparentBackground</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.TransparentBackground" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets or sets whether rendering should be done with transparent background.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.ImageDpi">
-<code class="descname">ImageDpi</code><a class="headerlink" href="#rhino3dm.RenderSettings.ImageDpi" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.ImageDpi">
+<span class="sig-name descname"><span class="pre">ImageDpi</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.ImageDpi" title="Link to this definition"></a></dt>
 <dd><p>float: Number of dots/inch (dots=pixels) to use when printing and saving
 bitmaps. The default is 72.0 dots/inch.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.ShadowMapLevel">
-<code class="descname">ShadowMapLevel</code><a class="headerlink" href="#rhino3dm.RenderSettings.ShadowMapLevel" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.ShadowMapLevel">
+<span class="sig-name descname"><span class="pre">ShadowMapLevel</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.ShadowMapLevel" title="Link to this definition"></a></dt>
 <dd><p>int: 0=none, 1=normal, 2=best.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.NamedView">
-<code class="descname">NamedView</code><a class="headerlink" href="#rhino3dm.RenderSettings.NamedView" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.NamedView">
+<span class="sig-name descname"><span class="pre">NamedView</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.NamedView" title="Link to this definition"></a></dt>
 <dd><p>str: Get or set the given named view</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.SnapShot">
-<code class="descname">SnapShot</code><a class="headerlink" href="#rhino3dm.RenderSettings.SnapShot" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.SnapShot">
+<span class="sig-name descname"><span class="pre">SnapShot</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.SnapShot" title="Link to this definition"></a></dt>
 <dd><p>str: Set or get the given snapshot view</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="rhino3dm.RenderSettings.SpecificViewport">
-<code class="descname">SpecificViewport</code><a class="headerlink" href="#rhino3dm.RenderSettings.SpecificViewport" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.SpecificViewport">
+<span class="sig-name descname"><span class="pre">SpecificViewport</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.SpecificViewport" title="Link to this definition"></a></dt>
 <dd><p>str: Set or get the given specific viewport</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.GroundPlane">
+<span class="sig-name descname"><span class="pre">GroundPlane</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.GroundPlane" title="Link to this definition"></a></dt>
+<dd><p>GroundPlane: If this object is associated with a document, this gets the document ground plane.
+If this object is associated with a File3dm, this gets the File3dm’s ground plane.
+Otherwise it gets a ‘free-floating’ ground plane object.</p>
 </dd></dl>
 
-</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.SafeFrame">
+<span class="sig-name descname"><span class="pre">SafeFrame</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.SafeFrame" title="Link to this definition"></a></dt>
+<dd><p>SafeFrame: If this object is associated with a document, this gets the document safe-frame.
+If this object is associated with a File3dm, this gets the File3dm’s safe-frame.
+Otherwise it gets a ‘free-floating’ safe-frame object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.Dithering">
+<span class="sig-name descname"><span class="pre">Dithering</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.Dithering" title="Link to this definition"></a></dt>
+<dd><p>Dithering: If this object is associated with a document, this gets the document dithering.
+If this object is associated with a File3dm, this gets the File3dm’s dithering.
+Otherwise it gets a ‘free-floating’ dithering object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.Skylight">
+<span class="sig-name descname"><span class="pre">Skylight</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.Skylight" title="Link to this definition"></a></dt>
+<dd><p>Skylight: If this object is associated with a document, this gets the document skylight.
+If this object is associated with a File3dm, this gets the File3dm’s skylight.
+Otherwise it gets a ‘free-floating’ skylight object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.LinearWorkflow">
+<span class="sig-name descname"><span class="pre">LinearWorkflow</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.LinearWorkflow" title="Link to this definition"></a></dt>
+<dd><p>LinearWorkflow: If this object is associated with a document, this gets the document linear workflow.
+If this object is associated with a File3dm, this gets the File3dm’s linear workflow.
+Otherwise it gets a ‘free-floating’ linear workflow object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderChannels">
+<span class="sig-name descname"><span class="pre">RenderChannels</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderChannels" title="Link to this definition"></a></dt>
+<dd><p>RenderChannels: If this object is associated with a document, this gets the document render channels.
+Otherwise it gets a ‘free-floating’ render channels object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.Sun">
+<span class="sig-name descname"><span class="pre">Sun</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.Sun" title="Link to this definition"></a></dt>
+<dd><p>Sun: If this object is associated with a document, this gets the document sun.
+If this object is associated with a File3dm, this gets the File3dm’s sun.
+Otherwise it gets a ‘free-floating’ sun object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.RenderEnvironments">
+<span class="sig-name descname"><span class="pre">RenderEnvironments</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.RenderEnvironments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.RenderSettings.PostEffects">
+<span class="sig-name descname"><span class="pre">PostEffects</span></span><a class="headerlink" href="#rhino3dm.RenderSettings.PostEffects" title="Link to this definition"></a></dt>
+<dd><p>PostEffectCollection: If this object is associated with a document, this gets the document post effect data collection.
+If this object is associated with a File3dm, this gets the File3dm’s post effect data collection.
+Otherwise it gets a ‘free-floating’ post effect data collection object.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="RevSurface.html" class="btn btn-neutral float-right" title="RevSurface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="PolylineCurve.html" class="btn btn-neutral" title="PolylineCurve" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="RenderMaterial.html" class="btn btn-neutral float-left" title="RenderMaterial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="RenderTexture.html" class="btn btn-neutral float-right" title="RenderTexture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Robert McNeel &amp; Associates
-
-    </p>
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

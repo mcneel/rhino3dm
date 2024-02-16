@@ -7,11 +7,45 @@ Intersection
 
    .. py:staticmethod:: LineLine(lineA, lineB)
 
-      [todo] add documentation
+      Intersects two lines.
+
+      :param Line lineA: First line for intersection.
+      :param Line lineB: Second line for intersection.
+      :param float tolerance: If tolerance > 0.0, then an intersection is reported only if the distance between the points is <= tolerance. \
+         If tolerance <= 0.0, then the closest point between the lines is reported.
+      :param bool finiteSegments: If true, the input lines are treated as finite segments. \
+         If false, the input lines are treated as infinite lines.
+
+      :return: tuple (bool, float, float)
+
+         - True if a closest point can be calculated and the result passes the tolerance parameter test; otherwise false.
+         - Parameter on lineA that is closest to LineB. \
+           The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b) \
+         - Parameter on lineB that is closest to LineA. \
+           The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b) \
+
+      :rtype: (bool, float, float)
 
    .. py:staticmethod:: LineLine(lineA, lineB, tolerance, finiteSegments)
 
-      [todo] add documentation
+      Intersects two lines.
+
+      :param Line lineA: First line for intersection.
+      :param Line lineB: Second line for intersection.
+      :param float tolerance: If tolerance > 0.0, then an intersection is reported only if the distance between the points is <= tolerance. \
+         If tolerance <= 0.0, then the closest point between the lines is reported.
+      :param bool finiteSegments: If true, the input lines are treated as finite segments. \
+         If false, the input lines are treated as infinite lines.
+
+      :return: tuple (bool, float, float)
+
+         - True if a closest point can be calculated and the result passes the tolerance parameter test; otherwise false.
+         - Parameter on lineA that is closest to LineB. \
+           The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b) \
+         - Parameter on lineB that is closest to LineA. \
+           The shortest distance between the lines is the chord from lineA.PointAt(a) to lineB.PointAt(b) \
+
+      :rtype: (bool, float, float)
 
    .. py:staticmethod:: LinePlane(line, plane)
 
@@ -80,15 +114,59 @@ Intersection
 
    .. py:staticmethod:: LineCircle(line, circle)
 
-      [todo] add documentation
+      Intersects a line with a circle using exact calculations.
+
+      :param Line line: Line for intersection.
+      :param Circle circle: Circle for intersection.
+
+      :return: tuple (LineCircleIntersection, float, rhino3dm.Point3d, float, rhino3dm.Point3d)
+
+         - If  is returned, only t1 and point1 will have valid values. \
+           If  is returned, t2 and point2 will also be filled out. \
+         - Parameter on line for first intersection. \
+         - Point on circle closest to first intersection. \
+         - Parameter on line for second intersection. \
+         - Point on circle closest to second intersection. \
+
+      :rtype: (LineCircleIntersection, float, rhino3dm.Point3d, float, rhino3dm.Point3d)
 
    .. py:staticmethod:: LineSphere(line, sphere)
 
-      [todo] add documentation
+      Intersects a line with a sphere using exact calculations.
+
+      :param Line line: Line for intersection.
+      :param rhino3dm.Sphere sphere: Sphere for intersection.
+
+      :return: tuple (LineSphereIntersection, rhino3dm.Point3d, rhino3dm.Point3d)
+
+         - If  is returned, the first point is the point on the line closest to the sphere and \
+           the second point is the point on the sphere closest to the line. \
+           If  is returned, the first point is the point on the line and the second point is the \
+           same point on the sphere. \
+         - First intersection point. \
+         - Second intersection point. \
+
+      :rtype: (LineSphereIntersection, rhino3dm.Point3d, rhino3dm.Point3d)
 
    .. py:staticmethod:: LineCylinder(line, cylinder)
 
-      [todo] add documentation
+      Intersects a line with a cylinder using exact calculations.
+
+      :param Line line: Line for intersection.
+      :param Cylinder cylinder: Cylinder for intersection.
+
+      :return: tuple (LineCylinderIntersection, rhino3dm.Point3d, rhino3dm.Point3d)
+
+         - If None is returned, the first point is the point on the line closest \
+           to the cylinder and the second point is the point on the cylinder closest to \
+           the line. \
+           If  is returned, the first point \
+           is the point on the line and the second point is the  same point on the \
+           cylinder. \
+         - First intersection point. \
+         - Second intersection point. \
+
+      :rtype: (LineCylinderIntersection, rhino3dm.Point3d, rhino3dm.Point3d)
 
    .. py:staticmethod:: SphereSphere(sphereA, sphereB)
 

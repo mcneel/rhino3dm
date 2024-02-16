@@ -16,9 +16,26 @@ Transform
       Transform constructor
 
 
+   .. py:attribute:: IsAffine
+
+      bool: Tests for an affine transformation.
+      A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
+      An affine transformation can be broken into a linear transformation and a translation.
+
    .. py:attribute:: IsIdentity
 
       bool: Return True if this Transform is the identity transform
+
+   .. py:attribute:: IsLinear
+
+      bool: Tests for a linear transformation.
+      A transformation is affine if it is valid and its last row is [0, 0, 0, 1].
+      If in addition its last column is ( 0, 0, 0, 1)^T then it is linear.
+      An affine transformation can be broken into a linear transformation and a translation.
+
+   .. py:attribute:: IsRotation
+
+      bool: Returns True if this is a proper rotation.
 
    .. py:attribute:: IsValid
 
@@ -37,6 +54,82 @@ Transform
    .. py:attribute:: IsZeroTransformation
 
       bool: True if all values are 0, except for M33 which is 1.
+
+   .. py:attribute:: RigidType
+
+      TransformRigidType: Gets a value indicating whether or not the Transform is rigid.
+      A rigid transformation can be broken into  a proper rotation and a translation,
+      while an isometry transformation could also include a reflection.
+
+   .. py:attribute:: SimilarityType
+
+      TransformSimilarityType: Gets a value indicating whether or not the Transform maintains similarity.
+      The easiest way to think of Similarity is that any circle, when transformed,
+      remains a circle. Whereas a non-similarity Transform deforms circles into ellipses.
+
+   .. py:attribute:: M00
+
+      float: Gets or sets this[0,0].
+
+   .. py:attribute:: M01
+
+      float: Gets or sets this[0,1].
+
+   .. py:attribute:: M02
+
+      float: Gets or sets this[0,2].
+
+   .. py:attribute:: M03
+
+      float: Gets or sets this[0,3].
+
+   .. py:attribute:: M10
+
+      float: Gets or sets this[1,0].
+
+   .. py:attribute:: M11
+
+      float: Gets or sets this[1,1].
+
+   .. py:attribute:: M12
+
+      float: Gets or sets this[1,2].
+
+   .. py:attribute:: M13
+
+      float: Gets or sets this[1,3].
+
+   .. py:attribute:: M20
+
+      float: Gets or sets this[2,0].
+
+   .. py:attribute:: M21
+
+      float: Gets or sets this[2,1].
+
+   .. py:attribute:: M22
+
+      float: Gets or sets this[2,2].
+
+   .. py:attribute:: M23
+
+      float: Gets or sets this[2,3].
+
+   .. py:attribute:: M30
+
+      float: Gets or sets this[3,0].
+
+   .. py:attribute:: M31
+
+      float: Gets or sets this[3,1].
+
+   .. py:attribute:: M32
+
+      float: Gets or sets this[3,2].
+
+   .. py:attribute:: M33
+
+      float: Gets or sets this[3,3].
 
    .. py:staticmethod:: Identity()
 
@@ -91,12 +184,25 @@ Transform
 
       Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
 
-      :param float sinAngle: Sin of the rotation angle.
-      :param float cosAngle: Cos of the rotation angle.
-      :param rhino3dm.Vector3d rotationAxis: Axis direction of rotation.
-      :param rhino3dm.Point3d rotationCenter: Center point of rotation.
+      :param float sinAngle: Sine of the rotation angle.
+      :param float cosAngle: Cosine of the rotation angle.
+      :param rhino3dm.Vector3d rotationAxis: 3D unit axis of rotation.
+      :param rhino3dm.Point3d rotationCenter: 3D center of rotation.
 
-      :return: A transformation matrix which rotates geometry around an anchor point.
+      :return: A rotation transformation matrix.
+
+      :rtype: Transform
+
+   .. py:staticmethod:: Rotation(startDirection, endDirection, rotationCenter)
+
+      Constructs a new rotation transformation with specified angle, rotation center and rotation axis.
+
+      :param float sinAngle: Sine of the rotation angle.
+      :param float cosAngle: Cosine of the rotation angle.
+      :param rhino3dm.Vector3d rotationAxis: 3D unit axis of rotation.
+      :param rhino3dm.Point3d rotationCenter: 3D center of rotation.
+
+      :return: A rotation transformation matrix.
 
       :rtype: Transform
 
@@ -125,6 +231,44 @@ Transform
       :param rhino3dm.Vector3d normalToMirrorPlane: Normal vector to the mirror plane.
 
       :return: A transformation matrix which mirrors geometry in a specified plane.
+
+      :rtype: Transform
+
+   .. py:staticmethod:: PlaneToPlane(plane0, plane1)
+
+      Create a rotation transformation that orients plane0 to plane1. If you want to orient objects from
+      one plane to another, use this form of transformation.
+
+      :param rhino3dm.Plane plane0: The plane to orient from.
+      :param rhino3dm.Plane plane1: the plane to orient to.
+
+      :return: The translation transformation if successful, Transform.Unset on failure.
+
+      :rtype: Transform
+
+   .. py:staticmethod:: Shear(plane, x, y, z)
+
+      Constructs a Shear transformation.
+
+      :param rhino3dm.Plane plane: Base plane for shear.
+      :param rhino3dm.Vector3d x: Shearing vector along plane x-axis.
+      :param rhino3dm.Vector3d y: Shearing vector along plane y-axis.
+      :param rhino3dm.Vector3d z: Shearing vector along plane z-axis.
+
+      :return: A transformation matrix which shear geometry.
+
+      :rtype: Transform
+
+   .. py:staticmethod:: Multiply(a, b)
+
+      Multiplies (combines) two transformations.
+      This is the same as the * operator between two transformations.
+
+      :param Transform a: First transformation.
+      :param Transform b: Second transformation.
+
+      :return: A transformation matrix that combines the effect of both input transformations. \
+         The resulting Transform gives the same result as though you'd first apply B then A.
 
       :rtype: Transform
 
@@ -165,7 +309,11 @@ Transform
 
    .. py:method:: ToFloatArray()
 
-      Return the matrix as a linear array of 16 float values
+      Return the matrix as a linear array of 16 float values.
 
+      :param bool rowDominant: If true, returns { M00, M01, M02...}. \
+         If false, returns { M00, M10, M20...}.
+
+      :return: An array of 16 floats.
 
       :rtype: float[]

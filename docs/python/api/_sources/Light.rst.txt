@@ -151,3 +151,16 @@ Light
       :return: 0 if a0 + d*a1 + d^2*a2 <= 0.
 
       :rtype: float
+
+   .. py:method:: GetSpotLightRadii()
+
+      Gets the spot light radii.
+
+
+      :return: tuple (bool, float, float)
+
+         - True if operation succeeded; otherwise, false.
+         - The inner radius. This out parameter is assigned during this call. \
+         - The outer radius. This out parameter is assigned during this call. \
+
+      :rtype: (bool, float, float)

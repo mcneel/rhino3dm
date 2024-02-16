@@ -175,6 +175,10 @@ File3dmObjectTable
 
       :rtype: void
 
+   .. py:method:: AddObject(object)
+
+      [todo] add documentation
+
    .. py:method:: GetBoundingBox()
 
       Gets the bounding box containing every object in this table.

@@ -23,3 +23,7 @@ Vector2d
    .. py:method:: Encode()
 
       [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation

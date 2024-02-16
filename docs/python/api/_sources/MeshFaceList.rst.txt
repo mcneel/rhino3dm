@@ -29,6 +29,33 @@ MeshFaceList
 
       [todo] add documentation
 
+   .. py:method:: GetFaceVertices(faceIndex)
+
+      Gets the 3D location of the vertices forming a face.
+
+      :param int faceIndex: A face index.
+
+      :return: tuple (bool, Point3f, Point3f, Point3f, Point3f)
+
+         - True if the operation succeeded, otherwise false.
+         - A first point. This out argument is assigned during the call. \
+         - A second point. This out argument is assigned during the call. \
+         - A third point. This out argument is assigned during the call. \
+         - A fourth point. This out argument is assigned during the call. \
+
+      :rtype: (bool, Point3f, Point3f, Point3f, Point3f)
+
+   .. py:method:: GetFaceCenter(faceIndex)
+
+      Gets the center point of a face.
+      For a triangular face, this is the centroid or barycenter.For a quad, this is the average of four comer points.
+
+      :param int faceIndex: A face index.
+
+      :return: The center point.
+
+      :rtype: rhino3dm.Point3d
+
    .. py:method:: Clear()
 
       Clears the Face list on the mesh.

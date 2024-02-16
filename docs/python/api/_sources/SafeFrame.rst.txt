@@ -1,0 +1,74 @@
+SafeFrame
+=========
+
+.. py:module:: rhino3dm
+
+.. py:class:: SafeFrame
+
+   .. py:method:: SafeFrame()
+
+      SafeFrame constructor
+
+
+   .. py:method:: SafeFrame()
+
+      SafeFrame constructor
+
+
+   .. py:attribute:: Enabled
+
+      bool: Determines whether the safe-frame is enabled.
+
+   .. py:attribute:: PerspectiveOnly
+
+      bool: Show the safe-frame only in perspective views.
+
+   .. py:attribute:: FieldGridOn
+
+
+   .. py:attribute:: LiveFrameOn
+
+      bool: Turn on the live area, which shows the size of the rendered view as a yellow frame
+      in the viewport.
+
+   .. py:attribute:: ActionFrameOn
+
+      bool: Turn on the user specified action area, which shown with blue frames.
+
+   .. py:attribute:: ActionFrameLinked
+
+      bool: Action Frame Linked, On = Use the same scale for X and Y. Off = use
+      different scales for X and Y.
+
+   .. py:attribute:: ActionFrameXScale
+
+      float: Action Frame X-scale.
+      This value should be in the range 0..1 but it is not clamped.
+      It is displayed in the UI in the range 0..100.
+
+   .. py:attribute:: ActionFrameYScale
+
+      float: Action Frame Y-scale.
+      This value should be in the range 0..1 but it is not clamped.
+      It is displayed in the UI in the range 0..100.
+
+   .. py:attribute:: TitleFrameOn
+
+      bool: Show a user specified title area frame in orange.
+
+   .. py:attribute:: TitleFrameLinked
+
+      bool: Title Frame Linked, On = Use the same scale for X and Y. Off = use
+      different scales for X and Y.
+
+   .. py:attribute:: TitleFrameXScale
+
+      float: Title Frame X-scale.
+      This value should be in the range 0..1 but it is not clamped.
+      It is displayed in the UI in the range 0..100.
+
+   .. py:attribute:: TitleFrameYScale
+
+      float: Title Frame Y-scale.
+      This value should be in the range 0..1 but it is not clamped.
+      It is displayed in the UI in the range 0..100.

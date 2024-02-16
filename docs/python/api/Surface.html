@@ -1,88 +1,53 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Surface &mdash; rhino3dm 7.6.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surface &mdash; rhino3dm 8.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ea47c46f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="SurfaceProxy" href="SurfaceProxy.html" />
-    <link rel="prev" title="SubD" href="SubD.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="prev" title="Sun" href="Sun.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> rhino3dm
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
           </a>
-
-          
-            
-            
               <div class="version">
-                7.6.0
+                8.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AnnotationBase.html">AnnotationBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
@@ -98,39 +63,56 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cone.html">Cone</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Curve.html">Curve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CurvePiping.html">CurvePiping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompressionOptions.html">DracoCompressionOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EarthAnchorPoint.html">EarthAnchorPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EdgeSoftening.html">EdgeSoftening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ellipse.html">Ellipse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EmbeddedFile.html">EmbeddedFile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Environment.html">Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Extrusion.html">Extrusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dm.html">File3dm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmBitmapTable.html">File3dmBitmapTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmDecalTable.html">File3dmDecalTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmDimStyleTable.html">File3dmDimStyleTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmEmbeddedFileTable.html">File3dmEmbeddedFileTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmGroupTable.html">File3dmGroupTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">File3dmInstanceDefinitionTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmLayerTable.html">File3dmLayerTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmLinetypeTable.html">File3dmLinetypeTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmMaterialTable.html">File3dmMaterialTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmMeshModifiers.html">File3dmMeshModifiers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObject.html">File3dmObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmObjectTable.html">File3dmObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInData.html">File3dmPlugInData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmPlugInDataTable.html">File3dmPlugInDataTable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmPostEffectTable.html">File3dmPostEffectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmRdkDocumentData.html">File3dmRdkDocumentData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmRenderContentTable.html">File3dmRenderContentTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmSettings.html">File3dmSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File3dmShutLiningCurveTable.html">File3dmShutLiningCurveTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmStringTable.html">File3dmStringTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmViewTable.html">File3dmViewTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="File3dmWriteOptions.html">File3dmWriteOptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Font.html">Font</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryBase.html">GeometryBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GroundPlane.html">GroundPlane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Group.html">Group</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Hatch.html">Hatch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InstanceDefinition.html">InstanceDefinition</a></li>
@@ -140,7 +122,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LineCurve.html">LineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Linetype.html">Linetype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Material.html">Material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshFaceList.html">MeshFaceList</a></li>
@@ -174,15 +158,57 @@
 <li class="toctree-l1"><a class="reference internal" href="PolyCurve.html">PolyCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Polyline.html">Polyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolylineCurve.html">PolylineCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostEffect.html">PostEffect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderChannels.html">RenderChannels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">RenderContent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironment.html">RenderEnvironment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderEnvironments.html">RenderEnvironments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderMaterial.html">RenderMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Surface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Surface"><code class="docutils literal notranslate"><span class="pre">Surface</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsSolid"><code class="docutils literal notranslate"><span class="pre">Surface.IsSolid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.SetDomain"><code class="docutils literal notranslate"><span class="pre">Surface.SetDomain()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.Degree"><code class="docutils literal notranslate"><span class="pre">Surface.Degree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.SpanCount"><code class="docutils literal notranslate"><span class="pre">Surface.SpanCount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.PointAt"><code class="docutils literal notranslate"><span class="pre">Surface.PointAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.FrameAt"><code class="docutils literal notranslate"><span class="pre">Surface.FrameAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.Domain"><code class="docutils literal notranslate"><span class="pre">Surface.Domain()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.GetSpanVector"><code class="docutils literal notranslate"><span class="pre">Surface.GetSpanVector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.NormalAt"><code class="docutils literal notranslate"><span class="pre">Surface.NormalAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsClosed"><code class="docutils literal notranslate"><span class="pre">Surface.IsClosed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsPeriodic"><code class="docutils literal notranslate"><span class="pre">Surface.IsPeriodic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsSingular"><code class="docutils literal notranslate"><span class="pre">Surface.IsSingular()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsAtSingularity"><code class="docutils literal notranslate"><span class="pre">Surface.IsAtSingularity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsAtSeam"><code class="docutils literal notranslate"><span class="pre">Surface.IsAtSeam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsoCurve"><code class="docutils literal notranslate"><span class="pre">Surface.IsoCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.ToNurbsSurface"><code class="docutils literal notranslate"><span class="pre">Surface.ToNurbsSurface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Surface.ToNurbsSurface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsPlanar"><code class="docutils literal notranslate"><span class="pre">Surface.IsPlanar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsSphere"><code class="docutils literal notranslate"><span class="pre">Surface.IsSphere()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsCylinder"><code class="docutils literal notranslate"><span class="pre">Surface.IsCylinder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsCone"><code class="docutils literal notranslate"><span class="pre">Surface.IsCone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.IsTorus"><code class="docutils literal notranslate"><span class="pre">Surface.IsTorus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter"><code class="docutils literal notranslate"><span class="pre">Surface.GetSurfaceParameterFromNurbsFormParameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter"><code class="docutils literal notranslate"><span class="pre">Surface.GetNurbsFormParameterFromSurfaceParameter()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Thickening.html">Thickening</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector2d.html">Vector2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Vector3d.html">Vector3d</a></li>
@@ -191,565 +217,490 @@
 <li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">rhino3dm</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Surface</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Surface</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/Surface.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-rhino3dm">
-<span id="surface"></span><h1>Surface<a class="headerlink" href="#module-rhino3dm" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="rhino3dm.Surface">
-<em class="property">class </em><code class="descclassname">rhino3dm.</code><code class="descname">Surface</code><a class="headerlink" href="#rhino3dm.Surface" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="rhino3dm.Surface.IsSolid">
-<code class="descname">IsSolid</code><a class="headerlink" href="#rhino3dm.Surface.IsSolid" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-rhino3dm">
+<span id="surface"></span><h1>Surface<a class="headerlink" href="#module-rhino3dm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Surface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Surface</span></span><a class="headerlink" href="#rhino3dm.Surface" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsSolid">
+<span class="sig-name descname"><span class="pre">IsSolid</span></span><a class="headerlink" href="#rhino3dm.Surface.IsSolid" title="Link to this definition"></a></dt>
 <dd><p>bool: Gets a values indicating whether a surface is solid.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.SetDomain">
-<code class="descname">SetDomain</code><span class="sig-paren">(</span><em>direction</em>, <em>domain</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SetDomain" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.SetDomain">
+<span class="sig-name descname"><span class="pre">SetDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SetDomain" title="Link to this definition"></a></dt>
 <dd><p>Sets the domain in a direction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>direction</strong> (<em>int</em>) – 0 sets first parameter’s domain, 1 sets second parameter’s domain.</li>
-<li><strong>domain</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – A new domain to be assigned.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direction</strong> (<em>int</em>) – 0 sets first parameter’s domain, 1 sets second parameter’s domain.</p></li>
+<li><p><strong>domain</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – A new domain to be assigned.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if setting succeeded, otherwise false.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if setting succeeded, otherwise false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.Degree">
-<code class="descname">Degree</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Degree" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.Degree">
+<span class="sig-name descname"><span class="pre">Degree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Degree" title="Link to this definition"></a></dt>
 <dd><p>Returns the maximum algebraic degree of any span
 (or a good estimate if curve spans are not algebraic).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The maximum degree.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The maximum degree.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.SpanCount">
-<code class="descname">SpanCount</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SpanCount" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.SpanCount">
+<span class="sig-name descname"><span class="pre">SpanCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.SpanCount" title="Link to this definition"></a></dt>
 <dd><p>Gets number of smooth nonempty spans in the parameter direction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The span count.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The span count.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.PointAt">
-<code class="descname">PointAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.PointAt" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.PointAt">
+<span class="sig-name descname"><span class="pre">PointAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.PointAt" title="Link to this definition"></a></dt>
 <dd><p>Evaluates a point at a given parameter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u</strong> (<em>float</em>) – evaluation parameters.</li>
-<li><strong>v</strong> (<em>float</em>) – evaluation parameters.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – evaluation parameters.</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – evaluation parameters.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Point3d.Unset on failure.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Point3d.Unset on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.FrameAt">
-<code class="descname">FrameAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.FrameAt" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.FrameAt">
+<span class="sig-name descname"><span class="pre">FrameAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.FrameAt" title="Link to this definition"></a></dt>
 <dd><p>Computes the orient plane on a surface given a U and V parameter.
 This is the simple evaluation call with no error handling.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u</strong> (<em>float</em>) – A first parameter.</li>
-<li><strong>v</strong> (<em>float</em>) – A second parameter.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – A first parameter.</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – A second parameter.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple (bool, rhino3dm.Plane)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>tuple (bool, rhino3dm.Plane)</p>
 <ul class="simple">
-<li>True if this operation succeeded; otherwise false.</li>
-<li>A frame plane that will be computed during this call. </li>
+<li><p>True if this operation succeeded; otherwise false.</p></li>
+<li><p>A frame plane that will be computed during this call. </p></li>
 </ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(bool, <a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a>)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool, <a class="reference internal" href="Plane.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.Domain">
-<code class="descname">Domain</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Domain" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.Domain">
+<span class="sig-name descname"><span class="pre">Domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.Domain" title="Link to this definition"></a></dt>
 <dd><p>Gets the domain in a direction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter, 1 gets second parameter.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An interval value.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval">rhino3dm.Interval</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 gets first parameter, 1 gets second parameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An interval value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval">rhino3dm.Interval</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.GetSpanVector">
-<code class="descname">GetSpanVector</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSpanVector" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.GetSpanVector">
+<span class="sig-name descname"><span class="pre">GetSpanVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSpanVector" title="Link to this definition"></a></dt>
 <dd><p>Gets array of span “knots”.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An array with span vectors; or None on error.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float[]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 gets first parameter’s domain, 1 gets second parameter’s domain.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with span vectors; or None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[]</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.NormalAt">
-<code class="descname">NormalAt</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.NormalAt" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.NormalAt">
+<span class="sig-name descname"><span class="pre">NormalAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.NormalAt" title="Link to this definition"></a></dt>
 <dd><p>Computes the surface normal at a point.
 This is the simple evaluation call - it does not support error handling.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u</strong> (<em>float</em>) – A U parameter.</li>
-<li><strong>v</strong> (<em>float</em>) – A V parameter.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – A U parameter.</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – A V parameter.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The normal.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normal.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Vector3d.html#rhino3dm.Vector3d" title="rhino3dm.Vector3d">rhino3dm.Vector3d</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsClosed">
-<code class="descname">IsClosed</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsClosed" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsClosed">
+<span class="sig-name descname"><span class="pre">IsClosed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsClosed" title="Link to this definition"></a></dt>
 <dd><p>Gets a value indicating if the surface is closed in a direction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The indicating boolean value.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The indicating boolean value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsPeriodic">
-<code class="descname">IsPeriodic</code><span class="sig-paren">(</span><em>direction</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPeriodic" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsPeriodic">
+<span class="sig-name descname"><span class="pre">IsPeriodic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPeriodic" title="Link to this definition"></a></dt>
 <dd><p>Gets a value indicating if the surface is periodic in a direction (default is false).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The indicating boolean value.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>direction</strong> (<em>int</em>) – 0 = U, 1 = V.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The indicating boolean value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsSingular">
-<code class="descname">IsSingular</code><span class="sig-paren">(</span><em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSingular" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsSingular">
+<span class="sig-name descname"><span class="pre">IsSingular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSingular" title="Link to this definition"></a></dt>
 <dd><p>True if surface side is collapsed to a point.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>side</strong> (<em>int</em>) – side of parameter space to test 0 = south, 1 = east, 2 = north, 3 = west.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this specific side of the surface is singular; otherwise, false.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>side</strong> (<em>int</em>) – side of parameter space to test 0 = south, 1 = east, 2 = north, 3 = west.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if this specific side of the surface is singular; otherwise, false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsAtSingularity">
-<code class="descname">IsAtSingularity</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>exact</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSingularity" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsAtSingularity">
+<span class="sig-name descname"><span class="pre">IsAtSingularity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSingularity" title="Link to this definition"></a></dt>
 <dd><p>Tests if a surface parameter value is at a singularity.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</li>
-<li><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</li>
-<li><strong>exact</strong> (<em>bool</em>) – If true, test if (u,v) is exactly at a singularity. If false, test if close enough to cause numerical problems.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</p></li>
+<li><p><strong>exact</strong> (<em>bool</em>) – If true, test if (u,v) is exactly at a singularity. If false, test if close enough to cause numerical problems.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if surface is singular at (s,t)</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if surface is singular at (s,t)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsAtSeam">
-<code class="descname">IsAtSeam</code><span class="sig-paren">(</span><em>u</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSeam" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsAtSeam">
+<span class="sig-name descname"><span class="pre">IsAtSeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsAtSeam" title="Link to this definition"></a></dt>
 <dd><p>Tests if a surface parameter value is at a seam.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</li>
-<li><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – Surface u parameter to test.</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – Surface v parameter to test.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 if not a seam, 1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) 2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) 3 if 1 and 2 are true.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 if not a seam, 1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) 2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) 3 if 1 and 2 are true.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsoCurve">
-<code class="descname">IsoCurve</code><span class="sig-paren">(</span><em>direction</em>, <em>constantParameter</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsoCurve" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsoCurve">
+<span class="sig-name descname"><span class="pre">IsoCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constantParameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsoCurve" title="Link to this definition"></a></dt>
 <dd><p>Gets isoparametric curve.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>direction</strong> (<em>int</em>) – 0 first parameter varies and second parameter is constant e.g., point on IsoCurve(0,c) at t is srf(t,c) This is a horizontal line from left to right 1 first parameter is constant and second parameter varies e.g., point on IsoCurve(1,c) at t is srf(c,t This is a vertical line from bottom to top.</li>
-<li><strong>constantParameter</strong> (<em>float</em>) – The parameter that was constant on the original surface.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direction</strong> (<em>int</em>) – 0 first parameter varies and second parameter is constant e.g., point on IsoCurve(0,c) at t is srf(t,c) This is a horizontal line from left to right 1 first parameter is constant and second parameter varies e.g., point on IsoCurve(1,c) at t is srf(c,t This is a vertical line from bottom to top.</p></li>
+<li><p><strong>constantParameter</strong> (<em>float</em>) – The parameter that was constant on the original surface.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An isoparametric curve or None on error.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An isoparametric curve or None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Curve.html#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.ToNurbsSurface">
-<code class="descname">ToNurbsSurface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.ToNurbsSurface" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.ToNurbsSurface">
+<span class="sig-name descname"><span class="pre">ToNurbsSurface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.ToNurbsSurface" title="Link to this definition"></a></dt>
 <dd><p>Gets a NURBS surface representation of this surface. Default
 tolerance of 0.0 is used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">NurbsSurface on success, None on failure.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NurbsSurface on success, None on failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt>
-<code class="descname">ToNurbsSurface</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">ToNurbsSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>Gets a NURBS surface representation of this surface. Default
 tolerance of 0.0 is used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">NurbsSurface on success, None on failure.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NurbsSurface on success, None on failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="NurbsSurface.html#rhino3dm.NurbsSurface" title="rhino3dm.NurbsSurface">NurbsSurface</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsPlanar">
-<code class="descname">IsPlanar</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPlanar" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsPlanar">
+<span class="sig-name descname"><span class="pre">IsPlanar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsPlanar" title="Link to this definition"></a></dt>
 <dd><p>Tests a surface to see if it is planar to zero tolerance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsSphere">
-<code class="descname">IsSphere</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSphere" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsSphere">
+<span class="sig-name descname"><span class="pre">IsSphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsSphere" title="Link to this definition"></a></dt>
 <dd><p>Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a sphere.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the surface is a portion of a sphere.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsCylinder">
-<code class="descname">IsCylinder</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCylinder" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsCylinder">
+<span class="sig-name descname"><span class="pre">IsCylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCylinder" title="Link to this definition"></a></dt>
 <dd><p>Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a cylinder.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the surface is a portion of a cylinder.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsCone">
-<code class="descname">IsCone</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCone" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsCone">
+<span class="sig-name descname"><span class="pre">IsCone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsCone" title="Link to this definition"></a></dt>
 <dd><p>Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a cone.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the surface is a portion of a cone.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.IsTorus">
-<code class="descname">IsTorus</code><span class="sig-paren">(</span><em>tolerance</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsTorus" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.IsTorus">
+<span class="sig-name descname"><span class="pre">IsTorus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.IsTorus" title="Link to this definition"></a></dt>
 <dd><p>Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the surface is a portion of a torus.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the surface is a portion of a torus.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter">
-<code class="descname">GetSurfaceParameterFromNurbsFormParameter</code><span class="sig-paren">(</span><em>nurbsS</em>, <em>nurbsT</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>[todo] add documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter">
+<span class="sig-name descname"><span class="pre">GetSurfaceParameterFromNurbsFormParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nurbsS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nurbsT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetSurfaceParameterFromNurbsFormParameter" title="Link to this definition"></a></dt>
+<dd><p>Translates a parameter from a value on the surface returned by  to the current surface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nurbsS</strong> (<em>float</em>) – The parameter in the S, or sometimes U, direction of the NURBS form surface.</p></li>
+<li><p><strong>nurbsT</strong> (<em>float</em>) – The parameter in the T, or sometimes V, direction of the NURBS form surface.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>tuple (bool, float, float)</p>
+<ul class="simple">
+<li><p>True if the operation succeeded; otherwise, false.</p></li>
+<li><p>S on this surface. </p></li>
+<li><p>T o n this surface. </p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool, float, float)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter">
-<code class="descname">GetNurbsFormParameterFromSurfaceParameter</code><span class="sig-paren">(</span><em>surfaceS</em>, <em>surfaceT</em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>[todo] add documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter">
+<span class="sig-name descname"><span class="pre">GetNurbsFormParameterFromSurfaceParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surfaceS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surfaceT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Surface.GetNurbsFormParameterFromSurfaceParameter" title="Link to this definition"></a></dt>
+<dd><p>Translates a parameter from the current surface to the parameter space of the surface returned by .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surfaceS</strong> (<em>float</em>) – The parameter in the S, or sometimes U, direction, of this surface.</p></li>
+<li><p><strong>surfaceT</strong> (<em>float</em>) – The parameter in the T, or sometimes V, direction of this surface.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>tuple (bool, float, float)</p>
+<ul class="simple">
+<li><p>True if the operation succeeded; otherwise, false.</p></li>
+<li><p>S on the NURBS form. </p></li>
+<li><p>T on the NURBS form. </p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool, float, float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="SurfaceProxy.html" class="btn btn-neutral float-right" title="SurfaceProxy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="SubD.html" class="btn btn-neutral" title="SubD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Sun.html" class="btn btn-neutral float-left" title="Sun" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SurfaceProxy.html" class="btn btn-neutral float-right" title="SurfaceProxy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Robert McNeel &amp; Associates
-
-    </p>
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

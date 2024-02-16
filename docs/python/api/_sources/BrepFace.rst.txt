@@ -5,6 +5,10 @@ BrepFace
 
 .. py:class:: BrepFace
 
+   .. py:attribute:: OrientationIsReversed
+
+      bool: True if face orientation is opposite of natural surface orientation.
+
    .. py:method:: UnderlyingSurface()
 
       Gets the untrimmed surface that is the base of this face.
@@ -12,6 +16,17 @@ BrepFace
       :return: A surface, or None on error.
 
       :rtype: rhino3dm.Surface
+
+   .. py:method:: CreateExtrusion(pathCurve, cap)
+
+      Extrude a face in a Brep.
+
+      :param rhino3dm.Curve pathCurve: The path to extrude along. Note, the direction of the extrusion will follow the direction of the curve.
+      :param bool cap: If true, the extrusion is capped with a translation of the face being extruded
+
+      :return: A Brep on success or None on failure.
+
+      :rtype: rhino3dm.Brep
 
    .. py:method:: DuplicateFace(duplicateMeshes)
 
@@ -40,3 +55,14 @@ BrepFace
       :return: A mesh.
 
       :rtype: rhino3dm.Mesh
+
+   .. py:method:: SetMesh(mesh, meshType)
+
+      Sets a reference to a specified type of mesh for this brep face.
+
+      :param MeshType meshType: The mesh type.
+      :param rhino3dm.Mesh mesh: The new mesh.
+
+      :return: True if the operation succeeded; otherwise false.
+
+      :rtype: bool

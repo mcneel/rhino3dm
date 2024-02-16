@@ -55,3 +55,12 @@ PhysicallyBasedMaterial
 
    .. py:attribute:: OpacityRoughness
 
+
+   .. py:attribute:: BaseColor
+
+
+   .. py:attribute:: EmissionColor
+
+
+   .. py:attribute:: SubsurfaceScatteringColor
+
