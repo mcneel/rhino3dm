@@ -59,6 +59,38 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Interval specifies the parameterization for the angular parameter.
+    /// Interval must be an increasing interval.
+    /// The parameter Interval[0] corresponds to Angle[0] and 
+    /// the parameter Interval[1] corresponds to Angle[1].
+    /// </summary>
+    /// <since>8.4</since>
+    public Interval Interval
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        Interval rc = new Interval();
+        UnsafeNativeMethods.ON_RevSurface_Interval(const_ptr_this, ref rc);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// If false, the "u" parameter is the angle parameter and the "v" parameter is the curve parameter.  
+    /// If true, the "u" parameter is the curve parameter and the "v" parameter is the angle parameter.  
+    /// </summary>
+    /// <since>8.4</since>
+    public bool IsTransposed
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_RevSurface_IsTransposed(const_ptr_this);
+      }
+    }
+
     #endregion
 
     #region static create functions

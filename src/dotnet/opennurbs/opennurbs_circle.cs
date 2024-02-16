@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Rhino.Runtime;
 
@@ -644,6 +645,64 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <summary>
+    /// Attempt to create the smallest circle enclosing a set of planar points.
+    /// </summary>
+    /// <param name="points">The points to enclose.</param>
+    /// <param name="tolerance">The tolerance to use</param>
+    /// <param name="circle">The resulting circle on success.</param>
+    /// <param name="indicesOnCircle">If possible, indices of two or three points that define the circle</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>8.4</since>
+    public static bool TrySmallestEnclosingCircle(IEnumerable<Point2d> points, double tolerance, out Circle circle, out int[] indicesOnCircle) {
+      if (!RhinoMath.IsValidDouble(tolerance))
+        throw new ArgumentNullException("tolerance");
+
+      circle = new Circle();
+      indicesOnCircle = Array.Empty<int>();
+
+      if (!points.Any())
+        return false;
+
+      int count;
+      Point2d[] ptArray = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out count);
+      ptArray = ptArray.Where(p => RhinoMath.IsValidDouble(p.X) && RhinoMath.IsValidDouble(p.Y)).ToArray();
+      count = ptArray.Length;
+
+      if (count == 0)
+        return false;
+
+      if (count == 1) {
+        var p = Plane.WorldXY;
+        p.Origin = new Point3d(ptArray[0].X, ptArray[0].Y, 0.0);
+        circle.Plane = p;
+        circle.Radius = 0.0;
+        return false;
+      }
+
+      if (count == 2) {
+        // would be safe to call in C++, but it might return an invalid circle.
+        if (ptArray[0].DistanceToSquared(ptArray[1]) < tolerance * tolerance) {
+          var p = Plane.WorldXY;
+          p.Origin = new Point3d(ptArray[0].X, ptArray[0].Y, 0.0);
+          circle.Plane = p;
+          circle.Radius = 0.0;
+          return false;
+        }
+      }
+
+      // now we have at least two points, they are all valid, and they don't all coincide.
+      // we might be safe now.
+      using (var boundaryArray = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
+        IntPtr ptrBoundaryArray = boundaryArray.NonConstPointer();
+        bool success = UnsafeNativeMethods.RHC_CreateCircleFrom2dPoints(ref circle, ptArray, count, tolerance, ptrBoundaryArray);
+        if (!success || !circle.IsValid)
+          return false;
+
+        indicesOnCircle = boundaryArray.ToArray();
+      }
+      return true;
+    }
 #endif
 
     //David comments : The following two functions seem fairly pointless to me. I might 

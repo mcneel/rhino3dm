@@ -68,21 +68,44 @@ RH_C_FUNCTION void ON_2dVector_Rotate(ON_2dVector* v, double angle)
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+RH_C_FUNCTION double ON_2fVector_Length(ON_2FVECTOR_STRUCT v)
+{
+  return ((ON_2fVector*)&v)->Length();
+}
+
+RH_C_FUNCTION bool ON_2fVector_Unitize(ON_2fVector* v)
+{
+  bool rc = false;
+  if (v)
+    rc = v->Unitize();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_2fVector_IsTiny(ON_2FVECTOR_STRUCT v, double tinyTolerance)
+{
+  const ON_2fVector* _v = (const ON_2fVector*)&v;
+  return _v->IsTiny(tinyTolerance);
+}
+
+RH_C_FUNCTION bool ON_2fVector_PerpendicularTo(ON_2fVector* v, ON_2FVECTOR_STRUCT other)
+{
+  bool rc = false;
+  if (v)
+  {
+    const ON_2fVector* _other = (const ON_2fVector*)&other;
+    rc = v->PerpendicularTo(*_other);
+  }
+  return rc;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
 RH_C_FUNCTION bool ON_3fVector_Unitize( ON_3fVector* v )
 {
   bool rc = false;
   if( v )
     rc = v->Unitize();
   return rc;
-}
-
-RH_C_FUNCTION void ON_3fVector_Rotate( ON_3fVector* v, double angle, ON_3FVECTOR_STRUCT axis )
-{
-  if( v )
-  {
-    const ON_3fVector* _axis = (const ON_3fVector*)&axis;
-    v->Rotate(angle, *_axis);
-  }
 }
 
 RH_C_FUNCTION bool ON_3fVector_PerpendicularTo( ON_3fVector* v, ON_3FVECTOR_STRUCT other )
@@ -94,6 +117,15 @@ RH_C_FUNCTION bool ON_3fVector_PerpendicularTo( ON_3fVector* v, ON_3FVECTOR_STRU
     rc = v->PerpendicularTo(*_other);
   }
   return rc;
+}
+
+RH_C_FUNCTION void ON_3fVector_Rotate(ON_3fVector* v, double angle, ON_3FVECTOR_STRUCT axis)
+{
+  if (v)
+  {
+    const ON_3fVector* _axis = (const ON_3fVector*)&axis;
+    v->Rotate(angle, *_axis);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

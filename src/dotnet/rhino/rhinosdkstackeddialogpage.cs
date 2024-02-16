@@ -47,6 +47,12 @@ namespace Rhino.UI
     /// <returns></returns>
     bool SetNativeParent(IntPtr hwndParent, object host);
     /// <summary>
+    /// Gets the native window handle associated with the host object if there is one.
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    IntPtr NativeHandle(object host);
+    /// <summary>
     /// Get the unmanaged pointer associated with the pages content control
     /// </summary>
     /// <param name="nativeWindowObject"></param>
@@ -102,6 +108,10 @@ namespace Rhino.UI
       throw new NotImplementedException ();
     }
     public bool SetNativeParent(IntPtr hwndParent, object host)
+    {
+      throw new NotImplementedException();
+    }
+    public IntPtr NativeHandle(object host)
     {
       throw new NotImplementedException();
     }

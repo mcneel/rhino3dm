@@ -706,7 +706,7 @@ namespace Rhino.DocObjects.Custom
     {
       // http://mcneel.myjetbrains.com/youtrack/issue/FL-5923
       // 17 August 2015 John Morse
-      // Need to copy the sour transform otherwise when you transform an object
+      // Need to copy the source transform otherwise when you transform an object
       // more than once you only get the last transform.
       // This was the problem
       // 1) Put a point in a dictionary
@@ -723,8 +723,15 @@ namespace Rhino.DocObjects.Custom
       var dict = source as UserDictionary;
       if (dict != null)
       {
-        m_dictionary = dict.m_dictionary.Clone();
-        m_dictionary.SetParentUserData(this);
+        if (dict.m_dictionary == null)
+        {
+          m_dictionary = null;
+        }
+        else
+        {
+          m_dictionary = dict.m_dictionary.Clone();
+          m_dictionary.SetParentUserData(this);
+        }
       }
     }
 
@@ -734,7 +741,10 @@ namespace Rhino.DocObjects.Custom
     /// <since>5.0</since>
     public override bool ShouldWrite
     {
-      get { return m_dictionary.Count > 0; }
+      get 
+      {
+        return m_dictionary!=null && m_dictionary.Count > 0;
+      }
     }
 
     /// <summary>

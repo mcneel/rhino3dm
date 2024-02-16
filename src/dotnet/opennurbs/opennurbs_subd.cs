@@ -1295,7 +1295,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Look for convex corners at sub-D vertices with 2 edges or fewer that have an
     /// included angle ≤ 120 degrees.
-    /// Look for concave corners at sub-D vertices with 3 edge or more that have an
+    /// Look for concave corners at sub-D vertices with 3 edges or more that have an
     /// included angle ≥ 240 degrees.
     /// </summary>
     /// <since>8.0</since>

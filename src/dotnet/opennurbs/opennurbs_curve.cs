@@ -883,30 +883,54 @@ namespace Rhino.Geometry
     /// <para>If true, curve endpoints will be compared to curve start points.</para>
     /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
     /// </param>
+    /// <param name="key">inputCurves[i] is part of returnValue[key[i]]</param>
     /// <returns>An array of joined curves. This array can be empty.</returns>
     /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
-    /// <since>5.0</since>
-    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection)
+    /// <since>8.4</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection, out int[] key)
     {
       if (null == inputCurves)
         throw new ArgumentNullException("inputCurves");
 
       using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(inputCurves))
       using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      using (SimpleArrayInt indexMap = new SimpleArrayInt())
       {
         IntPtr inputPtr = input.ConstPointer();
         IntPtr outputPtr = output.NonConstPointer();
 
+        //2-Jan-2024 Joshua Kennedy https://mcneel.myjetbrains.com/youtrack/issue/RH-79377/Index-tracking-in-Curve-Join.
+        IntPtr indexMapPtr = indexMap.NonConstPointer();
+
         // 18-Jan-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-67058
 #if RHINO_SDK
-        bool rc = UnsafeNativeMethods.RHC_RhinoMergeCurves(inputPtr, outputPtr, joinTolerance, preserveDirection);
+        bool rc = UnsafeNativeMethods.RHC_RhinoMergeCurves(inputPtr, outputPtr, joinTolerance, preserveDirection, indexMapPtr);
 #else
-        bool rc = UnsafeNativeMethods.ONC_JoinCurves(inputPtr, outputPtr, joinTolerance, preserveDirection);
+        bool rc = UnsafeNativeMethods.ONC_JoinCurves(inputPtr, outputPtr, joinTolerance, preserveDirection, indexMapPtr);
 #endif
 
         GC.KeepAlive(inputCurves);
+        key = indexMap.ToArray();
         return rc ? output.ToNonConstArray() : new Curve[0];
       }
+    }
+
+    /// <summary>
+    /// Joins a collection of curve segments together.
+    /// </summary>
+    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
+    /// <param name="joinTolerance">Joining tolerance, 
+    /// i.e. the distance between segment end-points that is allowed.</param>
+    /// <param name="preserveDirection">
+    /// <para>If true, curve endpoints will be compared to curve start points.</para>
+    /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
+    /// </param>
+    /// <returns>An array of joined curves. This array can be empty.</returns>
+    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
+    /// <since>5.0</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection)
+    {
+      return JoinCurves(inputCurves, joinTolerance, preserveDirection, out _);
     }
 
 #if RHINO_SDK
@@ -2961,6 +2985,34 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Returns a curve's inflection points. An inflection point is a location on
+    /// a curve at which the sign of the curvature (i.e., the concavity) changes. 
+    /// The curvature at these locations is always 0.
+    /// </summary>
+    /// <param name="curveParameters">An array of curve parameters at the inflection points.</param>
+    /// <returns>An array of points if successful, null if not successful or on error.</returns>
+    /// <since>8.4</since>
+    [ConstOperation]
+    public Point3d[] InflectionPoints(out double[] curveParameters)
+    {
+      Point3d[] rc = null;
+      curveParameters = null;
+      using (SimpleArrayPoint3d points = new SimpleArrayPoint3d())
+      using (SimpleArrayDouble parameters = new SimpleArrayDouble())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        IntPtr ptr_points = points.NonConstPointer();
+        IntPtr ptr_parameters = parameters.NonConstPointer();
+        if (UnsafeNativeMethods.RHC_RhinoCurveInflectionPoints2(ptr_const_this, ptr_points, ptr_parameters))
+        {
+          rc = points.ToArray();
+          curveParameters = parameters.ToArray();
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
     /// Returns a curve's maximum curvature points. The maximum curvature points identify
     /// where the curvature starts to decrease in both directions from the points.
     /// </summary>
@@ -2976,6 +3028,33 @@ namespace Rhino.Geometry
         IntPtr pPoints = points.NonConstPointer();
         if (UnsafeNativeMethods.RHC_RhinoCurveMaxCurvaturePoints(pConstThis, pPoints))
           rc = points.ToArray();
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns a curve's maximum curvature points. The maximum curvature points identify
+    /// where the curvature starts to decrease in both directions from the points.
+    /// </summary>
+    /// <param name="curveParameters">An array of curve parameters at the maximum curvature points.</param>
+    /// <returns>An array of points if successful, null if not successful or on error.</returns>
+    /// <since>8.4</since>
+    [ConstOperation]
+    public Point3d[] MaxCurvaturePoints(out double[] curveParameters)
+    {
+      Point3d[] rc = null;
+      curveParameters = null;
+      using (SimpleArrayPoint3d points = new SimpleArrayPoint3d())
+      using (SimpleArrayDouble parameters = new SimpleArrayDouble())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        IntPtr ptr_points = points.NonConstPointer();
+        IntPtr ptr_parameters = parameters.NonConstPointer();
+        if (UnsafeNativeMethods.RHC_RhinoCurveMaxCurvaturePoints2(ptr_const_this, ptr_points, ptr_parameters))
+        {
+          rc = points.ToArray();
+          curveParameters = parameters.ToArray();
+        }
       }
       return rc;
     }

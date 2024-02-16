@@ -850,6 +850,18 @@ using Rhino.Runtime.InteropWrappers;
             return "ref Vector3f";
           }
 
+          if (s.Equals("ON_2fVector") || s.Equals("AR_2fVector") || s.Equals("Vector2f"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "Vector2f[]";
+              else
+                return "[In,Out] Vector2f[]";
+            }
+            return "ref Vector2f";
+          }
+
           if (s.Equals("CRhPointData"))
           {
             if (isArray)
@@ -947,6 +959,9 @@ using Rhino.Runtime.InteropWrappers;
         if (s_type.Equals("ON_3FVECTOR_STRUCT"))
           return "Vector3f";
 
+        if (s_type.Equals("ON_2FVECTOR_STRUCT"))
+          return "Vector2f";
+
         if (s_type.Equals("ON_4FVECTOR_STRUCT"))
           return "Color4f";
 
@@ -1000,6 +1015,9 @@ using Rhino.Runtime.InteropWrappers;
 
         if (s_type.Equals("AR_3fVector"))
           return "Vector3f";
+
+        if (s_type.Equals("AR_2fVector"))
+          return "Vector2f";
 
         if (s_type.Equals("AR_3dPoint"))
           return "Point3d";

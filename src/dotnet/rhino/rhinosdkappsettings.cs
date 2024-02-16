@@ -4202,6 +4202,8 @@ namespace Rhino.ApplicationSettings
     AltCtrlPageUp,
     /// <summary>Alt + Ctrl + Page Down</summary>
     AltCtrlPageDown,
+    /// <summary>No shortcut key</summary>
+    None,
     /// <summary>Alt + Home</summary>
     AltHome,
     /// <summary>Alt + Home</summary>
@@ -4278,6 +4280,313 @@ namespace Rhino.ApplicationSettings
     Alt8,
     /// <summary>Alt + 9</summary>
     Alt9,
+    /// <summary>Control + Home (Mac)</summary>
+    MacControlHome,
+    /// <summary>Control + End (Mac)</summary>
+    MacControlEnd,
+    /// <summary>Control + A (Mac)</summary>
+    MacControlA,
+    /// <summary>Control + B (Mac)</summary>
+    MacControlB,
+    /// <summary>Control + C (Mac)</summary>
+    MacControlC,
+    /// <summary>Control + D (Mac)</summary>
+    MacControlD,
+    /// <summary>Control + E (Mac)</summary>
+    MacControlE,
+    /// <summary>Control + F (Mac)</summary>
+    MacControlF,
+    /// <summary>Control + G (Mac)</summary>
+    MacControlG,
+    /// <summary>Control + H (Mac)</summary>
+    MacControlH,
+    /// <summary>Control + I (Mac)</summary>
+    MacControlI,
+    /// <summary>Control + J (Mac)</summary>
+    MacControlJ,
+    /// <summary>Control + K (Mac)</summary>
+    MacControlK,
+    /// <summary>Control + L (Mac)</summary>
+    MacControlL,
+    /// <summary>Control + M (Mac)</summary>
+    MacControlM,
+    /// <summary>Control + N (Mac)</summary>
+    MacControlN,
+    /// <summary>Control + O (Mac)</summary>
+    MacControlO,
+    /// <summary>Control + P (Mac)</summary>
+    MacControlP,
+    /// <summary>Control + Q (Mac)</summary>
+    MacControlQ,
+    /// <summary>Control + R (Mac)</summary>
+    MacControlR,
+    /// <summary>Control + S (Mac)</summary>
+    MacControlS,
+    /// <summary>Control + T (Mac)</summary>
+    MacControlT,
+    /// <summary>Control + U (Mac)</summary>
+    MacControlU,
+    /// <summary>Control + V (Mac)</summary>
+    MacControlV,
+    /// <summary>Control + W (Mac)</summary>
+    MacControlW,
+    /// <summary>Control + X (Mac)</summary>
+    MacControlX,
+    /// <summary>Control + Y (Mac)</summary>
+    MacControlY,
+    /// <summary>Control + Z (Mac)</summary>
+    MacControlZ,
+    /// <summary>Control + 0 (Mac)</summary>
+    MacControl0,
+    /// <summary>Control + 1 (Mac)</summary>
+    MacControl1,
+    /// <summary>Control + 2 (Mac)</summary>
+    MacControl2,
+    /// <summary>Control + 3 (Mac)</summary>
+    MacControl3,
+    /// <summary>Control + 4 (Mac)</summary>
+    MacControl4,
+    /// <summary>Control + 5 (Mac)</summary>
+    MacControl5,
+    /// <summary>Control + 6 (Mac)</summary>
+    MacControl6,
+    /// <summary>Control + 7 (Mac)</summary>
+    MacControl7,
+    /// <summary>Control + 8 (Mac)</summary>
+    MacControl8,
+    /// <summary>Control + 9 (Mac)</summary>
+    MacControl9,
+
+    /// <summary>Control + Alt + Home (Mac)</summary>
+    MacControlAltHome,
+    /// <summary>Control + Alt + End (Mac)</summary>
+    MacControlAltEnd,
+    /// <summary>Control + Alt + A (Mac)</summary>
+    MacControlAltA,
+    /// <summary>Control + Alt + B (Mac)</summary>
+    MacControlAltB,
+    /// <summary>Control + Alt + C (Mac)</summary>
+    MacControlAltC,
+    /// <summary>Control + Alt + D (Mac)</summary>
+    MacControlAltD,
+    /// <summary>Control + Alt + E (Mac)</summary>
+    MacControlAltE,
+    /// <summary>Control + Alt + F (Mac)</summary>
+    MacControlAltF,
+    /// <summary>Control + Alt + G (Mac)</summary>
+    MacControlAltG,
+    /// <summary>Control + Alt + H (Mac)</summary>
+    MacControlAltH,
+    /// <summary>Control + Alt + I (Mac)</summary>
+    MacControlAltI,
+    /// <summary>Control + Alt + J (Mac)</summary>
+    MacControlAltJ,
+    /// <summary>Control + Alt + K (Mac)</summary>
+    MacControlAltK,
+    /// <summary>Control + Alt + L (Mac)</summary>
+    MacControlAltL,
+    /// <summary>Control + Alt + M (Mac)</summary>
+    MacControlAltM,
+    /// <summary>Control + Alt + N (Mac)</summary>
+    MacControlAltN,
+    /// <summary>Control + Alt + O (Mac)</summary>
+    MacControlAltO,
+    /// <summary>Control + Alt + P (Mac)</summary>
+    MacControlAltP,
+    /// <summary>Control + Alt + Q (Mac)</summary>
+    MacControlAltQ,
+    /// <summary>Control + Alt + R (Mac)</summary>
+    MacControlAltR,
+    /// <summary>Control + Alt + S (Mac)</summary>
+    MacControlAltS,
+    /// <summary>Control + Alt + T (Mac)</summary>
+    MacControlAltT,
+    /// <summary>Control + Alt + U (Mac)</summary>
+    MacControlAltU,
+    /// <summary>Control + Alt + Alt + V (Mac)</summary>
+    MacControlAltV,
+    /// <summary>Control + Alt + W (Mac)</summary>
+    MacControlAltW,
+    /// <summary>Control + Alt + X (Mac)</summary>
+    MacControlAltX,
+    /// <summary>Control + Alt + Y (Mac)</summary>
+    MacControlAltY,
+    /// <summary>Control + Alt + Z (Mac)</summary>
+    MacControlAltZ,
+    /// <summary>Control + Alt + 0 (Mac)</summary>
+    MacControlAlt0,
+    /// <summary>Control + Alt + 1 (Mac)</summary>
+    MacControlAlt1,
+    /// <summary>Control + Alt + 2 (Mac)</summary>
+    MacControlAlt2,
+    /// <summary>Control + Alt + 3 (Mac)</summary>
+    MacControlAlt3,
+    /// <summary>Control + Alt + 4 (Mac)</summary>
+    MacControlAlt4,
+    /// <summary>Control + Alt + 5 (Mac)</summary>
+    MacControlAlt5,
+    /// <summary>Control + Alt + 6 (Mac)</summary>
+    MacControlAlt6,
+    /// <summary>Control + Alt + 7 (Mac)</summary>
+    MacControlAlt7,
+    /// <summary>Control + Alt + 8 (Mac)</summary>
+    MacControlAlt8,
+    /// <summary>Control + Alt + 9 (Mac)</summary>
+    MacControlAlt9,
+
+    /// <summary>Control + Option + Home (Mac)</summary>
+    MacControlOptionHome,
+    /// <summary>Control + Option + End (Mac)</summary>
+    MacControlOptionEnd,
+    /// <summary>Control + Option + A (Mac)</summary>
+    MacControlOptionA,
+    /// <summary>Control + Option + B (Mac)</summary>
+    MacControlOptionB,
+    /// <summary>Control + Option + C (Mac)</summary>
+    MacControlOptionC,
+    /// <summary>Control + Option + D (Mac)</summary>
+    MacControlOptionD,
+    /// <summary>Control + Option + E (Mac)</summary>
+    MacControlOptionE,
+    /// <summary>Control + Option + F (Mac)</summary>
+    MacControlOptionF,
+    /// <summary>Control + Option + G (Mac)</summary>
+    MacControlOptionG,
+    /// <summary>Control + Option + H (Mac)</summary>
+    MacControlOptionH,
+    /// <summary>Control + Option + I (Mac)</summary>
+    MacControlOptionI,
+    /// <summary>Control + Option + J (Mac)</summary>
+    MacControlOptionJ,
+    /// <summary>Control + Option + K (Mac)</summary>
+    MacControlOptionK,
+    /// <summary>Control + Option + L (Mac)</summary>
+    MacControlOptionL,
+    /// <summary>Control + Option + M (Mac)</summary>
+    MacControlOptionM,
+    /// <summary>Control + Option + N (Mac)</summary>
+    MacControlOptionN,
+    /// <summary>Control + Option + O (Mac)</summary>
+    MacControlOptionO,
+    /// <summary>Control + Option + P (Mac)</summary>
+    MacControlOptionP,
+    /// <summary>Control + Option + Q (Mac)</summary>
+    MacControlOptionQ,
+    /// <summary>Control + Option + R (Mac)</summary>
+    MacControlOptionR,
+    /// <summary>Control + Option + S (Mac)</summary>
+    MacControlOptionS,
+    /// <summary>Control + Option + T (Mac)</summary>
+    MacControlOptionT,
+    /// <summary>Control + Option + U (Mac)</summary>
+    MacControlOptionU,
+    /// <summary>Control + Option + V (Mac)</summary>
+    MacControlOptionV,
+    /// <summary>Control + Option + W (Mac)</summary>
+    MacControlOptionW,
+    /// <summary>Control + Option + X (Mac)</summary>
+    MacControlOptionX,
+    /// <summary>Control + Option + Y (Mac)</summary>
+    MacControlOptionY,
+    /// <summary>Control + Option + Z (Mac)</summary>
+    MacControlOptionZ,
+    /// <summary>Control + Option + 0 (Mac)</summary>
+    MacControlOption0,
+    /// <summary>Control + Option + 1 (Mac)</summary>
+    MacControlOption1,
+    /// <summary>Control + Option + 2 (Mac)</summary>
+    MacControlOption2,
+    /// <summary>Control + Option + 3 (Mac)</summary>
+    MacControlOption3,
+    /// <summary>Control + Option + 4 (Mac)</summary>
+    MacControlOption4,
+    /// <summary>Control + Option + 5 (Mac)</summary>
+    MacControlOption5,
+    /// <summary>Control + Option + 6 (Mac)</summary>
+    MacControlOption6,
+    /// <summary>Control + Option + 7 (Mac)</summary>
+    MacControlOption7,
+    /// <summary>Control + Option + 8 (Mac)</summary>
+    MacControlOption8,
+    /// <summary>Control + Option + 9 (Mac)</summary>
+    MacControlOption9,
+
+    /// <summary>Control + Shift + Home (Mac)</summary>
+    MacControlShiftHome,
+    /// <summary>Control + Shift + End (Mac)</summary>
+    MacControlShiftEnd,
+    /// <summary>Control + Shift + A (Mac)</summary>
+    MacControlShiftA,
+    /// <summary>Control + Shift + B (Mac)</summary>
+    MacControlShiftB,
+    /// <summary>Control + Shift + C (Mac)</summary>
+    MacControlShiftC,
+    /// <summary>Control + Shift + D (Mac)</summary>
+    MacControlShiftD,
+    /// <summary>Control + Shift + E (Mac)</summary>
+    MacControlShiftE,
+    /// <summary>Control + Shift + F (Mac)</summary>
+    MacControlShiftF,
+    /// <summary>Control + Shift + G (Mac)</summary>
+    MacControlShiftG,
+    /// <summary>Control + Shift + H (Mac)</summary>
+    MacControlShiftH,
+    /// <summary>Control + Shift + I (Mac)</summary>
+    MacControlShiftI,
+    /// <summary>Control + Shift + J (Mac)</summary>
+    MacControlShiftJ,
+    /// <summary>Control + Shift + K (Mac)</summary>
+    MacControlShiftK,
+    /// <summary>Control + Shift + L (Mac)</summary>
+    MacControlShiftL,
+    /// <summary>Control + Shift + M (Mac)</summary>
+    MacControlShiftM,
+    /// <summary>Control + Shift + N (Mac)</summary>
+    MacControlShiftN,
+    /// <summary>Control + Shift + O (Mac)</summary>
+    MacControlShiftO,
+    /// <summary>Control + Shift + P (Mac)</summary>
+    MacControlShiftP,
+    /// <summary>Control + Shift + Q (Mac)</summary>
+    MacControlShiftQ,
+    /// <summary>Control + Shift + R (Mac)</summary>
+    MacControlShiftR,
+    /// <summary>Control + Shift + S (Mac)</summary>
+    MacControlShiftS,
+    /// <summary>Control + Shift + T (Mac)</summary>
+    MacControlShiftT,
+    /// <summary>Control + Shift + U (Mac)</summary>
+    MacControlShiftU,
+    /// <summary>Control + Shift + V (Mac)</summary>
+    MacControlShiftV,
+    /// <summary>Control + Shift + W (Mac)</summary>
+    MacControlShiftW,
+    /// <summary>Control + Shift + X (Mac)</summary>
+    MacControlShiftX,
+    /// <summary>Control + Shift + Y (Mac)</summary>
+    MacControlShiftY,
+    /// <summary>Control + Shift + Z (Mac)</summary>
+    MacControlShiftZ,
+    /// <summary>Control + Shift + 0 (Mac)</summary>
+    MacControlShift0,
+    /// <summary>Control + Shift + 1 (Mac)</summary>
+    MacControlShift1,
+    /// <summary>Control + Shift + 2 (Mac)</summary>
+    MacControlShift2,
+    /// <summary>Control + Shift + 3 (Mac)</summary>
+    MacControlShift3,
+    /// <summary>Control + Shift + 4 (Mac)</summary>
+    MacControlShift4,
+    /// <summary>Control + Shift + 5 (Mac)</summary>
+    MacControlShift5,
+    /// <summary>Control + Shift + 6 (Mac)</summary>
+    MacControlShift6,
+    /// <summary>Control + Shift + 7 (Mac)</summary>
+    MacControlShift7,
+    /// <summary>Control + Shift + 8 (Mac)</summary>
+    MacControlShift8,
+    /// <summary>Control + Shift + 9 (Mac)</summary>
+    MacControlShift9,
   }
 
   /// <summary>

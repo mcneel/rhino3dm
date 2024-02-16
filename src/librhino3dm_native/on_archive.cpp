@@ -783,10 +783,10 @@ RH_C_FUNCTION void ON_ReadBufferArchive_Delete(ON_Read3dmBufferArchive* pReadBuf
     delete pReadBufferArchive;
 }
 
-RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, unsigned int* length)
+RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, bool writerendermeshes, bool writeanalysismeshes, unsigned int* length)
 {
   ON_Write3dmBufferArchive* rc = nullptr;
-
+  
   if( pConstObject && length && nullptr != rhinoversion)
   {
     ON_UserDataHolder holder;
@@ -810,6 +810,8 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON
     unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
 
     rc = new ON_Write3dmBufferArchive(sz, 0, *rhinoversion, on_version__to_write);
+    rc->EnableSave3dmRenderMeshes((unsigned int)ON::object_type::any_object, writerendermeshes);
+    rc->EnableSave3dmAnalysisMeshes((unsigned int)ON::object_type::any_object, writeanalysismeshes);
     if( rc->WriteObject(pConstObject) )
     {
       *length = (unsigned int)rc->SizeOfArchive();
