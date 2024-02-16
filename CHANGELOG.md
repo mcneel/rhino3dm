@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.4.0-beta] - UNRELEASED
+## [8.4.0] - UNRELEASED
 
 ### Added
 - (py) added macos-12 to python builds
@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (dotnet) Added File3dmMaterialTable.AddMaterial() that returns an index [#547](https://github.com/mcneel/rhino3dm/issues/547)
 - (dotnet) Added File3dmGroupTable.Add() that returns an index [#417](https://github.com/mcneel/rhino3dm/issues/417)
 - (py, js) File3dmObjectTable.Add( file3dmobject ) that returns an index [#517](https://github.com/mcneel/rhino3dm/issues/517)
+- (dotnet) Sync'ed with Rhino DotNetSDK 8.4 and OpenNURBS 8.4
+    - Include RevSurface.IsTransposed [#578](https://github.com/mcneel/rhino3dm/issues/578)
 
 ### Changed
 - (py, js) Mesh::CreateFromSubDControlNet now has a second bool argument. If true, the resulting subd will include texture coordinates. [#573](https://github.com/mcneel/rhino3dm/issues/573)
-- (py, js) Changed File3dmMaterialTable.Add() to returns an int [#547](https://github.com/mcneel/rhino3dm/issues/547)
+- (py, js) Changed File3dmMaterialTable.Add() to return an int [#547](https://github.com/mcneel/rhino3dm/issues/547)
 
 
 ## [8.0.1] - 2023-11-17
