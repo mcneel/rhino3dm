@@ -48,12 +48,12 @@ rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3d
 
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
-  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+  <script async src="https://unpkg.com/es-module-shims@1.8.2/dist/es-module-shims.js"></script>
 
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.0.0-beta2/rhino3dm.module.min.js"
+            "rhino3dm":"https://unpkg.com/rhino3dm@8.4.0/rhino3dm.module.min.js"
           }
       }
   </script>
