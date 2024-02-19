@@ -66,7 +66,7 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
@@ -83,7 +83,7 @@ jobs:
         cd wheelhouse
         echo "file=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
     - name: artifacts
-      uses: actions/upload-artifact@v4.3.1
+      uses: actions/upload-artifact@v3.1.3 #needs to stay this version until we upgrade this os
       with:
         path: wheelhouse/*.whl
         name: ${{ steps.artifactname.outputs.file }}
