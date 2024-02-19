@@ -18,7 +18,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - name: check changed files
@@ -35,7 +35,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - name: check changed files
@@ -55,7 +55,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - name: check changed files
@@ -72,7 +72,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - name: check changed files
@@ -96,7 +96,7 @@ jobs:
       - name: info
         run: python3 --version && emcc --version && cmake --version
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
       - name: safe dir
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
@@ -108,7 +108,7 @@ jobs:
       - name: build js
         run: python3 script/build.py -p js -o -v
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: 7.0.x
       - name: copy files
@@ -122,7 +122,7 @@ jobs:
           cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
           cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: src/build/javascript/artifacts_js
           name: rhino3dm.js
@@ -149,7 +149,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.5.0
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -157,13 +157,13 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: dist
           name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
@@ -176,7 +176,7 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     steps:
       - name: setup python
-        uses: actions/setup-python@v4.5.0
+        uses: actions/setup-python@v5.0.0
         with:
           # Semantic version range syntax or exact version of a Python version
           python-version: '3.7.x'
@@ -185,7 +185,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
       - name: update submodules
         run: git submodule update --init
       - name: build python sdist
@@ -218,7 +218,7 @@ jobs:
           cd dist
           echo "file=$(ls *.tar.gz| head -1)" >> $GITHUB_OUTPUT
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
@@ -234,7 +234,7 @@ jobs:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4.1.1
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
@@ -246,7 +246,7 @@ jobs:
       - name: build dotnet
         run: python3 script/build.py -p linux -v
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: |
             src/build/linux/dotnet/Rhino3dm.dll
