@@ -80,6 +80,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initSphereBindings(m);
   initViewportBindings(m);
   initGroupBindings(m);
+  initNotesBindings(m);
   initExtensionsBindings(m);
   initDracoBindings(m);
   initRTreeBindings(m);

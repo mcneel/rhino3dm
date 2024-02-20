@@ -122,6 +122,7 @@ BND_DateTime CreateDateTime(struct tm t);
 #include "bnd_viewport.h"
 #include "bnd_group.h"
 #include "bnd_mesh_modifiers.h"
+#include "bnd_notes.h"
 #include "bnd_extensions.h"
 #include "bnd_3dm_attributes.h"
 #include "bnd_draco.h"
