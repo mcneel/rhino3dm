@@ -80,6 +80,13 @@ RH_C_FUNCTION const RHMONO_STRING* ON_wString_Get(ON_wString* pString, CRhCmnStr
       rc = stringHolder->Array();
     }
 #endif
+#if defined (__linux__)
+    if (stringHolder)
+    {
+      stringHolder->Set(*pString);
+      rc = stringHolder->Array();
+    }
+#endif
   }
   return rc;
 }

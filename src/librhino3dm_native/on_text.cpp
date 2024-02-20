@@ -115,6 +115,20 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
   }
 }
 
+RH_C_FUNCTION void ON_AnnotationBase_GetPlainText(const ON_Annotation* constAnnotation, ON_wString* wstring)
+{
+  (*wstring) = constAnnotation->PlainText().Array();
+}
+
+RH_C_FUNCTION void ON_AnnotationBase_GetRichText(const ON_Annotation* constAnnotation, ON_wString* wstring)
+{
+  const ON_TextContent* text_content = constAnnotation->Text();
+  if (text_content)
+    *wstring = text_content->PlatformRichTextFromRuns().Array();
+  else
+    *wstring = ON_wString::EmptyString;
+}
+
 RH_C_FUNCTION void ON_V6_Annotation_GetPlainTextWithFields(const ON_Annotation* constAnnotation, ON_wString* wstring)
 {
   if (constAnnotation && wstring)

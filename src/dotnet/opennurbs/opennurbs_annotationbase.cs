@@ -673,7 +673,11 @@ namespace Rhino.Geometry
       {
         var ptr_stringholder = sw.NonConstPointer;
         IntPtr const_ptr_this = ConstPointer();
-        UnsafeNativeMethods.ON_V6_Annotation_GetTextString(const_ptr_this, ptr_stringholder, rich);
+        //UnsafeNativeMethods.ON_V6_Annotation_GetTextString(const_ptr_this, ptr_stringholder, rich);
+        if(rich)
+          UnsafeNativeMethods.ON_AnnotationBase_GetRichText(const_ptr_this, ptr_stringholder);
+        else
+          UnsafeNativeMethods.ON_AnnotationBase_GetPlainText(const_ptr_this, ptr_stringholder);
         return sw.ToString();
       }
     }
@@ -685,7 +689,8 @@ namespace Rhino.Geometry
       {
         var ptr_stringholder = sw.NonConstPointer;
         IntPtr const_ptr_this = ConstPointer();
-        UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithFields(const_ptr_this, ptr_stringholder);
+        //UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithFields(const_ptr_this, ptr_stringholder);
+        UnsafeNativeMethods.ON_AnnotationBase_GetPlainText(const_ptr_this, ptr_stringholder);
         return sw.ToString();
       }
     }
