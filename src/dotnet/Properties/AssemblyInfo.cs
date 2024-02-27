@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Rhino3dm")]
-[assembly: AssemblyDescription("Cross Platform Rhino.NET SDK")]
+[assembly: AssemblyDescription("Cross Platform Rhino dotnet SDK")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Robert McNeel & Associates")]
 [assembly: AssemblyProduct("Rhino")]
@@ -73,6 +73,8 @@ using System.Runtime.InteropServices;
 //#if RHINO3DMIO_BUILD
 //[assembly: AssemblyVersion("6.0.0.1")]
 //#endif
+
+[assembly: AssemblyVersion("8.5.0.0")]
 
 // 2013-12-19, Brian Gillespie
 // AssemblyFileVersion is set in /src4/version.h
