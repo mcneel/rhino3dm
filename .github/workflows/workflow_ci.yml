@@ -22,10 +22,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: .github/workflows/workflow_ci.yml
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
   
   #checks if build scripts have changed
   check_build_scripts:
@@ -39,13 +46,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: |
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
             script
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #checks if src/dotnet files have changed
   check_dotnet:
@@ -59,10 +73,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: src/dotnet
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #checks if src/bindings have changed
   check_bindings:
@@ -76,12 +97,19 @@ jobs:
         with:
           fetch-depth: 0
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: |
             src/bindings
             src/CMakeLists.txt
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #only run if src files have changed.
 
