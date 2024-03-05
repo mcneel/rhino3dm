@@ -46,7 +46,7 @@ public:
   //void SetPlainText(const std::wstring& text);
   //public string RichText{ get; set; }
   //public string PlainText{ get; set; }
-  //public string PlainTextWithFields{ get; }
+  std::wstring PlainTextWithFields() const;
   //public static string PlainTextToRtf(string str) = >
   //public void SetRichText(string rtfText, DimensionStyle dimstyle)
   //public bool TextHasRtfFormatting{ get; }
