@@ -940,8 +940,18 @@ declare module 'rhino3dm' {
 		encode(): object;
 		/** ... */
 		toJSON(): object;
-		/** ... */
-		static decode(): BoundingBox;
+		/**
+		 * @description Decodes a json object to a BoundingBox
+		 * @param {object} json A js object with the following format: 
+		 * ```js
+		 * { 
+		 * 		Min: { X: <number>, Y: <number>, Z: <number> }, 
+		 * 		Max: { X: <number>, Y: <number>, Z: <number> } 
+		 * }
+		 * ```
+		 * @returns {BoundingBox}
+		*/
+		static decode(json:object): BoundingBox;
 	}
 
 	class Box {
@@ -1358,8 +1368,20 @@ declare module 'rhino3dm' {
 		 * @returns {string}
 		 */
 		toJSON(): string;
-		/** ... */
-		static decode(): void;
+		/**
+		 * @description Decodes a Rhino Object
+		 * @param {object} json A json formatted object in the following format (values are orientative):
+		 * ```js
+		 * {
+		 *		version: 10000,
+		 *		archive3dm: 60,
+		 *		opennurbs: -1877964208,
+		 *		data: 'encoded 3dm object data'
+		 * }
+		 * ```
+		 * @returns {CommonObject}
+		*/
+		static decode(json:object): CommonObject;
 		/**
 		 * @description Attach a user string (key,value combination) to this geometry.
 		 * @param {string} key id used to retrieve this string.
@@ -2576,7 +2598,11 @@ declare module 'rhino3dm' {
 		toByteArray(): Uint8Array;
 		/** ... */
 		toByteArrayOptions(options:File3dmWriteOptions): Uint8Array;
-		/** ... */
+		/**
+		 * @description Creates a File3dm object from a string encoded File3dm
+		 * @param {string} buffer
+		 * @returns {File3dm}
+		*/
 		static decode(buffer: string): File3dm;
 		/** ... */
 		embeddedFilePaths(): string[];
@@ -4356,7 +4382,31 @@ declare module 'rhino3dm' {
 		toJSON(): object;
 		/** ... */
 		encode(): object;
-		/** ... */
+		/**
+		 * @description Creates a MeshingParameters object from json data
+		 * @param {object} json A js object in the following format (values are orientative):
+		 * ```js
+		 * 	{	TextureRange: 2,
+		 *		JaggedSeams: false,
+		 *		RefineGrid: true,
+		 *		SimplePlanes: false,
+		 *		ComputeCurvature: false,
+		 *		ClosedObjectPostProcess: false,
+		 *		GridMinCount: 0,
+		 *		GridMaxCount: 0,
+		 *		GridAngle: 0.3490658503988659,
+		 *		GridAspectRatio: 6,
+		 *		GridAmplification: 1,
+		 *		Tolerance: 0,
+		 *		MinimumTolerance: 0,
+		 *		RelativeTolerance: 0,
+		 *		MinimumEdgeLength: 0.0001,
+		 *		MaximumEdgeLength: 0,
+		 *		RefineAngle: 0.3490658503988659
+		 * 	} 
+		 * ```
+		 * @returns {MeshingParameters}
+		*/
 		static decode(json:object): MeshingParameters;
 	}
 
@@ -6174,11 +6224,32 @@ declare module 'rhino3dm' {
 		 * @returns {NurbsSurface} A nurbs surface representation of this sphere or null.
 		 */
 		toNurbsSurface(): NurbsSurface;
-		/** ... */
+		/**
+		 * @description Encodes a sphere to json formatted data.
+		 * @returns {object} A js object.
+		*/
 		encode(): object;
-		/** ... */
+		/** 
+		 * @description Encodes a sphere to json formatted data. Internally calls encode()
+		 * @returns {object} A js object.
+		*/
 		toJSON(): object;
-		/** ... */
+		/**
+		 * @description Decodes js formated sphere data into a Sphere
+		 * @param {object} json A js object in the following format: 
+		 * ```js
+		 * { 
+		 * 		Radius: <number>,
+		 *		EquatorialPlane: {
+		 *			Origin: { X: <number>, Y: <number>, Z: <number> },
+		 *			XAxis: { X: <number>, Y: <number>, Z: <number> },
+		 *			YAxis: { X: <number>, Y: <number>, Z: <number> },
+		 *			ZAxis: { X: <number>, Y: <number>, Z: <number> }
+		 *		}
+		 *}
+		 * ```
+		 * @returns {Sphere} 
+		*/
 		static decode(json:object): Sphere;
 	}
 
