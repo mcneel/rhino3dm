@@ -1579,7 +1579,7 @@ declare module 'rhino3dm' {
 		 * Evaluate unit tangent vector at the end of the curve.
 		 */
 		tangentAtEnd: number[];
-/**
+		/**
 		 * @description Constructs a curve from a set of control-point locations.
 		 * @param {number[][]} points Control points.
 		 * @param {number} degree Degree of curve. The number of control points must be at least degree+1.
@@ -4064,11 +4064,11 @@ declare module 'rhino3dm' {
 		 */
 		static createFromSubDControlNet(): Mesh;
 		/**
-+		 * @description Cretes a Three.js bufferGeometry from an array of Rhino meshes.
-+		 * @param {Mesh[]} meshes The array of Rhino meshes.
-+		 * @param {boolean} rotateYUp Whether or not to orient the result to Y up.
-+		 * @returns {object} A Three.js bufferGeometry.
-+		 */
+		 * @description Cretes a Three.js bufferGeometry from an array of Rhino meshes.
+		 * @param {Mesh[]} meshes The array of Rhino meshes.
+		 * @param {boolean} rotateYUp Whether or not to orient the result to Y up.
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
 		static toThreejsJSONMerged(meshes: Mesh[], rotateYUp: boolean ): object;
 		/**
 		 * @description Returns true if every mesh "edge" has at most two faces.
@@ -4142,21 +4142,21 @@ declare module 'rhino3dm' {
 		 */
 		createPartitions(): boolean;
 		/**
-+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
-+		 * @returns {object} A Three.js bufferGeometry.
-+		 */
+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
 		toThreejsJSON(): object;
 		/**
-+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
-+		 * @param {boolean} rotateToYUp Rotate the result to Y up.
-+		 * @returns {object} A Three.js bufferGeometry.
-+		 */
+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
+		 * @param {boolean} rotateToYUp Rotate the result to Y up.
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
 		toThreejsJSON(rotateToYUp: boolean): object;	
 		/**
-+		 * @description Creates a Rhino mesh from a Three.js buffer geometry. 
-+		 * @param {object} object A js object in the form of { data: bufferGeometry }
-+		 * @returns {Mesh}
-+		 */
+		 * @description Creates a Rhino mesh from a Three.js buffer geometry. 
+		 * @param {object} object A js object in the form of { data: bufferGeometry }
+		 * @returns {Mesh}
+		 */
 		static createFromThreejsJSON( object: object ): Mesh;
 	}
 
@@ -5449,9 +5449,9 @@ declare module 'rhino3dm' {
 		 */
 		closestPoint(testPoint:number[]): number;
 		/**
-+		 * @description Converts a Rhino point cloud to a Three.js bufferGeometry
-+		 * @returns {object} A Three.js bufferGeometry.
-+		 */
+		 * @description Converts a Rhino point cloud to a Three.js bufferGeometry
+		 * @returns {object} A Three.js bufferGeometry.
+		 */
 		toThreejsJSON(): object;
 	}
 
