@@ -4142,7 +4142,7 @@ declare module 'rhino3dm' {
 		 */
 		createPartitions(): boolean;
 		/**
-		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
+		 * @description Creates a Three.js bufferGeometry from a Rhino mesh.
 		 * @returns {object} A Three.js bufferGeometry.
 		 */
 		toThreejsJSON(): object;
