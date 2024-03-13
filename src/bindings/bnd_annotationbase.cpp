@@ -18,11 +18,11 @@ std::wstring BND_AnnotationBase::RichText() const
   const ON_TextContent* text_content = m_annotation->Text();
   if (text_content)
     rc = text_content->PlatformRichTextFromRuns();
+  else
+    //opennurbs_font.cpp ON::RichTextStyleFromCurrentPlatform() does hot have a Rich Text Style for Linux
+    rc = m_annotation->RichText().Array();
   return rc;
 }
-
-//to trigger change
-//another change
 
 std::wstring BND_AnnotationBase::PlainText() const
 {
@@ -35,8 +35,6 @@ std::wstring BND_AnnotationBase::PlainTextWithFields() const
   std::wstring rc(m_annotation->PlainTextWithFields());
   return rc;
 }
-
-
 
 BND_TextDot::BND_TextDot(ON_TextDot* dot, const ON_ModelComponentReference* compref)
 {
