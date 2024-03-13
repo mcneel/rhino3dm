@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\dotnet\Rhino3dm.csproj" />
+    <ProjectReference Include="../../src/dotnet/Rhino3dm.csproj" />
   </ItemGroup>
 
 </Project>
