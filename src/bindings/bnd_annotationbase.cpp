@@ -21,6 +21,8 @@ std::wstring BND_AnnotationBase::RichText() const
   return rc;
 }
 
+//to trigger change
+
 std::wstring BND_AnnotationBase::PlainText() const
 {
   std::wstring rc(m_annotation->PlainText());

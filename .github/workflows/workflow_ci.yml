@@ -20,7 +20,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
         uses: tj-actions/changed-files@v42
         id: changed-files
@@ -44,7 +44,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
         uses: tj-actions/changed-files@v42
         id: changed-files
@@ -71,7 +71,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
         uses: tj-actions/changed-files@v42
         id: changed-files
@@ -95,7 +95,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
         uses: tj-actions/changed-files@v42
         id: changed-files
