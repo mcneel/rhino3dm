@@ -21,11 +21,10 @@ foreach( var ro in file3dm.Objects )
 {
     var te = ro.Geometry as Rhino.Geometry.TextEntity;
     if( te != null) {
-        string plainText = te.PlainText;
         Console.WriteLine("-----------");
-        Console.WriteLine("Plain text: {0}", plainText);
-        Console.WriteLine("Rich text: {0}", te.RichText);
+        Console.WriteLine("Plain text: {0}", te.PlainText);
         Console.WriteLine("Plain text with fields: {0}", te.PlainTextWithFields);
+        Console.WriteLine("Rich text: {0}", te.RichText);
     }
 }
 
