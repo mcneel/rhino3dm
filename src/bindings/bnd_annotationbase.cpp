@@ -22,6 +22,7 @@ std::wstring BND_AnnotationBase::RichText() const
 }
 
 //to trigger change
+//another change
 
 std::wstring BND_AnnotationBase::PlainText() const
 {

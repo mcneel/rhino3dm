@@ -52,7 +52,7 @@ jobs:
           files: |
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
-            script
+            script/**
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -76,7 +76,7 @@ jobs:
         uses: tj-actions/changed-files@v42
         id: changed-files
         with:
-          files: src/dotnet
+          files: src/dotnet/**
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -101,7 +101,7 @@ jobs:
         id: changed-files
         with:
           files: |
-            src/bindings
+            src/bindings/**
             src/CMakeLists.txt
       - name: List all changed files
         env:
