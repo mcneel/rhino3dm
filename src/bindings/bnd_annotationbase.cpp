@@ -18,6 +18,8 @@ std::wstring BND_AnnotationBase::RichText() const
   const ON_TextContent* text_content = m_annotation->Text();
   if (text_content)
     rc = text_content->PlatformRichTextFromRuns();
+    if(rc.empty())
+      rc = L"This didn't work";
   else
     //opennurbs_font.cpp ON::RichTextStyleFromCurrentPlatform() does hot have a Rich Text Style for Linux
     rc = m_annotation->RichText().Array();
