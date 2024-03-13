@@ -1,18 +1,34 @@
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 
 #include "../../src/lib/opennurbs/opennurbs_public.h"
 
-int main(int argc, char *argv[])
+namespace fs = std::filesystem;
+
+int main()
 {
     std::cout << "Reading textEntities_r8.3dm!" << std::endl;
     ON::Begin();
 
-    const std::wstring sFileName = L"textEntities_r8.3dm";
+    fs::path dir = fs::current_path();
+
+    if (dir.filename().string() == "build")
+    {
+        dir = dir.parent_path();
+    }
+
+    std::cout << dir << std::endl;
+
+    fs::path file("textEntities_r8.3dm");
+
+    fs::path full_path = dir / file;
+
+    std::cout << full_path << std::endl;
 
     ON_TextLog log;
 
-    FILE *fp = ON_FileStream::Open3dmToRead(sFileName.c_str());
+    FILE *fp = ON_FileStream::Open3dmToRead(full_path.c_str());
 
     if (!fp)
     {
@@ -59,34 +75,31 @@ int main(int argc, char *argv[])
             }
         }
 
-        //const ON_ModelComponent *model_component = mcr.ModelComponent();
-        //std::cout << model_component->ObjectType() << std::endl;
+        // const ON_ModelComponent *model_component = mcr.ModelComponent();
+        // std::cout << model_component->ObjectType() << std::endl;
     }
 
-    for(int i = 0; i < count; i ++)
+    for (int i = 0; i < count; i++)
     {
         ON_ModelComponentReference compref = m_compref_cache[i];
 
-        const ON_ModelComponent* model_component = compref.ModelComponent();
-        const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
-       // std::cout << geometryComponent->ObjectType() << std::endl;
-        
-        ON_Object* obj = const_cast<ON_Geometry*>(geometryComponent->Geometry(nullptr));
-        ON_Geometry* geometry = ON_Geometry::Cast(obj);
+        const ON_ModelComponent *model_component = compref.ModelComponent();
+        const ON_ModelGeometryComponent *geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+
+        ON_Object *obj = const_cast<ON_Geometry *>(geometryComponent->Geometry(nullptr));
+        ON_Geometry *geometry = ON_Geometry::Cast(obj);
+
         std::cout << geometry->ObjectType() << std::endl;
-        ON_Annotation* annotation = ON_Annotation::Cast(obj);
+
+        ON_Annotation *annotation = ON_Annotation::Cast(obj);
+
         std::wstring pt(annotation->PlainText());
-        wprintf(annotation->PlainText());
-        std::cout << std::endl;
+        std::wstring ptwf(annotation->PlainTextWithFields());
+        std::wstring rt(annotation->RichText());
 
-        wprintf(annotation->RichText());
-        std::cout << std::endl;
-
-        wprintf(annotation->PlainTextWithFields());
-        std::cout << std::endl;
-        //std::cout << pt.c_str() << std::endl;
-        //std::cout << annotation->RichText().Array() << std::endl;
-        //std::cout << annotation->PlainTextWithFields().Array() << std::endl;
+        std::wcout << pt << std::endl;
+        std::wcout << ptwf << std::endl;
+        std::wcout << rt << std::endl;
     }
 
     std::cout << "Bye!" << std::endl;
