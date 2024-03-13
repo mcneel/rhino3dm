@@ -66,7 +66,7 @@ RH_C_FUNCTION const RHMONO_STRING* ON_wString_Get(ON_wString* pString, CRhCmnStr
     UNREFERENCED_PARAMETER(stringHolder);
     rc = pString->Array();
 #endif
-#if defined (__APPLE__)
+#if defined (__APPLE__) || defined (__linux__)
     if (stringHolder)
     {
       stringHolder->Set(*pString);
