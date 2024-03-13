@@ -17,19 +17,19 @@ std::wstring BND_AnnotationBase::RichText() const
   std::wstring rc;
   const ON_TextContent* text_content = m_annotation->Text();
   if (text_content)
-    rc = text_content->PlatformRichTextFromRuns().Array();
+    rc = text_content->PlatformRichTextFromRuns();
   return rc;
 }
 
 std::wstring BND_AnnotationBase::PlainText() const
 {
-  std::wstring rc(m_annotation->PlainText().Array());
+  std::wstring rc(m_annotation->PlainText());
   return rc;
 }
 
 std::wstring BND_AnnotationBase::PlainTextWithFields() const
 {
-  std::wstring rc(m_annotation->PlainTextWithFields().Array());
+  std::wstring rc(m_annotation->PlainTextWithFields());
   return rc;
 }
 
