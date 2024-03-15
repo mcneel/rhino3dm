@@ -530,6 +530,10 @@ declare module 'rhino3dm' {
 		 * Text stripped of RTF formatting information
 		 */
 		plainText: string;
+		/**
+		 * Return plain text string for this annotation with field expressions unevaluated
+		 */
+		plainTextWithFields: string;
 	}
 
 	class Arc {
