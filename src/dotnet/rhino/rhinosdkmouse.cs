@@ -100,6 +100,11 @@ namespace Rhino.UI
     {
       get { return (m_flags & MK_CONTROL) == MK_CONTROL; }
     }
+    
+    public uint Flags
+    {
+      get { return m_flags; }
+    }
 
     /// <since>5.0</since>
     public System.Drawing.Point ViewportPoint
