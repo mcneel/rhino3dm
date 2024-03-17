@@ -36,7 +36,7 @@ BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
   return pbr;
 }
 
-void BND_Material::ToPhysicallyBased() 
+void BND_Material::ToPhysicallyBased()
 {
 
   if(m_material)
@@ -164,6 +164,7 @@ void initMaterialBindings(pybind11::module& m)
     .def(py::init<const BND_Material&>(), py::arg("other"))
     .def_static("CompareAppearance", &BND_Material::CompareAppearance, py::arg("material1"), py::arg("material2"))
     .def_property("RenderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
+    .def_property_readonly("RdkMaterialInstanceId", &BND_Material::GetRdkMaterialInstanceId)
     .def_property("Name", &BND_Material::GetName, &BND_Material::SetName)
     .def_property("Shine", &BND_Material::GetShine, &BND_Material::SetShine)
     .def_property("Transparency", &BND_Material::GetTransparency, &BND_Material::SetTransparency)
