@@ -25,6 +25,7 @@ public:
   //public void CopyFrom(Material other)
   BND_UUID GetRenderPlugInId() const { return ON_UUID_to_Binding(m_material->MaterialPlugInId()); }
   void SetRenderPlugInId(const BND_UUID& id) { m_material->SetMaterialPlugInId(Binding_to_ON_UUID(id)); }
+  BND_UUID GetRdkMaterialInstanceId() const { return ON_UUID_to_Binding(m_material->RdkMaterialInstanceId()); }
   int GetMaterialIndex() const { return m_material->Index(); }
   void SetMaterialIndex(int i) { m_material->SetIndex(i); }
   std::wstring GetName() const { return std::wstring(m_material->NameAsPointer()); }
