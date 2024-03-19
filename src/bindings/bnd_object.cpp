@@ -1499,9 +1499,16 @@ std::wstring BND_CommonObject::RdkXml() const
   return rc;
 }
 
-
-
-
+BND_TUPLE BND_CommonObject::IsValidWithLog() const
+{
+  BND_TUPLE rc = CreateTuple(2);
+  ON_wString str("");
+  ON_TextLog log(str);
+  bool isValid = m_object->IsValid(&log);
+  SetTuple(rc, 0, isValid);
+  SetTuple(rc, 1, std::wstring(str));
+  return rc;
+}
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -1509,6 +1516,7 @@ void initObjectBindings(pybind11::module& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
     .def_property_readonly("IsValid", &BND_CommonObject::IsValid)
+    .def_property_readonly("IsValidWithLog", &BND_CommonObject::IsValidWithLog)
     .def("Encode", &BND_CommonObject::Encode)
     .def_static("Decode", &BND_CommonObject::Decode, py::arg("jsonObject"))
     .def("SetUserString", &BND_CommonObject::SetUserString, py::arg("key"), py::arg("value"))
@@ -1533,6 +1541,7 @@ void initObjectBindings(void*)
 {
   class_<BND_CommonObject>("CommonObject")
     .property("isValid", &BND_CommonObject::IsValid)
+    .property("isValidWithLog", &BND_CommonObject::IsValidWithLog)
     .function("encode", &BND_CommonObject::Encode)
     .function("toJSON", &BND_CommonObject::toJSON)
     .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers())

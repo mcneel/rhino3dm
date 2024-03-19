@@ -27,6 +27,7 @@ public:
 #endif
 
   bool IsValid() const { return m_object->IsValid(); }
+  BND_TUPLE IsValidWithLog() const;
   BND_CommonObject* Duplicate() const;
   bool SetUserString(std::wstring key, std::wstring value);
   std::wstring GetUserString(std::wstring key);
