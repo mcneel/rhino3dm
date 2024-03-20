@@ -1189,6 +1189,12 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
   m_model->AddModelComponent(*_idef);
 }
 
+int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(const BND_TUPLE& geometry, const BND_TUPLE& attributes)
+{
+  
+  return geometry.size() + attributes.size();
+}
+
 
 int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<BND_GeometryBase>& geometry, const std::vector<BND_3dmObjectAttributes>& attributes)
 {
@@ -1738,6 +1744,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>(s.cast<BND_File3dmInstanceDefinitionTable &>(), s); })
     .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("idef"))
     .def("AddInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, py::arg("name"), py::arg("description"), py::arg("url"), py::arg("urlTag"), py::arg("basePoint"), py::arg("geometry"), py::arg("attributes"))
+    .def("AddInstanceDefinition2", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2)
     .def("FindIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmInstanceDefinitionTable::FindId, py::arg("id"))
     ;
