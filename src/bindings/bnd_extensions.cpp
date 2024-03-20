@@ -2010,6 +2010,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmInstanceDefinitionTable::Count)
     .function("get", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmInstanceDefinitionTable::Add)
+    .function("addInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, allow_raw_pointers())
     .function("findIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmInstanceDefinitionTable::FindId, allow_raw_pointers())
     ;
