@@ -443,7 +443,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
 {
   ON_PolylineCurve plc(points.m_polyline);
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
@@ -487,7 +487,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddEllipse(const BND_Ellipse& ellipse, const 
   ON_NurbsCurve nc;
   if (ellipse.m_ellipse.GetNurbForm(nc) != 0)
   {
-    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, nullptr);
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, attributes);
     return ON_UUID_to_Binding(rc);
   }
   return ON_UUID_to_Binding(ON_nil_uuid);
@@ -566,6 +566,51 @@ BND_UUID BND_ONXModel_ObjectTable::AddObject(const class BND_FileObject* object)
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, object->m_attributes);
   return ON_UUID_to_Binding(rc);
 }
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject1(const class BND_InstanceReferenceGeometry* instanceReference)
+{
+  const ON_Geometry* g = instanceReference ? instanceReference->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject2(const class BND_InstanceReferenceGeometry* instanceReference, const class BND_3dmObjectAttributes* attributes)
+{
+  const ON_Geometry* g = instanceReference ? instanceReference->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+/*
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject3(int idefIndex, const class BND_Transform& transform)
+{
+  ON_UUID rc = ON_nil_uuid;
+  const ON_ModelComponentReference& idef_component_ref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, idefIndex);
+
+  if (!idef_component_ref.IsEmpty())
+    {
+      const ON_InstanceDefinition* idef = ON_InstanceDefinition::Cast(idef_component_ref.ModelComponent());
+      if (nullptr != idef)
+      {
+        ON_InstanceRef iref;
+        iref.m_instance_definition_uuid = idef->Id();
+        const ON_Xform* xform = transform ? &(transform->m_xform) : nullptr;
+        iref.m_xform = *xform;
+        // Internal_ONX_Model_AddModelGeometry makes a copy
+        rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &iref, nullptr);
+      }
+    }
+  }
+
+  return rc;
+
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject4(int idefIndex, const class BND_Transform& transform, const class BND_3dmObjectAttributes* attributes)
+{
+  return ON_nil_uuid;
+}
+*/
 
 void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
 {
@@ -1575,6 +1620,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep, py::arg("brep"), py::arg("attributes")=nullptr)
     .def("AddHatch", &BND_ONXModel_ObjectTable::AddHatch, py::arg("hatch"), py::arg("attributes")=nullptr)
     .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
+    .def("AddInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject1, py::arg("idef") )
+    .def("AddInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, py::arg("idef"), py::arg("attributes")=nullptr)
     .def("AddObject", &BND_ONXModel_ObjectTable::AddObject, py::arg("object"))
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
@@ -1895,6 +1942,7 @@ void initExtensionsBindings(void*)
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
     .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
+    .function("addInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())

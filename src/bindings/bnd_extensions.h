@@ -59,10 +59,12 @@ public:
   BND_UUID AddTextDot(std::wstring text, const ON_3dPoint& location, const class BND_3dmObjectAttributes* attributes);
   //Guid AddTextDot3(Geometry.TextDot dot)
   //Guid AddTextDot4(Geometry.TextDot dot, DocObjects.ObjectAttributes attributes)
-  //Guid AddInstanceObject1(InstanceReferenceGeometry instanceReference)
-  //Guid AddInstanceObject2(InstanceReferenceGeometry instanceReference, ObjectAttributes attributes)
+  BND_UUID AddInstanceObject1(const class BND_InstanceReferenceGeometry* instanceReference);
+  BND_UUID AddInstanceObject2(const class BND_InstanceReferenceGeometry* instanceReference, const class BND_3dmObjectAttributes* attributes);
   //Guid AddInstanceObject3(int instanceDefinitionIndex, Transform instanceXform)
+  //BND_UUID AddInstanceObject3(int idefIndex, const class BND_Transform& transform);
   //Guid AddInstanceObject4(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
+  //BND_UUID AddInstanceObject4(int idefIndex, const class BND_Transform& transform, const class BND_3dmObjectAttributes* attributes);
   //Guid AddText1(string text, Plane plane, double height, string fontName, bool bold, bool italic)
   //Guid AddText2(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification)
   //Guid AddText3(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, DocObjects.ObjectAttributes attributes)
