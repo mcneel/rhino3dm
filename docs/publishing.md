@@ -16,7 +16,7 @@ There are several places where version numbers should be updated:
 ## Updating Documentation with docgen
 
 ### requirements:
-- javascript - jsdoc and docdash: `npm i -g docdash jsdoc`
+
 - python - 
   - sphinx: `python3 -m pip install sphinx`
   - theme: `python3 -m pip install sphinx-rtd-theme`
@@ -27,12 +27,18 @@ There are several places where version numbers should be updated:
 2. build docgen: `dotnet build docgen.csproj`
 3. run docgen: `cd bin/Debug && ./docgen`
 4. generate docs:
-    1. javascript: `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
+    1. javascript: 
+        - New System: 
+          - change to `src/js/docs` directory
+          - install dependencies (only first time): `npm i`
+          - generate docs: `npm run docs`
+        - Old system: 
+          - istall dependencies: `npm i -g docdash jsdoc`
+          - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
     2. python: 
         - `sphinx-build -M html out/py_apidocs out/py_apidocs/sphinxout`
         - replace the docs in docs/python/api with the docs generated in src/docgen/out/py_apidocs/sphinxout/html
 5. commit these changes and merge with `main`
-
 
 ## JavaScript
 

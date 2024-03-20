@@ -102,3 +102,5 @@ Properties/
 
 .venv/
 tests/SampleCppReadTextEntity/build
+
+src/js/docs/docs
