@@ -212,6 +212,15 @@ Curve
 
       :rtype: CurveOrientation
 
+   .. py:method:: ClosedCurveOrientation(plane)
+
+      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world XY plane.
+      Only works with simple (no self intersections) closed, planar curves.
+
+      :return: The orientation of this curve with respect to world XY plane.
+
+      :rtype: CurveOrientation
+
    .. py:method:: PointAt(t)
 
       Evaluates point at a curve parameter.
@@ -276,6 +285,25 @@ Curve
          - The frame is returned here. \
 
       :rtype: (bool, rhino3dm.Plane)
+
+   .. py:method:: DerivativeAt(t, derivativeCount)
+
+      Evaluate the derivatives at the specified curve parameter.
+
+      :param float t: Curve parameter to evaluate.
+      :param int derivativeCount: Number of derivatives to evaluate, must be at least 0.
+
+      :return: An array of vectors that represents all the derivatives starting at zero.
+
+      :rtype: rhino3dm.Vector3d[]
+
+   .. py:method:: DerivativeAt(t, derivativeCount, side)
+
+      Evaluate the derivatives at the specified curve parameter.
+
+      :return: An array of vectors that represents all the derivatives starting at zero.
+
+      :rtype: rhino3dm.Vector3d[]
 
    .. py:method:: GetCurveParameterFromNurbsFormParameter(nurbsParameter)
 

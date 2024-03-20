@@ -4521,6 +4521,8 @@ namespace Rhino.FileIO
       RhinoVersion = 7;
 #endif
       WriteUserData = true;
+      WriteRenderMeshes = true;
+      WriteAnalysisMeshes = true;
     }
 
     /// <summary>
@@ -4534,5 +4536,16 @@ namespace Rhino.FileIO
     /// </summary>
     /// <since>5.0</since>
     public bool WriteUserData { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to write render meshes
+    /// </summary>
+    public bool WriteRenderMeshes { get; set; }
+
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to write analysis meshes
+    /// </summary>
+    public bool WriteAnalysisMeshes { get; set; }
   }
 }

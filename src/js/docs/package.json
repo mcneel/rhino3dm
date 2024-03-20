@@ -1,0 +1,14 @@
+{
+  "name": "rhino3dm.js.docs",
+  "version": "0.0.1",
+  "description": "Generates rhino3dm.js documentation from typescript file.",
+  "main": "index.js",
+  "scripts": {
+    "docs": "npx typedoc ../rhino3dm.d.ts --readme ../../../docs/javascript/RHINO3DM.JS.md && cp -rp ./docs/* ../../../docs/javascript/api/"
+  },
+  "author": "Luis E. Fraguada",
+  "license": "MIT",
+  "devDependencies": {
+    "typedoc": "^0.25.11"
+  }
+}

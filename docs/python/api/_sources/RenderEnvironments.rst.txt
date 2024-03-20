@@ -1,0 +1,31 @@
+RenderEnvironments
+==================
+
+.. py:module:: rhino3dm
+
+.. py:class:: RenderEnvironments
+
+   .. py:method:: RenderEnvironments()
+
+      RenderEnvironments constructor
+
+
+   .. py:method:: RenderEnvironments()
+
+      RenderEnvironments constructor
+
+
+   .. py:attribute:: BackgroundId
+
+
+   .. py:attribute:: SkylightingId
+
+
+   .. py:attribute:: SkylightingOverride
+
+
+   .. py:attribute:: ReflectionId
+
+
+   .. py:attribute:: ReflectionOverride
+

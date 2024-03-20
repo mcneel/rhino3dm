@@ -21,6 +21,32 @@ NurbsSurfacePointList
 
       [todo] add documentation
 
+   .. py:method:: GetPoint(u, v)
+
+      Gets a world 3-D, or Euclidean, control point at the given (u, v) index.
+      The 4-D representation is (x, y, z, 1.0).
+
+      :param int u: Index of control point in the surface U direction.
+      :param int v: Index of control point in the surface V direction.
+
+      :return: tuple (bool, rhino3dm.Point3d)
+
+         - True on success, False on failure.
+         - Coordinate of control point. \
+
+      :rtype: (bool, rhino3dm.Point3d)
+
+   .. py:method:: GetControlPoint(u, v)
+
+      Gets the control point at the given (u, v) index.
+
+      :param int u: Index of control point in the surface U direction.
+      :param int v: Index of control point in the surface V direction.
+
+      :return: The control point at the given (u, v) index.
+
+      :rtype: ControlPoint
+
    .. py:method:: __setitem__()
 
       [todo] add documentation

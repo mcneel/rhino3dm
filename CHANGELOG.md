@@ -4,15 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.3.0-beta] - UNRELEASED
+## [8.6.0-beta1] - Unreleased
+
+### Added
+- (py, js) CommonObject.IsValidWithLog that returns a tuple {bool valid, string log} [#598](https://github.com/mcneel/rhino3dm/issues/598)
+- (dotnet, py, js) Material.RenderMaterialInstanceId [#596](https://github.com/mcneel/rhino3dm/issues/596)
+
+### Changed
+- (js) js docs now use typedoc for generating documentation from `src/js/rhino3dm.d.ts` [#594](https://github.com/mcneel/rhino3dm/issues/594)
+
+### Fixed
+
+## [8.6.0-beta] - 2024.03.15
+diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta
+
+### Added
+- (py, js) Added Annotation.PlainTextWithFields
+
+### Fixed
+- (dotnet, py, js) Annotation.PlainText, PlanTextWithFields, and RichText was returning empty strings, or gibberish across all languages and platforms. [#585](https://github.com/mcneel/rhino3dm/issues/585)
+
+## [8.4.0] - 2024.02.19
+diff: https://github.com/mcneel/rhino3dm/compare/8.0.1...8.4.0
 
 ### Added
 - (py) added macos-12 to python builds
 - (dotnet) File3dm.EarthAnchorPoint [#554](https://github.com/mcneel/rhino3dm/issues/554)
+- (dotnet) Added File3dmMaterialTable.AddMaterial() that returns an index [#547](https://github.com/mcneel/rhino3dm/issues/547)
+- (dotnet) Added File3dmGroupTable.Add() that returns an index [#417](https://github.com/mcneel/rhino3dm/issues/417)
+- (py, js) File3dmObjectTable.Add( file3dmobject ) that returns an index [#517](https://github.com/mcneel/rhino3dm/issues/517)
+- (dotnet) Sync'ed with Rhino DotNetSDK 8.4 and OpenNURBS 8.4
+    - Include RevSurface.IsTransposed [#578](https://github.com/mcneel/rhino3dm/issues/578)
 
 ### Changed
 - (py, js) Mesh::CreateFromSubDControlNet now has a second bool argument. If true, the resulting subd will include texture coordinates. [#573](https://github.com/mcneel/rhino3dm/issues/573)
-
+- (py, js) Changed File3dmMaterialTable.Add() to return an int [#547](https://github.com/mcneel/rhino3dm/issues/547)
 
 
 ## [8.0.1] - 2023-11-17

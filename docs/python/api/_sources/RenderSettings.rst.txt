@@ -101,3 +101,53 @@ RenderSettings
    .. py:attribute:: SpecificViewport
 
       str: Set or get the given specific viewport
+
+   .. py:attribute:: GroundPlane
+
+      GroundPlane: If this object is associated with a document, this gets the document ground plane.
+      If this object is associated with a File3dm, this gets the File3dm's ground plane.
+      Otherwise it gets a 'free-floating' ground plane object.
+
+   .. py:attribute:: SafeFrame
+
+      SafeFrame: If this object is associated with a document, this gets the document safe-frame.
+      If this object is associated with a File3dm, this gets the File3dm's safe-frame.
+      Otherwise it gets a 'free-floating' safe-frame object.
+
+   .. py:attribute:: Dithering
+
+      Dithering: If this object is associated with a document, this gets the document dithering.
+      If this object is associated with a File3dm, this gets the File3dm's dithering.
+      Otherwise it gets a 'free-floating' dithering object.
+
+   .. py:attribute:: Skylight
+
+      Skylight: If this object is associated with a document, this gets the document skylight.
+      If this object is associated with a File3dm, this gets the File3dm's skylight.
+      Otherwise it gets a 'free-floating' skylight object.
+
+   .. py:attribute:: LinearWorkflow
+
+      LinearWorkflow: If this object is associated with a document, this gets the document linear workflow.
+      If this object is associated with a File3dm, this gets the File3dm's linear workflow.
+      Otherwise it gets a 'free-floating' linear workflow object.
+
+   .. py:attribute:: RenderChannels
+
+      RenderChannels: If this object is associated with a document, this gets the document render channels.
+      Otherwise it gets a 'free-floating' render channels object.
+
+   .. py:attribute:: Sun
+
+      Sun: If this object is associated with a document, this gets the document sun.
+      If this object is associated with a File3dm, this gets the File3dm's sun.
+      Otherwise it gets a 'free-floating' sun object.
+
+   .. py:attribute:: RenderEnvironments
+
+
+   .. py:attribute:: PostEffects
+
+      PostEffectCollection: If this object is associated with a document, this gets the document post effect data collection.
+      If this object is associated with a File3dm, this gets the File3dm's post effect data collection.
+      Otherwise it gets a 'free-floating' post effect data collection object.

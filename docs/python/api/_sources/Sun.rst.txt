@@ -1,0 +1,106 @@
+Sun
+===
+
+.. py:module:: rhino3dm
+
+.. py:class:: Sun
+
+   .. py:method:: Sun()
+
+      Sun constructor
+
+
+   .. py:method:: Sun()
+
+      Sun constructor
+
+
+   .. py:attribute:: MinYear
+
+
+   .. py:attribute:: MaxYear
+
+
+   .. py:attribute:: Vector
+
+
+   .. py:attribute:: EnableAllowed
+
+
+   .. py:attribute:: EnableOn
+
+
+   .. py:attribute:: ManualControlAllowed
+
+
+   .. py:attribute:: ManualControlOn
+
+      bool: Manual control 'on' state. When true, allows the user to set the sun
+      azimuth and altitude directly. When false, the values are computed.
+
+   .. py:attribute:: North
+
+      float: Angle in degrees on world X-Y plane that should be considered north in the model.
+      The angle is measured starting at the x-axis and increases anti-clockwise. The y-axis
+      corresponds to a 'north' angle of 90 degrees.
+
+   .. py:attribute:: Azimuth
+
+      float: The sun's azimuth in degrees. The value increases Eastwards with North as zero.
+      Setting this value will also set the sun to manual control mode.
+      Note: This value is not affected by the direction of north.
+
+   .. py:attribute:: Altitude
+
+      float: The sun's altitude above the horizon in degrees in the range -90 to +90.
+      Setting this value will also set the sun to manual control mode.
+
+   .. py:attribute:: Latitude
+
+      float: The observer's latitude.
+
+   .. py:attribute:: Longitude
+
+      float: The observer's longitude.
+
+   .. py:attribute:: TimeZone
+
+      float: The observer's time zone measured in hours relative to UTC.
+
+   .. py:attribute:: DaylightSavingOn
+
+      bool: Daylight saving time 'on' state
+
+   .. py:attribute:: DaylightSavingMinutes
+
+      int: Daylight saving time in minutes
+
+   .. py:attribute:: Year
+
+
+   .. py:attribute:: Month
+
+
+   .. py:attribute:: Day
+
+
+   .. py:attribute:: Hours
+
+
+   .. py:attribute:: Intensity
+
+      float: Sun intensity.
+
+   .. py:attribute:: IsValid
+
+
+   .. py:attribute:: Light
+
+      Geometry.Light: Get a Light which represents the sun. If manual control is in effect, no sun calculation
+      is performed; the function uses the last known values of azimuth and altitude.
+      If manual control is not in effect, the observer's position, date, time, time zone and
+      daylight saving values are used to calculate the position of the sun.
+
+   .. py:staticmethod:: SunColorFromAltitude()
+
+      [todo] add documentation

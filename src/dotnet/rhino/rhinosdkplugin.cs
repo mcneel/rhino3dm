@@ -3807,7 +3807,8 @@ namespace Rhino.PlugIns
         g_ui_content_types_callback,
         g_save_custom_render_file_callback,
         g_render_settings_sections_callback,
-        g_plugin_icon_callback
+        g_plugin_icon_callback,
+        g_initial_channel_to_display
         );
     }
 
@@ -3987,6 +3988,30 @@ namespace Rhino.PlugIns
 
       return true;
     }
+
+    internal delegate Guid InitialChannelToDisplayCallback(int serialNumber);
+    private static readonly InitialChannelToDisplayCallback g_initial_channel_to_display = PlugInInitialChannelToDisplay;
+    private static Guid PlugInInitialChannelToDisplay(int serialNumber)
+    {
+      // Get the runtime plug-in to call
+      var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
+      if (render_plug_in == null)
+        return Guid.Empty;
+
+      try
+      {
+        return render_plug_in.InitialChannelToDisplay;
+      }
+
+      catch (Exception exception)
+      {
+        Runtime.HostUtils.ExceptionReport(exception);
+      }
+
+      return Guid.Empty;
+    }
+
+    
 
     internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
     private static readonly SaveCusomtomRenderFileCallback g_save_custom_render_file_callback = OnSaveCusomtomRenderFile;
@@ -4278,6 +4303,20 @@ namespace Rhino.PlugIns
           rc.Add(new FileIO.FileType(shExt.ToString(), shDesc.ToString()));
         }
         return rc;
+      }
+    }
+
+    protected virtual Guid InitialChannelToDisplay
+    {
+      get
+      {
+        //Just hard code the default channel ID - it's easier than calling back into C++
+        //const UUID IRhRdkRenderWindow::chanRGBA =
+        //{
+        //  0x453a9a1c, 0x9307, 0x4976, { 0xb2, 0x82, 0x4e, 0xad, 0x4d, 0x53, 0x98, 0x79 }
+        //};
+
+        return new Guid("453a9a1c-9307-4976-b282-4ead4d539879");
       }
     }
 

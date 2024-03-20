@@ -32,9 +32,7 @@ Polyline
 
    .. py:attribute:: IsClosed
 
-      bool: Gets a value that indicates whether this polyline is closed.
-      The polyline is considered to be closed if its start is
-      identical to its endpoint.
+      bool: Test a polyline to see if it is closed.
 
    .. py:attribute:: Length
 
@@ -42,12 +40,14 @@ Polyline
 
    .. py:method:: IsClosedWithinTolerance(tolerance)
 
-      Determines whether the polyline is closed, provided a tolerance value.
+      Test a polyline to see if it is closed.
 
-      :param float tolerance: If the distance between the start and end point of the polyline \
-         is less than tolerance, the polyline is considered to be closed.
+      :param float tolerance: The tolerance.
 
-      :return: True if the polyline is closed to within tolerance, False otherwise.
+      :return: Returns True if polyline has 4 or more points, the distance between the \
+         start and end points is <= tolerance, and there is a \
+         point in the polyline whose distance from the start and end \
+         points is > tolerance.
 
       :rtype: bool
 
@@ -102,6 +102,24 @@ Polyline
       :return: A curve shaped like this polyline or None on failure.
 
       :rtype: PolylineCurve
+
+   .. py:method:: GetSegments()
+
+      Constructs an array of line segments that make up the entire polyline.
+
+      :return: An array of line segments or None if the polyline contains fewer than 2 points.
+
+      :rtype: Line[]
+
+   .. py:method:: SegmentAt(index)
+
+      Gets the line segment at the given index.
+
+      :param int index: Index of segment to retrieve.
+
+      :return: Line segment at index or Line.Unset on failure.
+
+      :rtype: Line
 
    .. py:staticmethod:: CreateInscribedPolygon(circle, sideCount)
 

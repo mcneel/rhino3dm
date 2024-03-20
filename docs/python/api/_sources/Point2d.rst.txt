@@ -24,6 +24,10 @@ Point2d
 
       [todo] add documentation
 
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
    .. py:method:: DistanceTo(other)
 
       Computes the distance between two points.

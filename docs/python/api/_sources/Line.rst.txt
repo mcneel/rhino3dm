@@ -52,3 +52,13 @@ Line
       :return: The point at the specified parameter.
 
       :rtype: rhino3dm.Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transform the line using a Transformation matrix.
+
+      :param Transform xform: Transform to apply to this line.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool

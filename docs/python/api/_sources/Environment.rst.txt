@@ -1,0 +1,23 @@
+Environment
+===========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Environment
+
+   .. py:method:: Environment()
+
+      Environment constructor
+
+
+   .. py:attribute:: BackgroundColor
+
+      System.Drawing.Color: The background color.
+
+   .. py:attribute:: BackgroundImage
+
+      Texture: The background image texture.
+
+   .. py:attribute:: BackgroundProjection
+
+      BackgroundProjections: The background projection.

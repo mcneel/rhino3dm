@@ -53,7 +53,7 @@ Mesh
       int: Number of partition information chunks stored on this mesh based
       on the last call to CreatePartitions
 
-   .. py:staticmethod:: CreateFromSubDControlNet(subd)
+   .. py:staticmethod:: CreateFromSubDControlNet(subd, includeTextureCoordinates)
 
       Create a mesh from a SubD control net
 

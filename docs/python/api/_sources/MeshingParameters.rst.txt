@@ -126,7 +126,7 @@ MeshingParameters
 
    .. py:attribute:: RefineAngle
 
-      float: Gets or sets the mesh parameter refine angle.
+      float: Gets or sets the mesh parameter refine angle in radians.
 
    .. py:method:: Encode()
 

@@ -549,12 +549,25 @@ namespace Rhino.Display
     double GetDouble(int which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetDouble(pConstThis, which, false, 0);
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetDouble(pConstThis, which);
     }
     void SetDouble(int which, double d)
     {
       IntPtr pThis = NonConstPointer();
-      UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetDouble(pThis, which, true, d);
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetDouble(pThis, which, d);
+    }
+    #endregion
+
+    #region float
+    float GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat which)
+    {
+      IntPtr pConstThis = ConstPointer();
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetFloat(pConstThis, which);
+    }
+    void SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat which, float d)
+    {
+      IntPtr pThis = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetFloat(pThis, which, d);
     }
     #endregion
 
@@ -570,7 +583,19 @@ namespace Rhino.Display
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetInt(ptr_this, which, true, i);
     }
     #endregion
-    
+
+    #region byte
+    int GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte which)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetByte(const_ptr_this, which);
+    }
+    void SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte which, int i)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetByte(ptr_this, which, i);
+    }
+    #endregion
     #region Curves specific attributes...
     /// <summary>Draw curves</summary>
     /// <since>5.1</since>
@@ -590,6 +615,22 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleCurveColor, value); }
     }
 
+    public enum CurveThicknessType : int
+    {
+      UseObjectWidth = 0,
+      Pixels = 1
+    }
+
+    /// <summary>
+    /// Use a pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
+    /// </summary>
+    public CurveThicknessType CurveThicknessUsage
+    { 
+      get { return (CurveThicknessType)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)value);
+      }
+    }
+
     //bool m_bUseDefaultCurve; -- doesn't appear to be used in display pipelane
     /// <summary>Pixel thickness for curves</summary>
     /// <since>5.1</since>
@@ -597,6 +638,15 @@ namespace Rhino.Display
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CurveThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.CurveThickness, (int)value); }
+    }
+
+    /// <summary>
+    /// Scale thickness for curves
+    /// </summary>
+    public float CurveThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.CurveThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.CurveThicknessScale, value); }
     }
 
     //UINT m_nCurvePattern;
@@ -869,10 +919,33 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowLights); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowLights, value); }
     }
+
+    public enum LightingSchema
+    {
+      None = 0,
+      DefaultLighting = 1,
+      SceneLighting = 2,
+      CustomLighting = 3,
+      AmbientOcclusion = 4
+    }
+
+    //ELightingScheme m_eLightingScheme;
+    public LightingSchema LightingScheme
+    {
+      get
+      {
+        return (LightingSchema)GetInt(UnsafeNativeMethods.DisplayAttributesInt.LightingScheme);
+      }
+      set
+      {
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.LightingScheme, (int)value);
+      }
+    }
+
     //bool m_bUseHiddenLights;
     //bool m_bUseLightColor;
     //bool m_bUseDefaultLightingScheme;
-    //ELightingScheme m_eLightingScheme;
+    
     //bool m_bUseDefaultEnvironment;
     //int m_nLuminosity;
     /// <since>6.3</since>
@@ -1267,6 +1340,70 @@ namespace Rhino.Display
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetStereoRenderContext(ptr, (UnsafeNativeMethods.StereoRenderContext)value);
+      }
+    }
+    /// <summary>
+    /// Get or set the front material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// </summary>
+    public double FrontMaterialShine
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine, value);
+      }
+    }
+    /// <summary>
+    /// Get or set the back material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// </summary>
+    public double BackMaterialShine
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine, value);
+      }
+    }
+    /// <summary>
+    /// Get or set the front material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// </summary>
+    public double FrontMaterialTransparency
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency, value);
+      }
+    }
+    /// <summary>
+    /// Get or set the back material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// </summary>
+    public double BackMaterialTransparency
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency, value);
       }
     }
   }

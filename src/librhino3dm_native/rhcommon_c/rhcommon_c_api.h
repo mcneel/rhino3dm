@@ -166,7 +166,8 @@ RH_CPP_FUNCTION bool RhInShutDown();
 
 struct ON_2DPOINT_STRUCT { double val[2]; };
 struct ON_2DVECTOR_STRUCT { double val[2]; };
-struct ON_INTERVAL_STRUCT{ double val[2]; };
+struct ON_INTERVAL_STRUCT { double val[2]; };
+struct ON_2FVECTOR_STRUCT { double val[2]; };
 
 struct ON_3DPOINT_STRUCT{ double val[3]; };
 struct ON_LINE_STRUCT{ ON_3DPOINT_STRUCT from; ON_3DPOINT_STRUCT to; };

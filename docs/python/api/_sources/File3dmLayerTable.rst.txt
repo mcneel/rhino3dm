@@ -23,13 +23,12 @@ File3dmLayerTable
 
    .. py:method:: AddLayer(name, color)
 
-      Easy way to add a layer to the model
+      Easy way to add a new layer to the model.
 
-      :param str name: new layer name
-      :param System.Drawing.Color color: new layer color
+      :param str name: Layer name.
+      :param System.Drawing.Color color: Layer color.
 
-      :return: If layer_name is valid, the layer's index (>=0) is returned. Otherwise, \
-         RhinoMath.UnsetIntIndex is returned.
+      :return: The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 
       :rtype: int
 

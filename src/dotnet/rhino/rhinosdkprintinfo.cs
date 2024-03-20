@@ -1078,6 +1078,24 @@ namespace Rhino.Display
       set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.PrintWidthDefaultMM, value); }
     }
 
+    /// <summary>
+    /// Horizontal stretch to be applied to output. Useful for calibrating printers
+    /// </summary>
+    public double HorizontalScale
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.HorizontalScale); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.HorizontalScale, value); }
+    }
+
+    /// <summary>
+    /// Vertical stretch to be applied to output. Useful for calibrating printers
+    /// </summary>
+    public double VerticalScale
+    {
+      get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.VerticalScale); }
+      set { SetDouble(UnsafeNativeMethods.PrintInfoDouble.VerticalScale, value); }
+    }
+
     /// <since>6.8</since>
     public enum ColorMode
     {

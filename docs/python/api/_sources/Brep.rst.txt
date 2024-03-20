@@ -22,6 +22,10 @@ Brep
 
       Collections.BrepEdgeList: Gets the brep edges list accessor.
 
+   .. py:attribute:: Vertices
+
+      Collections.BrepVertexList: Gets the brep vertices list accessor.
+
    .. py:attribute:: IsSolid
 
       bool: Determines whether this brep is a solid, or a closed oriented manifold.
@@ -40,22 +44,27 @@ Brep
       natural parametric orientation and the orientation of the Brep.trivial trimming here means that there is only one loop curve in the brep
       and that loop curve is the same as the underlying surface boundary.
 
-   .. py:staticmethod:: CreateFromMesh(mesh, trimedTriangles)
+   .. py:staticmethod:: TryConvertBrep(geometry)
+
+      Attempts to convert a generic Geometry object into a Brep.
+
+      :param rhino3dm.GeometryBase geometry: Geometry to convert, not all types of GeometryBase can be represented by BReps.
+
+      :return: Brep if a brep form could be created or None if this is not possible. If geometry was of type Brep to \
+         begin with, the same object is returned, i.e. it is not duplicated.
+
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: CreateFromMesh(mesh, trimmedTriangles)
 
       Create a brep representation of a mesh
 
 
       :rtype: rhino3dm.Brep
 
-   .. py:staticmethod:: CreateFromBox(box)
+   .. py:staticmethod:: CreateFromBoundingBox(bbox)
 
-      Constructs new brep that matches a bounding box.
-
-      :param rhino3dm.BoundingBox box: A box to use for creation.
-
-      :return: A new brep; or None on failure.
-
-      :rtype: rhino3dm.Brep
+      [todo] add documentation
 
    .. py:staticmethod:: CreateFromBox(box)
 

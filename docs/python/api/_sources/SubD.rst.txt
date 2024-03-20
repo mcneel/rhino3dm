@@ -36,10 +36,7 @@ SubD
 
    .. py:method:: Subdivide(count)
 
-      Apply the Catmull-Clark subdivision algorithm and save the results in
-      this SubD
-
-      :param int count: Number of times to subdivide (must be greater than 0)
+      Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
 
       :return: True on success
 

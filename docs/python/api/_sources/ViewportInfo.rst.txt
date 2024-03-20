@@ -13,8 +13,9 @@ ViewportInfo
    .. py:attribute:: IsValidCameraFrame
 
 
-   .. py:attribute:: isValidCamer
+   .. py:attribute:: IsValidCamera
 
+      bool: Gets a value that indicates whether the camera is valid.
 
    .. py:attribute:: IsValidFrustum
 
@@ -72,6 +73,16 @@ ViewportInfo
       is not 36/24.  (35mm film is 36mm wide and 24mm high.)
       Setting preserves camera location,
       changes the frustum, but maintains the frustum's aspect.
+
+   .. py:attribute:: TargetPoint
+
+      rhino3dm.Point3d: The current value of the target point.  This point does not play
+      a role in the view projection calculations.  It can be used as a
+      fixed point when changing the camera so the visible regions of the
+      before and after frustums both contain the region of interest.
+      The default constructor sets this point on ON_3dPoint::UnsetPoint.
+      You must explicitly call one SetTargetPoint() functions to set
+      the target point.
 
    .. py:attribute:: Id
 
@@ -205,7 +216,20 @@ ViewportInfo
 
    .. py:method:: GetFrustum()
 
-      [todo] add documentation
+      Gets the view frustum.
+
+
+      :return: tuple (bool, float, float, float, float, float, float)
+
+         - True if operation succeeded; otherwise, false.
+         - A left value that will be filled during the call. \
+         - A right value that will be filled during the call. \
+         - A bottom value that will be filled during the call. \
+         - A top value that will be filled during the call. \
+         - A near distance value that will be filled during the call. \
+         - A far distance value that will be filled during the call. \
+
+      :rtype: (bool, float, float, float, float, float, float)
 
    .. py:method:: SetScreenPort()
 
@@ -240,11 +264,16 @@ ViewportInfo
    .. py:method:: GetScreenPort()
 
       Gets the location of viewport in pixels.
-      See documentation for SetScreenPort.
+      See value meanings in SetScreenPort.
 
-      :return: The rectangle, or Empty rectangle on error.
 
-      :rtype: System.Drawing.Rectangle
+      :return: tuple (System.Drawing.Rectangle, int, int)
+
+         - The rectangle, or Empty rectangle on error.
+         - The near value. This out parameter is assigned during the call. \
+         - The far value. This out parameter is assigned during the call. \
+
+      :rtype: (System.Drawing.Rectangle, int, int)
 
    .. py:method:: GetXform(sourceCoordinateSystem, destinationCoordinateSystem)
 

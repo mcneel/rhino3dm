@@ -32,9 +32,17 @@ Circle
       float: Gets or sets the diameter (radius * 2.0) of this circle.
       Diameters should be positive values.
 
+   .. py:attribute:: Plane
+
+      rhino3dm.Plane: Gets or sets the plane of the circle.
+
    .. py:attribute:: Center
 
       rhino3dm.Point3d: Gets or sets the center point of this circle.
+
+   .. py:attribute:: BoundingBox
+
+      rhino3dm.BoundingBox: Gets the circle's 3d axis aligned bounding box.
 
    .. py:attribute:: Normal
 
@@ -43,6 +51,17 @@ Circle
    .. py:attribute:: Circumference
 
       float: Gets or sets the circumference of this circle.
+
+   .. py:method:: IsInPlane(plane, tolerance)
+
+      Evaluates whether or not this circle is co-planar with a given plane.
+
+      :param rhino3dm.Plane plane: Plane.
+      :param float tolerance: Tolerance to use.
+
+      :return: True if the circle plane is co-planar with the given plane within tolerance.
+
+      :rtype: bool
 
    .. py:method:: PointAt(t)
 
@@ -77,6 +96,19 @@ Circle
 
       :rtype: rhino3dm.Vector3d
 
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets the parameter on the circle which is closest to a test point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto the circle.
+
+      :return: tuple (bool, float)
+
+         - True on success, False on failure.
+         - Parameter on circle closes to testPoint. \
+
+      :rtype: (bool, float)
+
    .. py:method:: ClosestPoint(testPoint)
 
       Gets the point on the circle which is closest to a test point.
@@ -87,6 +119,16 @@ Circle
          Point3d.Unset on failure.
 
       :rtype: rhino3dm.Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transforms this circle using an transformation matrix.
+
+      :param Transform xform: Transformation to apply.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
 
    .. py:method:: Translate(delta)
 

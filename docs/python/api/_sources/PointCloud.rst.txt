@@ -33,6 +33,9 @@ PointCloud
       bool: Gets a value indicating whether or not the points in this
       point cloud have normals assigned to them.
 
+   .. py:attribute:: ContainsValues
+
+
    .. py:attribute:: ContainsHiddenFlags
 
       bool: Gets a value indicating whether or not the points in this
@@ -87,7 +90,7 @@ PointCloud
 
    .. py:method:: Merge(other)
 
-      Copies the point values of another point cloud into this one.
+      Merges, or appends, a specified point cloud into this one.
 
       :param PointCloud other: PointCloud to merge with this one.
 
@@ -117,7 +120,21 @@ PointCloud
 
       :rtype: void
 
-   .. py:method:: Add(point, normal, normal)
+   .. py:method:: Add(point, normal, color)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, value)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, normal, normal, value)
 
       Append a new point to the end of the list.
 
@@ -154,6 +171,20 @@ PointCloud
 
       :rtype: void
 
+   .. py:method:: AddRange(points, values)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, normals, colors, values)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
    .. py:method:: Insert(index, point)
 
       Inserts a new point into the point list.
@@ -179,6 +210,20 @@ PointCloud
       :rtype: void
 
    .. py:method:: Insert(index, point, normal, color)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, value)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, normal, color, value)
 
       Inserts a new point into the point list.
 
@@ -236,6 +281,10 @@ PointCloud
       :return: An array containing all the colors in this point cloud.
 
       :rtype: Color[]
+
+   .. py:method:: GetValues()
+
+      [todo] add documentation
 
    .. py:method:: ClosestPoint(testPoint)
 
