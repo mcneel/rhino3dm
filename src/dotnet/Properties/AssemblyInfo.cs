@@ -74,7 +74,7 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyVersion("6.0.0.1")]
 //#endif
 
-[assembly: AssemblyVersion("8.6.0.0")]
+[assembly: AssemblyVersion("8.6.0.1")]
 
 // 2013-12-19, Brian Gillespie
 // AssemblyFileVersion is set in /src4/version.h
