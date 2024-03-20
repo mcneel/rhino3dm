@@ -191,7 +191,7 @@ public:
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::InstanceDefinition); }
   void Add(const class BND_InstanceDefinitionGeometry& idef);
   int AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<BND_GeometryBase>& geometry, const std::vector<BND_3dmObjectAttributes>& attributes);
-  int AddInstanceDefinition2(const BND_TUPLE& geometry, const BND_TUPLE& attributes);
+  int AddInstanceDefinition2(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const BND_TUPLE& geometry, const BND_TUPLE& attributes);
   // pulic int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
   //int Add(std::wstring name, std::wstring description, std::wstring url, std::wstring urlTag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes);
   // public int AddLinked(string filename, string name, string description)
