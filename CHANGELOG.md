@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.6.0-beta1] - Unreleased
 
 ### Added
-- (py, js) CommonObject.IsValidWithLog that returns a tuple {bool valid, string log}
+- (py, js) CommonObject.IsValidWithLog that returns a tuple {bool valid, string log} [#598](https://github.com/mcneel/rhino3dm/issues/598)
+- (dotnet, py, js) Material.RenderMaterialInstanceId [#596](https://github.com/mcneel/rhino3dm/issues/596)
 
 ### Changed
 

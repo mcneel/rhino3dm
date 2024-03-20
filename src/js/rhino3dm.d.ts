@@ -3982,6 +3982,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		transparentColor: number[];
+		/**
+		 */
+		renderMaterialInstanceId: string;
 		/** ... */
 		static compareAppearance(material1: Material, material2: Material): number;
 		/**
