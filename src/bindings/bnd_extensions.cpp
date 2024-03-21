@@ -1189,12 +1189,12 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
   m_model->AddModelComponent(*_idef);
 }
 
-int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const BND_TUPLE& geometry, const BND_TUPLE& attributes)
+int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes)
 {
 
   int index = -1;
-  const int count_g = (int)geometry.size();
-  const int count_a = (int)attributes.size();
+  const int count_g = geometry["length"].as<int>();
+  const int count_a = attributes["length"].as<int>();
 
   if(m_model && count_g > 0) 
   {
@@ -1212,10 +1212,10 @@ int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(std::wstring name
     for ( int i = 0; i < count_g; i ++ ) 
     {
 
-      BND_GeometryBase g = geometry[i].cast<BND_GeometryBase>();
+      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();
       const ON_Geometry* pConstGeom = g.GeometryPointer();
 
-      BND_3dmObjectAttributes oa = attributes[i].cast<BND_3dmObjectAttributes>();
+      BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
       const ON_3dmObjectAttributes* pConstAtts = i < count_a ? oa.m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
 
       if (pConstGeom && pConstAtts)
