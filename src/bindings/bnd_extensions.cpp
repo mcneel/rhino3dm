@@ -1189,6 +1189,90 @@ void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometr
   m_model->AddModelComponent(*_idef);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<BND_GeometryBase>& geometry, const std::vector<BND_3dmObjectAttributes>& attributes)
+{
+  int index = -1;
+  const int count_g = (int)geometry.size();
+  const int count_a = (int)attributes.size();
+
+  if(m_model && count_g > 0) 
+  {
+    // Determine if we need to transform geometry to world origin
+    ON_Xform xf;
+    ON_Xform* pXform = nullptr;
+    if (basePoint.IsValid() && basePoint != ON_3dPoint::Origin)
+    {
+      xf = ON_Xform::TranslationTransformation(ON_3dPoint::Origin - basePoint);
+      pXform = &xf;
+    }
+
+    ON_SimpleArray<ON_UUID> object_uuids;
+
+    for ( int i = 0; i < count_g; i ++ ) 
+    {
+      const ON_Geometry* pConstGeom = geometry[i].GeometryPointer();
+      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? attributes[i].m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
+
+      if (pConstGeom && pConstAtts)
+      {
+        ON_Geometry* pGeom = pConstGeom->Duplicate(); // Copy so we can transform
+        if (pGeom)
+        {
+          // Make certain that proper flags are set for instance definiton geometry
+          ON_3dmObjectAttributes atts(*pConstAtts);
+          atts.m_uuid = ON_nil_uuid;
+          atts.SetMode(ON::object_mode::idef_object);
+          atts.RemoveFromAllGroups();
+          atts.m_space = ON::model_space;
+          atts.m_viewport_id = ON_nil_uuid;
+
+          // Transform if needed
+          if (pXform)
+          {
+            atts.Transform(pGeom, *pXform);
+            pGeom->Transform(*pXform);
+          }
+
+          //have to pass in BND_3dmObjectAttributes to Internal_ONX_Model_AddModelGeometry
+          BND_3dmObjectAttributes _atts;
+          _atts.m_attributes = &atts;
+          ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(m_model.get(), pGeom, &_atts);
+          if (ON_UuidIsNotNil(uuid))
+            object_uuids.Append(uuid);
+
+          delete pGeom; // Don't leak...
+        }
+      }
+
+    }
+
+    if (object_uuids.Count())
+    {
+      ON_InstanceDefinition* idef = new ON_InstanceDefinition();
+      if (nullptr != idef)
+      {
+        idef->SetInstanceGeometryIdList(object_uuids);
+        idef->SetInstanceDefinitionType(ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static);
+        idef->SetName(name.c_str());
+        idef->SetDescription(description.c_str());
+        idef->SetURL(url.c_str());
+        idef->SetURL_Tag(url_tag.c_str());
+        ON_ModelComponentReference model_component_reference = m_model->AddManagedModelComponent(idef, true);
+        if (!model_component_reference.IsEmpty())
+        {
+          const ON_ModelComponent* model_component = model_component_reference.ModelComponent();
+          if (nullptr != model_component)
+            index = model_component->Index();
+        }
+      }
+    }
+  }
+
+  return index;
+
+}
+#else
 int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes)
 {
 
@@ -1279,91 +1363,7 @@ int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition2(std::wstring name
   
   return index;
 }
-
-
-int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, const std::vector<BND_GeometryBase>& geometry, const std::vector<BND_3dmObjectAttributes>& attributes)
-{
-  int index = -1;
-  const int count_g = (int)geometry.size();
-  const int count_a = (int)attributes.size();
-
-  if(m_model && count_g > 0) 
-  {
-    // Determine if we need to transform geometry to world origin
-    ON_Xform xf;
-    ON_Xform* pXform = nullptr;
-    if (basePoint.IsValid() && basePoint != ON_3dPoint::Origin)
-    {
-      xf = ON_Xform::TranslationTransformation(ON_3dPoint::Origin - basePoint);
-      pXform = &xf;
-    }
-
-    ON_SimpleArray<ON_UUID> object_uuids;
-
-    for ( int i = 0; i < count_g; i ++ ) 
-    {
-      const ON_Geometry* pConstGeom = geometry[i].GeometryPointer();
-      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? attributes[i].m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
-
-      if (pConstGeom && pConstAtts)
-      {
-        ON_Geometry* pGeom = pConstGeom->Duplicate(); // Copy so we can transform
-        if (pGeom)
-        {
-          // Make certain that proper flags are set for instance definiton geometry
-          ON_3dmObjectAttributes atts(*pConstAtts);
-          atts.m_uuid = ON_nil_uuid;
-          atts.SetMode(ON::object_mode::idef_object);
-          atts.RemoveFromAllGroups();
-          atts.m_space = ON::model_space;
-          atts.m_viewport_id = ON_nil_uuid;
-
-          // Transform if needed
-          if (pXform)
-          {
-            atts.Transform(pGeom, *pXform);
-            pGeom->Transform(*pXform);
-          }
-
-          //have to pass in BND_3dmObjectAttributes to Internal_ONX_Model_AddModelGeometry
-          BND_3dmObjectAttributes _atts;
-          _atts.m_attributes = &atts;
-          ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(m_model.get(), pGeom, &_atts);
-          if (ON_UuidIsNotNil(uuid))
-            object_uuids.Append(uuid);
-
-          delete pGeom; // Don't leak...
-        }
-      }
-
-    }
-
-    if (object_uuids.Count())
-    {
-      ON_InstanceDefinition* idef = new ON_InstanceDefinition();
-      if (nullptr != idef)
-      {
-        idef->SetInstanceGeometryIdList(object_uuids);
-        idef->SetInstanceDefinitionType(ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static);
-        idef->SetName(name.c_str());
-        idef->SetDescription(description.c_str());
-        idef->SetURL(url.c_str());
-        idef->SetURL_Tag(url_tag.c_str());
-        ON_ModelComponentReference model_component_reference = m_model->AddManagedModelComponent(idef, true);
-        if (!model_component_reference.IsEmpty())
-        {
-          const ON_ModelComponent* model_component = model_component_reference.ModelComponent();
-          if (nullptr != model_component)
-            index = model_component->Index();
-        }
-      }
-    }
-  }
-
-  return index;
-
-}
-
+#endif
 
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
