@@ -1183,13 +1183,13 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindId(BND_UUID id) const
 }
 
 
-void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometry& idef)
+void BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(const BND_InstanceDefinitionGeometry& idef)
 {
   const ON_InstanceDefinition* _idef = idef.m_idef;
   m_model->AddModelComponent(*_idef);
 }
 
-int BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes)
+int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes)
 {
 
   int index = -1;
@@ -1752,8 +1752,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmInstanceDefinitionTable::Count)
     .def("__getitem__", &BND_File3dmInstanceDefinitionTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>(s.cast<BND_File3dmInstanceDefinitionTable &>(), s); })
-    .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("idef"))
-    .def("AddInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, py::arg("name"), py::arg("description"), py::arg("url"), py::arg("urlTag"), py::arg("basePoint"), py::arg("geometry"), py::arg("attributes"))
+    .def("AddInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, py::arg("idef"))
+    .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("name"), py::arg("description"), py::arg("url"), py::arg("urlTag"), py::arg("basePoint"), py::arg("geometry"), py::arg("attributes"))
     .def("FindIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmInstanceDefinitionTable::FindId, py::arg("id"))
     ;
@@ -2025,8 +2025,8 @@ void initExtensionsBindings(void*)
   class_<BND_File3dmInstanceDefinitionTable>("File3dmInstanceDefinitionTable")
     .property("count", &BND_File3dmInstanceDefinitionTable::Count)
     .function("get", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
-    .function("add", &BND_File3dmInstanceDefinitionTable::Add)
-    .function("addInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, allow_raw_pointers())
+    .function("addInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition)
+    .function("add", &BND_File3dmInstanceDefinitionTable::Add, allow_raw_pointers())
     .function("findIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmInstanceDefinitionTable::FindId, allow_raw_pointers())
     ;
