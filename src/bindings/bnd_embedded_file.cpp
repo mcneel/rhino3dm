@@ -35,11 +35,11 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string 
   int length = sbuffer.length();
   const void* buffer = sbuffer.c_str();
 
-  ON_Buffer* b = new ON_Buffer;
-  b->Write(length, buffer);
+  ON_Buffer b;
+  b.Write(length, buffer);
 
   ON_EmbeddedFile* ef = new ON_EmbeddedFile();
-  ef->LoadFromBuffer(*b);
+  ef->LoadFromBuffer(b);
 
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
@@ -140,7 +140,7 @@ void initEmbeddedFileBindings(void*)
 
     .constructor<>()
     .constructor<const BND_File3dmEmbeddedFile&>()
-    .class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
+    //.class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
     .class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
     .property("fileName", &BND_File3dmEmbeddedFile::GetFilename)
