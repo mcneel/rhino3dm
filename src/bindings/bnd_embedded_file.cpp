@@ -29,6 +29,24 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
 
+//#if defined(ON_WASM_COMPILE)
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string sbuffer)
+{
+  int length = sbuffer.length();
+  const void* buffer = sbuffer.c_str();
+  void* nc_buffer = &buffer;
+  ON_Buffer* b = new ON_Buffer;
+  b->Read(length, nc_buffer);
+
+  //loadfrombuffer
+
+  ON_EmbeddedFile* ef = new ON_EmbeddedFile();
+  ef->LoadFromBuffer(*b);
+
+  return new BND_File3dmEmbeddedFile(ef, nullptr);
+}
+//#endif
+
 void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref)
 {
   _ef = ef;
@@ -100,8 +118,8 @@ namespace py = pybind11;
 void initEmbeddedFileBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmEmbeddedFile>(m, "EmbeddedFile")
-    //.def(py::init<>())
-    //.def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
+    .def(py::init<>())
+    .def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
     .def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
     .def_property_readonly("FileName", &BND_File3dmEmbeddedFile::GetFilename)
@@ -122,9 +140,10 @@ void initEmbeddedFileBindings(void*)
     //reading an embedded file thus makes little sense.
     //writing seems to have issues
 
-    //.constructor<>()
-    //.constructor<const BND_File3dmEmbeddedFile&>()
+    .constructor<>()
+    .constructor<const BND_File3dmEmbeddedFile&>()
     .class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
+    .class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
     .property("fileName", &BND_File3dmEmbeddedFile::GetFilename)
     //.function("setFileName", &BND_File3dmEmbeddedFile::SetFilename) //TODO
