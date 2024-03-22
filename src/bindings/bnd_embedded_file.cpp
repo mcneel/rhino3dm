@@ -34,11 +34,9 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string 
 {
   int length = sbuffer.length();
   const void* buffer = sbuffer.c_str();
-  void* nc_buffer = &buffer;
-  ON_Buffer* b = new ON_Buffer;
-  b->Read(length, nc_buffer);
 
-  //loadfrombuffer
+  ON_Buffer* b = new ON_Buffer;
+  b->Write(length, buffer);
 
   ON_EmbeddedFile* ef = new ON_EmbeddedFile();
   ef->LoadFromBuffer(*b);
