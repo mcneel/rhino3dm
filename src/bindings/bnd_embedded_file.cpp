@@ -1,7 +1,6 @@
 
 
 #include "bindings.h"
-#include <fstream>
 
 BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile()
 {
@@ -30,27 +29,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
 
-BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read2(const std::string& f) // Static.
-{
-  std::ifstream in(f.c_str());
-  std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-  int length = contents.length();
-  const void* buffer = contents.c_str();
-  ON_Buffer b;
-  int written = b.Write(length, buffer);
-  b.SeekFromStart(0); //important
-
-  auto* ef = new ON_EmbeddedFile;
-  if (!ef->LoadFromBuffer(b))
-  {
-    delete ef;
-    return nullptr;
-  }
-
-  return new BND_File3dmEmbeddedFile(ef, nullptr);
-}
-
-//#if defined(ON_WASM_COMPILE)
+#if defined(ON_WASM_COMPILE)
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string sbuffer)
 {
   int length = sbuffer.length();
@@ -65,7 +44,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string 
 
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
-//#endif
+#endif
 
 void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref)
 {
@@ -141,7 +120,6 @@ void initEmbeddedFileBindings(pybind11::module& m)
     .def(py::init<>())
     .def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
     .def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
-    .def_static("Read2", &BND_File3dmEmbeddedFile::Read2, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
     .def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
     .def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
@@ -156,18 +134,11 @@ using namespace emscripten;
 void initEmbeddedFileBindings(void*)
 {
   class_<BND_File3dmEmbeddedFile>("EmbeddedFile")
-    //commented ctors, read and write 
-    //we don't yet have the add method on the embedded file table.
-    //reading an embedded file thus makes little sense.
-    //writing seems to have issues
-
     .constructor<>()
     .constructor<const BND_File3dmEmbeddedFile&>()
-    //.class_function("read", &BND_File3dmEmbeddedFile::Read, allow_raw_pointers())
     .class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
     .property("fileName", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
-    //.function("setFileName", &BND_File3dmEmbeddedFile::SetFilename) //TODO
     .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
