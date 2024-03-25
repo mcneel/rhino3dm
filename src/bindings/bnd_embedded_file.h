@@ -28,6 +28,7 @@ public:
 //#endif
 
   std::wstring GetFilename(void) const;
+  void SetFileName(std::wstring filename){ _ef->SetFileName(filename.c_str())};
   size_t GetLength(void) const;
   bool Write(const std::wstring& f) const;
   bool Clear(void) const;
