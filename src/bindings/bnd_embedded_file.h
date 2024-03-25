@@ -23,9 +23,7 @@ public:
   BND_File3dmEmbeddedFile(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref);
 
   static BND_File3dmEmbeddedFile* Read(const std::wstring& f);
-#if defined(ON_WASM_COMPILE)
   static BND_File3dmEmbeddedFile* WasmFromByteArray(std::string buffer);
-#endif
 
   std::wstring GetFilename(void) const;
   void SetFilename(std::wstring filename){ _ef->SetFilename(filename.c_str()); };

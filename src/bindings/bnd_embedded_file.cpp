@@ -29,7 +29,6 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
 
-#if defined(ON_WASM_COMPILE)
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string sbuffer)
 {
   int length = sbuffer.length();
@@ -44,7 +43,6 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string 
 
   return new BND_File3dmEmbeddedFile(ef, nullptr);
 }
-#endif
 
 void BND_File3dmEmbeddedFile::SetTrackedPointer(ON_EmbeddedFile* ef, const ON_ModelComponentReference* compref)
 {
