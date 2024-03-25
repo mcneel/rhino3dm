@@ -83,11 +83,6 @@ namespace Rhino.FileIO
       ConstructNonConstObject(pEF);
     }
 
-    internal File3dmEmbeddedFile(IntPtr ef)
-    {
-      ConstructNonConstObject(ef);
-    }
-
     internal File3dmEmbeddedFile(Guid id, File3dm parent)
     {
       m_id = id;
@@ -123,17 +118,6 @@ namespace Rhino.FileIO
         return false;
 
       return true;
-    }
-
-    /// <summary>
-    /// Creates an <see cref="ModelComponentType.EmbeddedFile"/> from reading a file from disk.
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    static public File3dmEmbeddedFile Read(string path) 
-    {
-      IntPtr ptr = UnsafeNativeMethods.ON_EmbeddedFile_Read(path);
-      return new File3dmEmbeddedFile(ptr);
     }
 
     /// <summary>

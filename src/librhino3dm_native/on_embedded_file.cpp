@@ -24,20 +24,3 @@ RH_C_FUNCTION bool ON_EmbeddedFile_SaveToFile(ON_EmbeddedFile* ef, const RHMONO_
 
   return false;
 }
-
-RH_C_FUNCTION ON_EmbeddedFile* ON_EmbeddedFile_Read(const RHMONO_STRING* filename)
-{
-  ON_EmbeddedFile* ef = new ON_EmbeddedFile;
-  if (nullptr != filename)
-  {
-    INPUTSTRINGCOERCE(_filename, filename);
-
-    if (!ef->LoadFromFile(_filename))
-    {
-      delete ef;
-      return nullptr;
-    }
-
-  }
-  return ef;
-}
