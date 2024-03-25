@@ -17,6 +17,7 @@ BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile(ON_EmbeddedFile* ef, const ON_M
   SetTrackedPointer(ef, compref);
 }
 
+//works for python
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) // Static.
 {
   auto* ef = new ON_EmbeddedFile;
@@ -37,6 +38,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string 
 
   ON_Buffer b;
   b.Write(length, buffer);
+  b.SeekFromStart(0); //important
 
   ON_EmbeddedFile* ef = new ON_EmbeddedFile();
   ef->LoadFromBuffer(b);
