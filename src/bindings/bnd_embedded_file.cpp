@@ -1,6 +1,7 @@
 
 
 #include "bindings.h"
+#include <fstream>
 
 BND_File3dmEmbeddedFile::BND_File3dmEmbeddedFile()
 {
@@ -21,6 +22,26 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
 {
   auto* ef = new ON_EmbeddedFile;
   if (!ef->LoadFromFile(f.c_str()))
+  {
+    delete ef;
+    return nullptr;
+  }
+
+  return new BND_File3dmEmbeddedFile(ef, nullptr);
+}
+
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read2(const std::string& f) // Static.
+{
+  std::ifstream in(f.c_str());
+  std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  int length = contents.length();
+  const void* buffer = contents.c_str();
+  ON_Buffer b;
+  int written = b.Write(length, buffer);
+  b.SeekFromStart(0); //important
+
+  auto* ef = new ON_EmbeddedFile;
+  if (!ef->LoadFromBuffer(b))
   {
     delete ef;
     return nullptr;
@@ -120,6 +141,7 @@ void initEmbeddedFileBindings(pybind11::module& m)
     .def(py::init<>())
     .def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
     .def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
+    .def_static("Read2", &BND_File3dmEmbeddedFile::Read2, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
     .def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
     .def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
