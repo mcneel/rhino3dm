@@ -275,7 +275,9 @@ namespace Rhino.Geometry
     RebuildRationals = 8,
 
     /// <summary>
-    /// Adjust Curves at G1-joins.
+    /// Adjust segments that are G1 to each other. 
+    /// Segments might only be G1 within tolerance. This can affect downstream operations, such as offsetting.
+    /// So, if G1 within tolerance, adjust segments so to be exactly G1.
     /// </summary>
     AdjustG1 = 16,
 

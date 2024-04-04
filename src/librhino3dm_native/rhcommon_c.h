@@ -92,6 +92,7 @@ typedef CRhinoSettings CRhinoSettingsImpl;
 typedef int (CALLBACK* CRHINOPLUGIN_ONCALLWRITEDOCPROC)(int pluginSerialNumber, const class CRhinoFileWriteOptions*);
 typedef int (CALLBACK* CRHINOPLUGIN_WRITEDOCPROC)(int pluginSerialNumber, unsigned int docSerialNumber, class ON_BinaryArchive*, const class CRhinoFileWriteOptions*);
 typedef int (CALLBACK* CRHINOPLUGIN_READDOCPROC)(int pluginSerialNumber, unsigned int docSerialNumber, class ON_BinaryArchive*, const class CRhinoFileReadOptions*);
+typedef bool (CALLBACK* CRHINOPLUGIN_DISPLAYHELP)(int pluginSerialNumber, HWND hwndParent);
 #endif
 
 #endif
@@ -165,7 +166,8 @@ RH_C_FUNCTION void CRhinoPlugIn_SetCallbacks(
   CRHINOPLUGIN_ONCALLWRITEDOCPROC callwritedoc,
   CRHINOPLUGIN_WRITEDOCPROC writedoc,
   CRHINOPLUGIN_READDOCPROC readdoc,
-  DISPLAY_FILEIO_OPTIONS_DIALOG_PROC displayOptionsDialog
+  DISPLAY_FILEIO_OPTIONS_DIALOG_PROC displayOptionsDialog,
+  CRHINOPLUGIN_DISPLAYHELP displayhelp
 );
 
 RH_C_FUNCTION CRhinoPlugInImpl* CRhinoPlugIn_Pointer(int serialNumber);

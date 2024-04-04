@@ -385,10 +385,20 @@ namespace Rhino
           UnsafeNativeMethods.CRhinoApp_GetString(UnsafeNativeMethods.RhinoAppString.RegistrySchemeName, ptr_string);
           return sh.ToString();
         }
-
       }
     }
-      
+
+    /// <summary>
+    /// Returns true if Rhino will validate each object added to the document.
+    /// This can be time consuming but is valuable for debugging.
+    /// </summary>
+    /// <since>8.7</since>
+    public static bool CheckNewObject
+    {
+      get => UnsafeNativeMethods.CRhinoApp_CheckNewObjects(false, true);
+      set => UnsafeNativeMethods.CRhinoApp_CheckNewObjects(true, value);
+    }
+
     /// <summary>
     /// Gets the data directory.
     /// </summary>
@@ -2455,6 +2465,54 @@ namespace Rhino.UI
     public static int UpdateProgressMeter(uint docSerialNumber, int position, bool absolute)
     {
       return UnsafeNativeMethods.CRhinoApp_StatusBarProgressMeterPos(docSerialNumber, position, absolute);
+    }
+
+    /// <summary>
+    /// Sets the label and current position of Rhino's status bar progress meter.
+    /// </summary>
+    /// <param name="label">
+    /// The short description of the progress (e.g. "Calculating", "Meshing", etc)
+    /// </param>
+    /// <param name="position">
+    /// The new value. This can be stated in absolute terms, or relative compared to the current position.
+    /// The interval bounds are specified when you first show the bar. 
+    /// Note, if value is <seealso cref="RhinoMath.UnsetIntIndex"/>, only the label is updated.
+    /// </param>
+    /// <param name="absolute">
+    /// If true, then the progress meter is moved to position.
+    /// If false, then the progress meter is moved position from the current position (relative).
+    /// </param>
+    /// <returns>
+    /// The previous position if successful.
+    /// </returns>
+    /// <since>8.6</since>
+    public static int UpdateProgressMeter(string label, int position, bool absolute)
+    {
+      return UpdateProgressMeter(0, label, position, absolute);
+    }
+
+    /// <summary>
+    /// Sets the label and current position of Rhino's status bar progress meter.
+    /// </summary>
+    /// <param name="docSerialNumber">The document runtime serial number.</param>
+    /// <param name="label">The short description of the progress (e.g. "Calculating", "Meshing", etc)</param>
+    /// <param name="position">
+    /// The new value. This can be stated in absolute terms, or relative compared to the current position.
+    /// The interval bounds are specified when you first show the bar. 
+    /// Note, if value is <seealso cref="RhinoMath.UnsetIntIndex"/>, only the label is updated.
+    /// </param>
+    /// <param name="absolute">
+    /// If true, then the progress meter is moved to position.
+    /// If false, then the progress meter is moved position from the current position (relative).
+    /// </param>
+    /// <returns>
+    /// The previous position if successful.
+    /// </returns>
+    /// <since>8.6</since>
+    [CLSCompliant(false)]
+    public static int UpdateProgressMeter(uint docSerialNumber, string label, int position, bool absolute)
+    {
+      return UnsafeNativeMethods.CRhinoApp_StatusBarProgressMeterPos2(docSerialNumber, label, position, absolute);
     }
 
     /// <summary>

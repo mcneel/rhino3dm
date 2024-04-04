@@ -1468,7 +1468,7 @@ namespace Rhino.Geometry
 
     internal override GeometryBase DuplicateShallowHelper()
     {
-      return new RadialDimension(IntPtr.Zero, null);
+      return new AngularDimension(IntPtr.Zero, null);
     }
 
     /// <summary>

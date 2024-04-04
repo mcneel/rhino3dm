@@ -3,6 +3,7 @@ using Rhino.Display;
 using System.Runtime.Serialization;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Runtime;
+using System.Collections;
 
 namespace Rhino.Geometry
 {
@@ -108,6 +109,37 @@ namespace Rhino.Geometry
       int argb = color.ToArgb();
       UnsafeNativeMethods.ON_PolylineCurve_Draw(ptr, pDisplayPipeline, argb, thickness);
     }
+
+    /// <summary>
+    /// Attempts to create a closed PolylineCurve that is the anti-clockwise planar convex hull of the input points.
+    /// In addition, the indices of the extremal points among the input points are returned in correct order.
+    /// Possible duplicates among the input points are taken care of.
+    /// <param name="points">The input points</param>
+    /// <param name="hullIndices">The indices into the input points such that points[hullIndices[i]] = result[i]. Since the 
+    /// result is a closed polyline if successful, the start/end index is repeated at the beginning and end of the hullIndices.
+    /// </param>
+    /// <returns>
+    /// The closed PolylineCurve encompassing the input points, or null if the input points were either too few, or were found to be collinear.
+    /// </returns>
+    /// </summary>
+    /// <since>8.6</since>
+    public static PolylineCurve CreateConvexHull2d(
+      Point2d[] points,
+      out int[] hullIndices
+      ) {
+      int dim = 0;
+      using (var resArray = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
+        IntPtr plc = UnsafeNativeMethods.RHC_ConvexHull2d(
+        points,
+        points.Length,
+        resArray.NonConstPointer(),
+        ref dim
+        );
+        hullIndices = resArray.ToArray();
+        return GeometryBase.CreateGeometryHelper(plc, null) as PolylineCurve;
+      }
+    }
+
 #endif
 
     /// <summary>

@@ -1964,6 +1964,58 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoLayerUtilities_AddFromFullPathName(m_doc.RuntimeSerialNumber, layerPath, layerColor.ToArgb());
     }
 
+    /// <summary>
+    /// Layer types created by <seealso cref="CreateLayer"/>.
+    /// </summary>
+    /// <since>8.6</since>
+    public enum LayerType
+    {
+      /// <summary>
+      /// Normal ordinary layer.
+      /// </summary>
+      NormalLayer = 0,
+      /// <summary>
+      /// Linked instance definition "filename.3dm" parent layer of the instance definition's layer tree.
+      /// </summary>
+      LinkedInstanceDefinitionParentLayer = 2,
+      /// <summary>
+      /// Worksession reference model "filename.3dm" parent layer of the reference model's layer tree.
+      /// </summary>
+      WorkSessionParentLayer = 4,
+    }
+
+    /// <summary>
+    /// Basic tool used by the add layer methods.
+    /// </summary>
+    /// <param name="newLayer">
+    /// Settings for new layer. These are copied to the layer table entry and any user data on layer is moved to the layer table entry.
+    /// </param>
+    /// <param name="layerType">Type type of layer to create.</param>
+    /// <param name="worksessionReferenceModelSerialNumber">
+    /// Worksession reference model serial number, where:
+    ///   0: Layer is not a reference layer.
+    ///   1: Layer is a reference layer but not part of a worksession reference file.
+    ///   2-1000: Reserved for future use.
+    ///   &gt;1000: Worksession reference model serial number.
+    /// </param>
+    /// <param name="linkedInstanceDefinitionSerialNumber">
+    /// Linked instance definition serial number, where:
+    ///   0: Layer is not from a liked instance definition.
+    ///   1-1000: Reserved for future use.
+    ///   &gt;1000: Linked instance definition serial number. 
+    /// </param>
+    /// <returns>The index of the last layer created if successful, <see cref="RhinoMath.UnsetIntIndex"/> on failure.</returns>
+    /// <since>8.6</since>
+    [CLSCompliant(false)]
+    public int CreateLayer(Layer newLayer, LayerType layerType, uint worksessionReferenceModelSerialNumber, uint linkedInstanceDefinitionSerialNumber)
+    {
+      if (null == newLayer)
+        return RhinoMath.UnsetIntIndex;
+
+      IntPtr const_ptr_layer = newLayer.ConstPointer();
+      return UnsafeNativeMethods.CRhinoLayerTable_CreateLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, (int)layerType, worksessionReferenceModelSerialNumber, linkedInstanceDefinitionSerialNumber);
+    }
+
     /// <summary>Modifies layer settings.</summary>
     /// <param name="newSettings">This information is copied.</param>
     /// <param name="layerIndex">
@@ -2333,7 +2385,7 @@ namespace Rhino.DocObjects.Tables
       using (var out_layers = new SimpleArrayInt())
       {
         var ptr_const_in_layers = in_layers.ConstPointer();
-        var ptr_out_layers = in_layers.NonConstPointer();
+        var ptr_out_layers = out_layers.NonConstPointer();
         var rc = UnsafeNativeMethods.RHC_RhinoDuplicateLayers(m_doc.RuntimeSerialNumber, ptr_const_in_layers, duplicateObjects, duplicateSublayers, ptr_out_layers);
         if (rc > 0)
           return out_layers.ToArray();

@@ -71,6 +71,7 @@ namespace Rhino.Render
       m_owned = true;
     }
 
+    [Obsolete("Do not use")]
     internal Decal(IntPtr decal, DecalEnumerator decals, uint doc_sn)
     {
       // The document is only needed for rendering, specifically for calling Decal.TextureRenderCRC.
@@ -147,7 +148,7 @@ namespace Rhino.Render
     /// <since>7.0</since>
     /// <deprecated>8.0</deprecated>
     [CLSCompliant(false)]
-    [Obsolete("Use TextureRenderHash")]
+    [Obsolete("Do not use")]
     public uint TextureRenderCRC(TextureRenderHashFlags rh)
     {
       return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
@@ -160,7 +161,7 @@ namespace Rhino.Render
     /// <since>7.0</since>
     /// <deprecated>8.0</deprecated>
     [CLSCompliant(false)]
-    [Obsolete("Use TextureRenderHash")]
+    [Obsolete("Do not use")]
     public uint TextureRenderCRC(TextureRenderHashFlags rh, LinearWorkflow lw)
     {
       return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
@@ -172,6 +173,7 @@ namespace Rhino.Render
     /// </summary>
     /// <since>8.0</since>
     [CLSCompliant(false)]
+    [Obsolete("Do not use")]
     public uint TextureRenderHash(CrcRenderHashFlags flags)
     {
       if (0 == m_rhino_doc_serial)
@@ -187,6 +189,7 @@ namespace Rhino.Render
     /// </summary>
     /// <since>8.0</since>
     [CLSCompliant(false)]
+    [Obsolete("Do not use")]
     public uint TextureRenderHash(CrcRenderHashFlags flags, LinearWorkflow lw)
     {
       if (0 == m_rhino_doc_serial)
@@ -458,6 +461,7 @@ namespace Rhino.Render
     /// <param name="uvOut">the UV on the texture that the color point was read from.</param>
     /// <returns>true if the given point hits the decal, else false.</returns>
     /// <since>5.10</since>
+    [Obsolete("Incredibly slow call")]
     public bool TryGetColor(Rhino.Geometry.Point3d point, Rhino.Geometry.Vector3d normal, ref Rhino.Display.Color4f colInOut, ref Rhino.Geometry.Point2d uvOut)
     {
       if (0 == m_rhino_doc_serial)
@@ -610,7 +614,9 @@ namespace Rhino.Render
       if (m_index < count)
       {
         var decal_ptr = UnsafeNativeMethods.ON_3dmObjectAttributes_DecalAt(attr_ptr, m_index++);
+      #pragma warning disable CS0618
         decal = new Decal(decal_ptr, this, m_rhino_doc_serial); // decal_ptr is owned by attributes.
+      #pragma warning restore CS0618
       }
 
       Current = decal;

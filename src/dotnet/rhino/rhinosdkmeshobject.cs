@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 using Rhino.Geometry;
+using Rhino.Runtime;
 using System;
 using System.Collections.Generic;
 
@@ -52,10 +53,25 @@ namespace Rhino.DocObjects
       var p_this = NonConstPointer_I_KnowWhatImDoing();
 
       var p_mesh = mesh.NonConstPointer();
-      var p_old_mesh = UnsafeNativeMethods.CRhinoMeshObject_SetMesh(p_this, p_mesh);
+
+      //CRhinoMeshObject_SetMesh now returns std::shared_ptr<const ON_Mesh>*
+
+      var p_shared_ptr_to_old_mesh = UnsafeNativeMethods.CRhinoMeshObject_SetMesh(p_this, p_mesh);
       mesh.ChangeToConstObject(this);
-      if (p_old_mesh != p_mesh && p_old_mesh != IntPtr.Zero)
-        return new Mesh(p_old_mesh, null);
+
+      //If we have a new shared pointer to mesh, create a new mesh with a shared pointer parent.
+      if (p_shared_ptr_to_old_mesh != p_mesh && p_shared_ptr_to_old_mesh != IntPtr.Zero)
+      {
+        var raw_mesh_ptr = UnsafeNativeMethods.ON_Object_SharedPointer_Get(p_shared_ptr_to_old_mesh);
+
+        var new_mesh = new Mesh(raw_mesh_ptr, null);
+
+        new_mesh.ConvertToConstObjectWithSharedPointerParent(p_shared_ptr_to_old_mesh);
+
+        return new_mesh;
+      }
+
+
       return mesh;
     }
 

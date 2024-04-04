@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Drawing;
+using Rhino.UI;
 
 #if RHINO_SDK
 namespace Rhino.Display
@@ -201,13 +202,13 @@ namespace Rhino.Display
     FrameBufferFillMode GetFillMode()
     {
       IntPtr const_ptr_this = ConstPointer();
-      return (FrameBufferFillMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetFillMode(const_ptr_this, false, UnsafeNativeMethods.FrameBufferFillMode.DEFAULT_COLOR);
+      return (FrameBufferFillMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetFillMode(const_ptr_this);
     }
 
     void SetFillMode(UnsafeNativeMethods.FrameBufferFillMode mode)
     {
       IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetFillMode(ptr_this, true, mode);
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetFillMode(ptr_this, mode);
     }
     /// <summary>
     /// Get or set the frame buffer fill mode.
@@ -439,14 +440,14 @@ namespace Rhino.Display
       /// <since>5.0</since>
       public double HorizontalViewportScale
       {
-        get { return m_parent.GetDouble(idx_dHorzScale); }
-        set { m_parent.SetDouble(idx_dHorzScale, value); }
+        get { return m_parent.GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.HorzScale); }
+        set { m_parent.SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.HorzScale, value); }
       }
       /// <since>5.0</since>
       public double VerticalViewportScale
       {
-        get { return m_parent.GetDouble(idx_dVertScale); }
-        set { m_parent.SetDouble(idx_dVertScale, value); }
+        get { return m_parent.GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.VertScale); }
+        set { m_parent.SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.VertScale, value); }
       }
 
       //bool                  m_bUseLineSmoothing;
@@ -467,12 +468,12 @@ namespace Rhino.Display
     bool GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetBool(const_ptr_this, which, false, false);
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetBool(const_ptr_this, which);
     }
     void SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool which, bool b)
     {
       IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetBool(ptr_this, which, true, b);
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetBool(ptr_this, which, b);
     }
 
     /// <summary>
@@ -532,26 +533,23 @@ namespace Rhino.Display
     Color GetColor(UnsafeNativeMethods.DisplayAttrsColor which)
     {
       IntPtr pConstThis = ConstPointer();
-      int argb = UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetColor(pConstThis, which, false, 0);
+      int argb = UnsafeNativeMethods.CDisplayPipelineAttributes_GetColor(pConstThis, which);
       return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(UnsafeNativeMethods.DisplayAttrsColor which, Color c)
     {
       IntPtr pThis = NonConstPointer();
-      UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetColor(pThis, which, true, c.ToArgb());
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetColor(pThis, which, c.ToArgb());
     }
     #endregion
 
     #region double
-    const int idx_dHorzScale = 0;
-    const int idx_dVertScale = 1;
-
-    double GetDouble(int which)
+    double GetDouble(UnsafeNativeMethods.DisplayAttributesDouble which)
     {
       IntPtr pConstThis = ConstPointer();
       return UnsafeNativeMethods.CDisplayPipelineAttributes_GetDouble(pConstThis, which);
     }
-    void SetDouble(int which, double d)
+    void SetDouble(UnsafeNativeMethods.DisplayAttributesDouble which, double d)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetDouble(pThis, which, d);
@@ -575,12 +573,12 @@ namespace Rhino.Display
     int GetInt(UnsafeNativeMethods.DisplayAttributesInt which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetInt(const_ptr_this, which, false, 0);
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetInt(const_ptr_this, which);
     }
     void SetInt(UnsafeNativeMethods.DisplayAttributesInt which, int i)
     {
       IntPtr ptr_this = NonConstPointer();
-      UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetInt(ptr_this, which, true, i);
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetInt(ptr_this, which, i);
     }
     #endregion
 
@@ -615,20 +613,19 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleCurveColor, value); }
     }
 
-    public enum CurveThicknessType : int
+    public enum CurveThicknessUse : int
     {
-      UseObjectWidth = 0,
+      ObjectWidth = 0,
       Pixels = 1
     }
 
     /// <summary>
     /// Use a pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
     /// </summary>
-    public CurveThicknessType CurveThicknessUsage
+    public CurveThicknessUse CurveThicknessUsage
     { 
-      get { return (CurveThicknessType)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); }
-      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)value);
-      }
+      get { return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)value); }
     }
 
     //bool m_bUseDefaultCurve; -- doesn't appear to be used in display pipelane
@@ -754,14 +751,351 @@ namespace Rhino.Display
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeThickness, value); }
     }
-    //int m_nEdgeThickness;
-    //int m_nEdgeColorUsage;
-    //int m_nNakedEdgeColorUsage;
-    //int m_nNakedEdgeThickness;
-    //int m_nEdgeColorReduction;
-    //int m_nNakedEdgeColorReduction;
-    //COLORREF m_EdgeColor;
-    //COLORREF m_NakedEdgeColor;
+
+    enum SurfaceEdgeThicknessFlags : int
+    {
+      EdgeFixedWidth = 1,
+      NakedEdgeFixedWidth = 2,
+      IsoFixedWidth = 4 | 8 | 16,
+      AllSurfaceFixedWidth = EdgeFixedWidth | NakedEdgeFixedWidth | IsoFixedWidth
+    }
+
+    public enum SurfaceEdgeThicknessUse : int
+    {
+      ObjectWidth = 0,
+      Pixels = 1,
+    }
+
+    /// <summary>
+    /// Helper function for setting the SurfaceEdgeThicknessFlags
+    /// </summary>
+    /// <returns></returns>
+    public SurfaceEdgeThicknessUse GetSurfaceEdgeThicknessUsage()
+    {
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage) & (int)SurfaceEdgeThicknessFlags.EdgeFixedWidth);
+      if (currentUsage == SurfaceEdgeThicknessFlags.EdgeFixedWidth) return SurfaceEdgeThicknessUse.Pixels;
+      return SurfaceEdgeThicknessUse.ObjectWidth;
+    }
+
+    /// <summary>
+    /// Helper function for getting the SurfaceEdgeThicknessFlags
+    /// </summary>
+    /// <returns></returns>
+    public void SetSurfaceEdgeThicknessUsage(SurfaceEdgeThicknessUse use)
+    {
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
+      if (SurfaceEdgeThicknessUse.ObjectWidth == use)
+        currentUsage &= ~SurfaceEdgeThicknessFlags.EdgeFixedWidth;
+      else
+        currentUsage |= SurfaceEdgeThicknessFlags.EdgeFixedWidth;
+      SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage, (int)currentUsage);
+    }
+
+    public enum SurfaceNakedEdgeThicknessUse : int
+    {
+      UseSurfaceEdgeSettings = 0,
+      ObjectWidth = 1,
+      Pixels = 2
+    }
+
+    /// <summary>
+    /// This is a helper function that combines setting SurfaceNakeEdgeUseNormalThickness and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
+    /// to the behavor of the Settings page.
+    /// </summary>
+    public void SetSurfaceNakedEdgeThicknessUsage(SurfaceNakedEdgeThicknessUse use)
+    {
+      if (SurfaceNakedEdgeThicknessUse.UseSurfaceEdgeSettings == use) SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness, true);
+      else
+      {
+        SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
+        SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness, false);
+        if (SurfaceNakedEdgeThicknessUse.ObjectWidth == use)
+          currentUsage &= ~SurfaceEdgeThicknessFlags.NakedEdgeFixedWidth;
+        else if (SurfaceNakedEdgeThicknessUse.Pixels == use)
+          currentUsage |= SurfaceEdgeThicknessFlags.NakedEdgeFixedWidth;
+        SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage, (int)currentUsage);
+      }
+    }
+
+    /// <summary>
+    /// This is a helper function that combines getting SurfaceNakeEdgeUseNormalThickness and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
+    /// to the behavor of the Settings page. 
+    /// </summary>
+    public SurfaceNakedEdgeThicknessUse GetSurfaceNakedEdgeThicknessUsage()
+    {
+      if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness)) 
+        return SurfaceNakedEdgeThicknessUse.UseSurfaceEdgeSettings;
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
+      if (0 != (SurfaceEdgeThicknessFlags.NakedEdgeFixedWidth & currentUsage))
+        return SurfaceNakedEdgeThicknessUse.Pixels;
+      else
+        return SurfaceNakedEdgeThicknessUse.ObjectWidth;
+    }
+
+    public enum SurfaceIsoThicknessUse : int
+    {
+      ObjectWidth = 0,
+      SingleWidthForAllCurves = 1,
+      PixelsUV = 2
+    }
+
+    /// <summary>
+    /// This is a helper function that combines setting IsoThicknessUsed and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
+    /// to the behavor of the Settings page. 
+    /// </summary>
+    public void SetSurfaceIsoThicknessUsage(SurfaceIsoThicknessUse value)
+    {
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage) & (int)SurfaceEdgeThicknessFlags.IsoFixedWidth);
+
+      if (SurfaceIsoThicknessUse.ObjectWidth == value)
+        currentUsage &= ~SurfaceEdgeThicknessFlags.IsoFixedWidth;
+      else
+        currentUsage |= SurfaceEdgeThicknessFlags.IsoFixedWidth;
+      SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage, (int)currentUsage);
+      SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed, value == SurfaceIsoThicknessUse.PixelsUV);
+    }
+
+    /// <summary>
+    /// This is a helper function that combines getting IsoThicknessUsed and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
+    /// to the behavor of the Settings page. 
+    /// </summary>
+    public SurfaceIsoThicknessUse GetSurfaceIsoThicknessUsage()
+    {
+      if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed))
+        return SurfaceIsoThicknessUse.PixelsUV;
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
+      if (0 != (SurfaceEdgeThicknessFlags.IsoFixedWidth & currentUsage))
+        return SurfaceIsoThicknessUse.SingleWidthForAllCurves;
+      else
+        return SurfaceIsoThicknessUse.ObjectWidth;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="v"></param>
+    /// <param name="w"></param>
+    public void SetSurfaceIsoApplyPattern(bool u, bool v, bool w)
+    {
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetIsoApplyPattern(ConstPointer(), u, v, w);
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="v"></param>
+    /// <param name="w"></param>
+    public void GetSurfaceIsoApplyPattern(ref bool u, ref bool v, ref bool w)
+    {
+      UnsafeNativeMethods.CDisplayPipelineAttributes_GetIsoApplyPattern(NonConstPointer(), ref u, ref v, ref w);
+    }
+
+    public bool SurfaceIsoShowForFlatFaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowFlatSurfaceIsos); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowFlatSurfaceIsos, value); }
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool SurfaceIsoThicknessUsed
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed, value); }
+    }
+ 
+    /// <summary>
+    /// Turn pattern application on or off
+    /// </summary>
+    public bool SurfaceEdgeApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceEdgeApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceEdgeApplyPattern, value); }
+    }
+
+    /// <summary>
+    /// Turn pattern application on or off
+    /// </summary>
+    public bool SurfaceNakedEdgeApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeApplyPattern, value); }
+    }
+
+    /// <summary>
+    /// Turn Surface Edge visibility on or off
+    /// </summary>
+    public bool ShowSurfaceEdge
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowEdges, value);  }
+    }
+
+    /// <summary>
+    /// Turn Surface Naked Edge visibility on or off
+    /// </summary>
+    public bool ShowSurfaceNakedEdge
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowNakedEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowNakedEdges, value); }
+    }
+
+    public enum SurfaceEdgeColorUse : int
+    {
+      ObjectColor = 0,
+      IsocurveColor = 1,
+      SingleColorForAll = 2
+    }
+    public SurfaceEdgeColorUse SurfaceEdgeColorUsage
+    { 
+      get { return (SurfaceEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage, (int)value);  }
+    }
+
+    public enum SurfaceNakedEdgeColorUse : int
+    {
+      UseSurfaceEdgeSettings = 0,
+      ObjectColor = 1,
+      IsoCurveColor = 2,
+      SingleColorForAll = 3
+    }
+
+    public SurfaceNakedEdgeColorUse SurfaceNakedEdgeColorUsage
+    {
+      get { return (SurfaceNakedEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorUsage, (int)value); }
+    }
+
+    public enum SurfaceIsoColorUse : int
+    {
+      ObjectColor = 0,
+      SingleColorForAll = 1,
+      SpecifiedUV = 2
+    }
+
+    /// <summary>
+    /// Helper function for setting SurfaceIsoColorsUsed and SurfaceIsoSingleColor
+    /// </summary>
+    /// <param name="use"></param>
+    public void SetSurfaceIsoColorUsage(SurfaceIsoColorUse use)
+    {
+      SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed, SurfaceIsoColorUse.SpecifiedUV == use);
+      SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor, SurfaceIsoColorUse.SingleColorForAll == use);
+    }
+    /// <summary>
+    /// Helper function for getting SurfaceIsoColorsUsed and SurfaceSingleIsoColor
+    /// </summary>
+    public SurfaceIsoColorUse GetSurfaceIsoColorUsage()
+    {
+      if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor)) return SurfaceIsoColorUse.SingleColorForAll;
+      else if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed)) return SurfaceIsoColorUse.SpecifiedUV;
+      return SurfaceIsoColorUse.ObjectColor;
+    }
+
+    public bool SurfaceIsoSingleColor
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor, value);  }
+    }
+
+    public bool SurfaceIsoColorsUsed
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed, value); }
+    }
+
+    public Color SurfaceEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.EdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.EdgeColor, value); }
+    }
+
+    public Color SurfaceNakedEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.NakedEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.NakedEdgeColor, value); }
+    }
+
+    public Color SurfaceIsoUVColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoColor, value); }
+    }
+
+    public Color SurfaceIsoUColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoUColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoUColor, value); }
+    }
+
+    public Color SurfaceIsoVColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoVColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoVColor, value); }
+    }
+
+    public int SurfaceEdgeColorReductionPct
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction); }
+      set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction, value); }
+    }
+
+    public int SurfaceNakedEdgeColorReductionPct
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction); }
+      set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction, value); }
+    }
+
+    public int SurfaceNakedEdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeThickness, value); }
+    }
+
+    public int SurfaceIsoThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoThickness, value); }
+    }
+
+    public int SurfaceIsoUThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoUThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoUThickness, value); }
+    }
+    public int SurfaceIsoVThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoVThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoVThickness, value); }
+    }
+
+    public float SurfaceEdgeThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale);  }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale, value);  }
+    }
+    public float SurfaceNakedEdgeThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceNakedEdgeThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceNakedEdgeThicknessScale, value); }
+    }
+    public float SurfaceIsoThicknessUScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoUThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoUThicknessScale, value); }
+    }
+    public float SurfaceIsoThicknessVScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale, value); }
+   }
+    public float SurfaceIsoThicknessWScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoWThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoWThicknessScale, value); }
+    }
+
+
     //UINT m_nEdgePattern;
     //UINT m_nNakedEdgePattern;
     //UINT m_nNonmanifoldEdgePattern;
@@ -964,6 +1298,7 @@ namespace Rhino.Display
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.ShadowColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ShadowColor, value); }
     }
+
     //ON_3dVector m_ShadowBias;
     //double m_fShadowBlur;
     /// <summary>Cast shadows.</summary>
@@ -993,14 +1328,12 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        PointStyle rc = PointStyle.Simple;
-        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointStyle(const_ptr_this, true, ref rc);
-        return rc;
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointStyle(const_ptr_this);
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointStyle(ptr_this, false, ref value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_SetPointStyle(ptr_this, value);
       }
     }
 
@@ -1046,14 +1379,12 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        PointStyle rc = PointStyle.Simple;
-        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointCloudStyle(const_ptr_this, true, ref rc);
-        return rc;
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointCloudStyle(const_ptr_this);
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_GetSetPointCloudStyle(ptr_this, false, ref value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_SetPointCloudStyle(ptr_this, value);
       }
     }
 
@@ -1350,12 +1681,12 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine);
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
       }
       set
       {
         IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine, value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
       }
     }
     /// <summary>
@@ -1366,12 +1697,12 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine);
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
       }
       set
       {
         IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Shine, value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
       }
     }
     /// <summary>
@@ -1382,12 +1713,12 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency);
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
       }
       set
       {
         IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency, value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
       }
     }
     /// <summary>
@@ -1398,12 +1729,12 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency);
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
       }
       set
       {
         IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesDouble.Transparency, value);
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
       }
     }
   }

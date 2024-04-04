@@ -1691,6 +1691,13 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>5.0</since>
     public bool CreateBackupFiles { get; set; }
+
+
+    /// <summary>
+    /// Gets or sets the directory used for template files.
+    /// </summary>
+    /// <since>8.0</since>
+    public string TemplateFileDir { get; set; }
   }
 
   /// <summary>
@@ -1712,6 +1719,7 @@ namespace Rhino.ApplicationSettings
       rc.ClipboardCopyToPreviousRhinoVersion = UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(pFileSettings, idxClipboardCopyToPreviousRhinoVersion);
       rc.ClipboardOnExit = (ClipboardState)UnsafeNativeMethods.CRhinoAppFileSettings_GetClipboardOnExit(pFileSettings);
       rc.CreateBackupFiles = UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(pFileSettings, idxCreateBackupFiles);
+      rc.TemplateFileDir = TemplateFolder;
       UnsafeNativeMethods.CRhinoAppFileSettings_Delete(pFileSettings);
 
       return rc;
@@ -1735,6 +1743,41 @@ namespace Rhino.ApplicationSettings
     public static FileSettingsState GetCurrentState()
     {
       return CreateState(true);
+    }
+
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">A joined settings object.</param>
+    /// <since>8.0</since>
+    public static void UpdateFromState(FileSettingsState state)
+    {
+      AutoSaveInterval = state.AutoSaveInterval;
+      AutoSaveEnabled = state.AutoSaveEnabled;
+      AutoSaveMeshes = state.AutoSaveMeshes;
+      SaveViewChanges = state.SaveViewChanges;
+      FileLockingEnabled = state.FileLockingEnabled;
+      FileLockingOpenWarning = state.FileLockingOpenWarning;
+      ClipboardCopyToPreviousRhinoVersion = state.ClipboardCopyToPreviousRhinoVersion;
+      ClipboardOnExit = state.ClipboardOnExit;
+      CreateBackupFiles = state.CreateBackupFiles;
+      TemplateFolder = state.TemplateFileDir;
+    }
+
+      /// <summary>
+      /// Returns the default template folder for a given language id.
+      /// </summary>
+      /// <returns>The default template folder as string.</returns>
+      /// <since>8.0</since>
+      public static string DefaultTemplateFolderForLanguageID(int languageID)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pStringHolder = sh.NonConstPointer();
+        UnsafeNativeMethods.CRhinoFileUtilities_GetDefaultTemplateFolder(pStringHolder, languageID);
+        return sh.ToString();
+      }
     }
 
 
@@ -2807,6 +2850,12 @@ namespace Rhino.ApplicationSettings
     /// <since>8.0</since>
     public bool StickyAutoCPlane { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether the auto cplane will rotate towards the view after aligning to the selection
+    /// </summary>
+    /// <since>8.7</since>
+    public bool OrientAutoCPlaneToView { get; set; }
+
     /// <summary>Gets or sets the base orthogonal angle.</summary>
     /// <since>5.0</since>
     public double OrthoAngle { get; set; }
@@ -2897,6 +2946,7 @@ namespace Rhino.ApplicationSettings
       rc.AutoAlignCPlane = GetBool(idxAutoAlignCPlane, pSettings);
       rc.AutoCPlaneAlignment = GetInt(idxAutoCPlaneAlignment, pSettings);
       rc.StickyAutoCPlane = GetBool(idxStickyAutoCPlane, pSettings);
+      rc.OrientAutoCPlaneToView = GetBool(idxOrientAutoCPlaneToView, pSettings);
       rc.OrthoUseZ = GetBool(idxOrthoUseZ, pSettings);
 
       UnsafeNativeMethods.CRhinoAppModelAidSettings_Delete(pSettings);
@@ -2957,6 +3007,7 @@ namespace Rhino.ApplicationSettings
       AutoAlignCPlane = state.AutoAlignCPlane;
       AutoCPlaneAlignment = state.AutoCPlaneAlignment;
       StickyAutoCPlane = state.StickyAutoCPlane;
+      OrientAutoCPlaneToView = state.OrientAutoCPlaneToView;
       OrthoUseZ = state.OrthoUseZ;
     }
 
@@ -2988,6 +3039,7 @@ namespace Rhino.ApplicationSettings
     const int idxOrthoUseZ = 19;
     const int idxStickyAutoCPlane = 20;
     const int idxGumballExtrudeMergeFaces = 21;
+    const int idxOrientAutoCPlaneToView = 22;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3148,7 +3200,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// 
+    /// Gets or sets whether the cplane will automatically align to the selection
     /// </summary>
     /// <since>8.0</since>
     public static bool AutoAlignCPlane
@@ -3175,6 +3227,16 @@ namespace Rhino.ApplicationSettings
     {
       get => GetBool(idxStickyAutoCPlane);
       set => SetBool(idxStickyAutoCPlane, value);
+    }
+
+    /// <summary>
+    /// Gets or sets whether the auto cplane will rotate towards the view after aligning to the selection
+    /// </summary>
+    /// <since>8.7</since>
+    public static bool OrientAutoCPlaneToView
+    {
+      get => GetBool(idxOrientAutoCPlaneToView);
+      set => SetBool(idxOrientAutoCPlaneToView, value);
     }
 
     static double GetDouble(int which, IntPtr pSettings) { return UnsafeNativeMethods.RhModelAidSettings_GetSetDouble(which, false, 0, pSettings); }
@@ -4280,6 +4342,130 @@ namespace Rhino.ApplicationSettings
     Alt8,
     /// <summary>Alt + 9</summary>
     Alt9,
+    /// <summary>Alt + F1</summary>
+    AltF1,
+    /// <summary>Alt + F2</summary>
+    AltF2,
+    /// <summary>Alt + F3</summary>
+    AltF3,
+    /// <summary>Alt + F4</summary>
+    AltF4,
+    /// <summary>Alt + F5</summary>
+    AltF5,
+    /// <summary>Alt + F6</summary>
+    AltF6,
+    /// <summary>Alt + F7</summary>
+    AltF7,
+    /// <summary>Alt + F8</summary>
+    AltF8,
+    /// <summary>Alt + F9</summary>
+    AltF9,
+    /// <summary>Alt + F10</summary>
+    AltF10,
+    /// <summary>Alt + F11</summary>
+    AltF11,
+    /// <summary>Alt + F12</summary>
+    AltF12,
+    /// <summary>Alt + Shift + Home</summary>
+    AltShiftHome,
+    /// <summary>Alt + Shift + End</summary>
+    AltShiftEnd,
+    /// <summary>Alt + Shift + A</summary>
+    AltShiftA,
+    /// <summary>Alt + Shift + B</summary>
+    AltShiftB,
+    /// <summary>Alt + Shift + C</summary>
+    AltShiftC,
+    /// <summary>Alt + Shift + D</summary>
+    AltShiftD,
+    /// <summary>Alt + Shift + E</summary>
+    AltShiftE,
+    /// <summary>Alt + Shift + F</summary>
+    AltShiftF,
+    /// <summary>Alt + Shift + G</summary>
+    AltShiftG,
+    /// <summary>Alt + Shift + H</summary>
+    AltShiftH,
+    /// <summary>Alt + Shift + I</summary>
+    AltShiftI,
+    /// <summary>Alt + Shift + J</summary>
+    AltShiftJ,
+    /// <summary>Alt + Shift + K</summary>
+    AltShiftK,
+    /// <summary>Alt + Shift + L</summary>
+    AltShiftL,
+    /// <summary>Alt + Shift + M</summary>
+    AltShiftM,
+    /// <summary>Alt + Shift + N</summary>
+    AltShiftN,
+    /// <summary>Alt + Shift + O</summary>
+    AltShiftO,
+    /// <summary>Alt + Shift + P</summary>
+    AltShiftP,
+    /// <summary>Alt + Shift + Q</summary>
+    AltShiftQ,
+    /// <summary>Alt + Shift + R</summary>
+    AltShiftR,
+    /// <summary>Alt + Shift + S</summary>
+    AltShiftS,
+    /// <summary>Alt + Shift + T</summary>
+    AltShiftT,
+    /// <summary>Alt + Shift + U</summary>
+    AltShiftU,
+    /// <summary>Alt + Shift + V</summary>
+    AltShiftV,
+    /// <summary>Alt + Shift + W</summary>
+    AltShiftW,
+    /// <summary>Alt + Shift + X</summary>
+    AltShiftX,
+    /// <summary>Alt + Shift + Y</summary>
+    AltShiftY,
+    /// <summary>Alt + Shift + Z</summary>
+    AltShiftZ,
+    /// <summary>Alt + Shift + 0</summary>
+    AltShift0,
+    /// <summary>Alt + Shift + 1</summary>
+    AltShift1,
+    /// <summary>Alt + Shift + 2</summary>
+    AltShift2,
+    /// <summary>Alt + Shift + 3</summary>
+    AltShift3,
+    /// <summary>Alt + Shift + 4</summary>
+    AltShift4,
+    /// <summary>Alt + Shift + 5</summary>
+    AltShift5,
+    /// <summary>Alt + Shift + 6</summary>
+    AltShift6,
+    /// <summary>Alt + Shift + 7</summary>
+    AltShift7,
+    /// <summary>Alt + Shift + 8</summary>
+    AltShift8,
+    /// <summary>Alt + Shift + 9</summary>
+    AltShift9,
+    /// <summary>Alt + Shift + F1</summary>
+    AltShiftF1,
+    /// <summary>Alt + Shift + F2</summary>
+    AltShiftF2,
+    /// <summary>Alt + Shift + F3</summary>
+    AltShiftF3,
+    /// <summary>Alt + Shift + F4</summary>
+    AltShiftF4,
+    /// <summary>Alt + Shift + F5</summary>
+    AltShiftF5,
+    /// <summary>Alt + Shift + F6</summary>
+    AltShiftF6,
+    /// <summary>Alt + Shift + F7</summary>
+    AltShiftF7,
+    /// <summary>Alt + Shift + F8</summary>
+    AltShiftF8,
+    /// <summary>Alt + Shift + F9</summary>
+    AltShiftF9,
+    /// <summary>Alt + Shift + F10</summary>
+    AltShiftF10,
+    /// <summary>Alt + Shift + F11</summary>
+    AltShiftF11,
+    /// <summary>Alt + Shift + F12</summary>
+    AltShiftF12,
     /// <summary>Control + Home (Mac)</summary>
     MacControlHome,
     /// <summary>Control + End (Mac)</summary>
@@ -4356,6 +4542,30 @@ namespace Rhino.ApplicationSettings
     MacControl8,
     /// <summary>Control + 9 (Mac)</summary>
     MacControl9,
+    /// <summary>Control + F1 (Mac)</summary>
+    MacControlF1,
+    /// <summary>Control + F2 (Mac)</summary>
+    MacControlF2,
+    /// <summary>Control + F3 (Mac)</summary>
+    MacControlF3,
+    /// <summary>Control + F4 (Mac)</summary>
+    MacControlF4,
+    /// <summary>Control + F5 (Mac)</summary>
+    MacControlF5,
+    /// <summary>Control + F6 (Mac)</summary>
+    MacControlF6,
+    /// <summary>Control + F7 (Mac)</summary>
+    MacControlF7,
+    /// <summary>Control + F8 (Mac)</summary>
+    MacControlF8,
+    /// <summary>Control + F9 (Mac)</summary>
+    MacControlF9,
+    /// <summary>Control + F10 (Mac)</summary>
+    MacControlF10,
+    /// <summary>Control + F11 (Mac)</summary>
+    MacControlF11,
+    /// <summary>Control + F12 (Mac)</summary>
+    MacControlF12,
 
     /// <summary>Control + Alt + Home (Mac)</summary>
     MacControlAltHome,
@@ -4433,6 +4643,30 @@ namespace Rhino.ApplicationSettings
     MacControlAlt8,
     /// <summary>Control + Alt + 9 (Mac)</summary>
     MacControlAlt9,
+    /// <summary>Control + Alt + F1 (Mac)</summary>
+    MacControlAltF1,
+    /// <summary>Control + Alt + F2 (Mac)</summary>
+    MacControlAltF2,
+    /// <summary>Control + Alt + F3 (Mac)</summary>
+    MacControlAltF3,
+    /// <summary>Control + Alt + F4 (Mac)</summary>
+    MacControlAltF4,
+    /// <summary>Control + Alt + F5 (Mac)</summary>
+    MacControlAltF5,
+    /// <summary>Control + Alt + F6 (Mac)</summary>
+    MacControlAltF6,
+    /// <summary>Control + Alt + F7 (Mac)</summary>
+    MacControlAltF7,
+    /// <summary>Control + Alt + F8 (Mac)</summary>
+    MacControlAltF8,
+    /// <summary>Control + Alt + F9 (Mac)</summary>
+    MacControlAltF9,
+    /// <summary>Control + Alt + F10 (Mac)</summary>
+    MacControlAltF10,
+    /// <summary>Control + Alt + F11 (Mac)</summary>
+    MacControlAltF11,
+    /// <summary>Control + Alt + F12 (Mac)</summary>
+    MacControlAltF12,
 
     /// <summary>Control + Option + Home (Mac)</summary>
     MacControlOptionHome,
@@ -4510,6 +4744,30 @@ namespace Rhino.ApplicationSettings
     MacControlOption8,
     /// <summary>Control + Option + 9 (Mac)</summary>
     MacControlOption9,
+    /// <summary>Control + Option + F1 (Mac)</summary>
+    MacControlOptionF1,
+    /// <summary>Control + Option + F2 (Mac)</summary>
+    MacControlOptionF2,
+    /// <summary>Control + Option + F3 (Mac)</summary>
+    MacControlOptionF3,
+    /// <summary>Control + Option + F4 (Mac)</summary>
+    MacControlOptionF4,
+    /// <summary>Control + Option + F5 (Mac)</summary>
+    MacControlOptionF5,
+    /// <summary>Control + Option + F6 (Mac)</summary>
+    MacControlOptionF6,
+    /// <summary>Control + Option + F7 (Mac)</summary>
+    MacControlOptionF7,
+    /// <summary>Control + Option + F8 (Mac)</summary>
+    MacControlOptionF8,
+    /// <summary>Control + Option + F9 (Mac)</summary>
+    MacControlOptionF9,
+    /// <summary>Control + Option + F10 (Mac)</summary>
+    MacControlOptionF10,
+    /// <summary>Control + Option + F11 (Mac)</summary>
+    MacControlOptionF11,
+    /// <summary>Control + Option + F12 (Mac)</summary>
+    MacControlOptionF12,
 
     /// <summary>Control + Shift + Home (Mac)</summary>
     MacControlShiftHome,
@@ -4587,6 +4845,30 @@ namespace Rhino.ApplicationSettings
     MacControlShift8,
     /// <summary>Control + Shift + 9 (Mac)</summary>
     MacControlShift9,
+    /// <summary>Control + Shift + F1 (Mac)</summary>
+    MacControlShiftF1,
+    /// <summary>Control + Shift + F2 (Mac)</summary>
+    MacControlShiftF2,
+    /// <summary>Control + Shift + F3 (Mac)</summary>
+    MacControlShiftF3,
+    /// <summary>Control + Shift + F4 (Mac)</summary>
+    MacControlShiftF4,
+    /// <summary>Control + Shift + F5 (Mac)</summary>
+    MacControlShiftF5,
+    /// <summary>Control + Shift + F6 (Mac)</summary>
+    MacControlShiftF6,
+    /// <summary>Control + Shift + F7 (Mac)</summary>
+    MacControlShiftF7,
+    /// <summary>Control + Shift + F8 (Mac)</summary>
+    MacControlShiftF8,
+    /// <summary>Control + Shift + F9 (Mac)</summary>
+    MacControlShiftF9,
+    /// <summary>Control + Shift + F10 (Mac)</summary>
+    MacControlShiftF10,
+    /// <summary>Control + Shift + F11 (Mac)</summary>
+    MacControlShiftF11,
+    /// <summary>Control + Shift + F12 (Mac)</summary>
+    MacControlShiftF12,
   }
 
   /// <summary>

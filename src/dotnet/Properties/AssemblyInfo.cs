@@ -153,3 +153,9 @@ using System.Runtime.InteropServices;
                                                   "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
                                                   "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
                                                   "a3b345cf")]
+
+[assembly: InternalsVisibleTo ("RhinoiOS, PublicKey=002400000480000094000000060200000024000052534131000400000100010083c66ae8bfbbea" +
+                                                  "010a18559b1502c1b79e1fbb74b62ea03fec9bd46ec6fec5c1917c8a92c44f96a449f87cce288e" +
+                                                  "341a3109b0528c9775fe5b46bfc85ecb90e75f265bef0700eb98176671b4ff9c7e74ac683ebe8d" +
+                                                  "50cd4a1c4538d6bf94a7c7c48da9fee90327e273fbc0208c76f6782220d290dee6067981d33ea4" +
+                                                  "a3b345cf")]

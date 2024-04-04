@@ -326,6 +326,27 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Linetype_RemoveTaper(ptr_this);
     }
 
+    /// <summary>
+    /// Linetype patterns and widths are typically interpreted as distances on
+    /// the printed output when printing. In this case AlwaysModelDistances is
+    /// false (default). When set to true, the linetype pattern and width will
+    /// be interpreted as being in world distances. This is useful for cases
+    /// like modeling a road as a single curve.
+    /// </summary>
+    public bool AlwaysModelDistances
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_AlwaysModelDistances(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetAlwaysModelDistances(ptrThis, value);
+      }
+    }
+
     const int idxSegmentCount = 1;
     int GetInt(UnsafeNativeMethods.LinetypeInteger which)
     {

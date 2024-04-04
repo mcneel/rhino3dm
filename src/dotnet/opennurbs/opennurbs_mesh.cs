@@ -16,6 +16,8 @@ using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Render;
 using Rhino.Runtime;
+using System.Security.Cryptography;
+
 #if RHINO_SDK
 using System.Security.Policy;
 using Rhino.Commands;
@@ -169,7 +171,7 @@ namespace Rhino.Render
     {
       if (array == null) throw new ArgumentNullException("array");
       if (arrayIndex < 0) throw new ArgumentOutOfRangeException("arrayIndex");
-      if ((arrayIndex + Count) >= array.Length) throw new ArgumentException("Array not big enough for the point list");
+      if ((arrayIndex + Count) > array.Length) throw new ArgumentException("Array not big enough for the point list");
       var count = Count;
       for (int i = 0, j = arrayIndex; i < count; i++, j++)
       {
@@ -2773,6 +2775,162 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Attempts to create a Mesh that is a triangulation of an outermost simple closed polyline possibly with holes, all supplied by loops.
+    /// The loops are indices into the points array. All loops have to be closed - meaning that their first and last entries have to be the same -, free from self-intersections, and not intersecting each other.
+    /// The outermost loop will be interpreted as representing the outer boundary, and all other loops will be interpreted as holes.
+    /// Loops that are nested to deeper levels will be ignored.
+    /// This function will perform a fast de-duplication of the points before meshing.
+    /// This function may fail and return null, in which case it gives the caller some indication about what went wrong in its TesselationFailure argument.
+    /// </summary>
+    /// <param name="points">The input point array.</param>
+    /// <param name="loopIndices">The indices of closed loops standing for the inner and outer boundaries of the region to be meshed.</param>
+    /// <param name="permitVertexAdditions">Boolean to indicate if you are fine with new vertices</param>
+    /// <param name="permitEdgeSplitting">Boolean to indicate if you are with with your edges getting split</param>
+    /// <param name="tolerance">The tolerance to use for de-duplicating the points.</param>
+    /// <param name="failure">[out] The reason for failure, if any.</param>
+    /// <returns>
+    /// New mesh on success or null on failure.
+    /// </returns>
+    /// <since>8.6</since>
+    public static Mesh CreateFromClosedPolylinesAndPoints(
+      Point2d[] points,
+      int[][] loopIndices,
+      bool permitVertexAdditions,
+      bool permitEdgeSplitting,
+      double tolerance,
+      out TesselationFailure failure) {
+
+      failure = new TesselationFailure();
+      if (points.Length < 3 || loopIndices.Length == 0 || loopIndices[0].Length == 0)
+        return null;
+
+      int nloops = loopIndices.Length;
+      for (int i = 0; i < nloops; i++)
+        if (loopIndices[i] == null)
+          loopIndices[i] = Array.Empty<int>();
+
+      var loopCurvesArray = loopIndices.
+        Select(loop => new PolylineCurve(
+          loop.Select(i => new Point3d(points[i].X, points[i].Y, 0)))
+        ).ToArray();
+
+
+      for (int i = 0; i < nloops; i++) {
+        if (!loopCurvesArray[i].IsValid) continue;
+        if (!loopCurvesArray[i].IsClosed) {
+          failure.What += "Open polyline." + System.Environment.NewLine;
+          failure.OpenPolylines.Add(i);
+        }
+        if (Intersect.Intersection.CurveSelf(loopCurvesArray[i], tolerance).Any()) {
+          failure.What += "Self intersecting polylines." + System.Environment.NewLine;
+          failure.SelfIntersectingPolylines.Add(i);
+        }
+
+      }
+
+
+      if (nloops >= 2)
+        for (int i = 0; i < nloops; i++)
+          for (int j = i + 1; j < nloops; j++) {
+            if (!loopCurvesArray[i].IsValid || !loopCurvesArray[j].IsValid) continue;
+
+            if (Intersect.Intersection.CurveCurve(
+                    loopCurvesArray[i], loopCurvesArray[j], tolerance, tolerance).Any()) {
+              failure.What += "Mutually intersecting polylines." + System.Environment.NewLine;
+              failure.MutuallyIntersectingPolylines.Add(new IndexPair(i, j));
+            }
+          }
+
+      CurveOrientation[] os = loopCurvesArray.Select(o => o.ClosedCurveOrientation()).ToArray();
+
+      int indexOfOutermostCurve = 0;
+      if (nloops >= 2) {
+        double[] areas;
+        try {
+          areas = loopCurvesArray.Select(o => AreaMassProperties.Compute(o).Area).ToArray();
+        } catch {
+          // Since we have checked the curves are simple closed curves, we should not land here
+          // In this case, the loops were not all simple closed curves. This throws, and we have already registered the failure, so we can just return;
+          failure.What += "Could not calculate the area content of the curves.";
+          return null;
+        }
+
+        double ar = 0;
+
+        for (int i = 0; i < nloops; i++)
+          if (areas[i] > ar) { indexOfOutermostCurve = i; ar = areas[i]; }
+
+        var holeIndices = Enumerable.Range(0, nloops).Where(i => i != indexOfOutermostCurve);
+
+        foreach (var hi in holeIndices) {
+          if (!loopCurvesArray[hi].IsValid) continue;
+          var rc = Curve.PlanarClosedCurveRelationship(
+            loopCurvesArray[indexOfOutermostCurve], loopCurvesArray[hi], Plane.WorldXY, tolerance);
+          switch (rc) {
+            case RegionContainment.AInsideB:
+              failure.PolylinesNotContainedInOne = true;
+              failure.What += "Failure ... can't determine which curve is within the other." +
+                " Maybe they are too close, or the outer curve is present twice almost identically?" +
+                System.Environment.NewLine;
+              continue;
+            case RegionContainment.BInsideA:
+              continue;
+            case RegionContainment.Disjoint:
+              failure.PolylinesNotContainedInOne = true;
+              failure.What += "Failure - the curve encompassing the largest area does not contain all other curves." +
+              " The largest curve must contain all others. Can't mesh if this is not the case." +
+              System.Environment.NewLine;
+              continue;
+            case RegionContainment.MutualIntersection:
+              failure.MutuallyIntersectingPolylines.Append(new IndexPair(hi, indexOfOutermostCurve));
+              failure.What += "Failure - There is an intersection between the curve encompassing" +
+                " the largest area and another curve. Can't determine which is the outer curve." +
+                " The largest curve must contain all others." +
+                System.Environment.NewLine;
+              continue;
+          }
+        }
+      }
+
+      // Enough is enough. 
+      if (failure.Any()) return null;
+
+      List<IndexPair> ip = new List<IndexPair>();
+
+      for (int i = 0; i < nloops; i++) {
+        if (!loopCurvesArray[i].IsValid) continue;
+        var l = loopIndices[i];
+        int ll = l.Length - 1;
+        if (os[i] != CurveOrientation.CounterClockwise && os[i] != CurveOrientation.Clockwise) continue;
+
+        // The outermost curve needs to be in counterclockwise orientation, all others in clockwise.
+        if ((i == indexOfOutermostCurve).Equals(os[i] == CurveOrientation.CounterClockwise))
+          for (int ii = 0; ii < ll; ii++)
+            ip.Add(new IndexPair(l[ii], l[(ii + 1) % ll]));
+        else
+          for (int ii = ll - 1; ii >= 0; ii--)
+            ip.Add(new IndexPair(l[(ii + 1) % ll], l[ii]));
+      }
+
+      IntPtr meshptr = IntPtr.Zero;
+      IntPtr res = UnsafeNativeMethods.RHC_Mesh2dPointsAndEdges(
+        points,
+        points.Length,
+        ip.ToArray(),
+        ip.Count,
+        permitVertexAdditions,
+        permitEdgeSplitting,
+        tolerance
+        );
+
+      if (res == IntPtr.Zero) {
+        return null;
+      }
+      return CreateGeometryHelper(res, null) as Mesh;
+    }
+
+
+    /// <summary>
     /// Attempts to create a mesh that is a triangulation of a list of points, projected on a plane,
     /// including its holes and fixed edges.
     /// </summary>
@@ -3426,6 +3584,58 @@ namespace Rhino.Geometry
     }
 
 
+
+    /// <summary>Attempts to create a 3d convex hull mesh from input points.</summary>
+    /// <param name="points">The 3D input points to be covered with the convex hull.
+    /// These points must not be coplanar.</param>
+    /// <param name="hullFacets">An out parameter of jagged array of indices into the argument point enumerable.
+    /// Each list item specifies the indices that make up a facet of the convex hull.
+    /// These indices are not indices into the resulting mesh's indices.
+    /// Can be the empty jagged array if the resulting mesh is null.
+    /// </param>
+    /// <param name="tolerance">The tolerance used to decide if points are coplanar or not.
+    /// Use the document's tolerance if in doubt.</param>
+    /// <param name="angleTolerance">The angle tolerance used for merging coplanar points into facets.
+    /// Use the document's angle tolerance in radians if in doubt.</param>
+    /// <returns>A valid mesh if successful. If there were too few input points, or the input was coplanar
+    /// up to the specified tolerance, the result can be null.</returns>
+    /// <since>8.5</since>
+    public static Mesh CreateConvexHull3D(IEnumerable<Point3d> points, out int[][] hullFacets, double tolerance, double angleTolerance) {
+      hullFacets = new int[][] { };
+      var array = points.ToArray();
+      int errorCode = 0;
+
+      using (var hullFacetIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
+        using (var facetStartIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
+          IntPtr hfi = hullFacetIndices.NonConstPointer();
+          IntPtr fsi = facetStartIndices.NonConstPointer();
+          IntPtr res = UnsafeNativeMethods.RHC_ConvexHull3dMesh(array, array.Length, tolerance, angleTolerance, hfi, fsi, ref errorCode);
+          if (errorCode != 0 || res == IntPtr.Zero) return null;
+          Mesh m = CreateGeometryHelper(res, null) as Mesh;
+          if (m is null) return null;
+
+          var hfii = hullFacetIndices.ToArray();
+          var fsii = facetStartIndices.ToArray();
+          hullFacets = new int[fsii.Length][];
+          for (int i = 0; i < fsii.Length; i++) {
+            int start = fsii[i];
+            int length;
+
+            if (i == fsii.Length - 1)
+              length = hfii.Length - start; // Last slice goes till the end of the array
+            else
+              length = fsii[i + 1] - start; // Length is the difference between current and next index
+
+            hullFacets[i] = new int[length];
+            Array.Copy(hfii, start, hullFacets[i], 0, length);
+          }
+          return m;
+
+        }
+      }
+    }
+
+
     /// <summary>
     /// Analyzes some meshes, and determines if a pass of CreateFromIterativeCleanup would change the array.
     /// <para>All available cleanup steps are used. Currently available cleanup steps are:</para>
@@ -3975,7 +4185,24 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinates(NonConstPointer(), tm.ConstPointer(), ref xf, false);
       GC.KeepAlive(tm);
     }
-
+#if RHINO_SDK
+    /// <summary>
+    /// Sets up cached texture coordinate set for each texture in the material.
+    /// Textures in the Material define which mapping channels are used and
+    /// the RhinoObject defines what texture mapping is used for each mapping channel.
+    /// After this method is called all necessary texture coordinate sets are cached
+    /// and correct texture coordinates for each texture can be fetched using
+    ///  GetCachedTextureCoordinates(RhinoObject rhinoObject, Rhino.DocObjects.Texture texture)
+    ///
+    /// If any texture coordinates are already cached they will not be re-computed.
+    /// </summary>
+    /// <param name="rhinoObject">RhinoObject that defines texture mappings</param>
+    /// <param name="material">Material with textures that define mapping channels</param>
+    public void SetCachedTextureCoordinatesFromMaterial(RhinoObject rhinoObject, Rhino.DocObjects.Material material)
+    {
+      UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinatesFromMaterial(NonConstPointer(), rhinoObject.ConstPointer(), material.ConstPointer());
+    }
+#endif
     /// <summary>
     /// Call this method to get cached texture coordinates for a texture
     /// mapping with the specified Id.
@@ -3991,7 +4218,26 @@ namespace Rhino.Geometry
     {
       return CachedTextureCoordinates.GetCachedTextureCoordinates(this, textureMappingId);
     }
-
+#if RHINO_SDK
+    /// <summary>
+    /// Returns cached texture coordinate set based on the texture.
+    /// Make sure to set up cached texture coordinates for all textures in the material first by calling
+    ///  SetCachedTextureCoordinatesFromMaterial(RhinoObject rhinoObject, Rhino.DocObjects.Material material)
+    ///
+    /// If this function returns null then there are no texture coordinates available.
+    /// </summary>
+    /// <param name="rhinoObject">RhinoObject that defines texture mappings</param>
+    /// <param name="texture">Texture that defines the mapping channel</param>
+    /// <returns>Cached texture coordinates if available and otherwise null</returns>
+    public CachedTextureCoordinates GetCachedTextureCoordinates(RhinoObject rhinoObject, Rhino.DocObjects.Texture texture)
+    {
+      var tc_pointer = UnsafeNativeMethods.ON_Mesh_GetCachedTextureCoordinates(NonConstPointer(), rhinoObject.ConstPointer(), texture.ConstPointer());
+      if (tc_pointer == IntPtr.Zero)
+        return null;
+      var tc = new CachedTextureCoordinates(tc_pointer);
+      return tc;
+    }
+#endif
     /// <summary>
     /// Invalidates all cached texture coordinates. Call this
     /// function when you have made changes that will affect
@@ -4038,6 +4284,35 @@ namespace Rhino.Geometry
       GC.KeepAlive(this); // https://mcneel.myjetbrains.com/youtrack/issue/RH-76654
       return UnsafeNativeMethods.ON_Mesh_Volume(ptr_this);
     }
+
+    /// <summary>
+    /// Compute an approximation of the discrete curvatures of the mesh vertices, according to which
+    /// type of curvature information is requested.
+    /// This method will not yield meaningful values on nonmanifold vertices, and nan on naked vertices.
+    /// For now, this method operates solely on the mesh topology (the fully welded mesh),
+    /// but distribtes the result across all the ordinary vertices.
+    /// This method is a const and thread-safe method and will leave the m_K array untouched.
+    /// <param name="type">
+    /// An integer indicating which curvature is desired.
+    /// gaussian_curvature = 1, mean_curvature = 2, minimum unsigned radius of curvature = 3, maximum unsigned radius of curvature = 4
+    /// </param>
+    /// <param name="perVertexCurvatures">
+    /// Resulting curvature array on success, null on failure. On success, the length of the array is the number of vertices.
+    /// </param>
+    /// </summary>
+    /// <returns>True on success and false on failure.</returns>
+    /// <since>8.6</since>
+    [ConstOperation]
+    public bool ComputeCurvatureApproximation(int type, out double[] perVertexCurvatures) {
+      perVertexCurvatures = null;
+      using (var array = new Rhino.Runtime.InteropWrappers.SimpleArrayDouble())
+        if (UnsafeNativeMethods.RHC_RhinoMeshDiscreteCurvature(this.ConstPointer(), type, array.NonConstPointer())) {
+          perVertexCurvatures = array.ToArray();
+          return true;
+        }
+      return false;
+    }
+
 #endif
 
     /// <summary>Reverses the direction of the mesh.</summary>

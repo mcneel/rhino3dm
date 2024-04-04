@@ -922,6 +922,9 @@ using Rhino.Runtime.InteropWrappers;
           if (s.Equals("Circle"))
             return "ref Circle";
 
+          if (s.Equals("Triangle3d"))
+            return "ref Triangle3d";
+
           if (s.Equals("unsigned char"))
           {
             if (isArray)
