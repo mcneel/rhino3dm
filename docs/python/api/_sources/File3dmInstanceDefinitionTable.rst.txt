@@ -17,7 +17,11 @@ File3dmInstanceDefinitionTable
 
       [todo] add documentation
 
-   .. py:method:: Add(idef)
+   .. py:method:: AddInstanceDefinition(idef)
+
+      [todo] add documentation
+
+   .. py:method:: Add(name, description, url, urlTag, basePoint, geometry, attributes)
 
       Adds an instance definition to the instance definition table.
 

@@ -32,10 +32,16 @@ There are several places where version numbers should be updated:
           - change to `src/js/docs` directory
           - install dependencies (only first time): `npm i`
           - generate docs: `npm run docs`
+          - copy these to `docs/javscript/api`
         - Old system: 
           - istall dependencies: `npm i -g docdash jsdoc`
           - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
     2. python: 
+        - install dependencies in venv:
+          - python3 -m venv .venv
+          - source .venv/bin/activate
+          - pip install sphinx
+          - pip install sphinx-rtd-theme 
         - `sphinx-build -M html out/py_apidocs out/py_apidocs/sphinxout`
         - replace the docs in docs/python/api with the docs generated in src/docgen/out/py_apidocs/sphinxout/html
 5. commit these changes and merge with `main`
