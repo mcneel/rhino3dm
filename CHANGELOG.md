@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (py, js) CommonObject.IsValidWithLog that returns a tuple {bool valid, string log} [#598](https://github.com/mcneel/rhino3dm/issues/598)
 - (dotnet, py, js) Material.RenderMaterialInstanceId [#596](https://github.com/mcneel/rhino3dm/issues/596)
 - (py, js) InstanceDefinitionTable.Add [#436](https://github.com/mcneel/rhino3dm/issues/436) (see Changed below for consequential changes related to this)
+- (py, js) File3dmObjectTable.AddInstanceObject()
 - (py, js) EmbeddedFile.SetFilename.
 - (js) EmbeddedFile.WasmFromByteArray() to add embedded from a js Uint8Array. [#523](https://github.com/mcneel/rhino3dm/issues/523)
+- (py) EmbeddedFile.Read()
+
 
 ### Changed
 - (js) js docs now use typedoc for generating documentation from `src/js/rhino3dm.d.ts` [#594](https://github.com/mcneel/rhino3dm/issues/594)
@@ -19,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (py, js) EmbeddedFile.FileName is no longer read only and is Filename for py and fileName for js.
 
 ### Fixed
+- (py, js) File3dmObjectTable.AddSurface was incorrectly calling File3dmObjectTable.AddSphere
 
 ## [8.6.0-beta] - 2024.03.15
 diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta
