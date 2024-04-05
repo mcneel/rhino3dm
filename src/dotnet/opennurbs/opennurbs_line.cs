@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Rhino.Runtime;
 
@@ -1220,6 +1221,74 @@ namespace Rhino.Geometry
       var ac = C - A;
       return A + u * ab + v * ac;
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Attempt to create the smallest triangle containing a set of planar points.
+    /// </summary>
+    /// <param name="points">The points to enclose.</param>
+    /// <param name="tolerance">The tolerance to use</param>
+    /// <param name="triangle">The resulting triangle on success.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>8.4</since>
+    public static bool TrySmallestEnclosingTriangle(IEnumerable<Point2d> points, double tolerance, out Triangle3d triangle)
+    {
+      if (!RhinoMath.IsValidDouble(tolerance))
+        throw new ArgumentNullException("tolerance");
+
+      triangle = new Triangle3d();
+
+      if (!points.Any())
+        return false;
+
+      int count;
+      Point2d[] ptArray = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out count);
+      ptArray = ptArray.Where(p => RhinoMath.IsValidDouble(p.X) && RhinoMath.IsValidDouble(p.Y)).ToArray();
+      count = ptArray.Length;
+
+      if (count == 0)
+        return false;
+
+      if (count == 1)
+      {
+        var p = new Point3d(ptArray[0].X, ptArray[0].Y, 0.0);
+        triangle = new Triangle3d(p, p, p);
+        return false;
+      }
+
+      if (count == 2)
+      {
+        var p0 = new Point3d(ptArray[0].X, ptArray[0].Y, 0.0);
+        var p1 = new Point3d(ptArray[1].X, ptArray[1].Y, 0.0);
+        triangle = new Triangle3d(p0, p1, p1);
+        return false;
+      }
+
+      if (count == 3)
+      {
+        var p0 = new Point3d(ptArray[0].X, ptArray[0].Y, 0.0);
+        var p1 = new Point3d(ptArray[1].X, ptArray[1].Y, 0.0);
+        var p2 = new Point3d(ptArray[2].X, ptArray[2].Y, 0.0);
+
+        triangle = new Triangle3d(p0, p1, p2);
+        return triangle.Area > Math.Pow(tolerance, 3);
+      }
+
+      using (var boundaryArray = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
+      {
+        IntPtr ptrBoundaryArray = boundaryArray.NonConstPointer();
+        Point3d p = new Point3d();
+        Point3d q = new Point3d();
+        Point3d r = new Point3d();
+        bool success = UnsafeNativeMethods.RHC_CreateTriangleFrom2dPoints(ref p, ref q, ref r, ptArray, count, tolerance, ptrBoundaryArray);
+        triangle = new Triangle3d(p, q, r);
+        if (!success)
+          return false;
+      }
+      return true;
+    }
+#endif
+
     /*
     /// <summary>
     /// Gets the axial parameters on the triangle interior which are closest to a test point.

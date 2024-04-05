@@ -343,6 +343,21 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, frameRate);
     }
 
+    /// <summary>
+    /// Returns the current selection in the Named Views panel. If more than one such panel is open,
+    /// it will return the selection in the most recently opened panel.
+    /// </summary>
+    public string[] Selection
+    {
+      get
+      {
+        using (var names = new ClassArrayString())
+        {
+          UnsafeNativeMethods.CRhinoDocProperties_GetNamedViewSelection(m_doc.RuntimeSerialNumber, names.NonConstPointer());
+          return names.ToArray();
+        }
+      }
+    }
 
     #region enumerator
     /// <since>5.0</since>

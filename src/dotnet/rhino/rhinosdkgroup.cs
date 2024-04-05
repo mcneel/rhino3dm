@@ -151,6 +151,27 @@ namespace Rhino.DocObjects
         return UnsafeNativeMethods.CRhinoGroupTable_FindGroup(m_doc.RuntimeSerialNumber, groupName);
       }
 
+      /// <summary>
+      /// Conceptually, the group table is an array of groups.
+      /// The operator[] can be used to get individual groups. 
+      /// A group is either active or deleted and this state is reported by Group.IsDeleted.
+      /// </summary>
+      /// <param name="index">zero based array index.</param>
+      /// <returns>
+      /// Reference to the group. If index is out of range, null is returned.
+      /// Note that this reference may become invalid after Add() is called.
+      /// </returns>
+      /// <since>8.5</since>
+      public Group this[int index]
+      {
+        get
+        {
+          if (index < 0 || index >= Count)
+            return null;
+          return new Group(index, m_doc);
+        }
+      }
+
       /// <summary>Finds a group with a given name.</summary>
       /// <param name="groupName">
       /// Name of group to search for. Ignores case.

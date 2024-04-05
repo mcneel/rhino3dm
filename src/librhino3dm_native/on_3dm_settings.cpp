@@ -305,6 +305,20 @@ RH_C_FUNCTION void ON_EarthAnchorPoint_SetDouble(ON_EarthAnchorPoint* pEarthAnch
   }
 }
 
+RH_C_FUNCTION int ON_EarthAnchorPoint_GetEarthCoordinateSystem(const ON_EarthAnchorPoint* pConstEarthAnchor)
+{
+  int rc = 0;
+  if (pConstEarthAnchor)
+    rc = (int)(static_cast<unsigned int>(pConstEarthAnchor->EarthCoordinateSystem()));
+  return rc;
+}
+
+RH_C_FUNCTION void ON_EarthAnchorPoint_SetEarthCoordinateSystem(ON_EarthAnchorPoint* pEarthAnchor, int val)
+{
+  if (pEarthAnchor)
+    pEarthAnchor->SetEarthCoordinateSystem(ON::EarthCoordinateSystemFromUnsigned(val));
+}
+
 RH_C_FUNCTION int ON_EarthAnchorPoint_GetEarthBasepointElevationZero(const ON_EarthAnchorPoint* pConstEarthAnchor)
 {
   int rc = 0;
@@ -379,6 +393,16 @@ RH_C_FUNCTION bool ON_EarthAnchorPoint_EarthLocationIsSet(ON_EarthAnchorPoint* p
 		bIsSet = pEarthAnchor->EarthLocationIsSet();
 	}
 	return bIsSet;
+}
+
+RH_C_FUNCTION bool ON_EarthAnchorPoint_ModelLocationIsSet(ON_EarthAnchorPoint* pEarthAnchor)
+{
+  bool bIsSet = false;
+  if (pEarthAnchor)
+  {
+    bIsSet = pEarthAnchor->ModelLocationIsSet();
+  }
+  return bIsSet;
 }
 
 RH_C_FUNCTION void ON_EarthAnchorPoint_GetModelCompass(const ON_EarthAnchorPoint* pConstEarthAnchor, ON_PLANE_STRUCT* plane)

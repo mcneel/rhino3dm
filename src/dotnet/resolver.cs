@@ -3,6 +3,9 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Rhino.Runtime
 {
@@ -10,6 +13,12 @@ namespace Rhino.Runtime
   /// <summary> Assembly Resolver for the Rhino App Domain. </summary>
   public static class AssemblyResolver
   {
+    // List of assemblies we resolve by version first, otherwise we find based on name only
+    private static readonly ImmutableHashSet<string> ResolveByVersionWhitelist = ImmutableHashSet.Create(StringComparer.Ordinal, new [] {
+      "Newtonsoft.Json"
+    });
+    
+
     static bool Initialized = false;
     private static readonly ResolverContext ExecutionContext = new ResolverContext(false);
     private static readonly ResolverContext ReflectionContext = new ResolverContext(true);
@@ -17,7 +26,12 @@ namespace Rhino.Runtime
     private static string _logFilePath;
     private static string LogFilePath => _logFilePath ?? (_logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoAssemblyResolveLog.txt"));
     static readonly bool LogEnabled = File.Exists(LogFilePath);
-    private static void Log(params string[] contents) => File.AppendAllLines(LogFilePath, contents);
+    private static void Log(params string[] contents)
+    {
+      File.AppendAllLines(LogFilePath, contents);
+      foreach (var line in contents)
+        System.Diagnostics.Debug.WriteLine(line);
+    }
 
     internal static void InitializeAssemblyResolving()
     {
@@ -55,7 +69,7 @@ namespace Rhino.Runtime
     private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
       var assembly = ResolveAssembly(ExecutionContext, args);
-      if (LogEnabled && assembly is object)
+      if (LogEnabled && args.Name.IndexOf(".resources", StringComparison.Ordinal) == -1)
         Log
         (
           $"Assembly {args.RequestingAssembly?.FullName}",
@@ -69,7 +83,7 @@ namespace Rhino.Runtime
     private static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
     {
       var assembly = ResolveAssembly(ReflectionContext, args);
-      if (LogEnabled && assembly is object)
+      if (LogEnabled && args.Name.IndexOf(".resources", StringComparison.Ordinal) == -1)
         Log
         (
           $"(*) Assembly {args.RequestingAssembly?.FullName}",
@@ -90,6 +104,23 @@ namespace Rhino.Runtime
           return Assembly.GetExecutingAssembly();
       }
 
+      var requestedName = new AssemblyName(args.Name);
+
+      if (ResolveByVersionWhitelist.Contains(requestedName.Name))
+      {
+        // Resolve ensuring version matches first
+        var assembly = ResolveAssembly(context, args, true);
+        if (assembly != null)
+          return assembly;
+      }
+
+      // Resolve by name only
+      return ResolveAssembly(context, args, false);
+    }
+
+    private static Assembly ResolveAssembly(ResolverContext context, ResolveEventArgs args, bool checkVersion)
+    {
+
       // Get the significant name of the assembly we're looking for.
       string searchname = args.Name;
 
@@ -99,6 +130,8 @@ namespace Rhino.Runtime
         return null;
 
       List<string> potential_files;
+
+      var requestedName = new AssemblyName(args.Name);
 
       lock (context)
       {
@@ -125,8 +158,11 @@ namespace Rhino.Runtime
         var loaded_assemblies = context.GetCurrentDomainAssemblies();
         foreach (var loaded_assembly in loaded_assemblies)
         {
-          if (loaded_assembly.FullName.StartsWith(searchname + ",", StringComparison.OrdinalIgnoreCase))
+          if (AssemblyNameAndVersionMatches(requestedName, loaded_assembly.GetName(), searchname, checkVersion))
+          {
+            context.Assemblies[args.Name] = loaded_assembly;
             return loaded_assembly;
+          }
         }
 
         potential_files = new List<string>();
@@ -138,6 +174,9 @@ namespace Rhino.Runtime
         {
           foreach (string plugin_folder in plugin_folders)
           {
+            if (!Directory.Exists(plugin_folder))
+              continue;
+              
             string[] files = Directory.GetFiles(plugin_folder, @"*.dll", SearchOption.TopDirectoryOnly); //Why TopDirectoryOnly?
             if (files != null) { potential_files.AddRange(files); }
 
@@ -239,7 +278,7 @@ namespace Rhino.Runtime
         if (file.IndexOf(must_be_in_filename, StringComparison.InvariantCultureIgnoreCase) == -1)
           continue;
 
-        asm = TryLoadAssembly(context, file, searchname);
+        asm = TryLoadAssembly(context, requestedName, file, searchname, checkVersion);
         if (asm != null)
           break;
       }
@@ -253,7 +292,7 @@ namespace Rhino.Runtime
       }
     }
 
-    private static Assembly TryLoadAssembly(ResolverContext context, string filename, string searchname)
+    private static Assembly TryLoadAssembly(ResolverContext context, AssemblyName requestedName, string filename, string searchname, bool checkVersion)
     {
       // Don't try to load an assembly that already failed to load in the past.
       lock (context.LoadFailures)
@@ -269,7 +308,8 @@ namespace Rhino.Runtime
         {
           // First get assembly display-name so we can trivially reject incompatible assemblies.
           var asm_name = AssemblyName.GetAssemblyName(filename);
-          if (!asm_name.Name.Equals(searchname, StringComparison.OrdinalIgnoreCase))
+
+          if (!AssemblyNameAndVersionMatches(requestedName, asm_name, searchname, checkVersion))
             return null;
 
           // Load for real.
@@ -287,6 +327,23 @@ namespace Rhino.Runtime
       }
 
       return null;
+    }
+    
+    private static bool AssemblyNameAndVersionMatches(AssemblyName requested, AssemblyName candidate, string searchname, bool checkVersion)
+    {
+      searchname = searchname ?? requested.Name;
+      
+      if (!string.Equals(searchname, candidate.Name, StringComparison.OrdinalIgnoreCase))
+        return false;
+        
+      if (!checkVersion)
+        return true;
+
+      // Don't ever offer a version lower than requested
+      if (candidate.Version < requested.Version)
+        return false;
+
+      return true;
     }
 
     class ResolverContext

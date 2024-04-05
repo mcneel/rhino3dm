@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using Rhino.Geometry;
 using Rhino.Render.PostEffects;
@@ -809,7 +810,26 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Gets or sets a value indicating the zero level convention relating to a location on Earth.
     /// </summary>
+    /// <since>8.5</since>
+    public EarthCoordinateSystem EarthBasepointElevationCoordinateSystem
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return (EarthCoordinateSystem)UnsafeNativeMethods.ON_EarthAnchorPoint_GetEarthCoordinateSystem(ptr_const_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_EarthAnchorPoint_SetEarthCoordinateSystem(ptr_this, (int)value);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating the zero level convention relating to a location on Earth.
+    /// </summary>
     /// <since>5.0</since>
+    [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Please use EarthBasepointElevationCoordinateSystem property")]
     public BasepointZero EarthBasepointElevationZero
     {
       get
@@ -825,9 +845,9 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
-    /// </summary>
-    /// <since>7.11</since>
+         /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+         /// </summary>
+         /// <since>7.11</since>
     public double KMLOrientationHeadingAngleDegrees
     {
       get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationHeadingAngleDegrees); }
@@ -997,6 +1017,18 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Checks if the model location is set or not.
+    /// </summary>
+    /// <returns>Boolean value, true if set else false</returns>
+    /// <since>8.5</since>
+    public bool ModelLocationIsSet()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      bool is_set = UnsafeNativeMethods.ON_EarthAnchorPoint_EarthLocationIsSet(const_ptr_this);
+      return is_set;
+    }
+
+    /// <summary>
     /// Returns a plane in model coordinates whose X axis points East,
     /// Y axis points North and Z axis points Up. The origin
     /// is set to ModelBasepoint.
@@ -1123,6 +1155,7 @@ namespace Rhino.DocObjects
   /// <para>This is used in conjunction with the <see cref="EarthAnchorPoint"/> class.</para>
   /// </summary>
   /// <since>5.0</since>
+  [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Please use EarthCoordinateSystem")]
   public enum BasepointZero
   {
     /// <summary>
@@ -1140,7 +1173,6 @@ namespace Rhino.DocObjects
     /// </summary>
     CenterOfEarth = 2,
   }
-
 
   /// <summary>
   /// Contains information used by the Animation Tools to create sun, season,

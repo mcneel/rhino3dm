@@ -673,6 +673,19 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <since>6.0</since>
+    public Guid RenderMaterialInstanceId
+    {
+      get
+      {
+        return UnsafeNativeMethods.Rdk_RenderContent_MaterialInstanceId(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.Rdk_RenderContent_SetMaterialInstanceId(NonConstPointer(), value);
+      }
+    }
+
     /// <summary>
     /// Get the RenderMaterial related to this Material.
     /// 
@@ -715,7 +728,6 @@ namespace Rhino.DocObjects
       m_doc = doc;
     }
 #endif
-
     internal Material(IntPtr pMaterial)
     {
       ConstructNonConstObject(pMaterial);
@@ -834,19 +846,6 @@ namespace Rhino.DocObjects
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Material_SetPlugInId(ptr_this, value);
-      }
-    }
-
-    /// <since>6.0</since>
-    public Guid RenderMaterialInstanceId
-    {
-      get
-      {
-        return UnsafeNativeMethods.Rdk_RenderContent_MaterialInstanceId(ConstPointer());
-      }
-      set
-      {
-        UnsafeNativeMethods.Rdk_RenderContent_SetMaterialInstanceId(NonConstPointer(), value);
       }
     }
 
@@ -1119,6 +1118,23 @@ namespace Rhino.DocObjects
         var ptr_const_this = ConstPointer();
         var abgr = UnsafeNativeMethods.ON_Material_PreviewColor(ptr_const_this);
         return Runtime.Interop.ColorFromWin32(abgr);
+      }
+    }
+
+    /// <summary>
+    /// Gets the RDK material ID.
+    /// </summary>
+    /// <remarks>
+    /// Multiple Rhino materials ( with unique component IDs)
+    /// can have the same RDK material ID.
+    /// </remarks>
+    /// <since>8.6</since>
+    public Guid RDKMaterialID
+    {
+      get 
+      {
+        var ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Material_RdkMaterialID(ptr_const_this);
       }
     }
 

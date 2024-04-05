@@ -333,6 +333,24 @@ namespace Rhino.Runtime
       return shared;
     }
 
+    internal SharedPtrCommonObject ConvertToConstObjectWithSharedPointerParent(IntPtr sharedPtr)
+    {
+      if (m__parent is SharedPtrCommonObject sp)
+      {
+        return null;
+      }
+
+      EnsurePrivateCopy();
+      SharedPtrCommonObject shared = SharedPtrCommonObject.WrapSharedPointer(sharedPtr);
+      if (null == shared)
+        return null;
+
+      m__parent = shared;
+      m_ptr = IntPtr.Zero;
+
+      return shared;
+    }
+
     /// <summary>
     /// If true this object may not be modified. Any properties or functions that attempt
     /// to modify this object when it is set to "IsReadOnly" will throw a NotSupportedException.

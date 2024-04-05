@@ -465,6 +465,22 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// If false, the texture color values should be correctly by the linear workflow pre-process gamma value (in the document)
+    /// if linear workflow is on.  Otherwise, if the values is true, the values should be used raw from the texture.
+    /// </summary>
+    public bool TreatAsLinear
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_Texture_TreatAsLinear(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Texture_SetTreatAsLinear(ConstPointer(), value);
+      }
+    }
+
+    /// <summary>
     /// Is true if this texture uses world coordinate system (WCS) box projection for texture mapping.
     ///  Notice: If this texture is used by an object that has an object coordinate system (OCS) frame
     ///  defined on a mapping channel then that OCS frame is used instead of the WCS.

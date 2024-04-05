@@ -441,6 +441,9 @@ namespace Rhino.UI
     /// <returns></returns>
     private static void Add(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
     {
+      if (HostUtils.RunningOniOS)
+        return;
+
       if (type == null)
         throw new ArgumentNullException(nameof(type));
       // Check to see if the type definition was previously registered 

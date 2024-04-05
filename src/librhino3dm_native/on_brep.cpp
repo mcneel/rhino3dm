@@ -2508,3 +2508,14 @@ RH_C_FUNCTION void ON_Brep_SetTolerancesBoxesAndFlags(ON_Brep* pBrep,
     );
   }
 }
+
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION int ON_Brep_GetTangentConnectedComponents(const ON_Brep* pConstBrep, double angle_tol, bool bIncludeMeshes, ON_SimpleArray<ON_Brep*>* pOutBreps )
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-81106
+  int rc = 0;
+  if (pConstBrep && pOutBreps)
+    rc = pConstBrep->GetTangentConnectedComponents(*pOutBreps, angle_tol, bIncludeMeshes);
+  return rc;
+}
+#endif

@@ -49,6 +49,14 @@ namespace Rhino.Render
   /// </summary>
   public sealed class TextureMapping : ModelComponent
   {
+    // Represents both a CRhinoTextureMapping and an ON_TextureMapping. When m_ptr is
+    // null, the object uses m_doc and m_id to look up the const
+    // CRhinoTextureMapping in the Manifest table.
+    readonly Guid m_id = Guid.Empty;
+#if RHINO_SDK
+    readonly RhinoDoc m_doc;
+#endif
+
     internal TextureMapping()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_TextureMapping_New();
@@ -59,6 +67,15 @@ namespace Rhino.Render
       IntPtr ptr = UnsafeNativeMethods.ON_TextureMapping_NewFromPointer(pTextureMapping);
       ConstructNonConstObject(ptr);
     }
+
+#if RHINO_SDK
+    internal TextureMapping(int index, RhinoDoc doc)
+    {
+      m_id = UnsafeNativeMethods.CRhinoTextureMappingTable_GetTextureMappingId(doc.RuntimeSerialNumber, index);
+      m_doc = doc;
+      m__parent = m_doc;
+    }
+#endif
 
     /// <summary>
     /// Texture mapping type associated with this Mapping object.
@@ -108,7 +125,7 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.ON_TextureMapping_GetId(ConstPointer());
+        return IsDocumentControlled ? m_id : UnsafeNativeMethods.ON_TextureMapping_GetId(ConstPointer());
       }
     }
 
@@ -714,10 +731,24 @@ namespace Rhino.Render
       return rc;
     }
 
+#if RHINO_SDK
+    internal override IntPtr _InternalGetConstPointer()
+    {
+      if (m_doc != null)
+      {
+        IntPtr rc = UnsafeNativeMethods.CRhinoTextureMappingTable_GetTextureMappingPointerFromId(m_doc.RuntimeSerialNumber, m_id);
+        if (rc == IntPtr.Zero)
+          throw new Runtime.DocumentCollectedException($"Could not find TextureMapping with ID {m_id}");
+        return rc;
+      }
+      return IntPtr.Zero;
+    }
+#else
     internal override IntPtr _InternalGetConstPointer()
     {
       return IntPtr.Zero;
     }
+#endif
 
     internal override IntPtr _InternalDuplicate(out bool applymempressure)
     {
