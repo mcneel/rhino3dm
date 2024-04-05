@@ -531,7 +531,7 @@ declare module 'rhino3dm' {
 		 */
 		plainText: string;
 		/**
-		 * Return plain text string for this annotation with field expressions unevaluated
+		 * Text stripped of RTF formatting information and with field expressions intact
 		 */
 		plainTextWithFields: string;
 	}
@@ -1151,6 +1151,10 @@ declare module 'rhino3dm' {
 
 	class BrepFace extends SurfaceProxy {
 		/**
+		 * Gets or sets face orientation.
+		 */
+		orientationIsReversed: boolean;
+		/**
 		 * @description Gets the untrimmed surface that is the base of this face.
 		 * @returns {Surface} A surface, or null on error.
 		 */
@@ -1361,6 +1365,8 @@ declare module 'rhino3dm' {
 		 * Tests an object to see if it is valid.
 		 */
 		isValid: boolean;
+		/**... */
+		isValidWithLog: [boolean, string]
 		/**
 		 * Gets the amount of user strings.
 		 */
@@ -2290,6 +2296,11 @@ declare module 'rhino3dm' {
 		 * @returns {boolean} Returns true if successful, else false.
 		*/
 		write(path:string): boolean;
+		/**
+		 * Creates an EmbeddedFile from a string buffer
+		 * @param {string} buffer a Uint8Array
+		*/
+		static fromByteArray(buffer:string): EmbeddedFile;
 		/** ... */
 		clear(): boolean;
 	}
@@ -2709,7 +2720,19 @@ declare module 'rhino3dm' {
 		/** ... */
 		get(index:number): InstanceDefinition;
 		/** ... */
-		add(idef:InstanceDefinition): void;
+		addInstanceDefinition(idef:InstanceDefinition): Number;
+		/**
+		 * @description Adds an instance definition to the instance definition table.
+		 * @param {string} name The definition name.
+		 * @param {string} description The definition description.
+		 * @param {string} url A URL or hyperlink.
+		 * @param {string} urlTag A description of the URL or hyperlink.
+		 * @param {number[]} basePoint A base point.
+		 * @param {GeometryBase[]} geometry An array, a list or any enumerable set of geometry.
+		 * @param {ObjectAttributes[]} attributes An array, a list or any enumerable set of attributes.
+		 * @returns {number} >=0  index of instance definition in the instance definition table. -1 on failure.
+		 */
+		add(name:string,description:string,url:string,urlTag:string,basePoint:number[],geometry:GeometryBase[],attributes:ObjectAttributes[]): number;
 		/** ... */
 		findIndex(index:number): InstanceDefinition;
 		/** ... */
@@ -2728,8 +2751,7 @@ declare module 'rhino3dm' {
 		 * @description Easy way to add a new layer to the model
 		 * @param {string} name new layer name
 		 * @param {object} color new layer color in js object format: {r:number, g:number, b:number)} where number is from 0 - 255
-		 * @returns {number} If layer_name is valid, the layer's index (>=0) is returned. Otherwise,
-		RhinoMath.UnsetIntIndex is returned.
+		 * @returns {number} If layer_name is valid, the layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
 		addLayer(name:string,color:object): number;
 		/**
@@ -2936,6 +2958,14 @@ declare module 'rhino3dm' {
 		 * @returns {string} A unique identifier for the object.
 		 */
 		add(attributes: ObjectAttributes, geometry: GeometryBase): string;
+		/** ... */
+		addObject(): void;
+		/**
+		 * @description Adds an instance reference geometry object to the table.
+		 * @param {InstanceReferenceGeometry} instanceReference The instance reference geometry object.
+		 * @returns {string} A unique identifier for the object.
+		 */
+		addInstanceObject(instanceReference:InstanceReference): string;
 		/**
 		 * @description Gets the bounding box containing every object in this table.
 		 * @returns {BoundingBox} The computed bounding box.
@@ -6128,6 +6158,7 @@ declare module 'rhino3dm' {
 		 */
 		enabled: boolean;
 		/**
+		 * ShadowIntensity is currently unused.
 		 */
 		shadowIntensity: number;
 	}
@@ -6982,6 +7013,10 @@ declare module 'rhino3dm' {
 		 * Gets or sets the Focal blur sample count of the active viewport
 		 */
 		focalBlurSampleCount: number;
+		/** ... */
+		getViewport(): ViewportInfo;
+		/** ... */
+		setViewport(): void;
 	}
 
 	class ViewportInfo extends CommonObject {
@@ -6989,6 +7024,7 @@ declare module 'rhino3dm' {
 		 */
 		isValidCameraFrame: boolean;
 		/**
+		 * Gets a value that indicates whether the camera is valid.
 		 */
 		isValidCamera: boolean;
 		/**
