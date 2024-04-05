@@ -14,7 +14,7 @@ static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
   size_t sizeof__outbuffer;
   if (!archive.ReadCompressedBufferSize(&sizeof__outbuffer))
     return false;
-  
+
   if (0 == sizeof__outbuffer)
     return true;
 
@@ -264,6 +264,16 @@ void BND_ONXModel::SetStartSectionComments(std::wstring comments)
 {
   ON_wString wcomments = comments.c_str();
   m_model->m_sStartSectionComments = wcomments;
+}
+
+BND_File3dmNotes BND_ONXModel::GetNotes() const
+{
+  return BND_File3dmNotes(m_model->m_properties.m_Notes);
+}
+
+void BND_ONXModel::SetNotes(BND_File3dmNotes notes)
+{
+  m_model->m_properties.m_Notes = notes.m_notes;
 }
 
 const int idxApplicationName = 0;
@@ -1889,6 +1899,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def_property_readonly("CreatedBy", &BND_ONXModel::GetCreatedBy)
     .def_property_readonly("LastEdited", &BND_ONXModel::GetLastEdited)
     .def_property_readonly("LastEditedBy", &BND_ONXModel::GetLastEditedBy)
+    .def_property("Notes", &BND_ONXModel::GetNotes, &BND_ONXModel::SetNotes)
     .def_property("Revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .def_property_readonly("Settings", &BND_ONXModel::Settings)
     .def_property_readonly("Objects", &BND_ONXModel::Objects)
@@ -2116,6 +2127,7 @@ void initExtensionsBindings(void*)
     .property("createdBy", &BND_ONXModel::GetCreatedBy)
     .property("lastEdited", &BND_ONXModel::GetLastEdited)
     .property("lastEditedBy", &BND_ONXModel::GetLastEditedBy)
+    .property("notes", &BND_ONXModel::GetNotes, &BND_ONXModel::SetNotes)
     .property("revision", &BND_ONXModel::GetRevision, &BND_ONXModel::SetRevision)
     .function("settings", &BND_ONXModel::Settings)
     .function("objects", &BND_ONXModel::Objects)

@@ -292,7 +292,8 @@ public:
 
   std::wstring GetStartSectionComments() const;
   void SetStartSectionComments(std::wstring comments);
-  //public File3dmNotes Notes | get; set;
+  BND_File3dmNotes GetNotes() const;
+  void SetNotes(BND_File3dmNotes notes);
   std::wstring GetApplicationName() const;
   void SetApplicationName(std::wstring name);
   std::wstring GetApplicationUrl() const;
