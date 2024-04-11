@@ -3053,9 +3053,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Create a mesh from a SubD limit surface
     /// </summary>
-    /// <param name="subd"></param>
-    /// <param name="displayDensity"></param>
-    /// <returns></returns>
+    /// <param name="subd">SubD to mesh</param>
+    /// <param name="displayDensity">
+    /// Adaptive display density value to use. If in doubt, pass 
+    /// <see cref="SubDDisplayParameters.Density.DefaultDensity"/>: this is what the cache uses.
+    /// </param>
+    /// <returns>New mesh representing the SubD</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
     /// <since>7.0</since>
     public static Mesh CreateFromSubD(SubD subd, int displayDensity)
     {

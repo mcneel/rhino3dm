@@ -6010,14 +6010,14 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// 
+    /// The RefitTrim command replaces a trimmed surface edge with an untrimmed edge.
     /// </summary>
-    /// <param name="edge">The edge to fit</param>
-    /// <param name="knots">The custonm knot vector to use, or an empty vector to use the existing knots</param>
-    /// <param name="tolerance"> 3d tolerance for projection, splitting, fitting</param>
-    /// <param name="bSections">If true, the surface is divided into sections at all knots</param>
-    /// <param name="fitQuality">3-d fit to trim curve (projected)</param>
-    /// <returns></returns>
+    /// <param name="edge">The edge to fit.</param>
+    /// <param name="knots">The custom knot vector to use, or an empty vector to use the existing knots of the surface.</param>
+    /// <param name="tolerance">The 3d tolerance for projection, splitting, and fitting.</param>
+    /// <param name="bSections">If true, the surface is divided into seperate surface patches at all knots.</param>
+    /// <param name="fitQuality">A measure of the 3d fit to the trim curve.</param>
+    /// <returns>The trimmed surfaces.</returns>
     /// <since>7.0</since>
     public Surface[] RefitTrim(BrepEdge edge, IEnumerable<double> knots, double tolerance, bool bSections, ref double fitQuality)
     {
