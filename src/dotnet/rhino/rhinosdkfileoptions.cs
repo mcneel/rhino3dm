@@ -414,11 +414,50 @@ namespace Rhino.FileIO
       set { SetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts.ScaleGeometry, value); }
     }
 
+    uint GetUnsignedInt(UnsafeNativeMethods.FileReadOptionsUnsignedIntConsts which)
+    {
+      return UnsafeNativeMethods.CRhinoFileReadOptions_GetUnsignedInt(m_ptr, which);
+    }
+
     /// <summary>
-    /// Additional read options.
+    /// If a worksession reference model is being read, then a value &gt;= 1000 will be returned.
+    /// Otherwise, this value will be 0;
     /// </summary>
-    /// <since>8.0</since>
-    public Collections.ArchivableDictionary OptionsDictionary
+    /// <since>8.6</since>
+    [CLSCompliant(false)]
+    public uint WorkSessionReferenceModelSerialNumber
+    {
+      get { return GetUnsignedInt(UnsafeNativeMethods.FileReadOptionsUnsignedIntConsts.WorkSessionReferenceModelSerialNumber); }
+    }
+
+    /// <summary>
+    /// If a file is being read to create an instance definition, then this value will be the 
+    /// serial number of the instance definition being created.
+    /// Otherwise, this value will be 0;
+    /// </summary>
+    /// <since>8.6</since>
+    [CLSCompliant(false)]
+    public uint LinkedInstanceDefinitionSerialNumber
+    {
+      get { return GetUnsignedInt(UnsafeNativeMethods.FileReadOptionsUnsignedIntConsts.LinkedInstanceDefinitionSerialNumber); }
+    }
+
+    /// <summary>
+    /// Information that ultimately is part of a worksession reference model or linked instance definition model is being read, 
+    /// all layers are added as sub-layers of a grand-parent layer.When the information being read is destined for the active model,
+    /// no grandparent layer is used. Value is Guid.Empty if no grandparent layer is in use.
+    /// </summary>
+    /// <since>8.6</since>
+    public Guid ReferenceModelGrandParentLayerId
+    {
+      get { return UnsafeNativeMethods.CRhinoFileReadOptions_ReferenceModelGrandParentLayerId(m_ptr); }
+    }
+
+  /// <summary>
+  /// Additional read options.
+  /// </summary>
+  /// <since>8.0</since>
+  public Collections.ArchivableDictionary OptionsDictionary
     {
       get
       {

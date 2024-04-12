@@ -1676,6 +1676,38 @@ namespace Rhino.Render
       new_content.AutoDelete = true;
       return new_content;
     }
+
+    /// <summary>
+    /// Used by SaveToFile
+    /// </summary>
+    public enum EmbedFilesChoice : int 
+    { 
+      /// <summary>
+      /// Never embed support files in the content file
+      /// </summary>
+      NeverEmbed = 0,
+      /// <summary>
+      /// Always embed support files in the content file
+      /// </summary>
+      AlwaysEmbed = 1, 
+      /// <summary>
+      /// Show a UI
+      /// </summary>
+      AskUser = 2 
+    }
+
+    /// <summary>
+    /// Saves content to a file - RMTL, RENV or RTEX.
+    /// </summary>
+    /// <param name="filename">Full path to the file to be saved.</param>
+    /// <param name="embedFilesChoice"></param>
+    /// <returns>The loaded content or null if an error occurred.</returns>
+    public bool SaveToFile(String filename, EmbedFilesChoice embedFilesChoice)
+    {
+      return UnsafeNativeMethods.Rdk_RenderContent_SaveContentToFile(ConstPointer(), filename, (int)embedFilesChoice);
+    }
+
+
     /// <summary>
     /// Add a material, environment or texture to the internal RDK document lists as
     /// top level content.  The content must have been returned from

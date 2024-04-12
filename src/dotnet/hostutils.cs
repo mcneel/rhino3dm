@@ -1602,7 +1602,7 @@ namespace Rhino.Runtime
     /// <since>6.15</since>
     public static void GetCurrentProcessInfo(out string processName, out Version processVersion)
     {
-      if (RunningOnOSX)
+      if (RunningOnOSX || RunningOniOS)
       {
 #if RHINO_SDK
         processVersion = RhinoApp.Version;
@@ -1744,6 +1744,30 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Get limit margins for a given form (page size) and a given printer.
+    /// This is the physical limit area that a printer can print on a given page
+    /// </summary>
+    /// <param name="printerName"></param>
+    /// <param name="formName"></param>
+    /// <param name="portrait"></param>
+    /// <param name="leftMillimeters"></param>
+    /// <param name="topMillimeters"></param>
+    /// <param name="rightMillimeters"></param>
+    /// <param name="bottomMillimeters"></param>
+    /// <returns>true on success</returns>
+    public static bool GetPrinterFormMargins(string printerName, string formName, bool portrait,
+      out double leftMillimeters, out double topMillimeters, out double rightMillimeters, out double bottomMillimeters)
+    {
+      leftMillimeters = 0.0;
+      topMillimeters = 0.0;
+      rightMillimeters = 0.0;
+      bottomMillimeters = 0.0;
+      bool rc = UnsafeNativeMethods.RHC_GetPrinterFormMargins(printerName, formName, portrait, ref leftMillimeters,
+        ref topMillimeters, ref rightMillimeters, ref bottomMillimeters);
+      return rc;
+    }
+
+    /// <summary>
     /// Get the output resolution for a given printer.
     /// </summary>
     /// <param name="printerName"></param>
@@ -1770,7 +1794,11 @@ namespace Rhino.Runtime
     {
       if (string.IsNullOrEmpty(assemblyPath))
       {
+#if ON_RUNTIME_APPLE_IOS
+        assemblyPath = "RhinoiOS.dll";
+#else
         assemblyPath = RunningOnWindows ? "RhinoWindows.dll" : "RhinoMac.dll";
+#endif
       }
 
       if (!g_platform_locator.ContainsKey(assemblyPath))
@@ -1986,7 +2014,7 @@ namespace Rhino.Runtime
       {
         if (!directories.Contains(dir.FullName))
         {
-          directories.Add(dir.ToString());
+          directories.Add(dir.FullName);
         }
       }
       return directories.ToArray();
@@ -2026,24 +2054,30 @@ namespace Rhino.Runtime
     /// Tests if this process is currently executing on the Windows platform.
     /// </summary>
     /// <since>5.0</since>
-    public static bool RunningOnWindows
-    {
-      get { return !RunningOnOSX; }
-    }
+    public static bool RunningOnWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     /// <summary>
     /// Tests if this process is currently executing on the Mac OSX platform.
     /// </summary>
     /// <since>5.0</since>
-    public static bool RunningOnOSX
+    public static bool RunningOnOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+    /// <summary>
+    /// Tests if this process is currently executing on the iOS platform.
+    /// </summary>
+    /// <since>5.0</since>
+    public static bool RunningOniOS
     {
       get
       {
-        System.PlatformID pid = System.Environment.OSVersion.Platform;
-        // unfortunately Mono reports Unix when running on Mac
-        return (System.PlatformID.MacOSX == pid || System.PlatformID.Unix == pid);
+#if ON_RUNTIME_APPLE_IOS
+        return true;
+#else
+        return false;
+#endif
       }
     }
+
 
 #if RHINO_SDK
     /// <summary>
@@ -2647,6 +2681,28 @@ namespace Rhino.Runtime
       string msg = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, args);
       DebugString(msg);
     }
+#if RHINO_SDK
+    /// <summary>
+    /// Logs a debug event.
+    /// The function will log the filename and line number from where this function is called,
+    /// in addition to the input message.
+    /// </summary>
+    /// <param name="message">The event message.</param>
+    /// <since>8.5</since>
+    public static void LogDebugEvent(string message)
+    {
+      try
+      {
+        StackFrame callStack = new StackFrame(1, true);
+        String filename = Path.GetFileName(callStack.GetFileName());
+        UnsafeNativeMethods.RHC_RhLogDebugEvent(message, filename, callStack.GetFileLineNumber());
+      }
+      catch
+      {
+        // Don't crash when we can't log diagnostics
+      }
+    }
+#endif
     /// <summary>
     /// Gets or sets whether debug messages are printed to the command line.
     /// </summary>
@@ -3114,7 +3170,7 @@ namespace Rhino.Runtime
         "Date",
         "DateModified",
         "DetailScale",
-        "DocumentUserText",
+        "DocumentText",
         "FileName",
         "LayerName",
         "LayoutUserText",
@@ -3232,7 +3288,6 @@ namespace Rhino.Runtime
             {
               double double_result = (double)eval_result;
               // We should eventually support some sort of formatting field in the field.
-
               UnitSystem units;
               int displayPrecision;
               if (rhinoObject != null && (rhinoObject.Attributes.Space == DocObjects.ActiveSpace.PageSpace))
@@ -3246,7 +3301,7 @@ namespace Rhino.Runtime
                 displayPrecision = doc.ModelDistanceDisplayPrecision;
               }
 
-              var annotation = rhinoObject as Rhino.DocObjects.AnnotationObjectBase;
+              var annotation = rhinoObject as AnnotationObjectBase;
               
               //Look for block instances with BlockAttributesText and try to fish out an annotation base to get dimension style from
               //NOTE this only supports 1 dimension style per block. 
@@ -3254,7 +3309,28 @@ namespace Rhino.Runtime
               {
                 annotation = block.InstanceDefinition.GetObjects().FirstOrDefault(c=>c.ObjectType == ObjectType.Annotation) as AnnotationObjectBase;
               }
-              
+
+              if (annotation != null)
+              {
+                //If the object containing the function is an annotation then
+                //We need to know the space of the object being referenced by the function, not the annotations space.  
+                //strip the referenced object guid out of the expression and figure out what space that object resides in. 
+                //Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-80815
+                var guid_pattern = @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+                var regex = new Regex(guid_pattern);
+                var match = regex.Match(expression);
+                if (match.Success)
+                {
+                  Guid.TryParse(match.Value, out var object_guid);
+                  if (object_guid != null)
+                  {
+                    var ro = doc.Objects.Find(object_guid);
+                    if (ro != null)
+                      units = ro.Attributes.Space == ActiveSpace.PageSpace ? doc.PageUnitSystem : doc.ModelUnitSystem;
+                  }
+                }
+              }
+
 
               // Basic CurveLength expression
               if (annotation != null && formula.StartsWith("CurveLength", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
@@ -3798,6 +3874,9 @@ namespace Rhino.Runtime
     /// <since>6.0</since>
     public static void InitializeRhinoCommon_RDK()
     {
+#if ON_RUNTIME_APPLE_IOS
+        // no rhcommonrdk_c on ios yet.
+#else
       if (m_rhinocommonrdkinitialized)
         return;
       m_rhinocommonrdkinitialized = true;
@@ -3817,6 +3896,7 @@ namespace Rhino.Runtime
 
       Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(true);
       Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(true);
+#endif
     }
 
     /// <summary>

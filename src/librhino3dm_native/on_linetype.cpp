@@ -229,6 +229,16 @@ RH_C_FUNCTION void ON_Linetype_RemoveTaper(ON_Linetype* linetype)
     linetype->RemoveTaper();
 }
 
+RH_C_FUNCTION bool ON_Linetype_AlwaysModelDistances(const ON_Linetype* linetype)
+{
+  return linetype && linetype->AlwaysModelDistances();
+}
+
+RH_C_FUNCTION void ON_Linetype_SetAlwaysModelDistances(ON_Linetype* linetype, bool always)
+{
+  if (linetype)
+    linetype->SetAlwaysModelDistances(always);
+}
 
 // TODO: Move to on_sectionstyle.cpp and update all projects that compile rhcommon_c
 

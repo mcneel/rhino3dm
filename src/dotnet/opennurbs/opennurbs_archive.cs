@@ -235,9 +235,6 @@ namespace Rhino.Collections
     {
       Rhino.FileIO.SerializationOptions options = context.Context as Rhino.FileIO.SerializationOptions;
 
-      bool writeuserdata = true;
-      if (options != null)
-        writeuserdata = options.WriteUserData;
       int rhino_version = (options != null) ? options.RhinoVersion : 6;
 
       // 28 Aug 2014 S. Baer (RH-28446)
@@ -4505,7 +4502,7 @@ namespace Rhino.FileIO
 
   /// <summary>
   /// Contains options for serializing -or storing- data,
-  /// such as Rhino version and user data.
+  /// such as Rhino version, user data, and meshes.
   /// </summary>
   public class SerializationOptions
   {

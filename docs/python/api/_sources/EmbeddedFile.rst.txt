@@ -18,8 +18,12 @@ EmbeddedFile
    .. py:attribute:: Length
 
 
-   .. py:attribute:: FileName
+   .. py:attribute:: Filename
 
+
+   .. py:staticmethod:: Read(fileName)
+
+      [todo] add documentation
 
    .. py:method:: Write(fileName)
 

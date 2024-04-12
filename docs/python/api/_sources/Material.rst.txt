@@ -19,6 +19,9 @@ Material
 
       Guid: The Id of the RenderPlugIn that is associated with this material.
 
+   .. py:attribute:: RenderMaterialInstanceId
+
+
    .. py:attribute:: Name
 
 

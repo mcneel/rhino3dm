@@ -624,6 +624,23 @@ namespace Rhino
     /// <since>7.0</since>
     public bool SaveAs(string file3dmPath, int version)
     {
+      return SaveAs(file3dmPath, version, true, true, true, true);
+    }
+
+
+    /// <summary>
+    /// Save doc as a 3dm to a specified path
+    /// </summary>
+    /// <param name="file3dmPath"></param>
+    /// <param name="version">Rhino file version</param>
+    /// <param name="saveSmall">whether to inlcude render meshes and preview image</param>
+    /// <param name="saveTextures">whether to include the bitmap table</param>
+    /// <param name="saveGeometryOnly">whether to write enything besides geometry</param>
+    /// <param name="savePluginData">whether to write plugin user data</param>
+    /// <returns>true on success</returns>
+    /// <since>8.0</since>
+    public bool SaveAs(string file3dmPath, int version, bool saveSmall, bool saveTextures, bool saveGeometryOnly, bool savePluginData)
+    {
       // This line checks filePath is a valid path, well formatted, not too long...
       var info = new System.IO.FileInfo(file3dmPath);
 
@@ -638,7 +655,12 @@ namespace Rhino
           SuppressAllInput = true,
           SuppressDialogBoxes = true,
           WriteSelectedObjectsOnly = false,
-          FileVersion = version
+          FileVersion = version,
+          IncludeRenderMeshes = !saveSmall,
+          IncludePreviewImage = !saveSmall,
+          IncludeBitmapTable = saveTextures,
+          WriteGeometryOnly = saveGeometryOnly,
+          WriteUserData = savePluginData
         }
       )
       {
@@ -1091,6 +1113,12 @@ namespace Rhino
       set { UnsafeNativeMethods.CRhinoDoc_GetSetString(RuntimeSerialNumber, IDX_NOTES, true, value, IntPtr.Zero); }
     }
 
+    public bool NotesLocked
+    {
+      get { return GetBool(UnsafeNativeMethods.DocumentStatusBool.NotesLocked); }
+      set { UnsafeNativeMethods.CRhinoDoc_GetSetBool(RuntimeSerialNumber, UnsafeNativeMethods.DocumentStatusBool.NotesLocked, true, value); }
+    }
+
     /// <since>5.0</since>
     public DateTime DateCreated
     {
@@ -1362,6 +1390,17 @@ namespace Rhino
     public void AdjustPageUnitSystem(UnitSystem newUnitSystem, bool scale)
     {
       UnsafeNativeMethods.CRhinoDocProperties_AdjustUnitSystem(RuntimeSerialNumber, false, newUnitSystem, scale);
+    }
+
+    /// <summary>
+    /// Determines if a document unit system is a metric unit system.
+    /// </summary>
+    /// <param name="modelUnits">True to query model units, false to query page units.</param>
+    /// <returns>Return true if the length unit is a metric unit system.</returns>
+    /// <since>8.6</since>
+    public bool IsMetricUnitSystem(bool modelUnits)
+    {
+      return UnsafeNativeMethods.CRhinoDocProperties_IsMetricUnitSystem(RuntimeSerialNumber, modelUnits);
     }
 
     /// <since>5.0</since>
@@ -2111,9 +2150,10 @@ namespace Rhino
     internal bool InGet => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGet);
 
     /// <summary>
-    /// Returns true if currently in a GetPoint.Get(), GetObject.GetObjects(), or GetString.Get()
+    /// Returns true if currently in a GetPoint.Get().
     /// </summary>
-    internal bool InGetPoint => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGetPoint);
+    /// <since>8.5</since>
+    public bool InGetPoint => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGetPoint);
 
     /// <summary>
     /// Returns true if currently in a GetPoint.Get(), GetObject.GetObjects(), or GetString.Get()
@@ -2449,16 +2489,28 @@ namespace Rhino
       return rc;
     }
 
-    ///<summary>Extracts the bitmap preview image from the specified model (3DM).</summary>
-    ///<param name='path'>
-    ///The model (3DM) from which to extract the preview image.
-    ///If null, the currently loaded model is used.
-    ///</param>
-    ///<returns>true on success.</returns>
+    /// <summary>
+    /// Extracts the bitmap preview image from the specified .3dm file.
+    /// </summary>
+    /// <param name='path'>
+    /// The .3dm file from which to extract the preview image.
+    /// If null, the path to the active document is used.
+    /// </param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
     /// <since>5.0</since>
     static public System.Drawing.Bitmap ExtractPreviewImage(string path)
     {
-      return File3dm.ReadPreviewImage (path);
+      if (string.IsNullOrEmpty(path))
+      {
+        path = ActiveDoc?.Path;
+        if (string.IsNullOrEmpty(path))
+          return null;
+      }
+
+      if (!System.IO.File.Exists(path))
+        return null;
+
+      return File3dm.ReadPreviewImage(path);
     }
 
     /// <summary>
@@ -6569,6 +6621,30 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddPointCloud2(m_doc.RuntimeSerialNumber, const_ptr_cloud, const_ptr_attributes, ptr_history, reference);
     }
 
+
+    /// <summary>Adds a point cloud object to the document.</summary>
+    /// <param name="xCt">Number of points in X dir.</param>
+    /// <param name="yCt">Number of points in Y dir.</param>
+    /// <param name="zCt">Number of points in Z dir.</param>
+    /// <param name="min">point at x0,y0,z0 of bounding box of the pointcloud</param>
+    /// <param name="max">point at x1,y1,z1 of bounding box of the pointcloud</param>
+    /// <param name="attributes">Attributes to apply to point cloud. null is acceptable</param>
+    /// <param name="history">history associated with this point cloud. null is acceptable</param>
+    /// <param name="reference">
+    /// true if the object is from a reference file.  Reference objects do
+    /// not persist in archives
+    /// </param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>8.0</since>    
+    public Guid AddOrderedPointCloud(int xCt, int yCt, int zCt, Point3d min, Point3d max, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    {
+
+      IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
+
+      return UnsafeNativeMethods.CRhinoDoc_AddOrderedPointCloud(m_doc.RuntimeSerialNumber, xCt, yCt, zCt, min, max, const_ptr_attributes, ptr_history, reference);
+    }
+
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of points.</param>
     /// <returns>A unique identifier for the object.</returns>
@@ -10197,7 +10273,7 @@ namespace Rhino.DocObjects.Tables
           return new BitmapEntry(index, doc);
 
         case ModelComponentType.TextureMapping:
-          goto default; //not yet ON_ModelComponent derived
+          return new TextureMapping(index, doc);
 
         case ModelComponentType.RenderMaterial:
           return new Material(index, doc);
@@ -10235,7 +10311,7 @@ namespace Rhino.DocObjects.Tables
         default:
           throw new NotImplementedException(
             string.Format(
-              "Tell giulio@mcneel.com if you need access to ModelComponentType.{0}.",
+              "There is no current instantiation for document ModelComponentType.{0}.",
               type.ToString()
               )
             );

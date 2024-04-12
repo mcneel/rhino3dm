@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml;
 using Rhino.Geometry;
 using Rhino.Runtime;
 using Font = Rhino.DocObjects.Font;
@@ -102,10 +103,16 @@ namespace Rhino.Display
       float y = (float)(page_height / dpi * 72.0);
 
       SvgWriter.AppendAttribute(doc, svgroot, "version", "1.1");
-      SvgWriter.AppendAttribute(doc, svgroot, "width", $"{x}pt");
-      SvgWriter.AppendAttribute(doc, svgroot, "height", $"{y}pt");
+      // 12 March 2024 (S. Baer) RH-79884
+      // Skip writing width/height. It doesn't seem to do anything for us
+      // 15 March 2024 (S. Baer) RH-79884
+      // Actually width/height are required for outputting to devices like
+      // Trotec lasers. Include width/height and make sure they are written
+      // with period decimal separators like everything else
+      SvgWriter.AppendAttribute(doc, svgroot, "width", string.Format(CultureInfo.InvariantCulture, "{0:G4}pt", x));
+      SvgWriter.AppendAttribute(doc, svgroot, "height", string.Format(CultureInfo.InvariantCulture, "{0:G4}pt", y));
       SvgWriter.AppendAttribute(doc, svgroot, "viewBox", string.Format(CultureInfo.InvariantCulture, "0 0 {0} {1}", x, y));
-      SvgWriter.AppendAttribute(doc, svgroot, "overflow", "visible");
+      //SvgWriter.AppendAttribute(doc, svgroot, "overflow", "visible");
       doc.AppendChild(svgroot);
       var svgwriter = new SvgWriter(svgroot, dpi, new Size((int)x,(int)y));
       IntPtr ptr_page = Runtime.Interop.NativeNonConstPointer(settings);
@@ -159,9 +166,14 @@ namespace Rhino.Display
 
   class SvgWriter : Runtime.ViewCaptureWriter
   {
+    readonly System.Xml.XmlElement _rootNode;
+    readonly System.Xml.XmlDocument _doc;
+    private System.Xml.XmlElement m_def_node = null;
+    private List<XmlElement> _gradients = new List<XmlElement>();
+
     static void AppendAttribute(System.Xml.XmlDocument doc, System.Xml.XmlElement element, string name, double value)
     {
-      AppendAttribute(doc, element, name, value.ToString(CultureInfo.InvariantCulture));
+      AppendAttribute(doc, element, name, value.ToString("G4", CultureInfo.InvariantCulture));
     }
     public static void AppendAttribute(System.Xml.XmlDocument doc, System.Xml.XmlElement element, string name, string value)
     {
@@ -181,16 +193,12 @@ namespace Rhino.Display
       return true;
     }
 
-    readonly System.Xml.XmlElement m_root_node;
-    readonly System.Xml.XmlDocument m_doc;
-    //System.Xml.XmlElement m_def_node = null;
-    //int m_current_clippath_id = 1;
-
-    //List<Bitmap> m_bitmaps;
     public SvgWriter(System.Xml.XmlElement node, double dpi, Size pageSize) : base(dpi, pageSize)
     {
-      m_root_node = node;
-      m_doc = node.OwnerDocument;
+      _rootNode = node;
+      _doc = node.OwnerDocument;
+      m_def_node = _doc.CreateElement("defs", _doc.DocumentElement.NamespaceURI);
+      _rootNode.AppendChild(m_def_node);
     }
 
     public void BeforeDraw()
@@ -225,14 +233,14 @@ namespace Rhino.Display
 
     System.Xml.XmlElement GetParentNode(string layerName)
     {
-      var rc = m_root_node;
+      var rc = _rootNode;
       if (!string.IsNullOrEmpty(layerName))
       {
         System.Xml.XmlElement parentNode = null;
         if (!_groupElements.TryGetValue(layerName, out parentNode))
         {
-          parentNode = m_doc.CreateElement("g", m_doc.DocumentElement.NamespaceURI);
-          var idAttrib = m_doc.CreateAttribute("id");
+          parentNode = _doc.CreateElement("g", _doc.DocumentElement.NamespaceURI);
+          var idAttrib = _doc.CreateAttribute("id");
           idAttrib.Value = layerName.Replace(' ', '_'); // whitespace is not allowed for id attr
           parentNode.Attributes.Append(idAttrib);
           _groupElements.Add(layerName, parentNode);
@@ -246,18 +254,18 @@ namespace Rhino.Display
           }
           else
           {
-            m_root_node.AppendChild(parentNode);
+            _rootNode.AppendChild(parentNode);
           }
         }
         rc = parentNode;
       }
       return rc;
     }
-    
-    private void DrawPathHelper(PathPoint[] points, Pen pen, Color brushColor, System.Xml.XmlElement clippath)
+
+    private string BuildPathElement(PathPoint[] points)
     {
       if (null == points || points.Length < 2)
-        return;
+        return null;
 
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < points.Length; i++)
@@ -302,154 +310,261 @@ namespace Rhino.Display
           sb.Append("z");
         }
       }
-      var elem = m_doc.CreateElement("path", m_doc.DocumentElement.NamespaceURI);
-      var attrib = m_doc.CreateAttribute("d");
-      attrib.Value = sb.ToString();
-      elem.Attributes.Append(attrib);
-
-      if (clippath != null)
-      {
-        clippath.AppendChild(elem);
-      }
-      else
-      {
-        attrib = m_doc.CreateAttribute("stroke");
-        attrib.Value = ColorTranslator.ToHtml(Color.Black);
-        if (pen != null && pen.Width > 0)
-          attrib.Value = ColorTranslator.ToHtml(pen.Color);
-        elem.Attributes.Append(attrib);
-        attrib = m_doc.CreateAttribute("stroke-width");
-        float width = (pen != null && pen.Width > 0) ? pen.Width : 0;
-        attrib.Value = width.ToString(CultureInfo.InvariantCulture);
-        elem.Attributes.Append(attrib);
-        if (pen != null && pen.Width > 0 && pen.Color.A < 255)
-        {
-          attrib = m_doc.CreateAttribute("stroke-opacity");
-          attrib.Value = (pen.Color.A / 255.0).ToString(CultureInfo.InvariantCulture);
-          elem.Attributes.Append(attrib);
-        }
-
-        if (pen != null && pen.Width > 0)
-        {
-          attrib = m_doc.CreateAttribute("stroke-linecap");
-          switch(pen.Cap)
-          {
-            case DocObjects.LineCapStyle.Flat:
-              attrib.Value = "butt";
-              break;
-            case DocObjects.LineCapStyle.Square:
-              attrib.Value = "square";
-              break;
-            default:
-              attrib.Value = "round";
-              break;
-          }
-          elem.Attributes.Append(attrib);
-
-          attrib = m_doc.CreateAttribute("stroke-linejoin");
-          switch(pen.Join)
-          {
-            case DocObjects.LineJoinStyle.Miter:
-              attrib.Value = "miter";
-              break;
-            case DocObjects.LineJoinStyle.Bevel:
-              attrib.Value = "bevel";
-              break;
-            default:
-              attrib.Value = "round";
-              break;
-          }
-          elem.Attributes.Append(attrib);
-
-          if (IsValidPattern(pen.Pattern))
-          {
-            attrib = m_doc.CreateAttribute("stroke-dasharray");
-            StringBuilder pattern = new StringBuilder();
-            for(int i=0; i<pen.Pattern.Length; i++)
-            {
-              if (i > 0)
-                pattern.Append(" ");
-              pattern.Append(pen.Pattern[i]);
-            }
-            attrib.Value = pattern.ToString();
-            elem.Attributes.Append(attrib);
-          }
-        }
-        //Trav Feb-21-21 Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-62804
-        if (brushColor == Color.Empty)
-        {
-          attrib = m_doc.CreateAttribute("fill");
-          attrib.Value = "none";
-          elem.Attributes.Append(attrib);
-        }
-        else
-        {
-          attrib = m_doc.CreateAttribute("fill");
-          attrib.Value = ColorTranslator.ToHtml(brushColor);
-          elem.Attributes.Append(attrib);
-
-          AppendAttribute(m_doc, elem, "fill-opacity", brushColor.A / 255.0);
-        }
-
-        var parentNode = GetParentNode(_currentLayer);
-        parentNode.AppendChild(elem);
-      }
+      return sb.ToString();
     }
+
+    private XmlElement CreateGradientElement(bool linearGradient)
+    {
+      XmlElement rc = _doc.CreateElement(linearGradient ? "linearGradient" : "radialGradient", _doc.DocumentElement.NamespaceURI);
+      _gradients.Add(rc);
+      AppendAttribute(_doc, rc, "id", $"gradient{_gradients.Count}");
+      return rc;
+    }
+
+    double ToPoints(double pixelSize)
+    {
+      return pixelSize / Dpi * 72.0;
+    }
+
     protected override void DrawPath(PathPoint[] points, Pen pen, bool linearGradient, ColorStop[] stops, Point2d[] gradientPoints, double pointScale)
     {
+      string pathSeries = BuildPathElement(points);
+      if (string.IsNullOrWhiteSpace(pathSeries))
+        return;
+      
+      var elem = _doc.CreateElement("path", _doc.DocumentElement.NamespaceURI);
+      var attrib = _doc.CreateAttribute("d");
+      attrib.Value = pathSeries;
+      elem.Attributes.Append(attrib);
+
+      attrib = _doc.CreateAttribute("stroke");
+      attrib.Value = ColorTranslator.ToHtml(Color.Black);
+      if (pen != null && pen.Width > 0)
+        attrib.Value = ColorTranslator.ToHtml(pen.Color);
+      elem.Attributes.Append(attrib);
+      attrib = _doc.CreateAttribute("stroke-width");
+      float width = (pen != null && pen.Width > 0) ? pen.Width : 0;
+      attrib.Value = width.ToString(CultureInfo.InvariantCulture);
+      elem.Attributes.Append(attrib);
+      if (pen != null && pen.Width > 0 && pen.Color.A < 255)
+      {
+        attrib = _doc.CreateAttribute("stroke-opacity");
+        attrib.Value = (pen.Color.A / 255.0).ToString(CultureInfo.InvariantCulture);
+        elem.Attributes.Append(attrib);
+      }
+
+      if (pen != null && pen.Width > 0)
+      {
+        attrib = _doc.CreateAttribute("stroke-linecap");
+        switch (pen.Cap)
+        {
+          case DocObjects.LineCapStyle.Flat:
+            attrib.Value = "butt";
+            break;
+          case DocObjects.LineCapStyle.Square:
+            attrib.Value = "square";
+            break;
+          default:
+            attrib.Value = "round";
+            break;
+        }
+        elem.Attributes.Append(attrib);
+
+        attrib = _doc.CreateAttribute("stroke-linejoin");
+        switch (pen.Join)
+        {
+          case DocObjects.LineJoinStyle.Miter:
+            attrib.Value = "miter";
+            break;
+          case DocObjects.LineJoinStyle.Bevel:
+            attrib.Value = "bevel";
+            break;
+          default:
+            attrib.Value = "round";
+            break;
+        }
+        elem.Attributes.Append(attrib);
+
+        if (IsValidPattern(pen.Pattern))
+        {
+          attrib = _doc.CreateAttribute("stroke-dasharray");
+          StringBuilder pattern = new StringBuilder();
+          for (int i = 0; i < pen.Pattern.Length; i++)
+          {
+            if (i > 0)
+              pattern.Append(" ");
+            pattern.Append(pen.Pattern[i]);
+          }
+          attrib.Value = pattern.ToString();
+          elem.Attributes.Append(attrib);
+        }
+      }
+
       // TODO: Add gradient support for SVG
       Color brushColor = System.Drawing.Color.Empty;
       if (stops != null && stops.Length > 0)
         brushColor = stops[0].Color;
-      DrawPathHelper(points, pen, brushColor, null);
+
+
+      //Trav Feb-21-21 Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-62804
+      if (brushColor == Color.Empty)
+      {
+        attrib = _doc.CreateAttribute("fill");
+        attrib.Value = "none";
+        elem.Attributes.Append(attrib);
+      }
+      else
+      {
+        if (stops == null || stops.Length < 2)
+        {
+          attrib = _doc.CreateAttribute("fill");
+          attrib.Value = ColorTranslator.ToHtml(brushColor);
+          elem.Attributes.Append(attrib);
+
+          AppendAttribute(_doc, elem, "fill-opacity", brushColor.A / 255.0);
+        }
+        else
+        {
+          XmlElement gradient = CreateGradientElement(linearGradient);
+          PointF minPoint = points[0].Location;
+          PointF maxPoint = points[0].Location;
+          for(int i=1; i<points.Length; i++)
+          {
+            PointF loc = points[i].Location;
+            if (loc.X < minPoint.X) minPoint.X = loc.X;
+            if (loc.Y < minPoint.Y) minPoint.Y = loc.Y;
+            if (loc.X > maxPoint.X) maxPoint.X = loc.X;
+            if (loc.Y > maxPoint.Y) maxPoint.Y = loc.Y;
+          }
+
+          
+          double gradX0 = ToPoints(gradientPoints[0].X);
+          double gradY0 = ToPoints(gradientPoints[0].Y);
+          double gradX1 = ToPoints(gradientPoints[1].X);
+          double gradY1 = ToPoints(gradientPoints[1].Y);
+          double boundsWidth = maxPoint.X - minPoint.X;
+          double boundsHeight = maxPoint.Y - minPoint.Y;
+
+          double x1 = 0;
+          double x2 = 1;
+          double y1 = 0;
+          double y2 = 1;
+          if (boundsWidth > 0.0001)
+          {
+            x1 = (gradX0 - minPoint.X) / boundsWidth;
+            if (x1 > 0.999)
+              x1 = 1.0;
+            if (x1 < 0.001)
+              x1 = 0.0;
+
+            x2 = (gradX1 - minPoint.X) / boundsWidth;
+            if (x2 > 0.999)
+              x2 = 1.0;
+            if (x2 < 0.001)
+              x2 = 0.0;
+          }
+          if (boundsHeight > 0.0001)
+          {
+            y1 = (gradY0 - minPoint.Y) / boundsHeight;
+            if (y1 > 0.999)
+              y1 = 1.0;
+            if (y1 < 0.001)
+              y1 = 0.0;
+
+            y2 = (gradY1 - minPoint.Y) / boundsHeight;
+            if (y2 > 0.999)
+              y2 = 1.0;
+            if (y2 < 0.001)
+              y2 = 0.0;
+          }
+
+          if (linearGradient)
+          {
+            AppendAttribute(_doc, gradient, "x1", x1);
+            AppendAttribute(_doc, gradient, "y1", y1);
+            AppendAttribute(_doc, gradient, "x2", x2);
+            AppendAttribute(_doc, gradient, "y2", y2);
+          }
+          else
+          {
+            AppendAttribute(_doc, gradient, "cx", (x1 * 100).ToString("G4") + "%");
+            AppendAttribute(_doc, gradient, "cy", (y1 * 100).ToString("G4") + "%");
+            double distance = new Vector2d(gradX1 - gradX0, gradY1 - gradY0).Length;
+            double boundsSize = new Vector2d(boundsWidth, boundsHeight).Length;
+            if (boundsSize > 0.01)
+            {
+              double r = distance / boundsSize;
+              AppendAttribute(_doc, gradient, "r", (r * 100).ToString("G4") + "%");
+            }
+          }
+
+          foreach (var stop in stops)
+          {
+            XmlElement stopElement = _doc.CreateElement("stop", _doc.DocumentElement.NamespaceURI);
+            string percent = (stop.Position * 100.0).ToString("G4") + "%";
+            AppendAttribute(_doc, stopElement, "offset", percent);
+            string color = ColorTranslator.ToHtml(stop.Color);
+            AppendAttribute(_doc, stopElement, "stop-color", color);
+            gradient.AppendChild(stopElement);
+          }
+          m_def_node.AppendChild(gradient);
+          string reference = gradient.GetAttribute("id");
+          attrib = _doc.CreateAttribute("fill");
+          attrib.Value = $"url(#{reference}";
+          elem.Attributes.Append(attrib);
+        }
+      }
+
+      var parentNode = GetParentNode(_currentLayer);
+      parentNode.AppendChild(elem);
     }
 
     protected override void DrawBitmap(Bitmap bitmap, double m11, double m12, double m21, double m22, double dx, double dy)
     {
       /*
       m_bitmaps.Add(bitmap);
-      var elem = m_doc.CreateElement("image");
-      AppendAttribute(m_doc, elem, "xlink:href", $"Image_{m_bitmaps.Count}");
-      AppendAttribute(m_doc, elem, "width", bitmap.Width.ToString());
-      AppendAttribute(m_doc, elem, "height", bitmap.Height.ToString());
-      AppendAttribute(m_doc, elem, "transform", $"matrix({m11},{m12},{m21},{m22},{dx},{dy})");
+      var elem = _doc.CreateElement("image");
+      AppendAttribute(_doc, elem, "xlink:href", $"Image_{m_bitmaps.Count}");
+      AppendAttribute(_doc, elem, "width", bitmap.Width.ToString());
+      AppendAttribute(_doc, elem, "height", bitmap.Height.ToString());
+      AppendAttribute(_doc, elem, "transform", $"matrix({m11},{m12},{m21},{m22},{dx},{dy})");
       if (m_using_clippath)
-        AppendAttribute(m_doc, elem, "clip-path", $"url(#clippath_{m_current_clippath_id})");
-      m_root_node.AppendChild(elem);
+        AppendAttribute(_doc, elem, "clip-path", $"url(#clippath_{m_current_clippath_id})");
+      _rootNode.AppendChild(elem);
       */
     }
 
     protected override void DrawScreenText(string text, Color textColor, double x, double y, float angle, int horizontalAlignment,
       float heightPoint, Font font)
     {
-      var elem = m_doc.CreateElement("text", m_doc.DocumentElement.NamespaceURI);
-      AppendAttribute(m_doc, elem, "x", x);
-      AppendAttribute(m_doc, elem, "y", y);
+      var elem = _doc.CreateElement("text", _doc.DocumentElement.NamespaceURI);
+      AppendAttribute(_doc, elem, "x", x);
+      AppendAttribute(_doc, elem, "y", y);
       if (Math.Abs(angle) > 0.1)
       {
         string transform = $"rotate({angle.ToString(CultureInfo.InvariantCulture)} {x.ToString(CultureInfo.InvariantCulture)},{y.ToString(CultureInfo.InvariantCulture)})";
-        AppendAttribute(m_doc, elem, "transform", transform);
+        AppendAttribute(_doc, elem, "transform", transform);
       }
-      AppendAttribute(m_doc, elem, "font-family", font.LogfontName);
+      AppendAttribute(_doc, elem, "font-family", font.LogfontName);
       if (1 == horizontalAlignment)
-        AppendAttribute(m_doc, elem, "text-anchor", "middle");
+        AppendAttribute(_doc, elem, "text-anchor", "middle");
       if (2 == horizontalAlignment)
-        AppendAttribute(m_doc, elem, "text-anchor", "end");
+        AppendAttribute(_doc, elem, "text-anchor", "end");
       if (font.Bold)
-        AppendAttribute(m_doc, elem, "font-weight", "bold");
+        AppendAttribute(_doc, elem, "font-weight", "bold");
       if (font.Italic)
-        AppendAttribute(m_doc, elem, "font-style", "italic");
+        AppendAttribute(_doc, elem, "font-style", "italic");
       if (font.Underlined)
-        AppendAttribute(m_doc, elem, "text-decoration", "underline");
+        AppendAttribute(_doc, elem, "text-decoration", "underline");
       if (font.Strikeout)
-        AppendAttribute(m_doc, elem, "text-decoration", "line-through");
+        AppendAttribute(_doc, elem, "text-decoration", "line-through");
 
-      AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(textColor));
+      AppendAttribute(_doc, elem, "fill", ColorTranslator.ToHtml(textColor));
       if (textColor.A < 255)
-        AppendAttribute(m_doc, elem, "fill-opacity", textColor.A / 255.0);
-      AppendAttribute(m_doc, elem, "font-size", heightPoint);
+        AppendAttribute(_doc, elem, "fill-opacity", textColor.A / 255.0);
+      AppendAttribute(_doc, elem, "font-size", heightPoint);
       elem.InnerText = text;
-      m_root_node.AppendChild(elem);
+      _rootNode.AppendChild(elem);
     }
 
     protected override void SetClipPath(PathPoint[] points)
@@ -458,11 +573,11 @@ namespace Rhino.Display
       /*
       if(null==m_def_node)
       {
-        m_def_node = m_doc.CreateElement("defs");
-        m_root_node.PrependChild(m_def_node);
+        m_def_node = _doc.CreateElement("defs");
+        _rootNode.PrependChild(m_def_node);
       }
-      var clippath = m_doc.CreateElement("clipPath");
-      AppendAttribute(m_doc, clippath, "id", $"clippath_{m_current_clippath_id}");
+      var clippath = _doc.CreateElement("clipPath");
+      AppendAttribute(_doc, clippath, "id", $"clippath_{m_current_clippath_id}");
       m_def_node.AppendChild(clippath);
       DrawPathHelper(points, null, Color.Empty, clippath);
       //m_using_clippath = true;
@@ -472,14 +587,14 @@ namespace Rhino.Display
 
     protected override void FillPolygon(PointF[] points, Color fillColor)
     {
-      var elem = m_doc.CreateElement("polygon");
-      var attrib = m_doc.CreateAttribute("fill");
+      var elem = _doc.CreateElement("polygon");
+      var attrib = _doc.CreateAttribute("fill");
       attrib.Value = ColorTranslator.ToHtml(fillColor);
       elem.Attributes.Append(attrib);
 
-      AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
+      AppendAttribute(_doc, elem, "fill-opacity", fillColor.A / 255.0);
 
-      attrib = m_doc.CreateAttribute("points");
+      attrib = _doc.CreateAttribute("points");
       StringBuilder sb = new StringBuilder();
       foreach(var pt in points)
       {
@@ -489,28 +604,28 @@ namespace Rhino.Display
       attrib.Value = sb.ToString().Trim();
       elem.Attributes.Append(attrib);
 
-      m_root_node.AppendChild(elem);
+      _rootNode.AppendChild(elem);
     }
 
     protected override void DrawCircle(PointF center, float diameter, Color fillColor, Pen stroke)
     {
-      var elem = m_doc.CreateElement("circle", m_doc.DocumentElement.NamespaceURI);
-      AppendAttribute(m_doc, elem, "cx", center.X);
-      AppendAttribute(m_doc, elem, "cy", center.Y);
+      var elem = _doc.CreateElement("circle", _doc.DocumentElement.NamespaceURI);
+      AppendAttribute(_doc, elem, "cx", center.X);
+      AppendAttribute(_doc, elem, "cy", center.Y);
       float radius = diameter * 0.5f;
-      AppendAttribute(m_doc, elem, "r", radius);
-      AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(stroke.Color));
-      AppendAttribute(m_doc, elem, "stroke-width", stroke.Width);
+      AppendAttribute(_doc, elem, "r", radius);
+      AppendAttribute(_doc, elem, "stroke", ColorTranslator.ToHtml(stroke.Color));
+      AppendAttribute(_doc, elem, "stroke-width", stroke.Width);
       if (stroke.Color.A < 255)
-        AppendAttribute(m_doc, elem, "stroke-opacity", stroke.Color.A / 255.0);
+        AppendAttribute(_doc, elem, "stroke-opacity", stroke.Color.A / 255.0);
       if (fillColor.A == 0)
       {
-        AppendAttribute(m_doc, elem, "fill", "none");
+        AppendAttribute(_doc, elem, "fill", "none");
       }
       else
       {
-        AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
-        AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
+        AppendAttribute(_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
+        AppendAttribute(_doc, elem, "fill-opacity", fillColor.A / 255.0);
       }
       if (IsValidPattern(stroke.Pattern))
       {
@@ -521,7 +636,7 @@ namespace Rhino.Display
             pattern.Append(" ");
           pattern.Append(stroke.Pattern[i]);
         }
-        AppendAttribute(m_doc, elem, "stroke-dasharray", pattern.ToString());
+        AppendAttribute(_doc, elem, "stroke-dasharray", pattern.ToString());
       }
 
       var node = GetParentNode(_currentLayer);
@@ -530,26 +645,26 @@ namespace Rhino.Display
 
     protected override void DrawRectangle(RectangleF rect, Color fillColor, float strokeWidth, Color strokeColor, float cornerRadius)
     {
-      var elem = m_doc.CreateElement("rect", m_doc.DocumentElement.NamespaceURI);
-      AppendAttribute(m_doc, elem, "x", rect.Left);
-      AppendAttribute(m_doc, elem, "y", rect.Top);
-      AppendAttribute(m_doc, elem, "width", rect.Width);
-      AppendAttribute(m_doc, elem, "height", rect.Height);
-      AppendAttribute(m_doc, elem, "stroke", ColorTranslator.ToHtml(strokeColor));
-      AppendAttribute(m_doc, elem, "stroke-width", strokeWidth);
+      var elem = _doc.CreateElement("rect", _doc.DocumentElement.NamespaceURI);
+      AppendAttribute(_doc, elem, "x", rect.Left);
+      AppendAttribute(_doc, elem, "y", rect.Top);
+      AppendAttribute(_doc, elem, "width", rect.Width);
+      AppendAttribute(_doc, elem, "height", rect.Height);
+      AppendAttribute(_doc, elem, "stroke", ColorTranslator.ToHtml(strokeColor));
+      AppendAttribute(_doc, elem, "stroke-width", strokeWidth);
       if (strokeColor.A < 255)
-        AppendAttribute(m_doc, elem, "stroke-opacity", strokeColor.A / 255.0);
+        AppendAttribute(_doc, elem, "stroke-opacity", strokeColor.A / 255.0);
       if (cornerRadius > 0)
       {
-        AppendAttribute(m_doc, elem, "rx", cornerRadius);
-        AppendAttribute(m_doc, elem, "ry", cornerRadius);
+        AppendAttribute(_doc, elem, "rx", cornerRadius);
+        AppendAttribute(_doc, elem, "ry", cornerRadius);
       }
       if (fillColor != Color.Empty)
       {
-        AppendAttribute(m_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
-        AppendAttribute(m_doc, elem, "fill-opacity", fillColor.A / 255.0);
+        AppendAttribute(_doc, elem, "fill", ColorTranslator.ToHtml(fillColor));
+        AppendAttribute(_doc, elem, "fill-opacity", fillColor.A / 255.0);
       }
-      m_root_node.AppendChild(elem);
+      _rootNode.AppendChild(elem);
     }
 
     protected override void DrawGradientHatch(DisplayPipeline pipeline, Hatch hatch, DocObjects.HatchPattern pattern, Color[] gradientColors, float[] gradientStops, Point3d gradientPoint1, Point3d gradientPoint2,
@@ -572,48 +687,50 @@ namespace Rhino.Display
   /// </summary>
   public partial class ViewCaptureSettings : IDisposable
   {
-    IntPtr m_ptr_print_info; //CRhinoPrintInfo*
-    RhinoViewport _viewport;
+    private IntPtr _ptrPrintInfo; //CRhinoPrintInfo*
+    private RhinoViewport _viewport;
 
-    internal IntPtr ConstPointer() { return m_ptr_print_info; }
-    internal IntPtr NonConstPointer() { return m_ptr_print_info; }
+    internal IntPtr ConstPointer() { return _ptrPrintInfo; }
+    internal IntPtr NonConstPointer() { return _ptrPrintInfo; }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
+    /// <summary>Construct default view capture settings</summary>
     /// <since>6.0</since>
     public ViewCaptureSettings()
     {
-      m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
+      _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
     }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
+    /// <summary>Copy constructor</summary>
+    /// <param name="other">settings to copy data from</param>
+    public ViewCaptureSettings(ViewCaptureSettings other)
+    {
+      IntPtr ptrOther = other != null ? other.ConstPointer() : IntPtr.Zero;
+      _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(ptrOther);
+    }
+
+    /// <summary>Constructor</summary>
     /// <param name="sourceView">The Rhino view to capture or print.</param>
     /// <param name="mediaSize">The size of the output media.</param>
     /// <param name="dpi">Capture "density" in dots per inch.</param>
     /// <since>6.0</since>
     public ViewCaptureSettings(RhinoView sourceView, Size mediaSize, double dpi)
     {
-      m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
+      _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
       IntPtr const_rhino_viewport = sourceView.MainViewport.ConstPointer();
-      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(m_ptr_print_info, const_rhino_viewport);
+      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(_ptrPrintInfo, const_rhino_viewport);
       Resolution = dpi;
       SetLayout(mediaSize, new Rectangle(0, 0, mediaSize.Width, mediaSize.Height));
     }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
+    /// <summary>Constructor</summary>
     /// <param name="sourcePageView">The Rhino page view to capture or print.</param>
     /// <param name="dpi">Capture "density" in dots per inch.</param>
     /// <since>6.0</since>
     public ViewCaptureSettings(RhinoPageView sourcePageView, double dpi)
     {
-      m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
+      _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(IntPtr.Zero);
       IntPtr const_rhino_viewport = sourcePageView.MainViewport.ConstPointer();
-      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(m_ptr_print_info, const_rhino_viewport);
+      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(_ptrPrintInfo, const_rhino_viewport);
       Resolution = dpi;
       double width = sourcePageView.PageWidth;
       double height = sourcePageView.PageHeight;
@@ -643,6 +760,22 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <summary>
+    /// Check if the contents of this object is the same as another object
+    /// </summary>
+    /// <param name="other">other settings to compare against</param>
+    /// <returns></returns>
+    [ConstOperation]
+    public bool Equals(ViewCaptureSettings other)
+    {
+      if (other == null)
+        return false;
+      IntPtr constPointerThis = ConstPointer();
+      IntPtr constPointerOther = other.ConstPointer();
+      return UnsafeNativeMethods.CRhinoPrintInfo_Equals(constPointerThis, constPointerOther);
+    }
+
+
     /// <since>6.15</since>
     public void SetViewport(RhinoViewport viewport)
     {
@@ -663,7 +796,7 @@ namespace Rhino.Display
         }
       }
 
-      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(m_ptr_print_info, ptrRhinoViewport);
+      UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(_ptrPrintInfo, ptrRhinoViewport);
     }
 
     /// <summary>
@@ -684,7 +817,7 @@ namespace Rhino.Display
 
     internal ViewCaptureSettings(IntPtr ptrPrintInfo)
     {
-      m_ptr_print_info = UnsafeNativeMethods.CRhinoPrintInfo_New(ptrPrintInfo);
+      _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(ptrPrintInfo);
     }
 
     RhinoDoc _doc;
@@ -695,7 +828,7 @@ namespace Rhino.Display
       {
         if( _doc==null )
         {
-          uint sn = UnsafeNativeMethods.CRhinoPrintInfo_GetDoc(m_ptr_print_info);
+          uint sn = UnsafeNativeMethods.CRhinoPrintInfo_GetDoc(_ptrPrintInfo);
           return RhinoDoc.FromRuntimeSerialNumber(sn);
         }
         return _doc;
@@ -714,11 +847,11 @@ namespace Rhino.Display
     {
       get
       {
-        return UnsafeNativeMethods.CRhinoPrintInfo_GetViewArea(m_ptr_print_info);
+        return UnsafeNativeMethods.CRhinoPrintInfo_GetViewArea(_ptrPrintInfo);
       }
       set
       {
-        UnsafeNativeMethods.CRhinoPrintInfo_SetViewArea(m_ptr_print_info, value);
+        UnsafeNativeMethods.CRhinoPrintInfo_SetViewArea(_ptrPrintInfo, value);
       }
     }
 
@@ -754,6 +887,22 @@ namespace Rhino.Display
       }
     }
 
+    /// <summary>
+    /// Should curves and edges have their thicknesses scaled based the on the display
+    /// mode settings for a view being captured (default is false)
+    /// </summary>
+    public bool ApplyDisplayModeThicknessScales
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.PrintInfoBool.ApplyDisplayModeThicknessScales);
+      }
+      set
+      {
+        SetBool(UnsafeNativeMethods.PrintInfoBool.ApplyDisplayModeThicknessScales, value);
+      }
+    }
+
     /// <since>6.0</since>
     public void SetLayout(Size mediaSize, Rectangle cropRectangle)
     {
@@ -774,6 +923,20 @@ namespace Rhino.Display
         int margin_left = 0, margin_top = 0, margin_right = 0, margin_bottom = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_PageSize(const_ptr_this, ref width, ref height, ref dpi, ref margin_left, ref margin_top, ref margin_right, ref margin_bottom);
         return new Size(width, height);
+      }
+    }
+
+    /// <summary>
+    /// Rectangle where drawing is confined to on MediaSize
+    /// </summary>
+    public Rectangle DrawRectangle
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int left = 0, top = 0, right = 0, bottom = 0;
+        UnsafeNativeMethods.CRhinoPrintInfo_DrawRect(const_ptr_this, ref left, ref top, ref right, ref bottom);
+        return Rectangle.FromLTRB(left, top, right, bottom);
       }
     }
 
@@ -873,6 +1036,65 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.CRhinoPrintInfo_SetMargins(ptr_this, lengthUnits, left, top, right, bottom);
+    }
+
+    /// <summary>
+    /// Set the distance from the left edge of the paper to the CropRectangle
+    /// </summary>
+    /// <param name="lengthUnits">units that distance is defined in</param>
+    /// <param name="distance">distance to set</param>
+    /// <returns>
+    /// True if successful.
+    /// False if unsuccessful (this could happen if there is no set device_dpi)
+    /// </returns>
+    public bool SetMarginLeft(UnitSystem lengthUnits, double distance)
+    {
+      GetMargins(lengthUnits, out double _, out double top, out double right, out double bottom);
+      return SetMargins(lengthUnits, distance, top, right, bottom);
+    }
+
+    /// <summary>
+    /// Set the distance from the top edge of the paper to the CropRectangle
+    /// </summary>
+    /// <param name="lengthUnits">units that distance is defined in</param>
+    /// <param name="distance">distance to set</param>
+    /// <returns>
+    /// True if successful.
+    /// False if unsuccessful (this could happen if there is no set device_dpi)
+    /// </returns>
+    public bool SetMarginTop(UnitSystem lengthUnits, double distance)
+    {
+      GetMargins(lengthUnits, out double left, out double _, out double right, out double bottom);
+      return SetMargins(lengthUnits, left, distance, right, bottom);
+    }
+
+    /// <summary>
+    /// Set the distance from the right edge of the paper to the CropRectangle
+    /// </summary>
+    /// <param name="lengthUnits">units that distance is defined in</param>
+    /// <param name="distance">distance to set</param>
+    /// <returns>
+    /// True if successful.
+    /// False if unsuccessful (this could happen if there is no set device_dpi)
+    /// </returns>
+    public bool SetMarginRight(UnitSystem lengthUnits, double distance)
+    {
+      GetMargins(lengthUnits, out double left, out double top, out double _, out double bottom);
+      return SetMargins(lengthUnits, left, top, distance, bottom);
+    }
+    /// <summary>
+    /// Set the distance from the bottom edge of the paper to the CropRectangle
+    /// </summary>
+    /// <param name="lengthUnits">units that distance is defined in</param>
+    /// <param name="distance">distance to set</param>
+    /// <returns>
+    /// True if successful.
+    /// False if unsuccessful (this could happen if there is no set device_dpi)
+    /// </returns>
+    public bool SetMarginBottom(UnitSystem lengthUnits, double distance)
+    {
+      GetMargins(lengthUnits, out double left, out double top, out double right, out double _);
+      return SetMargins(lengthUnits, left, top, right, distance);
     }
 
     /// <since>6.2</since>
@@ -1303,11 +1525,11 @@ namespace Rhino.Display
 
     private void Dispose(bool isDisposing)
     {
-      if( m_ptr_print_info != IntPtr.Zero )
+      if( _ptrPrintInfo != IntPtr.Zero )
       {
-        UnsafeNativeMethods.CRhinoPrintInfo_Delete(m_ptr_print_info);
+        UnsafeNativeMethods.CRhinoPrintInfo_Delete(_ptrPrintInfo);
       }
-      m_ptr_print_info = IntPtr.Zero;
+      _ptrPrintInfo = IntPtr.Zero;
 
       if( _viewport != null )
       {

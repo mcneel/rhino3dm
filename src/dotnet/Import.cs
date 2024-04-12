@@ -18,7 +18,7 @@ class Import
     // DO NOT add the ".dll, .dynlib, .so, ..." extension.
     // Each platform should be smart enough to figure out how
     // to append an extension to find the dynamic library
-// #if ON_RUNTIME_IOS
+// #if ON_RUNTIME_APPLE_IOS
 
 //     public const string lib = "RhCore.framework/RhCore";
 //     // public const string librdk = "RhCommonRDK.framework/RhCommonRDK";

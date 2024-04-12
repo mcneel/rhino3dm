@@ -5,7 +5,9 @@
 There are several places where version numbers should be updated:
 
 - [JavaScript] package.json, line 3
-- [.NET] src/dotnet/Rhino3dm.csproj, line 11
+- [.NET] 
+    - src/dotnet/Rhino3dm.csproj, line 11
+    - src/dotnet/Properties/AssemblyInfo.cs, line 78
 - [Python]
   - setup.py, line 127
   - src/rhino3dm/\_\_init\_\_.py, line 7
@@ -14,7 +16,7 @@ There are several places where version numbers should be updated:
 ## Updating Documentation with docgen
 
 ### requirements:
-- javascript - jsdoc and docdash: `npm i -g docdash jsdoc`
+
 - python - 
   - sphinx: `python3 -m pip install sphinx`
   - theme: `python3 -m pip install sphinx-rtd-theme`
@@ -25,12 +27,25 @@ There are several places where version numbers should be updated:
 2. build docgen: `dotnet build docgen.csproj`
 3. run docgen: `cd bin/Debug && ./docgen`
 4. generate docs:
-    1. javascript: `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
+    1. javascript: 
+        - New System: 
+          - change to `src/js/docs` directory
+          - install dependencies (only first time): `npm i`
+          - generate docs: `npm run docs`
+          - copy these to `docs/javscript/api`
+        - Old system: 
+          - istall dependencies: `npm i -g docdash jsdoc`
+          - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
     2. python: 
-        - `sphinx-build -M html out/py_apidocs out/py_apidocs/sphinxout`
+        - install dependencies in venv:
+          - change to rhino3dm root directory
+          - `python3 -m venv .venv`
+          - `source .venv/bin/activate`
+          - `pip install sphinx`
+          - `pip install sphinx-rtd-theme`
+        - `sphinx-build -M html src/docgen/out/py_apidocs src/docgen/out/py_apidocs/sphinxout`
         - replace the docs in docs/python/api with the docs generated in src/docgen/out/py_apidocs/sphinxout/html
 5. commit these changes and merge with `main`
-
 
 ## JavaScript
 

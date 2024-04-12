@@ -175,6 +175,24 @@ File3dmObjectTable
 
       :rtype: void
 
+   .. py:method:: AddInstanceObject(idef)
+
+      Adds an instance reference geometry object to the table.
+
+      :param InstanceReferenceGeometry instanceReference: The instance reference geometry object.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddInstanceObject(idef, attributes)
+
+      Adds an instance reference geometry object to the table.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
    .. py:method:: AddObject(object)
 
       [todo] add documentation

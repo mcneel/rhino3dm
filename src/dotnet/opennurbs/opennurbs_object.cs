@@ -138,7 +138,7 @@ namespace Rhino.Runtime
         // m_ptr points ot an ON_Object.
         // Repair corruption that causes crashes in breps and meshes.
         // The parameters 0,0 mean:
-        // The first 0 parameter = bReplair and means detect but do not repair - so exception handler can see the damaged original information.
+        // The first 0 parameter = bRepair and means detect but do not repair - so exception handler can see the damaged original information.
         // The second 0 parameter = bSilentError means call C++ ON_ERROR() so a dev running a debug build gets a chance to see
         // the corrupt brep/mesh immediately.
         if (PerformCorruptionTesting && 0 != UnsafeNativeMethods.ON_Object_IsCorrupt(m_ptr, 0, 0))
@@ -323,6 +323,24 @@ namespace Rhino.Runtime
 
       EnsurePrivateCopy();
       IntPtr sharedPtr = UnsafeNativeMethods.ON_Object_NewSharedPointer(m_ptr);
+      SharedPtrCommonObject shared = SharedPtrCommonObject.WrapSharedPointer(sharedPtr);
+      if (null == shared)
+        return null;
+
+      m__parent = shared;
+      m_ptr = IntPtr.Zero;
+
+      return shared;
+    }
+
+    internal SharedPtrCommonObject ConvertToConstObjectWithSharedPointerParent(IntPtr sharedPtr)
+    {
+      if (m__parent is SharedPtrCommonObject sp)
+      {
+        return null;
+      }
+
+      EnsurePrivateCopy();
       SharedPtrCommonObject shared = SharedPtrCommonObject.WrapSharedPointer(sharedPtr);
       if (null == shared)
         return null;

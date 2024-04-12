@@ -12,3 +12,7 @@ AnnotationBase
    .. py:attribute:: PlainText
 
       str: Text stripped of RTF formatting information
+
+   .. py:attribute:: PlainTextWithFields
+
+      str: Text stripped of RTF formatting information and with field expressions intact

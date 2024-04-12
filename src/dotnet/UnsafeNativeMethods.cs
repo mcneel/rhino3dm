@@ -155,7 +155,8 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.PlugIn.CallWriteDocumentDelegate callwriteCallback,
     Rhino.PlugIns.PlugIn.WriteDocumentDelegate writedocumentCallback,
     Rhino.PlugIns.PlugIn.ReadDocumentDelegate readdocumentCallback,
-    Rhino.PlugIns.PlugIn.DisplayOptionsDialogDelegate displayOptionsDialog
+    Rhino.PlugIns.PlugIn.DisplayOptionsDialogDelegate displayOptionsDialog,
+    Rhino.PlugIns.PlugIn.OnDisplayHelpDelegate displayHelp
     );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -192,6 +193,7 @@ internal partial class UnsafeNativeMethods
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoRenderPlugIn_SetRdkCallbacks(
     Rhino.PlugIns.RenderPlugIn.SupportsFeatureCallback supportsFeatureCallback,
+    Rhino.PlugIns.RenderPlugIn.SupportedChannelsCallback supportedChannelsCallback,
     Rhino.PlugIns.RenderPlugIn.PreferBasicContentCallback preferBasicContentCallback,
     Rhino.PlugIns.RenderPlugIn.AbortRenderCallback abortRenderCallback,
     Rhino.PlugIns.RenderPlugIn.AllowChooseContentCallback allowChooseContentCallback,
@@ -208,7 +210,10 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.RenderPlugIn.UiContentTypesCallback uiContentTypesCallback,
     Rhino.PlugIns.RenderPlugIn.SaveCusomtomRenderFileCallback saveCustomRenderFile,
     Rhino.PlugIns.RenderPlugIn.RenderSettingsSectionsCallback renderSettingsSections,
-    Rhino.PlugIns.RenderPlugIn.PlugInIconCallback pluginiconcallback
+    Rhino.PlugIns.RenderPlugIn.PlugInIconCallback pluginiconcallback,
+    Rhino.PlugIns.RenderPlugIn.InitialChannelToDisplayCallback initialChannelToDisplay,
+    Rhino.PlugIns.RenderPlugIn.PlugInTextureNeedsBakingCallback pluginTextureNeedsBakingCallback,
+    Rhino.PlugIns.RenderPlugIn.CustomChannelNameCallback customChannelName
     );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -277,7 +282,7 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetActiveDocumentCallback(Rhino.RhinoDoc.DocumentCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
-  
+
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CNetModelessUserInterfaceDocChanged_SetCallback(Rhino.RhinoDoc.DocumentCallback cb);
 
@@ -926,7 +931,8 @@ internal partial class UnsafeNativeMethods
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.ATTACHSECTIONPROC de,
       Rhino.RDK.Delegates.GET_INT_PROC sc,
       Rhino.RDK.Delegates.AT_INDEX_PROC sa,
-      Rhino.RDK.Delegates.SET_INTPTR_PROC sp);
+      Rhino.RDK.Delegates.SET_INTPTR_PROC sp,
+      Rhino.RDK.Delegates.GET_INT_PTR_PROC gw);
 
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]

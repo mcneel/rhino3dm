@@ -419,7 +419,7 @@ namespace Rhino.FileIO
         throw new FileNotFoundException("The provided path is null, does not exist or cannot be accessed.", path);
 
       System.Drawing.Bitmap rc = null;
-      if(Rhino.Runtime.HostUtils.RunningOnWindows)
+      if (Rhino.Runtime.HostUtils.RunningOnWindows)
       {
         IntPtr ptr_bitmap = UnsafeNativeMethods.ONX_Model_WinReadPreviewImage(path);
         if (ptr_bitmap != IntPtr.Zero)
@@ -1714,7 +1714,7 @@ namespace Rhino.FileIO
     void ICollection<T>.Add(T item)
     {
       throw new NotSupportedException(
-        "This table does not support addition via item. If you think this is an error, email giulio@mcneel.com");
+        "This table does not support addition via item. If you think this is an error, email tech@mcneel.com");
     }
 
     /// <summary>
@@ -2475,7 +2475,7 @@ namespace Rhino.FileIO
         // Continues to default...
       default:
         throw new NotImplementedException(
-          string.Format("Tell giulio@mcneel.com if you need access to this ModelComponentType: {0}.",
+          string.Format("There is no current instantiation for File3dm ModelComponentType: {0}.",
             type.ToString()));
       }
     }

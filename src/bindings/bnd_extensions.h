@@ -59,10 +59,12 @@ public:
   BND_UUID AddTextDot(std::wstring text, const ON_3dPoint& location, const class BND_3dmObjectAttributes* attributes);
   //Guid AddTextDot3(Geometry.TextDot dot)
   //Guid AddTextDot4(Geometry.TextDot dot, DocObjects.ObjectAttributes attributes)
-  //Guid AddInstanceObject1(InstanceReferenceGeometry instanceReference)
-  //Guid AddInstanceObject2(InstanceReferenceGeometry instanceReference, ObjectAttributes attributes)
+  BND_UUID AddInstanceObject1(const class BND_InstanceReferenceGeometry* instanceReference);
+  BND_UUID AddInstanceObject2(const class BND_InstanceReferenceGeometry* instanceReference, const class BND_3dmObjectAttributes* attributes);
   //Guid AddInstanceObject3(int instanceDefinitionIndex, Transform instanceXform)
+  //BND_UUID AddInstanceObject3(int idefIndex, const class BND_Transform& transform);
   //Guid AddInstanceObject4(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
+  //BND_UUID AddInstanceObject4(int idefIndex, const class BND_Transform& transform, const class BND_3dmObjectAttributes* attributes);
   //Guid AddText1(string text, Plane plane, double height, string fontName, bool bold, bool italic)
   //Guid AddText2(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification)
   //Guid AddText3(string text, Plane plane, double height, string fontName, bool bold, bool italic, TextJustification justification, DocObjects.ObjectAttributes attributes)
@@ -187,9 +189,8 @@ class BND_File3dmInstanceDefinitionTable
 public:
   BND_File3dmInstanceDefinitionTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::InstanceDefinition); }
-  void Add(const class BND_InstanceDefinitionGeometry& idef);
-  // public int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
-  //int Add(std::wstring name, std::wstring description, std::wstring url, std::wstring urlTag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes);
+  void AddInstanceDefinition(const class BND_InstanceDefinitionGeometry& idef);
+  int Add(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes);
   // public int AddLinked(string filename, string name, string description)
   class BND_InstanceDefinitionGeometry* FindIndex(int index) const;
   class BND_InstanceDefinitionGeometry* IterIndex(int index) const; // helper function for iterator
@@ -273,7 +274,7 @@ public:
   //public static bool ReadRevisionHistory(string path, out string createdBy, out string lastEditedBy, out int revision, out DateTime createdOn, out DateTime lastEditedOn)
   //public static void ReadApplicationData(string path, out string applicationName, out string applicationUrl, out string applicationDetails)
 
-  #if defined(ON_WASM_COMPILE)
+#if defined(ON_WASM_COMPILE)
   // from https://sean.voisen.org/blog/2018/03/rendering-images-emscripten-wasm/
   static BND_ONXModel* WasmFromByteArray(std::string buffer);
   emscripten::val ToByteArray() const;

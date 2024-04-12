@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.6.0] - 2024.04.12
+diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0
+
+## [8.6.0-beta1] - 2024.04.05
+diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta1
+
+### Added
+- (py, js) CommonObject.IsValidWithLog that returns a tuple {bool valid, string log} [#598](https://github.com/mcneel/rhino3dm/issues/598)
+- (dotnet, py, js) Material.RenderMaterialInstanceId [#596](https://github.com/mcneel/rhino3dm/issues/596)
+- (py, js) InstanceDefinitionTable.Add [#436](https://github.com/mcneel/rhino3dm/issues/436) (see Changed below for consequential changes related to this)
+- (py, js) File3dmObjectTable.AddInstanceObject()
+- (py, js) EmbeddedFile.SetFilename.
+- (js) EmbeddedFile.WasmFromByteArray() to add embedded from a js Uint8Array. [#523](https://github.com/mcneel/rhino3dm/issues/523)
+- (py) EmbeddedFile.Read()
+
+
+### Changed
+- (js) js docs now use typedoc for generating documentation from `src/js/rhino3dm.d.ts` [#594](https://github.com/mcneel/rhino3dm/issues/594)
+- (js, py) InstanceDefinitionTable.Add(idef) is now InstanceDefinitionTable.AddInstanceDefinition(idef). This aligns dotnet, js, and py InstanceDefinitionTable.Add method args.
+- (py, js) EmbeddedFile.FileName is no longer read only and is Filename for py and fileName for js.
+
+### Fixed
+- (py, js) File3dmObjectTable.AddSurface was incorrectly calling File3dmObjectTable.AddSphere
+
+## [8.6.0-beta] - 2024.03.15
+diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta
+
+### Added
+- (py, js) Added Annotation.PlainTextWithFields
+
+### Fixed
+- (dotnet, py, js) Annotation.PlainText, PlanTextWithFields, and RichText was returning empty strings, or gibberish across all languages and platforms. [#585](https://github.com/mcneel/rhino3dm/issues/585)
+
 ## [8.4.0] - 2024.02.19
 diff: https://github.com/mcneel/rhino3dm/compare/8.0.1...8.4.0
 

@@ -443,7 +443,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
 {
   ON_PolylineCurve plc(points.m_polyline);
-  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, nullptr);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
@@ -487,7 +487,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddEllipse(const BND_Ellipse& ellipse, const 
   ON_NurbsCurve nc;
   if (ellipse.m_ellipse.GetNurbForm(nc) != 0)
   {
-    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, nullptr);
+    ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &nc, attributes);
     return ON_UUID_to_Binding(rc);
   }
   return ON_UUID_to_Binding(ON_nil_uuid);
@@ -566,6 +566,51 @@ BND_UUID BND_ONXModel_ObjectTable::AddObject(const class BND_FileObject* object)
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, object->m_attributes);
   return ON_UUID_to_Binding(rc);
 }
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject1(const class BND_InstanceReferenceGeometry* instanceReference)
+{
+  const ON_Geometry* g = instanceReference ? instanceReference->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject2(const class BND_InstanceReferenceGeometry* instanceReference, const class BND_3dmObjectAttributes* attributes)
+{
+  const ON_Geometry* g = instanceReference ? instanceReference->GeometryPointer() : nullptr;
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), g, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
+/*
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject3(int idefIndex, const class BND_Transform& transform)
+{
+  ON_UUID rc = ON_nil_uuid;
+  const ON_ModelComponentReference& idef_component_ref = m_model->ComponentFromIndex(ON_ModelComponent::Type::InstanceDefinition, idefIndex);
+
+  if (!idef_component_ref.IsEmpty())
+    {
+      const ON_InstanceDefinition* idef = ON_InstanceDefinition::Cast(idef_component_ref.ModelComponent());
+      if (nullptr != idef)
+      {
+        ON_InstanceRef iref;
+        iref.m_instance_definition_uuid = idef->Id();
+        const ON_Xform* xform = transform ? &(transform->m_xform) : nullptr;
+        iref.m_xform = *xform;
+        // Internal_ONX_Model_AddModelGeometry makes a copy
+        rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &iref, nullptr);
+      }
+    }
+  }
+
+  return rc;
+
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject4(int idefIndex, const class BND_Transform& transform, const class BND_3dmObjectAttributes* attributes)
+{
+  return ON_nil_uuid;
+}
+*/
 
 void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
 {
@@ -1138,18 +1183,112 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindId(BND_UUID id) const
 }
 
 
-void BND_File3dmInstanceDefinitionTable::Add(const BND_InstanceDefinitionGeometry& idef)
+void BND_File3dmInstanceDefinitionTable::AddInstanceDefinition(const BND_InstanceDefinitionGeometry& idef)
 {
   const ON_InstanceDefinition* _idef = idef.m_idef;
   m_model->AddModelComponent(*_idef);
 }
 
-/*
-void BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring description, std::wstring url, std::wstring urlTag, ON_3dPoint basePoint, const std::vector<ON_Geometry>& geometry, const std::vector<ON_3dmObjectAttributes>& attributes)
+int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring description, std::wstring url, std::wstring url_tag, ON_3dPoint basePoint, BND_TUPLE geometry, BND_TUPLE attributes)
 {
 
+  int index = -1;
+#if defined(ON_PYTHON_COMPILE)
+  const int count_g = geometry.size();
+  const int count_a = attributes.size();
+#else
+  const int count_g = geometry["length"].as<int>();
+  const int count_a = attributes["length"].as<int>();
+#endif
+
+  if(m_model && count_g > 0) 
+  {
+    // Determine if we need to transform geometry to world origin
+    ON_Xform xf;
+    ON_Xform* pXform = nullptr;
+    if (basePoint.IsValid() && basePoint != ON_3dPoint::Origin)
+    {
+      xf = ON_Xform::TranslationTransformation(ON_3dPoint::Origin - basePoint);
+      pXform = &xf;
+    }
+
+    ON_SimpleArray<ON_UUID> object_uuids;
+
+    for ( int i = 0; i < count_g; i ++ ) 
+    {
+
+#if defined(ON_PYTHON_COMPILE)
+      BND_GeometryBase g = geometry[i].cast<BND_GeometryBase>();  
+      BND_3dmObjectAttributes oa = attributes[i].cast<BND_3dmObjectAttributes>();
+#else
+      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();  
+      BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
+#endif
+      
+      const ON_Geometry* pConstGeom = g.GeometryPointer();
+      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? oa.m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
+
+      if (pConstGeom && pConstAtts)
+      {
+        ON_Geometry* pGeom = pConstGeom->Duplicate(); // Copy so we can transform
+
+        if (pGeom)
+        {
+
+          // Make certain that proper flags are set for instance definiton geometry
+          ON_3dmObjectAttributes atts(*pConstAtts);
+          atts.m_uuid = ON_nil_uuid;
+          atts.SetMode(ON::object_mode::idef_object);
+          atts.RemoveFromAllGroups();
+          atts.m_space = ON::model_space;
+          atts.m_viewport_id = ON_nil_uuid;
+
+          // Transform if needed
+          if (pXform)
+          {
+            atts.Transform(pGeom, *pXform);
+            pGeom->Transform(*pXform);
+          }
+
+          //have to pass in BND_3dmObjectAttributes to Internal_ONX_Model_AddModelGeometry
+          BND_3dmObjectAttributes _atts;
+          _atts.m_attributes = &atts;
+          ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(m_model.get(), pGeom, &_atts);
+          if (ON_UuidIsNotNil(uuid))
+            object_uuids.Append(uuid);
+
+          delete pGeom; // Don't leak...
+
+        }
+
+      }
+
+    }
+
+    if (object_uuids.Count())
+    {
+      ON_InstanceDefinition* idef = new ON_InstanceDefinition();
+      if (nullptr != idef)
+      {
+        idef->SetInstanceGeometryIdList(object_uuids);
+        idef->SetInstanceDefinitionType(ON_InstanceDefinition::IDEF_UPDATE_TYPE::Static);
+        idef->SetName(name.c_str());
+        idef->SetDescription(description.c_str());
+        idef->SetURL(url.c_str());
+        idef->SetURL_Tag(url_tag.c_str());
+        ON_ModelComponentReference model_component_reference = m_model->AddManagedModelComponent(idef, true);
+        if (!model_component_reference.IsEmpty())
+        {
+          const ON_ModelComponent* model_component = model_component_reference.ModelComponent();
+          if (nullptr != model_component)
+            index = model_component->Index();
+        }
+      }
+    }
+  }
+  
+  return index;
 }
-*/
 
 BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(int index) const
 {
@@ -1491,12 +1630,14 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddSphere", &BND_ONXModel_ObjectTable::AddSphere, py::arg("sphere"), py::arg("attributes") = nullptr)
     .def("AddCurve", &BND_ONXModel_ObjectTable::AddCurve, py::arg("curve"), py::arg("attributes")=nullptr)
     .def("AddTextDot", &BND_ONXModel_ObjectTable::AddTextDot, py::arg("text"), py::arg("location"), py::arg("attributes")=nullptr)
-    .def("AddSurface", &BND_ONXModel_ObjectTable::AddSphere, py::arg("surface"), py::arg("attributes")=nullptr)
+    .def("AddSurface", &BND_ONXModel_ObjectTable::AddSurface, py::arg("surface"), py::arg("attributes")=nullptr)
     .def("AddExtrusion", &BND_ONXModel_ObjectTable::AddExtrusion, py::arg("extrusion"), py::arg("attributes")=nullptr)
     .def("AddMesh", &BND_ONXModel_ObjectTable::AddMesh, py::arg("mesh"), py::arg("attributes")=nullptr)
     .def("AddBrep", &BND_ONXModel_ObjectTable::AddBrep, py::arg("brep"), py::arg("attributes")=nullptr)
     .def("AddHatch", &BND_ONXModel_ObjectTable::AddHatch, py::arg("hatch"), py::arg("attributes")=nullptr)
     .def("Add", &BND_ONXModel_ObjectTable::Add, py::arg("geometry"), py::arg("attributes")=nullptr)
+    .def("AddInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject1, py::arg("idef") )
+    .def("AddInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, py::arg("idef"), py::arg("attributes")=nullptr)
     .def("AddObject", &BND_ONXModel_ObjectTable::AddObject, py::arg("object"))
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
@@ -1611,7 +1752,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmInstanceDefinitionTable::Count)
     .def("__getitem__", &BND_File3dmInstanceDefinitionTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>(s.cast<BND_File3dmInstanceDefinitionTable &>(), s); })
-    .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("idef"))
+    .def("AddInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, py::arg("idef"))
+    .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("name"), py::arg("description"), py::arg("url"), py::arg("urlTag"), py::arg("basePoint"), py::arg("geometry"), py::arg("attributes"))
     .def("FindIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmInstanceDefinitionTable::FindId, py::arg("id"))
     ;
@@ -1810,12 +1952,13 @@ void initExtensionsBindings(void*)
     .function("addSphere", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
     .function("addCurve", &BND_ONXModel_ObjectTable::AddCurve, allow_raw_pointers())
     .function("addTextDot", &BND_ONXModel_ObjectTable::AddTextDot, allow_raw_pointers())
-    .function("addSurface", &BND_ONXModel_ObjectTable::AddSphere, allow_raw_pointers())
+    .function("addSurface", &BND_ONXModel_ObjectTable::AddSurface, allow_raw_pointers())
     .function("addExtrusion", &BND_ONXModel_ObjectTable::AddExtrusion, allow_raw_pointers())
     .function("addMesh", &BND_ONXModel_ObjectTable::AddMesh, allow_raw_pointers())
     .function("addBrep", &BND_ONXModel_ObjectTable::AddBrep, allow_raw_pointers())
     .function("add", &BND_ONXModel_ObjectTable::Add, allow_raw_pointers())
     .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
+    .function("addInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())
@@ -1882,7 +2025,8 @@ void initExtensionsBindings(void*)
   class_<BND_File3dmInstanceDefinitionTable>("File3dmInstanceDefinitionTable")
     .property("count", &BND_File3dmInstanceDefinitionTable::Count)
     .function("get", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
-    .function("add", &BND_File3dmInstanceDefinitionTable::Add)
+    .function("addInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition)
+    .function("add", &BND_File3dmInstanceDefinitionTable::Add, allow_raw_pointers())
     .function("findIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmInstanceDefinitionTable::FindId, allow_raw_pointers())
     ;

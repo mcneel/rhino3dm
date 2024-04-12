@@ -106,6 +106,9 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
         const ON_TextContent* text_content = constAnnotation->Text();
         if(nullptr != text_content)
           (*wstring) = text_content->PlatformRichTextFromRuns();
+        else
+          //to support retrieving RichText on Linux
+          (*wstring) = constAnnotation->RichText().Array();
       }
       else
         (*wstring) = constAnnotation->PlainText();

@@ -393,6 +393,15 @@ RH_C_FUNCTION int ON_Material_NextTransparencyTexture(const ON_Material* pConstM
 }
 
 #if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION ON_UUID ON_Material_RdkMaterialID(const CRhinoMaterial* pMaterial)
+{
+  if (pMaterial == nullptr)
+    return ON_nil_uuid;
+
+  return pMaterial->RdkMaterialInstanceId();
+}
+
+
 RH_C_FUNCTION ON_UUID ON_Material_MaterialChannelIdFromIndex(const CRhinoMaterial* pMaterial, int material_channel_index)
 {
   if (pMaterial == nullptr)
@@ -728,6 +737,22 @@ RH_C_FUNCTION bool ON_Texture_IsWcsProjected(const ON_Texture* pConstTexture)
     return pConstTexture->IsWcsProjected();
   return false;
 }
+
+RH_C_FUNCTION bool ON_Texture_TreatAsLinear(const ON_Texture* pConstTexture)
+{
+  if (pConstTexture)
+    return pConstTexture->m_bTreatAsLinear;
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Texture_SetTreatAsLinear(ON_Texture* pTexture, bool value)
+{
+  if (pTexture)
+    pTexture->m_bTreatAsLinear = value;
+  return false;
+}
+
+
 
 RH_C_FUNCTION bool ON_Texture_IsWcsBoxProjected(const ON_Texture* pConstTexture)
 {

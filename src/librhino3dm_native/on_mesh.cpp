@@ -176,6 +176,37 @@ RH_C_FUNCTION void ON_Mesh_SetCachedTextureCoordinatesEx(ON_Mesh* pMesh, ON_Text
   pMesh->SetCachedTextureCoordinatesEx(*pMapping, pXform, bLazy, bSeamCheck);
 }
 
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION void ON_Mesh_SetCachedTextureCoordinatesFromMaterial(ON_Mesh* pMesh, CRhinoObject* pObject, ON_Material* pMaterial)
+{
+  if (nullptr != pMesh && nullptr != pObject && nullptr != pMaterial)
+  {
+    const CRhinoDoc* pDoc = pObject->Document();
+    if (nullptr != pDoc)
+    {
+      // There might not be mapping ref if the object doesn't have any mappings. However we still want to call
+      // SetCachedTextureCoordinatesFromMaterial for there might be need to cache wcs[box] projections.
+      const ON_MappingRef* pMR = pObject->Attributes().m_rendering_attributes.MappingRef(RhinoApp().GetDefaultRenderApp());
+      pMesh->SetCachedTextureCoordinatesFromMaterial(*pDoc, *pMaterial, pMR);
+    }
+  }
+}
+
+RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_GetCachedTextureCoordinates(ON_Mesh* pMesh, CRhinoObject* pObject, ON_Texture* pTexture)
+{
+  if (nullptr != pMesh && nullptr != pObject && nullptr != pTexture)
+  {
+    const CRhinoDoc* pDoc = pObject->Document();
+    if (nullptr != pDoc)
+    {
+      const ON_MappingRef* pMR = pObject->Attributes().m_rendering_attributes.MappingRef(RhinoApp().GetDefaultRenderApp());
+      return pMesh->GetCachedTextureCoordinates(*pDoc, *pTexture, pMR);
+    }
+  }
+  return nullptr;
+}
+#endif
+
 RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_CachedTextureCoordinates(ON_Mesh* pMesh, ON_UUID id)
 
 {
@@ -1206,8 +1237,10 @@ RH_C_FUNCTION void ON_Mesh_ClearList(ON_Mesh* pMesh, enum MeshClearListConst whi
 {
   if (pMesh)
   {
-    if (mclcClearVertices == which)
+    if (mclcClearVertices == which) {
       pMesh->m_V.SetCount(0);
+      pMesh->m_dV.SetCount(0);
+    }
     else if (mclcClearFaces == which)
       pMesh->m_F.SetCount(0);
     else if (mclcClearNormals == which)
@@ -2502,7 +2535,7 @@ RH_C_FUNCTION bool ON_Mesh_MeshPointAt(const ON_Mesh* pConstMesh, int faceIndex,
           t1 = t2;
           t2 = t3;
         }
-        else if (t2 == -1)
+        else if (t2 == 0)
         { // point is on subtriangle {0,1,3}
           p0 = pConstMesh->m_V[face.vi[0]];
           p1 = pConstMesh->m_V[face.vi[1]];
@@ -2591,7 +2624,7 @@ RH_C_FUNCTION bool ON_Mesh_MeshNormalAt(const ON_Mesh* pConstMesh, int faceIndex
           t1 = t2;
           t2 = t3;
         }
-        else if (t2 == -1)
+        else if (t2 == 0)
         { // point is on subtriangle {0,1,3}
           p0 = pConstMesh->m_N[face.vi[0]];
           p1 = pConstMesh->m_N[face.vi[1]];
@@ -2680,7 +2713,7 @@ RH_C_FUNCTION int ON_Mesh_MeshColorAt(const ON_Mesh* pConstMesh, int faceIndex, 
           t1 = t2;
           t2 = t3;
         }
-        else if (t2 == -1)
+        else if (t2 == 0)
         { // point is on subtriangle {0,1,3}
           p0 = pConstMesh->m_C[face.vi[0]];
           p1 = pConstMesh->m_C[face.vi[1]];
@@ -2851,6 +2884,50 @@ RH_C_FUNCTION ON_TextureMapping* ON_TextureMapping_New()
 {
   return new ON_TextureMapping();
 }
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION const ON_TextureMapping* CRhinoTextureMappingTable_GetTextureMappingPointer(unsigned int doc_sn, int index)
+{
+  const ON_TextureMapping* rc = nullptr;
+  CRhinoDoc* doc = CRhinoDoc::FromRuntimeSerialNumber(doc_sn);
+
+  if (doc)
+  {
+    const ON_TextureMapping* mapping = &doc->m_texture_mapping_table[index];
+    rc = mapping;
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION const ON_TextureMapping* CRhinoTextureMappingTable_GetTextureMappingPointerFromId(unsigned int doc_sn, ON_UUID id)
+{
+  const ON_TextureMapping* rc = nullptr;
+  CRhinoDoc* doc = CRhinoDoc::FromRuntimeSerialNumber(doc_sn);
+
+  if (doc)
+  {
+    ON_ComponentManifestItem item = doc->Manifest().ItemFromId(ON_ModelComponent::Type::TextureMapping, id);
+
+    if (item.IsValid())
+    {
+      int index = item.Index();
+
+      rc = &doc->m_texture_mapping_table[index];
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION ON_UUID CRhinoTextureMappingTable_GetTextureMappingId(unsigned int doc_sn, int index)
+{
+  const ON_TextureMapping* mapping = CRhinoTextureMappingTable_GetTextureMappingPointer(doc_sn, index);
+  if (mapping)
+    return mapping->Id();
+  else
+    return ON_nil_uuid;
+}
+#endif
 
 RH_C_FUNCTION ON_TextureMapping* ON_TextureMapping_NewFromPointer(const ON_TextureMapping* pTextureMapping)
 {
@@ -2900,7 +2977,9 @@ enum TextureMappingType : int
   tmtSrfMappingPrimitive = 7, // m_mapping_primitive is an ON_Surface
   tmtBrepMappingPrimitive = 8, // m_mapping_primitive is an ON_Brep
   tmtOcsMapping = 9,
-  tmtFalseColors = 10
+  tmtFalseColors = 10,
+  tmtWcsProjection = 11,
+  tmtWcsBoxProjection = 12
 };
 
 RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_TextureMapping* pTextureMapping)
@@ -2930,6 +3009,10 @@ RH_C_FUNCTION TextureMappingType ON_TextureMapping_GetMappingType(const ON_Textu
     return tmtOcsMapping;
   case ON_TextureMapping::TYPE::false_colors:
     return tmtFalseColors;
+  case ON_TextureMapping::TYPE::wcs_projection:
+    return tmtWcsProjection;
+  case ON_TextureMapping::TYPE::wcsbox_projection:
+    return tmtWcsBoxProjection;
   }
   // Unknown type, add support for it to the list above
   return tmtNoMapping;

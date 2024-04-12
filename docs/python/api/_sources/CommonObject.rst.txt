@@ -9,6 +9,9 @@ CommonObject
 
       bool: Tests an object to see if it is valid.
 
+   .. py:attribute:: IsValidWithLog
+
+
    .. py:attribute:: UserStringCount
 
 

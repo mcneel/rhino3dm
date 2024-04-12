@@ -99,6 +99,8 @@ bin/
 obj/
 x64/
 Properties/
-*.3dm
 
 .venv/
+tests/SampleCppReadTextEntity/build
+
+src/js/docs/docs

@@ -1121,6 +1121,23 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Gets the RDK material ID.
+    /// </summary>
+    /// <remarks>
+    /// Multiple Rhino materials ( with unique component IDs)
+    /// can have the same RDK material ID.
+    /// </remarks>
+    /// <since>8.6</since>
+    public Guid RDKMaterialID
+    {
+      get 
+      {
+        var ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_Material_RdkMaterialID(ptr_const_this);
+      }
+    }
+
     const int IDX_DIFFUSE = 0;
     const int IDX_AMBIENT = 1;
     const int IDX_EMISSION = 2;

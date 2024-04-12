@@ -20,12 +20,19 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: .github/workflows/workflow_ci.yml
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
   
   #checks if build scripts have changed
   check_build_scripts:
@@ -37,15 +44,22 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: |
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
-            script
+            script/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #checks if src/dotnet files have changed
   check_dotnet:
@@ -57,12 +71,19 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
-          files: src/dotnet
+          files: src/dotnet/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #checks if src/bindings have changed
   check_bindings:
@@ -74,14 +95,21 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: check changed files
-        uses: tj-actions/changed-files@v41.0.0
+        uses: tj-actions/changed-files@v42
         id: changed-files
         with:
           files: |
-            src/bindings
+            src/bindings/**
             src/CMakeLists.txt
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
   #only run if src files have changed.
 
@@ -136,7 +164,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-11, macos-12]
-        python-version: [3.9, '3.10']
+        python-version: ['3.10', '3.11', '3.12']
         include:
           - os: ubuntu-latest
             target: linux
@@ -179,7 +207,7 @@ jobs:
         uses: actions/setup-python@v5.0.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.7.x'
+          python-version: '3.9.x'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies

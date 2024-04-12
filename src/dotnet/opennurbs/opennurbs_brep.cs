@@ -114,6 +114,35 @@ namespace Rhino.Geometry
     DistanceBetweenRails = 2
   }
 
+
+  /// <summary>
+  /// Fillet distances along a BrepEdge
+  /// </summary>
+  /// <since>8.6</since>
+  public class BrepEdgeFilletDistance
+  {
+    /// <summary>
+    /// Construct a fillet distance
+    /// </summary>
+    /// <param name="edgeParameter">The parameter along the edge where to apply the fillet distance</param>
+    /// <param name="filletDistance">The distance to apply</param>
+    public BrepEdgeFilletDistance(double edgeParameter, double filletDistance)
+    {
+      EdgeParameter = edgeParameter;
+      FilletDistance = filletDistance;
+    }
+
+    /// <summary>
+    /// The parameter along the BrepEdge where to apply a fillet distance (radius)
+    /// </summary>
+    public double EdgeParameter { get; }
+
+    /// <summary>
+    /// Distance to fillet
+    /// </summary>
+    public double FilletDistance { get; }
+  }
+
   /// <summary>
   /// Rebuild types for creating swept surfaces
   /// </summary>
@@ -446,18 +475,18 @@ namespace Rhino.Geometry
 
 #endif
 
-      /// <summary>
-      /// Create a brep representation of a mesh
-      /// </summary>
-      /// <param name="mesh"></param>
-      /// <param name="trimmedTriangles">
-      /// if true, triangles in the mesh will be represented by trimmed planes in
-      /// the brep. If false, triangles in the mesh will be represented by
-      /// untrimmed singular bilinear NURBS surfaces in the brep.
-      /// </param>
-      /// <returns></returns>
-      /// <since>5.1</since>
-      public static Brep CreateFromMesh(Mesh mesh, bool trimmedTriangles)
+    /// <summary>
+    /// Create a brep representation of a mesh
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="trimmedTriangles">
+    /// if true, triangles in the mesh will be represented by trimmed planes in
+    /// the brep. If false, triangles in the mesh will be represented by
+    /// untrimmed singular bilinear NURBS surfaces in the brep.
+    /// </param>
+    /// <returns></returns>
+    /// <since>5.1</since>
+    public static Brep CreateFromMesh(Mesh mesh, bool trimmedTriangles)
     {
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       IntPtr ptr_newbrep = UnsafeNativeMethods.ONC_BrepFromMesh(ptr_const_mesh, trimmedTriangles);
@@ -1567,16 +1596,16 @@ namespace Rhino.Geometry
     /// <returns>Array of Brep sweep results</returns>
     /// <since>6.16</since>
     public static Brep[] CreateFromSweep(
-      Curve rail1, 
-      Curve rail2, 
-      IEnumerable<Curve> shapes, 
+      Curve rail1,
+      Curve rail2,
+      IEnumerable<Curve> shapes,
       Point3d start,
       Point3d end,
       bool closed,
       double tolerance,
-      SweepRebuild rebuild, 
-      int rebuildPointCount, 
-      double refitTolerance, 
+      SweepRebuild rebuild,
+      int rebuildPointCount,
+      double refitTolerance,
       bool preserveHeight
       )
     {
@@ -2022,6 +2051,124 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Fillets, chamfers, or blends the edges of a brep.
+    /// </summary>
+    /// <param name="brep">The brep to fillet, chamfer, or blend edges.</param>
+    /// <param name="edgeIndices">An array of one or more edge indices where the fillet, chamfer, or blend will occur.</param>
+    /// <param name="startRadii">An array of starting fillet, chamfer, or blend radaii, one for each edge index.</param>
+    /// <param name="endRadii">An array of ending fillet, chamfer, or blend radaii, one for each edge index.</param>
+    /// <param name="blendType">The blend type.</param>
+    /// <param name="railType">The rail type.</param>
+    /// <param name="setbackFillets">UJse setback fillets (only used with blendType=<see cref="BlendType.Blend"/>)</param>
+    /// <param name="tolerance">The tolerance to be used to perform calculations.</param>
+    /// <param name="angleTolerance">Angle tolerance to be used to perform calculations.</param>
+    /// <returns>Array of Breps if successful.</returns>
+    /// <since>8.6</since>
+    public static Brep[] CreateFilletEdges(Brep brep, IEnumerable<int> edgeIndices, IEnumerable<double> startRadii, IEnumerable<double> endRadii, BlendType blendType, RailType railType, bool setbackFillets, double tolerance, double angleTolerance)
+    {
+      if (brep == null) throw new ArgumentNullException(nameof(brep));
+
+      var ptr_const_brep = brep.ConstPointer();
+
+      using (var edges = new SimpleArrayInt(edgeIndices))
+      using (var radii0 = new SimpleArrayDouble(startRadii))
+      using (var radii1 = new SimpleArrayDouble(endRadii))
+      using (var out_breps = new SimpleArrayBrepPointer())
+      {
+        var ptr_const_edges = edges.ConstPointer();
+        var ptr_const_radii0 = radii0.ConstPointer();
+        var ptr_const_radii1 = radii1.ConstPointer();
+
+        var ptr_out_breps = out_breps.NonConstPointer();
+
+        var rc = UnsafeNativeMethods.RHC_RhinoFilletEdges2(ptr_const_brep, ptr_const_edges, ptr_const_radii0, ptr_const_radii1, (int)blendType, (int)railType, setbackFillets, tolerance, angleTolerance, ptr_out_breps);
+        if (rc)
+          return out_breps.ToNonConstArray();
+
+        GC.KeepAlive(brep);
+        return new Brep[0];
+      }
+    }
+
+    /// <summary>
+    /// Fillets, chamfers, or blends the edges of a brep.
+    /// </summary>
+    /// <param name="brep">The brep to fillet, chamfer, or blend edges.</param>
+    /// <param name="edgeIndices">An array of one or more edge indices where the fillet, chamfer, or blend will occur.</param>
+    /// <param name="edgeDistances">A dictionary with key the edge index on the input brep, and value a list of <see cref="BrepEdgeFilletDistance"/> items to apply.</param>
+    /// <param name="blendType">The blend type.</param>
+    /// <param name="railType">The rail type.</param>
+    /// <param name="setbackFillets">UJse setback fillets (only used with blendType=<see cref="BlendType.Blend"/>)</param>
+    /// <param name="tolerance">The tolerance to be used to perform calculations.</param>
+    /// <param name="angleTolerance">Angle tolerance to be used to perform calculations.</param>
+    /// <returns>Array of Breps if successful.</returns>
+    /// <since>8.6</since>
+    public static Brep[] CreateFilletEdgesVariableRadius(Brep brep, IEnumerable<int> edgeIndices, IDictionary<int, IList<BrepEdgeFilletDistance>> edgeDistances, BlendType blendType, RailType railType, bool setbackFillets, double tolerance, double angleTolerance)
+    {
+      if (brep == null) throw new ArgumentNullException(nameof(brep));
+      if (edgeIndices == null) throw new ArgumentNullException(nameof(edgeIndices));
+      if (edgeDistances == null) throw new ArgumentNullException(nameof(edgeDistances));
+
+      // Some sanity checks:
+      // 1. all keys should be in the edgeIndices list
+      if (!edgeDistances.Keys.All(edgeIndices.Contains))
+      {
+        return new Brep[0];
+      }
+      // 2. And all indices should be in the keys list
+      if (!edgeIndices.All(edgeDistances.Keys.Contains))
+      {
+        return new Brep[0];
+      }
+
+      IntPtr pConstBrep = brep.ConstPointer();
+      using (var edges = new SimpleArrayInt(edgeIndices))
+      using (var outBreps = new SimpleArrayBrepPointer())
+      {
+        IntPtr pConstEdges = edges.ConstPointer();
+
+        // convert the dictionary to three lists with entries for each BrepEdgeFilletDistance in the dictionary
+        var edgeIds = new List<int>();
+        var edgeParam = new List<double>();
+        var edgeDist = new List<double>();
+        foreach (KeyValuePair<int, IList<BrepEdgeFilletDistance>> kv in edgeDistances)
+        {
+          IList<BrepEdgeFilletDistance> distancesForEdge = kv.Value;
+
+          // order by ascending EdgeParameter
+          foreach (BrepEdgeFilletDistance handle in distancesForEdge.OrderBy(x => x.EdgeParameter))
+          {
+            edgeIds.Add(kv.Key);
+            edgeParam.Add(handle.EdgeParameter);
+            edgeDist.Add(handle.FilletDistance);
+          }
+
+        }
+
+        // convert to SimpleArray
+        using (var arrEdgeIds = new SimpleArrayInt(edgeIds))
+        using (var arrEdgeParam = new SimpleArrayDouble(edgeParam))
+        using (var arrEdgeDist = new SimpleArrayDouble(edgeDist))
+        {
+
+          // get pointers
+          IntPtr pConstArrEdgeIds = arrEdgeIds.ConstPointer();
+          IntPtr pConstArrEdgeParam = arrEdgeParam.ConstPointer();
+          IntPtr pConstArrEdgeDist = arrEdgeDist.ConstPointer();
+          IntPtr pOutBreps = outBreps.NonConstPointer();
+
+          // call native method
+          bool rc = UnsafeNativeMethods.RHC_RhinoFilletEdgesVariableRadius(pConstBrep, pConstEdges, pConstArrEdgeIds, pConstArrEdgeParam, pConstArrEdgeDist, (int)blendType, (int)railType, setbackFillets, tolerance, angleTolerance, pOutBreps);
+          if (rc)
+            return outBreps.ToNonConstArray();
+        }
+
+        GC.KeepAlive(brep);
+        return new Brep[0];
+      }
+    }
+
+    /// <summary>
     /// Offsets a Brep.
     /// </summary>
     /// <param name="brep">The Brep to offset.</param>
@@ -2297,7 +2444,7 @@ namespace Rhino.Geometry
     /// first curve. Available when you have selected three shape curves.
     /// </returns>
     /// <since>7.0</since>
-    public static Brep[] CreateFromLoft(IEnumerable<Curve> curves, Point3d start, Point3d end, 
+    public static Brep[] CreateFromLoft(IEnumerable<Curve> curves, Point3d start, Point3d end,
       bool StartTangent, bool EndTangent, BrepTrim StartTrim, BrepTrim EndTrim,
       LoftType loftType, bool closed)
     {
@@ -2338,7 +2485,7 @@ namespace Rhino.Geometry
 
         IntPtr const_ptr_input = input.ConstPointer();
         IntPtr ptr_output = output.NonConstPointer();
-        
+
         bool rc = UnsafeNativeMethods.RHC_RhPlanarUnion(const_ptr_input, ref plane, tolerance, ptr_output);
         if (rc) return output.ToNonConstArray();
       }
@@ -2754,7 +2901,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="brepsToJoin">A list, an array or any enumerable set of breps to join.</param>
     /// <param name="tolerance">3d distance tolerance for detecting overlapping edges.</param>
-    /// <returns>new joined breps on success, null on failure.</returns>
+    /// <returns>New joined breps on success, null on failure.</returns>
     /// <since>5.0</since>
     public static Brep[] JoinBreps(IEnumerable<Brep> brepsToJoin, double tolerance)
     {
@@ -2774,16 +2921,9 @@ namespace Rhino.Geometry
         if (UnsafeNativeMethods.RHC_RhinoJoinBreps(ptr_input, ptr_output, tolerance) > 0)
         {
           rc = output.ToNonConstArray();
-
-          // 9 June 2010 - David
-          // Flip Breps that are inside out.
           for (int i = 0; i < rc.Length; i++)
           {
             // 23-Jun-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-34697
-            //if (!rc[i].IsSolid || rc[i].SolidOrientation != BrepSolidOrientation.Inward)
-            //  continue;
-            //rc[i].Flip();
-            // from rhino3DocObjManager.cpp, line 1239
             if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
               rc[i].Flip();
           }
@@ -2804,9 +2944,9 @@ namespace Rhino.Geometry
     /// </param>
     /// <param name="angleTolerance">
     /// Angle tolerance, in radians, used for merging edges.
-    /// When in doubt, use the document's model angle toleance.
+    /// When in doubt, use the document's model angle tolerance.
     /// </param>
-    /// <returns></returns>
+    /// <returns>New joined breps on success, null on failure.</returns>
     /// <since>8.3</since>
     public static Brep[] JoinBreps(IEnumerable<Brep> brepsToJoin, double tolerance, double angleTolerance)
     {
@@ -2828,6 +2968,7 @@ namespace Rhino.Geometry
           rc = output.ToNonConstArray();
           for (int i = 0; i < rc.Length; i++)
           {
+            // 23-Jun-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-34697
             if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
               rc[i].Flip();
           }
@@ -2836,6 +2977,84 @@ namespace Rhino.Geometry
         return rc;
       }
     }
+
+    /// <summary>
+    /// Joins the breps in the input array at any overlapping edges to form
+    /// as few as possible resulting breps. There may be more than one brep in the result array.
+    /// </summary>
+    /// <param name="brepsToJoin">A list, an array or any enumerable set of breps to join.</param>
+    /// <param name="tolerance">
+    /// 3d distance tolerance for detecting overlapping edges. 
+    /// When in doubt, use the document's model absolute tolerance.
+    /// </param>
+    /// <param name="angleTolerance">
+    /// Angle tolerance, in radians, used for merging edges.
+    /// When in doubt, use the document's model angle tolerance.
+    /// </param>
+    /// <param name="indexMap">
+    /// List of integer arrays, one for each joined result, containing all input Brep indices that went into making each result.
+    /// Note, this can be null.
+    /// </param>
+    /// <returns>New joined breps on success, null on failure.</returns>
+    /// <since>8.5</since>
+    public static Brep[] JoinBreps(IEnumerable<Brep> brepsToJoin, double tolerance, double angleTolerance, out List<int[]> indexMap)
+    {
+      // Start with null
+      indexMap = null;
+
+      if (null == brepsToJoin)
+        return null;
+
+      using (var input = new SimpleArrayBrepPointer())
+      using (var output_breps = new SimpleArrayBrepPointer())
+      using (var output_key = new SimpleArrayInt())
+      {
+        foreach (Brep brep in brepsToJoin)
+          input.Add(brep, true);
+
+        IntPtr ptr_input = input.ConstPointer();
+        IntPtr ptr_output_breps = output_breps.NonConstPointer();
+        IntPtr ptr_output_key = output_key.NonConstPointer();
+
+        Brep[] rc = null;
+        if (UnsafeNativeMethods.RHC_RhinoJoinBreps4(ptr_input, tolerance, angleTolerance, ptr_output_breps, ptr_output_key) > 0)
+        {
+          rc = output_breps.ToNonConstArray();
+
+          int[] faceCounts = new int[rc.Length];
+          int totalCount = 0;
+
+          for (int i = 0; i < rc.Length; i++)
+          {
+            faceCounts[i] = rc[i].Faces.Count;
+            totalCount += faceCounts[i];
+            // 23-Jun-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-34697
+            if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
+              rc[i].Flip();
+          }
+
+          // Sanity check
+          int[] keys = output_key.ToArray();
+          if (totalCount == keys.Length)
+          {
+            // OK to allocate output
+            indexMap = new List<int[]>(faceCounts.Length);
+            int index = 0;
+            // Convert linear map into jagged array
+            foreach (var count in faceCounts)
+            {
+              int[] map = new int[count];
+              for (int j = 0; j < count; j++)
+                map[j] = keys[index++];
+              indexMap.Add(map);
+            }
+          }
+        }
+        GC.KeepAlive(brepsToJoin);
+        return rc;
+      }
+    }
+
 
     /// <summary>
     /// Combines two or more breps into one. A merge is like a boolean union that keeps the inside pieces. This
@@ -2955,7 +3174,7 @@ namespace Rhino.Geometry
       if (null == parent)
       {
         ApplyMemoryPressure();
-        if( IntPtr.Zero != ptr )
+        if (IntPtr.Zero != ptr)
         {
           if (!_setTolerancesBoxesAndFlagsOnConstruct.HasValue)
           {
@@ -2968,7 +3187,7 @@ namespace Rhino.Geometry
             }
 #endif
           }
-          if( _setTolerancesBoxesAndFlagsOnConstruct.Value )
+          if (_setTolerancesBoxesAndFlagsOnConstruct.Value)
           {
             UnsafeNativeMethods.ON_Brep_SetTolerancesBoxesAndFlags(ptr, true, true, true, true, true, true, true, true);
           }
@@ -3329,6 +3548,26 @@ namespace Rhino.Geometry
     }
 
 #if RHINO_SDK
+    /// <summary>
+    /// If this Brep has two or more components connected by tangent edges,
+    /// then duplicates of the connected components are returned.
+    /// </summary>
+    /// <param name="angleTolerance">The angle tolerance, in radians, used to determine tangent edges.</param>
+    /// <param name="includeMeshes">If true, any cached meshes on this Brep are copied to the returned Breps.</param>
+    /// <returns>An array of tangent edge connected components, or an empty array.</returns>
+    /// <since>8.7</since>
+    [ConstOperation]
+    public Brep[] GetTangentConnectedComponents(double angleTolerance, bool includeMeshes)
+    {
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.ON_Brep_GetTangentConnectedComponents(const_ptr_this, angleTolerance, includeMeshes, ptr_breps);
+        return rc.ToNonConstArray();
+      }
+    }
+
     /// <summary>
     /// Constructs all the Wireframe curves for this Brep.
     /// </summary>
@@ -4824,7 +5063,7 @@ namespace Rhino.Geometry
     /// </returns>
     /// <since>5.0</since>
     [ConstOperation]
-    public bool IsSmoothManifoldEdge([Optional, DefaultParameterValue(RhinoMath.DefaultAngleTolerance)]double angleToleranceRadians)
+    public bool IsSmoothManifoldEdge([Optional, DefaultParameterValue(RhinoMath.DefaultAngleTolerance)] double angleToleranceRadians)
     {
       //NOTE!! don't ever use default parameters in RhinoCommon. They just lead to headache
       IntPtr ptr_const_this = ConstPointer();
@@ -5771,14 +6010,14 @@ namespace Rhino.Geometry
 
 #if RHINO_SDK
     /// <summary>
-    /// 
+    /// The RefitTrim command replaces a trimmed surface edge with an untrimmed edge.
     /// </summary>
-    /// <param name="edge">The edge to fit</param>
-    /// <param name="knots">The custonm knot vector to use, or an empty vector to use the existing knots</param>
-    /// <param name="tolerance"> 3d tolerance for projection, splitting, fitting</param>
-    /// <param name="bSections">If true, the surface is divided into sections at all knots</param>
-    /// <param name="fitQuality">3-d fit to trim curve (projected)</param>
-    /// <returns></returns>
+    /// <param name="edge">The edge to fit.</param>
+    /// <param name="knots">The custom knot vector to use, or an empty vector to use the existing knots of the surface.</param>
+    /// <param name="tolerance">The 3d tolerance for projection, splitting, and fitting.</param>
+    /// <param name="bSections">If true, the surface is divided into seperate surface patches at all knots.</param>
+    /// <param name="fitQuality">A measure of the 3d fit to the trim curve.</param>
+    /// <returns>The trimmed surfaces.</returns>
     /// <since>7.0</since>
     public Surface[] RefitTrim(BrepEdge edge, IEnumerable<double> knots, double tolerance, bool bSections, ref double fitQuality)
     {
@@ -6334,7 +6573,7 @@ namespace Rhino.Geometry
       return false;
     }
 #endif
-#endregion
+    #endregion
   }
 
 
@@ -6667,7 +6906,7 @@ namespace Rhino.Geometry
         IntPtr const_ptr_leader = m_leader.ConstPointer();
         return UnsafeNativeMethods.ON_V6_Leader_Curve(const_ptr_leader, IntPtr.Zero); //Null Dimstyle
       }
-      if( m_revsurface != null)
+      if (m_revsurface != null)
       {
         IntPtr const_ptr_revsrf = m_revsurface.ConstPointer();
         return UnsafeNativeMethods.ON_RevSurface_Curve(const_ptr_revsrf);
@@ -7486,7 +7725,7 @@ namespace Rhino.Geometry.Collections
     {
       return RemoveNakedMicroEdges(tolerance, true);
     }
-  
+
     /// <summary>
     /// Finds any naked edges with the same start and end vertex and an arc-length less than tolerance
     /// and attempts to remove them by removing trims and extending the adjacent to meet.

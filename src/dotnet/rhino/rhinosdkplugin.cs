@@ -187,9 +187,7 @@ namespace Rhino.PlugIns
       catch (Exception ex)
       {
         HostUtils.DebugString("  Exception thrown while creating Managed plug-in");
-        HostUtils.DebugString("  Message = " + ex.Message);
-        if (null != ex.InnerException)
-          HostUtils.DebugString("    Inner exception message = " + ex.InnerException.Message);
+        HostUtils.DebugString(ex.ToString());
         rc = null;
       }
 
@@ -237,6 +235,8 @@ namespace Rhino.PlugIns
         if (load_at_start)
           lt = PlugInLoadTime.AtStartup;
 
+        var addToHelpMenu = rc.AddToHelpMenu;
+
         Type rhdn_type = pluginType.GetInterface("RMA.Rhino.IRhinoPlugIn");
         bool is_rhino_dotnet = rhdn_type != null;
         if (is_rhino_dotnet)
@@ -244,8 +244,8 @@ namespace Rhino.PlugIns
           m_LoadSaveProfile = LoadSaveProfile;
           UnsafeNativeMethods.CRhinoPlugIn_SetLegacyCallbacks(m_LoadSaveProfile);
         }
-        
-        int sn = UnsafeNativeMethods.CRhinoPlugIn_DotNetNew(plugin_id, pluginName, pluginVersion, which, (int)lt, is_rhino_dotnet);
+
+        int sn = UnsafeNativeMethods.CRhinoPlugIn_DotNetNew(plugin_id, pluginName, pluginVersion, which, (int)lt, is_rhino_dotnet, addToHelpMenu);
         if (0 == sn)
           rc = null;
         else
@@ -643,6 +643,24 @@ namespace Rhino.PlugIns
       get { return PlugInLoadTime.WhenNeeded; }
     }
 
+    /// <summary>
+    /// Called by Rhino to determine if the plug-in name should be added to the Rhino Help/Plug-ins menu.
+    /// </summary>
+    public virtual bool AddToHelpMenu
+    {
+      get { return true; }
+    }
+
+    /// <summary>
+    /// Called by Rhino if AddToHelpMenu is true and menu item associated with this plug-in is selected.
+    /// </summary>
+    /// <param name="windowHandle">Native Window handle of the active Rhino interface.</param>
+    /// <returns>true  = Help displayed successfully, false = Error displaying help</returns>
+    public virtual bool DisplayHelp(IntPtr windowHandle)
+    {
+      return false;
+    }
+
     internal delegate bool UnknownUserDataCallback(uint doc_serial, Guid plugin_id);
     private static readonly UnknownUserDataCallback g_unknown_userdata_callback = OnUnknownUserData;
     private static bool OnUnknownUserData(uint doc_serial, Guid plugin_id)
@@ -670,9 +688,9 @@ namespace Rhino.PlugIns
         throw new ApplicationException("Never attempt to create an instance of a PlugIn class, this is the job of the plug-in manager");
 
       // Set callbacks if they haven't been set yet
-      if( null==m_OnLoad || null==m_OnShutDown || null==m_OnGetPlugInObject || 
+      if( null==m_OnLoad || null==m_OnShutDown || null==m_OnGetPlugInObject ||
           null==m_OnCallWriteDocument || null==m_OnWriteDocument || null==m_OnReadDocument ||
-          null==m_OnAddPagesToOptions || g_plug_in_proc == null || null==m_ResetMessageBoxes)
+          null==m_OnAddPagesToOptions || g_plug_in_proc == null || null==m_ResetMessageBoxes || null==m_OnDisplayHelp)
       {
         m_OnLoad = InternalOnLoad;
         m_OnShutDown = InternalOnShutdown;
@@ -683,6 +701,7 @@ namespace Rhino.PlugIns
         m_OnAddPagesToOptions = InternalAddPagesToOptions;
         g_plug_in_proc = InternalPlugInProc;
         m_OnAddPagesToObjectProperties = InternalAddPagesToObjectProperties;
+        m_OnDisplayHelp = InternalOnDisplayHelp;
 
         m_ResetMessageBoxes = InternalResetMessageBoxes;
 
@@ -701,7 +720,8 @@ namespace Rhino.PlugIns
           m_OnCallWriteDocument,
           m_OnWriteDocument,
           m_OnReadDocument,
-          g_display_options_dialog
+          g_display_options_dialog,
+          m_OnDisplayHelp
           );
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks3(m_OnAddPagesToOptions, m_OnAddPagesToObjectProperties, g_plug_in_proc);
         UnsafeNativeMethods.CRhinoPlugIn_SetCallbacks4(m_ResetMessageBoxes);
@@ -750,6 +770,7 @@ namespace Rhino.PlugIns
     internal delegate void OnAddPagesToObjectPropertiesDelegate(int pluginSerialNumber, int mode, uint documentRuntimeSerialNumber, IntPtr pageCollection);
     internal delegate void OnAddPagesToOptionsDelegate(int pluginSerialNumber, uint documentRuntimeSerialNumber, IntPtr pageCollection, int addToDocProps);
     internal delegate uint OnPlugInProcDelegate(int plugInSerialNumber, uint message, IntPtr wParam, IntPtr lParam);
+    internal delegate bool OnDisplayHelpDelegate(int pluginSerialNumber, IntPtr hwndParent);
 
     internal delegate void ResetMessageBoxesDelegate(int pluginSerialNumber);
 
@@ -771,6 +792,7 @@ namespace Rhino.PlugIns
     private static OnPlugInProcDelegate g_plug_in_proc;
     private static ResetMessageBoxesDelegate m_ResetMessageBoxes;
     private static DisplayOptionsDialogDelegate g_display_options_dialog;
+    private static OnDisplayHelpDelegate m_OnDisplayHelp;
 
     internal static OnAddSectionsToSunPanelDelegate m_OnAddPagesToSunPanel;
     internal static OnAddSectionsToRenderSettingsPanelDelegate m_OnAddPagesToRenderSettingsPanel;
@@ -800,6 +822,24 @@ namespace Rhino.PlugIns
 
     }
 
+    private static bool InternalOnDisplayHelp(int pluginSerialNumber, IntPtr hwndParent)
+    {
+      PlugIn p = LookUpBySerialNumber(pluginSerialNumber);
+      if (p != null)
+      {
+        try
+        {
+          return p.DisplayHelp(hwndParent);
+        }
+        catch (Exception)
+        {
+        }
+      }
+      return false;
+    }
+
+    
+
     private static int InternalOnLoad(int pluginSerialNumber)
     {
       LoadReturnCode rc = LoadReturnCode.Success;
@@ -811,7 +851,7 @@ namespace Rhino.PlugIns
         try
         {
           int computeEndpointCount = HostUtils.CustomComputeEndpointCount();
-          
+
           rc = p.OnLoad(ref error_msg);
           p.LoadCalled = true;
 
@@ -889,7 +929,7 @@ namespace Rhino.PlugIns
           // a plug-in. If there is one, write the settings and mark that we have
           // done this once
           Skin.WriteSettings(true);
-          
+
           // This is now handled on the C++ side by rhcommonrdk_c.dll
           // check to see if we should be uninitializing an RDK plugin
           //RdkPlugIn pRdk = RdkPlugIn.FromRhinoPlugIn(p);
@@ -1031,7 +1071,7 @@ namespace Rhino.PlugIns
           case 0:
 #pragma warning disable CS0618
         plug_in.ObjectPropertiesPages(collection.Pages);
-#pragma warning restore CS0618 
+#pragma warning restore CS0618
             break;
           default:
             plug_in.ObjectPropertiesPages(collection);
@@ -1178,7 +1218,7 @@ namespace Rhino.PlugIns
   /// Is called when the plug-in is being loaded.
   /// </summary>
   /// <param name="errorMessage">
-  /// If a load error is returned and this string is set. This string is the 
+  /// If a load error is returned and this string is set. This string is the
   /// error message that will be reported back to the user.
   /// </param>
   /// <returns>An appropriate load return code.
@@ -1312,7 +1352,7 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Called whenever a Rhino is about to save a .3dm file.
-    /// If you want to save plug-in document data when a model is 
+    /// If you want to save plug-in document data when a model is
     /// saved in a version 5 .3dm file, then you must override this
     /// function to return true and you must override WriteDocument().
     /// </summary>
@@ -1335,8 +1375,8 @@ namespace Rhino.PlugIns
     /// OpenNURBS file archive object Rhino is using to write the file.
     /// Use BinaryArchiveWriter.Write*() functions to write plug-in data.
     /// OR use the ArchivableDictionary
-    /// 
-    /// If any BinaryArchiveWriter.Write*() functions throw an exception, 
+    ///
+    /// If any BinaryArchiveWriter.Write*() functions throw an exception,
     /// then archive.WriteErrorOccured will be true and you should immediately return.
     /// Setting archive.WriteErrorOccured to true will cause Rhino to stop saving the file.
     /// </param>
@@ -1353,7 +1393,7 @@ namespace Rhino.PlugIns
     /// <param name="archive">
     /// OpenNURBS file archive object Rhino is using to read this file.
     /// Use BinaryArchiveReader.Read*() functions to read plug-in data.
-    /// 
+    ///
     /// If any BinaryArchive.Read*() functions throws an exception then
     /// archive.ReadErrorOccurve will be true and you should immediately return.
     /// </param>
@@ -1413,7 +1453,7 @@ namespace Rhino.PlugIns
     /// the Rhino licensing system. If the plug-in is installed as a standalone
     /// node, the locally installed license will be validated. If the plug-in
     /// is installed as a network node, a loaner license will be requested by
-    /// the system's assigned Zoo server. If the Zoo server finds and returns 
+    /// the system's assigned Zoo server. If the Zoo server finds and returns
     /// a license, then this license will be validated. If no license is found,
     /// then the user will be prompted to provide a license key, which will be
     /// validated.
@@ -1423,7 +1463,7 @@ namespace Rhino.PlugIns
     /// </param>
     /// <param name="validateProductKeyDelegate">
     /// Since the Rhino licensing system knows nothing about your product license,
-    /// you will need to validate the product license provided by the Rhino 
+    /// you will need to validate the product license provided by the Rhino
     /// licensing system. This is done by supplying a callback function, or delegate,
     /// that can be called to perform the validation.
     /// </param>
@@ -1448,7 +1488,7 @@ namespace Rhino.PlugIns
     /// the Rhino licensing system. If the plug-in is installed as a standalone
     /// node, the locally installed license will be validated. If the plug-in
     /// is installed as a network node, a loaner license will be requested by
-    /// the system's assigned Zoo server. If the Zoo server finds and returns 
+    /// the system's assigned Zoo server. If the Zoo server finds and returns
     /// a license, then this license will be validated. If no license is found,
     /// then the user will be prompted to provide a license key, which will be
     /// validated.
@@ -1467,7 +1507,7 @@ namespace Rhino.PlugIns
     /// </param>
     /// <param name="validateProductKeyDelegate">
     /// Since the Rhino licensing system knows nothing about your product license,
-    /// you will need to validate the product license provided by the Rhino 
+    /// you will need to validate the product license provided by the Rhino
     /// licensing system. This is done by supplying a callback function, or delegate,
     /// that can be called to perform the validation.
     /// </param>
@@ -1497,7 +1537,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Returns, or releases, a product license that was obtained from the Rhino
     /// licensing system. Note, most plug-ins do not need to call this as the
-    /// Rhino licensing system will return all licenses when Rhino shuts down. 
+    /// Rhino licensing system will return all licenses when Rhino shuts down.
     /// </summary>
     /// <since>5.0</since>
     protected bool ReturnLicense()
@@ -1507,7 +1547,7 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Get the customer name and organization used when entering the product
-    /// license. 
+    /// license.
     /// </summary>
     /// <param name="registeredOwner"></param>
     /// <param name="registeredOrganization"></param>
@@ -1527,7 +1567,7 @@ namespace Rhino.PlugIns
 
     string m_all_users_settings_dir;
     /// <summary>
-    /// Get the plug-in's "all users" settings directory. 
+    /// Get the plug-in's "all users" settings directory.
     /// This directory will be located in the system's program data folder.
     /// Note, this does not verify the directory exists.
     /// </summary>
@@ -1544,7 +1584,7 @@ namespace Rhino.PlugIns
 
     string m_local_user_settings_dir;
     /// <summary>
-    /// Get the plug-in's settings directory. This is the directory where the plug-in's persistent settings files are saved. 
+    /// Get the plug-in's settings directory. This is the directory where the plug-in's persistent settings files are saved.
     /// This directory will be located in the user's profile folder.
     /// Note, this does not verify the directory exists.
     /// </summary>
@@ -1726,7 +1766,7 @@ namespace Rhino.PlugIns
     /// <since>5.0</since>
     public PersistentSettings Settings
     {
-      get 
+      get
       {
         if (m_settings_manager == null)
           m_settings_manager = PersistentSettingsManager.Create(this);
@@ -1769,7 +1809,7 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// If true, Rhino will display a warning dialog when load-protected plug-ins are attempting to load. 
+    /// If true, Rhino will display a warning dialog when load-protected plug-ins are attempting to load.
     /// If false, load-protected plug-ins will silently not load.
     /// </summary>
     /// <since>6.0</since>
@@ -1961,7 +2001,7 @@ namespace Rhino.PlugIns
           {
             try {
               path = System.IO.Path.GetDirectoryName (path);
-            
+
               if (dirs.Contains (path))
                 continue;
               dirs.Add (path);
@@ -2168,7 +2208,7 @@ namespace Rhino.PlugIns
         // for directory installs (yak), this is already taken care of before we get here.
         path = GetMultiTargetPath(path) ?? path;
       }
-      
+
       if(HostUtils.RunningOnOSX)
       {
         // Mac plugins can be located inside of macOS plugin bundles (rhp directories) or
@@ -2195,7 +2235,7 @@ namespace Rhino.PlugIns
               path = dllFullPath;
           }
         }
-        
+
         if (!string.IsNullOrWhiteSpace(MonoHost.AlternateBinDirectory))
         {
           var dllname = System.IO.Path.GetFileNameWithoutExtension(path) + ".dll";
@@ -2267,14 +2307,14 @@ namespace Rhino.PlugIns
         UnsafeNativeMethods.ON_wString_Set(errorMessage, e.Message);
         return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
       }
-      
+
       if(reflect_assembly == null)
       {
         if(displayDebugInfo)
           RhinoApp.WriteLine("RhinoCommon error: {0}\nUnable to load assembly using ReflectionOnlyLoadFrom()", path);
         return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
       }
-      
+
       // At this point we were able to load the assembly for reflection. Check that it was built
       // against RhinoCommon.DLL (and an appropriate version number of RhinoCommon)
       try
@@ -2360,13 +2400,13 @@ namespace Rhino.PlugIns
             }
           }
         }
-        
+
         // At this point, we have determined that this is a RhinoCommon plug-in
         // We've done all the checking that we can do without actually loading
         // the DLL ( and resolving links)
         // if(displayDebugInfo)
         //   RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
-        
+
         if(ironpython_referenced)
         {
           // force load the IronPython that ships with Rhino so we don't accidentally get one from the GAC
@@ -2384,14 +2424,14 @@ namespace Rhino.PlugIns
         }
 
         var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
-        
+
         // if(displayDebugInfo)
         //   RhinoApp.Write("- extracting plug-in attributes to determine vendor information\n");
         // Fill out all of the info strings using Assembly attributes in the plugin
         ExtractPlugInAttributes( plugin_assembly, pluginInfo );
         if (UnsafeNativeMethods.CRhinoPlugInInfo_SilentBlock(pluginInfo))
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.SilentBlock;
-        
+
         // All of the major tests have passed
         // Find and create the plug-in and command classes through reflection
         // if(displayDebugInfo)
@@ -2399,7 +2439,7 @@ namespace Rhino.PlugIns
 
         if( !CreateFromAssembly( plugin_assembly, displayDebugInfo, index_rhinocommon==-1) )
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
-        
+
         // if(displayDebugInfo)
         //   RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
       }
@@ -2442,7 +2482,7 @@ namespace Rhino.PlugIns
       {
         pluginName = Path.GetFileName(path);
         dir = new DirectoryInfo(Path.GetDirectoryName(path));
-        
+
         // is the .rhp in a net* folder?
         var isTargetPath = targetPathRegex.IsMatch(dir.Name);
         if (!isTargetPath)
@@ -2454,8 +2494,8 @@ namespace Rhino.PlugIns
       // find the runtime specific folder
       var runtimeSpecificFolder = HostUtils.GetRuntimeSpecificFolder(dir, useRootFiles: HostUtils.RunningOnOSX);
       var runtimeSpecificPath = Path.Combine(runtimeSpecificFolder.FullName, pluginName);
-      
-      // if the plugin doesn't exist in the runtime specific folder, 
+
+      // if the plugin doesn't exist in the runtime specific folder,
       if (!File.Exists(runtimeSpecificPath))
         return null;
 
@@ -2465,10 +2505,10 @@ namespace Rhino.PlugIns
     static bool CheckPlugInVersioning( System.Reflection.AssemblyName dotnetAssemblyName )
     {
       var plugin_version = dotnetAssemblyName.Version;
-      
+
       //the major number is always in sync with the current release of Rhino
       var sdk_version = typeof(RhinoApp).Assembly.GetName().Version;
-      
+
       if( sdk_version.Major != plugin_version.Major )
       {
         return false;
@@ -2484,7 +2524,7 @@ namespace Rhino.PlugIns
           version_ok = sdk_version.Revision >= plugin_version.Revision;
         }
       }
-      
+
       if( !version_ok )
         return false;
 
@@ -2689,7 +2729,7 @@ namespace Rhino.PlugIns
         DebugStringSafe($"RhinoCommon.dll not found: {rhino_common_path}");
         throw new FileNotFoundException ("RhinoCommon.dll not found");
       }
-      
+
       string compat_exe = Runtime.HostUtils.RunningOnOSX ? "Compat.dll" : "Compat.exe";
 
       // get path to compat that's next to the RhinoCommon we're using
@@ -2762,7 +2802,7 @@ namespace Rhino.PlugIns
 
       if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
         || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
-        || proc.ExitCode == 114 // don't fail if there's only warnings 
+        || proc.ExitCode == 114 // don't fail if there's only warnings
         )
           return new CompatResult { Success = true, Output = output };
 
@@ -2990,7 +3030,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <since>6.0</since>
     public string RegistryPath
-    { 
+    {
       get { return GetString(UnsafeNativeMethods.RhinoPlugInRecordString.RegistryPath); }
     }
 
@@ -3044,7 +3084,7 @@ namespace Rhino.PlugIns
       if (IsDotNet)
       {
         if (IsLoaded)
-        { 
+        {
           string resource_name = GetString(UnsafeNativeMethods.RhinoPlugInRecordString.IconResourceName);
           if (!string.IsNullOrEmpty(resource_name))
             rc = PlugIn.GetLoadedPlugInIcon(Id, resource_name, size.Width);
@@ -3791,6 +3831,7 @@ namespace Rhino.PlugIns
 
       UnsafeNativeMethods.CRhinoRenderPlugIn_SetRdkCallbacks(
         m_OnSupportsFeature,
+        m_onSupportedChannels,
         g_prefer_basic_content_callback,
         m_OnAbortRender,
         m_OnAllowChooseContent,
@@ -3808,7 +3849,9 @@ namespace Rhino.PlugIns
         g_save_custom_render_file_callback,
         g_render_settings_sections_callback,
         g_plugin_icon_callback,
-        g_initial_channel_to_display
+        g_initial_channel_to_display,
+        g_plugin_texture_needs_baking,
+        m_customChannelName
         );
     }
 
@@ -3958,8 +4001,8 @@ namespace Rhino.PlugIns
       }
     }
 
-    
-    
+
+
 
     internal delegate bool PlugInIconCallback(int serialNumber, int width, int height, IntPtr dibOut);
     private static readonly PlugInIconCallback g_plugin_icon_callback = PlugInIcon;
@@ -4011,7 +4054,28 @@ namespace Rhino.PlugIns
       return Guid.Empty;
     }
 
-    
+    internal delegate bool PlugInTextureNeedsBakingCallback(int serialNumber, IntPtr pTexture);
+    private static readonly PlugInTextureNeedsBakingCallback g_plugin_texture_needs_baking = PlugInTextureNeedsBaking;
+    private static bool PlugInTextureNeedsBaking(int serialNumber, IntPtr pTexture)
+    {
+      // Get the runtime plug-in to call
+      var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
+      if (render_plug_in == null)
+        return false;
+
+      RenderTexture texture = (RenderTexture)RenderContent.FromPointer(pTexture, null);
+
+      return !render_plug_in.IsTextureSupported(texture);
+    }
+
+    /// <summary>
+    /// Returns true if this renderer can render the texture natively without needing it to be baked into a bitmap, false otherwise.
+    /// By default, returns false for all textures.
+    /// </summary>
+    public virtual bool IsTextureSupported(RenderTexture texture)
+    {
+      return UnsafeNativeMethods.Rdk_RenderPlugIn_BaseClassIsTextureSupported(NonConstPointer(), texture.ConstPointer());
+    }
 
     internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
     private static readonly SaveCusomtomRenderFileCallback g_save_custom_render_file_callback = OnSaveCusomtomRenderFile;
@@ -4131,7 +4195,7 @@ namespace Rhino.PlugIns
     /// </summary>
     protected virtual void RegisterRenderPanels(RenderPanels panels)
     {
-      
+
     }
 
     /// <summary>
@@ -4140,7 +4204,7 @@ namespace Rhino.PlugIns
     /// </summary>
     protected virtual void RegisterRenderTabs(RenderTabs tabs)
     {
-      
+
     }
 
     /// <summary>
@@ -4227,6 +4291,24 @@ namespace Rhino.PlugIns
       return true;
     }
 
+    /// <summary>
+    /// Override to communicate that the renderer supports more
+    /// channels beside the default channels RGBA, Depth, Normal, Albedo. See RenderWindow.StandardChannels. RenderWindow.ChannelId can be used to
+    /// get the GUIDs for the channels to support
+    /// </summary>
+    protected virtual Guid[] SupportedChannels
+    {
+      get { return new Guid[] { }; }
+    }
+
+    /// <summary>
+    /// Return the localized name of your custom channel.
+    /// </summary>
+    protected virtual string CustomChannelName(Guid id)
+    {
+      return "";
+    }
+
     /// <since>6.1</since>
     public static bool CurrentRendererSupportsFeature(RenderFeature feature)
     {
@@ -4247,7 +4329,7 @@ namespace Rhino.PlugIns
     /// <returns>One of PreviewRenderTypes</returns>
     protected virtual PreviewRenderTypes PreviewRenderType()
     {
-      return 0; 
+      return 0;
     }
 
     /// <summary>
@@ -4256,7 +4338,7 @@ namespace Rhino.PlugIns
     /// function is not overridden or the PreviewImage is not set on the
     /// arguments, then the internal OpenGL renderer will generate a simulation of
     /// the content.
-    /// 
+    ///
     /// This function is called with four different preview quality settings.
     /// The first quality level of RealtimeQuick is called on the main thread
     /// and needs to be drawn as fast as possible.  This function is called
@@ -4324,7 +4406,7 @@ namespace Rhino.PlugIns
      * Removed this virtual function until I understand what it is needed for.
      * It seems like you can register default content in the plug-in's OnLoad
      * virtual function and everything works fine
-     * 
+     *
     // override this method to create extra default content for your renderer in
     // addition to any content in the default content folder.
     protected virtual void CreateDefaultContent(RhinoDoc doc)
@@ -4340,7 +4422,7 @@ namespace Rhino.PlugIns
 
     /// <summary>
     /// Override this function to handle showing a modal dialog with your plug-in's
-    /// custom decal properties.  You will be passed the current properties for the 
+    /// custom decal properties.  You will be passed the current properties for the
     /// object being edited.  The defaults will be set in InitializeDecalProperties.
     /// </summary>
     /// <param name="properties">A list of named values that will be stored on the object
@@ -4388,6 +4470,57 @@ namespace Rhino.PlugIns
         }
       }
       return 0;
+    }
+
+    internal delegate void SupportedChannelsCallback(int serial_number, System.IntPtr ptrSupportedChannelGuids);
+    private static readonly SupportedChannelsCallback m_onSupportedChannels = OnSupportedChannels;
+    private static void OnSupportedChannels(int serialNumber, System.IntPtr ptrSupportedChannelGuids)
+    {
+      if (!(LookUpBySerialNumber(serialNumber) is RenderPlugIn p))
+      {
+        HostUtils.DebugString("ERROR: Invalid input for OnSupportedChannels");
+      }
+      else
+      {
+        try
+        {
+          var channels = new SimpleArrayGuid(ptrSupportedChannelGuids);
+          foreach(Guid guid in p.SupportedChannels)
+          {
+            channels.Append(guid);
+          }
+        }
+        catch (Exception ex)
+        {
+          string error_msg = "Error occurred during plug-in OnSupportedChannels\n Details:\n";
+          error_msg += ex.Message;
+          HostUtils.DebugString("Error " + error_msg);
+        }
+      }
+    }
+
+    internal delegate void CustomChannelNameCallback(int serialNumber, Guid channelId, System.IntPtr pChannelName);
+    private static readonly CustomChannelNameCallback m_customChannelName = OnCustomChannelName;
+    private static void OnCustomChannelName(int serialNumber, Guid channelId, System.IntPtr pChannelName)
+    {
+      if (!(LookUpBySerialNumber(serialNumber) is RenderPlugIn p))
+      {
+        HostUtils.DebugString("ERROR: Invalid input for OnCustomChannelNameChannel");
+      }
+      else
+      {
+        try
+        {
+          var name = p.CustomChannelName(channelId);
+          UnsafeNativeMethods.ON_wString_Set(pChannelName, name);
+        }
+        catch (Exception ex)
+        {
+          string error_msg = "Error occurred during plug-in OnCustomChannelNameChannel\n Details:\n";
+          error_msg += ex.Message;
+          HostUtils.DebugString("Error " + error_msg);
+        }
+      }
     }
 
     internal delegate int PreferBasicContentCallback(int serialNumber);
@@ -4479,7 +4612,7 @@ namespace Rhino.PlugIns
       /* 17 Oct 2012 S. Baer
        * Removed virtual CreateDefaultContent for the time being. Don't
        * understand yet why this is needed
-       * 
+       *
       RenderPlugIn p = LookUpBySerialNumber(serial_number) as RenderPlugIn;
       RhinoDoc doc = RhinoDoc.FromId(docId);
 
@@ -4682,7 +4815,7 @@ namespace Rhino.PlugIns
 
           XMLSectionUtilities.SetFromNamedValueList(pXmlSection, propertyList);
 
-          return 1;          
+          return 1;
         }
         catch (Exception ex)
         {
@@ -4695,7 +4828,7 @@ namespace Rhino.PlugIns
     #endregion
 
     /// <summary>
-    /// Called by Render and RenderPreview commands if this plug-in is set as the default render engine. 
+    /// Called by Render and RenderPreview commands if this plug-in is set as the default render engine.
     /// </summary>
     /// <param name="doc">A document.</param>
     /// <param name="mode">A command running mode.</param>
@@ -4772,7 +4905,7 @@ namespace Rhino.PlugIns
     {
       return false;
     }
-    
+
     /// <summary>
     /// This function is called by the Object Properties and Layer Control
     /// dialogs when the "Edit" button is pressed in the "Material" tab.  This
@@ -5092,7 +5225,7 @@ namespace Rhino.PlugIns
     protected abstract UnitSystem DigitizerUnitSystem { get; }
 
     /// <summary>
-    /// The point tolerance is the distance the digitizer must move 
+    /// The point tolerance is the distance the digitizer must move
     /// (in digitizer coordinates) for a new point to be considered
     /// real rather than noise. Small desktop digitizer arms have
     /// values like 0.001 inches and 0.01 millimeters.  This value
@@ -5239,7 +5372,7 @@ namespace Rhino.PlugIns
     /// This (internal) version of Rhino.PlugIns.LicenseUtils.GetLicense
     /// is used by Rhino.PlugIns.PlugIn objects.
     /// </summary>
-    internal static bool GetLicense(string productPath, Guid pluginId, Guid licenseId, int productBuildType, string productTitle, 
+    internal static bool GetLicense(string productPath, Guid pluginId, Guid licenseId, int productBuildType, string productTitle,
       LicenseCapabilities licenseCapabilities, string textMask, ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate leaseChangedDelegate)
     {
       if (null == validateProductKeyDelegate ||
@@ -5315,7 +5448,7 @@ namespace Rhino.PlugIns
     }
 
 
-    internal static bool AskUserForLicense(string productPath, bool standAlone, object parentWindow, Guid pluginId, Guid licenseId, 
+    internal static bool AskUserForLicense(string productPath, bool standAlone, object parentWindow, Guid pluginId, Guid licenseId,
                                            int productBuildType, string productTitle, string textMask,
                                            ValidateProductKeyDelegate validateProductKeyDelegate,
                                            OnLeaseChangedDelegate onLeaseChangedDelegate)
@@ -5324,7 +5457,7 @@ namespace Rhino.PlugIns
       if (/*null == validateProductKeyDelegate ||*/
           string.IsNullOrEmpty(productPath) ||
           string.IsNullOrEmpty(productTitle) ||
-          pluginId.Equals(Guid.Empty) || 
+          pluginId.Equals(Guid.Empty) ||
           licenseId.Equals(Guid.Empty)
         )
         return false;
@@ -5350,7 +5483,7 @@ namespace Rhino.PlugIns
 
     /// <since>6.0</since>
     public static bool AskUserForLicense(int productType, bool standAlone, object parentWindow, string textMask,
-      ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate onLeaseChangedDelegate, 
+      ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate onLeaseChangedDelegate,
       VerifyLicenseKeyDelegate verifyLicenseKeyDelegate, VerifyPreviousVersionLicenseDelegate verifyPreviousVersionLicenseKeyDelegate,
       string product_path, string product_title, Guid pluginId, Guid licenseId, LicenseCapabilities capabilities)
     {
@@ -5408,7 +5541,7 @@ namespace Rhino.PlugIns
       {
         if (g_zoo_client_utilities == null)
         {
-          // This line doesn't work in the InstallLicense project when the file is used 
+          // This line doesn't work in the InstallLicense project when the file is used
           // via an SVN external. Localization.cs is used outside RhinoCommon in InstallLicense.
           g_zoo_client_utilities = Runtime.HostUtils.GetPlatformService<IZooClientUtilities>();
           if (g_zoo_client_utilities == null)
@@ -5555,7 +5688,7 @@ namespace Rhino.PlugIns
         HostUtils.ExceptionReport(ex);
       }
 
-      return false;      
+      return false;
     }
 
     /// <summary>
@@ -5791,7 +5924,7 @@ namespace Rhino.PlugIns
   public delegate bool VerifyPreviousVersionLicenseDelegate(
     string license, string previousVersionLicense, out string errorMessage);
 
-  //public delegate void 
+  //public delegate void
 
   /// <summary>License build contentType enumerations.</summary>
   /// <since>5.0</since>
@@ -5918,7 +6051,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <since>6.0</since>
     public string GroupId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.GroupId);
-  
+
     /// <summary>
     /// Name of Rhino Accounts user that was logged in when this lease was obtained
     /// </summary>
@@ -5950,7 +6083,7 @@ namespace Rhino.PlugIns
     public string ProductEdition => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.ProductEdition);
 
     /// <summary>
-    /// The ID of this lease. 
+    /// The ID of this lease.
     /// </summary>
     /// <since>6.0</since>
     public string LeaseId => GetString(UnsafeNativeMethods.RHC_RhinoLicenseLease_Fields.LeaseId);
@@ -6181,7 +6314,7 @@ namespace Rhino.PlugIns
     }
 
     /// <summary>
-    /// The actual product license. 
+    /// The actual product license.
     /// This is provided by the plug-in that validated the license.
     /// </summary>
     /// <since>5.0</since>
@@ -6278,7 +6411,7 @@ namespace Rhino.PlugIns
         return true;
       }
     }
-    #endregion 
+    #endregion
 
     #region LicenseData static members
 
