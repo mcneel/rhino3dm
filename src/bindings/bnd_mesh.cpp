@@ -229,9 +229,9 @@ int BND_Mesh::PartitionCount() const
   return 0;
 }
 
-BND_CachedTextureCoordinates* BND_Mesh::GetCachedTextureCoordinates( BND_UUID textureMappingId ) 
+BND_CachedTextureCoordinates BND_Mesh::GetCachedTextureCoordinates( BND_UUID textureMappingId ) 
 {
-  BND_CachedTextureCoordinates* tc( m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(textureMappingId) ) );
+  BND_CachedTextureCoordinates tc( m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(textureMappingId) ) );
   return tc;
 }
 
@@ -994,7 +994,7 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("Normals", &BND_Mesh::GetNormals)
     .def_property_readonly("VertexColors", &BND_Mesh::VertexColors)
     .def_property_readonly("TextureCoordinates", &BND_Mesh::TextureCoordinates)
-    .def_property_readonly("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("textureMappingId"))
+    .def_property_readonly("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates)
     .def("ClearTextureData", &BND_Mesh::ClearTextureData)
     .def("ClearSurfaceData", &BND_Mesh::ClearSurfaceData)
     .def("DestroyTopology", &BND_Mesh::DestroyTopology)

@@ -272,7 +272,7 @@ public:
 public:
 
   BND_CachedTextureCoordinates();
-  BND_CachedTextureCoordinates( ON_TextureCoordinates* tc );
+  BND_CachedTextureCoordinates( const ON_TextureCoordinates* tc );
   //static BND_CachedTextureCoordinates* GetCachedTextureCoordinates( class BND_Mesh mesh, BND_UUID textureMappingId);
   //ON_MappingTag   m_tag;
   int Dimension() const { return m_TC->m_dim; }
