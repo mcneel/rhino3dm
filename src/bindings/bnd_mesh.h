@@ -202,12 +202,12 @@ public:
   BND_TUPLE GetFace(int i) const;
   //    public MeshFace this[int index]
   BND_TUPLE GetFaceVertices(int faceIndex) const;
-//    public BoundingBox GetFaceBoundingBox(int faceIndex)
-  ON_3dPoint GetFaceCenter(int faceIndex) const;
-//    public int[] AdjacentFaces(int faceIndex)
-//    BND_TUPLE ToIntArray(bool asTriangles) const;
-//    public int[] ToIntArray(bool asTriangles)
-//    public int[] ToIntArray(bool asTriangles, ref List<int> replacedIndices)
+  //    public BoundingBox GetFaceBoundingBox(int faceIndex)
+    ON_3dPoint GetFaceCenter(int faceIndex) const;
+  //    public int[] AdjacentFaces(int faceIndex)
+  //    BND_TUPLE ToIntArray(bool asTriangles) const;
+  //    public int[] ToIntArray(bool asTriangles)
+  //    public int[] ToIntArray(bool asTriangles, ref List<int> replacedIndices)
 
 
   //int DeleteFaces(IEnumerable<int> faceIndexes)
@@ -259,12 +259,29 @@ class BND_MeshTextureCoordinateList
   ON_Mesh* m_mesh = nullptr;
 public:
   BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
-
-
   int Count() const { return m_mesh->m_T.Count(); }
   ON_2fPoint GetTextureCoordinate(int i) const;
   void SetTextureCoordinate(int i, ON_2fPoint tc);
   int Add(float s, float t);
+};
+
+class BND_CachedTextureCoordinates : public BND_CommonObject
+{
+public:
+  ON_TextureCoordinates* m_TC = nullptr;
+public:
+
+  BND_CachedTextureCoordinates();
+  BND_CachedTextureCoordinates( ON_TextureCoordinates* tc );
+  //static BND_CachedTextureCoordinates* GetCachedTextureCoordinates( class BND_Mesh mesh, BND_UUID textureMappingId);
+  //ON_MappingTag   m_tag;
+  int Dimension() const { return m_TC->m_dim; }
+  int Count() const { return m_TC->m_T.Count(); }
+  BND_UUID MappingId() const { return ON_UUID_to_Binding(m_TC->m_tag.m_mapping_id); }
+  //BND_TextureCoordinates TextureCoordinates() const { return }
+
+  //IsReadOnly
+  //ON_SimpleArray<ON_3fPoint> m_T;   // texture coordinates
 };
 
 class BND_Mesh : public BND_GeometryBase
@@ -301,7 +318,7 @@ public:
   //public bool EvaluateMeshGeometry(Surface surface)
   void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
   //public void SetCachedTextureCoordinates(TextureMapping tm, ref Transform xf)
-  //public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
+  BND_CachedTextureCoordinates GetCachedTextureCoordinates( BND_UUID textureMappingId );
   bool Compact() { return m_mesh->Compact(); }
   //void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation);
   //public int SolidOrientation()
