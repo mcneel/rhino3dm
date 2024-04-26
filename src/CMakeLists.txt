@@ -1,17 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-endif()
-
-project(rhino3dm)
-
 set (CMAKE_CXX_STANDARD 14)
 
 if (EMSCRIPTEN)
   set(RHINO3DM_JS "YES")
 else()
   set(RHINO3DM_PY "YES")
+endif()
+
+project(rhino3dm)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  if (${RHINO3DM_PY})
+    set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+  endif()
 endif()
 
 if (${RHINO3DM_JS})
