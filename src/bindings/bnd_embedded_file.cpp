@@ -115,11 +115,11 @@ namespace py = pybind11;
 void initEmbeddedFileBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmEmbeddedFile>(m, "EmbeddedFile")
-    //.def(py::init<>())
-    //.def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
-    //.def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
+    .def(py::init<>())
+    .def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
+    .def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
-    //.def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
+    .def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
     .def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
     .def("Clear", &BND_File3dmEmbeddedFile::Clear)
     ;

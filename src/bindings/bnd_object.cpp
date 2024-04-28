@@ -1516,7 +1516,7 @@ void initObjectBindings(pybind11::module& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
     .def_property_readonly("IsValid", &BND_CommonObject::IsValid)
-    //.def_property_readonly("IsValidWithLog", &BND_CommonObject::IsValidWithLog)
+    .def_property_readonly("IsValidWithLog", &BND_CommonObject::IsValidWithLog)
     .def("Encode", &BND_CommonObject::Encode)
     .def_static("Decode", &BND_CommonObject::Decode, py::arg("jsonObject"))
     .def("SetUserString", &BND_CommonObject::SetUserString, py::arg("key"), py::arg("value"))
