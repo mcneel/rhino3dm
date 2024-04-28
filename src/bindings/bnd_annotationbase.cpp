@@ -62,7 +62,7 @@ void initAnnotationBaseBindings(pybind11::module& m)
   py::class_<BND_AnnotationBase, BND_GeometryBase>(m, "AnnotationBase")
     .def_property_readonly("RichText", &BND_AnnotationBase::RichText)
     .def_property_readonly("PlainText", &BND_AnnotationBase::PlainText)
-    .def_property_readonly("PlainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
+    //.def_property_readonly("PlainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
     ;
 
   py::class_<BND_TextDot, BND_GeometryBase>(m, "TextDot")
@@ -84,7 +84,7 @@ void initAnnotationBaseBindings(void*)
   class_<BND_AnnotationBase, base<BND_GeometryBase>>("AnnotationBase")
     .property("richText", &BND_AnnotationBase::RichText)
     .property("plainText", &BND_AnnotationBase::PlainText)
-    .property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
+    //.property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")

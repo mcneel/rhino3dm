@@ -115,11 +115,11 @@ namespace py = pybind11;
 void initEmbeddedFileBindings(pybind11::module& m)
 {
   py::class_<BND_File3dmEmbeddedFile>(m, "EmbeddedFile")
-    .def(py::init<>())
-    .def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
-    .def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
+    //.def(py::init<>())
+    //.def(py::init<const BND_File3dmEmbeddedFile&>(), py::arg("other"))
+    //.def_static("Read", &BND_File3dmEmbeddedFile::Read, py::arg("fileName"))
     .def_property_readonly("Length", &BND_File3dmEmbeddedFile::GetLength)
-    .def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
+    //.def_property("Filename", &BND_File3dmEmbeddedFile::GetFilename,  &BND_File3dmEmbeddedFile::SetFilename)
     .def("Write", &BND_File3dmEmbeddedFile::Write, py::arg("fileName"))
     .def("Clear", &BND_File3dmEmbeddedFile::Clear)
     ;
@@ -132,11 +132,11 @@ using namespace emscripten;
 void initEmbeddedFileBindings(void*)
 {
   class_<BND_File3dmEmbeddedFile>("EmbeddedFile")
-    .constructor<>()
-    .constructor<const BND_File3dmEmbeddedFile&>()
-    .class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
+    //.constructor<>()
+    //.constructor<const BND_File3dmEmbeddedFile&>()
+    //.class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
-    .property("fileName", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
+    //.property("fileName", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
     .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
