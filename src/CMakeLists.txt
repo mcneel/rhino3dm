@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+project(rhino3dm)
 
 set (CMAKE_CXX_STANDARD 14)
 
@@ -7,8 +8,6 @@ if (EMSCRIPTEN)
 else()
   set(RHINO3DM_PY "YES")
 endif()
-
-project(rhino3dm)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   if (${RHINO3DM_PY})
