@@ -1541,7 +1541,7 @@ void initObjectBindings(void*)
 {
   class_<BND_CommonObject>("CommonObject")
     .property("isValid", &BND_CommonObject::IsValid)
-    .property("isValidWithLog", &BND_CommonObject::IsValidWithLog)
+    //.property("isValidWithLog", &BND_CommonObject::IsValidWithLog)
     .function("encode", &BND_CommonObject::Encode)
     .function("toJSON", &BND_CommonObject::toJSON)
     .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers())
