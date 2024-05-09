@@ -136,7 +136,7 @@ void initEmbeddedFileBindings(void*)
     //.constructor<const BND_File3dmEmbeddedFile&>()
     .class_function("fromByteArray", &BND_File3dmEmbeddedFile::WasmFromByteArray, allow_raw_pointers())
     .property("length", &BND_File3dmEmbeddedFile::GetLength)
-    //.property("fileName", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
+    .property("fileName", &BND_File3dmEmbeddedFile::GetFilename, &BND_File3dmEmbeddedFile::SetFilename)
     .function("write", &BND_File3dmEmbeddedFile::Write, allow_raw_pointers()) //should return some sort of buffer that can be saved with the FileAPI
     .function("clear", &BND_File3dmEmbeddedFile::Clear)
     ;
