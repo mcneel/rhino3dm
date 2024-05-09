@@ -2056,7 +2056,7 @@ void initExtensionsBindings(void*)
   class_<BND_File3dmEmbeddedFileTable>("File3dmEmbeddedFileTable")
     .property("count", &BND_File3dmEmbeddedFileTable::Count)
     .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
-    //.function("add", &BND_File3dmEmbeddedFileTable::Add)
+    .function("add", &BND_File3dmEmbeddedFileTable::Add)
     .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
     ////.function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
     ;
