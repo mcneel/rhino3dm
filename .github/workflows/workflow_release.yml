@@ -102,6 +102,10 @@ jobs:
             target: macos
           - os: macos-12
             target: macos
+        exclude:
+          - os: macos-14
+            python-version: 3.7
+            
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
