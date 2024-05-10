@@ -300,7 +300,7 @@ public:
   void DestroyPartition() { m_mesh->DestroyPartition(); }
   //public bool EvaluateMeshGeometry(Surface surface)
   void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
-  //public void SetCachedTextureCoordinates(TextureMapping tm, ref Transform xf)
+  void SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf);
   //public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
   bool Compact() { return m_mesh->Compact(); }
   //void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation);

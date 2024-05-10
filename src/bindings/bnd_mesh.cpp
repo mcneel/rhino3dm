@@ -221,6 +221,16 @@ void BND_Mesh::SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Tra
   }
 }
 
+void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf)
+{
+  if (tm)
+  {
+    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
+    m_mesh->SetCachedTextureCoordinates(*tm->m_mapping, xform, false);
+  }
+
+}
+
 int BND_Mesh::PartitionCount() const
 {
   const ON_MeshPartition* pPartition = m_mesh->Partition();
@@ -989,6 +999,7 @@ void initMeshBindings(pybind11::module& m)
     .def("DestroyTree", &BND_Mesh::DestroyTree)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
     .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
+    .def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -1127,6 +1138,7 @@ void initMeshBindings(void*)
     .function("destroyTree", &BND_Mesh::DestroyTree)
     .function("destroyPartition", &BND_Mesh::DestroyPartition)
     .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
+    .function("setCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, allow_raw_pointers())
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)
