@@ -84,7 +84,7 @@ void initAnnotationBaseBindings(void*)
   class_<BND_AnnotationBase, base<BND_GeometryBase>>("AnnotationBase")
     .property("richText", &BND_AnnotationBase::RichText)
     .property("plainText", &BND_AnnotationBase::PlainText)
-    //.property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
+    .property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")

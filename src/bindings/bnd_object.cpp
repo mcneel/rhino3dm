@@ -1529,7 +1529,7 @@ void initObjectBindings(pybind11::module& m)
   py::class_<BND_ArchivableDictionary>(m, "ArchivableDictionary")
     .def_static("EncodeDict", &BND_ArchivableDictionary::EncodeFromDictionary)
     .def_static("DecodeDict", &BND_ArchivableDictionary::DecodeToDictionary)
-    //.def_static("WriteGeometry", &BND_ArchivableDictionary::WriteGeometry)
+    ////.def_static("WriteGeometry", &BND_ArchivableDictionary::WriteGeometry)
     ;
 }
 #endif
@@ -1541,7 +1541,7 @@ void initObjectBindings(void*)
 {
   class_<BND_CommonObject>("CommonObject")
     .property("isValid", &BND_CommonObject::IsValid)
-    //.property("isValidWithLog", &BND_CommonObject::IsValidWithLog)
+    .property("isValidWithLog", &BND_CommonObject::IsValidWithLog)
     .function("encode", &BND_CommonObject::Encode)
     .function("toJSON", &BND_CommonObject::toJSON)
     .class_function("decode", &BND_CommonObject::Decode, allow_raw_pointers())
@@ -1556,8 +1556,8 @@ void initObjectBindings(void*)
     .class_function("encodeDict", &BND_ArchivableDictionary::EncodeFromDictionary)
     .class_function("decodeDict", &BND_ArchivableDictionary::DecodeToDictionary)
     .class_function("writeGeometry", &BND_ArchivableDictionary::WriteGeometry, allow_raw_pointers())
-    //.class_function("test", &BND_ArchivableDictionary::Test)
-    //.class_function("test2", &BND_ArchivableDictionary::Test2, allow_raw_pointers())
+    ////.class_function("test", &BND_ArchivableDictionary::Test)
+    ////.class_function("test2", &BND_ArchivableDictionary::Test2, allow_raw_pointers())
     ;
 }
 #endif
