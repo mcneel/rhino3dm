@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1
 
+### Added
+- (py) macos 14 arm64 python wheels
+
 ### Fixed
 - (js) Regenerated js files that load wasm as those checked into src were outdated.
 
