@@ -265,7 +265,7 @@ public:
   int Add(float s, float t);
 };
 
-class BND_CachedTextureCordinates
+class BND_CachedTextureCordinates : public BND_CommonObject
 {
 public:
   ON_Mesh::CachedTextureCoordinates* m_cache = nullptr;
@@ -273,6 +273,16 @@ public:
   BND_CachedTextureCordinates() = default;
   BND_CachedTextureCordinates(ON_Mesh::CachedTextureCoordinates* cache) : m_cache(cache) {}
   ~BND_CachedTextureCordinates() { delete m_cache; }
+
+  // properties
+  int Dim () const { return m_cache->m_dim; }
+  BND_UUID MappingId() const { return ON_UUID_to_Binding(m_cache->m_tag.m_mapping_id); }
+  int Count() const { return m_cache->m_T.Count(); }
+  bool IsReadOnly() const { return true; }
+
+  //methods
+  BND_TUPLE TryGetAt(int index) const;
+
 
   //TODO: Implement the rest of the methods
 

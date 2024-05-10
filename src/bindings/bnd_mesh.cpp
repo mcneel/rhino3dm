@@ -243,6 +243,11 @@ BND_CachedTextureCoordinates* BND_Mesh::GetCachedTextureCoordinates( BND_UUID id
 
 }
 
+BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) 
+{
+
+}
+
 int BND_Mesh::PartitionCount() const
 {
   const ON_MeshPartition* pPartition = m_mesh->Partition();
