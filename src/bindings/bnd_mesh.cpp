@@ -231,6 +231,18 @@ void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class B
 
 }
 
+BND_CachedTextureCoordinates* BND_Mesh::GetCachedTextureCoordinates( BND_UUID id )
+{
+  ON_Mesh::CachedTextureCoordinates* ctc = m_mesh->GetCachedTextureCoordinates( Binding_to_ON_UUID(id) );
+  if (ctc)
+    return new BND_CachedTextureCoordinates(ctc);
+  return nullptr;
+
+  //const ON_TextureCoordinates* value = pMesh ? pMesh->CachedTextureCoordinates(id) : NULL;
+  //return value;
+
+}
+
 int BND_Mesh::PartitionCount() const
 {
   const ON_MeshPartition* pPartition = m_mesh->Partition();
@@ -1000,6 +1012,7 @@ void initMeshBindings(pybind11::module& m)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
     .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
     .def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
+    .def("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("id"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -1139,6 +1152,7 @@ void initMeshBindings(void*)
     .function("destroyPartition", &BND_Mesh::DestroyPartition)
     .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
     .function("setCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, allow_raw_pointers())
+    .function("getCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates)
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)

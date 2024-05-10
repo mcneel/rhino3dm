@@ -259,13 +259,24 @@ class BND_MeshTextureCoordinateList
   ON_Mesh* m_mesh = nullptr;
 public:
   BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
-
-
   int Count() const { return m_mesh->m_T.Count(); }
   ON_2fPoint GetTextureCoordinate(int i) const;
   void SetTextureCoordinate(int i, ON_2fPoint tc);
   int Add(float s, float t);
 };
+
+class BND_CachedTextureCordinates
+{
+public:
+  ON_Mesh::CachedTextureCoordinates* m_cache = nullptr;
+public:
+  BND_CachedTextureCordinates() = default;
+  BND_CachedTextureCordinates(ON_Mesh::CachedTextureCoordinates* cache) : m_cache(cache) {}
+  ~BND_CachedTextureCordinates() { delete m_cache; }
+
+  //TODO: Implement the rest of the methods
+
+);
 
 class BND_Mesh : public BND_GeometryBase
 {
@@ -301,7 +312,7 @@ public:
   //public bool EvaluateMeshGeometry(Surface surface)
   void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
   void SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf);
-  //public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
+  BND_CachedTextureCordinates& GetCachedTextureCoordinates(BND_UUID id) const;
   bool Compact() { return m_mesh->Compact(); }
   //void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation);
   //public int SolidOrientation()
