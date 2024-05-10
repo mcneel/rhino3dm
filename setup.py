@@ -132,10 +132,10 @@ setup(
 """# rhino3dm.py
 CPython package based on OpenNURBS with a RhinoCommon style
 
-Project Homepage at: https://github.com/mcneel/rhino3dm
-Developer samples at: https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py
-Forums at: https://discourse.mcneel.com/c/rhino-developer/rhino3dm/
-Report issue: https://github.com/mcneel/rhino3dm/issues
+* Project Homepage at: https://github.com/mcneel/rhino3dm
+* Developer samples at: https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py
+* Forums at: https://discourse.mcneel.com/c/rhino-developer/rhino3dm/
+* Report issue: https://github.com/mcneel/rhino3dm/issues
 
 ### Supported platforms
 * Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - Windows (32 and 64 bit)
