@@ -51,16 +51,17 @@ There are several places where version numbers should be updated:
 
 ### Node.js
 
-1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including the js version.
-2. Download and extract the `rhino3dm.js` artifact.
-3. cd into the directory you've just extracted
-4. From inside this directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
+1. Ensure the docs/javascript/RHINO3DM.JS.md is updated and committed to reflect the latest changes (version numbers, etc)
+2. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including the js version.
+3. Download and extract the `rhino3dm.js` artifact.
+4. cd into the directory you've just extracted
+5. From inside this directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
 
 See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for more info.
 
 #### Notes:
 1. After creating a user on npm.org, ask Will to add you to the mcneel team!
-2. If publishing a pre-release, e.g. `0.4.0-dev`, use `npm publish --tag next` ([source](https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420))
+2. If publishing a pre-release, e.g. `0.4.0-beta`, use `npm publish --tag next` ([source](https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420))
 
 ## dotnet
 

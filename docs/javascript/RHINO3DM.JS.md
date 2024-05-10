@@ -18,12 +18,12 @@ The easiest way to get started is to reference a specific version of the library
 
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
-  <script async src="https://unpkg.com/es-module-shims@1.9.0/dist/es-module-shims.js"></script>
+  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.6.0-beta1/rhino3dm.module.min.js"
+            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.6.1/rhino3dm.module.min.js"
           }
       }
   </script>
