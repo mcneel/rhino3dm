@@ -135,10 +135,6 @@ jobs:
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
         run: python3 script/build.py -p js -o -v
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v4.0.0
-        with:
-          dotnet-version: 7.0.x
       - name: copy files
         shell: bash
         run: |
@@ -163,7 +159,7 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macos-11, macos-12]
+        os: [ubuntu-latest, windows-2019, macos-11, macos-12, macos-14]
         python-version: ['3.10', '3.11', '3.12']
         include:
           - os: ubuntu-latest
@@ -173,6 +169,8 @@ jobs:
           - os: macos-11
             target: macos
           - os: macos-12
+            target: macos
+          - os: macos-14
             target: macos
       fail-fast: false
     steps:

@@ -93,7 +93,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, macos-11, macos-12]
+        os: [windows-2019, macos-11, macos-12, macos-14]
         python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
         include:
           - os: windows-2019
@@ -102,6 +102,10 @@ jobs:
             target: macos
           - os: macos-12
             target: macos
+        exclude:
+          - os: macos-14
+            python-version: 3.7
+            
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
@@ -236,10 +240,6 @@ jobs:
         run: python3 script/setup.py -p js -o -v
       - name: build js
         run: python3 script/build.py -p js -o -v
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v4.0.0
-        with:
-          dotnet-version: 7.0.x
       - name: copy files
         shell: bash
         run: |

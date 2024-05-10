@@ -1797,7 +1797,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmEmbeddedFileTable&, BND_File3dmEmbeddedFile*>(s.cast<BND_File3dmEmbeddedFileTable &>(), s); })
     .def("Add", &BND_File3dmEmbeddedFileTable::Add, py::arg("embedded_file"))
     .def("FindIndex", &BND_File3dmEmbeddedFileTable::FindIndex, py::arg("index"))
-    //.def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
+    ////.def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*> >(m, "__RenderContentIterator")
@@ -1824,7 +1824,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmPostEffectTable::Count)
     .def("__getitem__", &BND_File3dmPostEffectTable::FindIndex)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>(s.cast<BND_File3dmPostEffectTable &>(), s); })
-    //.def("Add", &BND_File3dmRenderContentTable::Add, py::arg("render_content"))
+    ////.def("Add", &BND_File3dmRenderContentTable::Add, py::arg("render_content"))
     .def("FindIndex", &BND_File3dmPostEffectTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmPostEffectTable::FindId, py::arg("id"))
     ;
@@ -2058,13 +2058,13 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmEmbeddedFileTable::Add)
     .function("findIndex", &BND_File3dmEmbeddedFileTable::FindIndex, allow_raw_pointers())
-    //.function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
+    ////.function("findId", &BND_File3dmEmbeddedFileTable::FindId, allow_raw_pointers())
     ;
 
   class_<BND_File3dmPostEffectTable>("File3dmPostEffectTable")
     .property("count", &BND_File3dmPostEffectTable::Count)
     .function("get", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
-    //.function("add", &BND_File3dmPostEffectTable::Add, allow_raw_pointers())
+    ////.function("add", &BND_File3dmPostEffectTable::Add, allow_raw_pointers())
     .function("findIndex", &BND_File3dmPostEffectTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmPostEffectTable::FindId, allow_raw_pointers())
     ;
