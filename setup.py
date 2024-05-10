@@ -133,13 +133,16 @@ setup(
 CPython package based on OpenNURBS with a RhinoCommon style
 
 Project Homepage at: https://github.com/mcneel/rhino3dm
+Developer samples at: https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py
+Forums at: https://discourse.mcneel.com/c/rhino-developer/rhino3dm/
+Report issue: https://github.com/mcneel/rhino3dm/issues
 
 ### Supported platforms
-* Python 3.7, 3.8, 3.9, 3.10, 3.11 - Windows (32 and 64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11 - OSX (installed through homebrew)
-* Python 3.8, 3.9, 3.10, 3.11 - Linux via manylinux
-* other python versions are supported through source distributions\
-
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - Windows (32 and 64 bit)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 11, 12 (installed through homebrew)
+* Python 3.8, 3.9, 3.10, 3.11, 3.12 - macos 14 arm 64
+* Python 3.8, 3.9, 3.10, 3.11 - Linux via manylinux2014_x86_64
+* other architectures, operating systems, and python versions are supported through source distributions\
 
 ## Test
 
