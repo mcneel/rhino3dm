@@ -80,7 +80,7 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             if platform.system() == "Darwin":
                 cmake_args += ['-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64']
-            build_args += ['--', f'-j{os.cpu_count()-1}']
+            build_args += ['--', f'-j{max(1,os.cpu_count()-1)}']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
