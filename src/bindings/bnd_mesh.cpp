@@ -862,74 +862,24 @@ int BND_MeshTextureCoordinateList::Add(float s, float t)
   m_mesh->SetTextureCoord(m_mesh->m_T.Count(), s, t);
   return m_mesh->m_T.Count() - 1;
 }
-/*
-BND_CachedTextureCoordinates::BND_CachedTextureCoordinates()
-{
-  SetTrackedPointer(new ON_TextureCoordinates(), nullptr);
-}
 
-BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(ON_TextureCoordinates* tc, const ON_ModelComponentReference* compref)
-{
-  SetTrackedPointer(tc, compref);
-}
-
-void BND_CachedTextureCoordinates::SetTrackedPointer(ON_TextureCoordinates* tc, const ON_ModelComponentReference* compref)
-{
-  m_ctc = tc;
-   BND_CommonObject::SetTrackedPointer(m_ctc, compref);
-}
-
-
-BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
-{
-  m_component_reference = compref;
-  m_mesh = mesh;
-}
-
-
-void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf)
-{
-  if (tm)
-  {
-    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
-    m_mesh->SetCachedTextureCoordinates(*tm->m_mapping, xform, false);
-  }
-
-}
-
-
-BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(const ON_TextureCoordinates& tc)
-{
-  m_cache = tc;
-}
-*/
-/*
-BND_CachedTextureCoordinates* BND_Mesh::CachedTextureCoordinates( BND_UUID id ) const
-{
-  
-  const ON_TextureCoordinates* tc = m_mesh ? m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(id) ) : nullptr;
-  if (tc)
-    return new BND_CachedTextureCoordinates(*tc);
-  return nullptr;
-
-}
+BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(const ON_TextureCoordinates& tc) : m_ctc(tc){}
 
 BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) const
 {
 
-  if ( m_cache == nullptr ) return NullTuple();
-  if ( index < 0 || index >= m_cache.m_T.Count() ) return NullTuple();
+  if ( index < 0 || index >= m_ctc.m_T.Count() ) return NullTuple();
 
   bool success = false;
   double u = 0;
   double v = 0;
   double w = 0;
   
-  u = m_cache.m_T[index].x;
-  v = m_cache.m_T[index].y;
-  w = m_cache.m_T[index].z;
+  u = m_ctc.m_T[index].x;
+  v = m_ctc.m_T[index].y;
+  w = m_ctc.m_T[index].z;
 
-  success = m_cache.m_dim > 0 ? true : false;
+  success = m_ctc.m_dim > 0 ? true : false;
 
   BND_TUPLE rc = CreateTuple(4);
   SetTuple<bool>(rc, 0, success);
@@ -940,33 +890,20 @@ BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) const
 
 }
 
-
-bool BND_CachedTextureCoordinates::Contains(double x, double y, double z) const
-{
-
-  if ( m_cache == nullptr ) return false;
-
-  int index = IndexOf(x, y, z);
-  return (index >= 0);
-
-}
-
 int BND_CachedTextureCoordinates::IndexOf(double x, double y, double z) const
 {
 
-  if ( m_cache == nullptr ) return -1;
-
-  int count = m_cache.m_T.Count();
+  int count = m_ctc.m_T.Count();
 
   for (int i = 0; i < count; i++)
   {
     double u, v, w;
-    u = m_cache.m_T[i].x;
-    v = m_cache.m_T[i].y;
-    w = m_cache.m_T[i].z;
-    bool success = m_cache->m_dim > 0? true : false;
+    u = m_ctc.m_T[i].x;
+    v = m_ctc.m_T[i].y;
+    w = m_ctc.m_T[i].z;
+    bool success = m_ctc.m_dim > 0? true : false;
 
-    if (success && u == x && v == y && ( m_cache.m_dim < 3 || w == z))
+    if (success && u == x && v == y && ( m_ctc.m_dim < 3 || w == z))
       return i;
 
   }
@@ -974,21 +911,30 @@ int BND_CachedTextureCoordinates::IndexOf(double x, double y, double z) const
   return -1;
   
 }
-*/
 
-BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(const ON_TextureCoordinates* tc)
+bool BND_CachedTextureCoordinates::Contains(double x, double y, double z) const
 {
-  m_ctc = tc;
+
+  int index = IndexOf(x, y, z);
+  return (index >= 0);
+
 }
 
-BND_CachedTextureCoordinates* BND_CachedTextureCoordinates::GetCachedTextureCoordinates(class BND_Mesh* mesh, BND_UUID mappingId)
+BND_CachedTextureCoordinates BND_Mesh::GetCachedTextureCoordinates( BND_UUID mappingId )
 {
-  const ON_Mesh* _mesh = ON_Mesh::Cast(mesh->GeometryPointer());
-  const ON_TextureCoordinates* tc = _mesh ? _mesh->CachedTextureCoordinates(Binding_to_ON_UUID(mappingId)) : nullptr;
-  if (tc)
-    return new BND_CachedTextureCoordinates(*tc);
-  return nullptr;
+  const ON_TextureCoordinates* tc = m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(mappingId) );
+  return BND_CachedTextureCoordinates(*tc);
 }
+
+void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf)
+{
+  if (tm)
+  {
+    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
+    m_mesh->SetCachedTextureCoordinates(*tm->m_mapping, xform, false);
+  }
+}
+
 
 
 #if defined(ON_PYTHON_COMPILE)
@@ -1100,13 +1046,12 @@ void initMeshBindings(pybind11::module& m)
 
   py::class_<BND_CachedTextureCoordinates>(m, "CachedTextureCoordinates")
     .def("__len__", &BND_CachedTextureCoordinates::Count)
-    .def_property_readonly("Count", &BND_CachedTextureCoordinates::Count)
-    //.def_property_readonly("Dim", &BND_CachedTextureCoordinates::Dim)
-    //.def_property_readonly("MappingId", &BND_CachedTextureCoordinates::MappingId)
-    //.def_property_readonly("IsReadOnly", &BND_CachedTextureCoordinates::IsReadOnly)
-    //.def("TryGetAt", &BND_CachedTextureCoordinates::TryGetAt)
-    //.def("IndexOf", &BND_CachedTextureCoordinates::IndexOf)
-    //.def("Contains", &BND_CachedTextureCoordinates::Contains)
+    .def_property_readonly("Dimension", &BND_CachedTextureCoordinates::Dim)
+    .def_property_readonly("MappingId", &BND_CachedTextureCoordinates::MappingId)
+    .def_property_readonly("IsReadOnly", &BND_CachedTextureCoordinates::IsReadOnly)
+    .def("TryGetAt", &BND_CachedTextureCoordinates::TryGetAt, py::arg("index"))
+    .def("IndexOf", &BND_CachedTextureCoordinates::IndexOf, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("Contains", &BND_CachedTextureCoordinates::Contains, py::arg("x"), py::arg("y"), py::arg("z"))
     ;
 
   py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
@@ -1122,15 +1067,14 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("Normals", &BND_Mesh::GetNormals)
     .def_property_readonly("VertexColors", &BND_Mesh::VertexColors)
     .def_property_readonly("TextureCoordinates", &BND_Mesh::TextureCoordinates)
-    //.def_property_readonly("CachedTextureCoordinates", &BND_Mesh::CachedTextureCoordinates)
     .def("ClearTextureData", &BND_Mesh::ClearTextureData)
     .def("ClearSurfaceData", &BND_Mesh::ClearSurfaceData)
     .def("DestroyTopology", &BND_Mesh::DestroyTopology)
     .def("DestroyTree", &BND_Mesh::DestroyTree)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
     .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
-    //.def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"))
-    //.def("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("id"))
+    .def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"))
+    .def("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("id"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -1247,6 +1191,16 @@ void initMeshBindings(void*)
     .function("get", &BND_MeshTextureCoordinateList::GetTextureCoordinate)
     .function("set", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
     .function("add", &BND_MeshTextureCoordinateList::Add)
+    ;
+
+  class_<BND_CachedTextureCoordinates>("CachedTextureCoordinates")
+    .property("count", &BND_CachedTextureCoordinates::Count)
+    .property("dimension", &BND_CachedTextureCoordinates::Dim)
+    .property("mappingId", &BND_CachedTextureCoordinates::MappingId)
+    .property("isReadOnly", &BND_CachedTextureCoordinates::IsReadOnly)
+    .function("tryGetAt", &BND_CachedTextureCoordinates::TryGetAt)
+    .function("indexOf", &BND_CachedTextureCoordinates::IndexOf)
+    .function("contains", &BND_CachedTextureCoordinates::Contains)
     ;
 
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
