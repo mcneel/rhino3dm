@@ -265,28 +265,32 @@ public:
   int Add(float s, float t);
 };
 
-class BND_CachedTextureCordinates : public BND_CommonObject
+class BND_CachedTextureCoordinates
 {
 public:
-  ON_Mesh::CachedTextureCoordinates* m_cache = nullptr;
+  ON_TextureCoordinates* m_ctc = nullptr;
 public:
-  BND_CachedTextureCordinates() = default;
-  BND_CachedTextureCordinates(ON_Mesh::CachedTextureCoordinates* cache) : m_cache(cache) {}
-  ~BND_CachedTextureCordinates() { delete m_cache; }
+  //BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
+  BND_CachedTextureCoordinates(const ON_TextureCoordinates* tc);
+
+  /* ... */
+
+  static BND_CachedTextureCoordinates* GetCachedTextureCoordinates(class BND_Mesh* mesh, BND_UUID mappingId);
+  //BND_CachedTextureCoordinates(const ON_TextureCoordinates& cache) : m_cache(cache) {}
 
   // properties
-  int Dim () const { return m_cache->m_dim; }
-  BND_UUID MappingId() const { return ON_UUID_to_Binding(m_cache->m_tag.m_mapping_id); }
-  int Count() const { return m_cache->m_T.Count(); }
+  int Count() const { return m_ctc->m_T.Count(); }
+  int Dim() const { return m_ctc->m_dim; }
+  //BND_UUID MappingId() const { return ON_UUID_to_Binding(m_mesh->m_TC.m_tag.m_mapping_id); }
   bool IsReadOnly() const { return true; }
 
   //methods
-  BND_TUPLE TryGetAt(int index) const;
+  //BND_TUPLE TryGetAt(int index) const;
+  //bool Contains(double x, double y, double z) const;
+  //int IndexOf(double x, double y, double z) const;
 
 
-  //TODO: Implement the rest of the methods
-
-);
+};
 
 class BND_Mesh : public BND_GeometryBase
 {
@@ -321,8 +325,8 @@ public:
   void DestroyPartition() { m_mesh->DestroyPartition(); }
   //public bool EvaluateMeshGeometry(Surface surface)
   void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
-  void SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf);
-  BND_CachedTextureCordinates& GetCachedTextureCoordinates(BND_UUID id) const;
+  //void SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf);
+  //BND_CachedTextureCoordinates GetCachedTextureCoordinates( BND_UUID id ) const;
   bool Compact() { return m_mesh->Compact(); }
   //void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation);
   //public int SolidOrientation()
