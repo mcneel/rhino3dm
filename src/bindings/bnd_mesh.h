@@ -270,14 +270,7 @@ class BND_CachedTextureCoordinates
 public:
   ON_TextureCoordinates m_ctc;
 public:
-  //BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref);
   BND_CachedTextureCoordinates(const ON_TextureCoordinates& tc);
-  
-
-  /* ... */
-
-  //static BND_CachedTextureCoordinates* GetCachedTextureCoordinates(class BND_Mesh* mesh, BND_UUID mappingId);
-  //BND_CachedTextureCoordinates(const ON_TextureCoordinates& cache) : m_cache(cache) {}
 
   // properties
   int Count() const { return m_ctc.m_T.Count(); }
@@ -289,7 +282,6 @@ public:
   BND_TUPLE TryGetAt(int index) const;
   bool Contains(double x, double y, double z) const;
   int IndexOf(double x, double y, double z) const;
-
 
 };
 
