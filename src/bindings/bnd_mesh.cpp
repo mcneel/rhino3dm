@@ -456,13 +456,6 @@ BND_MeshFaceList::BND_MeshFaceList(ON_Mesh* mesh, const ON_ModelComponentReferen
   m_mesh = mesh;
 }
 
-/*
-BND_CachedTextureCoordinates BND_Mesh::CachedTextureCoordinates()
-{
-  return BND_CachedTextureCoordinates(m_mesh, m_component_ref);
-}
-*/
-
 void BND_MeshVertexList::SetCount(int value)
 {
   ON_Mesh* pMesh = m_mesh;
@@ -836,6 +829,12 @@ void BND_MeshNormalList::SetNormal(int i, ON_3fVector v)
     throw pybind11::index_error();
 #endif
   m_mesh->m_N[i] = v;
+}
+
+BND_MeshTextureCoordinateList::BND_MeshTextureCoordinateList(ON_Mesh* mesh, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_mesh = mesh;
 }
 
 ON_2fPoint BND_MeshTextureCoordinateList::GetTextureCoordinate(int i) const
