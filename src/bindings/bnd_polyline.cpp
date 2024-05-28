@@ -7,6 +7,33 @@ BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
   m_polyline.Append(count, pts);
 }
 
+BND_Polyline* BND_Polyline::CreateFromPoints(const BND_Point3dList& points)
+{
+  int count = points.GetCount();
+  const ON_3dPoint* pts = points.m_polyline.Array();
+  BND_Polyline* rc = new BND_Polyline();
+  rc->m_polyline.Append(count, pts);
+  return rc;
+
+}
+
+#if defined(ON_PYTHON_COMPILE)
+
+BND_Polyline* BND_Polyline::CreateFromPoints2(pybind11::object points)
+{
+  BND_Point3dList pts;
+  for (auto item : points)
+  {
+    ON_3dPoint point = item.cast<ON_3dPoint>();
+    pts.Add(point.x, point.y, point.z);
+  }
+
+  return CreateFromPoints(pts);
+}
+
+#endif
+
+/*
 BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
@@ -15,6 +42,8 @@ BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& poin
   rc->m_polyline.Append(count, pts);
   return rc;
 }
+
+*/
 
 ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
@@ -201,6 +230,7 @@ void initPolylineBindings(pybind11::module& m)
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateStarPolygon", &BND_Polyline::CreateStarPolygon, py::arg("circle"), py::arg("radius"), py::arg("cornerCounts"))
+    .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
     ;
 }
 #endif
