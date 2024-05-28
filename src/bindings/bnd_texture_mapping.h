@@ -65,6 +65,9 @@ public:
   //public Transform NormalTransform | get; set;
   //public override ModelComponentType ComponentType
 
+  bool HasId() const { return m_mapping->IdIsSet(); }
+  BND_UUID Id() const { return ON_UUID_to_Binding(m_mapping->Id()); }
+
 
 protected:
   void SetTrackedPointer(ON_TextureMapping* mapping, const ON_ModelComponentReference* compref);
