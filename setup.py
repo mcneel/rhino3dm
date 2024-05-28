@@ -103,7 +103,7 @@ class CMakeBuild(build_ext):
 
             command = ['cmake', '-A', osplatform, f"{draco_src_dir}"]
             system(command, cwd=draco_static_dir)
-            system(["cmake", "--build" "." "--config", "Release"], cwd=draco_static_dir)
+            system(["cmake", "--build", ".", "--config", "Release"], cwd=draco_static_dir)
 
             command = ['cmake', '-A',
                         f"{osplatform}",
@@ -111,11 +111,11 @@ class CMakeBuild(build_ext):
                         ext.sourcedir+"/src"]
             system(command, cwd=build_temp_dir)
             if bitness == 64:
-                for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
-                    print(line.replace("WIN32;", "WIN64;"))
-                for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
-                    print(line.replace("WIN32;", "WIN64;"))
-                system(["cmake","--build","--config","Release","--target","_rhino3dm"], cwd=build_temp_dir)
+                _rhino3dmvcxproj = build_temp_dir / "_rhino3dm.vcxproj"
+                opennurbs_staticvcxproj = build_temp_dir / "opennurbs_static.vcxproj"
+                _rhino3dmvcxproj.write_text(_rhino3dmvcxproj.read_text().replace("WIN32;", "WIN64;"))
+                opennurbs_staticvcxproj.write_text(opennurbs_staticvcxproj.read_text().replace("WIN32;", "WIN64;"))
+                system(["cmake","--build",".", "--config","Release","--target","_rhino3dm"], cwd=build_temp_dir)
         else:
             # first build draco
             system(cmake_args + [f"{draco_src_dir}"], cwd=draco_static_dir)
