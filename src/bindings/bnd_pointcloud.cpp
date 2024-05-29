@@ -306,6 +306,52 @@ void BND_PointCloud::Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color,
   }
 }
 
+void BND_PointCloud::AddRangePoints(ON_3dPointArray points)
+{
+
+  m_pointcloud->m_P.Append(points.Count(), points);
+  ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
+  m_pointcloud->InvalidateBoundingBox();
+
+}
+
+#if defined(ON_PYTHON_COMPILE)
+
+void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
+{
+  const int count = points.size();
+  if (count > 0)
+  {
+    ON_3dPointArray pts(count);
+    for (int i = 0; i < count; i++)
+    {
+      pts.Append(points[i]);
+    }
+    AddRangePoints(pts);
+  }
+}
+
+#else
+
+void BND_PointCloud::AddRange1(BND_TUPLE points)
+{
+  const int count = points["length"].as<int>();
+  if (count > 0)
+  {
+    ON_3dPointArray pts(count)
+    for (int i = 0; i < count; i++)
+    {
+      ON_3dPoint point = points[i].as<ON_3dPoint>();
+      pts.Append(point);
+    }
+    AddRangePoints(pts);
+  }
+}
+
+#endif
+
+
+/*
 // DO NOT USE FOR PYTHON
 void BND_PointCloud::AddRange(BND_TUPLE points)
 {
@@ -346,7 +392,7 @@ void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
     m_pointcloud->InvalidateBoundingBox();
   }
 }
-
+*/
 void BND_PointCloud::AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals)
 {
   if (points.size() != normals.size())
@@ -856,7 +902,7 @@ void initPointCloudBindings(void*)
     .function("addPointValue", &BND_PointCloud::Add5)
     .function("addPointNormalColorValue", &BND_PointCloud::Add6)
 
-    .function("addRange", &BND_PointCloud::AddRange)
+    .function("addRange", &BND_PointCloud::AddRange1)
 
 /* We do not support arrays of Vector3d or BND_Color in WASM
 
