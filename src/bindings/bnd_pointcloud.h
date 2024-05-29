@@ -2,8 +2,16 @@
 
 #pragma once
 
+
+#if defined(ON_PYTHON_COMPILE)
+ON_3dPointArray STDVECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points);
+ON_SimpleArray<ON_3dVector> STDVECTOR_to_ON_SimpleArrayVector(const std::vector<ON_3dVector>& vectors);
+ON_SimpleArray<ON_Color> STDVECTOR_to_ON_SimpleArrayColor(const std::vector<ON_Color>& colors);
+#else
 ON_3dPointArray BND_TUPLE_to_ON_3dPointArray(BND_TUPLE points);
-ON_3dPointArray VECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points);
+ON_SimpleArray<ON_3dVector> BND_TUPLE_to_ON_SimpleArrayVector(BND_TUPLE vectors);
+ON_SimpleArray<ON_Color> BND_TUPLE_to_ON_SimpleArrayColor(BND_TUPLE colors);
+#endif
 
 #if defined(ON_PYTHON_COMPILE)
 void initPointCloudBindings(pybind11::module& m);
@@ -84,6 +92,12 @@ public:
   void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
 
   void AddRangePoints(ON_3dPointArray points);
+  void AddRangePointsNormals(ON_3dPointArray points, ON_SimpleArray<ON_3dVector> normals);
+  void AddRangePointsColors(ON_3dPointArray points, ON_SimpleArray<ON_Color> colors);
+  void AddRangePointsNormalsColors(ON_3dPointArray points, ON_SimpleArray<ON_3dVector> normals, ON_SimpleArray<ON_Color> colors);
+  void AddRangePointsValues(ON_3dPointArray points, ON_SimpleArray<double> values);
+  void AddRangePointsNormalsColorsValues(ON_3dPointArray points, ON_SimpleArray<ON_3dVector> normals, ON_SimpleArray<ON_Color> colors, ON_SimpleArray<double> values);
+  void InsertRangePoints(int index, ON_3dPointArray points);
 
 #if defined(ON_WASM_COMPILE)
   void AddRange1(BND_TUPLE points);

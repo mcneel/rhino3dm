@@ -1,6 +1,32 @@
 #include "bindings.h"
 
 
+#if defined(ON_PYTHON_COMPILE)
+ON_3dPointArray STDVECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points)
+{
+  int count = (int)points.size();
+  ON_3dPointArray rc(count);
+  for (int i = 0; i < count; i++)
+  {
+    rc.Append(points[i]);
+  }
+  return rc;
+}
+
+#else
+ON_3dPointArray BND_TUPLE_to_ON_3dPointArray(BND_TUPLE points)
+{
+  int count = points["length"].as<int>();
+  ON_3dPointArray rc(count);
+  for (int i = 0; i < count; i++)
+  {
+    ON_3dPoint point = points[i].as<ON_3dPoint>();
+    rc.Append(point);
+  }
+  return rc;
+}
+#endif
+
 static void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureValues)
 {
   if (pPointCloud)
@@ -319,16 +345,8 @@ void BND_PointCloud::AddRangePoints(ON_3dPointArray points)
 
 void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
 {
-  const int count = points.size();
-  if (count > 0)
-  {
-    ON_3dPointArray pts(count);
-    for (int i = 0; i < count; i++)
-    {
-      pts.Append(points[i]);
-    }
-    AddRangePoints(pts);
-  }
+  ON_3dPointArray pts( STDVECTOR_to_ON_3dPointArray(points) );
+  AddRangePoints( pts );
 }
 
 #else
