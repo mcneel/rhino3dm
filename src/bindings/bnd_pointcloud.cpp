@@ -356,7 +356,7 @@ void BND_PointCloud::AddRange1(BND_TUPLE points)
   const int count = points["length"].as<int>();
   if (count > 0)
   {
-    ON_3dPointArray pts(count)
+    ON_3dPointArray pts(count);
     for (int i = 0; i < count; i++)
     {
       ON_3dPoint point = points[i].as<ON_3dPoint>();
@@ -410,7 +410,7 @@ void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
     m_pointcloud->InvalidateBoundingBox();
   }
 }
-*/
+
 void BND_PointCloud::AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals)
 {
   if (points.size() != normals.size())
@@ -504,6 +504,7 @@ void BND_PointCloud::AddRange6(const std::vector<ON_3dPoint>& points, const std:
     m_pointcloud->InvalidateBoundingBox();
   }
 }
+*/
 
 void BND_PointCloud::Insert1(int index, const ON_3dPoint& point)
 {
@@ -593,7 +594,7 @@ void BND_PointCloud::Insert6(int index, const ON_3dPoint& point, const ON_3dVect
     }
   }
 }
-
+/*
 void BND_PointCloud::InsertRange(int index, const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
@@ -634,7 +635,7 @@ void BND_PointCloud::InsertRange(int index, const std::vector<ON_3dPoint>& point
     m_pointcloud->InvalidateBoundingBox();
   }
 }
-
+*/
 void BND_PointCloud::RemoveAt(int index)
 {
   if (index >= 0 && index < m_pointcloud->m_P.Count())
