@@ -76,5 +76,12 @@ public:
   static BND_Polyline* CreateInscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateCircumscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateStarPolygon(class BND_Circle& circle, double radius, int cornerCount);
-  static BND_Polyline* CreateFromPoints(const std::vector<ON_3dPoint>& points);
+  static BND_Polyline* CreateFromPoints(const class BND_Point3dList& points);
+#if defined(ON_PYTHON_COMPILE)
+  static BND_Polyline* CreateFromPoints2(pybind11::object points);
+#endif
+
+  
+
+  //const std::vector<ON_3dPoint>& points
 };
