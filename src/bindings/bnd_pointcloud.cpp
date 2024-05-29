@@ -654,6 +654,11 @@ int BND_PointCloud::ClosestPoint(const ON_3dPoint& testPoint)
   return -1;
 }
 
+int BND_PointCloud::Dummy(const std::vector<BND_Color>& colors) const
+{
+  return (int)colors.size();
+}
+
 #if defined(ON_WASM_COMPILE)
 
 
@@ -847,6 +852,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
+    .function("dummy", &BND_PointCloud::Dummy)
     ;
 }
 #endif

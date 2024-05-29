@@ -92,6 +92,9 @@ public:
   void Insert5(int index, const ON_3dPoint& point, const double& value);
   void Insert6(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color, const double& value);
   void InsertRange(int index, const std::vector<ON_3dPoint>& points);
+
+  int Dummy(const std::vector<BND_Color>& colors) const;
+  
   void RemoveAt(int index);
   BND_TUPLE GetPoints() const;
   ON_3dPoint PointAt(int index) const;
