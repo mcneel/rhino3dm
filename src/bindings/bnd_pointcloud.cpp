@@ -306,6 +306,35 @@ void BND_PointCloud::Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color,
   }
 }
 
+// DO NOT USE FOR PYTHON
+void BND_PointCloud::AddRange(BND_TUPLE points)
+{
+
+#if defined(ON_PYTHON_COMPILE)
+  const int count = points.size();
+#else
+  const int count = points["length"].as<int>();
+#endif
+
+  if (count > 0)
+  {
+    for ( int i = 0; i < count; i ++ ) 
+    {
+
+      #if defined(ON_PYTHON_COMPILE)
+        ON_3dPoint point = points[i].cast<ON_3dPoint>();
+      #else
+        ON_3dPoint point = points[i].as<ON_3dPoint>();
+      #endif
+
+      m_pointcloud->m_P.Append(point);
+
+    }
+    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
+    m_pointcloud->InvalidateBoundingBox();
+  }
+}
+
 void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
@@ -654,11 +683,6 @@ int BND_PointCloud::ClosestPoint(const ON_3dPoint& testPoint)
   return -1;
 }
 
-int BND_PointCloud::Dummy(const std::vector<BND_Color>& colors) const
-{
-  return (int)colors.size();
-}
-
 #if defined(ON_WASM_COMPILE)
 
 
@@ -831,19 +855,26 @@ void initPointCloudBindings(void*)
     .function("addPointNormalColor", &BND_PointCloud::Add4)
     .function("addPointValue", &BND_PointCloud::Add5)
     .function("addPointNormalColorValue", &BND_PointCloud::Add6)
-    .function("addRange", &BND_PointCloud::AddRange1)
+
+    .function("addRange", &BND_PointCloud::AddRange)
+
+/* We do not support arrays of Vector3d or BND_Color in WASM
+
     .function("addRangePointNormal", &BND_PointCloud::AddRange2)
     .function("addRangePointColor", &BND_PointCloud::AddRange3)
     .function("addRangePointNormalColor", &BND_PointCloud::AddRange4)
     .function("addRangePointValue", &BND_PointCloud::AddRange5)
     .function("addRangePointNormalColorValue", &BND_PointCloud::AddRange6)
+*/
     .function("insert", &BND_PointCloud::Insert1)
     .function("insertPointNormal", &BND_PointCloud::Insert2)
     .function("insertPointColor", &BND_PointCloud::Insert3)
     .function("insertPointNormalColor", &BND_PointCloud::Insert4)
     .function("insertPointValue", &BND_PointCloud::Insert5)
     .function("insertPointNormalColorValue", &BND_PointCloud::Insert6)
-    .function("insertRange", &BND_PointCloud::InsertRange)
+
+    //.function("insertRange", &BND_PointCloud::InsertRange)
+
     .function("removeAt", &BND_PointCloud::RemoveAt)
     .function("getPoints", &BND_PointCloud::GetPoints)
     .function("pointAt", &BND_PointCloud::PointAt)
@@ -852,7 +883,6 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
-    .function("dummy", &BND_PointCloud::Dummy)
     ;
 }
 #endif

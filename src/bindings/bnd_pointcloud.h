@@ -79,6 +79,7 @@ public:
   void Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color);
   void Add5(ON_3dPoint point, double value);
   void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
+  void AddRange(BND_TUPLE points); //for js
   void AddRange1(const std::vector<ON_3dPoint>& points);
   void AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
   void AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
@@ -92,9 +93,8 @@ public:
   void Insert5(int index, const ON_3dPoint& point, const double& value);
   void Insert6(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color, const double& value);
   void InsertRange(int index, const std::vector<ON_3dPoint>& points);
+  //void InsertRange2(int index, const class BND_Point3dList& points); //for js
 
-  int Dummy(const std::vector<BND_Color>& colors) const;
-  
   void RemoveAt(int index);
   BND_TUPLE GetPoints() const;
   ON_3dPoint PointAt(int index) const;
