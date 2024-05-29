@@ -409,7 +409,7 @@ void initPointBindings(void*)
   class_<BND_Point3d>("Point3d")
     .class_function("transform", &BND_Point3d::Transform);
 
-  register_vector<ON_3dPoint>("Point3dArray");
+  register_vector<Point3dSimple>("Point3dArray");
 
   value_array<ON_4dPoint>("Point4dSimple")
     .element(&ON_4dPoint::x)
