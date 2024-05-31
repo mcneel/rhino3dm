@@ -230,7 +230,7 @@ void initPolylineBindings(pybind11::module& m)
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateStarPolygon", &BND_Polyline::CreateStarPolygon, py::arg("circle"), py::arg("radius"), py::arg("cornerCounts"))
-    .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
+    .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints, py::arg("points"))
     ;
 }
 #endif
