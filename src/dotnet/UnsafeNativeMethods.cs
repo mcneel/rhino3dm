@@ -582,7 +582,10 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetOnRenderImageEventCallback(Rhino.Render.ImageFile.OnRenderImageCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCallback);
-
+  
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRdkCmnEventWatcher_SetOnPreviewRenderedEventCallback(Rhino.Render.RenderContent.OnPreviewRenderedCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCallback);
+  
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRdkCmnEventWatcher_SetOnRenderWindowClonedEventCallback(Rhino.Render.RenderWindow.ClonedEventCallback cb, Rhino.Runtime.HostUtils.RdkReportCallback reportCallback);
 

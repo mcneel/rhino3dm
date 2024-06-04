@@ -84,7 +84,7 @@ namespace Rhino.Render
     {
       if (g_changed_event_handler == null) return;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-      g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
+      g_changed_event_handler.SafeInvoke(null, new RenderPropertyChangedEvent(doc, 0x0010));
     }
 
     internal delegate void RdkSafeFrameChangedCallback(uint docSerialNumber);

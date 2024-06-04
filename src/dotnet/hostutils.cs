@@ -1435,27 +1435,27 @@ namespace Rhino.Runtime
       return System.Reflection.Assembly.LoadFrom(path);
 #else
       string fullPath = Path.GetFullPath(path);
-      
+
       if (!s_loadFromHandlerSet)
       {
-          lock (s_loadFromAssemblyList)
+        lock (s_loadFromAssemblyList)
+        {
+          if (!s_loadFromHandlerSet)
           {
-              if (!s_loadFromHandlerSet)
-              {
-                  AppDomain.CurrentDomain.AssemblyResolve += LoadFromResolveHandler;
-                  s_loadFromHandlerSet = true;
-              }
+            AppDomain.CurrentDomain.AssemblyResolve += LoadFromResolveHandler;
+            s_loadFromHandlerSet = true;
           }
+        }
       }
 
       // Add the path to the LoadFrom path list which we will consult
       // before handling the resolves in our handler.
       lock (s_loadFromAssemblyList)
       {
-          if (!s_loadFromAssemblyList.Contains(fullPath))
-          {
-              s_loadFromAssemblyList.Add(fullPath);
-          }
+        if (!s_loadFromAssemblyList.Contains(fullPath))
+        {
+          s_loadFromAssemblyList.Add(fullPath);
+        }
       }
 
       // LoadFromAssemblyPath can generate an error so let's check for previous errors here.
@@ -1477,7 +1477,7 @@ namespace Rhino.Runtime
       return assembly;
 #endif
     }
-    
+
     /// <summary>
     /// Gets the Rhino system managed assembly directory.
     /// </summary>
@@ -1497,7 +1497,7 @@ namespace Rhino.Runtime
         return location;
       }
     }
-    
+
 #if NET
     // Modified from https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Reflection/Assembly.cs
 
@@ -1511,7 +1511,7 @@ namespace Rhino.Runtime
       Assembly requestingAssembly = args.RequestingAssembly;
       if (requestingAssembly == null)
         return null;
-        
+
       // Requesting assembly for LoadFrom is always loaded in defaultContext - proceed only if that
       // is the case.
       if (RhinoLoadContext != AssemblyLoadContext.GetLoadContext(requestingAssembly))
@@ -1546,7 +1546,7 @@ namespace Rhino.Runtime
       string requestedAssemblyPath = Path.Combine(Path.GetDirectoryName(requestorPath)!, requestedAssemblyName.Name + ".dll");
       if (!File.Exists(requestedAssemblyPath))
         return null;
-        
+
       // Load the dependency via LoadFrom so that it goes through the same path of being in the LoadFrom list.
       return LoadAssemblyFrom(requestedAssemblyPath);
     }
@@ -1556,7 +1556,7 @@ namespace Rhino.Runtime
     internal static void DeleteObjectsOnMainThread(object sender, Rhino.Commands.CommandEventArgs e)
     {
       IDisposable item;
-      while(g_objectsToDisposeOnMainThread.TryTake(out item))
+      while (g_objectsToDisposeOnMainThread.TryTake(out item))
       {
         if (item != null)
           item.Dispose();
@@ -1702,7 +1702,7 @@ namespace Rhino.Runtime
     /// <since>8.0</since>
     public static string[] GetPrinterNames()
     {
-      using(var names = new InteropWrappers.ClassArrayString())
+      using (var names = new InteropWrappers.ClassArrayString())
       {
         IntPtr ptrNames = names.NonConstPointer();
         UnsafeNativeMethods.RHC_GetPrinterNames(ptrNames);
@@ -1790,7 +1790,7 @@ namespace Rhino.Runtime
     /// <typeparam name="T">The type of the service to be instantiated.</typeparam>
     /// <returns>An instance, or null.</returns>
     /// <since>6.0</since>
-    public static T GetPlatformService<T>(string assemblyPath=null, string typeFullName=null) where T : class
+    public static T GetPlatformService<T>(string assemblyPath = null, string typeFullName = null) where T : class
     {
       if (string.IsNullOrEmpty(assemblyPath))
       {
@@ -1903,7 +1903,7 @@ namespace Rhino.Runtime
       {
         string _name = StringWrapper.GetStringFromPointer(name);
         EventHandler<NamedParametersEventArgs> callback = null;
-        if( _namedCallbacks.TryGetValue(_name, out callback) && callback != null)
+        if (_namedCallbacks.TryGetValue(_name, out callback) && callback != null)
         {
           using (var e = new NamedParametersEventArgs(ptrNamedParams))
           {
@@ -1913,18 +1913,18 @@ namespace Rhino.Runtime
           return 1;
         }
       }
-      catch(NotLicensedException nle)
+      catch (NotLicensedException nle)
       {
         throw nle;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         ExceptionReport(ex);
       }
       return 0;
     }
 
-    static List<Tuple<string,Type>> _customComputeEndPoints;
+    static List<Tuple<string, Type>> _customComputeEndPoints;
     /// <summary>
     /// Register a class that can participate as a compute endpoint
     /// </summary>
@@ -1955,8 +1955,6 @@ namespace Rhino.Runtime
         return _customComputeEndPoints.ToArray();
       return new Tuple<string, Type>[0];
     }
-
-
 #endif
 
     /// <summary>
@@ -2650,6 +2648,39 @@ namespace Rhino.Runtime
       return !string.IsNullOrEmpty(fileName) && IsRhinoBackupFileExtension(System.IO.Path.GetExtension(fileName));
     }
 #endif
+
+    #region Events
+    /// <summary>
+    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// </summary>
+    /// <param name="handler">Event handler</param>
+    /// <param name="sender">Event sender</param>
+    /// <remarks>All handlers will be called even one of it throws an exception.</remarks>
+    internal static void SafeInvoke(this EventHandler handler, object sender = null)
+    {
+      foreach (var h in handler.GetInvocationList())
+      {
+        try { h.DynamicInvoke(sender, EventArgs.Empty); }
+        catch (Exception ex) { ExceptionReport(ex.InnerException ?? ex); }
+      }
+    }
+
+    /// <summary>
+    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// </summary>
+    /// <param name="handler">Event handler</param>
+    /// <param name="sender">Event sender</param>
+    /// <param name="args">Event arguments</param>
+    /// <remarks>All handlers will be called even one of it throws an exception.</remarks>
+    internal static void SafeInvoke<TEventArgs>(this EventHandler<TEventArgs> handler, object sender, TEventArgs args)
+    {
+      foreach (var h in handler.GetInvocationList())
+      {
+        try { h.DynamicInvoke(sender, args); }
+        catch (Exception ex) { ExceptionReport(ex.InnerException ?? ex); }
+      }
+    }
+    #endregion
 
     static bool m_bSendDebugToRhino; // = false; initialized by runtime
     /// <summary>
@@ -3940,7 +3971,18 @@ namespace Rhino.Runtime
 
       // on macOS, we include the exception info in the standard crash reporter so we don't need a file on the desktop.
       if (!RunningOnOSX)
+      {
         WriteException(title, sender, ex);
+
+        // Curtis RH-81806:
+        // Commenting out for now as it causes crashes on some machines
+        //if (RunningInNetCore && m_uiThreadId != System.Threading.Thread.CurrentThread.ManagedThreadId)
+        //{
+        //  // With .NET Core, the native crash handler doesn't get called when we get an exception in a non-UI thread
+        //  // so call this manually.
+        //  RHC_ShowCrashReporter();
+        //}
+      }
 
       if (ex == null)
         return;

@@ -2539,7 +2539,7 @@ namespace Rhino.Geometry
     /// CreatePlanarIntersection
     /// </summary>
     /// <param name="b0">The first brep to intersect.</param>
-    /// <param name="b1">The first brep to intersect.</param>
+    /// <param name="b1">The second brep to intersect.</param>
     /// <param name="plane">The plane in which all the input breps lie</param>
     /// <param name="tolerance">Tolerance to use for intersection operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
@@ -3155,6 +3155,7 @@ namespace Rhino.Geometry
         return 0 == count ? new Mesh[0] : outmeshes.ToNonConstArray();
       }
     }
+
 #endif
     #endregion
 
@@ -4356,6 +4357,38 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.ON_Brep_Volume(const_ptr_this, relativeTolerance, absoluteTolerance);
     }
+
+    /// <summary>
+    /// Individually insets faces of a brep by offsetting the faces outer edges inward and inner edges out then splitting the face with the offset curves.
+    /// </summary>
+    /// <param name="faceIndices">the indices of the faces to inset</param>
+    /// <param name="distance">The distance to offset along the face</param>
+    /// <param name="loose">If true, offset by moving edit points otherwise offset within tolerance.</param>
+    /// <param name="ignoreSeams">If true, the seam edges are not offset and adjacent edges are extended to meet the seam. Otherwise offset normally.</param>
+    /// <param name="creaseCorners">If true, splitting curves will be made between the creases on edge curves and creases on the inset curves.</param>
+    /// <param name="tolerance">The fitting tolerance for the offset. When in doubt, use the document's absolute tolerance.</param>
+    /// <param name="angleTolerance">The angle tolerance in radians for identifying creases when creasing corners.  When in doubt, use the document's angle tolerance.</param>
+    /// <returns>The brep with inset faces on success. Null on error.</returns>
+    [ConstOperation]
+    public Brep InsetFaces(IEnumerable<int> faceIndices, double distance, bool loose, bool ignoreSeams, bool creaseCorners, double tolerance, double angleTolerance)
+    {
+      if (faceIndices == null || faceIndices.Count() == 0)
+      {
+        return null;
+      }
+
+      IntPtr ptr_brep = ConstPointer();
+
+      IntPtr ptr_newbrep = IntPtr.Zero;
+
+      using (var faces = new SimpleArrayInt(faceIndices))
+      {
+        ptr_newbrep = UnsafeNativeMethods.RHC_RhinoInsetBrepFaces(ptr_brep, faces.ConstPointer(), distance, loose, ignoreSeams, creaseCorners, tolerance, angleTolerance);
+      }
+
+      return ptr_newbrep != IntPtr.Zero ? new Brep(ptr_newbrep, null) : null;
+    }
+
 #endif
     /// <summary>
     /// Add a 2d curve used by the brep trims

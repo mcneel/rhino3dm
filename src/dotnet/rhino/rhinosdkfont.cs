@@ -389,6 +389,29 @@ namespace Rhino.DocObjects
         }
       }
     }
+
+    /// <summary>Is this font installed on the system</summary>
+    public bool IsInstalled
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_Font_IsInstalledFont(constPtrThis);
+      }
+    }
+
+    /// <summary>
+    /// If this font is not installed on the system, try to find a substitute
+    /// </summary>
+    /// <returns></returns>
+    public Font GetSubstituteFont()
+    {
+      IntPtr constPtrThis = ConstPointer();
+      IntPtr constPtrSubstitute = UnsafeNativeMethods.ON_Font_GetSubstituteFont(constPtrThis);
+      if (constPtrSubstitute != IntPtr.Zero)
+        return new Font(constPtrSubstitute);
+      return null;
+    }
   }
 }
 #if RHINO_SDK

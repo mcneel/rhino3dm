@@ -2269,6 +2269,9 @@ namespace Rhino.DocObjects
 
       uint f = (uint)flags;
 
+      if (Document is object)
+        f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
+
       if (vp == null)
         vp = new ViewportInfo();
 
