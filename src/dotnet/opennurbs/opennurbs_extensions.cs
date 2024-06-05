@@ -1664,6 +1664,22 @@ namespace Rhino.FileIO
       return rc;
     }
 
+    /// <summary>
+    /// Gets the texture mapping from the <see cref="File3dmObject"/> object.
+    /// </summary>
+    /// <param name="mappingChannelId">The mapping channel id to search for.</param>
+    /// <param name="xform">The transformation that was applied to the mapping.</param>
+    /// <returns>The texture mapping if found, null otherwise.</returns>
+    public Rhino.Render.TextureMapping GetTextureMapping(int mappingChannelId, out Transform xform)
+    {
+      IntPtr const_ptr_model = m_parent.ConstPointer();
+      IntPtr const_ptr_object = GetGeometryConstPointer();
+      Transform xformOut = new Transform();
+      IntPtr ptr_mapping = UnsafeNativeMethods.ON_TextureMapping_GetMappingFromONXModelObject(const_ptr_model, m_id, mappingChannelId, ref xformOut);
+      xform = xformOut;
+      return ptr_mapping == IntPtr.Zero ? null : new Rhino.Render.TextureMapping(ptr_mapping);
+    }
+
   }
 
   /// <summary>
