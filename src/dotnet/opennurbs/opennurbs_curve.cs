@@ -715,7 +715,8 @@ namespace Rhino.Geometry
     /// Interpolates a sequence of points. Used by InterpCurve Command
     /// This routine works best when degree=3.
     /// </summary>
-    /// <param name="degree">The degree of the curve >=1.  Degree must be odd.</param>
+    /// <param name="degree">The degree of the curve >=1. Note: Even degree > 3 periodic interpolation
+    /// results in a non-periodic closed curve.</param>
     /// <param name="points">
     /// Points to interpolate. For periodic curves if the final point is a
     /// duplicate of the initial point it is  ignored. (Count must be >=2)
@@ -733,7 +734,8 @@ namespace Rhino.Geometry
     /// Interpolates a sequence of points. Used by InterpCurve Command
     /// This routine works best when degree=3.
     /// </summary>
-    /// <param name="degree">The degree of the curve >=1.  Degree must be odd.</param>
+    /// <param name="degree">The degree of the curve >=1. Note: Even degree > 3 periodic interpolation
+    /// results in a non-periodic closed curve.</param>
     /// <param name="points">
     /// Points to interpolate. For periodic curves if the final point is a
     /// duplicate of the initial point it is  ignored. (Count must be >=2)
@@ -2162,13 +2164,35 @@ namespace Rhino.Geometry
     /// An array of all the segments that make up this curve.
     /// </returns>
     /// <since>5.0</since>
+    /// <remarks>
+    /// Unlike <seealso cref="GetSubCurves"/>, this method produces results based on the curve's data structure.
+    /// </remarks>
     public Curve[] DuplicateSegments()
     {
       IntPtr ptr = ConstPointer();
       SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
       IntPtr outputPtr = output.NonConstPointer();
-
       int rc = UnsafeNativeMethods.RHC_RhinoDuplicateCurveSegments(ptr, outputPtr);
+      return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+    }
+
+    /// <summary>
+    /// Gets subcurves from a curve. 
+    /// The results will be similar to what is produced by Rhino's Explode command.
+    /// </summary>
+    /// <returns>
+    /// An array of subcurves that make up this curve.
+    /// </returns>
+    /// <since>8.0</since>
+    /// <remarks>
+    /// Unlike <seealso cref="DuplicateSegments"/>, this method produces results based on the curve's geometry.
+    /// </remarks>
+    public Curve[] GetSubCurves()
+    {
+      IntPtr ptr = ConstPointer();
+      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
+      IntPtr outputPtr = output.NonConstPointer();
+      int rc = UnsafeNativeMethods.RHC_RhinoGetSubCurves(ptr, outputPtr);
       return rc < 1 ? new Curve[0] : output.ToNonConstArray();
     }
 

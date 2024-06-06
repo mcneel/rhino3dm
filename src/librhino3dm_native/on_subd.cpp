@@ -149,6 +149,12 @@ RH_C_FUNCTION bool ON_SubD_LocalSubdivide(ON_SubD* subd, const ON_SimpleArray<ON
   return rc;
 }
 
+RH_C_FUNCTION bool ON_SubD_Flip(ON_SubD* ptrSubD) {
+  if (ptrSubD)
+    return ptrSubD->ReverseOrientation();
+  return false;
+}
+
 
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ON_SubD_InterpolateSurfacePoints(ON_SubD* subd, int count, /*ARRAY*/const ON_3dPoint* points)
@@ -377,10 +383,18 @@ RH_C_FUNCTION void ON_SubD_SetEdgeTags(ON_SubD* pSubD, const ON_SubDEdgeTag tag,
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 
-RH_C_FUNCTION void ON_SubD_UpdateSurfaceMeshCache(ON_SubD* ptrSubD)
+RH_C_FUNCTION unsigned int ON_SubD_UpdateSurfaceMeshCache(ON_SubD* ptrSubD, bool bLazyUpdate=true)
 {
   if (ptrSubD)
-    ptrSubD->UpdateSurfaceMeshCache(true);
+    return ptrSubD->UpdateSurfaceMeshCache(bLazyUpdate);
+  return 0U;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_ConstUpdateSurfaceMeshCache(const ON_SubD* constSubdPtr, bool bLazyUpdate=true)
+{
+  if (constSubdPtr)
+    return const_cast<ON_SubD*>(constSubdPtr)->UpdateSurfaceMeshCache(bLazyUpdate);
+  return 0U;
 }
 
 RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, unsigned int mesh_density )
@@ -406,6 +420,20 @@ RH_C_FUNCTION void ON_SubD_ClearEvaluationCache(const ON_SubD* constSubdPtr)
 {
   if (constSubdPtr)
     constSubdPtr->ClearEvaluationCache();
+}
+
+RH_C_FUNCTION bool ON_SubD_CopyEvaluationCache(ON_SubD* ptrSubD, const ON_SubD* src)
+{
+  if (ptrSubD && src)
+    return ptrSubD->CopyEvaluationCacheForExperts(*src);
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubD_ConstCopyEvaluationCache(const ON_SubD* constSubdPtr, const ON_SubD* src)
+{
+  if (constSubdPtr && src)
+    return const_cast<ON_SubD*>(constSubdPtr)->CopyEvaluationCacheForExperts(*src);
+  return false;
 }
 
 RH_C_FUNCTION ON_SubDFace* ON_SubD_AddFace(ON_SubD* pSubD, unsigned int edgeCount, /*ARRAY*/ON_SubDEdge** subDEdgePtrPtr, /*ARRAY*/const bool* subDEdgeDir, unsigned int* id)
@@ -943,10 +971,37 @@ RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag(ON_SubDEdge* edgePtr, const ON_SubDEdg
 RH_C_FUNCTION ON_NurbsCurve* ON_SubDEdge_LimitCurve(const ON_SubDEdge* constEdge, bool clamped)
 {
   if (constEdge)
-    return constEdge->EdgeSurfaceCurve(clamped, nullptr);
+    return constEdge->EdgeSurfaceCurve(clamped);
   return nullptr;
 }
 
+RH_C_FUNCTION void ON_SubD_DuplicateEdgeCurves(ON_SubD* pSubD, ON_SimpleArray<ON_Curve*>* pOutCurves, bool boundaryOnly, bool interiorOnly, bool smoothOnly, bool sharpOnly, bool creaseOnly, bool clampEnds)
+{
+  RHCHECK_LICENSE
+  if (nullptr == pSubD || nullptr == pOutCurves) return;
+  if (pSubD->EdgeCount() <= 0) return;
+  if (boundaryOnly && interiorOnly) return;
+  if (smoothOnly && sharpOnly && creaseOnly) return;
+
+  pSubD->UpdateSurfaceMeshCache(true);
+
+  ON_SubDEdgeIterator eit{pSubD->EdgeIterator()};
+  for (const ON_SubDEdge* eptr = eit.FirstEdge(); eptr != nullptr; eptr = eit.NextEdge())
+  {
+    if (boundaryOnly && !eptr->HasBoundaryEdgeTopology()) continue;
+    if (interiorOnly && !eptr->HasInteriorEdgeTopology(false)) continue;
+    if (smoothOnly && !eptr->IsSmoothNotSharp()) continue;
+    if (sharpOnly && !eptr->IsSharp()) continue;
+    if (creaseOnly && !eptr->IsCrease()) continue;
+
+    eptr->EdgeSurfaceCurve(clampEnds, &pOutCurves->AppendNew());
+  }
+}
+
+RH_C_FUNCTION void ON_SubD_ConstDuplicateEdgeCurves(const ON_SubD* pSubD, ON_SimpleArray<ON_Curve*>* pOutCurves, bool boundaryOnly, bool interiorOnly, bool smoothOnly, bool sharpOnly, bool creaseOnly, bool clampEnds)
+{
+  return ON_SubD_DuplicateEdgeCurves(const_cast<ON_SubD*>(pSubD), pOutCurves, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
+}
 #endif
 
 ///////////////////// ON_SubDFace

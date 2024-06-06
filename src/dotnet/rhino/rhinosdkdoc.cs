@@ -624,7 +624,28 @@ namespace Rhino
     /// <since>7.0</since>
     public bool SaveAs(string file3dmPath, int version)
     {
-      return SaveAs(file3dmPath, version, true, true, true, true);
+      // This line checks filePath is a valid path, well formatted, not too long...
+      var info = new System.IO.FileInfo(file3dmPath);
+
+      if (!string.Equals(info.Extension, ".3DM", StringComparison.OrdinalIgnoreCase))
+        throw new ArgumentException("Destination file path should have a 3DM extension", nameof(file3dmPath));
+
+      using
+      (
+        var options = new FileWriteOptions()
+        {
+          UpdateDocumentPath = true,
+          SuppressAllInput = true,
+          SuppressDialogBoxes = true,
+          WriteSelectedObjectsOnly = false,
+          FileVersion = version
+          /* Using default values for the rest of the options. */
+        }
+      )
+      {
+        IntPtr const_ptr_options = options.ConstPointer(true);
+        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, file3dmPath, const_ptr_options);
+      }
     }
 
 
@@ -644,8 +665,8 @@ namespace Rhino
       // This line checks filePath is a valid path, well formatted, not too long...
       var info = new System.IO.FileInfo(file3dmPath);
 
-      if (string.Compare(info.Extension, ".3DM", true) != 0)
-        throw new ArgumentException("Destination file path should have a 3DM extension", "file3DMPath");
+      if (!string.Equals(info.Extension, ".3DM", StringComparison.OrdinalIgnoreCase))
+        throw new ArgumentException("Destination file path should have a 3DM extension", nameof(file3dmPath));
 
       using
       (
@@ -2659,59 +2680,19 @@ namespace Rhino
     private static DocumentCallback g_on_document_properties_changed;
     private static void OnCloseDocument(uint docSerialNumber)
     {
-      if (m_close_document != null)
-      {
-        try
-        {
-          m_close_document(null, new DocumentEventArgs(docSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_close_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
     private static void OnNewDocument(uint docSerialNumber)
     {
-      if (m_new_document != null)
-      {
-        try
-        {
-          m_new_document(null, new DocumentEventArgs(docSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_new_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
     private static void OnSetActiveDocument(uint docSerialNumber)
     {
-      if (g_set_active_document != null)
-      {
-        try
-        {
-          g_set_active_document(null, new DocumentEventArgs(docSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      g_set_active_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
     private static void OnDocumentPropertiesChanged(uint docSerialNumber)
     {
-      if (m_document_properties_changed != null)
-      {
-        try
-        {
-          m_document_properties_changed(null, new DocumentEventArgs(docSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_document_properties_changed?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
 
     // https://mcneel.myjetbrains.com/youtrack/issue/RH-68860
@@ -2719,90 +2700,30 @@ namespace Rhino
     private static UnitsChangedWithScalingCallback g_on_units_changed_with_scaling_callback;
     private static void OnUnitChangedWithScaling(uint docSerialNumber, double scale)
     {
-      if (m_units_changed_with_scaling != null)
-      {
-        try
-        {
-          m_units_changed_with_scaling(null, new UnitsChangedWithScalingEventArgs(docSerialNumber, scale));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_units_changed_with_scaling?.SafeInvoke(null, new UnitsChangedWithScalingEventArgs(docSerialNumber, scale));
     }
 
     internal delegate void DocumentIoCallback(uint docSerialNumber, IntPtr pointerToWString, int b1, int b2);
     private static void OnBeginOpenDocument(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
-      if (m_begin_open_document != null)
-      {
-        try
-        {
-          m_begin_open_document(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_begin_open_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
     private static void OnEndOpenDocument(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
-      if (m_end_open_document != null)
-      {
-        try
-        {
-          m_end_open_document(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_end_open_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
     private static void OnEndOpenDocumentInitialiViewUpdate(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
-      if (m_after_post_read_view_update_document != null)
-      {
-        try
-        {
-          m_after_post_read_view_update_document(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_after_post_read_view_update_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
 
     private static void OnBeginSaveDocument(uint docSerialNumber, IntPtr pointerToWString, int bExportSelected, int bUnused)
     {
-      if (m_begin_save_document != null)
-      {
-        try
-        {
-          m_begin_save_document(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_begin_save_document?.SafeInvoke(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
     }
     private static void OnEndSaveDocument(uint docSerialNumber, IntPtr pointerToWString, int bExportSelected, int bUnused)
     {
-      if (m_end_save_document != null)
-      {
-        try
-        {
-          m_end_save_document(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_end_save_document?.SafeInvoke(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
     }
 
     private static readonly object g_event_lock = new object();
@@ -3278,17 +3199,7 @@ namespace Rhino
     private static RhinoObjectCallback g_on_purge_object;
     private static void OnAddObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
-      if (m_add_object != null)
-      {
-        try
-        {
-          m_add_object(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_add_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
     }
 
     internal static EventHandler<DocObjects.RhinoObjectEventArgs> m_add_object;
@@ -3331,14 +3242,7 @@ namespace Rhino
       {
         bool old_state = RhinoApp.InEventWatcher;
         RhinoApp.InEventWatcher = true;
-        try
-        {
-          m_delete_object(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        m_delete_object.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
         RhinoApp.InEventWatcher = old_state;
       }
     }
@@ -3380,17 +3284,7 @@ namespace Rhino
 
     private static void OnReplaceObject(uint docSerialNumber, IntPtr pOldObject, IntPtr pNewObject)
     {
-      if (m_replace_object != null)
-      {
-        try
-        {
-          m_replace_object(null, new DocObjects.RhinoReplaceObjectEventArgs(docSerialNumber, pOldObject, pNewObject));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_replace_object?.SafeInvoke(null, new DocObjects.RhinoReplaceObjectEventArgs(docSerialNumber, pOldObject, pNewObject));
     }
     internal static EventHandler<DocObjects.RhinoReplaceObjectEventArgs> m_replace_object;
     /// <summary>
@@ -3437,17 +3331,7 @@ namespace Rhino
 
     private static void OnUndeleteObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
-      if (m_undelete_object != null)
-      {
-        try
-        {
-          m_undelete_object(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_undelete_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
     }
     internal static EventHandler<DocObjects.RhinoObjectEventArgs> m_undelete_object;
     /// <summary>Called if an object is un-deleted.</summary>
@@ -3485,17 +3369,7 @@ namespace Rhino
 
     private static void OnPurgeObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
-      if (m_purge_object != null)
-      {
-        try
-        {
-          m_purge_object(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_purge_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
     }
     internal static EventHandler<DocObjects.RhinoObjectEventArgs> m_purge_object;
     /// <summary>
@@ -3541,27 +3415,11 @@ namespace Rhino
     {
       if (m_select_objects != null && bSelect == 1)
       {
-        try
-        {
-          var args = new DocObjects.RhinoObjectSelectionEventArgs(true, docSerialNumber, pObject, pObjects);
-          m_select_objects(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        m_select_objects?.SafeInvoke(null, new DocObjects.RhinoObjectSelectionEventArgs(true, docSerialNumber, pObject, pObjects));
       }
       else if (m_deselect_objects != null && bSelect == 0)
       {
-        try
-        {
-          var args = new DocObjects.RhinoObjectSelectionEventArgs(false, docSerialNumber, pObject, pObjects);
-          m_deselect_objects(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        m_deselect_objects?.SafeInvoke(null, new DocObjects.RhinoObjectSelectionEventArgs(false, docSerialNumber, pObject, pObjects));
       }
     }
     internal static EventHandler<DocObjects.RhinoObjectSelectionEventArgs> m_select_objects;
@@ -3642,18 +3500,7 @@ namespace Rhino
 
     private static void OnDeselectAllObjects(uint docSerialNumber, int count)
     {
-      if (m_deselect_allobjects != null)
-      {
-        try
-        {
-          var args = new DocObjects.RhinoDeselectAllObjectsEventArgs(docSerialNumber, count);
-          m_deselect_allobjects(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_deselect_allobjects?.SafeInvoke(null, new DocObjects.RhinoDeselectAllObjectsEventArgs(docSerialNumber, count));
     }
     internal static EventHandler<DocObjects.RhinoDeselectAllObjectsEventArgs> m_deselect_allobjects;
 
@@ -3698,18 +3545,7 @@ namespace Rhino
 
     private static void OnModifyObjectAttributes(uint docSerialNumber, IntPtr pRhinoObject, IntPtr pConstRhinoObjectAttributes)
     {
-      if (m_modify_object_attributes != null)
-      {
-        try
-        {
-          var args = new DocObjects.RhinoModifyObjectAttributesEventArgs(docSerialNumber, pRhinoObject, pConstRhinoObjectAttributes);
-          m_modify_object_attributes(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_modify_object_attributes?.SafeInvoke(null, new DocObjects.RhinoModifyObjectAttributesEventArgs(docSerialNumber, pRhinoObject, pConstRhinoObjectAttributes));
     }
     internal static EventHandler<DocObjects.RhinoModifyObjectAttributesEventArgs> m_modify_object_attributes;
 
@@ -3754,16 +3590,9 @@ namespace Rhino
     {
       if (g_before_transform_objects != null)
       {
-        try
-        {
-          var args = new DocObjects.RhinoTransformObjectsEventArgs(pRhinoOnTransformObject);
-          g_before_transform_objects(null, args);
-          args.CleanUp();
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var args = new DocObjects.RhinoTransformObjectsEventArgs(pRhinoOnTransformObject);
+        g_before_transform_objects.SafeInvoke(null, args);
+        args.CleanUp();
       }
     }
     static EventHandler<DocObjects.RhinoTransformObjectsEventArgs> g_before_transform_objects;
@@ -3807,21 +3636,12 @@ namespace Rhino
     }
 
     internal delegate void RhinoTableCallback(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings);
+
+    #region Layer table event
     private static RhinoTableCallback g_on_layer_table_event_callback;
     private static void OnLayerTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_layer_table_event != null)
-      {
-        try
-        {
-          var args = new LayerTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_layer_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_layer_table_event?.SafeInvoke(null, new LayerTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<LayerTableEventArgs> m_layer_table_event;
 
@@ -3859,25 +3679,14 @@ namespace Rhino
         }
       }
     }
-
+    #endregion
 
     #region Linetype table event
     private static RhinoTableCallback g_on_linetype_table_event_callback;
     private static GCHandle g_linetype_callback_gchandle;
     private static void OnLinetypeTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_linetype_table_event != null)
-      {
-        try
-        {
-          var args = new LinetypeTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_linetype_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_linetype_table_event?.SafeInvoke(null, new LinetypeTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<LinetypeTableEventArgs> m_linetype_table_event;
 
@@ -3923,23 +3732,11 @@ namespace Rhino
     }
     #endregion
 
-
     #region Dimension style table event
     private static RhinoTableCallback g_on_dim_style_table_event_callback;
     private static void OnDimStyleTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_dim_style_table_event != null)
-      {
-        try
-        {
-          var args = new DimStyleTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_dim_style_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_dim_style_table_event?.SafeInvoke(null, new DimStyleTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<DimStyleTableEventArgs> m_dim_style_table_event;
 
@@ -3982,18 +3779,7 @@ namespace Rhino
     private static RhinoTableCallback g_on_idef_table_event_callback;
     private static void OnIdefTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_idef_table_event != null)
-      {
-        try
-        {
-          var args = new InstanceDefinitionTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_idef_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_idef_table_event?.SafeInvoke(null, new InstanceDefinitionTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<InstanceDefinitionTableEventArgs> m_idef_table_event;
 
@@ -4035,18 +3821,7 @@ namespace Rhino
     private static RhinoTableCallback g_on_light_table_event_callback;
     private static void OnLightTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_light_table_event != null)
-      {
-        try
-        {
-          var args = new LightTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_light_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_light_table_event?.SafeInvoke(null, new LightTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<LightTableEventArgs> m_light_table_event;
 
@@ -4091,16 +3866,9 @@ namespace Rhino
     {
       if (m_material_table_event != null)
       {
-        try
-        {
-          var args = new MaterialTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_material_table_event(null, args);
-          args.Done();
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var args = new MaterialTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
+        m_material_table_event.SafeInvoke(null, args);
+        args.Done();
       }
     }
     internal static EventHandler<MaterialTableEventArgs> m_material_table_event;
@@ -4144,18 +3912,7 @@ namespace Rhino
     private static RhinoTableCallback g_on_group_table_event_callback;
     private static void OnGroupTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
-      if (m_group_table_event != null)
-      {
-        try
-        {
-          var args = new GroupTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings);
-          m_group_table_event(null, args);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_group_table_event?.SafeInvoke(null, new GroupTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
     }
     internal static EventHandler<GroupTableEventArgs> m_group_table_event;
 
@@ -4673,26 +4430,19 @@ namespace Rhino
     {
       if (g_texture_mapping_event != null)
       {
-        try
+        switch (eventType)
         {
-          switch (eventType)
-          {
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Added:
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Deleted:
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Modified:
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Undeleted:
-              break;
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Current:
-            case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Sorted:
-              return; // Ignore these for now
-          }
-          var args = new TextureMappingEventArgs(docSerialNumber, eventType, pConstNewSettings, pConstOldSettings);
-          g_texture_mapping_event(null, args);
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Added:
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Deleted:
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Modified:
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Undeleted:
+            break;
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Current:
+          case UnsafeNativeMethods.RhinoEventWatcherTextureMappingEventConsts.Sorted:
+            return; // Ignore these for now
         }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var args = new TextureMappingEventArgs(docSerialNumber, eventType, pConstNewSettings, pConstOldSettings);
+        g_texture_mapping_event.SafeInvoke(null, args);
       }
     }
     private static EventHandler<TextureMappingEventArgs> g_texture_mapping_event;
@@ -9688,6 +9438,14 @@ namespace Rhino.DocObjects.Tables
 
         return BoundingBox.Empty;
       }
+    }
+
+    /// <summary>
+    /// Destroys the cached scene bounding box so that it will be regenerated again from scratch next time the view is regenerated
+    /// </summary>
+    public void InvalidateBoundingBox()
+    {
+      UnsafeNativeMethods.CRhinoDoc_InvalidateBoundingBox(m_doc.RuntimeSerialNumber);
     }
 
     /// <since>6.0</since>

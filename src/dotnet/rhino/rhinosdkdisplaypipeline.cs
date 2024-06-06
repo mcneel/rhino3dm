@@ -449,94 +449,37 @@ namespace Rhino.Display
 
     private static void OnObjectCulling(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_objectCulling != null)
-      {
-        try
-        {
-          m_objectCulling(null, new CullObjectEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_objectCulling?.SafeInvoke(null, new CullObjectEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnCalcBoundingBox(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_calcbbox != null)
-      {
-        try
-        {
-          m_calcbbox(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_calcbbox?.SafeInvoke(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
     }
     private static void OnCalcBoundingBoxZoomExtents(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_calcbbox_zoomextents != null)
-      {
-        try
-        {
-          m_calcbbox_zoomextents(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_calcbbox_zoomextents?.SafeInvoke(null, new CalculateBoundingBoxEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnInitFrameBuffer(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_init_framebuffer != null)
-      {
-        try
-        {
-          m_init_framebuffer(null, new InitFrameBufferEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch(Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_init_framebuffer?.SafeInvoke(null, new InitFrameBufferEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnPreDrawObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_predrawobjects != null)
-      {
-        try
-        {
-          m_predrawobjects(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_predrawobjects?.SafeInvoke(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnPreDrawTransparentObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_predrawtransparentobjects != null)
       {
-        try
-        {
-          var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
+        var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
 
-          args.Display.MeshCacheEnabled = true;
-          m_predrawtransparentobjects(null, args);
-          args.Display.MeshCacheEnabled = false;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        args.Display.MeshCacheEnabled = true;
+        m_predrawtransparentobjects.SafeInvoke(null, args);
+        args.Display.MeshCacheEnabled = false;
       }
     }
 
@@ -544,114 +487,53 @@ namespace Rhino.Display
     {
       if( m_drawobject != null )
       {
-        try
-        {
-          var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
-          m_drawobject(null, e);
-          if (e.m_rhino_object != null)
-            e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
+        m_drawobject.SafeInvoke(null, e);
+        if (e.m_rhino_object != null)
+          e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
       }
     }
     private static void OnPostDrawObject(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_postdrawobject != null)
       {
-        try
-        {
-          var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
-          m_postdrawobject(null, e);
-          if (e.m_rhino_object != null)
-            e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var e = new DrawObjectEventArgs(pPipeline, conduitSerialNumber);
+        m_postdrawobject.SafeInvoke(null, e);
+        if (e.m_rhino_object != null)
+          e.m_rhino_object.m_pRhinoObject = IntPtr.Zero;
       }
     }
     private static void OnPostDrawObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       if (m_postdrawobjects != null)
       {
-        try
-        {
-          var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
+        var args = new DrawEventArgs(pPipeline, conduitSerialNumber);
 
-          // David R: Caching is disabled for 6.0, because RH-42617.
-          // Jeff L: I've fixed the real issue within the pipeline,
-          //         Therefore, I'm turning caching back on.
-          //         This was done to fix RH-44499
-          args.Display.MeshCacheEnabled = true;
-          m_postdrawobjects(null, args);
-          args.Display.MeshCacheEnabled = false;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        // David R: Caching is disabled for 6.0, because RH-42617.
+        // Jeff L: I've fixed the real issue within the pipeline,
+        //         Therefore, I'm turning caching back on.
+        //         This was done to fix RH-44499
+        args.Display.MeshCacheEnabled = true;
+        m_postdrawobjects.SafeInvoke(null, args);
+        args.Display.MeshCacheEnabled = false;
       }
     }
     private static void OnDrawForeground(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_drawforeground != null)
-      {
-        try
-        {
-          m_drawforeground(null, new DrawForegroundEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_drawforeground?.SafeInvoke(null, new DrawForegroundEventArgs(pPipeline, conduitSerialNumber));
     }
     private static void OnDrawOverlay(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if (m_drawoverlay != null)
-      {
-        try
-        {
-          m_drawoverlay(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_drawoverlay?.SafeInvoke(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
     }
     private static void OnProjectionChanged(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
-      if( m_projectionchanged != null)
-      {
-        try
-        {
-          m_projectionchanged(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_projectionchanged?.SafeInvoke(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnDisplayModeChanged(IntPtr pPipeline, Guid changedId, Guid oldId)
     {
-      if( m_displaymode_changed != null)
-      {
-        try
-        {
-          m_displaymode_changed(null, new DisplayModeChangedEventArgs(pPipeline, changedId, oldId));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
+      m_displaymode_changed?.SafeInvoke(null, new DisplayModeChangedEventArgs(pPipeline, changedId, oldId));
     }
 
 
