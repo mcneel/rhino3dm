@@ -73,7 +73,7 @@ if(${RHINO3DM_JS})
     add_definitions(-DON_32BIT_RUNTIME)
   endif()
   add_definitions(-DON_LITTLE_ENDIAN)
-  add_definitions(-DON_RUNTIME_ANDROID)
+  add_definitions(-DON_RUNTIME_WASM)
 
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
 
