@@ -620,12 +620,18 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Use a pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
+    /// Sets usage, pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
     /// </summary>
-    public CurveThicknessUse CurveThicknessUsage
-    { 
-      get { return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); }
-      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)value); }
+    public void SetCurveThicknessUsage(CurveThicknessUse usage)
+    {
+      SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)usage);
+    }
+    /// <summary>
+    /// Gets current usage, pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
+    /// </summary>
+    public CurveThicknessUse GetCurveThicknessUsage()
+    {
+      return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); 
     }
 
     //bool m_bUseDefaultCurve; -- doesn't appear to be used in display pipelane
@@ -882,11 +888,12 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="u"></param>
-    /// <param name="v"></param>
-    /// <param name="w"></param>
-    public void GetSurfaceIsoApplyPattern(ref bool u, ref bool v, ref bool w)
+    /// <param name="u">Gets mode in the u direction</param>
+    /// <param name="v">Gets mode in the v direction</param>
+    /// <param name="w">Gets mode in the w direction</param>
+    public void GetSurfaceIsoApplyPattern(out bool u, out bool v, out bool w)
     {
+      u = v = w = false;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetIsoApplyPattern(NonConstPointer(), ref u, ref v, ref w);
     }
 
@@ -1034,13 +1041,13 @@ namespace Rhino.Display
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoVColor, value); }
     }
 
-    public int SurfaceEdgeColorReductionPct
+    public int SurfaceEdgeColorReductionPercent
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction); }
       set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction, value); }
     }
 
-    public int SurfaceNakedEdgeColorReductionPct
+    public int SurfaceNakedEdgeColorReductionPercent
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction); }
       set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction, value); }
@@ -1737,6 +1744,31 @@ namespace Rhino.Display
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
       }
     }
+
+    public Color BackMaterialDiffuseColor
+    {
+      get 
+      {
+        return GetColor(UnsafeNativeMethods.DisplayAttrsColor.BackDiffuse);
+      }
+      set
+      {
+        SetColor(UnsafeNativeMethods.DisplayAttrsColor.BackDiffuse, value);
+      }
+    }
+
+    public bool CullBackfaces
+    {
+      get
+      {
+        return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CullBackfaces);
+      }
+      set
+      {
+        SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CullBackfaces, value);
+      }
+    }
+
   }
 }
 #endif

@@ -489,6 +489,31 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Returns true if some object in the instance definition is on the layer with the specified layer index.
+    /// </summary>
+    /// <param name="layerIndex">The index of layer to search for.</param>
+    /// <returns>
+    /// True if there is an object in the instance definition that is on the layer.</returns>
+    /// <since>8.7</since>
+    public bool UsesLayer(int layerIndex)
+    {
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.CRhinoInstanceDefinition_UsesLayer(const_ptr, layerIndex);
+    }
+
+    /// <summary>
+    /// Returns true if some object in the instance definition references the linetype with the specified linetype index.
+    /// </summary>
+    /// <param name="linetypeIndex">The index of linetype to search for.</param>
+    /// <returns>True if there is an object in the instance definition that references that linetype.</returns>
+    /// <since>8.7</since>
+    public bool UsesLinetype(int linetypeIndex)
+    {
+      IntPtr const_ptr = ConstPointer();
+      return UnsafeNativeMethods.CRhinoInstanceDefinition_UsesLinetype(const_ptr, linetypeIndex);
+    }
+
+    /// <summary>
     /// Index of this instance definition in the index definition table.
     /// </summary>
     /// <since>5.0</since>
@@ -565,7 +590,12 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr_const_idef = ConstPointer();
-        return UnsafeNativeMethods.CRhinoInstanceDefinition_UnitSystem(ptr_const_idef);
+        return UnsafeNativeMethods.CRhinoInstanceDefinition_GetUnitSystem(ptr_const_idef);
+      }
+      set
+      {
+        IntPtr ptr_const_idef = ConstPointer();
+        UnsafeNativeMethods.CRhinoInstanceDefinition_SetUnitSystem(ptr_const_idef, value);
       }
     }
 

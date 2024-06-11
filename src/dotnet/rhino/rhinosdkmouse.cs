@@ -107,6 +107,10 @@ namespace Rhino.UI
       get { return m_point; }
     }
 
+    public Gumball.GumballMode IsOverGumball()
+    {
+      return (Gumball.GumballMode)UnsafeNativeMethods.CRhGumball_MouseOverMode(m_view_serial_number);
+    }
   }
 
   /// <summary>Used for intercepting mouse events in the Rhino views.</summary>

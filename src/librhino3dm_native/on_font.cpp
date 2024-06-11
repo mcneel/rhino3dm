@@ -351,3 +351,15 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_Font_WriteBufferArchive_NewWriter(con
   }
   return rc;
 }
+
+RH_C_FUNCTION bool ON_Font_IsInstalledFont(const ON_Font* font)
+{
+  return (font && font->IsInstalledFont());
+}
+
+RH_C_FUNCTION const ON_Font* ON_Font_GetSubstituteFont(const ON_Font* font)
+{
+  if (font)
+    return font->SubstituteFont();
+  return nullptr;
+}

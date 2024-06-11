@@ -11,6 +11,10 @@ namespace Rhino
 {
   namespace UI
   {
+    /// <summary>
+    /// Represents a Rhino toolbar, or .RUI, file.
+    /// </summary>
+    /// <since>5.0</since>
     public sealed class ToolbarFile
     {
       readonly Guid m_id;
@@ -19,10 +23,15 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <summary>
+      /// Gets the id of the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public Guid Id { get { return m_id; } }
 
-      /// <summary>Full path to this file on disk</summary>
+      /// <summary>
+      /// Gets the full path to the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public string Path
       {
@@ -37,6 +46,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Gets the name, or alias, of the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public string Name
       {
@@ -51,6 +63,11 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Closes the toolbar file.
+      /// </summary>
+      /// <param name="prompt">Set true if you want to be prompted to cllose the file.</param>
+      /// <returns>True if successful, false otherwie.</returns>
       /// <since>5.0</since>
       public bool Close(bool prompt)
       {
@@ -65,31 +82,47 @@ namespace Rhino
         return UnsafeNativeMethods.CRhinoUiFile_FileClose(m_id);
       }
 
+      /// <summary>
+      /// Saves the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public bool Save()
       {
         return UnsafeNativeMethods.CRhinoUiFile_FileSave(m_id);
       }
 
+      /// <summary>
+      /// Saves the toolbar file to a different path.
+      /// </summary>
       /// <since>5.0</since>
       public bool SaveAs(string path)
       {
         return UnsafeNativeMethods.CRhinoUiFile_FileSaveAs(m_id, path);
       }
 
+      /// <summary>
+      /// Get the number of toolbar groups in the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public int GroupCount
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_GroupCount(m_id); }
       }
 
+      /// <summary>
+      /// Get the number of toolbars in the toolbar file.
+      /// </summary>
       /// <since>5.0</since>
       public int ToolbarCount
       {
         get { return UnsafeNativeMethods.CRhinoUiFile_ToolbarCount(m_id); }
       }
 
-      /// <since>5.0</since>
+      /// <summary>
+      /// Gets a toolbar.
+      /// </summary>
+      /// <param name="index">The index of the toolbar.</param>
+      /// <returns>The toolbar if successful, null otherwise.</returns>
       public Toolbar GetToolbar(int index)
       {
         Guid id = UnsafeNativeMethods.CRhinoUiFile_ToolBarID(m_id, index);
@@ -98,6 +131,11 @@ namespace Rhino
         return new Toolbar(this, id);
       }
 
+      /// <summary>
+      /// Gets a toolbar group.
+      /// </summary>
+      /// <param name="index">The index of the toolbar group.</param>
+      /// <returns>The toolbar group if successful, null otherwise.</returns>
       /// <since>5.0</since>
       public ToolbarGroup GetGroup(int index)
       {
@@ -107,6 +145,11 @@ namespace Rhino
         return new ToolbarGroup(this, id);
       }
 
+      /// <summary>
+      /// Gets a toolbar group.
+      /// </summary>
+      /// <param name="name">The name of the toolbar group.</param>
+      /// <returns>The toolbar group if successful, null otherwise.</returns>
       /// <since>5.0</since>
       public ToolbarGroup GetGroup(string name)
       {
@@ -121,6 +164,10 @@ namespace Rhino
       }
     }
 
+    /// <summary>
+    /// Represents a toolbar in a Rhino toolbar, or .RUI, file.
+    /// </summary>
+    /// <since>5.0</since>
     public sealed class Toolbar
     {
       readonly ToolbarFile m_parent;
@@ -132,12 +179,18 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <summary>
+      /// Gets the id of the toolbar.
+      /// </summary>
       /// <since>5.0</since>
       public Guid Id
       {
         get { return m_id; }
       }
 
+      /// <summary>
+      /// Gets the name of the toolbar.
+      /// </summary>
       /// <since>5.0</since>
       public string Name
       {
@@ -152,6 +205,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Gets and sets the size of the toolbar image.
+      /// </summary>
       /// <since>6.0</since>
       public static Size BitmapSize
       {
@@ -168,6 +224,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Gets and sets the size of the toolbar tab.
+      /// </summary>
       /// <since>6.0</since>
       public static Size TabSize
       {
@@ -185,6 +244,10 @@ namespace Rhino
       }
     }
 
+    /// <summary>
+    /// Represents a toolbar group in a Rhino toolbar, or .RUI, file.
+    /// </summary>
+    /// <since>5.0</since>
     public sealed class ToolbarGroup
     {
       readonly ToolbarFile m_parent;
@@ -196,12 +259,18 @@ namespace Rhino
         m_id = id;
       }
 
+      /// <summary>
+      /// Gets the id of the toolbar group.
+      /// </summary>
       /// <since>5.0</since>
       public Guid Id
       {
         get { return m_id; }
       }
 
+      /// <summary>
+      /// Gets the name of the toolbar group.
+      /// </summary>
       /// <since>5.0</since>
       public string Name
       {
@@ -216,6 +285,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Gets and sets a toolbar group's visibility.
+      /// </summary>
       /// <since>5.0</since>
       public bool Visible
       {
@@ -229,6 +301,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// Returns true if the toolbar group is docked.
+      /// </summary>
       /// <since>5.0</since>
       public bool IsDocked
       {
@@ -239,30 +314,46 @@ namespace Rhino
       }
     }
 
+    /// <summary>
+    /// Represents a collection of Rhino toolbars, or .RUI, files.
+    /// </summary>
+    /// <since>5.0</since>
     public sealed class ToolbarFileCollection : IEnumerable<ToolbarFile>
     {
       internal ToolbarFileCollection() { }
 
       /// <summary>
-      /// Number of open toolbar files
+      /// Get tne number of open toolbar files.
       /// </summary>
       /// <since>5.0</since>
       public int Count
       {
-        get{ return UnsafeNativeMethods.CRhinoUiFile_FileCount(); }
+        get { return UnsafeNativeMethods.CRhinoUiFile_FileCount(); }
       }
 
+      /// <summary>
+      /// Gets an open toolbar file by index.
+      /// </summary>
+      /// <param name="index">The index of the toolar file.</param>
+      /// <returns>The toolbar if successful, null otherwise.</returns>
+      /// <since>5.0</since>
       public ToolbarFile this[int index]
       {
         get
         {
           Guid id = UnsafeNativeMethods.CRhinoUiFile_FileID(index);
-          if( Guid.Empty==id )
-            throw new IndexOutOfRangeException();
+          if (Guid.Empty == id)
+            return null;
           return new ToolbarFile(id);
         }
       }
 
+      /// <summary>
+      /// Gets an open toolbar file by name, or alias.
+      /// </summary>
+      /// <param name="name">The name, or alias, of the toolbar file.</param>
+      /// <param name="ignoreCase">true to ignore case during the comparison; otherwise, false.</param>
+      /// <returns>The toolbar if successful, null otherwise.</returns>
       /// <since>5.0</since>
       public ToolbarFile FindByName(string name, bool ignoreCase)
       {
@@ -274,6 +365,12 @@ namespace Rhino
         return null;
       }
 
+      /// <summary>
+      /// Gets an open toolbar by full path.
+      /// </summary>
+      /// <param name="path">The full path to the toolbar file.</param>
+      /// <returns></returns>
+      /// <returns>The toolbar if successful, null otherwise.</returns>
       /// <since>5.0</since>
       public ToolbarFile FindByPath(string path)
       {
@@ -285,31 +382,42 @@ namespace Rhino
         return null;
       }
 
+      /// <summary>
+      /// Opens a toolbar file.
+      /// </summary>
+      /// <param name="path">The full path to the toolbar file.</param>
+      /// <returns>The toolbar if successful, null otherwise.</returns>
       /// <since>5.0</since>
       public ToolbarFile Open(string path)
       {
-        if( !System.IO.File.Exists(path) )
-          throw new System.IO.FileNotFoundException();
+        if (!System.IO.File.Exists(path))
+          return null;
         Guid id = UnsafeNativeMethods.CRhinoUiFile_FileOpen(path);
-        if( id==Guid.Empty )
+        if (id == Guid.Empty)
           return null;
         return new ToolbarFile(id);
       }
 
+      /// <summary>
+      /// Gets a toolbar file enumerator.
+      /// </summary>
+      /// <returns>The enumerator.</returns>
       /// <since>5.0</since>
       public IEnumerator<ToolbarFile> GetEnumerator()
       {
         int count = Count;
-        for( int i=0; i<count; i++ ) yield return this[i];
+        for (int i = 0; i < count; i++) yield return this[i];
       }
 
-      /// <since>5.0</since>
       System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
       {
         int count = Count;
         for (int i = 0; i < count; i++) yield return this[i];
       }
 
+      /// <summary>
+      /// Returns true if the sizebar is visible.
+      /// </summary>
       /// <since>5.0</since>
       public static bool SidebarIsVisible
       {
@@ -317,6 +425,9 @@ namespace Rhino
         set { UnsafeNativeMethods.CRhinoUiFile_ShowSidebar(false, value); }
       }
 
+      /// <summary>
+      /// Returns true if the most-recently-used sizebar is visible.
+      /// </summary>
       /// <since>5.0</since>
       public static bool MruSidebarIsVisible
       {
@@ -340,6 +451,7 @@ namespace Rhino
           return result;
         }
       }
+
       ///<summary>Set to true to enable menu item or false to disable menu item</summary>
       /// <since>5.11</since>
       public bool Enabled
@@ -351,6 +463,7 @@ namespace Rhino
           return result;
         }
       }
+
       ///<summary>Set to true to enable menu item or false to check menu item</summary>
       /// <since>5.11</since>
       public bool Checked
@@ -362,6 +475,7 @@ namespace Rhino
           return result;
         }
       }
+
       ///<summary>Set to true to enable menu item or false to check menu item</summary>
       /// <since>5.11</since>
       public bool RadioChecked
@@ -370,6 +484,7 @@ namespace Rhino
         get
         { return UnsafeNativeMethods.CRuiUpdateUi_GetBool(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateBoolConsts.RadioChecked, false); }
       }
+
       ///<summary>Menu item text</summary>
       /// <since>5.11</since>
       public string Text
@@ -386,36 +501,42 @@ namespace Rhino
           }
         }
       }
+
       ///<summary>Id of the RUI file that owns this menu item</summary>
       /// <since>5.11</since>
       public Guid FileId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.FileId); }
       }
+
       ///<summary>Id of the menu that owns this menu item</summary>
       /// <since>5.11</since>
       public Guid MenuId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.MenuId); }
       }
+
       ///<summary>Id of the menu item that owns this menu item</summary>
       /// <since>5.11</since>
       public Guid MenuItemId
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetGuid(m_ptr, (int)UnsafeNativeMethods.CRuiUpdateGetUuidConsts.MenuItemId); }
       }
+
       ///<summary>Windows menu handle of menu that contains this item</summary>
       /// <since>5.11</since>
       public IntPtr MenuHandle
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_GetMenuHandle(m_ptr); }
       }
+
       ///<summary>Zero based index of item in the Windows menu</summary>
       /// <since>5.11</since>
       public int MenuIndex
       {
         get { return UnsafeNativeMethods.CRuiUpdateUi_MenuItemIndex(m_ptr); }
       }
+
       ///<summary>Windows menu item ID</summary>
       /// <since>5.11</since>
       [CLSCompliant(false)]

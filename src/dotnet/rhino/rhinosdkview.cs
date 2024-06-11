@@ -862,15 +862,7 @@ namespace Rhino.Display
 
     static void ViewEventHelper(EventHandler<ViewEventArgs> handler, IntPtr pView)
     {
-      if (handler == null) return;
-      try
-      {
-        handler(null, new ViewEventArgs(pView));
-      }
-      catch (Exception ex)
-      {
-        Runtime.HostUtils.ExceptionReport(ex);
-      }
+      handler?.SafeInvoke(null, new ViewEventArgs(pView));
     }
 
     private static void OnCreateView(IntPtr pView)   { ViewEventHelper(g_create_view, pView); }
