@@ -387,8 +387,7 @@ namespace Rhino.Display
     private static EventHandler<PageViewSpaceChangeEventArgs> g_detail_space_change;
     private static void OnActiveDetailChange(IntPtr pPageView, Guid newDetailId, Guid oldDetailId)
     {
-      if (g_detail_space_change != null)
-        g_detail_space_change(null, new PageViewSpaceChangeEventArgs(pPageView, newDetailId, oldDetailId));
+      g_detail_space_change?.SafeInvoke(null, new PageViewSpaceChangeEventArgs(pPageView, newDetailId, oldDetailId));
     }
     /// <since>5.0</since>
     public static event EventHandler<PageViewSpaceChangeEventArgs> PageViewSpaceChange

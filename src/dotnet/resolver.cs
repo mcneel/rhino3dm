@@ -239,15 +239,32 @@ namespace Rhino.Runtime
           catch { }
         }
 
-#if RHINO_SDK
-        // 7 Feb 2017 S. Baer (RH-30818)
-        // Remove native DLLs from the list of potentials
+        // 23 August 2012 S. Baer
+        // Make sure that at least part of the searchname matches part of the filename
+        // Just use the first 5 characters as a required pattern in the filename
+        // Curtis: Changing to 6 characters as many assemblies now start with "Rhino".
+        const int length_match = 6;
+        string must_be_in_filename = searchname.Substring(0, Math.Min(searchname.Length, length_match));
+
         for (int i = potential_files.Count - 1; i >= 0; i--)
         {
-          if (!HostUtils.IsManagedDll(potential_files[i]))
+          // 19 Apr 2024 Curtis (RH-79171)
+          // Remove any file that doesn't at least partially match.
+          // Doing this here so we don't "touch" every file in the list, 
+          // causing initial startup delays when windows defender scans them
+          // Also we should only be checking the file name, not the whole path.
+          var file = potential_files[i];
+          var fileName = Path.GetFileNameWithoutExtension(file);
+          bool exclude = fileName.IndexOf(must_be_in_filename, StringComparison.InvariantCultureIgnoreCase) == -1;
+
+#if RHINO_SDK
+          // 7 Feb 2017 S. Baer (RH-30818)
+          // Remove native DLLs from the list of potentials
+          exclude |= !HostUtils.IsManagedDll(file);
+#endif
+          if (exclude)
             potential_files.RemoveAt(i);
         }
-#endif
 
         try
         {
@@ -261,23 +278,16 @@ namespace Rhino.Runtime
           HostUtils.ExceptionReport("FuzzyComparer", ex);
         }
       }
-      
+
       // Curtis: RH-75970
       // Don't execute this within the context lock, we can find ourselves back
       // here when loading from different threads.
-
-      // 23 August 2012 S. Baer
-      // Make sure that at least part of the searchname matches part of the filename
-      // Just use the first 5 characters as a required pattern in the filename
-      const int length_match = 5;
-      string must_be_in_filename = searchname.Substring(0, Math.Min(searchname.Length, length_match));
+      if (LogEnabled)
+        Log($"Scanning for {searchname}: ({potential_files.Count} files)\n\tCandidates: {string.Join(", ", potential_files.Select(r => Path.GetFileName(r)))}");
 
       Assembly asm = null;
       foreach (string file in potential_files)
       {
-        if (file.IndexOf(must_be_in_filename, StringComparison.InvariantCultureIgnoreCase) == -1)
-          continue;
-
         asm = TryLoadAssembly(context, requestedName, file, searchname, checkVersion);
         if (asm != null)
           break;
@@ -285,7 +295,6 @@ namespace Rhino.Runtime
 
       lock (context)
       {
-
         // Keep the results around so we don't keep doing the same job over and over.
         context.Assemblies[args.Name] = asm;
         return asm;

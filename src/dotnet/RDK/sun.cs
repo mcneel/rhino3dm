@@ -48,7 +48,7 @@ namespace Rhino.Render
       if (g_custom_ui_sections_event_handler == null) return;
 
       if (event_uuid.Equals(new Guid("57edb94c-1bd2-488f-89dd-783be738055d")))
-        g_custom_ui_sections_event_handler.Invoke(null, new AddCustomUISectionsEventArgs(event_uuid, event_args_pointer));
+        g_custom_ui_sections_event_handler.SafeInvoke(null, new AddCustomUISectionsEventArgs(event_uuid, event_args_pointer));
     }
 
     internal delegate void RdkAddCustomUISectionsEventCallback(Guid event_uuid, IntPtr event_args);
@@ -117,7 +117,7 @@ namespace Rhino.Render
     {
       if (g_undo_redo_event_handler == null) return;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-      g_undo_redo_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
+      g_undo_redo_event_handler.SafeInvoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
     }
 
     internal delegate void RdkUndoRedoCallback(uint docSerialNumber, bool bRedo);
@@ -157,7 +157,7 @@ namespace Rhino.Render
     {
       if (g_undo_redo_ended_event_handler == null) return;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-      g_undo_redo_ended_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
+      g_undo_redo_ended_event_handler.SafeInvoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
     }
 
     internal delegate void RdkUndoRedoEndedCallback(uint docSerialNumber);
@@ -231,7 +231,7 @@ namespace Rhino.Render
     {
       if (g_changed_event_handler == null) return;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-      g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
+      g_changed_event_handler.SafeInvoke(null, new RenderPropertyChangedEvent(doc, 0x0004));
     }
 
     internal delegate void RdkSunSettingsChangedCallback(uint docSerialNumber);
@@ -740,7 +740,7 @@ namespace Rhino.Render
     {
       if (g_changed_event_handler == null) return;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-      g_changed_event_handler.Invoke(null, new RenderPropertyChangedEvent(doc, 0x0080));
+      g_changed_event_handler.SafeInvoke(null, new RenderPropertyChangedEvent(doc, 0x0080));
     }
 
     internal delegate void RdkSkylightSettingsChangedCallback(uint docSerialNumber);

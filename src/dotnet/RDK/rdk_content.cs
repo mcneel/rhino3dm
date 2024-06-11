@@ -2230,6 +2230,10 @@ namespace Rhino.Render
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetInstanceId(ConstPointer(), value);
+        if (this is INativeContent native)
+        {
+          native.Id = value;
+        }
       }
     }
 
@@ -3850,8 +3854,6 @@ namespace Rhino.Render
     /// <since>6.13</since>
     public bool Replace(RenderContent newcontent)
     {
-      newcontent.AutoDelete = false;
-
       return UnsafeNativeMethods.Rdk_RenderContent_ReplaceContentInDocument(DocumentOwner.RuntimeSerialNumber, CppPointer, newcontent.CppPointer);
     }
 
@@ -4516,15 +4518,9 @@ namespace Rhino.Render
     {
       if (m_content_added_event != null)
       {
-        try
-        {
-          var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-          m_content_added_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null), ReasonFromAttachReason(reason)));
-        }
-        catch (Exception ex)
-        {
-          HostUtils.ExceptionReport(ex);
-        }
+        var content = FromPointer(pContent, null);
+        var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+        m_content_added_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content, ReasonFromAttachReason(reason)));
       }
     }
     internal static EventHandler<RenderContentEventArgs> m_content_added_event;
@@ -4534,13 +4530,9 @@ namespace Rhino.Render
     {
       if (g_content_renamed_event != null)
       {
-        try
-        {
-          var content = FromPointer(pContent, null);
-          var doc = content?.DocumentOwner;
-          g_content_renamed_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null)));
-        }
-        catch (Exception ex) { HostUtils.ExceptionReport(ex); }
+        var content = FromPointer(pContent, null);
+        var doc = content?.DocumentOwner;
+        g_content_renamed_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_renamed_event;
@@ -4550,15 +4542,9 @@ namespace Rhino.Render
     {
       if (g_content_deleting_event != null)
       {
-        try
-        {
-          var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-          g_content_deleting_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null), ReasonFromDetachReason(reason)));
-        }
-        catch (Exception ex)
-        {
-          HostUtils.ExceptionReport(ex);
-        }
+        var content = FromPointer(pContent, null);
+        var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+        g_content_deleting_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content, ReasonFromDetachReason(reason)));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_deleting_event;
@@ -4568,15 +4554,9 @@ namespace Rhino.Render
     {
       if (g_content_deleted_event != null)
       {
-        try
-        {
-          var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-          g_content_deleted_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null), ReasonFromDetachReason(reason)));
-        }
-        catch (Exception ex)
-        {
-          HostUtils.ExceptionReport(ex);
-        }
+        var content = FromPointer(pContent, null);
+        var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+        g_content_deleted_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content, ReasonFromDetachReason(reason)));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_deleted_event;
@@ -4586,9 +4566,9 @@ namespace Rhino.Render
     {
       if (g_content_replacing_event != null)
       {
+        var content = FromPointer(pContent, null);
         var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-        try { g_content_replacing_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null))); }
-        catch (Exception ex) { HostUtils.ExceptionReport(ex); }
+        g_content_replacing_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_replacing_event;
@@ -4598,9 +4578,9 @@ namespace Rhino.Render
     {
       if (g_content_replaced_event != null)
       {
+        var content = FromPointer(pContent, null);
         var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-        try { g_content_replaced_event(doc, new RenderContentEventArgs(doc, FromPointer(pContent, null))); }
-        catch (Exception ex) { HostUtils.ExceptionReport(ex); }
+        g_content_replaced_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_replaced_event;
@@ -4610,17 +4590,10 @@ namespace Rhino.Render
     {
       if (g_content_changed_event != null)
       {
-        try
-        {
-          var content = FromPointer(newContent, null);
-          var old_content = FromPointer(oldContent, null);
-          var doc = content?.DocumentOwner;
-          g_content_changed_event(doc, new RenderContentChangedEventArgs(doc, content, old_content, (ChangeContexts)cc));
-        }
-        catch (Exception ex)
-        {
-          HostUtils.ExceptionReport(ex);
-        }
+        var content = FromPointer(newContent, null);
+        var old_content = FromPointer(oldContent, null);
+        var doc = content?.DocumentOwner;
+        g_content_changed_event.SafeInvoke(doc, new RenderContentChangedEventArgs(doc, content, old_content, (ChangeContexts)cc));
       }
     }
     static EventHandler<RenderContentChangedEventArgs> g_content_changed_event;
@@ -4630,13 +4603,9 @@ namespace Rhino.Render
     {
       if (g_content_update_preview_event != null)
       {
-        try
-        {
-          var content = FromPointer(pContent, null);
-          var doc = content?.DocumentOwner;
-          g_content_update_preview_event(doc, new RenderContentEventArgs(doc, content));
-        }
-        catch (Exception ex) { HostUtils.ExceptionReport(ex); }
+        var content = FromPointer(pContent, null);
+        var doc = content?.DocumentOwner;
+        g_content_update_preview_event.SafeInvoke(doc, new RenderContentEventArgs(doc, content));
       }
     }
     static EventHandler<RenderContentEventArgs> g_content_update_preview_event;
@@ -4822,6 +4791,66 @@ namespace Rhino.Render
         }
       }
     }
+
+    /// <summary>
+    /// This event is raised when a preview has been rendered
+    /// </summary>
+    public static event EventHandler<PreviewRenderedEventArgs> PreviewRendered
+    {
+      add
+      {
+        if (g_on_preview_rendered == null)
+        {
+          g_on_preview_rendered = OnPreviewRendered;
+          UnsafeNativeMethods.CRdkCmnEventWatcher_SetOnPreviewRenderedEventCallback(g_on_preview_rendered, Rhino.Runtime.HostUtils.m_rdk_ew_report);
+        }
+        g_on_preview_rendered_event += value;
+      }
+      remove
+      {
+        g_on_preview_rendered_event -= value;
+        if (g_on_preview_rendered == null)
+        {
+          UnsafeNativeMethods.CRdkCmnEventWatcher_SetOnPreviewRenderedEventCallback(null, Rhino.Runtime.HostUtils.m_rdk_ew_report);
+          g_on_preview_rendered = null;
+        }
+      }
+    }
+    internal delegate void OnPreviewRenderedCallback(IntPtr pDib, uint quality, IntPtr pjs);
+    internal static OnPreviewRenderedCallback g_on_preview_rendered;
+    static EventHandler<PreviewRenderedEventArgs> g_on_preview_rendered_event;
+    private static void OnPreviewRendered(IntPtr pDib, uint quality, IntPtr p_pjs)
+    {
+      if (g_on_preview_rendered_event != null)
+      {
+        var args = new PreviewRenderedEventArgs();
+
+        PreviewJobSignature pjs = new PreviewJobSignature(p_pjs);
+
+        var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(pDib, true);
+
+        args.PreviewJobSignature = pjs;
+        args.Bitmap = bitmap;
+
+        Utilities.PreviewQuality q = Utilities.PreviewQuality.None;
+
+        if(quality == 0)
+          q = Utilities.PreviewQuality.None;
+        else if (quality == 1)
+          q = Utilities.PreviewQuality.Low;
+        else if (quality == 2)
+          q = Utilities.PreviewQuality.Medium;
+        else if (quality == 3)
+          q = Utilities.PreviewQuality.IntermediateProgressive;
+        else if (quality == 4)
+          q = Utilities.PreviewQuality.Full;
+
+        args.Quality = q;
+
+        g_on_preview_rendered_event.SafeInvoke(null, args);
+      }
+    }
+
     /// <summary>
     /// This event is raised when a field value is modified.
     /// </summary>
@@ -4852,7 +4881,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentFieldChangedEventArgs> g_content_field_changed_event;
     private static void OnContentFieldChanged(int serialNumber, IntPtr pString_name, IntPtr value, int cc)
     {
-      try
+      if (g_content_field_changed_event != null)
       {
         if (pString_name == IntPtr.Zero) return;
         var content = FromSerialNumber(serialNumber);
@@ -4861,11 +4890,7 @@ namespace Rhino.Render
         //var old_value = v.AsObject();
         var name_string = StringWrapper.GetStringFromPointer(pString_name);
         var args = new RenderContentFieldChangedEventArgs(content, name_string, (ChangeContexts) cc);
-        g_content_field_changed_event(content, args);
-      }
-      catch (Exception ex)
-      {
-        HostUtils.ExceptionReport(ex);
+        g_content_field_changed_event.SafeInvoke(content, args);
       }
     }
 
@@ -4901,14 +4926,10 @@ namespace Rhino.Render
     {
       if (g_current_environment_change_event != null)
       {
-        try
-        {
-          var content = FromPointer(pContent, null);
-          var doc = content?.DocumentOwner;
-          g_current_environment_change_event(doc, new RenderContentEventArgs(doc, content,
-                                            (RenderSettings.EnvironmentUsage)usage));
-        }
-        catch (Exception ex) { HostUtils.ExceptionReport(ex); }
+        var content = FromPointer(pContent, null);
+        var doc = content?.DocumentOwner;
+        var args = new RenderContentEventArgs(doc, content, (RenderSettings.EnvironmentUsage)usage);
+        g_current_environment_change_event.SafeInvoke(doc, args);
       }
     }
 
@@ -5203,6 +5224,32 @@ namespace Rhino.Render
     private readonly string m_field_name;
   }
 
+  /// <summary>
+  /// PreviewRenderedEventArgs is raised when a content preview has been rendered
+  /// </summary>
+  [CLSCompliant(true)] 
+  public class PreviewRenderedEventArgs : EventArgs
+  {
+    PreviewJobSignature m_preview_job_signature;
+    Bitmap m_bitmap;
+    Utilities.PreviewQuality m_quality;
+
+    /// <summary>
+    /// The Preview Job Signature associated with the rendered preview
+    /// </summary>
+    public PreviewJobSignature PreviewJobSignature { get { return m_preview_job_signature; } set { m_preview_job_signature = value;}}
+
+    /// <summary>
+    /// The Bitmap of the rendered preview
+    /// </summary>
+    public Bitmap Bitmap { get { return m_bitmap; } set { m_bitmap = value;}}
+    
+    /// <summary>
+    /// The Bitmap of the rendered preview
+    /// </summary>
+    public Utilities.PreviewQuality Quality { get { return m_quality; } set { m_quality = value;}}
+  }
+
   //*public*/
   //class RenderContentTypeEventArgs : EventArgs
   //{
@@ -5366,6 +5413,7 @@ namespace Rhino.Render
 internal interface INativeContent
 {
   Guid Document { get; set; }
+  Guid Id { get; set; }
 }
 
 #endif

@@ -98,6 +98,24 @@ namespace Rhino.Geometry
     {
     }
 
+    ///// <summary>
+    ///// Copies this SubD, including its evaluation cache.
+    ///// </summary>
+    ///// <returns>A SubD.</returns>
+    ///// <since>8.8</since>
+    //[ConstOperation]
+    //public override GeometryBase Duplicate()
+    //{
+    //  IntPtr const_ptr = ConstPointer();
+    //  GeometryBase rc = base.Duplicate();
+    //  SubD subd = rc as SubD;
+    //  if (null != subd)
+    //  {
+    //    subd.CopyEvaluationCache(this);
+    //  }
+    //  return rc;
+    //}
+
     internal override IntPtr _InternalGetConstPointer()
     {
       IntPtr const_ptr = UnsafeNativeMethods.ON_SubDRef_ConstPointerSubD(m_ptr_subd_ref);
@@ -135,6 +153,71 @@ namespace Rhino.Geometry
     {
       return new SubD(IntPtr.Zero, null);
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Gets Nurbs form of all edges in this SubD, with clamped knots.
+    /// NB: Does not update the SubD evaluation cache before getting the edges.
+    /// </summary>
+    /// <returns>An array of edge curves.</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
+    /// <since>8.7</since>
+    [ConstOperation]
+    public Curve[] DuplicateEdgeCurves()
+    {
+      return DuplicateEdgeCurves(false, false, false, false, false, true);
+    }
+
+    /// <summary>
+    /// Gets Nurbs form of edges in this SubD.
+    /// NB: Does not update the SubD evaluation cache before getting the edges.
+    /// </summary>
+    /// <param name="boundaryOnly">
+    /// If true, then only the boundary edges are duplicated.
+    /// If false, then all edges are duplicated.
+    /// If both boundaryOnly and interiorOnly are true, an empty array is returned.
+    /// </param>
+    /// <param name="interiorOnly">
+    /// If true, then only the interior edges are duplicated.
+    /// If false, then all edges are duplicated.
+    /// Note: interior edges with faces of different orientations are also returned.
+    /// If both boundaryOnly and interiorOnly are true, an empty array is returned.
+    /// </param>
+    /// <param name="smoothOnly">
+    /// If true, then only the smooth (and not sharp) edges are duplicated.
+    /// If false, then all edges are duplicated.
+    /// If both smoothOnly and sharpOnly and creaseOnly are true, an empty array is returned.
+    /// </param>
+    /// <param name="sharpOnly">
+    /// If true, then only the sharp edges are duplicated.
+    /// If false, then all edges are duplicated.
+    /// If both smoothOnly and sharpOnly and creaseOnly are true, an empty array is returned.
+    /// </param>
+    /// <param name="creaseOnly">
+    /// If true, then only the creased edges are duplicated.
+    /// If false, then all edges are duplicated.
+    /// If both smoothOnly and sharpOnly and creaseOnly are true, an empty array is returned.
+    /// </param>
+    /// <param name="clampEnds">
+    /// If true, the end knots are clamped.
+    /// Otherwise the end knots are(-2,-1,0,...., k1, k1+1, k1+2).
+    /// </param>
+    /// <returns>Array of edge curves on success.</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
+    /// <since>8.7</since>
+    public Curve[] DuplicateEdgeCurves(bool boundaryOnly, bool interiorOnly, bool smoothOnly, bool sharpOnly, bool creaseOnly, bool clampEnds)
+    {
+      // TODO: Should this be non-const, it might change the surface mesh cache and delete the display handle?
+      IntPtr const_ptr_this = ConstPointer();
+      //if (UpdateSurfaceMeshCache(true) > 0) DestroySubDDisplay();
+
+      var output = new SimpleArrayCurvePointer();
+      IntPtr ptr_output = output.NonConstPointer();
+
+      UnsafeNativeMethods.ON_SubD_DuplicateEdgeCurves(const_ptr_this, ptr_output, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
+      return output.ToNonConstArray();
+    }
+#endif
 
     /// <summary>
     /// Deletes the underlying native pointer during a Dispose call or GC collection
@@ -224,6 +307,11 @@ namespace Rhino.Geometry
         if (m_edges == null)
         {
           m_edges = new Collections.SubDEdgeList(this);
+          // 2024-03-14, Pierre, RH-80602:
+          // After careful consideration, I do not think this is the proper place
+          // to update the surface mesh cache. GH now does it when needed, and 
+          // users of the RhinoCommon SDK should do the same.
+          /*
 #if RHINO_SDK
           if (IsNonConst)
           {
@@ -233,7 +321,16 @@ namespace Rhino.Geometry
             // move this call to another location.
             UnsafeNativeMethods.ON_SubD_UpdateSurfaceMeshCache(ptr_this);
           }
+          else
+          {
+            // 2024-03-12, Pierre, RH-80602
+            // GH internaliazed data uses a const ref to the SubD, make sure these
+            // also have a surface mesh cached.
+            IntPtr const_ptr_this = ConstPointer();
+            UnsafeNativeMethods.ON_SubD_ConstUpdateSurfaceMeshCache(const_ptr_this);
+          }
 #endif
+          */
         }
         return m_edges;
       }
@@ -265,6 +362,18 @@ namespace Rhino.Geometry
         IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_Empty();
         return new SubD(ptr_subd, null);
       }
+    }
+
+
+    /// <summary>
+    /// Reverses the orientation of all SubD normals.
+    /// </summary>
+    /// <returns>True if successful.</returns>
+    /// <since>8.7</since>
+    public bool Flip()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_SubD_Flip(ptr_this);
     }
 
 #if RHINO_SDK
@@ -744,17 +853,90 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Clear cached information that depends on the location of vertex control points
+    /// Clear all cached evaluation information (meshes, surface points, bounding boxes, ...) 
+    /// that depends on edge tags, vertex tags, and the location of vertex control points.
     /// </summary>
+    /// <seealso cref="SubD.CopyEvaluationCache(in SubD)"/>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
     /// <since>7.0</since>
     public void ClearEvaluationCache()
     {
-      var const_ptr_this = ConstPointer();
-      UnsafeNativeMethods.ON_SubD_ClearEvaluationCache(const_ptr_this);
+      // TODO: Can this be const and not delete the RhinoCommon display cache?
+      var ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_SubD_ClearEvaluationCache(ptr_this);
     }
 
     /// <summary>
-    /// Returns a SubDComponent, eithere a SubDEdge, SubDFace, or SubDVertex, from a component index.
+    /// Expert function that copies cached evaluations of component subdivision points and
+    /// limit surface information from src to this. Typically this is done for performance
+    /// critical situations like control point editing:
+    ///   - Copy a SubD to be modified (this does not copy the evaluation cache)
+    ///   - Copy the evaluation cache from the unmodified SubD
+    ///   - Modify the SubD copy
+    ///   - Update the surface mesh cache so that only the modified parts are recalculated
+    ///   - Display, meshing, bounding boxes on the modified SubD are now available
+    /// </summary>
+    /// <param name="src">The SubD from which to copy cached evaluations</param>
+    /// <returns>True if the cache was fully copied, false otherwise</returns>
+    /// <seealso cref="SubD.ClearEvaluationCache()"/>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
+    /// <since>8.8</since>
+    public bool CopyEvaluationCache(in SubD src)
+    {
+      if (IsNonConst)
+      {
+        // TODO: This could keep the display cache when the copy is succesful as it meant SubDs were identical
+        var ptr_this = NonConstPointer();
+        return UnsafeNativeMethods.ON_SubD_CopyEvaluationCache(ptr_this, src.ConstPointer());
+      }
+      else
+      {
+        // TODO: Should this be non const and delete the RhinoCommon display cache?
+        var const_ptr_this = ConstPointer();
+        // If the cache is copied, SubDs were identical, no need to delete the display
+        // DestroySubDDisplay();
+        return UnsafeNativeMethods.ON_SubD_ConstCopyEvaluationCache(const_ptr_this, src.ConstPointer());
+      }
+    }
+
+    /// <summary>
+    /// Updates limit surface information returned by
+    ///   - <see cref="SubDVertex.SurfacePoint()"/>, 
+    ///   - <see cref="SubDEdge.ToNurbsCurve(bool)"/>, and
+    ///   - <see cref="Mesh.CreateFromSubD(SubD, int)"/>.
+    /// The density of the mesh cache is <see cref="SubDDisplayParameters.Default"/>.
+    /// </summary>
+    /// <param name="lazyUpdate">
+    /// If false, all information is updated.
+    /// If true, only missing information is updated. If a relatively small subset
+    /// of a SubD has been modified and care was taken to mark cached subdivision
+    /// information as stale, then passing true can substantially improve performance.
+    /// </param>
+    /// <returns>The number of elements that were updated.</returns>
+    /// <seealso cref="SubD.ClearEvaluationCache()"/>
+    /// <seealso cref="SubD.CopyEvaluationCache(in SubD)"/>
+    /// <since>8.7</since>
+    [CLSCompliant(false)]
+    public uint UpdateSurfaceMeshCache(bool lazyUpdate)
+    {
+      if (IsNonConst)
+      {
+        // TODO: This could keep the display cache when ON_SubD_UpdateSurfaceMeshCache returns 0
+        var ptr_this = NonConstPointer();
+        return UnsafeNativeMethods.ON_SubD_UpdateSurfaceMeshCache(ptr_this, lazyUpdate);
+      }
+      else
+      {
+        // TODO: Should this be non const and automatically delete the RhinoCommon display cache?
+        var const_ptr_this = ConstPointer();
+        uint rc = UnsafeNativeMethods.ON_SubD_ConstUpdateSurfaceMeshCache(const_ptr_this, lazyUpdate);
+        //if (rc > 0) DestroySubDDisplay();
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Returns a SubDComponent, either a SubDEdge, SubDFace, or SubDVertex, from a component index.
     /// </summary>
     /// <param name="componentIndex">The component index.</param>
     /// <returns>The SubDComponent if successful, null otherwise.</returns>
@@ -2205,6 +2387,7 @@ namespace Rhino.Geometry
     /// <seealso cref="SubD.InterpolateSurfacePoints(Point3d[])"/>
     /// <seealso cref="SubD.InterpolateSurfacePoints(uint[], Point3d[])"/>
     /// <seealso cref="SubDSurfaceInterpolator"/>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
     /// <since>7.1</since>
     public Point3d SurfacePoint()
     {
@@ -2230,7 +2413,7 @@ namespace Rhino.Geometry
     /// <remarks>
     /// This method is provided to be able to set multiple control vertices, without clearing
     /// the neighborhood cache everytime as the ControlNetPoint property setter does. When you
-    /// are done modifying your SubD, call subd.ClearEvaluationCache() to refresh
+    /// are done modifying your SubD, call subd.UpdateEvaluationCache() to refresh
     /// all caches.
     /// </remarks>
     /// <since>8.0</since>
@@ -2369,11 +2552,16 @@ namespace Rhino.Geometry
     /// Get a cubic, uniform, non-rational, NURBS curve that is on the
     /// edge's limit curve.
     /// </summary>
+    /// <remarks>
+    /// If some edges in your SubD are not able to be converted to NURBS,
+    /// you might need to run <see cref="SubD.UpdateSurfaceMeshCache(bool)"/>.
+    /// </remarks>
     /// <param name="clampEnds">
     /// If true, the end knots are clamped.
     /// Otherwise the end knots are(-2,-1,0,...., k1, k1+1, k1+2).
     /// </param>
-    /// <returns></returns>
+    /// <returns>The Nurbs form of this edge.</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
     /// <since>7.0</since>
     public NurbsCurve ToNurbsCurve(bool clampEnds)
     {
@@ -2732,6 +2920,9 @@ namespace Rhino.Geometry.Collections
         yield return face;
         if(parentSubdIsNonConst != m_subd.IsNonConst)
         {
+          // 2024-03-14, Pierre: WHY IS THAT THE ONLY PLACE WE CARE ABOUT THIS??
+          // Other SubD enumerators do not care about that, neither do other objects' subobjects enumerators.
+
           // subd changed from const to non-const. This enumerator needs
           // to update to reflect this change. The face will have a different
           // pointer value

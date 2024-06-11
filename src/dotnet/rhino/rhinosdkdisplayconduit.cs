@@ -258,7 +258,11 @@ namespace Rhino.Display
     {
       if (SpaceFilter == DocObjects.ActiveSpace.None)
         return true;
+      
       var viewport = e.Viewport;
+      if (viewport == null) 
+        return false;
+
       if (viewport.ViewportType == ViewportType.PageViewMainViewport)
         return SpaceFilter == DocObjects.ActiveSpace.PageSpace;
       return SpaceFilter == DocObjects.ActiveSpace.ModelSpace;

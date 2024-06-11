@@ -9,11 +9,12 @@ using Rhino;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+namespace Rhino
+{
 /// <summary>
 /// A class used to signal failure conditions of the 2D MeshCreateFromClosedPolylinesAndPoints.
 /// </summary>
-
-public sealed class TesselationFailure {
+internal sealed class TesselationFailure {
   /// <summary>
   /// Gets the indices of open polylines.
   /// </summary>
@@ -47,4 +48,5 @@ public sealed class TesselationFailure {
   {
     return PolylinesNotContainedInOne || OpenPolylines.Any() || SelfIntersectingPolylines.Any() || MutuallyIntersectingPolylines.Any();
   }
+}
 }

@@ -2416,6 +2416,9 @@ namespace Rhino.Geometry
       if (!yInterval.IsValid) { throw new ArgumentException("yInterval is invalid"); }
       if (xCount <= 0) { throw new ArgumentOutOfRangeException("xCount"); }
       if (yCount <= 0) { throw new ArgumentOutOfRangeException("yCount"); }
+      // wfcook RH-81709 Possible memory corruption caused by Rhinocommon's Mesh.CreateFromPlane
+      if (xInterval.Length / xCount < RhinoMath.SqrtEpsilon) { throw new ArgumentException("xInterval is collapsed"); }
+      if (yInterval.Length / yCount < RhinoMath.SqrtEpsilon) { throw new ArgumentException("yInterval is collapsed"); }
 
       IntPtr ptr = UnsafeNativeMethods.ON_Mesh_CreateMeshPlane(ref plane, xInterval, yInterval, xCount, yCount);
 
@@ -2791,8 +2794,7 @@ namespace Rhino.Geometry
     /// <returns>
     /// New mesh on success or null on failure.
     /// </returns>
-    /// <since>8.6</since>
-    public static Mesh CreateFromClosedPolylinesAndPoints(
+    internal static Mesh CreateFromClosedPolylinesAndPoints(
       Point2d[] points,
       int[][] loopIndices,
       bool permitVertexAdditions,

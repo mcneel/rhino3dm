@@ -567,32 +567,18 @@ namespace Rhino.Commands
     {
       if (m_begin_command != null)
       {
-        try
-        {
-          CommandEventArgs e = new CommandEventArgs(pCommand, rc, docRuntimeSerialNumber);
-          m_begin_command(null, e);
-          e.m_pCommand = IntPtr.Zero;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var e = new CommandEventArgs(pCommand, rc, docRuntimeSerialNumber);
+        m_begin_command.SafeInvoke(null, e);
+        e.m_pCommand = IntPtr.Zero;
       }
     }
     private static void OnEndCommand(IntPtr pCommand, int rc, uint docRuntimeSerialNumber)
     {
       if (m_end_command != null)
       {
-        try
-        {
-          CommandEventArgs e = new CommandEventArgs(pCommand, rc, docRuntimeSerialNumber);
-          m_end_command(null, e);
-          e.m_pCommand = IntPtr.Zero;
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        var e = new CommandEventArgs(pCommand, rc, docRuntimeSerialNumber);
+        m_end_command.SafeInvoke(null, e);
+        e.m_pCommand = IntPtr.Zero;
       }
     }
 
@@ -661,14 +647,7 @@ namespace Rhino.Commands
     {
       if (m_undo_event != null)
       {
-        try
-        {
-          m_undo_event(null, new UndoRedoEventArgs(undo_event, undo_record_sn, command_id));
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
+        m_undo_event.SafeInvoke(null, new UndoRedoEventArgs(undo_event, undo_record_sn, command_id));
       }
     }
     internal static EventHandler<UndoRedoEventArgs> m_undo_event;
