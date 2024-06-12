@@ -84,6 +84,7 @@ public:
   BND_PointCloudItem AppendNew();
   BND_PointCloudItem InsertNew(int index);
   void Merge(const BND_PointCloud& other);
+  
   void Add1(ON_3dPoint point);
   void Add2(ON_3dPoint point, ON_3dVector normal);
   void Add3(ON_3dPoint point, BND_Color color);
