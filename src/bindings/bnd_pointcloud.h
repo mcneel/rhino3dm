@@ -3,14 +3,8 @@
 #pragma once
 
 
-#if defined(ON_PYTHON_COMPILE)
-ON_3dPointArray STDVECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points);
-ON_SimpleArray<ON_3dVector> STDVECTOR_to_ON_SimpleArrayVector(const std::vector<ON_3dVector>& vectors);
-ON_SimpleArray<ON_Color> STDVECTOR_to_ON_SimpleArrayColor(const std::vector<ON_Color>& colors);
-#else
-ON_3dPointArray BND_TUPLE_to_ON_3dPointArray(BND_TUPLE points);
-ON_SimpleArray<ON_3dVector> BND_TUPLE_to_ON_SimpleArrayVector(BND_TUPLE vectors);
-ON_SimpleArray<ON_Color> BND_TUPLE_to_ON_SimpleArrayColor(BND_TUPLE colors);
+#if defined(ON_WASM_COMPILE)
+std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points)
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
@@ -98,7 +92,7 @@ public:
   void AddRangePointsValues(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
   void AddRangePointsNormalsColors(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
   void AddRangePointsNormalsColorsValues(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
-
+  void InsertRangePoints(int index, const std::vector<ON_3dPoint>& points);
 
 /*
   void AddRangePoints(ON_3dPointArray points);
@@ -124,7 +118,6 @@ public:
   void AddRange4(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
   void AddRange5(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
   void AddRange6(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
-  void InsertRange(int index, const std::vector<ON_3dPoint>& points);
 #endif
   void Insert1(int index, const ON_3dPoint& point);
   void Insert2(int index, const ON_3dPoint& point, const ON_3dVector& normal);

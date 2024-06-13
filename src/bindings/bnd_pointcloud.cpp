@@ -1,6 +1,7 @@
 #include "bindings.h"
 
 
+#if defined(ON_WASM_COMPILE)
 std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points)
 {
   std::vector<ON_3dPoint> rc;
@@ -12,42 +13,6 @@ std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points)
   }
   return rc;
 
-}
-
-#if defined(ON_PYTHON_COMPILE)
-ON_3dPointArray STDVECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points)
-{
-  int count = (int)points.size();
-  ON_3dPointArray rc(count);
-  for (int i = 0; i < count; i++)
-  {
-    rc.Append(points[i]);
-  }
-  return rc;
-}
-
-ON_SimpleArray<ON_3dVector> STDVECTOR_to_ON_SimpleArrayVector(const std::vector<ON_3dVector>& vectors)
-{
-  int count = (int)vectors.size();
-  ON_SimpleArray<ON_3dVector> rc(count);
-  for (int i = 0; i < count; i++)
-  {
-    rc.Append(vectors[i]);
-  }
-  return rc;
-}
-
-#else
-ON_3dPointArray BND_TUPLE_to_ON_3dPointArray(BND_TUPLE points)
-{
-  int count = points["length"].as<int>();
-  ON_3dPointArray rc(count);
-  for (int i = 0; i < count; i++)
-  {
-    ON_3dPoint point = points[i].as<ON_3dPoint>();
-    rc.Append(point);
-  }
-  return rc;
 }
 #endif
 
@@ -458,7 +423,7 @@ void BND_PointCloud::AddRangePointsNormalsColorsValues(const std::vector<ON_3dPo
   }
 }
 
-void BND_PointCloud::InsertRange(int index, const std::vector<ON_3dPoint>& points)
+void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
   if (index >= 0 && (index <= m_pointcloud->m_P.Count()) && count > 0)
@@ -831,7 +796,7 @@ void initPointCloudBindings(pybind11::module& m)
     .def("Insert", &BND_PointCloud::Insert4, py::arg("index"), py::arg("point"), py::arg("normal"), py::arg("color"))
     .def("Insert", &BND_PointCloud::Insert5, py::arg("index"), py::arg("point"), py::arg("value"))
     .def("Insert", &BND_PointCloud::Insert6, py::arg("index"), py::arg("point"), py::arg("normal"), py::arg("color"), py::arg("value"))
-    .def("InsertRange", &BND_PointCloud::InsertRange, py::arg("index"), py::arg("points"))
+    .def("InsertRangePoints", &BND_PointCloud::InsertRange, py::arg("index"), py::arg("points"))
     .def("RemoveAt", &BND_PointCloud::RemoveAt, py::arg("index"))
     .def("GetPoints", &BND_PointCloud::GetPoints)
     .def("PointAt", &BND_PointCloud::PointAt, py::arg("index"))
