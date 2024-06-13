@@ -513,7 +513,7 @@ void BND_PointCloud::AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE co
 
 void BND_PointCloud::InsertRange(int index, BND_TUPLE points )
 {
-  InsertRangePoints( index, tuple_to_vector(points) );
+  InsertRangePoints( index, tuple_to_vector3dPoint(points) );
 }
 
 #endif
