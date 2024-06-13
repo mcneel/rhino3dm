@@ -2,12 +2,13 @@
 
 
 #if defined(ON_WASM_COMPILE)
-
+/*
 template<class T>
 std::vector<T> tuple_to_vector(BND_TUPLE array) 
 {
   return emscripten::vecFromJSArray(array);
 }
+*/
 
 std::vector<ON_3dPoint> tuple_to_vector3dPoint(BND_TUPLE data)
 {
