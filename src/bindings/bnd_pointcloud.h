@@ -107,17 +107,10 @@ public:
   void AddRange1(BND_TUPLE points);
   void AddRange2(BND_TUPLE points, BND_TUPLE normals);
   void AddRange3(BND_TUPLE points, BND_TUPLE colors);
-  void AddRange5(BND_TUPLE points, BND_TUPLE values);
-  void AddRange4(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
+  void AddRange4(BND_TUPLE points, BND_TUPLE values);
+  void AddRange5(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
   void AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values);
   void InsertRange(int index, BND_TUPLE points);
-#else
-  void AddRange1(const std::vector<ON_3dPoint>& points);
-  void AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
-  void AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
-  void AddRange4(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
-  void AddRange5(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
-  void AddRange6(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
 #endif
   void Insert1(int index, const ON_3dPoint& point);
   void Insert2(int index, const ON_3dPoint& point, const ON_3dVector& normal);
