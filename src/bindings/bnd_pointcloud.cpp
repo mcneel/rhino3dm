@@ -1,6 +1,19 @@
 #include "bindings.h"
 
 
+std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points)
+{
+  std::vector<ON_3dPoint> rc;
+  int count = points["length"].as<int>();
+  for (int i = 0; i < count; i++)
+  {
+    ON_3dPoint pt = points[i].as<ON_3dPoint>();
+    rc.push_back(pt);
+  }
+  return rc;
+
+}
+
 #if defined(ON_PYTHON_COMPILE)
 ON_3dPointArray STDVECTOR_to_ON_3dPointArray(const std::vector<ON_3dPoint>& points)
 {
@@ -490,18 +503,7 @@ void BND_PointCloud::InsertRange(int index, const std::vector<ON_3dPoint>& point
 
 void BND_PointCloud::AddRange1(BND_TUPLE points)
 {
-  const int count = points["length"].as<int>();
-  if (count > 0)
-  {
-    ON_3dPointArray _points = BND_TUPLE_to_ON_3dPointArray(points)
-    ON_3dPointArray pts(count);
-    for (int i = 0; i < count; i++)
-    {
-      ON_3dPoint point = points[i].as<ON_3dPoint>();
-      pts.Append(point);
-    }
-    AddRangePoints(pts);
-  }
+  AddRangePoints( tuple_to_vectorPt3d(points) );
 }
 
 #endif
@@ -880,7 +882,7 @@ void initPointCloudBindings(void*)
     .function("addPointValue", &BND_PointCloud::Add5)
     .function("addPointNormalColorValue", &BND_PointCloud::Add6)
 
-    .function("addRange", &BND_PointCloud::AddRange1)
+    .function("addRangePoints", &BND_PointCloud::AddRange1)
 
 /* We do not support arrays of Vector3d or BND_Color in WASM
 
