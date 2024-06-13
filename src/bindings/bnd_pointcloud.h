@@ -84,7 +84,7 @@ public:
   BND_PointCloudItem AppendNew();
   BND_PointCloudItem InsertNew(int index);
   void Merge(const BND_PointCloud& other);
-  
+
   void Add1(ON_3dPoint point);
   void Add2(ON_3dPoint point, ON_3dVector normal);
   void Add3(ON_3dPoint point, BND_Color color);
@@ -92,6 +92,15 @@ public:
   void Add5(ON_3dPoint point, double value);
   void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
 
+  void AddRangePoints(const std::vector<ON_3dPoint>& points);
+  void AddRangePointsNormals(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
+  void AddRangePointsColors(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
+  void AddRangePointsValues(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
+  void AddRangePointsNormalsColors(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
+  void AddRangePointsNormalsColorsValues(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
+
+
+/*
   void AddRangePoints(ON_3dPointArray points);
   void AddRangePointsNormals(ON_3dPointArray points, ON_SimpleArray<ON_3dVector> normals);
   void AddRangePointsColors(ON_3dPointArray points, ON_SimpleArray<ON_Color> colors);
@@ -99,13 +108,13 @@ public:
   void AddRangePointsValues(ON_3dPointArray points, ON_SimpleArray<double> values);
   void AddRangePointsNormalsColorsValues(ON_3dPointArray points, ON_SimpleArray<ON_3dVector> normals, ON_SimpleArray<ON_Color> colors, ON_SimpleArray<double> values);
   void InsertRangePoints(int index, ON_3dPointArray points);
-
+*/
 #if defined(ON_WASM_COMPILE)
   void AddRange1(BND_TUPLE points);
   void AddRange2(BND_TUPLE points, BND_TUPLE normals);
   void AddRange3(BND_TUPLE points, BND_TUPLE colors);
-  void AddRange4(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
   void AddRange5(BND_TUPLE points, BND_TUPLE values);
+  void AddRange4(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
   void AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values);
   void InsertRange(int index, BND_TUPLE points);
 #else
