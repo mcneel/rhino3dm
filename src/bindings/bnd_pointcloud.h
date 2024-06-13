@@ -4,7 +4,7 @@
 
 
 #if defined(ON_WASM_COMPILE)
-std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points)
+std::vector<ON_3dPoint> tuple_to_vectorPt3d(BND_TUPLE points);
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
