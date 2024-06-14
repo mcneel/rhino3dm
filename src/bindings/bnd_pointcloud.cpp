@@ -2,13 +2,13 @@
 
 
 #if defined(ON_WASM_COMPILE)
-/*
+
 template<class T>
 std::vector<T> tuple_to_vector(BND_TUPLE array) 
 {
-  return emscripten::vecFromJSArray(array);
+  return emscripten::vecFromJSArray<T>(array);
 }
-*/
+
 
 std::vector<ON_3dPoint> tuple_to_vector3dPoint(BND_TUPLE data)
 {
@@ -484,7 +484,7 @@ void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>&
 
 void BND_PointCloud::AddRange1(BND_TUPLE points)
 {
-  AddRangePoints( tuple_to_vectorPt3d(points) );
+  AddRangePoints( tuple_to_vector<ON_3dPoint>(points) );
 }
 
 void BND_PointCloud::AddRange2(BND_TUPLE points, BND_TUPLE normals)
