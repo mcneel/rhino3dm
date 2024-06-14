@@ -1,5 +1,12 @@
 #include "bindings.h"
 
+#if defined(ON_WASM_COMPILE)
+template<typename T>
+std::vector<T> Tuple_To_Vector(BND_TUPLE array) 
+{
+  return emscripten::vecFromJSArray<T>(array);
+}
+#endif
 
 static void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureValues)
 {
@@ -306,40 +313,36 @@ void BND_PointCloud::Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color,
   }
 }
 
-void BND_PointCloud::AddRange1(const std::vector<ON_3dPoint>& points)
+void BND_PointCloud::AddRangePoints(const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
-  const ON_3dPoint* _points = points.data();
   if (count > 0)
   {
-    m_pointcloud->m_P.Append(count, _points);
+    m_pointcloud->m_P.Append(count, points.data());
     ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
     m_pointcloud->InvalidateBoundingBox();
   }
 }
 
-void BND_PointCloud::AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals)
+void BND_PointCloud::AddRangePointsNormals(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals)
 {
   if (points.size() != normals.size())
     return;
   int count = (int)points.size();
-  const ON_3dPoint* _points = points.data();
-  const ON_3dVector* _normals = normals.data();
   if (count > 0)
   {
-    m_pointcloud->m_P.Append(count, _points);
-    m_pointcloud->m_N.Append(count, _normals);
+    m_pointcloud->m_P.Append(count, points.data());
+    m_pointcloud->m_N.Append(count, normals.data());
     ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
     m_pointcloud->InvalidateBoundingBox();
   }
 }
 
-void BND_PointCloud::AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors)
+void BND_PointCloud::AddRangePointsColors(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors)
 {
   if (points.size() != colors.size())
     return;
   int count = (int)points.size();
-
   if (count > 0)
   {
     m_pointcloud->m_P.Append(count, points.data());
@@ -353,7 +356,23 @@ void BND_PointCloud::AddRange3(const std::vector<ON_3dPoint>& points, const std:
   }
 }
 
-void BND_PointCloud::AddRange4(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors)
+void BND_PointCloud::AddRangePointsValues(const std::vector<ON_3dPoint>& points, const std::vector<double>& values)
+{
+  if (points.size() != values.size())
+    return;
+  int count = (int)points.size();
+  const ON_3dPoint* _points = points.data();
+  const double* _values= values.data();
+  if (count > 0)
+  {
+    m_pointcloud->m_P.Append(count, _points);
+    m_pointcloud->m_V.Append(count, _values);
+    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
+    m_pointcloud->InvalidateBoundingBox();
+  }
+}
+
+void BND_PointCloud::AddRangePointsNormalsColors(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors)
 {
   if (points.size() != normals.size() || points.size() != colors.size())
     return;
@@ -374,23 +393,7 @@ void BND_PointCloud::AddRange4(const std::vector<ON_3dPoint>& points, const std:
   }
 }
 
-void BND_PointCloud::AddRange5(const std::vector<ON_3dPoint>& points, const std::vector<double>& values)
-{
-  if (points.size() != values.size())
-    return;
-  int count = (int)points.size();
-  const ON_3dPoint* _points = points.data();
-  const double* _values= values.data();
-  if (count > 0)
-  {
-    m_pointcloud->m_P.Append(count, _points);
-    m_pointcloud->m_V.Append(count, _values);
-    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
-    m_pointcloud->InvalidateBoundingBox();
-  }
-}
-
-void BND_PointCloud::AddRange6(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values)
+void BND_PointCloud::AddRangePointsNormalsColorsValues(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values)
 {
   if (points.size() != normals.size() || points.size() != colors.size() != values.size())
     return;
@@ -411,6 +414,89 @@ void BND_PointCloud::AddRange6(const std::vector<ON_3dPoint>& points, const std:
     m_pointcloud->InvalidateBoundingBox();
   }
 }
+
+void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>& points)
+{
+  int count = (int)points.size();
+  if (index >= 0 && (index <= m_pointcloud->m_P.Count()) && count > 0)
+  {
+    if (index == m_pointcloud->m_P.Count())
+    {
+      AddRangePoints(points);
+      return;
+    }
+
+    int oldcount = m_pointcloud->m_P.Count();
+    int newcount = oldcount + count;
+    m_pointcloud->m_P.Reserve(newcount);
+    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
+
+    m_pointcloud->m_P.SetCount(newcount);
+    ON_3dPoint* pPoints = m_pointcloud->m_P.Array();
+    const ON_3dPoint* pSource = pPoints + index;
+    ON_3dPoint* pDest = pPoints + oldcount;
+    ::memcpy(pDest, pSource, (oldcount - index) * sizeof(ON_3dPoint));
+
+    bool insertNormals = (m_pointcloud->m_N.Count() > 0);
+    bool insertColors = (m_pointcloud->m_C.Count() > 0);
+    bool insertHiddenFlags = (m_pointcloud->m_H.Count() > 0);
+
+    for (int i = 0; i < count; i++)
+    {
+      m_pointcloud->m_P[index + i] = points[i];
+      if (insertNormals)
+        m_pointcloud->m_N.Insert(index + i, ON_3dVector(0, 0, 0));
+      if (insertColors)
+        m_pointcloud->m_C.Insert(index + i, ON_Color(0, 0, 0));
+      if (insertHiddenFlags)
+        m_pointcloud->m_H.Insert(index + i, false);
+    }
+    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
+    m_pointcloud->InvalidateBoundingBox();
+  }
+}
+
+#if defined(ON_WASM_COMPILE)
+
+void BND_PointCloud::AddRange1(BND_TUPLE points)
+{
+  //AddRangePoints( tuple_to_vector3dPoint( points ) );
+  AddRangePoints( Tuple_To_Vector<ON_3dPoint>( points ) );
+}
+
+void BND_PointCloud::AddRange2(BND_TUPLE points, BND_TUPLE normals)
+{
+  //AddRangePointsNormals( tuple_to_vector3dPoint(points), tuple_to_vector3dVector(normals) );
+  AddRangePointsNormals( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals) );
+}
+
+void BND_PointCloud::AddRange3(BND_TUPLE points, BND_TUPLE colors)
+{
+  //AddRangePointsColors( tuple_to_vector3dPoint(points), tuple_to_vectorColor(colors) );
+  AddRangePointsColors( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<BND_Color>(colors) );
+}
+
+void BND_PointCloud::AddRange4(BND_TUPLE points, BND_TUPLE values)
+{
+  AddRangePointsValues( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<double>(values) );
+}
+
+void BND_PointCloud::AddRange5(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors)
+{
+  AddRangePointsNormalsColors( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals), Tuple_To_Vector<BND_Color>(colors) );
+}
+
+void BND_PointCloud::AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values)
+{
+  AddRangePointsNormalsColorsValues( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals), Tuple_To_Vector<BND_Color>(colors), Tuple_To_Vector<double>(values) );
+}
+
+void BND_PointCloud::InsertRange(int index, BND_TUPLE points )
+{
+  InsertRangePoints( index, Tuple_To_Vector<ON_3dPoint>(points) );
+}
+
+#endif
 
 void BND_PointCloud::Insert1(int index, const ON_3dPoint& point)
 {
@@ -498,47 +584,6 @@ void BND_PointCloud::Insert6(int index, const ON_3dPoint& point, const ON_3dVect
     {
       m_pointcloud->m_V[index] = value;
     }
-  }
-}
-
-void BND_PointCloud::InsertRange(int index, const std::vector<ON_3dPoint>& points)
-{
-  int count = (int)points.size();
-  if (index >= 0 && (index <= m_pointcloud->m_P.Count()) && count > 0)
-  {
-    if (index == m_pointcloud->m_P.Count())
-    {
-      AddRange1(points);
-      return;
-    }
-
-    int oldcount = m_pointcloud->m_P.Count();
-    int newcount = oldcount + count;
-    m_pointcloud->m_P.Reserve(newcount);
-    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
-
-    m_pointcloud->m_P.SetCount(newcount);
-    ON_3dPoint* pPoints = m_pointcloud->m_P.Array();
-    const ON_3dPoint* pSource = pPoints + index;
-    ON_3dPoint* pDest = pPoints + oldcount;
-    ::memcpy(pDest, pSource, (oldcount - index) * sizeof(ON_3dPoint));
-
-    bool insertNormals = (m_pointcloud->m_N.Count() > 0);
-    bool insertColors = (m_pointcloud->m_C.Count() > 0);
-    bool insertHiddenFlags = (m_pointcloud->m_H.Count() > 0);
-
-    for (int i = 0; i < count; i++)
-    {
-      m_pointcloud->m_P[index + i] = points[i];
-      if (insertNormals)
-        m_pointcloud->m_N.Insert(index + i, ON_3dVector(0, 0, 0));
-      if (insertColors)
-        m_pointcloud->m_C.Insert(index + i, ON_Color(0, 0, 0));
-      if (insertHiddenFlags)
-        m_pointcloud->m_H.Insert(index + i, false);
-    }
-    ON_PointCloud_FixPointCloud(m_pointcloud, false, false, false, false);
-    m_pointcloud->InvalidateBoundingBox();
   }
 }
 
@@ -764,19 +809,19 @@ void initPointCloudBindings(pybind11::module& m)
     .def("Add", &BND_PointCloud::Add4, py::arg("point"), py::arg("normal"), py::arg("color"))
     .def("Add", &BND_PointCloud::Add5, py::arg("point"), py::arg("value"))
     .def("Add", &BND_PointCloud::Add6, py::arg("point"), py::arg("normal"), py::arg("normal"), py::arg("value"))
-    .def("AddRange", &BND_PointCloud::AddRange1, py::arg("points"))
-    .def("AddRange", &BND_PointCloud::AddRange2, py::arg("points"), py::arg("normals"))
-    .def("AddRange", &BND_PointCloud::AddRange3, py::arg("points"), py::arg("colors"))
-    .def("AddRange", &BND_PointCloud::AddRange4, py::arg("points"), py::arg("normals"), py::arg("colors"))
-    .def("AddRange", &BND_PointCloud::AddRange5, py::arg("points"), py::arg("values"))
-    .def("AddRange", &BND_PointCloud::AddRange6, py::arg("points"), py::arg("normals"), py::arg("colors"), py::arg("values"))
+    .def("AddRange", &BND_PointCloud::AddRangePoints, py::arg("points"))
+    .def("AddRange", &BND_PointCloud::AddRangePointsNormals, py::arg("points"), py::arg("normals"))
+    .def("AddRange", &BND_PointCloud::AddRangePointsColors, py::arg("points"), py::arg("colors"))
+    .def("AddRange", &BND_PointCloud::AddRangePointsValues, py::arg("points"), py::arg("values"))
+    .def("AddRange", &BND_PointCloud::AddRangePointsNormalsColors, py::arg("points"), py::arg("normals"), py::arg("colors"))
+    .def("AddRange", &BND_PointCloud::AddRangePointsNormalsColorsValues, py::arg("points"), py::arg("normals"), py::arg("colors"), py::arg("values"))
     .def("Insert", &BND_PointCloud::Insert1, py::arg("index"), py::arg("point"))
     .def("Insert", &BND_PointCloud::Insert2, py::arg("index"), py::arg("point"), py::arg("normal"))
     .def("Insert", &BND_PointCloud::Insert3, py::arg("index"), py::arg("point"), py::arg("color"))
     .def("Insert", &BND_PointCloud::Insert4, py::arg("index"), py::arg("point"), py::arg("normal"), py::arg("color"))
     .def("Insert", &BND_PointCloud::Insert5, py::arg("index"), py::arg("point"), py::arg("value"))
     .def("Insert", &BND_PointCloud::Insert6, py::arg("index"), py::arg("point"), py::arg("normal"), py::arg("color"), py::arg("value"))
-    .def("InsertRange", &BND_PointCloud::InsertRange, py::arg("index"), py::arg("points"))
+    .def("InsertRange", &BND_PointCloud::InsertRangePoints, py::arg("index"), py::arg("points"))
     .def("RemoveAt", &BND_PointCloud::RemoveAt, py::arg("index"))
     .def("GetPoints", &BND_PointCloud::GetPoints)
     .def("PointAt", &BND_PointCloud::PointAt, py::arg("index"))
@@ -820,25 +865,30 @@ void initPointCloudBindings(void*)
     .function("appendNew", &BND_PointCloud::AppendNew)
     .function("insertNew", &BND_PointCloud::InsertNew)
     .function("merge", &BND_PointCloud::Merge)
+    
     .function("add", &BND_PointCloud::Add1)
     .function("addPointNormal", &BND_PointCloud::Add2)
     .function("addPointColor", &BND_PointCloud::Add3)
     .function("addPointNormalColor", &BND_PointCloud::Add4)
     .function("addPointValue", &BND_PointCloud::Add5)
     .function("addPointNormalColorValue", &BND_PointCloud::Add6)
-    .function("addRange", &BND_PointCloud::AddRange1)
-    .function("addRangePointNormal", &BND_PointCloud::AddRange2)
-    .function("addRangePointColor", &BND_PointCloud::AddRange3)
-    .function("addRangePointNormalColor", &BND_PointCloud::AddRange4)
-    .function("addRangePointValue", &BND_PointCloud::AddRange5)
-    .function("addRangePointNormalColorValue", &BND_PointCloud::AddRange6)
+
+    .function("addRangePoints", &BND_PointCloud::AddRange1)
+    .function("addRangePointsNormals", &BND_PointCloud::AddRange2)
+    .function("addRangePointsColors", &BND_PointCloud::AddRange3)
+    .function("addRangePointsValues", &BND_PointCloud::AddRange4)
+    .function("addRangePointsNormalsColors", &BND_PointCloud::AddRange5)
+    .function("addRangePointsNormalsColorsValues", &BND_PointCloud::AddRange6)
+
     .function("insert", &BND_PointCloud::Insert1)
     .function("insertPointNormal", &BND_PointCloud::Insert2)
     .function("insertPointColor", &BND_PointCloud::Insert3)
     .function("insertPointNormalColor", &BND_PointCloud::Insert4)
     .function("insertPointValue", &BND_PointCloud::Insert5)
     .function("insertPointNormalColorValue", &BND_PointCloud::Insert6)
+
     .function("insertRange", &BND_PointCloud::InsertRange)
+
     .function("removeAt", &BND_PointCloud::RemoveAt)
     .function("getPoints", &BND_PointCloud::GetPoints)
     .function("pointAt", &BND_PointCloud::PointAt)

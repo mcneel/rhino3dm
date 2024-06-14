@@ -50,6 +50,7 @@ public:
   BND_Polyline() = default;
   BND_Polyline(int initialCapacity) : BND_Point3dList(initialCapacity) {};
   BND_Polyline(const std::vector<ON_3dPoint>& points) : BND_Point3dList(points) {};
+
   bool IsValid() const { return m_polyline.IsValid(); }
   int SegmentCount() const { return m_polyline.SegmentCount(); }
   bool IsClosed() const { return m_polyline.IsClosed(); }

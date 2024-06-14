@@ -396,6 +396,7 @@ using namespace emscripten;
 
 void initPointBindings(void*)
 {
+
   value_array<ON_2dPoint>("Point2dSimple")
     .element(&ON_2dPoint::x)
     .element(&ON_2dPoint::y);
@@ -407,6 +408,8 @@ void initPointBindings(void*)
 
   class_<BND_Point3d>("Point3d")
     .class_function("transform", &BND_Point3d::Transform);
+
+  //register_vector<ON_3dPoint>("Point3dArray");
 
   value_array<ON_4dPoint>("Point4dSimple")
     .element(&ON_4dPoint::x)
