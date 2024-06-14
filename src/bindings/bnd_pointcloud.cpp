@@ -482,6 +482,11 @@ void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>&
 
 #if defined(ON_WASM_COMPILE)
 
+void BND_PointCloud::AddRange11(BND_TUPLE points)
+{
+  AddRangePoints( tuple_to_vector<ON_3dPoint>(points) );
+}
+
 void BND_PointCloud::AddRange1(BND_TUPLE points)
 {
   AddRangePoints( tuple_to_vector3dPoint(points) );
@@ -894,6 +899,7 @@ void initPointCloudBindings(void*)
     .function("addPointNormalColorValue", &BND_PointCloud::Add6)
 
     .function("addRangePoints", &BND_PointCloud::AddRange1)
+    .function("addRangePointsGeneric", &BND_PointCloud::AddRange11)
     .function("addRangePointsNormals", &BND_PointCloud::AddRange2)
     .function("addRangePointsColors", &BND_PointCloud::AddRange3)
     .function("addRangePointsValues", &BND_PointCloud::AddRange4)
