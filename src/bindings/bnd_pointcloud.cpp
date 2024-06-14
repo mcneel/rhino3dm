@@ -484,7 +484,7 @@ void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>&
 
 void BND_PointCloud::AddRange1(BND_TUPLE points)
 {
-  AddRangePoints( tuple_to_vector<ON_3dPoint>(points) );
+  AddRangePoints( tuple_to_vector3dPoint(points) );
 }
 
 void BND_PointCloud::AddRange2(BND_TUPLE points, BND_TUPLE normals)
