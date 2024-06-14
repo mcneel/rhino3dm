@@ -101,7 +101,6 @@ public:
 
 #if defined(ON_WASM_COMPILE)
   void AddRange1(BND_TUPLE points);
-  void AddRange11(BND_TUPLE points);
   void AddRange2(BND_TUPLE points, BND_TUPLE normals);
   void AddRange3(BND_TUPLE points, BND_TUPLE colors);
   void AddRange4(BND_TUPLE points, BND_TUPLE values);
