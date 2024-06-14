@@ -865,6 +865,7 @@ void initPointCloudBindings(void*)
     .function("appendNew", &BND_PointCloud::AppendNew)
     .function("insertNew", &BND_PointCloud::InsertNew)
     .function("merge", &BND_PointCloud::Merge)
+    
     .function("add", &BND_PointCloud::Add1)
     .function("addPointNormal", &BND_PointCloud::Add2)
     .function("addPointColor", &BND_PointCloud::Add3)
@@ -879,14 +880,6 @@ void initPointCloudBindings(void*)
     .function("addRangePointsNormalsColors", &BND_PointCloud::AddRange5)
     .function("addRangePointsNormalsColorsValues", &BND_PointCloud::AddRange6)
 
-/* We do not support arrays of Vector3d or BND_Color in WASM
-
-    .function("addRangePointNormal", &BND_PointCloud::AddRange2)
-    .function("addRangePointColor", &BND_PointCloud::AddRange3)
-    .function("addRangePointNormalColor", &BND_PointCloud::AddRange4)
-    .function("addRangePointValue", &BND_PointCloud::AddRange5)
-    .function("addRangePointNormalColorValue", &BND_PointCloud::AddRange6)
-*/
     .function("insert", &BND_PointCloud::Insert1)
     .function("insertPointNormal", &BND_PointCloud::Insert2)
     .function("insertPointColor", &BND_PointCloud::Insert3)
