@@ -1,5 +1,13 @@
 #include "bindings.h"
 
+#if defined(ON_WASM_COMPILE)
+template<typename T>
+std::vector<T> Tuple_To_Vector(BND_TUPLE array) 
+{
+  return emscripten::vecFromJSArray<T>(array);
+}
+#endif
+
 static void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureValues)
 {
   if (pPointCloud)

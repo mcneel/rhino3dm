@@ -8,6 +8,11 @@ void initPointCloudBindings(pybind11::module& m);
 void initPointCloudBindings(void* m);
 #endif
 
+#if defined(ON_WASM_COMPILE)
+template<typename T>
+std::vector<T> Tuple_To_Vector(BND_TUPLE data);
+#endif
+
 class BND_PointCloudItem
 {
   ON_ModelComponentReference m_component_reference;
