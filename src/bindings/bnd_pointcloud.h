@@ -2,16 +2,6 @@
 
 #pragma once
 
-
-#if defined(ON_WASM_COMPILE)
-std::vector<ON_3dPoint> tuple_to_vector3dPoint(BND_TUPLE data);
-std::vector<ON_3dVector> tuple_to_vector3dVector(BND_TUPLE data);
-std::vector<BND_Color> tuple_to_vectorColor(BND_TUPLE data);
-std::vector<double> tuple_to_vectorDouble(BND_TUPLE data);
-template<class T>
-std::vector<T> tuple_to_vector(BND_TUPLE data);
-#endif
-
 #if defined(ON_PYTHON_COMPILE)
 void initPointCloudBindings(pybind11::module& m);
 #else

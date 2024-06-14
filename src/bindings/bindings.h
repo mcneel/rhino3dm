@@ -37,6 +37,10 @@ typedef emscripten::val BND_Color;
 typedef emscripten::val BND_Color4f;
 typedef emscripten::val BND_TUPLE;
 typedef emscripten::val BND_DateTime;
+
+template<typename T>
+std::vector<T> Tuple_To_Vector(BND_TUPLE data);
+
 #endif
 
 BND_TUPLE CreateTuple(int count);

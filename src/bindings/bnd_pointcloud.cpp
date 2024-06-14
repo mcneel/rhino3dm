@@ -1,37 +1,5 @@
 #include "bindings.h"
 
-
-#if defined(ON_WASM_COMPILE)
-
-template<class T>
-std::vector<T> tuple_to_vector(BND_TUPLE array) 
-{
-  return emscripten::vecFromJSArray<T>(array);
-}
-
-
-std::vector<ON_3dPoint> tuple_to_vector3dPoint(BND_TUPLE data)
-{
-  return emscripten::vecFromJSArray<ON_3dPoint>(data);
-}
-
-std::vector<ON_3dVector> tuple_to_vector3dVector(BND_TUPLE data)
-{
-  return emscripten::vecFromJSArray<ON_3dVector>(data);
-}
-
-std::vector<BND_Color> tuple_to_vectorColor(BND_TUPLE data)
-{
-  return emscripten::vecFromJSArray<BND_Color>(data);
-}
-
-std::vector<double> tuple_to_vectorDouble(BND_TUPLE data)
-{
-  return emscripten::vecFromJSArray<double>(data);
-}
-
-#endif
-
 static void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureValues)
 {
   if (pPointCloud)
@@ -485,39 +453,39 @@ void BND_PointCloud::InsertRangePoints(int index, const std::vector<ON_3dPoint>&
 void BND_PointCloud::AddRange1(BND_TUPLE points)
 {
   //AddRangePoints( tuple_to_vector3dPoint( points ) );
-  AddRangePoints( tuple_to_vector<ON_3dPoint>( points ) );
+  AddRangePoints( Tuple_To_Vector<ON_3dPoint>( points ) );
 }
 
 void BND_PointCloud::AddRange2(BND_TUPLE points, BND_TUPLE normals)
 {
   //AddRangePointsNormals( tuple_to_vector3dPoint(points), tuple_to_vector3dVector(normals) );
-  AddRangePointsNormals( tuple_to_vector<ON_3dPoint>(points), tuple_to_vector<ON_3dVector>(normals) );
+  AddRangePointsNormals( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals) );
 }
 
 void BND_PointCloud::AddRange3(BND_TUPLE points, BND_TUPLE colors)
 {
   //AddRangePointsColors( tuple_to_vector3dPoint(points), tuple_to_vectorColor(colors) );
-  AddRangePointsColors( tuple_to_vector<ON_3dPoint>(points), tuple_to_vector<BND_Color>(colors) );
+  AddRangePointsColors( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<BND_Color>(colors) );
 }
 
 void BND_PointCloud::AddRange4(BND_TUPLE points, BND_TUPLE values)
 {
-  AddRangePointsValues( tuple_to_vector<ON_3dPoint>(points), tuple_to_vector<double>(values) );
+  AddRangePointsValues( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<double>(values) );
 }
 
 void BND_PointCloud::AddRange5(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors)
 {
-  AddRangePointsNormalsColors( tuple_to_vector<ON_3dPoint>(points), tuple_to_vector<ON_3dVector>(normals), tuple_to_vector<BND_Color>(colors) );
+  AddRangePointsNormalsColors( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals), Tuple_To_Vector<BND_Color>(colors) );
 }
 
 void BND_PointCloud::AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values)
 {
-  AddRangePointsNormalsColorsValues( tuple_to_vector<ON_3dPoint>(points), tuple_to_vector<ON_3dVector>(normals), tuple_to_vector<BND_Color>(colors), tuple_to_vector<double>(values) );
+  AddRangePointsNormalsColorsValues( Tuple_To_Vector<ON_3dPoint>(points), Tuple_To_Vector<ON_3dVector>(normals), Tuple_To_Vector<BND_Color>(colors), Tuple_To_Vector<double>(values) );
 }
 
 void BND_PointCloud::InsertRange(int index, BND_TUPLE points )
 {
-  InsertRangePoints( index, tuple_to_vector<ON_3dPoint>(points) );
+  InsertRangePoints( index, Tuple_To_Vector<ON_3dPoint>(points) );
 }
 
 #endif
