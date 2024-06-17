@@ -4,7 +4,7 @@
 #### Supported Python platforms:
 
 - Windows (32 and 64 bit): Python 3.7 - 3.12
-- macOS 11 and 12: Python 3.7 - 3.12 (x86_64), Python 3.11 (Universal)
+- macOS 12: Python 3.7 - 3.12 (x86_64), Python 3.11 - 3.12 (Universal)
 - macOS 14: Python 3.8 - 3.12
 - linux: Python cp38-cp38 - cp312-cp312 via manylinux2014_x86_64
 - Other architectures, operating systems, and python versions are supported through source distributions on PyPi
