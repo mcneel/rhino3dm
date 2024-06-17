@@ -93,7 +93,7 @@ def print_ok_message(ok_message):
 # ------------------------------------------------- Versions -----------------------------------------------------------
 
 def split_by_numbers(x):
-    r = re.compile('(\d+)')
+    r = re.compile('(\\d+)')
     l = r.split(x)
     return [int(y) if y.isdigit() else y for y in l]
 
