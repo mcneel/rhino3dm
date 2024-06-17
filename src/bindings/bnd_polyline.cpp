@@ -9,7 +9,7 @@ BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
 
 BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& points) 
 {
-  int count = points.GetCount();
+  int count = (int)points.size();
   BND_Polyline* rc = new BND_Polyline();
   rc->m_polyline.Append(count, points.data());
   return rc;
