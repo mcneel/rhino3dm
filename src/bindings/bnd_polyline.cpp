@@ -138,12 +138,12 @@ BND_Polyline* BND_Polyline::CreateStarPolygon(BND_Circle& circle, double radius,
 
 BND_TUPLE BND_Polyline::GetSegments() const
 {
-  int count = m_polyline.SegmentCount();
+  int count = m_polyline.Count();
   if( count < 2 ) 
   {
     return NullTuple();
   }
-  BND_TUPLE rc = CreateTuple(count);
+  BND_TUPLE rc = CreateTuple(count - 1);
 
   for (int i = 0; i < count - 1; i++)
   {
