@@ -11,12 +11,16 @@ void initExtensionsBindings(void* m);
 
 class BND_FileObject
 {
+  //std::shared_ptr<ONX_Model> m_model;
 public:
+  //BND_FileObject() = default;
+  //BND_FileObject(std::shared_ptr<ONX_Model> m) { m_model = m; }
   class BND_GeometryBase* m_geometry = nullptr;
   class BND_3dmObjectAttributes* m_attributes = nullptr;
 
   BND_GeometryBase* GetGeometry() { return m_geometry; };
   BND_3dmObjectAttributes* GetAttributes() { return m_attributes; }
+  BND_TUPLE GetTextureMapping( const class BND_File3dm* file3dm, int mappingId );
 };
 
 class BND_ONXModel_ObjectTable

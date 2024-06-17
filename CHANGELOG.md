@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.9.0] - UNRELEASED
+## [8.9.0-beta] - UNRELEASED
 
 diff:
 
@@ -15,12 +15,13 @@ diff:
 
  ### Changed
 
- - Updated OpenNURBS to v8.7.24138.15431 diff: https://github.com/mcneel/opennurbs/compare/v8.6.24101.05001...v8.7.24138.15431
+ - Updated OpenNURBS to v8.9 diff: https://github.com/mcneel/opennurbs/compare/v8.6.24101.05001...update-1718616159-8.9
 
  ### Fixed
 
  - (py, js) Polyline.CreateFromPoints now works [#616](https://github.com/mcneel/rhino3dm/issues/616)
  - (js) None of the PointCloud.AddRange* methods were working in js. This is fixed. [#620](https://github.com/mcneel/rhino3dm/issues/620)
+ - (py, js) Polyline.GetSegments() always returned an extra NULL at the end of the segment array. [#623](https://github.com/mcneel/rhino3dm/issues/623)
 
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1

@@ -1566,6 +1566,48 @@ int BND_File3dmWriteOptions::VersionForWriting() const
   return m_version * 10;
 }
 
+/*
+BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, int mappingId )
+{
+  ON_UUID id = m_attributes->m_attributes->m_uuid;
+  ON_TextureMapping tm;
+  ON_Xform m_object_xform;
+  BND_TUPLE rc = CreateTuple(2);
+
+  ON_ModelComponentReference ref = *file3dm->m_model->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, id);
+  if (ref.IsEmpty())
+    return NullTuple();
+
+  const ON_ModelGeometryComponent* component_ptr = ON_ModelGeometryComponent::FromModelComponentRef(ref, &ON_ModelGeometryComponent::Unset);
+  if (nullptr == component_ptr)
+    return NullTuple();
+
+  // Get any mapping ref for now. Not sure how to figure out the current render plug-in.
+  const ON_MappingRef* mappingRef = m_attributes->m_attributes->m_rendering_attributes.MappingRef(ON_nil_uuid);
+  if (nullptr == mappingRef)
+    return NullTuple();
+
+  for (int i = 0; i < mappingRef->m_mapping_channels.Count(); i++)
+  {
+    if (mappingRef->m_mapping_channels[i].m_mapping_channel_id == mappingId)
+    {
+      m_object_xform = mappingRef->m_mapping_channels[i].m_object_xform;
+      tm = ONX_Model_GetTextureMappingHelper(*file3dm->m_model, &mappingRef->m_mapping_channels[i]);
+    }
+  }
+
+  if(tm == ON_TextureMapping::Unset)
+    return NullTuple();
+  else 
+  {
+    SetTuple(rc, 0, BND_TextureMapping(tm, nullptr));
+    SetTuple(rc, 1, BND_Transform(m_object_xform));
+    return rc;
+  }
+
+}
+*/
+
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
