@@ -7,43 +7,20 @@ BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
   m_polyline.Append(count, pts);
 }
 
-BND_Polyline* BND_Polyline::CreateFromPoints(const BND_Point3dList& points)
+BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& points) 
 {
   int count = points.GetCount();
-  const ON_3dPoint* pts = points.m_polyline.Array();
   BND_Polyline* rc = new BND_Polyline();
-  rc->m_polyline.Append(count, pts);
+  rc->m_polyline.Append(count, points.data());
   return rc;
-
 }
 
-#if defined(ON_PYTHON_COMPILE)
-
-BND_Polyline* BND_Polyline::CreateFromPoints2(pybind11::object points)
+#if defined(ON_WASM_COMPILE)
+BND_Polyline* BND_Polyline::CreateFromPoints1(BND_TUPLE points) 
 {
-  BND_Point3dList pts;
-  for (auto item : points)
-  {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    pts.Add(point.x, point.y, point.z);
-  }
-
-  return CreateFromPoints(pts);
+  return CreateFromPoints( emscripten::vecFromJSArray<ON_3dPoint>(points) );
 }
-
 #endif
-
-/*
-BND_Polyline* BND_Polyline::CreateFromPoints(const std::vector<ON_3dPoint>& points)
-{
-  int count = (int)points.size();
-  const ON_3dPoint* pts = points.data();
-  BND_Polyline* rc = new BND_Polyline();
-  rc->m_polyline.Append(count, pts);
-  return rc;
-}
-
-*/
 
 ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
@@ -280,7 +257,7 @@ void initPolylineBindings(void*)
     .class_function("createInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, allow_raw_pointers())
     .class_function("createCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, allow_raw_pointers())
     .class_function("createStarPolygon", &BND_Polyline::CreateStarPolygon, allow_raw_pointers())
-    .class_function("createFromPoints", &BND_Polyline::CreateFromPoints, allow_raw_pointers()) 
+    .class_function("createFromPoints", &BND_Polyline::CreateFromPoints1, allow_raw_pointers()) 
     ;
 }
 #endif

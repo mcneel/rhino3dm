@@ -51,6 +51,7 @@ public:
   BND_Polyline(int initialCapacity) : BND_Point3dList(initialCapacity) {};
   BND_Polyline(const std::vector<ON_3dPoint>& points) : BND_Point3dList(points) {};
 
+
   bool IsValid() const { return m_polyline.IsValid(); }
   int SegmentCount() const { return m_polyline.SegmentCount(); }
   bool IsClosed() const { return m_polyline.IsClosed(); }
@@ -77,9 +78,9 @@ public:
   static BND_Polyline* CreateInscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateCircumscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateStarPolygon(class BND_Circle& circle, double radius, int cornerCount);
-  static BND_Polyline* CreateFromPoints(const class BND_Point3dList& points);
-#if defined(ON_PYTHON_COMPILE)
-  static BND_Polyline* CreateFromPoints2(pybind11::object points);
+  static BND_Polyline* CreateFromPoints(const std::vector<ON_3dPoint>& points); //for python
+#if defined(ON_WASM_COMPILE)
+  static BND_Polyline* CreateFromPoints1(BND_TUPLE points); //for js
 #endif
 
   
