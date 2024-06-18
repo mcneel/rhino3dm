@@ -182,7 +182,7 @@ jobs:
         if: ${{ matrix.target != 'linux' }}
         uses: jwlawson/actions-setup-cmake@v2.0.0
         with:
-          cmake-version: '3.21.1'
+          cmake-version: '3.25.0'
       - name: checkout
         uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
       - name: safe directory
