@@ -23,6 +23,9 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9-beta
  - (js) None of the PointCloud.AddRange* methods were working in js. This is fixed. [#620](https://github.com/mcneel/rhino3dm/issues/620)
  - (py, js) Polyline.GetSegments() always returned an extra NULL at the end of the segment array. [#623](https://github.com/mcneel/rhino3dm/issues/623)
 
+ ### Removed
+ - (py) GitHub has deprecated building on macos-11 so from this point forward we will not build python wheels for macos-11
+
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1
 

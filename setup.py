@@ -152,7 +152,7 @@ CPython package based on OpenNURBS with a RhinoCommon style
 
 ### Supported platforms
 * Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - Windows (32 and 64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 11, 12 (installed through homebrew)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 12 (installed through homebrew)
 * Python 3.8, 3.9, 3.10, 3.11, 3.12 - macos 14 arm 64
 * Python 3.8, 3.9, 3.10, 3.11 - Linux via manylinux2014_x86_64
 * other architectures, operating systems, and python versions are supported through source distributions\

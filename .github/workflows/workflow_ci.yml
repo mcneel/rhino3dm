@@ -159,15 +159,13 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macos-11, macos-12, macos-14]
+        os: [ubuntu-latest, windows-2019, macos-12, macos-14]
         python-version: ['3.10', '3.11', '3.12']
         include:
           - os: ubuntu-latest
             target: linux
           - os: windows-2019
             target: windows
-          - os: macos-11
-            target: macos
           - os: macos-12
             target: macos
           - os: macos-14
