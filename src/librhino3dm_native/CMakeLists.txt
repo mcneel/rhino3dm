@@ -30,7 +30,7 @@ file(GLOB uuid_SRC "../lib/opennurbs/android_uuid/*.h" "../lib/opennurbs/android
 file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.skip" "../lib/opennurbs/android_uuid/gen_uuid_nt.c")
 
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
