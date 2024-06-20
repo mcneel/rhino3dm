@@ -77,8 +77,7 @@ def print_error_message(error_message):
     if xcode_logging:
         print(error_prefix + error_message)
     else:
-        print(bcolors.BOLD + bcolors.FAIL + error_prefix.upper() + bcolors.ENDC + bcolors.FAIL + error_message +
-              bcolors.ENDC)
+        print(f"{bcolors.BOLD}{bcolors.FAIL}{error_prefix.upper()}{bcolors.ENDC}{bcolors.FAIL}{error_message}{bcolors.ENDC}")
 
 
 def print_ok_message(ok_message):
