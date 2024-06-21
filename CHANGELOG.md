@@ -4,14 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.9.0-beta] - 2024.06.17
+## [8.9.0-beta] - UNRELEASED
 
-diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9-beta
+diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0-beta
 
 ### Added
  - (py, js) CachedTextureCoordinates class
  - (py, js) Mesh.SetCachedTextureCoordinates and Mesh.GetCachedTextureCoordinates
  - (py, js) TextureMapping.HasId and TextureMapping.Id
+ - (py, js) Added many Annotation classes [#627](https://github.com/mcneel/rhino3dm/pull/627) @jesterKing
 
  ### Changed
 
@@ -24,7 +25,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9-beta
  - (py, js) Polyline.GetSegments() always returned an extra NULL at the end of the segment array. [#623](https://github.com/mcneel/rhino3dm/issues/623)
 
  ### Removed
- - (py) GitHub has deprecated building on macos-11 so from this point forward we will not build python wheels for macos-11
+ - (py, dotnet) GitHub has deprecated building on macos-11 so from this point forward we will not build python wheels for macos-11. macos-14 will be used to build the dotnet library for macos.
 
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1
@@ -49,7 +50,6 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta1
 - (py, js) EmbeddedFile.SetFilename.
 - (js) EmbeddedFile.WasmFromByteArray() to add embedded from a js Uint8Array. [#523](https://github.com/mcneel/rhino3dm/issues/523)
 - (py) EmbeddedFile.Read()
-
 
 ### Changed
 - (js) js docs now use typedoc for generating documentation from `src/js/rhino3dm.d.ts` [#594](https://github.com/mcneel/rhino3dm/issues/594)

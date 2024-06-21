@@ -20,7 +20,7 @@ public:
 
   BND_GeometryBase* GetGeometry() { return m_geometry; };
   BND_3dmObjectAttributes* GetAttributes() { return m_attributes; }
-  BND_TUPLE GetTextureMapping( const class BND_File3dm* file3dm, int mappingId );
+  //BND_TUPLE GetTextureMapping( const class BND_File3dm* file3dm, int mappingId );
 };
 
 class BND_ONXModel_ObjectTable
