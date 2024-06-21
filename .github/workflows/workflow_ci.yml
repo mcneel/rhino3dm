@@ -296,6 +296,7 @@ jobs:
           path: tests/dotnet/lib
       - name: test dotnet
         run: |
+          cp tests/dotnet/lib/dotnet/Rhino3dm.dll tests/dotnet/lib/Rhino3dm.dll
           ls -R tests/dotnet/lib
           cd tests/dotnet/rhino3dm_test
           dotnet build
