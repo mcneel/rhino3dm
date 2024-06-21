@@ -296,7 +296,9 @@ jobs:
           path: tests/dotnet/lib
       - name: test dotnet
         run: |
+          ls -R tests/dotnet/lib
           cd tests/dotnet/rhino3dm_test
           dotnet build
           cp ../lib/librhino3dm_native.so /bin/Debug/net7.0/librhino3dm_native.so
+          ls -R tests/dotnet/rhino3dm_test//bin/Debug/net7.0/
           dotnet test
