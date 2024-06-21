@@ -163,7 +163,42 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
 
     ON_Annotation* annotation = ON_Annotation::Cast(obj);
     if (annotation)
+    {
+      ON_Text* text = ON_Text::Cast(obj);
+      if (text)
+        return new BND_Text(text, compref);
+
+      ON_Leader* leader = ON_Leader::Cast(obj);
+      if(leader)
+        return new BND_Leader(leader, compref);
+
+      ON_Dimension* dimension = ON_Dimension::Cast(obj);
+      if( dimension )
+      {
+        ON_DimLinear* dimlinear = ON_DimLinear::Cast(obj);
+        if(dimlinear)
+          return new BND_DimLinear(dimlinear, compref);
+
+        ON_DimAngular* dimangular = ON_DimAngular::Cast(obj);
+        if(dimangular)
+          return new BND_DimAngular(dimangular, compref);
+
+        ON_DimRadial* dimradial = ON_DimRadial::Cast(obj);
+        if(dimradial)
+          return new BND_DimRadial(dimradial, compref);
+
+        ON_DimOrdinate* dimordinate = ON_DimOrdinate::Cast(obj);
+        if(dimordinate)
+          return new BND_DimOrdinate(dimordinate, compref);
+
+        ON_Centermark* centermark = ON_Centermark::Cast(obj);
+        if(centermark)
+          return new BND_Centermark(centermark, compref);
+
+        return new BND_Dimension(dimension, compref);
+      }
       return new BND_AnnotationBase(annotation, compref);
+    }
 
     ON_TextDot* dot = ON_TextDot::Cast(obj);
     if (dot)
