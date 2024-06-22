@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Annotations &mdash; rhino3dm {8.9} documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d31f2110"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Breps" href="Breps.html" />
+    <link rel="prev" title="Welcome to rhino3dm’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+              <div class="version">
+                {8.9}
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Annotations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.AnnotationBase"><code class="docutils literal notranslate"><span class="pre">AnnotationBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.RichText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.RichText</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.PlainText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.PlainText</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.PlainTextWithFields"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.PlainTextWithFields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.DimensionStyleId"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.DimensionStyleId</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.AnnotationType"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.AnnotationType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.WrapText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.WrapText()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextIsWrapped"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextIsWrapped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.Plane"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.Plane</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.AnnotationTypes"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Unset"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Unset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Aligned"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Aligned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Angular"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Angular</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Diameter"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Diameter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Radius"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Radius</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Rotated"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Rotated</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Ordinate"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Ordinate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.ArcLen"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.ArcLen</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.CenterMark"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.CenterMark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Text"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Text</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Leader"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Leader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationTypes.Angular3pt"><code class="docutils literal notranslate"><span class="pre">AnnotationTypes.Angular3pt</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Centermark"><code class="docutils literal notranslate"><span class="pre">Centermark</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Centermark.GetDisplayLines"><code class="docutils literal notranslate"><span class="pre">Centermark.GetDisplayLines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Dimension"><code class="docutils literal notranslate"><span class="pre">Dimension</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimensionStyle"><code class="docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.DimensionStyle"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.DimensionStyle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.Name"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.Name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.Font"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.Font</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowBlockId1"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowBlockId1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowBlockId2"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowBlockId2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderArrowBlockId"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderArrowBlockId</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SuppressExtension1"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SuppressExtension1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SuppressExtension2"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SuppressExtension2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SuppressArrow1"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SuppressArrow1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SuppressArrow2"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SuppressArrow2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.AlternateBelowLine"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.AlternateBelowLine</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.DrawTextMask"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.DrawTextMask</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderHasLanding"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderHasLanding</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.DrawForward"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.DrawForward</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextUnderlined"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextUnderlined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderArrowLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderArrowLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.CentermarkSize"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.CentermarkSize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextGap"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextGap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextHEight"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextHEight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextHeight"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextHeight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LengthFactor"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LengthFactor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.AlternateLengthFactor"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.AlternateLengthFactor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ToleranceUpperValue"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ToleranceUpperValue</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ToleranceLowerValue"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ToleranceLowerValue</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ToleranceHeightScale"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ToleranceHeightScale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.BaselineSpacing"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.BaselineSpacing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextRotation"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextRotation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.StackHeightScale"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.StackHeightScale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderLandingLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderLandingLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.HasFieldOverrides"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.HasFieldOverrides</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.IsChild"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.IsChild</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ParentId"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ParentId</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ScaleLengthValues"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ScaleLengthValues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.IsFieldOverridden"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.IsFieldOverridden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SetFieldOverride"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SetFieldOverride()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ClearFieldOverride"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ClearFieldOverride()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ClearAllFieldOverrides"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ClearAllFieldOverrides()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.IsChildOf"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.IsChildOf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimAngular"><code class="docutils literal notranslate"><span class="pre">DimAngular</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimAngular.Points"><code class="docutils literal notranslate"><span class="pre">DimAngular.Points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimAngular.GetDisplayLines"><code class="docutils literal notranslate"><span class="pre">DimAngular.GetDisplayLines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimAngular.Radius"><code class="docutils literal notranslate"><span class="pre">DimAngular.Radius</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimAngular.Angle"><code class="docutils literal notranslate"><span class="pre">DimAngular.Angle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimLinear"><code class="docutils literal notranslate"><span class="pre">DimLinear</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimLinear.Points"><code class="docutils literal notranslate"><span class="pre">DimLinear.Points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimLinear.GetDisplayLines"><code class="docutils literal notranslate"><span class="pre">DimLinear.GetDisplayLines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimRadial"><code class="docutils literal notranslate"><span class="pre">DimRadial</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimRadial.Points"><code class="docutils literal notranslate"><span class="pre">DimRadial.Points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimRadial.GetDisplayLines"><code class="docutils literal notranslate"><span class="pre">DimRadial.GetDisplayLines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimOrdinate"><code class="docutils literal notranslate"><span class="pre">DimOrdinate</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimOrdinate.Points"><code class="docutils literal notranslate"><span class="pre">DimOrdinate.Points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimOrdinate.GetDisplayLines"><code class="docutils literal notranslate"><span class="pre">DimOrdinate.GetDisplayLines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Leader"><code class="docutils literal notranslate"><span class="pre">Leader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Leader.Points"><code class="docutils literal notranslate"><span class="pre">Leader.Points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Leader.GetTextPoint2d"><code class="docutils literal notranslate"><span class="pre">Leader.GetTextPoint2d()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.TextDot"><code class="docutils literal notranslate"><span class="pre">TextDot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.TextDot"><code class="docutils literal notranslate"><span class="pre">TextDot.TextDot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.Point"><code class="docutils literal notranslate"><span class="pre">TextDot.Point</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.Text"><code class="docutils literal notranslate"><span class="pre">TextDot.Text</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.SecondaryText"><code class="docutils literal notranslate"><span class="pre">TextDot.SecondaryText</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.FontHeight"><code class="docutils literal notranslate"><span class="pre">TextDot.FontHeight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.TextDot.FontFace"><code class="docutils literal notranslate"><span class="pre">TextDot.FontFace</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Breps.html">Breps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curves.html">Curves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meshes.html">Mesh, Mesh modifiers and SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileLevel.html">File and Document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Object.html">Model and Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">Rendering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surfaces.html">Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Points.html">Points and Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Annotations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Annotations.rst.txt.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="annotations">
+<h1>Annotations<a class="headerlink" href="#annotations" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">AnnotationBase</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.RichText">
+<span class="sig-name descname"><span class="pre">RichText</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.RichText" title="Link to this definition"></a></dt>
+<dd><p>Text including additional RTF formatting information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.PlainText">
+<span class="sig-name descname"><span class="pre">PlainText</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.PlainText" title="Link to this definition"></a></dt>
+<dd><p>Text stripped of RTF formatting information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.PlainTextWithFields">
+<span class="sig-name descname"><span class="pre">PlainTextWithFields</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.PlainTextWithFields" title="Link to this definition"></a></dt>
+<dd><p>Text stripped of RTF formatting information and with field expressions intact</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.DimensionStyleId">
+<span class="sig-name descname"><span class="pre">DimensionStyleId</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.DimensionStyleId" title="Link to this definition"></a></dt>
+<dd><p>Get Id of the DimensionStyle assigned to this annotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>uuid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.AnnotationType">
+<span class="sig-name descname"><span class="pre">AnnotationType</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.AnnotationType" title="Link to this definition"></a></dt>
+<dd><p>Get annotation type of the this annotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.AnnotationTypes" title="rhino3dm.AnnotationTypes">AnnotationTypes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.WrapText">
+<span class="sig-name descname"><span class="pre">WrapText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrapwidth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.WrapText" title="Link to this definition"></a></dt>
+<dd><p>Wraps text for given width</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.TextIsWrapped">
+<span class="sig-name descname"><span class="pre">TextIsWrapped</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.TextIsWrapped" title="Link to this definition"></a></dt>
+<dd><p>Get or set whether the text for the annotation should be wrapped</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.Plane">
+<span class="sig-name descname"><span class="pre">Plane</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.Plane" title="Link to this definition"></a></dt>
+<dd><p>Get the plane for this annotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Surfaces.html#rhino3dm.Plane" title="rhino3dm.Plane">Plane</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">AnnotationTypes</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes" title="Link to this definition"></a></dt>
+<dd><p>Enum defining all annotation types available</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Unset">
+<span class="sig-name descname"><span class="pre">Unset</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Unset" title="Link to this definition"></a></dt>
+<dd><p>Annotation type not set</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Aligned">
+<span class="sig-name descname"><span class="pre">Aligned</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Aligned" title="Link to this definition"></a></dt>
+<dd><p>Aligned annotation type, presented by <a class="reference internal" href="#rhino3dm.DimLinear" title="rhino3dm.DimLinear"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimLinear</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Angular">
+<span class="sig-name descname"><span class="pre">Angular</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Angular" title="Link to this definition"></a></dt>
+<dd><p>Angle annotation type, represented by <a class="reference internal" href="#rhino3dm.DimAngular" title="rhino3dm.DimAngular"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimAngular</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Diameter">
+<span class="sig-name descname"><span class="pre">Diameter</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Diameter" title="Link to this definition"></a></dt>
+<dd><p>Annotation denoting diameter, represented by <a class="reference internal" href="#rhino3dm.DimRadial" title="rhino3dm.DimRadial"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimRadial</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Radius">
+<span class="sig-name descname"><span class="pre">Radius</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Radius" title="Link to this definition"></a></dt>
+<dd><p>Annotation denoting radius, represented by <a class="reference internal" href="#rhino3dm.DimRadial" title="rhino3dm.DimRadial"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimRadial</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Rotated">
+<span class="sig-name descname"><span class="pre">Rotated</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Rotated" title="Link to this definition"></a></dt>
+<dd><p>Aligned annotation type, but with definition points not on the same height, represented by <a class="reference internal" href="#rhino3dm.DimLinear" title="rhino3dm.DimLinear"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimLinear</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Ordinate">
+<span class="sig-name descname"><span class="pre">Ordinate</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Ordinate" title="Link to this definition"></a></dt>
+<dd><p>Ordinate annotation type, represented by <a class="reference internal" href="#rhino3dm.DimOrdinate" title="rhino3dm.DimOrdinate"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimOrdinate</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.ArcLen">
+<span class="sig-name descname"><span class="pre">ArcLen</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.ArcLen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.CenterMark">
+<span class="sig-name descname"><span class="pre">CenterMark</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.CenterMark" title="Link to this definition"></a></dt>
+<dd><p>Centermark annotation, represented by <a class="reference internal" href="#rhino3dm.Centermark" title="rhino3dm.Centermark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Centermark</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Text">
+<span class="sig-name descname"><span class="pre">Text</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Leader">
+<span class="sig-name descname"><span class="pre">Leader</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Leader" title="Link to this definition"></a></dt>
+<dd><p>Leader annotation, represented by <a class="reference internal" href="#rhino3dm.Leader" title="rhino3dm.Leader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Leader</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationTypes.Angular3pt">
+<span class="sig-name descname"><span class="pre">Angular3pt</span></span><a class="headerlink" href="#rhino3dm.AnnotationTypes.Angular3pt" title="Link to this definition"></a></dt>
+<dd><p>Angle annotation type, represented by <a class="reference internal" href="#rhino3dm.DimAngular" title="rhino3dm.DimAngular"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimAngular</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Centermark">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Centermark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Dimension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Centermark" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.CenterMark" title="rhino3dm.AnnotationTypes.CenterMark"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.CenterMark</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Centermark.GetDisplayLines">
+<span class="sig-name descname"><span class="pre">GetDisplayLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Centermark.GetDisplayLines" title="Link to this definition"></a></dt>
+<dd><p>Get a list of <a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> that form the center mark.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Dimension">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">AnnotationBase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Dimension" title="Link to this definition"></a></dt>
+<dd><p>Base class for most annotation classes</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DimensionStyle</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.DimensionStyle">
+<span class="sig-name descname"><span class="pre">DimensionStyle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.DimensionStyle" title="Link to this definition"></a></dt>
+<dd><p>Constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.Name">
+<span class="sig-name descname"><span class="pre">Name</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.Name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.Font">
+<span class="sig-name descname"><span class="pre">Font</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.Font" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ArrowBlockId1">
+<span class="sig-name descname"><span class="pre">ArrowBlockId1</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowBlockId1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ArrowBlockId2">
+<span class="sig-name descname"><span class="pre">ArrowBlockId2</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowBlockId2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LeaderArrowBlockId">
+<span class="sig-name descname"><span class="pre">LeaderArrowBlockId</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowBlockId" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.SuppressExtension1">
+<span class="sig-name descname"><span class="pre">SuppressExtension1</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressExtension1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.SuppressExtension2">
+<span class="sig-name descname"><span class="pre">SuppressExtension2</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressExtension2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.SuppressArrow1">
+<span class="sig-name descname"><span class="pre">SuppressArrow1</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.SuppressArrow2">
+<span class="sig-name descname"><span class="pre">SuppressArrow2</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.SuppressArrow2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.AlternateBelowLine">
+<span class="sig-name descname"><span class="pre">AlternateBelowLine</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateBelowLine" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.DrawTextMask">
+<span class="sig-name descname"><span class="pre">DrawTextMask</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawTextMask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LeaderHasLanding">
+<span class="sig-name descname"><span class="pre">LeaderHasLanding</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderHasLanding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.DrawForward">
+<span class="sig-name descname"><span class="pre">DrawForward</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.DrawForward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextUnderlined">
+<span class="sig-name descname"><span class="pre">TextUnderlined</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextUnderlined" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ArrowLength">
+<span class="sig-name descname"><span class="pre">ArrowLength</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowLength" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LeaderArrowLength">
+<span class="sig-name descname"><span class="pre">LeaderArrowLength</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowLength" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.CentermarkSize">
+<span class="sig-name descname"><span class="pre">CentermarkSize</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.CentermarkSize" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextGap">
+<span class="sig-name descname"><span class="pre">TextGap</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextGap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextHEight">
+<span class="sig-name descname"><span class="pre">TextHEight</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextHEight" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextHeight">
+<span class="sig-name descname"><span class="pre">TextHeight</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextHeight" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LengthFactor">
+<span class="sig-name descname"><span class="pre">LengthFactor</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LengthFactor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.AlternateLengthFactor">
+<span class="sig-name descname"><span class="pre">AlternateLengthFactor</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.AlternateLengthFactor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ToleranceUpperValue">
+<span class="sig-name descname"><span class="pre">ToleranceUpperValue</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceUpperValue" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ToleranceLowerValue">
+<span class="sig-name descname"><span class="pre">ToleranceLowerValue</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceLowerValue" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ToleranceHeightScale">
+<span class="sig-name descname"><span class="pre">ToleranceHeightScale</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ToleranceHeightScale" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.BaselineSpacing">
+<span class="sig-name descname"><span class="pre">BaselineSpacing</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.BaselineSpacing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextRotation">
+<span class="sig-name descname"><span class="pre">TextRotation</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextRotation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.StackHeightScale">
+<span class="sig-name descname"><span class="pre">StackHeightScale</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.StackHeightScale" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LeaderLandingLength">
+<span class="sig-name descname"><span class="pre">LeaderLandingLength</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderLandingLength" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.HasFieldOverrides">
+<span class="sig-name descname"><span class="pre">HasFieldOverrides</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.HasFieldOverrides" title="Link to this definition"></a></dt>
+<dd><p>Checks if any fields in this DimensionStyle are overrides</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.IsChild">
+<span class="sig-name descname"><span class="pre">IsChild</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChild" title="Link to this definition"></a></dt>
+<dd><p>Tests if this DimensionStyle is a child of any other DimensionStyle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ParentId">
+<span class="sig-name descname"><span class="pre">ParentId</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ParentId" title="Link to this definition"></a></dt>
+<dd><p>Get or Set the Id of this DimensionStyle’s parent.
+If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>uuid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ScaleLengthValues">
+<span class="sig-name descname"><span class="pre">ScaleLengthValues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ScaleLengthValues" title="Link to this definition"></a></dt>
+<dd><p>Scales all length values by ‘scale’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.IsFieldOverridden">
+<span class="sig-name descname"><span class="pre">IsFieldOverridden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsFieldOverridden" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.SetFieldOverride">
+<span class="sig-name descname"><span class="pre">SetFieldOverride</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.SetFieldOverride" title="Link to this definition"></a></dt>
+<dd><p>Set a field as overridden</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ClearFieldOverride">
+<span class="sig-name descname"><span class="pre">ClearFieldOverride</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearFieldOverride" title="Link to this definition"></a></dt>
+<dd><p>Set the field as not overridden</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ClearAllFieldOverrides">
+<span class="sig-name descname"><span class="pre">ClearAllFieldOverrides</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.ClearAllFieldOverrides" title="Link to this definition"></a></dt>
+<dd><p>Sets all the fields in this DimensionStyle to be not overridden
+Does not change any dimstyle_id’s or parent_id’s</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.IsChildOf">
+<span class="sig-name descname"><span class="pre">IsChildOf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimensionStyle.IsChildOf" title="Link to this definition"></a></dt>
+<dd><p>Tests if this DimensionStyle is a child of a specific DimensionStyle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this is a child of the DimensionStyle with Parent False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DimAngular">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DimAngular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Dimension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimAngular" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.Angular" title="rhino3dm.AnnotationTypes.Angular"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Angular</span></code></a> and <a class="reference internal" href="#rhino3dm.AnnotationTypes.Angular3pt" title="rhino3dm.AnnotationTypes.Angular3pt"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Angular3pt</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimAngular.Points">
+<span class="sig-name descname"><span class="pre">Points</span></span><a class="headerlink" href="#rhino3dm.DimAngular.Points" title="Link to this definition"></a></dt>
+<dd><p>Gets list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> that froms a polyline representing the dimension lines. The different points are given with the following key names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'centerpt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the center of the angular dimension</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'defpt1'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the first definition point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'defpt2'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the second definition point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'arrowpt1'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the place of the tip of the first arrow head</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'arrowpt2'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the place of the tip of the second arrow head</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dimlinept'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the dimension line start</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'textpt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the text location of the annotation</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimAngular.GetDisplayLines">
+<span class="sig-name descname"><span class="pre">GetDisplayLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimAngular.GetDisplayLines" title="Link to this definition"></a></dt>
+<dd><p>Get a dictionary with the fields <code class="docutils literal notranslate"><span class="pre">'lines'</span></code>, <code class="docutils literal notranslate"><span class="pre">'arcs'</span></code> and <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code>.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> is a list of <a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> that are all straight line work for this dimension.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'arcs'</span></code> is a list of <a class="reference internal" href="Curves.html#rhino3dm.Arc" title="rhino3dm.Arc"><code class="xref py py-class docutils literal notranslate"><span class="pre">Arc</span></code></a> that are all arc line work for this dimension.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code> constains a list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> for the box containing the dimension text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, list[<a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>|<a class="reference internal" href="Curves.html#rhino3dm.Arc" title="rhino3dm.Arc">Arc</a>|<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimAngular.Radius">
+<span class="sig-name descname"><span class="pre">Radius</span></span><a class="headerlink" href="#rhino3dm.DimAngular.Radius" title="Link to this definition"></a></dt>
+<dd><p>Get radius of the arc segment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimAngular.Angle">
+<span class="sig-name descname"><span class="pre">Angle</span></span><a class="headerlink" href="#rhino3dm.DimAngular.Angle" title="Link to this definition"></a></dt>
+<dd><p>Get angle of the arc segment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DimLinear">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DimLinear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Dimension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimLinear" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.Aligned" title="rhino3dm.AnnotationTypes.Aligned"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Aligned</span></code></a> and <a class="reference internal" href="#rhino3dm.AnnotationTypes.Rotated" title="rhino3dm.AnnotationTypes.Rotated"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Rotated</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimLinear.Points">
+<span class="sig-name descname"><span class="pre">Points</span></span><a class="headerlink" href="#rhino3dm.DimLinear.Points" title="Link to this definition"></a></dt>
+<dd><p>Gets list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> that is a polyline representing the leader lines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimLinear.GetDisplayLines">
+<span class="sig-name descname"><span class="pre">GetDisplayLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimLinear.GetDisplayLines" title="Link to this definition"></a></dt>
+<dd><p>Get a dictionary with the fields <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> and <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code>.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> is a list of <a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> that are all the line work for this dimension.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code> constains a list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> for the box containing the dimension text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, list[<a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>|<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DimRadial">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DimRadial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Dimension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimRadial" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.Radius" title="rhino3dm.AnnotationTypes.Radius"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Radius</span></code></a> and <a class="reference internal" href="#rhino3dm.AnnotationTypes.Diameter" title="rhino3dm.AnnotationTypes.Diameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Diameter</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimRadial.Points">
+<span class="sig-name descname"><span class="pre">Points</span></span><a class="headerlink" href="#rhino3dm.DimRadial.Points" title="Link to this definition"></a></dt>
+<dd><p>Gets list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> that from the lienwork the dimension lines. The different points are given with the following key names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'centerpt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the center of the angular dimension, here you would place the center mark</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'defpt1'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the first definition point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'radiuspt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the radius point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dimlinept'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> dimension line point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kneept'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> knee point in the dimension line</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimRadial.GetDisplayLines">
+<span class="sig-name descname"><span class="pre">GetDisplayLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimRadial.GetDisplayLines" title="Link to this definition"></a></dt>
+<dd><p>Get a dictionary with the fields <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> and <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code>.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> is a list of <a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> that are all the line work for this dimension.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code> constains a list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> for the box containing the dimension text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, list[<a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>|<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DimOrdinate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DimOrdinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Dimension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimOrdinate" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.Ordinate" title="rhino3dm.AnnotationTypes.Ordinate"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Ordinate</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimOrdinate.Points">
+<span class="sig-name descname"><span class="pre">Points</span></span><a class="headerlink" href="#rhino3dm.DimOrdinate.Points" title="Link to this definition"></a></dt>
+<dd><p>Gets list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> that from the linework of the dimension lines. The different points are given with the following key names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'basept'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> Base point from which the ordinate dimension is calculated</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'defpt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the first definition point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'leaderpt'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> denoting the leader point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kinkpt1'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> first kink point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kinkpt2'</span></code> <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> second kink point</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DimOrdinate.GetDisplayLines">
+<span class="sig-name descname"><span class="pre">GetDisplayLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DimOrdinate.GetDisplayLines" title="Link to this definition"></a></dt>
+<dd><p>Get a dictionary with the fields <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> and <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code>.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'lines'</span></code> is a list of <a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> that are all the line work for this dimension.</p>
+<p>The list contained by <code class="docutils literal notranslate"><span class="pre">'text_rect'</span></code> constains a list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> for the box containing the dimension text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, list[<a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a>|<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Leader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Leader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">AnnotationBase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Leader" title="Link to this definition"></a></dt>
+<dd><p>Annotation representing <a class="reference internal" href="#rhino3dm.AnnotationTypes.Leader" title="rhino3dm.AnnotationTypes.Leader"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationTypes.Leader</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Leader.Points">
+<span class="sig-name descname"><span class="pre">Points</span></span><a class="headerlink" href="#rhino3dm.Leader.Points" title="Link to this definition"></a></dt>
+<dd><p>Gets list of <a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point3d</span></code></a> that is a polyline representing the leader lines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Leader.GetTextPoint2d">
+<span class="sig-name descname"><span class="pre">GetTextPoint2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaderscale</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Leader.GetTextPoint2d" title="Link to this definition"></a></dt>
+<dd><p>Get a <a class="reference internal" href="Points.html#rhino3dm.Point2d" title="rhino3dm.Point2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point2d</span></code></a> where the text for the leader is located in the annotation plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimstyle</strong> (<a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – <a class="reference internal" href="#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a> to use</p></li>
+<li><p><strong>leaderscale</strong> (<em>float</em>) – Scale factor to use</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Points.html#rhino3dm.Point2d" title="rhino3dm.Point2d">Point2d</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.TextDot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">TextDot</span></span><a class="headerlink" href="#rhino3dm.TextDot" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.TextDot">
+<span class="sig-name descname"><span class="pre">TextDot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.TextDot.TextDot" title="Link to this definition"></a></dt>
+<dd><p>Constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.Point">
+<span class="sig-name descname"><span class="pre">Point</span></span><a class="headerlink" href="#rhino3dm.TextDot.Point" title="Link to this definition"></a></dt>
+<dd><p>Get or set the position of the text dot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">Point3d</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.Text">
+<span class="sig-name descname"><span class="pre">Text</span></span><a class="headerlink" href="#rhino3dm.TextDot.Text" title="Link to this definition"></a></dt>
+<dd><p>Get or set the primary text of the text dot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.SecondaryText">
+<span class="sig-name descname"><span class="pre">SecondaryText</span></span><a class="headerlink" href="#rhino3dm.TextDot.SecondaryText" title="Link to this definition"></a></dt>
+<dd><p>Get or set the secondary text of the text dot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.FontHeight">
+<span class="sig-name descname"><span class="pre">FontHeight</span></span><a class="headerlink" href="#rhino3dm.TextDot.FontHeight" title="Link to this definition"></a></dt>
+<dd><p>Get or set height of font used for displaying the dot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.TextDot.FontFace">
+<span class="sig-name descname"><span class="pre">FontFace</span></span><a class="headerlink" href="#rhino3dm.TextDot.FontFace" title="Link to this definition"></a></dt>
+<dd><p>Get or set font face used for displaying the dot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to rhino3dm’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Breps.html" class="btn btn-neutral float-right" title="Breps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

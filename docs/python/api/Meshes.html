@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesh, Mesh modifiers and SubD &mdash; rhino3dm {8.9} documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d31f2110"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File and Document" href="FileLevel.html" />
+    <link rel="prev" title="Curves" href="Curves.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+              <div class="version">
+                {8.9}
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Annotations.html">Annotations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Breps.html">Breps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curves.html">Curves</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh, Mesh modifiers and SubD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Displacement"><code class="docutils literal notranslate"><span class="pre">Displacement</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.Displacement"><code class="docutils literal notranslate"><span class="pre">Displacement.Displacement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Displacement.Displacement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.On"><code class="docutils literal notranslate"><span class="pre">Displacement.On</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.Texture"><code class="docutils literal notranslate"><span class="pre">Displacement.Texture</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.BlackPoint"><code class="docutils literal notranslate"><span class="pre">Displacement.BlackPoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.WhitePoint"><code class="docutils literal notranslate"><span class="pre">Displacement.WhitePoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.PostWeldAngle"><code class="docutils literal notranslate"><span class="pre">Displacement.PostWeldAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.FairingOn"><code class="docutils literal notranslate"><span class="pre">Displacement.FairingOn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.Fairing"><code class="docutils literal notranslate"><span class="pre">Displacement.Fairing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.FinalMaxFaces"><code class="docutils literal notranslate"><span class="pre">Displacement.FinalMaxFaces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.FinalMaxFacesOn"><code class="docutils literal notranslate"><span class="pre">Displacement.FinalMaxFacesOn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.InitialQuality"><code class="docutils literal notranslate"><span class="pre">Displacement.InitialQuality</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.MappingChannel"><code class="docutils literal notranslate"><span class="pre">Displacement.MappingChannel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.MeshMemoryLimit"><code class="docutils literal notranslate"><span class="pre">Displacement.MeshMemoryLimit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.RefineSteps"><code class="docutils literal notranslate"><span class="pre">Displacement.RefineSteps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.RefineSensitivity"><code class="docutils literal notranslate"><span class="pre">Displacement.RefineSensitivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Displacement.SweepResolutionFormula"><code class="docutils literal notranslate"><span class="pre">Displacement.SweepResolutionFormula</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.EdgeSoftening"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.EdgeSoftening"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.EdgeSoftening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.EdgeSoftening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.On"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.On</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.Softening"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.Softening</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.Chamfer"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.Chamfer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.Faceted"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.Faceted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.EdgeAngleThreshold"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.EdgeAngleThreshold</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EdgeSoftening.ForceSoftening"><code class="docutils literal notranslate"><span class="pre">EdgeSoftening.ForceSoftening</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh.Mesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.IsClosed"><code class="docutils literal notranslate"><span class="pre">Mesh.IsClosed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.HasCachedTextureCoordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.HasCachedTextureCoordinates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.HasPrincipalCurvatures"><code class="docutils literal notranslate"><span class="pre">Mesh.HasPrincipalCurvatures</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Vertices"><code class="docutils literal notranslate"><span class="pre">Mesh.Vertices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.TopologyEdges"><code class="docutils literal notranslate"><span class="pre">Mesh.TopologyEdges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Faces"><code class="docutils literal notranslate"><span class="pre">Mesh.Faces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Normals"><code class="docutils literal notranslate"><span class="pre">Mesh.Normals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.VertexColors"><code class="docutils literal notranslate"><span class="pre">Mesh.VertexColors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.TextureCoordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.TextureCoordinates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.PartitionCount"><code class="docutils literal notranslate"><span class="pre">Mesh.PartitionCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.CreateFromSubDControlNet"><code class="docutils literal notranslate"><span class="pre">Mesh.CreateFromSubDControlNet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.IsManifold"><code class="docutils literal notranslate"><span class="pre">Mesh.IsManifold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.ClearTextureData"><code class="docutils literal notranslate"><span class="pre">Mesh.ClearTextureData()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.ClearSurfaceData"><code class="docutils literal notranslate"><span class="pre">Mesh.ClearSurfaceData()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.DestroyTopology"><code class="docutils literal notranslate"><span class="pre">Mesh.DestroyTopology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.DestroyTree"><code class="docutils literal notranslate"><span class="pre">Mesh.DestroyTree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.DestroyPartition"><code class="docutils literal notranslate"><span class="pre">Mesh.DestroyPartition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.SetTextureCoordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.SetTextureCoordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Compact"><code class="docutils literal notranslate"><span class="pre">Mesh.Compact()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.Append"><code class="docutils literal notranslate"><span class="pre">Mesh.Append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Mesh.CreatePartitions"><code class="docutils literal notranslate"><span class="pre">Mesh.CreatePartitions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshFaceList"><code class="docutils literal notranslate"><span class="pre">MeshFaceList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.Count"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.Count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.QuadCount"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.QuadCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.TriangleCount"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.TriangleCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.Capacity"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.Capacity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.__len__"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.__getitem__"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.GetFaceVertices"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.GetFaceVertices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.GetFaceCenter"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.GetFaceCenter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.Clear"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.Clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.Destroy"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.Destroy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.AddFace"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.AddFace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.AddFace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.SetFace"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.SetFace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.SetFace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.ConvertQuadsToTriangles"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.ConvertQuadsToTriangles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.ConvertNonPlanarQuadsToTriangles"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.ConvertNonPlanarQuadsToTriangles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.ConvertTrianglesToQuads"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.ConvertTrianglesToQuads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.CullDegenerateFaces"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.CullDegenerateFaces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.IsHidden"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.IsHidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshFaceList.HasNakedEdges"><code class="docutils literal notranslate"><span class="pre">MeshFaceList.HasNakedEdges()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshingParameters"><code class="docutils literal notranslate"><span class="pre">MeshingParameters</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.MeshingParameters"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MeshingParameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MeshingParameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MeshingParameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.Default"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.Default</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.FastRenderMesh"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.FastRenderMesh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.QualityRenderMesh"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.QualityRenderMesh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.DefaultAnalysisMesh"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.DefaultAnalysisMesh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.TextureRange"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.TextureRange</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.JaggedSeams"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.JaggedSeams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.RefineGrid"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.RefineGrid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.SimplePlanes"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.SimplePlanes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.ComputeCurvature"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.ComputeCurvature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.ClosedObjectPostProcess"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.ClosedObjectPostProcess</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.GridMinCount"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.GridMinCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.GridMaxCount"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.GridMaxCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.GridAngle"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.GridAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.GridAspectRatio"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.GridAspectRatio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.GridAmplification"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.GridAmplification</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.Tolerance"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.Tolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.MinimumTolerance"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MinimumTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.RelativeTolerance"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.RelativeTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.MinimumEdgeLength"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MinimumEdgeLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.MaximumEdgeLength"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.MaximumEdgeLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.RefineAngle"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.RefineAngle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.Encode"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.Encode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshingParameters.Decode"><code class="docutils literal notranslate"><span class="pre">MeshingParameters.Decode()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshNormalList"><code class="docutils literal notranslate"><span class="pre">MeshNormalList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.__len__"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.__getitem__"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.__setitem__"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.Clear"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.Destroy"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Destroy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.Add"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.ComputeNormals"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.ComputeNormals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.UnitizeNormals"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.UnitizeNormals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshNormalList.Flip"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Flip()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">MeshNormalList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Destroy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.ComputeNormals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.UnitizeNormals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">MeshNormalList.Flip()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshTopologyEdgeList"><code class="docutils literal notranslate"><span class="pre">MeshTopologyEdgeList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshTopologyEdgeList.__len__"><code class="docutils literal notranslate"><span class="pre">MeshTopologyEdgeList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshTopologyEdgeList.EdgeLine"><code class="docutils literal notranslate"><span class="pre">MeshTopologyEdgeList.EdgeLine()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshVertexColorList"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.Count"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.Count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.Capacity"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.Capacity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.__len__"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.__getitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.__setitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.Clear"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.Clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexColorList.Add"><code class="docutils literal notranslate"><span class="pre">MeshVertexColorList.Add()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.MeshVertexList"><code class="docutils literal notranslate"><span class="pre">MeshVertexList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.UseDoublePrecisionVertices"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.UseDoublePrecisionVertices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.__len__"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.SetCount"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.SetCount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.__getitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.__setitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Clear"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Destroy"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Destroy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Add"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.IsHidden"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.IsHidden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Hide"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Hide()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Show"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Show()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.HideAll"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.HideAll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.ShowAll"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.ShowAll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.CullUnused"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.CullUnused()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.CombineIdentical"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.CombineIdentical()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.ShutLining"><code class="docutils literal notranslate"><span class="pre">ShutLining</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.ShutLining"><code class="docutils literal notranslate"><span class="pre">ShutLining.ShutLining()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">ShutLining.ShutLining()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.On"><code class="docutils literal notranslate"><span class="pre">ShutLining.On</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.Faceted"><code class="docutils literal notranslate"><span class="pre">ShutLining.Faceted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.AutoUpdate"><code class="docutils literal notranslate"><span class="pre">ShutLining.AutoUpdate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.ForceUpdate"><code class="docutils literal notranslate"><span class="pre">ShutLining.ForceUpdate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.Curves"><code class="docutils literal notranslate"><span class="pre">ShutLining.Curves</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLining.DeleteAllCurves"><code class="docutils literal notranslate"><span class="pre">ShutLining.DeleteAllCurves()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.ShutLiningCurve"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.ShutLiningCurve"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.ShutLiningCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.ShutLiningCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.Id"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.Id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.Radius"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.Radius</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.Profile"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.Profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.Enabled"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.Enabled</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.Pull"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.Pull</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ShutLiningCurve.IsBump"><code class="docutils literal notranslate"><span class="pre">ShutLiningCurve.IsBump</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.SubD"><code class="docutils literal notranslate"><span class="pre">SubD</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.SubD"><code class="docutils literal notranslate"><span class="pre">SubD.SubD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.IsSolid"><code class="docutils literal notranslate"><span class="pre">SubD.IsSolid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.ClearEvaluationCache"><code class="docutils literal notranslate"><span class="pre">SubD.ClearEvaluationCache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients"><code class="docutils literal notranslate"><span class="pre">SubD.UpdateAllTagsAndSectorCoefficients()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.Subdivide"><code class="docutils literal notranslate"><span class="pre">SubD.Subdivide()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.Thickening"><code class="docutils literal notranslate"><span class="pre">Thickening</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.Thickening"><code class="docutils literal notranslate"><span class="pre">Thickening.Thickening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18"><code class="docutils literal notranslate"><span class="pre">Thickening.Thickening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.On"><code class="docutils literal notranslate"><span class="pre">Thickening.On</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.Distance"><code class="docutils literal notranslate"><span class="pre">Thickening.Distance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.Solid"><code class="docutils literal notranslate"><span class="pre">Thickening.Solid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.OffsetOnly"><code class="docutils literal notranslate"><span class="pre">Thickening.OffsetOnly</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Thickening.BothSides"><code class="docutils literal notranslate"><span class="pre">Thickening.BothSides</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FileLevel.html">File and Document</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Object.html">Model and Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">Rendering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surfaces.html">Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Points.html">Points and Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Mesh, Mesh modifiers and SubD</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Meshes.rst.txt.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mesh-mesh-modifiers-and-subd">
+<h1>Mesh, Mesh modifiers and SubD<a class="headerlink" href="#mesh-mesh-modifiers-and-subd" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Displacement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Displacement</span></span><a class="headerlink" href="#rhino3dm.Displacement" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.Displacement">
+<span class="sig-name descname"><span class="pre">Displacement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Displacement.Displacement" title="Link to this definition"></a></dt>
+<dd><p>Displacement constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">Displacement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Displacement constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.On">
+<span class="sig-name descname"><span class="pre">On</span></span><a class="headerlink" href="#rhino3dm.Displacement.On" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.Texture">
+<span class="sig-name descname"><span class="pre">Texture</span></span><a class="headerlink" href="#rhino3dm.Displacement.Texture" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.BlackPoint">
+<span class="sig-name descname"><span class="pre">BlackPoint</span></span><a class="headerlink" href="#rhino3dm.Displacement.BlackPoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.WhitePoint">
+<span class="sig-name descname"><span class="pre">WhitePoint</span></span><a class="headerlink" href="#rhino3dm.Displacement.WhitePoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.PostWeldAngle">
+<span class="sig-name descname"><span class="pre">PostWeldAngle</span></span><a class="headerlink" href="#rhino3dm.Displacement.PostWeldAngle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.FairingOn">
+<span class="sig-name descname"><span class="pre">FairingOn</span></span><a class="headerlink" href="#rhino3dm.Displacement.FairingOn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.Fairing">
+<span class="sig-name descname"><span class="pre">Fairing</span></span><a class="headerlink" href="#rhino3dm.Displacement.Fairing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.FinalMaxFaces">
+<span class="sig-name descname"><span class="pre">FinalMaxFaces</span></span><a class="headerlink" href="#rhino3dm.Displacement.FinalMaxFaces" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.FinalMaxFacesOn">
+<span class="sig-name descname"><span class="pre">FinalMaxFacesOn</span></span><a class="headerlink" href="#rhino3dm.Displacement.FinalMaxFacesOn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.InitialQuality">
+<span class="sig-name descname"><span class="pre">InitialQuality</span></span><a class="headerlink" href="#rhino3dm.Displacement.InitialQuality" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.MappingChannel">
+<span class="sig-name descname"><span class="pre">MappingChannel</span></span><a class="headerlink" href="#rhino3dm.Displacement.MappingChannel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.MeshMemoryLimit">
+<span class="sig-name descname"><span class="pre">MeshMemoryLimit</span></span><a class="headerlink" href="#rhino3dm.Displacement.MeshMemoryLimit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.RefineSteps">
+<span class="sig-name descname"><span class="pre">RefineSteps</span></span><a class="headerlink" href="#rhino3dm.Displacement.RefineSteps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.RefineSensitivity">
+<span class="sig-name descname"><span class="pre">RefineSensitivity</span></span><a class="headerlink" href="#rhino3dm.Displacement.RefineSensitivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Displacement.SweepResolutionFormula">
+<span class="sig-name descname"><span class="pre">SweepResolutionFormula</span></span><a class="headerlink" href="#rhino3dm.Displacement.SweepResolutionFormula" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">EdgeSoftening</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.EdgeSoftening">
+<span class="sig-name descname"><span class="pre">EdgeSoftening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EdgeSoftening.EdgeSoftening" title="Link to this definition"></a></dt>
+<dd><p>EdgeSoftening constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">EdgeSoftening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>EdgeSoftening constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.On">
+<span class="sig-name descname"><span class="pre">On</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.On" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.Softening">
+<span class="sig-name descname"><span class="pre">Softening</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.Softening" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.Chamfer">
+<span class="sig-name descname"><span class="pre">Chamfer</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.Chamfer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.Faceted">
+<span class="sig-name descname"><span class="pre">Faceted</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.Faceted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.EdgeAngleThreshold">
+<span class="sig-name descname"><span class="pre">EdgeAngleThreshold</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.EdgeAngleThreshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EdgeSoftening.ForceSoftening">
+<span class="sig-name descname"><span class="pre">ForceSoftening</span></span><a class="headerlink" href="#rhino3dm.EdgeSoftening.ForceSoftening" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Mesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><a class="headerlink" href="#rhino3dm.Mesh" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Mesh">
+<span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Mesh" title="Link to this definition"></a></dt>
+<dd><p>Mesh constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.IsClosed">
+<span class="sig-name descname"><span class="pre">IsClosed</span></span><a class="headerlink" href="#rhino3dm.Mesh.IsClosed" title="Link to this definition"></a></dt>
+<dd><p>bool: Returns True if every mesh “edge” has two or more faces.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.HasCachedTextureCoordinates">
+<span class="sig-name descname"><span class="pre">HasCachedTextureCoordinates</span></span><a class="headerlink" href="#rhino3dm.Mesh.HasCachedTextureCoordinates" title="Link to this definition"></a></dt>
+<dd><p>bool: Will return True if SetCachedTextureCoordinates has been called;
+otherwise will return false.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.HasPrincipalCurvatures">
+<span class="sig-name descname"><span class="pre">HasPrincipalCurvatures</span></span><a class="headerlink" href="#rhino3dm.Mesh.HasPrincipalCurvatures" title="Link to this definition"></a></dt>
+<dd><p>bool: HasPrincipalCurvatures</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Vertices">
+<span class="sig-name descname"><span class="pre">Vertices</span></span><a class="headerlink" href="#rhino3dm.Mesh.Vertices" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshVertexList: Gets access to the vertices set of this mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.TopologyEdges">
+<span class="sig-name descname"><span class="pre">TopologyEdges</span></span><a class="headerlink" href="#rhino3dm.Mesh.TopologyEdges" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshTopologyEdgeList: Gets the  object associated with this mesh.
+This object stores edge connectivity.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Faces">
+<span class="sig-name descname"><span class="pre">Faces</span></span><a class="headerlink" href="#rhino3dm.Mesh.Faces" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshFaceList: Gets access to the mesh face list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Normals">
+<span class="sig-name descname"><span class="pre">Normals</span></span><a class="headerlink" href="#rhino3dm.Mesh.Normals" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshVertexNormalList: Gets access to the vertex normal collection in this mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.VertexColors">
+<span class="sig-name descname"><span class="pre">VertexColors</span></span><a class="headerlink" href="#rhino3dm.Mesh.VertexColors" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshVertexColorList: Gets access to the (optional) vertex color collection in this mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.TextureCoordinates">
+<span class="sig-name descname"><span class="pre">TextureCoordinates</span></span><a class="headerlink" href="#rhino3dm.Mesh.TextureCoordinates" title="Link to this definition"></a></dt>
+<dd><p>Collections.MeshTextureCoordinateList: Gets access to the vertex texture coordinate collection in this mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.PartitionCount">
+<span class="sig-name descname"><span class="pre">PartitionCount</span></span><a class="headerlink" href="#rhino3dm.Mesh.PartitionCount" title="Link to this definition"></a></dt>
+<dd><p>int: Number of partition information chunks stored on this mesh based
+on the last call to CreatePartitions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.CreateFromSubDControlNet">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateFromSubDControlNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">includeTextureCoordinates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.CreateFromSubDControlNet" title="Link to this definition"></a></dt>
+<dd><p>Create a mesh from a SubD control net</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mesh representing control net on success, None on failure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rhino3dm.Mesh" title="rhino3dm.Mesh">rhino3dm.Mesh</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.IsManifold">
+<span class="sig-name descname"><span class="pre">IsManifold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topologicalTest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.IsManifold" title="Link to this definition"></a></dt>
+<dd><p>Returns True if every mesh “edge” has at most two faces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the mesh is manifold, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.ClearTextureData">
+<span class="sig-name descname"><span class="pre">ClearTextureData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.ClearTextureData" title="Link to this definition"></a></dt>
+<dd><p>Removes all texture coordinate information from this mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.ClearSurfaceData">
+<span class="sig-name descname"><span class="pre">ClearSurfaceData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.ClearSurfaceData" title="Link to this definition"></a></dt>
+<dd><p>Removes surface parameters, curvature parameters and surface statistics from the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.DestroyTopology">
+<span class="sig-name descname"><span class="pre">DestroyTopology</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTopology" title="Link to this definition"></a></dt>
+<dd><p>Removes topology data, forcing all topology information to be recomputed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.DestroyTree">
+<span class="sig-name descname"><span class="pre">DestroyTree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyTree" title="Link to this definition"></a></dt>
+<dd><p>Destroys the mesh vertex access tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.DestroyPartition">
+<span class="sig-name descname"><span class="pre">DestroyPartition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.DestroyPartition" title="Link to this definition"></a></dt>
+<dd><p>Destroys mesh partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.SetTextureCoordinates">
+<span class="sig-name descname"><span class="pre">SetTextureCoordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lazy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.SetTextureCoordinates" title="Link to this definition"></a></dt>
+<dd><p>Set texture coordinates using given mapping and applying given transform.</p>
+<p>Set lazy to False to generate texture coordinates right away.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tm</strong> (<a class="reference internal" href="RenderContent.html#rhino3dm.TextureMapping" title="rhino3dm.TextureMapping"><em>TextureMapping</em></a>) – Texture mapping</p></li>
+<li><p><strong>xf</strong> (<a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – Transform to apply to the texture mapping</p></li>
+<li><p><strong>lazy</strong> (<em>bool</em>) – Whether to generate lazily (true) or right away (false)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Compact">
+<span class="sig-name descname"><span class="pre">Compact</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Compact" title="Link to this definition"></a></dt>
+<dd><p>Removes any unreferenced objects from arrays, re-indexes as needed
+and shrinks arrays to minimum required size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True on success, False on failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.Append">
+<span class="sig-name descname"><span class="pre">Append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.Append" title="Link to this definition"></a></dt>
+<dd><p>Appends a copy of another mesh to this one and updates indices of appended mesh parts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#rhino3dm.Mesh" title="rhino3dm.Mesh"><em>rhino3dm.Mesh</em></a>) – Mesh to append to this one.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Mesh.CreatePartitions">
+<span class="sig-name descname"><span class="pre">CreatePartitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximumVertexCount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximumTriangleCount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Mesh.CreatePartitions" title="Link to this definition"></a></dt>
+<dd><p>In ancient times (or modern smart phone times), some rendering engines
+were only able to process small batches of triangles and the
+CreatePartitions() function was provided to partition the mesh into
+subsets of vertices and faces that those rendering engines could handle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True on success</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshFaceList</span></span><a class="headerlink" href="#rhino3dm.MeshFaceList" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.Count">
+<span class="sig-name descname"><span class="pre">Count</span></span><a class="headerlink" href="#rhino3dm.MeshFaceList.Count" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the number of mesh faces. When getting this can includes invalid faces.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.QuadCount">
+<span class="sig-name descname"><span class="pre">QuadCount</span></span><a class="headerlink" href="#rhino3dm.MeshFaceList.QuadCount" title="Link to this definition"></a></dt>
+<dd><p>int: Gets the number of faces that are valid quads (4 corners).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.TriangleCount">
+<span class="sig-name descname"><span class="pre">TriangleCount</span></span><a class="headerlink" href="#rhino3dm.MeshFaceList.TriangleCount" title="Link to this definition"></a></dt>
+<dd><p>int: Gets the number of faces that are valid triangles (3 corners).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.Capacity">
+<span class="sig-name descname"><span class="pre">Capacity</span></span><a class="headerlink" href="#rhino3dm.MeshFaceList.Capacity" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the total number of mesh triangles and quads the internal data structure can hold without resizing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.GetFaceVertices">
+<span class="sig-name descname"><span class="pre">GetFaceVertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">faceIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.GetFaceVertices" title="Link to this definition"></a></dt>
+<dd><p>Gets the 3D location of the vertices forming a face.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>faceIndex</strong> (<em>int</em>) – A face index.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>tuple (bool, Point3f, Point3f, Point3f, Point3f)</p>
+<ul class="simple">
+<li><p>True if the operation succeeded, otherwise false.</p></li>
+<li><p>A first point. This out argument is assigned during the call. </p></li>
+<li><p>A second point. This out argument is assigned during the call. </p></li>
+<li><p>A third point. This out argument is assigned during the call. </p></li>
+<li><p>A fourth point. This out argument is assigned during the call. </p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool, <a class="reference internal" href="Points.html#rhino3dm.Point3f" title="rhino3dm.Point3f">Point3f</a>, <a class="reference internal" href="Points.html#rhino3dm.Point3f" title="rhino3dm.Point3f">Point3f</a>, <a class="reference internal" href="Points.html#rhino3dm.Point3f" title="rhino3dm.Point3f">Point3f</a>, <a class="reference internal" href="Points.html#rhino3dm.Point3f" title="rhino3dm.Point3f">Point3f</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.GetFaceCenter">
+<span class="sig-name descname"><span class="pre">GetFaceCenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">faceIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.GetFaceCenter" title="Link to this definition"></a></dt>
+<dd><p>Gets the center point of a face.
+For a triangular face, this is the centroid or barycenter.For a quad, this is the average of four comer points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>faceIndex</strong> (<em>int</em>) – A face index.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The center point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.Clear">
+<span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.Clear" title="Link to this definition"></a></dt>
+<dd><p>Clears the Face list on the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.Destroy">
+<span class="sig-name descname"><span class="pre">Destroy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.Destroy" title="Link to this definition"></a></dt>
+<dd><p>Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+Subsequent calls can add new items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.AddFace">
+<span class="sig-name descname"><span class="pre">AddFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.AddFace" title="Link to this definition"></a></dt>
+<dd><p>Appends a new mesh face to the end of the mesh face list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The index of the newly added face.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">AddFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Appends a new mesh face to the end of the mesh face list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The index of the newly added face.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.SetFace">
+<span class="sig-name descname"><span class="pre">SetFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.SetFace" title="Link to this definition"></a></dt>
+<dd><p>Sets a face at a specific index of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the operation succeeded, otherwise false.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">SetFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Sets a face at a specific index of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the operation succeeded, otherwise false.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.ConvertQuadsToTriangles">
+<span class="sig-name descname"><span class="pre">ConvertQuadsToTriangles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertQuadsToTriangles" title="Link to this definition"></a></dt>
+<dd><p>Splits all quads along the short diagonal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True on success, False on failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.ConvertNonPlanarQuadsToTriangles">
+<span class="sig-name descname"><span class="pre">ConvertNonPlanarQuadsToTriangles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertNonPlanarQuadsToTriangles" title="Link to this definition"></a></dt>
+<dd><p>Splits non-planar quads into two triangles based on given parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planarTolerance</strong> (<em>float</em>) – If planarTolerance &gt;= 0, then a quad is split if its vertices are not coplanar. If both planarTolerance = Rhino.RhinoMath.UnsetValue and angleToleranceRadians &gt;= 0.0, then the planarity test is skipped.</p></li>
+<li><p><strong>angleToleranceRadians</strong> (<em>float</em>) – If angleToleranceRadians &gt;= 0.0, then a quad is split if the angle between opposite corner normals is &gt; angleToleranceRadians. The corner normal is the normal to the triangle formed by two adjacent edges and the diagonal connecting their endpoints. A quad has four corner normals. If both angleToleranceRadians = Rhino.RhinoMath.UnsetValue and planarTolerance &gt;= 0.0, then the corner normal angle test is skipped.</p></li>
+<li><p><strong>splitMethod</strong> (<em>int</em>) – 0 default Currently divides along the short diagonal. This may be changed as better methods are found or preferences change. By passing zero, you let the developers of this code decide what’s best for you over time. 1 divide along the short diagonal 2 divide along the long diagonal 3 minimize resulting area 4 maximize resulting area 5 minimize angle between triangle normals 6 maximize angle between triangle normals</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of quads that were converted to triangles.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.ConvertTrianglesToQuads">
+<span class="sig-name descname"><span class="pre">ConvertTrianglesToQuads</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.ConvertTrianglesToQuads" title="Link to this definition"></a></dt>
+<dd><p>Joins adjacent triangles into quads if the resulting quad is ‘nice’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>angleToleranceRadians</strong> (<em>float</em>) – Used to compare adjacent triangles’ face normals. For two triangles to be considered, the angle between their face normals has to be &lt;= angleToleranceRadians. When in doubt use RhinoMath.PI/90.0 (2 degrees).</p></li>
+<li><p><strong>minimumDiagonalLengthRatio</strong> (<em>float</em>) – ( &lt;= 1.0) For two triangles to be considered the ratio of the resulting quad’s diagonals (length of the shortest diagonal)/(length of longest diagonal). has to be &gt;= minimumDiagonalLengthRatio. When in doubt us .875.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True on success, False on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.CullDegenerateFaces">
+<span class="sig-name descname"><span class="pre">CullDegenerateFaces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.CullDegenerateFaces" title="Link to this definition"></a></dt>
+<dd><p>Attempts to removes degenerate faces from the mesh.
+Degenerate faces are faces that contains such a combination of indices,
+that their final shape collapsed in a line or point.Before returning, this method also attempts to repair faces by juggling
+vertex indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of degenerate faces that were removed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.IsHidden">
+<span class="sig-name descname"><span class="pre">IsHidden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.IsHidden" title="Link to this definition"></a></dt>
+<dd><p>Gets a value indicating whether a face is hidden.
+A face is hidden if, and only if, at least one of its vertices is hidden.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>faceIndex</strong> (<em>int</em>) – A face index.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if hidden, False if fully visible.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshFaceList.HasNakedEdges">
+<span class="sig-name descname"><span class="pre">HasNakedEdges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshFaceList.HasNakedEdges" title="Link to this definition"></a></dt>
+<dd><p>Returns True if at least one of the face edges are not topologically
+connected to any other faces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>faceIndex</strong> (<em>int</em>) – A face index.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if that face makes the mesh open, otherwise false.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshingParameters</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.MeshingParameters">
+<span class="sig-name descname"><span class="pre">MeshingParameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.MeshingParameters" title="Link to this definition"></a></dt>
+<dd><p>MeshingParameters constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">MeshingParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Initializes a new instance with simple values,
+similar to that of Rhino’s meshing slider interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>density</strong> (<em>float</em>) – The density and number of mesh polygons, where 0.0 &lt;= density &lt;= 1.0, where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">MeshingParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimumEdgeLength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Initializes a new instance with simple values,
+similar to that of Rhino’s meshing slider interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density</strong> (<em>float</em>) – The density and number of mesh polygons, where 0.0 &lt;= density &lt;= 1.0, where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.</p></li>
+<li><p><strong>minimumEdgeLength</strong> (<em>float</em>) – The minimum allowed mesh edge length.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.Default">
+<span class="sig-name descname"><span class="pre">Default</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.Default" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default render mesh.
+Only use this if you plan on specifying your own custom meshing
+parameters.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.FastRenderMesh">
+<span class="sig-name descname"><span class="pre">FastRenderMesh</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.FastRenderMesh" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when
+meshing speed is preferred over mesh quality.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.QualityRenderMesh">
+<span class="sig-name descname"><span class="pre">QualityRenderMesh</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.QualityRenderMesh" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when mesh
+quality is preferred over meshing speed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.DefaultAnalysisMesh">
+<span class="sig-name descname"><span class="pre">DefaultAnalysisMesh</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.DefaultAnalysisMesh" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default analysis mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.TextureRange">
+<span class="sig-name descname"><span class="pre">TextureRange</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.TextureRange" title="Link to this definition"></a></dt>
+<dd><p>MeshingParameterTextureRange: Gets or sets how and if textures will be packed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.JaggedSeams">
+<span class="sig-name descname"><span class="pre">JaggedSeams</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.JaggedSeams" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets or sets whether or not the mesh is allowed to have jagged seams.
+When this flag is set to true, meshes on either side of a Brep Edge will not match up.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.RefineGrid">
+<span class="sig-name descname"><span class="pre">RefineGrid</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineGrid" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not the sampling grid can be refined
+when certain tolerances are not met.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.SimplePlanes">
+<span class="sig-name descname"><span class="pre">SimplePlanes</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.SimplePlanes" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not planar areas are allowed
+to be meshed in a simplified manner.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.ComputeCurvature">
+<span class="sig-name descname"><span class="pre">ComputeCurvature</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.ComputeCurvature" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not surface curvature
+data will be embedded in the mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.ClosedObjectPostProcess">
+<span class="sig-name descname"><span class="pre">ClosedObjectPostProcess</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.ClosedObjectPostProcess" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets or sets a value indicating whether or not to post process non-closed meshes
+that should be closed. If the Brep being meshed is closed, JaggedSeams = false,
+and ClosedObjectPostProcess = true, and the resulting mesh is not closed, then a
+post meshing process is applied to find and close gaps in the mesh. Typically the
+resulting mesh is not closed because the input Brep has a geometric flaw, like
+loops in trimming curve.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.GridMinCount">
+<span class="sig-name descname"><span class="pre">GridMinCount</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMinCount" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the minimum number of grid quads in the initial sampling grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.GridMaxCount">
+<span class="sig-name descname"><span class="pre">GridMaxCount</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.GridMaxCount" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the maximum number of grid quads in the initial sampling grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.GridAngle">
+<span class="sig-name descname"><span class="pre">GridAngle</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAngle" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the maximum allowed angle difference (in radians)
+for a single sampling quad. The angle pertains to the surface normals.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.GridAspectRatio">
+<span class="sig-name descname"><span class="pre">GridAspectRatio</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAspectRatio" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the maximum allowed aspect ratio of sampling quads.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.GridAmplification">
+<span class="sig-name descname"><span class="pre">GridAmplification</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.GridAmplification" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the grid amplification factor.
+Values lower than 1.0 will decrease the number of initial quads,
+values higher than 1.0 will increase the number of initial quads.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.Tolerance">
+<span class="sig-name descname"><span class="pre">Tolerance</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.Tolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the maximum allowed edge deviation.
+This tolerance is measured between the center of the mesh edge and the surface.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.MinimumTolerance">
+<span class="sig-name descname"><span class="pre">MinimumTolerance</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the minimum tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.RelativeTolerance">
+<span class="sig-name descname"><span class="pre">RelativeTolerance</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.RelativeTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the relative tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.MinimumEdgeLength">
+<span class="sig-name descname"><span class="pre">MinimumEdgeLength</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.MinimumEdgeLength" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the minimum allowed mesh edge length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.MaximumEdgeLength">
+<span class="sig-name descname"><span class="pre">MaximumEdgeLength</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.MaximumEdgeLength" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the maximum allowed mesh edge length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.RefineAngle">
+<span class="sig-name descname"><span class="pre">RefineAngle</span></span><a class="headerlink" href="#rhino3dm.MeshingParameters.RefineAngle" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the mesh parameter refine angle in radians.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.Encode">
+<span class="sig-name descname"><span class="pre">Encode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.Encode" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshingParameters.Decode">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonObject</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshingParameters.Decode" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshNormalList</span></span><a class="headerlink" href="#rhino3dm.MeshNormalList" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.__setitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.Clear">
+<span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.Clear" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.Destroy">
+<span class="sig-name descname"><span class="pre">Destroy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.Destroy" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.ComputeNormals">
+<span class="sig-name descname"><span class="pre">ComputeNormals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.ComputeNormals" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.UnitizeNormals">
+<span class="sig-name descname"><span class="pre">UnitizeNormals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.UnitizeNormals" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshNormalList.Flip">
+<span class="sig-name descname"><span class="pre">Flip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshNormalList.Flip" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="id6">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshNormalList</span></span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">Destroy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">ComputeNormals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">UnitizeNormals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">Flip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshTopologyEdgeList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshTopologyEdgeList</span></span><a class="headerlink" href="#rhino3dm.MeshTopologyEdgeList" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshTopologyEdgeList.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshTopologyEdgeList.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshTopologyEdgeList.EdgeLine">
+<span class="sig-name descname"><span class="pre">EdgeLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topologyEdgeIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshTopologyEdgeList.EdgeLine" title="Link to this definition"></a></dt>
+<dd><p>Gets the 3d line along an edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topologyEdgeIndex</strong> (<em>int</em>) – The topology edge index.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Line along edge. If input is not valid, an Invalid Line is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Curves.html#rhino3dm.Line" title="rhino3dm.Line">Line</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshVertexColorList</span></span><a class="headerlink" href="#rhino3dm.MeshVertexColorList" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.Count">
+<span class="sig-name descname"><span class="pre">Count</span></span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Count" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the number of mesh colors.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.Capacity">
+<span class="sig-name descname"><span class="pre">Capacity</span></span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Capacity" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the total number of vertex colors the internal data structure can hold without resizing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.__setitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.Clear">
+<span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Clear" title="Link to this definition"></a></dt>
+<dd><p>Clears the vertex color list on the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexColorList.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">red</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">green</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexColorList.Add" title="Link to this definition"></a></dt>
+<dd><p>Adds a new vertex color to the end of the color list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>red</strong> (<em>int</em>) – Red component of color, must be in the 0~255 range.</p></li>
+<li><p><strong>green</strong> (<em>int</em>) – Green component of color, must be in the 0~255 range.</p></li>
+<li><p><strong>blue</strong> (<em>int</em>) – Blue component of color, must be in the 0~255 range.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the newly added color.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">MeshVertexList</span></span><a class="headerlink" href="#rhino3dm.MeshVertexList" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.UseDoublePrecisionVertices">
+<span class="sig-name descname"><span class="pre">UseDoublePrecisionVertices</span></span><a class="headerlink" href="#rhino3dm.MeshVertexList.UseDoublePrecisionVertices" title="Link to this definition"></a></dt>
+<dd><p>bool: Set to True if the vertices should be stored in double precision</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.SetCount">
+<span class="sig-name descname"><span class="pre">SetCount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.SetCount" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.__setitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Clear">
+<span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Clear" title="Link to this definition"></a></dt>
+<dd><p>Clears the Vertex list on the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Destroy">
+<span class="sig-name descname"><span class="pre">Destroy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Destroy" title="Link to this definition"></a></dt>
+<dd><p>Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+Subsequent calls can add new items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Add" title="Link to this definition"></a></dt>
+<dd><p>Adds a new vertex to the end of the Vertex list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X component of new vertex coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y component of new vertex coordinate.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z component of new vertex coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the newly added vertex.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.IsHidden">
+<span class="sig-name descname"><span class="pre">IsHidden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertexIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.IsHidden" title="Link to this definition"></a></dt>
+<dd><p>Gets a value indicating whether or not a vertex is hidden.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to query.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the vertex is hidden, False if it is not.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Hide">
+<span class="sig-name descname"><span class="pre">Hide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertexIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Hide" title="Link to this definition"></a></dt>
+<dd><p>Hides the vertex at the given index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to hide.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Show">
+<span class="sig-name descname"><span class="pre">Show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertexIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Show" title="Link to this definition"></a></dt>
+<dd><p>Shows the vertex at the given index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vertexIndex</strong> (<em>int</em>) – Index of vertex to show.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.HideAll">
+<span class="sig-name descname"><span class="pre">HideAll</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.HideAll" title="Link to this definition"></a></dt>
+<dd><p>Hides all vertices in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.ShowAll">
+<span class="sig-name descname"><span class="pre">ShowAll</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.ShowAll" title="Link to this definition"></a></dt>
+<dd><p>Shows all vertices in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.CullUnused">
+<span class="sig-name descname"><span class="pre">CullUnused</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.CullUnused" title="Link to this definition"></a></dt>
+<dd><p>Removes all vertices that are currently not used by the Face list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of unused vertices that were removed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.CombineIdentical">
+<span class="sig-name descname"><span class="pre">CombineIdentical</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.CombineIdentical" title="Link to this definition"></a></dt>
+<dd><p>Merges identical vertices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignoreNormals</strong> (<em>bool</em>) – If true, vertex normals will not be taken into consideration when comparing vertices.</p></li>
+<li><p><strong>ignoreAdditional</strong> (<em>bool</em>) – If true, texture coordinates, colors, and principal curvatures will not be taken into consideration when comparing vertices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the mesh is changed, in which case the mesh will have fewer vertices than before.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">ShutLining</span></span><a class="headerlink" href="#rhino3dm.ShutLining" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.ShutLining">
+<span class="sig-name descname"><span class="pre">ShutLining</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ShutLining.ShutLining" title="Link to this definition"></a></dt>
+<dd><p>ShutLining constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">ShutLining</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd><p>ShutLining constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.On">
+<span class="sig-name descname"><span class="pre">On</span></span><a class="headerlink" href="#rhino3dm.ShutLining.On" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.Faceted">
+<span class="sig-name descname"><span class="pre">Faceted</span></span><a class="headerlink" href="#rhino3dm.ShutLining.Faceted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.AutoUpdate">
+<span class="sig-name descname"><span class="pre">AutoUpdate</span></span><a class="headerlink" href="#rhino3dm.ShutLining.AutoUpdate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.ForceUpdate">
+<span class="sig-name descname"><span class="pre">ForceUpdate</span></span><a class="headerlink" href="#rhino3dm.ShutLining.ForceUpdate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.Curves">
+<span class="sig-name descname"><span class="pre">Curves</span></span><a class="headerlink" href="#rhino3dm.ShutLining.Curves" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ShutLining.DeleteAllCurves">
+<span class="sig-name descname"><span class="pre">DeleteAllCurves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ShutLining.DeleteAllCurves" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">ShutLiningCurve</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.ShutLiningCurve">
+<span class="sig-name descname"><span class="pre">ShutLiningCurve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.ShutLiningCurve" title="Link to this definition"></a></dt>
+<dd><p>ShutLiningCurve constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">ShutLiningCurve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dd><p>ShutLiningCurve constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.Id">
+<span class="sig-name descname"><span class="pre">Id</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.Id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.Radius">
+<span class="sig-name descname"><span class="pre">Radius</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.Radius" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.Profile">
+<span class="sig-name descname"><span class="pre">Profile</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.Profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.Enabled">
+<span class="sig-name descname"><span class="pre">Enabled</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.Enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.Pull">
+<span class="sig-name descname"><span class="pre">Pull</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.Pull" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.ShutLiningCurve.IsBump">
+<span class="sig-name descname"><span class="pre">IsBump</span></span><a class="headerlink" href="#rhino3dm.ShutLiningCurve.IsBump" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.SubD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">SubD</span></span><a class="headerlink" href="#rhino3dm.SubD" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.SubD.SubD">
+<span class="sig-name descname"><span class="pre">SubD</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.SubD" title="Link to this definition"></a></dt>
+<dd><p>SubD constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.IsSolid">
+<span class="sig-name descname"><span class="pre">IsSolid</span></span><a class="headerlink" href="#rhino3dm.SubD.IsSolid" title="Link to this definition"></a></dt>
+<dd><p>bool: Test SubD to see if the active level is a solid.
+A “solid” is a closed oriented manifold, or a closed oriented manifold.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.SubD.ClearEvaluationCache">
+<span class="sig-name descname"><span class="pre">ClearEvaluationCache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.ClearEvaluationCache" title="Link to this definition"></a></dt>
+<dd><p>Clear cached information that depends on the location of vertex control points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients">
+<span class="sig-name descname"><span class="pre">UpdateAllTagsAndSectorCoefficients</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients" title="Link to this definition"></a></dt>
+<dd><p>Updates vertex tag, edge tag, and edge coefficient values on the active
+level. After completing custom editing operations that modify the
+topology of the SubD control net or changing values of vertex or edge
+tags, the tag and sector coefficients information on nearby components
+in the edited areas need to be updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of vertices and edges that were changed during the update.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uint</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.SubD.Subdivide">
+<span class="sig-name descname"><span class="pre">Subdivide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.Subdivide" title="Link to this definition"></a></dt>
+<dd><p>Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True on success</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Thickening">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Thickening</span></span><a class="headerlink" href="#rhino3dm.Thickening" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.Thickening">
+<span class="sig-name descname"><span class="pre">Thickening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Thickening.Thickening" title="Link to this definition"></a></dt>
+<dd><p>Thickening constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">Thickening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dd><p>Thickening constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.On">
+<span class="sig-name descname"><span class="pre">On</span></span><a class="headerlink" href="#rhino3dm.Thickening.On" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.Distance">
+<span class="sig-name descname"><span class="pre">Distance</span></span><a class="headerlink" href="#rhino3dm.Thickening.Distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.Solid">
+<span class="sig-name descname"><span class="pre">Solid</span></span><a class="headerlink" href="#rhino3dm.Thickening.Solid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.OffsetOnly">
+<span class="sig-name descname"><span class="pre">OffsetOnly</span></span><a class="headerlink" href="#rhino3dm.Thickening.OffsetOnly" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.Thickening.BothSides">
+<span class="sig-name descname"><span class="pre">BothSides</span></span><a class="headerlink" href="#rhino3dm.Thickening.BothSides" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Curves.html" class="btn btn-neutral float-left" title="Curves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="FileLevel.html" class="btn btn-neutral float-right" title="File and Document" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

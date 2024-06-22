@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File and Document &mdash; rhino3dm {8.9} documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d31f2110"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Model and Objects" href="Object.html" />
+    <link rel="prev" title="Mesh, Mesh modifiers and SubD" href="Meshes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+              <div class="version">
+                {8.9}
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Annotations.html">Annotations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Breps.html">Breps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Curves.html">Curves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meshes.html">Mesh, Mesh modifiers and SubD</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File and Document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.ArchivableDictionary"><code class="docutils literal notranslate"><span class="pre">ArchivableDictionary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ArchivableDictionary.EncodeDict"><code class="docutils literal notranslate"><span class="pre">ArchivableDictionary.EncodeDict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.ArchivableDictionary.DecodeDict"><code class="docutils literal notranslate"><span class="pre">ArchivableDictionary.DecodeDict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DracoCompression"><code class="docutils literal notranslate"><span class="pre">DracoCompression</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompression.Compress"><code class="docutils literal notranslate"><span class="pre">DracoCompression.Compress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DracoCompression.Compress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompression.Write"><code class="docutils literal notranslate"><span class="pre">DracoCompression.Write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompression.DecompressByteArray"><code class="docutils literal notranslate"><span class="pre">DracoCompression.DecompressByteArray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompression.DecompressBase64String"><code class="docutils literal notranslate"><span class="pre">DracoCompression.DecompressBase64String()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompression.ToBase64String"><code class="docutils literal notranslate"><span class="pre">DracoCompression.ToBase64String()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.DracoCompressionOptions"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.DracoCompressionOptions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.CompressionLevel"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.CompressionLevel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.PositionQuantizationBits"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.PositionQuantizationBits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.TextureCoordintateQuantizationBits"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.TextureCoordintateQuantizationBits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.NormalQuantizationBits"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.NormalQuantizationBits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.IncludeNormals"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.IncludeNormals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.IncludeTextureCoordinates"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.IncludeTextureCoordinates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DracoCompressionOptions.IncludeVertexColors"><code class="docutils literal notranslate"><span class="pre">DracoCompressionOptions.IncludeVertexColors</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLatitude"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.EarthBasepointLatitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLongitude"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.EarthBasepointLongitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevation"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.EarthBasepointElevation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevationZero"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.EarthBasepointElevationZero</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.ModelBasePoint"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.ModelBasePoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.ModelNorth"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.ModelNorth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.ModelEast"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.ModelEast</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.Name"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.Name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.Description"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.Description</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.EarthLocationIsSet"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.EarthLocationIsSet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.GetModelCompass"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.GetModelCompass()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.EarthAnchorPoint.GetModelToEarthTransform"><code class="docutils literal notranslate"><span class="pre">EarthAnchorPoint.GetModelToEarthTransform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dm"><code class="docutils literal notranslate"><span class="pre">File3dm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.File3dm"><code class="docutils literal notranslate"><span class="pre">File3dm.File3dm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.StartSectionComments"><code class="docutils literal notranslate"><span class="pre">File3dm.StartSectionComments</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ApplicationName"><code class="docutils literal notranslate"><span class="pre">File3dm.ApplicationName</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ApplicationUrl"><code class="docutils literal notranslate"><span class="pre">File3dm.ApplicationUrl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ApplicationDetails"><code class="docutils literal notranslate"><span class="pre">File3dm.ApplicationDetails</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ArchiveVersion"><code class="docutils literal notranslate"><span class="pre">File3dm.ArchiveVersion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Created"><code class="docutils literal notranslate"><span class="pre">File3dm.Created</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.CreatedBy"><code class="docutils literal notranslate"><span class="pre">File3dm.CreatedBy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.LastEdited"><code class="docutils literal notranslate"><span class="pre">File3dm.LastEdited</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.LastEditedBy"><code class="docutils literal notranslate"><span class="pre">File3dm.LastEditedBy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Revision"><code class="docutils literal notranslate"><span class="pre">File3dm.Revision</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Settings"><code class="docutils literal notranslate"><span class="pre">File3dm.Settings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Objects"><code class="docutils literal notranslate"><span class="pre">File3dm.Objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Materials"><code class="docutils literal notranslate"><span class="pre">File3dm.Materials</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Linetypes"><code class="docutils literal notranslate"><span class="pre">File3dm.Linetypes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Bitmaps"><code class="docutils literal notranslate"><span class="pre">File3dm.Bitmaps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Layers"><code class="docutils literal notranslate"><span class="pre">File3dm.Layers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Groups"><code class="docutils literal notranslate"><span class="pre">File3dm.Groups</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.DimStyles"><code class="docutils literal notranslate"><span class="pre">File3dm.DimStyles</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.InstanceDefinitions"><code class="docutils literal notranslate"><span class="pre">File3dm.InstanceDefinitions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Views"><code class="docutils literal notranslate"><span class="pre">File3dm.Views</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.NamedViews"><code class="docutils literal notranslate"><span class="pre">File3dm.NamedViews</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.PlugInData"><code class="docutils literal notranslate"><span class="pre">File3dm.PlugInData</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Strings"><code class="docutils literal notranslate"><span class="pre">File3dm.Strings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.EmbeddedFiles"><code class="docutils literal notranslate"><span class="pre">File3dm.EmbeddedFiles</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.RenderContent"><code class="docutils literal notranslate"><span class="pre">File3dm.RenderContent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Read"><code class="docutils literal notranslate"><span class="pre">File3dm.Read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ReadNotes"><code class="docutils literal notranslate"><span class="pre">File3dm.ReadNotes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.ReadArchiveVersion"><code class="docutils literal notranslate"><span class="pre">File3dm.ReadArchiveVersion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.FromByteArray"><code class="docutils literal notranslate"><span class="pre">File3dm.FromByteArray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Write"><code class="docutils literal notranslate"><span class="pre">File3dm.Write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Encode"><code class="docutils literal notranslate"><span class="pre">File3dm.Encode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">File3dm.Encode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.Decode"><code class="docutils literal notranslate"><span class="pre">File3dm.Decode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.EmbeddedFilePaths"><code class="docutils literal notranslate"><span class="pre">File3dm.EmbeddedFilePaths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.GetEmbeddedFileAsBase64"><code class="docutils literal notranslate"><span class="pre">File3dm.GetEmbeddedFileAsBase64()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">File3dm.GetEmbeddedFileAsBase64()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dm.RdkXml"><code class="docutils literal notranslate"><span class="pre">File3dm.RdkXml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmBitmapTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmBitmapTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmDecalTable"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDecalTable.File3dmDecalTable"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.File3dmDecalTable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.File3dmDecalTable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDecalTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDecalTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDecalTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDecalTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable.FindIndex()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmDimStyleTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmDimStyleTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmEmbeddedFileTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable.FindIndex()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmGroupTable"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.Delete"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.Delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.Delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.Delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.FindName"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.FindName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmGroupTable.GroupMembers"><code class="docutils literal notranslate"><span class="pre">File3dmGroupTable.GroupMembers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.AddInstanceDefinition"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.AddInstanceDefinition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmInstanceDefinitionTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmInstanceDefinitionTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmLayerTable"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.AddLayer"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.AddLayer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.FindName"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.FindName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLayerTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmLayerTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.Current"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.Current</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.CurrentSource"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.CurrentSource</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.Scale"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.Scale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.Delete"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.Delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.FindId()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.FindName"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.FindName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.FromAttributes"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.FromAttributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmLinetypeTable.FromLayerIndex"><code class="docutils literal notranslate"><span class="pre">File3dmLinetypeTable.FromLayerIndex()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.FindId()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMaterialTable.FindFromAttributes"><code class="docutils literal notranslate"><span class="pre">File3dmMaterialTable.FindFromAttributes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.Displacement"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.Displacement</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.EdgeSoftening"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.EdgeSoftening</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.Thickening"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.Thickening</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CurvePiping"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CurvePiping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.ShutLining"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.ShutLining</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CreateDisplacement"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CreateDisplacement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CreateEdgeSoftening"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CreateEdgeSoftening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CreateThickening"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CreateThickening()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CreateCurvePiping"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CreateCurvePiping()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmMeshModifiers.CreateShutLining"><code class="docutils literal notranslate"><span class="pre">File3dmMeshModifiers.CreateShutLining()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmObject"><code class="docutils literal notranslate"><span class="pre">File3dmObject</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObject.Attributes"><code class="docutils literal notranslate"><span class="pre">File3dmObject.Attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObject.Geometry"><code class="docutils literal notranslate"><span class="pre">File3dmObject.Geometry</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmObjectTable"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddPoint"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddPoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddPoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddPoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddPointCloud"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddPointCloud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddLine"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddLine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddPolyline"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddPolyline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddArc"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddArc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddCircle"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddCircle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddEllipse"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddEllipse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddSphere"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddSphere()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddCurve"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddTextDot"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddTextDot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddSurface"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddSurface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddExtrusion"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddExtrusion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddMesh"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddMesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddBrep"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddBrep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddHatch"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddHatch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddInstanceObject"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddInstanceObject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddInstanceObject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.AddObject"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.AddObject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.GetBoundingBox"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.GetBoundingBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.Delete"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.Delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmObjectTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmObjectTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmPlugInData"><code class="docutils literal notranslate"><span class="pre">File3dmPlugInData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmPlugInDataTable"><code class="docutils literal notranslate"><span class="pre">File3dmPlugInDataTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPlugInDataTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmPlugInDataTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPlugInDataTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmPlugInDataTable.__getitem__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.File3dmPostEffectTable"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.File3dmPostEffectTable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.File3dmPostEffectTable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmPostEffectTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmRdkDocumentData"><code class="docutils literal notranslate"><span class="pre">File3dmRdkDocumentData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRdkDocumentData.RdkXml"><code class="docutils literal notranslate"><span class="pre">File3dmRdkDocumentData.RdkXml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmRenderContentTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmRenderContentTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmSettings"><code class="docutils literal notranslate"><span class="pre">File3dmSettings</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelUrl"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelUrl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelBasePoint"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelBasePoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.EarthAnchorPoint"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.EarthAnchorPoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelAbsoluteTolerance"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelAbsoluteTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelAngleToleranceRadians"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelAngleToleranceRadians</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelAngleToleranceDegrees"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelAngleToleranceDegrees</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelRelativeTolerance"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelRelativeTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.PageAbsoluteTolerance"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.PageAbsoluteTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.PageAngleToleranceRadians"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.PageAngleToleranceRadians</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.PageAngleToleranceDegrees"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.PageAngleToleranceDegrees</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.PageRelativeTolerance"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.PageRelativeTolerance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.ModelUnitSystem"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.ModelUnitSystem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.PageUnitSystem"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.PageUnitSystem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmSettings.RenderSettings"><code class="docutils literal notranslate"><span class="pre">File3dmSettings.RenderSettings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.FindIndex"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.FindIndex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmShutLiningCurveTable.FindId"><code class="docutils literal notranslate"><span class="pre">File3dmShutLiningCurveTable.FindId()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmStringTable"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmStringTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmStringTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmStringTable.__setitem__"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmStringTable.DocumentUserTextCount"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.DocumentUserTextCount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmStringTable.Delete"><code class="docutils literal notranslate"><span class="pre">File3dmStringTable.Delete()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmViewTable"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmViewTable.__len__"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmViewTable.__getitem__"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable.__getitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmViewTable.__setitem__"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmViewTable.__iter__"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmViewTable.Add"><code class="docutils literal notranslate"><span class="pre">File3dmViewTable.Add()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rhino3dm.File3dmWriteOptions"><code class="docutils literal notranslate"><span class="pre">File3dmWriteOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmWriteOptions.File3dmWriteOptions"><code class="docutils literal notranslate"><span class="pre">File3dmWriteOptions.File3dmWriteOptions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmWriteOptions.Version"><code class="docutils literal notranslate"><span class="pre">File3dmWriteOptions.Version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.File3dmWriteOptions.SaveUserData"><code class="docutils literal notranslate"><span class="pre">File3dmWriteOptions.SaveUserData</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Object.html">Model and Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RenderContent.html">Rendering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Surfaces.html">Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Points.html">Points and Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConstructionPlane.html">ConstructionPlane</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileReference.html">FileReference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transform.html">Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewInfo.html">ViewInfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ViewportInfo.html">ViewportInfo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">File and Document</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/FileLevel.rst.txt.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="file-and-document">
+<h1>File and Document<a class="headerlink" href="#file-and-document" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.ArchivableDictionary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">ArchivableDictionary</span></span><a class="headerlink" href="#rhino3dm.ArchivableDictionary" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ArchivableDictionary.EncodeDict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EncodeDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ArchivableDictionary.EncodeDict" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.ArchivableDictionary.DecodeDict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecodeDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.ArchivableDictionary.DecodeDict" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DracoCompression</span></span><a class="headerlink" href="#rhino3dm.DracoCompression" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression.Compress">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.Compress" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression.Write">
+<span class="sig-name descname"><span class="pre">Write</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.Write" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression.DecompressByteArray">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecompressByteArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.DecompressByteArray" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression.DecompressBase64String">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecompressBase64String</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.DecompressBase64String" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompression.ToBase64String">
+<span class="sig-name descname"><span class="pre">ToBase64String</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompression.ToBase64String" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">DracoCompressionOptions</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.DracoCompressionOptions">
+<span class="sig-name descname"><span class="pre">DracoCompressionOptions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.DracoCompressionOptions" title="Link to this definition"></a></dt>
+<dd><p>DracoCompressionOptions constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.CompressionLevel">
+<span class="sig-name descname"><span class="pre">CompressionLevel</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.CompressionLevel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.PositionQuantizationBits">
+<span class="sig-name descname"><span class="pre">PositionQuantizationBits</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.PositionQuantizationBits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.TextureCoordintateQuantizationBits">
+<span class="sig-name descname"><span class="pre">TextureCoordintateQuantizationBits</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.TextureCoordintateQuantizationBits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.NormalQuantizationBits">
+<span class="sig-name descname"><span class="pre">NormalQuantizationBits</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.NormalQuantizationBits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.IncludeNormals">
+<span class="sig-name descname"><span class="pre">IncludeNormals</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.IncludeNormals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.IncludeTextureCoordinates">
+<span class="sig-name descname"><span class="pre">IncludeTextureCoordinates</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.IncludeTextureCoordinates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DracoCompressionOptions.IncludeVertexColors">
+<span class="sig-name descname"><span class="pre">IncludeVertexColors</span></span><a class="headerlink" href="#rhino3dm.DracoCompressionOptions.IncludeVertexColors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">EarthAnchorPoint</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.EarthBasepointLatitude">
+<span class="sig-name descname"><span class="pre">EarthBasepointLatitude</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLatitude" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets a point latitude on earth, in degrees.
++90 = north pole, 0 = equator, -90 = south pole.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.EarthBasepointLongitude">
+<span class="sig-name descname"><span class="pre">EarthBasepointLongitude</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointLongitude" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the point longitude on earth, in degrees.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.EarthBasepointElevation">
+<span class="sig-name descname"><span class="pre">EarthBasepointElevation</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevation" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the point elevation on earth, in meters.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.EarthBasepointElevationZero">
+<span class="sig-name descname"><span class="pre">EarthBasepointElevationZero</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthBasepointElevationZero" title="Link to this definition"></a></dt>
+<dd><p>BasepointZero: Gets or sets a value indicating the zero level convention relating to a location on Earth.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.ModelBasePoint">
+<span class="sig-name descname"><span class="pre">ModelBasePoint</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelBasePoint" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Point3d: Corresponding model point in model coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.ModelNorth">
+<span class="sig-name descname"><span class="pre">ModelNorth</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelNorth" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Vector3d: Earth directions in model coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.ModelEast">
+<span class="sig-name descname"><span class="pre">ModelEast</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.ModelEast" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Vector3d: Earth directions in model coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.Name">
+<span class="sig-name descname"><span class="pre">Name</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.Name" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets the short form of the identifying information about this location.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.Description">
+<span class="sig-name descname"><span class="pre">Description</span></span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.Description" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets the long form of the identifying information about this location.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.EarthLocationIsSet">
+<span class="sig-name descname"><span class="pre">EarthLocationIsSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.EarthLocationIsSet" title="Link to this definition"></a></dt>
+<dd><p>Checks if the earth location is set or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean value, True if set else false</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.GetModelCompass">
+<span class="sig-name descname"><span class="pre">GetModelCompass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.GetModelCompass" title="Link to this definition"></a></dt>
+<dd><p>Returns a plane in model coordinates whose X axis points East,
+Y axis points North and Z axis points Up. The origin
+is set to ModelBasepoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A plane value. This might be invalid on error.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Surfaces.html#rhino3dm.Plane" title="rhino3dm.Plane">rhino3dm.Plane</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.EarthAnchorPoint.GetModelToEarthTransform">
+<span class="sig-name descname"><span class="pre">GetModelToEarthTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelUnitSystem</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.EarthAnchorPoint.GetModelToEarthTransform" title="Link to this definition"></a></dt>
+<dd><p>Gets a transformation from model coordinates to earth coordinates.
+This transformation assumes the model is small enough that
+the curvature of the earth can be ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>modelUnitSystem</strong> (<em>UnitSystem</em>) – The model unit system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transform on success. Invalid Transform on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dm</span></span><a class="headerlink" href="#rhino3dm.File3dm" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.File3dm">
+<span class="sig-name descname"><span class="pre">File3dm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.File3dm" title="Link to this definition"></a></dt>
+<dd><p>File3dm constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.StartSectionComments">
+<span class="sig-name descname"><span class="pre">StartSectionComments</span></span><a class="headerlink" href="#rhino3dm.File3dm.StartSectionComments" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets the start section comments, which are the comments with which the 3dm file begins.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ApplicationName">
+<span class="sig-name descname"><span class="pre">ApplicationName</span></span><a class="headerlink" href="#rhino3dm.File3dm.ApplicationName" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets the name of the application that wrote this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ApplicationUrl">
+<span class="sig-name descname"><span class="pre">ApplicationUrl</span></span><a class="headerlink" href="#rhino3dm.File3dm.ApplicationUrl" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets a URL for the application that wrote this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ApplicationDetails">
+<span class="sig-name descname"><span class="pre">ApplicationDetails</span></span><a class="headerlink" href="#rhino3dm.File3dm.ApplicationDetails" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets details for the application that wrote this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ArchiveVersion">
+<span class="sig-name descname"><span class="pre">ArchiveVersion</span></span><a class="headerlink" href="#rhino3dm.File3dm.ArchiveVersion" title="Link to this definition"></a></dt>
+<dd><p>int: Gets the 3dm file archive version.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Created">
+<span class="sig-name descname"><span class="pre">Created</span></span><a class="headerlink" href="#rhino3dm.File3dm.Created" title="Link to this definition"></a></dt>
+<dd><p>DateTime: Get the DateTime that this file was originally created. If the
+value is not set in the 3dm file, then DateTime.MinValue is returned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.CreatedBy">
+<span class="sig-name descname"><span class="pre">CreatedBy</span></span><a class="headerlink" href="#rhino3dm.File3dm.CreatedBy" title="Link to this definition"></a></dt>
+<dd><p>str: Gets a string that names the user who created the file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.LastEdited">
+<span class="sig-name descname"><span class="pre">LastEdited</span></span><a class="headerlink" href="#rhino3dm.File3dm.LastEdited" title="Link to this definition"></a></dt>
+<dd><p>DateTime: Get the DateTime that this file was last edited. If the
+value is not set in the 3dm file, then DateTime.MinValue is returned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.LastEditedBy">
+<span class="sig-name descname"><span class="pre">LastEditedBy</span></span><a class="headerlink" href="#rhino3dm.File3dm.LastEditedBy" title="Link to this definition"></a></dt>
+<dd><p>str: Gets a string that names the user who last edited the file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Revision">
+<span class="sig-name descname"><span class="pre">Revision</span></span><a class="headerlink" href="#rhino3dm.File3dm.Revision" title="Link to this definition"></a></dt>
+<dd><p>int: Gets or sets the revision number.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Settings">
+<span class="sig-name descname"><span class="pre">Settings</span></span><a class="headerlink" href="#rhino3dm.File3dm.Settings" title="Link to this definition"></a></dt>
+<dd><p>File3dmSettings: Settings include tolerance, and unit system, and defaults used
+for creating views and objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Objects">
+<span class="sig-name descname"><span class="pre">Objects</span></span><a class="headerlink" href="#rhino3dm.File3dm.Objects" title="Link to this definition"></a></dt>
+<dd><p>File3dmObjectTable: Gets access to the  class associated with this file,
+which contains all objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Materials">
+<span class="sig-name descname"><span class="pre">Materials</span></span><a class="headerlink" href="#rhino3dm.File3dm.Materials" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;Material&gt;: Materials in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Linetypes">
+<span class="sig-name descname"><span class="pre">Linetypes</span></span><a class="headerlink" href="#rhino3dm.File3dm.Linetypes" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;Linetype&gt;: Linetypes in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Bitmaps">
+<span class="sig-name descname"><span class="pre">Bitmaps</span></span><a class="headerlink" href="#rhino3dm.File3dm.Bitmaps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Layers">
+<span class="sig-name descname"><span class="pre">Layers</span></span><a class="headerlink" href="#rhino3dm.File3dm.Layers" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;Layer&gt;: Layers in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Groups">
+<span class="sig-name descname"><span class="pre">Groups</span></span><a class="headerlink" href="#rhino3dm.File3dm.Groups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.DimStyles">
+<span class="sig-name descname"><span class="pre">DimStyles</span></span><a class="headerlink" href="#rhino3dm.File3dm.DimStyles" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;DimensionStyle&gt;: Dimension Styles in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.InstanceDefinitions">
+<span class="sig-name descname"><span class="pre">InstanceDefinitions</span></span><a class="headerlink" href="#rhino3dm.File3dm.InstanceDefinitions" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;InstanceDefinitionGeometry&gt;: Instance definitions in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Views">
+<span class="sig-name descname"><span class="pre">Views</span></span><a class="headerlink" href="#rhino3dm.File3dm.Views" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;ViewInfo&gt;: Views that represent the RhinoViews which are displayed when Rhino loads this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.NamedViews">
+<span class="sig-name descname"><span class="pre">NamedViews</span></span><a class="headerlink" href="#rhino3dm.File3dm.NamedViews" title="Link to this definition"></a></dt>
+<dd><p>IList&lt;ViewInfo&gt;: Named views in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.PlugInData">
+<span class="sig-name descname"><span class="pre">PlugInData</span></span><a class="headerlink" href="#rhino3dm.File3dm.PlugInData" title="Link to this definition"></a></dt>
+<dd><p>File3dmPlugInDataTable: Custom plug-in data in this file.  This data is not attached to any geometry or attributes</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Strings">
+<span class="sig-name descname"><span class="pre">Strings</span></span><a class="headerlink" href="#rhino3dm.File3dm.Strings" title="Link to this definition"></a></dt>
+<dd><p>File3dmStringTable: Document user strings in this file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.EmbeddedFiles">
+<span class="sig-name descname"><span class="pre">EmbeddedFiles</span></span><a class="headerlink" href="#rhino3dm.File3dm.EmbeddedFiles" title="Link to this definition"></a></dt>
+<dd><p>File3dmEmbeddedFiles: The embedded files in this file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.RenderContent">
+<span class="sig-name descname"><span class="pre">RenderContent</span></span><a class="headerlink" href="#rhino3dm.File3dm.RenderContent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Read">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Read" title="Link to this definition"></a></dt>
+<dd><p>Reads a 3dm file from a specified location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The file to read.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>new File3dm on success, None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.File3dm" title="rhino3dm.File3dm">File3dm</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ReadNotes">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadNotes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.ReadNotes" title="Link to this definition"></a></dt>
+<dd><p>Reads only the notes from an existing 3dm file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The file from which to read the notes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The 3dm file notes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.ReadArchiveVersion">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadArchiveVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.ReadArchiveVersion" title="Link to this definition"></a></dt>
+<dd><p>Reads only the archive 3dm version from an existing 3dm file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The file from which to read the archive version.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The 3dm file archive version.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.FromByteArray">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FromByteArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.FromByteArray" title="Link to this definition"></a></dt>
+<dd><p>Read a 3dm file from a byte array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>New File3dm on success, None on error.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rhino3dm.File3dm" title="rhino3dm.File3dm">File3dm</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Write">
+<span class="sig-name descname"><span class="pre">Write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Write" title="Link to this definition"></a></dt>
+<dd><p>Writes contents of this model to an openNURBS archive.
+If the model is not valid, then Write will refuse to write it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The file name to use for writing.</p></li>
+<li><p><strong>version</strong> (<em>int</em>) – Version of the openNURBS archive to write.  Must be [2; current version]. Rhino can read its current version, plus earlier file versions except 1. Use latest version when possible. Alternatively, 0 is a placeholder for the last valid version.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if archive is written with no error. False if errors occur.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Encode">
+<span class="sig-name descname"><span class="pre">Encode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Encode" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">Encode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.Decode">
+<span class="sig-name descname"><span class="pre">Decode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.Decode" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.EmbeddedFilePaths">
+<span class="sig-name descname"><span class="pre">EmbeddedFilePaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.EmbeddedFilePaths" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.GetEmbeddedFileAsBase64">
+<span class="sig-name descname"><span class="pre">GetEmbeddedFileAsBase64</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.GetEmbeddedFileAsBase64" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">GetEmbeddedFileAsBase64</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dm.RdkXml">
+<span class="sig-name descname"><span class="pre">RdkXml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dm.RdkXml" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmBitmapTable</span></span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bitmap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmBitmapTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmBitmapTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmDecalTable</span></span><a class="headerlink" href="#rhino3dm.File3dmDecalTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable.File3dmDecalTable">
+<span class="sig-name descname"><span class="pre">File3dmDecalTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDecalTable.File3dmDecalTable" title="Link to this definition"></a></dt>
+<dd><p>File3dmDecalTable constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">File3dmDecalTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>File3dmDecalTable constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDecalTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDecalTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDecalTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDecalTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDecalTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmDimStyleTable</span></span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – The index to search for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DimensionStyle object, or None if none was found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Annotations.html#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle">DimensionStyle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmDimStyleTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmDimStyleTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmEmbeddedFileTable</span></span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmEmbeddedFileTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmEmbeddedFileTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmGroupTable</span></span><a class="headerlink" href="#rhino3dm.File3dmGroupTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.Delete">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.Delete" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a Group object based on an index. This search type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>groupIndex</strong> (<em>int</em>) – The index to search for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Group object, or None if none was found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Object.html#rhino3dm.Group" title="rhino3dm.Group">Group</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.FindName">
+<span class="sig-name descname"><span class="pre">FindName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.FindName" title="Link to this definition"></a></dt>
+<dd><p>Finds a Group given its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the Group to be searched.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Group, or None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Object.html#rhino3dm.Group" title="rhino3dm.Group">Group</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmGroupTable.GroupMembers">
+<span class="sig-name descname"><span class="pre">GroupMembers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groupIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmGroupTable.GroupMembers" title="Link to this definition"></a></dt>
+<dd><p>Gets an array of all of the objects in a group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>groupIndex</strong> (<em>int</em>) – The index of the group in this table.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of objects that belong to the specified group or empty array if no objects could be found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rhino3dm.File3dmObject" title="rhino3dm.File3dmObject">File3dmObject</a>[]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmInstanceDefinitionTable</span></span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.AddInstanceDefinition">
+<span class="sig-name descname"><span class="pre">AddInstanceDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.AddInstanceDefinition" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urlTag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basePoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.Add" title="Link to this definition"></a></dt>
+<dd><p>Adds an instance definition to the instance definition table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The definition name.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – The definition description.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – A URL or hyperlink.</p></li>
+<li><p><strong>urlTag</strong> (<em>str</em>) – A description of the URL or hyperlink.</p></li>
+<li><p><strong>basePoint</strong> (<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A base point.</p></li>
+<li><p><strong>geometry</strong> (<em>list</em><em>[</em><a class="reference internal" href="Object.html#rhino3dm.GeometryBase" title="rhino3dm.GeometryBase"><em>rhino3dm.GeometryBase</em></a><em>]</em>) – An array, a list or any enumerable set of geometry.</p></li>
+<li><p><strong>attributes</strong> (<em>IEnumerable&lt;ObjectAttributes&gt;</em>) – An array, a list or any enumerable set of attributes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>&gt;=0  index of instance definition in the instance definition table. -1 on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmInstanceDefinitionTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmInstanceDefinitionTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmLayerTable</span></span><a class="headerlink" href="#rhino3dm.File3dmLayerTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.AddLayer">
+<span class="sig-name descname"><span class="pre">AddLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.AddLayer" title="Link to this definition"></a></dt>
+<dd><p>Easy way to add a new layer to the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Layer name.</p></li>
+<li><p><strong>color</strong> (<em>System.Drawing.Color</em>) – Layer color.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The layer’s index (&gt;=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.FindName">
+<span class="sig-name descname"><span class="pre">FindName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parentId</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindName" title="Link to this definition"></a></dt>
+<dd><p>Finds a Layer given its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the Layer to be searched.</p></li>
+<li><p><strong>parentId</strong> (<em>Guid</em>) – The id of the parent Layer to be searched.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Layer, or None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Object.html#rhino3dm.Layer" title="rhino3dm.Layer">Layer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a Layer object based on Index. This search type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – The index to search for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Layer object, or None if none was found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Object.html#rhino3dm.Layer" title="rhino3dm.Layer">Layer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLayerTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLayerTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmLinetypeTable</span></span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.Current">
+<span class="sig-name descname"><span class="pre">Current</span></span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.Current" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.CurrentSource">
+<span class="sig-name descname"><span class="pre">CurrentSource</span></span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.CurrentSource" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.Scale">
+<span class="sig-name descname"><span class="pre">Scale</span></span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.Scale" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linetype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.Delete">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.Delete" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a Linetype object based on Index. This search type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – The index to search for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Linetype, or None if none was found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Curves.html#rhino3dm.Linetype" title="rhino3dm.Linetype">Linetype</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.FindName">
+<span class="sig-name descname"><span class="pre">FindName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.FindName" title="Link to this definition"></a></dt>
+<dd><p>Finds a Linetype given its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the Linetype to be searched.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Linetype, or None on error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Curves.html#rhino3dm.Linetype" title="rhino3dm.Linetype">Linetype</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.FromAttributes">
+<span class="sig-name descname"><span class="pre">FromAttributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.FromAttributes" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmLinetypeTable.FromLayerIndex">
+<span class="sig-name descname"><span class="pre">FromLayerIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmLinetypeTable.FromLayerIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmMaterialTable</span></span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a material based on Index. This search type of search is discouraged.
+We are moving towards using only IDs for all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – The index to search for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A material, or None if none was found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DocObjects.Material</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMaterialTable.FindFromAttributes">
+<span class="sig-name descname"><span class="pre">FindFromAttributes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMaterialTable.FindFromAttributes" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmMeshModifiers</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.Displacement">
+<span class="sig-name descname"><span class="pre">Displacement</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.Displacement" title="Link to this definition"></a></dt>
+<dd><p>File3dmDisplacement: Returns an object that provides access to displacement information.
+If no displacement information is present, the method returns null.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.EdgeSoftening">
+<span class="sig-name descname"><span class="pre">EdgeSoftening</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.EdgeSoftening" title="Link to this definition"></a></dt>
+<dd><p>File3dmEdgeSoftening: Returns an object that provides access to edge softening information.
+If no edge softening information is present, the method returns null.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.Thickening">
+<span class="sig-name descname"><span class="pre">Thickening</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.Thickening" title="Link to this definition"></a></dt>
+<dd><p>File3dmThickening: Returns an object that provides access to thickening information.
+If no thickening information is present, the method returns null.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CurvePiping">
+<span class="sig-name descname"><span class="pre">CurvePiping</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CurvePiping" title="Link to this definition"></a></dt>
+<dd><p>File3dmCurvePiping: Returns an object that provides access to curve piping information.
+If no curve piping information is present, the method returns null.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.ShutLining">
+<span class="sig-name descname"><span class="pre">ShutLining</span></span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.ShutLining" title="Link to this definition"></a></dt>
+<dd><p>File3dmShutLining: Returns an object that provides access to shut-lining information.
+If no shutlining information is present, the method returns null.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CreateDisplacement">
+<span class="sig-name descname"><span class="pre">CreateDisplacement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CreateDisplacement" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CreateEdgeSoftening">
+<span class="sig-name descname"><span class="pre">CreateEdgeSoftening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CreateEdgeSoftening" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CreateThickening">
+<span class="sig-name descname"><span class="pre">CreateThickening</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CreateThickening" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CreateCurvePiping">
+<span class="sig-name descname"><span class="pre">CreateCurvePiping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CreateCurvePiping" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmMeshModifiers.CreateShutLining">
+<span class="sig-name descname"><span class="pre">CreateShutLining</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmMeshModifiers.CreateShutLining" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmObject</span></span><a class="headerlink" href="#rhino3dm.File3dmObject" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObject.Attributes">
+<span class="sig-name descname"><span class="pre">Attributes</span></span><a class="headerlink" href="#rhino3dm.File3dmObject.Attributes" title="Link to this definition"></a></dt>
+<dd><p>ObjectAttributes: Gets the attributes that are linked with this document object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObject.Geometry">
+<span class="sig-name descname"><span class="pre">Geometry</span></span><a class="headerlink" href="#rhino3dm.File3dmObject.Geometry" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.GeometryBase: Gets the geometry that is linked with this document object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmObjectTable</span></span><a class="headerlink" href="#rhino3dm.File3dmObjectTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddPoint">
+<span class="sig-name descname"><span class="pre">AddPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPoint" title="Link to this definition"></a></dt>
+<dd><p>Adds a point object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X component of point coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y component of point coordinate.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z component of point coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>id of new object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">AddPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Adds a point object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X component of point coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y component of point coordinate.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z component of point coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>id of new object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">AddPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Adds a point object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X component of point coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y component of point coordinate.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z component of point coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>id of new object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddPointCloud">
+<span class="sig-name descname"><span class="pre">AddPointCloud</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPointCloud" title="Link to this definition"></a></dt>
+<dd><p>Adds a point cloud object to the document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddLine">
+<span class="sig-name descname"><span class="pre">AddLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddLine" title="Link to this definition"></a></dt>
+<dd><p>Adds a line object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from</strong> (<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A line start point.</p></li>
+<li><p><strong>to</strong> (<a class="reference internal" href="Points.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a>) – A line end point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A unique identifier of new rhino object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddPolyline">
+<span class="sig-name descname"><span class="pre">AddPolyline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polyline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddPolyline" title="Link to this definition"></a></dt>
+<dd><p>Adds a polyline object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddArc">
+<span class="sig-name descname"><span class="pre">AddArc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddArc" title="Link to this definition"></a></dt>
+<dd><p>Adds a curve object to the document representing an arc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddCircle">
+<span class="sig-name descname"><span class="pre">AddCircle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCircle" title="Link to this definition"></a></dt>
+<dd><p>Adds a curve object to the document representing a circle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddEllipse">
+<span class="sig-name descname"><span class="pre">AddEllipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddEllipse" title="Link to this definition"></a></dt>
+<dd><p>Adds a curve object to the document representing an ellipse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddSphere">
+<span class="sig-name descname"><span class="pre">AddSphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sphere</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSphere" title="Link to this definition"></a></dt>
+<dd><p>Adds a surface object to the document representing a sphere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddCurve">
+<span class="sig-name descname"><span class="pre">AddCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddCurve" title="Link to this definition"></a></dt>
+<dd><p>Adds a curve object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddTextDot">
+<span class="sig-name descname"><span class="pre">AddTextDot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddTextDot" title="Link to this definition"></a></dt>
+<dd><p>Adds a text dot object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddSurface">
+<span class="sig-name descname"><span class="pre">AddSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddSurface" title="Link to this definition"></a></dt>
+<dd><p>Adds a surface object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddExtrusion">
+<span class="sig-name descname"><span class="pre">AddExtrusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extrusion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddExtrusion" title="Link to this definition"></a></dt>
+<dd><p>Adds an extrusion object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddMesh">
+<span class="sig-name descname"><span class="pre">AddMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddMesh" title="Link to this definition"></a></dt>
+<dd><p>Adds a mesh object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddBrep">
+<span class="sig-name descname"><span class="pre">AddBrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddBrep" title="Link to this definition"></a></dt>
+<dd><p>Adds a brep object to Rhino.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddHatch">
+<span class="sig-name descname"><span class="pre">AddHatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddHatch" title="Link to this definition"></a></dt>
+<dd><p>Adds a hatch to the document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the hatch, or  on failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Add" title="Link to this definition"></a></dt>
+<dd><p>Duplicates the object, then adds a copy of the object to the document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddInstanceObject">
+<span class="sig-name descname"><span class="pre">AddInstanceObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddInstanceObject" title="Link to this definition"></a></dt>
+<dd><p>Adds an instance reference geometry object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>instanceReference</strong> (<em>InstanceReferenceGeometry</em>) – The instance reference geometry object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">AddInstanceObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Adds an instance reference geometry object to the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A unique identifier for the object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Guid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.AddObject">
+<span class="sig-name descname"><span class="pre">AddObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.AddObject" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.GetBoundingBox">
+<span class="sig-name descname"><span class="pre">GetBoundingBox</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.GetBoundingBox" title="Link to this definition"></a></dt>
+<dd><p>Gets the bounding box containing every object in this table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The computed bounding box.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rhino.Geometry.BoundingBox</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.Delete">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.Delete" title="Link to this definition"></a></dt>
+<dd><p>Deletes object from document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>objectId</strong> (<em>Guid</em>) – Id of the object to delete.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True on success, False on failure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmObjectTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmObjectTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPlugInData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmPlugInData</span></span><a class="headerlink" href="#rhino3dm.File3dmPlugInData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPlugInDataTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmPlugInDataTable</span></span><a class="headerlink" href="#rhino3dm.File3dmPlugInDataTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPlugInDataTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPlugInDataTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPlugInDataTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPlugInDataTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmPostEffectTable</span></span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.File3dmPostEffectTable">
+<span class="sig-name descname"><span class="pre">File3dmPostEffectTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.File3dmPostEffectTable" title="Link to this definition"></a></dt>
+<dd><p>File3dmPostEffectTable constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">File3dmPostEffectTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>File3dmPostEffectTable constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmPostEffectTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmPostEffectTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRdkDocumentData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmRdkDocumentData</span></span><a class="headerlink" href="#rhino3dm.File3dmRdkDocumentData" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRdkDocumentData.RdkXml">
+<span class="sig-name descname"><span class="pre">RdkXml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRdkDocumentData.RdkXml" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmRenderContentTable</span></span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render_content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmRenderContentTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmRenderContentTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmSettings</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelUrl">
+<span class="sig-name descname"><span class="pre">ModelUrl</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelUrl" title="Link to this definition"></a></dt>
+<dd><p>str: Gets or sets a Uniform Resource Locator (URL) direction for the model.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelBasePoint">
+<span class="sig-name descname"><span class="pre">ModelBasePoint</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelBasePoint" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Point3d: Gets or sets the model base point that is used when the file is read as an instance definition.
+This point is mapped to the origin in the instance definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.EarthAnchorPoint">
+<span class="sig-name descname"><span class="pre">EarthAnchorPoint</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.EarthAnchorPoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelAbsoluteTolerance">
+<span class="sig-name descname"><span class="pre">ModelAbsoluteTolerance</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAbsoluteTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the model space absolute tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelAngleToleranceRadians">
+<span class="sig-name descname"><span class="pre">ModelAngleToleranceRadians</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAngleToleranceRadians" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the model space angle tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelAngleToleranceDegrees">
+<span class="sig-name descname"><span class="pre">ModelAngleToleranceDegrees</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelAngleToleranceDegrees" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the model space angle tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelRelativeTolerance">
+<span class="sig-name descname"><span class="pre">ModelRelativeTolerance</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelRelativeTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the model space relative tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.PageAbsoluteTolerance">
+<span class="sig-name descname"><span class="pre">PageAbsoluteTolerance</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAbsoluteTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the page space absolute tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.PageAngleToleranceRadians">
+<span class="sig-name descname"><span class="pre">PageAngleToleranceRadians</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAngleToleranceRadians" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the page space angle tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.PageAngleToleranceDegrees">
+<span class="sig-name descname"><span class="pre">PageAngleToleranceDegrees</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.PageAngleToleranceDegrees" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the page space angle tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.PageRelativeTolerance">
+<span class="sig-name descname"><span class="pre">PageRelativeTolerance</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.PageRelativeTolerance" title="Link to this definition"></a></dt>
+<dd><p>float: Gets or sets the page space relative tolerance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.ModelUnitSystem">
+<span class="sig-name descname"><span class="pre">ModelUnitSystem</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.ModelUnitSystem" title="Link to this definition"></a></dt>
+<dd><p>UnitSystem: Gets or sets the model unit system, using  enumeration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.PageUnitSystem">
+<span class="sig-name descname"><span class="pre">PageUnitSystem</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.PageUnitSystem" title="Link to this definition"></a></dt>
+<dd><p>UnitSystem: Gets or sets the page unit system, using  enumeration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmSettings.RenderSettings">
+<span class="sig-name descname"><span class="pre">RenderSettings</span></span><a class="headerlink" href="#rhino3dm.File3dmSettings.RenderSettings" title="Link to this definition"></a></dt>
+<dd><p>Rhino.Render.RenderSettings: Gets or sets the render settings.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmShutLiningCurveTable</span></span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.Add" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.FindIndex">
+<span class="sig-name descname"><span class="pre">FindIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.FindIndex" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmShutLiningCurveTable.FindId">
+<span class="sig-name descname"><span class="pre">FindId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmShutLiningCurveTable.FindId" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmStringTable</span></span><a class="headerlink" href="#rhino3dm.File3dmStringTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmStringTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmStringTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmStringTable.__setitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable.DocumentUserTextCount">
+<span class="sig-name descname"><span class="pre">DocumentUserTextCount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmStringTable.DocumentUserTextCount" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmStringTable.Delete">
+<span class="sig-name descname"><span class="pre">Delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmStringTable.Delete" title="Link to this definition"></a></dt>
+<dd><p>Removes document strings from the 3dm file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – name of section to delete. If null, all sections will be deleted.</p></li>
+<li><p><strong>entry</strong> (<em>str</em>) – name of entry to delete. If null, all entries will be deleted for a given section.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmViewTable</span></span><a class="headerlink" href="#rhino3dm.File3dmViewTable" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmViewTable.__len__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmViewTable.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmViewTable.__setitem__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmViewTable.__iter__" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmViewTable.Add">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmViewTable.Add" title="Link to this definition"></a></dt>
+<dd><p>Adds a</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.File3dmWriteOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmWriteOptions</span></span><a class="headerlink" href="#rhino3dm.File3dmWriteOptions" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.File3dmWriteOptions.File3dmWriteOptions">
+<span class="sig-name descname"><span class="pre">File3dmWriteOptions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.File3dmWriteOptions.File3dmWriteOptions" title="Link to this definition"></a></dt>
+<dd><p>File3dmWriteOptions constructor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmWriteOptions.Version">
+<span class="sig-name descname"><span class="pre">Version</span></span><a class="headerlink" href="#rhino3dm.File3dmWriteOptions.Version" title="Link to this definition"></a></dt>
+<dd><p>int: File version. Default is major version number of this assembly version.Must be in range [2; current version].Alternatively, 0 is a placeholder for the last valid version.Rhino can read its current version, plus earlier file versions except 1.Use latest version when possible.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.File3dmWriteOptions.SaveUserData">
+<span class="sig-name descname"><span class="pre">SaveUserData</span></span><a class="headerlink" href="#rhino3dm.File3dmWriteOptions.SaveUserData" title="Link to this definition"></a></dt>
+<dd><p>bool: Include custom user data in the file. Default is true</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Meshes.html" class="btn btn-neutral float-left" title="Mesh, Mesh modifiers and SubD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Object.html" class="btn btn-neutral float-right" title="Model and Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
