@@ -1,0 +1,1203 @@
+File and Document
+=================
+
+.. py:currentmodule:: rhino3dm
+
+.. py:class:: ArchivableDictionary
+
+   .. py:staticmethod:: EncodeDict()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: DecodeDict()
+
+      [todo] add documentation
+
+.. py:class:: DracoCompression
+
+   .. py:staticmethod:: Compress(mesh)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Compress(mesh, options)
+
+      [todo] add documentation
+
+   .. py:method:: Write()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: DecompressByteArray()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: DecompressBase64String(encoded)
+
+      [todo] add documentation
+
+   .. py:method:: ToBase64String()
+
+      [todo] add documentation
+
+.. py:class:: DracoCompressionOptions
+
+   .. py:method:: DracoCompressionOptions()
+
+      DracoCompressionOptions constructor
+
+
+   .. py:attribute:: CompressionLevel
+
+
+   .. py:attribute:: PositionQuantizationBits
+
+
+   .. py:attribute:: TextureCoordintateQuantizationBits
+
+
+   .. py:attribute:: NormalQuantizationBits
+
+
+   .. py:attribute:: IncludeNormals
+
+
+   .. py:attribute:: IncludeTextureCoordinates
+
+
+   .. py:attribute:: IncludeVertexColors
+
+.. py:class:: EarthAnchorPoint
+
+   .. py:attribute:: EarthBasepointLatitude
+
+      float: Gets or sets a point latitude on earth, in degrees.
+      +90 = north pole, 0 = equator, -90 = south pole.
+
+   .. py:attribute:: EarthBasepointLongitude
+
+      float: Gets or sets the point longitude on earth, in degrees.
+
+   .. py:attribute:: EarthBasepointElevation
+
+      float: Gets or sets the point elevation on earth, in meters.
+
+   .. py:attribute:: EarthBasepointElevationZero
+
+      BasepointZero: Gets or sets a value indicating the zero level convention relating to a location on Earth.
+
+   .. py:attribute:: ModelBasePoint
+
+      rhino3dm.Point3d: Corresponding model point in model coordinates.
+
+   .. py:attribute:: ModelNorth
+
+      rhino3dm.Vector3d: Earth directions in model coordinates.
+
+   .. py:attribute:: ModelEast
+
+      rhino3dm.Vector3d: Earth directions in model coordinates.
+
+   .. py:attribute:: Name
+
+      str: Gets or sets the short form of the identifying information about this location.
+
+   .. py:attribute:: Description
+
+      str: Gets or sets the long form of the identifying information about this location.
+
+   .. py:method:: EarthLocationIsSet()
+
+      Checks if the earth location is set or not.
+
+      :return: Boolean value, True if set else false
+
+      :rtype: bool
+
+   .. py:method:: GetModelCompass()
+
+      Returns a plane in model coordinates whose X axis points East,
+      Y axis points North and Z axis points Up. The origin
+      is set to ModelBasepoint.
+
+      :return: A plane value. This might be invalid on error.
+
+      :rtype: rhino3dm.Plane
+
+   .. py:method:: GetModelToEarthTransform(modelUnitSystem)
+
+      Gets a transformation from model coordinates to earth coordinates.
+      This transformation assumes the model is small enough that
+      the curvature of the earth can be ignored.
+
+      :param UnitSystem modelUnitSystem: The model unit system.
+
+      :return: Transform on success. Invalid Transform on error.
+
+      :rtype: Transform
+
+.. py:class:: File3dm
+
+   .. py:method:: File3dm()
+
+      File3dm constructor
+
+
+   .. py:attribute:: StartSectionComments
+
+      str: Gets or sets the start section comments, which are the comments with which the 3dm file begins.
+
+   .. py:attribute:: ApplicationName
+
+      str: Gets or sets the name of the application that wrote this file.
+
+   .. py:attribute:: ApplicationUrl
+
+      str: Gets or sets a URL for the application that wrote this file.
+
+   .. py:attribute:: ApplicationDetails
+
+      str: Gets or sets details for the application that wrote this file.
+
+   .. py:attribute:: ArchiveVersion
+
+      int: Gets the 3dm file archive version.
+
+   .. py:attribute:: Created
+
+      DateTime: Get the DateTime that this file was originally created. If the
+      value is not set in the 3dm file, then DateTime.MinValue is returned
+
+   .. py:attribute:: CreatedBy
+
+      str: Gets a string that names the user who created the file.
+
+   .. py:attribute:: LastEdited
+
+      DateTime: Get the DateTime that this file was last edited. If the
+      value is not set in the 3dm file, then DateTime.MinValue is returned
+
+   .. py:attribute:: LastEditedBy
+
+      str: Gets a string that names the user who last edited the file.
+
+   .. py:attribute:: Revision
+
+      int: Gets or sets the revision number.
+
+   .. py:attribute:: Settings
+
+      File3dmSettings: Settings include tolerance, and unit system, and defaults used
+      for creating views and objects.
+
+   .. py:attribute:: Objects
+
+      File3dmObjectTable: Gets access to the  class associated with this file,
+      which contains all objects.
+
+   .. py:attribute:: Materials
+
+      IList<Material>: Materials in this file.
+
+   .. py:attribute:: Linetypes
+
+      IList<Linetype>: Linetypes in this file.
+
+   .. py:attribute:: Bitmaps
+
+
+   .. py:attribute:: Layers
+
+      IList<Layer>: Layers in this file.
+
+   .. py:attribute:: Groups
+
+
+   .. py:attribute:: DimStyles
+
+      IList<DimensionStyle>: Dimension Styles in this file.
+
+   .. py:attribute:: InstanceDefinitions
+
+      IList<InstanceDefinitionGeometry>: Instance definitions in this file.
+
+   .. py:attribute:: Views
+
+      IList<ViewInfo>: Views that represent the RhinoViews which are displayed when Rhino loads this file.
+
+   .. py:attribute:: NamedViews
+
+      IList<ViewInfo>: Named views in this file.
+
+   .. py:attribute:: PlugInData
+
+      File3dmPlugInDataTable: Custom plug-in data in this file.  This data is not attached to any geometry or attributes
+
+   .. py:attribute:: Strings
+
+      File3dmStringTable: Document user strings in this file
+
+   .. py:attribute:: EmbeddedFiles
+
+      File3dmEmbeddedFiles: The embedded files in this file.
+
+   .. py:attribute:: RenderContent
+
+
+   .. py:staticmethod:: Read(path)
+
+      Reads a 3dm file from a specified location.
+
+      :param str path: The file to read.
+
+      :return: new File3dm on success, None on error.
+
+      :rtype: File3dm
+
+   .. py:staticmethod:: ReadNotes(path)
+
+      Reads only the notes from an existing 3dm file.
+
+      :param str path: The file from which to read the notes.
+
+      :return: The 3dm file notes.
+
+      :rtype: str
+
+   .. py:staticmethod:: ReadArchiveVersion(path)
+
+      Reads only the archive 3dm version from an existing 3dm file.
+
+      :param str path: The file from which to read the archive version.
+
+      :return: The 3dm file archive version.
+
+      :rtype: int
+
+   .. py:staticmethod:: FromByteArray()
+
+      Read a 3dm file from a byte array
+
+      :return: New File3dm on success, None on error.
+
+      :rtype: File3dm
+
+   .. py:method:: Write(path, version)
+
+      Writes contents of this model to an openNURBS archive.
+      If the model is not valid, then Write will refuse to write it.
+
+      :param str path: The file name to use for writing.
+      :param int version: Version of the openNURBS archive to write.  Must be [2; current version]. \
+         Rhino can read its current version, plus earlier file versions except 1. \
+         Use latest version when possible. \
+         Alternatively, 0 is a placeholder for the last valid version.
+
+      :return: True if archive is written with no error. \
+         False if errors occur.
+
+      :rtype: bool
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: Decode()
+
+      [todo] add documentation
+
+   .. py:method:: EmbeddedFilePaths()
+
+      [todo] add documentation
+
+   .. py:method:: GetEmbeddedFileAsBase64()
+
+      [todo] add documentation
+
+   .. py:method:: GetEmbeddedFileAsBase64()
+
+      [todo] add documentation
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation
+
+.. py:class:: File3dmBitmapTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(bitmap)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmDecalTable
+
+   .. py:method:: File3dmDecalTable()
+
+      File3dmDecalTable constructor
+
+
+   .. py:method:: File3dmDecalTable()
+
+      File3dmDecalTable constructor
+
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+.. py:class:: File3dmDimStyleTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(dimstyle)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A DimensionStyle object, or None if none was found.
+
+      :rtype: DimensionStyle
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmEmbeddedFileTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(embedded_file)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+.. py:class:: File3dmGroupTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(group)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(group)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(index)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a Group object based on an index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int groupIndex: The index to search for.
+
+      :return: A Group object, or None if none was found.
+
+      :rtype: Group
+
+   .. py:method:: FindName(name)
+
+      Finds a Group given its name.
+
+      :param str name: The name of the Group to be searched.
+
+      :return: A Group, or None on error.
+
+      :rtype: Group
+
+   .. py:method:: GroupMembers(groupIndex)
+
+      Gets an array of all of the objects in a group.
+
+      :param int groupIndex: The index of the group in this table.
+
+      :return: Array of objects that belong to the specified group or empty array if no objects could be found.
+
+      :rtype: File3dmObject[]
+
+.. py:class:: File3dmInstanceDefinitionTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: AddInstanceDefinition(idef)
+
+      [todo] add documentation
+
+   .. py:method:: Add(name, description, url, urlTag, basePoint, geometry, attributes)
+
+      Adds an instance definition to the instance definition table.
+
+      :param str name: The definition name.
+      :param str description: The definition description.
+      :param str url: A URL or hyperlink.
+      :param str urlTag: A description of the URL or hyperlink.
+      :param rhino3dm.Point3d basePoint: A base point.
+      :param list[rhino3dm.GeometryBase] geometry: An array, a list or any enumerable set of geometry.
+      :param IEnumerable<ObjectAttributes> attributes: An array, a list or any enumerable set of attributes.
+
+      :return: >=0  index of instance definition in the instance definition table. -1 on failure.
+
+      :rtype: int
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmLayerTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(layer)
+
+      [todo] add documentation
+
+   .. py:method:: AddLayer(name, color)
+
+      Easy way to add a new layer to the model.
+
+      :param str name: Layer name.
+      :param System.Drawing.Color color: Layer color.
+
+      :return: The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+
+      :rtype: int
+
+   .. py:method:: FindName(name, parentId)
+
+      Finds a Layer given its name.
+
+      :param str name: The name of the Layer to be searched.
+      :param Guid parentId: The id of the parent Layer to be searched.
+
+      :return: A Layer, or None on error.
+
+      :rtype: Layer
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a Layer object based on Index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A Layer object, or None if none was found.
+
+      :rtype: Layer
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmLinetypeTable
+
+   .. py:attribute:: Current
+
+
+   .. py:attribute:: CurrentSource
+
+
+   .. py:attribute:: Scale
+
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(linetype)
+
+      [todo] add documentation
+
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a Linetype object based on Index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A Linetype, or None if none was found.
+
+      :rtype: Linetype
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindName(name)
+
+      Finds a Linetype given its name.
+
+      :param str name: The name of the Linetype to be searched.
+
+      :return: A Linetype, or None on error.
+
+      :rtype: Linetype
+
+   .. py:method:: FromAttributes(attributes)
+
+      [todo] add documentation
+
+   .. py:method:: FromLayerIndex(index)
+
+      [todo] add documentation
+
+.. py:class:: File3dmMaterialTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(material)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      Retrieves a material based on Index. This search type of search is discouraged.
+      We are moving towards using only IDs for all tables.
+
+      :param int index: The index to search for.
+
+      :return: A material, or None if none was found.
+
+      :rtype: DocObjects.Material
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindFromAttributes()
+
+      [todo] add documentation
+
+.. py:class:: File3dmMeshModifiers
+
+   .. py:attribute:: Displacement
+
+      File3dmDisplacement: Returns an object that provides access to displacement information.
+      If no displacement information is present, the method returns null.
+
+   .. py:attribute:: EdgeSoftening
+
+      File3dmEdgeSoftening: Returns an object that provides access to edge softening information.
+      If no edge softening information is present, the method returns null.
+
+   .. py:attribute:: Thickening
+
+      File3dmThickening: Returns an object that provides access to thickening information.
+      If no thickening information is present, the method returns null.
+
+   .. py:attribute:: CurvePiping
+
+      File3dmCurvePiping: Returns an object that provides access to curve piping information.
+      If no curve piping information is present, the method returns null.
+
+   .. py:attribute:: ShutLining
+
+      File3dmShutLining: Returns an object that provides access to shut-lining information.
+      If no shutlining information is present, the method returns null.
+
+   .. py:method:: CreateDisplacement()
+
+      [todo] add documentation
+
+   .. py:method:: CreateEdgeSoftening()
+
+      [todo] add documentation
+
+   .. py:method:: CreateThickening ()
+
+      [todo] add documentation
+
+   .. py:method:: CreateCurvePiping()
+
+      [todo] add documentation
+
+   .. py:method:: CreateShutLining ()
+
+      [todo] add documentation
+
+.. py:class:: File3dmObject
+
+   .. py:attribute:: Attributes
+
+      ObjectAttributes: Gets the attributes that are linked with this document object.
+
+   .. py:attribute:: Geometry
+
+      rhino3dm.GeometryBase: Gets the geometry that is linked with this document object.
+
+.. py:class:: File3dmObjectTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: AddPoint(x, y, z)
+
+      Adds a point object to the table.
+
+      :param float x: X component of point coordinate.
+      :param float y: Y component of point coordinate.
+      :param float z: Z component of point coordinate.
+
+      :return: id of new object.
+
+      :rtype: Guid
+
+   .. py:method:: AddPoint(point)
+
+      Adds a point object to the table.
+
+      :param float x: X component of point coordinate.
+      :param float y: Y component of point coordinate.
+      :param float z: Z component of point coordinate.
+
+      :return: id of new object.
+
+      :rtype: Guid
+
+   .. py:method:: AddPoint(point)
+
+      Adds a point object to the table.
+
+      :param float x: X component of point coordinate.
+      :param float y: Y component of point coordinate.
+      :param float z: Z component of point coordinate.
+
+      :return: id of new object.
+
+      :rtype: Guid
+
+   .. py:method:: AddPointCloud(cloud, attributes)
+
+      Adds a point cloud object to the document.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddLine(from, to)
+
+      Adds a line object to Rhino.
+
+      :param rhino3dm.Point3d from: A line start point.
+      :param rhino3dm.Point3d to: A line end point.
+
+      :return: A unique identifier of new rhino object.
+
+      :rtype: Guid
+
+   .. py:method:: AddPolyline(polyline, attributes)
+
+      Adds a polyline object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddArc(arc, attributes)
+
+      Adds a curve object to the document representing an arc.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddCircle(circle, attributes)
+
+      Adds a curve object to the document representing a circle.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddEllipse(ellipse, attributes)
+
+      Adds a curve object to the document representing an ellipse.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddSphere(sphere, attributes)
+
+      Adds a surface object to the document representing a sphere.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddCurve(curve, attributes)
+
+      Adds a curve object to the table.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddTextDot(text, location, attributes)
+
+      Adds a text dot object to the table.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddSurface(surface, attributes)
+
+      Adds a surface object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddExtrusion(extrusion, attributes)
+
+      Adds an extrusion object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddMesh(mesh, attributes)
+
+      Adds a mesh object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddBrep(brep, attributes)
+
+      Adds a brep object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddHatch(hatch, attributes)
+
+      Adds a hatch to the document.
+
+      :return: A unique identifier for the hatch, or  on failure.
+
+      :rtype: Guid
+
+   .. py:method:: Add(geometry, attributes)
+
+      Duplicates the object, then adds a copy of the object to the document.
+
+
+      :rtype: void
+
+   .. py:method:: AddInstanceObject(idef)
+
+      Adds an instance reference geometry object to the table.
+
+      :param InstanceReferenceGeometry instanceReference: The instance reference geometry object.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddInstanceObject(idef, attributes)
+
+      Adds an instance reference geometry object to the table.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
+   .. py:method:: AddObject(object)
+
+      [todo] add documentation
+
+   .. py:method:: GetBoundingBox()
+
+      Gets the bounding box containing every object in this table.
+
+      :return: The computed bounding box.
+
+      :rtype: Rhino.Geometry.BoundingBox
+
+   .. py:method:: Delete(id)
+
+      Deletes object from document.
+
+      :param Guid objectId: Id of the object to delete.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmPlugInData
+
+.. py:class:: File3dmPlugInDataTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+.. py:class:: File3dmPostEffectTable
+
+   .. py:method:: File3dmPostEffectTable()
+
+      File3dmPostEffectTable constructor
+
+
+   .. py:method:: File3dmPostEffectTable()
+
+      File3dmPostEffectTable constructor
+
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmRdkDocumentData
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation
+
+.. py:class:: File3dmRenderContentTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(render_content)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmSettings
+
+   .. py:attribute:: ModelUrl
+
+      str: Gets or sets a Uniform Resource Locator (URL) direction for the model.
+
+   .. py:attribute:: ModelBasePoint
+
+      rhino3dm.Point3d: Gets or sets the model base point that is used when the file is read as an instance definition.
+      This point is mapped to the origin in the instance definition.
+
+   .. py:attribute:: EarthAnchorPoint
+
+
+   .. py:attribute:: ModelAbsoluteTolerance
+
+      float: Gets or sets the model space absolute tolerance.
+
+   .. py:attribute:: ModelAngleToleranceRadians
+
+      float: Gets or sets the model space angle tolerance.
+
+   .. py:attribute:: ModelAngleToleranceDegrees
+
+      float: Gets or sets the model space angle tolerance.
+
+   .. py:attribute:: ModelRelativeTolerance
+
+      float: Gets or sets the model space relative tolerance.
+
+   .. py:attribute:: PageAbsoluteTolerance
+
+      float: Gets or sets the page space absolute tolerance.
+
+   .. py:attribute:: PageAngleToleranceRadians
+
+      float: Gets or sets the page space angle tolerance.
+
+   .. py:attribute:: PageAngleToleranceDegrees
+
+      float: Gets or sets the page space angle tolerance.
+
+   .. py:attribute:: PageRelativeTolerance
+
+      float: Gets or sets the page space relative tolerance.
+
+   .. py:attribute:: ModelUnitSystem
+
+      UnitSystem: Gets or sets the model unit system, using  enumeration.
+
+   .. py:attribute:: PageUnitSystem
+
+      UnitSystem: Gets or sets the page unit system, using  enumeration.
+
+   .. py:attribute:: RenderSettings
+
+      Rhino.Render.RenderSettings: Gets or sets the render settings.
+
+.. py:class:: File3dmShutLiningCurveTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(id)
+
+      [todo] add documentation
+
+   .. py:method:: FindIndex(index)
+
+      [todo] add documentation
+
+   .. py:method:: FindId(id)
+
+      [todo] add documentation
+
+.. py:class:: File3dmStringTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: DocumentUserTextCount()
+
+      [todo] add documentation
+
+   .. py:method:: Delete(key)
+
+      Removes document strings from the 3dm file.
+
+      :param str section: name of section to delete. If null, all sections will be deleted.
+      :param str entry: name of entry to delete. If null, all entries will be deleted for a given section.
+
+
+      :rtype: void
+
+.. py:class:: File3dmViewTable
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: Add(view)
+
+      Adds a
+
+
+      :rtype: void
+
+.. py:class:: File3dmWriteOptions
+
+   .. py:method:: File3dmWriteOptions()
+
+      File3dmWriteOptions constructor
+
+
+   .. py:attribute:: Version
+
+      int: File version. Default is major version number of this assembly version.Must be in range [2; current version].Alternatively, 0 is a placeholder for the last valid version.Rhino can read its current version, plus earlier file versions except 1.Use latest version when possible.
+
+   .. py:attribute:: SaveUserData
+
+      bool: Include custom user data in the file. Default is true

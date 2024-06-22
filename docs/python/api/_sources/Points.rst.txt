@@ -1,0 +1,761 @@
+Points and Vectors
+==================
+
+API to Rhino points and vectors of different forms and types.
+
+.. py:currentmodule:: rhino3dm
+
+.. py:class:: Point
+
+   .. py:method:: Point()
+
+      Point constructor
+
+
+   .. py:method:: Point(location)
+
+      Initializes a new point instance with a location.
+
+      :param Point3d location: A position in 3D space.
+
+   .. py:attribute:: Location
+
+      :py:class:`Point3d`: Gets or sets the location (position) of this point.
+
+.. py:class:: Point2d
+
+   .. py:method:: Point2d(x, y)
+
+      Initializes a new instance of  from coordinates.
+
+      :param float x: The X (first) coordinate.
+      :param float y: The Y (second) coordinate.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of the point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of the point.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+   .. py:method:: DistanceTo(other)
+
+      Computes the distance between two points.
+
+      :param Point2d other: Another point.
+
+      :return: The length of the line between the two points, or 0 if either point is invalid.
+
+      :rtype: float
+
+.. py:class:: Point2f
+
+   .. py:method:: Point2f(x, y)
+
+      Initializes a new two-dimensional point from two components.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of the vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of the vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+.. py:class:: Point3d
+
+   .. py:method:: Point3d(x, y, z)
+
+      Initializes a new point by defining the X, Y and Z coordinates.
+
+      :param float x: The value of the X (first) coordinate.
+      :param float y: The value of the Y (second) coordinate.
+      :param float z: The value of the Z (third) coordinate.
+
+   .. py:attribute:: Unset
+
+      :py:class:`Point3d`: Gets the value of a point at location RhinoMath.UnsetValue,RhinoMath.UnsetValue,RhinoMath.UnsetValue.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of this point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of this point.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) coordinate of this point.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+   .. py:method:: DistanceTo(other)
+
+      Computes the distance between two points.
+
+      :param Point3d other: Other point for distance measurement.
+
+      :return: The length of the line between this and the other point; or 0 if any of the points is not valid.
+
+      :rtype: float
+
+   .. py:method:: Transform(xform)
+
+      Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+      result = transformation*point
+
+      :param Transform xform: Transformation to apply.
+
+
+      :rtype: void
+
+.. py:class:: Point3dList
+
+   .. py:method:: Point3dList()
+
+      Point3dList constructor
+
+   .. py:method:: Point3dList(initialCapacity)
+
+      Initializes a new point list with a preallocated initial capacity.
+
+      :param int initialCapacity: The number of added items before which the underlying array will be resized.
+
+   .. py:attribute:: Capacity
+
+      :rtype: int
+
+   .. py:attribute:: Count
+
+      :rtype: int
+
+   .. py:attribute:: BoundingBox
+
+      Even though this is a property, it is not a "fast" calculation. Every point is evaluated in order to get the bounding box of the list.
+
+      :rtype: BoundingBox
+
+   .. py:method:: __len__()
+
+      Get the list length
+
+      :rtype: int
+
+   .. py:method:: __getitem__(index)
+
+      Get item at given index
+
+      :param int index: item to get
+
+      :rtype: Point3d
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation
+
+   .. py:method:: Insert(index, item)
+
+      [todo] add documentation
+
+   .. py:method:: RemoveAt(index)
+
+      [todo] add documentation
+
+   .. py:method:: Add(x, y, z)
+
+      Adds a Point3d to the end of the list with given x,y,z coordinates.
+
+      :param float x: The X coordinate.
+      :param float y: The Y coordinate.
+      :param float z: The Z coordinate.
+
+   .. py:method:: Transform(xform)
+
+      Applies a transform to all the points in the list.
+
+      :param Transform xform: Transform to apply.
+
+   .. py:method:: SetAllX(x)
+
+      Set all the X values for the points to a single value
+
+   .. py:method:: SetAllY(y)
+
+      Set all the Y values for the points to a single value
+
+   .. py:method:: SetAllZ(z)
+
+      Set all the Z values for the points to a single value
+
+   .. py:method:: Append(points)
+
+      [todo] add documentation
+
+.. py:class:: Point3f
+
+   .. py:method:: Point3f(x, y, z)
+
+      Initializes a new two-dimensional vector from two components.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+      :param float z: Z component of vector.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of the vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of the vector.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) component of the vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+.. py:class:: Point4d
+
+   .. py:method:: Point4d(x, y, z, w)
+
+      Initializes a new instance of the  class based on coordinates.
+
+      :param float x: The X (first) dimension.
+      :param float y: The Y (second) dimension.
+      :param float z: The Z (third) dimension.
+      :param float w: The W (fourth) dimension, or weight.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) coordinate of this point.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) coordinate of this point.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) coordinate of this point.
+
+   .. py:attribute:: W
+
+      float: Gets or sets the W (fourth) coordinate -or weight- of this point.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+.. py:class:: PointCloud
+
+   .. py:method:: PointCloud()
+
+      PointCloud constructor
+
+
+   .. py:method:: PointCloud()
+
+      PointCloud constructor
+
+
+   .. py:attribute:: Count
+
+      int: Gets the number of points in this point cloud.
+
+   .. py:attribute:: HiddenPointCount
+
+      int: Gets the number of points that have their Hidden flag set.
+
+   .. py:attribute:: ContainsColors
+
+      bool: Gets a value indicating whether or not the points in this
+      point cloud have colors assigned to them.
+
+   .. py:attribute:: ContainsNormals
+
+      bool: Gets a value indicating whether or not the points in this
+      point cloud have normals assigned to them.
+
+   .. py:attribute:: ContainsValues
+
+
+   .. py:attribute:: ContainsHiddenFlags
+
+      bool: Gets a value indicating whether or not the points in this
+      point cloud have hidden flags assigned to them.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: ClearColors()
+
+      Destroys the color information in this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: ClearNormals()
+
+      Destroys the normal vector information in this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: ClearHiddenFlags()
+
+      Destroys the hidden flag information in this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AppendNew()
+
+      Appends a new PointCloudItem to the end of this point cloud.
+
+      :return: The newly appended item.
+
+      :rtype: PointCloudItem
+
+   .. py:method:: InsertNew(index)
+
+      Inserts a new  at a specific position of the point cloud.
+
+      :param int index: Index of new item.
+
+      :return: The newly inserted item.
+
+      :rtype: PointCloudItem
+
+   .. py:method:: Merge(other)
+
+      Merges, or appends, a specified point cloud into this one.
+
+      :param PointCloud other: PointCloud to merge with this one.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point)
+
+      Append a new point to the end of the list.
+
+      :param Point3d point: Point to append.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, normal)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, color)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, normal, color)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, value)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: Add(point, normal, normal, value)
+
+      Append a new point to the end of the list.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points)
+
+      Appends a collection of points to this point cloud.
+
+      :param list[:py:class:`Point3d`] points: Points to append.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, normals)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, colors)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, normals, colors)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, values)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: AddRange(points, normals, colors, values)
+
+      Appends a collection of points to this point cloud.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point)
+
+      Inserts a new point into the point list.
+
+      :param int index: Insertion index.
+      :param Point3d point: Point to append.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, normal)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, color)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, normal, color)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, value)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: Insert(index, point, normal, color, value)
+
+      Inserts a new point into the point list.
+
+
+      :rtype: void
+
+   .. py:method:: InsertRange(index, points)
+
+      Append a collection of points to this point cloud.
+
+      :param int index: Index at which to insert the new collection.
+      :param list[Point3d] points: Points to append.
+
+
+      :rtype: void
+
+   .. py:method:: RemoveAt(index)
+
+      Remove the point at the given index.
+
+      :param int index: Index of point to remove.
+
+   .. py:method:: GetPoints()
+
+      Copy all the point coordinates in this point cloud to an array.
+
+      :return: An array containing all the points in this point cloud.
+
+      :rtype: tuple[Point3d]
+
+   .. py:method:: PointAt(index)
+
+      Returns the location of the point at a specific index.
+
+      :param int index: The index.
+
+
+      :rtype: Point3d
+
+   .. py:method:: GetNormals()
+
+      Copy all the normal vectors in this point cloud to an array.
+
+      :return: An array containing all the normals in this point cloud.
+
+      :rtype: Vector3d[]
+
+   .. py:method:: GetColors()
+
+      Copy all the point colors in this point cloud to an array.
+
+      :return: An array containing all the colors in this point cloud.
+
+      :rtype: Color[]
+
+   .. py:method:: GetValues()
+
+      [todo] add documentation
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Returns index of the closest point in the point cloud to a given test point.
+
+      :param Point3d testPoint: .
+
+      :return: Index of point in the point cloud on success. -1 on failure.
+
+      :rtype: int
+
+.. py:class:: PointCloudItem
+
+   .. py:attribute:: Location
+
+      :py:class:`Point3d`: Gets or sets the location of this point cloud item.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X component of this point cloud item location.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y component of this point cloud item location.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z component of this point cloud item location.
+
+   .. py:attribute:: Normal
+
+      :py:class:`Vector3d: Gets or sets the normal vector for this point cloud item`.
+      If this point cloud item does not have a normal vector,
+      Vector3d.Unset is returned.
+
+   .. py:attribute:: Color
+
+      Color: Gets or sets the color of this point cloud item.
+      If this point cloud item does not have a color, System.Drawing.Color.Black is returned.
+
+   .. py:attribute:: Hidden
+
+      bool: Gets or sets the hidden flag of this point cloud item.
+      If this point cloud item does not have a hidden flag, False is returned.
+
+   .. py:attribute:: Value
+
+
+   .. py:attribute:: Index
+
+      int: Gets the index of this point cloud item.
+
+.. py:class:: PointGrid
+
+   .. py:method:: PointGrid()
+
+      PointGrid constructor
+
+.. py:class:: Vector2d
+
+   .. py:method:: Vector2d(x, y)
+
+      Initializes a new instance of the vector based on two, X and Y, components.
+
+      :param float x: The X (first) component.
+      :param float y: The Y (second) component.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of this vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of this vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+.. py:class:: Vector3d
+
+   .. py:method:: Vector3d(x, y, z)
+
+      Initializes a new instance of a vector, using its three components.
+
+      :param float x: The X (first) component.
+      :param float y: The Y (second) component.
+      :param float z: The Z (third) component.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of the vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of the vector.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) component of the vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+
+   .. py:method:: IsParallelTo(other)
+
+      Determines whether this vector is parallel to another vector, within one degree (within Pi / 180).
+
+      :param Vector3d other: Vector to use for comparison.
+
+      :return: Parallel indicator: \
+         +1 = both vectors are parallel 0 = vectors are not parallel, or at least one of the vectors is zero-1 = vectors are anti-parallel.
+
+      :rtype: int
+
+   .. py:method:: IsParallelTo(other, angleTolerance)
+
+      Determines whether this vector is parallel to another vector, within one degree (within Pi / 180).
+
+      :return: Parallel indicator: \
+         +1 = both vectors are parallel 0 = vectors are not parallel, or at least one of the vectors is zero-1 = vectors are anti-parallel.
+
+      :rtype: int
+
+   .. py:staticmethod:: VectorAngle(a, b)
+
+      Compute the angle between two vectors.
+      This operation is commutative.
+
+      :param Vector3d a: First vector for angle.
+      :param Vector3d b: Second vector for angle.
+
+      :return: If the input is valid, the angle (in radians) between a and b; RhinoMath.UnsetValue otherwise.
+
+      :rtype: float
+
+   .. py:staticmethod:: VectorAngle(a, b, plane)
+
+      Compute the angle between two vectors.
+      This operation is commutative.
+
+      :return: If the input is valid, the angle (in radians) between a and b; RhinoMath.UnsetValue otherwise.
+
+      :rtype: float
+
+   .. py:staticmethod:: VectorAngle(v1, v2, vNormal)
+
+      Compute the angle between two vectors.
+      This operation is commutative.
+
+      :return: If the input is valid, the angle (in radians) between a and b; RhinoMath.UnsetValue otherwise.
+
+      :rtype: float
+
+.. py:class:: Vector3f
+
+   .. py:method:: Vector3f(x, y, z)
+
+      Constructs a new vector from 3 single precision numbers.
+
+      :param float x: X component of vector.
+      :param float y: Y component of vector.
+      :param float z: Z component of vector.
+
+   .. py:attribute:: X
+
+      float: Gets or sets the X (first) component of this vector.
+
+   .. py:attribute:: Y
+
+      float: Gets or sets the Y (second) component of this vector.
+
+   .. py:attribute:: Z
+
+      float: Gets or sets the Z (third) component of this vector.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:method:: __repr__()
+
+      [todo] add documentation
+

@@ -1,6 +1,0 @@
-File3dmPlugInData
-=================
-
-.. py:module:: rhino3dm
-
-.. py:class:: File3dmPlugInData

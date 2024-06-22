@@ -1,0 +1,1746 @@
+Curves
+======
+
+.. py:currentmodule:: rhino3dm
+
+.. py:class:: Arc
+
+   .. py:method:: Arc(circle, angleRadians)
+
+      Initializes a new instance of an arc from a base circle and an angle.
+
+      :param Circle circle: Circle to base arc upon.
+      :param float angleRadians: Sweep angle of arc (in radians)
+
+   .. py:method:: Arc(center, radius, angleRadians)
+
+      Initializes a new horizontal arc at the given center point, with a custom radius and angle.
+
+      :param Point3d center: Center point of arc.
+      :param float radius: Radius of arc.
+      :param float angleRadians: Sweep angle of arc (in radians)
+
+   .. py:method:: Arc(startPoint, pointOnInterior, endPoint)
+
+      Initializes a new arc through three points. If the points are coincident
+      or co-linear, this will result in an Invalid arc.
+
+      :param Point3d startPoint: Start point of arc.
+      :param Point3d pointOnInterior: Point on arc interior.
+      :param Point3d endPoint: End point of arc.
+
+   .. py:method:: Arc(pointA, tangentA, pointB)
+
+      Initializes a new arc from end points and a tangent vector.
+      If the tangent is parallel with the endpoints this will result in an Invalid arc.
+
+      :param Point3d pointA: Start point of arc.
+      :param Vector3d tangentA: Tangent at start of arc.
+      :param Point3d pointB: End point of arc.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value indicating whether or not this arc is valid.
+      Detail:
+      Radius>0 and 0<AngleRadians()<=2*Math.Pi.
+
+   .. py:attribute:: IsCircle
+
+      bool: Gets a value indicating whether or not this arc is a complete circle.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of this arc.
+
+   .. py:attribute:: Diameter
+
+      float: Gets or sets the Diameter of this arc.
+
+   .. py:attribute:: Plane
+
+      Plane: Gets or sets the plane in which this arc lies.
+
+   .. py:attribute:: Center
+
+      Point3d: Gets or sets the center point for this arc.
+
+   .. py:attribute:: Circumference
+
+      float: Gets the circumference of the circle that is coincident with this arc.
+
+   .. py:attribute:: Length
+
+      float: Gets the length of the arc. (Length = Radius * (subtended angle in radians)).
+
+   .. py:attribute:: StartPoint
+
+      Point3d: Gets the start point of the arc.
+
+   .. py:attribute:: MidPoint
+
+      Point3d: Gets the mid-point of the arc.
+
+   .. py:attribute:: EndPoint
+
+      Point3d: Gets the end point of the arc.
+
+   .. py:attribute:: AngleDomain
+
+      Interval: Gets or sets the angle domain (in Radians) of this arc.
+
+   .. py:attribute:: StartAngle
+
+      float: Gets or sets the start angle (in Radians) for this arc segment.
+
+   .. py:attribute:: EndAngle
+
+      float: Gets or sets the end angle (in Radians) for this arc segment.
+
+   .. py:attribute:: AngleRadians
+
+
+   .. py:attribute:: StartAngleDegrees
+
+      float: Gets or sets the start angle (in Degrees) for this arc segment.
+
+   .. py:attribute:: EndAngleDegrees
+
+      float: Gets or sets the end angle (in Degrees) for this arc segment.
+
+   .. py:attribute:: AngleDegrees
+
+      float: Gets or sets the sweep -or subtended- angle (in Degrees) for this arc segment.
+
+   .. py:method:: Trim(domain)
+
+      Sets arc's angle domain (in Radians) as a sub-domain of the circle.
+
+      :param Interval domain: 0 < domain[1] - domain[0] <= 2.0 * RhinoMath.Pi.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: BoundingBox()
+
+      Computes the 3D axis aligned bounding box for this arc.
+
+      :return: Bounding box of arc.
+
+      :rtype: BoundingBox
+
+   .. py:method:: PointAt(t)
+
+      Gets the point at the given arc parameter.
+
+      :param float t: Arc parameter to evaluate.
+
+      :return: The point at the given parameter.
+
+      :rtype: Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Gets the tangent at the given parameter.
+
+      :param float t: Parameter of tangent to evaluate.
+
+      :return: The tangent at the arc at the given parameter.
+
+      :rtype: Vector3d
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets parameter on the arc closest to a test point.
+
+      :param Point3d testPoint: Point to get close to.
+
+      :return: Parameter (in radians) of the point on the arc that \
+         is closest to the test point. If testPoint is the center \
+         of the arc, then the starting point of the arc is \
+         (arc.Domain()[0]) returned. If no parameter could be found, \
+         RhinoMath.UnsetValue is returned.
+
+      :rtype: float
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Computes the point on an arc that is closest to a test point.
+
+      :param Point3d testPoint: Point to get close to.
+
+      :return: The point on the arc that is closest to testPoint. If testPoint is \
+         the center of the arc, then the starting point of the arc is returned. \
+         UnsetPoint on failure.
+
+      :rtype: Point3d
+
+   .. py:method:: Reverse()
+
+      Reverses the orientation of the arc. Changes the domain from [a,b]
+      to [-b,-a].
+
+
+      :rtype: void
+
+   .. py:method:: Transform(xform)
+
+      Transforms the arc using a Transformation matrix.
+
+      :param Transform xform: Transformations to apply. \
+         Note that arcs cannot handle non-euclidean transformations.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: ToNurbsCurve()
+
+      Initializes a nurbs curve representation of this arc.
+      This amounts to the same as calling NurbsCurve.CreateFromArc().
+
+      :return: A nurbs curve representation of this arc or None if no such representation could be made.
+
+      :rtype: NurbsCurve
+
+.. py:class:: ArcCurve
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:method:: ArcCurve()
+
+      ArcCurve constructor
+
+
+   .. py:attribute:: Arc
+
+      Arc: Gets the arc that is contained within this ArcCurve.
+
+   .. py:attribute:: IsCompleteCircle
+
+      bool: Gets a value indicating whether or not this curve can be represented by a complete circle.
+
+   .. py:attribute:: Radius
+
+      float: Gets the radius of this ArcCurve.
+
+   .. py:attribute:: AngleRadians
+
+      float: Gets the angles of this arc in radians.
+
+   .. py:attribute:: AngleDegrees
+
+      float: Gets the angles of this arc in degrees.
+
+   .. py:staticmethod:: CreateFromArc(arc)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreateFromArcParams(arc, t0, t1)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreateFromCircle(circle)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreateFromCircleParams(circle, t0, t1)
+
+      [todo] add documentation
+
+.. py:class:: BezierCurve
+
+   .. py:attribute:: Dimension
+
+      int: Dimension of Bezier
+
+   .. py:attribute:: IsValid
+
+      bool: Tests an object to see if it is valid.
+
+   .. py:attribute:: IsRational
+
+      bool: Gets a value indicating whether or not the curve is rational.
+      Rational curves have control-points with custom weights.
+
+   .. py:attribute:: ControlVertexCount
+
+      int: Number of control vertices in this curve
+
+   .. py:method:: PointAt(t)
+
+      Evaluates point at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Point (location of curve at the parameter t).
+
+      :rtype: Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Evaluates the unit tangent vector at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Unit tangent vector of the curve at the parameter t.
+
+      :rtype: Vector3d
+
+   .. py:method:: CurvatureAt(t)
+
+      Evaluate the curvature vector at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Curvature vector of the curve at the parameter t.
+
+      :rtype: Vector3d
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a NURBS curve representation of this curve.
+
+      :return: NURBS representation of the curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:method:: MakeRational()
+
+      Make bezier rational
+
+      :return: True if successful
+
+      :rtype: bool
+
+   .. py:method:: MakeNonRational()
+
+      Make bezier non-rational
+
+      :return: True if successful
+
+      :rtype: bool
+
+   .. py:method:: IncreaseDegree(desiredDegree)
+
+      Increase degree of bezier
+
+      :return: True if successful.  False if desiredDegree < current degree.
+
+      :rtype: bool
+
+   .. py:method:: ChangeDimension(desiredDimension)
+
+      Change dimension of bezier.
+
+      :return: True if successful.  False if desired_dimension < 1
+
+      :rtype: bool
+
+   .. py:method:: Split(t)
+
+      Divides the Bezier curve at the specified parameter.
+
+      :param float t: parameter must satisfy 0 < t < 1
+
+      :return: True on success
+
+      :rtype: bool
+
+.. py:class:: Circle
+
+   .. py:method:: Circle(radius)
+
+      Initializes a circle with center (0,0,0) in the world XY plane.
+
+      :param float radius: Radius of circle, should be a positive number.
+
+   .. py:method:: Circle(center, radius)
+
+      Initializes a circle parallel to the world XY plane with given center and radius.
+
+      :param Point3d center: Center of circle.
+      :param float radius: Radius of circle (should be a positive value).
+
+   .. py:attribute:: IsValid
+
+      bool: A valid circle has radius larger than 0.0 and a base plane which is must also be valid.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of this circle.
+      Radii should be positive values.
+
+   .. py:attribute:: Diameter
+
+      float: Gets or sets the diameter (radius * 2.0) of this circle.
+      Diameters should be positive values.
+
+   .. py:attribute:: Plane
+
+      Plane: Gets or sets the plane of the circle.
+
+   .. py:attribute:: Center
+
+      Point3d: Gets or sets the center point of this circle.
+
+   .. py:attribute:: BoundingBox
+
+      BoundingBox: Gets the circle's 3d axis aligned bounding box.
+
+   .. py:attribute:: Normal
+
+      Vector3d: Gets the normal vector for this circle.
+
+   .. py:attribute:: Circumference
+
+      float: Gets or sets the circumference of this circle.
+
+   .. py:method:: IsInPlane(plane, tolerance)
+
+      Evaluates whether or not this circle is co-planar with a given plane.
+
+      :param Plane plane: Plane.
+      :param float tolerance: Tolerance to use.
+
+      :return: True if the circle plane is co-planar with the given plane within tolerance.
+
+      :rtype: bool
+
+   .. py:method:: PointAt(t)
+
+      Circles use trigonometric parameterization:
+      t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.
+
+      :param float t: Parameter of point to evaluate.
+
+      :return: The point on the circle at the given parameter.
+
+      :rtype: Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Circles use trigonometric parameterization:
+      t -> center + cos(t)*radius*xaxis + sin(t)*radius*yaxis.
+
+      :param float t: Parameter of tangent to evaluate.
+
+      :return: The tangent at the circle at the given parameter.
+
+      :rtype: Vector3d
+
+   .. py:method:: DerivativeAt(derivative, t)
+
+      Determines the value of the Nth derivative at a parameter.
+
+      :param int derivative: Which order of derivative is wanted.
+      :param float t: Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.
+
+      :return: The derivative of the circle at the given parameter.
+
+      :rtype: Vector3d
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets the parameter on the circle which is closest to a test point.
+
+      :param Point3d testPoint: Point to project onto the circle.
+
+      :return: tuple (bool, float)
+
+         - True on success, False on failure.
+         - Parameter on circle closes to testPoint. \
+
+      :rtype: (bool, float)
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Gets the point on the circle which is closest to a test point.
+
+      :param Point3d testPoint: Point to project onto the circle.
+
+      :return: The point on the circle that is closest to testPoint or \
+         Point3d.Unset on failure.
+
+      :rtype: Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transforms this circle using an transformation matrix.
+
+      :param Transform xform: Transformation to apply.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Translate(delta)
+
+      Moves the circle.
+
+      :param Vector3d delta: Translation vector.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Reverse()
+
+      Reverse the orientation of the circle. Changes the domain from [a,b]
+      to [-b,-a].
+
+
+      :rtype: void
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a nurbs curve representation of this circle.
+      This amounts to the same as calling NurbsCurve.CreateFromCircle().
+
+      :return: A nurbs curve representation of this circle or None if no such representation could be made.
+
+      :rtype: NurbsCurve
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+.. py:class:: Curve
+
+   .. py:attribute:: Domain
+
+      Interval: Gets or sets the domain of the curve.
+
+   .. py:attribute:: Dimension
+
+      int: Gets the dimension of the object.
+      The dimension is typically three. For parameter space trimming
+      curves the dimension is two. In rare cases the dimension can
+      be one or greater than three.
+
+   .. py:attribute:: SpanCount
+
+      int: Gets the number of non-empty smooth (c-infinity) spans in the curve.
+
+   .. py:attribute:: Degree
+
+      int: Gets the maximum algebraic degree of any span
+      or a good estimate if curve spans are not algebraic.
+
+   .. py:attribute:: IsClosed
+
+      bool: Gets a value indicating whether or not this curve is a closed curve.
+
+   .. py:attribute:: IsPeriodic
+
+      bool: Gets a value indicating whether or not this curve is considered to be Periodic.
+
+   .. py:attribute:: PointAtStart
+
+      Point3d: Evaluates point at the start of the curve.
+
+   .. py:attribute:: PointAtEnd
+
+      Point3d: Evaluates point at the end of the curve.
+
+   .. py:attribute:: TangentAtStart
+
+      Vector3d: Evaluates the unit tangent vector at the start of the curve.
+
+   .. py:attribute:: TangentAtEnd
+
+      Vector3d: Evaluate unit tangent vector at the end of the curve.
+
+   .. py:staticmethod:: CreateControlPointCurve(points, degree)
+
+      Constructs a curve from a set of control-point locations.
+
+      :param list[Point3d] points: Control points.
+      :param int degree: Degree of curve. The number of control points must be at least degree+1.
+
+
+      :rtype: Curve
+
+   .. py:method:: ChangeDimension(desiredDimension)
+
+      Changes the dimension of a curve.
+
+      :param int desiredDimension: The desired dimension.
+
+      :return: True if the curve's dimension was already desiredDimension \
+         or if the curve's dimension was successfully changed to desiredDimension; \
+         otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: IsLinear(tolerance)
+
+      Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
+
+      :return: True if the curve is linear.
+
+      :rtype: bool
+
+   .. py:method:: IsPolyline()
+
+      Several types of Curve can have the form of a polyline
+      including a degree 1 NurbsCurve, a PolylineCurve,
+      and a PolyCurve all of whose segments are some form of
+      polyline. IsPolyline tests a curve to see if it can be
+      represented as a polyline.
+
+      :return: True if this curve can be represented as a polyline; otherwise, false.
+
+      :rtype: bool
+
+   .. py:method:: TryGetPolyline()
+
+      Several types of Curve can have the form of a polyline
+      including a degree 1 NurbsCurve, a PolylineCurve,
+      and a PolyCurve all of whose segments are some form of
+      polyline. IsPolyline tests a curve to see if it can be
+      represented as a polyline.
+
+
+      :return: tuple (bool, Polyline)
+
+         - True if this curve can be represented as a polyline; otherwise, false.
+         - If True is returned, then the polyline form is returned here. \
+
+      :rtype: (bool, Polyline)
+
+   .. py:method:: IsArc(tolerance)
+
+      Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
+
+      :return: True if the curve can be represented by an arc or a circle within tolerance.
+
+      :rtype: bool
+
+   .. py:method:: TryGetArc(tolerance)
+
+      Try to convert this curve into an Arc using RhinoMath.ZeroTolerance.
+
+
+      :return: tuple (bool, Arc)
+
+         - True if the curve could be converted into an arc.
+         - On success, the Arc will be filled in. \
+
+      :rtype: (bool, Arc)
+
+   .. py:method:: IsCircle(tolerance)
+
+      Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.
+
+      :return: True if the Curve can be represented by a circle within tolerance.
+
+      :rtype: bool
+
+   .. py:method:: TryGetCircle(tolerance)
+
+      Try to convert this curve into a circle using RhinoMath.ZeroTolerance.
+
+
+      :return: tuple (bool, Circle)
+
+         - True if the curve could be converted into a Circle.
+         - On success, the Circle will be filled in. \
+
+      :rtype: (bool, Circle)
+
+   .. py:method:: IsEllipse(tolerance)
+
+      Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
+
+      :return: True if the Curve can be represented by an ellipse within tolerance.
+
+      :rtype: bool
+
+   .. py:method:: TryGetEllipse(tolerance)
+
+      Try to convert this curve into an Ellipse within RhinoMath.ZeroTolerance.
+
+
+      :return: tuple (bool, Ellipse)
+
+         - True if the curve could be converted into an Ellipse.
+         - On success, the Ellipse will be filled in. \
+
+      :rtype: (bool, Ellipse)
+
+   .. py:method:: IsPlanar(tolerance)
+
+      Test a curve for planarity.
+
+      :return: True if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+
+      :rtype: bool
+
+   .. py:method:: ChangeClosedCurveSeam(t)
+
+      If this curve is closed, then modify it so that the start/end point is at curve parameter t.
+
+      :param float t: Curve parameter of new start/end point. The returned curves domain will start at t.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: IsClosable(tolerance, minimumAbsoluteSize, minimumRelativeSize)
+
+      Decide if it makes sense to close off this curve by moving the endpoint
+      to the start based on start-end gap size and length of curve as
+      approximated by chord defined by 6 points.
+
+      :return: True if start and end points are close enough based on above conditions.
+
+      :rtype: bool
+
+   .. py:method:: Reverse()
+
+      Reverses the direction of the curve.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: ClosedCurveOrientation()
+
+      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world XY plane.
+      Only works with simple (no self intersections) closed, planar curves.
+
+      :return: The orientation of this curve with respect to world XY plane.
+
+      :rtype: CurveOrientation
+
+   .. py:method:: ClosedCurveOrientation(plane)
+
+      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world XY plane.
+      Only works with simple (no self intersections) closed, planar curves.
+
+      :return: The orientation of this curve with respect to world XY plane.
+
+      :rtype: CurveOrientation
+
+   .. py:method:: PointAt(t)
+
+      Evaluates point at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Point (location of curve at the parameter t).
+
+      :rtype: Point3d
+
+   .. py:method:: SetStartPoint(point)
+
+      Forces the curve to start at a specified point.
+      Not all curve types support this operation.
+
+      :param Point3d point: New start point of curve.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: SetEndPoint(point)
+
+      Forces the curve to end at a specified point.
+      Not all curve types support this operation.
+
+      :param Point3d point: New end point of curve.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: TangentAt(t)
+
+      Evaluates the unit tangent vector at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Unit tangent vector of the curve at the parameter t.
+
+      :rtype: Vector3d
+
+   .. py:method:: CurvatureAt(t)
+
+      Evaluate the curvature vector at a curve parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: Curvature vector of the curve at the parameter t.
+
+      :rtype: Vector3d
+
+   .. py:method:: FrameAt(t)
+
+      Returns a 3d frame at a parameter.
+
+      :param float t: Evaluation parameter.
+
+      :return: tuple (bool, Plane)
+
+         - True on success, False on failure.
+         - The frame is returned here. \
+
+      :rtype: (bool, Plane)
+
+   .. py:method:: DerivativeAt(t, derivativeCount)
+
+      Evaluate the derivatives at the specified curve parameter.
+
+      :param float t: Curve parameter to evaluate.
+      :param int derivativeCount: Number of derivatives to evaluate, must be at least 0.
+
+      :return: An array of vectors that represents all the derivatives starting at zero.
+
+      :rtype: Vector3d[]
+
+   .. py:method:: DerivativeAt(t, derivativeCount, side)
+
+      Evaluate the derivatives at the specified curve parameter.
+
+      :return: An array of vectors that represents all the derivatives starting at zero.
+
+      :rtype: Vector3d[]
+
+   .. py:method:: GetCurveParameterFromNurbsFormParameter(nurbsParameter)
+
+      Convert a NURBS curve parameter to a curve parameter.
+
+      :param float nurbsParameter: NURBS form parameter.
+
+      :return: tuple (bool, float)
+
+         - True on success, False on failure.
+         - Curve parameter. \
+
+      :rtype: (bool, float)
+
+   .. py:method:: GetNurbsFormParameterFromCurveParameter(curveParameter)
+
+      Convert a curve parameter to a NURBS curve parameter.
+
+      :param float curveParameter: Curve parameter.
+
+      :return: tuple (bool, float)
+
+         - True on success, False on failure.
+         - NURBS form parameter. \
+
+      :rtype: (bool, float)
+
+   .. py:method:: Trim(t0, t1)
+
+      Removes portions of the curve outside the specified interval.
+
+      :param float t0: Start of the trimming interval. Portions of the curve before curve(t0) are removed.
+      :param float t1: End of the trimming interval. Portions of the curve after curve(t1) are removed.
+
+      :return: Trimmed portion of this curve is successful, None on failure.
+
+      :rtype: Curve
+
+   .. py:method:: Split(t)
+
+      Splits (divides) the curve at the specified parameter.
+      The parameter must be in the interior of the curve's domain.
+
+      :param float t: Parameter to split the curve at in the interval returned by Domain().
+
+      :return: Two curves on success, None on failure.
+
+      :rtype: Curve[]
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a NURBS curve representation of this curve.
+
+      :return: NURBS representation of the curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:method:: ToNurbsCurve(subdomain)
+
+      Constructs a NURBS curve representation of this curve.
+
+      :return: NURBS representation of the curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+.. py:class:: CurvePiping
+
+   .. py:method:: CurvePiping()
+
+      CurvePiping constructor
+
+
+   .. py:method:: CurvePiping()
+
+      CurvePiping constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Radius
+
+
+   .. py:attribute:: Segments
+
+
+   .. py:attribute:: Faceted
+
+
+   .. py:attribute:: Accuracy
+
+
+   .. py:attribute:: CapType
+
+.. py:class:: CurveProxy
+
+   .. py:attribute:: ProxyCurveIsReversed
+
+      bool: True if "this" is a curve is reversed from the "real" curve geometry
+
+.. py:class:: Ellipse
+
+.. py:class:: Hatch
+
+   .. py:method:: Hatch()
+
+      Hatch constructor
+
+
+   .. py:attribute:: PatternIndex
+
+      int: Gets or sets the index of the pattern in the document hatch pattern table.
+
+   .. py:attribute:: PatternRotation
+
+      float: Gets or sets the relative rotation of the pattern.
+
+   .. py:attribute:: BasePoint
+
+      rhino3dm.Point3d: Gets or sets the hatch pattern base point
+
+   .. py:attribute:: Plane
+
+      rhino3dm.Plane: Gets or sets the hatch plane
+
+   .. py:attribute:: PatternScale
+
+      float: Gets or sets the scaling factor of the pattern.
+
+   .. py:method:: ScalePattern(xform)
+
+      Scale the hatch's pattern
+
+
+      :rtype: void
+
+.. py:class:: Line
+
+   .. py:method:: Line(from, to)
+
+      Constructs a new line segment between two points.
+
+      :param Point3d from: Start point of line.
+      :param Point3d to: End point of line.
+
+   .. py:attribute:: From
+
+      Start point of line segment.
+
+      :rtype: Point3d
+
+   .. py:attribute:: To
+
+      End point of line segment.
+
+      :rtype: Point3d
+
+   .. py:attribute:: IsValid
+
+      Gets a value indicating whether or not this line is valid.
+      Valid lines must have valid start and end points, and the points must not be equal.
+
+      :rtype: bool
+
+   .. py:attribute:: Length
+
+      Gets or sets the length of this line segment.
+      Note that a negative length will invert the line segment without
+      making the actual length negative. The line From point will remain fixed
+      when a new Length is set.
+
+      :rtype: float
+
+   .. py:attribute:: Direction
+
+      Gets the direction of this line segment.
+      The length of the direction vector equals the length of
+      the line segment.
+
+      :rtype: Vector3d
+
+   .. py:attribute:: UnitTangent
+
+      Gets the tangent of the line segment.
+      Note that tangent vectors are always unit vectors.
+
+      :rtype: Vector3d
+
+   .. py:method:: PointAt(t)
+
+      Evaluates the line at the specified parameter.
+
+      :param float t: Parameter to evaluate line segment at. Line parameters are normalized parameters.
+
+      :return: The point at the specified parameter.
+
+      :rtype: Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transform the line using a Transformation matrix.
+
+      :param Transform xform: Transform to apply to this line.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+.. py:class:: LineCurve
+
+   .. py:method:: LineCurve(from, to)
+
+      Initializes a new instance of the  class, by
+      setting start and end point from two 3D points.
+
+      :param Point3d from: A start point.
+      :param Point3d to: An end point.
+
+   .. py:attribute:: Line
+
+      Line: Gets or sets the Line value inside this curve.
+
+.. py:class:: Linetype
+
+   .. py:method:: Linetype()
+
+      Linetype constructor
+
+
+   .. py:attribute:: Name
+
+      str: The name of this linetype.
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: PatternLength
+
+      float: Total length of one repeat of the pattern.
+
+   .. py:attribute:: SegmentCount
+
+      int: Number of segments in the pattern.
+
+   .. py:attribute:: Border
+
+
+   .. py:attribute:: ByLayer
+
+
+   .. py:attribute:: ByParent
+
+
+   .. py:attribute:: Center
+
+
+   .. py:attribute:: Continuous
+
+
+   .. py:attribute:: DashDot
+
+
+   .. py:attribute:: Dashed
+
+
+   .. py:attribute:: Dots
+
+
+   .. py:attribute:: Hidden
+
+
+   .. py:method:: GetSegment(index)
+
+      Gets the segment information at a index.
+
+      :param int index: Zero based index of the segment.
+
+
+      :rtype: (void, float, bool)
+
+   .. py:method:: SetSegment(index, length, isSolid)
+
+      Sets the length and type of the segment at index.
+
+      :param int index: Zero based index of the segment.
+      :param float length: The length of the segment to be added in millimeters.
+      :param bool isSolid: If true, the length is interpreted as a line. If false, \
+         then the length is interpreted as a space.
+
+      :return: True if the operation was successful; otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: AppendSegment(length, isSolid)
+
+      Adds a segment to the pattern.
+
+      :param float length: The length of the segment to be added.
+      :param bool isSolid: If true, the length is interpreted as a line. If false, \
+         then the length is interpreted as a space.
+
+      :return: Index of the added segment.
+
+      :rtype: int
+
+   .. py:method:: RemoveSegment(index)
+
+      Removes a segment in the linetype.
+
+      :param int index: Zero based index of the segment to remove.
+
+      :return: True if the segment index was removed.
+
+      :rtype: bool
+
+   .. py:method:: ClearPattern()
+
+      [todo] add documentation
+
+.. py:class:: NurbsCurve
+
+   .. py:method:: NurbsCurve(degree, pointCount)
+
+      Constructs a new NURBS curve with a specific degree and control point count.
+
+      :param int degree: Degree of curve. Must be equal to or larger than 1 and smaller than or equal to 11.
+      :param int pointCount: Number of control-points.
+
+   .. py:method:: NurbsCurve(dimension, rational, order, pointCount)
+
+      Constructs a new NURBS curve with knot and CV memory allocated.
+
+      :param int dimension: >=1.
+      :param bool rational: True to make a rational NURBS.
+      :param int order: (>= 2) The order=degree+1.
+      :param int pointCount: (>= order) number of control vertices.
+
+   .. py:attribute:: Order
+
+      int: Gets the order of the curve. Order = Degree + 1.
+
+   .. py:attribute:: IsRational
+
+      bool: Gets a value indicating whether or not the curve is rational.
+      Rational curves have control-points with custom weights.
+
+   .. py:attribute:: HasBezierSpans
+
+      bool: Returns True if the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree)
+
+   .. py:attribute:: Points
+
+      Collections.NurbsCurvePointList: Gets access to the control points of this NURBS curve.
+
+   .. py:attribute:: Knots
+
+      Collections.NurbsCurveKnotList: Gets access to the knots (or "knot vector") of this NURBS curve.
+
+   .. py:staticmethod:: CreateFromLine(line)
+
+      Gets a non-rational, degree 1 NURBS curve representation of the line.
+
+      :return: Curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:staticmethod:: CreateFromArc(arc)
+
+      Gets a rational degree 2 NURBS curve representation
+      of the arc. Note that the parameterization of NURBS curve
+      does not match arc's transcendental parameterization.
+
+      :return: Curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:staticmethod:: CreateFromCircle(circle)
+
+      Gets a rational degree 2 NURBS curve representation
+      of the circle. Note that the parameterization of NURBS curve
+      does not match circle's transcendental parameterization.
+      Use GetRadianFromNurbFormParameter() and
+      GetParameterFromRadian() to convert between the NURBS curve
+      parameter and the transcendental parameter.
+
+      :return: Curve on success, None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:staticmethod:: CreateFromEllipse(ellipse)
+
+      Gets a rational degree 2 NURBS curve representation of the ellipse.
+      Note that the parameterization of the NURBS curve does not match
+      with the transcendental parameterization of the ellipsis.
+
+      :return: A NURBS curve representation of this ellipse or None if no such representation could be made.
+
+      :rtype: NurbsCurve
+
+   .. py:staticmethod:: Create(periodic, degree, points)
+
+      Constructs a 3D NURBS curve from a list of control points.
+
+      :param bool periodic: If true, create a periodic uniform curve. If false, create a clamped uniform curve.
+      :param int degree: (>=1) degree=order-1.
+      :param System.Collections.Generic.IEnumerable<Point3d> points: control vertex locations.
+
+      :return: new NURBS curve on success \
+         None on error.
+
+      :rtype: NurbsCurve
+
+   .. py:method:: IncreaseDegree(desiredDegree)
+
+      Increase the degree of this curve.
+
+      :param int desiredDegree: The desired degree. \
+         Degrees should be number between and including 1 and 11.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: MakePiecewiseBezier(setEndWeightsToOne)
+
+      Clamps ends and adds knots so the NURBS curve has Bezier spans
+      (all distinct knots have multiplicity = degree).
+
+      :param bool setEndWeightsToOne: If True and the first or last weight is not one, then the first and \
+         last spans are re-parameterized so that the end weights are one.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Reparameterize(c)
+
+      Use a linear fractional transformation to re-parameterize the NURBS curve.
+      This does not change the curve's domain.
+
+      :param float c: re-parameterization constant (generally speaking, c should be > 0). The \
+         control points and knots are adjusted so that \
+         output_nurbs(t) = input_nurbs(lambda(t)), where lambda(t) = c*t/( (c-1)*t + 1 ). \
+         Note that lambda(0) = 0, lambda(1) = 1, lambda'(t) > 0, \
+         lambda'(0) = c and lambda'(1) = 1/c.
+
+      :return: True if successful.
+
+      :rtype: bool
+
+   .. py:method:: GrevilleParameter(index)
+
+      Gets the greville (edit point) parameter that belongs
+      to the control point at the specified index.
+
+      :param int index: Index of Greville (Edit) point.
+
+
+      :rtype: float
+
+   .. py:method:: GrevillePoint(index)
+
+      Gets the Greville parameter that belongs
+      to the control point at the specified index.
+
+      :param int index: Index of Greville point.
+
+
+      :rtype: Point3d
+
+   .. py:method:: ConvertSpanToBezier(index)
+
+      Converts a span of the NURBS curve into a Bezier.
+
+      :param int spanIndex: The span index, where (0 <= spanIndex <= Points.Count - Order).
+
+      :return: Bezier curve if successful, None otherwise.
+
+      :rtype: BezierCurve
+
+.. py:class:: NurbsCurveKnotList
+
+   .. py:attribute:: IsClampedStart
+
+      bool: Gets a value indicating whether or not the knot vector is clamped at the start of the curve.
+      Clamped curves start at the first control-point. This requires fully multiple knots.
+
+   .. py:attribute:: IsClampedEnd
+
+      bool: Gets a value indicating whether or not the knot vector is clamped at the end of the curve.
+      Clamped curves are coincident with the first and last control-point. This requires fully multiple knots.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: ToList()
+
+      [todo] add documentation
+
+   .. py:method:: InsertKnot(value, multiplicity)
+
+      Inserts a knot and update control point locations.
+      Does not change parameterization or locus of curve.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: KnotMultiplicity(index)
+
+      Get knot multiplicity.
+
+      :param int index: Index of knot to query.
+
+      :return: The multiplicity (valence) of the knot.
+
+      :rtype: int
+
+   .. py:method:: CreateUniformKnots(knotSpacing)
+
+      Compute a clamped, uniform knot vector based on the current
+      degree and control point count. Does not change values of control
+      vertices.
+
+      :param float knotSpacing: Spacing of subsequent knots.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: CreatePeriodicKnots(knotSpacing)
+
+      Compute a clamped, uniform, periodic knot vector based on the current
+      degree and control point count. Does not change values of control
+      vertices.
+
+      :param float knotSpacing: Spacing of subsequent knots.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: SuperfluousKnot(start)
+
+      Computes the knots that are superfluous because they are not used in NURBs evaluation.
+      These make it appear so that the first and last curve spans are different from interior spans.
+      http://wiki.mcneel.com/developer/onsuperfluousknot
+
+      :param bool start: True if the query targets the first knot. Otherwise, the last knot.
+
+      :return: A component.
+
+      :rtype: float
+
+.. py:class:: NurbsCurvePointList
+
+   .. py:attribute:: ControlPolygonLength
+
+      float: Gets the length of the polyline connecting all control points.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: ChangeEndWeights(w0, w1)
+
+      Use a combination of scaling and reparameterization to change the end weights to the specified values.
+
+      :param float w0: Weight for first control point.
+      :param float w1: Weight for last control point.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: MakeRational()
+
+      Converts the curve to a Rational NURBS curve. Rational NURBS curves have weighted control points.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: MakeNonRational()
+
+      Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+.. py:class:: PolyCurve
+
+   .. py:method:: PolyCurve()
+
+      PolyCurve constructor
+
+
+   .. py:attribute:: SegmentCount
+
+      int: Gets the number of segments that make up this Polycurve.
+
+   .. py:attribute:: IsNested
+
+      bool: Gets a value indicating whether or not a PolyCurve contains nested PolyCurves.
+
+   .. py:attribute:: HasGap
+
+      bool: This is a quick way to see if the curve has gaps between the sub curve segments.
+
+   .. py:method:: SegmentCurve(index)
+
+      Gets the segment curve at the given index.
+
+      :param int index: Index of segment to retrieve.
+
+      :return: The segment at the given index or None on failure.
+
+      :rtype: Curve
+
+   .. py:method:: RemoveNesting()
+
+      Explodes nested polycurve segments and reconstructs this curve from the shattered remains.
+      The result will have not have any PolyCurves as segments but it will have identical
+      locus and parameterization.
+
+      :return: True if any nested PolyCurve was found and absorbed, False if no PolyCurve segments could be found.
+
+      :rtype: bool
+
+   .. py:method:: Explode()
+
+      Explodes this PolyCurve into a list of Curve segments. This will not explode nested polycurves.
+      Call  first if you need all individual segments.
+
+      :return: An array of polycurve segments.
+
+      :rtype: Curve[]
+
+   .. py:method:: Append(line)
+
+      Appends and matches the start of the line to the end of polycurve.
+      This function will fail if the polycurve is closed.
+
+      :param Line line: Line segment to append.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Append(arc)
+
+      Appends and matches the start of the line to the end of polycurve.
+      This function will fail if the polycurve is closed.
+
+      :param Line line: Line segment to append.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Append(curve)
+
+      Appends and matches the start of the line to the end of polycurve.
+      This function will fail if the polycurve is closed.
+
+      :param Line line: Line segment to append.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: AppendSegment(curve)
+
+      Appends the curve to the polycurve without changing the new segment's geometry.
+      This function will fail if the PolyCurve is closed or if SegmentCount > 0 and the new segment is closed.
+
+      :param Curve curve: Segment to append.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: SegmentCurveParameter(polycurveParameter)
+
+      Converts a polycurve parameter to a segment curve parameter.
+
+      :param float polycurveParameter: Parameter on PolyCurve to convert.
+
+      :return: Segment curve evaluation parameter or UnsetValue if the \
+         segment curve parameter could not be computed.
+
+      :rtype: float
+
+   .. py:method:: PolyCurveParameter(segmentIndex, segmentCurveParameter)
+
+      Converts a segment curve parameter to a polycurve parameter.
+
+      :param int segmentIndex: Index of segment.
+      :param float segmentCurveParameter: Parameter on segment.
+
+      :return: Polycurve evaluation parameter or UnsetValue if the polycurve curve parameter could not be computed.
+
+      :rtype: float
+
+   .. py:method:: SegmentDomain(segmentIndex)
+
+      Returns the polycurve sub-domain assigned to a segment curve.
+
+      :param int segmentIndex: Index of segment.
+
+      :return: The polycurve sub-domain assigned to a segment curve. \
+         Returns Interval.Unset if segment_index < 0 or segment_index >= Count().
+
+      :rtype: Interval
+
+   .. py:method:: SegmentIndex(polycurveParameter)
+
+      Finds the segment used for evaluation at polycurve_parameter.
+
+      :param float polycurveParameter: Parameter on polycurve for segment lookup.
+
+      :return: Index of the segment used for evaluation at polycurve_parameter. \
+         If polycurve_parameter < Domain.Min(), then 0 is returned. \
+         If polycurve_parameter > Domain.Max(), then Count()-1 is returned.
+
+      :rtype: int
+
+.. py:class:: Polyline
+
+   .. py:method:: Polyline()
+
+      Polyline constructor
+
+
+   .. py:method:: Polyline(initialCapacity)
+
+      Initializes a new empty polyline with an initial capacity.
+
+      :param int initialCapacity: Number of vertices this polyline can contain without resizing.
+
+   .. py:method:: Polyline()
+
+      Polyline constructor
+
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value that indicates whether this polyline is valid.
+      Valid polylines have at least one segment, no Invalid points and no zero length segments.Closed polylines with only two segments are also not considered valid.
+
+   .. py:attribute:: SegmentCount
+
+      int: Gets the number of segments for this polyline.
+
+   .. py:attribute:: IsClosed
+
+      bool: Test a polyline to see if it is closed.
+
+   .. py:attribute:: Length
+
+      float: Gets the total length of the polyline.
+
+   .. py:method:: IsClosedWithinTolerance(tolerance)
+
+      Test a polyline to see if it is closed.
+
+      :param float tolerance: The tolerance.
+
+      :return: Returns True if polyline has 4 or more points, the distance between the \
+         start and end points is <= tolerance, and there is a \
+         point in the polyline whose distance from the start and end \
+         points is > tolerance.
+
+      :rtype: bool
+
+   .. py:method:: PointAt(t)
+
+      Gets the point on the polyline at the given parameter.
+      The integer part of the parameter indicates the index of the segment.
+
+      :param float t: Polyline parameter.
+
+      :return: The point on the polyline at t.
+
+      :rtype: Point3d
+
+   .. py:method:: TangentAt(t)
+
+      Gets the unit tangent vector along the polyline at the given parameter.
+      The integer part of the parameter indicates the index of the segment.
+
+      :param float t: Polyline parameter.
+
+      :return: The tangent along the polyline at t.
+
+      :rtype: Vector3d
+
+   .. py:method:: ClosesPoint(testPoint)
+
+      [todo] add documentation
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Gets the parameter along the polyline which is closest to a test-point.
+
+      :param Point3d testPoint: Point to approximate.
+
+      :return: The parameter along the polyline closest to testPoint.
+
+      :rtype: float
+
+   .. py:method:: ToNurbsCurve()
+
+      Constructs a nurbs curve representation of this polyline.
+
+      :return: A Nurbs curve shaped like this polyline or None on failure.
+
+      :rtype: NurbsCurve
+
+   .. py:method:: ToPolylineCurve()
+
+      Constructs a polyline curve representation of this polyline.
+
+      :return: A curve shaped like this polyline or None on failure.
+
+      :rtype: PolylineCurve
+
+   .. py:method:: GetSegments()
+
+      Constructs an array of line segments that make up the entire polyline.
+
+      :return: An array of line segments or None if the polyline contains fewer than 2 points.
+
+      :rtype: Line[]
+
+   .. py:method:: SegmentAt(index)
+
+      Gets the line segment at the given index.
+
+      :param int index: Index of segment to retrieve.
+
+      :return: Line segment at index or Line.Unset on failure.
+
+      :rtype: Line
+
+   .. py:staticmethod:: CreateInscribedPolygon(circle, sideCount)
+
+      Create a regular polygon inscribed in a circle. The vertices of the polygon will be on the circle.
+
+      :param Circle circle: The circle.
+      :param int sideCount: The number of sides
+
+      :return: A closed polyline if successful, None otherwise.
+
+      :rtype: Polyline
+
+   .. py:staticmethod:: CreateCircumscribedPolygon(circle, sideCount)
+
+      Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tangent to the circle.
+
+      :param Circle circle: The circle.
+      :param int sideCount: The number of sides
+
+      :return: A closed polyline if successful, None otherwise.
+
+      :rtype: Polyline
+
+   .. py:staticmethod:: CreateStarPolygon(circle, radius, cornerCounts)
+
+      Create a regular star polygon. The star begins at circle.PointAt(0) and the vertices
+      alternate between being on circle and begin on a concentric circle of other_radius.
+
+      :param Circle circle: The circle.
+      :param float radius: The radius of other circle.
+      :param int cornerCount: The number of corners on the circle. There will be 2*cornerCount sides and 2*cornerCount vertices.
+
+      :return: A closed polyline if successful, None otherwise.
+
+      :rtype: Polyline
+
+.. py:class:: PolylineCurve
+
+   .. py:method:: PolylineCurve()
+
+      PolylineCurve constructor
+
+   .. py:attribute:: PointCount
+
+      int: Gets the number of points in this polyline.
+
+   .. py:method:: Point(index)
+
+      Gets a point at a specified index in the polyline curve.
+
+      :param int index: An index.
+
+      :return: A point.
+
+      :rtype: Point3d
+
+   .. py:method:: SetPoint(index, point)
+
+      Sets a point at a specified index in the polyline curve.
+
+      :param int index: An index.
+      :param Point3d point: A point location to set.
+
+
+      :rtype: void
+
+   .. py:method:: ToPolyline()
+
+      Returns the underlying Polyline, or points.
+
+      :return: The Polyline if successful, None of the curve has no points.
+
+      :rtype: Polyline

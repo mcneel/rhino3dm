@@ -1,7 +1,7 @@
 Interval
 ========
 
-.. py:module:: rhino3dm
+.. py:currentmodule:: rhino3dm
 
 .. py:class:: Interval
 

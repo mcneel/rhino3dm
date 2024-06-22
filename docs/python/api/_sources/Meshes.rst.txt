@@ -1,0 +1,922 @@
+Mesh, Mesh modifiers and SubD
+=============================
+
+.. py:currentmodule:: rhino3dm
+
+.. py:class:: Displacement
+
+   .. py:method:: Displacement()
+
+      Displacement constructor
+
+
+   .. py:method:: Displacement()
+
+      Displacement constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Texture
+
+
+   .. py:attribute:: BlackPoint
+
+
+   .. py:attribute:: WhitePoint
+
+
+   .. py:attribute:: PostWeldAngle
+
+
+   .. py:attribute:: FairingOn
+
+
+   .. py:attribute:: Fairing
+
+
+   .. py:attribute:: FinalMaxFaces
+
+
+   .. py:attribute:: FinalMaxFacesOn
+
+
+   .. py:attribute:: InitialQuality
+
+
+   .. py:attribute:: MappingChannel
+
+
+   .. py:attribute:: MeshMemoryLimit
+
+
+   .. py:attribute:: RefineSteps
+
+
+   .. py:attribute:: RefineSensitivity
+
+
+   .. py:attribute:: SweepResolutionFormula
+
+.. py:class:: EdgeSoftening
+
+   .. py:method:: EdgeSoftening()
+
+      EdgeSoftening constructor
+
+
+   .. py:method:: EdgeSoftening()
+
+      EdgeSoftening constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Softening
+
+
+   .. py:attribute:: Chamfer
+
+
+   .. py:attribute:: Faceted
+
+
+   .. py:attribute:: EdgeAngleThreshold
+
+
+   .. py:attribute:: ForceSoftening
+
+.. py:class:: Mesh
+
+   .. py:method:: Mesh()
+
+      Mesh constructor
+
+
+   .. py:attribute:: IsClosed
+
+      bool: Returns True if every mesh "edge" has two or more faces.
+
+   .. py:attribute:: HasCachedTextureCoordinates
+
+      bool: Will return True if SetCachedTextureCoordinates has been called;
+      otherwise will return false.
+
+   .. py:attribute:: HasPrincipalCurvatures
+
+      bool: HasPrincipalCurvatures
+
+   .. py:attribute:: Vertices
+
+      Collections.MeshVertexList: Gets access to the vertices set of this mesh.
+
+   .. py:attribute:: TopologyEdges
+
+      Collections.MeshTopologyEdgeList: Gets the  object associated with this mesh.
+      This object stores edge connectivity.
+
+   .. py:attribute:: Faces
+
+      Collections.MeshFaceList: Gets access to the mesh face list.
+
+   .. py:attribute:: Normals
+
+      Collections.MeshVertexNormalList: Gets access to the vertex normal collection in this mesh.
+
+   .. py:attribute:: VertexColors
+
+      Collections.MeshVertexColorList: Gets access to the (optional) vertex color collection in this mesh.
+
+   .. py:attribute:: TextureCoordinates
+
+      Collections.MeshTextureCoordinateList: Gets access to the vertex texture coordinate collection in this mesh.
+
+   .. py:attribute:: PartitionCount
+
+      int: Number of partition information chunks stored on this mesh based
+      on the last call to CreatePartitions
+
+   .. py:staticmethod:: CreateFromSubDControlNet(subd, includeTextureCoordinates)
+
+      Create a mesh from a SubD control net
+
+      :return: mesh representing control net on success, None on failure
+
+      :rtype: rhino3dm.Mesh
+
+   .. py:method:: IsManifold(topologicalTest)
+
+      Returns True if every mesh "edge" has at most two faces.
+
+      :return: True if the mesh is manifold, False otherwise.
+
+      :rtype: bool
+
+   .. py:method:: ClearTextureData()
+
+      Removes all texture coordinate information from this mesh.
+
+
+      :rtype: void
+
+   .. py:method:: ClearSurfaceData()
+
+      Removes surface parameters, curvature parameters and surface statistics from the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: DestroyTopology()
+
+      Removes topology data, forcing all topology information to be recomputed.
+
+
+      :rtype: void
+
+   .. py:method:: DestroyTree()
+
+      Destroys the mesh vertex access tree.
+
+
+      :rtype: void
+
+   .. py:method:: DestroyPartition()
+
+      Destroys mesh partition.
+
+
+      :rtype: void
+
+   .. py:method:: SetTextureCoordinates(tm, xf, lazy)
+
+      Set texture coordinates using given mapping and applying given transform.
+
+      Set lazy to False to generate texture coordinates right away.
+
+      :param TextureMapping tm: Texture mapping
+      :param Transform xf: Transform to apply to the texture mapping
+      :param bool lazy: Whether to generate lazily (true) or right away (false)
+
+
+      :rtype: void
+
+   .. py:method:: Compact()
+
+      Removes any unreferenced objects from arrays, re-indexes as needed
+      and shrinks arrays to minimum required size.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Append(other)
+
+      Appends a copy of another mesh to this one and updates indices of appended mesh parts.
+
+      :param rhino3dm.Mesh other: Mesh to append to this one.
+
+
+      :rtype: void
+
+   .. py:method:: CreatePartitions(maximumVertexCount, maximumTriangleCount)
+
+      In ancient times (or modern smart phone times), some rendering engines
+      were only able to process small batches of triangles and the
+      CreatePartitions() function was provided to partition the mesh into
+      subsets of vertices and faces that those rendering engines could handle.
+
+      :return: True on success
+
+      :rtype: bool
+
+.. py:class:: MeshFaceList
+
+   .. py:attribute:: Count
+
+      int: Gets or sets the number of mesh faces. When getting this can includes invalid faces.
+
+   .. py:attribute:: QuadCount
+
+      int: Gets the number of faces that are valid quads (4 corners).
+
+   .. py:attribute:: TriangleCount
+
+      int: Gets the number of faces that are valid triangles (3 corners).
+
+   .. py:attribute:: Capacity
+
+      int: Gets or sets the total number of mesh triangles and quads the internal data structure can hold without resizing.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: GetFaceVertices(faceIndex)
+
+      Gets the 3D location of the vertices forming a face.
+
+      :param int faceIndex: A face index.
+
+      :return: tuple (bool, Point3f, Point3f, Point3f, Point3f)
+
+         - True if the operation succeeded, otherwise false.
+         - A first point. This out argument is assigned during the call. \
+         - A second point. This out argument is assigned during the call. \
+         - A third point. This out argument is assigned during the call. \
+         - A fourth point. This out argument is assigned during the call. \
+
+      :rtype: (bool, Point3f, Point3f, Point3f, Point3f)
+
+   .. py:method:: GetFaceCenter(faceIndex)
+
+      Gets the center point of a face.
+      For a triangular face, this is the centroid or barycenter.For a quad, this is the average of four comer points.
+
+      :param int faceIndex: A face index.
+
+      :return: The center point.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Clear()
+
+      Clears the Face list on the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: Destroy()
+
+      Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+      Subsequent calls can add new items.
+
+
+      :rtype: void
+
+   .. py:method:: AddFace(vertex1, vertex2, vertex3)
+
+      Appends a new mesh face to the end of the mesh face list.
+
+      :return: The index of the newly added face.
+
+      :rtype: int
+
+   .. py:method:: AddFace(vertex1, vertex2, vertex3, vertex4)
+
+      Appends a new mesh face to the end of the mesh face list.
+
+      :return: The index of the newly added face.
+
+      :rtype: int
+
+   .. py:method:: SetFace(index, vertex1, vertex2, vertex3)
+
+      Sets a face at a specific index of the mesh.
+
+      :return: True if the operation succeeded, otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: SetFace(index, vertex1, vertex2, vertex3, vertex4)
+
+      Sets a face at a specific index of the mesh.
+
+      :return: True if the operation succeeded, otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: ConvertQuadsToTriangles()
+
+      Splits all quads along the short diagonal.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: ConvertNonPlanarQuadsToTriangles()
+
+      Splits non-planar quads into two triangles based on given parameters.
+
+      :param float planarTolerance: If planarTolerance >= 0, then a quad is split if its vertices \
+         are not coplanar. \
+         If both planarTolerance = Rhino.RhinoMath.UnsetValue and \
+         angleToleranceRadians >= 0.0, then the planarity test is skipped.
+      :param float angleToleranceRadians: If angleToleranceRadians >= 0.0, then a quad is split if the \
+         angle between opposite corner normals is > angleToleranceRadians. \
+         The corner normal is the normal to the triangle formed by two \
+         adjacent edges and the diagonal connecting their endpoints. \
+         A quad has four corner normals. \
+         If both angleToleranceRadians = Rhino.RhinoMath.UnsetValue and planarTolerance >= 0.0, \
+         then the corner normal angle test is skipped.
+      :param int splitMethod: 0 default \
+         Currently divides along the short diagonal. This may be \
+         changed as better methods are found or preferences change. \
+         By passing zero, you let the developers of this code \
+         decide what's best for you over time. \
+         1 divide along the short diagonal \
+         2 divide along the long diagonal \
+         3 minimize resulting area \
+         4 maximize resulting area \
+         5 minimize angle between triangle normals \
+         6 maximize angle between triangle normals
+
+      :return: Number of quads that were converted to triangles.
+
+      :rtype: int
+
+   .. py:method:: ConvertTrianglesToQuads()
+
+      Joins adjacent triangles into quads if the resulting quad is 'nice'.
+
+      :param float angleToleranceRadians: Used to compare adjacent triangles' face normals. For two triangles \
+         to be considered, the angle between their face normals has to \
+         be <= angleToleranceRadians. When in doubt use RhinoMath.PI/90.0 (2 degrees).
+      :param float minimumDiagonalLengthRatio: ( <= 1.0) For two triangles to be considered the ratio of the \
+         resulting quad's diagonals \
+         (length of the shortest diagonal)/(length of longest diagonal). \
+         has to be >= minimumDiagonalLengthRatio. When in doubt us .875.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
+   .. py:method:: CullDegenerateFaces()
+
+      Attempts to removes degenerate faces from the mesh.
+      Degenerate faces are faces that contains such a combination of indices,
+      that their final shape collapsed in a line or point.Before returning, this method also attempts to repair faces by juggling
+      vertex indices.
+
+      :return: The number of degenerate faces that were removed.
+
+      :rtype: int
+
+   .. py:method:: IsHidden()
+
+      Gets a value indicating whether a face is hidden.
+      A face is hidden if, and only if, at least one of its vertices is hidden.
+
+      :param int faceIndex: A face index.
+
+      :return: True if hidden, False if fully visible.
+
+      :rtype: bool
+
+   .. py:method:: HasNakedEdges()
+
+      Returns True if at least one of the face edges are not topologically
+      connected to any other faces.
+
+      :param int faceIndex: A face index.
+
+      :return: True if that face makes the mesh open, otherwise false.
+
+      :rtype: bool
+
+.. py:class:: MeshingParameters
+
+   .. py:method:: MeshingParameters()
+
+      MeshingParameters constructor
+
+
+   .. py:method:: MeshingParameters(density)
+
+      Initializes a new instance with simple values,
+      similar to that of Rhino's meshing slider interface.
+
+      :param float density: The density and number of mesh polygons, where 0.0 <= density <= 1.0, \
+         where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
+
+   .. py:method:: MeshingParameters(density, minimumEdgeLength)
+
+      Initializes a new instance with simple values,
+      similar to that of Rhino's meshing slider interface.
+
+      :param float density: The density and number of mesh polygons, where 0.0 <= density <= 1.0, \
+         where 0 quickly creates coarse meshes, and 1 slowly creates dense meshes.
+      :param float minimumEdgeLength: The minimum allowed mesh edge length.
+
+   .. py:attribute:: Default
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default render mesh.
+      Only use this if you plan on specifying your own custom meshing
+      parameters.
+
+   .. py:attribute:: FastRenderMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when
+      meshing speed is preferred over mesh quality.
+
+   .. py:attribute:: QualityRenderMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the a render mesh when mesh
+      quality is preferred over meshing speed.
+
+   .. py:attribute:: DefaultAnalysisMesh
+
+      rhino3dm.MeshingParameters: Gets mesh creation parameters to create the default analysis mesh.
+
+   .. py:attribute:: TextureRange
+
+      MeshingParameterTextureRange: Gets or sets how and if textures will be packed.
+
+   .. py:attribute:: JaggedSeams
+
+      bool: Gets or sets whether or not the mesh is allowed to have jagged seams.
+      When this flag is set to true, meshes on either side of a Brep Edge will not match up.
+
+   .. py:attribute:: RefineGrid
+
+      bool: Gets or sets a value indicating whether or not the sampling grid can be refined
+      when certain tolerances are not met.
+
+   .. py:attribute:: SimplePlanes
+
+      bool: Gets or sets a value indicating whether or not planar areas are allowed
+      to be meshed in a simplified manner.
+
+   .. py:attribute:: ComputeCurvature
+
+      bool: Gets or sets a value indicating whether or not surface curvature
+      data will be embedded in the mesh.
+
+   .. py:attribute:: ClosedObjectPostProcess
+
+      bool: Gets or sets a value indicating whether or not to post process non-closed meshes
+      that should be closed. If the Brep being meshed is closed, JaggedSeams = false,
+      and ClosedObjectPostProcess = true, and the resulting mesh is not closed, then a
+      post meshing process is applied to find and close gaps in the mesh. Typically the
+      resulting mesh is not closed because the input Brep has a geometric flaw, like
+      loops in trimming curve.
+
+   .. py:attribute:: GridMinCount
+
+      int: Gets or sets the minimum number of grid quads in the initial sampling grid.
+
+   .. py:attribute:: GridMaxCount
+
+      int: Gets or sets the maximum number of grid quads in the initial sampling grid.
+
+   .. py:attribute:: GridAngle
+
+      float: Gets or sets the maximum allowed angle difference (in radians)
+      for a single sampling quad. The angle pertains to the surface normals.
+
+   .. py:attribute:: GridAspectRatio
+
+      float: Gets or sets the maximum allowed aspect ratio of sampling quads.
+
+   .. py:attribute:: GridAmplification
+
+      float: Gets or sets the grid amplification factor.
+      Values lower than 1.0 will decrease the number of initial quads,
+      values higher than 1.0 will increase the number of initial quads.
+
+   .. py:attribute:: Tolerance
+
+      float: Gets or sets the maximum allowed edge deviation.
+      This tolerance is measured between the center of the mesh edge and the surface.
+
+   .. py:attribute:: MinimumTolerance
+
+      float: Gets or sets the minimum tolerance.
+
+   .. py:attribute:: RelativeTolerance
+
+      float: Gets or sets the relative tolerance.
+
+   .. py:attribute:: MinimumEdgeLength
+
+      float: Gets or sets the minimum allowed mesh edge length.
+
+   .. py:attribute:: MaximumEdgeLength
+
+      float: Gets or sets the maximum allowed mesh edge length.
+
+   .. py:attribute:: RefineAngle
+
+      float: Gets or sets the mesh parameter refine angle in radians.
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation
+
+.. py:class:: MeshNormalList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation
+
+   .. py:method:: Destroy()
+
+      [todo] add documentation
+
+   .. py:method:: Add(x, y, z)
+
+      [todo] add documentation
+
+   .. py:method:: ComputeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: UnitizeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: Flip()
+
+      [todo] add documentation
+
+.. py:class:: MeshNormalList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      [todo] add documentation
+
+   .. py:method:: Destroy()
+
+      [todo] add documentation
+
+   .. py:method:: Add(x, y, z)
+
+      [todo] add documentation
+
+   .. py:method:: ComputeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: UnitizeNormals()
+
+      [todo] add documentation
+
+   .. py:method:: Flip()
+
+      [todo] add documentation
+
+.. py:class:: MeshTopologyEdgeList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: EdgeLine(topologyEdgeIndex)
+
+      Gets the 3d line along an edge.
+
+      :param int topologyEdgeIndex: The topology edge index.
+
+      :return: Line along edge. If input is not valid, an Invalid Line is returned.
+
+      :rtype: Line
+
+.. py:class:: MeshVertexColorList
+
+   .. py:attribute:: Count
+
+      int: Gets or sets the number of mesh colors.
+
+   .. py:attribute:: Capacity
+
+      int: Gets or sets the total number of vertex colors the internal data structure can hold without resizing.
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      Clears the vertex color list on the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: Add(red, green, blue)
+
+      Adds a new vertex color to the end of the color list.
+
+      :param int red: Red component of color, must be in the 0~255 range.
+      :param int green: Green component of color, must be in the 0~255 range.
+      :param int blue: Blue component of color, must be in the 0~255 range.
+
+      :return: The index of the newly added color.
+
+      :rtype: int
+
+.. py:class:: MeshVertexList
+
+   .. py:attribute:: UseDoublePrecisionVertices
+
+      bool: Set to True if the vertices should be stored in double precision
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: SetCount()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: __setitem__()
+
+      [todo] add documentation
+
+   .. py:method:: Clear()
+
+      Clears the Vertex list on the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: Destroy()
+
+      Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+      Subsequent calls can add new items.
+
+
+      :rtype: void
+
+   .. py:method:: Add(x, y, z)
+
+      Adds a new vertex to the end of the Vertex list.
+
+      :param float x: X component of new vertex coordinate.
+      :param float y: Y component of new vertex coordinate.
+      :param float z: Z component of new vertex coordinate.
+
+      :return: The index of the newly added vertex.
+
+      :rtype: int
+
+   .. py:method:: IsHidden(vertexIndex)
+
+      Gets a value indicating whether or not a vertex is hidden.
+
+      :param int vertexIndex: Index of vertex to query.
+
+      :return: True if the vertex is hidden, False if it is not.
+
+      :rtype: bool
+
+   .. py:method:: Hide(vertexIndex)
+
+      Hides the vertex at the given index.
+
+      :param int vertexIndex: Index of vertex to hide.
+
+
+      :rtype: void
+
+   .. py:method:: Show(vertexIndex)
+
+      Shows the vertex at the given index.
+
+      :param int vertexIndex: Index of vertex to show.
+
+
+      :rtype: void
+
+   .. py:method:: HideAll()
+
+      Hides all vertices in the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: ShowAll()
+
+      Shows all vertices in the mesh.
+
+
+      :rtype: void
+
+   .. py:method:: CullUnused()
+
+      Removes all vertices that are currently not used by the Face list.
+
+      :return: The number of unused vertices that were removed.
+
+      :rtype: int
+
+   .. py:method:: CombineIdentical()
+
+      Merges identical vertices.
+
+      :param bool ignoreNormals: If true, vertex normals will not be taken into consideration when comparing vertices.
+      :param bool ignoreAdditional: If true, texture coordinates, colors, and principal curvatures \
+         will not be taken into consideration when comparing vertices.
+
+      :return: True if the mesh is changed, in which case the mesh will have fewer vertices than before.
+
+      :rtype: bool
+
+.. py:class:: ShutLining
+
+   .. py:method:: ShutLining()
+
+      ShutLining constructor
+
+
+   .. py:method:: ShutLining()
+
+      ShutLining constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Faceted
+
+
+   .. py:attribute:: AutoUpdate
+
+
+   .. py:attribute:: ForceUpdate
+
+
+   .. py:attribute:: Curves
+
+
+   .. py:method:: DeleteAllCurves()
+
+      [todo] add documentation
+
+.. py:class:: ShutLiningCurve
+
+   .. py:method:: ShutLiningCurve()
+
+      ShutLiningCurve constructor
+
+
+   .. py:method:: ShutLiningCurve()
+
+      ShutLiningCurve constructor
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Radius
+
+
+   .. py:attribute:: Profile
+
+
+   .. py:attribute:: Enabled
+
+
+   .. py:attribute:: Pull
+
+
+   .. py:attribute:: IsBump
+
+.. py:class:: SubD
+
+   .. py:method:: SubD()
+
+      SubD constructor
+
+
+   .. py:attribute:: IsSolid
+
+      bool: Test SubD to see if the active level is a solid.
+      A "solid" is a closed oriented manifold, or a closed oriented manifold.
+
+   .. py:method:: ClearEvaluationCache()
+
+      Clear cached information that depends on the location of vertex control points
+
+
+      :rtype: void
+
+   .. py:method:: UpdateAllTagsAndSectorCoefficients()
+
+      Updates vertex tag, edge tag, and edge coefficient values on the active
+      level. After completing custom editing operations that modify the
+      topology of the SubD control net or changing values of vertex or edge
+      tags, the tag and sector coefficients information on nearby components
+      in the edited areas need to be updated.
+
+      :return: Number of vertices and edges that were changed during the update.
+
+      :rtype: uint
+
+   .. py:method:: Subdivide(count)
+
+      Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
+
+      :return: True on success
+
+      :rtype: bool
+
+.. py:class:: Thickening
+
+   .. py:method:: Thickening()
+
+      Thickening constructor
+
+
+   .. py:method:: Thickening()
+
+      Thickening constructor
+
+
+   .. py:attribute:: On
+
+
+   .. py:attribute:: Distance
+
+
+   .. py:attribute:: Solid
+
+
+   .. py:attribute:: OffsetOnly
+
+
+   .. py:attribute:: BothSides

@@ -1,6 +1,0 @@
-SurfaceProxy
-============
-
-.. py:module:: rhino3dm
-
-.. py:class:: SurfaceProxy

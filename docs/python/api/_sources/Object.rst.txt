@@ -1,0 +1,1484 @@
+Model and Objects
+=================
+
+.. py:currentmodule:: rhino3dm
+
+.. py:class:: BoundingBox
+
+   .. py:method:: BoundingBox(min, max)
+
+      Constructs a new bounding box from two corner points.
+
+      :param rhino3dm.Point3d min: Point containing all the minimum coordinates.
+      :param rhino3dm.Point3d max: Point containing all the maximum coordinates.
+
+   .. py:method:: BoundingBox(minX, minY, minZ, maxX, maxY, maxZ)
+
+      Constructs a bounding box from numeric extremes.
+
+      :param float minX: Lower extreme for box X size.
+      :param float minY: Lower extreme for box Y size.
+      :param float minZ: Lower extreme for box Z size.
+      :param float maxX: Upper extreme for box X size.
+      :param float maxY: Upper extreme for box Y size.
+      :param float maxZ: Upper extreme for box Z size.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value that indicates whether or not this bounding box is valid.
+      Empty boxes are not valid, and neither are boxes with unset points.
+
+   .. py:attribute:: Min
+
+      rhino3dm.Point3d: Gets or sets the point in the minimal corner.
+
+   .. py:attribute:: Max
+
+      rhino3dm.Point3d: Gets or sets the point in the maximal corner.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets the point in the center of the bounding box.
+
+   .. py:attribute:: Area
+
+      float: Gets the area of this BoundingBox.
+
+   .. py:attribute:: Volume
+
+      float: Gets the volume of this BoundingBox.
+
+   .. py:attribute:: Diagonal
+
+      rhino3dm.Vector3d: Gets the diagonal vector of this BoundingBox.
+      The diagonal connects the Min and Max points.
+
+   .. py:method:: ClosestPoint(point)
+
+      Finds the closest point on or in the bounding box.
+
+      :param rhino3dm.Point3d point: Sample point.
+
+      :return: The point on or in the box that is closest to the sample point.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Inflate(amount)
+
+      Inflates the box with equal amounts in all directions.
+      Inflating with negative amounts may result in decreasing boxes.
+      Invalid boxes can not be inflated.
+
+      :param float amount: Amount (in model units) to inflate this box in all directions.
+
+
+      :rtype: void
+
+   .. py:method:: Inflate(xAmount, yAmount, zAmount)
+
+      Inflates the box with equal amounts in all directions.
+      Inflating with negative amounts may result in decreasing boxes.
+      Invalid boxes can not be inflated.
+
+
+      :rtype: void
+
+   .. py:method:: Contains(point)
+
+      Tests a point for bounding box inclusion. This is the same as calling Contains(point, false)
+
+      :param rhino3dm.Point3d point: Point to test.
+
+      :return: True if the point is on the inside of or coincident with this bounding box; otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: IsDegenerate(tolerance)
+
+      Determines whether a bounding box is degenerate (flat) in one or more directions.
+
+      :param float tolerance: Distances <= tolerance will be considered to be zero.  If tolerance \
+         is negative (default), then a scale invariant tolerance is used.
+
+      :return: 0 = box is not degenerate \
+         1 = box is a rectangle (degenerate in one direction). \
+         2 = box is a line (degenerate in two directions). \
+         3 = box is a point (degenerate in three directions) \
+         4 = box is not valid.
+
+      :rtype: int
+
+   .. py:method:: Transform(xform)
+
+      Updates this bounding box to be the smallest axis aligned
+      bounding box that contains the transformed result of its 8 original corner
+      points.
+
+      :param Transform xform: A transform.
+
+      :return: True if this operation is successful; otherwise false.
+
+      :rtype: bool
+
+   .. py:method:: ToBrep()
+
+      Constructs a  representation of this bounding box.
+
+      :return: If this operation is successful, a Brep representation of this box; otherwise null.
+
+      :rtype: rhino3dm.Brep
+
+   .. py:staticmethod:: Union(a, b)
+
+      Updates this BoundingBox to represent the union of itself and another box.
+
+
+      :rtype: void
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation
+
+.. py:class:: Box
+
+   .. py:method:: Box()
+
+      Box constructor
+
+
+   .. py:attribute:: IsValid
+
+      bool: Gets the validity of this Box. Boxes are invalid when the base plane or any of
+      the dimension intervals are invalid or decreasing.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets the point that is in the center of the box.
+
+   .. py:attribute:: Area
+
+      float: Gets the total surface area of this box.
+
+   .. py:attribute:: Volume
+
+      float: Gets the total volume of this box.
+
+   .. py:method:: PointAt(x, y, z)
+
+      Evaluates the box volume at the given unitized parameters.
+      The box has idealized side length of 1x1x1.
+
+      :param float x: Unitized parameter (between 0 and 1 is inside the box) along box X direction.
+      :param float y: Unitized parameter (between 0 and 1 is inside the box) along box Y direction.
+      :param float z: Unitized parameter (between 0 and 1 is inside the box) along box Z direction.
+
+      :return: The point at (x,y,z).
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: ClosestPoint(point)
+
+      Finds the closest point on or in the Box. The box should be Valid for this to work.
+
+      :param rhino3dm.Point3d point: Sample point.
+
+      :return: The point on or in the box that is closest to the sample point.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Transform(xform)
+
+      Transforms this Box using a Transformation matrix. If the Transform does not preserve
+      Similarity, the dimensions of the resulting box cannot be trusted.
+
+      :param Transform xform: Transformation matrix to apply to this Box.
+
+      :return: True if the Box was successfully transformed, False if otherwise.
+
+      :rtype: bool
+
+.. py:class:: CommonObject
+
+   .. py:attribute:: IsValid
+
+      bool: Tests an object to see if it is valid.
+
+   .. py:attribute:: IsValidWithLog
+
+
+   .. py:attribute:: UserStringCount
+
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation
+
+   .. py:method:: SetUserString(key, value)
+
+      [todo] add documentation
+
+   .. py:method:: GetUserString(key)
+
+      [todo] add documentation
+
+   .. py:method:: GetUserStrings()
+
+      [todo] add documentation
+
+   .. py:method:: RdkXml()
+
+      [todo] add documentation
+
+.. py:class:: ComponentIndex
+
+   .. py:method:: ComponentIndex()
+
+      ComponentIndex constructor
+
+
+   .. py:attribute:: ComponentIndexType
+
+      ComponentIndexType: The interpretation of Index depends on the Type value.
+      Type             m_index interpretation (0 based indices)
+      no_type            used when context makes it clear what array is being index
+      brep_vertex        Brep.m_V[] array index
+      brep_edge          Brep.m_E[] array index
+      brep_face          Brep.m_F[] array index
+      brep_trim          Brep.m_T[] array index
+      brep_loop          Brep.m_L[] array index
+      mesh_vertex        Mesh.m_V[] array index
+      meshtop_vertex     MeshTopology.m_topv[] array index
+      meshtop_edge       MeshTopology.m_tope[] array index
+      mesh_face          Mesh.m_F[] array index
+      idef_part          InstanceDefinition.m_object_uuid[] array index
+      polycurve_segment  PolyCurve::m_segment[] array index
+      dim_linear_point   LinearDimension2::POINT_INDEX
+      dim_radial_point   RadialDimension2::POINT_INDEX
+      dim_angular_point  AngularDimension2::POINT_INDEX
+      dim_ordinate_point OrdinateDimension2::POINT_INDEX
+      dim_text_point     TextEntity2 origin point.
+
+   .. py:attribute:: Index
+
+      int: The interpretation of m_index depends on the m_type value.
+      m_type             m_index interpretation (0 based indices)
+      no_type            used when context makes it clear what array is being index
+      brep_vertex        Brep.m_V[] array index
+      brep_edge          Brep.m_E[] array index
+      brep_face          Brep.m_F[] array index
+      brep_trim          Brep.m_T[] array index
+      brep_loop          Brep.m_L[] array index
+      mesh_vertex        Mesh.m_V[] array index
+      meshtop_vertex     MeshTopology.m_topv[] array index
+      meshtop_edge       MeshTopology.m_tope[] array index
+      mesh_face          Mesh.m_F[] array index
+      idef_part          InstanceDefinition.m_object_uuid[] array index
+      polycurve_segment  PolyCurve::m_segment[] array index
+      dim_linear_point   LinearDimension2::POINT_INDEX
+      dim_radial_point   RadialDimension2::POINT_INDEX
+      dim_angular_point  AngularDimension2::POINT_INDEX
+      dim_ordinate_point OrdinateDimension2::POINT_INDEX
+      dim_text_point     TextEntity2 origin point.
+
+.. py:class:: Cone
+
+   .. py:attribute:: Height
+
+      float: Gets or sets the height of the circular right cone.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of the cone.
+
+   .. py:attribute:: IsValid
+
+      bool: True if plane is valid, height is not zero and radius is not zero.
+
+   .. py:attribute:: BasePoint
+
+      rhino3dm.Point3d: Center of base circle.
+
+   .. py:attribute:: ApexPoint
+
+      rhino3dm.Point3d: Point at tip of the cone.
+
+   .. py:attribute:: Axis
+
+      rhino3dm.Vector3d: Unit vector axis of cone.
+
+   .. py:attribute:: AngleInRadians
+
+
+   .. py:attribute:: AngleInDegrees
+
+
+   .. py:method:: ToNurbsSurface()
+
+      Constructs a Nurbs surface representation of this Cone.
+      This is synonymous with calling NurbsSurface.CreateFromCone().
+
+      :return: A Nurbs surface representation of the cone or null.
+
+      :rtype: NurbsSurface
+
+   .. py:method:: ToBrep(capBottom)
+
+      Gets a Brep representation of the cone with a single
+      face for the cone, an edge along the cone seam,
+      and vertices at the base and apex ends of this seam edge.
+      The optional cap is a single face with one circular edge
+      starting and ending at the base vertex.
+
+      :param bool capBottom: True if the bottom should be filled with a surface. False otherwise.
+
+      :return: A brep (polysurface) representation of this cone values.
+
+      :rtype: rhino3dm.Brep
+
+.. py:class:: Cylinder
+
+   .. py:method:: Cylinder(baseCircle)
+
+      Constructs a new cylinder with infinite height.
+
+      :param Circle baseCircle: Base circle for infinite cylinder.
+
+   .. py:method:: Cylinder(baseCircle, height)
+
+      Constructs a new cylinder with a finite height.
+
+      :param Circle baseCircle: Base circle for cylinder.
+      :param float height: Height of cylinder (zero for infinite cylinder).
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a boolean value indicating whether this cylinder is valid.
+      A valid cylinder is represented by a valid circle and two valid heights.
+
+   .. py:attribute:: IsFinite
+
+      bool: True if the cylinder is finite (Height0 != Height1)
+      False if the cylinder is infinite.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets the center point of the defining circle.
+
+   .. py:attribute:: Axis
+
+      rhino3dm.Vector3d: Gets the axis direction of the cylinder.
+
+   .. py:attribute:: TotalHeight
+
+      float: Gets the height of the cylinder.
+      Infinite cylinders have a height of zero, not Double.PositiveInfinity.
+
+   .. py:attribute:: Height1
+
+      float: Gets or sets the start height of the cylinder.
+      The center of bottom cap is: BasePlane.Origin + Height1 * BasePlane.ZAxis.
+
+   .. py:attribute:: Height2
+
+      float: Gets or sets the end height of the cylinder.
+      If the end height equals the start height, the cylinder is
+      presumed to be infinite.
+      The center of top cap is: BasePlane.Origin + Height2 * BasePlane.ZAxis.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the radius of the cylinder.
+
+   .. py:method:: CircleAt(linearParameter)
+
+      Compute the circle at the given elevation parameter.
+
+      :param float linearParameter: Height parameter for circle section.
+
+
+      :rtype: Circle
+
+   .. py:method:: ToBrep(capBottom, capTop)
+
+      Constructs a Brep representation of this Cylinder.
+      This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :param bool capBottom: If true, the bottom of the cylinder will be capped.
+      :param bool capTop: If true, the top of the cylinder will be capped.
+
+      :return: A Brep representation of the cylinder or null.
+
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: ToNurbsSurface()
+
+      Constructs a Nurbs surface representation of this cylinder.
+      This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :return: A Nurbs surface representation of the cylinder or null.
+
+      :rtype: NurbsSurface
+
+.. py:class:: Extrusion
+
+   .. py:method:: Extrusion()
+
+      Extrusion constructor
+
+
+   .. py:attribute:: PathStart
+
+      rhino3dm.Point3d: Gets the start point of the path.
+
+   .. py:attribute:: PathEnd
+
+      rhino3dm.Point3d: Gets the end point of the path.
+
+   .. py:attribute:: PathTangent
+
+      rhino3dm.Vector3d: Gets the up vector of the path.
+
+   .. py:attribute:: MiterPlaneNormalAtStart
+
+      rhino3dm.Vector3d: Gets or sets the normal of the miter plane at the start in profile coordinates.
+      In profile coordinates, 0,0,1 always maps to the extrusion axis
+
+   .. py:attribute:: MiterPlaneNormalAtEnd
+
+      rhino3dm.Vector3d: Gets or sets the normal of the miter plane at the end in profile coordinates.
+      In profile coordinates, 0,0,1 always maps to the extrusion axis
+
+   .. py:attribute:: IsMiteredAtStart
+
+      bool: Returns a value indicating whether a miter plane at start is defined.
+
+   .. py:attribute:: IsMiteredAtEnd
+
+      bool: Gets a value indicating whether a miter plane at the end is defined.
+
+   .. py:attribute:: IsSolid
+
+      bool: Gets a value indicating whether there is no gap among all surfaces constructing this object.
+
+   .. py:attribute:: IsCappedAtBottom
+
+      bool: Gets a value indicating whether the surface that fills the bottom profile is existing.
+
+   .. py:attribute:: IsCappedAtTop
+
+      bool: Gets a value indicating whether the surface that fills the top profile is existing.
+
+   .. py:attribute:: CapCount
+
+      int: Gets the amount of capping surfaces.
+
+   .. py:attribute:: ProfileCount
+
+      int: Gets the amount of profile curves.
+
+   .. py:staticmethod:: Create(planarCurve, height, cap)
+
+      Creates an extrusion of a 3d curve (which must be planar) and a height.
+
+      :param rhino3dm.Curve planarCurve: Planar curve used as profile
+      :param float height: If the height > 0, the bottom of the extrusion will be in plane and \
+         the top will be height units above the plane. \
+         If the height < 0, the top of the extrusion will be in plane and \
+         the bottom will be height units below the plane. \
+         The plane used is the one that is returned from the curve's TryGetPlane function.
+      :param bool cap: If the curve is closed and cap is true, then the resulting extrusion is capped.
+
+      :return: If the input is valid, then a new extrusion is returned. Otherwise None is returned
+
+      :rtype: Extrusion
+
+   .. py:staticmethod:: CreateBoxExtrusion(box, cap)
+
+      Gets an extrusion from a box.
+
+      :param rhino3dm.Box box: IsValid must be true.
+      :param bool cap: If true, the base and the top of the box will be capped. Defaults to true.
+
+      :return: Extrusion on success. None on failure.
+
+      :rtype: Extrusion
+
+   .. py:staticmethod:: CreateCylinderExtrusion(cylinder, capBottom, capTop)
+
+      Gets an extrusion form of a cylinder.
+
+      :param Cylinder cylinder: IsFinite must be true.
+      :param bool capBottom: If true, the end at cylinder.Height1 will be capped.
+      :param bool capTop: If true, the end at cylinder.Height2 will be capped.
+
+      :return: Extrusion on success. None on failure.
+
+      :rtype: Extrusion
+
+   .. py:staticmethod:: CreatePipeExtrusion(cylinder, otherRadius, capBottom, capTop)
+
+      Gets an extrusion form of a pipe.
+
+      :param Cylinder cylinder: IsFinite must be true.
+      :param float otherRadius: If cylinder.Radius is less than other radius, then the cylinder will be the inside \
+         of the pipe.
+      :param bool capBottom: If true, the end at cylinder.Height1 will be capped.
+      :param bool capTop: If true, the end at cylinder.Height2 will be capped.
+
+      :return: Extrusion on success. None on failure.
+
+      :rtype: Extrusion
+
+   .. py:method:: ToBrep(splitKinkyFaces)
+
+      Constructs a brep form of the extrusion. The outer profile is always the first face of the brep.
+      If there are inner profiles, additional brep faces are created for each profile. If the
+      outer profile is closed, then end caps are added as the last two faces of the brep.
+
+      :param bool splitKinkyFaces: If True and the profiles have kinks, then the faces corresponding to those profiles are split \
+         so they will be G1.
+
+      :return: A brep with a similar shape like this extrusion, or None on error.
+
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: SetPathAndUp()
+
+      Allows to set the two points at the extremes and the up vector.
+
+      :param rhino3dm.Point3d a: The start point.
+      :param rhino3dm.Point3d b: The end point.
+      :param rhino3dm.Vector3d up: The up vector.
+
+      :return: True if the operation succeeded; otherwise false. \
+         Setting up=a-b will make the operation fail.
+
+      :rtype: bool
+
+   .. py:method:: GetProfileTransformation(s)
+
+      Gets the transformation that maps the XY profile curve to its 3d location.
+
+      :param float s: 0.0 = starting profile \
+         1.0 = ending profile.
+
+      :return: A Transformation. The transform is Invalid on failure.
+
+      :rtype: Transform
+
+   .. py:method:: GetProfilePlane(s)
+
+      Gets the 3D plane containing the profile curve at a normalized path parameter.
+
+      :param float s: 0.0 = starting profile \
+         1.0 = ending profile.
+
+      :return: A plane. The plane is Invalid on failure.
+
+      :rtype: rhino3dm.Plane
+
+   .. py:method:: GetPathPlane(s)
+
+      Gets the 3D plane perpendicular to the path at a normalized path parameter.
+
+      :param float s: 0.0 = starting profile \
+         1.0 = ending profile.
+
+      :return: A plane. The plane is Invalid on failure.
+
+      :rtype: rhino3dm.Plane
+
+   .. py:method:: SetOuterProfile(outerProfile, cap)
+
+      Sets the outer profile of the extrusion.
+
+      :param rhino3dm.Curve outerProfile: curve in the XY plane or a 2D curve.
+      :param bool cap: If outerProfile is a closed curve, then cap determines if the extrusion \
+         has end caps. If outerProfile is an open curve, cap is ignored.
+
+      :return: True if the profile was set. If the outer profile is closed, then the \
+         extrusion may also have inner profiles. If the outer profile is open, \
+         the extrusion may not have inner profiles. If the extrusion already \
+         has a profile, the set will fail.
+
+      :rtype: bool
+
+   .. py:method:: AddInnerProfile(innerProfile)
+
+      Adds an inner profile.
+
+      :param rhino3dm.Curve innerProfile: Closed curve in the XY plane or a 2d curve.
+
+      :return: True if the profile was set.
+
+      :rtype: bool
+
+   .. py:method:: Profile3d(profileIndex, s)
+
+      Gets a transversal isocurve of the extruded profile.
+
+      :param int profileIndex: 0 <= profileIndex < ProfileCount \
+         The outer profile has index 0.
+      :param float s: 0.0 <= s <= 1.0 \
+         A relative parameter controlling which profile is returned. \
+         0 = bottom profile and 1 = top profile.
+
+      :return: The profile.
+
+      :rtype: rhino3dm.Curve
+
+   .. py:method:: Profile3d(ci)
+
+      Gets a transversal isocurve of the extruded profile.
+
+      :param int profileIndex: 0 <= profileIndex < ProfileCount \
+         The outer profile has index 0.
+      :param float s: 0.0 <= s <= 1.0 \
+         A relative parameter controlling which profile is returned. \
+         0 = bottom profile and 1 = top profile.
+
+      :return: The profile.
+
+      :rtype: rhino3dm.Curve
+
+   .. py:method:: WallEdge(ci)
+
+      Gets one of the longitudinal curves along the beam or extrusion.
+
+      :param ComponentIndex ci: The index of this profile.
+
+      :return: The profile.
+
+      :rtype: rhino3dm.Curve
+
+   .. py:method:: WallSurface(ci)
+
+      Gets one of the longitudinal surfaces of the extrusion.
+
+      :param ComponentIndex ci: The index specifying which precise item to retrieve.
+
+      :return: The surface.
+
+      :rtype: rhino3dm.Surface
+
+   .. py:method:: PathLineCurve()
+
+      Gets the line-like curve that is the conceptual axis of the extrusion.
+
+      :return: The path as a line curve.
+
+      :rtype: LineCurve
+
+   .. py:method:: ProfileIndex(profileParameter)
+
+      Gets the index of the profile curve at a domain related to a parameter.
+
+      :param float profileParameter: Parameter on profile curve.
+
+      :return: -1 if profileParameter does not correspond to a point on the profile curve. \
+         When the profileParameter corresponds to the end of one profile and the \
+         beginning of the next profile, the index of the next profile is returned.
+
+      :rtype: int
+
+   .. py:method:: GetMesh(meshType)
+
+      Obtains a reference to a specified type of mesh for this extrusion.
+
+      :param MeshType meshType: The mesh type.
+
+      :return: A mesh.
+
+      :rtype: rhino3dm.Mesh
+
+   .. py:method:: SetMesh(mesh, meshType)
+
+      Sets a specified type of mesh for this extrusion.
+
+      :param rhino3dm.Mesh mesh: The mesh.
+      :param MeshType meshType: The mesh type.
+
+      :return: True on success.
+
+      :rtype: bool
+
+.. py:class:: GeometryBase
+
+   .. py:attribute:: ObjectType
+
+      ObjectType: Useful for switch statements that need to differentiate between
+      basic object types like points, curves, surfaces, and so on.
+
+   .. py:attribute:: IsDeformable
+
+      bool: True if object can be accurately modified with "squishy" transformations like
+      projections, shears, and non-uniform scaling.
+
+   .. py:attribute:: HasBrepForm
+
+      bool: Returns True if the Brep.TryConvertBrep function will be successful for this object
+
+   .. py:method:: Transform(xform)
+
+      Transforms the geometry. If the input :py:class:`Transform` has a SimilarityType of
+      OrientationReversing, you may want to consider flipping the transformed
+      geometry after calling this function when it makes sense. For example,
+      you may want to call Flip() on a Brep after transforming it.
+
+      :param Transform xform: Transformation to apply to geometry.
+
+      :return: True if geometry successfully transformed.
+
+      :rtype: bool
+
+   .. py:method:: Translate(translationVector)
+
+      Translates the object along the specified vector.
+
+      :param Vector3d translationVector: A moving vector.
+
+      :return: True if geometry successfully translated.
+
+      :rtype: bool
+
+   .. py:method:: Scale(scaleFactor)
+
+      Scales the object by the specified factor. The scale is centered at the origin.
+
+      :param float scaleFactor: The uniform scaling factor.
+
+      :return: True if geometry successfully scaled.
+
+      :rtype: bool
+
+   .. py:method:: Rotate(rotationAngle, rotationAxis, rotationCenter)
+
+      Rotates the object about the specified axis. A positive rotation
+      angle results in a counter-clockwise rotation about the axis (right hand rule).
+
+      :param float angleRadians: Angle of rotation in radians.
+      :param Vector3d rotationAxis: Direction of the axis of rotation.
+      :param Point3d rotationCenter: Point on the axis of rotation.
+
+      :return: True if geometry successfully rotated.
+
+      :rtype: bool
+
+   .. py:method:: GetBoundingBox()
+
+      Bounding box solver. Gets the world axis aligned bounding box for the geometry.
+
+      :param bool accurate: If true, a physically accurate bounding box will be computed. \
+         If not, a bounding box estimate will be computed. For some geometry types there is no \
+         difference between the estimate and the accurate bounding box. Estimated bounding boxes \
+         can be computed much (much) faster than accurate (or "tight") bounding boxes. \
+         Estimated bounding boxes are always similar to or larger than accurate bounding boxes.
+
+      :return: The bounding box of the geometry in world coordinates or BoundingBox.Empty \
+         if not bounding box could be found.
+
+      :rtype: BoundingBox
+
+   .. py:method:: MakeDeformable()
+
+      If possible, converts the object into a form that can be accurately modified
+      with "squishy" transformations like projections, shears, an non-uniform scaling.
+
+      :return: False if object cannot be converted to a deformable object. True if object was \
+         already deformable or was converted into a deformable object.
+
+      :rtype: bool
+
+   .. py:method:: Duplicate()
+
+      Constructs a deep (full) copy of this object.
+
+      :return: An object of the same type as this, with the same properties and behavior.
+
+      :rtype: GeometryBase
+
+.. py:class:: Font
+
+   .. py:method:: Font()
+
+      Font constructor
+
+
+   .. py:attribute:: QuartetName
+
+
+   .. py:attribute:: FaceName
+
+      str: Returns Face name
+
+   .. py:attribute:: PostScriptName
+
+      str: Returns the Font PostScriptName - "Apple font name"
+
+   .. py:attribute:: RichTextFontName
+
+      str: Returns the Font RichTextFontName used in RTF strings:
+      {\\fonttbl...{\\fN RichTextFontName;}...}
+
+   .. py:attribute:: Bold
+
+
+   .. py:attribute:: Italic
+
+
+   .. py:attribute:: Underlined
+
+
+   .. py:attribute:: StrikeOut
+
+
+   .. py:attribute:: IsEngravingFont
+
+
+   .. py:attribute:: IsSymbolFont
+
+
+   .. py:attribute:: IsSingleStrokeFont
+
+
+   .. py:attribute:: IsSimulated
+
+
+   .. py:attribute:: PointSize
+
+
+   .. py:attribute:: FamilyName
+
+.. py:class:: Group
+
+   .. py:method:: Group()
+
+      Group constructor
+
+
+   .. py:attribute:: Name
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Index
+
+.. py:class:: InstanceDefinition
+
+   .. py:method:: InstanceDefinition()
+
+      InstanceDefinition constructor
+
+
+   .. py:attribute:: Description
+
+
+   .. py:attribute:: Name
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: SourceArchive
+
+
+   .. py:attribute:: UpdateType
+
+
+   .. py:method:: GetObjectIds()
+
+      [todo] add documentation
+
+   .. py:method:: IsInstanceGeometryId(id)
+
+      [todo] add documentation
+
+.. py:class:: InstanceReference
+
+   .. py:method:: InstanceReference()
+
+      InstanceReference constructor
+
+
+   .. py:attribute:: ParentIdefId
+
+
+   .. py:attribute:: Xform
+
+.. py:class:: Layer
+
+   .. py:method:: Layer()
+
+      Layer constructor
+
+
+   .. py:attribute:: PathSeparator
+
+
+   .. py:attribute:: Name
+
+      str: Gets or sets the name of this layer.
+
+   .. py:attribute:: FullPath
+
+      str: Gets the full path to this layer. The full path includes nesting information.
+
+   .. py:attribute:: Id
+
+      Guid: Gets or sets the ID of this layer object.
+      You typically do not need to assign a custom ID.
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: ParentLayerId
+
+      Guid: Gets the ID of the parent layer. Layers can be organized in a hierarchical structure,
+      in which case this returns the parent layer ID. If the layer has no parent,
+      Guid.Empty will be returned.
+
+   .. py:attribute:: IgesLevel
+
+      int: Gets or sets the IGES level for this layer.
+
+   .. py:attribute:: Color
+
+      System.Drawing.Color: Gets or sets the display color for this layer.
+
+   .. py:attribute:: PlotColor
+
+      System.Drawing.Color: Gets or sets the plot color for this layer.
+
+   .. py:attribute:: PlotWeight
+
+      float: Gets or sets the weight of the plotting pen in millimeters.
+      A weight of 0.0 indicates the "default" pen weight should be used.
+      A weight of -1.0 indicates the layer should not be printed.
+
+   .. py:attribute:: LinetypeIndex
+
+      int: Gets or sets the line-type index for this layer.
+
+   .. py:attribute:: RenderMaterialIndex
+
+      int: Gets or sets the index of render material for objects on this layer that have
+      MaterialSource() == MaterialFromLayer.
+      A material index of -1 indicates no material has been assigned
+      and the material created by the default Material constructor
+      should be used.
+
+   .. py:attribute:: Visible
+
+
+   .. py:attribute:: Locked
+
+
+   .. py:attribute:: Expanded
+
+
+   .. py:method:: HasPerViewportSettings(viewportId)
+
+      Verifies that a layer has per viewport settings.
+
+      :param Guid viewportId: If not Guid.Empty, then checks for settings for that specific viewport. \
+         If Guid.Empty, then checks for any viewport settings.
+
+      :return: True if the layer has per viewport settings, False otherwise.
+
+      :rtype: bool
+
+   .. py:method:: DeletePerViewportSettings(viewportId)
+
+      Deletes per viewport layer settings.
+
+      :param Guid viewportId: If not Guid.Empty, then the settings for that viewport are deleted. \
+         If Guid.Empty, then all per viewport settings are deleted.
+
+
+      :rtype: void
+
+   .. py:method:: PerViewportColor(viewportId)
+
+      Gets the display color for this layer.
+
+      :param Guid viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+
+      :return: The display color.
+
+      :rtype: System.Drawing.Color
+
+   .. py:method:: SetPerViewportColor(viewportId, color)
+
+      Sets the display color for this layer.
+
+      :param Guid viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+      :param System.Drawing.Color color: The display color.
+
+
+      :rtype: void
+
+   .. py:method:: DeletePerViewportColor(viewportId)
+
+      Remove any per viewport layer color setting so the layer's overall setting will be used for all viewports.
+
+      :param Guid viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. \
+         If Guid.Empty, the all per viewport layer color settings will be removed.
+
+
+      :rtype: void
+
+   .. py:method:: GetPersistentVisibility()
+
+      The global persistent visibility setting is used for layers whose visibility can
+      be changed by a "parent" object. A common case is when a layer is a
+      child layer (ParentId is not nil). In this case, when a parent layer is
+      turned off, then child layers are also turned off. The persistent
+      visibility setting determines what happens when the parent is turned on
+      again.
+
+
+      :rtype: bool
+
+   .. py:method:: SetPersistentVisibility(persistentVisibility)
+
+      Set the global persistent visibility setting for this layer.
+
+
+      :rtype: void
+
+   .. py:method:: UnsetPersistentVisibility()
+
+      Remove any explicit persistent visibility setting from this layer
+
+
+      :rtype: void
+
+   .. py:method:: GetPersistentLocking()
+
+      The persistent locking setting is used for layers that can be locked by
+      a "parent" object. A common case is when a layer is a child layer
+      (Layer.ParentI is not nil). In this case, when a parent layer is locked,
+      then child layers are also locked. The persistent locking setting
+      determines what happens when the parent is unlocked again.
+
+
+      :rtype: bool
+
+   .. py:method:: SetPersistentLocking(persistentLocking)
+
+      Set the persistent locking setting for this layer
+
+
+      :rtype: void
+
+   .. py:method:: UnsetPersistentLocking()
+
+      Remove any explicitly persistent locking settings from this layer
+
+
+      :rtype: void
+
+.. py:class:: ModelComponent
+
+   .. py:attribute:: IsSystemComponent
+
+      bool: True if this model component is a system constant.
+      An incomplete list of system constant model components is below:ON_ModelComponent::Unset
+      ON_InstanceDefinition::Empty
+      ON_Linetype::UnsetON_Linetype::ContinuousON_Linetype::ByLayerON_Linetype::ByParent
+      ON_Layer::UnsetON_Layer::Default
+      ON_TextStyle::UnsetON_TextStyle::DefaultON_TextStyle::ByLayerON_TextStyle::ByParent
+      ON_DimStyle::UnsetON_DimStyle::DefaultON_DimStyle::DefaultInchDecimalON_DimStyle::DefaultInchFractionalON_DimStyle::DefaultFootInchArchitectureON_DimStyle::DefaultMillimeterSmallON_DimStyle::DefaultMillimeterLargeON_DimStyle::DefaultMillimeterArchitecture
+
+   .. py:attribute:: Id
+
+      Guid: Gets or sets the ID of the current instance.
+
+   .. py:method:: DataCRC(currentRemainder)
+
+      Increments the Cyclic Redundancy Check value by this instance.
+
+      :param uint currentRemainder: The current remainder value.
+
+      :return: The updated remainder value.
+
+      :rtype: uint
+
+   .. py:method:: ClearId()
+
+      Resets the HasId property of the model component to false, if possible.
+
+
+      :rtype: void
+
+.. py:class:: ObjectAttributes
+
+   .. py:method:: ObjectAttributes()
+
+      ObjectAttributes constructor
+
+
+   .. py:attribute:: Mode
+
+      ObjectMode: An object must be in one of three modes: normal, locked or hidden.
+      If an object is in normal mode, then the object's layer controls visibility
+      and selectability. If an object is locked, then the object's layer controls
+      visibility by the object cannot be selected. If the object is hidden, it is
+      not visible and it cannot be selected.
+
+   .. py:attribute:: IsInstanceDefinitionObject
+
+      bool: Use this query to determine if an object is part of an instance definition.
+
+   .. py:attribute:: Visible
+
+      bool: Gets or sets an object's visibility.
+
+   .. py:attribute:: CastsShadows
+
+      bool: Gets or sets an object's casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.
+
+   .. py:attribute:: ReceivesShadows
+
+      bool: Gets or sets an object's receives shadows property, or whether or not an object receives shadows from other objects.
+
+   .. py:attribute:: LinetypeSource
+
+      ObjectLinetypeSource: The Linetype used to display an object is specified in one of two ways.
+      If LinetypeSource is ON::linetype_from_layer, then the object's layer ON_Layer::Linetype() is used.
+      If LinetypeSource is ON::linetype_from_object, then value of m_linetype is used.
+
+   .. py:attribute:: ColorSource
+
+      ObjectColorSource: The color used to display an object is specified in one of three ways.
+      If ColorSource is ON::color_from_layer, then the object's layer ON_Layer::Color() is used.
+      If ColorSource is ON::color_from_object, then value of m_color is used.
+      If ColorSource is ON::color_from_material, then the diffuse color of the object's
+      render material is used.  See ON_3dmObjectAttributes::MaterialSource() to
+      determine where to get the definition of the object's render material.
+
+   .. py:attribute:: PlotColorSource
+
+      ObjectPlotColorSource: The color used to plot an object on paper is specified in one of three ways.
+      If PlotColorSource is ON::plot_color_from_layer, then the object's layer ON_Layer::PlotColor() is used.
+      If PlotColorSource is ON::plot_color_from_object, then value of PlotColor() is used.
+
+   .. py:attribute:: PlotWeightSource
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: Name
+
+      str: Gets or sets an object optional text name.
+      More than one object in a model can have the same name and
+      some objects may have no name.
+
+   .. py:attribute:: Url
+
+      str: Objects may have an URL. There are no restrictions on what value this
+      URL may have. As an example, if the object came from a commercial part
+      library, the URL might point to the definition of that part.
+
+   .. py:attribute:: LayerIndex
+
+      int: Gets or sets an associated layer index.
+      Layer definitions in an OpenNURBS model are stored in a layer table.
+      The layer table is conceptually an array of ON_Layer classes.  Every
+      OpenNURBS object in a model is on some layer.  The object's layer
+      is specified by zero based indices into the ON_Layer array.
+
+   .. py:attribute:: LinetypeIndex
+
+      int: Gets or sets the linetype index.
+      Linetype definitions in an OpenNURBS model are stored in a linetype table.
+      The linetype table is conceptually an array of ON_Linetype classes. Every
+      OpenNURBS object in a model references some linetype.  The object's linetype
+      is specified by zero based indices into the ON_Linetype array.Index 0 is reserved for continuous linetype (no pattern).
+
+   .. py:attribute:: MaterialIndex
+
+      int: Gets or sets the material index.
+      If you want something simple and fast, set the index of
+      the rendering material.
+
+   .. py:attribute:: MaterialSource
+
+      ObjectMaterialSource: Determines if the simple material should come from the object or from it's layer.
+      High quality rendering plug-ins should use m_rendering_attributes.
+
+   .. py:attribute:: ObjectColor
+
+      System.Drawing.Color: If ON::color_from_object == ColorSource, then color is the object's display color.
+
+   .. py:attribute:: PlotColor
+
+      System.Drawing.Color: If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
+
+   .. py:attribute:: DisplayOrder
+
+      int: Display order used to force objects to be drawn on top or behind each other.
+      Larger numbers draw on top of smaller numbers.
+      0  = draw object in standard depth buffered order<0 = draw object behind "normal" draw order objects>0 = draw object on top of "normal" draw order objects
+
+   .. py:attribute:: PlotWeight
+
+      float: Plot weight in millimeters.
+      =0.0 means use the default width
+      <0.0 means don't plot (visible for screen display, but does not show on plot)
+
+   .. py:attribute:: ObjectDecoration
+
+      ObjectDecoration: Used to indicate an object has a decoration (like an arrowhead on a curve)
+
+   .. py:attribute:: WireDensity
+
+      int: When a surface object is displayed in wireframe, this controls
+      how many isoparametric wires are used.
+      value    number of isoparametric wires
+      -1       boundary wires (off)
+      0        boundary and knot wires
+      1        boundary and knot wires and, if there are no interior knots, a single interior wire.
+      N>=2     boundary and knot wires and (N+1) interior wires.
+
+   .. py:attribute:: ViewportId
+
+      Guid: If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
+      this object is only active in a specific view. This field is primarily used to assign page
+      space objects to a specific page, but it can also be used to restrict model space to a
+      specific view.
+
+   .. py:attribute:: ActiveSpace
+
+
+   .. py:attribute:: GroupCount
+
+      int: number of groups object belongs to.
+
+   .. py:attribute:: Decals
+
+      Render.Decals: Gets all object decals associated with this object.
+
+   .. py:attribute:: MeshModifiers
+
+
+   .. py:method:: Transform(transform)
+
+      Apply a transformation.
+
+      :param Transform xform: The transformation.
+
+      :return: True if successful, False otherwise.
+
+      :rtype: bool
+
+   .. py:method:: HasDisplayModeOverride(viewportId)
+
+      Determines if an object has a display mode override for a given viewport.
+
+      :param Guid viewportId: Id of a Rhino Viewport.
+
+      :return: True if the object has a display mode override for the viewport; otherwise, false.
+
+      :rtype: bool
+
+   .. py:method:: DrawColor(doc)
+
+      [todo] add documentation
+
+   .. py:method:: GetGroupList()
+
+      Returns an array of GroupCount group indices.  If GroupCount is zero, then GetGroupList() returns null.
+
+      :return: An array of group indices. None might be returned in place of an empty array.
+
+      :rtype: int[]
+
+   .. py:method:: AddToGroup()
+
+      Adds object to the group with specified index by appending index to
+      group list.
+      If the object is already in group, nothing is changed.
+
+      :param int groupIndex: The index that will be added.
+
+
+      :rtype: void
+
+   .. py:method:: RemoveFromGroup()
+
+      removes object from the group with specified index.
+      If the object is not in the group, nothing is changed.
+
+      :param int groupIndex: The index that will be removed.
+
+
+      :rtype: void
+
+   .. py:method:: RemoveFromAllGroups()
+
+      Removes object from all groups.
+
+
+      :rtype: void
+
+.. py:class:: Sphere
+
+   .. py:method:: Sphere(center, radius)
+
+      Initializes a new sphere given center point and radius.
+
+      :param rhino3dm.Point3d center: A center point.
+      :param float radius: A radius value.
+
+   .. py:attribute:: IsValid
+
+      bool: Gets a value that indicates whether the sphere is valid.
+
+   .. py:attribute:: Diameter
+
+      float: Gets or sets the diameter for this sphere.
+
+   .. py:attribute:: Radius
+
+      float: Gets or sets the Radius for this sphere.
+
+   .. py:attribute:: Center
+
+      rhino3dm.Point3d: Gets or sets the center point of the sphere.
+
+   .. py:attribute:: NorthPole
+
+      rhino3dm.Point3d: Gets the point at the North Pole of the sphere.
+      This is the parameterization singularity that can be obtained,
+      at V value +Math.Pi/2.
+
+   .. py:attribute:: SouthPole
+
+      rhino3dm.Point3d: Gets the point at the South Pole of the sphere.
+      This is the parameterization singularity that can be obtained,
+      at V value -Math.Pi/2.
+
+   .. py:method:: LatitudeRadians(radians)
+
+      Computes the parallel at a specific latitude angle.
+      The angle is specified in radians.
+
+      :param float radians: An angle in radians for the parallel.
+
+      :return: A circle.
+
+      :rtype: Circle
+
+   .. py:method:: LatitudeDegrees(degrees)
+
+      Computes the parallel at a specific latitude angle.
+      The angle is specified in degrees.
+
+      :param float degrees: An angle in degrees for the meridian.
+
+      :return: A circle.
+
+      :rtype: Circle
+
+   .. py:method:: LongitudeRadians(radians)
+
+      Computes the meridian at a specific longitude angle.
+      The angle is specified in radians.
+
+      :param float radians: An angle in radians.
+
+      :return: A circle.
+
+      :rtype: Circle
+
+   .. py:method:: LongitudeDegrees(degrees)
+
+      Computes the meridian at a specific longitude angle.
+      The angle is specified in degrees.
+
+      :param float degrees: An angle in degrees.
+
+      :return: A circle.
+
+      :rtype: Circle
+
+   .. py:method:: PointAt(longitudeRadians, latitudeRadians)
+
+      Evaluates the sphere at specific longitude and latitude angles.
+
+      :param float longitudeRadians: A number within the interval [0, 2pi].
+      :param float latitudeRadians: A number within the interval [-pi/2,pi/2].
+
+      :return: A point value.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: NormalAt(longitudeRadians, latitudeRadians)
+
+      Computes the normal at a specific angular location on the sphere.
+
+      :param float longitudeRadians: A number within the interval [0, 2pi].
+      :param float latitudeRadians: A number within the interval [-pi/2, pi/2].
+
+      :return: A vector.
+
+      :rtype: rhino3dm.Vector3d
+
+   .. py:method:: ClosestPoint(testPoint)
+
+      Returns point on sphere that is closest to given point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto Sphere.
+
+      :return: Point on sphere surface closest to testPoint.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: ClosestParameter(testPoint)
+
+      Finds the angle parameters on this sphere that are closest to a test point.
+
+      :param rhino3dm.Point3d testPoint: Point to project onto the sphere.
+
+      :return: tuple (bool, float, float)
+
+         - True on success, False on failure. This function will fail if the point it coincident with the sphere center.
+         - The longitudinal angle (in radians; 0.0 to 2pi) where the sphere approaches testPoint best. \
+         - The latitudinal angle (in radians; -0.5pi to +0.5pi) where the sphere approaches testPoint best. \
+
+      :rtype: (bool, float, float)
+
+   .. py:method:: ToBrep()
+
+      Converts this sphere is it Brep representation
+
+
+      :rtype: rhino3dm.Brep
+
+   .. py:method:: ToNurbsSurface()
+
+      Converts this sphere to its NurbsSurface representation.
+      This is synonymous with calling NurbsSurface.CreateFromSphere().
+
+      :return: A nurbs surface representation of this sphere or null.
+
+      :rtype: NurbsSurface
+
+   .. py:method:: Encode()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: Decode(jsonObject)
+
+      [todo] add documentation
