@@ -335,6 +335,7 @@ jobs:
         name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
         path: tests/python/lib
     - name: install whl
+      shell: bash
       run: pip install --no-index tests/python/lib/*.whl --force-reinstall
     - name: test python bdist
       run: python tests/python/rhino3dm_test/test.py
