@@ -340,6 +340,26 @@ jobs:
     - name: test python bdist
       run: python tests/python/rhino3dm_test/test.py
         
+  test_javascript:
+    name: test javascript
+    runs-on: ubuntu-latest
+    needs: [build_js]
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && node --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js
+          path: tests/javascript/lib
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript/rhino3dm_test
+          npm i
+          npm test
       
 
 
