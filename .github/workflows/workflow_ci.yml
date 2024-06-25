@@ -301,3 +301,42 @@ jobs:
           dotnet build
           cp ../lib/librhino3dm_native.so bin/Debug/net7.0/librhino3dm_native.so
           dotnet test
+
+    test_python_bdist:
+      name: test python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
+      runs_on: ${{ matrix.os }}
+      needs: [build_py_all_bdist]
+      strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2019, macos-12, macos-14]
+        python-version: ['3.10', '3.11', '3.12']
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-2019
+            target: windows
+          - os: macos-12
+            target: macos
+          - os: macos-14
+            target: macos
+      fail-fast: false
+      steps:
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: info
+        run: python --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/upload-artifact@v4.1.7
+        with:
+          name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
+          path: tests/python/lib
+      - name: list
+        run: ls tests/python/lib
+        
+      
+
+
