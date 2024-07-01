@@ -463,7 +463,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(pybind11::object points, const c
 
 std::wstring BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
-  return points.typeof();
+  return points.typeof().as<std::string>();
 }
 
 #endif
