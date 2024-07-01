@@ -459,6 +459,14 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(pybind11::object points, const c
   return AddPolyline(list, attributes);
 }
 #endif
+#if defined(ON_WASM_COMPILE)
+
+std::wstring BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
+{
+  return points.typeof().as<std::string>();
+}
+
+#endif
 
 BND_UUID BND_ONXModel_ObjectTable::AddArc(const BND_Arc& arc, const BND_3dmObjectAttributes* attributes)
 {
@@ -1665,7 +1673,12 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
-    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
+    //.def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddPolyline", py::overload_cast<pybind11::object, const BND_3dmObjectAttributes*>(&BND_ONXModel_ObjectTable::AddPolyline2), py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddPolyline", py::overload_cast<const BND_Point3dList&, const BND_3dmObjectAttributes*>(&BND_ONXModel_ObjectTable::AddPolyline), py::arg("polyline"), py::arg("attributes")=nullptr)
+    //.def("set", py::overload_cast<int>(&Pet::set), "Set the pet's age")
+    //.def("set", py::overload_cast<const std::string &>(&Pet::set), "Set the pet's name");
+
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
     .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle, py::arg("circle"), py::arg("attributes") = nullptr)
     .def("AddEllipse", &BND_ONXModel_ObjectTable::AddEllipse, py::arg("ellipse"), py::arg("attributes") = nullptr)
@@ -1988,6 +2001,7 @@ void initExtensionsBindings(void*)
     .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
     .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline, allow_raw_pointers())
+    .function("addPolyline3", &BND_ONXModel_ObjectTable::AddPolyline3, allow_raw_pointers())
     .function("addArc", &BND_ONXModel_ObjectTable::AddArc, allow_raw_pointers())
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
     .function("addEllipse", &BND_ONXModel_ObjectTable::AddEllipse, allow_raw_pointers())
