@@ -440,14 +440,14 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline1(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
 {
   ON_PolylineCurve plc(points.m_polyline);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const std::vector<ON_3dPoint>& points, const class BND_3dmObjectAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& points, const class BND_3dmObjectAttributes* attributes)
 {
   BND_Point3dList list;
 
@@ -456,12 +456,12 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const std::vector<ON_3dPoint>& po
     list.Add(points[i].x, points[i].y, points[i].z);
   }
 
-  return AddPolyline(list, attributes);
+  return AddPolyline1(list, attributes);
 }
 
 #if defined(ON_WASM_COMPILE)
 
-bool BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
+std::wstring BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
   return points.typeOf().as<std::string>();
 }
@@ -1674,8 +1674,8 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
-    .def("AddPolyline", py::overload_cast<const std::vector<ON_3dPoint>&, const BND_3dmObjectAttributes*>(&BND_ONXModel_ObjectTable::AddPolyline), py::arg("polyline"), py::arg("attributes")=nullptr)
-    .def("AddPolyline", py::overload_cast<const BND_Point3dList&, const BND_3dmObjectAttributes*>(&BND_ONXModel_ObjectTable::AddPolyline), py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, py::arg("polyline"), py::arg("attributes")=nullptr)
+    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
     .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle, py::arg("circle"), py::arg("attributes") = nullptr)
     .def("AddEllipse", &BND_ONXModel_ObjectTable::AddEllipse, py::arg("ellipse"), py::arg("attributes") = nullptr)
@@ -1997,7 +1997,7 @@ void initExtensionsBindings(void*)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint2)
     .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
-    .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline, allow_raw_pointers())
+    .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, allow_raw_pointers())
     .function("addPolyline3", &BND_ONXModel_ObjectTable::AddPolyline3, allow_raw_pointers())
     .function("addArc", &BND_ONXModel_ObjectTable::AddArc, allow_raw_pointers())
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
