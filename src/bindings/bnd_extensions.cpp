@@ -463,7 +463,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& p
 
 std::wstring BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
-  return points.typeOf().as<std::string>();
+  return points.typeOf().as<std::wstring>();
 }
 
 #endif
