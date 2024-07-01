@@ -52,9 +52,7 @@ public:
   //Guid AddLine3(Line line)
   //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
   BND_UUID AddPolyline(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
-#if defined(ON_PYTHON_COMPILE)
-  BND_UUID AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes);
-#endif
+  BND_UUID AddPolyline(const std::vector<ON_3dPoint>& points, const class BND_3dmObjectAttributes* attributes);
 #if defined(ON_WASM_COMPILE)
   bool AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes);
 #endif
