@@ -461,9 +461,16 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& p
 
 #if defined(ON_WASM_COMPILE)
 
-std::wstring BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
-  return points.typeOf().as<std::wstring>();
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    return AddPolyline2( array, attributes ); 
+  }
+  else
+    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes ); 
 }
 
 #endif
