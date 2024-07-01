@@ -56,7 +56,7 @@ public:
   BND_UUID AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes);
 #endif
 #if defined(ON_WASM_COMPILE)
-  BND_UUID AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes);
+  std::wstring AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes);
 #endif
   BND_UUID AddArc(const class BND_Arc& arc, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddCircle(const class BND_Circle& circle, const class BND_3dmObjectAttributes* attributes);
