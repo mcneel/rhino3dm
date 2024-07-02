@@ -7,22 +7,20 @@ BND_Point3dList::BND_Point3dList(const std::vector<ON_3dPoint>& points)
   m_polyline.Append(count, pts);
 }
 
+/*
 static BND_Polyline* CreateFromPoints1(const class BND_Point3dList& points)
 {
   BND_Polyline* rc = new BND_Polyline();
   rc->m_polyline.Append(points.GetCount(), points.m_polyline);
   return rc;
 }
+*/
 
 BND_Polyline* BND_Polyline::CreateFromPoints2(const std::vector<ON_3dPoint>& points) 
 {
-  BND_Point3dList list;
-  int count = (int)points.size();
-  for (int i = 0; i < count; i++)
-  {
-    list.Add(points[i].x, points[i].y, points[i].z);
-  }  
-  return CreateFromPoints1( list );
+  BND_Polyline* rc = new BND_Polyline();
+  rc->m_polyline.Append(points.size(), points.data());
+  return rc;
 }
 
 #if defined(ON_WASM_COMPILE)
@@ -34,8 +32,8 @@ BND_Polyline* BND_Polyline::CreateFromPoints3(emscripten::val points)
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
     return CreateFromPoints2( array ); 
   }
-  else
-    return CreateFromPoints1( points.as<const BND_Point3dList&>() ); 
+ // else
+   // return CreateFromPoints1( points.as<const BND_Point3dList&>() ); 
 }
 #endif
 
@@ -239,7 +237,7 @@ void initPolylineBindings(pybind11::module& m)
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateStarPolygon", &BND_Polyline::CreateStarPolygon, py::arg("circle"), py::arg("radius"), py::arg("cornerCounts"))
-    .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints1, py::arg("points"))
+    //.def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints1, py::arg("points"))
     .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
     ;
 }
