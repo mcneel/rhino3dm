@@ -142,23 +142,34 @@ BND_LineCurve* BND_Polyline::SegmentAt(int index) const
 
 }
 
-#if defined(ON_PYTHON_COMPILE)
-void BND_Point3dList::Append2 (pybind11::object points)
+#if defined(ON_WASM_COMPILE)
+void BND_Point3dList::Append3 (emscripten::val points)
 {
-  for (auto item : points)
+
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
   {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    m_polyline.Append(point);
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    Append2( array )
   }
+  else
+    Append1( points.as<const BND_Point3dList&>() ); 
+  
 }
-#else
-void BND_Point3dList::Append (const std::vector<ON_3dPoint>& points)
+#endif
+
+void BND_Point3dList::Append1 (const BND_Point3dList& points)
+{
+  m_polyline.Append(count, points->m_polyline);
+}
+
+void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 {
   int count = (int)points.size();
   const ON_3dPoint* pts = points.data();
-  m_polyline.Append(count, pts);
+  Append1(count, pts);
 }
-#endif
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -184,6 +195,7 @@ void initPolylineBindings(pybind11::module& m)
     .def("SetAllX", &BND_Point3dList::SetAllX, py::arg("x"))
     .def("SetAllY", &BND_Point3dList::SetAllY, py::arg("y"))
     .def("SetAllZ", &BND_Point3dList::SetAllZ, py::arg("z"))
+    .def("Append", &BND_Point3dList::Append1, py::arg("points"))
     .def("Append", &BND_Point3dList::Append2, py::arg("points"))
     ;
 
@@ -234,7 +246,7 @@ void initPolylineBindings(void*)
     .function("setAllX", &BND_Point3dList::SetAllX)
     .function("setAllY", &BND_Point3dList::SetAllY)
     .function("setAllZ", &BND_Point3dList::SetAllZ)
-    .function("append", &BND_Point3dList::Append)
+    .function("append", &BND_Point3dList::Append3)
     ;
 
   class_<BND_Polyline, base<BND_Point3dList>>("Polyline")

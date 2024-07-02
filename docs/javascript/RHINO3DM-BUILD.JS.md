@@ -109,7 +109,7 @@ macos setup
     `emsdk:3.1.30` is the version of emscripten we are using.
 
 6. In vs code, open Docker explorer
-7. You should see a container in the list. Right-click on it and select "Attach shell" which will open a new terminal from the container.
+7. You should see a container in the list. Right-click on it and select "Attach shell" which will open a new terminal from the container. Alternatively, you can run `docker exec -it <mycontainer> bash`, where `<mycontainer>` is the container id printed out after step 5.
 8. Make sure the terminal is in the rhino3dm directory. Run the following command to setup the rhino3dm.js build:
 
     `python3 script/setup.py --platform js`

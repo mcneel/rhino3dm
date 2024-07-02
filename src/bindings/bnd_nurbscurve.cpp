@@ -142,7 +142,7 @@ BND_NurbsCurve* BND_NurbsCurve::CreateFromEllipse(const class BND_Ellipse& ellip
   return new BND_NurbsCurve(nc, nullptr);
 }
 
-BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Point3dList& points)
+BND_NurbsCurve* BND_NurbsCurve::Create1(bool periodic, int degree, const BND_Point3dList& points)
 {
   if (degree < 1)
     return nullptr;
@@ -167,17 +167,29 @@ BND_NurbsCurve* BND_NurbsCurve::Create(bool periodic, int degree, const BND_Poin
   return new BND_NurbsCurve(nc, nullptr);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-BND_NurbsCurve* BND_NurbsCurve::Create2(bool periodic, int degree, pybind11::object points)
+BND_NurbsCurve* BND_NurbsCurve::Create2(bool periodic, int degree, const std::vector<ON_3dPoint>& points)
 {
   BND_Point3dList list;
-  for (auto item : points)
+  for (int i = 0; i < points.size(); i++)
   {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
+    list.Add(points[i].x, points[i].y, points[i].z);
   }
-  return Create(periodic, degree, list);
 
+  return Create1(periodic, degree, list);
+
+}
+
+#if defined(ON_WASM_COMPILE)
+BND_NurbsCurve* BND_NurbsCurve::Create3(bool periodic, int degree, emscripten::val points)
+{
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+     return Create2(periodic, degree, array);
+  }
+  else
+    return Create1( periodic, degree, points.as<const BND_Point3dList&>() ); 
 }
 #endif
 
@@ -268,6 +280,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def_static("CreateFromCircle", &BND_NurbsCurve::CreateFromCircle, py::arg("circle"))
     .def_static("CreateFromEllipse", &BND_NurbsCurve::CreateFromEllipse, py::arg("ellipse"))
     .def_static("Create", &BND_NurbsCurve::Create2, py::arg("periodic"), py::arg("degree"), py::arg("points"))
+    .def_static("Create", &BND_NurbsCurve::Create1, py::arg("periodic"), py::arg("degree"), py::arg("points"))
     .def(py::init<int, int>(), py::arg("degree"), py::arg("pointcount"))
     .def(py::init<int, bool, int, int>(), py::arg("dimension"), py::arg("rational"), py::arg("order"), py::arg("pointcount"))
     .def_property_readonly("Order", &BND_NurbsCurve::Order)
@@ -303,7 +316,6 @@ void initNurbsCurveBindings(void*)
     .property("isClampedEnd", &BND_NurbsCurveKnotList::IsClampedEnd)
     .function("superfluousKnot", &BND_NurbsCurveKnotList::SuperfluousKnot)
     ;
-  ;
 
   class_<BND_NurbsCurvePointList>("NurbsCurvePointList")
     .property("count", &BND_NurbsCurvePointList::Count)
@@ -315,13 +327,12 @@ void initNurbsCurveBindings(void*)
     .function("makeNonRational", &BND_NurbsCurvePointList::MakeNonRational)
     ;
 
-
   class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
     .class_function("createFromLine", &BND_NurbsCurve::CreateFromLine, allow_raw_pointers())
     .class_function("createFromArc", &BND_NurbsCurve::CreateFromArc, allow_raw_pointers())
     .class_function("createFromCircle", &BND_NurbsCurve::CreateFromCircle, allow_raw_pointers())
     .class_function("createFromEllipse", &BND_NurbsCurve::CreateFromEllipse, allow_raw_pointers())
-    .class_function("create", &BND_NurbsCurve::Create, allow_raw_pointers())
+    .class_function("create", &BND_NurbsCurve::Create3, allow_raw_pointers())
     .constructor<int, int>()
     .constructor<int, bool, int, int>()
     .property("order", &BND_NurbsCurve::Order)
