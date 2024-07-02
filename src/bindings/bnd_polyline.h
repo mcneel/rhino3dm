@@ -80,9 +80,10 @@ public:
   static BND_Polyline* CreateInscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateCircumscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateStarPolygon(class BND_Circle& circle, double radius, int cornerCount);
-  static BND_Polyline* CreateFromPoints(const std::vector<ON_3dPoint>& points); //for python
+  static BND_Polyline* CreateFromPoints1(const class BND_Point3dList& points);
+  static BND_Polyline* CreateFromPoints2(const std::vector<ON_3dPoint>& points);
 #if defined(ON_WASM_COMPILE)
-  static BND_Polyline* CreateFromPoints1(BND_TUPLE points); //for js
+  static BND_Polyline* CreateFromPoints3(emscripten::val points);
 #endif
 
   
