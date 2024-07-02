@@ -150,7 +150,7 @@ void BND_Point3dList::Append3 (emscripten::val points)
   if( isArray ) 
   {
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
-    Append2( array )
+    Append2( array );
   }
   else
     Append1( points.as<const BND_Point3dList&>() ); 
@@ -160,14 +160,17 @@ void BND_Point3dList::Append3 (emscripten::val points)
 
 void BND_Point3dList::Append1 (const BND_Point3dList& points)
 {
-  m_polyline.Append(count, points->m_polyline);
+  m_polyline.Append(points.GetCount(), points.m_polyline);
 }
 
 void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 {
-  int count = (int)points.size();
-  const ON_3dPoint* pts = points.data();
-  Append1(count, pts);
+  BND_Point3dList list;
+  for (int i = 0; i < points.size(); i++)
+  {
+    list.Add(points[i].x, points[i].y, points[i].z);
+  }
+  Append1( list );
 }
 
 
