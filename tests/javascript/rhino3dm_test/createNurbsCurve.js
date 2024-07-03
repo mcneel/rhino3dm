@@ -13,10 +13,10 @@ async function createNurbsCurve() {
     pointList.add(3, -1, 0)
     pointList.add(4, 0, 0)
 
-    const crvFromArray = rhino3dm.NurbsCurve.create(false, 3, pointArray)
-    const crvFromList = rhino3dm.NurbsCurve.create(false, 3, pointList)
-
-    return crvFromArray === crvFromList
+    const crvFromList = rhino.NurbsCurve.create(false, 3, pointList)
+    const crvFromArray = rhino.NurbsCurve.create(false, 3, pointArray)
+    
+    return crvFromArray.points().count === crvFromList.points().count
 
 }
 

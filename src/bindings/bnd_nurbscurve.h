@@ -73,7 +73,9 @@ public:
   static BND_NurbsCurve* Create1(bool periodic, int degree, const class BND_Point3dList& points);
   static BND_NurbsCurve* Create2(bool periodic, int degree, const std::vector<ON_3dPoint>& points);
 #if defined(ON_WASM_COMPILE)
+
   static BND_NurbsCurve* Create3(bool periodic, int degree, emscripten::val points);
+  
 #endif
   //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
   
