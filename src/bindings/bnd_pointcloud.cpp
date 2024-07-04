@@ -166,16 +166,18 @@ BND_PointCloud::BND_PointCloud(emscripten::val points)
   bool isArray = points.hasOwnProperty("length");
   if( isArray ) 
   {
-    count = (int)points.size();
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    count = (int)array.size();
     pc = new ON_PointCloud(count);
     const ON_3dPoint* pts = points.data();
     pc->m_P.Append(count, pts);
   }
   else
   {
-    count = points.GetCount();
+    BND_Point3dList list = points.as<const BND_Point3dList&>();
+    count = list.GetCount();
     pc = new ON_PointCloud(count);
-    pc->m_P.Append(count, points.m_polyline.Array());
+    pc->m_P.Append(count, list.m_polyline.Array());
   }
 
   SetTrackedPointer(pc, nullptr);
