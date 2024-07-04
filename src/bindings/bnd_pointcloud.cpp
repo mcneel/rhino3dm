@@ -169,7 +169,7 @@ BND_PointCloud::BND_PointCloud(emscripten::val points)
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
     count = (int)array.size();
     pc = new ON_PointCloud(count);
-    const ON_3dPoint* pts = points.data();
+    const ON_3dPoint* pts = array.data();
     pc->m_P.Append(count, pts);
   }
   else
