@@ -10,6 +10,37 @@ BND_PolylineCurve::BND_PolylineCurve(const BND_Point3dList& points)
   SetTrackedPointer(new ON_PolylineCurve(points.m_polyline), nullptr);
 }
 
+BND_PolylineCurve::BND_PolylineCurve(const std::vector<ON_3dPoint>& points)
+{
+  BND_Point3dList list;
+
+  for (int i = 0; i < points.size(); i++)
+  {
+    list.Add(points[i].x, points[i].y, points[i].z);
+  }
+  SetTrackedPointer(new ON_PolylineCurve(list.m_polyline), nullptr);
+}
+
+#if defined(ON_WASM_COMPILE)
+BND_PolylineCurve::BND_PolylineCurve(emscripten::val points)
+{
+  BND_Point3dList list;
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    for (int i = 0; i < array.size(); i++)
+    {
+      list.Add(array[i].x, array[i].y, array[i].z);
+    }
+  }
+  else
+    list = points.as<const BND_Point3dList&>()
+
+    SetTrackedPointer(new ON_PolylineCurve(list.m_polyline), nullptr);
+}
+#endif
+
 BND_PolylineCurve::BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(polylinecurve, compref);
@@ -37,6 +68,7 @@ void initPolylineCurveBindings(pybind11::module& m)
   py::class_<BND_PolylineCurve, BND_Curve>(m, "PolylineCurve")
     .def(py::init<>())
     .def(py::init<const BND_Point3dList&>(), py::arg("points"))
+    .def(py::init<const std::vector<ON_3dPoint>&>(), py::arg("points"))
     .def_property_readonly("PointCount", &BND_PolylineCurve::PointCount)
     .def("Point", &BND_PolylineCurve::Point, py::arg("index"))
     .def("SetPoint", &BND_PolylineCurve::SetPoint, py::arg("index"), py::arg("point"))
@@ -52,7 +84,7 @@ void initPolylineCurveBindings(void*)
 {
   class_<BND_PolylineCurve, base<BND_Curve>>("PolylineCurve")
     .constructor<>()
-    .constructor<const BND_Point3dList&>()
+    .constructor<emscripten::val>()
     .property("pointCount", &BND_PolylineCurve::PointCount)
     .function("point", &BND_PolylineCurve::Point)
     .function("setPoint", &BND_PolylineCurve::SetPoint)

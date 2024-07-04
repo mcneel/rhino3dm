@@ -14,6 +14,11 @@ public:
   BND_PolylineCurve();
   BND_PolylineCurve(ON_PolylineCurve* polylinecurve, const ON_ModelComponentReference* compref);
   BND_PolylineCurve(const class BND_Point3dList& points);
+  BND_PolylineCurve(const std::vector<ON_3dPoint>& points);
+
+#if defined(ON_WASM_COMPILE)
+  BND_PolylineCurve(emscripten::val points);
+#endif
   
   int PointCount() const { return m_polylinecurve->PointCount(); }
   ON_3dPoint Point(int index) const { return m_polylinecurve->m_pline[index]; }
