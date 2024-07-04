@@ -35,9 +35,9 @@ BND_PolylineCurve::BND_PolylineCurve(emscripten::val points)
     }
   }
   else
-    list = points.as<const BND_Point3dList&>()
+    list = points.as<const BND_Point3dList&>();
 
-    SetTrackedPointer(new ON_PolylineCurve(list.m_polyline), nullptr);
+  SetTrackedPointer(new ON_PolylineCurve(list.m_polyline), nullptr);
 }
 #endif
 
