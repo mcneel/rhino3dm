@@ -81,9 +81,10 @@ protected:
   void SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentReference* compref);
 
 public:
-  static class BND_Curve* CreateControlPointCurve(const class BND_Point3dList& points, int degree);
-#if defined(ON_PYTHON_COMPILE)
-  static class BND_Curve* CreateControlPointCurve2(pybind11::object points, int degree);
+  static class BND_Curve* CreateControlPointCurve1(const class BND_Point3dList& points, int degree);
+  static class BND_Curve* CreateControlPointCurve2(const std::vector<ON_3dPoint>& points, int degree);
+#if defined(ON_WASM_COMPILE)
+  static class BND_Curve* CreateControlPointCurve3(emscripten::val points, int degree);
 #endif
 public:
   BND_Curve(ON_Curve* curve, const ON_ModelComponentReference* compref);

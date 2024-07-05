@@ -250,8 +250,8 @@ jobs:
   build_dotnet:
     name: build dotnet
     runs-on: ubuntu-latest
-    container:
-      image: mcneel/rhino3dm-dev-amzn2
+    #container:
+      #image: mcneel/rhino3dm-dev-amzn2
     needs: [check_dotnet, check_workflow, check_build_scripts]
     if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
     steps:
@@ -338,7 +338,7 @@ jobs:
       shell: bash
       run: pip install --no-index tests/python/lib/*.whl --force-reinstall
     - name: test python bdist
-      run: python tests/python/rhino3dm_test/test.py
+      run: python -m unittest discover tests/python/
         
   test_javascript:
     name: test javascript
@@ -357,7 +357,7 @@ jobs:
       - name: test javascript
         run: |
           ls tests/javascript/lib
-          cd tests/javascript/rhino3dm_test
+          cd tests/javascript
           npm i
           npm test
       

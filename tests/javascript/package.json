@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/mcneel/rhino3dm#readme",
   "dependencies": {
-    "rhino3dm": "file:../lib"
+    "rhino3dm": "file:./lib"
   },
   "devDependencies": {
     "jest": "^29.7.0"

@@ -64,6 +64,11 @@ public:
   BND_PointCloud();
   BND_PointCloud(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref);
   BND_PointCloud(const std::vector<ON_3dPoint>& points);
+  BND_PointCloud(const class BND_Point3dList& points);
+
+#if defined(ON_WASM_COMPILE)
+  BND_PointCloud(emscripten::val points);
+#endif
 
   int Count() const { return m_pointcloud->PointCount(); }
   BND_PointCloudItem GetItem(int index);

@@ -33,11 +33,14 @@ public:
   void SetAllX(double xValue);
   void SetAllY(double yValue);
   void SetAllZ(double zValue);
+
+  void Append1(const BND_Point3dList& points);
+  void Append2(const std::vector<ON_3dPoint>& points);
   
-  #if defined(ON_PYTHON_COMPILE)
-  void Append2(pybind11::object points);
-  #else
-  void Append(const std::vector<ON_3dPoint>& points);
+#if defined(ON_WASM_COMPILE)
+  void Append3(emscripten::val points);
+#else
+  
   #endif
   //public static int ClosestIndexInList(IList<Point3d> list, Point3d testPoint)
   //public static Point3d ClosestPointInList(IList<Point3d> list, Point3d testPoint)
@@ -50,7 +53,6 @@ public:
   BND_Polyline() = default;
   BND_Polyline(int initialCapacity) : BND_Point3dList(initialCapacity) {};
   BND_Polyline(const std::vector<ON_3dPoint>& points) : BND_Point3dList(points) {};
-
 
   bool IsValid() const { return m_polyline.IsValid(); }
   int SegmentCount() const { return m_polyline.SegmentCount(); }
@@ -78,9 +80,10 @@ public:
   static BND_Polyline* CreateInscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateCircumscribedPolygon(class BND_Circle& circle, int sideCount);
   static BND_Polyline* CreateStarPolygon(class BND_Circle& circle, double radius, int cornerCount);
-  static BND_Polyline* CreateFromPoints(const std::vector<ON_3dPoint>& points); //for python
+  static BND_Polyline* CreateFromPoints1(const class BND_Point3dList& points);
+  static BND_Polyline* CreateFromPoints2(const std::vector<ON_3dPoint>& points);
 #if defined(ON_WASM_COMPILE)
-  static BND_Polyline* CreateFromPoints1(BND_TUPLE points); //for js
+  static BND_Polyline* CreateFromPoints3(emscripten::val points);
 #endif
 
   

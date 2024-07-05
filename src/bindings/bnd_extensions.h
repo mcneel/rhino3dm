@@ -51,9 +51,10 @@ public:
   //Guid AddLine2(Point3d from, Point3d to, DocObjects.ObjectAttributes attributes)
   //Guid AddLine3(Line line)
   //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
-  BND_UUID AddPolyline(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
-#if defined(ON_PYTHON_COMPILE)
-  BND_UUID AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes);
+  BND_UUID AddPolyline1(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
+  BND_UUID AddPolyline2(const std::vector<ON_3dPoint>& points, const class BND_3dmObjectAttributes* attributes);
+#if defined(ON_WASM_COMPILE)
+  BND_UUID AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes);
 #endif
   BND_UUID AddArc(const class BND_Arc& arc, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddCircle(const class BND_Circle& circle, const class BND_3dmObjectAttributes* attributes);

@@ -148,6 +148,43 @@ BND_PointCloud::BND_PointCloud(const std::vector<ON_3dPoint>& points)
   SetTrackedPointer(pc, nullptr);
 }
 
+BND_PointCloud::BND_PointCloud(const class BND_Point3dList& points)
+{
+  int count = points.GetCount();
+  ON_PointCloud* pc = new ON_PointCloud(count);
+  pc->m_P.Append(count, points.m_polyline.Array());
+  SetTrackedPointer(pc, nullptr);
+}
+
+#if defined(ON_WASM_COMPILE)
+BND_PointCloud::BND_PointCloud(emscripten::val points)
+{
+
+  ON_PointCloud* pc;
+  int count;
+
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    count = (int)array.size();
+    pc = new ON_PointCloud(count);
+    const ON_3dPoint* pts = array.data();
+    pc->m_P.Append(count, pts);
+  }
+  else
+  {
+    BND_Point3dList list = points.as<const BND_Point3dList&>();
+    count = list.GetCount();
+    pc = new ON_PointCloud(count);
+    pc->m_P.Append(count, list.m_polyline.Array());
+  }
+
+  SetTrackedPointer(pc, nullptr);
+
+}
+#endif
+
 void BND_PointCloud::SetTrackedPointer(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref)
 {
   m_pointcloud = pointcloud;
@@ -789,6 +826,7 @@ void initPointCloudBindings(pybind11::module& m)
   py::class_<BND_PointCloud, BND_GeometryBase>(m, "PointCloud")
     .def(py::init<>())
     .def(py::init<const std::vector<ON_3dPoint>&>())
+    .def(py::init<const class BND_Point3dList&>())
     .def_property_readonly("Count", &BND_PointCloud::Count)
     .def("__len__", &BND_PointCloud::Count)
     .def("__getitem__", &BND_PointCloud::GetItem)
@@ -852,7 +890,7 @@ void initPointCloudBindings(void*)
 
   class_<BND_PointCloud, base<BND_GeometryBase>>("PointCloud")
     .constructor<>()
-    .constructor<const std::vector<ON_3dPoint>&>()
+    .constructor<emscripten::val>()
     .property("count", &BND_PointCloud::Count)
     .property("hiddenPointCount", &BND_PointCloud::HiddenPointCount)
     .property("containsColors", &BND_PointCloud::ContainsColors)
