@@ -357,7 +357,7 @@ jobs:
       - name: test javascript
         run: |
           ls tests/javascript/lib
-          cd tests/javascript/rhino3dm_test
+          cd tests/javascript
           npm i
           npm test
       

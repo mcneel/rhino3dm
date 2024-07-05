@@ -30,10 +30,10 @@ BND_Polyline* BND_Polyline::CreateFromPoints3(emscripten::val points)
   if( isArray ) 
   {
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
-    return CreateFromPoints2( array ); 
+    return CreateFromPoints2( array );
   }
- // else
-   // return CreateFromPoints1( points.as<const BND_Point3dList&>() ); 
+  else
+    return CreateFromPoints1( points.as<const BND_Point3dList&>() ); 
 }
 #endif
 
