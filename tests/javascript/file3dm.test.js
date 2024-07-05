@@ -1,12 +1,15 @@
 const rhino3dm = require('rhino3dm')
 const fs = require('fs')
 
-async function writeFile() {
+let rhino
+beforeEach( async() => {
+    rhino = await rhino3dm()
+  })
 
-  const rhino = await rhino3dm()
+test('writeFile', async () => {
 
   const file3dm = new rhino.File3dm()
-  //const points = [ [ 0, 0, 0 ], [ 1, 1, 0 ], [ 2, 0, 0 ], [ 3, -1, 0 ], [ 4, 0, 0 ] ]
+  const points2 = [ [ 0, 0, 0 ], [ 1, 1, 0 ], [ 2, 0, 0 ], [ 3, -1, 0 ], [ 4, 0, 0 ] ]
 
   const points = new rhino.Point3dList(5)
   points.add(0, 0, 0)
@@ -20,10 +23,14 @@ async function writeFile() {
     file3dm.objects().addCurve( spline, null )
   }
 
+  const uuid1 = file3dm.objects().addPolyline(points, null)
+  const uuid2 = file3dm.objects().addPolyline(points2, null)
+
   const buffer = file3dm.toByteArray()
   fs.writeFileSync('spline.3dm', buffer)
-  return fs.existsSync('spline.3dm')
+  const result = fs.existsSync('spline.3dm')
 
-}
+  expect(result).toBe(true) 
+  expect(uuid1 === uuid2).toBe(false)
 
-module.exports = writeFile
+} )

@@ -1,8 +1,13 @@
 const rhino3dm = require('rhino3dm')
 
-async function createNurbsCurve() {
+let rhino
+beforeEach( async() => {
+    rhino = await rhino3dm()
+  })
 
-    const rhino = await rhino3dm()
+test('NurbsCurve_create', async () => {
+
+    //const rhino = await rhino3dm()
 
     const pointArray = [ [ 0, 0, 0 ], [ 1, 1, 0 ], [ 2, 0, 0 ], [ 3, -1, 0 ], [ 4, 0, 0 ] ]
 
@@ -16,8 +21,8 @@ async function createNurbsCurve() {
     const crvFromList = rhino.NurbsCurve.create(false, 3, pointList)
     const crvFromArray = rhino.NurbsCurve.create(false, 3, pointArray)
     
-    return crvFromArray.points().count === crvFromList.points().count
+    const result = crvFromArray.points().count === crvFromList.points().count
 
-}
+    expect(result).toBe(true)
 
-module.exports = createNurbsCurve
+})
