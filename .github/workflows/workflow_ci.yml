@@ -338,7 +338,7 @@ jobs:
       shell: bash
       run: pip install --no-index tests/python/lib/*.whl --force-reinstall
     - name: test python bdist
-      run: python tests/python/rhino3dm_test/test.py
+      run: python -m unittest discover tests/python/
         
   test_javascript:
     name: test javascript
