@@ -41,6 +41,9 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
+
+          cd ..
+          python -m unittest discover tests/python/
       - name: list files
         run: ls -R
       - name: artifact name
@@ -55,7 +58,7 @@ jobs:
           name: ${{ steps.artifactname.outputs.file }}
 
   build_py_manylinux:
-    name: build python ${{ matrix.python-version }} manylinux2014
+    name: build python ${{ matrix.python-version }} manylinux_2_28
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux_2_28_x86_64 #manylinux2014_x86_64
     strategy:
@@ -77,6 +80,12 @@ jobs:
       run: auditwheel repair dist/*.whl
     - name: list files
       run: ls -R
+    - name: test python bdist
+      shell: bash
+      run: |
+        find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
+        pip install --no-index tests/python/lib/*.whl --force-reinstall
+        python -m unittest discover tests/python/
     - name: artifact name
       id: artifactname
       run: |
