@@ -1691,11 +1691,11 @@ declare module 'rhino3dm' {
 		tangentAtEnd: number[];
 		/**
 		 * @description Constructs a curve from a set of control-point locations.
-		 * @param {number[][]} points Control points.
+		 * @param {number[][] | Point3dList} points Control points as an array of arrays containing three numbers or a Point3dList.
 		 * @param {number} degree Degree of curve. The number of control points must be at least degree+1.
 		 * @returns {Curve}
 		 */
-		static createControlPointCurve(points:number[][],degree:number): Curve;
+		static createControlPointCurve(points:number[][] | Point3dList, degree:number): Curve;
 		/**
 		 * @description Changes the dimension of a curve.
 		 * @param {number} desiredDimension The desired dimension.
@@ -3044,10 +3044,10 @@ declare module 'rhino3dm' {
 		addLine(from:number[],to:number[]): string;
 		/**
 		 * @description Adds a polyline object to Rhino.
-		 * @param {number[][]} points An array of points in [x, y, z] format.
+		 * @param {number[][] | Point3dList} points An array of points in [x, y, z] format or Point3dList. 
 		 * @returns {string} A unique identifier for the object.
 		 */
-		addPolyline(points:number[][]): string;
+		addPolyline(points:number[][] | Point3dList): string;
 		/**
 		 * @description Adds a curve object to the document representing an arc.
 		 * @param {Arc} arc An arc.
@@ -4878,11 +4878,11 @@ declare module 'rhino3dm' {
 		 * @description Constructs a 3D NURBS curve from a list of control points.
 		 * @param {boolean} periodic If true, create a periodic uniform curve. If false, create a clamped uniform curve.
 		 * @param {number} degree (>=1) degree=order-1.
-		 * @param {Point3dList} points control vertex locations.
+		 * @param {number[][] | Point3dList} points control vertex locations as an array of points or a Point3dList.
 		 * @returns {NurbsCurve} new NURBS curve on success
 		null on error.
 		 */
-		static create(periodic:boolean,degree:number,points:Point3dList): NurbsCurve;
+		static create(periodic:boolean,degree:number,points: number[][] | Point3dList): NurbsCurve;
 		/**
 		 * @description Increase the degree of this curve.
 		 * @param {number} desiredDegree The desired degree.
@@ -5525,8 +5525,11 @@ declare module 'rhino3dm' {
 		 * @returns {void}
 		 */
 		setAllZ(): void;
-		/** ... */
-		append(): void;
+		/**
+		 * @description Add a range of points to the list.
+		 * @param {number[][]} points Points to add.
+		*/
+		append(points: number[][]): void;
 	}
 
 	class PointCloud extends GeometryBase {
@@ -5906,13 +5909,19 @@ declare module 'rhino3dm' {
 		static createStarPolygon(circle:Circle,radius:number,cornerCount:number): Polyline;
 		/**
 		 * @description Creates a polyline of points to this point cloud.
-		 * @param {number[][]} points Points to use for polyline creation.
+		 * @param {number[][] | Point3dList} points Points to use for polyline creation as an array of points [x, y, z] or Point3dList.
 		 * @returns {Polyline}
 		 */
-		static createFromPoints(points:number[][]): Polyline;
+		static createFromPoints(points:number[][] | Point3dList): Polyline;
 	}
 
 	class PolylineCurve extends Curve {
+
+		/**
+		 * @description Constructs a new polyline curve from a list of points.
+		 * @param {number[][] | Point3dList} points Points to use for PolylineCurve creation as an array of points [x, y, z] or Point3dList.
+		 */
+		constructor(points: number[][] | Point3dList);
 		/**
 		 * Gets the number of points in this polyline.
 		 */
