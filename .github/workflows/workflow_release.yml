@@ -80,11 +80,11 @@ jobs:
       run: auditwheel repair dist/*.whl
     - name: list files
       run: ls -R
-    - name: test python bdist
+    - name: test python
       shell: bash
       run: |
         find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
-        pip install --no-index tests/python/lib/*.whl --force-reinstall
+        python -m pip install --no-index tests/python/lib/*.whl --force-reinstall
         python -m unittest discover tests/python/
     - name: artifact name
       id: artifactname
