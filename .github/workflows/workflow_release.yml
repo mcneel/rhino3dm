@@ -140,7 +140,7 @@ jobs:
       - name: test python bdist
         shell: bash
         run: |
-          cp dist/*.whl /tests/python/lib
+          find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib
           pip install --no-index tests/python/lib/*.whl --force-reinstall
           python -m unittest discover tests/python/
       - name: artifact name
