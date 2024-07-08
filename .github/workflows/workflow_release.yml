@@ -105,7 +105,6 @@ jobs:
         exclude:
           - os: macos-14
             python-version: 3.7
-            
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
@@ -138,6 +137,12 @@ jobs:
         shell: bash
       - name: list files
         run: ls -R
+      - name: test python bdist
+        shell: bash
+        run: |
+          cp dist/*.whl /tests/python/lib
+          pip install --no-index tests/python/lib/*.whl --force-reinstall
+          python -m unittest discover tests/python/
       - name: artifact name
         id: artifactname
         shell: bash
@@ -343,12 +348,45 @@ jobs:
         run: "ls -R src/build/"
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
+      - name: test dotnet
+        run: |
+          dotnet nuget add source src/dotnet/bin/Release/
+          cd tests/dotnet/rhino3dm_test
+          dotnet remove package Rhino3dm
+          dotnet nuget locals all --clear
+          dotnet add package Rhino3dm
+          dotnet build
+          dotnet test
       - name: artifacts nupkg
         uses: actions/upload-artifact@v4.3.1
         with:
           path: src/dotnet/bin/Release/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
 
+
+# TESTS
+
+  test_javascript:
+    name: test javascript
+    runs-on: ubuntu-latest
+    needs: [build_js]
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && node --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js
+          path: tests/javascript/lib
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript
+          npm i
+          npm test
+    
   # pack_py:
   #   name: pack python
   #   needs: [build_py_manylinux2014, build_py_sdist, build_py_all_bdist]
