@@ -66,7 +66,7 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
+      uses: taiki-e/checkout-action@v1 #actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
