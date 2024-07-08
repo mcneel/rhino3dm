@@ -12,20 +12,25 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0-beta
  - (py, js) CachedTextureCoordinates class
  - (py, js) Mesh.SetCachedTextureCoordinates and Mesh.GetCachedTextureCoordinates
  - (py, js) TextureMapping.HasId and TextureMapping.Id
- - (py, js) Added many Annotation classes [#627](https://github.com/mcneel/rhino3dm/pull/627) @jesterKing
+ - (py, js) Added many Annotation classes and enums [#627](https://github.com/mcneel/rhino3dm/pull/627) @jesterKing
+ - (all) A series of automated tests have been added and are run on all ci builds
 
  ### Changed
 
  - Updated OpenNURBS to v8.9 diff: https://github.com/mcneel/opennurbs/compare/v8.6.24101.05001...update-1718616159-8.9
+ - (py, js) Several methods that take in arrays/lists of points have been updated to either be overloaded and take `Point3dList` and `std::vector<T>` (for py) or `emscripten::val` and the type is checked in cpp (for js). This means the SDK is not broken and users can pass in language specific lists / arrays of points. [#620](https://github.com/mcneel/rhino3dm/issues/620), [#616](https://github.com/mcneel/rhino3dm/issues/616)
+
 
  ### Fixed
 
  - (py, js) Polyline.CreateFromPoints now works [#616](https://github.com/mcneel/rhino3dm/issues/616)
  - (js) None of the PointCloud.AddRange* methods were working in js. This is fixed. [#620](https://github.com/mcneel/rhino3dm/issues/620)
  - (py, js) Polyline.GetSegments() always returned an extra NULL at the end of the segment array. [#623](https://github.com/mcneel/rhino3dm/issues/623)
+ - (py) Universal builds for native library on macos. (#617)[https://github.com/mcneel/rhino3dm/pull/617] @jesterKing
 
  ### Removed
  - (py, dotnet) GitHub has deprecated building on macos-11 so from this point forward we will not build python wheels for macos-11. macos-14 will be used to build the dotnet library for macos.
+ - (dotnet) GitHub deprecated actions that run on node.js < 20 which means that we cannot build on Amazon Linux 2 in with ci workflow. For now the ci linux build uses ubuntu-latest.
 
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1

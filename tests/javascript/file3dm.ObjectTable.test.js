@@ -21,20 +21,15 @@ test('AddPolyline', async () => {
   const id1 = file3dm.objects().addPolyline(pointArray, null)
   const id2 =file3dm.objects().addPolyline(pointList, null)
 
-  console.log(id1)
-  console.log(id2)
-
   const objqty = file3dm.objects().count
   const o1 = file3dm.objects().get(0)
   const o2 = file3dm.objects().get(1)
 
-  //console.log(file3dm.objects().get(0).geometry.objectType)
-  //const isCurve1 = file3dm.objects().get(0).geometry.objectType == rhino.ObjectType.PolylineCurve
-  //const isCurve2 = file3dm.objects().get(1).geometry.objectType == rhino.ObjectType.PolylineCurve
+  const isCurve1 = o1.geometry.objectType == rhino.ObjectType.PolylineCurve
+  const isCurve2 = o2.geometry.objectType == rhino.ObjectType.PolylineCurve
   //const len1 = file3dm.objects().get(0).geometry.pointCount
   //const len2 = file3dm.objects().get(1).geometry.pointCount
 
-
-  expect((objqty === 2)).toBe(true)
+  expect((objqty === 2) && isCurve1 && isCurve2 && (id1 !== id2) ).toBe(true)
 
 } )
