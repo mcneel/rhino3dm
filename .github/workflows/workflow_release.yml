@@ -303,7 +303,7 @@ jobs:
             python3 script/build.py -p linux -v -l
             ldd src/build/linux/librhino3dm_native.so
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: |
             src/build/linux/librhino3dm_native.so
