@@ -84,8 +84,8 @@ jobs:
       shell: bash
       run: |
         find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
-        python -m pip install --no-index tests/python/lib/*.whl --force-reinstall
-        python -m unittest discover tests/python/
+        /opt/python/${{ matrix.python-version }}/bin/python -m pip install --no-index tests/python/lib/*.whl --force-reinstall
+        /opt/python/${{ matrix.python-version }}/bin/python -m unittest discover tests/python/
     - name: artifact name
       id: artifactname
       run: |
