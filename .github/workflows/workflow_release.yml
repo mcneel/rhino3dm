@@ -20,7 +20,7 @@ jobs:
       - name: update submodules
         run: git submodule update --init
       - name: build python sdist
-        run: python setup.py sdist
+        run: python setup.py sdist build --debug
       - name: check sdist
         run: |
           # installs rhino3dm from the source distribution
@@ -75,7 +75,7 @@ jobs:
     - name: update submodules
       run: git submodule update --init
     - name: build python manylinux
-      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
+      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
     - name: list files
