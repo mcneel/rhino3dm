@@ -234,43 +234,6 @@ jobs:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
 
-  build_js:
-    name: build rhino3dm.js
-    runs-on: ubuntu-latest
-    container:
-      image: emscripten/emsdk:3.1.30
-    steps:
-      - name: info
-        run: python3 --version && emcc --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v4.1.1
-      - name: safe dir
-        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
-      - name: update submodules
-        run: git submodule update --init
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p js
-      - name: setup
-        run: python3 script/setup.py -p js -o -v
-      - name: build js
-        run: python3 script/build.py -p js -o -v
-      - name: copy files
-        shell: bash
-        run: |
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/rhino3dm.release.js src/build/javascript/artifacts_js/rhino3dm.js
-          cp src/js/rhino3dm.release.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          cp src/js/rhino3dm.release.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp src/js/rhino3dm.release.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
-      - name: artifacts
-        uses: actions/upload-artifact@v4.3.1
-        with:
-          path: src/build/javascript/artifacts_js
-          name: rhino3dm.js
-          retention-days: ${{ env.RETENTION_DAYS }}
-
   build_dotnet_arm64:
     name: build dotnet arm 64
     runs-on: ubuntu-latest
@@ -363,6 +326,42 @@ jobs:
           path: src/dotnet/bin/Release/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
 
+  build_js:
+    name: build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:3.1.30
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup
+        run: python3 script/setup.py -p js -o -v
+      - name: build js
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          cp package.json src/build/javascript/artifacts_js
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
+          cp src/js/rhino3dm.release.js src/build/javascript/artifacts_js/rhino3dm.js
+          cp src/js/rhino3dm.release.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
+          cp src/js/rhino3dm.release.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
+          cp src/js/rhino3dm.release.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
+      - name: artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: src/build/javascript/artifacts_js
+          name: rhino3dm.js
+          retention-days: ${{ env.RETENTION_DAYS }}
 
 # TESTS
 
@@ -388,27 +387,28 @@ jobs:
           npm test
     
   test_dotnet:
-    name: test dotnet
-    runs-on: ubuntu-latest
-    needs: [pack_dotnet]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4.1.1
-      - name: download rhino3dm.net nuget
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: rhino3dm.net nupkg
-          path: tests/dotnet/lib
-      - name: test dotnet
-        run: |
-          dotnet nuget add source $(pwd)/tests/dotnet/lib
-          cd tests/dotnet/rhino3dm_test
-          dotnet nuget locals all --clear
-          dotnet add package Rhino3dm -v 8.9.0
-          dotnet build
-          dotnet test
-
-
+      name: test dotnet
+      runs-on: ubuntu-latest
+      needs: [pack_dotnet]
+      steps:
+        - name: checkout
+          uses: actions/checkout@v4.1.1
+        - name: download rhino3dm.net nuget
+          uses: actions/download-artifact@v4.1.7
+          with:
+            name: rhino3dm.net nupkg
+            path: tests/dotnet/lib
+        - name: test dotnet
+          run: |
+            NUGET_FILE="$(find tests/dotnet/lib -type f -name "*.nupkg")"
+            FILENAME=$(basename ${NUGET_FILE})
+            NAME=${FILENAME%.*}
+            VERSION=${NAME:9}
+            dotnet nuget add source $(pwd)/tests/dotnet/lib
+            cd tests/dotnet/rhino3dm_test
+            dotnet add package Rhino3dm -v ${VERSION}
+            dotnet build
+            dotnet test
 
   # pack_py:
   #   name: pack python
