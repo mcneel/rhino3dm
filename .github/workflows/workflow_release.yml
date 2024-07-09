@@ -313,7 +313,7 @@ jobs:
   pack_dotnet:
     name: pack dotnet
     needs: [build_dotnet_os, build_dotnet_arm64]
-    runs-on: ubuntu-latest
+    runs-on: windows-2022
     steps:
       - name: set up python
         uses: actions/setup-python@v5.0.0
@@ -357,15 +357,6 @@ jobs:
         run: "ls -R src/build/"
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
-      - name: test dotnet
-        run: |
-          dotnet nuget add source $(pwd)/src/dotnet/bin/Release/
-          cd tests/dotnet/rhino3dm_test
-          dotnet remove package Rhino3dm
-          dotnet nuget locals all --clear
-          dotnet add package Rhino3dm
-          dotnet build
-          dotnet test
       - name: artifacts nupkg
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -396,6 +387,30 @@ jobs:
           npm i
           npm test
     
+  test_dotnet:
+    name: test javascript
+    runs-on: ubuntu-latest
+    needs: [pack_dotnet]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download rhino3dm.net nuget
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net nupkg
+          path: tests/dotnet/lib
+      - name: test dotnet
+        run: |
+          dotnet nuget add source $(pwd)/tests/dotnet/lib
+          cd tests/dotnet/rhino3dm_test
+          dotnet remove package Rhino3dm
+          dotnet nuget locals all --clear
+          dotnet add package Rhino3dm
+          dotnet build
+          dotnet test
+
+
+
   # pack_py:
   #   name: pack python
   #   needs: [build_py_manylinux2014, build_py_sdist, build_py_all_bdist]
