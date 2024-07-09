@@ -388,7 +388,7 @@ jobs:
           npm test
     
   test_dotnet:
-    name: test javascript
+    name: test dotnet
     runs-on: ubuntu-latest
     needs: [pack_dotnet]
     steps:
@@ -403,7 +403,6 @@ jobs:
         run: |
           dotnet nuget add source $(pwd)/tests/dotnet/lib
           cd tests/dotnet/rhino3dm_test
-          dotnet remove package Rhino3dm
           dotnet nuget locals all --clear
           dotnet add package Rhino3dm
           dotnet build
