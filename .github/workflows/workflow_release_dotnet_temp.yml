@@ -1,0 +1,149 @@
+name: workflow release
+on: [workflow_dispatch]
+jobs:
+
+  build_dotnet_os:
+    name: build dotnet ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    #container:
+      #image: ${{ matrix.image }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-2022]
+        include:
+          - os: ubuntu-latest
+            target: linux
+            #image: mcneel/rhino3dm-dev-amzn2
+            artifact-path: src/build/linux/librhino3dm_native.so
+          - os: windows-2022
+            target: windows
+            #image: ""
+            artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
+          - os: macos-14
+            target: macos
+            #image: ""
+            artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+      fail-fast: false
+    steps:
+      #- name: setup dotnet
+      #  if: ${{ matrix.target == 'macos'}}
+      #  uses: actions/setup-dotnet@v4.0.0
+      #  with:
+      #    dotnet-version: '7.0.x'
+      - name: setup cmake
+        if: ${{ matrix.target != 'linux' }}
+        uses: jwlawson/actions-setup-cmake@v2.0.0
+        with:
+          cmake-version: '3.25.0'
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe directory
+        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap dotnet ${{ matrix.target }}
+        run: python3 script/bootstrap.py -p ${{ matrix.target }}
+      - name: setup dotnet ${{ matrix.target }}
+        run: python3 script/setup.py -p ${{ matrix.target }} -v -l
+      - name: build dotnet ${{ matrix.target }}
+        run: python3 script/build.py -p ${{ matrix.target }} -v -l
+      - name: list
+        run: "ls -R src/build/${{ matrix.target }}"
+      - name: code-sign native libraries
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
+        shell: bash
+        run: ./script/codesign-native.sh src/build/macos/Release
+      - name: notarize native library
+        if: ${{ matrix.target == 'macos' }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACDEV_PW: ${{ secrets.MACDEV_PW }}
+        shell: bash
+        run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
+      - name: artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: ${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.target }}
+
+  pack_dotnet:
+    name: pack dotnet
+    needs: [build_dotnet_os]
+    runs-on: windows-2022
+    steps:
+      - name: set up python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: 3.7.x
+      - name: setup cmake
+        uses: jwlawson/actions-setup-cmake@v2.0.0
+        with:
+          cmake-version: '3.21.1'
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: update submodules
+        run: ls && git submodule update --init
+      - name: bootstrap dotnet
+        run: python script/bootstrap.py -p windows
+      - name: setup dotnet
+        run: python script/setup.py -p windows -v
+      - name: build dotnet
+        run: dotnet build src/dotnet/Rhino3dm.csproj
+      - name: download rhino3dm.net linux
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net linux
+          path: src/build/linux/Release/
+      - name: download rhino3dm.net linux arm64
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net linux arm64
+          path: src/build/linux/arm64/Release/
+      - name: download rhino3dm.net macos
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net macos
+          path: src/build/macos/Release/
+      - name: download rhino3dm.net windows
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net windows
+          path: src/build/windows/
+      - name: list
+        run: "ls -R src/build/"
+      - name: pack dotnet
+        run: dotnet pack src/dotnet/Rhino3dm.csproj
+      - name: artifacts nupkg
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: src/dotnet/bin/Release/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
+          name: rhino3dm.net nupkg
+
+
+# TESTS
+
+  test_dotnet:
+    name: test dotnet
+    runs-on: ubuntu-latest
+    needs: [pack_dotnet]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download rhino3dm.net nuget
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net nupkg
+          path: tests/dotnet/lib
+      - name: test dotnet
+        run: |
+          dotnet nuget add source $(pwd)/tests/dotnet/lib -n local_rhino3dm
+          cd tests/dotnet/rhino3dm_test
+          dotnet add package Rhino3dm -v 8.9.0-beta
+          dotnet build
+          dotnet test

@@ -404,7 +404,7 @@ jobs:
           dotnet nuget add source $(pwd)/tests/dotnet/lib
           cd tests/dotnet/rhino3dm_test
           dotnet nuget locals all --clear
-          dotnet add package Rhino3dm
+          dotnet add package Rhino3dm -v 8.9.0
           dotnet build
           dotnet test
 
