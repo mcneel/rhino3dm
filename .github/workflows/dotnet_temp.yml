@@ -100,11 +100,6 @@ jobs:
         with:
           name: rhino3dm.net linux
           path: src/build/linux/Release/
-      - name: download rhino3dm.net linux arm64
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: rhino3dm.net linux arm64
-          path: src/build/linux/arm64/Release/
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v4.1.7
         with:
