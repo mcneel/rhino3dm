@@ -359,7 +359,7 @@ jobs:
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: test dotnet
         run: |
-          dotnet nuget add source src/dotnet/bin/Release/
+          dotnet nuget add source $(pwd)/src/dotnet/bin/Release/
           cd tests/dotnet/rhino3dm_test
           dotnet remove package Rhino3dm
           dotnet nuget locals all --clear
