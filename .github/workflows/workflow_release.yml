@@ -358,6 +358,7 @@ jobs:
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: test dotnet
+        shell: bash
         run: |
           dotnet nuget add source $(pwd)/src/dotnet/bin/Release/
           cd tests/dotnet/rhino3dm_test
