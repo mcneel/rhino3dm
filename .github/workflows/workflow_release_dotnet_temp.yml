@@ -1,4 +1,4 @@
-name: workflow release
+name: workflow release dotnet temp
 on: [workflow_dispatch]
 jobs:
 
