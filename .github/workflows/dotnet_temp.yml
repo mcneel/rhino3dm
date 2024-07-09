@@ -137,8 +137,12 @@ jobs:
           path: tests/dotnet/lib
       - name: test dotnet
         run: |
-          dotnet nuget add source $(pwd)/tests/dotnet/lib -n local_rhino3dm
+          NUGET_FILE="$(find tests/dotnet/lib -type f -name "*.nupkg")"
+          FILENAME=$(basename ${NUGET_FILE})
+          NAME=${FILENAME%.*}
+          VERSION=${NAME:9}
+          dotnet nuget add source $(pwd)/tests/dotnet/lib
           cd tests/dotnet/rhino3dm_test
-          dotnet add package Rhino3dm -v 8.9.0-beta
+          dotnet add package Rhino3dm -v ${VERSION}
           dotnet build
           dotnet test
