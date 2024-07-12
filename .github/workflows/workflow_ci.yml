@@ -271,7 +271,7 @@ jobs:
       - name: build dotnet
         run: python3 script/build.py -p linux -v
       - name: pack dotnet
-        run: dotnet pack src/dotnet/Rhino3dm.csproj
+        run: dotnet pack src/dotnet/Rhino3dm.csproj -c Debug
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
