@@ -405,7 +405,7 @@ jobs:
             NAME=${FILENAME%.*}
             VERSION=${NAME:9}
             dotnet nuget add source $(pwd)/tests/dotnet/lib
-            cd tests/dotnet/rhino3dm_test
+            cd tests/dotnet
             dotnet add package Rhino3dm -v ${VERSION}
             dotnet build
             dotnet test

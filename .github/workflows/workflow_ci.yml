@@ -298,7 +298,7 @@ jobs:
       - name: test dotnet
         run: |
           cp tests/dotnet/lib/dotnet/Rhino3dm.dll tests/dotnet/lib/Rhino3dm.dll
-          cd tests/dotnet/rhino3dm_test
+          cd tests/dotnet
           dotnet build
           cp ../lib/librhino3dm_native.so bin/Debug/net7.0/librhino3dm_native.so
           dotnet test
