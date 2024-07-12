@@ -186,7 +186,7 @@ jobs:
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
-        run: python setup.py bdist_wheel
+        run: python setup.py bdist_wheel build --debug
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -300,10 +300,15 @@ jobs:
           path: tests/dotnet/lib
       - name: test dotnet
         run: |
-          cp tests/dotnet/lib/dotnet/Rhino3dm.dll tests/dotnet/lib/Rhino3dm.dll
+          ls -R tests/dotnet/lib
+          NUGET_FILE="$(find tests/dotnet/lib/dotnet/bin/Debug -type f -name "*.nupkg")"
+          FILENAME=$(basename ${NUGET_FILE})
+          NAME=${FILENAME%.*}
+          VERSION=${NAME:9}
+          dotnet nuget add source $(pwd)/tests/dotnet/lib/dotnet/bin/Debug
           cd tests/dotnet
+          dotnet add package Rhino3dm -v ${VERSION}
           dotnet build
-          cp ../lib/librhino3dm_native.so bin/Debug/net7.0/librhino3dm_native.so
           dotnet test
 
   test_python_bdist:
