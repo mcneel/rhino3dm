@@ -270,12 +270,15 @@ jobs:
         run: python3 script/setup.py -p linux -v
       - name: build dotnet
         run: python3 script/build.py -p linux -v
+      - name: pack dotnet
+        run: dotnet pack src/dotnet/Rhino3dm.csproj
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
           path: |
             src/build/linux/dotnet/Rhino3dm.dll
             src/build/linux/librhino3dm_native.so
+            src/dotnet/bin/Debug/*.nupkg
           name: rhino3dm.net
           retention-days: ${{ env.RETENTION_DAYS }}
 
