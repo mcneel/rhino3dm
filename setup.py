@@ -131,6 +131,11 @@ class CMakeBuild(build_ext):
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
             shutil.copy(file, self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/*.so"):
+            if platform.system() == "Linux" and self.debug:
+                print("debug linux")
+                system(["stat", file])
+                system(["strip", "--strip-unneeded", file])
+                system(["stat", file])
             shutil.copy(file, self.build_lib + "/rhino3dm")
         print()  # Add an empty line for cleaner output
 
