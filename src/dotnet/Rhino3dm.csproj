@@ -63,6 +63,14 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup Condition="exists('..\build\linux\librhino3dm_native.so')">
+    <None Include="..\build\linux\librhino3dm_native.so">
+      <PackagePath>runtimes\linux-x64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
   <ItemGroup Condition="exists('..\build\linux\arm64\Release\librhino3dm_native.so')">
     <None Include="..\build\linux\arm64\Release\librhino3dm_native.so">
       <PackagePath>runtimes\linux-arm64\native</PackagePath>
