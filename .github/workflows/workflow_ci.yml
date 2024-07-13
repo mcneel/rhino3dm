@@ -300,8 +300,6 @@ jobs:
           path: tests/dotnet/lib
       - name: test dotnet
         run: |
-          ls -R tests/dotnet/lib
-          #cp tests/dotnet/lib/dotnet/Rhino3dm.dll tests/dotnet/lib/Rhino3dm.dll
           NUGET_FILE="$(find tests/dotnet/lib/dotnet/bin/Debug -type f -name "*.nupkg")"
           FILENAME=$(basename ${NUGET_FILE})
           NAME=${FILENAME%.*}
