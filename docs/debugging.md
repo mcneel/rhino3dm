@@ -16,7 +16,7 @@ updated 2023.07.25
   - Select _Experiments_ and ensure that _WebAssembly Debugging: Enable DWARF support_ is checked.
 
 ### Debugging
-- Once the setup is in place, you should have somer code you'd like to debug. This is typically an html with a js script that calls rhino3dm.js.
+- Once the setup is in place, you should have some code you'd like to debug. This is typically an html with a js script that calls rhino3dm.js.
 - The debug wasm build is a much bigger binary that what we use for release and when we compile it, it includes hardcoded paths to the root. Since we might build this debug build on a number of machines or containers, we need to pay special attention to map the source hardcoded in the wasm binary to where the source is on our local machine.
   - navigate in Chrome to `chrome://extensions`
   - here you should see the _C/C++ DevTools Support (DWARF)_ extension. Click on the _Details_ button.
