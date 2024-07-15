@@ -164,12 +164,9 @@ BND_CommonObject* BND_CommonObject::CreateWrapper(ON_Object* obj, const ON_Model
     ON_Annotation* annotation = ON_Annotation::Cast(obj);
     if (annotation)
     {
-      /*
       ON_Text* text = ON_Text::Cast(obj);
       if (text)
         return new BND_Text(text, compref);
-
-        */
 
       ON_Leader* leader = ON_Leader::Cast(obj);
       if(leader)

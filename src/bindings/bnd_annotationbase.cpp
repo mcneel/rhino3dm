@@ -129,7 +129,7 @@ void BND_TextDot::SetTrackedPointer(ON_TextDot* dot, const ON_ModelComponentRefe
 }
 
 /*********/
-/*
+
 BND_Text::BND_Text(ON_Text* text, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(text, compref);
@@ -141,7 +141,7 @@ void BND_Text::SetTrackedPointer(ON_Text* text, const ON_ModelComponentReference
   m_text = text;
   BND_AnnotationBase::SetTrackedPointer(text, compref);
 }
-*/
+
 /*********/
 
 BND_Leader::BND_Leader(ON_Leader* leader, const ON_ModelComponentReference* compref)
@@ -636,10 +636,10 @@ void initAnnotationBaseBindings(pybind11::module& m)
     .def_property("TextIsWrapped", &BND_AnnotationBase::TextIsWrapped, &BND_AnnotationBase::SetTextIsWrapped)
     .def_property_readonly("Plane", &BND_AnnotationBase::Plane)
     ;
-/*
+
   py::class_<BND_Text, BND_AnnotationBase>(m, "Text")
     ;
-*/
+
   py::class_<BND_Leader, BND_AnnotationBase>(m, "Leader")
     .def_property_readonly("Points", &BND_Leader::GetPoints)
     .def("GetTextPoint2d", &BND_Leader::GetTextPoint2d, py::arg("dimstyle"), py::arg("leaderscale"))
@@ -708,6 +708,9 @@ void initAnnotationBaseBindings(void*)
   class_<BND_Leader, base<BND_AnnotationBase>>("Leader")
     .property("points", &BND_Leader::GetPoints)
     .function("getTextPoint2d", &BND_Leader::GetTextPoint2d, allow_raw_pointers())
+    ;
+
+  class_<BND_Text, base<BND_AnnotationBase>>("Text")
     ;
 
   class_<BND_Dimension, base<BND_AnnotationBase>>("Dimension")

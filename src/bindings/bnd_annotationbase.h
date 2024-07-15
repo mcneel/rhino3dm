@@ -101,7 +101,6 @@ public:
   void SetFontFace(const std::wstring& face) { m_dot->SetFontFace(face.c_str()); }
 };
 
-/*
 class BND_Text : public BND_AnnotationBase
 {
   ON_Text* m_text = nullptr;
@@ -110,8 +109,6 @@ protected:
 public:
   BND_Text(ON_Text* text, const ON_ModelComponentReference* compref);
 };
-
-*/
 
 class BND_Leader : public BND_AnnotationBase
 {
