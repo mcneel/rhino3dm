@@ -146,6 +146,7 @@ jobs:
           #cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
           #cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
           cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
+          ls src/build/javascript/artifacts_js
       - name: setup js
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
@@ -154,6 +155,7 @@ jobs:
         shell: bash
         run: |
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js
+          ls src/build/javascript/artifacts_js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
