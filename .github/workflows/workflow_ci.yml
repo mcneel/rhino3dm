@@ -138,15 +138,16 @@ jobs:
       - name: copy files
         shell: bash
         run: |
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
+          mkdir src/build/javascript/artifacts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
+          cp package.json src/build/javascript/artifacts
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
           #cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
           #cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
           #cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
           #cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
-          ls src/build/javascript/artifacts_js
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
+          ls src/build/javascript/artifacts
       - name: setup js
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
@@ -154,12 +155,13 @@ jobs:
       - name: copy files
         shell: bash
         run: |
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
           ls src/build/javascript/artifacts_js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
-          path: src/build/javascript/artifacts_js
+          path: src/build/javascript/artifacts
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 
