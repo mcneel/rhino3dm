@@ -157,7 +157,7 @@ jobs:
         run: |
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
           mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
-          ls src/build/javascript/artifacts_js
+          ls src/build/javascript/artifacts
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
