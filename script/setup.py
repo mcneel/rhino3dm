@@ -521,6 +521,8 @@ def setup_js():
     if module:
         print("ES6 module build")
         cmakecommand = cmakecommand + "-D MODULE=TRUE "
+    else:
+        cmakecommand = cmakecommand + "-D MODULE=FALSE "
 
     if node:
         print("generating node build")
@@ -641,6 +643,7 @@ def main():
 
     global module
     module = args.module
+    print(args.module)
 
     global node
     node = False
