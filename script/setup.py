@@ -518,6 +518,10 @@ def setup_js():
     os.chdir(target_path)
     cmakecommand = "emcmake cmake "
 
+    if module:
+        print("ES6 module build")
+        cmakecommand = cmakecommand + "-D MODULE=TRUE "
+
     if node:
         print("generating node build")
         cmakecommand = cmakecommand + "-D NODE=TRUE "
@@ -605,6 +609,8 @@ def main():
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
     parser.add_argument('--debug', '-d', action='store_true',
                         help="generate a debug build (wasm only)")
+    parser.add_argument('--module', '-m', action='store_true',
+                        help="generate a ES6 module build (wasm only)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     
@@ -632,6 +638,9 @@ def main():
 
     global debug
     debug = args.debug
+
+    global module
+    module = args.module
 
     global node
     node = False

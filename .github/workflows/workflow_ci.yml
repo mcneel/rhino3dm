@@ -131,21 +131,29 @@ jobs:
         run: git submodule update --init
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
-      - name: setup
+      - name: setup js module
+        run: python3 script/setup.py -p js -o -v -d -m
+      - name: build js module
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js/rhino3dm.module.js
+          cp package.json src/build/javascript/artifacts_js
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
+          #cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
+          #cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
+          #cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
+          #cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
+      - name: setup js
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
         run: python3 script/build.py -p js -o -v
       - name: copy files
         shell: bash
         run: |
-          cp src/build/javascript/rhino3dm.wasm.map src/build/javascript/artifacts_js/rhino3dm.wasm.map
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
-          cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
