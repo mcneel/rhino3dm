@@ -138,6 +138,7 @@ jobs:
       - name: copy files
         shell: bash
         run: |
+          ls -R src/build/javascript
           cp package.json src/build/javascript/artifacts_js
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
           cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
