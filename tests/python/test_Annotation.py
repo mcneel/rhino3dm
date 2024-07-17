@@ -12,10 +12,10 @@ class TestAnnotation(unittest.TestCase):
 
             if geo.ObjectType == rhino3dm.ObjectType.Annotation:
                 if not any(x in geo.PlainText for x in plainText):
-                        self.fail("Annotation plain text not or not correct")
+                        self.fail("Something wrong with Annotation.PlainText")
             elif geo.ObjectType == rhino3dm.ObjectType.TextDot:
                 if not any(x in geo.Text for x in plainText):
-                        self.fail("TextDot text not or not correct")
+                        self.fail("Something wrong with TextDot.Text")
 
 if __name__ == '__main__':
     print("running tests")
