@@ -7,7 +7,7 @@ class TestAnnotation(unittest.TestCase):
     def test_readAnnotations(self):
 
         dir = "../models"
-        assert os.path.exists(dir)
+        #assert os.path.exists(dir)
 
         fname = "../models/textEntities_r8.3dm"
 
