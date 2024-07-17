@@ -5,7 +5,14 @@ import os.path
 class TestAnnotation(unittest.TestCase):
     def test_readAnnotations(self):
 
-        fname = '../models/textEntities_r8.3dm'
+        dir = "../models"
+        assert os.path.exists(dir)
+
+        fname = "../models/textEntities_r8.3dm"
+
+        cwd = os.getcwd()
+        print(cwd)
+
         if not os.path.isfile(fname):
             self.fail("File not found")
 
