@@ -643,7 +643,6 @@ def main():
 
     global module
     module = args.module
-    print(args.module)
 
     global node
     node = False

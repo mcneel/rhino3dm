@@ -694,6 +694,9 @@ void initAnnotationBaseBindings(void*)
     .property("richText", &BND_AnnotationBase::RichText)
     .property("plainText", &BND_AnnotationBase::PlainText)
     .property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
+    .property("plane", &BND_AnnotationBase::Plane)
+    .property("textIsWrapped", &BND_AnnotationBase::TextIsWrapped, &BND_AnnotationBase::SetTextIsWrapped)
+    .function("wrapText", &BND_AnnotationBase::WrapText)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")

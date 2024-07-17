@@ -16,26 +16,24 @@ test('createAnnotation', async () => {
     const doc = rhino.File3dm.fromByteArray(arr)
     const objects = doc.objects()
 
-    console.log(objects.count)
-
-    const testArray = ["Hello World!", "Hello Cruel World!", "Hi there!"]
+    const testArray = ["Hello World!", "Hello Cruel World!", "Hi there!", "WTF"]
 
     for ( let i = 0; i < objects.count; i ++ ) {
 
-        const geometry = objects.get(i).geometry
-        console.log(geometry)
-        console.log(geometry.annotationType)
-        console.log(geometry.dimensionStyleId)
-        console.log(geometry.plainText)
-        console.log(geometry.plainTextWithFields)
-        console.log(geometry.richText)
+        const geometry = objects.get(i).geometry()
 
-        if(!testArray.includes( geometry.PlainText )){
-            //fail(`Text not read correctly: ${geometry.PlainText}`)
+        switch(geometry.objectType){
+            case rhino.ObjectType.Annotation:
+                expect(testArray.includes( geometry.plainText )).toBe(true)
+                break
+            case rhino.ObjectType.TextDot:
+                expect(testArray.includes( geometry.text )).toBe(true)
+                break
         }
+    
         
     }
 
-    expect(true).toBe(true)
+
 
 })
