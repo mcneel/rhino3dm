@@ -1,13 +1,22 @@
 import rhino3dm
 import unittest
+import os.path
 
 class TestAnnotation(unittest.TestCase):
     def test_readAnnotations(self):
 
-        model = rhino3dm.File3dm.Read('../models/textEntities_r8.3dm')
-        objects = model.Objects
+        fname = '../models/textEntities_r8.3dm'
+        if not os.path.isfile(fname):
+            self.fail("File not found")
+
+        model = rhino3dm.File3dm.Read(fname)
+        print(model)
+
+        if model is None:
+            self.fail("Failed to read file")
+
         plainText = ["Hello World!", "Hello Cruel World!", "WTF"]
-        for obj in objects:
+        for obj in model.Objects:
             geo = obj.Geometry
 
             if geo.ObjectType == rhino3dm.ObjectType.Annotation:
