@@ -6,25 +6,7 @@ from os.path import dirname
 class TestAnnotation(unittest.TestCase):
     def test_readAnnotations(self):
 
-        dir = "../models"
-        #assert os.path.exists(dir)
-
-        fname = "../models/textEntities_r8.3dm"
-
-        cwd = os.getcwd()
-        print(cwd)
-        print(dirname(cwd))
-        modelDir = os.path.join(dirname(cwd), "models")
-        print(os.path.exists(modelDir))
-
-        subfolders = [ f.path for f in os.scandir(dirname(cwd)) if f.is_dir() ]
-        print(subfolders)
-
-        if not os.path.isfile(fname):
-            self.fail("File not found")
-
-        model = rhino3dm.File3dm.Read(fname)
-        print(model)
+        model = rhino3dm.File3dm.Read("../models/textEntities_r8.3dm")
 
         if model is None:
             self.fail("Failed to read file")

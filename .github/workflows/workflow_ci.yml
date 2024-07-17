@@ -430,7 +430,9 @@ jobs:
       shell: bash
       run: pip install --no-index tests/python/lib/*.whl --force-reinstall
     - name: test python bdist
-      run: python -m unittest discover tests/python/
+      run: |
+        cd tests/python
+        python -m unittest discover .
         
   test_javascript:
     name: test javascript
