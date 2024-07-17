@@ -1,6 +1,8 @@
 # Debugging rhino3dm
 
-## JavaScript
+## JavaScript / WASM
+
+One can debug the compiled wasm in the browser or in vscode if using nodejs.
 
 updated 2023.07.25
 ### Requirements
@@ -9,14 +11,20 @@ updated 2023.07.25
 - A rhino3dm.js debug build (TODO Docs)
 
 ### Setup
+
+#### Browser
 - Install the required tools.
 - Enable WebAssembly Debugging in Chrome.
   - Open the dev tools in Chrome.
   - Click on the gear icon, or press F1 to get to the settings.
   - Select _Experiments_ and ensure that _WebAssembly Debugging: Enable DWARF support_ is checked.
 
+#### vscode
+TODO
+- https://marketplace.visualstudio.com/items?itemName=ms-vscode.wasm-dwarf-debugging 
+
 ### Debugging
-- Once the setup is in place, you should have somer code you'd like to debug. This is typically an html with a js script that calls rhino3dm.js.
+- Once the setup is in place, you should have some code you'd like to debug. This is typically an html with a js script that calls rhino3dm.js.
 - The debug wasm build is a much bigger binary that what we use for release and when we compile it, it includes hardcoded paths to the root. Since we might build this debug build on a number of machines or containers, we need to pay special attention to map the source hardcoded in the wasm binary to where the source is on our local machine.
   - navigate in Chrome to `chrome://extensions`
   - here you should see the _C/C++ DevTools Support (DWARF)_ extension. Click on the _Details_ button.

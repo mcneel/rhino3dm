@@ -694,6 +694,9 @@ void initAnnotationBaseBindings(void*)
     .property("richText", &BND_AnnotationBase::RichText)
     .property("plainText", &BND_AnnotationBase::PlainText)
     .property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
+    .property("plane", &BND_AnnotationBase::Plane)
+    .property("textIsWrapped", &BND_AnnotationBase::TextIsWrapped, &BND_AnnotationBase::SetTextIsWrapped)
+    .function("wrapText", &BND_AnnotationBase::WrapText)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")
@@ -708,6 +711,9 @@ void initAnnotationBaseBindings(void*)
   class_<BND_Leader, base<BND_AnnotationBase>>("Leader")
     .property("points", &BND_Leader::GetPoints)
     .function("getTextPoint2d", &BND_Leader::GetTextPoint2d, allow_raw_pointers())
+    ;
+
+  class_<BND_Text, base<BND_AnnotationBase>>("Text")
     ;
 
   class_<BND_Dimension, base<BND_AnnotationBase>>("Dimension")
