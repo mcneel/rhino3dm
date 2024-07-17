@@ -1,6 +1,7 @@
 import rhino3dm
 import unittest
 import os.path
+from os.path import dirname
 
 class TestAnnotation(unittest.TestCase):
     def test_readAnnotations(self):
@@ -12,6 +13,12 @@ class TestAnnotation(unittest.TestCase):
 
         cwd = os.getcwd()
         print(cwd)
+        print(dirname(cwd))
+        modelDir = os.path.join(dirname(cwd), "models")
+        print(os.path.exists(modelDir))
+
+        subfolders = [ f.path for f in os.scandir(dirname(cwd)) if f.is_dir() ]
+        print(subfolders)
 
         if not os.path.isfile(fname):
             self.fail("File not found")
