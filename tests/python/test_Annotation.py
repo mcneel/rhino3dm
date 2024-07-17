@@ -6,17 +6,18 @@ class TestAnnotation(unittest.TestCase):
 
         model = rhino3dm.File3dm.Read('../models/textEntities_r8.3dm')
         objects = model.Objects
-        plainText = ["Hello World!", "Hello Cruel World!"]
+        plainText = ["Hello World!", "Hello Cruel World!", "WTF"]
         for obj in objects:
             geo = obj.Geometry
-            #print(geo.ObjectType)
-            #print(geo.PlainText)
-            #print(geo.RichText)
-            #print(geo.PlainTextWithFields)
-            if not any(x in geo.PlainText for x in plainText):
-                self.fail("Annotation plain text not or not correct")
 
-        self.assertTrue(True)
+            match obj.Geometry.ObjectType:
+                case rhino3dm.ObjectType.Annotation:
+                    if not any(x in geo.PlainText for x in plainText):
+                        self.fail("Annotation plain text not or not correct")
+                case rhino3dm.ObjectType.TextDot:
+                    if not any(x in geo.Text for x in plainText):
+                        self.fail("TextDot text not or not correct")
+
 
 
 

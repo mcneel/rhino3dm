@@ -27,17 +27,34 @@ public class Annotation_Tests
             file3dm = File3dm.Read("../models/textEntities_r8.3dm");
         } 
 
-        //Console.WriteLine("Number of objects in file {0}", file3dm.Objects.Count);
+        Console.WriteLine("Number of objects in file {0}", file3dm.Objects.Count);
 
-        string[] textArray = {"Hello World!", "Hello Cruel World!"};
+        string[] textArray = {"Hello World!", "Hello Cruel World!", "WTF"};
 
         foreach( var obj in file3dm.Objects){
-            TextEntity textEntity = obj.Geometry as TextEntity;
 
-            if(!textArray.Contains(textEntity.PlainText))
+            switch(obj.Geometry.ObjectType)
             {
-                Assert.Fail("TextEntity Plain Text not found in textArray");
+                case Rhino.DocObjects.ObjectType.Annotation:
+                    TextEntity textEntity = obj.Geometry as TextEntity;
+                    if(!textArray.Contains(textEntity.PlainText))
+                    {
+                        Assert.Fail("TextEntity Plain Text not found in textArray");
+                    }
+                    break;
+                
+                case Rhino.DocObjects.ObjectType.TextDot:
+                    TextDot textDot = obj.Geometry as TextDot;
+                    if(!textArray.Contains(textDot.Text))
+                    {
+                        Assert.Fail("TextDot Text not found in textArray");
+                    }
+                    break;
+
             }
+            
+
+            
             
         }
 
