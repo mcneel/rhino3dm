@@ -10,17 +10,12 @@ class TestAnnotation(unittest.TestCase):
         for obj in objects:
             geo = obj.Geometry
 
-            match obj.Geometry.ObjectType:
-                case rhino3dm.ObjectType.Annotation:
-                    if not any(x in geo.PlainText for x in plainText):
+            if geo.ObjectType == rhino3dm.ObjectType.Annotation:
+                if not any(x in geo.PlainText for x in plainText):
                         self.fail("Annotation plain text not or not correct")
-                case rhino3dm.ObjectType.TextDot:
-                    if not any(x in geo.Text for x in plainText):
+            elif geo.ObjectType == rhino3dm.ObjectType.TextDot:
+                if not any(x in geo.Text for x in plainText):
                         self.fail("TextDot text not or not correct")
-
-
-
-
 
 if __name__ == '__main__':
     print("running tests")
