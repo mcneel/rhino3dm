@@ -53,7 +53,78 @@ jobs:
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
             script/**
-            tests/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+  check_tests_dotnet:
+    name: check if dotnet tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/dotnet/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+  check_tests_js:
+    name: check if js tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/javascript/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+  check_tests_py:
+    name: check if py tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/python/**
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -116,8 +187,8 @@ jobs:
   build_js:
     name: build rhino3dm.js
     runs-on: ubuntu-latest
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_js]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_js.outputs.any_changed == 'true' }}
     container:
       image: emscripten/emsdk:3.1.30
     steps:
@@ -168,8 +239,8 @@ jobs:
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_py]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-12, macos-14]
@@ -209,8 +280,8 @@ jobs:
   build_py_sdist:
     name: build python sdist
     runs-on: ubuntu-latest
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_py]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     steps:
       - name: setup python
         uses: actions/setup-python@v5.0.0
@@ -265,8 +336,8 @@ jobs:
     runs-on: ubuntu-latest
     #container:
       #image: mcneel/rhino3dm-dev-amzn2
-    needs: [check_dotnet, check_workflow, check_build_scripts]
-    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_dotnet, check_workflow, check_build_scripts, check_tests_dotnet]
+    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' ||  needs.check_tests_dotnet.outputs.any_changed == 'true'}}
     steps:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
