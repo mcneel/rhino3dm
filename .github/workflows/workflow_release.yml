@@ -151,7 +151,8 @@ jobs:
         run: |
           find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
           pip install --no-index tests/python/lib/*.whl --force-reinstall
-          python -m unittest discover tests/python/
+          cd tests/python
+          python -m unittest discover .
       - name: artifact name
         id: artifactname
         shell: bash
