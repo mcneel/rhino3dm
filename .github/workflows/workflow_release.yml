@@ -85,7 +85,8 @@ jobs:
       run: |
         find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
         /opt/python/${{ matrix.python-version }}/bin/python -m pip install --no-index tests/python/lib/*.whl --force-reinstall
-        /opt/python/${{ matrix.python-version }}/bin/python -m unittest discover tests/python/
+        cd tests/python
+        /opt/python/${{ matrix.python-version }}/bin/python -m unittest discover .
     - name: artifact name
       id: artifactname
       run: |
