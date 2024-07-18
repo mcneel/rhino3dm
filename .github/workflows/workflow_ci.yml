@@ -213,10 +213,6 @@ jobs:
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
           cp package.json src/build/javascript/artifacts
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
-          #cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
-          #cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          #cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          #cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
           cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
           ls src/build/javascript/artifacts
       - name: setup js
@@ -228,6 +224,9 @@ jobs:
         run: |
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
           mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          npm i uglify-js
+          uglifyjs src/build/javascript/artifacts/rhino3dm.js --compress -o src/build/javascript/artifacts/rhino3dm.min.js
+          uglifyjs src/build/javascript/artifacts/rhino3dm.module.js --compress -o src/build/javascript/artifacts/rhino3dm.module.min.js
           ls src/build/javascript/artifacts
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
