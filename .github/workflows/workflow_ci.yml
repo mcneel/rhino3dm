@@ -223,12 +223,10 @@ jobs:
         run: |
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
           mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
-          ls src/build/javascript/artifacts
           npm install -g uglify-js
           cd src/build/javascript/artifacts
           uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
           uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
-          ls src/build/javascript/artifacts
       - name: minifyjs
         uses: nizarmah/auto-minify@v3
         with:
