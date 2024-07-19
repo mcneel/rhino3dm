@@ -214,10 +214,6 @@ jobs:
           cp package.json src/build/javascript/artifacts
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
           cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
-          npm install -g uglify-js
-          uglifyjs src/build/javascript/artifacts/rhino3dm.module.js  --compress -o src/build/javascript/artifacts/rhino3dm.module.min.js
-          uglifyjs src/build/javascript/artifacts/rhino3dm.js  --compress -o src/build/javascript/artifacts/rhino3dm.min.js
-          ls src/build/javascript/artifacts
       - name: setup js
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
@@ -227,6 +223,12 @@ jobs:
         run: |
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
           mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          ls src/build/javascript/artifacts
+          npm install -g uglify-js
+          cd src/build/javascript/artifacts
+          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
+          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
+          ls src/build/javascript/artifacts
       - name: minifyjs
         uses: nizarmah/auto-minify@v3
         with:
