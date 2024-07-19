@@ -440,25 +440,41 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
   return ON_UUID_to_Binding(rc);
 }
 
-BND_UUID BND_ONXModel_ObjectTable::AddPolyline(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline1(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
 {
   ON_PolylineCurve plc(points.m_polyline);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &plc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(pybind11::object points, const class BND_3dmObjectAttributes* attributes)
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& points, const class BND_3dmObjectAttributes* attributes)
 {
   BND_Point3dList list;
-  for (auto item : points)
+
+  for (int i = 0; i < points.size(); i++)
   {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
+    list.Add(points[i].x, points[i].y, points[i].z);
   }
-  return AddPolyline(list, attributes);
+
+  return AddPolyline1(list, attributes);
 }
+
+#if defined(ON_WASM_COMPILE)
+
+BND_UUID BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
+{
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    return AddPolyline2( array, attributes ); 
+  }
+  else
+    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes ); 
+}
+
 #endif
+
 
 BND_UUID BND_ONXModel_ObjectTable::AddArc(const BND_Arc& arc, const BND_3dmObjectAttributes* attributes)
 {
@@ -1566,6 +1582,48 @@ int BND_File3dmWriteOptions::VersionForWriting() const
   return m_version * 10;
 }
 
+/*
+BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, int mappingId )
+{
+  ON_UUID id = m_attributes->m_attributes->m_uuid;
+  ON_TextureMapping tm;
+  ON_Xform m_object_xform;
+  BND_TUPLE rc = CreateTuple(2);
+
+  ON_ModelComponentReference ref = *file3dm->m_model->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, id);
+  if (ref.IsEmpty())
+    return NullTuple();
+
+  const ON_ModelGeometryComponent* component_ptr = ON_ModelGeometryComponent::FromModelComponentRef(ref, &ON_ModelGeometryComponent::Unset);
+  if (nullptr == component_ptr)
+    return NullTuple();
+
+  // Get any mapping ref for now. Not sure how to figure out the current render plug-in.
+  const ON_MappingRef* mappingRef = m_attributes->m_attributes->m_rendering_attributes.MappingRef(ON_nil_uuid);
+  if (nullptr == mappingRef)
+    return NullTuple();
+
+  for (int i = 0; i < mappingRef->m_mapping_channels.Count(); i++)
+  {
+    if (mappingRef->m_mapping_channels[i].m_mapping_channel_id == mappingId)
+    {
+      m_object_xform = mappingRef->m_mapping_channels[i].m_object_xform;
+      tm = ONX_Model_GetTextureMappingHelper(*file3dm->m_model, &mappingRef->m_mapping_channels[i]);
+    }
+  }
+
+  if(tm == ON_TextureMapping::Unset)
+    return NullTuple();
+  else 
+  {
+    SetTuple(rc, 0, BND_TextureMapping(tm, nullptr));
+    SetTuple(rc, 1, BND_Transform(m_object_xform));
+    return rc;
+  }
+
+}
+*/
+
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -1623,6 +1681,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
+    .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
     .def("AddCircle", &BND_ONXModel_ObjectTable::AddCircle, py::arg("circle"), py::arg("attributes") = nullptr)
@@ -1945,7 +2004,7 @@ void initExtensionsBindings(void*)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint2)
     .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
-    .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline, allow_raw_pointers())
+    .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline3, allow_raw_pointers())
     .function("addArc", &BND_ONXModel_ObjectTable::AddArc, allow_raw_pointers())
     .function("addCircle", &BND_ONXModel_ObjectTable::AddCircle, allow_raw_pointers())
     .function("addEllipse", &BND_ONXModel_ObjectTable::AddEllipse, allow_raw_pointers())

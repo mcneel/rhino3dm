@@ -8,7 +8,7 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>8.6.1</Version>
+    <Version>8.9.0</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
@@ -57,6 +57,14 @@
 
   <ItemGroup Condition="exists('..\build\linux\Release\librhino3dm_native.so')">
     <None Include="..\build\linux\Release\librhino3dm_native.so">
+      <PackagePath>runtimes\linux-x64\native</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="exists('..\build\linux\librhino3dm_native.so')">
+    <None Include="..\build\linux\librhino3dm_native.so">
       <PackagePath>runtimes\linux-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>

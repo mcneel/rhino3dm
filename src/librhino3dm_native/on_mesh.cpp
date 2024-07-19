@@ -207,6 +207,51 @@ RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_GetCachedTextureCoordinates(O
 }
 #endif
 
+const ON_MappingRef* GetMappingRef(const ONX_Model* pModel, ON_UUID objectId, ON_UUID renderPluginId)
+{
+  if (nullptr == pModel)
+    return nullptr;
+
+  ON_ModelComponentReference ref = pModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, objectId);
+  if (ref.IsEmpty())
+    return nullptr;
+
+  const ON_ModelGeometryComponent* component_ptr = ON_ModelGeometryComponent::FromModelComponentRef(ref, &ON_ModelGeometryComponent::Unset);
+  if (nullptr == component_ptr)
+    return nullptr;
+
+  const ON_3dmObjectAttributes* attributes = component_ptr->Attributes(nullptr);
+  if (nullptr == attributes)
+    return nullptr;
+
+  const ON_MappingRef* mappingRef = attributes->m_rendering_attributes.MappingRef(renderPluginId);
+  return mappingRef;
+}
+
+RH_C_FUNCTION void ON_Mesh_SetCachedTextureCoordinatesFromMaterial_ONX_Model(ON_Mesh* pMesh, const ONX_Model* pModel, ON_UUID objectId, const ON_Material* pMaterial)
+{
+  if (nullptr != pMesh && nullptr != pModel && nullptr != pMaterial)
+  {
+    // Get any mapping ref for now. Not sure how to figure out the current render plug-in.
+    const ON_MappingRef* pMR = GetMappingRef(pModel, objectId, ON_nil_uuid);
+    // MappingRef can be null. It's normal when there are no texture mappings on the object.
+    pMesh->SetCachedTextureCoordinatesFromMaterial(*pModel, *pMaterial, pMR);
+  }
+}
+
+RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_GetCachedTextureCoordinates_ONX_Model(ON_Mesh* pMesh, const ONX_Model* pModel, ON_UUID objectId, const ON_Texture* pTexture)
+{
+  if (nullptr != pMesh && nullptr != pModel && nullptr != pTexture)
+  {
+    // Get any mapping ref for now. Not sure how to figure out the current render plug-in.
+    const ON_MappingRef* pMR = GetMappingRef(pModel, objectId, ON_nil_uuid);
+    // MappingRef can be null. It's normal when there are no texture mappings on the object.
+    return pMesh->GetCachedTextureCoordinates(*pModel, *pTexture, pMR);
+  }
+  return nullptr;
+}
+
+
 RH_C_FUNCTION const ON_TextureCoordinates* ON_Mesh_CachedTextureCoordinates(ON_Mesh* pMesh, ON_UUID id)
 
 {
@@ -3311,7 +3356,7 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
   const UUID plug_in_id = RhinoApp().GetDefaultRenderApp();
   const ON_MappingRef* mapping_ref = rhinoObject->Attributes().m_rendering_attributes.MappingRef(plug_in_id);
   ON_Xform xform(1);
-  int index = -1;
+  UUID mapping_id = ON_nil_uuid;
 
   //If there's no mapping ref, we can assume that there's no custom mapping
   if (mapping_ref)
@@ -3324,7 +3369,7 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
       if (iChannelId == mc.m_mapping_channel_id)
       {
         //OK - this is the guy.
-        index = mc.m_mapping_index;
+        mapping_id = mc.m_mapping_id;
 
         //The mapping for an object is modified per object by its local transform.
         xform = mc.m_object_xform;
@@ -3353,19 +3398,21 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
       return 1;
 
     // No previous mapping so return success
-    if (index < 0)
+    if (ON_UuidIsNil(mapping_id))
       return 1;
 
     // If there was a previous mapping then remove it now
+    const int index = table.FindTextureMapping(mapping_id);
     success = table.DeleteTextureMapping(index);
     return (success ? 1 : 0);
   }
 
   // Add or replace the mapping
 
-  if (-1 != index)
+  if (ON_UuidIsNotNil(mapping_id))
   {
     //This does everything.
+    const int index = table.FindTextureMapping(mapping_id);
     success = table.ModifyTextureMapping(*mapping, index);
 
     if (success && nullptr != transform)
@@ -3392,7 +3439,7 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
   else
   {
     //There's no entry in the table.  We have to add one.
-    index = table.AddTextureMapping(*mapping);
+    const int index = table.AddTextureMapping(*mapping);
 
     //In this case, we're going to have to build new attributes for the object
     //because there's no existing custom texture mapping.
@@ -3425,6 +3472,18 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
     {
       //Couldn't modify - have to add.
       new_mapping_ref->AddMappingChannel(iChannelId, table[index].Id());
+
+      // And also set the transform if one is passed in
+      if (nullptr != transform)
+      {
+        for (int i = 0; i < new_mapping_ref->m_mapping_channels.Count(); i++)
+        {
+          if (new_mapping_ref->m_mapping_channels[i].m_mapping_channel_id == iChannelId)
+          {
+            new_mapping_ref->m_mapping_channels[i].m_object_xform = *transform;
+          }
+        }
+      }
     }
 
     //Now just modify the attributes
@@ -3439,6 +3498,44 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMapping(const CRhinoObject* rhinoOb
   return ON_TextureMapping_SetObjectMappingAndTransform(rhinoObject, iChannelId, mapping, nullptr);
 }
 #endif
+
+ON_TextureMapping ONX_Model_GetTextureMappingHelper(const ONX_Model& onx_model, const ON_MappingChannel* pMC);
+
+RH_C_FUNCTION ON_TextureMapping* ON_TextureMapping_GetMappingFromONXModelObject(const ONX_Model* pConstModel, ON_UUID id, int iChannelId, ON_Xform* objectXformOut)
+{
+  if (nullptr == pConstModel)
+    return nullptr;
+
+  ON_ModelComponentReference ref = pConstModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry, id);
+  if (ref.IsEmpty())
+    return nullptr;
+
+  const ON_ModelGeometryComponent* component_ptr = ON_ModelGeometryComponent::FromModelComponentRef(ref, &ON_ModelGeometryComponent::Unset);
+  if (nullptr == component_ptr)
+    return nullptr;
+
+  const ON_3dmObjectAttributes* attributes = component_ptr->Attributes(nullptr);
+  if (nullptr == attributes)
+    return nullptr;
+
+  // Get any mapping ref for now. Not sure how to figure out the current render plug-in.
+  const ON_MappingRef* mappingRef = attributes->m_rendering_attributes.MappingRef(ON_nil_uuid);
+  if (nullptr == mappingRef)
+    return nullptr;
+
+  for (int i = 0; i < mappingRef->m_mapping_channels.Count(); i++)
+  {
+    if (mappingRef->m_mapping_channels[i].m_mapping_channel_id == iChannelId)
+    {
+      if (nullptr != objectXformOut)
+        *objectXformOut = mappingRef->m_mapping_channels[i].m_object_xform;
+      ON_TextureMapping tm = ONX_Model_GetTextureMappingHelper(*pConstModel, &mappingRef->m_mapping_channels[i]);
+      return new ON_TextureMapping(tm);
+    }
+  }
+
+  return nullptr;
+}
 
 static bool GetBrepFaceCorners(const ON_BrepFace& face, ON_SimpleArray<ON_3fPoint>& points)
 {

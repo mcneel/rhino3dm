@@ -221,6 +221,24 @@ namespace Rhino.DocObjects
       }
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Returns true if the linetype is in use by a Rhino object, 
+    /// a layer, an instance definition, or a section style.
+    /// </summary>
+    /// <since>8.7</since>
+    public bool InUse
+    {
+      get
+      {
+        if (null == m_doc)
+          return false;
+        int index = Index;
+        return UnsafeNativeMethods.CRhinoLinetype_InUse(m_doc.RuntimeSerialNumber, index);
+      }
+    }
+#endif
+
     /// <summary>
     /// Defines how the ends of open curves should be drawn
     /// </summary>

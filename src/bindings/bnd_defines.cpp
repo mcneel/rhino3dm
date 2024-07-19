@@ -18,6 +18,16 @@ static bool TransformLine(ON_Line& line, const BND_Transform& xform)
   return line.Transform(xform.m_xform);
 }
 
+static std::vector<ON_2dPoint> ArrowPoints(ON_Arrowhead::arrow_type arrowType, double size)
+{
+  ON_2dPointArray points;
+  ON_Arrowhead::GetPoints(arrowType, points);
+  std::vector<ON_2dPoint> rc(points.Count());
+  for (int i = 0; i < points.Count(); i++)
+    rc[i] = points[i];
+  return rc;
+}
+
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
 void initDefines(pybind11::module& m)
@@ -72,6 +82,10 @@ void initDefines(pybind11::module& m)
     .def("PointAt", &ON_Line::PointAt, py::arg("t"))
     .def("Transform", &TransformLine, py::arg("xform"))
     ;
+
+  py::class_<ON_Arrowhead>(m, "Arrowhead")
+      .def_static("GetPoints", &ArrowPoints, py::arg("arrowType"), py::arg("size"))
+      ;
 
   py::enum_<LoftType>(m, "LoftType")
     .value("Normal", LoftType::Normal)
@@ -272,6 +286,34 @@ void initDefines(pybind11::module& m)
     .value("Box" , ON_CurvePiping::CapTypes::Box)
     .value("Dome", ON_CurvePiping::CapTypes::Dome)
     ;
+
+  py::enum_<ON::AnnotationType>(m, "AnnotationTypes")
+      .value("Unset", ON::AnnotationType::Unset)
+      .value("Aligned", ON::AnnotationType::Aligned)
+      .value("Angular", ON::AnnotationType::Angular)
+      .value("Diameter", ON::AnnotationType::Diameter)
+      .value("Radius", ON::AnnotationType::Radius)
+      .value("Rotated", ON::AnnotationType::Rotated)
+      .value("Ordinate", ON::AnnotationType::Ordinate)
+      .value("ArcLen", ON::AnnotationType::ArcLen)
+      .value("CenterMark", ON::AnnotationType::CenterMark)
+      .value("Text", ON::AnnotationType::Text)
+      .value("Leader", ON::AnnotationType::Leader)
+      .value("Angular3pt", ON::AnnotationType::Angular3pt)
+    ;
+
+  py::enum_<ON_Arrowhead::arrow_type>(m, "ArrowheadTypes")
+      .value("None", ON_Arrowhead::arrow_type::None)
+      .value("UserBlock", ON_Arrowhead::arrow_type::UserBlock)
+      .value("SolidTriangle", ON_Arrowhead::arrow_type::SolidTriangle)
+      .value("Dot", ON_Arrowhead::arrow_type::Dot)
+      .value("Tick", ON_Arrowhead::arrow_type::Tick)
+      .value("ShortTriangle", ON_Arrowhead::arrow_type::ShortTriangle)
+      .value("OpenArrow", ON_Arrowhead::arrow_type::OpenArrow)
+      .value("Rectangle", ON_Arrowhead::arrow_type::Rectangle)
+      .value("LongTriangle", ON_Arrowhead::arrow_type::LongTriangle)
+      .value("LongerTriangle", ON_Arrowhead::arrow_type::LongerTriangle)
+    ;
 }
 
 pybind11::dict PointToDict(const ON_3dPoint& point)
@@ -378,8 +420,17 @@ void initDefines(void*)
     .constructor<ON_3dPoint, ON_3dPoint>()
     .property("from", &ON_Line::from)
     .property("to", &ON_Line::to)
-    .property("length", &ON_Line::Length);
+    .property("length", &ON_Line::Length)
+    .property("isValid", &ON_Line::IsValid)
+    .property("direction", &ON_Line::Direction)
+    .property("unitTangent", &ON_Line::Tangent)
+    .function("pointAt", &ON_Line::PointAt, allow_raw_pointers())
+    .function("transform", &TransformLine, allow_raw_pointers())
+    ;
 
+  class_<ON_Arrowhead>("Arrowhead")
+    .class_function("getPoints", &ArrowPoints, allow_raw_pointers())
+    ;
 
   enum_<ON::object_mode>("ObjectMode")
     .value("Normal", ON::object_mode::normal_object)
@@ -571,6 +622,36 @@ void initDefines(void*)
     .value("Box" , ON_CurvePiping::CapTypes::Box)
     .value("Dome", ON_CurvePiping::CapTypes::Dome)
     ;
+
+  enum_<ON::AnnotationType>("AnnotationTypes")
+      .value("Unset", ON::AnnotationType::Unset)
+      .value("Aligned", ON::AnnotationType::Aligned)
+      .value("Angular", ON::AnnotationType::Angular)
+      .value("Diameter", ON::AnnotationType::Diameter)
+      .value("Radius", ON::AnnotationType::Radius)
+      .value("Rotated", ON::AnnotationType::Rotated)
+      .value("Ordinate", ON::AnnotationType::Ordinate)
+      .value("ArcLen", ON::AnnotationType::ArcLen)
+      .value("CenterMark", ON::AnnotationType::CenterMark)
+      .value("Text", ON::AnnotationType::Text)
+      .value("Leader", ON::AnnotationType::Leader)
+      .value("Angular3pt", ON::AnnotationType::Angular3pt)
+    ;
+
+  enum_<ON_Arrowhead::arrow_type>("ArrowheadTypes")
+      .value("None", ON_Arrowhead::arrow_type::None)
+      .value("UserBlock", ON_Arrowhead::arrow_type::UserBlock)
+      .value("SolidTriangle", ON_Arrowhead::arrow_type::SolidTriangle)
+      .value("Dot", ON_Arrowhead::arrow_type::Dot)
+      .value("Tick", ON_Arrowhead::arrow_type::Tick)
+      .value("ShortTriangle", ON_Arrowhead::arrow_type::ShortTriangle)
+      .value("OpenArrow", ON_Arrowhead::arrow_type::OpenArrow)
+      .value("Rectangle", ON_Arrowhead::arrow_type::Rectangle)
+      .value("LongTriangle", ON_Arrowhead::arrow_type::LongTriangle)
+      .value("LongerTriangle", ON_Arrowhead::arrow_type::LongerTriangle)
+    ;
+
+  register_vector<ON_2dPoint>("vector<ON_2dPoint>");
 }
 
 

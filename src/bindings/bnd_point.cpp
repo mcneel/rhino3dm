@@ -85,6 +85,16 @@ static pybind11::dict EncodeVector3d(const ON_3dVector& v)
   return d;
 }
 
+static double ON_3dVectorLength(const ON_3dVector& a)
+{
+  return a.Length();
+}
+
+static void ON_3dVectorUnitize(ON_3dVector& a)
+{
+  a.Unitize();
+}
+
 static int ON_3dVectorIsParallelTo(const ON_3dVector& a, const ON_3dVector& b)
 {
   return a.IsParallelTo(b);
@@ -98,7 +108,7 @@ static double ON_3dVectorVectorAngle(ON_3dVector a, ON_3dVector b)
 {
   if (!a.Unitize() || !b.Unitize())
     return ON_UNSET_VALUE;
-  
+
   //compute dot product
   double dot = a.x * b.x + a.y * b.y + a.z * b.z;
   // remove any "noise"
@@ -194,6 +204,16 @@ static double ON_3dVectorVectorAngle3(ON_3dVector v1, ON_3dVector v2, ON_3dVecto
     dAngle = (ON_PI * 2.0) - dAngle;
 
   return dAngle;
+}
+
+static ON_3dVector ON_3dVectorCrossProduct(const ON_3dVector& a, const ON_3dVector& b)
+{
+  return ON_3dVector::CrossProduct(a, b);
+}
+
+static double ON_3dVectorDotProduct(const ON_3dVector& a, const ON_3dVector& b)
+{
+  return a * b;
 }
 
 
@@ -342,6 +362,10 @@ void initPointBindings(pybind11::module& m)
     .def("__repr__", &ReprVector3d)
     .def("IsParallelTo", &ON_3dVectorIsParallelTo, py::arg("other"))
     .def("IsParallelTo", &ON_3dVectorIsParallelTo2, py::arg("other"), py::arg("angleTolerance"))
+    .def("Unitize", &ON_3dVectorUnitize)
+    .def("Length", &ON_3dVectorLength)
+    .def_static("CrossProduct", &ON_3dVectorCrossProduct, py::arg("a"), py::arg("b"))
+    .def_static("DotProduct", &ON_3dVectorDotProduct, py::arg("a"), py::arg("b"))
     .def_static("VectorAngle", &ON_3dVectorVectorAngle, py::arg("a"), py::arg("b"))
     .def_static("VectorAngle", &ON_3dVectorVectorAngle2, py::arg("a"), py::arg("b"), py::arg("plane"))
     .def_static("VectorAngle", &ON_3dVectorVectorAngle3, py::arg("v1"), py::arg("v2"), py::arg("vNormal"))
@@ -396,6 +420,7 @@ using namespace emscripten;
 
 void initPointBindings(void*)
 {
+
   value_array<ON_2dPoint>("Point2dSimple")
     .element(&ON_2dPoint::x)
     .element(&ON_2dPoint::y);
@@ -407,6 +432,8 @@ void initPointBindings(void*)
 
   class_<BND_Point3d>("Point3d")
     .class_function("transform", &BND_Point3d::Transform);
+
+  //register_vector<ON_3dPoint>("Point3dArray");
 
   value_array<ON_4dPoint>("Point4dSimple")
     .element(&ON_4dPoint::x)

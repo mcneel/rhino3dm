@@ -8,6 +8,11 @@ void initPointCloudBindings(pybind11::module& m);
 void initPointCloudBindings(void* m);
 #endif
 
+#if defined(ON_WASM_COMPILE)
+template<typename T>
+std::vector<T> Tuple_To_Vector(BND_TUPLE data);
+#endif
+
 class BND_PointCloudItem
 {
   ON_ModelComponentReference m_component_reference;
@@ -59,6 +64,11 @@ public:
   BND_PointCloud();
   BND_PointCloud(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref);
   BND_PointCloud(const std::vector<ON_3dPoint>& points);
+  BND_PointCloud(const class BND_Point3dList& points);
+
+#if defined(ON_WASM_COMPILE)
+  BND_PointCloud(emscripten::val points);
+#endif
 
   int Count() const { return m_pointcloud->PointCount(); }
   BND_PointCloudItem GetItem(int index);
@@ -73,25 +83,39 @@ public:
   BND_PointCloudItem AppendNew();
   BND_PointCloudItem InsertNew(int index);
   void Merge(const BND_PointCloud& other);
+
   void Add1(ON_3dPoint point);
   void Add2(ON_3dPoint point, ON_3dVector normal);
   void Add3(ON_3dPoint point, BND_Color color);
   void Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color);
   void Add5(ON_3dPoint point, double value);
   void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
-  void AddRange1(const std::vector<ON_3dPoint>& points);
-  void AddRange2(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
-  void AddRange3(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
-  void AddRange4(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
-  void AddRange5(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
-  void AddRange6(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
+
+  void AddRangePoints(const std::vector<ON_3dPoint>& points);
+  void AddRangePointsNormals(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
+  void AddRangePointsColors(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
+  void AddRangePointsValues(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
+  void AddRangePointsNormalsColors(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
+  void AddRangePointsNormalsColorsValues(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
+  void InsertRangePoints(int index, const std::vector<ON_3dPoint>& points);
+
+#if defined(ON_WASM_COMPILE)
+  void AddRange1(BND_TUPLE points);
+  void AddRange2(BND_TUPLE points, BND_TUPLE normals);
+  void AddRange3(BND_TUPLE points, BND_TUPLE colors);
+  void AddRange4(BND_TUPLE points, BND_TUPLE values);
+  void AddRange5(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
+  void AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values);
+  void InsertRange(int index, BND_TUPLE points);
+#endif
+
   void Insert1(int index, const ON_3dPoint& point);
   void Insert2(int index, const ON_3dPoint& point, const ON_3dVector& normal);
   void Insert3(int index, const ON_3dPoint& point, const BND_Color& color);
   void Insert4(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color);
   void Insert5(int index, const ON_3dPoint& point, const double& value);
   void Insert6(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color, const double& value);
-  void InsertRange(int index, const std::vector<ON_3dPoint>& points);
+  
   void RemoveAt(int index);
   BND_TUPLE GetPoints() const;
   ON_3dPoint PointAt(int index) const;

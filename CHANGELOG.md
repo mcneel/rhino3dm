@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.9.0] - 2024.07.19
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0
+
+See changes in 8.9.0-beta.
+
+### Fixed 
+
+- (js) AnnotationBase objects would be undefined due to new cast to Text in the bindings but no Text class exposed to emscripten
+
+## [8.9.0-beta] - 2024.07.12
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0-beta
+
+### Added
+ - (py, js) CachedTextureCoordinates class
+ - (py, js) Mesh.SetCachedTextureCoordinates and Mesh.GetCachedTextureCoordinates
+ - (py, js) TextureMapping.HasId and TextureMapping.Id
+ - (py, js) Added many Annotation classes and enums [#627](https://github.com/mcneel/rhino3dm/pull/627) @jesterKing
+ - (all) A series of automated tests have been added and are run on all ci builds
+
+ ### Changed
+ - Updated OpenNURBS to v8.9 diff: https://github.com/mcneel/opennurbs/compare/v8.6.24101.05001...update-1718616159-8.9
+ - (py, js) Several methods that take in arrays/lists of points have been updated to either be overloaded and take `Point3dList` and `std::vector<T>` (for py) or `emscripten::val` and the type is checked in cpp (for js). This means the SDK is not broken and users can pass in language specific lists / arrays of points. [#620](https://github.com/mcneel/rhino3dm/issues/620), [#616](https://github.com/mcneel/rhino3dm/issues/616)
+ - (py) x86_64 Linux builds are now build using the manylinux_2_28_x86_64 docker image
+
+
+ ### Fixed
+ - (py, js) Polyline.CreateFromPoints now works [#616](https://github.com/mcneel/rhino3dm/issues/616)
+ - (js) None of the PointCloud.AddRange* methods were working in js. This is fixed. [#620](https://github.com/mcneel/rhino3dm/issues/620)
+ - (py, js) Polyline.GetSegments() always returned an extra NULL at the end of the segment array. [#623](https://github.com/mcneel/rhino3dm/issues/623)
+ - (py) Universal builds for native library on macos. (#617)[https://github.com/mcneel/rhino3dm/pull/617] @jesterKing
+
+ ### Removed
+ - (py, dotnet) GitHub has deprecated building on macos-11 so from this point forward we will not build python wheels for macos-11. macos-14 will be used to build the dotnet library for macos.
+ - (dotnet) GitHub deprecated actions that run on node.js < 20 which means that we cannot build on Amazon Linux 2 in with ci workflow. For now the ci linux build uses ubuntu-latest.
+
 ## [8.6.1] - 2024.05.10
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.0...8.6.1
 
@@ -27,7 +64,6 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.4.0...8.6.0-beta1
 - (py, js) EmbeddedFile.SetFilename.
 - (js) EmbeddedFile.WasmFromByteArray() to add embedded from a js Uint8Array. [#523](https://github.com/mcneel/rhino3dm/issues/523)
 - (py) EmbeddedFile.Read()
-
 
 ### Changed
 - (js) js docs now use typedoc for generating documentation from `src/js/rhino3dm.d.ts` [#594](https://github.com/mcneel/rhino3dm/issues/594)

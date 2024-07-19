@@ -23,6 +23,11 @@ if( NODE )
     message("NODE evaluates to True")
 endif()
 
+message("MODULE=${MODULE}")
+if( MODULE ) 
+    message("MODULE evaluates to True")
+endif()
+
 # Add draco add_library
 include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
 
@@ -55,7 +60,10 @@ if(${RHINO3DM_JS})
   if(NODE)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MEMORY64=1")
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH=1 --bind")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm  -s ALLOW_MEMORY_GROWTH=1 --bind")
+  if(MODULE)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s EXPORT_ES6=1")
+  endif()
 endif()
 
 add_definitions(-D_GNU_SOURCE)
@@ -73,7 +81,7 @@ if(${RHINO3DM_JS})
     add_definitions(-DON_32BIT_RUNTIME)
   endif()
   add_definitions(-DON_LITTLE_ENDIAN)
-  add_definitions(-DON_RUNTIME_ANDROID)
+  add_definitions(-DON_RUNTIME_WASM)
 
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
 

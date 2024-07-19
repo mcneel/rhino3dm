@@ -20,7 +20,7 @@ jobs:
       - name: update submodules
         run: git submodule update --init
       - name: build python sdist
-        run: python setup.py sdist
+        run: python setup.py sdist build --debug
       - name: check sdist
         run: |
           # installs rhino3dm from the source distribution
@@ -41,6 +41,9 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
+
+          #cd ..
+          #python -m unittest discover tests/python/
       - name: list files
         run: ls -R
       - name: artifact name
@@ -54,10 +57,10 @@ jobs:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
 
-  build_py_manylinux2014:
-    name: build python ${{ matrix.python-version }} manylinux2014
+  build_py_manylinux:
+    name: build python ${{ matrix.python-version }} manylinux_2_28
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
+    container: quay.io/pypa/manylinux_2_28_x86_64 #manylinux2014_x86_64
     strategy:
       matrix:
         python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312]
@@ -66,24 +69,31 @@ jobs:
     - name: info
       run: /opt/python/${{ matrix.python-version }}/bin/python --version
     - name: checkout
-      uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
+      uses: actions/checkout@v4.1.1 #needs to stay this version until we upgrade this os
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
       run: git submodule update --init
     - name: build python manylinux
-      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
+      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
     - name: list files
       run: ls -R
+    - name: test python
+      shell: bash
+      run: |
+        find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
+        /opt/python/${{ matrix.python-version }}/bin/python -m pip install --no-index tests/python/lib/*.whl --force-reinstall
+        cd tests/python
+        /opt/python/${{ matrix.python-version }}/bin/python -m unittest discover .
     - name: artifact name
       id: artifactname
       run: |
         cd wheelhouse
         echo "file=$(ls *.whl| head -1)" >> $GITHUB_OUTPUT
     - name: artifacts
-      uses: actions/upload-artifact@v3.1.3 #needs to stay this version until we upgrade this os
+      uses: actions/upload-artifact@v4.3.1 #needs to stay this version until we upgrade this os
       with:
         path: wheelhouse/*.whl
         name: ${{ steps.artifactname.outputs.file }}
@@ -93,19 +103,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, macos-11, macos-12, macos-14]
+        os: [windows-2019, macos-12, macos-14]
         python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
         include:
           - os: windows-2019
             target: windows
-          - os: macos-11
-            target: macos
           - os: macos-12
+            target: macos
+          - os: macos-14
             target: macos
         exclude:
           - os: macos-14
             python-version: 3.7
-            
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
@@ -138,6 +147,13 @@ jobs:
         shell: bash
       - name: list files
         run: ls -R
+      - name: test python bdist
+        shell: bash
+        run: |
+          find ./dist -type f -name "*.whl" -exec cp '{}' ./tests/python/lib \;
+          pip install --no-index tests/python/lib/*.whl --force-reinstall
+          cd tests/python
+          python -m unittest discover .
       - name: artifact name
         id: artifactname
         shell: bash
@@ -153,23 +169,23 @@ jobs:
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    container:
-      image: ${{ matrix.image }}
+    #container:
+      #image: ${{ matrix.image }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-11, windows-2022]
+        os: [ubuntu-latest, macos-14, windows-2022]
         include:
           - os: ubuntu-latest
             target: linux
-            image: mcneel/rhino3dm-dev-amzn2
+            #image: mcneel/rhino3dm-dev-amzn2
             artifact-path: src/build/linux/librhino3dm_native.so
           - os: windows-2022
             target: windows
-            image: ""
+            #image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
-          - os: macos-11
+          - os: macos-14
             target: macos
-            image: ""
+            #image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
       fail-fast: false
     steps:
@@ -182,9 +198,9 @@ jobs:
         if: ${{ matrix.target != 'linux' }}
         uses: jwlawson/actions-setup-cmake@v2.0.0
         with:
-          cmake-version: '3.21.1'
+          cmake-version: '3.25.0'
       - name: checkout
-        uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
+        uses: actions/checkout@v4.1.1
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
@@ -215,47 +231,10 @@ jobs:
         shell: bash
         run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.3 #needs to stay this version until we upgrade this os
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
-
-  build_js:
-    name: build rhino3dm.js
-    runs-on: ubuntu-latest
-    container:
-      image: emscripten/emsdk:3.1.30
-    steps:
-      - name: info
-        run: python3 --version && emcc --version && cmake --version
-      - name: checkout
-        uses: actions/checkout@v4.1.1
-      - name: safe dir
-        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
-      - name: update submodules
-        run: git submodule update --init
-      - name: bootstrap
-        run: python3 script/bootstrap.py -p js
-      - name: setup
-        run: python3 script/setup.py -p js -o -v
-      - name: build js
-        run: python3 script/build.py -p js -o -v
-      - name: copy files
-        shell: bash
-        run: |
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/rhino3dm.release.js src/build/javascript/artifacts_js/rhino3dm.js
-          cp src/js/rhino3dm.release.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          cp src/js/rhino3dm.release.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp src/js/rhino3dm.release.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
-      - name: artifacts
-        uses: actions/upload-artifact@v4.3.1
-        with:
-          path: src/build/javascript/artifacts_js
-          name: rhino3dm.js
-          retention-days: ${{ env.RETENTION_DAYS }}
 
   build_dotnet_arm64:
     name: build dotnet arm 64
@@ -289,7 +268,7 @@ jobs:
             python3 script/build.py -p linux -v -l
             ldd src/build/linux/librhino3dm_native.so
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: |
             src/build/linux/librhino3dm_native.so
@@ -320,22 +299,22 @@ jobs:
       - name: build dotnet
         run: dotnet build src/dotnet/Rhino3dm.csproj
       - name: download rhino3dm.net linux
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net linux
           path: src/build/linux/Release/
       - name: download rhino3dm.net linux arm64
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net linux arm64
           path: src/build/linux/arm64/Release/
       - name: download rhino3dm.net macos
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net macos
           path: src/build/macos/Release/
       - name: download rhino3dm.net windows
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net windows
           path: src/build/windows/
@@ -348,6 +327,101 @@ jobs:
         with:
           path: src/dotnet/bin/Release/Rhino3dm.*.nupkg #${{ matrix.artifact-path }}
           name: rhino3dm.net nupkg
+
+  build_js:
+    name: build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:3.1.30
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup js module
+        run: python3 script/setup.py -p js -o -v -m
+      - name: build js
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mkdir src/build/javascript/artifacts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
+          cp package.json src/build/javascript/artifacts
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
+      - name: setup js
+        run: python3 script/setup.py -p js -o -v
+      - name: build js
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          npm install -g uglify-js
+          cd src/build/javascript/artifacts
+          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
+          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
+      - name: artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: src/build/javascript/artifacts
+          name: rhino3dm.js
+          retention-days: ${{ env.RETENTION_DAYS }}
+
+# TESTS
+
+  test_javascript:
+    name: test javascript
+    runs-on: ubuntu-latest
+    needs: [build_js]
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && node --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js
+          path: tests/javascript/lib
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript
+          npm i
+          npm test
+    
+  test_dotnet:
+      name: test dotnet
+      runs-on: ubuntu-latest
+      needs: [pack_dotnet]
+      steps:
+        - name: checkout
+          uses: actions/checkout@v4.1.1
+        - name: download rhino3dm.net nuget
+          uses: actions/download-artifact@v4.1.7
+          with:
+            name: rhino3dm.net nupkg
+            path: tests/dotnet/lib
+        - name: test dotnet
+          run: |
+            NUGET_FILE="$(find tests/dotnet/lib -type f -name "*.nupkg")"
+            FILENAME=$(basename ${NUGET_FILE})
+            NAME=${FILENAME%.*}
+            VERSION=${NAME:9}
+            dotnet nuget add source $(pwd)/tests/dotnet/lib
+            cd tests/dotnet
+            dotnet add package Rhino3dm -v ${VERSION}
+            dotnet build
+            dotnet test
 
   # pack_py:
   #   name: pack python

@@ -12,34 +12,40 @@ class BND_AnnotationBase : public BND_GeometryBase
 {
   ON_Annotation* m_annotation = nullptr;
 protected:
+  BND_AnnotationBase();
   void SetTrackedPointer(ON_Annotation* annotation, const ON_ModelComponentReference* compref);
 
 public:
-  BND_AnnotationBase(ON_Annotation* annotation, const ON_ModelComponentReference* compref);
+  BND_AnnotationBase(ON_Annotation *annotation, const ON_ModelComponentReference *compref);
   //public Guid DimensionStyleId {get;set;}
-  //public bool HasPropertyOverrides {get;}
-  //public bool IsPropertyOverridden(DimensionStyle.Field field)
-  //public bool ClearPropertyOverrides()
-  //public DimensionStyle GetDimensionStyle(DimensionStyle parentDimStyle)
-  //public DimensionStyle DimensionStyle {get;}
-  //public bool SetOverrideDimStyle(DimensionStyle OverrideStyle)
-  //public DimensionStyle ParentDimensionStyle {get; set;}
-  //public double TextHeight {get; set;}
-  //public bool MaskEnabled { get;set;}
-  //public bool MaskUsesViewportColor{ get; set; }
-  //public DimensionStyle.MaskType MaskColorSource{ get; set; }
-  //public bool DrawTextFrame{ get; set; }
-  //public DimensionStyle.MaskFrame MaskFrame{ get; set; }
-  //public Color MaskColor{ get; set; }
-  //public double MaskOffset{ get; set; }
-  //public double DimensionScale{ get; set; }
-  //public bool DrawForward{ get; set; }
-  //public DocObjects.Font Font{ get; set; }
-  //public DimensionStyle.LengthDisplay DimensionLengthDisplay{ get; set; }
-  //public DimensionStyle.LengthDisplay AlternateDimensionLengthDisplay{ get; set; }
-  //public char DecimalSeparator{ get; set; }
-  //public Plane Plane{ get; set; }
-  //public string GetPlainTextWithRunMap(ref int[] map)
+  ON::AnnotationType AnnotationType() const;
+  BND_UUID DimensionStyleId() const;
+  // public bool HasPropertyOverrides {get;}
+  // public bool IsPropertyOverridden(DimensionStyle.Field field)
+  // public bool ClearPropertyOverrides()
+  // public DimensionStyle GetDimensionStyle(DimensionStyle parentDimStyle)
+  // public DimensionStyle DimensionStyle {get;}
+  //BND_DimensionStyle DimensionStyle();
+  // public bool SetOverrideDimStyle(DimensionStyle OverrideStyle)
+  // public DimensionStyle ParentDimensionStyle {get; set;}
+  // public double TextHeight {get; set;}
+  //  --- double TextHeight() const;
+  //  public bool MaskEnabled { get;set;}
+  //  public bool MaskUsesViewportColor{ get; set; }
+  //  public DimensionStyle.MaskType MaskColorSource{ get; set; }
+  //  public bool DrawTextFrame{ get; set; }
+  //  public DimensionStyle.MaskFrame MaskFrame{ get; set; }
+  //  public Color MaskColor{ get; set; }
+  //  public double MaskOffset{ get; set; }
+  //  public double DimensionScale{ get; set; }
+  //  public bool DrawForward{ get; set; }
+  //  public DocObjects.Font Font{ get; set; }
+  //  public DimensionStyle.LengthDisplay DimensionLengthDisplay{ get; set; }
+  //  public DimensionStyle.LengthDisplay AlternateDimensionLengthDisplay{ get; set; }
+  //  public char DecimalSeparator{ get; set; }
+  //  public Plane Plane{ get; set; }
+  BND_Plane Plane() const;
+  // public string GetPlainTextWithRunMap(ref int[] map)
   std::wstring RichText() const;
   //void SetRichText(const std::wstring& rtf);
   std::wstring PlainText() const;
@@ -59,14 +65,17 @@ public:
   //public double TextModelWidth{ get; }
   //public double FormatWidth{ get; set; }
   //public bool TextIsWrapped{ get; set; }
+  bool TextIsWrapped() const;
+  void SetTextIsWrapped(bool wrapped);
   //public void WrapText()
-  //public double TextRotationRadians{ get; set; }
-  //public double TextRotationDegrees{ get; set; }
-  //public virtual bool SetBold(bool set_on)
-  //public virtual bool SetItalic(bool set_on)
-  //public virtual bool SetUnderline(bool set_on)
-  //public virtual bool SetFacename(bool set_on, string facename)
-  //public bool RunReplace(
+  void WrapText(double wrapWidth);
+  // public double TextRotationRadians{ get; set; }
+  // public double TextRotationDegrees{ get; set; }
+  // public virtual bool SetBold(bool set_on)
+  // public virtual bool SetItalic(bool set_on)
+  // public virtual bool SetUnderline(bool set_on)
+  // public virtual bool SetFacename(bool set_on, string facename)
+  // public bool RunReplace(
 };
 
 
@@ -91,3 +100,103 @@ public:
   std::wstring GetFontFace() const { return std::wstring(m_dot->FontFace()); }
   void SetFontFace(const std::wstring& face) { m_dot->SetFontFace(face.c_str()); }
 };
+
+class BND_Text : public BND_AnnotationBase
+{
+  ON_Text* m_text = nullptr;
+protected:
+  void SetTrackedPointer(ON_Text* text, const ON_ModelComponentReference* compref);
+public:
+  BND_Text(ON_Text* text, const ON_ModelComponentReference* compref);
+};
+
+class BND_Leader : public BND_AnnotationBase
+{
+  ON_Leader* m_leader = nullptr;
+protected:
+  void SetTrackedPointer(ON_Leader* leader, const ON_ModelComponentReference* compref);
+public:
+  BND_Leader(ON_Leader* leader, const ON_ModelComponentReference* compref);
+
+#if defined(ON_PYTHON_COMPILE)
+  std::vector<ON_3dPoint> GetPoints() const;
+#else
+  emscripten::val GetPoints() const;
+#endif
+  ON_2dPoint GetTextPoint2d(const BND_DimensionStyle& dimstyle, double leaderscale) const;
+};
+
+class BND_Dimension : public BND_AnnotationBase
+{
+  ON_Dimension* m_dimension = nullptr;
+protected:
+  BND_Dimension();
+  void SetTrackedPointer(ON_Dimension* dimension, const ON_ModelComponentReference* compref);
+
+public:
+  BND_Dimension(ON_Dimension* dimension, const ON_ModelComponentReference* compref);
+};
+
+class BND_DimLinear : public BND_Dimension
+{
+  ON_DimLinear* m_dimLinear= nullptr;
+protected:
+  void SetTrackedPointer(ON_DimLinear* dimLinear, const ON_ModelComponentReference* compref);
+
+public:
+  BND_DimLinear(ON_DimLinear* dimLinear, const ON_ModelComponentReference* compref);
+  BND_DICT GetPoints() const;
+  BND_DICT GetDisplayLines(const BND_DimensionStyle& dimStyle);
+};
+
+class BND_DimAngular : public BND_Dimension
+{
+  ON_DimAngular* m_dimAngular= nullptr;
+protected:
+  void SetTrackedPointer(ON_DimAngular *dimAngular, const ON_ModelComponentReference *compref);
+
+public:
+  BND_DimAngular(ON_DimAngular* dimAngular, const ON_ModelComponentReference* compref);
+
+  BND_DICT GetPoints() const;
+  BND_DICT GetDisplayLines(const BND_DimensionStyle& dimStyle);
+  double Radius() const;
+  double Measurement() const;
+};
+
+class BND_DimRadial : public BND_Dimension
+{
+  ON_DimRadial* m_dimRadial= nullptr;
+protected:
+  void SetTrackedPointer(ON_DimRadial* dimRadial, const ON_ModelComponentReference* compref);
+
+public:
+  BND_DimRadial(ON_DimRadial* dimRadial, const ON_ModelComponentReference* compref);
+  BND_DICT GetPoints() const;
+  BND_DICT GetDisplayLines(const BND_DimensionStyle& dimStyle);
+
+};
+
+class BND_DimOrdinate : public BND_Dimension
+{
+  ON_DimOrdinate* m_dimOrdinate= nullptr;
+protected:
+  void SetTrackedPointer(ON_DimOrdinate* dimOrdinate, const ON_ModelComponentReference* compref);
+
+public:
+  BND_DimOrdinate(ON_DimOrdinate* dimOrdinate, const ON_ModelComponentReference* compref);
+  BND_DICT GetPoints() const;
+  BND_DICT GetDisplayLines(const BND_DimensionStyle& dimStyle);
+};
+
+class BND_Centermark : public BND_Dimension
+{
+  ON_Centermark* m_centermark= nullptr;
+protected:
+  void SetTrackedPointer(ON_Centermark* centermark, const ON_ModelComponentReference* compref);
+
+public:
+  BND_Centermark(ON_Centermark* centermark, const ON_ModelComponentReference* compref);
+  std::vector<ON_Line> GetDisplayLines(const BND_DimensionStyle& dimStyle);
+};
+

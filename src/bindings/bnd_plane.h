@@ -17,12 +17,17 @@ public:
   BND_Plane(ON_3dPoint origin, ON_3dVector xDirection, ON_3dVector yDirection);
   BND_Plane(double a, double b, double c, double d);
 
+  BND_Plane Rotate(double angle, const ON_3dVector &axis);
+
   ON_Plane ToOnPlane() const;
   static BND_Plane FromOnPlane(const ON_Plane& plane);
   static BND_Plane WorldXY();
   static BND_Plane WorldYZ();
   static BND_Plane WorldZX();
   static BND_Plane Unset();
+
+  ON_3dPoint PointAtUV(double u, double v) const;
+  ON_3dPoint PointAtUVW(double u, double v, double w) const;
 
 #if defined(__EMSCRIPTEN__)
   emscripten::val toJSON(emscripten::val key);

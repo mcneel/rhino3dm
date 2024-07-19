@@ -1576,20 +1576,8 @@ namespace Rhino
     internal delegate void RhCmnEmptyCallback();
 
     private static RhCmnEmptyCallback m_OnEscapeKey;
-    private static void OnEscapeKey()
-    {
-      if (m_escape_key != null)
-      {
-        try
-        {
-          m_escape_key(null, System.EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnEscapeKey() => m_escape_key?.SafeInvoke();
+
     private static EventHandler m_escape_key;
 
     /// <summary>
@@ -1673,20 +1661,8 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnInitApp;
-    private static void OnInitApp()
-    {
-      if (m_init_app != null)
-      {
-        try
-        {
-          m_init_app(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnInitApp() => m_init_app.SafeInvoke();
+
     internal static EventHandler m_init_app;
 
     private static readonly object m_event_lock = new object();
@@ -1726,20 +1702,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnCloseApp;
-    private static void OnCloseApp()
-    {
-      if (m_close_app != null)
-      {
-        try
-        {
-          m_close_app(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnCloseApp() => m_close_app?.SafeInvoke();
 
     internal static EventHandler m_close_app;
 
@@ -1778,20 +1741,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnAppSettingsChanged;
-    private static void OnAppSettingsChanged()
-    {
-      if (m_appsettings_changed != null)
-      {
-        try
-        {
-          m_appsettings_changed(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnAppSettingsChanged() => m_appsettings_changed?.SafeInvoke();
 
     internal static EventHandler m_appsettings_changed;
 
@@ -1829,20 +1779,8 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnIdle;
-    private static void OnIdle()
-    {
-      if (m_idle_occured != null)
-      {
-        try
-        {
-          m_idle_occured(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnIdle() => m_idle_occured?.SafeInvoke();
+
     private static EventHandler m_idle_occured;
 
     internal static void OnSettingsSaved(bool writing, bool dirty)
@@ -1890,20 +1828,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnMainLoop;
-    private static void OnMainLoop()
-    {
-      if (m_main_loop_occured != null)
-      {
-        try
-        {
-          m_main_loop_occured(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          Runtime.HostUtils.ExceptionReport(ex);
-        }
-      }
-    }
+    private static void OnMainLoop() => m_main_loop_occured?.SafeInvoke();
 
     private static EventHandler m_main_loop_occured;
 
@@ -1963,12 +1888,7 @@ namespace Rhino
     private static RhCmnOneUintCallback m_OnNewRdkDocument;
     private static void OnNewRdkDocument(uint docSerialNumber)
     {
-      if (m_new_rdk_document != null)
-      {
-        var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-        try                     { m_new_rdk_document(doc, EventArgs.Empty); }
-        catch (Exception ex)    { Runtime.HostUtils.ExceptionReport(ex); }
-      }
+      m_new_rdk_document?.SafeInvoke(RhinoDoc.FromRuntimeSerialNumber(docSerialNumber));
     }
     internal static EventHandler m_new_rdk_document;
 
@@ -2001,14 +1921,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnRdkGlobalSettingsChanged;
-    private static void OnRdkGlobalSettingsChanged()
-    {
-      if (m_rdk_global_settings_changed != null)
-      {
-        try { m_rdk_global_settings_changed(null, System.EventArgs.Empty); }
-        catch (Exception ex) { Runtime.HostUtils.ExceptionReport(ex); }
-      }
-    }
+    private static void OnRdkGlobalSettingsChanged() => m_rdk_global_settings_changed?.SafeInvoke();
     internal static EventHandler m_rdk_global_settings_changed;
 
     /// <summary>
@@ -2041,12 +1954,7 @@ namespace Rhino
     private static RhCmnOneUintCallback m_OnRdkUpdateAllPreviews;
     private static void OnRdkUpdateAllPreviews(uint docSerialNumber)
     {
-      if (m_rdk_update_all_previews != null)
-      {
-        var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-        try { m_rdk_update_all_previews(doc, EventArgs.Empty); }
-        catch (Exception ex) { Runtime.HostUtils.ExceptionReport(ex); }
-      }
+      m_rdk_update_all_previews?.SafeInvoke(RhinoDoc.FromRuntimeSerialNumber(docSerialNumber));
     }
     internal static EventHandler m_rdk_update_all_previews;
 
@@ -2078,14 +1986,7 @@ namespace Rhino
     
 
     private static RhCmnEmptyCallback m_OnCacheImageChanged;
-    private static void OnRdkCacheImageChanged()
-    {
-      if (m_rdk_cache_image_changed != null)
-      {
-        try { m_rdk_cache_image_changed(null, System.EventArgs.Empty); }
-        catch (Exception ex) { Runtime.HostUtils.ExceptionReport(ex); }
-      }
-    }
+    private static void OnRdkCacheImageChanged() => m_rdk_cache_image_changed?.SafeInvoke();
     internal static EventHandler m_rdk_cache_image_changed;
 
     /// <summary>
@@ -2115,14 +2016,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnRendererChanged;
-    private static void OnRendererChanged()
-    {
-      if (m_renderer_changed != null)
-      {
-        try { m_renderer_changed(null, System.EventArgs.Empty); }
-        catch (Exception ex) { Runtime.HostUtils.ExceptionReport(ex); }
-      }
-    }
+    private static void OnRendererChanged() => m_renderer_changed?.SafeInvoke();
     internal static EventHandler m_renderer_changed;
 
     /// <summary>
@@ -2155,14 +2049,7 @@ namespace Rhino
 
     internal delegate void ClientPlugInUnloadingCallback(Guid plugIn);
     private static ClientPlugInUnloadingCallback m_OnClientPlugInUnloading;
-    private static void OnClientPlugInUnloading(Guid plugIn)
-    {
-      if (m_client_plugin_unloading != null)
-      {
-        try { m_renderer_changed(null, System.EventArgs.Empty); }
-        catch (Exception ex) { Runtime.HostUtils.ExceptionReport(ex); }
-      }
-    }
+    private static void OnClientPlugInUnloading(Guid plugIn) => m_client_plugin_unloading?.SafeInvoke();
     internal static EventHandler m_client_plugin_unloading;
 
     /// <summary>

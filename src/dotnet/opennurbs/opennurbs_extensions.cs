@@ -1664,6 +1664,22 @@ namespace Rhino.FileIO
       return rc;
     }
 
+    /// <summary>
+    /// Gets the texture mapping from the <see cref="File3dmObject"/> object.
+    /// </summary>
+    /// <param name="mappingChannelId">The mapping channel id to search for.</param>
+    /// <param name="xform">The transformation that was applied to the mapping.</param>
+    /// <returns>The texture mapping if found, null otherwise.</returns>
+    public Rhino.Render.TextureMapping GetTextureMapping(int mappingChannelId, out Transform xform)
+    {
+      IntPtr const_ptr_model = m_parent.ConstPointer();
+      IntPtr const_ptr_object = GetGeometryConstPointer();
+      Transform xformOut = new Transform();
+      IntPtr ptr_mapping = UnsafeNativeMethods.ON_TextureMapping_GetMappingFromONXModelObject(const_ptr_model, m_id, mappingChannelId, ref xformOut);
+      xform = xformOut;
+      return ptr_mapping == IntPtr.Zero ? null : new Rhino.Render.TextureMapping(ptr_mapping);
+    }
+
   }
 
   /// <summary>
@@ -1772,7 +1788,10 @@ namespace Rhino.FileIO
     /// <returns>Reference to the rhino object with the objectId or null if no such object could be found.</returns>
     public virtual T FindId(Guid id)
     {
-      return (T)m_manifest.FindId(id, ComponentType);
+      if (m_manifest.FindId(id, ComponentType) is T item && !item.IsDeleted)
+        return item;
+
+      return null;
     }
 
     /// <summary>
@@ -1868,17 +1887,43 @@ namespace Rhino.FileIO
 
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
-      GenericIListImplementation.CopyTo<T>(this, array, arrayIndex);
+      if (_nonIndexedTable)
+      {
+        int i = -1;
+        var enumerator = m_manifest.GetEnumerator(ComponentType);
+        while (enumerator.MoveNext())
+        {
+          if (++i < arrayIndex) continue;
+          array[i] = (T)enumerator.Current;
+        }
+      }
+      else GenericIListImplementation.CopyTo(this, array, arrayIndex);
     }
 
     int IList<T>.IndexOf(T item)
     {
       if (item == null) return -1;
 
-      if (FindId(item.Id) != null)
-        return item.Index;
-      else
-        return -1;
+      if (m_manifest.FindId(item.Id, ComponentType) != null)
+      {
+        if (_nonIndexedTable)
+        {
+          int i = 0;
+          var enumerator = m_manifest.GetEnumerator(ComponentType);
+          while (enumerator.MoveNext())
+          {
+            if (item.Id == enumerator.Current?.Id) // Questionmark is here because may be null when objects are purged.
+              return i;
+            i++;
+          }
+        }
+        else
+        {
+          return item.Index;
+        }
+      }
+
+      return -1;
     }
 
     void IList<T>.Insert(int index, T item)

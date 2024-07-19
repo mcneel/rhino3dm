@@ -8,6 +8,34 @@ declare module 'rhino3dm' {
 		PageSpace
 	}
 
+	enum AnnotationTypes {
+		Unset,
+		Aligned,
+		Angular,
+		Diameter,
+		Radius,
+		Rotated,
+		Ordinate,
+		ArcLen,
+		CenterMark,
+		Text,
+		Leader,
+		Angular3pt
+	}
+
+	enum ArrowheadTypes {
+		None,
+		UserBlock,
+		SolidTriangle,
+		Dot,
+		Tick,
+		ShortTriangle,
+		OpenArrow,
+		Rectangle,
+		LongTriangle,
+		LongerTriangle
+	}
+
 	enum BasepointZero {
 		GroundLevel,
 		MeanSeaLevel,
@@ -354,6 +382,8 @@ declare module 'rhino3dm' {
 
 	class RhinoModule {
 		ActiveSpace: typeof ActiveSpace
+		AnnotationTypes: typeof AnnotationTypes
+		ArrowheadTypes: typeof ArrowheadTypes
 		BasepointZero: typeof BasepointZero
 		ComponentIndexType: typeof ComponentIndexType
 		CoordinateSystem: typeof CoordinateSystem
@@ -393,6 +423,7 @@ declare module 'rhino3dm' {
 		Arc: typeof Arc;
 		ArcCurve: typeof ArcCurve;
 		ArchivableDictionary: typeof ArchivableDictionary;
+		Arrowhead: typeof Arrowhead;
 		BezierCurve: typeof BezierCurve;
 		Bitmap: typeof Bitmap;
 		BoundingBox: typeof BoundingBox;
@@ -405,6 +436,8 @@ declare module 'rhino3dm' {
 		BrepSurfaceList: typeof BrepSurfaceList;
 		BrepVertex: typeof BrepVertex;
 		BrepVertexList: typeof BrepVertexList;
+		CachedTextureCoordinates: typeof CachedTextureCoordinates;
+		Centermark: typeof Centermark;
 		Circle: typeof Circle;
 		CommonObject: typeof CommonObject;
 		ComponentIndex: typeof ComponentIndex;
@@ -416,7 +449,12 @@ declare module 'rhino3dm' {
 		CurveProxy: typeof CurveProxy;
 		Cylinder: typeof Cylinder;
 		Decal: typeof Decal;
+		DimAngular: typeof DimAngular;
+		Dimension: typeof Dimension;
 		DimensionStyle: typeof DimensionStyle;
+		DimLinear: typeof DimLinear;
+		DimOrdinate: typeof DimOrdinate;
+		DimRadial: typeof DimRadial;
 		Displacement: typeof Displacement;
 		Dithering: typeof Dithering;
 		DracoCompression: typeof DracoCompression;
@@ -460,6 +498,7 @@ declare module 'rhino3dm' {
 		InstanceReference: typeof InstanceReference;
 		Intersection: typeof Intersection;
 		Layer: typeof Layer;
+		Leader: typeof Leader;
 		Light: typeof Light;
 		Line: typeof Line;
 		LinearWorkflow: typeof LinearWorkflow;
@@ -512,6 +551,7 @@ declare module 'rhino3dm' {
 		Sun: typeof Sun;
 		Surface: typeof Surface;
 		SurfaceProxy: typeof SurfaceProxy;
+		Text: typeof Text;
 		TextDot: typeof TextDot;
 		Texture: typeof Texture;
 		TextureMapping: typeof TextureMapping;
@@ -522,6 +562,17 @@ declare module 'rhino3dm' {
 	}
 
 	class AnnotationBase extends GeometryBase {
+		/**
+		 * Type of annotation
+		 */
+		annotationType: AnnotationTypes;
+		/**
+		 * Id of this annotation's parent dimstyle
+		 * If this annotation has overrides to dimstyle properties,
+		 * those overrides will be represented in the DimensionStyle
+		 * returned by DimensionStyle(ParentStyle)
+		 */
+		dimensionStyleId: string;
 		/**
 		 * Text including additional RTF formatting information
 		 */
@@ -534,6 +585,19 @@ declare module 'rhino3dm' {
 		 * Text stripped of RTF formatting information and with field expressions intact
 		 */
 		plainTextWithFields: string;
+		/**
+		 * Plane that this annotation lies on
+		 */
+		plane: Plane;
+		/**
+		 * Is text wrapping on
+		 */
+		textIsWrapped: boolean;
+		/**
+		 * @description Wrap text
+		 * @returns {void}
+		 */
+		wrapText(): void;
 	}
 
 	class Arc {
@@ -745,6 +809,11 @@ declare module 'rhino3dm' {
 		static decodeDict(): void;
 		/** ... */
 		static writeGeometry(): void;
+	}
+
+	class Arrowhead {
+		/** ... */
+		static getPoints(): number[][];
 	}
 
 	class BezierCurve {
@@ -1151,7 +1220,7 @@ declare module 'rhino3dm' {
 
 	class BrepFace extends SurfaceProxy {
 		/**
-		 * Gets or sets face orientation.
+		 * Gets or sets face orientation. true if face orientation is opposite of natural surface orientation.
 		 */
 		orientationIsReversed: boolean;
 		/**
@@ -1243,6 +1312,51 @@ declare module 'rhino3dm' {
 		 * @param {number} index integer index of BrepVertex to retrieve from the list
 		*/
 		get(index:number): BrepVertex;
+	}
+
+	class CachedTextureCoordinates {
+		/**
+		 * Number of cached coordinates.
+		 */
+		count: number;
+		/**
+		 */
+		dimension: number;
+		/**
+		 * The texture mapping Id.
+		 */
+		mappingId: string;
+		/**
+		 * This collection is always read-only
+		 */
+		isReadOnly: boolean;
+		/**
+		 * @description Use this method to iterate the cached texture coordinate array.
+		 * @param {number} index Index for the vertex to fetch.
+		 * @returns {Array} [boolean, number, number, number]
+		 * (boolean) Returns true if index is valid; otherwise returns false.
+		 * (number) Output parameter which will receive the U value.
+		 * (number) Output parameter which will receive the V value.
+		 * (number) Output parameter which will receive the W value, this is only
+		meaningful if  is 3.
+		 */
+		tryGetAt(index:number): object;
+		/**
+		 * @description Determines the index of a specific point in this collection.
+		 * @param {number[]} item The point (UV or UVW) to locate in this collection.
+		 * @returns {number} The index of item if found in the list; otherwise, -1.
+		 */
+		indexOf(item:number[]): number;
+		/**
+		 * @description Determines whether this collection contains a specific value.
+		 * @returns {boolean}
+		 */
+		contains(): boolean;
+	}
+
+	class Centermark extends Dimension {
+		/** ... */
+		getDisplayLines(): Line[];
 	}
 
 	class Circle {
@@ -1591,11 +1705,11 @@ declare module 'rhino3dm' {
 		tangentAtEnd: number[];
 		/**
 		 * @description Constructs a curve from a set of control-point locations.
-		 * @param {number[][]} points Control points.
+		 * @param {number[][] | Point3dList} points Control points as an array of arrays containing three numbers or a Point3dList.
 		 * @param {number} degree Degree of curve. The number of control points must be at least degree+1.
 		 * @returns {Curve}
 		 */
-		static createControlPointCurve(points:number[][],degree:number): Curve;
+		static createControlPointCurve(points:number[][] | Point3dList, degree:number): Curve;
 		/**
 		 * @description Changes the dimension of a curve.
 		 * @param {number} desiredDimension The desired dimension.
@@ -1954,15 +2068,24 @@ declare module 'rhino3dm' {
 		/**
 		 * The V min bounds of the decal.
 		 */
-		boundsMinV: number;
+		boundsMaxV: any;
+	}
+
+	class DimAngular extends Dimension {
 		/**
-		 * The U max bounds of the decal.
 		 */
-		boundsMaxU: number;
+		points: object;
 		/**
-		 * The V bounds of the decal.
 		 */
-		boundsMaxV: number;
+		radius: number;
+		/**
+		 */
+		angle: number;
+		/** ... */
+		getDisplayLines(): object;
+	}
+
+	class Dimension extends AnnotationBase {
 	}
 
 	class DimensionStyle extends CommonObject {
@@ -2013,13 +2136,22 @@ declare module 'rhino3dm' {
 		leaderArrowLength: number;
 		/**
 		 */
+		arrowType1: ArrowheadTypes;
+		/**
+		 */
+		arrowType2: ArrowheadTypes;
+		/**
+		 */
+		leaderArrowType: ArrowheadTypes;
+		/**
+		 */
 		centermarkSize: number;
 		/**
 		 */
 		textGap: number;
 		/**
 		 */
-		textHEight: number;
+		textHeight: number;
 		/**
 		 */
 		lengthFactor: number;
@@ -2047,6 +2179,21 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		leaderLandingLength: number;
+		/**
+		 */
+		extensionLineExtension: number;
+		/**
+		 */
+		extensionLineOffset: number;
+		/**
+		 */
+		dimensionLineExtension: number;
+		/**
+		 */
+		fixedExtensionLength: number;
+		/**
+		 */
+		fixedExtensionLengthOn: any;
 		/**
 		 * Checks if any fields in this DimensionStyle are overrides
 		 */
@@ -2081,6 +2228,30 @@ declare module 'rhino3dm' {
 		False otherwise.
 		 */
 		isChildOf(id:string): boolean;
+	}
+
+	class DimLinear extends Dimension {
+		/**
+		 */
+		points: object;
+		/** ... */
+		getDisplayLines(): object;
+	}
+
+	class DimOrdinate extends Dimension {
+		/**
+		 */
+		points: object;
+		/** ... */
+		getDisplayLines(): object;
+	}
+
+	class DimRadial extends Dimension {
+		/**
+		 */
+		points: object;
+		/** ... */
+		getDisplayLines(): object;
 	}
 
 	class Displacement {
@@ -2517,7 +2688,7 @@ declare module 'rhino3dm' {
 		 * @description Sets a specified type of mesh for this extrusion.
 		 * @param {Mesh} mesh The mesh.
 		 * @param {MeshType} meshType The mesh type.
-		 * @returns {boolean} A bool.
+		 * @returns {boolean} True on success.
 		 */
 		setMesh(mesh:Mesh,meshType:MeshType): boolean;
 	}
@@ -2886,10 +3057,10 @@ declare module 'rhino3dm' {
 		addLine(from:number[],to:number[]): string;
 		/**
 		 * @description Adds a polyline object to Rhino.
-		 * @param {number[][]} points An array of points in [x, y, z] format.
+		 * @param {number[][] | Point3dList} points An array of points in [x, y, z] format or Point3dList. 
 		 * @returns {string} A unique identifier for the object.
 		 */
-		addPolyline(points:number[][]): string;
+		addPolyline(points:number[][] | Point3dList): string;
 		/**
 		 * @description Adds a curve object to the document representing an arc.
 		 * @param {Arc} arc An arc.
@@ -3674,6 +3845,14 @@ declare module 'rhino3dm' {
 		unsetPersistentLocking(): void;
 	}
 
+	class Leader extends AnnotationBase {
+		/**
+		 */
+		points: number[][];
+		/** ... */
+		getTextPoint2d(): number[];
+	}
+
 	class Light extends GeometryBase {
 		/**
 		 * Gets or sets a value that defines if the light is turned on (true) or off (false).
@@ -3836,8 +4015,36 @@ declare module 'rhino3dm' {
 		 * when a new Length is set.
 		 */
 		length: number;
+		/**
+		 * Gets a value indicating whether or not this line is valid.
+		 * Valid lines must have valid start and end points, and the points must not be equal.
+		 */
+		isValid: boolean;
+		/**
+		 * Gets the direction of this line segment.
+		 * The length of the direction vector equals the length of
+		 * the line segment.
+		 */
+		direction: number[];
+		/**
+		 * Gets the tangent of the line segment.
+		 * Note that tangent vectors are always unit vectors.
+		 */
+		unitTangent: number[];
 
 		constructor(from: number[], to: number[]);
+		/**
+		 * @description Evaluates the line at the specified parameter.
+		 * @param {number} t Parameter to evaluate line segment at. Line parameters are normalized parameters.
+		 * @returns {number[]} The point at the specified parameter.
+		 */
+		pointAt(t:number): number[];
+		/**
+		 * @description Transform the line using a Transformation matrix.
+		 * @param {Transform} xform Transform to apply to this line.
+		 * @returns {boolean} true on success, false on failure.
+		 */
+		transform(xform:Transform): boolean;
 	}
 
 	class LinearWorkflow {
@@ -4158,6 +4365,15 @@ declare module 'rhino3dm' {
 		 * @returns {void}
 		 */
 		setTextureCoordinates(tm:TextureMapping,xf:Transform,lazy:boolean): void;
+		/** TODO */
+		setCachedTextureCoordinates(): void;
+		/**
+		 * @description Call this method to get cached texture coordinates for a texture
+		mapping with the specified Id.
+		 * @param {string} textureMappingId Texture mapping Id
+		 * @returns {CachedTextureCoordinates} Object which allows access to coordinates and other props.
+		 */
+		getCachedTextureCoordinates(textureMappingId:string): CachedTextureCoordinates;
 		/**
 		 * @description Removes any unreferenced objects from arrays, re-indexes as needed
 		and shrinks arrays to minimum required size.
@@ -4684,11 +4900,11 @@ declare module 'rhino3dm' {
 		 * @description Constructs a 3D NURBS curve from a list of control points.
 		 * @param {boolean} periodic If true, create a periodic uniform curve. If false, create a clamped uniform curve.
 		 * @param {number} degree (>=1) degree=order-1.
-		 * @param {Point3dList} points control vertex locations.
+		 * @param {number[][] | Point3dList} points control vertex locations as an array of points or a Point3dList.
 		 * @returns {NurbsCurve} new NURBS curve on success
 		null on error.
 		 */
-		static create(periodic:boolean,degree:number,points:Point3dList): NurbsCurve;
+		static create(periodic:boolean,degree:number,points: number[][] | Point3dList): NurbsCurve;
 		/**
 		 * @description Increase the degree of this curve.
 		 * @param {number} desiredDegree The desired degree.
@@ -5331,8 +5547,11 @@ declare module 'rhino3dm' {
 		 * @returns {void}
 		 */
 		setAllZ(): void;
-		/** ... */
-		append(): void;
+		/**
+		 * @description Add a range of points to the list.
+		 * @param {number[][]} points Points to add.
+		*/
+		append(points: number[][]): void;
 	}
 
 	class PointCloud extends GeometryBase {
@@ -5389,7 +5608,7 @@ declare module 'rhino3dm' {
 		 */
 		insertNew(index:number): PointCloudItem;
 		/**
-		 * @description Copies the point values of another point cloud into this one.
+		 * @description Merges, or appends, a specified point cloud into this one.
 		 * @param {PointCloud} other PointCloud to merge with this one.
 		 * @returns {void}
 		 */
@@ -5415,17 +5634,17 @@ declare module 'rhino3dm' {
 		 * @param {number[][]} points Points to append.
 		 * @returns {void}
 		 */
-		addRange(points:number[][]): void;
+		addRangePoints(points:number[][]): void;
 		/** ... */
-		addRangePointNormal(points:number[][], normals:number[][]): void;
+		addRangePointsNormals(points:number[][], normals:number[][]): void;
 		/** ... */
-		addRangePointColor(points:number[][], colors:object[]): void;
+		addRangePointsColors(points:number[][], colors:object[]): void;
 		/** ... */
-		addRangePointNormalColor(points:number[][], normals:number[][], colors:object[]): void;
+		addRangePointsNormalsColors(points:number[][], normals:number[][], colors:object[]): void;
 		/** ... */
-		addRangePointValue(points:number[][], values:number[]): void;
+		addRangePointsValues(points:number[][], values:number[]): void;
 		/** ... */
-		addRangePointNormalColorValue(points:number[][], normals:number[][], colors:object[], values:number[]): void;
+		addRangePointsNormalsColorsValues(points:number[][], normals:number[][], colors:object[], values:number[]): void;
 		/**
 		 * @description Inserts a new point into the point list.
 		 * @param {number} index Insertion index.
@@ -5712,13 +5931,19 @@ declare module 'rhino3dm' {
 		static createStarPolygon(circle:Circle,radius:number,cornerCount:number): Polyline;
 		/**
 		 * @description Creates a polyline of points to this point cloud.
-		 * @param {number[][]} points Points to use for polyline creation.
+		 * @param {number[][] | Point3dList} points Points to use for polyline creation as an array of points [x, y, z] or Point3dList.
 		 * @returns {Polyline}
 		 */
-		static createFromPoints(points:number[][]): Polyline;
+		static createFromPoints(points:number[][] | Point3dList): Polyline;
 	}
 
 	class PolylineCurve extends Curve {
+
+		/**
+		 * @description Constructs a new polyline curve from a list of points.
+		 * @param {number[][] | Point3dList} points Points to use for PolylineCurve creation as an array of points [x, y, z] or Point3dList.
+		 */
+		constructor(points: number[][] | Point3dList);
 		/**
 		 * Gets the number of points in this polyline.
 		 */
@@ -6298,7 +6523,8 @@ declare module 'rhino3dm' {
 		 */
 		isSolid: boolean;
 		/**
-		 * @description Clear cached information that depends on the location of vertex control points
+		 * @description Clear all cached evaluation information (meshes, surface points, bounding boxes, ...)
+		that depends on edge tags, vertex tags, and the location of vertex control points.
 		 * @returns {void}
 		 */
 		clearEvaluationCache(): void;
@@ -6579,6 +6805,9 @@ declare module 'rhino3dm' {
 	class SurfaceProxy extends Surface {
 	}
 
+	class Text extends AnnotationBase {
+	}
+
 	class TextDot extends GeometryBase {
 		/**
 		 * Gets or sets the position of the text dot.
@@ -6666,6 +6895,13 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		isPeriodic: boolean;
+		/**
+		 */
+		hasId: boolean;
+		/**
+		 * The unique Id for this texture mapping object.
+		 */
+		id: string;
 		/**
 		 * @description Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.
 		 * @returns {TextureMapping} TextureMapping instance or null if failed.

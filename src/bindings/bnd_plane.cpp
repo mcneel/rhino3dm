@@ -79,6 +79,27 @@ BND_Plane BND_Plane::Unset()
   return rc;
 }
 
+ON_3dPoint BND_Plane::PointAtUV(double u, double v) const
+{
+  ON_Plane plane = ToOnPlane();
+  return plane.PointAt(u, v);
+}
+
+ON_3dPoint BND_Plane::PointAtUVW(double u, double v, double w) const
+{
+  ON_Plane plane = ToOnPlane();
+  return plane.PointAt(u, v, w);
+}
+
+BND_Plane BND_Plane::Rotate(double angle, const ON_3dVector &axis)
+{
+  ON_Plane plane = ToOnPlane();
+  if(plane.Rotate(angle, axis))
+    return FromOnPlane(plane);
+
+  return *this;
+}
+
 #if defined(ON_WASM_COMPILE)
 emscripten::val BND_Plane::Encode() const
 {
@@ -182,6 +203,9 @@ void initPlaneBindings(pybind11::module& m)
     .def(py::init<ON_3dPoint, ON_3dPoint, ON_3dPoint>(), py::arg("origin"), py::arg("xPoint"), py::arg("yPoint"))
     .def(py::init<ON_3dPoint, ON_3dVector, ON_3dVector>(), py::arg("origin"), py::arg("xDirection"), py::arg("yDirection"))
     .def(py::init<double, double, double, double>(), py::arg("a"), py::arg("b"), py::arg("c"), py::arg("d"))
+    .def("PointAt", &BND_Plane::PointAtUV, py::arg("u"), py::arg("v"))
+    .def("PointAt", &BND_Plane::PointAtUVW, py::arg("u"), py::arg("v"), py::arg("w"))
+    .def("Rotate", &BND_Plane::Rotate, py::arg("angle"), py::arg("axis"))
     .def_readwrite("Origin", &BND_Plane::m_origin)
     .def_readwrite("XAxis", &BND_Plane::m_xaxis)
     .def_readwrite("YAxis", &BND_Plane::m_yaxis)

@@ -862,6 +862,79 @@ int BND_MeshTextureCoordinateList::Add(float s, float t)
   return m_mesh->m_T.Count() - 1;
 }
 
+BND_CachedTextureCoordinates::BND_CachedTextureCoordinates(const ON_TextureCoordinates& tc) : m_ctc(tc){}
+
+BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) const
+{
+
+  if ( index < 0 || index >= m_ctc.m_T.Count() ) return NullTuple();
+
+  bool success = false;
+  double u = 0;
+  double v = 0;
+  double w = 0;
+  
+  u = m_ctc.m_T[index].x;
+  v = m_ctc.m_T[index].y;
+  w = m_ctc.m_T[index].z;
+
+  success = m_ctc.m_dim > 0 ? true : false;
+
+  BND_TUPLE rc = CreateTuple(4);
+  SetTuple<bool>(rc, 0, success);
+  SetTuple<double>(rc, 1, u);
+  SetTuple<double>(rc, 2, v);
+  SetTuple<double>(rc, 3, w);
+  return rc;
+
+}
+
+int BND_CachedTextureCoordinates::IndexOf(double x, double y, double z) const
+{
+
+  int count = m_ctc.m_T.Count();
+
+  for (int i = 0; i < count; i++)
+  {
+    double u, v, w;
+    u = m_ctc.m_T[i].x;
+    v = m_ctc.m_T[i].y;
+    w = m_ctc.m_T[i].z;
+    bool success = m_ctc.m_dim > 0? true : false;
+
+    if (success && u == x && v == y && ( m_ctc.m_dim < 3 || w == z))
+      return i;
+
+  }
+
+  return -1;
+  
+}
+
+bool BND_CachedTextureCoordinates::Contains(double x, double y, double z) const
+{
+
+  int index = IndexOf(x, y, z);
+  return (index >= 0);
+
+}
+
+BND_CachedTextureCoordinates BND_Mesh::GetCachedTextureCoordinates( BND_UUID mappingId )
+{
+  const ON_TextureCoordinates* tc = m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(mappingId) );
+  return BND_CachedTextureCoordinates(*tc);
+}
+
+void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf)
+{
+  if (tm)
+  {
+    const ON_Xform* xform = xf ? &(xf->m_xform) : nullptr;
+    m_mesh->SetCachedTextureCoordinates(*tm->m_mapping, xform, false);
+  }
+}
+
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -970,6 +1043,16 @@ void initMeshBindings(pybind11::module& m)
     .def("__setitem__", &BND_MeshTextureCoordinateList::SetTextureCoordinate)
     .def("__add__", &BND_MeshTextureCoordinateList::Add);
 
+  py::class_<BND_CachedTextureCoordinates>(m, "CachedTextureCoordinates")
+    .def("__len__", &BND_CachedTextureCoordinates::Count)
+    .def_property_readonly("Dimension", &BND_CachedTextureCoordinates::Dim)
+    .def_property_readonly("MappingId", &BND_CachedTextureCoordinates::MappingId)
+    .def_property_readonly("IsReadOnly", &BND_CachedTextureCoordinates::IsReadOnly)
+    .def("TryGetAt", &BND_CachedTextureCoordinates::TryGetAt, py::arg("index"))
+    .def("IndexOf", &BND_CachedTextureCoordinates::IndexOf, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("Contains", &BND_CachedTextureCoordinates::Contains, py::arg("x"), py::arg("y"), py::arg("z"))
+    ;
+
   py::class_<BND_Mesh, BND_GeometryBase>(m, "Mesh")
     .def(py::init<>())
     .def_static("CreateFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, py::arg("subd"), py::arg("includeTextureCoordinates"))
@@ -989,6 +1072,8 @@ void initMeshBindings(pybind11::module& m)
     .def("DestroyTree", &BND_Mesh::DestroyTree)
     .def("DestroyPartition", &BND_Mesh::DestroyPartition)
     .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
+    .def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"))
+    .def("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("id"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -1107,6 +1192,16 @@ void initMeshBindings(void*)
     .function("add", &BND_MeshTextureCoordinateList::Add)
     ;
 
+  class_<BND_CachedTextureCoordinates>("CachedTextureCoordinates")
+    .property("count", &BND_CachedTextureCoordinates::Count)
+    .property("dimension", &BND_CachedTextureCoordinates::Dim)
+    .property("mappingId", &BND_CachedTextureCoordinates::MappingId)
+    .property("isReadOnly", &BND_CachedTextureCoordinates::IsReadOnly)
+    .function("tryGetAt", &BND_CachedTextureCoordinates::TryGetAt)
+    .function("indexOf", &BND_CachedTextureCoordinates::IndexOf)
+    .function("contains", &BND_CachedTextureCoordinates::Contains)
+    ;
+
   class_<BND_Mesh, base<BND_GeometryBase>>("Mesh")
     .constructor<>()
     .class_function("createFromSubDControlNet", &BND_Mesh::CreateFromSubDControlNet, allow_raw_pointers())
@@ -1127,6 +1222,8 @@ void initMeshBindings(void*)
     .function("destroyTree", &BND_Mesh::DestroyTree)
     .function("destroyPartition", &BND_Mesh::DestroyPartition)
     .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
+    .function("setCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, allow_raw_pointers())
+    .function("getCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates)
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)

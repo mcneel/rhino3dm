@@ -38,25 +38,31 @@ public:
   BND_UUID GetLeaderArrowBlockId() const { return ON_UUID_to_Binding(m_dimstyle->LeaderArrowBlockId()); }
   void SetLeaderArrowBlockId(BND_UUID id) { m_dimstyle->SetLeaderArrowBlockId(Binding_to_ON_UUID(id)); }
 
+  ON_Arrowhead::arrow_type ArrowType1() const;
+  ON_Arrowhead::arrow_type ArrowType2() const;
+  ON_Arrowhead::arrow_type LeaderArrowType() const;
+
   DIMSTYLE_PROPERTY(bool, SuppressExtension1)
   DIMSTYLE_PROPERTY(bool, SuppressExtension2)
   DIMSTYLE_PROPERTY(bool, SuppressArrow1)
   DIMSTYLE_PROPERTY(bool, SuppressArrow2)
-  
+
   //public bool AlternateUnitsDisplay | get; set;
   bool GetAlternateBelowLine() const { return m_dimstyle->AlternateBelow(); }
   void SetAlternateBelowLine(bool b) { m_dimstyle->SetAlternateBelow(b); }
   DIMSTYLE_PROPERTY(bool, DrawTextMask)
     //public bool FixedExtensionOn | get; set;
+    DIMSTYLE_PROPERTY(bool, FixedExtensionLenOn)
 
     DIMSTYLE_PROPERTY(bool, LeaderHasLanding)
     DIMSTYLE_PROPERTY(bool, DrawForward)
     DIMSTYLE_PROPERTY(bool, TextUnderlined)
 
     //  DIMSTYLE_PROPERTY(double, MaskOffest)
-    //  DIMSTYLE_PROPERTY(double, ExtensionLineExtension)
-    //  DIMSTYLE_PROPERTY(double, ExtensionLineOffset)
-      //public double DimensionLineExtension | get; set;
+    DIMSTYLE_PROPERTY(double, ExtExtension)
+    DIMSTYLE_PROPERTY(double, ExtOffset)
+    DIMSTYLE_PROPERTY(double, DimExtension)
+    // public double DimensionLineExtension | get; set;
     DIMSTYLE_PROPERTY(double, ArrowSize) //ArrowLength
     DIMSTYLE_PROPERTY(double, LeaderArrowSize) //LeaderArrowLength
     DIMSTYLE_PROPERTY(double, CenterMark) //CentermarkSize
@@ -69,7 +75,7 @@ public:
     DIMSTYLE_PROPERTY(double, ToleranceHeightScale)
     DIMSTYLE_PROPERTY(double, BaselineSpacing)
     //DIMSTYLE_PROPERTY(double, DimensionScale)
-    //DIMSTYLE_PROPERTY(double, FixedExtensionLength)
+    DIMSTYLE_PROPERTY(double, FixedExtensionLen)
     DIMSTYLE_PROPERTY(double, TextRotation)
     DIMSTYLE_PROPERTY(double, StackHeightScale)
     //DIMSTYLE_PROPERTY(double, Roundoff)
@@ -103,7 +109,7 @@ public:
     //public TextHorizontalAlignment TextHorizontalAlignment | get; set;
     //public TextVerticalAlignment LeaderTextVerticalAlignment | get; set;
     //public TextHorizontalAlignment LeaderTextHorizontalAlignment | get; set;
-    //public TextLocation DimTextLocation | get; set; 
+    //public TextLocation DimTextLocation | get; set;
     //public TextLocation DimRadialTextLocation | get; set;
     //public LeaderCurveStyle LeaderCurveType | get; set;
     //public LeaderContentAngleStyle DimTextAngleType | get; set;

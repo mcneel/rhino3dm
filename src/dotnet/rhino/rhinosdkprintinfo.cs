@@ -487,30 +487,35 @@ namespace Rhino.Display
           }
           else
           {
-            AppendAttribute(_doc, gradient, "cx", (x1 * 100).ToString("G4") + "%");
-            AppendAttribute(_doc, gradient, "cy", (y1 * 100).ToString("G4") + "%");
+            AppendAttribute(_doc, gradient, "cx", (x1 * 100).ToString("G4", CultureInfo.InvariantCulture) + "%");
+            AppendAttribute(_doc, gradient, "cy", (y1 * 100).ToString("G4", CultureInfo.InvariantCulture) + "%");
             double distance = new Vector2d(gradX1 - gradX0, gradY1 - gradY0).Length;
             double boundsSize = new Vector2d(boundsWidth, boundsHeight).Length;
             if (boundsSize > 0.01)
             {
               double r = distance / boundsSize;
-              AppendAttribute(_doc, gradient, "r", (r * 100).ToString("G4") + "%");
+              AppendAttribute(_doc, gradient, "r", (r * 100).ToString("G4", CultureInfo.InvariantCulture) + "%");
             }
           }
 
           foreach (var stop in stops)
           {
             XmlElement stopElement = _doc.CreateElement("stop", _doc.DocumentElement.NamespaceURI);
-            string percent = (stop.Position * 100.0).ToString("G4") + "%";
+            string percent = (stop.Position * 100.0).ToString("G4", CultureInfo.InvariantCulture) + "%";
             AppendAttribute(_doc, stopElement, "offset", percent);
             string color = ColorTranslator.ToHtml(stop.Color);
             AppendAttribute(_doc, stopElement, "stop-color", color);
             gradient.AppendChild(stopElement);
+            if (stop.Color.A < 255)
+            {
+              double opacity = stop.Color.A / 255.0;
+              AppendAttribute(_doc, stopElement, "stop-opacity", opacity);
+            }
           }
           m_def_node.AppendChild(gradient);
           string reference = gradient.GetAttribute("id");
           attrib = _doc.CreateAttribute("fill");
-          attrib.Value = $"url(#{reference}";
+          attrib.Value = $"url(#{reference})";
           elem.Attributes.Append(attrib);
         }
       }

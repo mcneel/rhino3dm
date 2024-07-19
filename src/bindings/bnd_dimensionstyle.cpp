@@ -28,6 +28,21 @@ void BND_DimensionStyle::SetFont(const BND_Font* font)
     m_dimstyle->SetFont(*font->m_managed_font);
 }
 
+ON_Arrowhead::arrow_type BND_DimensionStyle::ArrowType1() const
+{
+  return m_dimstyle->ArrowType1();
+}
+
+ON_Arrowhead::arrow_type BND_DimensionStyle::ArrowType2() const
+{
+  return m_dimstyle->ArrowType2();
+}
+
+ON_Arrowhead::arrow_type BND_DimensionStyle::LeaderArrowType() const
+{
+  return m_dimstyle->LeaderArrowType();
+}
+
 
 #if defined(ON_PYTHON_COMPILE)
 namespace py = pybind11;
@@ -53,9 +68,13 @@ void initDimensionStyleBindings(pybind11::module& m)
     .def_property("TextUnderlined", &BND_DimensionStyle::GetTextUnderlined, &BND_DimensionStyle::SetTextUnderlined)
     .def_property("ArrowLength", &BND_DimensionStyle::GetArrowSize, &BND_DimensionStyle::SetArrowSize)
     .def_property("LeaderArrowLength", &BND_DimensionStyle::GetLeaderArrowSize, &BND_DimensionStyle::SetLeaderArrowSize)
+    .def_property_readonly("ArrowType1", &BND_DimensionStyle::ArrowType1)
+    .def_property_readonly("ArrowType2", &BND_DimensionStyle::ArrowType2)
+    .def_property_readonly("LeaderArrowType", &BND_DimensionStyle::LeaderArrowType)
     .def_property("CentermarkSize", &BND_DimensionStyle::GetCenterMark, &BND_DimensionStyle::SetCenterMark)
     .def_property("TextGap", &BND_DimensionStyle::GetTextGap, &BND_DimensionStyle::SetTextGap)
     .def_property("TextHEight", &BND_DimensionStyle::GetTextHeight, &BND_DimensionStyle::SetTextHeight)
+    .def_property("TextHeight", &BND_DimensionStyle::GetTextHeight, &BND_DimensionStyle::SetTextHeight)
     .def_property("LengthFactor", &BND_DimensionStyle::GetLengthFactor, &BND_DimensionStyle::SetLengthFactor)
     .def_property("AlternateLengthFactor", &BND_DimensionStyle::GetAlternateLengthFactor, &BND_DimensionStyle::SetAlternateLengthFactor)
     .def_property("ToleranceUpperValue", &BND_DimensionStyle::GetToleranceUpperValue, &BND_DimensionStyle::SetToleranceUpperValue)
@@ -65,6 +84,11 @@ void initDimensionStyleBindings(pybind11::module& m)
     .def_property("TextRotation", &BND_DimensionStyle::GetTextRotation, &BND_DimensionStyle::SetTextRotation)
     .def_property("StackHeightScale", &BND_DimensionStyle::GetStackHeightScale, &BND_DimensionStyle::SetStackHeightScale)
     .def_property("LeaderLandingLength", &BND_DimensionStyle::GetLeaderLandingLength, &BND_DimensionStyle::SetLeaderLandingLength)
+    .def_property("ExtensionLineExtension", &BND_DimensionStyle::GetExtExtension, &BND_DimensionStyle::SetExtExtension)
+    .def_property("ExtensionLineOffset", &BND_DimensionStyle::GetExtOffset, &BND_DimensionStyle::SetExtOffset)
+    .def_property("DimensionLineExtension", &BND_DimensionStyle::GetDimExtension, &BND_DimensionStyle::SetDimExtension)
+    .def_property("FixedExtensionLength", &BND_DimensionStyle::GetFixedExtensionLen, &BND_DimensionStyle::SetFixedExtensionLen)
+    .def_property("FixedExtensionLengthOn", &BND_DimensionStyle::GetFixedExtensionLenOn, &BND_DimensionStyle::SetFixedExtensionLenOn)
     .def("IsFieldOverridden", &BND_DimensionStyle::IsFieldOverriden, py::arg("field"))
     .def("SetFieldOverride", &BND_DimensionStyle::SetFieldOverride, py::arg("field"))
     .def("ClearFieldOverride", &BND_DimensionStyle::ClearFieldOverride, py::arg("field"))
@@ -210,9 +234,12 @@ void initDimensionStyleBindings(void*)
     .property("textUnderlined", &BND_DimensionStyle::GetTextUnderlined, &BND_DimensionStyle::SetTextUnderlined)
     .property("arrowLength", &BND_DimensionStyle::GetArrowSize, &BND_DimensionStyle::SetArrowSize)
     .property("leaderArrowLength", &BND_DimensionStyle::GetLeaderArrowSize, &BND_DimensionStyle::SetLeaderArrowSize)
+    .property("arrowType1", &BND_DimensionStyle::ArrowType1)
+    .property("arrowType2", &BND_DimensionStyle::ArrowType2)
+    .property("leaderArrowType", &BND_DimensionStyle::LeaderArrowType)
     .property("centermarkSize", &BND_DimensionStyle::GetCenterMark, &BND_DimensionStyle::SetCenterMark)
     .property("textGap", &BND_DimensionStyle::GetTextGap, &BND_DimensionStyle::SetTextGap)
-    .property("textHEight", &BND_DimensionStyle::GetTextHeight, &BND_DimensionStyle::SetTextHeight)
+    .property("textHeight", &BND_DimensionStyle::GetTextHeight, &BND_DimensionStyle::SetTextHeight)
     .property("lengthFactor", &BND_DimensionStyle::GetLengthFactor, &BND_DimensionStyle::SetLengthFactor)
     .property("alternateLengthFactor", &BND_DimensionStyle::GetAlternateLengthFactor, &BND_DimensionStyle::SetAlternateLengthFactor)
     .property("toleranceUpperValue", &BND_DimensionStyle::GetToleranceUpperValue, &BND_DimensionStyle::SetToleranceUpperValue)
@@ -222,6 +249,11 @@ void initDimensionStyleBindings(void*)
     .property("textRotation", &BND_DimensionStyle::GetTextRotation, &BND_DimensionStyle::SetTextRotation)
     .property("stackHeightScale", &BND_DimensionStyle::GetStackHeightScale, &BND_DimensionStyle::SetStackHeightScale)
     .property("leaderLandingLength", &BND_DimensionStyle::GetLeaderLandingLength, &BND_DimensionStyle::SetLeaderLandingLength)
+    .property("extensionLineExtension", &BND_DimensionStyle::GetExtExtension, &BND_DimensionStyle::SetExtExtension)
+    .property("extensionLineOffset", &BND_DimensionStyle::GetExtOffset, &BND_DimensionStyle::SetExtOffset)
+    .property("dimensionLineExtension", &BND_DimensionStyle::GetDimExtension, &BND_DimensionStyle::SetDimExtension)
+    .property("fixedExtensionLength", &BND_DimensionStyle::GetFixedExtensionLen, &BND_DimensionStyle::SetFixedExtensionLen)
+    .property("fixedExtensionLengthOn", &BND_DimensionStyle::GetFixedExtensionLenOn, &BND_DimensionStyle::SetFixedExtensionLenOn)
     .function("clearAllFieldOverrides", &BND_DimensionStyle::ClearAllFieldOverrides)
     .property("hasFieldOverrides", &BND_DimensionStyle::HasFieldOverrides)
     .property("isChild", &BND_DimensionStyle::IsChild)

@@ -63,18 +63,22 @@ class BND_NurbsCurve : public BND_Curve
   ON_NurbsCurve* m_nurbscurve = nullptr;
 public:
   BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref);
+  BND_NurbsCurve(int degree, int pointCount);
+  BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
 
   static BND_NurbsCurve* CreateFromLine(const ON_Line& line);
   static BND_NurbsCurve* CreateFromArc(const class BND_Arc& arc);
   static BND_NurbsCurve* CreateFromCircle(const class BND_Circle& circle);
   static BND_NurbsCurve* CreateFromEllipse(const class BND_Ellipse& ellipse);
-  //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
-  static BND_NurbsCurve* Create(bool periodic, int degree, const class BND_Point3dList& points);
-#if defined(ON_PYTHON_COMPILE)
-  static BND_NurbsCurve* Create2(bool periodic, int degree, pybind11::object points);
+  static BND_NurbsCurve* Create1(bool periodic, int degree, const class BND_Point3dList& points);
+  static BND_NurbsCurve* Create2(bool periodic, int degree, const std::vector<ON_3dPoint>& points);
+#if defined(ON_WASM_COMPILE)
+
+  static BND_NurbsCurve* Create3(bool periodic, int degree, emscripten::val points);
+  
 #endif
-  BND_NurbsCurve(int degree, int pointCount);
-  BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
+  //static bool IsDuplicate(NurbsCurve curveA, NurbsCurve curveB, bool ignoreParameterization, double tolerance)
+  
   int Order() const { return m_nurbscurve->Order(); }
   bool IsRational() const { return m_nurbscurve->IsRational(); }
 

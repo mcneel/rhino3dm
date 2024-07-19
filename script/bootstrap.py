@@ -77,8 +77,7 @@ def print_error_message(error_message):
     if xcode_logging:
         print(error_prefix + error_message)
     else:
-        print(bcolors.BOLD + bcolors.FAIL + error_prefix.upper() + bcolors.ENDC + bcolors.FAIL + error_message +
-              bcolors.ENDC)
+        print(f"{bcolors.BOLD}{bcolors.FAIL}{error_prefix.upper()}{bcolors.ENDC}{bcolors.FAIL}{error_message}{bcolors.ENDC}")
 
 
 def print_ok_message(ok_message):
@@ -93,7 +92,7 @@ def print_ok_message(ok_message):
 # ------------------------------------------------- Versions -----------------------------------------------------------
 
 def split_by_numbers(x):
-    r = re.compile('(\d+)')
+    r = re.compile('(\\d+)')
     l = r.split(x)
     return [int(y) if y.isdigit() else y for y in l]
 

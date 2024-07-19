@@ -19,7 +19,7 @@ void BND_Curve::SetTrackedPointer(ON_Curve* curve, const ON_ModelComponentRefere
   BND_GeometryBase::SetTrackedPointer(curve, compref);
 }
 
-BND_Curve* BND_Curve::CreateControlPointCurve(const BND_Point3dList& points, int degree)
+BND_Curve* BND_Curve::CreateControlPointCurve1(const BND_Point3dList& points, int degree)
 {
   int count = points.m_polyline.Count();
   if (count < 2)
@@ -31,19 +31,31 @@ BND_Curve* BND_Curve::CreateControlPointCurve(const BND_Point3dList& points, int
   if (1 == degree && count > 2)
     return new BND_PolylineCurve(points);
 
-  return BND_NurbsCurve::Create(false, degree, points);
+  return BND_NurbsCurve::Create1(false, degree, points);
 }
 
-#if defined(ON_PYTHON_COMPILE)
-BND_Curve* BND_Curve::CreateControlPointCurve2(pybind11::object points, int degree)
+BND_Curve* BND_Curve::CreateControlPointCurve2(const std::vector<ON_3dPoint>& points, int degree)
 {
   BND_Point3dList list;
-  for (auto item : points)
+  for (int i = 0; i < points.size(); i++)
   {
-    ON_3dPoint point = item.cast<ON_3dPoint>();
-    list.Add(point.x, point.y, point.z);
+    list.Add(points[i].x, points[i].y, points[i].z);
   }
-  return CreateControlPointCurve(list, degree);
+  return CreateControlPointCurve1(list, degree);
+}
+
+
+#if defined(ON_WASM_COMPILE)
+BND_Curve* BND_Curve::CreateControlPointCurve3(emscripten::val points, int degree)
+{
+  bool isArray = points.hasOwnProperty("length");
+  if( isArray ) 
+  {
+    const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
+    return CreateControlPointCurve2( array, degree ); 
+  }
+  else
+    return CreateControlPointCurve1( points.as<const BND_Point3dList&>(), degree ); 
 }
 #endif
 
@@ -300,6 +312,7 @@ void initCurveBindings(pybind11::module& m)
 
   py::class_<BND_Curve, BND_GeometryBase>(m, "Curve")
     .def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve2, py::arg("points"), py::arg("degree")=3)
+    .def_static("CreateControlPointCurve", &BND_Curve::CreateControlPointCurve1, py::arg("points"), py::arg("degree")=3)
     .def_property("Domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
     .def_property_readonly("Dimension", &BND_GeometryBase::Dimension)
     .def("ChangeDimension", &BND_Curve::ChangeDimension, py::arg("desiredDimension"))
@@ -350,7 +363,7 @@ using namespace emscripten;
 void initCurveBindings(void*)
 {
   class_<BND_Curve, base<BND_GeometryBase>>("Curve")
-    .class_function("createControlPointCurve", &BND_Curve::CreateControlPointCurve, allow_raw_pointers())
+    .class_function("createControlPointCurve", &BND_Curve::CreateControlPointCurve3, allow_raw_pointers())
     .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)
     .property("dimension", &BND_GeometryBase::Dimension)
     .function("changeDimension", &BND_Curve::ChangeDimension)

@@ -60,7 +60,14 @@ namespace Rhino.UI.Gumball
     /// <summary>Extrusion along a single axis.</summary>
     ExtrudeY = 19,
     /// <summary>Extrusion along a single axis.</summary>
-    ExtrudeZ = 20
+    ExtrudeZ = 20,
+
+    /// <summary>Cutting extrusion along the gumball X axis.</summary>
+    CutX = 21,
+    /// <summary>Cutting extrusion along the gumball Y axis.</summary>
+    CutY = 22,
+    /// <summary>Cutting extrusion along the gumball Z axis.</summary>
+    CutZ = 23,
   }
 
   public class GumballObject : IDisposable

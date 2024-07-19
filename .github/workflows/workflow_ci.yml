@@ -61,6 +61,78 @@ jobs:
             echo "$file was changed"
           done
 
+  check_tests_dotnet:
+    name: check if dotnet tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/dotnet/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+  check_tests_js:
+    name: check if js tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/javascript/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+  check_tests_py:
+    name: check if py tests changed
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@v42
+        id: changed-files
+        with:
+          files: |
+            tests/python/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
   #checks if src/dotnet files have changed
   check_dotnet:
     name: check src/dotnet
@@ -112,12 +184,11 @@ jobs:
           done
 
   #only run if src files have changed.
-
   build_js:
     name: build rhino3dm.js
     runs-on: ubuntu-latest
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_js]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_js.outputs.any_changed == 'true' }}
     container:
       image: emscripten/emsdk:3.1.30
     steps:
@@ -131,43 +202,52 @@ jobs:
         run: git submodule update --init
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
-      - name: setup
+      - name: setup js module
+        run: python3 script/setup.py -p js -o -v -d -m
+      - name: build js module
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mkdir src/build/javascript/artifacts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
+          cp package.json src/build/javascript/artifacts
+          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
+          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
+      - name: setup js
         run: python3 script/setup.py -p js -o -v -d
       - name: build js
         run: python3 script/build.py -p js -o -v
       - name: copy files
         shell: bash
         run: |
-          cp package.json src/build/javascript/artifacts_js
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts_js/README.md
-          cp src/js/rhino3dm.debug.js src/build/javascript/artifacts_js/rhino3dm.js
-          cp src/js/rhino3dm.debug.min.js src/build/javascript/artifacts_js/rhino3dm.min.js
-          cp src/js/rhino3dm.debug.module.js src/build/javascript/artifacts_js/rhino3dm.module.js
-          cp src/js/rhino3dm.debug.module.min.js src/build/javascript/artifacts_js/rhino3dm.module.min.js
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts_js/rhino3dm.d.ts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          npm install -g uglify-js
+          cd src/build/javascript/artifacts
+          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
+          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
-          path: src/build/javascript/artifacts_js
+          path: src/build/javascript/artifacts
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_py]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macos-11, macos-12, macos-14]
+        os: [ubuntu-latest, windows-2019, macos-12, macos-14]
         python-version: ['3.10', '3.11', '3.12']
         include:
           - os: ubuntu-latest
             target: linux
           - os: windows-2019
             target: windows
-          - os: macos-11
-            target: macos
           - os: macos-12
             target: macos
           - os: macos-14
@@ -187,7 +267,7 @@ jobs:
       - name: update submodules
         run: git submodule update --init
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
-        run: python setup.py bdist_wheel
+        run: python setup.py bdist_wheel build --debug
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -198,8 +278,8 @@ jobs:
   build_py_sdist:
     name: build python sdist
     runs-on: ubuntu-latest
-    needs: [check_bindings, check_workflow, check_build_scripts]
-    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_py]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     steps:
       - name: setup python
         uses: actions/setup-python@v5.0.0
@@ -252,15 +332,15 @@ jobs:
   build_dotnet:
     name: build dotnet
     runs-on: ubuntu-latest
-    container:
-      image: mcneel/rhino3dm-dev-amzn2
-    needs: [check_dotnet, check_workflow, check_build_scripts]
-    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' }}
+    #container:
+      #image: mcneel/rhino3dm-dev-amzn2
+    needs: [check_dotnet, check_workflow, check_build_scripts, check_tests_dotnet]
+    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' ||  needs.check_tests_dotnet.outputs.any_changed == 'true'}}
     steps:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
-        uses: actions/checkout@v3.6.0 #needs to stay this version until we upgrade this os
+        uses: actions/checkout@v4.1.1
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
@@ -271,11 +351,107 @@ jobs:
         run: python3 script/setup.py -p linux -v
       - name: build dotnet
         run: python3 script/build.py -p linux -v
+      - name: pack dotnet
+        run: dotnet pack src/dotnet/Rhino3dm.csproj -c Debug
       - name: artifacts
-        uses: actions/upload-artifact@v3.1.3 #needs to stay this version until we upgrade this os
+        uses: actions/upload-artifact@v4.3.1
         with:
           path: |
             src/build/linux/dotnet/Rhino3dm.dll
             src/build/linux/librhino3dm_native.so
+            src/dotnet/bin/Debug/*.nupkg
           name: rhino3dm.net
           retention-days: ${{ env.RETENTION_DAYS }}
+
+  #tests
+  test_dotnet:
+    name: test dotnet
+    runs-on: ubuntu-latest
+    needs: [build_dotnet]
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && dotnet --version && git --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe directory
+        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.net
+          path: tests/dotnet/lib
+      - name: test dotnet
+        run: |
+          NUGET_FILE="$(find tests/dotnet/lib/dotnet/bin/Debug -type f -name "*.nupkg")"
+          FILENAME=$(basename ${NUGET_FILE})
+          NAME=${FILENAME%.*}
+          VERSION=${NAME:9}
+          dotnet nuget add source $(pwd)/tests/dotnet/lib/dotnet/bin/Debug
+          cd tests/dotnet
+          dotnet add package Rhino3dm -v ${VERSION}
+          dotnet build
+          dotnet test
+
+  test_python_bdist:
+    name: build python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
+    runs-on: ${{ matrix.os }}
+    needs: [build_py_all_bdist]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2019, macos-12, macos-14]
+        python-version: ['3.10', '3.11', '3.12']
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-2019
+            target: windows
+          - os: macos-12
+            target: macos
+          - os: macos-14
+            target: macos
+      fail-fast: false
+    steps:
+    - name: set up python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5.0.0
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: info
+      run: python --version && cmake --version
+    - name: checkout
+      uses: actions/checkout@v4.1.1
+    - name: download artifact
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: rhino3dm.py ${{ matrix.python-version }} ${{ matrix.os }}
+        path: tests/python/lib
+    - name: install whl
+      shell: bash
+      run: pip install --no-index tests/python/lib/*.whl --force-reinstall
+    - name: test python bdist
+      run: |
+        cd tests/python
+        python -m unittest discover .
+        
+  test_javascript:
+    name: test javascript
+    runs-on: ubuntu-latest
+    needs: [build_js]
+    steps:
+      - name: info
+        run: python3 --version && cmake --version && node --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js
+          path: tests/javascript/lib
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript
+          npm i
+          npm test
+      
+
+

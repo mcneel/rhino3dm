@@ -277,6 +277,15 @@ namespace Rhino.DocObjects.Tables
       return Delete(item.Index, true);
     }
 
+    /// <summary>Restores a light that has been deleted.</summary>
+    /// <param name="index">A light index to be undeleted.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>8.8</since>
+    public bool Undelete(int index)
+    {
+      return UnsafeNativeMethods.CRhinoLightTable_Un(m_doc.RuntimeSerialNumber, index, false);
+    }
+
     /// <example>
     /// <code source='examples\vbnet\ex_modifylightcolor.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_modifylightcolor.cs' lang='cs'/>

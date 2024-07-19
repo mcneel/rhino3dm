@@ -354,7 +354,6 @@ namespace Rhino.Geometry
   /// Utility class for generating Breps by sweeping cross section curves over two rail curves.
   /// Note, this class has been superseded by the Rhino.Geometry.Brep.CreateFromSweep static functions.
   /// </summary>
-  [Obsolete("Use Brep.CreateFromSweep.")]
   public class SweepTwoRail
   {
     private bool m_bClosed = true;
@@ -363,7 +362,6 @@ namespace Rhino.Geometry
     private bool m_bAutoAdjust = true;
 
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public SweepTwoRail()
     {
     }
@@ -372,7 +370,6 @@ namespace Rhino.Geometry
     /// Gets or sets the sweeping tolerance.
     /// </summary>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public double SweepTolerance
     {
       get
@@ -391,7 +388,6 @@ namespace Rhino.Geometry
     /// Gets or sets the angle tolerance in radians.
     /// </summary>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public double AngleToleranceRadians
     {
       get
@@ -410,14 +406,12 @@ namespace Rhino.Geometry
     /// Removes the association between the height scaling from the width scaling.
     /// </summary>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public bool MaintainHeight { get; set; } // false is the proper default
 
     /// <summary>
     /// If the input rails are closed, ClosedSweep determines if the swept Breps will also be closed.
     /// </summary>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public bool ClosedSweep
     {
       get { return m_bClosed; }
@@ -430,36 +424,31 @@ namespace Rhino.Geometry
     /// Set to false to not have shape curves adjusted, sorted, and matched automatically.
     /// </summary>
     /// <since>7.19</since>
-    /// <deprecated>8.0</deprecated>
     public bool AutoAdjust
     {
       get { return m_bAutoAdjust; }
       set { m_bAutoAdjust = value; }
     }
 
+    /// <summary>
+    /// Set to true if you want to use the legacy, low-level sweeper found in earlier versions of Rhino.
+    /// </summary>
+    /// <since>8.8</since>
+    public bool UseLegacySweeper { get; set; } = false;
+
+
     #region no simplify
     /// <summary>
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSection">Shape curve</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection)
     {
-      return PerformSweep(rail1, rail2, new Curve[] { crossSection });
-    }
-
-    /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
-    public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2)
-    {
-      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      //return PerformSweep(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 });
       return PerformSweep(rail1, rail2, new Curve[] { crossSection });
     }
 
@@ -467,58 +456,88 @@ namespace Rhino.Geometry
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSections">Shape curves</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <param name="crossSectionParameterRail1">Curve parameter on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParameterRail2">Curve parameter on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
+    public Brep[] PerformSweep(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2)
+    {
+      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+        return PerformSweep(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 });
+      return PerformSweep(rail1, rail2, new Curve[] { crossSection });
+    }
+
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Shape curves.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweep(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      // Call the new sweep code, used by the Sweep2 command
-      //
-      //List<double> rail_params1 = new List<double>();
-      //List<double> rail_params2 = new List<double>();
-      //Interval domain1 = rail1.Domain;
-      //Interval domain2 = rail2.Domain;
-      //foreach (Curve c in crossSections)
-      //{
-      //  Point3d point_at_start = c.PointAtStart;
-      //  double t;
-      //  rail1.ClosestPoint(point_at_start, out t);
-      //  if (t == domain1.Max)
-      //    t = domain1.Max - RhinoMath.SqrtEpsilon;
-      //  rail_params1.Add(t);
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        List<double> rail_params1 = new List<double>();
+        List<double> rail_params2 = new List<double>();
+        Interval domain1 = rail1.Domain;
+        Interval domain2 = rail2.Domain;
+        foreach (Curve c in crossSections)
+        {
+          Point3d point_at_start = c.PointAtStart;
+          double t;
+          rail1.ClosestPoint(point_at_start, out t);
+          if (t == domain1.Max)
+            t = domain1.Max - RhinoMath.SqrtEpsilon;
+          rail_params1.Add(t);
 
-      //  rail2.ClosestPoint(point_at_start, out t);
-      //  if (t == domain2.Max)
-      //    t = domain2.Max - RhinoMath.SqrtEpsilon;
-      //  rail_params2.Add(t);
-      //}
-
-      //// NOTE: See if we need to do anything special in a rail_params1.Count==1 case
-      //// like we do in the Sweep1 counterpart function
-      //return PerformSweep(rail1, rail2, crossSections, rail_params1, rail_params2);
+          rail2.ClosestPoint(point_at_start, out t);
+          if (t == domain2.Max)
+            t = domain2.Max - RhinoMath.SqrtEpsilon;
+          rail_params2.Add(t);
+        }
+        return PerformSweep(rail1, rail2, crossSections, rail_params1, rail_params2);
+      }
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.None, 0, 0.0, MaintainHeight, AutoAdjust);
     }
 
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Cross section curves.</param>
+    /// <param name="crossSectionParameters1">Curve parameters on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParameters2">Curve parameters on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweep(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParameters1, IEnumerable<double> crossSectionParameters2)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      //ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParameters1, crossSectionParameters2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
-      //using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
-      //{
-      //  IntPtr pArgsSweep2 = sweep.NonConstPointer();
-      //  IntPtr pBreps = breps.NonConstPointer();
-      //  UnsafeNativeMethods.RHC_Sweep2(pArgsSweep2, pBreps);
-      //  Brep[] rc = breps.ToNonConstArray();
-      //  sweep.Dispose();
-      //  return rc;
-      //}
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParameters1, crossSectionParameters2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
+        using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
+        {
+          IntPtr pArgsSweep2 = sweep.NonConstPointer();
+          IntPtr pBreps = breps.NonConstPointer();
+          UnsafeNativeMethods.RHC_Sweep2(pArgsSweep2, pBreps);
+          Brep[] rc = breps.ToNonConstArray();
+          sweep.Dispose();
+          return rc;
+        }
+      }
       return PerformSweep(rail1, rail2, crossSections);
     }
     #endregion
@@ -528,25 +547,14 @@ namespace Rhino.Geometry
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSection">Shape curve</param>
-    /// <param name="refitTolerance">Refit tolerance</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <param name="refitTolerance">Refit tolerance.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double refitTolerance)
     {
-      return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, refitTolerance);
-    }
-
-    /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
-    public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, double refitTolerance)
-    {
-      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      //return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 }, refitTolerance);
       return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, refitTolerance);
     }
 
@@ -554,49 +562,84 @@ namespace Rhino.Geometry
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSections">Shape curves</param>
-    /// <param name="refitTolerance">Refit tolerance</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <param name="crossSectionParameterRail1">Curve parameter on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParameterRail2">Curve parameter on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="refitTolerance">Refit tolerance.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
+    public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, double refitTolerance)
+    {
+      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+        return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 }, refitTolerance);
+      return PerformSweepRefit(rail1, rail2, new Curve[] { crossSection }, refitTolerance);
+    }
+
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Shape curves.</param>
+    /// <param name="refitTolerance">Refit tolerance.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, double refitTolerance)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      // Call the new sweep code, used by the Sweep2 command
-      //
-      //List<double> rail_params1 = new List<double>();
-      //List<double> rail_params2 = new List<double>();
-      //foreach (Curve c in crossSections)
-      //{
-      //  Point3d point_at_start = c.PointAtStart;
-      //  double t;
-      //  rail1.ClosestPoint(point_at_start, out t);
-      //  rail_params1.Add(t);
-      //  rail2.ClosestPoint(point_at_start, out t);
-      //  rail_params2.Add(t);
-      //}
-      //return PerformSweepRefit(rail1, rail2, crossSections, rail_params1, rail_params2, refitTolerance);
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        List<double> rail_params1 = new List<double>();
+        List<double> rail_params2 = new List<double>();
+        foreach (Curve c in crossSections)
+        {
+          Point3d point_at_start = c.PointAtStart;
+          double t;
+          rail1.ClosestPoint(point_at_start, out t);
+          rail_params1.Add(t);
+          rail2.ClosestPoint(point_at_start, out t);
+          rail_params2.Add(t);
+        }
+        return PerformSweepRefit(rail1, rail2, crossSections, rail_params1, rail_params2, refitTolerance);
+      }
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.Refit, 0, refitTolerance, MaintainHeight, AutoAdjust);
     }
 
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Shape curves.</param>
+    /// <param name="crossSectionParametersRail1">Curve parameters on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParametersRail2">Curve parameters on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="refitTolerance">Refit tolerance.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRefit(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, double refitTolerance)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      //ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParametersRail1, crossSectionParametersRail2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
-      //using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
-      //{
-      //  IntPtr pArgsSweep2 = sweep.NonConstPointer();
-      //  IntPtr pBreps = breps.NonConstPointer();
-      //  UnsafeNativeMethods.RHC_Sweep2Refit(pArgsSweep2, pBreps, refitTolerance);
-      //  Brep[] rc = breps.ToNonConstArray();
-      //  sweep.Dispose();
-      //  return rc;
-      //}
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParametersRail1, crossSectionParametersRail2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
+        using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
+        {
+          IntPtr pArgsSweep2 = sweep.NonConstPointer();
+          IntPtr pBreps = breps.NonConstPointer();
+          UnsafeNativeMethods.RHC_Sweep2Refit(pArgsSweep2, pBreps, refitTolerance);
+          Brep[] rc = breps.ToNonConstArray();
+          sweep.Dispose();
+          return rc;
+        }
+      }
       return PerformSweepRefit(rail1, rail2, crossSections, refitTolerance);
     }
     #endregion
@@ -606,25 +649,14 @@ namespace Rhino.Geometry
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSection">Shape curve</param>
-    /// <param name="rebuildCount">Rebuild point count</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <param name="rebuildCount">Rebuild point count.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, int rebuildCount)
     {
-      return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, rebuildCount);
-    }
-
-    /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
-    public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, int rebuildCount)
-    {
-      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      // return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 }, rebuildCount);
       return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, rebuildCount);
     }
 
@@ -632,49 +664,84 @@ namespace Rhino.Geometry
     /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
     /// and two curves that defines a surface edge.
     /// </summary>
-    /// <param name="rail1">Rail to sweep shapes along</param>
-    /// <param name="rail2">Rail to sweep shapes along</param>
-    /// <param name="crossSections">Shape curves</param>
-    /// <param name="rebuildCount">Rebuild point count</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSection">Shape curve.</param>
+    /// <param name="crossSectionParameterRail1">Curve parameter on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParameterRail2">Curve parameter on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="rebuildCount">Rebuild point count.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>8.0</deprecated>
+    public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, Curve crossSection, double crossSectionParameterRail1, double crossSectionParameterRail2, int rebuildCount)
+    {
+      // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+        return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, new double[] { crossSectionParameterRail1 }, new double[] { crossSectionParameterRail2 }, rebuildCount);
+      return PerformSweepRebuild(rail1, rail2, new Curve[] { crossSection }, rebuildCount);
+    }
+
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Shape curves.</param>
+    /// <param name="rebuildCount">Rebuild point count.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <since>5.0</since>
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, int rebuildCount)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      // Call the new sweep code, used by the Sweep2 command
-      //
-      //List<double> rail_params1 = new List<double>();
-      //List<double> rail_params2 = new List<double>();
-      //foreach (Curve c in crossSections)
-      //{
-      //  Point3d point_at_start = c.PointAtStart;
-      //  double t;
-      //  rail1.ClosestPoint(point_at_start, out t);
-      //  rail_params1.Add(t);
-      //  rail2.ClosestPoint(point_at_start, out t);
-      //  rail_params2.Add(t);
-      //}
-      //return PerformSweepRebuild(rail1, rail2, crossSections, rail_params1, rail_params2, rebuildCount);
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        List<double> rail_params1 = new List<double>();
+        List<double> rail_params2 = new List<double>();
+        foreach (Curve c in crossSections)
+        {
+          Point3d point_at_start = c.PointAtStart;
+          double t;
+          rail1.ClosestPoint(point_at_start, out t);
+          rail_params1.Add(t);
+          rail2.ClosestPoint(point_at_start, out t);
+          rail_params2.Add(t);
+        }
+        return PerformSweepRebuild(rail1, rail2, crossSections, rail_params1, rail_params2, rebuildCount);
+      }
       return Brep.CreateFromSweep(rail1, rail2, crossSections, Point3d.Unset, Point3d.Unset, ClosedSweep, SweepTolerance, SweepRebuild.Rebuild, rebuildCount, 0.0, MaintainHeight, AutoAdjust);
     }
 
+    /// <summary>
+    /// Sweep2 function that fits a surface through profile curves that define the surface cross-sections
+    /// and two curves that defines a surface edge.
+    /// </summary>
+    /// <param name="rail1">Rail to sweep shapes along.</param>
+    /// <param name="rail2">Rail to sweep shapes along.</param>
+    /// <param name="crossSections">Shape curves.</param>
+    /// <param name="crossSectionParametersRail1">Curve parameters on first rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="crossSectionParametersRail2">Curve parameters on second rail curve. Unused if <seealso cref="UseLegacySweeper"/> is true.</param>
+    /// <param name="rebuildCount">Rebuild point count.</param>
+    /// <returns>Array of Brep sweep results.</returns>
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use version that does not require rail parameters")]
     public Brep[] PerformSweepRebuild(Curve rail1, Curve rail2, IEnumerable<Curve> crossSections, IEnumerable<double> crossSectionParametersRail1, IEnumerable<double> crossSectionParametersRail2, int rebuildCount)
     {
       // 12-Jun-2019 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-31673
-      //ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParametersRail1, crossSectionParametersRail2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
-      //using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
-      //{
-      //  IntPtr pArgsSweep2 = sweep.NonConstPointer();
-      //  IntPtr pBreps = breps.NonConstPointer();
-      //  UnsafeNativeMethods.RHC_Sweep2Rebuild(pArgsSweep2, pBreps, rebuildCount);
-      //  Brep[] rc = breps.ToNonConstArray();
-      //  sweep.Dispose();
-      //  return rc;
-      //}
+      // 6-May-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-81872
+      if (UseLegacySweeper)
+      {
+        ArgsSweep2 sweep = ArgsSweep2.Construct(rail1, rail2, crossSections, crossSectionParametersRail1, crossSectionParametersRail2, m_bClosed, m_sweep_tol, m_angle_tol, MaintainHeight);
+        using (var breps = new Rhino.Runtime.InteropWrappers.SimpleArrayBrepPointer())
+        {
+          IntPtr pArgsSweep2 = sweep.NonConstPointer();
+          IntPtr pBreps = breps.NonConstPointer();
+          UnsafeNativeMethods.RHC_Sweep2Rebuild(pArgsSweep2, pBreps, rebuildCount);
+          Brep[] rc = breps.ToNonConstArray();
+          sweep.Dispose();
+          return rc;
+        }
+      }
       return PerformSweepRebuild(rail1, rail2, crossSections, rebuildCount);
     }
     #endregion

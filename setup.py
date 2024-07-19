@@ -3,21 +3,31 @@ import re
 import sys
 import sysconfig
 import platform
-import subprocess
+import subprocess as sp
 import glob
 import shutil
 import struct
 import fileinput
+from typing import List
+from pathlib import Path
 from distutils.version import LooseVersion
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 
+pyexec = Path(sys.executable).resolve()
 
-def system(cmd):
-    rv = os.system(cmd)
-    rc = rv if os.name == 'nt' else os.WEXITSTATUS(rv)
-    if (rc != 0):
-        raise RuntimeError('The command "{}" exited with {}'.format(cmd, rc))
+print(f"Using Python executable: {pyexec}")
+
+def system(cmd : List, **kwargs):
+    print(f"Running {' '.join(cmd)}")
+    if "cwd" in kwargs.keys():
+        print(f"Using 'cwd'={kwargs['cwd']}")
+    try:
+        cmd_out = sp.run(cmd, encoding='utf-8', check=True, stdout=sp.PIPE, stderr=sp.PIPE, **kwargs)
+    except sp.CalledProcessError as e:
+        raise RuntimeError(f"Command execution failed.\n\n{e.stderr}\n\n{e.output}")
+    print(cmd_out.stdout)
+
 
 
 class CMakeExtension(Extension):
@@ -29,7 +39,7 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
     def run(self):
         try:
-            out = subprocess.check_output(['cmake', '--version'])
+            out = sp.check_output(['cmake', '--version'])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: " +
@@ -53,8 +63,8 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE:FILEPATH="{}"'.format(sys.executable)]
+        cmake_args = ['cmake',
+                      f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -68,49 +78,52 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2']
+            if platform.system() == "Darwin":
+                cmake_args += ['-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64']
+            build_args += ['--', f'-j{max(1,os.cpu_count()-1)}']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
-        if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
-        build_temp_dir = os.path.abspath(self.build_temp)
-        draco_static_dir = os.path.join(build_temp_dir, "draco_static")
-        if not os.path.exists(draco_static_dir):
-            os.makedirs(draco_static_dir)
+        build_dir = Path(self.build_temp).resolve()
+        build_dir.mkdir(parents=True, exist_ok=True)
+        draco_static_dir = build_dir / "draco_static"
+        draco_static_dir.mkdir(parents=True, exist_ok=True)
+        draco_src_dir = Path(ext.sourcedir) / "src" / "lib" / "draco"
+        build_temp_dir = Path(self.build_temp).resolve()
+        src_dir = Path(ext.sourcedir).resolve() / "src"
 
-        current_dir = os.getcwd()
+        current_dir = Path.cwd()
 
         if os.name == 'nt':  # windows
             bitness = 8 * struct.calcsize("P")
+            osplatform = "win32" if bitness == 32 else "x64"
 
-            os.chdir(draco_static_dir)
-            command = 'cmake -A {} "{}"'.format("win32" if bitness == 32 else "x64",
-                                                ext.sourcedir+"/src/lib/draco")
-            system(command)
-            system("cmake --build . --config Release")
 
-            os.chdir(build_temp_dir)
-            command = 'cmake -A {} -DPYTHON_EXECUTABLE:FILEPATH="{}" "{}"'.format("win32" if bitness == 32 else "x64",
-                                                                                   sys.executable,
-                                                                                   ext.sourcedir+"/src")
-            system(command)
+            command = ['cmake', '-A', osplatform, f"{draco_src_dir}"]
+            system(command, cwd=draco_static_dir)
+            system(["cmake", "--build", ".", "--config", "Release"], cwd=draco_static_dir)
+
+            command = ['cmake', '-A',
+                        f"{osplatform}",
+                        f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}',
+                        ext.sourcedir+"/src"]
+            system(command, cwd=build_temp_dir)
             if bitness == 64:
-                for line in fileinput.input("_rhino3dm.vcxproj", inplace=1):
-                    print(line.replace("WIN32;", "WIN64;"))
-                for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
-                    print(line.replace("WIN32;", "WIN64;"))
-            system("cmake --build . --config Release --target _rhino3dm")
+                _rhino3dmvcxproj = build_temp_dir / "_rhino3dm.vcxproj"
+                opennurbs_staticvcxproj = build_temp_dir / "opennurbs_static.vcxproj"
+                _rhino3dmvcxproj.write_text(_rhino3dmvcxproj.read_text().replace("WIN32;", "WIN64;"))
+                opennurbs_staticvcxproj.write_text(opennurbs_staticvcxproj.read_text().replace("WIN32;", "WIN64;"))
+                system(["cmake","--build",".", "--config","Release","--target","_rhino3dm"], cwd=build_temp_dir)
         else:
-            os.chdir(draco_static_dir)
-            system("cmake {}".format(ext.sourcedir+"/src/lib/draco"))
-            system("cmake --build .")
+            # first build draco
+            system(cmake_args + [f"{draco_src_dir}"], cwd=draco_static_dir)
+            system(["cmake", "--build", "."] + build_args, cwd=draco_static_dir)
 
-            os.chdir(build_temp_dir)
-            system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} {}".format(sys.executable, ext.sourcedir+"/src"))
-            system("cmake --build .")
+            # then build rhino3dm
+            system(cmake_args + [f"{src_dir}"], cwd=build_temp_dir)
+            system(["cmake", "--build", "."] + build_args, cwd=build_temp_dir)
 
         os.chdir(current_dir)
         if not os.path.exists(self.build_lib + "/rhino3dm"):
@@ -118,13 +131,18 @@ class CMakeBuild(build_ext):
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
             shutil.copy(file, self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/*.so"):
+            if platform.system() == "Linux" and self.debug:
+                print("debug linux")
+                system(["stat", file])
+                system(["strip", "--strip-unneeded", file])
+                system(["stat", file])
             shutil.copy(file, self.build_lib + "/rhino3dm")
         print()  # Add an empty line for cleaner output
 
 
 setup(
     name='rhino3dm',
-    version='8.6.1',
+    version='8.9.0',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -139,7 +157,7 @@ CPython package based on OpenNURBS with a RhinoCommon style
 
 ### Supported platforms
 * Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - Windows (32 and 64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 11, 12 (installed through homebrew)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 12 (installed through homebrew)
 * Python 3.8, 3.9, 3.10, 3.11, 3.12 - macos 14 arm 64
 * Python 3.8, 3.9, 3.10, 3.11 - Linux via manylinux2014_x86_64
 * other architectures, operating systems, and python versions are supported through source distributions\

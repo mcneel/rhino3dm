@@ -35,6 +35,7 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// Gets or sets the active state of the detail view.
+    /// Note, setting this property will trigger a <seealso cref="RhinoPageView.PageViewSpaceChange"/> event.
     /// </summary>
     /// <since>5.0</since>
     public bool IsActive
