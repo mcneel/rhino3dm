@@ -551,6 +551,7 @@ declare module 'rhino3dm' {
 		Sun: typeof Sun;
 		Surface: typeof Surface;
 		SurfaceProxy: typeof SurfaceProxy;
+		Text: typeof Text;
 		TextDot: typeof TextDot;
 		Texture: typeof Texture;
 		TextureMapping: typeof TextureMapping;
@@ -584,6 +585,19 @@ declare module 'rhino3dm' {
 		 * Text stripped of RTF formatting information and with field expressions intact
 		 */
 		plainTextWithFields: string;
+		/**
+		 * Plane that this annotation lies on
+		 */
+		plane: Plane;
+		/**
+		 * Is text wrapping on
+		 */
+		textIsWrapped: boolean;
+		/**
+		 * @description Wrap text
+		 * @returns {void}
+		 */
+		wrapText(): void;
 	}
 
 	class Arc {
@@ -1206,7 +1220,7 @@ declare module 'rhino3dm' {
 
 	class BrepFace extends SurfaceProxy {
 		/**
-		 * Gets or sets face orientation.
+		 * Gets or sets face orientation. true if face orientation is opposite of natural surface orientation.
 		 */
 		orientationIsReversed: boolean;
 		/**
@@ -2135,7 +2149,6 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		textGap: number;
-
 		/**
 		 */
 		textHeight: number;
@@ -4352,6 +4365,15 @@ declare module 'rhino3dm' {
 		 * @returns {void}
 		 */
 		setTextureCoordinates(tm:TextureMapping,xf:Transform,lazy:boolean): void;
+		/** TODO */
+		setCachedTextureCoordinates(): void;
+		/**
+		 * @description Call this method to get cached texture coordinates for a texture
+		mapping with the specified Id.
+		 * @param {string} textureMappingId Texture mapping Id
+		 * @returns {CachedTextureCoordinates} Object which allows access to coordinates and other props.
+		 */
+		getCachedTextureCoordinates(textureMappingId:string): CachedTextureCoordinates;
 		/**
 		 * @description Removes any unreferenced objects from arrays, re-indexes as needed
 		and shrinks arrays to minimum required size.
@@ -5586,7 +5608,7 @@ declare module 'rhino3dm' {
 		 */
 		insertNew(index:number): PointCloudItem;
 		/**
-		 * @description Copies the point values of another point cloud into this one.
+		 * @description Merges, or appends, a specified point cloud into this one.
 		 * @param {PointCloud} other PointCloud to merge with this one.
 		 * @returns {void}
 		 */
@@ -6781,6 +6803,9 @@ declare module 'rhino3dm' {
 	}
 
 	class SurfaceProxy extends Surface {
+	}
+
+	class Text extends AnnotationBase {
 	}
 
 	class TextDot extends GeometryBase {

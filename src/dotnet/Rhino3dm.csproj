@@ -8,7 +8,7 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>8.9.0-beta</Version>
+    <Version>8.9.0</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
