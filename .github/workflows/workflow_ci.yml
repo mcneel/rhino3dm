@@ -227,11 +227,6 @@ jobs:
           cd src/build/javascript/artifacts
           uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
           uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
-      - name: minifyjs
-        uses: nizarmah/auto-minify@v3
-        with:
-          directory: src/build/javascript/artifacts
-          js_engine: uglify-js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
