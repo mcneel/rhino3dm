@@ -27,6 +27,7 @@ If you want to tests agains a published version of rhino3dm.js, you would need t
 
 - `npm i rhino3dm@8.9.0-beta` for example, to install version 8.9.0-beta of rhino3dm
 - `npm test` to run the tests
+- do not commit this change.
 
 ## python
 
@@ -56,7 +57,7 @@ If you have built rhino3dm.net from source, you need to follow a few additional 
 - `dotnet build`
 - `dotnet test`
 
-If you want to test with a publushed version:
+If you want to test with a published version:
 
 - `cd tests/dotnet/rhino3dm_test`
 - `dotnet add package Rhino3dm -v 8.9.0-beta`
