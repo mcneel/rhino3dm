@@ -2,9 +2,15 @@
 
 #if defined(ON_PYTHON_COMPILE)
 
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+
 BND_Color ON_Color_to_Binding(const ON_Color& color)
 {
-  return pybind11::make_tuple(color.Red(), color.Green(), color.Blue(), 255 - color.Alpha());
+  return py::make_tuple(color.Red(), color.Green(), color.Blue(), 255 - color.Alpha());
 }
 
 ON_Color Binding_to_ON_Color(const BND_Color& color)
@@ -18,7 +24,7 @@ ON_Color Binding_to_ON_Color(const BND_Color& color)
 
 BND_Color4f ON_4fColor_to_Binding(const ON_4fColor& color)
 {
-  return pybind11::make_tuple(color.Red(), color.Green(), color.Blue(), color.Alpha());
+  return py::make_tuple(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
 ON_4fColor Binding_to_ON_4fColor(const BND_Color4f& color)

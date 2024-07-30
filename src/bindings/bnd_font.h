@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initFontBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initFontBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initFontBindings(py::module& m);
+#endif
+
 #else
 void initFontBindings(void* m);
 #endif

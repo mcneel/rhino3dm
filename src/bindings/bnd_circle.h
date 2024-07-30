@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initCircleBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCircleBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initCircleBindings(py::module& m);
+#endif
+
 #else
 void initCircleBindings(void* m);
 #endif

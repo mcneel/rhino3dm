@@ -4,7 +4,14 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initRenderEnvironmentsBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initRenderEnvironmentsBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initRenderEnvironmentsBindings(py::module& m);
+#endif
+
 #else
 void initRenderEnvironmentsBindings(void* m);
 #endif

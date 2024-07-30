@@ -4,7 +4,14 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initMeshModifierBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initMeshModifierBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initMeshModifierBindings(py::module& m);
+#endif
+
 #else
 void initMeshModifierBindings(void* m);
 #endif

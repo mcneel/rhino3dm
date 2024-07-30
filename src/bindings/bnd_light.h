@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLightBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initLightBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initLightBindings(py::module& m);
+#endif
+
 #else
 void initLightBindings(void* m);
 #endif

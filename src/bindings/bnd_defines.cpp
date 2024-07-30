@@ -29,8 +29,12 @@ static std::vector<ON_2dPoint> ArrowPoints(ON_Arrowhead::arrow_type arrowType, d
 }
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
 namespace py = pybind11;
-void initDefines(pybind11::module& m)
+#endif
+void initDefines(py::module& m)
 {
   py::enum_<ON_COMPONENT_INDEX::TYPE>(m, "ComponentIndexType")
     .value("InvalidType", ON_COMPONENT_INDEX::TYPE::invalid_type)
@@ -316,25 +320,25 @@ void initDefines(pybind11::module& m)
     ;
 }
 
-pybind11::dict PointToDict(const ON_3dPoint& point)
+py::dict PointToDict(const ON_3dPoint& point)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["X"] = point.x;
   rc["Y"] = point.y;
   rc["Z"] = point.z;
   return rc;
 }
-pybind11::dict VectorToDict(const ON_3dVector& vector)
+py::dict VectorToDict(const ON_3dVector& vector)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["X"] = vector.x;
   rc["Y"] = vector.y;
   rc["Z"] = vector.z;
   return rc;
 }
-pybind11::dict PlaneToDict(const ON_Plane& plane)
+py::dict PlaneToDict(const ON_Plane& plane)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["Origin"] = PointToDict(plane.origin);
   rc["XAxis"] = VectorToDict(plane.xaxis);
   rc["YAxis"] = VectorToDict(plane.yaxis);
@@ -342,7 +346,7 @@ pybind11::dict PlaneToDict(const ON_Plane& plane)
   return rc;
 }
 
-ON_3dPoint PointFromDict(pybind11::dict& dict)
+ON_3dPoint PointFromDict(py::dict& dict)
 {
   ON_3dVector rc;
   rc.x = dict["X"].cast<double>();
@@ -350,21 +354,21 @@ ON_3dPoint PointFromDict(pybind11::dict& dict)
   rc.z = dict["Z"].cast<double>();
   return rc;
 }
-ON_3dVector VectorFromDict(pybind11::dict& dict)
+ON_3dVector VectorFromDict(py::dict& dict)
 {
   ON_3dPoint pt = PointFromDict(dict);
   return ON_3dVector(pt.x, pt.y, pt.z);
 }
-ON_Plane PlaneFromDict(pybind11::dict& dict)
+ON_Plane PlaneFromDict(py::dict& dict)
 {
   ON_Plane plane;
-  pybind11::dict d = dict["Origin"].cast<pybind11::dict>();
+  py::dict d = dict["Origin"].cast<py::dict>();
   plane.origin = PointFromDict(d);
-  d = dict["XAxis"].cast<pybind11::dict>();
+  d = dict["XAxis"].cast<py::dict>();
   plane.xaxis = VectorFromDict(d);
-  d = dict["YAxis"].cast<pybind11::dict>();
+  d = dict["YAxis"].cast<py::dict>();
   plane.yaxis = VectorFromDict(d);
-  d = dict["ZAxis"].cast<pybind11::dict>();
+  d = dict["ZAxis"].cast<py::dict>();
   plane.zaxis = VectorFromDict(d);
   plane.UpdateEquation();
   return plane;

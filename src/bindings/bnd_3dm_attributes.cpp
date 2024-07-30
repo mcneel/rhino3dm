@@ -109,8 +109,13 @@ BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
 //////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void init3dmAttributesBindings(py::module_& m)
+#else
 namespace py = pybind11;
-void init3dmAttributesBindings(pybind11::module& m)
+void init3dmAttributesBindings(py::module& m)
+#endif
 {
   py::class_<BND_3dmObjectAttributes, BND_CommonObject>(m, "ObjectAttributes")
     .def(py::init<>())

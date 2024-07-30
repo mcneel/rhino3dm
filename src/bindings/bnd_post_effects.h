@@ -4,7 +4,14 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initPostEffectBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPostEffectBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initPostEffectBindings(py::module& m);
+#endif
+
 #else
 void initPostEffectBindings(void* m);
 #endif

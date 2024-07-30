@@ -4,7 +4,14 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initDitheringBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initDitheringBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initDitheringBindings(py::module& m);
+#endif
+
 #else
 void initDitheringBindings(void* m);
 #endif

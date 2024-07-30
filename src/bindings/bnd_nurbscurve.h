@@ -4,7 +4,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initNurbsCurveBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initNurbsCurveBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initNurbsCurveBindings(py::module& m);
+#endif
+
 #else
 void initNurbsCurveBindings(void* m);
 #endif

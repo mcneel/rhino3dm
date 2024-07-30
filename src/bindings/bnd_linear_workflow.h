@@ -4,7 +4,14 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initLinearWorkflowBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initLinearWorkflowBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initLinearWorkflowBindings(py::module& m);
+#endif
+
 #else
 void initLinearWorkflowBindings(void* m);
 #endif

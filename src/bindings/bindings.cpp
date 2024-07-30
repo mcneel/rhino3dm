@@ -1,9 +1,15 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+NB_MODULE(_rhino3dm, m) {
+  m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
+#else
 namespace py = pybind11;
 PYBIND11_MODULE(_rhino3dm, m){
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -14,6 +20,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
   ON::Begin();
   initFileUtilitiesBindings(m);
+  /*
   initDefines(m);
   initIntersectBindings(m);
   initPolylineBindings(m);
@@ -84,13 +91,19 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initDracoBindings(m);
   initRTreeBindings(m);
   initLinetypeBindings(m);
+  */
+
 }
 
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+  nanobind::tuple rc(count);
+#else
   pybind11::tuple rc(count);
   return rc;
+#endif
 #else
   emscripten::val rc(emscripten::val::array());
   return rc;
@@ -100,7 +113,7 @@ BND_TUPLE CreateTuple(int count)
 BND_TUPLE NullTuple()
 {
 #if defined(ON_PYTHON_COMPILE)
-  return pybind11::none();
+    return py::none();
 #else
   return emscripten::val::null();
 #endif

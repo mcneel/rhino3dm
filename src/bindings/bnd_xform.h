@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initXformBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initXformBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initXformBindings(py::module& m);
+#endif
+
 #else
 void initXformBindings(void* m);
 #endif

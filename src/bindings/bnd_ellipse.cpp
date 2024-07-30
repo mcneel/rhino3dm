@@ -2,8 +2,12 @@
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
 namespace py = pybind11;
-void initEllipseBindings(pybind11::module& m)
+#endif
+void initEllipseBindings(py::module& m)
 {
   py::class_<BND_Ellipse>(m, "Ellipse")
     ;

@@ -12,11 +12,16 @@
 #include "../lib/opennurbs/opennurbs.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include "datetime.h"
-#pragma comment(lib, "rpcrt4.lib")
-#pragma comment(lib, "shlwapi.lib")
+  #if defined(NANOBIND)
+    #include <nanobind/nanobind.h>
+    #include <nanobind/stl/string.h>
+  #else
+    #include <pybind11/pybind11.h>
+    #include <pybind11/stl.h>
+  #endif
+  #include "datetime.h"
+  #pragma comment(lib, "rpcrt4.lib")
+  #pragma comment(lib, "shlwapi.lib")
 #endif
 
 
@@ -25,11 +30,21 @@
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+
+typedef nanobind::dict BND_DICT;
+typedef nanobind::tuple BND_Color;
+typedef nanobind::tuple BND_Color4f;
+typedef nanobind::tuple BND_TUPLE;
+typedef nanobind::handle BND_DateTime;
+
+#else
 typedef pybind11::dict BND_DICT;
 typedef pybind11::tuple BND_Color;
 typedef pybind11::tuple BND_Color4f;
 typedef pybind11::tuple BND_TUPLE;
 typedef pybind11::handle BND_DateTime;
+#endif
 #endif
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;

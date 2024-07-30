@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLineCurveBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initLineCurveBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initLineCurveBindings(py::module& m);
+#endif
+
 #else
 void initLineCurveBindings(void* m);
 #endif

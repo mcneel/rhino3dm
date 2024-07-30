@@ -43,7 +43,14 @@ public:
 
 
 #if defined(ON_PYTHON_COMPILE)
-void initModelComponentBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initModelComponentBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initModelComponentBindings(py::module& m);
+#endif
+
 #else
 void initModelComponentBindings(void* m);
 #endif

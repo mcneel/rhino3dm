@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPlaneBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPlaneBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initPlaneBindings(py::module& m);
+#endif
+
 #else
 void initPlaneBindings(void* m);
 #endif
@@ -36,8 +43,8 @@ public:
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_Plane* Decode(pybind11::dict jsonObject);
+  py::dict Encode() const;
+  static BND_Plane* Decode(py::dict jsonObject);
 #endif
 
   ON_3dPoint m_origin;

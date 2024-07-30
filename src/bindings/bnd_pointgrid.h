@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPointGridBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPointGridBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initPointGridBindings(py::module& m);
+#endif
+
 #else
 void initPointGridBindings(void* m);
 #endif

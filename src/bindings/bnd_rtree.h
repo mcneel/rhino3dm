@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initRTreeBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initRTreeBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initRTreeBindings(py::module& m);
+#endif
+
 #else
 void initRTreeBindings(void* m);
 #endif

@@ -25,6 +25,8 @@ def system(cmd : List, **kwargs):
     try:
         cmd_out = sp.run(cmd, encoding='utf-8', check=True, stdout=sp.PIPE, stderr=sp.PIPE, **kwargs)
     except sp.CalledProcessError as e:
+        print(e.stderr)
+        print(e.output)
         raise RuntimeError(f"Command execution failed.\n\n{e.stderr}\n\n{e.output}")
     print(cmd_out.stdout)
 
@@ -63,8 +65,8 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['cmake',
-                      f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
+        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
+        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND']
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]

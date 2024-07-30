@@ -192,8 +192,13 @@ BND_Extrusion::BND_Extrusion(ON_Extrusion* extrusion, const ON_ModelComponentRef
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initExtrusionBindings(py::module_& m)
+#else
 namespace py = pybind11;
-void initExtrusionBindings(pybind11::module& m)
+void initExtrusionBindings(py::module& m)
+#endif
 {
   py::class_<BND_Extrusion, BND_Surface>(m, "Extrusion")
     .def_static("Create", &BND_Extrusion::Create, py::arg("planarCurve"), py::arg("height"), py::arg("cap"))

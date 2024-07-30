@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initCurveProxyBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCurveProxyBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initCurveProxyBindings(py::module& m);
+#endif
+
 #else
 void initCurveProxyBindings(void* m);
 #endif

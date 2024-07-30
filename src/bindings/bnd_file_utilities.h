@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initFileUtilitiesBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initFileUtilitiesBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initFileUtilitiesBindings(py::module& m);
+#endif
+
 #else
 void initFileUtilitiesBindings(void* m);
 #endif

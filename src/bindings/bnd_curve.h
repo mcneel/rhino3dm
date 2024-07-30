@@ -67,7 +67,14 @@ enum class CurveEvaluationSide : int
 
 
 #if defined(ON_PYTHON_COMPILE)
-void initCurveBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCurveBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initCurveBindings(py::module& m);
+#endif
+
 #else
 void initCurveBindings(void* m);
 #endif

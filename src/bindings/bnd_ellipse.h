@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initEllipseBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initEllipseBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initEllipseBindings(py::module& m);
+#endif
+
 #else
 void initEllipseBindings(void* m);
 #endif

@@ -4,7 +4,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void init3dmSettingsBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void init3dmSettingsBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void init3dmSettingsBindings(py::module& m);
+#endif
+
 #else
 void init3dmSettingsBindings(void* m);
 #endif

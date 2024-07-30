@@ -3,7 +3,12 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-typedef pybind11::object BND_UUID;
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+typedef py::object BND_UUID;
 #else
 typedef std::string BND_UUID;
 #endif

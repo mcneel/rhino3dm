@@ -4,8 +4,16 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initEnvironmentBindings(pybind11::module& m);
-void initTextureBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initEnvironmentBindings(py::module_& m);
+void initTextureBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initEnvironmentBindings(py::module& m);
+void initTextureBindings(py::module& m);
+#endif
+
 #else
 void initEnvironmentBindings(void* m);
 void initTextureBindings(void* m);

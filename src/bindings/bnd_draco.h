@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initDracoBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initDracoBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initDracoBindings(py::module& m);
+#endif
+
 #else
 void initDracoBindings(void* m);
 #endif

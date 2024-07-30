@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBitmapBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initBitmapBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initBitmapBindings(py::module& m);
+#endif
+
 #else
 void initBitmapBindings(void* m);
 #endif

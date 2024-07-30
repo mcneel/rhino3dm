@@ -4,7 +4,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initEmbeddedFileBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initEmbeddedFileBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initEmbeddedFileBindings(py::module& m);
+#endif
+
 #else
 void initEmbeddedFileBindings(void* m);
 #endif

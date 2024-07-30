@@ -11,7 +11,14 @@ enum class InstanceDefinitionUpdateType : int
 };
 
 #if defined(ON_PYTHON_COMPILE)
-void initInstanceBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initInstanceBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initInstanceBindings(py::module& m);
+#endif
+
 #else
 void initInstanceBindings(void* m);
 #endif

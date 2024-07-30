@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBezierBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initBezierBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initBezierBindings(py::module& m);
+#endif
+
 #else
 void initBezierBindings(void* m);
 #endif

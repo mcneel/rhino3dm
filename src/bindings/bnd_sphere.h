@@ -3,7 +3,14 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initSphereBindings(pybind11::module& m);
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initSphereBindings(py::module_& m);
+#else
+namespace py = pybind11;
+void initSphereBindings(py::module& m);
+#endif
+
 #else
 void initSphereBindings(void* m);
 #endif
@@ -54,8 +61,8 @@ public:
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_Sphere* Decode(pybind11::dict jsonObject);
+  py::dict Encode() const;
+  static BND_Sphere* Decode(py::dict jsonObject);
 #endif
 
 };
