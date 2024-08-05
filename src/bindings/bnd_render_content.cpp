@@ -444,8 +444,12 @@ BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initRenderContentBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initRenderContentBindings(pybind11::module& m)
+void initRenderContentBindings(py::module& m)
 {
   py::class_<BND_File3dmRenderContent>(m, "RenderContent")
     .def(py::init<>())
@@ -502,6 +506,7 @@ void initRenderContentBindings(pybind11::module& m)
     .def_property("FileName", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

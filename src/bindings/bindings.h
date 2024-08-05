@@ -13,9 +13,12 @@
 
 #if defined(ON_PYTHON_COMPILE)
   #if defined(NANOBIND)
+    namespace py = nanobind;
     #include <nanobind/nanobind.h>
     #include <nanobind/stl/string.h>
+    #include <nanobind/stl/tuple.h>
   #else
+    namespace py = pybind11;
     #include <pybind11/pybind11.h>
     #include <pybind11/stl.h>
   #endif
@@ -30,22 +33,13 @@
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-
-typedef nanobind::dict BND_DICT;
-typedef nanobind::tuple BND_Color;
-typedef nanobind::tuple BND_Color4f;
-typedef nanobind::tuple BND_TUPLE;
-typedef nanobind::handle BND_DateTime;
-
-#else
-typedef pybind11::dict BND_DICT;
-typedef pybind11::tuple BND_Color;
-typedef pybind11::tuple BND_Color4f;
-typedef pybind11::tuple BND_TUPLE;
-typedef pybind11::handle BND_DateTime;
+typedef py::dict BND_DICT;
+typedef py::tuple BND_Color;
+typedef py::tuple BND_Color4f;
+typedef py::tuple BND_TUPLE;
+typedef py::handle BND_DateTime;
 #endif
-#endif
+
 #if defined(ON_WASM_COMPILE)
 typedef emscripten::val BND_DICT;
 typedef emscripten::val BND_Color;

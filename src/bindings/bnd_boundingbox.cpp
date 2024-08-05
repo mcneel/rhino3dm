@@ -1,5 +1,11 @@
 #include "bindings.h"
 
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+
 BND_BoundingBox::BND_BoundingBox(const ON_3dPoint& min, const ON_3dPoint& max)
 : m_bbox(min, max)
 {
@@ -90,23 +96,28 @@ BND_BoundingBox BND_BoundingBox::Union(const BND_BoundingBox& a, const BND_Bound
 
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_BoundingBox::Encode() const
+py::dict BND_BoundingBox::Encode() const
 {
-  pybind11::dict d;
+  py::dict d;
   d["Min"] = PointToDict(m_bbox.m_min);
   d["Max"] = PointToDict(m_bbox.m_max);
   return d;
 }
 
-BND_BoundingBox* BND_BoundingBox::Decode(pybind11::dict jsonObject)
+#if defined(NANOBIND)
+// TODO: BND_BoundingBox::Decode for NANOBIND
+#else
+BND_BoundingBox* BND_BoundingBox::Decode(py::dict jsonObject)
 {
   ON_BoundingBox bbox;
-  pybind11::dict d = jsonObject["Min"].cast<pybind11::dict>();
+  py::dict d = jsonObject["Min"].cast<py::dict>();
   bbox.m_min = PointFromDict(d);
-  d = jsonObject["Max"].cast<pybind11::dict>();
+  d = jsonObject["Max"].cast<py::dict>();
   bbox.m_max = PointFromDict(d);
   return new BND_BoundingBox(bbox);
 }
+#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -150,8 +161,10 @@ BND_BoundingBox* BND_BoundingBox::Decode(emscripten::val jsonObject)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBoundingBoxBindings(pybind11::module& m)
+#if defined(NANOBIND)
+void initBoundingBoxBindings(py::module_& m){}
+#else
+void initBoundingBoxBindings(py::module& m)
 {
   py::class_<BND_BoundingBox>(m, "BoundingBox")
     .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("minPoint"), py::arg("maxPoint"))
@@ -175,7 +188,10 @@ void initBoundingBoxBindings(pybind11::module& m)
     .def_static("Decode", &BND_BoundingBox::Decode, py::arg("jsonObject"))
     ;
 }
-#else
+#endif
+#endif
+
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initBoundingBoxBindings(void*)

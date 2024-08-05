@@ -133,8 +133,12 @@ bool BND_PhysicallyBasedMaterial::Supported() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initMaterialBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initMaterialBindings(pybind11::module& m)
+void initMaterialBindings(py::module& m)
 {
   py::class_<BND_PhysicallyBasedMaterial>(m, "PhysicallyBasedMaterial")
     .def_property_readonly("Supported", &BND_PhysicallyBasedMaterial::Supported)
@@ -200,6 +204,7 @@ void initMaterialBindings(pybind11::module& m)
     .def("ToPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

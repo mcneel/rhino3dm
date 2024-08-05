@@ -31,9 +31,9 @@ static std::vector<ON_2dPoint> ArrowPoints(ON_Arrowhead::arrow_type arrowType, d
 #if defined(ON_PYTHON_COMPILE)
 #if defined(NANOBIND)
 namespace py = nanobind;
+void initDefines(py::module_& m){}
 #else
 namespace py = pybind11;
-#endif
 void initDefines(py::module& m)
 {
   py::enum_<ON_COMPONENT_INDEX::TYPE>(m, "ComponentIndexType")
@@ -373,7 +373,7 @@ ON_Plane PlaneFromDict(py::dict& dict)
   plane.UpdateEquation();
   return plane;
 }
-
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

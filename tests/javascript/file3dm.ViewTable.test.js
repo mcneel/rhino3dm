@@ -1,0 +1,57 @@
+const rhino3dm = require('rhino3dm')
+const fs = require('fs')
+
+let rhino
+beforeEach(async () => {
+  rhino = await rhino3dm()
+})
+//TODO
+test('CreateFileWithView', async () => {
+
+  const file3dm = new rhino.File3dm()
+  file3dm.applicationName = 'rhino3dm.js'
+  file3dm.applicationDetails = 'rhino3dm-tests'
+  file3dm.applicationUrl = 'https://rhino3d.com'
+
+  // make some geometry
+  for (let i = 0; i < 100; i++) {
+
+    const x = Math.random() * 100
+    const y = Math.random() * 100
+    const z = Math.random() * 100
+    const sphere = new rhino.Sphere([x, y, z], 10)
+
+    file3dm.objects().addSphere(sphere, null)
+
+  }
+
+  const vi = new rhino.ViewInfo()
+  vi.name = 'main_js'
+
+  //does not work
+  /*
+  vi.getViewport().setCameraLocation([50, 50, 100])
+  loc = vi.getViewport().cameraLocation //<-- default location
+  */
+
+  // works
+  const vp = new rhino.ViewportInfo()
+  const loc = [50,50,100]
+  vp.setCameraLocation(loc)
+  vi.setViewport(vp)
+  file3dm.views().add(vi)
+
+  const bufferWrite = file3dm.toByteArray()
+  fs.writeFileSync('test_createFileWithView.3dm', bufferWrite)
+
+  const bufferRead = fs.readFileSync('test_createFileWithView.3dm')
+  const arr = new Uint8Array(bufferRead)
+  const file3dmRead = rhino.File3dm.fromByteArray(arr)
+
+  const vi_read = file3dmRead.views().get(0)
+  const vp_read = vi_read.getViewport()
+  const loc_read = vp_read.cameraLocation
+
+  expect(loc[0] === loc_read[0] && loc[1] === loc_read[1] && loc[2] === loc_read[2]).toBe(true)
+
+})

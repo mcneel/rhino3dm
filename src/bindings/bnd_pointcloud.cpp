@@ -808,8 +808,12 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPointCloudBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initPointCloudBindings(pybind11::module& m)
+void initPointCloudBindings(py::module& m)
 {
   py::class_<BND_PointCloudItem>(m, "PointCloudItem")
     .def_property("Location", &BND_PointCloudItem::GetLocation, &BND_PointCloudItem::SetLocation)
@@ -869,6 +873,7 @@ void initPointCloudBindings(pybind11::module& m)
     .def("ClosestPoint", &BND_PointCloud::ClosestPoint, py::arg("testPoint"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -20,8 +20,12 @@ BND_FileReference BND_FileReference::CreateFromFullAndRelativePaths(std::wstring
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initFileUtilitiesBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initFileUtilitiesBindings(pybind11::module& m)
+void initFileUtilitiesBindings(py::module& m)
 {
   py::class_<BND_FileReference>(m, "FileReference")
     .def_static("CreateFromFullPath", &BND_FileReference::CreateFromFullPath, py::arg("path"))
@@ -30,6 +34,7 @@ void initFileUtilitiesBindings(pybind11::module& m)
     .def_property_readonly("RelativePath", &BND_FileReference::GetRelativePath)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

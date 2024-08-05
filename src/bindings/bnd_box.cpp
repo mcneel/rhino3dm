@@ -29,8 +29,12 @@ ON_3dPoint BND_Box::PointAt(double x, double y, double z) const
 //}
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initBoxBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initBoxBindings(pybind11::module& m)
+void initBoxBindings(py::module& m)
 {
   py::class_<BND_Box>(m, "Box")
     .def(py::init<const BND_BoundingBox&>(), py::arg("bbox"))
@@ -43,6 +47,7 @@ void initBoxBindings(pybind11::module& m)
     .def("Transform", &BND_Box::Transform, py::arg("xform"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

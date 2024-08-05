@@ -252,8 +252,12 @@ BND_NurbsCurve* BND_Curve::ToNurbsCurve2(BND_Interval subdomain) const
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCurveBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initCurveBindings(pybind11::module& m)
+void initCurveBindings(py::module& m)
 {
   py::enum_<CurveEvaluationSide>(m, "CurveEvaluationSide")
     .value("Default", CurveEvaluationSide::Default)
@@ -355,6 +359,7 @@ void initCurveBindings(pybind11::module& m)
     .def("ToNurbsCurve", &BND_Curve::ToNurbsCurve2, py::arg("subdomain"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -45,8 +45,12 @@ ON_Arrowhead::arrow_type BND_DimensionStyle::LeaderArrowType() const
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initDimensionStyleBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initDimensionStyleBindings(pybind11::module& m)
+void initDimensionStyleBindings(py::module& m)
 {
   py::class_<BND_DimensionStyle, BND_CommonObject> pyDimStyle(m, "DimensionStyle");
 
@@ -208,6 +212,8 @@ void initDimensionStyleBindings(pybind11::module& m)
     ;
 }
 #endif
+#endif
+
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;

@@ -124,12 +124,14 @@ BND_NurbsCurve* BND_Arc::ToNurbsCurve() const
 }
 
 #if defined(ON_PYTHON_COMPILE)
+
+#if defined(NANOBIND)
 namespace py = nanobind;
-void initArcBindings(py::module_& m)
+void initArcBindings(py::module_& m){}
 #else
 namespace py = pybind11;
 void initArcBindings(py::module& m)
-#endif
+
 {
   py::class_<BND_Arc>(m, "Arc")
     .def(py::init<const BND_Circle&, double>(), py::arg("circle"), py::arg("angleRadians"))
@@ -164,6 +166,7 @@ void initArcBindings(py::module& m)
     .def("Transform", &BND_Arc::Transform, py::arg("xform"))
     .def("ToNurbsCurve", &BND_Arc::ToNurbsCurve);
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

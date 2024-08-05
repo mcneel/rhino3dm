@@ -17,12 +17,17 @@ BND_SurfaceProxy::BND_SurfaceProxy()
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initSurfaceProxyBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initSurfaceProxyBindings(pybind11::module& m)
+void initSurfaceProxyBindings(py::module& m)
 {
   py::class_<BND_SurfaceProxy, BND_Surface>(m, "SurfaceProxy")
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -138,8 +138,12 @@ std::tuple<int, ON_3dPoint> BND_TextureMapping::Evaluate(const ON_3dPoint& P, co
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initTextureMappingBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initTextureMappingBindings(pybind11::module& m)
+void initTextureMappingBindings(py::module& m)
 {
   py::class_<BND_TextureMapping, BND_CommonObject>(m, "TextureMapping")
     .def(py::init<>())
@@ -162,6 +166,7 @@ void initTextureMappingBindings(pybind11::module& m)
     .def("Evaluate", &BND_TextureMapping::Evaluate, py::arg("p"), py::arg("n"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

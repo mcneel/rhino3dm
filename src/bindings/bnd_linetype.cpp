@@ -52,9 +52,12 @@ int BND_Linetype::AppendSegment(double length, bool isSolid)
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initLinetypeBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-
-void initLinetypeBindings(pybind11::module& m)
+void initLinetypeBindings(py::module& m)
 {
   py::class_<BND_Linetype, BND_ModelComponent>(m, "Linetype")
     .def(py::init<>())
@@ -78,6 +81,7 @@ void initLinetypeBindings(pybind11::module& m)
     .def_property_readonly_static("Hidden", &BND_Linetype::Hidden)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

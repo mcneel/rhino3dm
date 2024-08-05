@@ -33,8 +33,12 @@ bool BND_GeometryBase::Rotate(double rotation_angle, const ON_3dVector& rotation
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initGeometryBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initGeometryBindings(pybind11::module& m)
+void initGeometryBindings(py::module& m)
 {
   py::class_<BND_GeometryBase, BND_CommonObject>(m, "GeometryBase")
     .def_property_readonly("ObjectType", &BND_GeometryBase::ObjectType)
@@ -50,6 +54,8 @@ void initGeometryBindings(pybind11::module& m)
     ;
 }
 #endif
+#endif
+
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 

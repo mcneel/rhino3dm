@@ -1647,8 +1647,12 @@ struct PyBNDIterator {
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initExtensionsBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initExtensionsBindings(pybind11::module& m)
+void initExtensionsBindings(py::module& m)
 {
   py::class_<BND_File3dmPlugInData>(m, "File3dmPlugInData")
     ;
@@ -1973,6 +1977,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("RdkXml", &BND_ONXModel::RdkXml)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

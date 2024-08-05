@@ -76,8 +76,12 @@ BND_Transform BND_InstanceReferenceGeometry::Xform() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initInstanceBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initInstanceBindings(pybind11::module& m)
+void initInstanceBindings(py::module& m)
 {
   py::enum_<InstanceDefinitionUpdateType>(m, "InstanceDefinitionUpdateType")
     .value("Static", InstanceDefinitionUpdateType::Static)
@@ -103,6 +107,7 @@ void initInstanceBindings(pybind11::module& m)
     .def_property_readonly("Xform", &BND_InstanceReferenceGeometry::Xform)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -222,8 +222,12 @@ BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initNurbsCurveBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initNurbsCurveBindings(pybind11::module& m)
+void initNurbsCurveBindings(py::module& m)
 {
   py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
     .def("__len__", &BND_NurbsCurveKnotList::Count)
@@ -296,6 +300,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def_property_readonly("Knots", &BND_NurbsCurve::Knots)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

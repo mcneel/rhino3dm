@@ -42,8 +42,12 @@ BND_NurbsSurface* BND_Cylinder::ToNurbsSurface() const
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCylinderBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initCylinderBindings(pybind11::module& m)
+void initCylinderBindings(py::module& m)
 {
   py::class_<BND_Cylinder>(m, "Cylinder")
     .def(py::init<const BND_Circle&>(), py::arg("baseCircle"))
@@ -61,6 +65,7 @@ void initCylinderBindings(pybind11::module& m)
     .def("ToNurbsSurface", &BND_Cylinder::ToNurbsSurface)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -30,14 +30,19 @@ BND_PlaneSurface::BND_PlaneSurface(const BND_Plane& plane, const BND_Interval& x
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPlaneSurfaceBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initPlaneSurfaceBindings(pybind11::module& m)
+void initPlaneSurfaceBindings(py::module& m)
 {
   py::class_<BND_PlaneSurface, BND_Surface>(m, "PlaneSurface")
     .def(py::init<>())
     .def(py::init<const BND_Plane&, const BND_Interval&, const BND_Interval&>(), py::arg("plane"), py::arg("xExtents"), py::arg("yExtents"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -401,8 +401,12 @@ std::string BND_Draco::ToBase64String() const
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initDracoBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initDracoBindings(pybind11::module& m)
+void initDracoBindings(py::module& m)
 {
 #if defined(ON_INCLUDE_DRACO)
   py::class_<BND_DracoCompressionOptions>(m, "DracoCompressionOptions")
@@ -429,6 +433,7 @@ void initDracoBindings(pybind11::module& m)
     ;
 #endif
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

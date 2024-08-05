@@ -13,6 +13,9 @@ BND_Color ON_Color_to_Binding(const ON_Color& color)
   return py::make_tuple(color.Red(), color.Green(), color.Blue(), 255 - color.Alpha());
 }
 
+#if defined(NANOBIND)
+// TODO: Binding_to_ON_Color is not implemented in nanobind
+#else
 ON_Color Binding_to_ON_Color(const BND_Color& color)
 {
   int r = color[0].cast<int>();
@@ -21,12 +24,16 @@ ON_Color Binding_to_ON_Color(const BND_Color& color)
   int a = color[3].cast<int>();
   return ON_Color(r, g, b, 255-a);
 }
+#endif
 
 BND_Color4f ON_4fColor_to_Binding(const ON_4fColor& color)
 {
   return py::make_tuple(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
+#if defined(NANOBIND)
+// TODO: Binding_to_ON_4fColor is not implemented in nanobind
+#else
 ON_4fColor Binding_to_ON_4fColor(const BND_Color4f& color)
 {
   float r = color[0].cast<float>();
@@ -35,6 +42,7 @@ ON_4fColor Binding_to_ON_4fColor(const BND_Color4f& color)
   float a = color[3].cast<float>();
   return ON_4fColor(r, g, b, a);
 }
+#endif
 
 #endif
 

@@ -20,8 +20,12 @@ BND_Brep* BND_Cone::ToBrep(bool capBottom) const
 }
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initConeBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initConeBindings(pybind11::module& m)
+void initConeBindings(py::module& m)
 {
   py::class_<BND_Cone>(m, "Cone")
     .def_property("Height", &BND_Cone::GetHeight, &BND_Cone::SetHeight)
@@ -36,6 +40,7 @@ void initConeBindings(pybind11::module& m)
     .def("ToBrep", &BND_Cone::ToBrep, py::arg("capBottom"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

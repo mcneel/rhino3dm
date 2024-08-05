@@ -937,8 +937,12 @@ void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class B
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initMeshBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initMeshBindings(pybind11::module& m)
+void initMeshBindings(py::module& m)
 {
   py::class_<BND_MeshingParameters>(m, "MeshingParameters")
     .def(py::init<>())
@@ -1080,6 +1084,7 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("PartitionCount", &BND_Mesh::PartitionCount)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

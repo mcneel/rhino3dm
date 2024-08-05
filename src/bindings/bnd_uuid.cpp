@@ -1,6 +1,10 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
 
 static pybind11::object make_uuid;
 BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
@@ -35,6 +39,7 @@ std::vector<BND_UUID> ON_SimpleArrayUUID_to_Binding(const ON_SimpleArray<ON_UUID
 	return guids;
 }
 
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

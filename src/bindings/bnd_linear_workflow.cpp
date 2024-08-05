@@ -32,8 +32,12 @@ BND_File3dmLinearWorkflow::BND_File3dmLinearWorkflow(ON_LinearWorkflow* lw)
 }
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initLinearWorkflowBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initLinearWorkflowBindings(pybind11::module& m)
+void initLinearWorkflowBindings(py::module& m)
 {
   py::class_<BND_File3dmLinearWorkflow>(m, "LinearWorkflow")
     .def(py::init<>())
@@ -46,6 +50,7 @@ void initLinearWorkflowBindings(pybind11::module& m)
     .def_property("PostProcessGammaOn", &BND_File3dmLinearWorkflow::GetPostProcessGammaOn, &BND_File3dmLinearWorkflow::SetPostProcessGammaOn)
    ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

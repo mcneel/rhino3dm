@@ -1,5 +1,11 @@
 #include "bindings.h"
 
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+
 BND_Viewport::BND_Viewport()
 {
   SetTrackedPointer(new ON_Viewport(), nullptr);
@@ -114,7 +120,7 @@ BND_DICT BND_Viewport::GetFrustum() const
     d["far"] = far_dist;
     return d;
   }
-  throw pybind11::value_error("Invalid viewport");
+  throw py::value_error("Invalid viewport");
 }
 #endif
 
@@ -367,8 +373,10 @@ BND_UUID BND_Viewport::GetId() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initViewportBindings(pybind11::module& m)
+#if defined(NANOBIND)
+void initViewportBindings(py::module_& m){}
+#else
+void initViewportBindings(py::module& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
@@ -408,9 +416,10 @@ void initViewportBindings(pybind11::module& m)
     .def_property_readonly("Id", &BND_Viewport::GetId)
     ;
 }
+#endif
+#endif
 
-#else
-
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initViewportBindings(void*)

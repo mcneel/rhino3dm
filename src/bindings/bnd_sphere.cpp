@@ -117,8 +117,12 @@ BND_Sphere* BND_Sphere::Decode(emscripten::val jsonObject)
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initSphereBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initSphereBindings(pybind11::module& m)
+void initSphereBindings(py::module& m)
 {
   py::class_<BND_Sphere>(m, "Sphere")
     .def(py::init<ON_3dPoint, double>(), py::arg("center"), py::arg("radius"))
@@ -142,6 +146,7 @@ void initSphereBindings(pybind11::module& m)
     .def_static("Decode", &BND_Sphere::Decode, py::arg("jsonObject"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

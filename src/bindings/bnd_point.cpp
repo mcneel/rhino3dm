@@ -1,6 +1,11 @@
 #include "bindings.h"
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
 #include <pybind11/operators.h>
+#endif
 #endif
 
 
@@ -34,6 +39,9 @@ ON_3dPoint BND_Point3d::Transform(const ON_3dPoint& pt, const BND_Transform& tra
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+void initPointBindings(py::module_& m){}
+#else
 static ON_3dPoint GetUnsetPoint3d(pybind11::object /*self*/)
 {
   return ON_3dPoint::UnsetPoint;
@@ -304,9 +312,7 @@ static std::string ReprInterval(const BND_Interval& i)
   return repr.str();
 }
 
-
-namespace py = pybind11;
-void initPointBindings(pybind11::module& m)
+void initPointBindings(py::module& m)
 {
   py::class_<ON_2dPoint>(m, "Point2d")
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
@@ -415,7 +421,10 @@ void initPointBindings(pybind11::module& m)
     .def("__repr__", &ReprInterval);
 
 }
+#endif
+
 #else
+
 using namespace emscripten;
 
 void initPointBindings(void*)

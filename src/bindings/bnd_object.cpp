@@ -1546,8 +1546,12 @@ BND_TUPLE BND_CommonObject::IsValidWithLog() const
 }
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initObjectBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initObjectBindings(pybind11::module& m)
+void initObjectBindings(py::module& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
     .def_property_readonly("IsValid", &BND_CommonObject::IsValid)
@@ -1567,6 +1571,7 @@ void initObjectBindings(pybind11::module& m)
     ////.def_static("WriteGeometry", &BND_ArchivableDictionary::WriteGeometry)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

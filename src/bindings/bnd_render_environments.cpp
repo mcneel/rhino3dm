@@ -87,8 +87,12 @@ void BND_File3dmRenderEnvironments::SetReflectionId(const BND_UUID& id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initRenderEnvironmentsBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initRenderEnvironmentsBindings(pybind11::module& m)
+void initRenderEnvironmentsBindings(py::module& m)
 {
   py::class_<BND_File3dmRenderEnvironments>(m, "RenderEnvironments")
     .def(py::init<>())
@@ -100,6 +104,7 @@ void initRenderEnvironmentsBindings(pybind11::module& m)
     .def_property("ReflectionOverride", &BND_File3dmRenderEnvironments::GetReflectionOverride, &BND_File3dmRenderEnvironments::SetReflectionOverride)
    ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

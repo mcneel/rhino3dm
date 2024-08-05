@@ -17,8 +17,12 @@ void BND_Bitmap::SetTrackedPointer(ON_Bitmap* bitmap, const ON_ModelComponentRef
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initBitmapBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initBitmapBindings(pybind11::module& m)
+void initBitmapBindings(py::module& m)
 {
   py::class_<BND_Bitmap>(m, "Bitmap")
     .def(py::init<>())
@@ -29,6 +33,7 @@ void initBitmapBindings(pybind11::module& m)
     .def_property_readonly("SizeOfImage", &BND_Bitmap::SizeOfImage)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

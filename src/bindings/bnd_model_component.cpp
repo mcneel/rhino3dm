@@ -22,8 +22,12 @@ void BND_ModelComponent::SetId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initModelComponentBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initModelComponentBindings(pybind11::module& m)
+void initModelComponentBindings(py::module& m)
 {
   py::class_<BND_ModelComponent, BND_CommonObject>(m, "ModelComponent")
     .def("DataCRC", &BND_ModelComponent::DataCRC, py::arg("currentRemainder"))
@@ -32,6 +36,7 @@ void initModelComponentBindings(pybind11::module& m)
     .def("ClearId", &BND_ModelComponent::ClearId)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -1,5 +1,13 @@
 #include "bindings.h"
 
+#if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+#endif
+
 BND_BrepEdge::BND_BrepEdge(ON_BrepEdge* edge, const ON_ModelComponentReference* compref)
 {
   m_edge = edge;
@@ -186,7 +194,7 @@ BND_BrepFace* BND_BrepFaceList::GetFace(int i)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i >= Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_BrepFace* face = m_brep->Face(i);
@@ -297,7 +305,7 @@ BND_Surface* BND_BrepSurfaceList::GetSurface(int i)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i >= Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_Surface* surface = nullptr;
@@ -320,7 +328,7 @@ BND_BrepEdge* BND_BrepEdgeList::GetEdge(int i)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i >= Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_BrepEdge* edge = m_brep->Edge(i);
@@ -352,7 +360,7 @@ BND_BrepVertex* BND_BrepVertexList::GetVertex(int i) {
 
 #if defined(ON_PYTHON_COMPILE)
   if (i >= Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_BrepVertex* vertex = m_brep->Vertex(i);
@@ -376,8 +384,10 @@ BND_TUPLE BND_BrepVertex::EdgeIndices() const {
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBrepBindings(pybind11::module& m)
+#if defined(NANOBIND)
+void initBrepBindings(py::module_& m){}
+#else
+void initBrepBindings(py::module& m)
 {
   py::class_<BND_BrepEdge, BND_CurveProxy>(m, "BrepEdge")
     ;
@@ -441,6 +451,7 @@ void initBrepBindings(pybind11::module& m)
     .def("Flip", &BND_Brep::Flip)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

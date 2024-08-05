@@ -95,8 +95,12 @@ BND_DICT BND_Circle::Encode() const
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initCircleBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initCircleBindings(pybind11::module& m)
+void initCircleBindings(py::module& m)
 {
   py::class_<BND_Circle>(m, "Circle")
     .def(py::init<double>(), py::arg("radius"))
@@ -122,6 +126,7 @@ void initCircleBindings(pybind11::module& m)
     .def("Encode", &BND_Circle::Encode)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

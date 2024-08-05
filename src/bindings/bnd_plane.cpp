@@ -190,8 +190,12 @@ BND_Plane BND_PlaneHelper::WorldXY()
 }
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPlaneBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initPlaneBindings(pybind11::module& m)
+void initPlaneBindings(py::module& m)
 {
   py::class_<BND_Plane>(m, "Plane")
     .def_static("WorldXY", &BND_Plane::WorldXY)
@@ -214,6 +218,7 @@ void initPlaneBindings(pybind11::module& m)
     .def_static("Decode", &BND_Plane::Decode, py::arg("jsonObject"))
     ;
 }
+#endif
 #endif
 
 

@@ -110,8 +110,12 @@ int BND_PolyCurve::SegmentIndex(double polycurveParameter) const
 /////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initPolyCurveBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initPolyCurveBindings(pybind11::module& m)
+void initPolyCurveBindings(py::module& m)
 {
   py::class_<BND_PolyCurve, BND_Curve>(m, "PolyCurve")
     .def(py::init<>())
@@ -131,6 +135,7 @@ void initPolyCurveBindings(pybind11::module& m)
     .def("SegmentIndex", &BND_PolyCurve::SegmentIndex, py::arg("polycurveParameter"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

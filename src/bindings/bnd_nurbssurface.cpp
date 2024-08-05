@@ -197,8 +197,12 @@ BND_NurbsSurfacePointList BND_NurbsSurface::Points()
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initNurbsSurfaceBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initNurbsSurfaceBindings(pybind11::module& m)
+void initNurbsSurfaceBindings(py::module& m)
 {
   py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
     .def("__len__", &BND_NurbsSurfaceKnotList::Count)
@@ -271,6 +275,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def_property_readonly("Points", &BND_NurbsSurface::Points)
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

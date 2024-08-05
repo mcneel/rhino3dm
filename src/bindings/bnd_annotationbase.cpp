@@ -1,5 +1,11 @@
 #include "bindings.h"
 
+#if defined(NANOBIND)
+namespace py = nanobind;
+#else
+namespace py = pybind11;
+#endif
+
 BND_AnnotationBase::BND_AnnotationBase()
 {
 }
@@ -268,7 +274,7 @@ BND_DICT BND_DimLinear::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimLinear points");
+  throw py::value_error("Failed to get DimLinear points");
 #else
   return emscripten::val::null();
 #endif
@@ -369,7 +375,7 @@ BND_DICT BND_DimAngular::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimAngular points");
+  throw py::value_error("Failed to get DimAngular points");
 #else
   return emscripten::val::null();
 #endif
@@ -463,7 +469,7 @@ BND_DICT BND_DimRadial::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimRadial points");
+  throw py::value_error("Failed to get DimRadial points");
 #else
   return emscripten::val::null();
 #endif
@@ -550,7 +556,7 @@ BND_DICT BND_DimOrdinate::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimOrdinate points");
+  throw py::value_error("Failed to get DimOrdinate points");
 #else
   return emscripten::val::null();
 #endif
@@ -623,8 +629,11 @@ std::vector<ON_Line> BND_Centermark::GetDisplayLines(const BND_DimensionStyle& d
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initAnnotationBaseBindings(pybind11::module& m)
+
+#if defined(NANOBIND)
+void initAnnotationBaseBindings(py::module_& m){}
+#else
+void initAnnotationBaseBindings(py::module& m)
 {
   py::class_<BND_AnnotationBase, BND_GeometryBase>(m, "AnnotationBase")
     .def_property_readonly("DimensionStyleId", &BND_AnnotationBase::DimensionStyleId)
@@ -681,6 +690,7 @@ void initAnnotationBaseBindings(pybind11::module& m)
     ;
 
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -98,16 +98,11 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-  nanobind::tuple rc(count);
-#else
-  pybind11::tuple rc(count);
-  return rc;
-#endif
+  py::tuple rc(count);
 #else
   emscripten::val rc(emscripten::val::array());
-  return rc;
 #endif
+  return rc;
 }
 
 BND_TUPLE NullTuple()

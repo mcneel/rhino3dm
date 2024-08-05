@@ -32,8 +32,12 @@ BND_TUPLE BND_BezierCurve::Split(double t)
 
 
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+namespace py = nanobind;
+void initBezierBindings(py::module_& m){}
+#else
 namespace py = pybind11;
-void initBezierBindings(pybind11::module& m)
+void initBezierBindings(py::module& m)
 {
   py::class_<BND_BezierCurve>(m, "BezierCurve")
     .def_property_readonly("Dimension", &BND_BezierCurve::Dimension)
@@ -51,6 +55,7 @@ void initBezierBindings(pybind11::module& m)
     .def("Split", &BND_BezierCurve::Split, py::arg("t"))
     ;
 }
+#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)
