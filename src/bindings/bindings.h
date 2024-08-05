@@ -7,26 +7,22 @@
 #define ON_WASM_COMPILE
 #else
 #define ON_PYTHON_COMPILE
+#if defined(NANOBIND)
+  #include <nanobind/nanobind.h>
+  #include <nanobind/stl/string.h>
+  #include <nanobind/stl/tuple.h>
+  namespace py = nanobind;
+#else
+  #include <pybind11/pybind11.h>
+  #include <pybind11/stl.h>
+  namespace py = pybind11;
 #endif
-
-#include "../lib/opennurbs/opennurbs.h"
-
-#if defined(ON_PYTHON_COMPILE)
-  #if defined(NANOBIND)
-    namespace py = nanobind;
-    #include <nanobind/nanobind.h>
-    #include <nanobind/stl/string.h>
-    #include <nanobind/stl/tuple.h>
-  #else
-    namespace py = pybind11;
-    #include <pybind11/pybind11.h>
-    #include <pybind11/stl.h>
-  #endif
   #include "datetime.h"
   #pragma comment(lib, "rpcrt4.lib")
   #pragma comment(lib, "shlwapi.lib")
 #endif
 
+#include "../lib/opennurbs/opennurbs.h"
 
 #if defined(ON_WASM_COMPILE)
 #include <emscripten/bind.h>
