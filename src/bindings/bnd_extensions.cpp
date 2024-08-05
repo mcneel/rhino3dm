@@ -671,7 +671,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0)
     return nullptr;
@@ -706,7 +706,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -775,7 +775,7 @@ BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
     return new BND_Material(modelmaterial, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -930,7 +930,7 @@ BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
     return new BND_Bitmap(modelbitmap, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -994,7 +994,7 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
     return new BND_Layer(modellayer, &compref, m_model);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1056,7 +1056,7 @@ BND_Group* BND_File3dmGroupTable::FindIndex(int index)
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1129,7 +1129,7 @@ BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
 
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= count)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0 || index >= count)
     return nullptr;
@@ -1176,7 +1176,7 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindIndex(int index) const
     return new BND_DimensionStyle(modeldimstyle, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1234,8 +1234,8 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
     {
 
 #if defined(ON_PYTHON_COMPILE)
-      BND_GeometryBase g = geometry[i].cast<BND_GeometryBase>();  
-      BND_3dmObjectAttributes oa = attributes[i].cast<BND_3dmObjectAttributes>();
+      BND_GeometryBase g = py::cast<BND_GeometryBase>(geometry[i]);
+      BND_3dmObjectAttributes oa = py::cast<BND_3dmObjectAttributes>(attributes[i]);
 #else
       BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();  
       BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
@@ -1318,7 +1318,7 @@ BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(in
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1363,7 +1363,7 @@ BND_File3dmPlugInData* BND_File3dmPlugInDataTable::GetPlugInData(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_model->m_userdata_table.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0 || index >= m_model->m_userdata_table.Count())
     return nullptr;
@@ -1415,7 +1415,7 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
 
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= strings.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   const ON_UserString& us = strings[i];
@@ -1626,7 +1626,6 @@ BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, i
 
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
 
 template <typename IT, typename ET>
 struct PyBNDIterator {

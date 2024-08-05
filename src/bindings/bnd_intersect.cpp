@@ -210,8 +210,7 @@ BND_TUPLE BND_Intersection::LineBox(const ON_Line& line, const BND_BoundingBox& 
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initIntersectBindings(pybind11::module& m)
+void initIntersectBindings(py::module_& m)
 {
   //py::enum_<PlaneCircleIntersection>(m, "PlaneCircleIntersection")
   //  .value("None", PlaneCircleIntersection::None)

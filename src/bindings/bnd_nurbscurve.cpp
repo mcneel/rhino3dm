@@ -11,7 +11,7 @@ ON_4dPoint BND_NurbsCurvePointList::GetControlPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
   m_nurbs_curve->GetCV(index, pt);
@@ -22,7 +22,7 @@ void BND_NurbsCurvePointList::SetControlPoint(int index, ON_4dPoint point)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_nurbs_curve->SetCV(index, point);
 }
@@ -40,7 +40,7 @@ double BND_NurbsCurveKnotList::GetKnot(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   return m_nurbs_curve->Knot(index);
 }
@@ -49,7 +49,7 @@ void BND_NurbsCurveKnotList::SetKnot(int index, double k)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_nurbs_curve->SetKnot(index, k);
 }

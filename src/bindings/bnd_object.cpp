@@ -5,7 +5,7 @@
 std::string StringFromDict(BND_DICT& d, const char* key)
 {
 #if defined(ON_PYTHON_COMPILE)
-  std::string rc = pybind11::str(d[key]);
+  std::string rc = ToStdString(py::str(d[key]));
 #else
   std::string rc = d[key].as<std::string>();
 #endif
@@ -15,7 +15,8 @@ std::string StringFromDict(BND_DICT& d, const char* key)
 int IntFromDict(BND_DICT& d, const char* key)
 {
 #if defined(ON_PYTHON_COMPILE)
-  int rc = d[key].cast<int>();
+//  int rc = d[key].cast<int>();
+  int rc = py::cast<int>(d[key]);
 #else
   int rc = d[key].as<int>();
 #endif
@@ -359,7 +360,7 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(in
 }
 
 #if defined(ON_PYTHON_COMPILE)
-static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const ON_wString& key, ItemType it, pybind11::handle& value)
+static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const ON_wString& key, ItemType it, py::handle& value)
 {
   if (ItemType::Undefined == it)
     return false;
@@ -367,14 +368,14 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
   if (!archive->BeginWriteDictionaryEntry((int)it, key))
     return false;
   bool rc = false;
-  std::string s;
+
   switch (it)
   {
   case ItemType::Undefined:
     break;
   case ItemType::Bool:
     {
-      bool b = value.cast<bool>();
+      bool b = py::cast<bool>(value);
       rc = archive->WriteBool(b);
     }
     break;
@@ -388,7 +389,7 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::Int32:
     {
-      int i = value.cast<int>();
+      int i = py::cast<int>(value);
       rc = archive->WriteInt(i);
     }
     break;
@@ -400,7 +401,7 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::Double:
     {
-      double d = value.cast<double>();
+      double d = py::cast<double>(value);
       rc = archive->WriteDouble(d);
     }
     break;
@@ -408,7 +409,7 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::String:
     {
-      s = pybind11::str(value);
+      std::string s = ToStdString(py::str(value));
       ON_wString ws(s.c_str());
       rc = archive->WriteString(ws);
     }
@@ -451,31 +452,31 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::Point2d:
   {
-    ON_2dPoint pt = value.cast<ON_2dPoint>();
+    ON_2dPoint pt = py::cast<ON_2dPoint>(value);
     rc = archive->WritePoint(pt);
   }
     break;
   case ItemType::Point3d:
     {
-      ON_3dPoint pt = value.cast<ON_3dPoint>();
+      ON_3dPoint pt = py::cast<ON_3dPoint>(value);
       rc = archive->WritePoint(pt);
     }
     break;
   case ItemType::Point4d:
     {
-      ON_4dPoint pt = value.cast<ON_4dPoint>();
+      ON_4dPoint pt = py::cast<ON_4dPoint>(value);
       rc = archive->WritePoint(pt);
     }
     break;
   case ItemType::Vector2d:
     {
-      ON_2dVector v = value.cast<ON_2dVector>();
+      ON_2dVector v = py::cast<ON_2dVector>(value);
       rc = archive->WriteVector(v);
     }
     break;
   case ItemType::Vector3d:
     {
-      ON_3dVector v = value.cast<ON_3dVector>();
+      ON_3dVector v = py::cast<ON_3dVector>(value);
       rc = archive->WriteVector(v);
     }
     break;
@@ -503,7 +504,7 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
     break;
   case ItemType::OnGeometry:
   {
-    BND_GeometryBase* geometry = value.cast<BND_GeometryBase*>();
+    BND_GeometryBase* geometry = py::cast<BND_GeometryBase*>(value);
     rc = archive->WriteObject(*geometry->GeometryPointer());
   }
     break;
@@ -514,12 +515,12 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
   case ItemType::ArrayGeometry:
   {
     int listCount = 0;
-    for (auto item : pybind11::iter(value))
+    for (auto item : py::iter(value))
       listCount++;
     rc = archive->WriteInt(listCount);
-    for (auto item : pybind11::iter(value))
+    for (auto item : py::iter(value))
     {
-      BND_GeometryBase* geometry = item.cast<BND_GeometryBase*>();
+      BND_GeometryBase* geometry = py::cast<BND_GeometryBase*>(item);
       rc = rc && archive->WriteObject(*geometry->GeometryPointer());
     }
   }
@@ -530,9 +531,9 @@ static bool WriteDictionaryEntryHelper(ON_Write3dmBufferArchive* archive, const 
   return archive->EndWriteDictionaryEntry() && rc;
 }
 
-pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
+py::dict BND_ArchivableDictionary::EncodeFromDictionary(py::dict d)
 {
-  pybind11::dict rc;
+  py::dict rc;
   int rhinoversion;
   SetupEncodedDictionaryVersions(rc, rhinoversion);
 
@@ -545,55 +546,55 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
 
   for (auto item : d)
   {
-    std::string key(pybind11::str(item.first));
-    ON_wString wkey(key.c_str());
+    std::string s = ToStdString(py::str(item.first));
+    ON_wString wkey(s.c_str());
 
     ItemType it = ItemType::Undefined;
-    if (pybind11::bool_::check_(item.second))
+    if (py::bool_::check_(item.second))
     {
       it = ItemType::Bool; //1
     }
-    else if (pybind11::int_::check_(item.second))
+    else if (py::int_::check_(item.second))
     {
       it = ItemType::Int32; //6
     }
-    else if (pybind11::float_::check_(item.second))
+    else if (py::float_::check_(item.second))
     {
       it = ItemType::Double; //10
     }
-    else if (pybind11::str::check_(item.second))
+    else if (py::str::check_(item.second))
     {
       it = ItemType::String; //12
     }
-    else if (pybind11::isinstance<ON_2dPoint>(item.second))
+    else if (py::isinstance<ON_2dPoint>(item.second))
     {
       it = ItemType::Point2d; //31
     }
-    else if (pybind11::isinstance<ON_3dPoint>(item.second))
+    else if (py::isinstance<ON_3dPoint>(item.second))
     {
       it = ItemType::Point3d; //32
     }
-    else if (pybind11::isinstance<ON_4dPoint>(item.second))
+    else if (py::isinstance<ON_4dPoint>(item.second))
     {
       it = ItemType::Point4d; //33
     }
-    else if (pybind11::isinstance<ON_2dVector>(item.second))
+    else if (py::isinstance<ON_2dVector>(item.second))
     {
       it = ItemType::Vector2d; //34
     }
-    else if (pybind11::isinstance<ON_3dVector>(item.second))
+    else if (py::isinstance<ON_3dVector>(item.second))
     {
       it = ItemType::Vector3d; //35
     }
-    else if (pybind11::isinstance<BND_GeometryBase>(item.second))
+    else if (py::isinstance<BND_GeometryBase>(item.second))
     {
       it = ItemType::OnGeometry; //47
     }
-    else if (pybind11::isinstance<pybind11::iterable>(item.second))
+    else if (py::isinstance<py::iterable>(item.second))
     {
-      for (auto listitem : pybind11::iter(item.second))
+      for (auto listitem : py::iter(item.second))
       {
-        bool isGeometry = pybind11::isinstance<BND_GeometryBase>(listitem);
+        bool isGeometry = py::isinstance<BND_GeometryBase>(listitem);
         if (!isGeometry)
         {
           it = ItemType::Undefined;
@@ -611,13 +612,13 @@ pybind11::dict BND_ArchivableDictionary::EncodeFromDictionary(pybind11::dict d)
       msg += "\nAllowed value types are bool, int, float, str, Point2d, Point3d, Point4d,";
       msg += "\nVector2d, Vector3d, and GeometryBase.";
       msg += "\nMore types can be supported; just ask.";
-      throw pybind11::cast_error(msg);
+      throw py::cast_error();
+//      throw py::cast_error(msg);
     }
 
     if (ItemType::Undefined != it)
       WriteDictionaryEntryHelper(archive, wkey, it, item.second);
   }
-  pybind11::cast_error("");
   archive->EndWriteDictionary();
 
   std::string data = "";
@@ -916,7 +917,7 @@ BND_DICT BND_ArchivableDictionary::EncodeFromDictionary(BND_DICT dict)
 BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
 {
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict rc;
+  py::dict rc;
 #else
   emscripten::val rc(emscripten::val::object());
 #endif
@@ -929,7 +930,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   // Eliminate potential bogus file versions written
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::cast_error exception("Unable to decode ArchivableDictionary");
+  py::cast_error exception();//("Unable to decode ArchivableDictionary");
   if (rhinoversion > 5 && rhinoversion < 50)
     throw exception;
 
@@ -1192,7 +1193,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadInt(2, i))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+            rc[keyname] = py::make_tuple(i[0], i[1]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,i[0]);
@@ -1208,7 +1209,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadFloat(2, f))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+            rc[keyname] = py::make_tuple(f[0], f[1]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,f[0]);
@@ -1224,7 +1225,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadInt(4, i))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(i[0], i[1], i[2], i[3]);
+            rc[keyname] = py::make_tuple(i[0], i[1], i[2], i[3]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,i[0]);
@@ -1242,7 +1243,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadFloat(4, f))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(f[0], f[1], f[2], f[3]);
+            rc[keyname] = py::make_tuple(f[0], f[1], f[2], f[3]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,f[0]);
@@ -1260,7 +1261,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadInt(2, i))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(i[0], i[1]);
+            rc[keyname] = py::make_tuple(i[0], i[1]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,i[0]);
@@ -1276,7 +1277,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
           if (archive.ReadFloat(2, f))
           {
 #if defined(ON_PYTHON_COMPILE)
-            rc[keyname] = pybind11::make_tuple(f[0], f[1]);
+            rc[keyname] = py::make_tuple(f[0], f[1]);
 #else
             emscripten::val arr = emscripten::val::array();
             arr.set(0,f[0]);

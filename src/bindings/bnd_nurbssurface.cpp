@@ -22,7 +22,7 @@ ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint2(int u, int v) const
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
       u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
   m_surface->GetCV(u, v, pt);
@@ -34,7 +34,7 @@ ON_3dPoint BND_NurbsSurfacePointList::GetPoint(int u, int v) const
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
       u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_3dPoint pt;
   m_surface->GetCV(u, v, pt);
@@ -54,7 +54,7 @@ void BND_NurbsSurfacePointList::SetControlPoint2(int u, int v, ON_4dPoint point)
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
      u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_surface->SetCV(u, v, point);
 }
@@ -70,7 +70,7 @@ double BND_NurbsSurfaceKnotList::GetKnot(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   return m_surface->Knot(m_direction, index);
 }
@@ -79,7 +79,7 @@ void BND_NurbsSurfaceKnotList::SetKnot(int index, double k)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_surface->SetKnot(m_direction, index, k);
 }

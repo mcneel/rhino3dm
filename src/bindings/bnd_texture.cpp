@@ -113,8 +113,7 @@ void initEnvironmentBindings(void*)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initTextureBindings(pybind11::module& m)
+void initTextureBindings(py::module_& m)
 {
   py::enum_<ON_Texture::TYPE>(m, "TextureType")
     .value("None", ON_Texture::TYPE::no_texture_type)

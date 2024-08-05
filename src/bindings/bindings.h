@@ -12,11 +12,21 @@
   #include <nanobind/stl/string.h>
   #include <nanobind/stl/tuple.h>
   namespace py = nanobind;
+  typedef nanobind::module_ rh3dmpymodule;
+#define RH3DM_PYTHON_BINDING(name, variable) NB_MODULE(name, variable)
+#define def_property def_prop_rw
+#define def_property_readonly def_prop_ro
+#define UNIMPLEMENTED_EXCEPTION throw std::exception()
+
 #else
   #include <pybind11/pybind11.h>
   #include <pybind11/stl.h>
   namespace py = pybind11;
+  #define RH3DM_PYTHON_BINDING(name, variable) PYBIND11_MODULE(name, variable)
+  typedef pybind11::module_ rh3dmpymodule;
 #endif
+
+std::string ToStdString(const py::str& str);
   #include "datetime.h"
   #pragma comment(lib, "rpcrt4.lib")
   #pragma comment(lib, "shlwapi.lib")
@@ -50,7 +60,11 @@ template<typename T>
 void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 {
 #if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+  UNIMPLEMENTED_EXCEPTION;
+#else
   tuple[index] = value;
+#endif
 #else
   tuple.set(index, value);
 #endif

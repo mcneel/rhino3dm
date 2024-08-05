@@ -41,7 +41,7 @@ ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_polyline.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_polyline[index]; 
 }
