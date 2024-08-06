@@ -109,12 +109,8 @@ BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
 //////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void init3dmAttributesBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void init3dmAttributesBindings(py::module& m)
+
+void init3dmAttributesBindings(rh3dmpymodule& m)
 
 {
   py::class_<BND_3dmObjectAttributes, BND_CommonObject>(m, "ObjectAttributes")
@@ -155,7 +151,7 @@ void init3dmAttributesBindings(py::module& m)
     .def("RemoveFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

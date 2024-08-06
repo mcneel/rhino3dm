@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initHatchBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initHatchBindings(py::module& m);
-#endif
-
+void initHatchBindings(rh3dmpymodule& m);
 #else
 void initHatchBindings(void* m);
 #endif

@@ -4,14 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSkylightBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initSkylightBindings(py::module& m);
-#endif
-
+void initSkylightBindings(rh3dmpymodule& m);
 #else
 void initSkylightBindings(void* m);
 #endif

@@ -4,14 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSafeFrameBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initSafeFrameBindings(py::module& m);
-#endif
-
+void initSafeFrameBindings(rh3dmpymodule& m);
 #else
 void initSafeFrameBindings(void* m);
 #endif

@@ -29,12 +29,8 @@ static std::vector<ON_2dPoint> ArrowPoints(ON_Arrowhead::arrow_type arrowType, d
 }
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDefines(py::module_& m){}
-#else
-namespace py = pybind11;
-void initDefines(py::module& m)
+
+void initDefines(rh3dmpymodule& m)
 {
   py::enum_<ON_COMPONENT_INDEX::TYPE>(m, "ComponentIndexType")
     .value("InvalidType", ON_COMPONENT_INDEX::TYPE::invalid_type)
@@ -349,9 +345,9 @@ py::dict PlaneToDict(const ON_Plane& plane)
 ON_3dPoint PointFromDict(py::dict& dict)
 {
   ON_3dVector rc;
-  rc.x = dict["X"].cast<double>();
-  rc.y = dict["Y"].cast<double>();
-  rc.z = dict["Z"].cast<double>();
+  rc.x = py::cast<double>(dict["X"]);
+  rc.y = py::cast<double>(dict["Y"]);
+  rc.z = py::cast<double>(dict["Z"]);
   return rc;
 }
 ON_3dVector VectorFromDict(py::dict& dict)
@@ -362,18 +358,18 @@ ON_3dVector VectorFromDict(py::dict& dict)
 ON_Plane PlaneFromDict(py::dict& dict)
 {
   ON_Plane plane;
-  py::dict d = dict["Origin"].cast<py::dict>();
+  py::dict d = dict["Origin"];
   plane.origin = PointFromDict(d);
-  d = dict["XAxis"].cast<py::dict>();
+  d = dict["XAxis"];
   plane.xaxis = VectorFromDict(d);
-  d = dict["YAxis"].cast<py::dict>();
+  d = dict["YAxis"];
   plane.yaxis = VectorFromDict(d);
-  d = dict["ZAxis"].cast<py::dict>();
+  d = dict["ZAxis"];
   plane.zaxis = VectorFromDict(d);
   plane.UpdateEquation();
   return plane;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

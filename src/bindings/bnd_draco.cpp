@@ -401,12 +401,8 @@ std::string BND_Draco::ToBase64String() const
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDracoBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initDracoBindings(py::module& m)
+
+void initDracoBindings(rh3dmpymodule& m)
 {
 #if defined(ON_INCLUDE_DRACO)
   py::class_<BND_DracoCompressionOptions>(m, "DracoCompressionOptions")
@@ -424,16 +420,18 @@ void initDracoBindings(py::module& m)
     .def_static("Compress", &BND_Draco::CompressMesh, py::arg("mesh"))
     .def_static("Compress", &BND_Draco::CompressMesh2, py::arg("mesh"), py::arg("options"))
     .def("Write", &BND_Draco::WriteToFile)
+#if !defined(NANOBIND)
     .def_static("DecompressByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_Draco::DecompressByteArray(static_cast<int>(info.size), (const char*)info.ptr);
     })
+#endif
     .def_static("DecompressBase64String", &BND_Draco::DecompressBase64, py::arg("encoded"))
     .def("ToBase64String", &BND_Draco::ToBase64String)
     ;
 #endif
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

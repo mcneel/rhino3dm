@@ -930,12 +930,12 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
   const unsigned char* c = (const unsigned char*)&decoded.at(0);
   // Eliminate potential bogus file versions written
 #if defined(ON_PYTHON_COMPILE)
-  py::cast_error exception();//("Unable to decode ArchivableDictionary");
+  //py::cast_error exception();//("Unable to decode ArchivableDictionary");
   if (rhinoversion > 5 && rhinoversion < 50)
-    throw exception;
+    throw py::cast_error();
 
   if (length < 1 || nullptr == c)
-    throw exception;
+    throw py::cast_error();
 #endif
 
   ON_Read3dmBufferArchive archive((size_t)length, c, false, rhinoversion, opennurbsversion);
@@ -944,9 +944,9 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
   ON_wString dictionaryName;
 #if defined(ON_PYTHON_COMPILE)
   if (!archive.BeginReadDictionary(&dictionaryId, &dictionaryVersion, dictionaryName))
-    throw exception;
+    throw py::cast_error();
   if (dictionaryId != RhinoDotNetDictionaryId())
-    throw exception;
+    throw py::cast_error();
 #else
   archive.BeginReadDictionary(&dictionaryId, &dictionaryVersion, dictionaryName);
 #endif
@@ -958,7 +958,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
     int read_rc = archive.BeginReadDictionaryEntry(&i_type, entryName);
 #if defined(ON_PYTHON_COMPILE)
     if (0 == read_rc)
-      throw exception;
+      throw py::cast_error();
 #else
     if (0 == read_rc)
       break;
@@ -1451,7 +1451,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
     }
 #if defined(ON_PYTHON_COMPILE)
     if (!archive.EndReadDictionaryEntry())
-      throw exception;
+      throw py::cast_error();;
 #else
     archive.EndReadDictionaryEntry();
 #endif
@@ -1547,12 +1547,8 @@ BND_TUPLE BND_CommonObject::IsValidWithLog() const
 }
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initObjectBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initObjectBindings(py::module& m)
+
+void initObjectBindings(rh3dmpymodule& m)
 {
   py::class_<BND_CommonObject>(m, "CommonObject")
     .def_property_readonly("IsValid", &BND_CommonObject::IsValid)
@@ -1572,7 +1568,7 @@ void initObjectBindings(py::module& m)
     ////.def_static("WriteGeometry", &BND_ArchivableDictionary::WriteGeometry)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

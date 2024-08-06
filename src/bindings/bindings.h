@@ -16,6 +16,9 @@
 #define RH3DM_PYTHON_BINDING(name, variable) NB_MODULE(name, variable)
 #define def_property def_prop_rw
 #define def_property_readonly def_prop_ro
+#define def_readonly def_ro
+#define def_readwrite def_rw
+#define def_property_readonly_static def_prop_ro_static
 #define UNIMPLEMENTED_EXCEPTION throw std::exception()
 
 #else
@@ -23,7 +26,7 @@
   #include <pybind11/stl.h>
   namespace py = pybind11;
   #define RH3DM_PYTHON_BINDING(name, variable) PYBIND11_MODULE(name, variable)
-  typedef pybind11::module_ rh3dmpymodule;
+  typedef pybind11::module rh3dmpymodule;
 #endif
 
 std::string ToStdString(const py::str& str);
@@ -44,6 +47,7 @@ typedef py::tuple BND_Color;
 typedef py::tuple BND_Color4f;
 typedef py::tuple BND_TUPLE;
 typedef py::handle BND_DateTime;
+typedef py::list BND_LIST;
 #endif
 
 #if defined(ON_WASM_COMPILE)

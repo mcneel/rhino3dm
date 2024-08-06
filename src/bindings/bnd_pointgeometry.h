@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPointGeometryBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initPointGeometryBindings(py::module& m);
-#endif
-
+void initPointGeometryBindings(rh3dmpymodule& m);
 #else
 void initPointGeometryBindings(void* m);
 #endif

@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDimensionStyleBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initDimensionStyleBindings(py::module& m);
-#endif
-
+void initDimensionStyleBindings(rh3dmpymodule& m);
 #else
 void initDimensionStyleBindings(void* m);
 #endif

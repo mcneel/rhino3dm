@@ -7,13 +7,10 @@
 
 #if defined(NANOBIND)
 namespace py = nanobind;
-void initDefines(py::module_& m);
 #else
 namespace py = pybind11;
-void initDefines(py::module& m);
 #endif
-
-
+void initDefines(rh3dmpymodule& m);
 
 py::dict PointToDict(const ON_3dPoint& point);
 py::dict VectorToDict(const ON_3dVector& vector);

@@ -6,14 +6,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPointBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initPointBindings(py::module& m);
-#endif
-
+void initPointBindings(rh3dmpymodule& m);
 #else
 void initPointBindings(void* m);
 #endif

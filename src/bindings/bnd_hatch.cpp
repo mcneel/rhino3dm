@@ -19,12 +19,8 @@ void BND_Hatch::SetTrackedPointer(ON_Hatch* hatch, const ON_ModelComponentRefere
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initHatchBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initHatchBindings(py::module& m)
+
+void initHatchBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Hatch, BND_GeometryBase>(m, "Hatch")
     .def(py::init<>())
@@ -36,7 +32,7 @@ void initHatchBindings(py::module& m)
     .def("ScalePattern", &BND_Hatch::ScalePattern, py::arg("xform"))
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

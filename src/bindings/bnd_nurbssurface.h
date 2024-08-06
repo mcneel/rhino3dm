@@ -4,14 +4,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initNurbsSurfaceBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initNurbsSurfaceBindings(py::module& m);
-#endif
-
+void initNurbsSurfaceBindings(rh3dmpymodule& m);
 #else
 void initNurbsSurfaceBindings(void* m);
 #endif

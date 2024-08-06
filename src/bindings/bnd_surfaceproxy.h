@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSurfaceProxyBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initSurfaceProxyBindings(py::module& m);
-#endif
-
+void initSurfaceProxyBindings(rh3dmpymodule& m);
 #else
 void initSurfaceProxyBindings(void* m);
 #endif

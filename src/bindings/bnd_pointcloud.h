@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPointCloudBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initPointCloudBindings(py::module& m);
-#endif
-
+void initPointCloudBindings(rh3dmpymodule& m);
 #else
 void initPointCloudBindings(void* m);
 #endif

@@ -20,12 +20,8 @@ void BND_Group::SetTrackedPointer(ON_Group* group, const ON_ModelComponentRefere
 
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initGroupBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initGroupBindings(py::module& m)
+
+void initGroupBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Group, BND_CommonObject>(m, "Group")
     .def(py::init<>())
@@ -34,7 +30,7 @@ void initGroupBindings(py::module& m)
     .def_property_readonly("Index", &BND_Group::GetIndex)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

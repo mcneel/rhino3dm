@@ -4,14 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSunBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initSunBindings(py::module& m);
-#endif
-
+void initSunBindings(rh3dmpymodule& m);
 #else
 void initSunBindings(void* m);
 #endif

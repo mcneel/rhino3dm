@@ -4,14 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initRenderChannelsBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initRenderChannelsBindings(py::module& m);
-#endif
-
+void initRenderChannelsBindings(rh3dmpymodule& m);
 #else
 void initRenderChannelsBindings(void* m);
 #endif

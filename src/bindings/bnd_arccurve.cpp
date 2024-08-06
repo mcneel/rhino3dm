@@ -51,12 +51,7 @@ void BND_ArcCurve::SetTrackedPointer(ON_ArcCurve* arccurve, const ON_ModelCompon
 
 #if defined(ON_PYTHON_COMPILE)
 
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initArcCurveBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initArcCurveBindings(py::module& m)
+void initArcCurveBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ArcCurve, BND_Curve>(m, "ArcCurve")
     .def_static("CreateFromArc", &BND_ArcCurve::CreateFromArc, py::arg("arc"))
@@ -72,7 +67,6 @@ void initArcCurveBindings(py::module& m)
     .def_property_readonly("AngleDegrees", &BND_ArcCurve::AngleDegrees)
     ;
 }
-#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

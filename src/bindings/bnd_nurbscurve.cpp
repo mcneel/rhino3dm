@@ -222,18 +222,15 @@ BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initNurbsCurveBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initNurbsCurveBindings(py::module& m)
+
+void initNurbsCurveBindings(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList" /* , py::buffer_protocol()*/)
     .def("__len__", &BND_NurbsCurveKnotList::Count)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
     .def("ToList", &BND_NurbsCurveKnotList::ToList)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurveKnotList& kl) -> py::buffer_info
       {
         return py::buffer_info
@@ -246,6 +243,7 @@ void initNurbsCurveBindings(py::module& m)
           {sizeof(double)}                          /* Strides (in bytes) for each index */
         );
       })
+#endif
     .def("InsertKnot", &BND_NurbsCurveKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsCurveKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsCurveKnotList::CreateUniformKnots, py::arg("knotSpacing"))
@@ -256,10 +254,11 @@ void initNurbsCurveBindings(py::module& m)
     ;
   ;
 
-  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList"/*, py::buffer_protocol()*/)
     .def("__len__", &BND_NurbsCurvePointList::Count)
     .def("__getitem__", &BND_NurbsCurvePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsCurvePointList::SetControlPoint)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurvePointList& pl) -> py::buffer_info
     {
       return py::buffer_info
@@ -272,6 +271,7 @@ void initNurbsCurveBindings(py::module& m)
         {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
       );
     })
+#endif
     .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
     .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))
     .def("MakeRational", &BND_NurbsCurvePointList::MakeRational)
@@ -300,7 +300,7 @@ void initNurbsCurveBindings(py::module& m)
     .def_property_readonly("Knots", &BND_NurbsCurve::Knots)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

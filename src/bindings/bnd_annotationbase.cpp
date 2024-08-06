@@ -630,10 +630,7 @@ std::vector<ON_Line> BND_Centermark::GetDisplayLines(const BND_DimensionStyle& d
 
 #if defined(ON_PYTHON_COMPILE)
 
-#if defined(NANOBIND)
-void initAnnotationBaseBindings(py::module_& m){}
-#else
-void initAnnotationBaseBindings(py::module& m)
+void initAnnotationBaseBindings(rh3dmpymodule& m)
 {
   py::class_<BND_AnnotationBase, BND_GeometryBase>(m, "AnnotationBase")
     .def_property_readonly("DimensionStyleId", &BND_AnnotationBase::DimensionStyleId)
@@ -690,7 +687,6 @@ void initAnnotationBaseBindings(py::module& m)
     ;
 
 }
-#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -124,12 +124,8 @@ BND_TUPLE BND_Surface::GetNurbsFormParameterFromSurfaceParameter(double surfaceS
 
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSurfaceBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initSurfaceBindings(py::module& m)
+
+void initSurfaceBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Surface, BND_GeometryBase>(m, "Surface")
     .def_property_readonly("IsSolid", &BND_Surface::IsSolid)
@@ -158,7 +154,7 @@ void initSurfaceBindings(py::module& m)
     .def("GetNurbsFormParameterFromSurfaceParameter", &BND_Surface::GetNurbsFormParameterFromSurfaceParameter, py::arg("surfaceS"), py::arg("surfaceT"))
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -111,12 +111,8 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initEmbeddedFileBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initEmbeddedFileBindings(py::module& m)
+
+void initEmbeddedFileBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmEmbeddedFile>(m, "EmbeddedFile")
     .def(py::init<>())
@@ -128,7 +124,7 @@ void initEmbeddedFileBindings(py::module& m)
     .def("Clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

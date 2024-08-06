@@ -42,12 +42,8 @@ BND_File3dmGroundPlane::BND_File3dmGroundPlane(ON_GroundPlane* gp)
 }
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initGroundPlaneBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initGroundPlaneBindings(py::module& m)
+
+void initGroundPlaneBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmGroundPlane>(m, "GroundPlane")
     .def(py::init<>())
@@ -65,7 +61,7 @@ void initGroundPlaneBindings(py::module& m)
     .def_property("TextureRotation", &BND_File3dmGroundPlane::GetTextureRotation, &BND_File3dmGroundPlane::SetTextureRotation)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

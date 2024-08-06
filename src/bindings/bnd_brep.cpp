@@ -384,10 +384,8 @@ BND_TUPLE BND_BrepVertex::EdgeIndices() const {
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-void initBrepBindings(py::module_& m){}
-#else
-void initBrepBindings(py::module& m)
+
+void initBrepBindings(rh3dmpymodule& m)
 {
   py::class_<BND_BrepEdge, BND_CurveProxy>(m, "BrepEdge")
     ;
@@ -451,7 +449,7 @@ void initBrepBindings(py::module& m)
     .def("Flip", &BND_Brep::Flip)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

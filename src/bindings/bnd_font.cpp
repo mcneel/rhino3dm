@@ -21,12 +21,8 @@ BND_Font::BND_Font(std::wstring familyName)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initFontBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initFontBindings(py::module& m)
+
+void initFontBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Font>(m, "Font")
     .def(py::init<std::wstring>(), py::arg("familyName"))
@@ -46,7 +42,7 @@ void initFontBindings(py::module& m)
     .def_property_readonly("FamilyName", &BND_Font::FamilyName)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

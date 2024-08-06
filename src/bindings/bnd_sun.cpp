@@ -108,12 +108,8 @@ BND_Color BND_File3dmSun::GetSunColorFromAltitude(double v) // Static.
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initSunBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initSunBindings(py::module& m)
+
+void initSunBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmSun>(m, "Sun")
     .def(py::init<>())
@@ -143,7 +139,7 @@ void initSunBindings(py::module& m)
     .def_static("SunColorFromAltitude", &BND_File3dmSun::GetSunColorFromAltitude)
    ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

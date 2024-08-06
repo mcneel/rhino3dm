@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initRevSurfaceBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initRevSurfaceBindings(py::module& m);
-#endif
-
+void initRevSurfaceBindings(rh3dmpymodule& m);
 #else
 void initRevSurfaceBindings(void* m);
 #endif

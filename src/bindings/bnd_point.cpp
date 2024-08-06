@@ -312,7 +312,7 @@ static std::string ReprInterval(const BND_Interval& i)
   return repr.str();
 }
 
-void initPointBindings(py::module& m)
+void initPointBindings(rh3dmpymodule& m)
 {
   py::class_<ON_2dPoint>(m, "Point2d")
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))

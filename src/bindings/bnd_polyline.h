@@ -2,14 +2,7 @@
 
 #pragma once
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPolylineBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initPolylineBindings(py::module& m);
-#endif
-
+void initPolylineBindings(rh3dmpymodule& m);
 #else
 void initPolylineBindings(void* m);
 #endif

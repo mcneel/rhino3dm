@@ -4,14 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPostEffectBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initPostEffectBindings(py::module& m);
-#endif
-
+void initPostEffectBindings(rh3dmpymodule& m);
 #else
 void initPostEffectBindings(void* m);
 #endif

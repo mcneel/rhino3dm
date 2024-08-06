@@ -91,7 +91,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 #if defined(ON_PYTHON_COMPILE)
 std::string ToStdString(const py::str& str)
 {
-  std::string rc = str;
+  std::string rc = py::cast<std::string>(str);
   return rc;
 }
 #endif

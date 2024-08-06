@@ -2,16 +2,7 @@
 
 #pragma once
 #if defined(ON_PYTHON_COMPILE)
-
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initBrepBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initBrepBindings(py::module& m);
-#endif
-
-
+void initBrepBindings(rh3dmpymodule& m);
 #else
 void initBrepBindings(void* m);
 #endif

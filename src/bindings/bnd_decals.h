@@ -20,14 +20,7 @@ enum class Projections : int
 };
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDecalBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initDecalBindings(py::module& m);
-#endif
-
+void initDecalBindings(rh3dmpymodule& m);
 #else
 void initDecalBindings(void* m);
 #endif

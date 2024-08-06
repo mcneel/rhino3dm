@@ -115,12 +115,8 @@ BND_TUPLE BND_Transform::ToFloatArray(bool rowDominant) const
 }
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initXformBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initXformBindings(py::module& m)
+
+void initXformBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Transform>(m, "Transform")
     .def(py::init<double>(), py::arg("diagonalValue"))
@@ -184,7 +180,7 @@ void initXformBindings(py::module& m)
     .value("Rigid", TransformRigidType::Rigid)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

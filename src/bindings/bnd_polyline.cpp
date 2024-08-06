@@ -192,12 +192,8 @@ void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initPolylineBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initPolylineBindings(py::module& m)
+
+void initPolylineBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Point3dList>(m, "Point3dList")
     .def(py::init<>())
@@ -245,7 +241,7 @@ void initPolylineBindings(py::module& m)
     .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

@@ -373,10 +373,8 @@ BND_UUID BND_Viewport::GetId() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-void initViewportBindings(py::module_& m){}
-#else
-void initViewportBindings(py::module& m)
+
+void initViewportBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
@@ -416,7 +414,6 @@ void initViewportBindings(py::module& m)
     .def_property_readonly("Id", &BND_Viewport::GetId)
     ;
 }
-#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

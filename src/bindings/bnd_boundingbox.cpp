@@ -161,10 +161,8 @@ BND_BoundingBox* BND_BoundingBox::Decode(emscripten::val jsonObject)
 
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-void initBoundingBoxBindings(py::module_& m){}
-#else
-void initBoundingBoxBindings(py::module& m)
+
+void initBoundingBoxBindings(rh3dmpymodule& m)
 {
   py::class_<BND_BoundingBox>(m, "BoundingBox")
     .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("minPoint"), py::arg("maxPoint"))
@@ -188,7 +186,6 @@ void initBoundingBoxBindings(py::module& m)
     .def_static("Decode", &BND_BoundingBox::Decode, py::arg("jsonObject"))
     ;
 }
-#endif
 #endif
 
 #if defined(ON_WASM_COMPILE)

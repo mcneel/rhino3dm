@@ -279,12 +279,8 @@ BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDecalBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initDecalBindings(py::module& m)
+
+void initDecalBindings(rh3dmpymodule& m)
 {
   py::enum_<Mappings>(m, "Mappings")
     .value("None", Mappings::None)
@@ -324,7 +320,7 @@ void initDecalBindings(py::module& m)
     .def_property("BoundsMaxV", &BND_File3dmDecal::BoundsMaxV, &BND_File3dmDecal::SetBoundsMaxV)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

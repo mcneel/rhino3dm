@@ -78,12 +78,8 @@ void BND_Environment::SetTrackedPointer(ON_Environment* env, const ON_ModelCompo
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initEnvironmentBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initEnvironmentBindings(py::module& m)
+
+void initEnvironmentBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Environment>(m, "Environment")
     .def(py::init<>())
@@ -92,7 +88,7 @@ void initEnvironmentBindings(py::module& m)
     .def_property("BackgroundProjection", &BND_Environment::BackgroundProjection, &BND_Environment::SetBackgroundProjection)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

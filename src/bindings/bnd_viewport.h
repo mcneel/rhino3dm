@@ -3,14 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initViewportBindings(py::module_& m);
-#else
-namespace py = pybind11;
-void initViewportBindings(py::module& m);
-#endif
-
+void initViewportBindings(rh3dmpymodule& m);
 #else
 void initViewportBindings(void* m);
 #endif

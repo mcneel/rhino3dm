@@ -45,12 +45,8 @@ ON_Arrowhead::arrow_type BND_DimensionStyle::LeaderArrowType() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void initDimensionStyleBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void initDimensionStyleBindings(py::module& m)
+
+void initDimensionStyleBindings(rh3dmpymodule& m)
 {
   py::class_<BND_DimensionStyle, BND_CommonObject> pyDimStyle(m, "DimensionStyle");
 
@@ -211,7 +207,7 @@ void initDimensionStyleBindings(py::module& m)
     .value("AlternateDimensionLengthDisplay", ON_DimStyle::field::AlternateDimensionLengthDisplay)
     ;
 }
-#endif
+
 #endif
 
 

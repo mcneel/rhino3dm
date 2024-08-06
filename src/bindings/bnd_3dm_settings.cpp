@@ -122,13 +122,8 @@ void BND_File3dmSettings::SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchor
 }
 
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-void init3dmSettingsBindings(py::module_& m){}
-#else
-namespace py = pybind11;
-void init3dmSettingsBindings(py::module& m)
 
+void init3dmSettingsBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ConstructionPlane>(m, "ConstructionPlane")
     .def(py::init<>())
@@ -220,7 +215,7 @@ void init3dmSettingsBindings(py::module& m)
     .def_property_readonly("RenderSettings", &BND_File3dmSettings::GetRenderSettings)
     ;
 }
-#endif
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
