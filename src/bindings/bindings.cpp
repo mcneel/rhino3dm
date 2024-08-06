@@ -13,7 +13,6 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 
   ON::Begin();
   initFileUtilitiesBindings(m);
-  /*
   initDefines(m);
   initIntersectBindings(m);
   initPolylineBindings(m);
@@ -84,8 +83,6 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initDracoBindings(m);
   initRTreeBindings(m);
   initLinetypeBindings(m);
-  */
-
 }
 
 #if defined(ON_PYTHON_COMPILE)

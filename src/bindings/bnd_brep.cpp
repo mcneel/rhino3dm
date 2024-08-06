@@ -1,13 +1,5 @@
 #include "bindings.h"
 
-#if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
-namespace py = nanobind;
-#else
-namespace py = pybind11;
-#endif
-#endif
-
 BND_BrepEdge::BND_BrepEdge(ON_BrepEdge* edge, const ON_ModelComponentReference* compref)
 {
   m_edge = edge;

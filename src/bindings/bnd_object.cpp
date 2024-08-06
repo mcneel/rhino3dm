@@ -1451,7 +1451,7 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
     }
 #if defined(ON_PYTHON_COMPILE)
     if (!archive.EndReadDictionaryEntry())
-      throw py::cast_error();;
+      throw py::cast_error();
 #else
     archive.EndReadDictionaryEntry();
 #endif

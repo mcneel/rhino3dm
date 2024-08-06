@@ -1,11 +1,5 @@
 #include "bindings.h"
 
-#if defined(NANOBIND)
-namespace py = nanobind;
-#else
-namespace py = pybind11;
-#endif
-
 BND_BoundingBox::BND_BoundingBox(const ON_3dPoint& min, const ON_3dPoint& max)
 : m_bbox(min, max)
 {
@@ -104,19 +98,15 @@ py::dict BND_BoundingBox::Encode() const
   return d;
 }
 
-#if defined(NANOBIND)
-// TODO: BND_BoundingBox::Decode for NANOBIND
-#else
 BND_BoundingBox* BND_BoundingBox::Decode(py::dict jsonObject)
 {
   ON_BoundingBox bbox;
-  py::dict d = jsonObject["Min"].cast<py::dict>();
+  py::dict d = py::cast<py::dict>(jsonObject["Min"]);
   bbox.m_min = PointFromDict(d);
-  d = jsonObject["Max"].cast<py::dict>();
+  d = py::cast<py::dict>(jsonObject["Max"]);
   bbox.m_max = PointFromDict(d);
   return new BND_BoundingBox(bbox);
 }
-#endif
 
 #endif
 

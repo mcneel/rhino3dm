@@ -1,11 +1,5 @@
 #include "bindings.h"
 
-#if defined(NANOBIND)
-namespace py = nanobind;
-#else
-namespace py = pybind11;
-#endif
-
 BND_AnnotationBase::BND_AnnotationBase()
 {
 }

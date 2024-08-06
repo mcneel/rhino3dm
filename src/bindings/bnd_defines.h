@@ -5,11 +5,6 @@
 
 #if defined(ON_PYTHON_COMPILE)
 
-#if defined(NANOBIND)
-namespace py = nanobind;
-#else
-namespace py = pybind11;
-#endif
 void initDefines(rh3dmpymodule& m);
 
 py::dict PointToDict(const ON_3dPoint& point);
