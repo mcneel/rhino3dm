@@ -77,6 +77,29 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
 #endif
 }
 
+BND_LIST CreateList(int count);
+BND_LIST NullList();
+template<typename T>
+void Insert(BND_LIST& list, int index, const T& value)
+{
+#if defined(ON_PYTHON_COMPILE)
+  list.insert(index, value);
+#else
+  list.set(index, value);
+#endif
+}
+
+template<typename T>
+void Append(BND_LIST& list, const T& value)
+{
+#if defined(ON_PYTHON_COMPILE)
+  list.append(value);
+#else
+  const int count = list["length"].as<int>();
+  list.set(count++, value);
+#endif
+}
+
 BND_DateTime CreateDateTime(struct tm t);
 
 #include "bnd_color.h"

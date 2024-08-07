@@ -116,6 +116,29 @@ BND_TUPLE NullTuple()
 #endif
 }
 
+BND_LIST CreateList()
+{
+#if defined(ON_PYTHON_COMPILE)
+  BND_LIST rc = py::list();
+#else
+  emscripten::val rc(emscripten::val::array());
+#endif
+  return rc;
+}
+
+BND_LIST NullList()
+{
+#if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+  return py::list();
+#else
+  return py::none();
+#endif
+#else
+  return emscripten::val::null();
+#endif
+}
+
 BND_DateTime CreateDateTime(struct tm t)
 {
 #if defined(ON_PYTHON_COMPILE)

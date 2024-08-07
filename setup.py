@@ -65,8 +65,8 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
-        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND']
+        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
+        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND']
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
