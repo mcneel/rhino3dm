@@ -96,7 +96,7 @@ void Append(BND_LIST& list, const T& value)
 #if defined(ON_PYTHON_COMPILE)
   list.append(value);
 #else
-  const int count = list["length"].as<int>();
+  int count = list["length"].as<int>();
   list.set(count++, value);
 #endif
 }
