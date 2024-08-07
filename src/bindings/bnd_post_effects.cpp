@@ -179,8 +179,8 @@ int BND_File3dmPostEffectTable::Count() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPostEffectBindings(pybind11::module& m)
+
+void initPostEffectBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmPostEffect>(m, "PostEffect")
     .def(py::init<>())
@@ -196,6 +196,7 @@ void initPostEffectBindings(pybind11::module& m)
     ;
 
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

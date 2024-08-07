@@ -95,8 +95,8 @@ BND_DICT BND_Circle::Encode() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initCircleBindings(pybind11::module& m)
+
+void initCircleBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Circle>(m, "Circle")
     .def(py::init<double>(), py::arg("radius"))
@@ -122,6 +122,7 @@ void initCircleBindings(pybind11::module& m)
     .def("Encode", &BND_Circle::Encode)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

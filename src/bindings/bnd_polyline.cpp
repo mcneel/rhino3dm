@@ -41,7 +41,7 @@ ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_polyline.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_polyline[index]; 
 }
@@ -192,8 +192,8 @@ void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPolylineBindings(pybind11::module& m)
+
+void initPolylineBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Point3dList>(m, "Point3dList")
     .def(py::init<>())
@@ -241,6 +241,7 @@ void initPolylineBindings(pybind11::module& m)
     .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

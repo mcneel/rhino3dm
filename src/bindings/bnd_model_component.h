@@ -43,7 +43,7 @@ public:
 
 
 #if defined(ON_PYTHON_COMPILE)
-void initModelComponentBindings(pybind11::module& m);
+void initModelComponentBindings(rh3dmpymodule& m);
 #else
 void initModelComponentBindings(void* m);
 #endif

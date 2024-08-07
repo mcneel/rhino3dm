@@ -32,8 +32,8 @@ BND_File3dmSafeFrame::BND_File3dmSafeFrame(ON_SafeFrame* sf)
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initSafeFrameBindings(pybind11::module& m)
+
+void initSafeFrameBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmSafeFrame>(m, "SafeFrame")
     .def(py::init<>())
@@ -52,6 +52,7 @@ void initSafeFrameBindings(pybind11::module& m)
     .def_property("TitleFrameYScale", &BND_File3dmSafeFrame::GetTitleFrameYScale, &BND_File3dmSafeFrame::SetTitleFrameYScale)
    ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

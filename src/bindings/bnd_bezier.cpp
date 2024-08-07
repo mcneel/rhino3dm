@@ -32,8 +32,8 @@ BND_TUPLE BND_BezierCurve::Split(double t)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBezierBindings(pybind11::module& m)
+
+void initBezierBindings(rh3dmpymodule& m)
 {
   py::class_<BND_BezierCurve>(m, "BezierCurve")
     .def_property_readonly("Dimension", &BND_BezierCurve::Dimension)

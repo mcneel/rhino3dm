@@ -45,8 +45,8 @@ ON_Arrowhead::arrow_type BND_DimensionStyle::LeaderArrowType() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initDimensionStyleBindings(pybind11::module& m)
+
+void initDimensionStyleBindings(rh3dmpymodule& m)
 {
   py::class_<BND_DimensionStyle, BND_CommonObject> pyDimStyle(m, "DimensionStyle");
 
@@ -207,7 +207,9 @@ void initDimensionStyleBindings(pybind11::module& m)
     .value("AlternateDimensionLengthDisplay", ON_DimStyle::field::AlternateDimensionLengthDisplay)
     ;
 }
+
 #endif
+
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;

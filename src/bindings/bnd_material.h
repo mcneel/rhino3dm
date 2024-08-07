@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initMaterialBindings(pybind11::module& m);
+void initMaterialBindings(rh3dmpymodule& m);
 #else
 void initMaterialBindings(void* m);
 #endif

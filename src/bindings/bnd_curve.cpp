@@ -252,8 +252,8 @@ BND_NurbsCurve* BND_Curve::ToNurbsCurve2(BND_Interval subdomain) const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initCurveBindings(pybind11::module& m)
+
+void initCurveBindings(rh3dmpymodule& m)
 {
   py::enum_<CurveEvaluationSide>(m, "CurveEvaluationSide")
     .value("Default", CurveEvaluationSide::Default)

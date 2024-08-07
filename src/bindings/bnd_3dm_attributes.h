@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void init3dmAttributesBindings(pybind11::module& m);
+void init3dmAttributesBindings(rh3dmpymodule& m);
 #else
 void init3dmAttributesBindings(void* m);
 #endif

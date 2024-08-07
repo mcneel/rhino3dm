@@ -4,7 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initSunBindings(pybind11::module& m);
+void initSunBindings(rh3dmpymodule& m);
 #else
 void initSunBindings(void* m);
 #endif

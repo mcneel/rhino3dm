@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initSubDBindings(pybind11::module& m);
+void initSubDBindings(rh3dmpymodule& m);
 #else
 void initSubDBindings(void* m);
 #endif

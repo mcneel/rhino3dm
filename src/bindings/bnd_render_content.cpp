@@ -4,7 +4,7 @@
 BND_File3dmRenderContent::BND_File3dmRenderContent()
 {
   #if defined(ON_PYTHON_COMPILE)
-    throw pybind11::type_error("Unable to create an instance of RenderContent. Try creating RenderMaterial, RenderEnvironment, or RenderTexture");
+    throw py::type_error("Unable to create an instance of RenderContent. Try creating RenderMaterial, RenderEnvironment, or RenderTexture");
   #endif
 }
 
@@ -13,7 +13,7 @@ BND_File3dmRenderContent::BND_File3dmRenderContent(ON_RenderContent* rc)
   if (nullptr == rc)
   {
   #if defined(ON_PYTHON_COMPILE)
-    throw pybind11::value_error("NULL RenderContent");
+    throw py::value_error("NULL RenderContent");
   #endif
   }
 
@@ -444,8 +444,8 @@ BND_File3dmRenderContent* BND_File3dmRenderContentTable::FindId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initRenderContentBindings(pybind11::module& m)
+
+void initRenderContentBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmRenderContent>(m, "RenderContent")
     .def(py::init<>())
@@ -502,6 +502,7 @@ void initRenderContentBindings(pybind11::module& m)
     .def_property("FileName", &BND_File3dmRenderTexture::Filename, &BND_File3dmRenderTexture::SetFilename)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

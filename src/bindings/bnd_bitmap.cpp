@@ -17,8 +17,8 @@ void BND_Bitmap::SetTrackedPointer(ON_Bitmap* bitmap, const ON_ModelComponentRef
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBitmapBindings(pybind11::module& m)
+
+void initBitmapBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Bitmap>(m, "Bitmap")
     .def(py::init<>())

@@ -32,8 +32,8 @@ BND_TUPLE BND_Light::GetSpotLightRadii() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initLightBindings(pybind11::module& m)
+
+void initLightBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Light, BND_GeometryBase>(m, "Light")
     .def(py::init<>())
@@ -67,6 +67,7 @@ void initLightBindings(pybind11::module& m)
     .def_property("Name", &BND_Light::GetName, &BND_Light::SetName)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

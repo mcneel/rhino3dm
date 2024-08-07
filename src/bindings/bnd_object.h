@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initObjectBindings(pybind11::module& m);
+void initObjectBindings(rh3dmpymodule& m);
 #else
 void initObjectBindings(void* m);
 #endif

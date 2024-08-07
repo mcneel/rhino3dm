@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initArcCurveBindings(pybind11::module& m);
+void initArcCurveBindings(rh3dmpymodule& m);
 #else
 void initArcCurveBindings(void* m);
 #endif

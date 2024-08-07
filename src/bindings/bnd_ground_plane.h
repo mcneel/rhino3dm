@@ -4,7 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initGroundPlaneBindings(pybind11::module& m);
+void initGroundPlaneBindings(rh3dmpymodule& m);
 #else
 void initGroundPlaneBindings(void* m);
 #endif

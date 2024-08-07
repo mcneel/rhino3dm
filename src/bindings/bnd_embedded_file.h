@@ -4,7 +4,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initEmbeddedFileBindings(pybind11::module& m);
+void initEmbeddedFileBindings(rh3dmpymodule& m);
 #else
 void initEmbeddedFileBindings(void* m);
 #endif

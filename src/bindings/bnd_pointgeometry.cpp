@@ -25,8 +25,8 @@ void BND_Point::SetTrackedPointer(ON_Point* point, const ON_ModelComponentRefere
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPointGeometryBindings(pybind11::module& m)
+
+void initPointGeometryBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Point, BND_GeometryBase>(m, "Point")
     .def(py::init<>())
@@ -34,6 +34,7 @@ void initPointGeometryBindings(pybind11::module& m)
     .def_property("Location", &BND_Point::GetLocation, &BND_Point::SetLocation)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

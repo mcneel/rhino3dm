@@ -100,8 +100,8 @@ void BND_Layer::SetPlotColor(const BND_Color& color)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initLayerBindings(pybind11::module& m)
+
+void initLayerBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Layer, BND_CommonObject>(m, "Layer")
     .def(py::init<>())
@@ -133,6 +133,7 @@ void initLayerBindings(pybind11::module& m)
     .def_property("Expanded", &BND_Layer::IsExpanded, &BND_Layer::SetExpanded)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

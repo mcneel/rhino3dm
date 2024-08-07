@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initSurfaceProxyBindings(pybind11::module& m);
+void initSurfaceProxyBindings(rh3dmpymodule& m);
 #else
 void initSurfaceProxyBindings(void* m);
 #endif

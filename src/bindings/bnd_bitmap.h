@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBitmapBindings(pybind11::module& m);
+void initBitmapBindings(rh3dmpymodule& m);
 #else
 void initBitmapBindings(void* m);
 #endif

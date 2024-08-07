@@ -66,19 +66,21 @@ BND_NurbsSurface* BND_Sphere::ToNurbsSurface() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_Sphere::Encode() const
+py::dict BND_Sphere::Encode() const
 {
-  pybind11::dict d;
+  py::dict d;
   d["Radius"] = m_sphere.radius;
   d["EquatorialPlane"] = PlaneToDict(m_sphere.plane);
   return d;
 }
 
-BND_Sphere* BND_Sphere::Decode(pybind11::dict jsonObject)
+BND_Sphere* BND_Sphere::Decode(py::dict jsonObject)
 {
   ON_Sphere s;
-  s.radius = jsonObject["Radius"].cast<double>();
-  pybind11::dict d = jsonObject["EquatorialPlane"].cast<pybind11::dict>();
+//  s.radius = jsonObject["Radius"].cast<double>();
+//  py::dict d = jsonObject["EquatorialPlane"].cast<py::dict>();
+  s.radius = py::cast<double>(jsonObject["Radius"]);
+  py::dict d = py::cast<py::dict>(jsonObject["EquatorialPlane"]);
   s.plane = PlaneFromDict(d);
   return new BND_Sphere(s);
 }
@@ -117,8 +119,8 @@ BND_Sphere* BND_Sphere::Decode(emscripten::val jsonObject)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initSphereBindings(pybind11::module& m)
+
+void initSphereBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Sphere>(m, "Sphere")
     .def(py::init<ON_3dPoint, double>(), py::arg("center"), py::arg("radius"))
@@ -142,6 +144,7 @@ void initSphereBindings(pybind11::module& m)
     .def_static("Decode", &BND_Sphere::Decode, py::arg("jsonObject"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

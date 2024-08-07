@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initArcBindings(pybind11::module& m);
+void initArcBindings(rh3dmpymodule& m);
 #else
 void initArcBindings(void* m);
 #endif

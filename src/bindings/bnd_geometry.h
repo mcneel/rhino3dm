@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initGeometryBindings(pybind11::module& m);
+void initGeometryBindings(rh3dmpymodule& m);
 #else
 void initGeometryBindings(void* m);
 #endif

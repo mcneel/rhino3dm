@@ -18,8 +18,8 @@ BND_SubD::BND_SubD()
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initSubDBindings(pybind11::module& m)
+
+void initSubDBindings(rh3dmpymodule& m)
 {
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
     .def(py::init<>())
@@ -29,6 +29,7 @@ void initSubDBindings(pybind11::module& m)
     .def("Subdivide", &BND_SubD::Subdivide, py::arg("count"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

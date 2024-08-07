@@ -268,7 +268,7 @@ BND_DICT BND_DimLinear::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimLinear points");
+  throw py::value_error("Failed to get DimLinear points");
 #else
   return emscripten::val::null();
 #endif
@@ -369,7 +369,7 @@ BND_DICT BND_DimAngular::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimAngular points");
+  throw py::value_error("Failed to get DimAngular points");
 #else
   return emscripten::val::null();
 #endif
@@ -463,7 +463,7 @@ BND_DICT BND_DimRadial::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimRadial points");
+  throw py::value_error("Failed to get DimRadial points");
 #else
   return emscripten::val::null();
 #endif
@@ -550,7 +550,7 @@ BND_DICT BND_DimOrdinate::GetPoints() const
     return d;
   }
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::value_error("Failed to get DimOrdinate points");
+  throw py::value_error("Failed to get DimOrdinate points");
 #else
   return emscripten::val::null();
 #endif
@@ -623,8 +623,8 @@ std::vector<ON_Line> BND_Centermark::GetDisplayLines(const BND_DimensionStyle& d
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initAnnotationBaseBindings(pybind11::module& m)
+
+void initAnnotationBaseBindings(rh3dmpymodule& m)
 {
   py::class_<BND_AnnotationBase, BND_GeometryBase>(m, "AnnotationBase")
     .def_property_readonly("DimensionStyleId", &BND_AnnotationBase::DimensionStyleId)

@@ -4,7 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initPostEffectBindings(pybind11::module& m);
+void initPostEffectBindings(rh3dmpymodule& m);
 #else
 void initPostEffectBindings(void* m);
 #endif

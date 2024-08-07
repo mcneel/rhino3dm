@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLineCurveBindings(pybind11::module& m);
+void initLineCurveBindings(rh3dmpymodule& m);
 #else
 void initLineCurveBindings(void* m);
 #endif

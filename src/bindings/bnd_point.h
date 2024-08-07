@@ -6,7 +6,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPointBindings(pybind11::module& m);
+void initPointBindings(rh3dmpymodule& m);
 #else
 void initPointBindings(void* m);
 #endif

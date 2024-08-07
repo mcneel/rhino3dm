@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLightBindings(pybind11::module& m);
+void initLightBindings(rh3dmpymodule& m);
 #else
 void initLightBindings(void* m);
 #endif

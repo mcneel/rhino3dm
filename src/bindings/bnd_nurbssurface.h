@@ -4,7 +4,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initNurbsSurfaceBindings(pybind11::module& m);
+void initNurbsSurfaceBindings(rh3dmpymodule& m);
 #else
 void initNurbsSurfaceBindings(void* m);
 #endif

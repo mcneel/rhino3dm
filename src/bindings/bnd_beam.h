@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initExtrusionBindings(pybind11::module& m);
+void initExtrusionBindings(rh3dmpymodule& m);
 #else
 void initExtrusionBindings(void* m);
 #endif

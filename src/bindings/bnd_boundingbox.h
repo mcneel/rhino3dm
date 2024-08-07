@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBoundingBoxBindings(pybind11::module& m);
+void initBoundingBoxBindings(rh3dmpymodule& m);
 #else
 void initBoundingBoxBindings(void* m);
 #endif
@@ -56,8 +56,8 @@ public:
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_BoundingBox* Decode(pybind11::dict jsonObject);
+  py::dict Encode() const;
+  static BND_BoundingBox* Decode(py::dict jsonObject);
 #endif
 
 };

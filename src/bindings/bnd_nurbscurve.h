@@ -4,7 +4,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initNurbsCurveBindings(pybind11::module& m);
+void initNurbsCurveBindings(rh3dmpymodule& m);
 #else
 void initNurbsCurveBindings(void* m);
 #endif

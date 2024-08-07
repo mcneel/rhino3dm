@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initSurfaceBindings(pybind11::module& m);
+void initSurfaceBindings(rh3dmpymodule& m);
 #else
 void initSurfaceBindings(void* m);
 #endif

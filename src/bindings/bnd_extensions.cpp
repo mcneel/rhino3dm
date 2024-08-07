@@ -671,7 +671,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0)
     return nullptr;
@@ -706,7 +706,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -775,7 +775,7 @@ BND_Material* BND_File3dmMaterialTable::FindIndex(int index)
     return new BND_Material(modelmaterial, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -930,7 +930,7 @@ BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
     return new BND_Bitmap(modelbitmap, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -994,7 +994,7 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
     return new BND_Layer(modellayer, &compref, m_model);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1056,7 +1056,7 @@ BND_Group* BND_File3dmGroupTable::FindIndex(int index)
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1129,7 +1129,7 @@ BND_ViewInfo* BND_File3dmViewTable::GetItem(int index) const
 
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= count)
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0 || index >= count)
     return nullptr;
@@ -1176,7 +1176,7 @@ BND_DimensionStyle* BND_File3dmDimStyleTable::FindIndex(int index) const
     return new BND_DimensionStyle(modeldimstyle, &compref);
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1234,8 +1234,8 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
     {
 
 #if defined(ON_PYTHON_COMPILE)
-      BND_GeometryBase g = geometry[i].cast<BND_GeometryBase>();  
-      BND_3dmObjectAttributes oa = attributes[i].cast<BND_3dmObjectAttributes>();
+      BND_GeometryBase g = py::cast<BND_GeometryBase>(geometry[i]);
+      BND_3dmObjectAttributes oa = py::cast<BND_3dmObjectAttributes>(attributes[i]);
 #else
       BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();  
       BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
@@ -1318,7 +1318,7 @@ BND_InstanceDefinitionGeometry* BND_File3dmInstanceDefinitionTable::FindIndex(in
   }
 
 #if defined(ON_PYTHON_COMPILE)
-  throw pybind11::index_error();
+  throw py::index_error();
 #else
   return nullptr;
 #endif
@@ -1363,7 +1363,7 @@ BND_File3dmPlugInData* BND_File3dmPlugInDataTable::GetPlugInData(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_model->m_userdata_table.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #else
   if (index < 0 || index >= m_model->m_userdata_table.Count())
     return nullptr;
@@ -1415,7 +1415,7 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
 
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= strings.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   const ON_UserString& us = strings[i];
@@ -1626,7 +1626,6 @@ BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, i
 
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
 
 template <typename IT, typename ET>
 struct PyBNDIterator {
@@ -1647,8 +1646,8 @@ struct PyBNDIterator {
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initExtensionsBindings(pybind11::module& m)
+
+void initExtensionsBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmPlugInData>(m, "File3dmPlugInData")
     ;
@@ -1675,7 +1674,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_ONXModel_ObjectTable>(m, "File3dmObjectTable")
     .def("__len__", &BND_ONXModel_ObjectTable::Count)
     .def("__getitem__", &BND_ONXModel_ObjectTable::ModelObjectAt)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>(s.cast<BND_ONXModel_ObjectTable &>(), s); })
+#endif
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
@@ -1711,7 +1712,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmMaterialTable>(m, "File3dmMaterialTable")
     .def("__len__", &BND_File3dmMaterialTable::Count)
     .def("__getitem__", &BND_File3dmMaterialTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>(s.cast<BND_File3dmMaterialTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
     .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
@@ -1727,7 +1730,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmLinetypeTable::Count)
     .def("__getitem__", static_cast<BND_Linetype* (BND_File3dmLinetypeTable::*)(int)>(&BND_File3dmLinetypeTable::FindIndex))
     .def("__getitem__", static_cast<BND_Linetype* (BND_File3dmLinetypeTable::*)(BND_UUID)>(&BND_File3dmLinetypeTable::FindId))
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmLinetypeTable&, BND_Linetype*>(s.cast<BND_File3dmLinetypeTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmLinetypeTable::Add, py::arg("linetype"))
     .def("Delete", &BND_File3dmLinetypeTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmLinetypeTable::FindIndex, py::arg("index"))
@@ -1748,7 +1753,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmBitmapTable>(m, "File3dmBitmapTable")
     .def("__len__", &BND_File3dmBitmapTable::Count)
     .def("__getitem__", &BND_File3dmBitmapTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>(s.cast<BND_File3dmBitmapTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmBitmapTable::Add, py::arg("bitmap"))
     .def("FindIndex", &BND_File3dmBitmapTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmBitmapTable::FindId, py::arg("id"))
@@ -1762,7 +1769,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmLayerTable>(m, "File3dmLayerTable")
     .def("__len__", &BND_File3dmLayerTable::Count)
     .def("__getitem__", &BND_File3dmLayerTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmLayerTable&, BND_Layer*>(s.cast<BND_File3dmLayerTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
     .def("AddLayer", &BND_File3dmLayerTable::AddLayer, py::arg("name"), py::arg("color"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
@@ -1778,7 +1787,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmGroupTable>(m, "File3dmGroupTable")
     .def("__len__", &BND_File3dmGroupTable::Count)
     .def("__getitem__", &BND_File3dmGroupTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmGroupTable&, BND_Group*>(s.cast<BND_File3dmGroupTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmGroupTable::Add, py::arg("group"))
     .def("Delete", &BND_File3dmGroupTable::Delete, py::arg("group"))
     .def("Delete", &BND_File3dmGroupTable::DeleteIndex, py::arg("index"))
@@ -1796,7 +1807,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmDimStyleTable>(m, "File3dmDimStyleTable")
     .def("__len__", &BND_File3dmDimStyleTable::Count)
     .def("__getitem__", &BND_File3dmDimStyleTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>(s.cast<BND_File3dmDimStyleTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmDimStyleTable::Add, py::arg("dimstyle"))
     .def("FindIndex", &BND_File3dmDimStyleTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmDimStyleTable::FindId, py::arg("id"))
@@ -1810,7 +1823,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmInstanceDefinitionTable>(m, "File3dmInstanceDefinitionTable")
     .def("__len__", &BND_File3dmInstanceDefinitionTable::Count)
     .def("__getitem__", &BND_File3dmInstanceDefinitionTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmInstanceDefinitionTable&, BND_InstanceDefinitionGeometry*>(s.cast<BND_File3dmInstanceDefinitionTable &>(), s); })
+#endif
     .def("AddInstanceDefinition", &BND_File3dmInstanceDefinitionTable::AddInstanceDefinition, py::arg("idef"))
     .def("Add", &BND_File3dmInstanceDefinitionTable::Add, py::arg("name"), py::arg("description"), py::arg("url"), py::arg("urlTag"), py::arg("basePoint"), py::arg("geometry"), py::arg("attributes"))
     .def("FindIndex", &BND_File3dmInstanceDefinitionTable::FindIndex, py::arg("index"))
@@ -1826,7 +1841,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def("__len__", &BND_File3dmViewTable::Count)
     .def("__getitem__", &BND_File3dmViewTable::GetItem)
     .def("__setitem__", &BND_File3dmViewTable::SetItem)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmViewTable&, BND_ViewInfo*>(s.cast<BND_File3dmViewTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmViewTable::Add, py::arg("view"))
     ;
 
@@ -1853,7 +1870,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmEmbeddedFileTable>(m, "File3dmEmbeddedFileTable")
     .def("__len__", &BND_File3dmEmbeddedFileTable::Count)
     .def("__getitem__", &BND_File3dmEmbeddedFileTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmEmbeddedFileTable&, BND_File3dmEmbeddedFile*>(s.cast<BND_File3dmEmbeddedFileTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmEmbeddedFileTable::Add, py::arg("embedded_file"))
     .def("FindIndex", &BND_File3dmEmbeddedFileTable::FindIndex, py::arg("index"))
     ////.def("FindId", &BND_File3dmEmbeddedFileTable::FindId, py::arg("id"))
@@ -1866,7 +1885,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmRenderContentTable>(m, "File3dmRenderContentTable")
     .def("__len__", &BND_File3dmRenderContentTable::Count)
     .def("__getitem__", &BND_File3dmRenderContentTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmRenderContentTable&, BND_File3dmRenderContent*>(s.cast<BND_File3dmRenderContentTable &>(), s); })
+#endif
     .def("Add", &BND_File3dmRenderContentTable::Add, py::arg("render_content"))
     .def("FindIndex", &BND_File3dmRenderContentTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmRenderContentTable::FindId, py::arg("id"))
@@ -1882,7 +1903,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def(py::init<const BND_File3dmPostEffectTable&>(), py::arg("other"))
     .def("__len__", &BND_File3dmPostEffectTable::Count)
     .def("__getitem__", &BND_File3dmPostEffectTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmPostEffectTable&, BND_File3dmPostEffect*>(s.cast<BND_File3dmPostEffectTable &>(), s); })
+#endif
     ////.def("Add", &BND_File3dmRenderContentTable::Add, py::arg("render_content"))
     .def("FindIndex", &BND_File3dmPostEffectTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmPostEffectTable::FindId, py::arg("id"))
@@ -1898,7 +1921,9 @@ void initExtensionsBindings(pybind11::module& m)
     .def(py::init<const BND_File3dmDecalTable&>(), py::arg("other"))
     .def("__len__", &BND_File3dmDecalTable::Count)
     .def("__getitem__", &BND_File3dmDecalTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDecalTable&, BND_File3dmDecal*>(s.cast<BND_File3dmDecalTable&>(), s); })
+#endif
     .def("FindIndex", &BND_File3dmDecalTable::FindIndex, py::arg("index"))
     ;
 
@@ -1923,7 +1948,9 @@ void initExtensionsBindings(pybind11::module& m)
   py::class_<BND_File3dmShutLiningCurveTable>(m, "File3dmShutLiningCurveTable")
     .def("__len__", &BND_File3dmShutLiningCurveTable::Count)
     .def("__getitem__", &BND_File3dmShutLiningCurveTable::FindIndex)
+#if !defined(NANOBIND)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmShutLiningCurveTable&, BND_File3dmShutLiningCurve*>(s.cast<BND_File3dmShutLiningCurveTable&>(), s); })
+#endif
     .def("Add", &BND_File3dmShutLiningCurveTable::Add, py::arg("id"))
     .def("FindIndex", &BND_File3dmShutLiningCurveTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmShutLiningCurveTable::FindId, py::arg("id"))
@@ -1934,10 +1961,12 @@ void initExtensionsBindings(pybind11::module& m)
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
     .def_static("ReadNotes", &BND_ONXModel::ReadNotes, py::arg("path"))
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion, py::arg("path"))
+/*
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
+    */
     .def("Write", &BND_ONXModel::Write, py::arg("path"), py::arg("version")=0)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
@@ -1973,6 +2002,7 @@ void initExtensionsBindings(pybind11::module& m)
     .def("RdkXml", &BND_ONXModel::RdkXml)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

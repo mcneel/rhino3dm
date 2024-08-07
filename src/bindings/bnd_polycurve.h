@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPolyCurveBindings(pybind11::module& m);
+void initPolyCurveBindings(rh3dmpymodule& m);
 #else
 void initPolyCurveBindings(void* m);
 #endif

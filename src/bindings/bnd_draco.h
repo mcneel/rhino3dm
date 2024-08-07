@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initDracoBindings(pybind11::module& m);
+void initDracoBindings(rh3dmpymodule& m);
 #else
 void initDracoBindings(void* m);
 #endif

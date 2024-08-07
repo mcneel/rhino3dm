@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPointCloudBindings(pybind11::module& m);
+void initPointCloudBindings(rh3dmpymodule& m);
 #else
 void initPointCloudBindings(void* m);
 #endif

@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initXformBindings(pybind11::module& m);
+void initXformBindings(rh3dmpymodule& m);
 #else
 void initXformBindings(void* m);
 #endif

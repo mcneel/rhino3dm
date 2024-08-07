@@ -4,7 +4,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initRenderEnvironmentsBindings(pybind11::module& m);
+void initRenderEnvironmentsBindings(rh3dmpymodule& m);
 #else
 void initRenderEnvironmentsBindings(void* m);
 #endif

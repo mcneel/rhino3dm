@@ -67,7 +67,7 @@ enum class CurveEvaluationSide : int
 
 
 #if defined(ON_PYTHON_COMPILE)
-void initCurveBindings(pybind11::module& m);
+void initCurveBindings(rh3dmpymodule& m);
 #else
 void initCurveBindings(void* m);
 #endif

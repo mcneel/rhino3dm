@@ -4,7 +4,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void init3dmSettingsBindings(pybind11::module& m);
+void init3dmSettingsBindings(rh3dmpymodule& m);
 #else
 void init3dmSettingsBindings(void* m);
 #endif

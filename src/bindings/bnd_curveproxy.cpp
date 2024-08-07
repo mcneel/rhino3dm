@@ -14,13 +14,14 @@ void BND_CurveProxy::SetTrackedPointer(ON_CurveProxy* curveproxy, const ON_Model
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initCurveProxyBindings(pybind11::module& m)
+
+void initCurveProxyBindings(rh3dmpymodule& m)
 {
   py::class_<BND_CurveProxy, BND_Curve>(m, "CurveProxy")
     .def_property_readonly("ProxyCurveIsReversed", &BND_CurveProxy::ProxyCurveIsReversed)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

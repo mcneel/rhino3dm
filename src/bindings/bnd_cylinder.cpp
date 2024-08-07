@@ -42,8 +42,8 @@ BND_NurbsSurface* BND_Cylinder::ToNurbsSurface() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initCylinderBindings(pybind11::module& m)
+
+void initCylinderBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Cylinder>(m, "Cylinder")
     .def(py::init<const BND_Circle&>(), py::arg("baseCircle"))

@@ -122,8 +122,8 @@ void BND_File3dmSettings::SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchor
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void init3dmSettingsBindings(pybind11::module& m)
+
+void init3dmSettingsBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ConstructionPlane>(m, "ConstructionPlane")
     .def(py::init<>())
@@ -215,6 +215,7 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property_readonly("RenderSettings", &BND_File3dmSettings::GetRenderSettings)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

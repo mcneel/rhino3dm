@@ -4,8 +4,8 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initEnvironmentBindings(pybind11::module& m);
-void initTextureBindings(pybind11::module& m);
+void initEnvironmentBindings(rh3dmpymodule& m);
+void initTextureBindings(rh3dmpymodule& m);
 #else
 void initEnvironmentBindings(void* m);
 void initTextureBindings(void* m);

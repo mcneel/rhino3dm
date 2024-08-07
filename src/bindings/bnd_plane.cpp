@@ -168,18 +168,28 @@ BND_DICT BND_Plane::Encode() const
   return d;
 }
 
-BND_Plane* BND_Plane::Decode(pybind11::dict jsonObject)
+BND_Plane* BND_Plane::Decode(py::dict jsonObject)
 {
   BND_Plane* rc = new BND_Plane();
 
-  pybind11::dict d = jsonObject["Origin"].cast<pybind11::dict>();
+  py::dict d = py::cast<py::dict>(jsonObject["Origin"]);
   rc->m_origin = PointFromDict(d);
-  d = jsonObject["XAxis"].cast<pybind11::dict>();
+  d = py::cast<py::dict>(jsonObject["XAxis"]);
   rc->m_xaxis = PointFromDict(d);
-  d = jsonObject["YAxis"].cast<pybind11::dict>();
+  d = py::cast<py::dict>(jsonObject["YAxis"]);
   rc->m_yaxis = PointFromDict(d);
-  d = jsonObject["ZAxis"].cast<pybind11::dict>();
+  d = py::cast<py::dict>(jsonObject["ZAxis"]);
   rc->m_zaxis = PointFromDict(d);
+  /*
+  py::dict d = jsonObject["Origin"].cast<py::dict>();
+  rc->m_origin = PointFromDict(d);
+  d = jsonObject["XAxis"].cast<py::dict>();
+  rc->m_xaxis = PointFromDict(d);
+  d = jsonObject["YAxis"].cast<py::dict>();
+  rc->m_yaxis = PointFromDict(d);
+  d = jsonObject["ZAxis"].cast<py::dict>();
+  rc->m_zaxis = PointFromDict(d);
+   */
   return rc;
 }
 #endif
@@ -190,8 +200,8 @@ BND_Plane BND_PlaneHelper::WorldXY()
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPlaneBindings(pybind11::module& m)
+
+void initPlaneBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Plane>(m, "Plane")
     .def_static("WorldXY", &BND_Plane::WorldXY)
@@ -214,6 +224,7 @@ void initPlaneBindings(pybind11::module& m)
     .def_static("Decode", &BND_Plane::Decode, py::arg("jsonObject"))
     ;
 }
+
 #endif
 
 

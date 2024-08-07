@@ -19,13 +19,14 @@ void BND_PointGrid::SetTrackedPointer(ON_PointGrid* pointgrid, const ON_ModelCom
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPointGridBindings(pybind11::module& m)
+
+void initPointGridBindings(rh3dmpymodule& m)
 {
   py::class_<BND_PointGrid, BND_GeometryBase>(m, "PointGrid")
     .def(py::init<>())
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

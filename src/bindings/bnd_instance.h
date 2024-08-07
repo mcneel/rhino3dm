@@ -11,7 +11,7 @@ enum class InstanceDefinitionUpdateType : int
 };
 
 #if defined(ON_PYTHON_COMPILE)
-void initInstanceBindings(pybind11::module& m);
+void initInstanceBindings(rh3dmpymodule& m);
 #else
 void initInstanceBindings(void* m);
 #endif

@@ -4,9 +4,9 @@
 
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_MeshingParameters::Encode() const
+py::dict BND_MeshingParameters::Encode() const
 {
-  pybind11::dict d;
+  py::dict d;
   d["TextureRange"] = GetTextureRange();
   d["JaggedSeams"] = GetJaggedSeams();
   d["RefineGrid"] = GetRefineGrid();
@@ -27,9 +27,10 @@ pybind11::dict BND_MeshingParameters::Encode() const
   return d;
 }
 
-BND_MeshingParameters* BND_MeshingParameters::Decode(pybind11::dict jsonObject)
+BND_MeshingParameters* BND_MeshingParameters::Decode(py::dict jsonObject)
 {
   BND_MeshingParameters* mp = new BND_MeshingParameters();
+  /*
   mp->SetTextureRange(jsonObject["TextureRange"].cast<int>());
   mp->SetJaggedSeams(jsonObject["JaggedSeams"].cast<bool>());
   mp->SetRefineGrid(jsonObject["RefineGrid"].cast<bool>());
@@ -47,6 +48,24 @@ BND_MeshingParameters* BND_MeshingParameters::Decode(pybind11::dict jsonObject)
   mp->SetMinimumEdgeLength(jsonObject["MinimumEdgeLength"].cast<double>());
   mp->SetMaximumEdgeLength(jsonObject["MaximumEdgeLength"].cast<double>());
   mp->SetRefineAngle(jsonObject["RefineAngle"].cast<double>());
+   */
+  mp->SetTextureRange(py::cast<int>(jsonObject["TextureRange"]));
+  mp->SetJaggedSeams(py::cast<bool>(jsonObject["JaggedSeams"]));
+  mp->SetRefineGrid(py::cast<bool>(jsonObject["RefineGrid"]));
+  mp->SetSimplePlanes(py::cast<bool>(jsonObject["SimplePlanes"]));
+  mp->SetComputeCurvature(py::cast<bool>(jsonObject["ComputeCurvature"]));
+  mp->SetClosedObjectPostProcess(py::cast<bool>(jsonObject["ClosedObjectPostProcess"]));
+  mp->SetGridMinCount(py::cast<bool>(jsonObject["GridMinCount"]));
+  mp->SetGridMaxCount(py::cast<int>(jsonObject["GridMaxCount"]));
+  mp->SetGridAngle(py::cast<double>(jsonObject["GridAngle"]));
+  mp->SetGridAspectRatio(py::cast<double>(jsonObject["GridAspectRatio"]));
+  mp->SetGridAmplification(py::cast<double>(jsonObject["GridAmplification"]));
+  mp->SetTolerance(py::cast<double>(jsonObject["Tolerance"]));
+  mp->SetMinimumTolerance(py::cast<double>(jsonObject["MinimumTolerance"]));
+  mp->SetRelativeTolerance(py::cast<double>(jsonObject["RelativeTolerance"]));
+  mp->SetMinimumEdgeLength(py::cast<double>(jsonObject["MinimumEdgeLength"]));
+  mp->SetMaximumEdgeLength(py::cast<double>(jsonObject["MaximumEdgeLength"]));
+  mp->SetRefineAngle(py::cast<double>(jsonObject["RefineAngle"]));
   return mp;
 }
 #endif
@@ -473,7 +492,7 @@ ON_3fPoint BND_MeshVertexList::GetVertex(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i<0 || i>=m_mesh->m_V.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_mesh->m_V[i];
 }
@@ -482,7 +501,7 @@ void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_V.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_V[i] = pt;
 }
@@ -707,7 +726,7 @@ BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_F.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_MeshFace& face = m_mesh->m_F[i];
@@ -784,7 +803,7 @@ BND_Color BND_MeshVertexColorList::GetColor(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_mesh->m_C.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return ON_Color_to_Binding(m_mesh->m_C[index]);
 }
@@ -793,7 +812,7 @@ void BND_MeshVertexColorList::SetColor(int index, BND_Color color)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_mesh->m_C.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   // if index == count, then we are appending
@@ -816,7 +835,7 @@ ON_3fVector BND_MeshNormalList::GetNormal(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_N.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   return m_mesh->m_N[i];
@@ -826,7 +845,7 @@ void BND_MeshNormalList::SetNormal(int i, ON_3fVector v)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_N.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_N[i] = v;
 }
@@ -841,7 +860,7 @@ ON_2fPoint BND_MeshTextureCoordinateList::GetTextureCoordinate(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i<0 || i >= m_mesh->m_T.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_mesh->m_T[i];
 }
@@ -850,7 +869,7 @@ void BND_MeshTextureCoordinateList::SetTextureCoordinate(int i, ON_2fPoint tc)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_T.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_T[i] = tc;
 }
@@ -937,8 +956,8 @@ void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class B
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initMeshBindings(pybind11::module& m)
+
+void initMeshBindings(rh3dmpymodule& m)
 {
   py::class_<BND_MeshingParameters>(m, "MeshingParameters")
     .def(py::init<>())
@@ -1080,6 +1099,7 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("PartitionCount", &BND_Mesh::PartitionCount)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

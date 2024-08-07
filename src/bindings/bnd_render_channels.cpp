@@ -66,8 +66,8 @@ void BND_File3dmRenderChannels::SetCustomList(BND_TUPLE tuple)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initRenderChannelsBindings(pybind11::module& m)
+
+void initRenderChannelsBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmRenderChannels>(m, "RenderChannels")
     .def(py::init<>())
@@ -76,6 +76,7 @@ void initRenderChannelsBindings(pybind11::module& m)
     .def_property("CustomIds", &BND_File3dmRenderChannels::GetCustomList, &BND_File3dmRenderChannels::SetCustomList)
    ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

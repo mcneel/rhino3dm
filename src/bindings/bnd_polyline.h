@@ -2,7 +2,7 @@
 
 #pragma once
 #if defined(ON_PYTHON_COMPILE)
-void initPolylineBindings(pybind11::module& m);
+void initPolylineBindings(rh3dmpymodule& m);
 #else
 void initPolylineBindings(void* m);
 #endif

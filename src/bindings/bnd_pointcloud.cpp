@@ -196,7 +196,7 @@ BND_PointCloudItem BND_PointCloud::GetItem(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_pointcloud->PointCount())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   return BND_PointCloudItem(index, m_pointcloud, m_component_ref);
@@ -808,8 +808,8 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPointCloudBindings(pybind11::module& m)
+
+void initPointCloudBindings(rh3dmpymodule& m)
 {
   py::class_<BND_PointCloudItem>(m, "PointCloudItem")
     .def_property("Location", &BND_PointCloudItem::GetLocation, &BND_PointCloudItem::SetLocation)
@@ -869,6 +869,7 @@ void initPointCloudBindings(pybind11::module& m)
     .def("ClosestPoint", &BND_PointCloud::ClosestPoint, py::arg("testPoint"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

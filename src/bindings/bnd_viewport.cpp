@@ -114,7 +114,7 @@ BND_DICT BND_Viewport::GetFrustum() const
     d["far"] = far_dist;
     return d;
   }
-  throw pybind11::value_error("Invalid viewport");
+  throw py::value_error("Invalid viewport");
 }
 #endif
 
@@ -143,10 +143,10 @@ emscripten::val BND_Viewport::GetFrustum() const
 void BND_Viewport::SetScreenPort(BND_TUPLE rect)
 {
 #if defined(ON_PYTHON_COMPILE)
-  int x = rect[0].cast<int>();
-  int y = rect[1].cast<int>();
-  int width = rect[2].cast<int>();
-  int height = rect[3].cast<int>();
+  int x = py::cast<int>(rect[0]);
+  int y = py::cast<int>(rect[1]);
+  int width = py::cast<int>(rect[2]);
+  int height = py::cast<int>(rect[3]);
   m_viewport->SetScreenPort(x, x + width, y + height, y);
 #else
   int x = rect[0].as<int>();
@@ -367,8 +367,8 @@ BND_UUID BND_Viewport::GetId() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initViewportBindings(pybind11::module& m)
+
+void initViewportBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
@@ -408,9 +408,9 @@ void initViewportBindings(pybind11::module& m)
     .def_property_readonly("Id", &BND_Viewport::GetId)
     ;
 }
+#endif
 
-#else
-
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initViewportBindings(void*)

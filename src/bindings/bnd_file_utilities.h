@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initFileUtilitiesBindings(pybind11::module& m);
+void initFileUtilitiesBindings(rh3dmpymodule& m);
 #else
 void initFileUtilitiesBindings(void* m);
 #endif

@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initDimensionStyleBindings(pybind11::module& m);
+void initDimensionStyleBindings(rh3dmpymodule& m);
 #else
 void initDimensionStyleBindings(void* m);
 #endif

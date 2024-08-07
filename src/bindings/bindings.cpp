@@ -1,8 +1,7 @@
 #include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-PYBIND11_MODULE(_rhino3dm, m){
+RH3DM_PYTHON_BINDING(_rhino3dm, m) {
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
 #endif
 
@@ -86,21 +85,55 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
   initLinetypeBindings(m);
 }
 
+#if defined(ON_PYTHON_COMPILE)
+std::string ToStdString(const py::str& str)
+{
+  std::string rc = py::cast<std::string>(str);
+  return rc;
+}
+#endif
+  
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::tuple rc(count);
-  return rc;
+  BND_TUPLE rc = py::make_tuple(count);
 #else
   emscripten::val rc(emscripten::val::array());
-  return rc;
 #endif
+  return rc;
 }
 
 BND_TUPLE NullTuple()
 {
 #if defined(ON_PYTHON_COMPILE)
-  return pybind11::none();
+#if defined(NANOBIND)
+  UNIMPLEMENTED_EXCEPTION;
+#else
+  return py::none();
+#endif
+#else
+  return emscripten::val::null();
+#endif
+}
+
+BND_LIST CreateList()
+{
+#if defined(ON_PYTHON_COMPILE)
+  BND_LIST rc = py::list();
+#else
+  emscripten::val rc(emscripten::val::array());
+#endif
+  return rc;
+}
+
+BND_LIST NullList()
+{
+#if defined(ON_PYTHON_COMPILE)
+#if defined(NANOBIND)
+  return py::list();
+#else
+  return py::none();
+#endif
 #else
   return emscripten::val::null();
 #endif

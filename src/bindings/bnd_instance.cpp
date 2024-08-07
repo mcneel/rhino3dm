@@ -76,8 +76,8 @@ BND_Transform BND_InstanceReferenceGeometry::Xform() const
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initInstanceBindings(pybind11::module& m)
+
+void initInstanceBindings(rh3dmpymodule& m)
 {
   py::enum_<InstanceDefinitionUpdateType>(m, "InstanceDefinitionUpdateType")
     .value("Static", InstanceDefinitionUpdateType::Static)
@@ -103,6 +103,7 @@ void initInstanceBindings(pybind11::module& m)
     .def_property_readonly("Xform", &BND_InstanceReferenceGeometry::Xform)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

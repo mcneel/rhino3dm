@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initFontBindings(pybind11::module& m);
+void initFontBindings(rh3dmpymodule& m);
 #else
 void initFontBindings(void* m);
 #endif

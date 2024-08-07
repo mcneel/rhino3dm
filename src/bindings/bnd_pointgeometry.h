@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPointGeometryBindings(pybind11::module& m);
+void initPointGeometryBindings(rh3dmpymodule& m);
 #else
 void initPointGeometryBindings(void* m);
 #endif
