@@ -59,6 +59,7 @@ typedef emscripten::val BND_Color;
 typedef emscripten::val BND_Color4f;
 typedef emscripten::val BND_TUPLE;
 typedef emscripten::val BND_DateTime;
+typedef emscripten::val BND_LIST;
 #endif
 
 BND_TUPLE CreateTuple(int count);

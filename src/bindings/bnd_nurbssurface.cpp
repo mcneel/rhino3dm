@@ -200,7 +200,7 @@ BND_NurbsSurfacePointList BND_NurbsSurface::Points()
 
 void initNurbsSurfaceBindings(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList" /* , py::buffer_protocol() */)
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
     .def("__len__", &BND_NurbsSurfaceKnotList::Count)
     .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
@@ -228,7 +228,7 @@ void initNurbsSurfaceBindings(rh3dmpymodule& m)
     .def("SuperfluousKnot", &BND_NurbsSurfaceKnotList::SuperfluousKnot, py::arg("start"))
     ;
 
-  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList"/* , py::buffer_protocol() */)
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::buffer_protocol())
     .def("__len__", &BND_NurbsSurfacePointList::Count)
     .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
     .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
