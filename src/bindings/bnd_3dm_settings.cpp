@@ -235,6 +235,7 @@ void init3dmSettingsBindings(void*)
     ;
 
   class_<BND_ViewInfo>("ViewInfo")
+    .constructor<>()
     .property("name", &BND_ViewInfo::GetName, &BND_ViewInfo::SetName)
     .property("wallpaperName", &BND_ViewInfo::GetWallpaperFilename)
     .property("showWallpaperInGrayScale", &BND_ViewInfo::ShowWallpaperInGrayScale, &BND_ViewInfo::SetShowWallpaperInGrayScale)
