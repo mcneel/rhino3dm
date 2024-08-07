@@ -225,7 +225,11 @@ BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
 
 void initNurbsCurveBindings(rh3dmpymodule& m)
 {
+#if defined(NANOBIND) // temp workaround for buffer protocol
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList")
+#else
   py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsCurveKnotList::Count)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
@@ -254,7 +258,11 @@ void initNurbsCurveBindings(rh3dmpymodule& m)
     ;
   ;
 
+#if defined(NANOBIND) // temp workaround for buffer protocol
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList")
+#else
   py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsCurvePointList::Count)
     .def("__getitem__", &BND_NurbsCurvePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsCurvePointList::SetControlPoint)
