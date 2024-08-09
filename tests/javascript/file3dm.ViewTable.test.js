@@ -28,18 +28,13 @@ test('CreateFileWithView', async () => {
   const vi = new rhino.ViewInfo()
   vi.name = 'main_js'
 
-  //does not work
-  /*
-  vi.getViewport().setCameraLocation([50, 50, 100])
-  loc = vi.getViewport().cameraLocation //<-- default location
-  */
-
-  // works
-  const vp = new rhino.ViewportInfo()
   const loc = [50,50,100]
-  vp.setCameraLocation(loc)
-  vi.setViewport(vp)
+
+  vi.getViewport().setCameraLocation([50, 50, 100])
+  const loc2 = vi.getViewport().cameraLocation 
+
   file3dm.views().add(vi)
+  loc3 = vi.getViewport().cameraLocation
 
   const bufferWrite = file3dm.toByteArray()
   fs.writeFileSync('test_createFileWithView.3dm', bufferWrite)
@@ -52,6 +47,6 @@ test('CreateFileWithView', async () => {
   const vp_read = vi_read.getViewport()
   const loc_read = vp_read.cameraLocation
 
-  expect(loc[0] === loc_read[0] && loc[1] === loc_read[1] && loc[2] === loc_read[2]).toBe(true)
+  expect(JSON.stringify(loc) === JSON.stringify(loc_read) && JSON.stringify(loc2) === JSON.stringify(loc_read) && JSON.stringify(loc3) === JSON.stringify(loc_read)).toBe(true)
 
 })
