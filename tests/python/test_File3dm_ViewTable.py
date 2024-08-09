@@ -36,10 +36,6 @@ class TestFile3dmViewTable(unittest.TestCase):
         vi_read = file3dm_read.Views[0]
         loc_read = vi_read.Viewport.CameraLocation
 
-        print(loc.X, loc.Y, loc.Z)
-        print(loc2.X, loc2.Y, loc2.Z)
-        print(loc_read.X, loc_read.Y, loc_read.Z)
-
         self.assertTrue(loc == loc_read and loc2 == loc_read)
 
 if __name__ == '__main__':
