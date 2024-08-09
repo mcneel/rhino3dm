@@ -3,7 +3,7 @@
 
 BND_Viewport* BND_ViewInfo::GetViewport() const
 {
-  return new BND_Viewport(new ON_Viewport(m_view.m_vp), nullptr);
+  return new BND_Viewport(const_cast<ON_Viewport*>(&m_view.m_vp), nullptr);
 }
 
 void BND_ViewInfo::SetViewport(const BND_Viewport& viewport)
