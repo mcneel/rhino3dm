@@ -19,12 +19,13 @@ class TestFile3dmViewTable(unittest.TestCase):
             sphere = rhino3dm.Sphere(rhino3dm.Point3d(x, y, z), 10)
             file3dm.Objects.AddSphere(sphere, None)
 
-        vp = rhino3dm.ViewportInfo()
-        loc = rhino3dm.Point3d(50, 50, 50)
-        vp.SetCameraLocation(loc)
         view = rhino3dm.ViewInfo()
         view.Name = "Main_py"
-        view.Viewport = vp
+
+        loc = rhino3dm.Point3d(50, 50, 50)
+
+        view.Viewport.SetCameraLocation(loc)
+        
         loc2 = view.Viewport.CameraLocation
 
         file3dm.Views.Add(view)
@@ -35,11 +36,7 @@ class TestFile3dmViewTable(unittest.TestCase):
         vi_read = file3dm_read.Views[0]
         loc_read = vi_read.Viewport.CameraLocation
 
-        print(loc.X, loc.Y, loc.Z)
-        print(loc2.X, loc2.Y, loc2.Z)
-        print(loc_read.X, loc_read.Y, loc_read.Z)
-
-        self.assertTrue(loc.X == loc_read.X and loc.Y == loc_read.Y and loc.Z == loc_read.Z)
+        self.assertTrue(loc == loc_read and loc2 == loc_read)
 
 if __name__ == '__main__':
     print("running tests")
