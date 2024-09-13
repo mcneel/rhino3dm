@@ -169,8 +169,8 @@ jobs:
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    #container:
-      #image: ${{ matrix.image }}
+    container:
+      image: ${{ matrix.image }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-14, windows-2022]
