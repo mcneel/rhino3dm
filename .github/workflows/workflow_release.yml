@@ -177,15 +177,15 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux
-            #image: mcneel/rhino3dm-dev-amzn2
+            image: mcneel/rhino3dm-dev-amazonlinux2023
             artifact-path: src/build/linux/librhino3dm_native.so
           - os: windows-2022
             target: windows
-            #image: ""
+            image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
           - os: macos-14
             target: macos
-            #image: ""
+            image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
       fail-fast: false
     steps:
