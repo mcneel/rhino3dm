@@ -3124,11 +3124,11 @@ declare module 'rhino3dm' {
 		addBrep(brep:Brep): string;
 		/**
 		 * @description Duplicates the object, then adds a copy of the object to the document.
-		 * @param {ObjectAttributes} attributes
 		 * @param {GeometryBase} geometry
+		 * @param {ObjectAttributes} attributes
 		 * @returns {string} A unique identifier for the object.
 		 */
-		add(attributes: ObjectAttributes, geometry: GeometryBase): string;
+		add(geometry: GeometryBase, attributes: ObjectAttributes): string;
 		/** ... */
 		addObject(): void;
 		/**
