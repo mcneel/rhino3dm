@@ -802,6 +802,29 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 
 }
 
+BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
+{
+   if (emscripten::val::undefined() == json["data"])
+    return nullptr;
+  emscripten::val attributes = json["data"]["attributes"];
+
+  std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
+
+  ON_PointCloud* pc = new ON_PointCloud();
+
+  const int vertex_count = position_array.size() / 3;
+  pc->m_V.SetCapacity(vertex_count);
+  pc->m_V.SetCount(vertex_count);
+  memcpy(pc->m_V.Array(), position_array.data(), sizeof(float) * position_array.size());
+
+  ON_Xform rotation(1);
+  rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  pc->Transform(rotation);
+
+  return new BND_PointCloud(pc, nullptr);
+}
+
+
 
 #endif
 
@@ -936,6 +959,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
+    .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON)
     ;
 }
 #endif

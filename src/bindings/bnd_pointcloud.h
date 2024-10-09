@@ -126,5 +126,6 @@ public:
 
 #if defined(ON_WASM_COMPILE)
   BND_DICT ToThreejsJSON() const;
+  static BND_PointCloud CreateFromThreejsJSON(BND_DICT json);
 #endif
 };
