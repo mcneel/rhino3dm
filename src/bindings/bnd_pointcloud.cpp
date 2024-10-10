@@ -959,7 +959,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
-    .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON)
+    .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }
 #endif
