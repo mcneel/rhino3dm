@@ -808,6 +808,11 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
     return nullptr;
   emscripten::val attributes = json["data"]["attributes"];
 
+  // Adding data validation
+  if (emscripten::val::undefined() == attributes["position"] ||
+      emscripten::val::undefined() == attributes["position"]["array"])
+      return nullptr;
+
   std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
 
   ON_PointCloud* pc = new ON_PointCloud();
