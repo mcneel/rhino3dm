@@ -813,14 +813,14 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
       emscripten::val::undefined() == attributes["position"]["array"])
       return nullptr;
 
-  std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
+  std::vector<double> position_array = emscripten::vecFromJSArray<double>(attributes["position"]["array"]);
 
   ON_PointCloud* pc = new ON_PointCloud();
 
   const int vertex_count = position_array.size() / 3;
   pc->m_V.SetCapacity(vertex_count);
   pc->m_V.SetCount(vertex_count);
-  memcpy(pc->m_V.Array(), position_array.data(), sizeof(float) * position_array.size());
+  memcpy(pc->m_V.Array(), position_array.data(), sizeof(double) * position_array.size());
 
   ON_Xform rotation(1);
   rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
