@@ -818,9 +818,9 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   ON_PointCloud* pc = new ON_PointCloud();
 
   const int vertex_count = position_array.size() / 3;
-  pc->m_V.SetCapacity(vertex_count);
-  pc->m_V.SetCount(vertex_count);
-  memcpy(pc->m_V.Array(), position_array.data(), sizeof(double) * position_array.size());
+  pc->m_P.SetCapacity(vertex_count);
+  pc->m_P.SetCount(vertex_count);
+  memcpy(pc->m_P.Array(), position_array.data(), sizeof(double) * position_array.size());
 
   ON_Xform rotation(1);
   rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
