@@ -30,6 +30,34 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 2)
 
+    def test_createFileWithSubLayers(self):
+
+        file3dm = rhino3dm.File3dm()
+        file3dm.ApplicationName = 'python'
+        file3dm.ApplicationDetails = 'rhino3dm-tests'
+        file3dm.ApplicationUrl = 'https://rhino3d.com'
+
+        #create layers
+        file3dm.Layers.AddLayer("layer1", (30, 144, 255, 255))
+        file3dm.Layers.AddLayer("layer2", (255, 215, 0, 255))
+
+        # set parent layer
+        layer_id = file3dm.Layers.FindName("layer1", "").Id
+        file3dm.Layers.FindName("layer2", "").ParentLayerId = layer_id
+
+        with self.subTest(msg="Check index layer1"):
+            self.assertEqual(file3dm.Layers.FindName("layer1", "").Index, 0)
+
+        with self.subTest(msg="Check index layer2"):
+            self.assertEqual(file3dm.Layers.FindName("layer2", "").Index, 1)
+
+        with self.subTest(msg="Check index layer2 obtained via FindName without ParentId"):
+            self.assertEqual(file3dm.Layers.FindName("layer2", "").Index, 1)
+
+        with self.subTest(msg="Check index layer2 obtained via FindName"):
+            self.assertEqual(file3dm.Layers.FindName("layer2", layer_id).Index, 1)
+
+
 if __name__ == '__main__':
     print("running tests")
     unittest.main()
