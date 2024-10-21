@@ -48,13 +48,10 @@ class TestFile3dmLayerTable(unittest.TestCase):
         with self.subTest(msg="Check index layer1"):
             self.assertEqual(file3dm.Layers.FindName("layer1", "").Index, 0)
 
-        with self.subTest(msg="Check index layer2"):
-            self.assertEqual(file3dm.Layers.FindName("layer2", "").Index, 1)
-
         with self.subTest(msg="Check index layer2 obtained via FindName without ParentId"):
             self.assertEqual(file3dm.Layers.FindName("layer2", "").Index, 1)
 
-        with self.subTest(msg="Check index layer2 obtained via FindName"):
+        with self.subTest(msg="Check index layer2 obtained via FindName with ParentId"):
             self.assertEqual(file3dm.Layers.FindName("layer2", layer_id).Index, 1)
 
 
