@@ -72,6 +72,7 @@ ON_3dVector BND_PointCloudItem::GetNormal() const
     return m_pointcloud->m_N[m_index];
   return ON_3dVector::UnsetVector;
 }
+
 void BND_PointCloudItem::SetNormal(const ON_3dVector& v)
 {
   if((m_index >= 0) && (m_index < m_pointcloud->m_P.Count()))
@@ -808,12 +809,19 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
     return nullptr;
   emscripten::val attributes = json["data"]["attributes"];
 
-  // Adding data validation
-  if (emscripten::val::undefined() == attributes["position"] ||
-      emscripten::val::undefined() == attributes["position"]["array"])
-      return nullptr;
-
   std::vector<double> position_array = emscripten::vecFromJSArray<double>(attributes["position"]["array"]);
+
+  std::vector<double> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+  }
+
+  std::vector<float> color_array;
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
+  }
 
   ON_PointCloud* pc = new ON_PointCloud();
 
@@ -821,6 +829,16 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   pc->m_P.SetCapacity(vertex_count);
   pc->m_P.SetCount(vertex_count);
   memcpy(pc->m_P.Array(), position_array.data(), sizeof(double) * position_array.size());
+
+  const int normal_count = normal_array.size() / 3;
+  pc->m_N.SetCapacity(normal_count);
+  pc->m_N.SetCount(normal_count);
+  memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
+
+  const int color_count = color_array.size() / 3;
+  pc->m_C.SetCapacity(color_count);
+  pc->m_C.SetCount(color_count);
+  memcpy(pc->m_C.Array(), color_array.data(), sizeof(double) * color_array.size());
 
   ON_Xform rotation(1);
   rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
