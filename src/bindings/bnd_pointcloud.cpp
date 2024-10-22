@@ -820,7 +820,7 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   std::vector<double> color_array;
   if (emscripten::val::undefined() != attributes["color"])
   {
-    color_array = emscripten::vecFromJSArray<double>(attributes["normal"]["array"]);
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
   }
 
   ON_PointCloud* pc = new ON_PointCloud();
