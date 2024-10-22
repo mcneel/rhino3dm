@@ -2742,7 +2742,7 @@ declare module 'rhino3dm' {
 		 * @description Read a 3dm file from a byte array
 		 * @returns {File3dm} New File3dm on success, null on error.
 		 */
-		static fromByteArray(length:number, buffer: Uint8Array): File3dm;
+		static fromByteArray(buffer: Uint8Array): File3dm;
 		/** ... */
 		settings(): File3dmSettings;
 		/** ... */
