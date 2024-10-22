@@ -833,7 +833,7 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   const int normal_count = normal_array.size() / 3;
   pc->m_N.SetCapacity(normal_count);
   pc->m_N.SetCount(normal_count);
-  memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
+  memcpy(pc->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
 
   const int color_count = color_array.size() / 3;
   pc->m_C.SetCapacity(color_count);
