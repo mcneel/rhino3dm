@@ -699,8 +699,7 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0)
-    int new_index = m_compref_cache.Count() + index;
-    index = new_index < 0 ? std::abs(new_index) : new_index;
+    index = m_compref_cache.Count() + index < 0 ? std::abs(index) : m_compref_cache.Count() + index;
 #endif
 
   if (index < m_compref_cache.Count())
