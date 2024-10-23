@@ -1,5 +1,6 @@
 import rhino3dm
 import unittest
+from os import remove
 
 #objective: to test that adding a user string to an object and reading it back returns the same string
 class TestObject(unittest.TestCase):
@@ -25,6 +26,10 @@ class TestObject(unittest.TestCase):
         valueRead = obj.Attributes.GetUserString(key)
 
         self.assertTrue( value == valueRead )
+
+        # delete temporary file
+        remove("test_Object_UserString.3dm")
+
 
 if __name__ == '__main__':
     print("running tests")

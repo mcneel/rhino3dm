@@ -1,5 +1,6 @@
 import rhino3dm
 import unittest
+from os import remove
 
 #objective: to test creating file with layers and reasing a file with layers
 class TestFile3dmViewTable(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestFile3dmViewTable(unittest.TestCase):
         loc = rhino3dm.Point3d(50, 50, 50)
 
         view.Viewport.SetCameraLocation(loc)
-        
+
         loc2 = view.Viewport.CameraLocation
 
         file3dm.Views.Add(view)
@@ -37,6 +38,10 @@ class TestFile3dmViewTable(unittest.TestCase):
         loc_read = vi_read.Viewport.CameraLocation
 
         self.assertTrue(loc == loc_read and loc2 == loc_read)
+
+        # delete temporary file
+        remove("CreateFileWithView_py.3dm")
+
 
 if __name__ == '__main__':
     print("running tests")
