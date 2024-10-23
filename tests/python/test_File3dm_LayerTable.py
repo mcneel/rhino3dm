@@ -1,5 +1,6 @@
 import rhino3dm
 import unittest
+from os import remove
 
 #objective: to test creating file with layers and reasing a file with layers
 class TestFile3dmLayerTable(unittest.TestCase):
@@ -29,6 +30,10 @@ class TestFile3dmLayerTable(unittest.TestCase):
         qtyLayers2 = len(file.Layers)
 
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 2)
+
+        # delete temporary file
+        remove("test_createFileWithLayers.3dm")
+
 
 if __name__ == '__main__':
     print("running tests")
