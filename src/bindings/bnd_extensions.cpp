@@ -669,10 +669,7 @@ static BND_FileObject* FileObjectFromCompRef(ON_ModelComponentReference& compref
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
-#if defined(ON_PYTHON_COMPILE)
-  if (index < 0)
-    throw py::index_error();
-#else
+#if !defined(ON_PYTHON_COMPILE)
   if (index < 0)
     return nullptr;
 #endif
@@ -699,6 +696,12 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
       compref = iterator2.NextComponentReference();
     }
   }
+
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0)
+    int new_index = m_compref_cache.Count() + index;
+    index = new_index < 0 ? std::abs(new_index) : new_index;
+#endif
 
   if (index < m_compref_cache.Count())
   {
