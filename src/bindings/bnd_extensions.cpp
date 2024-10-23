@@ -14,7 +14,7 @@ static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
   size_t sizeof__outbuffer;
   if (!archive.ReadCompressedBufferSize(&sizeof__outbuffer))
     return false;
-  
+
   if (0 == sizeof__outbuffer)
     return true;
 
@@ -464,13 +464,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& p
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
   bool isArray = points.hasOwnProperty("length");
-  if( isArray ) 
+  if( isArray )
   {
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
-    return AddPolyline2( array, attributes ); 
+    return AddPolyline2( array, attributes );
   }
   else
-    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes ); 
+    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes );
 }
 
 #endif
@@ -669,10 +669,7 @@ static BND_FileObject* FileObjectFromCompRef(ON_ModelComponentReference& compref
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
-#if defined(ON_PYTHON_COMPILE)
-  if (index < 0)
-    throw py::index_error();
-#else
+#if !defined(ON_PYTHON_COMPILE)
   if (index < 0)
     return nullptr;
 #endif
@@ -699,6 +696,11 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
       compref = iterator2.NextComponentReference();
     }
   }
+
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0)
+    index = m_compref_cache.Count() + index < 0 ? std::abs(index) : m_compref_cache.Count() + index;
+#endif
 
   if (index < m_compref_cache.Count())
   {
@@ -1217,7 +1219,7 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
   const int count_a = attributes["length"].as<int>();
 #endif
 
-  if(m_model && count_g > 0) 
+  if(m_model && count_g > 0)
   {
     // Determine if we need to transform geometry to world origin
     ON_Xform xf;
@@ -1230,17 +1232,17 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
 
     ON_SimpleArray<ON_UUID> object_uuids;
 
-    for ( int i = 0; i < count_g; i ++ ) 
+    for ( int i = 0; i < count_g; i ++ )
     {
 
 #if defined(ON_PYTHON_COMPILE)
       BND_GeometryBase g = py::cast<BND_GeometryBase>(geometry[i]);
       BND_3dmObjectAttributes oa = py::cast<BND_3dmObjectAttributes>(attributes[i]);
 #else
-      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();  
+      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();
       BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
 #endif
-      
+
       const ON_Geometry* pConstGeom = g.GeometryPointer();
       const ON_3dmObjectAttributes* pConstAtts = i < count_a ? oa.m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
 
@@ -1302,7 +1304,7 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
       }
     }
   }
-  
+
   return index;
 }
 
@@ -1614,7 +1616,7 @@ BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, i
 
   if(tm == ON_TextureMapping::Unset)
     return NullTuple();
-  else 
+  else
   {
     SetTuple(rc, 0, BND_TextureMapping(tm, nullptr));
     SetTuple(rc, 1, BND_Transform(m_object_xform));
