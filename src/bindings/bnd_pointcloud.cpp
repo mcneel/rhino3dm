@@ -838,11 +838,12 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   const int color_count = color_array.size() / 3;
   pc->m_C.SetCapacity(color_count);
   pc->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
   memcpy(pc->m_C.Array(), color_array.data(), sizeof(double) * color_array.size());
 
-  ON_Xform rotation(1);
-  rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
-  pc->Transform(rotation);
+  // ON_Xform rotation(1);
+  // rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  // pc->Transform(rotation);
 
   return new BND_PointCloud(pc, nullptr);
 }
