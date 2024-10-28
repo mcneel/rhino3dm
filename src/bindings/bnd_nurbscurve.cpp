@@ -279,6 +279,19 @@ void initNurbsCurveBindings(rh3dmpymodule& m)
         {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
       );
     })
+#elif defined(NANOBIND)
+  .def_buffer([](BND_NurbsCurvePointList& pl) -> buffer_info
+    {
+      return buffer_info
+      (
+        pl.GetCurve()->m_cv,                      /* Pointer to buffer */
+        sizeof(double),                           /* Size of one scalar */
+        py::format_descriptor<double>::format(),  /* Python struct-style format descriptor */
+        2,                                        /* Number of dimensions */
+        {pl.Count(), pl.GetCVDims() },            /* Buffer dimensions */
+        {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
+      );
+    })
 #endif
     .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
     .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))
