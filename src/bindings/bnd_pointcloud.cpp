@@ -72,6 +72,7 @@ ON_3dVector BND_PointCloudItem::GetNormal() const
     return m_pointcloud->m_N[m_index];
   return ON_3dVector::UnsetVector;
 }
+
 void BND_PointCloudItem::SetNormal(const ON_3dVector& v)
 {
   if((m_index >= 0) && (m_index < m_pointcloud->m_P.Count()))
@@ -808,18 +809,50 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
     return nullptr;
   emscripten::val attributes = json["data"]["attributes"];
 
-  std::vector<float> position_array = emscripten::vecFromJSArray<float>(attributes["position"]["array"]);
+  std::vector<double> position_array = emscripten::vecFromJSArray<double>(attributes["position"]["array"]);
+
+  std::vector<double> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<double>(attributes["normal"]["array"]);
+  }
+
+  std::vector<double> color_array;
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+  }
 
   ON_PointCloud* pc = new ON_PointCloud();
 
   const int vertex_count = position_array.size() / 3;
-  pc->m_V.SetCapacity(vertex_count);
-  pc->m_V.SetCount(vertex_count);
-  memcpy(pc->m_V.Array(), position_array.data(), sizeof(float) * position_array.size());
+  pc->m_P.SetCapacity(vertex_count);
+  pc->m_P.SetCount(vertex_count);
+  memcpy(pc->m_P.Array(), position_array.data(), sizeof(double) * position_array.size());
 
-  ON_Xform rotation(1);
-  rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
-  pc->Transform(rotation);
+  const int normal_count = normal_array.size() / 3;
+  pc->m_N.SetCapacity(normal_count);
+  pc->m_N.SetCount(normal_count);
+  memcpy(pc->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
+
+  const int color_count = color_array.size() / 3;
+  pc->m_C.SetCapacity(color_count);
+  pc->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
+
+  ON_Color* color_array_ptr = pc->m_C.Array();
+  for (int i = 0; i < color_count; ++i) {
+      int r = static_cast<int>(color_array[i * 3]);
+      int g = static_cast<int>(color_array[i * 3 + 1]);
+      int b = static_cast<int>(color_array[i * 3 + 2]);
+      color_array_ptr[i] = ON_Color(r, g, b);
+  }
+
+  //memcpy(pc->m_C.Array(), color_array.data(), sizeof(ON_Color) * color_array.size());
+
+  // ON_Xform rotation(1);
+  // rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  // pc->Transform(rotation);
 
   return new BND_PointCloud(pc, nullptr);
 }
