@@ -33,3 +33,26 @@ test('AddPolyline', async () => {
   expect((objqty === 2) && isCurve1 && isCurve2 && (id1 !== id2) ).toBe(true)
 
 } )
+
+test('DeleteObject', async () => {
+
+  const file3dm = new rhino.File3dm()
+  file3dm.applicationName = 'rhino3dm.js'
+  file3dm.applicationDetails = 'rhino3dm-tests-objectTable-deleteObject'
+  file3dm.applicationUrl = 'https://rhino3d.com'
+
+  const circle1 = new file3dm.Circle(5);
+  const circle2 = new file3dm.Circle(50);
+
+  const id1 = file3dm.objects().addCircle(circle1)
+  const id2 = file3dm.objects().addCircle(circle2)
+
+  const qtyObjects = file3dm.objects().count
+
+  file3dm.objects().delete(id1)
+
+  const qtyObjects2 = file3dm.objects().count
+
+  expect(qtyObjects === 2 && qtyObjects2 === 1).toBe(true)
+
+})
