@@ -3,6 +3,21 @@ import unittest
 
 #objective: to test creating file with layers and reasing a file with layers
 class TestFile3dmLayerTable(unittest.TestCase):
+    def test_Add(self) -> None:
+        """Test for the Add method of File3dmLayerTable.
+        """
+        file3dm = rhino3dm.File3dm()
+        file3dm.ApplicationName = 'python'
+        file3dm.ApplicationDetails = 'rhino3dm-tests-Add'
+        file3dm.ApplicationUrl = 'https://rhino3d.com'
+
+        # create layer
+        layer_index_0 = rhino3dm.Layer()
+        # add the layer to the table the update the index accordingly
+        file3dm.Layers.Add(layer_index_0)
+
+        self.assertEqual(layer_index_0.Index, 0)
+
     def test_createFileWithLayers(self):
 
         file3dm = rhino3dm.File3dm()
