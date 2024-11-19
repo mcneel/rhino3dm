@@ -153,6 +153,7 @@ public:
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Layer); }
   int Add(const class BND_Layer& layer);
   int AddLayer(std::wstring name, BND_Color color);
+  bool Delete(BND_UUID id);
   class BND_Layer* FindName(std::wstring name, BND_UUID parentId);
   //BND_Layer* FindNameHash(NameHash nameHash)
   class BND_Layer* FindIndex(int index);

@@ -20,7 +20,11 @@ BND_UUID ON_UUID_to_Binding(const ON_UUID& id)
 
 ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
 {
+#if !defined(NANOBIND)
+  std::string s = pybind11::str(id);
+#else
   std::string s = py::cast<std::string>(id);
+#endif
   return ON_UuidFromString(s.c_str());
 }
 

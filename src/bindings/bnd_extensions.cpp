@@ -954,7 +954,6 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
   return nullptr;
 }
 
-
 int BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
@@ -969,6 +968,13 @@ int BND_File3dmLayerTable::AddLayer(std::wstring name, BND_Color color)
   ON_Color c = Binding_to_ON_Color(color);
   int rc = m_model->AddLayer(name.c_str(), c);
   return rc;
+}
+
+bool BND_File3dmLayerTable::Delete(BND_UUID id)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(ON_ModelComponent::Type::Layer, _id);
+  return !compref.IsEmpty();
 }
 
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
@@ -1776,6 +1782,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
 #endif
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
     .def("AddLayer", &BND_File3dmLayerTable::AddLayer, py::arg("name"), py::arg("color"))
+    .def("Delete", &BND_File3dmLayerTable::Delete, py::arg("id"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
     .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
@@ -2089,6 +2096,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLayerTable::Add)
     .function("addLayer", &BND_File3dmLayerTable::AddLayer)
+    .function("delete", &BND_File3dmLayerTable::Delete)
     .function("findName", &BND_File3dmLayerTable::FindName, allow_raw_pointers())
     .function("findIndex", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
