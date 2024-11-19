@@ -956,10 +956,11 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
 
 int BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
-  const ON_Layer* l = layer.m_layer;
+  ON_Layer* l = layer.m_layer;
   ON_ModelComponentReference mr = m_model->AddModelComponent(*l);
   const ON_Layer* managed_layer = ON_Layer::FromModelComponentRef(mr, nullptr);
   int layer_index = (nullptr != managed_layer) ? managed_layer->Index() : ON_UNSET_INT_INDEX;
+  layer.m_layer->SetIndex(layer_index);
   return layer_index;
 }
 
