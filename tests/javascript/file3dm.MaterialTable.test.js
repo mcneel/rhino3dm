@@ -25,16 +25,16 @@ test('DeleteMaterial', async () => {
   material2.physicallyBased().metallic = 0.7
   material2.physicallyBased().roughness = 0.5
 
-  const index1 = model.materials().add(material1)
-  const index2 = model.materials().add(material2)
+  const index1 = file3dm.materials().add(material1)
+  const index2 = file3dm.materials().add(material2)
 
-  const qtyMaterials1 = model.materials().count
+  const qtyMaterials1 = file3dm.materials().count
 
-  const id1 = model.materials().get(index1).id
+  const id1 = file3dm.materials().get(index1).id
 
-  model.materials().delete(id1)
+  file3dm.materials().delete(id1)
 
-  const qtyMaterials2 = model.materials().count
+  const qtyMaterials2 = file3dm.materials().count
 
   expect(qtyMaterials1 === 2 && qtyMaterials2 === 1).toBe(true)
 

@@ -44,8 +44,8 @@ test('DeleteObject', async () => {
   const circle1 = new rhino.Circle(5);
   const circle2 = new rhino.Circle(50);
 
-  const id1 = file3dm.objects().addCircle(circle1)
-  file3dm.objects().addCircle(circle2)
+  const id1 = file3dm.objects().addCircle(circle1, null)
+  file3dm.objects().addCircle(circle2, null)
 
   const qtyObjects = file3dm.objects().count
 
