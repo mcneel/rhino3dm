@@ -4,17 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.10.0] - UNRELEASED
+## [8.13.0-beta] - UNRELEASED
 
 diff: 
 
-### Fixed 
+### Added
 
-- (dotnet) Changes to ViewInfo.Viewport would not set.
+- (js, py) DimensionStyle.Id
+- (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
+- (js, py) Added tests for various ::Delete methods. 
 
 ### Changed
 
 - (py) switching from pybind11 to nanobind
+- (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
+
+### Fixed 
+
+- (dotnet) Changes to ViewInfo.Viewport would not set.
+- (py) uuid conversion in c++ was broken
+
 
 ## [8.9.0] - 2024.07.19
 
