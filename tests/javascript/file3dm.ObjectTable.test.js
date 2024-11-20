@@ -41,11 +41,11 @@ test('DeleteObject', async () => {
   file3dm.applicationDetails = 'rhino3dm-tests-objectTable-deleteObject'
   file3dm.applicationUrl = 'https://rhino3d.com'
 
-  const circle1 = new rhino3dm.Circle(5);
-  const circle2 = new rhino3dm.Circle(50);
+  const circle1 = new rhino.Circle(5);
+  const circle2 = new rhino.Circle(50);
 
   const id1 = file3dm.objects().addCircle(circle1)
-  const id2 = file3dm.objects().addCircle(circle2)
+  file3dm.objects().addCircle(circle2)
 
   const qtyObjects = file3dm.objects().count
 

@@ -1,7 +1,7 @@
 import rhino3dm
 import unittest
 
-#objective: to test creating file with layers and reasing a file with layers
+#objective: to test creating file with layers and reading a file with layers
 class TestFile3dmLayerTable(unittest.TestCase):
     def test_createFileWithLayers(self):
 
@@ -30,6 +30,7 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 2)
 
+#objective: to test creating file with layers and deleting a layer
     def test_deleteLayer(self):
         file3dm = rhino3dm.File3dm()
         file3dm.ApplicationName = 'python'
