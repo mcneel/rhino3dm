@@ -47,7 +47,7 @@ test('DeleteObject', async () => {
 
   const qtyObjects1 = file3dm.objects().count
 
-  file3dm.objects().deleteItem(id1)
+  file3dm.objects().delete(id1)
 
   const qtyObjects2 = file3dm.objects().count
 

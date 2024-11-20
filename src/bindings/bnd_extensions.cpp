@@ -2080,7 +2080,7 @@ void initExtensionsBindings(void*)
     .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
     .function("addInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
-    .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
+    .function("delete", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())
     ;
 
