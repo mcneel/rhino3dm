@@ -418,6 +418,12 @@ static ON_UUID Internal_ONX_Model_AddModelGeometry(
   return ON_ModelGeometryComponent::FromModelComponentRef(model_component_reference, &ON_ModelGeometryComponent::Unset)->Id();
 }
 
+static bool DeleteModelComponent(BND_UUID id, ON_ModelComponent::Type objectType, std::shared_ptr<ONX_Model> m_model)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(objectType, _id);
+  return !compref.IsEmpty();
+}
 
 BND_UUID BND_ONXModel_ObjectTable::AddPoint1(double x, double y, double z)
 {
@@ -763,6 +769,11 @@ int BND_File3dmMaterialTable::Add(const BND_Material& material)
   return material_index;
 }
 
+bool BND_File3dmMaterialTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Material, m_model);
+}
+
 BND_Material* BND_File3dmMaterialTable::IterIndex(int index)
 {
   return FindIndex(index);
@@ -923,9 +934,14 @@ void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
   m_model->AddModelComponent(*b);
 }
 
+bool BND_File3dmBitmapTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Image, m_model);
+}
+
 BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
 {
-  ON_ModelComponentReference compref = m_model->MaterialFromIndex(index);
+  ON_ModelComponentReference compref = m_model->ImageFromIndex(index);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
   if (modelbitmap)
@@ -954,7 +970,6 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
   return nullptr;
 }
 
-
 int BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
@@ -969,6 +984,11 @@ int BND_File3dmLayerTable::AddLayer(std::wstring name, BND_Color color)
   ON_Color c = Binding_to_ON_Color(color);
   int rc = m_model->AddLayer(name.c_str(), c);
   return rc;
+}
+
+bool BND_File3dmLayerTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Layer, m_model);
 }
 
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
@@ -1167,6 +1187,11 @@ void BND_File3dmDimStyleTable::Add(const BND_DimensionStyle& dimstyle)
 {
   const ON_DimStyle* ds = dimstyle.m_dimstyle;
   m_model->AddModelComponent(*ds);
+}
+
+bool BND_File3dmDimStyleTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::DimStyle, m_model);
 }
 
 BND_DimensionStyle* BND_File3dmDimStyleTable::FindIndex(int index) const
@@ -1718,6 +1743,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>(s.cast<BND_File3dmMaterialTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
+    .def("Delete", &BND_File3dmMaterialTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     .def("FindFromAttributes", &BND_File3dmMaterialTable::FromAttributes)
@@ -1759,6 +1785,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>(s.cast<BND_File3dmBitmapTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmBitmapTable::Add, py::arg("bitmap"))
+    .def("Delete", &BND_File3dmBitmapTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmBitmapTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmBitmapTable::FindId, py::arg("id"))
     ;
@@ -1776,6 +1803,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
 #endif
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
     .def("AddLayer", &BND_File3dmLayerTable::AddLayer, py::arg("name"), py::arg("color"))
+    .def("Delete", &BND_File3dmLayerTable::Delete, py::arg("id"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
     .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
@@ -1813,6 +1841,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>(s.cast<BND_File3dmDimStyleTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmDimStyleTable::Add, py::arg("dimstyle"))
+    .def("Delete", &BND_File3dmDimStyleTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmDimStyleTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmDimStyleTable::FindId, py::arg("id"))
     ;
@@ -2051,7 +2080,7 @@ void initExtensionsBindings(void*)
     .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
     .function("addInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
-    .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
+    .function("delete", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())
     ;
 
@@ -2059,6 +2088,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmMaterialTable::Count)
     .function("get", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmMaterialTable::Add)
+    .function("delete", &BND_File3dmMaterialTable::Delete)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
     .function("findFromAttributes", &BND_File3dmMaterialTable::FromAttributes, allow_raw_pointers())
@@ -2080,6 +2110,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmBitmapTable::Count)
     .function("get", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmBitmapTable::Add)
+    .function("delete", &BND_File3dmBitmapTable::Delete)
     .function("findIndex", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmBitmapTable::FindId, allow_raw_pointers())
     ;
@@ -2089,6 +2120,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLayerTable::Add)
     .function("addLayer", &BND_File3dmLayerTable::AddLayer)
+    .function("delete", &BND_File3dmLayerTable::Delete)
     .function("findName", &BND_File3dmLayerTable::FindName, allow_raw_pointers())
     .function("findIndex", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
@@ -2109,6 +2141,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmDimStyleTable::Count)
     .function("get", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmDimStyleTable::Add)
+    .function("delete", &BND_File3dmDimStyleTable::Delete)
     .function("findIndex", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
     ;

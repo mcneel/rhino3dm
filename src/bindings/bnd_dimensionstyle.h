@@ -30,6 +30,8 @@ public:
   class BND_Font* GetFont() const;
   void SetFont(const class BND_Font* font);
 
+  BND_UUID GetId() const { return ON_UUID_to_Binding( m_dimstyle->Id()); }
+
   void ScaleLengthValues(double scale) { m_dimstyle->Scale(scale); }
   BND_UUID GetArrowBlockId1() const { return ON_UUID_to_Binding(m_dimstyle->ArrowBlockId1()); }
   void SetArrowBlockId1(BND_UUID id) { m_dimstyle->SetArrowBlockId1(Binding_to_ON_UUID(id)); }

@@ -24,7 +24,6 @@ class TestFile3dmObjectTable(unittest.TestCase):
 
         self.assertTrue(objqty == 2 and isCurve1 and isCurve2 and len1 == 15 and len2 == 15)
 
-
     def test_negativeIndexing(self) -> None:
         """Tests for indexing `ObjectTable`.
         """
@@ -44,6 +43,27 @@ class TestFile3dmObjectTable(unittest.TestCase):
         with self.subTest(msg="Test negative indexing"):
             self.assertEqual(file_3dm.Objects[-2].Geometry.Location, rhino3dm.Point3d(0, 0, 0))
 
+    def test_deleteObject(self):
+        file3dm = rhino3dm.File3dm()
+        file3dm.ApplicationName = 'python'
+        file3dm.ApplicationDetails = 'rhino3dm-tests-deleteLayer'
+        file3dm.ApplicationUrl = 'https://rhino3d.com'
+
+        #create objects
+        circle = rhino3dm.Circle(5)
+        point = rhino3dm.Point3d(0,0,0)
+        id1 = file3dm.Objects.AddCircle(circle)
+        id2 = file3dm.Objects.AddPoint(rhino3dm.Point3d(0,0,0))
+
+        qtyObjects = len(file3dm.Objects)
+
+        file3dm.Objects.Delete(id1)
+
+        qtyObjects2 = len(file3dm.Objects)
+
+        self.assertTrue(qtyObjects == 2 and qtyObjects2 == 1)
+
+        
 
 if __name__ == '__main__':
     print("running tests")
