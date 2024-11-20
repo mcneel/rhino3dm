@@ -28,6 +28,6 @@ test.skip('DeleteBitmap', async () => {
 
   const qtyBitmaps2 = model.bitmaps().count
 
-  expect(qtyDims1 === 2 && qtyDims2 === 1).toBe(true)
+  expect(qtyBitmaps1 === 2 && qtyBitmaps2 === 1).toBe(true)
 
 })

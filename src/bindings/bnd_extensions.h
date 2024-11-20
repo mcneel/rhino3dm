@@ -105,6 +105,7 @@ public:
   BND_File3dmMaterialTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model->ActiveComponentCount(ON_ModelComponent::Type::RenderMaterial); }
   int Add(const class BND_Material& material);
+  bool Delete(BND_UUID id);
   class BND_Material* FindIndex(int index);
   class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);
@@ -140,6 +141,7 @@ public:
   BND_File3dmBitmapTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Image); }
   void Add(const class BND_Bitmap& bitmap);
+  bool Delete(BND_UUID id);
   class BND_Bitmap* FindIndex(int index);
   class BND_Bitmap* IterIndex(int index); // helper function for iterator
   class BND_Bitmap* FindId(BND_UUID id);
@@ -184,6 +186,7 @@ public:
   BND_File3dmDimStyleTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::DimStyle); }
   void Add(const class BND_DimensionStyle& dimstyle);
+  bool Delete(BND_UUID id);
   class BND_DimensionStyle* FindIndex(int index) const;
   class BND_DimensionStyle* IterIndex(int index) const; // helper function for iterator
   class BND_DimensionStyle* FindId(BND_UUID id) const;
