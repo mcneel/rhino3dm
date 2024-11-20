@@ -74,6 +74,8 @@ jobs:
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
       run: git submodule update --init
+    - name: install dependencies
+      run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
     - name: build python manylinux
       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
     - name: audit python wheel
