@@ -42,17 +42,15 @@ test('DeleteObject', async () => {
   file3dm.applicationUrl = 'https://rhino3d.com'
 
   const circle1 = new rhino.Circle(5);
-  const circle2 = new rhino.Circle(50);
-
   const id1 = file3dm.objects().addCircle(circle1, null)
-  file3dm.objects().addCircle(circle2, null)
+  file3dm.objects().addPointXYZ(0,0,0)
 
-  const qtyObjects = file3dm.objects().count
+  const qtyObjects1 = file3dm.objects().count
 
-  file3dm.objects().delete(id1)
+  file3dm.objects().deleteItem(id1)
 
   const qtyObjects2 = file3dm.objects().count
 
-  expect(qtyObjects === 2 && qtyObjects2 === 1).toBe(true)
+  expect(qtyObjects1 === 2 && qtyObjects2 === 1).toBe(true)
 
 })
