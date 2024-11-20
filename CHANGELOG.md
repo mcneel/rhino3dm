@@ -13,6 +13,7 @@ diff:
 - (js, py) DimensionStyle.Id
 - (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
 - (js, py) Added tests for various ::Delete methods. 
+- (py) Added python 3.13 target #654
 
 ### Changed
 
