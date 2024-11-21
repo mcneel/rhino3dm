@@ -3143,7 +3143,7 @@ declare module 'rhino3dm' {
 		 */
 		getBoundingBox(): BoundingBox;
 		/** ... */
-		deleteItem(id:string): void;
+		delete(id:string): void;
 		/** ... */
 		findId(id:string): File3dmObject;
 	}

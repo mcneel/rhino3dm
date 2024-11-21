@@ -58,6 +58,23 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 1)
 
+    def test_Add(self) -> None:
+        """Test for the Add method of File3dmLayerTable.
+        """
+        file3dm = rhino3dm.File3dm()
+        file3dm.ApplicationName = 'python'
+        file3dm.ApplicationDetails = 'rhino3dm-tests-Add'
+        file3dm.ApplicationUrl = 'https://rhino3d.com'
+
+        # create layer
+        layer_index_0 = rhino3dm.Layer()
+        # add the layer to the table the update the index accordingly
+        index = file3dm.Layers.Add(layer_index_0)
+
+        l0 = file3dm.Layers.FindIndex(index)
+
+        self.assertEqual(l0.Index, 0)
+
 if __name__ == '__main__':
     print("running tests")
     unittest.main()

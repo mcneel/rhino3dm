@@ -22,7 +22,7 @@ diff:
 
 ### Fixed 
 
-- (dotnet) Changes to ViewInfo.Viewport would not set.
+- (js, py) Changes to ViewInfo.Viewport would not set.
 - (py) uuid conversion in c++ was broken
 
 
