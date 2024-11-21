@@ -167,6 +167,7 @@ void initLayerBindings(void*)
     .function("setPersistentLocking", &BND_Layer::SetPersistentLocking)
     .function("unsetPersistentLocking", &BND_Layer::UnsetPersistentLocking)
     .property("expanded", &BND_Layer::IsExpanded, &BND_Layer::SetExpanded)
+    .property("index", &BND_Layer::GetIndex)
     ;
 }
 #endif
