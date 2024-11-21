@@ -32,7 +32,6 @@ test('createFromThreejsJSON', async () => {
     expect(mesh.vertices().count        === geometry.attributes.position.count).toBe(true)
     expect(mesh.normals().count         === geometry.attributes.normal.count).toBe(true)
     expect(mesh.vertexColors().count    === geometry.attributes.color.count).toBe(true)
-    console.log(mesh.vertexColors().get(0))
 
     //assign random color to verts
     for (let i = 0; i < count; i++) {
@@ -54,7 +53,6 @@ test('createFromThreejsJSON', async () => {
     expect(mesh.vertices().count        === geometry.attributes.position.count).toBe(true)
     expect(mesh.normals().count         === geometry.attributes.normal.count).toBe(true)
     expect(mesh.vertexColors().count    === geometry.attributes.color.count).toBe(true)
-    console.log(mesh.vertexColors().get(0))
 
     const r = geometry.attributes.color.array[0]
     const g = geometry.attributes.color.array[1]
