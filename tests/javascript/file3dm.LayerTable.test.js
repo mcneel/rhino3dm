@@ -68,3 +68,27 @@ test('DeleteLayer', async () => {
   expect(qtyLayers === 2 && qtyLayers2 === 1).toBe(true)
 
 })
+
+test('LayerIndex', async () => {
+
+  const file3dm = new rhino.File3dm()
+  file3dm.applicationName = 'rhino3dm.js'
+  file3dm.applicationDetails = 'rhino3dm-tests-layerTable-layerIndex'
+  file3dm.applicationUrl = 'https://rhino3d.com'
+
+  //create layers
+  const layer1 = new rhino.Layer()
+  layer1.Name = 'layer1'
+  layer1.Color = { r: 255, g: 0, b: 255, a: 255 }
+
+  const layer2 = new rhino.Layer()
+  layer2.Name = 'layer2'
+
+  const index1 = file3dm.layers().add(layer1)
+  file3dm.layers().add(layer2)
+
+  const _index1 = file3dm.layers().findIndex(index1).index
+
+  expect(index1 === _index1).toBe(true)
+
+})
