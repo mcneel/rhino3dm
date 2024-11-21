@@ -59,7 +59,6 @@ test('createFromThreejsJSON', async () => {
     expect(pc.containsColors).toBe(true)
     expect(pc.getPoints().length    === geometry.attributes.position.count).toBe(true)
     expect(pc.getColors().length    === geometry.attributes.color.count).toBe(true)
-    //console.log(pc.getColors()[0])
 
     //assign random color to verts
     for (let i = 0; i < num; i++) {
@@ -75,15 +74,12 @@ test('createFromThreejsJSON', async () => {
 
     geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors4, 4 ) )
 
-    console.log(geometry.attributes)
-
     pc = rhino.PointCloud.createFromThreejsJSON( { data: geometry })
 
     expect(pc instanceof rhino.PointCloud).toBe(true)
     expect(pc.containsColors).toBe(true)
     expect(pc.getPoints().length  === geometry.attributes.position.count).toBe(true)
     expect(pc.getColors().length === geometry.attributes.color.count).toBe(true)
-    //console.log(pc.getColors()[0])
 
     const r = geometry.attributes.color.array[0]
     const g = geometry.attributes.color.array[1]
