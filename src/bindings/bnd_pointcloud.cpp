@@ -818,9 +818,11 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   }
 
   std::vector<double> color_array;
+  int colorChannels = 3; // could be RGB (3) or RGBA (4)
   if (emscripten::val::undefined() != attributes["color"])
   {
     color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+    colorChannels = attributes["color"]["itemSize"].as<int>();
   }
 
   ON_PointCloud* pc = new ON_PointCloud();
@@ -835,17 +837,23 @@ BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
   pc->m_N.SetCount(normal_count);
   memcpy(pc->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
 
-  const int color_count = color_array.size() / 3;
+  const int color_count = color_array.size() / colorChannels;
   pc->m_C.SetCapacity(color_count);
   pc->m_C.SetCount(color_count);
   std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
 
   ON_Color* color_array_ptr = pc->m_C.Array();
   for (int i = 0; i < color_count; ++i) {
-      int r = static_cast<int>(color_array[i * 3]);
-      int g = static_cast<int>(color_array[i * 3 + 1]);
-      int b = static_cast<int>(color_array[i * 3 + 2]);
-      color_array_ptr[i] = ON_Color(r, g, b);
+      int r = static_cast<int>(color_array[i * colorChannels]);
+      int g = static_cast<int>(color_array[i * colorChannels + 1]);
+      int b = static_cast<int>(color_array[i * colorChannels + 2]);
+      if(colorChannels == 4)
+      {
+        int a = static_cast<int>(color_array[i * colorChannels + 3]);
+        color_array_ptr[i] = ON_Color(r, g, b, 255-a);
+      }
+      else
+        color_array_ptr[i] = ON_Color(r, g, b);
   }
 
   //memcpy(pc->m_C.Array(), color_array.data(), sizeof(ON_Color) * color_array.size());
