@@ -2365,6 +2365,7 @@ namespace Rhino.Geometry
     /// Inflate mesh vertices, points and point clouds
     /// Mesh vertices will be inflated as though the mesh were a point cloud
     /// </summary>
+    /// <since>8.3</since>
     public bool InflateVerticesAndPoints { get; set; }
   }
 
@@ -2915,7 +2916,7 @@ namespace Rhino.Geometry
       }
 
       IntPtr meshptr = IntPtr.Zero;
-      IntPtr res = UnsafeNativeMethods.RHC_Mesh2dPointsAndEdges(
+      IntPtr res = UnsafeNativeMethods.RHC_Mesh2dPointsAndEdges_R8SR11(
         points,
         points.Length,
         ip.ToArray(),
@@ -3111,6 +3112,7 @@ namespace Rhino.Geometry
     /// <summary>Create a mesh from a SubD control net including texture coordinates</summary>
     /// <param name="subd"></param>
     /// <returns>mesh representing control net on success, null on failure</returns>
+    /// <since>8.3</since>
     public static Mesh CreateFromSubDControlNetWithTextureCoordinates(SubD subd)
     {
       IntPtr constPtrSubD = subd.ConstPointer();
@@ -3615,7 +3617,7 @@ namespace Rhino.Geometry
         using (var facetStartIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
           IntPtr hfi = hullFacetIndices.NonConstPointer();
           IntPtr fsi = facetStartIndices.NonConstPointer();
-          IntPtr res = UnsafeNativeMethods.RHC_ConvexHull3dMesh(array, array.Length, tolerance, angleTolerance, hfi, fsi, ref errorCode);
+          IntPtr res = UnsafeNativeMethods.RHC_ConvexHull3dMesh_R8SR11(array, array.Length, tolerance, angleTolerance, hfi, fsi, ref errorCode);
           if (errorCode != 0 || res == IntPtr.Zero) return null;
           Mesh m = CreateGeometryHelper(res, null) as Mesh;
           if (m is null) return null;
@@ -4204,6 +4206,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="rhinoObject">RhinoObject that defines texture mappings</param>
     /// <param name="material">Material with textures that define mapping channels</param>
+    /// <since>8.7</since>
     public void SetCachedTextureCoordinatesFromMaterial(RhinoObject rhinoObject, Rhino.DocObjects.Material material)
     {
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinatesFromMaterial(NonConstPointer(), rhinoObject.ConstPointer(), material.ConstPointer());
@@ -4235,6 +4238,7 @@ namespace Rhino.Geometry
     /// <param name="rhinoObject">RhinoObject that defines texture mappings</param>
     /// <param name="texture">Texture that defines the mapping channel</param>
     /// <returns>Cached texture coordinates if available and otherwise null</returns>
+    /// <since>8.7</since>
     public CachedTextureCoordinates GetCachedTextureCoordinates(RhinoObject rhinoObject, Rhino.DocObjects.Texture texture)
     {
       var tc_pointer = UnsafeNativeMethods.ON_Mesh_GetCachedTextureCoordinates(NonConstPointer(), rhinoObject.ConstPointer(), texture.ConstPointer());
@@ -4562,6 +4566,24 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.RHC_RhinoWeldMesh(ptr_this, angleToleranceRadians);
+    }
+
+    /// <summary>
+    /// Creates a new unwelded mesh from an existing mesh. Texture coordinates are ignored.
+    /// </summary>
+    /// <param name="mesh">The source mesh to copy.</param>
+    /// <returns>The new unwelded mesh if successful, null otherwise.</returns>
+    /// <since>8.12</since>
+    public static Mesh CreateUnweldedMesh(Mesh mesh)
+    {
+      if (null == mesh)
+        return null;
+
+      IntPtr ptr_const_mesh = mesh.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_CreateUnweldedMesh(ptr_const_mesh);
+      if (IntPtr.Zero == ptr)
+        return null;
+      return new Mesh(ptr, null);
     }
 
     /// <summary>
@@ -6197,60 +6219,49 @@ namespace Rhino.Geometry
       return Task.Run(() => QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, faceBlocks, settings, guideCurves, progress, cancelToken), cancelToken);
     }
 
-
     /// <summary>
-    /// Get the shrinkwrap plugin and pass back the shrinkwrap interface
-    /// </summary>
-    /// <returns></returns>
-    private static IShrinkWrapService GetShrinkWrapPluginService()
-    {
-      Guid plugin_id = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
-      object obj = Rhino.RhinoApp.GetPlugInObject(plugin_id);
-      IShrinkWrapService sw = obj as IShrinkWrapService;
-      return sw ?? null;
-    }
-
-    /// <summary>
-    /// Returns a ShrinkWraped mesh or
+    /// Returns a ShrinkWrapped mesh or
     /// null when a mesh was not created or error. 
     /// </summary>
-    /// <param name="parameters"></param>
+    /// <param name="parameters">
+    /// A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process. 
+    /// </param>
     /// <returns></returns>
     /// <since>8.0</since>
     public Mesh ShrinkWrap(ShrinkWrapParameters parameters)
     {
-      var sw = GetShrinkWrapPluginService();
-      return sw.ShrinkWrap(this, parameters) ?? null;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(this, parameters);
     }
 
     /// <summary>
-    /// 
+    /// Returns a ShrinkWrapped mesh or
+    /// null when a mesh was not created or error. 
     /// </summary>
-    /// <param name="parameters"></param>
-    /// <param name="token"></param>
+    /// <param name="parameters">A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process. </param>
+    /// <param name="token">A cancellation token</param>
     /// <returns></returns>
     /// <since>8.0</since>
     public Mesh ShrinkWrap(ShrinkWrapParameters parameters, CancellationToken token)
     {
-      var sw = GetShrinkWrapPluginService();
-      return sw.ShrinkWrap(this, parameters) ?? null;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(this, parameters);
     }
 
     /// <summary>
-    /// Creates a unified ShrinkWrap mesh from a collection of input meshes
+    /// Creates a unified ShrinkWrap mesh from a collection of input meshes.
+    /// Returns null on error or failure. 
     /// </summary>
     /// <param name="meshes"></param>
-    /// <param name="parameters"></param>
+    /// <param name="parameters">A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process.</param>
     /// <returns></returns>
     /// <since>8.0</since>
     public static Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters)
     {
-      var sw = GetShrinkWrapPluginService();
-      return sw.ShrinkWrap(meshes, parameters) ?? null;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(meshes, parameters);
     }
 
     /// <summary>
     /// Creates a unified ShrinkWrap mesh from a point cloud
+    /// returns null on error or failure
     /// </summary>
     /// <param name="pointCloud"></param>
     /// <param name="parameters"></param>
@@ -6258,21 +6269,21 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public static Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters)
     {
-      var sw = GetShrinkWrapPluginService();
-      return sw.ShrinkWrap(pointCloud, parameters) ?? null;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(pointCloud, parameters);
     }
 
     /// <summary>
-    /// Creates a unified ShrinkWrap mesh from a collection of geometry base objects
+    /// Creates a unified ShrinkWrap mesh from a collection of GeometryBase objects.
+    /// returns null or error on failure
     /// </summary>
     /// <param name="geometryBases"></param>
-    /// <param name="parameters"></param>
-    /// <param name="meshingParameters"></param>
+    /// <param name="parameters">A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process. </param>
+    /// <param name="meshingParameters">GeometryBase objects are converted to meshes first using the MeshingParameters provided. Those meshes are then used in the ShrinkWrap process.</param>
     /// <returns></returns>
+    /// <since>8.3</since>
     public static Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters)
     {
-      var sw = GetShrinkWrapPluginService();
-      return sw.ShrinkWrap(geometryBases, parameters,meshingParameters) ?? null;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(geometryBases, parameters, meshingParameters);
     }
 
 
@@ -6803,6 +6814,7 @@ namespace Rhino.Geometry
     /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one.</returns>
     /// <exception cref="InvalidOperationException">The mesh does not have vertex normals.</exception>
+    /// <since>8.1</since>
     [CLSCompliant(false)]
     public unsafe int* VertexColorsArray(out int length)
     {
@@ -6857,6 +6869,7 @@ namespace Rhino.Geometry
     /// <returns>The beginning of the vertex array. Item 0 is the first vertex,
     /// and item length-1 is the last valid one.</returns>
     /// <exception cref="InvalidOperationException">The mesh does not have face normals.</exception>
+    /// <since>8.1</since>
     [CLSCompliant(false)]
     public unsafe Vector3f* FaceNormalsArray(out int length)
     {
@@ -11172,16 +11185,29 @@ namespace Rhino.Geometry.Collections
       SetColor(Count, red, green, blue);
       return Count - 1;
     }
+
     /// <summary>
     /// Adds a new vertex color to the end of the color list.
     /// </summary>
-    /// <param name="color">Color to append, Alpha channels will be ignored.</param>
+    /// <param name="color">Color to append.</param>
     /// <returns>The index of the newly added color.</returns>
     /// <since>5.0</since>
     public int Add(Color color)
     {
       SetColor(Count, color);
       return Count - 1;
+    }
+
+    /// <summary>
+    /// Adds an enumerable of colors to the to the vertex color list. 
+    /// For the Mesh to be valid, the number of colors must match the number of vertices.
+    /// </summary>
+    /// <param name="colors">Colors to append.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>8.12</since>
+    public bool AddRange(IEnumerable<Color> colors)
+    {
+      return SetColorsHelper(colors.ToArray(), true);
     }
 
     /// <summary>
@@ -13795,6 +13821,28 @@ namespace Rhino.Geometry
 namespace Rhino.Runtime
 {
   /// <summary>
+  /// Internal class used by ShrinkWrap functions to acces the <see cref="IShrinkWrapService"/> instance.
+  /// </summary>
+  internal static class ShrinkWrap
+  {
+    private static readonly Guid PluginId = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
+    private static readonly object Lock = new object();
+
+    /// <summary>
+    /// Get the shrinkwrap plugin and pass back the shrinkwrap interface
+    /// </summary>
+    /// <returns></returns>
+    public static IShrinkWrapService Service()
+    {
+      lock (Lock)
+      {
+        object obj = RhinoApp.GetPlugInObject(PluginId);
+        return obj as IShrinkWrapService;
+      }
+    }
+  }
+
+  /// <summary>
   /// Internal interface used by ShrinkWrap functions
   /// </summary>
   public interface IShrinkWrapService
@@ -13837,6 +13885,7 @@ namespace Rhino.Runtime
     /// <param name="parameters"></param>
     /// <param name="meshingParameters"></param>
     /// <returns></returns>
+    /// <since>8.3</since>
     Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters);
   }
 }

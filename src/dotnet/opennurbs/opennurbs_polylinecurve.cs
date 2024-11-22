@@ -129,7 +129,7 @@ namespace Rhino.Geometry
       ) {
       int dim = 0;
       using (var resArray = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
-        IntPtr plc = UnsafeNativeMethods.RHC_ConvexHull2d(
+        IntPtr plc = UnsafeNativeMethods.RHC_ConvexHull2d_R8SR11(
         points,
         points.Length,
         resArray.NonConstPointer(),
@@ -238,6 +238,24 @@ namespace Rhino.Geometry
         IntPtr output_points_ptr = output_points.NonConstPointer();
         UnsafeNativeMethods.ON_PolylineCurve_CopyValues(const_ptr_this, output_points_ptr);
         return Polyline.PolyLineFromNativeArray(output_points);
+      }
+    }
+
+    /// <summary>
+    /// Returns the underlying Polyline points as an array.
+    /// </summary>
+    /// <returns>An array of 3d points.</returns>
+    /// <since>8.9</since>
+    public Point3d[] ToArray()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      using (var output_points = new SimpleArrayPoint3d())
+      {
+        IntPtr output_points_ptr = output_points.NonConstPointer();
+        UnsafeNativeMethods.ON_PolylineCurve_CopyValues(const_ptr_this, output_points_ptr);
+        if (output_points.Count > 0)
+          return output_points.ToArray();
+        return Array.Empty<Point3d>();
       }
     }
   }

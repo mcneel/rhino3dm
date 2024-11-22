@@ -16,6 +16,7 @@ using Rhino.DocObjects.Tables;
 using Rhino.FileIO;
 using System.Diagnostics;
 using Rhino.Render.CustomRenderMeshes;
+using Rhino.Runtime;
 
 namespace Rhino.Commands
 {
@@ -335,14 +336,29 @@ namespace Rhino
     /// <since>6.0</since>
     public static RhinoDoc Open(string filePath, out bool wasAlreadyOpen)
     {
-      wasAlreadyOpen = (null != FromFilePath(filePath));
-      if (string.IsNullOrWhiteSpace(filePath))
+      // look for an already opened document
+      RhinoDoc openDoc = FromFilePath(filePath);
+      wasAlreadyOpen = (null != openDoc);
+
+      // the file may have been removed, but if it was
+      // already open let's return the opened file
+      if (!wasAlreadyOpen && !System.IO.File.Exists(filePath))
         return null;
-      if (!System.IO.File.Exists(filePath))
-        return null;
+
+      // assign the doc if it was already open
+      RhinoDoc doc;
+      if (wasAlreadyOpen)
+      {
+        doc = openDoc;
+      }
+      else
+      {
+        // only open the document if not yet opened, otherwise 
+        // active doc serial# will be out of sync, see RH-82580
       if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath))
         return null;
-      var doc = FromFilePath(filePath);
+        doc = FromFilePath(filePath);
+      }
       return doc;
     }
 
@@ -372,7 +388,8 @@ namespace Rhino
     [Obsolete("OpenFile is obsolete, use Open instead")]
     public static bool OpenFile(string path)
     {
-      return UnsafeNativeMethods.CRhinoFileMenu_Open(path);
+      RhinoDoc unused = Open(path, out _);
+      return null  != unused;
     }
 
     /// <since>5.0</since>
@@ -1134,6 +1151,7 @@ namespace Rhino
       set { UnsafeNativeMethods.CRhinoDoc_GetSetString(RuntimeSerialNumber, IDX_NOTES, true, value, IntPtr.Zero); }
     }
 
+    /// <since>8.6</since>
     public bool NotesLocked
     {
       get { return GetBool(UnsafeNativeMethods.DocumentStatusBool.NotesLocked); }
@@ -1472,6 +1490,21 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDocProperties_SetCustomUnitSystem(RuntimeSerialNumber, modelUnits, customUnitName, metersPerCustomUnit, scale);
     }
 
+    public ConstructionPlaneGridDefaults GetGridDefaults()
+    {
+      IntPtr ptrGridDefaults = UnsafeNativeMethods.CRhinoDocProperties_GetGridDefaults(RuntimeSerialNumber);
+      return ConstructionPlaneGridDefaults.FromConstPointer(ptrGridDefaults);
+    }
+
+    public void SetGridDefaults(ConstructionPlaneGridDefaults defaults)
+    {
+      if (defaults == null)
+        return;
+      IntPtr ptrGridDefaults = UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_New();
+      defaults.SetupNativePointer(ptrGridDefaults);
+      UnsafeNativeMethods.CRhinoDocProperties_SetGridDefaults(RuntimeSerialNumber, ptrGridDefaults);
+      UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_Delete(ptrGridDefaults);
+    }
     #endregion
 
     /// <summary>
@@ -2678,18 +2711,22 @@ namespace Rhino
     private static DocumentCallback g_on_new_document_callback;
     private static DocumentCallback g_on_set_active_document_callback;
     private static DocumentCallback g_on_document_properties_changed;
+    [MonoPInvokeCallback(typeof(DocumentCallback))]
     private static void OnCloseDocument(uint docSerialNumber)
     {
       m_close_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
+    [MonoPInvokeCallback(typeof(DocumentCallback))]
     private static void OnNewDocument(uint docSerialNumber)
     {
       m_new_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
+    [MonoPInvokeCallback(typeof(DocumentCallback))]
     private static void OnSetActiveDocument(uint docSerialNumber)
     {
       g_set_active_document?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
     }
+    [MonoPInvokeCallback(typeof(DocumentCallback))]
     private static void OnDocumentPropertiesChanged(uint docSerialNumber)
     {
       m_document_properties_changed?.SafeInvoke(null, new DocumentEventArgs(docSerialNumber));
@@ -2698,29 +2735,35 @@ namespace Rhino
     // https://mcneel.myjetbrains.com/youtrack/issue/RH-68860
     internal delegate void UnitsChangedWithScalingCallback(uint docSerialNumber, double scale);
     private static UnitsChangedWithScalingCallback g_on_units_changed_with_scaling_callback;
+    [MonoPInvokeCallback(typeof(UnitsChangedWithScalingCallback))]
     private static void OnUnitChangedWithScaling(uint docSerialNumber, double scale)
     {
       m_units_changed_with_scaling?.SafeInvoke(null, new UnitsChangedWithScalingEventArgs(docSerialNumber, scale));
     }
 
     internal delegate void DocumentIoCallback(uint docSerialNumber, IntPtr pointerToWString, int b1, int b2);
+    [MonoPInvokeCallback(typeof(DocumentIoCallback))]
     private static void OnBeginOpenDocument(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
       m_begin_open_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
+    [MonoPInvokeCallback(typeof(DocumentIoCallback))]
     private static void OnEndOpenDocument(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
       m_end_open_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
+    [MonoPInvokeCallback(typeof(DocumentIoCallback))]
     private static void OnEndOpenDocumentInitialiViewUpdate(uint docSerialNumber, IntPtr pointerToWString, int bMerge, int bReference)
     {
       m_after_post_read_view_update_document?.SafeInvoke(null, new DocumentOpenEventArgs(docSerialNumber, pointerToWString, bMerge != 0, bReference != 0));
     }
 
+    [MonoPInvokeCallback(typeof(DocumentIoCallback))]
     private static void OnBeginSaveDocument(uint docSerialNumber, IntPtr pointerToWString, int bExportSelected, int bUnused)
     {
       m_begin_save_document?.SafeInvoke(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
     }
+    [MonoPInvokeCallback(typeof(DocumentIoCallback))]
     private static void OnEndSaveDocument(uint docSerialNumber, IntPtr pointerToWString, int bExportSelected, int bUnused)
     {
       m_end_save_document?.SafeInvoke(null, new DocumentSaveEventArgs(docSerialNumber, pointerToWString, bExportSelected != 0));
@@ -2965,6 +3008,7 @@ namespace Rhino
     private static event EventHandler<UserStringChangedArgs> _userStringChangedEvent;
     internal delegate void UserStringChangedCallback(uint docRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string key);
     private static UserStringChangedCallback _userStringChangedCallback = null;
+    [MonoPInvokeCallback(typeof(UserStringChangedCallback))]
     private static void OnUserStringChanged(uint docRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string key)
     {
       var doc = RhinoDoc.FromRuntimeSerialNumber(docRuntimeSerialNumber);
@@ -3197,6 +3241,7 @@ namespace Rhino
     private static RhinoObjectCallback g_on_replace_object;
     private static RhinoObjectCallback g_on_undelete_object;
     private static RhinoObjectCallback g_on_purge_object;
+    [MonoPInvokeCallback(typeof(RhinoObjectCallback))]
     private static void OnAddObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
       m_add_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
@@ -3236,6 +3281,7 @@ namespace Rhino
       }
     }
 
+    [MonoPInvokeCallback(typeof(RhinoObjectCallback))]
     private static void OnDeleteObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
       if (m_delete_object != null)
@@ -3282,6 +3328,7 @@ namespace Rhino
       }
     }
 
+    [MonoPInvokeCallback(typeof(RhinoObjectCallback))]
     private static void OnReplaceObject(uint docSerialNumber, IntPtr pOldObject, IntPtr pNewObject)
     {
       m_replace_object?.SafeInvoke(null, new DocObjects.RhinoReplaceObjectEventArgs(docSerialNumber, pOldObject, pNewObject));
@@ -3329,6 +3376,7 @@ namespace Rhino
       }
     }
 
+    [MonoPInvokeCallback(typeof(RhinoObjectCallback))]
     private static void OnUndeleteObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
       m_undelete_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
@@ -3367,6 +3415,7 @@ namespace Rhino
       }
     }
 
+    [MonoPInvokeCallback(typeof(RhinoObjectCallback))]
     private static void OnPurgeObject(uint docSerialNumber, IntPtr pObject, IntPtr pObject2)
     {
       m_purge_object?.SafeInvoke(null, new DocObjects.RhinoObjectEventArgs(docSerialNumber, pObject));
@@ -3411,6 +3460,7 @@ namespace Rhino
 
     private static RhinoObjectSelectionCallback g_on_select_rhino_object_callback;
 
+    [MonoPInvokeCallback(typeof(RhinoObjectSelectionCallback))]
     private static void OnSelectObject(uint docSerialNumber, int bSelect, IntPtr pObject, IntPtr pObjects)
     {
       if (m_select_objects != null && bSelect == 1)
@@ -3498,6 +3548,7 @@ namespace Rhino
     internal delegate void RhinoDeselectAllObjectsCallback(uint docSerialNumber, int objectCount);
     private static RhinoDeselectAllObjectsCallback g_on_deselect_all_rhino_objects_callback;
 
+    [MonoPInvokeCallback(typeof(RhinoDeselectAllObjectsCallback))]
     private static void OnDeselectAllObjects(uint docSerialNumber, int count)
     {
       m_deselect_allobjects?.SafeInvoke(null, new DocObjects.RhinoDeselectAllObjectsEventArgs(docSerialNumber, count));
@@ -3543,6 +3594,7 @@ namespace Rhino
     internal delegate void RhinoModifyObjectAttributesCallback(uint docSerialNumber, IntPtr pRhinoObject, IntPtr pConstRhinoObjectAttributes);
     private static RhinoModifyObjectAttributesCallback g_on_modify_object_attributes_callback;
 
+    [MonoPInvokeCallback(typeof(RhinoModifyObjectAttributesCallback))]
     private static void OnModifyObjectAttributes(uint docSerialNumber, IntPtr pRhinoObject, IntPtr pConstRhinoObjectAttributes)
     {
       m_modify_object_attributes?.SafeInvoke(null, new DocObjects.RhinoModifyObjectAttributesEventArgs(docSerialNumber, pRhinoObject, pConstRhinoObjectAttributes));
@@ -3586,6 +3638,7 @@ namespace Rhino
 
     internal delegate void RhinoTransformObjectsCallback(IntPtr pRhinoOnTransformObject);
     private static RhinoTransformObjectsCallback g_on_before_transform_objects_callback;
+    [MonoPInvokeCallback(typeof(RhinoTransformObjectsCallback))]
     private static void OnBeforeTransformObjects(IntPtr pRhinoOnTransformObject)
     {
       if (g_before_transform_objects != null)
@@ -3639,6 +3692,7 @@ namespace Rhino
 
     #region Layer table event
     private static RhinoTableCallback g_on_layer_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnLayerTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_layer_table_event?.SafeInvoke(null, new LayerTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -3684,6 +3738,7 @@ namespace Rhino
     #region Linetype table event
     private static RhinoTableCallback g_on_linetype_table_event_callback;
     private static GCHandle g_linetype_callback_gchandle;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnLinetypeTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_linetype_table_event?.SafeInvoke(null, new LinetypeTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -3734,6 +3789,7 @@ namespace Rhino
 
     #region Dimension style table event
     private static RhinoTableCallback g_on_dim_style_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnDimStyleTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_dim_style_table_event?.SafeInvoke(null, new DimStyleTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -3777,6 +3833,7 @@ namespace Rhino
     #endregion
 
     private static RhinoTableCallback g_on_idef_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnIdefTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_idef_table_event?.SafeInvoke(null, new InstanceDefinitionTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -3819,6 +3876,7 @@ namespace Rhino
     }
 
     private static RhinoTableCallback g_on_light_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnLightTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_light_table_event?.SafeInvoke(null, new LightTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -3862,6 +3920,7 @@ namespace Rhino
 
 
     private static RhinoTableCallback g_on_material_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnMaterialTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       if (m_material_table_event != null)
@@ -3910,6 +3969,7 @@ namespace Rhino
 
 
     private static RhinoTableCallback g_on_group_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnGroupTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
     {
       m_group_table_event?.SafeInvoke(null, new GroupTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
@@ -4004,6 +4064,7 @@ namespace Rhino
       private readonly RenderContentTableEventType m_event_type;
     }
     private static RenderContentTableEventForwarder.ContentListLoadedCallback g_on_render_content_loaded_event_callback;
+    [MonoPInvokeCallback(typeof(RenderContentTableEventForwarder.ContentListLoadedCallback))]
     private static void OnRenderContentdLoadedEvent(int kind, uint docSerialNumber)
     {
       var document = FromRuntimeSerialNumber(docSerialNumber);
@@ -4021,17 +4082,20 @@ namespace Rhino
       }
     }
     private static RenderContentTableEventForwarder.MaterialAssigmentChangedCallback g_on_object_material_assignment_changed_event_callback;
+    [MonoPInvokeCallback(typeof(RenderContentTableEventForwarder.MaterialAssigmentChangedCallback))]
     private static void OnObjectMaterialAssignmentChangedEvent(uint docSerialNumber, Guid objectId, Guid newMaterialId, Guid oldMaterialId)
     {
       OnMaterialAssignmentChangedCustomEvent(docSerialNumber, true, objectId, newMaterialId, oldMaterialId);
     }
     private static RenderContentTableEventForwarder.MaterialAssigmentChangedCallback g_on_layer_material_assignment_changed_event_callback;
+    [MonoPInvokeCallback(typeof(RenderContentTableEventForwarder.MaterialAssigmentChangedCallback))]
     private static void OnLayerMaterialAssignmentChangedEvent(uint docSerialNumber, Guid layerId, Guid newMaterialId, Guid oldMaterialId)
     {
       OnMaterialAssignmentChangedCustomEvent(docSerialNumber, false, layerId, newMaterialId, oldMaterialId);
     }
 
     private static RenderContentTableEventForwarder.ContentListClearingCallback g_on_render_content_clearing_event_callback;
+    [MonoPInvokeCallback(typeof(RenderContentTableEventForwarder.ContentListClearingCallback))]
     private static void OnRenderContentdClearingEvent(int kind, uint docSerialNumber)
     {
       var document = FromRuntimeSerialNumber(docSerialNumber);
@@ -4050,6 +4114,7 @@ namespace Rhino
     }
 
     private static RenderContentTableEventForwarder.ContentListClearedCallback g_on_render_content_cleared_event_callback;
+    [MonoPInvokeCallback(typeof(RenderContentTableEventForwarder.ContentListClearedCallback))]
     private static void OnRenderContentdClearedEvent(int kind, uint docSerialNumber)
     {
       var document = FromRuntimeSerialNumber(docSerialNumber);
@@ -4669,6 +4734,10 @@ namespace Rhino
       private readonly IntPtr m_pRhinoObject;
       private readonly IntPtr m_pRhinoObjectList;
 
+      private RhinoDoc m_doc;
+      private RhinoObject[] m_objects;
+
+
       internal RhinoObjectSelectionEventArgs(bool select, uint docSerialNumber, IntPtr pRhinoObject, IntPtr pRhinoObjects)
       {
         Selected = select;
@@ -4684,14 +4753,27 @@ namespace Rhino
       /// <since>5.0</since>
       public bool Selected { get; }
 
-      RhinoDoc m_doc;
       /// <since>5.0</since>
       public RhinoDoc Document
       {
         get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number)); }
       }
 
-      List<RhinoObject> m_objects;
+      /// <summary>
+      /// Can be faster to call than RhinoObjects.Length
+      /// </summary>
+      public int RhinoObjectCount
+      {
+        get
+        {
+          if (m_objects != null)
+            return m_objects.Length;
+          if (m_pRhinoObjectList != IntPtr.Zero && m_pRhinoObject == IntPtr.Zero)
+            return UnsafeNativeMethods.RhinoObjectArray_Count(m_pRhinoObjectList);
+          return RhinoObjects.Length;
+        }
+      }
+
       /// <since>5.0</since>
       public RhinoObject[] RhinoObjects
       {
@@ -4699,20 +4781,26 @@ namespace Rhino
         {
           if (m_objects == null)
           {
-            m_objects = new List<RhinoObject>();
+            var objects = new List<RhinoObject>();
             if (m_pRhinoObject != IntPtr.Zero)
             {
               RhinoObject rhobj = RhinoObject.CreateRhinoObjectHelper(m_pRhinoObject);
               if (rhobj != null)
-                m_objects.Add(rhobj);
+                objects.Add(rhobj);
             }
             if (m_pRhinoObjectList != IntPtr.Zero)
             {
               RhinoObject[] rhobjs = Runtime.InternalRhinoObjectArray.ToArrayFromPointer(m_pRhinoObjectList, true);
-              m_objects.AddRange(rhobjs);
+              if (objects.Count == 0)
+              {
+                m_objects = rhobjs;
+                return m_objects;
             }
+              objects.AddRange(rhobjs);
           }
-          return m_objects.ToArray();
+            m_objects = objects.ToArray();
+          }
+          return m_objects;
         }
       }
     }
@@ -6131,7 +6219,8 @@ namespace Rhino.DocObjects.Tables
         case ObjectType.Phantom:
           throw new NotImplementedException("Add currently does not support phantom types.");
         case ObjectType.ClipPlane:
-          throw new NotSupportedException("Add currently does not support clipping planes.");
+          obj_id = AddClippingPlaneSurface((ClippingPlaneSurface)geometry, attributes, history, reference);
+          break;
         case ObjectType.Extrusion:
           obj_id = AddExtrusion((Extrusion)geometry, attributes, history, reference);
           break;
@@ -7413,6 +7502,15 @@ namespace Rhino.DocObjects.Tables
       return UnsafeNativeMethods.CRhinoDoc_AddExtrusion(m_doc.RuntimeSerialNumber, pConstExtrusion, pConstAttributes, pHistory, reference);
     }
 
+    public Guid AddClippingPlaneSurface(Geometry.ClippingPlaneSurface clippingPlane, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    {
+      IntPtr pConstClippingPlane = clippingPlane.ConstPointer();
+      IntPtr pConstAttributes = IntPtr.Zero;
+      IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
+      if (attributes != null) pConstAttributes = attributes.ConstPointer();
+      return UnsafeNativeMethods.CRhinoDoc_AddClippingPlaneSurface(m_doc.RuntimeSerialNumber, pConstClippingPlane, pConstAttributes, pHistory, reference);
+    }
+
     /// <summary>Adds a mesh object to Rhino.</summary>
     /// <param name="mesh">A duplicate of this mesh is added to Rhino.</param>
     /// <returns>A unique identifier for the object.</returns>
@@ -7441,7 +7539,6 @@ namespace Rhino.DocObjects.Tables
     {
       return AddMesh(mesh, attributes, history, reference, true);
     }
-
 
     /// <since>6.0</since>
     public Guid AddMesh(Mesh mesh, ObjectAttributes attributes, HistoryRecord history, bool reference, bool requireValidMesh)
@@ -9443,6 +9540,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Destroys the cached scene bounding box so that it will be regenerated again from scratch next time the view is regenerated
     /// </summary>
+    /// <since>8.8</since>
     public void InvalidateBoundingBox()
     {
       UnsafeNativeMethods.CRhinoDoc_InvalidateBoundingBox(m_doc.RuntimeSerialNumber);
@@ -9793,12 +9891,19 @@ namespace Rhino.DocObjects.Tables
       return it;
     }
 
-    private class EnumeratorWrapper : IEnumerable<RhinoObject>
+    private class EnumeratorWrapper : IEnumerable<RhinoObject>, IDisposable
     {
       readonly IEnumerator<RhinoObject> m_enumerator;
       public EnumeratorWrapper(IEnumerator<RhinoObject> enumerator)
       {
         m_enumerator = enumerator;
+      }
+
+      public void Dispose()
+      {
+        IDisposable eDisposable = m_enumerator as IDisposable;
+        if (eDisposable != null)
+          eDisposable.Dispose();
       }
 
       public IEnumerator<RhinoObject> GetEnumerator()
@@ -9913,11 +10018,35 @@ namespace Rhino.DocObjects.Tables
       return GetObjectList(s);
     }
 
+    /// <summary>
+    /// Quick way to test if any objects are currently selected
+    /// </summary>
+    /// <param name="objectType">the type of objects to test for</param>
+    /// <param name="checkSubObjects">Check to see if subobjects are selected</param>
+    /// <returns></returns>
+    [CLSCompliant(false)]
+    public bool SelectedObjectsExist(ObjectType objectType, bool checkSubObjects)
+    {
+      return UnsafeNativeMethods.CRhinoDoc_DoSelectedObjectsExist(m_doc.RuntimeSerialNumber, (uint)objectType, checkSubObjects);
+    }
+
+    /// <summary>What geometry types are currently selected</summary>
     /// <since>6.0</since>
     [CLSCompliant(false)]
     public ObjectType GetSelectedObjectTypes()
     {
-      return (ObjectType)UnsafeNativeMethods.CRhinoDoc_SelectedObjectTypes(m_doc.RuntimeSerialNumber);
+      return (ObjectType)UnsafeNativeMethods.CRhinoDoc_SelectedObjectTypes(m_doc.RuntimeSerialNumber, false);
+    }
+
+    /// <summary>
+    /// Compute the current number of selected objects
+    /// </summary>
+    /// <param name="checkSubObjects">Check to see if subobjects are selected</param>
+    /// <returns></returns>
+    [CLSCompliant(false)]
+    public uint GetSelectedObjectCount(bool checkSubObjects)
+    {
+      return UnsafeNativeMethods.CRhinoDoc_SelectedObjectCount(m_doc.RuntimeSerialNumber, checkSubObjects);
     }
 
     /// <since>5.0</since>

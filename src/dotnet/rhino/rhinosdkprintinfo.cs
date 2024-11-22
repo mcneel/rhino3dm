@@ -707,6 +707,7 @@ namespace Rhino.Display
 
     /// <summary>Copy constructor</summary>
     /// <param name="other">settings to copy data from</param>
+    /// <since>8.5</since>
     public ViewCaptureSettings(ViewCaptureSettings other)
     {
       IntPtr ptrOther = other != null ? other.ConstPointer() : IntPtr.Zero;
@@ -770,6 +771,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="other">other settings to compare against</param>
     /// <returns></returns>
+    /// <since>8.5</since>
     [ConstOperation]
     public bool Equals(ViewCaptureSettings other)
     {
@@ -896,6 +898,7 @@ namespace Rhino.Display
     /// Should curves and edges have their thicknesses scaled based the on the display
     /// mode settings for a view being captured (default is false)
     /// </summary>
+    /// <since>8.5</since>
     public bool ApplyDisplayModeThicknessScales
     {
       get
@@ -934,6 +937,7 @@ namespace Rhino.Display
     /// <summary>
     /// Rectangle where drawing is confined to on MediaSize
     /// </summary>
+    /// <since>8.5</since>
     public Rectangle DrawRectangle
     {
       get
@@ -1052,6 +1056,7 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>8.5</since>
     public bool SetMarginLeft(UnitSystem lengthUnits, double distance)
     {
       GetMargins(lengthUnits, out double _, out double top, out double right, out double bottom);
@@ -1067,6 +1072,7 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>8.5</since>
     public bool SetMarginTop(UnitSystem lengthUnits, double distance)
     {
       GetMargins(lengthUnits, out double left, out double _, out double right, out double bottom);
@@ -1082,6 +1088,7 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>8.5</since>
     public bool SetMarginRight(UnitSystem lengthUnits, double distance)
     {
       GetMargins(lengthUnits, out double left, out double top, out double _, out double bottom);
@@ -1096,6 +1103,7 @@ namespace Rhino.Display
     /// True if successful.
     /// False if unsuccessful (this could happen if there is no set device_dpi)
     /// </returns>
+    /// <since>8.5</since>
     public bool SetMarginBottom(UnitSystem lengthUnits, double distance)
     {
       GetMargins(lengthUnits, out double left, out double top, out double right, out double _);
@@ -1308,6 +1316,7 @@ namespace Rhino.Display
     /// <summary>
     /// Horizontal stretch to be applied to output. Useful for calibrating printers
     /// </summary>
+    /// <since>8.4</since>
     public double HorizontalScale
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.HorizontalScale); }
@@ -1317,6 +1326,7 @@ namespace Rhino.Display
     /// <summary>
     /// Vertical stretch to be applied to output. Useful for calibrating printers
     /// </summary>
+    /// <since>8.4</since>
     public double VerticalScale
     {
       get { return GetDouble(UnsafeNativeMethods.PrintInfoDouble.VerticalScale); }
@@ -1500,6 +1510,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>8.1</since>
     public bool Load(string name, PersistentSettings settings)
     {
       IntPtr ptr_this = NonConstPointer();
@@ -1507,6 +1518,7 @@ namespace Rhino.Display
       return UnsafeNativeMethods.CRhinoPrintInfo_Load(ptr_this, command_name, name);
     }
 
+    /// <since>8.1</since>
     public void Save(string name, PersistentSettings settings)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -2399,8 +2411,6 @@ namespace Rhino.Runtime
           pointstyle == Display.PointStyle.RoundControlPoint ||
           pointstyle == Display.PointStyle.RoundSimple)
       {
-        if (pointstyle == Display.PointStyle.RoundSimple)
-          stroke_width_points = 0;
         DrawCircle(center, diameter_points, fill_color, new Pen {Color=stroke_color, Width=stroke_width_points });
       }
       else

@@ -574,7 +574,7 @@ RH_C_FUNCTION void ON_Brep_DuplicateEdgeCurves(const ON_Brep* pConstBrep, ON_Sim
       {
         // From RhinoScript:
         // make the curve direction go in the natural boundary loop direction
-        // so that the curve directions come out consistantly
+        // so that the curve directions come out consistently
 
         // 16-Mar-2016 Dale Fugier, validate trim count
         if (edge.TrimCount())

@@ -351,6 +351,7 @@ namespace Rhino.DocObjects
     /// be interpreted as being in world distances. This is useful for cases
     /// like modeling a road as a single curve.
     /// </summary>
+    /// <since>8.6</since>
     public bool AlwaysModelDistances
     {
       get
@@ -555,6 +556,43 @@ namespace Rhino.DocObjects
 
 #endif
 
+    #region user strings
+    /// <summary>
+    /// Attach a user string (key,value combination) to this geometry.
+    /// </summary>
+    /// <param name="key">id used to retrieve this string.</param>
+    /// <param name="value">string associated with key.</param>
+    /// <returns>true on success.</returns>
+    /// <since>8.9</since>
+    public bool SetUserString(string key, string value) => _SetUserString(key, value);
+
+    /// <summary>
+    /// Gets user string from this geometry.
+    /// </summary>
+    /// <param name="key">id used to retrieve the string.</param>
+    /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>8.9</since>
+    public string GetUserString(string key) => _GetUserString(key);
+
+    /// <summary>
+    /// Gets the amount of user strings.
+    /// </summary>
+    /// <since>8.9</since>
+    public int UserStringCount => _UserStringCount;
+
+    /// <summary>
+    /// Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+    /// </summary>
+    /// <returns>A new collection.</returns>
+    /// <since>8.9</since>
+    public System.Collections.Specialized.NameValueCollection GetUserStrings() => _GetUserStrings();
+
+    /// <since>8.9</since>
+    public bool DeleteUserString(string key) => SetUserString(key, null);
+
+    /// <since>8.9</since>
+    public void DeleteAllUserStrings() => _DeleteAllUserStrings();
+    #endregion
   }
 }
 

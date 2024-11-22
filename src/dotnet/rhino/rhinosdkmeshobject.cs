@@ -64,9 +64,17 @@ namespace Rhino.DocObjects
       {
         var raw_mesh_ptr = UnsafeNativeMethods.ON_Object_SharedPointer_Get(p_shared_ptr_to_old_mesh);
 
-        var new_mesh = new Mesh(raw_mesh_ptr, null);
+        Mesh new_mesh = null;
 
+        if (raw_mesh_ptr != IntPtr.Zero)
+        {
+          new_mesh = new Mesh(raw_mesh_ptr, null);
         new_mesh.ConvertToConstObjectWithSharedPointerParent(p_shared_ptr_to_old_mesh);
+        }
+        else
+        {
+          new_mesh = new Mesh();
+        }
 
         return new_mesh;
       }

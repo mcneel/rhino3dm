@@ -100,7 +100,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CDisplayPipelineAttributes_CopyContents(ptr_this, const_ptr_other);
     }
     #endregion
- 
+
     protected DisplayPipelineAttributes(SerializationInfo info, StreamingContext context)
     {
       m_parent = null;
@@ -135,7 +135,7 @@ namespace Rhino.Display
 
     protected virtual void Dispose(bool disposing)
     {
-      if (m_ptr_attributes!=IntPtr.Zero && !m_dontdelete)
+      if (m_ptr_attributes != IntPtr.Zero && !m_dontdelete)
       {
         UnsafeNativeMethods.CDisplayPipelineAttributes_Delete(m_ptr_attributes);
       }
@@ -613,6 +613,7 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleCurveColor, value); }
     }
 
+    /// <since>8.6</since>
     public enum CurveThicknessUse : int
     {
       ObjectWidth = 0,
@@ -620,15 +621,30 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Use a pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
+    /// </summary>
+    /// <since>8.4</since>
+    public CurveThicknessUse CurveThicknessUsage
+    {
+      get { return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)value); }
+    }
+
+    /// <summary>
     /// Sets usage, pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
     /// </summary>
+    /// <since>8.7</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public void SetCurveThicknessUsage(CurveThicknessUse usage)
     {
       SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage, (int)usage);
     }
+
     /// <summary>
     /// Gets current usage, pixel thickness (CurveThickness) or a scale thickness (CurveThicknessScale)
     /// </summary>
+    /// <since>8.7</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public CurveThicknessUse GetCurveThicknessUsage()
     {
       return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); 
@@ -646,6 +662,7 @@ namespace Rhino.Display
     /// <summary>
     /// Scale thickness for curves
     /// </summary>
+    /// <since>8.4</since>
     public float CurveThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.CurveThicknessScale); }
@@ -766,37 +783,39 @@ namespace Rhino.Display
       AllSurfaceFixedWidth = EdgeFixedWidth | NakedEdgeFixedWidth | IsoFixedWidth
     }
 
-    public enum SurfaceEdgeThicknessUse : int
+    public enum SurfaceThicknessUse : int
     {
       ObjectWidth = 0,
-      Pixels = 1,
+      Pixels = 1
     }
 
     /// <summary>
     /// Helper function for setting the SurfaceEdgeThicknessFlags
     /// </summary>
     /// <returns></returns>
-    public SurfaceEdgeThicknessUse GetSurfaceEdgeThicknessUsage()
+    /// <since>8.6</since>
+    public SurfaceThicknessUse GetSurfaceEdgeThicknessUsage()
     {
       SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage) & (int)SurfaceEdgeThicknessFlags.EdgeFixedWidth);
-      if (currentUsage == SurfaceEdgeThicknessFlags.EdgeFixedWidth) return SurfaceEdgeThicknessUse.Pixels;
-      return SurfaceEdgeThicknessUse.ObjectWidth;
+      if (currentUsage == SurfaceEdgeThicknessFlags.EdgeFixedWidth) return SurfaceThicknessUse.Pixels;
+      return SurfaceThicknessUse.ObjectWidth;
     }
 
     /// <summary>
     /// Helper function for getting the SurfaceEdgeThicknessFlags
     /// </summary>
     /// <returns></returns>
-    public void SetSurfaceEdgeThicknessUsage(SurfaceEdgeThicknessUse use)
+    public void SetSurfaceEdgeThicknessUsage(SurfaceThicknessUse use)
     {
       SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
-      if (SurfaceEdgeThicknessUse.ObjectWidth == use)
+      if (SurfaceThicknessUse.ObjectWidth == use)
         currentUsage &= ~SurfaceEdgeThicknessFlags.EdgeFixedWidth;
       else
         currentUsage |= SurfaceEdgeThicknessFlags.EdgeFixedWidth;
       SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage, (int)currentUsage);
     }
 
+    /// <since>8.6</since>
     public enum SurfaceNakedEdgeThicknessUse : int
     {
       UseSurfaceEdgeSettings = 0,
@@ -808,6 +827,7 @@ namespace Rhino.Display
     /// This is a helper function that combines setting SurfaceNakeEdgeUseNormalThickness and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
     /// to the behavor of the Settings page.
     /// </summary>
+    /// <since>8.6</since>
     public void SetSurfaceNakedEdgeThicknessUsage(SurfaceNakedEdgeThicknessUse use)
     {
       if (SurfaceNakedEdgeThicknessUse.UseSurfaceEdgeSettings == use) SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness, true);
@@ -827,6 +847,7 @@ namespace Rhino.Display
     /// This is a helper function that combines getting SurfaceNakeEdgeUseNormalThickness and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
     /// to the behavor of the Settings page. 
     /// </summary>
+    /// <since>8.6</since>
     public SurfaceNakedEdgeThicknessUse GetSurfaceNakedEdgeThicknessUsage()
     {
       if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness)) 
@@ -838,6 +859,7 @@ namespace Rhino.Display
         return SurfaceNakedEdgeThicknessUse.ObjectWidth;
     }
 
+    /// <since>8.6</since>
     public enum SurfaceIsoThicknessUse : int
     {
       ObjectWidth = 0,
@@ -849,6 +871,7 @@ namespace Rhino.Display
     /// This is a helper function that combines setting IsoThicknessUsed and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
     /// to the behavor of the Settings page. 
     /// </summary>
+    /// <since>8.6</since>
     public void SetSurfaceIsoThicknessUsage(SurfaceIsoThicknessUse value)
     {
       SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage) & (int)SurfaceEdgeThicknessFlags.IsoFixedWidth);
@@ -865,6 +888,7 @@ namespace Rhino.Display
     /// This is a helper function that combines getting IsoThicknessUsed and SurfaceNakedEdgeThicknessUsageFlags settings to correspond
     /// to the behavor of the Settings page. 
     /// </summary>
+    /// <since>8.6</since>
     public SurfaceIsoThicknessUse GetSurfaceIsoThicknessUsage()
     {
       if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed))
@@ -881,6 +905,7 @@ namespace Rhino.Display
     /// <param name="u"></param>
     /// <param name="v"></param>
     /// <param name="w"></param>
+    /// <since>8.6</since>
     public void SetSurfaceIsoApplyPattern(bool u, bool v, bool w)
     {
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetIsoApplyPattern(ConstPointer(), u, v, w);
@@ -891,12 +916,14 @@ namespace Rhino.Display
     /// <param name="u">Gets mode in the u direction</param>
     /// <param name="v">Gets mode in the v direction</param>
     /// <param name="w">Gets mode in the w direction</param>
+    /// <since>8.6</since>
     public void GetSurfaceIsoApplyPattern(out bool u, out bool v, out bool w)
     {
       u = v = w = false;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetIsoApplyPattern(NonConstPointer(), ref u, ref v, ref w);
     }
 
+    /// <since>8.6</since>
     public bool SurfaceIsoShowForFlatFaces
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowFlatSurfaceIsos); }
@@ -905,6 +932,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.6</since>
     public bool SurfaceIsoThicknessUsed
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed); }
@@ -914,6 +942,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turn pattern application on or off
     /// </summary>
+    /// <since>8.6</since>
     public bool SurfaceEdgeApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceEdgeApplyPattern); }
@@ -923,6 +952,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turn pattern application on or off
     /// </summary>
+    /// <since>8.6</since>
     public bool SurfaceNakedEdgeApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeApplyPattern); }
@@ -932,33 +962,38 @@ namespace Rhino.Display
     /// <summary>
     /// Turn Surface Edge visibility on or off
     /// </summary>
+    /// <since>8.6</since>
     public bool ShowSurfaceEdge
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowEdges); }
-      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowEdges, value);  }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowEdges, value); }
     }
 
     /// <summary>
     /// Turn Surface Naked Edge visibility on or off
     /// </summary>
+    /// <since>8.6</since>
     public bool ShowSurfaceNakedEdge
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowNakedEdges); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowNakedEdges, value); }
     }
 
+    /// <since>8.6</since>
     public enum SurfaceEdgeColorUse : int
     {
       ObjectColor = 0,
       IsocurveColor = 1,
       SingleColorForAll = 2
     }
+    /// <since>8.6</since>
     public SurfaceEdgeColorUse SurfaceEdgeColorUsage
     { 
       get { return (SurfaceEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage); }
-      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage, (int)value);  }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage, (int)value); }
     }
 
+    /// <since>8.6</since>
     public enum SurfaceNakedEdgeColorUse : int
     {
       UseSurfaceEdgeSettings = 0,
@@ -967,12 +1002,14 @@ namespace Rhino.Display
       SingleColorForAll = 3
     }
 
+    /// <since>8.6</since>
     public SurfaceNakedEdgeColorUse SurfaceNakedEdgeColorUsage
     {
       get { return (SurfaceNakedEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorUsage, (int)value); }
     }
 
+    /// <since>8.6</since>
     public enum SurfaceIsoColorUse : int
     {
       ObjectColor = 0,
@@ -984,6 +1021,7 @@ namespace Rhino.Display
     /// Helper function for setting SurfaceIsoColorsUsed and SurfaceIsoSingleColor
     /// </summary>
     /// <param name="use"></param>
+    /// <since>8.6</since>
     public void SetSurfaceIsoColorUsage(SurfaceIsoColorUse use)
     {
       SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed, SurfaceIsoColorUse.SpecifiedUV == use);
@@ -992,6 +1030,7 @@ namespace Rhino.Display
     /// <summary>
     /// Helper function for getting SurfaceIsoColorsUsed and SurfaceSingleIsoColor
     /// </summary>
+    /// <since>8.6</since>
     public SurfaceIsoColorUse GetSurfaceIsoColorUsage()
     {
       if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor)) return SurfaceIsoColorUse.SingleColorForAll;
@@ -999,103 +1038,137 @@ namespace Rhino.Display
       return SurfaceIsoColorUse.ObjectColor;
     }
 
+    /// <since>8.6</since>
     public bool SurfaceIsoSingleColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor); }
-      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor, value);  }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleIsoColor, value); }
     }
 
+    /// <since>8.6</since>
     public bool SurfaceIsoColorsUsed
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoColorsUsed, value); }
     }
 
+    /// <since>8.6</since>
     public Color SurfaceEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.EdgeColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.EdgeColor, value); }
     }
 
+    /// <since>8.6</since>
     public Color SurfaceNakedEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.NakedEdgeColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.NakedEdgeColor, value); }
     }
 
+    /// <since>8.6</since>
     public Color SurfaceIsoUVColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoColor, value); }
     }
 
+    /// <since>8.6</since>
     public Color SurfaceIsoUColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoUColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoUColor, value); }
     }
 
+    /// <since>8.6</since>
     public Color SurfaceIsoVColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoVColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.IsoVColor, value); }
     }
 
+    /// <since>8.6</since>
+    public int SurfaceEdgeColorReduction
+    {
+      get { return SurfaceEdgeColorReductionPercent; }
+      set { SurfaceEdgeColorReductionPercent = value; }
+    }
+
+    /// <since>8.6</since>
+    public int SurfaceNakedAdgeColorReduction
+    {
+      get { return SurfaceNakedEdgeColorReductionPercent; }
+      set { SurfaceNakedEdgeColorReductionPercent = value; }
+    }
+
+    /// <since>8.7</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int SurfaceEdgeColorReductionPercent
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction); }
       set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction, value); }
     }
 
+    /// <since>8.7</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int SurfaceNakedEdgeColorReductionPercent
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction); }
       set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeColorReduction, value); }
     }
 
+    /// <since>8.6</since>
     public int SurfaceNakedEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.NakedEdgeThickness, value); }
     }
 
+    /// <since>8.6</since>
     public int SurfaceIsoThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoThickness, value); }
     }
 
+    /// <since>8.6</since>
     public int SurfaceIsoUThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoUThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoUThickness, value); }
     }
+    /// <since>8.6</since>
     public int SurfaceIsoVThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoVThickness); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.IsoVThickness, value); }
     }
 
+    /// <since>8.6</since>
     public float SurfaceEdgeThicknessScale
     {
-      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale);  }
-      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale, value);  }
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceEdgeThicknessScale, value); }
     }
+    /// <since>8.6</since>
     public float SurfaceNakedEdgeThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceNakedEdgeThicknessScale); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceNakedEdgeThicknessScale, value); }
     }
+    /// <since>8.6</since>
     public float SurfaceIsoThicknessUScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoUThicknessScale); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoUThicknessScale, value); }
     }
+    /// <since>8.6</since>
     public float SurfaceIsoThicknessVScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale, value); }
    }
+    /// <since>8.7</since>
     public float SurfaceIsoThicknessWScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoWThicknessScale); }
@@ -1172,9 +1245,9 @@ namespace Rhino.Display
         }
         set
         {
-          bool single_color = (value!=Color.Empty);
+          bool single_color = (value != Color.Empty);
           m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SingleMeshWireColor, single_color);
-          if( single_color )
+          if (single_color)
             m_parent.SetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshWireColor, value);
         }
       }
@@ -1261,6 +1334,7 @@ namespace Rhino.Display
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowLights, value); }
     }
 
+    /// <since>8.4</since>
     public enum LightingSchema
     {
       None = 0,
@@ -1271,6 +1345,7 @@ namespace Rhino.Display
     }
 
     //ELightingScheme m_eLightingScheme;
+    /// <since>8.4</since>
     public LightingSchema LightingScheme
     {
       get
@@ -1304,6 +1379,14 @@ namespace Rhino.Display
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.ShadowColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ShadowColor, value); }
+    }
+
+    /// <since>8.6</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public int ColorReductionPct
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction); }
+      set { if (value < 0) value = 0; if (value > 100) value = 100; SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorReduction, value); }
     }
 
     //ON_3dVector m_ShadowBias;
@@ -1683,6 +1766,7 @@ namespace Rhino.Display
     /// <summary>
     /// Get or set the front material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
+    /// <since>8.4</since>
     public double FrontMaterialShine
     {
       get
@@ -1699,6 +1783,7 @@ namespace Rhino.Display
     /// <summary>
     /// Get or set the back material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
+    /// <since>8.4</since>
     public double BackMaterialShine
     {
       get
@@ -1715,6 +1800,7 @@ namespace Rhino.Display
     /// <summary>
     /// Get or set the front material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
+    /// <since>8.4</since>
     public double FrontMaterialTransparency
     {
       get
@@ -1731,6 +1817,7 @@ namespace Rhino.Display
     /// <summary>
     /// Get or set the back material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
+    /// <since>8.4</since>
     public double BackMaterialTransparency
     {
       get
@@ -1745,6 +1832,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>8.8</since>
     public Color BackMaterialDiffuseColor
     {
       get 
@@ -1757,6 +1845,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>8.8</since>
     public bool CullBackfaces
     {
       get
@@ -1768,7 +1857,1097 @@ namespace Rhino.Display
         SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CullBackfaces, value);
       }
     }
+    /// <summary>
+    /// Color reduction percentage
+    /// </summary>
+    public int SubDSmoothInteriorColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorColorReduction, value); }
+    }
+    /// <summary>
+    /// Color reduction percentage
+    /// </summary>
+    public int SubDCreaseInteriorColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorColorReduction, value); }
+    }
+    /// <summary>
+    /// Color reduction percentage
+    /// </summary>
+    public int SubDNonManifoldColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldColorReduction, value); }
+    }
+    /// <summary>
+    /// Color reduction percentage
+    /// </summary>
+    public int SubDBoundaryColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryColorReduction, value); }
+    }
+    /// <summary>
+    /// SubD edge color use
+    /// </summary>
+    public enum SubDEdgeColorUse : int
+    {
+      ObjectColor = 0,
+      SingleColorForAll = 1
+    }
+    /// <summary>
+    /// Edge color usage
+    /// </summary>
+    public SubDEdgeColorUse SubDSmoothInteriorEdgeColorUsage
+    {
+      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage, (int)value); }
+    }
+    /// <summary>
+    /// Edge color usage
+    /// </summary>
+    public SubDEdgeColorUse SubDCreaseInteriorEdgeColorUsage
+    {
+      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage, (int)value); }
+    }
+    /// <summary>
+    /// Edge color usage
+    /// </summary>
+    public SubDEdgeColorUse SubDNonManifoldEdgeColorUsage
+    {
+      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage, (int)value); }
+    }
+    /// <summary>
+    /// Edge color usage
+    /// </summary>
+    public SubDEdgeColorUse SubDBoundaryEdgeColorUsage
+    {
+      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage, (int)value); }
+    }
+    /// <summary>
+    /// SubD replection plane color use
+    /// </summary>
+    public enum SubDReflectionPlaneColorUse : int
+    {
+      ObjectColor = 0,
+      CustomColor = 1,
+      SingleColorForAll = 2
+    }
+    /// <summary>
+    /// SubD replection plane color use
+    /// </summary>
+    public SubDReflectionPlaneColorUse SubDReflectionPlaneColorUsage
+    {
+      get { return (SubDReflectionPlaneColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorUsage, (int)value); }
+    }
+    /// <summary>
+    /// SubD replection plane color reduction percentage
+    /// </summary>
+    public int SubDReflectionPlaneColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorReduction, value); }
+    }
+    /// <summary>
+    /// Mesh edge width in pixels
+    /// </summary>
+    public int MeshEdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Naked mesh edge width in pixels.}
+    /// </summary>
+    public int MeshNakedEdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Non-manifold mesh edge width in pixels
+    /// </summary>
+    public int MeshNonmanifoldEdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Mesh vertex size in pixels
+    /// </summary>
+    public int MeshVertexSize
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshVertexSize); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshVertexSize, value); }
+    }
+    /// <summary>
+    /// The darken percentage of the color
+    /// </summary>
+    public int MeshEdgeColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeColorReduction, value); }
+    }
+    /// <summary>
+    /// The darken percentage of the color
+    /// </summary>
+    public int MeshNakedEdgeColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeColorReduction, value); }
+    }
+    /// <summary>
+    /// The darken percentage of the color
+    /// </summary>
+    public int MeshNonmanifoldEdgeColorReduction
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeColorReduction); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeColorReduction, value); }
+    }
+    /// <summary>
+    /// Edge thickness scale
+    /// </summary>
+    public float SubDSmoothInteriorThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorThicknessScale, value); }
+    }
+    /// <summary>
+    /// Edge thickness scale
+    /// </summary>
+    public float SubDCreaseInteriorThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorThicknessScale, value); }
+    }
+    /// <summary>
+    /// Edge thickness scale
+    /// </summary>
+    public float SubDNonManifoldThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldThicknessScale, value); }
+    }
+    /// <summary>
+    /// Edge thickness scale
+    /// </summary>
+    public float SubDBoundaryThicknessScale
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryThicknessScale); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryThicknessScale, value); }
+    }
+    /// <summary>
+    /// Edge thickness (pixels).
+    /// </summary>
+    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    public float SubDSmoothInteriorEdgeThickness
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorEdgeThickness); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Edge thickness (pixels).
+    /// </summary>
+    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    public float SubDCreaseInteriorEdgeThickness
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorEdgeThickness); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Edge thickness (pixels).
+    /// </summary>
+    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    public float SubDNonManifoldEdgeThickness
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldEdgeThickness); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Edge thickness (pixels).
+    /// </summary>
+    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    public float SubDBoundaryEdgeThickness
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryEdgeThickness); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryEdgeThickness, value); }
+    }
+
+    public enum SubDThicknessUse : int
+    {
+      ObjectWidth = 0,
+      Pixels = 1
+    }
+
+    /// <summary>
+    /// Thickness usage, pixel thickness or a scale thickness
+    /// </summary>
+    public SubDThicknessUse SubDThicknessUsage
+    {
+      get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDThicknessUsage, (int)value); }
+    }
+    public SubDThicknessUse SubDSmoothInteriorThicknessUsage
+    {
+      get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDSmoothInteriorThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDSmoothInteriorThicknessUsage, (int)value); }
+    }
+    public SubDThicknessUse SubDCreaseInteriorThicknessUsage
+    {
+      get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDCreaseInteriorThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDCreaseInteriorThicknessUsage, (int)value); }
+    }
+    public SubDThicknessUse SubDNonManifoldThicknessUsage
+    {
+      get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDNonManifoldThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDNonManifoldThicknessUsage, (int)value); }
+    }
+    public SubDThicknessUse SubDBoundaryThicknessUsage
+    {
+      get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDBoundaryThicknessUsage); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDBoundaryThicknessUsage, (int)value); }
+    }
+    /// <summary>
+    /// Apply pattern to the edge
+    /// </summary>
+    public bool SubDSmoothInteriorApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDSmoothInteriorApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDSmoothInteriorApplyPattern, value); }
+    }
+    /// <summary>
+    /// Apply pattern to the edge
+    /// </summary>
+    public bool SubDCreaseInteriorApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDCreaseInteriorApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDCreaseInteriorApplyPattern, value); }
+    }
+    /// <summary>
+    /// Apply pattern to the edge
+    /// </summary>
+    public bool SubDNonManifoldApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDNonManifoldApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDNonManifoldApplyPattern, value); }
+    }
+    /// <summary>
+    /// Apply pattern to the edge
+    /// </summary>
+    public bool SubDBoundaryApplyPattern
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDBoundaryApplyPattern); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDBoundaryApplyPattern, value); }
+    }
+    /// <summary>
+    /// Apply Turnh on or off the reflection plane axis line
+    /// </summary>
+    public bool SubDReflectionPlaneAxisLineOn
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectionPlaneAxisLineOn); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectionPlaneAxisLineOn, value); }
+    }
+    /// <summary>
+    /// Edge color
+    /// </summary>
+    public Color SubDSmoothInteriorEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDSmoothInteriorEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDSmoothInteriorEdgeColor, value); }
+    }
+    /// <summary>
+    /// Edge color
+    /// </summary>
+    public Color SubDCreaseInteriorEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDCreaseInteriorEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDCreaseInteriorEdgeColor, value); }
+    }
+    /// <summary>
+    /// Edge color
+    /// </summary>
+    public Color SubDNonManifoldEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDNonManifoldEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDNonManifoldEdgeColor, value); }
+    }
+    /// <summary>
+    /// Edge color
+    /// </summary>
+    public Color SubDBoundaryEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDBoundaryEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDBoundaryEdgeColor, value); }
+    }
+    /// <summary>
+    /// Reflection axis line color
+    /// </summary>
+    public Color SubDReflectionAxisLineColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionAxisLineColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionAxisLineColor, value); }
+    }
+    /// <summary>
+    /// Reflection plane color
+    /// </summary>
+    public Color SubDReflectionPlaneColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionPlaneColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionPlaneColor, value); }
+    }
+    /// <summary>
+    /// Sets the mesh edge color
+    /// </summary>
+    public Color MeshEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshEdgeColor, value); }
+    }
+    /// <summary>
+    /// Sets the naked edge color
+    /// </summary>
+    public Color MeshNakedEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNakedEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNakedEdgeColor, value); }
+    }
+    /// <summary>
+    /// Sets the nonmanifold edge color
+    /// </summary>
+    public Color MeshNonmanifoldEdgeColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNonmanifoldEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNonmanifoldEdgeColor, value); }
+    }
+
+    /// <summary>
+    /// Height above the world XY plane in model units
+    /// </summary>
+    public double CustomGroundPlaneAltitude
+    {
+      get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.CustomGroundPlaneAltitude); }
+      set { SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.CustomGroundPlaneAltitude, value); }
+    }
+    /// <summary>
+    /// Turn the custom ground plane on or off
+    /// </summary>
+    public bool CustomGroundPlaneOn
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneOn); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneOn, value); }
+    }
+    /// <summary>
+    /// Makes the ground plane transparent, but allows shadows to still be cast on it.
+    /// </summary>
+    public bool CustomGroundPlaneShadowOnly
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneShadowOnly); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneShadowOnly, value); }
+    }
+
+    /// <summary>
+    /// Turns on auto-elevation that moves Ground Plane to the lowest point of the objects in the model.
+    /// </summary>
+    public bool CustomGroundPlaneAutomaticAltitude
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneAutomaticAltitude); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneAutomaticAltitude, value); }
+    }
+    /// <summary>
+    /// Set visibility of SubD smooth edges.
+    /// </summary>
+    public bool ShowSubDEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDEdges, value); }
+    }
+    /// <summary>
+    /// Set visibility of SubD creased edges.
+    /// </summary>
+    public bool ShowSubDCreases
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDCreases); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDCreases, value); }
+    }
+    /// <summary>
+    /// Set visibility of SubD naked edges.
+    /// </summary>
+    public bool ShowSubDBoundary
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDBoundary); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDBoundary, value); }
+    }
+    /// <summary>
+    /// Turn on/off color differentiation of SubD symmetry children.
+    /// </summary>
+    public bool ShowSubDNonmanifoldEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDNonmanifoldEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDNonmanifoldEdges, value); }
+    }
+    public bool ShowSubDReflectionPlanePreview
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectedPreview); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectedPreview, value); }
+    }
+    /// <summary>
+    /// Display mesh edges on/off
+    /// </summary>
+    public bool ShowMeshEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshEdges, value); }
+    }
+    /// <summary>
+    /// Display mesh naked edges on/off
+    /// </summary>
+    public bool ShowMeshNakedEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNakedEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNakedEdges, value); }
+    }
+
+    /// <summary>
+    /// Display mesh manifold edges on/off
+    /// </summary>
+    public bool ShowMeshNonmanifoldEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNonmanifoldEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNonmanifoldEdges, value); }
+    }
+    /// <summary>
+    /// Draw lights using light color
+    /// </summary>
+    public bool UseLightColor
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseLightColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseLightColor, value); }
+    }
+    /// <summary>
+    /// When a clipping plane intersects a 3-D object and the section is closed, the section is filled.
+    /// </summary>
+    public bool ShowClippingFills
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXSurface); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXSurface, value); }
+    }
+    /// <summary>
+    /// Shows the edges between the clipping plane and clipped objects.
+    /// </summary>
+    public bool ShowClippingEdges
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXEdges); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXEdges, value); }
+    }
+    /// <summary>
+    /// Shades the selected clipping plane.
+    /// </summary>
+    public bool ClippingShadeSelectedPlane
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowCP); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowCP, value); }
+    }
+    /// <summary>
+    /// Clips the highlight wires. Shaded selections always clip.
+    /// </summary>
+    public bool ClipSelectionHighlight
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingClipSelected); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingClipSelected, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum ClippingPlaneFillColorUse : int
+    {
+      /// <summary>
+      /// Follows how the object displays in the viewport.
+      /// </summary>
+      ViewportColor = 0,
+      /// <summary>
+      /// Uses the object's render material.
+      /// </summary>
+      RenderMaterialColor = 1,
+      /// <summary>
+      /// Uses the clipping plane's color or layer color property.
+      /// </summary>
+      PlaneMaterialColor = 2,
+      /// <summary>
+      /// Solid color
+      /// </summary>
+      SolidColor = 3
+    }
+
+    /// <summary>
+    /// Specifies how the color for the clipping plane object fill is determined.
+    /// </summary>
+    public ClippingPlaneFillColorUse ClippingPlaneFillColorUsage
+    {
+      get { return (ClippingPlaneFillColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingSurfaceUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingSurfaceUsage, (int)value); }
+    }
+    /// <summary>
+    /// Clipping plane fill color
+    /// </summary>
+    public Color ClippingFillColor
+    {
+      get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingSurfaceColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingSurfaceColor, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum ClippingEdgeColorUse : int
+    {
+      /// <summary>
+      /// Uses the clipping plane's color (object or layer).
+      /// </summary>
+      PlaneColor = 0,
+      /// <summary>
+      /// Solid color
+      /// </summary>
+      SolidColor = 1,
+      /// <summary>
+      /// Uses the object's color (object or layer).
+      /// </summary>
+      ObjectColor = 2
+    }
+    /// <summary>
+    /// Specifies how the color for the Edges is determined
+    /// </summary>
+    public ClippingEdgeColorUse ClippingEdgeColorUsage
+    {
+      get { return (ClippingEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgesUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgesUsage, (int)value); }
+    }
+    /// <summary>
+    /// Clipping edge color
+    /// </summary>
+    public Color ClippingEdgeColor
+    {
+      get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingEdgeColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingEdgeColor, value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum ClippingShadeColorUse : int
+    {
+      /// <summary>
+      /// Uses the clipping plane's color (object or layer).
+      /// </summary>
+      PlaneColor = 0,
+      /// <summary>
+      /// Uses the plane's render material (object or layer).
+      /// </summary>
+      PlaneMaterialColor = 1,
+      /// <summary>
+      /// Solid Color
+      /// </summary>
+      SolidColor = 2
+    }
+    /// <summary>
+    /// Specifies how to shade the clipping plane
+    /// </summary>
+    public ClippingShadeColorUse ClippingShadeColorUsage
+    {
+      get { return (ClippingShadeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPUsage, (int)value); }
+    }
+    /// <summary>
+    /// Clipping plane solid color
+    /// </summary>
+    public Color ClippingShadeColor
+    {
+      get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingCPColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingCPColor, value); }
+    }
+    /// <summary>
+    /// Edge thickness in pixels.
+    /// </summary>
+    public int ClippingEdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgeThickness, value); }
+    }
+    /// <summary>
+    /// Specifies the clipping plane transparency percentage.
+    /// </summary>
+    public int ClippingShadeTransparency
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPTrans); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPTrans, value); }
+    }
+    /// <summary>
+    /// When enabled, the appearances of clipping fills and edges are based on objects' section style properties.
+    /// </summary>
+    public bool UseSectionStyles
+    {
+      get { return (1 == GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage)); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage, value ? 1 : 0); }
+    }
+
+    /// <summary>
+    /// The width of the control polygon lines in pixels.
+    /// </summary>
+    public int ControlPolygonWireThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CPWireThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.CPWireThickness, value); }
+    }
+    /// <summary>
+    /// PointStyle for the control polygon. Supported values are ControlPoint, RoundControlPoint, VariableDot, and RoundDot
+    /// </summary>
+    public PointStyle ControlPolygonStyle
+    {
+      get { return (PointStyle)GetInt(UnsafeNativeMethods.DisplayAttributesInt.CVStyle); }
+      set
+      {
+        if (value != PointStyle.RoundControlPoint && value != PointStyle.VariableDot && value != PointStyle.RoundDot)
+          value = PointStyle.ControlPoint;
+
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.CVStyle, (int)value);
+      }
+    }
+    /// <summary>
+    /// The control point size in pixels.
+    /// </summary>
+    public int ControlPolygonGripSize
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CVSize); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.CVSize, value); }
+    }
+
+    /// <summary>
+    /// LockedObjectTransparency.
+    /// </summary>
+    public int LockedObjectTransparency
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedTrans); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedTrans, value); }
+    }
+
+    public enum LockedObjectUse : int
+    {
+      /// <summary>
+      /// Uses the object's specified attributes.
+      /// </summary>
+      UseObjectAttributes = 0,
+      /// <summary>
+      /// Use specified lock color
+      /// </summary>
+      SpecifyColor = 1,
+      /// <summary>
+      /// Use settings specified in Appearance: Colors Options.
+      /// </summary>
+      UseAppSettings = 2
+    }
+
+    /// <summary>
+    /// Set asource of display attributes for locked objects
+    /// </summary>
+    public LockedObjectUse LockedObjectUsage
+    {
+      get { return (LockedObjectUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedUsage, (int)value); }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum DynamicDisplayUse
+    {
+      /// <summary>
+      /// Use system default settings.
+      /// </summary>
+      UseAppSettings = 0,
+      /// <summary>
+      /// Reduces the display of objects to their bounding boxes. This can speed up the display on large models.
+      /// </summary>
+      DisplayObjectBoundingBox = 1
+    }
+    /// <summary>
+    /// Sets the appearance of objects in the display
+    /// </summary>
+    public DynamicDisplayUse DynamicDisplayUsage
+    {
+      get { return (DynamicDisplayUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.BBoxMode); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.BBoxMode, (int)value); }
+    }
+    /// <summary>
+    /// Shades entire object with highlight color.
+    /// </summary>
+    public bool HighlightSurfaces
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HighlightSurfaces); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HighlightSurfaces, value); }
+    }
+    /// <summary>
+    /// Use dotted / solid lines
+    /// </summary>
+    public bool ControlPolygonUseSolidLines
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSolidLines); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSolidLines, value); }
+    }
+    /// <summary>
+    /// Specifies a color for the control polygon.
+    /// </summary>
+    /// <value>true = Use a specified color for all control polygons.</value>
+    /// <value>false = Use the color specified in the object's Properties.</value>
+    public bool ControlPolygonUseFixedSingleColor
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSingleColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSingleColor, value); }
+    }
+    /// <summary>
+    /// Shows the control points while the control polygon is displayed.
+    /// </summary>
+    public bool ControlPolygonShowPoints
+    {
+      get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidePoints); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidePoints, !value); }
+    }
+    /// <summary>
+    /// Shows the object while the control polygon is displayed.
+    /// </summary>
+    public bool ControlPolygonShowSurface
+    {
+      get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHideSurface); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHideSurface, !value); }
+    }
+    /// <summary>
+    /// Shows the control polygon and only shows the control points.
+    /// </summary>
+    public bool ControlPolygonShow
+    {
+      get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidden); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidden, !value); }
+    }
+    /// <summary>
+    /// Highlights the segments of the control polygon on either side of the control points.
+    /// </summary>
+    public bool ControlPolygonHighlight
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHighlight); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHighlight, value); }
+    }
+    /// <summary>
+    /// Set locked appearance
+    /// </summary>
+    /// <value>true = Locked objects appear transparent</value>
+    /// <value>false = Locked objects appear solid</value>
+    public bool GhostLockedObjects
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.GhostLockedObjects); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.GhostLockedObjects, value); }
+    }
+    /// <summary>
+    /// Applies the settings for locked objects to locked layers.
+    /// </summary>
+    public bool LayersFollowLockUsage
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.LayersFollowLockUsage); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.LayersFollowLockUsage, value); }
+    }
+    /// <summary>
+    /// Control polygon color
+    /// </summary>
+    public Color ControlPolygonColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.CPColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.CPColor, value); }
+    }
+    /// <summary>
+    /// Locked Object Color
+    /// </summary>
+    public Color LockedColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.LockedColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.LockedColor, value); }
+    }
+
+    /// <summary>
+    /// Enable shadows
+    /// </summary>
+    public bool ShadowsOn
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.Shadows); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.Shadows, value); }
+    }
+    /// <summary>
+    /// Shadow intensity (percentage 0-100)
+    /// </summary>
+    public int ShadowIntensity
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity); }
+      set 
+      {
+        if (value < 0) value = 0;
+        else if (value > 100) value = 100;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity, value); 
+      }
+    }
+    /// <summary>
+    /// Value from 1 to 16384 indicating how much memory is to be allocated. Actual memory use
+    /// is ShadowMemoryUsage*ShadowMemoryUsage*4.
+    /// </summary>
+    public int ShadowMemoryUsage
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMemoryUsage); }
+      set
+      {
+        if (value < 1) value = 1;
+        else if (value > 16384) value = 16384;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMemoryUsage, value);
+      }
+    }
+    /// <summary>
+    /// Skylight shadow quality, from 0 (lowest) to 8 (highest)
+    /// </summary>
+    public int SkylightShadowQuality
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SkylightQuality); }
+      set
+      {
+        if (value < 0) value = 0;
+        else if (value > 8) value = 8;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.SkylightQuality, value);
+      }
+    }
+
+    // might expose this stuff in the future
+    private const int CubeShadows = 50;
+    private const int DrmShadows = 100;
+    private enum ShadowMapType : uint
+    {
+      None = 0,
+      Normal = 1,
+      Sampled = 2,
+      PCF = 3,
+      Dithered = 4,
+
+      GI = 5,
+
+      NormalCube = Normal + CubeShadows,
+      SampledCube = Sampled + CubeShadows,
+      PCFCube = PCF + CubeShadows,
+      SMDitheredCube = Dithered + CubeShadows,
+
+      Force32bit = 0xFFFFFFFF
+    }
+    /// <summary>
+    /// Soft edge quality, from 0 (none/faster) to 12 (softer/slower)
+    /// </summary>
+    public int ShadowSoftEdgeQuality
+    {
+      get 
+      {
+        if (GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMapType) == (int)ShadowMapType.Normal)
+          return 0;
+        else
+        {
+          return GetInt(UnsafeNativeMethods.DisplayAttributesInt.NumSamples);
+        }
+      }
+      set
+      {
+        if (value < 0) value = 0;
+        if (value > 12) value = 12;
+
+        if (value == 0)
+        {
+          SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMapType, (int)ShadowMapType.Normal);
+          SetInt(UnsafeNativeMethods.DisplayAttributesInt.NumSamples, 0);
+        }
+        else
+        {
+          SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMapType, (int)ShadowMapType.Sampled);
+          SetInt(UnsafeNativeMethods.DisplayAttributesInt.NumSamples, value);
+        }
+      }
+    }
+    /// <summary>
+    /// Set blurring from 0 (no blurring) to 16 (maximum blurring)
+    /// </summary>
+    public double ShadowEdgeBlur
+    {
+      get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur); }
+      set 
+      {
+        if (value < 0.0f) value = 0.0f;
+        if (value > 16.0f) value = 16.0f;
+        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur, value); 
+      }
+    }
+    /// <summary>
+    /// ShadowBiasX (Self shadowing artifacts) from 0 (dirty) to 50 (cleaner).
+    /// </summary>
+    public double ShadowBiasX
+    {
+      get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX); }
+      set 
+      {
+        if (value < 0.0) value = 0.0;
+        if (value > 50.0) value = 50.0;
+        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX, value); }
+    }
+    /// <summary>
+    /// Transparency tolerance from 0 (never cast shadows) to 100 (always case shadows)
+    /// </summary>
+    public int ShadowTransparencyTolerance
+    {
+      get { return (int)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.TransparencyTolerance); }
+      set
+      {
+        if (value < 0) value = 0;
+        if (value > 100) value = 100;
+        SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.TransparencyTolerance, value);
+      }
+    }
+    /// <summary>
+    /// Camera-based shadow clipping radius
+    /// </summary>
+    public float ShadowClippingRadius
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.ShadowClippingRadius); }
+      set
+      {
+        int current = GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage);
+        if (value == 0.0)
+          current &= 0xF0;
+        else
+          current |= 0x01;
+
+        SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.ShadowClippingRadius, value);
+      }
+    }
+
+    /// <summary>
+    /// If true, shadows ignore user-defined clipping planes
+    /// </summary>
+    public bool ShadowsIgnoreUserDefinedClippingPlanes
+    {
+      get { return (0 != (0x10 & GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage))); }
+      set 
+      {
+        int current = GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage);
+        if (value) current |= 0x10;
+        if (!value) current &= ~0x10;
+        SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage, current); 
+      }
+    }
+
+    /// <summary>
+    /// Size of axes as a percentage of the grid extents.
+    /// </summary>
+    public int AxesSizePercentage
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.AxesPercentage); }
+      set
+      {
+        if (value < 0) value = 0;
+        else if (value > 100) value = 100;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.AxesPercentage, value);
+      }
+    }
+
+    /// <summary>
+    /// Transparency of the grid, percentage (0-100)
+    /// </summary>
+    public int GridTransparency
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.GridTrans); }
+      set
+      {
+        if (value < 0) value = 0;
+        else if (value > 100) value = 100;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.GridTrans, value);
+      }
+    }
+
+    /// <summary>
+    /// Transparency of the grid plane, percentage (0-100)
+    /// </summary>
+    public int GridPlaneTransparency
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.GridPlaneTrans); }
+      set
+      {
+        if (value < 0) value = 0;
+        else if (value > 100) value = 100;
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.GridPlaneTrans, value);
+      }
+    }
+    public enum GridPlaneVisibilityMode : int
+    {
+      /// <summary>
+      /// Show only when grid is on
+      /// </summary>
+      ShowOnlyIfGridVisible = 0,
+      /// <summary>
+      /// Show always
+      /// </summary>
+      AlwaysShow = 1
+    }
+    /// <summary>
+    /// Set when to show the grid plane
+    /// </summary>
+    public GridPlaneVisibilityMode GridPlaneVisibility
+    {
+      get { return (GridPlaneVisibilityMode)GetInt(UnsafeNativeMethods.DisplayAttributesInt.PlaneVisibility); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.PlaneVisibility, (int)value); }
+    }
+
+    public enum WorldAxesIconColorUse : int
+    {
+      /// <summary>
+      /// Use default setting
+      /// </summary>
+      UseApplicationSettings = 0,
+      /// <summary>
+      /// Set colors for grid axes in Appearance: Colors Options
+      /// </summary>
+      SameAsGridAxesColors = 1,
+      /// <summary>
+      /// Use specified custom colors
+      /// </summary>
+      Custom = 2
+    }
+    public WorldAxesIconColorUse WorldAxesIconColorUsage
+    {
+      get { return (WorldAxesIconColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.WorldAxesColor); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.WorldAxesColor, (int)value); }
+    }
+
+    /// <summary>
+    /// If true, use the grid thin line color in App settings
+    /// </summary>
+    public bool PlaneUsesGridColor
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PlaneUsesGridColor); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PlaneUsesGridColor, value); }
+    }
+
+    /// <summary>
+    /// The color of the grid plane
+    /// </summary>
+    public Color GridPlaneColor
+    {
+      get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.GridPlaneColor); }
+      set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.GridPlaneColor, value); }
+    }
 
   }
 }
+
 #endif

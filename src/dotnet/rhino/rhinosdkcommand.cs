@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Rhino.Runtime.InteropWrappers;
+using Rhino.Runtime;
 
 #if RHINO_SDK
 namespace Rhino.Commands
@@ -348,7 +349,8 @@ namespace Rhino.Commands
     /// <param name="mode">The command running mode.</param>
     /// <returns>The command result code.</returns>
     protected abstract Result RunCommand(RhinoDoc doc, RunMode mode);
-    internal int OnRunCommand(int commandSerialNumber, uint docSerialNumber, int mode)
+    [MonoPInvokeCallback(typeof(RunCommandCallback))]
+    internal static int OnRunCommand(int commandSerialNumber, uint docSerialNumber, int mode)
     {
       Result rc = Result.Failure;
       try
@@ -388,6 +390,7 @@ namespace Rhino.Commands
     /// <para>The default implementation return an empty string.</para>
     /// </summary>
     protected virtual string CommandContextHelpUrl{ get { return string.Empty; } }
+    [MonoPInvokeCallback(typeof(DoHelpCallback))]
     static void OnDoHelp(int command_serial_number)
     {
       try
@@ -401,6 +404,7 @@ namespace Rhino.Commands
         Rhino.Runtime.HostUtils.ExceptionReport(ex);
       }
     }
+    [MonoPInvokeCallback(typeof(ContextHelpCallback))]
     static int OnCommandContextHelpUrl(int command_serial_number, IntPtr pON_wString)
     {
       int rc = 0;
@@ -563,6 +567,7 @@ namespace Rhino.Commands
     internal delegate void CommandCallback(IntPtr pCommand, int rc, uint docRuntimeSerialNumber);
     private static CommandCallback m_OnBeginCommand;
     private static CommandCallback m_OnEndCommand;
+    [MonoPInvokeCallback(typeof(CommandCallback))]
     private static void OnBeginCommand(IntPtr pCommand, int rc, uint docRuntimeSerialNumber)
     {
       if (m_begin_command != null)
@@ -572,6 +577,7 @@ namespace Rhino.Commands
         e.m_pCommand = IntPtr.Zero;
       }
     }
+    [MonoPInvokeCallback(typeof(CommandCallback))]
     private static void OnEndCommand(IntPtr pCommand, int rc, uint docRuntimeSerialNumber)
     {
       if (m_end_command != null)
@@ -643,6 +649,7 @@ namespace Rhino.Commands
 
     internal delegate void UndoCallback(int undo_event, uint undo_record_sn, Guid command_id);
     private static UndoCallback m_OnUndoEvent;
+    [MonoPInvokeCallback(typeof(UndoCallback))]
     private static void OnUndoEvent(int undo_event, uint undo_record_sn, Guid command_id)
     {
       if (m_undo_event != null)
@@ -694,6 +701,7 @@ namespace Rhino.Commands
     {
       return false;
     }
+    [MonoPInvokeCallback(typeof(ReplayHistoryCallback))]
     private static int OnReplayHistory(int command_serial_number, IntPtr pConstRhinoHistoryRecord, IntPtr pObjectPairArray)
     {
       int rc = 0;
@@ -777,6 +785,33 @@ namespace Rhino.Commands
         return m_local_name;
       }
     }
+
+    string m_help_url = null;
+    /// <summary>
+    /// Gets the help url of the command that raised this event.
+    /// </summary>
+    /// <remarks>
+    /// Null is a possible return. Calling function must check before using result.
+    /// m_help_url will get set only if the commmand has a ContextHelpURL override.
+    /// </remarks>
+    /// <since>8.0</since>
+    public string CommandHelpURL
+    {
+      get
+      {
+        if (m_help_url == null)
+        {
+          using (var sh = new StringHolder())
+          {
+            IntPtr pStringHolder = sh.NonConstPointer();
+            if (true == UnsafeNativeMethods.CRhinoCommand_HelpURL(m_pCommand, pStringHolder))
+              m_help_url = sh.ToString();
+          }
+        }
+        return m_help_url;
+      }
+    }
+    
 
     string m_plugin_name;
     /// <summary>
@@ -881,6 +916,7 @@ namespace Rhino.Commands
     /// <param name="rhObj">The object to check regarding selection status.</param>
     /// <returns>true if the object should be selected; false otherwise.</returns>
     protected abstract bool SelFilter(Rhino.DocObjects.RhinoObject rhObj);
+    [MonoPInvokeCallback(typeof(SelFilterCallback))]
     internal static int OnSelFilter(int commandSerialNumber, IntPtr pRhinoObject)
     {
       int rc = 0;
@@ -910,6 +946,7 @@ namespace Rhino.Commands
     /// </returns>
     /// <since>7.9</since>
     protected virtual bool SelSubObjectFilter(Rhino.DocObjects.RhinoObject rhObj, List<Rhino.Geometry.ComponentIndex> indicesToSelect) { return false; }
+    [MonoPInvokeCallback(typeof(SelSubObjectCallback))]
     internal static int OnSelSubObjectFilter(int commandSerialNumber, IntPtr pRhinoObject, IntPtr pComponentIndices)
     {
       bool rc = false;

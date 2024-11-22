@@ -62,7 +62,7 @@ RH_C_FUNCTION const RHMONO_STRING* ON_wString_Get(ON_wString* pString, CRhCmnStr
   const RHMONO_STRING* rc = nullptr;
   if (pString)
   {
-#if defined (_WIN32)
+#if defined (ON_RUNTIME_WIN)
     UNREFERENCED_PARAMETER(stringHolder);
     rc = pString->Array();
 #endif

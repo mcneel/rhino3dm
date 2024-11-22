@@ -9,7 +9,7 @@ RH_C_FUNCTION bool ON_Light_IsEnabled(const ON_Light* pConstLight)
 {
   bool rc = false;
   if( pConstLight )
-    rc = pConstLight->IsEnabled()?true:false;
+    rc = pConstLight->IsEnabled();
   return rc;
 }
 

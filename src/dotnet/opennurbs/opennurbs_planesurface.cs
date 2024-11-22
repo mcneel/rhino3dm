@@ -29,6 +29,7 @@ namespace Rhino.Geometry
     /// Constructs a new plane surface.
     /// </summary>
     /// <param name="plane">The plane.</param>
+    /// <since>8.1</since>
     public PlaneSurface(Plane plane)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_PlaneSurface_New2(ref plane);
@@ -187,6 +188,32 @@ namespace Rhino.Geometry
   [Serializable]
   public class ClippingPlaneSurface : PlaneSurface
   {
+    /// <summary>
+    /// Constructs an empty clipping plane surface
+    /// </summary>
+    public ClippingPlaneSurface()
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New();
+      ConstructNonConstObject(ptr);
+    }
+    /// <summary>
+    /// Constructs a clipping plane surface from a Plane
+    /// </summary>
+    /// <param name="plane"></param>
+    public ClippingPlaneSurface(Plane plane)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New_FromPlane(ref plane);
+      ConstructNonConstObject(ptr);
+    }
+    /// <summary>
+    /// Constructs a ClippingPlaneSurface from a PlaneSurface
+    /// </summary>
+    /// <param name="planeSurface"></param>
+    public ClippingPlaneSurface(PlaneSurface planeSurface)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New_FromPLaneSurface(planeSurface.ConstPointer());
+      ConstructNonConstObject(ptr);
+    }
     internal ClippingPlaneSurface(IntPtr ptr, object parent)
       : base(ptr, parent)
     { }

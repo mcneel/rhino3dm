@@ -160,10 +160,40 @@ namespace Rhino.Render.PostEffects
   /// <since>7.0</since>
   public enum PostEffectExecuteWhileRenderingOptions : int
   {
-    None = 0,     // The post effect does not support execution while rendering.
+    None = 0,     // OBSOLETE; typo. Use Never.
+    Never = 0,    // The post effect does not support execution while rendering.
     Always = 1,   // The post effect supports execution while rendering and it should be run every time the dib is updated.
     UseDelay = 2, // The post effect supports execution while rendering but only after a delay the first time.
   };
+
+  public static class PostEffectUuids
+  {
+    public static Guid Glare           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Glare);
+    public static Guid Bloom           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Bloom);
+    public static Guid Glow            => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Glow);
+    public static Guid Fog             => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Fog);
+    public static Guid DepthOfField    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_DepthOfField);
+    public static Guid Multiplier      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Multiplier);
+    public static Guid Noise           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Noise);
+    public static Guid GaussianBlur    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_GaussianBlur);
+
+    public static Guid WireframePointsRGBA      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframePointsRGBA);
+    public static Guid WireframeCurvesRGBA      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeCurvesRGBA);
+    public static Guid WireframeIsocurvesRGBA   => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeIsocurvesRGBA);
+    public static Guid WireframeAnnotationsRGBA => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeAnnotationsRGBA);
+
+    public static Guid ToneMapper_Clamp           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Clamp);
+    public static Guid ToneMapper_BlackWhitePoint => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_BlackWhitePoint);
+    public static Guid ToneMapper_Logarithmic     => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Logarithmic);
+    public static Guid ToneMapper_FalseColor      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_FalseColor);
+    public static Guid ToneMapper_Filmic          => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Filmic);
+
+    public static Guid Gamma     => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Gamma);
+    public static Guid Dithering => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Dithering);
+    public static Guid Watermark => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Watermark);
+    public static Guid HueSatLum => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_HueSatLum);
+    public static Guid BriCon    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_BriCon);
+  }
 
   public abstract class PostEffect : IDisposable
   {
@@ -372,6 +402,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.CAN_EXECUTE_PROC can_execute_proc = CanExecute;
+    [MonoPInvokeCallback(typeof(DE.CAN_EXECUTE_PROC))]
     private static int CanExecute(int serial, IntPtr pIRhRdkPostEffectPipeLine)
     {
       var client = FromSerialNumber(serial);
@@ -384,6 +415,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.REQUIRED_CHANNELS_PROC required_channels_proc = GetRequiredChannels;
+    [MonoPInvokeCallback(typeof(DE.REQUIRED_CHANNELS_PROC))]
     private static void GetRequiredChannels(int serial, IntPtr pOnSimpleArrayUuid)
     {
       var client = FromSerialNumber(serial);
@@ -399,6 +431,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.DELETE_THIS_PROC delete_this_proc = DeleteThis;
+    [MonoPInvokeCallback(typeof(DE.DELETE_THIS_PROC))]
     private static void DeleteThis(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -411,6 +444,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.READ_FROM_DOCUMENT_DEFAULTS_PROC read_from_document_defaults_proc = ReadFromDocumentDefaults;
+    [MonoPInvokeCallback(typeof(DE.READ_FROM_DOCUMENT_DEFAULTS_PROC))]
     private static int ReadFromDocumentDefaults(int serial, uint doc_serial)
     {
       //var client = FromSerialNumber(serial);
@@ -423,6 +457,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.WRITE_TO_DOCUMENT_DEFAULTS_PROC write_to_document_defaults_proc = WriteToDocumentDefaults;
+    [MonoPInvokeCallback(typeof(DE.WRITE_TO_DOCUMENT_DEFAULTS_PROC))]
     private static int WriteToDocumentDefaults(int serial, uint doc_serial)
     {
       //var client = FromSerialNumber(serial);
@@ -446,6 +481,7 @@ namespace Rhino.Render.PostEffects
 
     // Remember to change IntPtr to real instance
     internal static DE.EXECUTE_PROC execute_proc = Execute;
+    [MonoPInvokeCallback(typeof(DE.EXECUTE_PROC))]
     private static int Execute(int serial, IntPtr pIRhRdkPostEffectPipeline, int left, int top, int width, int height)
     {
       var client = FromSerialNumber(serial);
@@ -459,6 +495,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.GET_PARAM_PROC get_param_proc = GetParam;
+    [MonoPInvokeCallback(typeof(DE.GET_PARAM_PROC))]
     private static int GetParam(int serial, IntPtr pString, IntPtr pVariant)
     {
       var client = FromSerialNumber(serial);
@@ -479,6 +516,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.SET_PARAM_PROC set_param_proc = SetParam;
+    [MonoPInvokeCallback(typeof(DE.SET_PARAM_PROC))]
     private static int SetParam(int serial, IntPtr pString, IntPtr pVariant)
     {
       var client = FromSerialNumber(serial);
@@ -492,6 +530,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.READ_STATE_PROC read_state_proc = ReadState;
+    [MonoPInvokeCallback(typeof(DE.READ_STATE_PROC))]
     private static int ReadState(int serial, IntPtr pState)
     {
       var client = FromSerialNumber(serial);
@@ -504,6 +543,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.WRITE_STATE_PROC write_state_proc = WriteState;
+    [MonoPInvokeCallback(typeof(DE.WRITE_STATE_PROC))]
     private static int WriteState(int serial, IntPtr pState)
     {
       var client = FromSerialNumber(serial);
@@ -516,6 +556,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.RESET_TO_FACTORY_DEFAULTS_PROC reset_to_factory_defaults_proc = ResetToFactoryDefaults;
+    [MonoPInvokeCallback(typeof(DE.RESET_TO_FACTORY_DEFAULTS_PROC))]
     private static void ResetToFactoryDefaults(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -523,6 +564,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.ADD_UI_SECTIONS_PROC add_ui_sections_proc = AddUISections;
+    [MonoPInvokeCallback(typeof(DE.ADD_UI_SECTIONS_PROC))]
     private static void AddUISections(int serial, IntPtr pIRhRdkPostEffecsUI)
     {
       var client = FromSerialNumber(serial);
@@ -534,6 +576,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.DISPLAY_HELP_PROC display_help_proc = DisplayHelp;
+    [MonoPInvokeCallback(typeof(DE.DISPLAY_HELP_PROC))]
     private static int DisplayHelp(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -974,6 +1017,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.NEW_POST_EFFECT_PROC new_posteffect_proc = NewPostEffect;
+    [MonoPInvokeCallback(typeof(DE.NEW_POST_EFFECT_PROC))]
     private static IntPtr NewPostEffect(int serial)
     {
       if (InternalRdkViewModelFactory.m_factories.ContainsKey(serial))
@@ -992,6 +1036,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.PEP_UUID_PROC plugin_id_proc = PlugInId;
+    [MonoPInvokeCallback(typeof(DE.PEP_UUID_PROC))]
     private static Guid PlugInId(int serial)
     {
       if (InternalRdkViewModelFactory.m_factories.ContainsKey(serial))
@@ -1526,6 +1571,7 @@ namespace Rhino.Render.PostEffects
     public abstract bool Execute(Rectangle rect, PostEffectJobChannels access);
 
     internal static DE.CLONE_POST_EFFECT_JOB_PROC clone_proc = Clone;
+    [MonoPInvokeCallback(typeof(DE.CLONE_POST_EFFECT_JOB_PROC))]
     private static IntPtr Clone(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -1545,6 +1591,7 @@ namespace Rhino.Render.PostEffects
     }
 
     internal static DE.DELETE_THIS_POST_EFFECT_JOB delete_this_proc = DeleteThis;
+    [MonoPInvokeCallback(typeof(DE.DELETE_THIS_POST_EFFECT_JOB))]
     private static void DeleteThis(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -1553,6 +1600,7 @@ namespace Rhino.Render.PostEffects
 
     // Kom ihåg att byta pPixels....
     internal static DE.EXECUTE_POST_EFFECT_JOB execute_proc = Execute;
+    [MonoPInvokeCallback(typeof(DE.EXECUTE_POST_EFFECT_JOB))]
     private static int Execute(int serial, int left, int top, int width, int height, IntPtr pAccess)
     {
       var client = FromSerialNumber(serial);
@@ -2216,4 +2264,114 @@ namespace Rhino.Render.PostEffects
       return UnsafeNativeMethods.ON_PostEffects_PostEffectFromId(CppPointer, id);
     }
   }
+
+  internal class PostEffectExecutionControlList
+  {
+    public static int serial_number = 0;
+    public static List<WeakReference<PostEffectExecutionControl>> _list = new List<WeakReference<PostEffectExecutionControl>>();
+  }
+
+  public abstract class PostEffectExecutionControl : IDisposable
+  {
+    internal int SerialNumber { get; set; }
+    internal IntPtr CppPointer { get; private set; }
+
+    /// <since>8.0</since>
+    public PostEffectExecutionControl()
+    {
+      lock (PostEffectExecutionControlList._list)
+      {
+        SerialNumber = PostEffectExecutionControlList.serial_number;
+        CppPointer = UnsafeNativeMethods.CRdkCmnPostEffectExecutionControl_New(SerialNumber);
+        PostEffectExecutionControlList.serial_number++;
+        PostEffectExecutionControlList._list.Add(new WeakReference<PostEffectExecutionControl>(this));
+      }
+    }
+
+    ~PostEffectExecutionControl()
+    {
+      Dispose(false);
+    }
+
+    public abstract bool ReadyToExecutePostEffect(Guid pep_id);
+
+    private bool disposed = false;
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <since>8.0</since>
+    public virtual void Dispose(bool bDisposing)
+    {
+      if (!disposed)
+      {
+        disposed = true;
+
+        if (CppPointer != IntPtr.Zero)
+        {
+          UnsafeNativeMethods.CRdkCmnPostEffectExecutionControl_DeleteThis(CppPointer);
+          CppPointer = IntPtr.Zero;
+        }
+      }
+    }
+
+    private static PostEffectExecutionControl FromSerialNumber(int serial)
+    {
+      lock (PostEffectExecutionControlList._list)
+      {
+        foreach (var item in PostEffectExecutionControlList._list)
+        {
+          if (item.TryGetTarget(out var ec))
+          {
+            if (ec.SerialNumber == serial)
+              return ec;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    public IntPtr Detach()
+    {
+      var p = CppPointer;
+      CppPointer = IntPtr.Zero;
+      return p;
+    }
+
+    internal static DE.POST_EFFECT_EXECUTION_CONTROL_PROC__DELETE_THIS delete_this_proc = DeleteThis;
+    [MonoPInvokeCallback(typeof(DE.POST_EFFECT_EXECUTION_CONTROL_PROC__DELETE_THIS))]
+    private static void DeleteThis(int serial)
+    {
+      var client = FromSerialNumber(serial);
+      client?.Dispose();
+    }
+
+    internal static DE.POST_EFFECT_EXECUTION_CONTROL_PROC__READY_TO_EXECUTE ready_to_execute_proc = ReadyToExecutePostEffect;
+    [MonoPInvokeCallback(typeof(DE.POST_EFFECT_EXECUTION_CONTROL_PROC__READY_TO_EXECUTE))]
+    private static bool ReadyToExecutePostEffect(int serial, Guid pep_id)
+    {
+      var client = FromSerialNumber(serial);
+      if (client == null)
+        return false;
+
+      return client.ReadyToExecutePostEffect(pep_id);
+    }
+
+    static internal void SetCppHooks(bool bInitialize)
+    {
+      if (bInitialize)
+      {
+        UnsafeNativeMethods.Rdk_CRdkCmnPostEffectExecutionControl_SetCallbacks(delete_this_proc, ready_to_execute_proc);
+      }
+      else
+      {
+        UnsafeNativeMethods.Rdk_CRdkCmnPostEffectExecutionControl_SetCallbacks(null, null);
+      }
+    }
+  }
+
 }

@@ -124,7 +124,7 @@ _variablename = (LPCTSTR) _variablename##_;                        \
 
 
 // Android compile
-#if defined (ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
+#if defined (ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX)
 #define RH_CPP_FUNCTION __attribute__ ((visibility ("default")))
 #define RH_CPP_CLASS __attribute__ ((visibility ("default")))
 #define RH_C_FUNCTION extern "C" __attribute__ ((visibility ("default")))
@@ -152,7 +152,7 @@ typedef signed char     BOOL;
 #define TRUE 1
 #define FALSE 0
 #define CALLBACK
-#endif // ON_COMPILER_ANDROIDNDK
+#endif
 
 // Only applicable for when compiled for running inside Rhino
 #if !defined(RHINO3DM_BUILD)
@@ -256,7 +256,7 @@ private:
 #else
   ON_wString m_winString;
 #endif
-#if defined(ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
+#if defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX)
   ON_SimpleArray<ON__UINT16> m_android;
 #endif
 };

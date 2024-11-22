@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 using System;
+using System.Collections.Generic;
 using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 
@@ -67,7 +68,7 @@ namespace Rhino.DocObjects
   // I think CRhinoGripObjectEx can probably be merged with GripObject
   public class GripObject : RhinoObject
   {
-    internal GripObject() {}
+    internal GripObject() { }
 
     internal GripObject(uint serialNumber)
       : base(serialNumber)
@@ -215,7 +216,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       uint sn = UnsafeNativeMethods.CRhinoGripObject_NeighborGrip(const_ptr_this, directionR, directionS, directionT, wrap);
-      if( sn!=0 )
+      if (sn != 0)
         return new GripObject(sn);
       return null;
     }
@@ -237,7 +238,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Retrieves the 2d parameter space values of this GripObject from the surface it's associated with.
+    /// Retrieves the NURBS surface 2d parameter space values of this GripObject from the surface it's associated with.
     /// </summary>
     /// <param name="u"></param>
     /// <param name="v"></param>
@@ -248,6 +249,60 @@ namespace Rhino.DocObjects
       u = v = Double.NaN;
       IntPtr const_ptr_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoGripObject_GetSurfaceParameters(const_ptr_this, ref u, ref v);
+    }
+
+    /// <summary>
+    /// Retrieves the NURBS curve control point indices of this GripObject from the curve it is associated with.
+    /// </summary>
+    /// <param name="cvIndices">The NURBS curve control point indices.</param>
+    /// <returns>
+    /// The number of NURBS curve control points managed by this grip.
+    /// If the grip is not a curve control point, zero is returned.
+    /// </returns>
+    /// <since>8.10</since>
+    public int GetCurveCVIndices(out int[] cvIndices)
+    {
+      cvIndices = Array.Empty<int>();
+      using (var index_array = new SimpleArrayInt())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        var ptr_index_array = index_array.NonConstPointer();
+        var count = UnsafeNativeMethods.CRhinoGripObject_GetCurveCVIndices(ptr_const_this, ptr_index_array);
+        if (count > 0)
+          cvIndices = index_array.ToArray();
+        return cvIndices.Length;
+      }
+    }
+
+    /// <summary>
+    /// Retrieves the NURBS surface control point indices of this GripObject from the surface it is associated with.
+    /// </summary>
+    /// <param name="cvIndices">The NURBS surface control point indices as tuples.</param>
+    /// <returns>
+    /// The number of NURBS surface control points managed by this grip.
+    /// If the grip is not a surface control point, zero is returned.
+    /// </returns>
+    /// <since>8.10</since>
+    public int GetSurfaceCVIndices(out Tuple<int, int>[] cvIndices)
+    {
+      cvIndices = Array.Empty<Tuple<int, int>>();
+      using (var dex_array = new SimpleArray2dex())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        var ptr_dex = dex_array.NonConstPointer();
+        var count = UnsafeNativeMethods.CRhinoGripObject_GetSurfaceCVIndices(ptr_const_this, ptr_dex);
+        if (count > 0)
+        {
+          var results = new List<Tuple<int, int>>();
+          foreach (var dex in dex_array.ToArray())
+          {
+            var uv = new Tuple<int, int>(dex.I, dex.J);
+            results.Add(uv);
+          }
+          cvIndices = results.ToArray();
+        }
+        return cvIndices.Length;
+      }
     }
 
     /// <summary>

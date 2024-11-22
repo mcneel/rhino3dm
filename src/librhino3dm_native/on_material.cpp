@@ -777,21 +777,21 @@ enum class TextureProjectionModes : int
   Wcs = 3,
   /// <summary>Box type world coordinate system projection</summary>
   WcsBox = 4,
-  /// <summary>Box type environtment mapping</summary>
+  /// <summary>Box type environment mapping</summary>
   EnvironmentMapBox = 5,
-  /// <summary>Light probe type environtment mapping</summary>
+  /// <summary>Light probe type environment mapping</summary>
   EnvironmentMapLightProbe = 6,
-  /// <summary>Spherical environtment mapping</summary>
+  /// <summary>Spherical environment mapping</summary>
   EnvironmentMapSpherical = 7,
-  /// <summary>Cube type environtment mapping</summary>
+  /// <summary>Cube type environment mapping</summary>
   EnvironmentMapCube = 8,
-  /// <summary>Vertical cross cube type environtment mapping</summary>
+  /// <summary>Vertical cross cube type environment mapping</summary>
   EnvironmentMapVCrossCube = 9,
-  /// <summary>Horizontal cross type environtment mapping</summary>
+  /// <summary>Horizontal cross type environment mapping</summary>
   EnvironmentMapHCrossCube = 10,
-  /// <summary>Hemispherical environtment mapping</summary>
+  /// <summary>Hemispherical environment mapping</summary>
   EnvironmentMapHemispherical = 11,
-  /// <summary>Emap type environtment mapping</summary>
+  /// <summary>Emap type environment mapping</summary>
   EnvironmentMapEmap = 12,
   /// <summary>Surface parameterization</summary>
   SurfaceParameterization = 13,

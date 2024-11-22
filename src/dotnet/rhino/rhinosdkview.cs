@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 using System;
 using Rhino.Render;
+using Rhino.Runtime;
 
 #if RHINO_SDK
 
@@ -209,6 +210,7 @@ namespace Rhino.Display
     /// <summary>
     /// true if the view is being dynamically changed by mouse moves, arrow keys, trackballs, etc.
     /// </summary>
+    /// <since>8.1</since>
     public bool InDynamicViewChange
     {
       get
@@ -1301,6 +1303,52 @@ namespace Rhino.Display
     /// </summary>
     /// <since>5.0</since>
     public Guid OldActiveDetailId { get; private set; }
+  }
+
+  /// <summary>
+  /// PageView properties change event arguments.
+  /// </summary>
+  /// <since>8.9</since>
+  public class PageViewPropertiesChangeEventArgs : EventArgs
+  {
+    internal PageViewPropertiesChangeEventArgs(uint documentSerialNumber, uint pageViewSerialNumber)
+    {
+      DocumentSerialNumber = documentSerialNumber;
+      PageViewSerialNumber = pageViewSerialNumber;
+    }
+
+    /// <summary>
+    /// The serial number of the Rhino document.
+    /// </summary>
+    /// <since>8.9</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber { get; private set; }
+
+    /// <summary>
+    /// The serial number of the page view.
+    /// </summary>
+    /// <since>8.9</since>
+    [CLSCompliant(false)]
+    public uint PageViewSerialNumber { get; private set; }
+
+    /// <summary>
+    /// Gets the Rhino document.
+    /// </summary>
+    /// <since>8.9</since>
+    public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber);
+
+    /// <summary>
+    /// Gets the Rhino page view.
+    /// </summary>
+    /// <since>8.9</since>
+    public RhinoPageView PageView
+    {
+      get 
+      {
+        var view = RhinoView.FromRuntimeSerialNumber(PageViewSerialNumber);
+        return view is RhinoPageView pageView ? pageView : null;
+      }
+    }
   }
 }
 

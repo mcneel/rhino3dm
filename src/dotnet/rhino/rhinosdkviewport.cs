@@ -22,6 +22,19 @@ namespace Rhino.Display
     TwoPointPerspective = 8
   }
 
+  /// <summary>
+  /// Isometric camera orientation.
+  /// </summary>
+  /// <since>8.10</since>
+  public enum IsometricCamera
+  {
+    None = 0,
+    Northeast = 1,
+    Northwest = 2,
+    Southeast = 3,
+    Southwest = 4,
+  }
+
 #if RHINO_SDK
   /// <summary>
   /// Displays geometry with a given projection. In standard modeling views there

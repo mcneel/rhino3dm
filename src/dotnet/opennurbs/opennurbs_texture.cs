@@ -439,6 +439,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// How texture is projected onto geometry
     /// </summary>
+    /// <since>8.3</since>
     public TextureProjectionModes ProjectionMode
     {
       get
@@ -456,6 +457,7 @@ namespace Rhino.DocObjects
     ///  Notice: If this texture is used by an object that has an object coordinate system (OCS) frame
     ///  defined on a mapping channel then that OCS frame is used instead of the WCS.
     /// </summary>
+    /// <since>8.3</since>
     public bool WcsProjected
     {
       get
@@ -468,6 +470,7 @@ namespace Rhino.DocObjects
     /// If false, the texture color values should be correctly by the linear workflow pre-process gamma value (in the document)
     /// if linear workflow is on.  Otherwise, if the values is true, the values should be used raw from the texture.
     /// </summary>
+    /// <since>8.7</since>
     public bool TreatAsLinear
     {
       get
@@ -485,6 +488,7 @@ namespace Rhino.DocObjects
     ///  Notice: If this texture is used by an object that has an object coordinate system (OCS) frame
     ///  defined on a mapping channel then that OCS frame is used instead of the WCS.
     /// </summary>
+    /// <since>8.3</since>
     public bool WcsBoxProjected
     {
       get

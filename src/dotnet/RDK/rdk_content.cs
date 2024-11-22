@@ -440,130 +440,130 @@ namespace Rhino.Render
   public static class ContentUuids
   {
     /// <since>6.0</since>
-    public static Guid BasicMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBasicMaterialType);
+    public static Guid BasicMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBasicMaterialType);
     /// <since>6.0</since>
-    public static Guid BlendMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBlendMaterialType);
+    public static Guid BlendMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBlendMaterialType);
     /// <since>6.0</since>
-    public static Guid CompositeMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcCompositeMaterialType);
+    public static Guid CompositeMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcCompositeMaterialType);
     /// <since>6.0</since>
-    public static Guid PlasterMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPlasterMaterialType);
+    public static Guid PlasterMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPlasterMaterialType);
     /// <since>6.0</since>
-    public static Guid MetalMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcMetalMaterialType);
+    public static Guid MetalMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcMetalMaterialType);
     /// <since>6.0</since>
-    public static Guid PaintMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPaintMaterialType);
+    public static Guid PaintMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPaintMaterialType);
     /// <since>6.0</since>
-    public static Guid PlasticMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPlasticMaterialType);
+    public static Guid PlasticMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPlasticMaterialType);
     /// <since>6.0</since>
-    public static Guid GemMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGemMaterialType);
+    public static Guid GemMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGemMaterialType);
     /// <since>6.0</since>
-    public static Guid GlassMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGlassMaterialType);
+    public static Guid GlassMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGlassMaterialType);
     /// <since>6.0</since>
-    public static Guid PictureMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPictureMaterialType);
+    public static Guid PictureMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPictureMaterialType);
     /// <since>6.0</since>
-    public static Guid DefaultMaterialInstance => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcDefaultMaterialInstance);
+    public static Guid DefaultMaterialInstance => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcDefaultMaterialInstance);
     /// <summary>
     /// Rhino V8 Blend material type Guid
     /// </summary>
     /// <since>8.0</since>
-    public static Guid V8BlendMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcV8BlendMaterialType);
+    public static Guid V8BlendMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcV8BlendMaterialType);
     /// <since>7.0</since>
-    public static Guid PhysicallyBasedMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPhysicallyBasedMaterialType);
+    public static Guid PhysicallyBasedMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPhysicallyBasedMaterialType);
     /// <since>7.0</since>
-    public static Guid DoubleSidedMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcDoubleSidedMaterialType);
+    public static Guid DoubleSidedMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcDoubleSidedMaterialType);
     /// <since>7.0</since>
-    public static Guid EmissionMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcEmissionMaterialType);
+    public static Guid EmissionMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcEmissionMaterialType);
     /// <since>7.5</since>
-    public static Guid DisplayAttributeMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcDisplayAttributeMaterialType);
+    public static Guid DisplayAttributeMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcDisplayAttributeMaterialType);
     /// <since>6.0</since>
-    public static Guid RealtimeDisplayMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcRealtimeDisplayMaterialType);
+    public static Guid RealtimeDisplayMaterialType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcRealtimeDisplayMaterialType);
     /// <since>6.0</since>
-    public static Guid BasicEnvironmentType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBasicEnvironmentType);
+    public static Guid BasicEnvironmentType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBasicEnvironmentType);
     /// <since>6.0</since>
-    public static Guid DefaultEnvironmentInstance => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcDefaultEnvironmentInstance);
+    public static Guid DefaultEnvironmentInstance => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcDefaultEnvironmentInstance);
     /// <since>6.0</since>
-    public static Guid Texture2DCheckerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.Rc2DCheckerTextureType);
+    public static Guid Texture2DCheckerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.Rc2DCheckerTextureType);
     /// <since>6.0</since>
-    public static Guid Texture3DCheckerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.Rc3DCheckerTextureType);
+    public static Guid Texture3DCheckerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.Rc3DCheckerTextureType);
     /// <since>6.0</since>
-    public static Guid AdvancedDotTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcAdvancedDotTextureType);
+    public static Guid AdvancedDotTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcAdvancedDotTextureType);
     /// <since>6.0</since>
-    public static Guid BitmapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBitmapTextureType);
+    public static Guid BitmapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBitmapTextureType);
     /// <since>6.0</since>
-    public static Guid BlendTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBlendTextureType);
+    public static Guid BlendTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBlendTextureType);
     /// <since>6.0</since>
-    public static Guid CubeMapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcCubeMapTextureType);
+    public static Guid CubeMapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcCubeMapTextureType);
     /// <since>6.0</since>
-    public static Guid ExposureTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcExposureTextureType);
+    public static Guid ExposureTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcExposureTextureType);
     /// <since>6.0</since>
-    public static Guid FBmTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcFBmTextureType);
+    public static Guid FBmTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcFBmTextureType);
     /// <since>6.0</since>
-    public static Guid GradientTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGradientTextureType);
+    public static Guid GradientTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGradientTextureType);
     /// <since>6.0</since>
-    public static Guid GraniteTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGraniteTextureType);
+    public static Guid GraniteTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGraniteTextureType);
     /// <since>6.0</since>
-    public static Guid GridTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGridTextureType);
+    public static Guid GridTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGridTextureType);
     /// <since>6.0</since>
-    public static Guid HDRTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcHDRTextureType);
+    public static Guid HDRTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcHDRTextureType);
     /// <since>6.0</since>
-    public static Guid EXRTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcEXRTextureType);
+    public static Guid EXRTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcEXRTextureType);
     /// <since>6.0</since>
-    public static Guid MarbleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcMarbleTextureType);
+    public static Guid MarbleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcMarbleTextureType);
     /// <since>6.0</since>
-    public static Guid MaskTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcMaskTextureType);
+    public static Guid MaskTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcMaskTextureType);
     /// <since>6.0</since>
-    public static Guid NoiseTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcNoiseTextureType);
+    public static Guid NoiseTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcNoiseTextureType);
     /// <since>6.0</since>
-    public static Guid PerlinMarbleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPerlinMarbleTextureType);
+    public static Guid PerlinMarbleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPerlinMarbleTextureType);
     /// <since>6.0</since>
-    public static Guid PerturbingTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPerturbingTextureType);
+    public static Guid PerturbingTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPerturbingTextureType);
     /// <since>6.0</since>
-    public static Guid ProjectionChangerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcProjectionChangerTextureType);
+    public static Guid ProjectionChangerTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcProjectionChangerTextureType);
     /// <since>6.0</since>
-    public static Guid ResampleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcResampleTextureType);
+    public static Guid ResampleTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcResampleTextureType);
     /// <since>6.0</since>
-    public static Guid SingleColorTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcSingleColorTextureType);
+    public static Guid SingleColorTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcSingleColorTextureType);
     /// <since>6.0</since>
-    public static Guid SimpleBitmapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcSimpleBitmapTextureType);
+    public static Guid SimpleBitmapTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcSimpleBitmapTextureType);
     /// <since>6.0</since>
-    public static Guid StuccoTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcStuccoTextureType);
+    public static Guid StuccoTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcStuccoTextureType);
     /// <since>6.0</since>
-    public static Guid TextureAdjustmentTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcTextureAdjustmentTextureType);
+    public static Guid TextureAdjustmentTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcTextureAdjustmentTextureType);
     /// <since>6.0</since>
-    public static Guid TileTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcTileTextureType);
+    public static Guid TileTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcTileTextureType);
     /// <since>6.0</since>
-    public static Guid TurbulenceTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcTurbulenceTextureType);
+    public static Guid TurbulenceTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcTurbulenceTextureType);
     /// <since>6.0</since>
-    public static Guid WavesTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcWavesTextureType);
+    public static Guid WavesTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcWavesTextureType);
     /// <since>6.0</since>
-    public static Guid WoodTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcWoodTextureType);
+    public static Guid WoodTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcWoodTextureType);
     /// <since>8.0</since>
-    public static Guid AddTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcAddTextureType);
+    public static Guid AddTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcAddTextureType);
     /// <since>8.0</since>
-    public static Guid MultiplyTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcMultiplyTextureType);
+    public static Guid MultiplyTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcMultiplyTextureType);
     /// <since>8.0</since>
-    public static Guid PhysicalSkyTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcPhysicalSkyTextureType);
+    public static Guid PhysicalSkyTextureType => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcPhysicalSkyTextureType);
     /// <since>6.0</since>
-    public static Guid HatchBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcHatchBumpTexture);
+    public static Guid HatchBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcHatchBumpTexture);
     /// <since>6.0</since>
-    public static Guid CrossHatchBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcCrossHatchBumpTexture);
+    public static Guid CrossHatchBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcCrossHatchBumpTexture);
     /// <since>6.0</since>
-    public static Guid LeatherBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcLeatherBumpTexture);
+    public static Guid LeatherBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcLeatherBumpTexture);
     /// <since>6.0</since>
-    public static Guid WoodBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcWoodBumpTexture);
+    public static Guid WoodBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcWoodBumpTexture);
     /// <since>6.0</since>
-    public static Guid SpeckleBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcSpeckleBumpTexture);
+    public static Guid SpeckleBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcSpeckleBumpTexture);
     /// <since>6.0</since>
-    public static Guid GritBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcGritBumpTexture);
+    public static Guid GritBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcGritBumpTexture);
     /// <since>6.0</since>
-    public static Guid DotBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcDotBumpTexture);
+    public static Guid DotBumpTexture => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcDotBumpTexture);
     /// <since>6.0</since>
-    public static Guid BasicMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBasicMaterialCCI);
+    public static Guid BasicMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBasicMaterialCCI);
     /// <since>6.0</since>
-    public static Guid BlendMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBlendMaterialCCI);
+    public static Guid BlendMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBlendMaterialCCI);
     /// <since>6.0</since>
-    public static Guid CompositeMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcCompositeMaterialCCI);
+    public static Guid CompositeMaterialCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcCompositeMaterialCCI);
     /// <since>6.0</since>
-    public static Guid BasicEnvironmentCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.RenderContent_UuidIds.RcBasicEnvironmentCCI);
+    public static Guid BasicEnvironmentCCI => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.RcBasicEnvironmentCCI);
   }
 
   /// <since>6.0</since>
@@ -1203,14 +1203,21 @@ namespace Rhino.Render
       var iterator = Iterator();
       if (iterator != null)
       {
-        var content = iterator.First();
-        while (content != null)
+        // 4th June 2024 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-82358
+        // Use try..finally to make sure the iterator gets deleted even if the caller breaks out of the loop.
+        try
         {
-          yield return content;
-          content = iterator.Next();
+          var content = iterator.First();
+          while (content != null)
+          {
+            yield return content;
+            content = iterator.Next();
+          }
         }
-
-        iterator.DeleteThis();
+        finally
+        {
+          iterator.DeleteThis();
+        }
       }
     }
   }
@@ -1383,11 +1390,20 @@ namespace Rhino.Render
     /// <summary>
     /// If this is a material, checks if it's in use and the rhino object is selected.
     /// Otherwise returns false.
-    /// /// </summary>
+    /// </summary>
     /// <returns></returns>
     internal bool IsInUseBySelectedObject()
     {
       return UnsafeNativeMethods.Rdk_RenderContent_IsInUseBySelectedObject(CppPointer);
+    }
+
+    /// <summary>
+    /// Checks if this render content has the specified id. This is different to checking the id
+    /// directly because it also checks the members of texture proxies.
+    /// </summary>
+    internal bool HasId(Guid id)
+    {
+      return UnsafeNativeMethods.Rdk_RenderContent_HasId(ConstPointer(), id);
     }
     #endregion
 
@@ -1680,6 +1696,7 @@ namespace Rhino.Render
     /// <summary>
     /// Used by SaveToFile
     /// </summary>
+    /// <since>8.6</since>
     public enum EmbedFilesChoice : int 
     { 
       /// <summary>
@@ -1702,6 +1719,7 @@ namespace Rhino.Render
     /// <param name="filename">Full path to the file to be saved.</param>
     /// <param name="embedFilesChoice"></param>
     /// <returns>The loaded content or null if an error occurred.</returns>
+    /// <since>8.6</since>
     public bool SaveToFile(String filename, EmbedFilesChoice embedFilesChoice)
     {
       return UnsafeNativeMethods.Rdk_RenderContent_SaveContentToFile(ConstPointer(), filename, (int)embedFilesChoice);
@@ -1794,6 +1812,7 @@ namespace Rhino.Render
 
     internal delegate void OnMakeCopyCallback(int serialNumber, IntPtr pNewContent);
     internal static OnMakeCopyCallback g_on_make_copy = OnMakeCopyImpl;
+    [MonoPInvokeCallback(typeof(OnMakeCopyCallback))]
     private static void OnMakeCopyImpl(int serialNumber, IntPtr pNewContent)
     {
       var content = FromSerialNumber(serialNumber);
@@ -1881,6 +1900,88 @@ namespace Rhino.Render
       return RenderContent.FromPointer(pContent, null);
     }
 
+    /// <summary>
+    /// Generate a render content preview
+    /// </summary>
+    /// <param name="lwf">Linear Workflow</param>
+    /// <param name="c">Render Content</param>
+    /// <param name="width">Image width</param>
+    /// <param name="height">Image height</param>
+    /// <param name="bSuppressLocalMapping">Suppress Local Mapping</param>
+    /// <param name="pjs">Preivew Job Signature</param>
+    /// <param name="pa">Preivew Appearance</param>
+    /// <param name="result">Reference to PreviewRenderResult value</param>
+    /// <returns>The Bitmap of the render content preview</returns>
+    public static System.Drawing.Bitmap GenerateRenderContentPreview(LinearWorkflow lwf, RenderContent c, int width, int height, bool bSuppressLocalMapping, PreviewJobSignature pjs, PreviewAppearance pa, ref Utilities.PreviewRenderResult result)
+    {
+      if (lwf == null || c == null || pjs == null || pa == null)
+        return null;
+
+      result = Utilities.PreviewRenderResult.Nothing;
+
+      uint rValue = 0;
+
+      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateRenderedContentPreview(lwf.CppPointer, c.CppPointer, width, height, bSuppressLocalMapping, pjs.CppPointer, pa.CppPointer, ref rValue);
+
+      if(rValue == 0)
+        result = Utilities.PreviewRenderResult.Rendering;
+      else if(rValue == 1)
+        result = Utilities.PreviewRenderResult.CacheOK;
+      else if(rValue == 2)
+        result = Utilities.PreviewRenderResult.CacheFail;
+      else if(rValue == 3)
+        result = Utilities.PreviewRenderResult.Nothing;
+
+      if (pDib == IntPtr.Zero)
+        return null;
+
+      if (rValue == (uint)Utilities.PreviewRenderResult.Rendering || rValue == (uint)Utilities.PreviewRenderResult.CacheFail || rValue == (uint)Utilities.PreviewRenderResult.Nothing)
+        return null;
+
+      var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(pDib, true);
+      return bitmap;
+    }
+
+    /// <summary>
+    /// Generate a quick render content preview
+    /// </summary>
+    /// <param name="c">Render Content</param>
+    /// <param name="width">Image width</param>
+    /// <param name="height">Image height</param>
+    /// <param name="psc">PreviewSceneServer</param>
+    /// <param name="bSuppressLocalMapping">SuppressLocalMapping</param>
+    /// <param name="reason"> ContentChanged = 0, ViewChanged = 1, RefreshDisplay = 2, Other = 99</param>
+    /// <param name="result">Rhino.Command.Result value for successfull quick image creation</param>
+    /// <returns>The Bitmap of the quick render content preview</returns>
+    public static System.Drawing.Bitmap GenerateQuickContentPreview(RenderContent c, int width, int height, PreviewSceneServer psc, bool bSuppressLocalMapping, int reason, ref Rhino.Commands.Result result)
+    {
+      uint rValue = 0;
+      result = Rhino.Commands.Result.Nothing;
+
+      if (c == null)
+        return null;
+
+      IntPtr pPreviewSceneServer = IntPtr.Zero;
+      if (psc != null)
+        pPreviewSceneServer = psc.CppPointer;
+
+      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateQuickContentPreview(c.CppPointer, width, height, pPreviewSceneServer, bSuppressLocalMapping, reason, ref rValue);
+
+      if(rValue == 0)
+        result = Rhino.Commands.Result.Nothing;
+      else if(rValue == 1)
+        result = Rhino.Commands.Result.Success;
+
+      if (pDib == IntPtr.Zero)
+        return null;
+
+      if (rValue == 0)
+        return null;
+
+      var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(pDib, true);
+      return bitmap;
+    }
+
     internal static ChangeContexts ChangeContextFromExtraRequirementsSetContext(ExtraRequirementsSetContexts sc) // Static.
     {
       switch (sc)
@@ -1957,6 +2058,7 @@ namespace Rhino.Render
     /// by m_runtime_serial_number.
     /// </summary>
     static readonly Dictionary<int, RenderContent> g_custom_content_dictionary = new Dictionary<int, RenderContent>();
+    static object g_custom_content_dictionary_lock = new object();
     /// <summary>
     /// Rhino.Render.Fields FieldDictionary which provides access to setting
     /// and retrieving field values.
@@ -2061,8 +2163,11 @@ namespace Rhino.Render
       // This constructor is being called because we have a custom .NET subclass
       if (IsCustomClassDefintion())
       {
-        RuntimeSerialNumber = g_current_serial_number++;
-        g_custom_content_dictionary.Add(RuntimeSerialNumber, this);
+        lock(g_custom_content_dictionary_lock)
+        {
+          RuntimeSerialNumber = System.Threading.Interlocked.Increment(ref g_current_serial_number);
+          g_custom_content_dictionary.Add(RuntimeSerialNumber, this);
+        }
       }
       // Find the plug-in that registered this class type
       var type = GetType();
@@ -2493,6 +2598,7 @@ namespace Rhino.Render
 
     internal delegate uint RenderCrcCallback(int serialNumber, ulong rcrcFlags, IntPtr pString_excludeParameterNames);
     internal static readonly RenderCrcCallback g_on_render_crc = OnRenderCrc;
+    [MonoPInvokeCallback(typeof(RenderCrcCallback))]
     private static uint OnRenderCrc(int serialNumber, ulong rcrcFlags, IntPtr pString_excludeParameterNamese)
     {
       var render_content = FromSerialNumber(serialNumber);
@@ -3052,7 +3158,8 @@ namespace Rhino.Render
     }
 
     /// <since>7.0</since>
-    public bool GetUnderlyingInstances(ref RenderContentCollection collection)
+    /// DO NOT CALL THIS FUNCTION IN NEW CODE. IT WILL BE DEPRECATED ASAP.
+    public bool GetUnderlyingInstances(ref RenderContentCollection collection) // TODO: JOHNC GetUnderlyingInstances
     {
       return UnsafeNativeMethods.Rdk_RenderContent_GetUnderlyingInstances(ConstPointer(), collection.CppPointer);
     }
@@ -3917,6 +4024,7 @@ namespace Rhino.Render
 
     internal delegate int IsFactoryProductAcceptableAsChildCallback(int serialNumber, IntPtr contentFactoryPointer, IntPtr pString_childSlotName);
     internal static IsFactoryProductAcceptableAsChildCallback IsFactoryProductAcceptableAsChildHook = OnIsFactoryProductAcceptableAsChild;
+    [MonoPInvokeCallback(typeof(IsFactoryProductAcceptableAsChildCallback))]
     static int OnIsFactoryProductAcceptableAsChild(int serialNumber, IntPtr contentFactoryPointer, IntPtr pString_childSlotName)
     {
       var content = FromSerialNumber(serialNumber);
@@ -3955,6 +4063,7 @@ namespace Rhino.Render
 
     internal delegate int IsContentTypeAcceptableAsChildCallback(int serialNumber, Guid type, IntPtr pString_childSlotName);
     internal static IsContentTypeAcceptableAsChildCallback m_IsContentTypeAcceptableAsChild = OnIsContentTypeAcceptableAsChild;
+    [MonoPInvokeCallback(typeof(IsContentTypeAcceptableAsChildCallback))]
     static int OnIsContentTypeAcceptableAsChild(int serialNumber, Guid type, IntPtr pString_childSlotName)
     {
       try
@@ -3972,6 +4081,7 @@ namespace Rhino.Render
 
     internal delegate void GetParameterCallback(int serialNumber, IntPtr pStringName, IntPtr pVariant);
     internal static GetParameterCallback m_GetParameter = OnGetParameter;
+    [MonoPInvokeCallback(typeof(GetParameterCallback))]
     static void OnGetParameter(int serialNumber, IntPtr pStringName, IntPtr pVariant)
     {
       try
@@ -4033,6 +4143,7 @@ namespace Rhino.Render
 
     internal delegate void SetEmbeddedFilesCallback(int serialNumber, IntPtr result);
     internal static SetEmbeddedFilesCallback g_embedded_files_callback = OnEmbeddedFilesCallback;
+    [MonoPInvokeCallback(typeof(SetEmbeddedFilesCallback))]
     static void OnEmbeddedFilesCallback(int serialNumber, IntPtr result)
     {
       // 22nd November 2022 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-71480
@@ -4050,6 +4161,7 @@ namespace Rhino.Render
 
     internal delegate void SetGetFilenameCallback(int serialNumber, IntPtr result);
     internal static SetGetFilenameCallback g_get_filename_callback = OnGetFilenameCallback;
+    [MonoPInvokeCallback(typeof(SetGetFilenameCallback))]
     static void OnGetFilenameCallback(int serialNumber, IntPtr result)
     {
       var content = FromSerialNumber(serialNumber);
@@ -4065,6 +4177,7 @@ namespace Rhino.Render
 
     internal delegate bool SetSetFilenameCallback(int serialNumber, IntPtr pFilename);
     internal static SetSetFilenameCallback g_set_filename_callback = OnSetFilenameCallback;
+    [MonoPInvokeCallback(typeof(SetSetFilenameCallback))]
     static bool OnSetFilenameCallback(int serialNumber, IntPtr pFilename)
     {
       var content = FromSerialNumber(serialNumber);
@@ -4080,6 +4193,7 @@ namespace Rhino.Render
 
     internal delegate void SetMetersToUnitsCallback(int serialNumber);
     internal static SetMetersToUnitsCallback g_meters_to_units_callback = OnMetersToUnitsCallback;
+    [MonoPInvokeCallback(typeof(SetMetersToUnitsCallback))]
     static void OnMetersToUnitsCallback(int serialNumber)
     {
       var content = FromSerialNumber(serialNumber);
@@ -4094,6 +4208,7 @@ namespace Rhino.Render
 
     internal delegate void SetUnitsToMetersCallback(int serialNumber);
     internal static SetUnitsToMetersCallback g_units_to_meters_callback = OnUnitsToMetersCallback;
+    [MonoPInvokeCallback(typeof(SetUnitsToMetersCallback))]
     static void OnUnitsToMetersCallback(int serialNumber)
     {
       var content = FromSerialNumber(serialNumber);
@@ -4152,6 +4267,7 @@ namespace Rhino.Render
 
     internal delegate int SetParameterCallback(int serialNumber, IntPtr name, IntPtr value);
     internal static SetParameterCallback m_SetParameter = OnSetParameter;
+    [MonoPInvokeCallback(typeof(SetParameterCallback))]
     static int OnSetParameter(int serialNumber, IntPtr pString_name, IntPtr value)
     {
       try
@@ -4173,6 +4289,7 @@ namespace Rhino.Render
 
     internal delegate int GetExtraRequirementParameterCallback(int serialNumber, IntPtr pString_paramName, IntPtr pString_extraRequirementName, IntPtr value);
     internal static GetExtraRequirementParameterCallback m_GetExtraRequirementParameter = OnGetExtraRequirementParameter;
+    [MonoPInvokeCallback(typeof(GetExtraRequirementParameterCallback))]
     static int OnGetExtraRequirementParameter(int serialNumber, IntPtr pString_paramName, IntPtr pString_extraRequirementName, IntPtr value)
     {
       try
@@ -4199,6 +4316,7 @@ namespace Rhino.Render
 
     internal delegate int SetContentIconCallback(int serialNumber, int width, int height, IntPtr dibOut, int fromBaseClass);
     internal static SetContentIconCallback SetContentIcon = OnSetContentIcon;
+    [MonoPInvokeCallback(typeof(SetContentIconCallback))]
     private static int OnSetContentIcon(int serialNumber, int width, int height, IntPtr dibOut, int fromBaseClass)
     {
       try
@@ -4298,6 +4416,7 @@ namespace Rhino.Render
     
     internal delegate int SetExtraRequirementParameterCallback(int serialNumber, IntPtr pString_paramName, IntPtr pString_extraRequirementName, IntPtr value, int sc);
     internal static SetExtraRequirementParameterCallback m_SetExtraRequirementParameter = OnSetExtraRequirementParameter;
+    [MonoPInvokeCallback(typeof(SetExtraRequirementParameterCallback))]
     static int OnSetExtraRequirementParameter(int serialNumber, IntPtr pString_paramName, IntPtr pString_extraRequirementName, IntPtr value, int sc)
     {
       try
@@ -4320,6 +4439,7 @@ namespace Rhino.Render
 
     internal delegate int HarvestDataCallback(int serialNumber, IntPtr oldContent);
     internal static HarvestDataCallback HarvestData = g_on_harvest_data;
+    [MonoPInvokeCallback(typeof(HarvestDataCallback))]
     static int g_on_harvest_data(int serialNumber, IntPtr oldContent)
     {
       try
@@ -4339,6 +4459,7 @@ namespace Rhino.Render
     internal delegate void AddUiSectionsCallback(int serialNumber, Guid editorId);
     internal static AddUiSectionsCallback m_AddUISections = OnAddUISections;
     internal static Guid OnAddUiSectionsUIId = Guid.Empty;
+    [MonoPInvokeCallback(typeof(AddUiSectionsCallback))]
     static void OnAddUISections(int serialNumber, Guid UIId)
     {
       OnAddUiSectionsUIId = UIId;
@@ -4356,6 +4477,7 @@ namespace Rhino.Render
 
     internal delegate int GetDefaultsFromUserCallback(int serialNumber);
     internal static GetDefaultsFromUserCallback GetDefaultsFromUser = g_on_get_defaults_from_user;
+    [MonoPInvokeCallback(typeof(GetDefaultsFromUserCallback))]
     static int g_on_get_defaults_from_user(int serialNumber)
     {
       try
@@ -4373,6 +4495,7 @@ namespace Rhino.Render
 
     internal delegate void RenderContentOnCppDtorCallback(int serialNumber);
     internal static RenderContentOnCppDtorCallback OnCppDtor = OnCppDtorRhCmnRenderContent;
+    [MonoPInvokeCallback(typeof(RenderContentOnCppDtorCallback))]
     static void OnCppDtorRhCmnRenderContent(int serialNumber)
     {
       try
@@ -4393,6 +4516,7 @@ namespace Rhino.Render
 
     internal delegate uint RenderContentBitFlagsCallback(int serialNumber, uint flags);
     internal static RenderContentBitFlagsCallback BitFlags = OnContentBitFlags;
+    [MonoPInvokeCallback(typeof(RenderContentBitFlagsCallback))]
     static uint OnContentBitFlags(int serialNumber, uint flags)
     {
       try
@@ -4437,6 +4561,7 @@ namespace Rhino.Render
 
     internal delegate void GetRenderContentStringCallback(int serialNumber, int string_id, IntPtr pON_wString);
     internal static GetRenderContentStringCallback GetRenderContentString = OnGetRenderContentString;
+    [MonoPInvokeCallback(typeof(GetRenderContentStringCallback))]
     static void OnGetRenderContentString(int serialNnumber, int string_id, IntPtr pOnWString)
     {
       try
@@ -4471,6 +4596,7 @@ namespace Rhino.Render
 
     internal delegate IntPtr GetShaderCallback(int serialNumber, Guid renderEngineId, IntPtr privateData);
     internal static GetShaderCallback m_GetShader = OnGetShader;
+    [MonoPInvokeCallback(typeof(GetShaderCallback))]
     static IntPtr OnGetShader(int serialNumber, Guid renderEngineId, IntPtr privateData)
     {
       try
@@ -4488,6 +4614,7 @@ namespace Rhino.Render
 
     internal delegate ulong RenderContentUiHashCallback(int serialNumber);
     internal static readonly RenderContentUiHashCallback m_GetUiHash = OnRenderContentUiHash;
+    [MonoPInvokeCallback(typeof(RenderContentUiHashCallback))]
     private static ulong OnRenderContentUiHash(int serialNumber)
     {
       var render_content = FromSerialNumber(serialNumber);
@@ -4514,6 +4641,7 @@ namespace Rhino.Render
     internal delegate void CurrentContentChangedCallback(uint docSerialNumber, int kind, int usage, IntPtr pContent);
 
     private static ContentAddedCallback m_OnContentAdded;
+    [MonoPInvokeCallback(typeof(ContentAddedCallback))]
     private static void OnContentAdded(uint docSerialNumber, IntPtr pContent, UnsafeNativeMethods.RdkEventWatcherBaseAttachReason reason)
     {
       if (m_content_added_event != null)
@@ -4526,6 +4654,7 @@ namespace Rhino.Render
     internal static EventHandler<RenderContentEventArgs> m_content_added_event;
 
     private static ContentRenamedCallback m_OnContentRenamed;
+    [MonoPInvokeCallback(typeof(ContentRenamedCallback))]
     private static void OnContentRenamed(IntPtr pContent)
     {
       if (g_content_renamed_event != null)
@@ -4538,6 +4667,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentEventArgs> g_content_renamed_event;
 
     private static ContentDeletingCallback m_OnContentDeleting;
+    [MonoPInvokeCallback(typeof(ContentDeletingCallback))]
     private static void OnContentDeleting(uint docSerialNumber, IntPtr pContent, UnsafeNativeMethods.RdkEventWatcherBaseDetachReason reason)
     {
       if (g_content_deleting_event != null)
@@ -4550,6 +4680,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentEventArgs> g_content_deleting_event;
 
     private static ContentDeletingCallback m_OnContentDeleted;
+    [MonoPInvokeCallback(typeof(ContentDeletingCallback))]
     private static void OnContentDeleted(uint docSerialNumber, IntPtr pContent, UnsafeNativeMethods.RdkEventWatcherBaseDetachReason reason)
     {
       if (g_content_deleted_event != null)
@@ -4562,6 +4693,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentEventArgs> g_content_deleted_event;
 
     private static ContentReplacingCallback m_OnContentReplacing;
+    [MonoPInvokeCallback(typeof(ContentReplacingCallback))]
     private static void OnContentReplacing(uint docSerialNumber, IntPtr pContent)
     {
       if (g_content_replacing_event != null)
@@ -4574,6 +4706,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentEventArgs> g_content_replacing_event;
 
     private static ContentReplacedCallback m_OnContentReplaced;
+    [MonoPInvokeCallback(typeof(ContentReplacedCallback))]
     private static void OnContentReplaced(uint docSerialNumber, IntPtr pContent)
     {
       if (g_content_replaced_event != null)
@@ -4586,6 +4719,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentEventArgs> g_content_replaced_event;
 
     private static ContentChangedCallback m_OnContentChanged;
+    [MonoPInvokeCallback(typeof(ContentChangedCallback))]
     private static void OnContentChanged(IntPtr newContent, IntPtr oldContent, int cc)
     {
       if (g_content_changed_event != null)
@@ -4599,6 +4733,7 @@ namespace Rhino.Render
     static EventHandler<RenderContentChangedEventArgs> g_content_changed_event;
 
     private static ContentUpdatePreviewCallback m_OnContentUpdatePreview;
+    [MonoPInvokeCallback(typeof(ContentUpdatePreviewCallback))]
     private static void OnContentUpdatePreview(IntPtr pContent)
     {
       if (g_content_update_preview_event != null)
@@ -4819,6 +4954,7 @@ namespace Rhino.Render
     internal delegate void OnPreviewRenderedCallback(IntPtr pDib, uint quality, IntPtr pjs);
     internal static OnPreviewRenderedCallback g_on_preview_rendered;
     static EventHandler<PreviewRenderedEventArgs> g_on_preview_rendered_event;
+    [MonoPInvokeCallback(typeof(OnPreviewRenderedCallback))]
     private static void OnPreviewRendered(IntPtr pDib, uint quality, IntPtr p_pjs)
     {
       if (g_on_preview_rendered_event != null)
@@ -4827,7 +4963,7 @@ namespace Rhino.Render
 
         PreviewJobSignature pjs = new PreviewJobSignature(p_pjs);
 
-        var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(pDib, true);
+        var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(UnsafeNativeMethods.CRhinoDib_Copy(pDib), true);
 
         args.PreviewJobSignature = pjs;
         args.Bitmap = bitmap;
@@ -4879,6 +5015,7 @@ namespace Rhino.Render
     internal delegate void OnContentFieldChangedCallback(int serialNumber, IntPtr pString_name, IntPtr value, int cc);
     internal static OnContentFieldChangedCallback g_on_content_field_changed;
     static EventHandler<RenderContentFieldChangedEventArgs> g_content_field_changed_event;
+    [MonoPInvokeCallback(typeof(OnContentFieldChangedCallback))]
     private static void OnContentFieldChanged(int serialNumber, IntPtr pString_name, IntPtr value, int cc)
     {
       if (g_content_field_changed_event != null)
@@ -4922,6 +5059,7 @@ namespace Rhino.Render
 
     static EventHandler<RenderContentEventArgs> g_current_environment_change_event;
     private static CurrentContentChangedCallback m_OnCurrentEnvironmentChange;
+    [MonoPInvokeCallback(typeof(CurrentContentChangedCallback))]
     private static void OnCurrentEnvironmentChange(uint docSerialNumber, int kind, int usage, IntPtr pContent)
     {
       if (g_current_environment_change_event != null)
@@ -4973,8 +5111,11 @@ namespace Rhino.Render
 
     internal static RenderContent FromSerialNumber(int serialNumber)
     {
-      g_custom_content_dictionary.TryGetValue(serialNumber, out RenderContent rc);
-      return rc;
+      lock (g_custom_content_dictionary_lock)
+      {
+        g_custom_content_dictionary.TryGetValue(serialNumber, out RenderContent rc);
+        return rc;
+      }
     }
 
     internal virtual IntPtr ConstPointer()
@@ -5036,7 +5177,10 @@ namespace Rhino.Render
       if (serialNumber >= 0)
       {
         RuntimeSerialNumber = -1;
-        g_custom_content_dictionary.Remove(serialNumber);
+        lock (g_custom_content_dictionary_lock)
+        {
+          g_custom_content_dictionary.Remove(serialNumber);
+        }
       }
 
       if (HostUtils.RunningOnWindows)
@@ -5237,16 +5381,19 @@ namespace Rhino.Render
     /// <summary>
     /// The Preview Job Signature associated with the rendered preview
     /// </summary>
+    /// <since>8.8</since>
     public PreviewJobSignature PreviewJobSignature { get { return m_preview_job_signature; } set { m_preview_job_signature = value;}}
 
     /// <summary>
     /// The Bitmap of the rendered preview
     /// </summary>
+    /// <since>8.8</since>
     public Bitmap Bitmap { get { return m_bitmap; } set { m_bitmap = value;}}
     
     /// <summary>
     /// The Bitmap of the rendered preview
     /// </summary>
+    /// <since>8.8</since>
     public Utilities.PreviewQuality Quality { get { return m_quality; } set { m_quality = value;}}
   }
 

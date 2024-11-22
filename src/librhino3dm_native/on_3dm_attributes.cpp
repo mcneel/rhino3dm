@@ -375,6 +375,14 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_GroupList(const ON_3dmObjectAttributes
   }
 }
 
+RH_C_FUNCTION bool ON_3dmObjectAttributes_IsInGroup(const ON_3dmObjectAttributes* ptr, int index)
+{
+  if (ptr)
+    return ptr->IsInGroup(index);
+
+  return false;
+}
+
 RH_C_FUNCTION void ON_3dmObjectAttributes_GroupOp(ON_3dmObjectAttributes* ptr, int whichOp, int index)
 {
   if( NULL == ptr )

@@ -836,4 +836,21 @@ RH_C_FUNCTION bool ONC_CombineShortSegments(ON_Curve* ptrCurve, double tolerance
     return ON_CombineShortSegments(*ptrCurve, tolerance);
   return false;
 }
+
+RH_C_FUNCTION bool RHC_RhExtractCurveControlPolygon(const ON_Curve* pCurve, ON_Polyline* pPolyline)
+{
+  bool rc = false;
+  if (pCurve && pPolyline)
+    rc = RhExtractCurveControlPolygon(pCurve, *pPolyline);
+  return rc;
+}
+
+RH_C_FUNCTION void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>* vector)
+{
+  if (vector) vector->Empty();
+  if (curve)
+  {
+    *vector = curve->SpanVector();
+  }
+}
 #endif

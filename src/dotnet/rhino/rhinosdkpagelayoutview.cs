@@ -1,4 +1,5 @@
 using Rhino.DocObjects;
+using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 #pragma warning disable 1591
 using System;
@@ -413,6 +414,40 @@ namespace Rhino.Display
         {
           UnsafeNativeMethods.CRhinoEventWatcher_SetDetailEventCallback(null);
           g_on_page_space_changed = null;
+        }
+      }
+    }
+
+    internal delegate void PageViewPropertiesCallback(uint documentSerialNumber, uint pageviewSerialNumber);
+    private static PageViewPropertiesCallback g_pageview_properties_callback;
+    private static EventHandler<PageViewPropertiesChangeEventArgs> g_pageview_properties_change;
+    private static void OnPageViewPropertiesChange(uint documentSerialNumber, uint pageViewSerialNumber)
+    {
+      g_pageview_properties_change?.SafeInvoke(null, new PageViewPropertiesChangeEventArgs(documentSerialNumber, pageViewSerialNumber));
+    }
+    public static event EventHandler<PageViewPropertiesChangeEventArgs> PageViewPropertiesChange
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_pageview_properties_change, value))
+          return;
+        if (g_pageview_properties_change == null)
+        {
+          g_pageview_properties_callback = OnPageViewPropertiesChange;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetPageViewPropertiesCallback(g_pageview_properties_callback);
+        }
+        // ReSharper disable once DelegateSubtraction
+        g_pageview_properties_change -= value;
+        g_pageview_properties_change += value;
+      }
+      remove
+      {
+        // ReSharper disable once DelegateSubtraction
+        g_pageview_properties_change -= value;
+        if (g_pageview_properties_change == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetDetailEventCallback(null);
+          g_pageview_properties_callback = null;
         }
       }
     }

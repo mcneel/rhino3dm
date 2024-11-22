@@ -869,6 +869,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Gets the value of the vector with components 0,1.
     /// </summary>
+    /// <since>8.4</since>
     public static Vector2f YAxis
     {
       get { return new Vector2f(0f, 1f); }
@@ -1047,6 +1048,7 @@ namespace Rhino.Geometry
     /// <para>An invalid or zero length vector cannot be unitized.</para>
     /// </summary>
     /// <returns>true on success or false on failure.</returns>
+    /// <since>8.4</since>
     public bool Unitize()
     {
       bool rc = UnsafeNativeMethods.ON_2fVector_Unitize(ref this);
@@ -1060,6 +1062,7 @@ namespace Rhino.Geometry
     ///</summary>
     ///<remarks>Similar to <see cref="Negate">Negate</see>, that is only provided for CLR language compliance.</remarks>
     ///<returns>true on success or false if the vector is invalid.</returns>
+    /// <since>8.4</since>
     public bool Reverse()
     {
       bool rc = true;
@@ -1076,6 +1079,7 @@ namespace Rhino.Geometry
     ///</summary>
     /// <param name="other">Vector to use as guide.</param>
     ///<returns>true on success, false if input vector is zero or invalid.</returns>
+    /// <since>8.4</since>
     [ConstOperation]
     public bool PerpendicularTo(Vector2f other)
     {
@@ -1168,6 +1172,7 @@ namespace Rhino.Geometry
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
     /// <returns>A new vector that results from the component-wise addition of the two vectors.</returns>
+    /// <since>8.4</since>
     public static Vector2f Add(Vector2f vector1, Vector2f vector2)
     {
       return new Vector2f(vector1.m_x + vector2.m_x, vector1.m_y + vector2.m_y);
@@ -1201,6 +1206,7 @@ namespace Rhino.Geometry
     /// <param name="vector1">A vector.</param>
     /// <param name="vector2">A second vector.</param>
     /// <returns>A new vector that results from the component-wise difference of vector1 - vector2.</returns>
+    /// <since>8.4</since>
     public static Vector2f Subtract(Vector2f vector1, Vector2f vector2)
     {
       return new Vector2f(vector1.m_x - vector2.m_x, vector1.m_y - vector2.m_y);
@@ -1213,6 +1219,7 @@ namespace Rhino.Geometry
     /// <remarks>This is similar to <see cref="Reverse">Reverse()</see>, but is static for CLR compliance, and with default name.</remarks>
     /// <param name="vector">A vector to negate.</param>
     /// <returns>A new vector where all components were multiplied by -1.</returns>
+    /// <since>8.4</since>
     public static Vector2f Negate(Vector2f vector)
     {
       return new Vector2f(-vector.m_x, -vector.m_y);
@@ -1225,6 +1232,7 @@ namespace Rhino.Geometry
     /// <param name="point">A point.</param>
     /// <param name="vector">A vector.</param>
     /// <returns>A new point that results from the addition of point and vector.</returns>
+    /// <since>8.4</since>
     public static Point2f Add(Point2f point, Vector2f vector)
     {
       return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
@@ -1297,6 +1305,7 @@ namespace Rhino.Geometry
     /// This is an application of Pythagoras' theorem.
     /// If this vector is invalid, its length is considered 0.
     /// </summary>
+    /// <since>8.4</since>
     public double Length
     {
       get { return Vector2d.GetLengthHelper(m_x, m_y); }  // alternatively return UnsafeNativeMethods.ON_2dVector_Length(this). Avoid the thunk to improve performance

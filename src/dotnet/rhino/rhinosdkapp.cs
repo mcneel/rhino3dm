@@ -6,6 +6,7 @@ using System.Text;
 using Rhino.ApplicationSettings;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.ApplicationSettings
@@ -1387,6 +1388,15 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Is the current thread the main thread
+    /// </summary>
+    /// <since>8.10</since>
+    public static bool IsOnMainThread
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsOnMainThread); }
+    }
+
+    /// <summary>
     /// Returns true when Rhino is allowed to save, false otherwise
     /// Conditions where Rhino is not allowed to save are: when evaluation licenses are expired;
     /// when a Cloud Zoo lease is expired; when a license is shared by a single user on multiple
@@ -1661,6 +1671,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnInitApp;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnInitApp() => m_init_app.SafeInvoke();
 
     internal static EventHandler m_init_app;
@@ -1702,6 +1713,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnCloseApp;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnCloseApp() => m_close_app?.SafeInvoke();
 
     internal static EventHandler m_close_app;
@@ -1741,6 +1753,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnAppSettingsChanged;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnAppSettingsChanged() => m_appsettings_changed?.SafeInvoke();
 
     internal static EventHandler m_appsettings_changed;
@@ -1779,6 +1792,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnIdle;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnIdle() => m_idle_occured?.SafeInvoke();
 
     private static EventHandler m_idle_occured;
@@ -1828,6 +1842,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnMainLoop;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnMainLoop() => m_main_loop_occured?.SafeInvoke();
 
     private static EventHandler m_main_loop_occured;
@@ -1886,6 +1901,7 @@ namespace Rhino
 
     internal delegate void RhCmnOneUintCallback(uint docSerialNumber);
     private static RhCmnOneUintCallback m_OnNewRdkDocument;
+    [MonoPInvokeCallback(typeof(RhCmnOneUintCallback))]
     private static void OnNewRdkDocument(uint docSerialNumber)
     {
       m_new_rdk_document?.SafeInvoke(RhinoDoc.FromRuntimeSerialNumber(docSerialNumber));
@@ -1921,6 +1937,7 @@ namespace Rhino
 
 
     private static RhCmnEmptyCallback m_OnRdkGlobalSettingsChanged;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnRdkGlobalSettingsChanged() => m_rdk_global_settings_changed?.SafeInvoke();
     internal static EventHandler m_rdk_global_settings_changed;
 
@@ -1952,6 +1969,7 @@ namespace Rhino
     
 
     private static RhCmnOneUintCallback m_OnRdkUpdateAllPreviews;
+    [MonoPInvokeCallback(typeof(RhCmnOneUintCallback))]
     private static void OnRdkUpdateAllPreviews(uint docSerialNumber)
     {
       m_rdk_update_all_previews?.SafeInvoke(RhinoDoc.FromRuntimeSerialNumber(docSerialNumber));
@@ -1986,6 +2004,7 @@ namespace Rhino
     
 
     private static RhCmnEmptyCallback m_OnCacheImageChanged;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnRdkCacheImageChanged() => m_rdk_cache_image_changed?.SafeInvoke();
     internal static EventHandler m_rdk_cache_image_changed;
 
@@ -2016,6 +2035,7 @@ namespace Rhino
     }
 
     private static RhCmnEmptyCallback m_OnRendererChanged;
+    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
     private static void OnRendererChanged() => m_renderer_changed?.SafeInvoke();
     internal static EventHandler m_renderer_changed;
 
@@ -2049,6 +2069,7 @@ namespace Rhino
 
     internal delegate void ClientPlugInUnloadingCallback(Guid plugIn);
     private static ClientPlugInUnloadingCallback m_OnClientPlugInUnloading;
+    [MonoPInvokeCallback(typeof(ClientPlugInUnloadingCallback))]
     private static void OnClientPlugInUnloading(Guid plugIn) => m_client_plugin_unloading?.SafeInvoke();
     internal static EventHandler m_client_plugin_unloading;
 
@@ -2130,12 +2151,12 @@ namespace Rhino
     }
 
     /// <summary>
-    /// 
+    /// Parses a text field string.
     /// </summary>
-    /// <param name="formula"></param>
-    /// <param name="obj"></param>
-    /// <param name="topParentObject"></param>
-    /// <returns></returns>
+    /// <param name="formula">The text formula.</param>
+    /// <param name="obj">The Rhino object. Value can be IntPtr.Zero.</param>
+    /// <param name="topParentObject">The parent Rhino object. Value can be IntPtr.Zero.</param>
+    /// <returns>The parsed text field if sucessful.</returns>
     /// <since>6.0</since>
     public static string ParseTextField(string formula, RhinoObject obj, RhinoObject topParentObject )
     {
@@ -2154,6 +2175,37 @@ namespace Rhino
         return sh.ToString();
       }
     }
+
+    /// <summary>
+    /// Parses a text field string.
+    /// </summary>
+    /// <param name="formula">The text formula.</param>
+    /// <param name="obj">The Rhino object. Value can be IntPtr.Zero.</param>
+    /// <param name="topParentObject">The parent Rhino object. Value can be IntPtr.Zero.</param>
+    /// <param name="immediateParent">The immediate parent instance object. Value can be IntPtr.Zero.</param>
+    /// <returns>The parsed text field if sucessful.</returns>
+    /// <since>8.10</since>
+    public static string ParseTextField(string formula, RhinoObject obj, RhinoObject topParentObject, InstanceObject immediateParent)
+    {
+      if (topParentObject == null)
+        topParentObject = obj;
+      using (var sh = new Runtime.InteropWrappers.StringWrapper())
+      {
+        IntPtr ptr_string = sh.NonConstPointer;
+        IntPtr ptr_obj = IntPtr.Zero;
+        if (obj != null)
+          ptr_obj = obj.ConstPointer();
+        IntPtr ptr_parent_obj = IntPtr.Zero;
+        if (topParentObject != null)
+          ptr_parent_obj = topParentObject.ConstPointer();
+        IntPtr ptr_immediate_parent_obj = IntPtr.Zero;
+        if (immediateParent != null)
+          ptr_immediate_parent_obj = immediateParent.ConstPointer();
+        UnsafeNativeMethods.CRhinoApp_RhParseTextField2(formula, ptr_string, ptr_obj, ptr_parent_obj, ptr_immediate_parent_obj);
+        return sh.ToString();
+      }
+    }
+
     /// <summary>
     /// Post an enter event to the command line
     /// </summary>
