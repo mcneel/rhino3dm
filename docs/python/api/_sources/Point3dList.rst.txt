@@ -100,3 +100,7 @@ Point3dList
    .. py:method:: Append(points)
 
       [todo] add documentation
+
+   .. py:method:: Append(points)
+
+      [todo] add documentation

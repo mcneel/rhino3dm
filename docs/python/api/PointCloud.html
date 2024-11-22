@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PointCloud &mdash; rhino3dm 8.6.0-beta1 documentation</title>
+  <title>PointCloud &mdash; rhino3dm 8.13.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,8 +15,8 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d31f2110"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/documentation_options.js?v=d48ed8ed"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.6.0-beta1
+                8.13.0-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -65,6 +66,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Centermark.html">Centermark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
@@ -75,7 +78,12 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimAngular.html">DimAngular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dimension.html">Dimension</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimLinear.html">DimLinear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimOrdinate.html">DimOrdinate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimRadial.html">DimRadial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
@@ -120,6 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Leader.html">Leader</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
@@ -156,6 +165,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#rhino3dm.PointCloud"><code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.PointCloud"><code class="docutils literal notranslate"><span class="pre">PointCloud.PointCloud()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">PointCloud.PointCloud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">PointCloud.PointCloud()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.Count"><code class="docutils literal notranslate"><span class="pre">PointCloud.Count</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.HiddenPointCount"><code class="docutils literal notranslate"><span class="pre">PointCloud.HiddenPointCount</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.ContainsColors"><code class="docutils literal notranslate"><span class="pre">PointCloud.ContainsColors</span></code></a></li>
@@ -171,23 +181,23 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.InsertNew"><code class="docutils literal notranslate"><span class="pre">PointCloud.InsertNew()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.Merge"><code class="docutils literal notranslate"><span class="pre">PointCloud.Merge()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.Add"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">PointCloud.Add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.AddRange"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">PointCloud.AddRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.Insert"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">PointCloud.Insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.InsertRange"><code class="docutils literal notranslate"><span class="pre">PointCloud.InsertRange()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.RemoveAt"><code class="docutils literal notranslate"><span class="pre">PointCloud.RemoveAt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.PointCloud.GetPoints"><code class="docutils literal notranslate"><span class="pre">PointCloud.GetPoints()</span></code></a></li>
@@ -223,6 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Text.html">Text</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
@@ -273,6 +284,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
 <span class="sig-name descname"><span class="pre">PointCloud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>PointCloud constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">PointCloud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>PointCloud constructor</p>
 </dd></dl>
 
@@ -419,19 +436,8 @@ point cloud have hidden flags assigned to them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd><p>Append a new point to the end of the list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>void</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Append a new point to the end of the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -442,7 +448,7 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd><p>Append a new point to the end of the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -453,7 +459,7 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd><p>Append a new point to the end of the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -464,7 +470,18 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Append a new point to the end of the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
 <dd><p>Append a new point to the end of the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -488,19 +505,8 @@ point cloud have hidden flags assigned to them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
-<dd><p>Appends a collection of points to this point cloud.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>void</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="id7">
-<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
 <dd><p>Appends a collection of points to this point cloud.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -511,7 +517,7 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
 <dd><p>Appends a collection of points to this point cloud.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -533,7 +539,18 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id10">
-<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Appends a collection of points to this point cloud.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">AddRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
 <dd><p>Appends a collection of points to this point cloud.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -560,19 +577,8 @@ point cloud have hidden flags assigned to them.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id11">
-<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
-<dd><p>Inserts a new point into the point list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>void</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="id12">
-<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
 <dd><p>Inserts a new point into the point list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -583,7 +589,7 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id13">
-<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
 <dd><p>Inserts a new point into the point list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -594,7 +600,7 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id14">
-<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
 <dd><p>Inserts a new point into the point list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -605,7 +611,18 @@ point cloud have hidden flags assigned to them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id15">
-<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>Inserts a new point into the point list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">Insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
 <dd><p>Inserts a new point into the point list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

@@ -1,0 +1,13 @@
+Leader
+======
+
+.. py:module:: rhino3dm
+
+.. py:class:: Leader
+
+   .. py:attribute:: Points
+
+
+   .. py:method:: GetTextPoint2d(dimstyle, leaderscale)
+
+      [todo] add documentation

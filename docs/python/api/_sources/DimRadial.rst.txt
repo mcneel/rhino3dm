@@ -1,0 +1,13 @@
+DimRadial
+=========
+
+.. py:module:: rhino3dm
+
+.. py:class:: DimRadial
+
+   .. py:attribute:: Points
+
+
+   .. py:method:: GetDisplayLines(dimstyle)
+
+      [todo] add documentation
