@@ -14,16 +14,28 @@ diff:
 - (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
 - (js, py) Added tests for various ::Delete methods. 
 - (py) Added python 3.13 target #654
+- (js) Layer.Index #655
+- (dotnet) Linux release builds in an Amazon Linux 2023 container
+- (js) BND_PointCloud::CreateFromThreeJSON #642
+- (py) BND_MeshingParameters::Decode now supports more properties
+
 
 ### Changed
 
-- (py) switching from pybind11 to nanobind
+- (py) switching from pybind11 to nanobind. WIP. This affects a lot of the src/binding files, which now include many `#if defined()`. When the switch is complete these will be cleaned up.
 - (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
+- (py) File3dmObjectTable now accepts negative indexing #651 @StudioWEngineers
 
 ### Fixed 
 
 - (js, py) Changes to ViewInfo.Viewport would not set.
 - (py) uuid conversion in c++ was broken
+- (js) BND_Mesh::CreateFromThreeJSON did not pay attention to vertex colors #641
+- (js) BND_PointCloud::CreateFromThreeJSON did not pay attention to RGBA (4 channel) colors #641
+
+### Removed
+
+- (py) GitHub is deprecating macos-12 runners, so they have been removed from the python builds
 
 
 ## [8.9.0] - 2024.07.19
