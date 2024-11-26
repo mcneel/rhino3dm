@@ -13,23 +13,24 @@ diff:
 - (js, py) DimensionStyle.Id
 - (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
 - (js, py) Added tests for various ::Delete methods. 
+- (js, py) Extrusion::CreateWithPlane #636
 - (py) Added python 3.13 target #654
-- (js) Layer.Index #655
-- (dotnet) Linux release builds in an Amazon Linux 2023 container
-- (js) BND_PointCloud::CreateFromThreeJSON #642
 - (py) BND_MeshingParameters::Decode now supports more properties
-
+- (js) Layer.Index #655
+- (js) BND_PointCloud::CreateFromThreeJSON #642
+- (js) Added several methods and properties for Planes #568
+- (dotnet) Linux release builds in an Amazon Linux 2023 container
 
 ### Changed
 
 - (py) switching from pybind11 to nanobind. WIP. This affects a lot of the src/binding files, which now include many `#if defined()`. When the switch is complete these will be cleaned up.
-- (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
 - (py) File3dmObjectTable now accepts negative indexing #651 @StudioWEngineers
+- (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
 
 ### Fixed 
 
-- (js, py) Changes to ViewInfo.Viewport would not set.
 - (py) uuid conversion in c++ was broken
+- (js, py) Changes to ViewInfo.Viewport would not set.
 - (js) BND_Mesh::CreateFromThreeJSON did not pay attention to vertex colors #641
 - (js) BND_PointCloud::CreateFromThreeJSON did not pay attention to RGBA (4 channel) colors #641
 
