@@ -14,6 +14,16 @@ BND_Extrusion* BND_Extrusion::Create(const BND_Curve& planarCurve, double height
   return new BND_Extrusion(ext, nullptr);
 }
 
+BND_Extrusion* BND_Extrusion::CreateWithPlane(const BND_Curve& planarCurve, const class BND_Plane& plane, double height, bool cap)
+{
+  const ON_Plane& on_plane_ref = plane.ToOnPlane();
+  const ON_Plane* on_plane = &on_plane_ref;
+  ON_Extrusion* ext = ON_Extrusion::CreateFrom3dCurve(*planarCurve.m_curve, on_plane, height, cap);
+  if (nullptr == ext)
+    return nullptr;
+  return new BND_Extrusion(ext, nullptr);
+}
+
 BND_Extrusion* BND_Extrusion::CreateBoxExtrusion(const BND_Box& box, bool cap)
 {
   if (!box.m_box.IsValid()) return nullptr;
@@ -197,6 +207,7 @@ void initExtrusionBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Extrusion, BND_Surface>(m, "Extrusion")
     .def_static("Create", &BND_Extrusion::Create, py::arg("planarCurve"), py::arg("height"), py::arg("cap"))
+    .def_static("CreateWithPlane", &BND_Extrusion::CreateWithPlane, py::arg("planarCurve"),  py::arg("plane"), py::arg("height"), py::arg("cap"))
     .def_static("CreateBoxExtrusion", &BND_Extrusion::CreateBoxExtrusion, py::arg("box"), py::arg("cap"))
     .def_static("CreateCylinderExtrusion", &BND_Extrusion::CreateCylinderExtrusion, py::arg("cylinder"), py::arg("capBottom"), py::arg("capTop"))
     .def_static("CreatePipeExtrusion", &BND_Extrusion::CreatePipeExtrusion, py::arg("cylinder"), py::arg("otherRadius"), py::arg("capBottom"), py::arg("capTop"))
@@ -240,6 +251,7 @@ void initExtrusionBindings(void*)
   class_<BND_Extrusion, base<BND_Surface>>("Extrusion")
     .constructor<>()
     .class_function("create", &BND_Extrusion::Create, allow_raw_pointers())
+    .class_function("createWithPlane", &BND_Extrusion::CreateWithPlane, allow_raw_pointers())
     .class_function("createBoxExtrusion", &BND_Extrusion::CreateBoxExtrusion, allow_raw_pointers())
     .class_function("createCylinderExtrusion", &BND_Extrusion::CreateCylinderExtrusion, allow_raw_pointers())
     .class_function("createPipeExtrusion", &BND_Extrusion::CreatePipeExtrusion, allow_raw_pointers())

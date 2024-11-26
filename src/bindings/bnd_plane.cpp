@@ -240,7 +240,22 @@ void initPlaneBindings(void*)
     .field("zAxis", &BND_Plane::m_zaxis);
 
   class_<BND_PlaneHelper>("Plane")
-      .class_function("worldXY", &BND_PlaneHelper::WorldXY);
+      
+      .class_function("worldXY", &BND_Plane::WorldXY)
+      .class_function("worldYZ", &BND_Plane::WorldYZ)
+      .class_function("worldZX", &BND_Plane::WorldZX)
+      .class_function("unset", &BND_Plane::Unset)
+      .property("origin", &BND_Plane::m_origin)
+      .property("xAxis", &BND_Plane::m_xaxis)
+      .property("yAxis", &BND_Plane::m_yaxis)
+      .property("zAxis", &BND_Plane::m_zaxis)
+      .function("pointAtUV", &BND_Plane::PointAtUV)
+      .function("pointAtUVW", &BND_Plane::PointAtUVW)
+      .function("rotate", &BND_Plane::Rotate)
+      .function("toJSON", &BND_Plane::toJSON)
+      .function("encode", &BND_Plane::Encode)
+      .class_function("decode", &BND_Plane::Decode)
+      ;
 
 }
 #endif
