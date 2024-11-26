@@ -199,6 +199,21 @@ BND_Plane BND_PlaneHelper::WorldXY()
   return BND_Plane::WorldXY();
 }
 
+BND_Plane BND_PlaneHelper::WorldYZ()
+{
+  return BND_Plane::WorldYZ();
+}
+
+BND_Plane BND_PlaneHelper::WorldZX()
+{
+  return BND_Plane::WorldZX();
+}
+
+BND_Plane BND_PlaneHelper::Unset()
+{
+  return BND_Plane::Unset();
+}
+
 #if defined(ON_PYTHON_COMPILE)
 
 void initPlaneBindings(rh3dmpymodule& m)
@@ -243,7 +258,7 @@ void initPlaneBindings(void*)
       .class_function("worldXY", &BND_PlaneHelper::WorldXY)
       .class_function("worldYZ", &BND_PlaneHelper::WorldYZ)
       .class_function("worldZX", &BND_PlaneHelper::WorldZX)
-      .class_function("unset", &BND_PlaneHelper::WorldZX)
+      .class_function("unset", &BND_PlaneHelper::Unset)
       ;
 
 }
