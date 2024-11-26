@@ -4049,7 +4049,7 @@ RH_C_FUNCTION int ON_Mesh_GetNgonBoundaryPoints(
       for (i = 0; ict > i; i++)
         ngon_boundary_points->Append(constMesh->Vertex(verts[i]));
     }
-    if (true == bAppendStartPoint)
+    if (bAppendStartPoint)
       ngon_boundary_points->Append(constMesh->Vertex(verts[0]));
   }
 

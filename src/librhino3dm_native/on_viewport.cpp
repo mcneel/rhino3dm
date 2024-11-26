@@ -31,7 +31,7 @@ RH_C_FUNCTION bool ON_Viewport_GetBool(const ON_Viewport* pConstViewport, int wh
       rc = pConstViewport->IsValidFrustum();
       break;
     case idxIsValid:
-      rc = pConstViewport->IsValid()?true:false;
+      rc = pConstViewport->IsValid();
       break;
     case idxIsPerspectiveProjection:
       rc = pConstViewport->IsPerspectiveProjection();
@@ -742,7 +742,7 @@ RH_C_FUNCTION bool ON_Viewport_DollyExtents(ON_Viewport* pViewport, ON_3DPOINT_S
     double zmin = camcoord_bbox.m_min.z;
     double zmax = camcoord_bbox.m_max.z;
     
-    // Please discuss any changes to dz caclulations with Dale Lear
+    // Please discuss any changes to dz calculations with Dale Lear
     // before you check in the code.
     double dz = (zmax - zmin)*0.00390625; // 0.00390625 = 1/256
     if ( ON::perspective_view == pViewport->Projection() )

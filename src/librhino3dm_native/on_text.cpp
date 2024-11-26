@@ -470,7 +470,10 @@ RH_C_FUNCTION void ON_V6_Annotation_SetAlternateLengthResolution(ON_Annotation* 
 
 RH_C_FUNCTION void ON_V6_Annotation_Prefix(const ON_Annotation* annotation, const ON_DimStyle* parent_style, ON_wString* wstring)
 {
-  if (nullptr != annotation && nullptr != wstring)
+  if (nullptr == wstring)
+    return;
+
+  if (nullptr != annotation)
     *wstring = annotation->Prefix(parent_style);
   else
     *wstring = ON_wString::EmptyString;
@@ -487,7 +490,10 @@ RH_C_FUNCTION void ON_V6_Annotation_SetPrefix(ON_Annotation* annotation, const O
 
 RH_C_FUNCTION void ON_V6_Annotation_Suffix(const ON_Annotation* annotation, const ON_DimStyle* parent_style, ON_wString* wstring)
 {
-  if (nullptr != annotation && nullptr != wstring)
+  if (nullptr == wstring)
+    return;
+
+  if (nullptr != annotation)
     *wstring = annotation->Suffix(parent_style);
   else
     *wstring = ON_wString::EmptyString;
@@ -504,7 +510,10 @@ RH_C_FUNCTION void ON_V6_Annotation_SetSuffix(ON_Annotation* annotation, const O
 
 RH_C_FUNCTION void ON_V6_Annotation_AlternatePrefix(const ON_Annotation* annotation, const ON_DimStyle* parent_style, ON_wString* wstring)
 {
-  if (nullptr != annotation && nullptr != wstring)
+  if (nullptr == wstring)
+    return;
+
+  if (nullptr != annotation)
     *wstring = annotation->AlternatePrefix(parent_style);
   else
     *wstring = ON_wString::EmptyString;
@@ -1641,7 +1650,7 @@ RH_C_FUNCTION bool ON_V6_TextObject_GetTextXform(const ON_Text* constPtrTextObje
   bool rc = false;
   if (constPtrTextObject && xform_out)
   {
-    rc = constPtrTextObject->GetTextXform(nullptr, dimstyle, scale, *xform_out) ? true : false;
+    rc = constPtrTextObject->GetTextXform(nullptr, dimstyle, scale, *xform_out);
   }
   return rc;
 }

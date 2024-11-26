@@ -397,6 +397,13 @@ RH_C_FUNCTION unsigned int ON_SubD_ConstUpdateSurfaceMeshCache(const ON_SubD* co
   return 0U;
 }
 
+RH_C_FUNCTION bool ON_SubD_SurfaceMeshCacheExists(const ON_SubD* constSubdPtr, bool bTextureCoordinatesExist, bool bCurvaturesExist, bool bColorsExist)
+{
+  if (constSubdPtr)
+    return constSubdPtr->SurfaceMeshCacheExists(bTextureCoordinatesExist, bCurvaturesExist, bColorsExist);
+  return false;
+}
+
 RH_C_FUNCTION ON_Mesh* ON_SubD_ToLimitSurfaceMesh( const ON_SubD* constSubdPtr, unsigned int mesh_density )
 {
   RHCHECK_LICENSE
@@ -1002,6 +1009,18 @@ RH_C_FUNCTION void ON_SubD_ConstDuplicateEdgeCurves(const ON_SubD* pSubD, ON_Sim
 {
   return ON_SubD_DuplicateEdgeCurves(const_cast<ON_SubD*>(pSubD), pOutCurves, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
 }
+
+RH_C_FUNCTION unsigned int ON_SubD_TransformComponents(ON_SubD* pSubD, const ON_Xform* pXform, int componentCount, /*ARRAY*/const ON_COMPONENT_INDEX* pComponents, ON_SubDComponentLocation componentLocation)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-83674
+  unsigned int rc = 0;
+  if (pSubD && pXform && pComponents)
+  {
+    rc = pSubD->TransformComponents(*pXform, pComponents, (size_t)componentCount, componentLocation);
+  }
+  return rc;
+}
+
 #endif
 
 ///////////////////// ON_SubDFace
