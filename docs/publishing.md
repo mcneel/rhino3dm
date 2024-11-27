@@ -31,8 +31,7 @@ There are several places where version numbers should be updated:
         - New System: 
           - change to `src/js/docs` directory
           - install dependencies (only first time): `npm i`
-          - generate docs: `npm run docs`
-          - copy these to `docs/javscript/api`
+          - generate docs: `npm run docs`. This also handles copying to `docs/javscript/api`
         - Old system: 
           - istall dependencies: `npm i -g docdash jsdoc`
           - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`

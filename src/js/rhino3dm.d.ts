@@ -2561,6 +2561,19 @@ declare module 'rhino3dm' {
 		 */
 		static create(planarCurve:Curve,height:number,cap:boolean): Extrusion;
 		/**
+		 * @description Creates an extrusion of a 3d curve (which must be planar), a plane, and a height.
+		 * @param {Curve} planarCurve Planar curve used as profile
+		 * @param {Plane} plane The curve is projected to this plane
+		 * @param {number} height If the height > 0, the bottom of the extrusion will be in plane and
+		the top will be height units above the plane.
+		If the height < 0, the top of the extrusion will be in plane and
+		the bottom will be height units below the plane.
+		The plane used is the one that is returned from the curve's TryGetPlane function.
+		 * @param {boolean} cap If the curve is closed and cap is true, then the resulting extrusion is capped.
+		 * @returns {Extrusion} If the input is valid, then a new extrusion is returned. Otherwise null is returned
+		 */
+		static createWithPlane(planarCurve:Curve, plane: Plane, height:number,cap:boolean): Extrusion;
+		/**
 		 * @description Gets an extrusion from a box.
 		 * @param {Box} box IsValid must be true.
 		 * @param {boolean} cap If true, the base and the top of the box will be capped. Defaults to true.
@@ -5484,6 +5497,12 @@ declare module 'rhino3dm' {
 	class Plane {
 		/** ... */
 		static worldXY(): Plane;
+		/** ... */
+		static worldYZ(): Plane;
+		/** ... */
+		static worldZX(): Plane;
+		/** ... */
+		static unset(): Plane;
 	}
 
 	class PlaneSurface extends Surface {
