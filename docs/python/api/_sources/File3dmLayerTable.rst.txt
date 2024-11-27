@@ -32,6 +32,10 @@ File3dmLayerTable
 
       :rtype: int
 
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
    .. py:method:: FindName(name, parentId)
 
       Finds a Layer given its name.

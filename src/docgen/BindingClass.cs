@@ -40,9 +40,13 @@ namespace docgen
                             string baseClass = line.Substring(baseIndex, baseEnd - baseIndex);
                             activeJavascriptClass.BaseClass = baseClass;
                         }
-                        AllJavascriptClasses.Add(name.ToLowerInvariant(), activeJavascriptClass);
-                        activeClass = activeJavascriptClass;
-                        continue;
+                        if(!AllJavascriptClasses.ContainsKey(name.ToLowerInvariant()))
+                        {
+                            AllJavascriptClasses.Add(name.ToLowerInvariant(), activeJavascriptClass);
+                            activeClass = activeJavascriptClass;
+                            continue;
+                        }
+                        
                     }
 
                     if (line.StartsWith("py::class_"))
@@ -64,9 +68,14 @@ namespace docgen
                                 activePythonClass.BaseClass = baseClass;
                             }
                         }
-                        AllPythonClasses.Add(name.ToLowerInvariant(), activePythonClass);
-                        activeClass = activePythonClass;
-                        continue;
+
+                        if(!AllPythonClasses.ContainsKey(name.ToLowerInvariant()))
+                        {
+                            AllPythonClasses.Add(name.ToLowerInvariant(), activePythonClass);
+                            activeClass = activePythonClass;
+                            continue;
+                        }
+                        
                     }
 
                     if (line.StartsWith("enum_"))

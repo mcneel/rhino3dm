@@ -73,6 +73,37 @@ Plane
 
       [todo] add documentation
 
+   .. py:method:: PointAt(u, v)
+
+      Evaluate a point on the plane.
+
+      :param float u: evaluation parameter.
+      :param float v: evaluation parameter.
+
+      :return: plane.origin + u*plane.xaxis + v*plane.yaxis.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: PointAt(u, v, w)
+
+      Evaluate a point on the plane.
+
+      :return: plane.origin + u*plane.xaxis + v*plane.yaxis.
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: Rotate(angle, axis)
+
+      Rotate the plane about its origin point.
+
+      :param float sinAngle: Sin(angle).
+      :param float cosAngle: Cos(angle).
+      :param rhino3dm.Vector3d axis: Axis of rotation.
+
+      :return: True on success, False on failure.
+
+      :rtype: bool
+
    .. py:method:: Encode()
 
       [todo] add documentation

@@ -96,6 +96,19 @@ NurbsCurve
 
       :rtype: rhino3dm.NurbsCurve
 
+   .. py:staticmethod:: Create(periodic, degree, points)
+
+      Constructs a 3D NURBS curve from a list of control points.
+
+      :param bool periodic: If true, create a periodic uniform curve. If false, create a clamped uniform curve.
+      :param int degree: (>=1) degree=order-1.
+      :param System.Collections.Generic.IEnumerable<Point3d> points: control vertex locations.
+
+      :return: new NURBS curve on success \
+         None on error.
+
+      :rtype: rhino3dm.NurbsCurve
+
    .. py:method:: IncreaseDegree(desiredDegree)
 
       Increase the degree of this curve.

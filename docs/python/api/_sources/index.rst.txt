@@ -14,6 +14,7 @@ Welcome to rhino3dm's documentation!
    Arc
    ArcCurve
    ArchivableDictionary
+   Arrowhead
    BezierCurve
    Bitmap
    BoundingBox
@@ -26,6 +27,8 @@ Welcome to rhino3dm's documentation!
    BrepSurfaceList
    BrepVertex
    BrepVertexList
+   CachedTextureCoordinates
+   Centermark
    Circle
    CommonObject
    ComponentIndex
@@ -36,7 +39,12 @@ Welcome to rhino3dm's documentation!
    CurveProxy
    Cylinder
    Decal
+   DimAngular
+   Dimension
    DimensionStyle
+   DimLinear
+   DimOrdinate
+   DimRadial
    Displacement
    Dithering
    DracoCompression
@@ -81,6 +89,7 @@ Welcome to rhino3dm's documentation!
    Intersection
    Interval
    Layer
+   Leader
    Light
    Line
    LinearWorkflow
@@ -137,6 +146,7 @@ Welcome to rhino3dm's documentation!
    Sun
    Surface
    SurfaceProxy
+   Text
    TextDot
    Texture
    TextureMapping

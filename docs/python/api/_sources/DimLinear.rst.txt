@@ -1,0 +1,13 @@
+DimLinear
+=========
+
+.. py:module:: rhino3dm
+
+.. py:class:: DimLinear
+
+   .. py:attribute:: Points
+
+
+   .. py:method:: GetDisplayLines(dimstyle)
+
+      [todo] add documentation

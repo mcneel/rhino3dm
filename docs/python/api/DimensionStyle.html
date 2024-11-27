@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DimensionStyle &mdash; rhino3dm 8.6.0-beta1 documentation</title>
+  <title>DimensionStyle &mdash; rhino3dm 8.13.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d31f2110"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/documentation_options.js?v=d48ed8ed"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Displacement" href="Displacement.html" />
-    <link rel="prev" title="Decal" href="Decal.html" /> 
+    <link rel="next" title="DimLinear" href="DimLinear.html" />
+    <link rel="prev" title="Dimension" href="Dimension.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.6.0-beta1
+                8.13.0-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -65,6 +66,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Centermark.html">Centermark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
@@ -75,6 +78,8 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimAngular.html">DimAngular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dimension.html">Dimension</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DimensionStyle</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rhino3dm.DimensionStyle"><code class="docutils literal notranslate"><span class="pre">DimensionStyle</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.DimensionStyle"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.DimensionStyle()</span></code></a></li>
@@ -94,9 +99,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextUnderlined"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextUnderlined</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowLength</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderArrowLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderArrowLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowType1"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowType1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ArrowType2"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowType2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderArrowType"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderArrowType</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.CentermarkSize"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.CentermarkSize</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextGap"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextGap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextHEight"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextHEight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextHeight"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextHeight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LengthFactor"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LengthFactor</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.AlternateLengthFactor"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.AlternateLengthFactor</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ToleranceUpperValue"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ToleranceUpperValue</span></code></a></li>
@@ -106,9 +115,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.TextRotation"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.TextRotation</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.StackHeightScale"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.StackHeightScale</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.LeaderLandingLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LeaderLandingLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ExtensionLineExtension"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ExtensionLineExtension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ExtensionLineOffset"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ExtensionLineOffset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.DimensionLineExtension"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.DimensionLineExtension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.FixedExtensionLength"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.FixedExtensionLength</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.FixedExtensionLengthOn"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.FixedExtensionLengthOn</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.HasFieldOverrides"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.HasFieldOverrides</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.IsChild"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.IsChild</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ParentId"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ParentId</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.Id"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.Id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.ScaleLengthValues"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ScaleLengthValues()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.IsFieldOverridden"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.IsFieldOverridden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.DimensionStyle.SetFieldOverride"><code class="docutils literal notranslate"><span class="pre">DimensionStyle.SetFieldOverride()</span></code></a></li>
@@ -119,6 +134,9 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="DimLinear.html">DimLinear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimOrdinate.html">DimOrdinate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimRadial.html">DimRadial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
@@ -163,6 +181,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Leader.html">Leader</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
@@ -219,6 +238,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Text.html">Text</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
@@ -347,6 +367,21 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ArrowType1">
+<span class="sig-name descname"><span class="pre">ArrowType1</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowType1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ArrowType2">
+<span class="sig-name descname"><span class="pre">ArrowType2</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ArrowType2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.LeaderArrowType">
+<span class="sig-name descname"><span class="pre">LeaderArrowType</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.LeaderArrowType" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rhino3dm.DimensionStyle.CentermarkSize">
 <span class="sig-name descname"><span class="pre">CentermarkSize</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.CentermarkSize" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -359,6 +394,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextHEight">
 <span class="sig-name descname"><span class="pre">TextHEight</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextHEight" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.TextHeight">
+<span class="sig-name descname"><span class="pre">TextHeight</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.TextHeight" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -407,6 +447,31 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ExtensionLineExtension">
+<span class="sig-name descname"><span class="pre">ExtensionLineExtension</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ExtensionLineExtension" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ExtensionLineOffset">
+<span class="sig-name descname"><span class="pre">ExtensionLineOffset</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.ExtensionLineOffset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.DimensionLineExtension">
+<span class="sig-name descname"><span class="pre">DimensionLineExtension</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.DimensionLineExtension" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.FixedExtensionLength">
+<span class="sig-name descname"><span class="pre">FixedExtensionLength</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.FixedExtensionLength" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.FixedExtensionLengthOn">
+<span class="sig-name descname"><span class="pre">FixedExtensionLengthOn</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.FixedExtensionLengthOn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rhino3dm.DimensionStyle.HasFieldOverrides">
 <span class="sig-name descname"><span class="pre">HasFieldOverrides</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.HasFieldOverrides" title="Link to this definition"></a></dt>
 <dd><p>bool: Checks if any fields in this DimensionStyle are overrides</p>
@@ -424,6 +489,11 @@
 <dd><p>Guid: Get or Set the Id of this DimensionStyle’s parent.
 If ParentId is Guid.Empty, this DimensionStyle has no parent</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.DimensionStyle.Id">
+<span class="sig-name descname"><span class="pre">Id</span></span><a class="headerlink" href="#rhino3dm.DimensionStyle.Id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.DimensionStyle.ScaleLengthValues">
@@ -498,8 +568,8 @@ Does not change any dimstyle_id’s or parent_id’s</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Decal.html" class="btn btn-neutral float-left" title="Decal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Displacement.html" class="btn btn-neutral float-right" title="Displacement" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Dimension.html" class="btn btn-neutral float-left" title="Dimension" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DimLinear.html" class="btn btn-neutral float-right" title="DimLinear" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

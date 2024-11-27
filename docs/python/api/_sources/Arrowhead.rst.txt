@@ -1,0 +1,10 @@
+Arrowhead
+=========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Arrowhead
+
+   .. py:staticmethod:: GetPoints(arrowType, size)
+
+      [todo] add documentation

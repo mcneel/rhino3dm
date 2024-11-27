@@ -15,6 +15,11 @@ PolylineCurve
       PolylineCurve constructor
 
 
+   .. py:method:: PolylineCurve()
+
+      PolylineCurve constructor
+
+
    .. py:attribute:: PointCount
 
       int: Gets the number of points in this polyline.

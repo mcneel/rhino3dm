@@ -8,7 +8,7 @@ declare module 'rhino3dm' {
 		PageSpace
 	}
 
-	enum AnnotationTypes {
+	enum AnnotationType {
 		Unset,
 		Aligned,
 		Angular,
@@ -382,7 +382,7 @@ declare module 'rhino3dm' {
 
 	class RhinoModule {
 		ActiveSpace: typeof ActiveSpace
-		AnnotationTypes: typeof AnnotationTypes
+		AnnotationType: typeof AnnotationType
 		ArrowheadTypes: typeof ArrowheadTypes
 		BasepointZero: typeof BasepointZero
 		ComponentIndexType: typeof ComponentIndexType
@@ -565,7 +565,7 @@ declare module 'rhino3dm' {
 		/**
 		 * Type of annotation
 		 */
-		annotationType: AnnotationTypes;
+		annotationType: AnnotationType;
 		/**
 		 * Id of this annotation's parent dimstyle
 		 * If this annotation has overrides to dimstyle properties,
@@ -885,7 +885,7 @@ declare module 'rhino3dm' {
 		split(t:number): object;
 	}
 
-	class Bitmap {
+	class Bitmap extends CommonObject {
 		/**
 		 */
 		width: number;
@@ -901,6 +901,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		sizeOfImage: number;
+		/**
+		 */
+		id: string;
 	}
 
 	class BoundingBox {
@@ -2809,6 +2812,8 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(bitmap: Bitmap): void;
 		/** ... */
+		delete(id:string): boolean;
+		/** ... */
 		findIndex(index:number): Bitmap;
 		/** ... */
 		findId(id:string): Bitmap;
@@ -2832,6 +2837,8 @@ declare module 'rhino3dm' {
 		get(index:number): DimensionStyle;
 		/** ... */
 		add(dimStyle: DimensionStyle): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -2864,7 +2871,7 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(group:Group): void;
 		/** ... */
-		delete(Group): boolean;
+		delete(group:Group): boolean;
 		/** ... */
 		deleteIndex(index:number): boolean;
 		/** ... */
@@ -2925,6 +2932,8 @@ declare module 'rhino3dm' {
 		 * @returns {number} If layer_name is valid, the layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
 		addLayer(name:string,color:object): number;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Finds a Layer given its name.
 		 * @param {string} name The name of the Layer to be searched.
@@ -2982,6 +2991,8 @@ declare module 'rhino3dm' {
 		get(index:number): Material;
 		/** ... */
 		add(material:Material): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a material based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -3130,7 +3141,7 @@ declare module 'rhino3dm' {
 		 */
 		add(geometry: GeometryBase, attributes: ObjectAttributes): string;
 		/** ... */
-		addObject(): void;
+		addObject(object: File3dmObject): string;
 		/**
 		 * @description Adds an instance reference geometry object to the table.
 		 * @param {InstanceReferenceGeometry} instanceReference The instance reference geometry object.
@@ -3770,6 +3781,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		expanded: boolean;
+		/**
+		 */
+		index: number;
 		/**
 		 * @description Verifies that a layer has per viewport settings.
 		 * @param {string} viewportId If not Guid.Empty, then checks for settings for that specific viewport.
@@ -5709,6 +5723,8 @@ declare module 'rhino3dm' {
 		 * @returns {object} A Three.js bufferGeometry.
 		 */
 		toThreejsJSON(): object;
+		/** ... */
+		static createFromThreejsJSON(json: object): PointCloud;
 	}
 
 	class PointCloudItem {

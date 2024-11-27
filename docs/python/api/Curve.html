@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Curve &mdash; rhino3dm 8.6.0-beta1 documentation</title>
+  <title>Curve &mdash; rhino3dm 8.13.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,8 +15,8 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d31f2110"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/documentation_options.js?v=d48ed8ed"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.6.0-beta1
+                8.13.0-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -65,6 +66,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Centermark.html">Centermark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
@@ -83,6 +86,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.TangentAtStart"><code class="docutils literal notranslate"><span class="pre">Curve.TangentAtStart</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.TangentAtEnd"><code class="docutils literal notranslate"><span class="pre">Curve.TangentAtEnd</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.CreateControlPointCurve"><code class="docutils literal notranslate"><span class="pre">Curve.CreateControlPointCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Curve.CreateControlPointCurve()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.ChangeDimension"><code class="docutils literal notranslate"><span class="pre">Curve.ChangeDimension()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.IsLinear"><code class="docutils literal notranslate"><span class="pre">Curve.IsLinear()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.IsPolyline"><code class="docutils literal notranslate"><span class="pre">Curve.IsPolyline()</span></code></a></li>
@@ -98,7 +102,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.IsClosable"><code class="docutils literal notranslate"><span class="pre">Curve.IsClosable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.Reverse"><code class="docutils literal notranslate"><span class="pre">Curve.Reverse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.ClosedCurveOrientation"><code class="docutils literal notranslate"><span class="pre">Curve.ClosedCurveOrientation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Curve.ClosedCurveOrientation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Curve.ClosedCurveOrientation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.PointAt"><code class="docutils literal notranslate"><span class="pre">Curve.PointAt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.SetStartPoint"><code class="docutils literal notranslate"><span class="pre">Curve.SetStartPoint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.SetEndPoint"><code class="docutils literal notranslate"><span class="pre">Curve.SetEndPoint()</span></code></a></li>
@@ -106,13 +110,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.CurvatureAt"><code class="docutils literal notranslate"><span class="pre">Curve.CurvatureAt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.FrameAt"><code class="docutils literal notranslate"><span class="pre">Curve.FrameAt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.DerivativeAt"><code class="docutils literal notranslate"><span class="pre">Curve.DerivativeAt()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Curve.DerivativeAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Curve.DerivativeAt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.GetCurveParameterFromNurbsFormParameter"><code class="docutils literal notranslate"><span class="pre">Curve.GetCurveParameterFromNurbsFormParameter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.GetNurbsFormParameterFromCurveParameter"><code class="docutils literal notranslate"><span class="pre">Curve.GetNurbsFormParameterFromCurveParameter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.Trim"><code class="docutils literal notranslate"><span class="pre">Curve.Trim()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.Split"><code class="docutils literal notranslate"><span class="pre">Curve.Split()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.Curve.ToNurbsCurve"><code class="docutils literal notranslate"><span class="pre">Curve.ToNurbsCurve()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Curve.ToNurbsCurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Curve.ToNurbsCurve()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -121,7 +125,12 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimAngular.html">DimAngular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dimension.html">Dimension</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimLinear.html">DimLinear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimOrdinate.html">DimOrdinate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimRadial.html">DimRadial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
@@ -166,6 +175,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Leader.html">Leader</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
@@ -222,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Text.html">Text</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
@@ -330,6 +341,23 @@ or a good estimate if curve spans are not algebraic.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.Curve.CreateControlPointCurve">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateControlPointCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Curve.CreateControlPointCurve" title="Link to this definition"></a></dt>
+<dd><p>Constructs a curve from a set of control-point locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>list</em><em>[</em><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d"><em>rhino3dm.Point3d</em></a><em>]</em>) – Control points.</p></li>
+<li><p><strong>degree</strong> (<em>int</em>) – Degree of curve. The number of control points must be at least degree+1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rhino3dm.Curve" title="rhino3dm.Curve">rhino3dm.Curve</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateControlPointCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>Constructs a curve from a set of control-point locations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -592,8 +620,8 @@ Only works with simple (no self intersections) closed, planar curves.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">ClosedCurveOrientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">ClosedCurveOrientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in the world XY plane.
 Only works with simple (no self intersections) closed, planar curves.</p>
 <dl class="field-list simple">
@@ -736,8 +764,8 @@ Not all curve types support this operation.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">DerivativeAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivativeCount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">DerivativeAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivativeCount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Evaluate the derivatives at the specified curve parameter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -846,8 +874,8 @@ The parameter must be in the interior of the curve’s domain.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">ToNurbsCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdomain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">ToNurbsCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdomain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd><p>Constructs a NURBS curve representation of this curve.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

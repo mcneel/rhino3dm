@@ -1,0 +1,52 @@
+CachedTextureCoordinates
+========================
+
+.. py:module:: rhino3dm
+
+.. py:class:: CachedTextureCoordinates
+
+   .. py:attribute:: Dimension
+
+
+   .. py:attribute:: MappingId
+
+      Guid: The texture mapping Id.
+
+   .. py:attribute:: IsReadOnly
+
+      bool: This collection is always read-only
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: TryGetAt(index)
+
+      Use this method to iterate the cached texture coordinate array.
+
+      :param int index: Index for the vertex to fetch.
+
+      :return: tuple (bool, float, float, float)
+
+         - Returns True if index is valid; otherwise returns false.
+         - Output parameter which will receive the U value. \
+         - Output parameter which will receive the V value. \
+         - Output parameter which will receive the W value, this is only \
+           meaningful if  is 3. \
+
+      :rtype: (bool, float, float, float)
+
+   .. py:method:: IndexOf(x, y, z)
+
+      Determines the index of a specific point in this collection.
+
+      :return: The index of item if found in the list; otherwise, -1.
+
+      :rtype: int
+
+   .. py:method:: Contains(x, y, z)
+
+      Determines whether this collection contains a specific value.
+
+
+      :rtype: bool

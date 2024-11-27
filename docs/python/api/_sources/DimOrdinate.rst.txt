@@ -1,0 +1,13 @@
+DimOrdinate
+===========
+
+.. py:module:: rhino3dm
+
+.. py:class:: DimOrdinate
+
+   .. py:attribute:: Points
+
+
+   .. py:method:: GetDisplayLines(dimstyle)
+
+      [todo] add documentation
