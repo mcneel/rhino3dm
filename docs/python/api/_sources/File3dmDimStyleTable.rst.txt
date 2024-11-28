@@ -21,6 +21,10 @@ File3dmDimStyleTable
 
       [todo] add documentation
 
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
    .. py:method:: FindIndex(index)
 
       Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.

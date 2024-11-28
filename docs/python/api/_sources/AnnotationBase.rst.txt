@@ -5,6 +5,13 @@ AnnotationBase
 
 .. py:class:: AnnotationBase
 
+   .. py:attribute:: DimensionStyleId
+
+      Guid: Id of this annotation's parent dimstyle
+      If this annotation has overrides to dimstyle properties,
+      those overrides will be represented in the DimensionStyle
+      returned by DimensionStyle(ParentStyle)
+
    .. py:attribute:: RichText
 
       str: Text including additional RTF formatting information
@@ -16,3 +23,22 @@ AnnotationBase
    .. py:attribute:: PlainTextWithFields
 
       str: Text stripped of RTF formatting information and with field expressions intact
+
+   .. py:attribute:: AnnotationType
+
+      AnnotationType: Type of annotation
+
+   .. py:attribute:: TextIsWrapped
+
+      bool: Is text wrapping on
+
+   .. py:attribute:: Plane
+
+      rhino3dm.Plane: Plane that this annotation lies on
+
+   .. py:method:: WrapText(wrapwidth)
+
+      Wrap text
+
+
+      :rtype: void

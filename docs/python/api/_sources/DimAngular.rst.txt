@@ -1,0 +1,19 @@
+DimAngular
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: DimAngular
+
+   .. py:attribute:: Points
+
+
+   .. py:attribute:: Radius
+
+
+   .. py:attribute:: Angle
+
+
+   .. py:method:: GetDisplayLines(dimstyle)
+
+      [todo] add documentation

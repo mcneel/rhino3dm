@@ -59,6 +59,16 @@ Curve
 
       :rtype: rhino3dm.Curve
 
+   .. py:staticmethod:: CreateControlPointCurve(points, degree)
+
+      Constructs a curve from a set of control-point locations.
+
+      :param list[rhino3dm.Point3d] points: Control points.
+      :param int degree: Degree of curve. The number of control points must be at least degree+1.
+
+
+      :rtype: rhino3dm.Curve
+
    .. py:method:: ChangeDimension(desiredDimension)
 
       Changes the dimension of a curve.

@@ -1,0 +1,10 @@
+Centermark
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: Centermark
+
+   .. py:method:: GetDisplayLines(dimstyle)
+
+      [todo] add documentation

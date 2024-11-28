@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AnnotationBase &mdash; rhino3dm 8.6.0-beta1 documentation</title>
+  <title>AnnotationBase &mdash; rhino3dm 8.15.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,8 +15,8 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d31f2110"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/documentation_options.js?v=0554218e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.6.0-beta1
+                8.15.0-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -51,9 +51,14 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">AnnotationBase</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rhino3dm.AnnotationBase"><code class="docutils literal notranslate"><span class="pre">AnnotationBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.DimensionStyleId"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.DimensionStyleId</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.RichText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.RichText</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.PlainText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.PlainText</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.PlainTextWithFields"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.PlainTextWithFields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.AnnotationType"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.AnnotationType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextIsWrapped"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextIsWrapped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.Plane"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.Plane</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.WrapText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.WrapText()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -61,6 +66,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arc.html">Arc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArcCurve.html">ArcCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ArchivableDictionary.html">ArchivableDictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
@@ -73,6 +79,8 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Centermark.html">Centermark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Circle.html">Circle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CommonObject.html">CommonObject</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComponentIndex.html">ComponentIndex</a></li>
@@ -83,7 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="CurveProxy.html">CurveProxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Cylinder.html">Cylinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Decal.html">Decal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimAngular.html">DimAngular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dimension.html">Dimension</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DimensionStyle.html">DimensionStyle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimLinear.html">DimLinear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimOrdinate.html">DimOrdinate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DimRadial.html">DimRadial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Displacement.html">Displacement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Dithering.html">Dithering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DracoCompression.html">DracoCompression</a></li>
@@ -128,6 +141,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Intersection.html">Intersection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interval.html">Interval</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Layer.html">Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Leader.html">Leader</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Light.html">Light</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Line.html">Line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearWorkflow.html">LinearWorkflow</a></li>
@@ -184,6 +198,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Text.html">Text</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextDot.html">TextDot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Texture.html">Texture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TextureMapping.html">TextureMapping</a></li>
@@ -226,6 +241,15 @@
 <dt class="sig sig-object py" id="rhino3dm.AnnotationBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">AnnotationBase</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase" title="Link to this definition"></a></dt>
 <dd><dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.DimensionStyleId">
+<span class="sig-name descname"><span class="pre">DimensionStyleId</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.DimensionStyleId" title="Link to this definition"></a></dt>
+<dd><p>Guid: Id of this annotation’s parent dimstyle
+If this annotation has overrides to dimstyle properties,
+those overrides will be represented in the DimensionStyle
+returned by DimensionStyle(ParentStyle)</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rhino3dm.AnnotationBase.RichText">
 <span class="sig-name descname"><span class="pre">RichText</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.RichText" title="Link to this definition"></a></dt>
 <dd><p>str: Text including additional RTF formatting information</p>
@@ -241,6 +265,35 @@
 <dt class="sig sig-object py" id="rhino3dm.AnnotationBase.PlainTextWithFields">
 <span class="sig-name descname"><span class="pre">PlainTextWithFields</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.PlainTextWithFields" title="Link to this definition"></a></dt>
 <dd><p>str: Text stripped of RTF formatting information and with field expressions intact</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.AnnotationType">
+<span class="sig-name descname"><span class="pre">AnnotationType</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.AnnotationType" title="Link to this definition"></a></dt>
+<dd><p>AnnotationType: Type of annotation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.TextIsWrapped">
+<span class="sig-name descname"><span class="pre">TextIsWrapped</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.TextIsWrapped" title="Link to this definition"></a></dt>
+<dd><p>bool: Is text wrapping on</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.Plane">
+<span class="sig-name descname"><span class="pre">Plane</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.Plane" title="Link to this definition"></a></dt>
+<dd><p>rhino3dm.Plane: Plane that this annotation lies on</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.WrapText">
+<span class="sig-name descname"><span class="pre">WrapText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrapwidth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.WrapText" title="Link to this definition"></a></dt>
+<dd><p>Wrap text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

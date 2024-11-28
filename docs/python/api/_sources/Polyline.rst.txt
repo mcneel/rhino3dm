@@ -155,3 +155,11 @@ Polyline
       :return: A closed polyline if successful, None otherwise.
 
       :rtype: rhino3dm.Polyline
+
+   .. py:staticmethod:: CreateFromPoints(points)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreateFromPoints(points)
+
+      [todo] add documentation
