@@ -3070,6 +3070,47 @@ enum TextureMappingGetTransform : int
   gettNxyz
 };
 
+RH_C_FUNCTION bool ON_TextureMapping_GetCapped(const ON_TextureMapping* pTextureMapping)
+{
+  return pTextureMapping ? pTextureMapping->m_bCapped : false;
+}
+
+RH_C_FUNCTION int ON_TextureMapping_GetProjection(const ON_TextureMapping* pTextureMapping)
+{
+  return pTextureMapping ? (unsigned int)pTextureMapping->m_projection : 0;
+}
+
+RH_C_FUNCTION int ON_TextureMapping_GetTextureSpace(const ON_TextureMapping* pTextureMapping)
+{
+  return pTextureMapping ? (unsigned int)pTextureMapping->m_texture_space : 0;
+}
+
+RH_C_FUNCTION void ON_TextureMapping_SetCapped(ON_TextureMapping* pTextureMapping, bool b)
+{
+  if (pTextureMapping)
+  {
+    pTextureMapping->m_bCapped = b;
+  }
+}
+
+RH_C_FUNCTION void ON_TextureMapping_SetProjection(ON_TextureMapping* pTextureMapping, int p)
+{
+  if(pTextureMapping)
+  {
+    pTextureMapping->m_projection = ON_TextureMapping::ProjectionFromUnsigned((unsigned int)p);
+  }
+}
+
+RH_C_FUNCTION void ON_TextureMapping_SetTextureSpace(ON_TextureMapping* pTextureMapping, int t)
+{
+  if (pTextureMapping)
+  {
+    pTextureMapping->m_texture_space = ON_TextureMapping::TextureSpaceFromUnsigned((unsigned int)t);
+  }
+}
+
+
+
 RH_C_FUNCTION bool ON_TextureMapping_GetTransform(const ON_TextureMapping* pTextureMapping, TextureMappingGetTransform type, ON_Xform* xformOut)
 {
   if (pTextureMapping == nullptr || xformOut == nullptr) return false;

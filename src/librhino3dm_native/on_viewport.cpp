@@ -72,6 +72,11 @@ RH_C_FUNCTION bool ON_Viewport_ChangeToParallelProjection(ON_Viewport* pVP, bool
 	return pVP ? pVP->ChangeToParallelProjection(symmetricFrustum) : false;
 }
 
+RH_C_FUNCTION bool ON_Viewport_ChangeToParallelReflectedProjection(ON_Viewport* pVP)
+{
+  return pVP ? pVP->ChangeToParallelReflectedProjection() : false;
+}
+
 RH_C_FUNCTION bool ON_Viewport_ChangeToPerspectiveProjection(ON_Viewport* pVP, double targetDistance, bool symmetricFrustum, double lensLength)
 {
 	return pVP ? pVP->ChangeToPerspectiveProjection(targetDistance, symmetricFrustum, lensLength) : false;
@@ -698,118 +703,12 @@ RH_C_FUNCTION ON_Viewport* ON_Viewport_New2(const CRhinoViewport* pRhinoViewport
 RH_C_FUNCTION bool ON_Viewport_DollyExtents(ON_Viewport* pViewport, ON_3DPOINT_STRUCT camboxmin, ON_3DPOINT_STRUCT camboxmax)
 {
   bool rc = false;
-  if( pViewport )
+  if (pViewport)
   {
-    ON_BoundingBox camcoord_bbox(ON_3dPoint(camboxmin.val), ON_3dPoint(camboxmax.val));
-    if ( !camcoord_bbox.IsValid() || !pViewport->IsValid() )
-    {
-      return false;
-    }
-    
-    double aspect = 0.0;
-    if ( !pViewport->GetFrustumAspect(aspect) )
-    {
-      return false;
-    }
-    if ( !ON_IsValid(aspect) || 0.0 == aspect )
-    {
-      return false;
-    }
-    
-    // 22 May 2006 Dale Lear
-    //     I added the scale call to handle non-uniform viewport scaling
-    ON_3dVector scale(1.0,1.0,0.0);
-    pViewport->GetViewScale(&scale.x,&scale.y);
-    
-    const double xmin = camcoord_bbox.m_min.x;
-    const double xmax = camcoord_bbox.m_max.x;
-    const double ymin = camcoord_bbox.m_min.y;
-    const double ymax = camcoord_bbox.m_max.y;
-    double dx = 0.5*(xmax - xmin)*scale.x;
-    double dy = 0.5*(ymax - ymin)*scale.y;
-    if ( dx <= ON_SQRT_EPSILON && dy <= ON_SQRT_EPSILON)
-    {
-      dx = dy = 0.5;
-    }
-    
-    if( dx < dy*aspect )
-      dx = dy*aspect;
-    else
-      dy = dx/aspect;
-  
-    // pad depths a bit so clippling plane are not coplanar with displayed geometry
-    // zmax is on frustum near and zmin is on frustum far
-    double zmin = camcoord_bbox.m_min.z;
-    double zmax = camcoord_bbox.m_max.z;
-    
-    // Please discuss any changes to dz calculations with Dale Lear
-    // before you check in the code.
-    double dz = (zmax - zmin)*0.00390625; // 0.00390625 = 1/256
-    if ( ON::perspective_view == pViewport->Projection() )
-    {
-      // 16 May 2006 Dale Lear 
-      //    Do not increase zmax too much or you make zooming to small
-      //    objects in perspective views impossible.  To test any 
-      //    changes, make a line from (0,0,0) to (0.001,0.001,0.001).
-      //    Make a perspective view with a 50mm lens angle.  If you 
-      //    can't ZEA on the line, then you've adjusted dz too much.
-      if ( dz <= 1.0e-6 )
-        dz = 1.0e-6;
-    }
-    else if ( dz <= 0.125 )
-    {
-      // In parallel projection it is ok to be generous.
-      dz = 0.125;
-    }
-    zmax += dz;
-    
-    // It is ok to adjust zmin by more generous amount because it
-    // does not effect the ability to zoom in on small objects a 
-    // perspective view.
-    if ( dz <= 0.125 )
-      dz = 0.125;
-    zmin -= dz;  
-    dz = zmax - zmin;
-    
-    double frus_near = 0.0;
-    if( ON::parallel_view == pViewport->Projection() )
-    {
-      // parallel projection
-      //double cota = 50.0/12.0; // 50 mm lens angle
-      //frus_near = ((dx > dy) ? dx : dy)*cota;
-      frus_near = 0.125*dz;
-    }
-    else if( ON::perspective_view == pViewport->Projection() )
-    {
-      // perspective projection
-      double ax, ay;
-      if ( pViewport->GetCameraAngle(nullptr,&ay,&ax) )
-      {
-        double zx = (ON_IsValid(ax) && ax > 0.0) ? dx/tan(ax) : 0.0;
-        double zy = (ON_IsValid(ay) && ay > 0.0) ? dy/tan(ay) : 0.0;
-        frus_near = (zx > zy) ? zx : zy;
-      }
-    }
-
-    if ( !ON_IsValid(frus_near) || frus_near <= ON_SQRT_EPSILON )
-    {
-      frus_near = 1.0;
-    }
-    
-    ON_3dPoint camloc = pViewport->CameraLocation();
-    if ( camloc.IsValid() )
-    {
-      ON_3dVector dolly = 0.5*(xmax + xmin)*pViewport->CameraX() 
-                        + 0.5*(ymax + ymin)*pViewport->CameraY()
-                        + (frus_near + zmax)*pViewport->CameraZ();
-      camloc += dolly;
-      if ( pViewport->SetCameraLocation(camloc) )
-      {
-        double frus_far = frus_near + dz;
-        rc = pViewport->SetFrustum( -dx, dx, -dy, dy, frus_near, frus_far);
-      }
-    }
+    const ON_BoundingBox camcoord_bbox(ON_3dPoint(camboxmin.val), ON_3dPoint(camboxmax.val));
+    rc = ON_DollyExtents(*pViewport, camcoord_bbox, *pViewport);
   }
+
   return rc;
 }
 

@@ -2,6 +2,8 @@
 
 RH_C_FUNCTION ON_HatchPattern* ON_HatchPattern_New()
 {
+  if (pConstHatchPattern) 
+    return new ON_HatchPattern(*pConstHatchPattern);
   return new ON_HatchPattern();
 }
 

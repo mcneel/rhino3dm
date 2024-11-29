@@ -65,15 +65,7 @@ RH_C_FUNCTION const RHMONO_STRING* ON_wString_Get(ON_wString* pString, CRhCmnStr
 #if defined (ON_RUNTIME_WIN)
     UNREFERENCED_PARAMETER(stringHolder);
     rc = pString->Array();
-#endif
-#if defined (__APPLE__) || defined (__linux__)
-    if (stringHolder)
-    {
-      stringHolder->Set(*pString);
-      rc = stringHolder->Array();
-    }
-#endif
-#if defined(ON_COMPILER_ANDROIDNDK)
+#else
     if (stringHolder)
     {
       stringHolder->Set(*pString);

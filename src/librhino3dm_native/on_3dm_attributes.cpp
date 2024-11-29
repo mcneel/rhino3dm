@@ -644,6 +644,7 @@ enum DisplayModeSpecialType : int
   dmstPen = 8,
   dmstAmbientOcclusion = 9,
   dmstRaytraced = 10,
+  dmstMonochrome = 11
 };
 
 RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpecialType displayModeSpecialType)
@@ -684,6 +685,9 @@ RH_C_FUNCTION ON_UUID ON_MaterialRef_DisplayModeSpecialType(const DisplayModeSpe
       break;
     case dmstRaytraced:
       id = CRhinoDisplayAttrsMgr::RaytracedModeId();
+      break;
+    case dmstMonochrome:
+      id = CRhinoDisplayAttrsMgr::MonochromeModeId();
       break;
     default:
       id = ON_UUID();
