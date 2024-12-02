@@ -234,6 +234,16 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
+    /// </summary>
+    /// <returns>true if successful</returns>
+    public bool ChangeToParallelReflectedProjection()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Viewport_ChangeToParallelReflectedProjection(ptr_this);
+    }
+
+    /// <summary>
     /// Use this function to change projections of valid viewports
     /// from parallel to perspective.  It will make common additional
     /// adjustments to the frustum and camera location so the resulting

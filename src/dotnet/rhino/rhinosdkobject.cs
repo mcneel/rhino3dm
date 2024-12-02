@@ -2270,7 +2270,7 @@ namespace Rhino.DocObjects
 
       uint f = (uint)flags;
 
-        f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
+      f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
 
       IntPtr ptrViewport = (vp != null) ? vp.ConstPointer() : IntPtr.Zero;
 
@@ -2307,7 +2307,7 @@ namespace Rhino.DocObjects
       if (Document == null)
         return null;
 
-      var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0);
+      var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0, (uint)flags);
 
       uint f = (uint)flags;
 

@@ -73,7 +73,6 @@ RH_C_FUNCTION double ON_Integrate_1D(void* func, void* context, ON_INTERVAL_STRU
   return 0.0;
 }
 
-
 RH_C_FUNCTION double ON_Integrate_1D_Curve(void* func, void* context, const ON_Curve* curve, double relative_tolerance, double absolute_tolerance, double* error_bound)
 {
   if (curve && func && context)
