@@ -4162,6 +4162,7 @@ namespace Rhino.Geometry
     public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy)
     {
       UnsafeNativeMethods.ON_Mesh_SetTextureCoordinatesFromMappingAndTransform(NonConstPointer(), tm.ConstPointer(), ref xf, lazy);
+      GC.KeepAlive(tm);
     }
 
     /// <summary>
@@ -13820,6 +13821,7 @@ namespace Rhino.Geometry
 
 namespace Rhino.Runtime
 {
+#if RHINO_SDK
   /// <summary>
   /// Internal class used by ShrinkWrap functions to acces the <see cref="IShrinkWrapService"/> instance.
   /// </summary>
@@ -13841,7 +13843,7 @@ namespace Rhino.Runtime
       }
     }
   }
-
+#endif
   /// <summary>
   /// Internal interface used by ShrinkWrap functions
   /// </summary>

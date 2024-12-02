@@ -11,7 +11,6 @@ using Rhino.Runtime.InteropWrappers;
 
 #if RHINO_SDK
 using DE = Rhino.RDK.Delegates;
-using static Rhino.Render.RenderContent;
 using Rhino.UI.Controls;
 #endif
 
@@ -160,10 +159,23 @@ namespace Rhino.Render.PostEffects
   /// <since>7.0</since>
   public enum PostEffectExecuteWhileRenderingOptions : int
   {
-    None = 0,     // OBSOLETE; typo. Use Never.
-    Never = 0,    // The post effect does not support execution while rendering.
-    Always = 1,   // The post effect supports execution while rendering and it should be run every time the dib is updated.
-    UseDelay = 2, // The post effect supports execution while rendering but only after a delay the first time.
+    None = 0, /// OBSOLETE; typo. Use Never.
+
+    /// The post effect does not support execution while rendering.
+    Never = 0,
+
+    /// The post effect supports execution while rendering and it should be run every time the dib
+    /// is updated.
+    Always = 1,
+
+    /// The post effect supports execution while rendering but only after a delay the first time.
+    UseDelay = 2,
+
+    /// <since>8.14</since>
+    /// The post effect supports execution while rendering but requires a PostEffectExecutionControl object
+    /// to be registered with the render window. The ReadyToExecutePostEffect() function on this object will
+    /// then be called to decide when to run the post effect.
+    UseExecutionControl = 3
   };
 
   public static class PostEffectUuids
@@ -401,6 +413,7 @@ namespace Rhino.Render.PostEffects
       return null;
     }
 
+#if RHINO_SDK
     internal static DE.CAN_EXECUTE_PROC can_execute_proc = CanExecute;
     [MonoPInvokeCallback(typeof(DE.CAN_EXECUTE_PROC))]
     private static int CanExecute(int serial, IntPtr pIRhRdkPostEffectPipeLine)
@@ -605,6 +618,7 @@ namespace Rhino.Render.PostEffects
                                              null, null, null, null, null, null, null, null);
       }
     }
+#endif
 
      /// <since>7.0</since>
      public static Type[] RegisterPostEffect(PlugIns.PlugIn plugin)
@@ -812,7 +826,7 @@ namespace Rhino.Render.PostEffects
     }
 
     /// <since>7.0</since>
-    public void BeginChange(ChangeContexts changeContext)
+    public void BeginChange(RenderContent.ChangeContexts changeContext)
     {
       UnsafeNativeMethods.IRhRdkPostEffect_BeginChange(CppPointer, (int)changeContext);
       
@@ -935,6 +949,8 @@ namespace Rhino.Render.PostEffects
         m_cpp = IntPtr.Zero;
       }
     }
+
+#if RHINO_SDK
     /// <summary>
     /// Add a section to the UI.
     /// </summary>
@@ -944,6 +960,7 @@ namespace Rhino.Render.PostEffects
     {
       UnsafeNativeMethods.IRhRdkPostEffectUI_AddSection(m_cpp, section.CppPointer);
     }
+#endif
   }
 
   internal class PostEffectFactory : PostEffectFactoryBase
@@ -1016,6 +1033,7 @@ namespace Rhino.Render.PostEffects
       return new Guid(uuid);
     }
 
+#if RHINO_SDK
     internal static DE.NEW_POST_EFFECT_PROC new_posteffect_proc = NewPostEffect;
     [MonoPInvokeCallback(typeof(DE.NEW_POST_EFFECT_PROC))]
     private static IntPtr NewPostEffect(int serial)
@@ -1062,6 +1080,7 @@ namespace Rhino.Render.PostEffects
       }
     }
   }
+#endif
 
   /// <since>7.0</since>
   [Flags]
@@ -1570,6 +1589,7 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public abstract bool Execute(Rectangle rect, PostEffectJobChannels access);
 
+#if RHINO_SDK
     internal static DE.CLONE_POST_EFFECT_JOB_PROC clone_proc = Clone;
     [MonoPInvokeCallback(typeof(DE.CLONE_POST_EFFECT_JOB_PROC))]
     private static IntPtr Clone(int serial)
@@ -1623,6 +1643,7 @@ namespace Rhino.Render.PostEffects
         UnsafeNativeMethods.Rdk_CRdkCmnPostEffectJob_SetCallbacks(null, null, null);
       }
     }
+#endif
   }
 
   public class PostEffectJobChannels : IDisposable
@@ -1921,7 +1942,7 @@ namespace Rhino.Render.PostEffects
       return UnsafeNativeMethods.IRhRdkPostEffect_WriteState(CppPointer, state.CppPointer);
     }
 
-    new public void BeginChange(ChangeContexts changeContext)
+    new public void BeginChange(RenderContent.ChangeContexts changeContext)
     {
       UnsafeNativeMethods.IRhRdkPostEffect_BeginChange(CppPointer, (int)changeContext);
     }
@@ -2275,7 +2296,7 @@ namespace Rhino.Render.PostEffects
   {
     internal int SerialNumber { get; set; }
     internal IntPtr CppPointer { get; private set; }
-
+#if RHINO_SDK
     /// <since>8.0</since>
     public PostEffectExecutionControl()
     {
@@ -2287,7 +2308,7 @@ namespace Rhino.Render.PostEffects
         PostEffectExecutionControlList._list.Add(new WeakReference<PostEffectExecutionControl>(this));
       }
     }
-
+#endif
     ~PostEffectExecutionControl()
     {
       Dispose(false);
@@ -2309,12 +2330,13 @@ namespace Rhino.Render.PostEffects
       if (!disposed)
       {
         disposed = true;
-
+#if RHINO_SDK
         if (CppPointer != IntPtr.Zero)
         {
           UnsafeNativeMethods.CRdkCmnPostEffectExecutionControl_DeleteThis(CppPointer);
           CppPointer = IntPtr.Zero;
         }
+#endif
       }
     }
 
@@ -2342,6 +2364,7 @@ namespace Rhino.Render.PostEffects
       return p;
     }
 
+#if RHINO_SDK
     internal static DE.POST_EFFECT_EXECUTION_CONTROL_PROC__DELETE_THIS delete_this_proc = DeleteThis;
     [MonoPInvokeCallback(typeof(DE.POST_EFFECT_EXECUTION_CONTROL_PROC__DELETE_THIS))]
     private static void DeleteThis(int serial)
@@ -2361,6 +2384,7 @@ namespace Rhino.Render.PostEffects
       return client.ReadyToExecutePostEffect(pep_id);
     }
 
+
     static internal void SetCppHooks(bool bInitialize)
     {
       if (bInitialize)
@@ -2372,6 +2396,7 @@ namespace Rhino.Render.PostEffects
         UnsafeNativeMethods.Rdk_CRdkCmnPostEffectExecutionControl_SetCallbacks(null, null);
       }
     }
-  }
 
+#endif
+  }
 }

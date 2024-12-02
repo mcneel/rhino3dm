@@ -1982,27 +1982,55 @@ namespace Rhino.Render
       return bitmap;
     }
 
-    internal static ChangeContexts ChangeContextFromExtraRequirementsSetContext(ExtraRequirementsSetContexts sc) // Static.
+    /// <summary>Specifies optional buttons for ShowContentInstanceBrowser().</summary>
+    public enum ContentInstanceBrowserButtons
+    {
+      /// <summary>No optional buttons.</summary>
+      None = 0,
+      /// <summary>Include New button.</summary>
+      NewButton = 1,
+      /// <summary>Include Edit button.</summary>
+      EditButton = 2
+    }
+
+    /// <summary>
+    /// Allows the user to choose a content by displaying the Content Instance Browser dialog.
+    /// The dialog will have OK, Cancel and Help buttons, and optional New and Edit buttons.
+    /// <param name="doc">Specifies the document to use.</param>
+    /// <param name="instance_id">Sets the initially selected content and receives the instance id of the chosen content.</param>
+    /// <param name="kinds">Specifies the kind(s) of content that should be displayed in the browser.</param>
+    /// <param name="buttons">Specifies which optional buttons to display.</param>
+    /// Returns true if the user chooses a content or false if the dialog is cancelled.
+    /// </summary>
+    public static bool ShowContentInstanceBrowser(RhinoDoc doc, ref Guid instance_id, RenderContentKind kinds, ContentInstanceBrowserButtons buttons)
+    {
+      return UnsafeNativeMethods.Rdk_Globals_ShowContentInstanceBrowser(doc.RuntimeSerialNumber, ref instance_id, (uint)kinds, (uint)buttons);
+    }
+
+    internal static ChangeContexts ChangeContextFromExtraRequirementsSetContext(ExtraRequirementsSetContexts sc)
     {
       switch (sc)
       {
-        case ExtraRequirementsSetContexts.UI: return ChangeContexts.UI;
-        case ExtraRequirementsSetContexts.Drop: return ChangeContexts.Drop;
+      case ExtraRequirementsSetContexts.UI:   return ChangeContexts.UI;
+      case ExtraRequirementsSetContexts.Drop: return ChangeContexts.Drop;
+      default: break;
       }
 
       return ChangeContexts.Program;
     }
 
-    internal static ExtraRequirementsSetContexts ExtraRequirementsSetContextFromChangeContext(ChangeContexts cc) // Static.
+    internal static ExtraRequirementsSetContexts ExtraRequirementsSetContextFromChangeContext(ChangeContexts cc)
     {
       switch (cc)
       {
-        case ChangeContexts.UI: return ExtraRequirementsSetContexts.UI;
+        case ChangeContexts.UI:   return ExtraRequirementsSetContexts.UI;
         case ChangeContexts.Drop: return ExtraRequirementsSetContexts.Drop;
+        default: break;
       }
 
       return ExtraRequirementsSetContexts.Program;
     }
+
     static internal RenderContentChangeReason ReasonFromAttachReason(UnsafeNativeMethods.RdkEventWatcherBaseAttachReason reason)
     {
       switch (reason)
@@ -2015,9 +2043,12 @@ namespace Rhino.Render
           return RenderContentChangeReason.Open;
         case UnsafeNativeMethods.RdkEventWatcherBaseAttachReason.Undo:
           return RenderContentChangeReason.AttachUndo;
+        default: break;
       }
+
       throw new Exception("Unknown RdkEventWatcherBaseAttachReason type");
     }
+
     static internal RenderContentChangeReason ReasonFromDetachReason(UnsafeNativeMethods.RdkEventWatcherBaseDetachReason reason)
     {
       switch (reason)
@@ -2030,7 +2061,9 @@ namespace Rhino.Render
           return RenderContentChangeReason.Delete;
         case UnsafeNativeMethods.RdkEventWatcherBaseDetachReason.Undo:
           return RenderContentChangeReason.DetachUndo;
+        default: break;
       }
+
       throw new Exception("Unknown RdkEventWatcherBaseDetachReason type");
     }
 

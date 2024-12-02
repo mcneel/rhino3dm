@@ -19,7 +19,8 @@ namespace Rhino.Display
     Front = 5,
     Back = 6,
     Perspective = 7,
-    TwoPointPerspective = 8
+    TwoPointPerspective = 8,
+    ParallelReflected = 9,
   }
 
   /// <summary>
@@ -1291,7 +1292,17 @@ namespace Rhino.Display
         lensLength);
     }
 
-    const int idxCameraLocation = 0;
+    /// <summary>
+    ///   When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
+    /// </summary>
+    /// <returns></returns>
+    public bool ChangeToParallelReflectedProjection()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToParallelReflectedProjection(ptr_this);
+    }
+
+  const int idxCameraLocation = 0;
     const int idxCameraDirection = 1;
     const int idxCameraUp = 2;
     const int idxCameraX = 3;

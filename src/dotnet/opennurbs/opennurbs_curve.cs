@@ -1225,7 +1225,7 @@ namespace Rhino.Geometry
     /// <param name="curve0">The first, or starting, curve.</param>
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1245,7 +1245,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="tolerance"></param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurves(Curve curve0, Curve curve1, int numCurves, double tolerance)
     {
@@ -1267,7 +1267,7 @@ namespace Rhino.Geometry
     /// <param name="curve0">The first, or starting, curve.</param>
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1288,7 +1288,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="tolerance"></param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurvesWithMatching(Curve curve0, Curve curve1, int numCurves, double tolerance)
     {
@@ -1311,7 +1311,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="numSamples">Number of sample points along input curves.</param>
-    /// <returns>>An array of joint curves. This array can be empty.</returns>
+    /// <returns>>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1332,8 +1332,8 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="numSamples">Number of sample points along input curves.</param>
-    /// <param name="tolerance"></param>
-    /// <returns>>An array of joint curves. This array can be empty.</returns>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurvesWithSampling(Curve curve0, Curve curve1, int numCurves, int numSamples, double tolerance)
     {
@@ -1794,6 +1794,45 @@ namespace Rhino.Geometry
         Runtime.CommonObject.GcProtect(curveA, curveB);
         return output_array.ToNonConstArray();
       }
+    }
+
+    /// <summary>
+    /// Creates a revision cloud curve from a planar curve.
+    /// </summary>
+    /// <param name="curve">The input planar curve.</param>
+    /// <param name="segmentCount">
+    /// The number of segments in the output revision cloud curve.
+    /// If zero, the number of segments in the output revision cloud curve is based on the NURB form of the input curve.
+    /// </param>
+    /// <param name="angle">
+    /// The angle in radians, between PI/2.0 and PI radians (90 and 180 degrees). 
+    /// This angle indicates the amount of bulge in the segments.
+    /// </param>
+    /// <param name="flip">The arc segments in output revision cloud curve will be in the opposite direction to the input curve.</param>
+    /// <returns>A revision cloud curve is successful, false otherwise.</returns>
+    /// <since>8.4</since>
+    public static Curve CreateRevisionCloud(Curve curve, int segmentCount, double angle, bool flip)
+    {
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhCreateRevisionCloud(ptr_const_curve, segmentCount, angle, flip);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Creates a revision cloud curve from points that make up a planar polyline.
+    /// </summary>
+    /// <param name="points">The input points.</param>
+    /// <param name="angle">
+    /// The angle in radians, between PI/2.0 and PI radians (90 and 180 degrees). 
+    /// This angle indicates the amount of bulge in the segments.
+    /// </param>
+    /// <param name="flip">The arc segments in output revision cloud curve will be in the opposite direction to the input curve.</param>
+    /// <returns>A revision cloud curve is successful, false otherwise.</returns>
+    /// <since>8.4</since>
+    public static Curve CreateRevisionCloud(IEnumerable<Point3d> points, double angle, bool flip)
+    {
+      PolylineCurve curve = new PolylineCurve(points);
+      return CreateRevisionCloud(curve, 0, angle, flip);
     }
 
     /// <summary>
@@ -3606,6 +3645,7 @@ namespace Rhino.Geometry
     const int idxPointAtT = 0;
     const int idxPointAtStart = 1;
     const int idxPointAtEnd = 2;
+    const int idxPointAtMid = 3;
 
     /// <summary>Evaluates point at a curve parameter.</summary>
     /// <param name="t">Evaluation parameter.</param>
@@ -3625,6 +3665,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_Curve_PointAt(ptr, t, ref rc, idxPointAtT);
       return rc;
     }
+
     /// <summary>
     /// Evaluates point at the start of the curve.
     /// </summary>
@@ -3639,6 +3680,7 @@ namespace Rhino.Geometry
         return rc;
       }
     }
+
     /// <summary>
     /// Evaluates point at the end of the curve.
     /// </summary>
@@ -3654,7 +3696,41 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Evaluates point at the middle, or mid, of the curve.
+    /// </summary>
+    /// <since>8.14</since>
+    public Point3d PointAtMid
+    {
+      get
+      {
+        Point3d rc = new Point3d();
+        IntPtr ptr = ConstPointer();
+        UnsafeNativeMethods.ON_Curve_PointAt(ptr, 1, ref rc, idxPointAtMid);
+        return rc;
+      }
+    }
+
 #if RHINO_SDK
+
+    /// <summary>
+    /// Reparameterizes a curve using automatic parameterization.
+    /// </summary>
+    /// <returns>The reparameterized curve if successful, null otherwise.</returns>
+    /// <remarks>
+    /// Poorly parameterized objects may not intersect and trim properly when combined with other objects.
+    /// "Poorly parameterized" means the curve's domain or the surface's u or v spaces are tiny or huge compared to the size of the object.
+    /// When curves are parameterized with a [0,1] domain, both the accuracy and the precision of geometric calculations like intersections and closest points are reduced, sometimes dramatically.
+    /// Ideally the domain of a curve is close to it's length.
+    /// </remarks>
+    /// <since>8.14</since>
+    public Curve Reparameterize()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr rc = UnsafeNativeMethods.ON_Curve_Reparameterize(ptr_const_this);
+      return GeometryBase.CreateGeometryHelper(rc, null) as Curve;
+    }
+
     /// <summary>
     /// Gets a point at a certain length along the curve. The length must be 
     /// non-negative and less than or equal to the length of the curve. 
@@ -4570,6 +4646,11 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="distance">The distance between division points.</param>
     /// <returns>An array of equidistant points, or null on error.</returns>
+    /// <remarks>
+    /// Unlike the other divide methods, which divides a curve based on arc length, 
+    /// or the distance along the curve between two points, this function divides a curve
+    /// based on the linear distance between points.
+    /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] DivideEquidistant(double distance)
@@ -4578,9 +4659,46 @@ namespace Rhino.Geometry
       SimpleArrayPoint3d points = new SimpleArrayPoint3d();
       IntPtr pConstThis = ConstPointer();
       IntPtr pPoints = points.NonConstPointer();
-      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints) > 0)
+      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints, IntPtr.Zero) > 0)
         rc = points.ToArray();
       points.Dispose();
+      return rc;
+    }
+
+    /// <summary>
+    /// Calculates 3d points on a curve where the linear distance between the points is equal.
+    /// </summary>
+    /// <param name="distance">The distance between division points.</param>
+    /// <param name="curveParameters">If successful, an array of curve parameters at the point locations.</param>
+    /// <returns>An array of equidistant points, or null on error.</returns>
+    /// <remarks>
+    /// Unlike the other divide methods, which divides a curve based on arc length, 
+    /// or the distance along the curve between two points, this function divides a curve
+    /// based on the linear distance between points.
+    /// </remarks>
+    /// <since>8.14</since>
+    public Point3d[] DivideEquidistant(double distance, out double[] curveParameters)
+    {
+      Point3d[] rc = null;
+      curveParameters = new double[0];
+
+      IntPtr pConstThis = ConstPointer();
+
+      SimpleArrayPoint3d points = new SimpleArrayPoint3d();
+      IntPtr pPoints = points.NonConstPointer();
+
+      SimpleArrayDouble parameters = new SimpleArrayDouble();
+      IntPtr pParameters = parameters.NonConstPointer();
+
+      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints, pParameters) > 0)
+      {
+        rc = points.ToArray();
+        curveParameters = parameters.ToArray();
+      }
+
+      points.Dispose();
+      parameters.Dispose();
+
       return rc;
     }
 

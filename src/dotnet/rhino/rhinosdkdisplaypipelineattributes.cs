@@ -647,7 +647,7 @@ namespace Rhino.Display
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public CurveThicknessUse GetCurveThicknessUsage()
     {
-      return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage); 
+      return (CurveThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.CurveThicknessUsage);
     }
 
     //bool m_bUseDefaultCurve; -- doesn't appear to be used in display pipelane
@@ -850,7 +850,7 @@ namespace Rhino.Display
     /// <since>8.6</since>
     public SurfaceNakedEdgeThicknessUse GetSurfaceNakedEdgeThicknessUsage()
     {
-      if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness)) 
+      if (GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SurfaceNakedEdgeUseNormalEdgeThickness))
         return SurfaceNakedEdgeThicknessUse.UseSurfaceEdgeSettings;
       SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
       if (0 != (SurfaceEdgeThicknessFlags.NakedEdgeFixedWidth & currentUsage))
@@ -938,7 +938,7 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IsoThicknessUsed, value); }
     }
- 
+
     /// <summary>
     /// Turn pattern application on or off
     /// </summary>
@@ -988,7 +988,7 @@ namespace Rhino.Display
     }
     /// <since>8.6</since>
     public SurfaceEdgeColorUse SurfaceEdgeColorUsage
-    { 
+    {
       get { return (SurfaceEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.EdgeColorUsage, (int)value); }
     }
@@ -1167,7 +1167,7 @@ namespace Rhino.Display
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SurfaceIsoVThicknessScale, value); }
-   }
+    }
     /// <since>8.7</since>
     public float SurfaceIsoThicknessWScale
     {
@@ -1361,7 +1361,7 @@ namespace Rhino.Display
     //bool m_bUseHiddenLights;
     //bool m_bUseLightColor;
     //bool m_bUseDefaultLightingScheme;
-    
+
     //bool m_bUseDefaultEnvironment;
     //int m_nLuminosity;
     /// <since>6.3</since>
@@ -1744,7 +1744,7 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowRealtimeRenderProgressBar); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowRealtimeRenderProgressBar, value); }
     }
-#endregion
+    #endregion
 
     /// <summary>
     /// Get or set the stereo render context.
@@ -1835,7 +1835,7 @@ namespace Rhino.Display
     /// <since>8.8</since>
     public Color BackMaterialDiffuseColor
     {
-      get 
+      get
       {
         return GetColor(UnsafeNativeMethods.DisplayAttrsColor.BackDiffuse);
       }
@@ -2690,11 +2690,11 @@ namespace Rhino.Display
     public int ShadowIntensity
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity); }
-      set 
+      set
       {
         if (value < 0) value = 0;
         else if (value > 100) value = 100;
-        SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity, value); 
+        SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity, value);
       }
     }
     /// <summary>
@@ -2750,7 +2750,7 @@ namespace Rhino.Display
     /// </summary>
     public int ShadowSoftEdgeQuality
     {
-      get 
+      get
       {
         if (GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMapType) == (int)ShadowMapType.Normal)
           return 0;
@@ -2782,11 +2782,11 @@ namespace Rhino.Display
     public double ShadowEdgeBlur
     {
       get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur); }
-      set 
+      set
       {
         if (value < 0.0f) value = 0.0f;
         if (value > 16.0f) value = 16.0f;
-        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur, value); 
+        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur, value);
       }
     }
     /// <summary>
@@ -2795,7 +2795,7 @@ namespace Rhino.Display
     public double ShadowBiasX
     {
       get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX); }
-      set 
+      set
       {
         if (value < 0.0) value = 0.0;
         if (value > 50.0) value = 50.0;
@@ -2838,12 +2838,12 @@ namespace Rhino.Display
     public bool ShadowsIgnoreUserDefinedClippingPlanes
     {
       get { return (0 != (0x10 & GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage))); }
-      set 
+      set
       {
         int current = GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage);
         if (value) current |= 0x10;
         if (!value) current &= ~0x10;
-        SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage, current); 
+        SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage, current);
       }
     }
 
@@ -2946,6 +2946,148 @@ namespace Rhino.Display
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.GridPlaneColor); }
       set { SetColor(UnsafeNativeMethods.DisplayAttrsColor.GridPlaneColor, value); }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum GroundPlaneUsages
+    {
+      ByDocument = 0,
+      Custom = 1,
+    }
+
+    /// <summary>
+    /// Turn on or off custom Ground plane settungs
+    /// </summary>
+    public GroundPlaneUsages GroundPlaneUsage
+    {
+      get { return (GroundPlaneUsages)GetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage, (int) value); }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum LinearWorkflowUsages
+    {
+      ByDocument=0,
+      Custom=1,
+    }
+
+    /// <summary>
+    /// Turn on or off custom linear workflow settings
+    /// </summary>
+    public LinearWorkflowUsages LinearWorkflowUsage
+    {
+      get { return (LinearWorkflowUsages)GetInt(UnsafeNativeMethods.DisplayAttributesInt.LinearWorkflowUsage); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.LinearWorkflowUsage, (int)value); }
+    }
+
+    /// <summary>
+    /// Linear workflow input colors
+    /// </summary>
+    public bool PreProcessColors
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessColors); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessColors, value); }
+    }
+
+    /// <summary>
+    /// Linear workflow input textures
+    /// </summary>
+    public bool PreProcessTextures
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessTextures); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessTextures, value); }
+    }
+
+    /// <summary>
+    /// Linear workflow input gamma
+    /// </summary>
+    public bool PreProcessGamma
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessGamma); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessGamma, value); }
+    }
+
+    /// <summary>
+    /// Linear workflow Adjust output image
+    /// </summary>
+    public bool PostProcessFrameBuffer
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessFrameBuffer); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessFrameBuffer, value); }
+    }
+
+    /// <summary>
+    /// Linear workflow Output image gamma
+    /// </summary>
+    public bool PostProcessGamma
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessGamma); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessGamma, value); }
+    }
+
+    /// <summary>
+    /// Shades the current viewport with no smoothing so the individual render mesh faces are visible.
+    /// </summary>
+    public bool FrontFlatShaded
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded, value);
+      }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool FrontOverrideObjectColor
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor, value);
+      }
+    }
+
+    /// <summary>
+    /// Shades the current viewport with no smoothing so the individual render mesh faces are visible.
+    /// </summary>
+    public Color FrontDiffuse
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        return System.Drawing.Color.FromArgb(UnsafeNativeMethods.CDisplayAttributeMaterial_GetColor(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse));
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayAttributeMaterial_SetColor(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse, value.ToArgb());
+      }
+    }
+
+    /// <summary>
+    /// Adds the ability to display procedural textures in viewports. When it is turned off, procedural textures in viewports look different from the rendering.
+    /// </summary>
+    public bool BakeTextures
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BakeTextures); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BakeTextures, value); }
+    }
+
 
   }
 }

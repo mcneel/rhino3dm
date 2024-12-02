@@ -60,7 +60,7 @@ RH_C_FUNCTION bool ONC_EvNormalPartials(
 typedef double (*Callback1Delegate)(ON__UINT_PTR context, int limit_direction, double t);
 typedef double (*Callback2Delegate)(ON__UINT_PTR context, int limit_direction, double s, double t);
 
-
+#if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION double ON_Integrate_1D(void* func, void* context, ON_INTERVAL_STRUCT limits, double relative_tolerance, double absolute_tolerance, double* error_bound)
 {
   if (context && func)
@@ -72,6 +72,7 @@ RH_C_FUNCTION double ON_Integrate_1D(void* func, void* context, ON_INTERVAL_STRU
   // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
   return 0.0;
 }
+
 
 RH_C_FUNCTION double ON_Integrate_1D_Curve(void* func, void* context, const ON_Curve* curve, double relative_tolerance, double absolute_tolerance, double* error_bound)
 {
@@ -104,3 +105,4 @@ RH_C_FUNCTION double ON_Integrate_2D_Surface(void* func, void* context, const ON
   // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
   return 0.0;
 }
+#endif

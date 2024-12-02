@@ -7,6 +7,9 @@ using Rhino.Collections;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 using System.Threading;
+#if RHINO_SDK
+using System.Security.Policy;
+#endif
 
 namespace Rhino.Geometry
 {

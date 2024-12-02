@@ -501,7 +501,7 @@ namespace Rhino.Geometry
           x = (intervalParameter == m_t1) ? 1.0 : (intervalParameter - m_t0) / (m_t1 - m_t0);
         }
         else
-          x = m_t0;
+          x = 0.0;
       }
       else
       {

@@ -2030,6 +2030,14 @@ namespace Rhino.PlugIns
           }
         }
       }
+      if (HostUtils.RunningInNetFramework)
+      {
+        // ensure we don't ever pass back System\netcore folder
+        // assemblies there are not compatible in this mode.
+        var netcorePath = Path.Combine(HostUtils.RhinoAssemblyDirectory, "netcore");
+        if (dirs.Contains(netcorePath))
+          dirs.Remove(netcorePath);
+      }
       return dirs.ToArray();
     }
 
@@ -2110,6 +2118,32 @@ namespace Rhino.PlugIns
         for (int i = 0; i < m_plugins.Count; i++)
         {
           if (string.Compare(m_plugins[i].Assembly.Location, pluginPath, true) == 0)
+          {
+            rc = m_plugins[i].Id;
+            break;
+          }
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Attempt to get a plugiin id from just the filename of a plug-in
+    /// </summary>
+    /// <param name="filename">plug-in filename</param>
+    /// <returns>id on success; Guid.Empty if no plug-in could be found</returns>
+    public static Guid IdFromFileName(string filename)
+    {
+      Guid rc = UnsafeNativeMethods.CRhinoPlugInManager_IdFromFileName(filename);
+      if (rc.Equals(Guid.Empty))
+      {
+        // Look in our local collection of plug-ins. We may be in "OnLoad"
+        // and the plug-in hasn't officially been registered with Rhino.
+        for (int i = 0; i < m_plugins.Count; i++)
+        {
+          string pluginFilename = m_plugins[i].Assembly.Location;
+          pluginFilename = Path.GetFileName(pluginFilename);
+          if (pluginFilename.Equals(filename, StringComparison.InvariantCultureIgnoreCase))
           {
             rc = m_plugins[i].Id;
             break;

@@ -110,7 +110,7 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public bool Moved
     {
-      get 
+      get
       {
         IntPtr ptr = ConstPointer();
         return UnsafeNativeMethods.CRhinoGripObject_Moved(ptr);
@@ -162,7 +162,7 @@ namespace Rhino.DocObjects
     public void UndoMove()
     {
       IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
-      UnsafeNativeMethods.CRhinoGripObject_UndoMode(ptr);      
+      UnsafeNativeMethods.CRhinoGripObject_UndoMode(ptr);
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ namespace Rhino.DocObjects
         IntPtr ptr = ConstPointer();
         return UnsafeNativeMethods.CRhinoGripObject_GetSetWeight(ptr, false, 0);
       }
-      set 
+      set
       {
         IntPtr ptr = NonConstPointer_I_KnowWhatImDoing();
         UnsafeNativeMethods.CRhinoGripObject_GetSetWeight(ptr, true, value);

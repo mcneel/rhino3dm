@@ -1295,6 +1295,9 @@ namespace Rhino.Display
 
     /// <summary>
     /// Font point size use for printing text dots. The default value is 10.0.
+    /// This has morphed into a scale setting as individual text dots have
+    /// their own sizes. A value of 20 will print dots at double of their size 
+    /// setting while a value of 10 will print with no scaling applied.
     /// </summary>
     /// <since>7.27</since>
     public double TextDotPointSize

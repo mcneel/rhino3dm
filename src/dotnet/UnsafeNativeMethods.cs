@@ -341,6 +341,9 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetLinetypeTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetHatchPatternTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetDimStyleTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -380,9 +383,12 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetDetailEventCallback(Rhino.Display.RhinoPageView.PageViewCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetViewEnableDrawingCallback(Rhino.Display.RhinoView.ViewEnableDrawingCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetPageViewPropertiesCallback(Rhino.Display.RhinoPageView.PageViewPropertiesCallback cb);
 
-[DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetDisplayModeChangedEventCallback(Rhino.Display.DisplayPipeline.DisplayModeChangedCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -392,7 +398,10 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void CRhinoEventWatcher_SetTransformObjectsCallback(Rhino.RhinoDoc.RhinoTransformObjectsCallback cb);
+  internal static extern void CRhinoEventWatcher_SetBeforeTransformObjectsCallback(Rhino.RhinoDoc.RhinoBeforeTransformObjectsCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetAfterTransformObjectsCallback(Rhino.RhinoDoc.RhinoAfterTransformObjectsCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnMainLoopCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);

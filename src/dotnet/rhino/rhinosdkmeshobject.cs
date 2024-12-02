@@ -69,7 +69,7 @@ namespace Rhino.DocObjects
         if (raw_mesh_ptr != IntPtr.Zero)
         {
           new_mesh = new Mesh(raw_mesh_ptr, null);
-        new_mesh.ConvertToConstObjectWithSharedPointerParent(p_shared_ptr_to_old_mesh);
+          new_mesh.ConvertToConstObjectWithSharedPointerParent(p_shared_ptr_to_old_mesh);
         }
         else
         {

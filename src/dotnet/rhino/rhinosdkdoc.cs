@@ -355,8 +355,8 @@ namespace Rhino
       {
         // only open the document if not yet opened, otherwise 
         // active doc serial# will be out of sync, see RH-82580
-      if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath))
-        return null;
+        if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath))
+          return null;
         doc = FromFilePath(filePath);
       }
       return doc;
@@ -2102,7 +2102,7 @@ namespace Rhino
 
       foreach (var id in a)
       {
-        var primitives = new RenderMeshes(this, id, Guid.Empty, 0);
+        var primitives = new RenderMeshes(this, id, Guid.Empty, 0, (uint)flags);
 
         UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp.ConstPointer(), RuntimeSerialNumber, id, ref f, plugin.NonConstPointer(), attrs.ConstPointer(), IntPtr.Zero);
 
@@ -3636,14 +3636,15 @@ namespace Rhino
       }
     }
 
-    internal delegate void RhinoTransformObjectsCallback(IntPtr pRhinoOnTransformObject);
-    private static RhinoTransformObjectsCallback g_on_before_transform_objects_callback;
-    [MonoPInvokeCallback(typeof(RhinoTransformObjectsCallback))]
-    private static void OnBeforeTransformObjects(IntPtr pRhinoOnTransformObject)
+    #region Before transform event
+    internal delegate void RhinoBeforeTransformObjectsCallback(IntPtr pRhinoOnTransformObject);
+    private static RhinoBeforeTransformObjectsCallback g_on_before_transform_objects_callback;
+    [MonoPInvokeCallback(typeof(RhinoBeforeTransformObjectsCallback))]
+    private static void OnBeforeTransformObjects(IntPtr pRhinoBeforeTransformObject)
     {
       if (g_before_transform_objects != null)
       {
-        var args = new DocObjects.RhinoTransformObjectsEventArgs(pRhinoOnTransformObject);
+        var args = new DocObjects.RhinoTransformObjectsEventArgs(pRhinoBeforeTransformObject);
         g_before_transform_objects.SafeInvoke(null, args);
         args.CleanUp();
       }
@@ -3666,7 +3667,7 @@ namespace Rhino
           if (g_before_transform_objects == null)
           {
             g_on_before_transform_objects_callback = OnBeforeTransformObjects;
-            UnsafeNativeMethods.CRhinoEventWatcher_SetTransformObjectsCallback(g_on_before_transform_objects_callback);
+            UnsafeNativeMethods.CRhinoEventWatcher_SetBeforeTransformObjectsCallback(g_on_before_transform_objects_callback);
           }
           // ReSharper disable once DelegateSubtraction - okay for single value
           g_before_transform_objects -= value;
@@ -3681,12 +3682,65 @@ namespace Rhino
           g_before_transform_objects -= value;
           if (g_before_transform_objects == null)
           {
-            UnsafeNativeMethods.CRhinoEventWatcher_SetTransformObjectsCallback(null);
+            UnsafeNativeMethods.CRhinoEventWatcher_SetBeforeTransformObjectsCallback(null);
             g_on_before_transform_objects_callback = null;
           }
         }
       }
     }
+    #endregion
+
+    #region After transform event
+    internal delegate void RhinoAfterTransformObjectsCallback(IntPtr pRhinoAfterTransformObject);
+    private static RhinoAfterTransformObjectsCallback g_on_after_transform_objects_callback;
+    [MonoPInvokeCallback(typeof(RhinoAfterTransformObjectsCallback))]
+    private static void OnAfterTransformObjects(IntPtr pRhinoAfterTransformObject)
+    {
+      if (g_after_transform_objects != null)
+      {
+        var args = new DocObjects.RhinoAfterTransformObjectsEventArgs(pRhinoAfterTransformObject);
+        g_after_transform_objects.SafeInvoke(null, args);
+        args.CleanUp();
+      }
+    }
+    static EventHandler<DocObjects.RhinoAfterTransformObjectsEventArgs> g_after_transform_objects;
+    /// <summary>
+    /// Called after objects are being transformed
+    /// </summary>
+    /// <example>
+    /// </example>
+    /// <since>8.15</since>
+    public static event EventHandler<DocObjects.RhinoAfterTransformObjectsEventArgs> AfterTransformObjects
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (g_after_transform_objects == null)
+          {
+            g_on_after_transform_objects_callback = OnAfterTransformObjects;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetAfterTransformObjectsCallback(g_on_after_transform_objects_callback);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          g_after_transform_objects -= value;
+          g_after_transform_objects += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          g_after_transform_objects -= value;
+          if (g_after_transform_objects == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetAfterTransformObjectsCallback(null);
+            g_on_after_transform_objects_callback = null;
+          }
+        }
+      }
+    }
+    #endregion
 
     internal delegate void RhinoTableCallback(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings);
 
@@ -3780,6 +3834,58 @@ namespace Rhino
             if (g_linetype_callback_gchandle.IsAllocated)
             {
               g_linetype_callback_gchandle.Free();
+            }
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region HatchPattern table event
+    private static RhinoTableCallback g_on_hatchpattern_table_event_callback;
+    private static GCHandle g_hatchpattern_callback_gchandle;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
+    private static void OnHatchPatternTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
+    {
+      m_hatchpattern_table_event?.SafeInvoke(null, new HatchPatternTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
+    }
+    internal static EventHandler<HatchPatternTableEventArgs> m_hatchpattern_table_event;
+
+    /// <summary>
+    /// Called when any modification happens to a document's hatch pattern table.
+    /// </summary>
+    /// <since>8.15</since>
+    public static event EventHandler<HatchPatternTableEventArgs> HatchPatternTableEvent
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (m_hatchpattern_table_event == null)
+          {
+            g_on_hatchpattern_table_event_callback = OnHatchPatternTableEvent;
+            g_hatchpattern_callback_gchandle = GCHandle.Alloc(g_on_hatchpattern_table_event_callback);
+
+            UnsafeNativeMethods.CRhinoEventWatcher_SetHatchPatternTableEventCallback(g_on_hatchpattern_table_event_callback, Runtime.HostUtils.m_ew_report);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_hatchpattern_table_event -= value;
+          m_hatchpattern_table_event += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_hatchpattern_table_event -= value;
+          if (m_hatchpattern_table_event == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetHatchPatternTableEventCallback(null, Runtime.HostUtils.m_ew_report);
+            g_on_hatchpattern_table_event_callback = null;
+            if (g_hatchpattern_callback_gchandle.IsAllocated)
+            {
+              g_hatchpattern_callback_gchandle.Free();
             }
           }
         }
@@ -4795,9 +4901,9 @@ namespace Rhino
               {
                 m_objects = rhobjs;
                 return m_objects;
-            }
+              }
               objects.AddRange(rhobjs);
-          }
+            }
             m_objects = objects.ToArray();
           }
           return m_objects;
@@ -4941,6 +5047,7 @@ namespace Rhino
     /// <summary>
     /// EventArgs passed to RhinoDoc.BeforeTransform.
     /// </summary>
+    /// <since>5.10</since>
     public class RhinoTransformObjectsEventArgs : EventArgs
     {
       IntPtr m_ptr_transform_object;
@@ -4948,14 +5055,27 @@ namespace Rhino
       GripObject[] m_grips;
       RhinoObject[] m_grip_owners;
 
-      internal RhinoTransformObjectsEventArgs(IntPtr pRhinoOnTransformObject)
+      internal RhinoTransformObjectsEventArgs(IntPtr pRhinoBeforeTransformObject)
       {
-        m_ptr_transform_object = pRhinoOnTransformObject;
+        m_ptr_transform_object = pRhinoBeforeTransformObject;
       }
 
       internal void CleanUp()
       {
         m_ptr_transform_object = IntPtr.Zero;
+      }
+
+      /// <summary>
+      /// The transformation event id.
+      /// </summary>
+      /// <since>8.15</since>
+      [CLSCompliant(false)]
+      public uint TransformEventId
+      {
+        get
+        {
+          return UnsafeNativeMethods.CRhinoBeforeTransformObject_TransformEventId(m_ptr_transform_object);
+        }
       }
 
       /// <summary>
@@ -4967,7 +5087,7 @@ namespace Rhino
         get
         {
           Transform xf = Transform.Identity;
-          UnsafeNativeMethods.CRhinoOnTransformObject_Transform(m_ptr_transform_object, ref xf);
+          UnsafeNativeMethods.CRhinoBeforeTransformObject_Transform(m_ptr_transform_object, ref xf);
           return xf;
         }
       }
@@ -4976,7 +5096,7 @@ namespace Rhino
       /// True if the objects will be copied.
       /// </summary>
       /// <since>5.10</since>
-      public bool ObjectsWillBeCopied => UnsafeNativeMethods.CRhinoOnTransformObject_Copy(m_ptr_transform_object);
+      public bool ObjectsWillBeCopied => UnsafeNativeMethods.CRhinoBeforeTransformObject_Copy(m_ptr_transform_object);
 
       private const int idxObjectCount = 0;
       private const int idxGripCount = 1;
@@ -4986,19 +5106,19 @@ namespace Rhino
       /// The number of Rhino objects that will be transformed.
       /// </summary>
       /// <since>5.10</since>
-      public int ObjectCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxObjectCount);
+      public int ObjectCount => UnsafeNativeMethods.CRhinoBeforeTransformObject_ObjectCount(m_ptr_transform_object, idxObjectCount);
 
       /// <summary>
       /// The number of Rhino object grips that will be transformed.
       /// </summary>
       /// <since>7.0</since>
-      public int GripCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxGripCount);
+      public int GripCount => UnsafeNativeMethods.CRhinoBeforeTransformObject_ObjectCount(m_ptr_transform_object, idxGripCount);
 
       /// <summary>
       /// The number of Rhino object grip owners that will be changed when the grips are transformed.
       /// </summary>
       /// <since>7.0</since>
-      public int GripOwnerCount => UnsafeNativeMethods.CRhinoOnTransformObject_ObjectCount(m_ptr_transform_object, idxGripOwnerCount);
+      public int GripOwnerCount => UnsafeNativeMethods.CRhinoBeforeTransformObject_ObjectCount(m_ptr_transform_object, idxGripOwnerCount);
 
       /// <summary>
       /// An array of Rhino objects to be transformed.
@@ -5017,7 +5137,7 @@ namespace Rhino
             m_objects = new RhinoObject[count];
             for (int i = 0; i < count; i++)
             {
-              IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoOnTransformObject_Object(m_ptr_transform_object, i);
+              IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoBeforeTransformObject_Object(m_ptr_transform_object, i);
               m_objects[i] = RhinoObject.CreateRhinoObjectHelper(ptr_rhino_object);
             }
           }
@@ -5042,7 +5162,7 @@ namespace Rhino
             m_grips = new GripObject[count];
             for (int i = 0; i < count; i++)
             {
-              IntPtr ptr_grip_object = UnsafeNativeMethods.CRhinoOnTransformObject_Grip(m_ptr_transform_object, i);
+              IntPtr ptr_grip_object = UnsafeNativeMethods.CRhinoBeforeTransformObject_Grip(m_ptr_transform_object, i);
               var sn = UnsafeNativeMethods.CRhinoObject_RuntimeSN(ptr_grip_object);
               if (IntPtr.Zero != ptr_grip_object && sn > 0)
               {
@@ -5072,11 +5192,43 @@ namespace Rhino
             m_grip_owners = new RhinoObject[count];
             for (int i = 0; i < count; i++)
             {
-              IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoOnTransformObject_GripOwner(m_ptr_transform_object, i);
+              IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoBeforeTransformObject_GripOwner(m_ptr_transform_object, i);
               m_grip_owners[i] = RhinoObject.CreateRhinoObjectHelper(ptr_rhino_object);
             }
           }
           return m_grip_owners;
+        }
+      }
+    }
+
+    /// <summary>
+    /// EventArgs passed to RhinoDoc.AfterTransform.
+    /// </summary>
+    /// <since>8.15</since>
+    public class RhinoAfterTransformObjectsEventArgs : EventArgs
+    {
+      IntPtr m_ptr_transform_object;
+
+      internal RhinoAfterTransformObjectsEventArgs(IntPtr pRhinoAfterTransformObject)
+      {
+        m_ptr_transform_object = pRhinoAfterTransformObject;
+      }
+
+      internal void CleanUp()
+      {
+        m_ptr_transform_object = IntPtr.Zero;
+      }
+
+      /// <summary>
+      /// The transformation event id.
+      /// </summary>
+      /// <since>8.15</since>
+      [CLSCompliant(false)]
+      public uint TransformEventId
+      {
+        get
+        {
+          return UnsafeNativeMethods.CRhinoAfterTransformObject_TransformEventId(m_ptr_transform_object);
         }
       }
     }
@@ -7501,7 +7653,7 @@ namespace Rhino.DocObjects.Tables
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       return UnsafeNativeMethods.CRhinoDoc_AddExtrusion(m_doc.RuntimeSerialNumber, pConstExtrusion, pConstAttributes, pHistory, reference);
     }
-
+    
     public Guid AddClippingPlaneSurface(Geometry.ClippingPlaneSurface clippingPlane, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pConstClippingPlane = clippingPlane.ConstPointer();

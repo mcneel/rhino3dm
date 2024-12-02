@@ -514,6 +514,21 @@ namespace Rhino
       get { return UnsafeNativeMethods.CRhinoApp_GetGUID(UnsafeNativeMethods.RhinoAppGuid.CurrentRhinoId); }
     }
 
+    /// <summary>
+    /// Returns true if Rhino's parent window is the desktop, false otherwise.
+    /// </summary>
+    /// <remarks>
+    /// The parent of a top-level window is the desktop window.
+    /// Some applications like to re-parent Rhino's main window to a window they provide.
+    /// Use this property to determine if Rhino is in such a condition. 
+    /// Note, this property is only valid on Windows.
+    /// </remarks>
+    /// <since>8.14</since>
+    public static bool IsParentDesktop
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_IsParentDesktop(); }
+    }
+
     /// <summary>Is Rhino currently being executed through automation</summary>
     /// <since>5.0</since>
     public static bool IsRunningAutomated
