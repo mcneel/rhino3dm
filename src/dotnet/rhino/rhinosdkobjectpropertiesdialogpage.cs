@@ -646,6 +646,46 @@ namespace Rhino.UI
     {
       var type = typeof (T);
       var filter = allMustMatch ? ObjectType.AnyObject : TypeFilter(type);
+
+      // 9 July 2024 S. Baer (RH-82891)
+      // Try to bail out as quick as possible by using the more efficient
+      // RhinoDoc functions. This function could be further optimized to not
+      // require any .NET looping through object lists.
+      uint docSerialNumber = RhinoPageHooks.RhinoDocRuntimeSerialNumberFromPage(this);
+      RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+      if (doc != null)
+      {
+        if (!doc.Objects.SelectedObjectsExist(filter, true))
+          return false;
+
+        var objectlist = doc.Objects.GetObjectList(new ObjectEnumeratorSettings() { ObjectTypeFilter = filter, SelectedObjectsFilter = true });
+        IDisposable disposable = objectlist as IDisposable;
+        bool listHasElements = false;
+        foreach (var rhinoObject in objectlist)
+        {
+          listHasElements = true;
+          var obj = rhinoObject as T;
+          // If all objects must match and this object does not then return false
+          if (allMustMatch && obj == null)
+          {
+            if (disposable != null)
+              disposable.Dispose();
+            return false;
+          }
+          // No requirement for all objects to match and this one does then just return true now
+          if (!allMustMatch && obj != null)
+          {
+            if (disposable != null)
+              disposable.Dispose();
+            return true;
+          }
+        }
+        if (disposable != null)
+          disposable.Dispose();
+        return allMustMatch && listHasElements;
+      }
+
+      // This code should never be hit anymore since doc should always exist
       var page_pointer = RhinoPageHooks.UnmanagedIRhinoPagePointerFromPage(this);
       var count = 0;
       var array_pointer = UnsafeNativeMethods.IRhinoPropertiesPanelPage_GetObjects(page_pointer, (uint)filter, ref count);

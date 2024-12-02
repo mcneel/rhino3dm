@@ -1,6 +1,7 @@
 
 using System;
 using System.Diagnostics;
+using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 
 #pragma warning disable 1591

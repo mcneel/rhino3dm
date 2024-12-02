@@ -45,6 +45,59 @@ namespace Rhino.Render
   }
 
   /// <summary>
+  /// Texture space
+  ///
+  ///   When a mapping primitive is a box or a capped cylinder,
+  ///   there are two options for the mapping.  Either the sides
+  ///   all map to (0,1)x(0,1) (so the either texture map appears 
+  ///   on each side, or the sides map to distinct regions of the
+  ///   texture space.  
+  ///   
+  /// </summary>
+  public enum TextureSpace : int
+  {
+    /// <summary>
+    ///  sides and caps map to same texture space
+    /// </summary>
+    Single = 0,
+    /// <summary>
+    /// regions of texture space.
+    /// (0, 1/4, 2/4, 3/4, 1) for uncapped boxes.
+    /// (0, 1/6, 2/6, 3/6, 4/6, 5/6, 1) for capped boxes.
+    /// (0, 4/6, 5/6, 1) for capped cylinders.
+    /// </summary>
+    Divided = 1
+  };
+
+  /// <summary>
+  /// When a mapping primitive, like a plane, sphere, box,
+  ///   or cylinder, is used, there are two projection options.
+  ///If m_type = srfp_mapping, then m_projection is ignored.
+  /// </summary>
+  public enum Projection : int
+  {
+    /// <summary>
+    /// None
+    /// </summary>
+    None    = 0,
+    /// <summary>
+    /// ClosestPoint: world xyz maps to the point on the 
+    ///                    mapping primitive that is closest to xyz.
+    ///                    In this case, ON_TextureMapping::Evaluate
+    ///                    ignores the vector argument.
+    /// </summary>
+    ClosestPoint = 1,
+    /// <summary>
+    /// Ray:   world xyz + world vector defines a world line.
+    ///                    The world line is intersected with the mapping 
+    ///                    primitive and the intersection point that is
+    ///                    closest to the world xyz point is used to
+    ///                    calculate the mapping parameters.
+    /// </summary>
+    Ray = 2
+  };
+
+  /// <summary>
   /// Represents a texture mapping.
   /// </summary>
   public sealed class TextureMapping : ModelComponent
@@ -115,6 +168,55 @@ namespace Rhino.Render
         throw new Exception("Unknown TextureMappingType");
       }
     }
+
+    /// <summary>
+    /// // The m_bCapped applies to planar, cylinder and box mappings.
+    /// If m_bCapped is false, the cylinder or box is "infinite", if m_bCapped is true, they are finite.
+    /// In planar mappings, m_bCapped=false means "the Z texture coordinate will always be 0.0"
+    /// this is now the default behaviour in Rhino 5.0 - it's what users expect apparently.
+    /// </summary>
+    public bool Capped
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_TextureMapping_GetCapped(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_TextureMapping_SetCapped(NonConstPointer(), value);
+      }
+    }
+
+    /// <summary>
+    /// See TextureSpace
+    /// </summary>
+    public TextureSpace TextureSpace
+    {
+      get
+      {
+        return (TextureSpace)UnsafeNativeMethods.ON_TextureMapping_GetTextureSpace(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_TextureMapping_SetTextureSpace(NonConstPointer(), (int)value);
+      }
+    }
+
+    /// <summary>
+    /// See Projection
+    /// </summary>
+    public Projection Projection
+    {
+      get
+      {
+        return (Projection)UnsafeNativeMethods.ON_TextureMapping_GetProjection(ConstPointer());
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_TextureMapping_SetProjection(NonConstPointer(), (int)value);
+      }
+    }
+
 
 
     /// <summary>

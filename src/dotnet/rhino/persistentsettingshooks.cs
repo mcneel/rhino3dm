@@ -67,6 +67,7 @@ namespace Rhino
     // Get a specific PersistentSettings reference to attach to 
     internal delegate uint GetPlugInPersistentSettingsPointerProc(Guid plugInId, uint pointerId, bool windowPositions);
     static internal GetPlugInPersistentSettingsPointerProc GetManagedPlugInPersistentSettingsPointerHook = GetManagedPlugInPersistentSettingsPointerFunc;
+    [MonoPInvokeCallback(typeof(GetPlugInPersistentSettingsPointerProc))]
     private static uint GetManagedPlugInPersistentSettingsPointerFunc(Guid plugInId, uint pointerId, bool windowPositions)
     {
       PersistentSettings settings;
@@ -98,18 +99,28 @@ namespace Rhino
     /// <param name="pointerId"></param>
     /// <param name="windowPositions"></param>
     /// <returns></returns>
+    [MonoPInvokeCallback(typeof(GetPlugInPersistentSettingsPointerProc))]
     static private uint GetPlugInPersistentSettingsPointerFunc(Guid plugInId, uint pointerId, bool windowPositions)
     {
       PlugInSettings plug_in_settings;
       if (pointerId == 0)
       {
         lock (g_dictionary_lock)
+        {
           g_dictionary.TryGetValue(plugInId, out plug_in_settings);
+        }
       }
       else
       {
         lock (g_plug_in_settings_read_lock)
-          g_plug_in_settings_read.TryGetValue(pointerId, out plug_in_settings);
+        {
+          bool check = g_plug_in_settings_read.TryGetValue(pointerId, out plug_in_settings);
+
+          //ALB 2024.09.01
+          //If this fires, it means that my fix for https://mcneel.myjetbrains.com/youtrack/issue/RH-82124/Memory-leak-with-PersistentSettings
+          //is incorrect.  Please log as much information in the bug about what you did, and the callstack and reopen the bug.
+          System.Diagnostics.Debug.Assert(check);
+        }
       }
       if (plug_in_settings == null)
         return 0;
@@ -132,6 +143,7 @@ namespace Rhino
     }
     internal delegate uint GetChildPersistentSettingsPointerProc(uint parentPointerId, IntPtr stringPointerChildName);
     static internal GetChildPersistentSettingsPointerProc GetChildPersistentSettingsHook = GetChildPersistentSettingsFunc;
+    [MonoPInvokeCallback(typeof(GetChildPersistentSettingsPointerProc))]
     static private uint GetChildPersistentSettingsFunc(uint parentPointerId, IntPtr stringPointerChildName)
     {
       var child_name = IntPtrToString(stringPointerChildName);
@@ -151,6 +163,7 @@ namespace Rhino
       }
     }
     static internal GetChildPersistentSettingsPointerProc AddChildPersistentSettingsHook = AddChildPersistentSettingsFunc;
+    [MonoPInvokeCallback(typeof(GetChildPersistentSettingsPointerProc))]
     static private uint AddChildPersistentSettingsFunc(uint parentPointerId, IntPtr stringPointerChildName)
     {
       var child_name = IntPtrToString(stringPointerChildName);
@@ -170,6 +183,7 @@ namespace Rhino
       }
     }
     static internal GetChildPersistentSettingsPointerProc DeleteItemPersistentSettingsHook = DeleteItemPersistentSettingsFunc;
+    [MonoPInvokeCallback(typeof(GetChildPersistentSettingsPointerProc))]
     static private uint DeleteItemPersistentSettingsFunc(uint pointerId, IntPtr keyString)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -179,6 +193,7 @@ namespace Rhino
     }
 
     static internal GetChildPersistentSettingsPointerProc DeleteChildPersistentSettingsHook = DeleteChildPersistentSettingsFunc;
+    [MonoPInvokeCallback(typeof(GetChildPersistentSettingsPointerProc))]
     static private uint DeleteChildPersistentSettingsFunc(uint parentPointerId, IntPtr stringPointerChildName)
     {
       var child_name = IntPtrToString(stringPointerChildName);
@@ -200,6 +215,7 @@ namespace Rhino
     }
     internal delegate uint GetCommandPersistentSettingsPointerProc(Guid plugInId, bool managedPlugIn, IntPtr stringPointerChildName);
     static internal GetCommandPersistentSettingsPointerProc GetCommandPersistentSettingsHook = GetCommandPersistentSettingsFunc;
+    [MonoPInvokeCallback(typeof(GetCommandPersistentSettingsPointerProc))]
     static private uint GetCommandPersistentSettingsFunc(Guid plugInId, bool managedPlugIn, IntPtr stringPointerCommandName)
     {
       var command_name = IntPtrToString(stringPointerCommandName);
@@ -233,6 +249,7 @@ namespace Rhino
     }
     internal delegate void ReleasePlugInSettingsPointerProc(uint pointerId, bool readSettingsPointer);
     static internal ReleasePlugInSettingsPointerProc ReleasePlugInSettingsPointerHook = ReleasePlugInSettingsPointerFunc;
+    [MonoPInvokeCallback(typeof(ReleasePlugInSettingsPointerProc))]
     static private void ReleasePlugInSettingsPointerFunc(uint pointerId, bool readSettingsPointer)
     {
       lock (g_plug_in_settings_read_lock)
@@ -287,6 +304,12 @@ namespace Rhino
       g_settings_saved(plugInId, pointer_id, thisRhinoIsSaving);
       // Invoke the changed call back on the main thread
       //RhinoApp.InvokeOnUiThread(g_settings_saved, plugInId, pointer_id, thisRhinoIsSaving);
+
+      // ALB 2024.09.01
+      //https://mcneel.myjetbrains.com/youtrack/issue/RH-82124/Memory-leak-with-PersistentSettings
+      //The change above made it possible to release the plug-in settings here, synchonously.  I think
+      //this is now the correct fix, but if the invoke comes back, then it might need to be thought through again
+      ReleasePlugInSettingsPointerFunc(pointer_id, true);
     }
     private delegate void SettingsSavedDelegate(Guid plugInId, uint pointerId, bool thisRhinoIsSaving);
     private static readonly SettingsSavedDelegate g_settings_saved = OnSettingsSaved;
@@ -299,6 +322,7 @@ namespace Rhino
     #region Create plug-in settings hook
     internal delegate int CreateDelegate(Guid plugInId);
     internal static CreateDelegate CreateHook = Create;
+    [MonoPInvokeCallback(typeof(CreateDelegate))]
     private static int Create(Guid plugInId)
     {
       if (plugInId == Guid.Empty) return 0;
@@ -330,6 +354,7 @@ namespace Rhino
     #region Save settings hook
     internal delegate int SaveDelegate(Guid plugInId, bool shuttingDown);
     internal static SaveDelegate SaveHook = Save;
+    [MonoPInvokeCallback(typeof(SaveDelegate))]
     private static int Save(Guid plugInId, bool shuttingDown)
     {
       var settings = PlugInSettings(plugInId);
@@ -342,6 +367,7 @@ namespace Rhino
 
     internal delegate void FlushSavedDelegate();
     internal static FlushSavedDelegate FlushSavedHook = FlushSaved;
+    [MonoPInvokeCallback(typeof(FlushSavedDelegate))]
     private static void FlushSaved()
     {
       Rhino.PlugInSettings.FlushSettingsSavedQueue();
@@ -350,6 +376,7 @@ namespace Rhino
 
     internal delegate int GetKeysDelegate(uint pointerId, IntPtr keysPointer, bool children);
     internal static GetKeysDelegate GetKeysHook = GetKeys;
+    [MonoPInvokeCallback(typeof(GetKeysDelegate))]
     private static int GetKeys(uint pointerId, IntPtr keysPointer, bool children)
     {
       var settings = PersistentSettings(pointerId);
@@ -393,6 +420,7 @@ namespace Rhino
     #region Set... hooks
     internal delegate int SetStringDelegate(uint pointerId, IntPtr keyString, bool setDefault, IntPtr value);
     internal static SetStringDelegate SetStringHook = SetString;
+    [MonoPInvokeCallback(typeof(SetStringDelegate))]
     private static int SetString(uint pointerId, IntPtr keyString, bool setDefault, IntPtr value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -407,6 +435,7 @@ namespace Rhino
 
     internal delegate int SetRectDelegate(uint pointerId, IntPtr keyString, bool setDefault, int left, int top, int right, int bottom);
     internal static SetRectDelegate SetRectHook = SetRect;
+    [MonoPInvokeCallback(typeof(SetRectDelegate))]
     private static int SetRect(uint pointerId, IntPtr keyString, bool setDefault, int left, int top, int right, int bottom)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -421,6 +450,7 @@ namespace Rhino
 
     internal delegate int SetPointDelegate(uint pointerId, IntPtr keyString, bool setDefault, int x, int y);
     internal static SetPointDelegate SetPointHook = SetPoint;
+    [MonoPInvokeCallback(typeof(SetPointDelegate))]
     private static int SetPoint(uint pointerId, IntPtr keyString, bool setDefault, int x, int y)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -434,6 +464,7 @@ namespace Rhino
     }
 
     internal static SetPointDelegate SetSizeHook = SetSize;
+    [MonoPInvokeCallback(typeof(SetPointDelegate))]
     private static int SetSize(uint pointerId, IntPtr keyString, bool setDefault, int x, int y)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -448,6 +479,7 @@ namespace Rhino
 
     internal delegate int SetIntegerDelegate(uint pointerId, IntPtr keyString, bool setDefault, int value);
     internal static SetIntegerDelegate SetIntegerHook = SetInteger;
+    [MonoPInvokeCallback(typeof(SetIntegerDelegate))]
     private static int SetInteger(uint pointerId, IntPtr keyString, bool setDefault, int value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -461,6 +493,7 @@ namespace Rhino
 
     internal delegate int SetUnsignedIntegerDelegate(uint pointerId, IntPtr keyString, bool setDefault, uint value);
     internal static SetUnsignedIntegerDelegate SetUnsignedIntegerHook = SetUnsignedInteger;
+    [MonoPInvokeCallback(typeof(SetUnsignedIntegerDelegate))]
     private static int SetUnsignedInteger(uint pointerId, IntPtr keyString, bool setDefault, uint value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -488,6 +521,7 @@ namespace Rhino
 
     internal delegate int SetStringListDelegate(uint pointerId, IntPtr keyString, bool setDefault, IntPtr value);
     internal static SetStringListDelegate SetStringListHook = SetStringList;
+    [MonoPInvokeCallback(typeof(SetStringListDelegate))]
     private static int SetStringList(uint pointerId, IntPtr keyString, bool setDefault, IntPtr value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -502,6 +536,7 @@ namespace Rhino
 
     internal delegate int SetStringDictionaryDelegate(uint pointerId, IntPtr keyString, bool setDefault, IntPtr keys, IntPtr values);
     internal static SetStringDictionaryDelegate SetStringDictionaryHook = SetStringDictionary;
+    [MonoPInvokeCallback(typeof(SetStringDictionaryDelegate))]
     private static int SetStringDictionary(uint pointerId, IntPtr keyString, bool setDefault, IntPtr keys, IntPtr values)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -521,6 +556,7 @@ namespace Rhino
 
     internal delegate int SetDoubleDelegate(uint pointerId, IntPtr keyString, bool setDefault, double value);
     internal static SetDoubleDelegate SetDoubleHook = SetDouble;
+    [MonoPInvokeCallback(typeof(SetDoubleDelegate))]
     private static int SetDouble(uint pointerId, IntPtr keyString, bool setDefault, double value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -533,6 +569,7 @@ namespace Rhino
     }
 
     internal static SetIntegerDelegate SetBoolHook = SetBool;
+    [MonoPInvokeCallback(typeof(SetIntegerDelegate))]
     private static int SetBool(uint pointerId, IntPtr keyString, bool setDefault, int value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -545,6 +582,7 @@ namespace Rhino
     }
 
     internal static SetIntegerDelegate SetHideHook = SetHide;
+    [MonoPInvokeCallback(typeof(SetIntegerDelegate))]
     private static int SetHide(uint pointerId, IntPtr keyString, bool setDefault, int value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -555,6 +593,7 @@ namespace Rhino
 
     internal delegate int PersistentSettingsHiddenProc(uint pointerId, ref int hide);
     internal static PersistentSettingsHiddenProc SetPersistentSettingsHiddenHook = SetPersistentSettingsHidden;
+    [MonoPInvokeCallback(typeof(PersistentSettingsHiddenProc))]
     private static int SetPersistentSettingsHidden(uint pointerId, ref int hide)
     {
       var settings = PersistentSettings(pointerId);
@@ -564,6 +603,7 @@ namespace Rhino
     }
 
     internal static SetIntegerDelegate SetColorHook = SetColor;
+    [MonoPInvokeCallback(typeof(SetIntegerDelegate))]
     private static int SetColor(uint pointerId, IntPtr keyString, bool setDefault, int abgr)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -581,6 +621,7 @@ namespace Rhino
 
     internal delegate int SetGuidDelegate(uint pointerId, IntPtr keyString, bool setDefault, Guid value);
     internal static SetGuidDelegate SetGuidHook = SetGuid;
+    [MonoPInvokeCallback(typeof(SetGuidDelegate))]
     private static int SetGuid(uint pointerId, IntPtr keyString, bool setDefault, Guid value)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -594,6 +635,7 @@ namespace Rhino
 
     internal delegate int SetPoint3DDelegate(uint pointerId, IntPtr keyString, bool setDefault, ref Point3d point);
     internal static SetPoint3DDelegate SetPoint3DHook = SetPoint3D;
+    [MonoPInvokeCallback(typeof(SetPoint3DDelegate))]
     private static int SetPoint3D(uint pointerId, IntPtr keyString, bool setDefault, ref Point3d point)
     {
       var helper = SetGetHelper.OkayToGetOrSetValue(pointerId, keyString);
@@ -610,6 +652,7 @@ namespace Rhino
     #region Get... hooks
     internal delegate int GetStringDelegate(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count);
     internal static GetStringDelegate GetStringHook = GetString;
+    [MonoPInvokeCallback(typeof(GetStringDelegate))]
     private static int GetString(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -642,6 +685,7 @@ namespace Rhino
       IntPtr legacyKeyList,
       int count);
     internal static GetRectDelegate GetRectHook = GetRect;
+    [MonoPInvokeCallback(typeof(GetRectDelegate))]
     private static int GetRect(
       uint pointerId,
       IntPtr keyString,
@@ -679,6 +723,7 @@ namespace Rhino
 
     internal delegate int GetPointDelegate(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count);
     internal static GetPointDelegate GetPointHook = GetPoint;
+    [MonoPInvokeCallback(typeof(GetPointDelegate))]
     private static int GetPoint(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count)
     {
       try
@@ -706,6 +751,7 @@ namespace Rhino
     }
 
     internal static GetPointDelegate GetSizeHook = GetSize;
+    [MonoPInvokeCallback(typeof(GetPointDelegate))]
     private static int GetSize(uint pointerId, IntPtr keyString, ref int x, ref int y, bool useDefault, int defaultX, int defaultY, IntPtr legacyKeyList, int count)
     {
       try
@@ -734,6 +780,7 @@ namespace Rhino
 
     internal delegate int GetIntegerDelegate(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count);
     internal static GetIntegerDelegate GetIntegerHook = GetInteger;
+    [MonoPInvokeCallback(typeof(GetIntegerDelegate))]
     private static int GetInteger(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -754,6 +801,7 @@ namespace Rhino
     }
     internal delegate int GetUnsignedIntegerDelegate(uint pointerId, IntPtr keyString, ref uint value, bool useDefault, uint defaultValue, IntPtr legacyKeyList, int count);
     internal static GetUnsignedIntegerDelegate GetUnsignedIntegerHook = GetUnsignedInteger;
+    [MonoPInvokeCallback(typeof(GetUnsignedIntegerDelegate))]
     private static int GetUnsignedInteger(uint pointerId, IntPtr keyString, ref uint value, bool useDefault, uint defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -774,6 +822,7 @@ namespace Rhino
     }
     internal delegate int GetStringListDelegate(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count);
     internal static GetStringListDelegate GetStringListHook = GetStringList;
+    [MonoPInvokeCallback(typeof(GetStringListDelegate))]
     private static int GetStringList(uint pointerId, IntPtr keyString, IntPtr value, bool useDefault, IntPtr defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -808,6 +857,7 @@ namespace Rhino
       IntPtr legacyKeyList,
       int count);
     internal static GetStringDictionaryDelegate GetStringDictionaryHook = GetStringDictionary;
+    [MonoPInvokeCallback(typeof(GetStringDictionaryDelegate))]
     private static int GetStringDictionary(
       uint pointerId,
       IntPtr keyString,
@@ -854,6 +904,7 @@ namespace Rhino
     }
     internal delegate int GetDoubleDelegate(uint pointerId, IntPtr keyString, ref double value, bool useDefault, double defaultValue, IntPtr legacyKeyList, int count);
     internal static GetDoubleDelegate GetDoubleHook = GetDouble;
+    [MonoPInvokeCallback(typeof(GetDoubleDelegate))]
     private static int GetDouble(uint pointerId, IntPtr keyString, ref double value, bool useDefault, double defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -873,6 +924,7 @@ namespace Rhino
       }
     }
     internal static GetIntegerDelegate GetBoolHook = GetBool;
+    [MonoPInvokeCallback(typeof(GetIntegerDelegate))]
     private static int GetBool(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -896,6 +948,7 @@ namespace Rhino
       }
     }
     internal static GetIntegerDelegate GetHideHook = GetHide;
+    [MonoPInvokeCallback(typeof(GetIntegerDelegate))]
     private static int GetHide(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -913,6 +966,7 @@ namespace Rhino
       }
     }
     internal static PersistentSettingsHiddenProc PersistentSettingsHiddenHook = PersistentSettingsHidden;
+    [MonoPInvokeCallback(typeof(PersistentSettingsHiddenProc))]
     private static int PersistentSettingsHidden(uint pointerId, ref int hide)
     {
       var settings = PersistentSettings(pointerId);
@@ -921,6 +975,7 @@ namespace Rhino
       return 1;
     }
     internal static GetIntegerDelegate GetColorHook = GetColor;
+    [MonoPInvokeCallback(typeof(GetIntegerDelegate))]
     private static int GetColor(uint pointerId, IntPtr keyString, ref int value, bool useDefault, int defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -944,6 +999,7 @@ namespace Rhino
 
     internal delegate int GetGuidDelegate(uint pointerId, IntPtr keyString, ref Guid value, bool useDefault, Guid defaultValue, IntPtr legacyKeyList, int count);
     internal static GetGuidDelegate GetGuidHook = GetGuid;
+    [MonoPInvokeCallback(typeof(GetGuidDelegate))]
     private static int GetGuid(uint pointerId, IntPtr keyString, ref Guid value, bool useDefault, Guid defaultValue, IntPtr legacyKeyList, int count)
     {
       try
@@ -968,6 +1024,7 @@ namespace Rhino
 
     internal delegate int GetPoint3DDelegate(uint pointerId, IntPtr keyString, ref Point3d value, bool useDefault, ref Point3d defaultValue, IntPtr legacyKeyList, int count);
     internal static GetPoint3DDelegate GetPoint3DHook = GetPoint3D;
+    [MonoPInvokeCallback(typeof(GetPoint3DDelegate))]
     private static int GetPoint3D(uint pointerId, IntPtr keyString, ref Point3d value, bool useDefault, ref Point3d defaultValue, IntPtr legacyKeyList, int count)
     {
       try

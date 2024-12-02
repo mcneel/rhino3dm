@@ -9,6 +9,67 @@ using Rhino.Runtime.InteropWrappers;
 // functionality is merged into other wrapper classes
 namespace Rhino.DocObjects
 {
+  /// <summary>
+  /// Default grid settings for a document
+  /// </summary>
+  public class ConstructionPlaneGridDefaults
+  {
+    internal static ConstructionPlaneGridDefaults FromConstPointer(IntPtr ptrConstructionPlaneDefaults)
+    {
+      ConstructionPlaneGridDefaults defaults = new ConstructionPlaneGridDefaults();
+      double gridSpacing = defaults.GridSpacing;
+      double snapSpacing = defaults.SnapSpacing;
+      int gridLineCount = defaults.GridLineCount;
+      int gridThickFrequency = defaults.GridThickFrequency;
+      bool showGrid = defaults.ShowGrid;
+      bool showGridAxes = defaults.ShowGridAxes;
+      bool showWorldAxes = defaults.ShowWorldAxes;
+      UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_Get(ptrConstructionPlaneDefaults, ref gridSpacing, ref snapSpacing, ref gridLineCount,
+        ref gridThickFrequency, ref showGrid, ref showGridAxes, ref showWorldAxes);
+      defaults.GridSpacing = gridSpacing;
+      defaults.SnapSpacing = snapSpacing;
+      defaults.GridLineCount = gridLineCount;
+      defaults.GridThickFrequency = gridThickFrequency;
+      defaults.ShowGrid = showGrid;
+      defaults.ShowGridAxes = showGridAxes;
+      defaults.ShowWorldAxes = showWorldAxes;
+      return defaults;
+    }
+
+    internal void SetupNativePointer(IntPtr ptrConstructionPlaneDefaults)
+    {
+      UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_Set(ptrConstructionPlaneDefaults, GridSpacing, SnapSpacing, GridLineCount,
+        GridThickFrequency, ShowGrid, ShowGridAxes, ShowWorldAxes);
+    }
+
+    /// <summary>Distance between grid lines</summary>
+    public double GridSpacing { get; set; } = 1.0;
+
+    /// <summary>
+    /// When grid snap is enabled, the distance between snap points. Typically
+    /// this is the same distance as grid spacing
+    /// </summary>
+    public double SnapSpacing { get; set; } = 1.0;
+
+    /// <summary>Number of grid lines in each direction</summary>
+    public int GridLineCount { get; set; } = 70;
+
+    /// <summary>
+    /// This line frequency. 0: none, 1: all lines are thick, 2: every other is
+    /// thick, ...
+    /// </summary>
+    public int GridThickFrequency { get; set; } = 5;
+
+    /// <summary>Show the grid</summary>
+    public bool ShowGrid { get; set; } = true;
+
+    /// <summary>Show the grid axes</summary>
+    public bool ShowGridAxes { get; set; } = true;
+
+    /// <summary>Show the world axes icon in the corner</summary>
+    public bool ShowWorldAxes { get; set; } = true;
+  }
+
   // Can't add a cref to an XML comment here since the NamedConstructionPlaneTable
   // is not included in the OpenNURBS flavor build of RhinoCommon
 
@@ -307,6 +368,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Create a default ViewInfo instance
     /// </summary>
+    /// <since>8.2</since>
     public ViewInfo()
     {
       m_parent = null;
@@ -1155,6 +1217,7 @@ namespace Rhino.DocObjects
   /// <para>This is used in conjunction with the <see cref="EarthAnchorPoint"/> class.</para>
   /// </summary>
   /// <since>5.0</since>
+  /// <deprecated>8.6</deprecated>
   [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Please use EarthCoordinateSystem")]
   public enum BasepointZero
   {

@@ -391,6 +391,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Is this font installed on the system</summary>
+    /// <since>8.7</since>
     public bool IsInstalled
     {
       get
@@ -404,6 +405,7 @@ namespace Rhino.DocObjects
     /// If this font is not installed on the system, try to find a substitute
     /// </summary>
     /// <returns></returns>
+    /// <since>8.7</since>
     public Font GetSubstituteFont()
     {
       IntPtr constPtrThis = ConstPointer();

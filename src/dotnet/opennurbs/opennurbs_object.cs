@@ -532,7 +532,7 @@ namespace Rhino.Runtime
       {
         try
         {
-          return m_disposed || (m_ptr == IntPtr.Zero && _InternalGetConstPointer() == IntPtr.Zero);
+          return m_disposed || (m_ptr == IntPtr.Zero && ConstPointer() == IntPtr.Zero);
         }
         catch (DocumentCollectedException)
         {

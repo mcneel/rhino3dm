@@ -62,7 +62,7 @@ RH_C_FUNCTION bool ON_Arc_IsValid(ON_Arc* pArc)
   if( pArc )
   {
     pArc->plane.UpdateEquation();
-    rc = pArc->IsValid() ? true : false;
+    rc = pArc->IsValid();
   }
   return rc;
 }

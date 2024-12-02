@@ -31,8 +31,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Rectangle3d CreateFromPolyline(IEnumerable<Point3d> polyline)
     {
-      double dev, angdev;
-      return CreateFromPolyline(polyline, out dev, out angdev);
+      return CreateFromPolyline(polyline, out _, out _);
     }
     /// <summary>
     /// Attempts to create a rectangle from a polyline. This method only works well for
@@ -56,9 +55,9 @@ namespace Rhino.Geometry
       angleDeviation = 0.0;
 
       // Remove consecutive identical vertices.
-      Point3d prev = Point3d.Unset;
-      List<Point3d> points = new List<Point3d>();
-      foreach (Point3d point in polyline)
+      var prev = Point3d.Unset;
+      var points = new List<Point3d>();
+      foreach (var point in polyline)
       {
         if (point == prev) continue;
         if (!point.IsValid) continue;
@@ -75,35 +74,31 @@ namespace Rhino.Geometry
       if (points.Count == 1) return CreateDegenerateRectangle(points[0], points[0]);
       if (points.Count == 2) return CreateDegenerateRectangle(points[0], points[1]);
       if (points.Count == 3) points.Add(points[0] + (points[2] - points[1]));
-      if (points.Count > 5) RecursiveReduceVertices(points);
+      if (points.Count >= 5) RecursiveReduceVertices(points);
 
-      Point3d centre = 0.25 * (points[0] + points[1] + points[2] + points[3]);
-      Vector3d xaxis = (points[1] - points[0]) + (points[2] - points[3]);
-      Vector3d yaxis = (points[3] - points[0]) + (points[2] - points[1]);
+      var centre = 0.25 * (points[0] + points[1] + points[2] + points[3]);
+      var xaxis = (points[1] - points[0]) + (points[2] - points[3]);
+      var yaxis = (points[3] - points[0]) + (points[2] - points[1]);
       bool flip = false;
       if (xaxis.Length < yaxis.Length)
       {
         flip = true;
-        Vector3d cache = xaxis;
-        xaxis = yaxis;
-        yaxis = cache;
+        (yaxis, xaxis) = (xaxis, yaxis);
       }
 
-      Plane plane = new Plane(centre, xaxis, yaxis);
+      var plane = new Plane(centre, xaxis, yaxis);
       if (flip)
         plane.Flip();
 
-      double x0, x1, x2, x3;
-      double y0, y1, y2, y3;
-      plane.ClosestParameter(points[0], out x0, out y0);
-      plane.ClosestParameter(points[1], out x1, out y1);
-      plane.ClosestParameter(points[2], out x2, out y2);
-      plane.ClosestParameter(points[3], out x3, out y3);
+      plane.ClosestParameter(points[0], out var x0, out var y0);
+      plane.ClosestParameter(points[1], out var x1, out var y1);
+      plane.ClosestParameter(points[2], out var x2, out var y2);
+      plane.ClosestParameter(points[3], out var x3, out var y3);
 
-      Interval xdomain = new Interval(0.5 * x0 + 0.5 * x3, 0.5 * x1 + 0.5 * x2);
-      Interval ydomain = new Interval(0.5 * y0 + 0.5 * y1, 0.5 * y2 + 0.5 * y3);
+      var xdomain = new Interval(0.5 * x0 + 0.5 * x3, 0.5 * x1 + 0.5 * x2);
+      var ydomain = new Interval(0.5 * y0 + 0.5 * y1, 0.5 * y2 + 0.5 * y3);
 
-      Rectangle3d rec = new Rectangle3d(plane, xdomain, ydomain);
+      var rec = new Rectangle3d(plane, xdomain, ydomain);
       ComputeDeviation(rec, points, out deviation, out angleDeviation);
       return rec;
     }
@@ -173,7 +168,7 @@ namespace Rhino.Geometry
     {
       while (p.Count > 4)
       {
-        double minD = double.MaxValue;
+        var minD = double.MaxValue;
         int minI = -1;
 
         int n = p.Count;
@@ -182,8 +177,8 @@ namespace Rhino.Geometry
           int k0 = (i - 1 + n) % n;
           int k1 = (i + 1) % n;
 
-          Line segment = new Line(p[k0], p[k1]);
-          double localD = segment.DistanceTo(p[i], true);
+          var segment = new Line(p[k0], p[k1]);
+          var localD = segment.DistanceTo(p[i], true);
           if (localD < minD)
           {
             minD = localD;

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.Runtime;
 using Rhino.UI;
 
 namespace Rhino.Display
@@ -979,6 +980,7 @@ namespace Rhino.Display
     /// true if a tiled capture is being performed. If false, the fullSize parameter will have the
     /// same size as currentTile
     /// </returns>
+    /// <since>8.2</since>
     public bool IsInTiledDraw(out System.Drawing.Size fullSize, out System.Drawing.Rectangle currentTile)
     {
       int fullWidth=0, fullHeight=0;
@@ -2065,10 +2067,38 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public void DrawSubDWires(SubD subd, System.Drawing.Color color, float thickness)
     {
+      if (subd == null)
+        return;
       int argb = color.ToArgb();
       IntPtr const_ptr_subd = subd.ConstPointer();
       IntPtr subd_display = subd.SubDDisplay();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires(m_ptr, const_ptr_subd, argb, thickness, subd_display);
+      GC.KeepAlive(subd);
+    }
+
+    /// <summary>
+    /// Draws all the wireframe curves os a SubD object using different pens
+    /// </summary>
+    /// <param name="subd">SubD to draw</param>
+    /// <param name="boundaryPen">Pen to use for boundary wires. If null, no boundary wires will be drawn</param>
+    /// <param name="smoothInteriorPen">Pen to use for smooth interior wires. If null, no smooth interior wires will be drawn</param>
+    /// <param name="creasePen">Pen to use for crease wires. If null, no crease wires will be drawn</param>
+    /// <param name="nonmanifoldPen">Pen to use for non-manifold wires. If null, no non-manifold wires will be drawn</param>
+    public void DrawSubDWires(SubD subd, DisplayPen boundaryPen, DisplayPen smoothInteriorPen, DisplayPen creasePen, DisplayPen nonmanifoldPen)
+    {
+      if (subd == null)
+        return;
+      IntPtr const_ptr_subd = subd.ConstPointer();
+      IntPtr subd_display = subd.SubDDisplay();
+      IntPtr ptrBoundary = boundaryPen != null ? boundaryPen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrSmoothInterior = smoothInteriorPen != null ? smoothInteriorPen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrCrease = creasePen != null ? creasePen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrNonmanifold = nonmanifoldPen != null ? nonmanifoldPen.ToNativePointer() : IntPtr.Zero;
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires2(m_ptr, const_ptr_subd, subd_display, ptrBoundary, ptrSmoothInterior, ptrCrease, ptrNonmanifold);
+      DisplayPen.DeleteNativePointer(ptrBoundary);
+      DisplayPen.DeleteNativePointer(ptrSmoothInterior);
+      DisplayPen.DeleteNativePointer(ptrCrease);
+      DisplayPen.DeleteNativePointer(ptrNonmanifold);
       GC.KeepAlive(subd);
     }
 

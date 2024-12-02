@@ -4,6 +4,7 @@ using System.Drawing;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Geometry;
 using System.Collections.Generic;
+using Rhino.Runtime;
 
 namespace Rhino.ApplicationSettings
 {
@@ -236,6 +237,7 @@ namespace Rhino.ApplicationSettings
   {
     /// <summary>Set UI to the default dark mode color scheme</summary>
     /// <returns>true on sucess</returns>
+    /// <since>8.2</since>
     public static bool SetToDarkMode()
     {
       var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
@@ -246,6 +248,7 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>Set UI to the default light mode color scheme</summary>
     /// <returns>true on sucess</returns>
+    /// <since>8.2</since>
     public static bool SetToLightMode()
     {
       var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
@@ -258,6 +261,7 @@ namespace Rhino.ApplicationSettings
     /// Determine if Rhino is running with default dark mode color settings
     /// </summary>
     /// <returns></returns>
+    /// <since>8.2</since>
     public static bool UsingDefaultDarkModeColors()
     {
       var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
@@ -273,6 +277,7 @@ namespace Rhino.ApplicationSettings
     /// Determine if Rhino is running with default light mode color settings
     /// </summary>
     /// <returns></returns>
+    /// <since>8.2</since>
     public static bool UsingDefaultLightModeColors()
     {
       var service = Rhino.UI.RhinoUiServiceLocater.DialogService;
@@ -1428,7 +1433,7 @@ namespace Rhino.ApplicationSettings
 
       var up_direction = Vector3d.ZAxis;
       if (UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_UpDirection(ptr_settings, ref up_direction, false))
-        return rc;
+        rc.UpDirection = up_direction;
 
       UnsafeNativeMethods.CRhinoDraftAngleAnalysisSettings_Delete(ptr_settings);
       return rc;
@@ -3040,6 +3045,7 @@ namespace Rhino.ApplicationSettings
     const int idxStickyAutoCPlane = 20;
     const int idxGumballExtrudeMergeFaces = 21;
     const int idxOrientAutoCPlaneToView = 22;
+    const int idxGumballAutoReset = 23;
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3413,6 +3419,17 @@ namespace Rhino.ApplicationSettings
     {
       get => GetBool(idxGumballExtrudeMergeFaces);
       set => SetBool(idxGumballExtrudeMergeFaces, value);
+    }
+
+    /// <summary>
+    /// When GumballAutoReset is on the gumball resets its orientation after a drag
+    /// When GumballAutoReset is off the gumball orientation is kept to where it was dragged
+    /// </summary>
+    /// <since>8.10</since>
+    public static bool GumballAutoReset
+    {
+      get => GetBool(idxGumballAutoReset);
+      set => SetBool(idxGumballAutoReset, value);
     }
   }
 
@@ -4872,10 +4889,92 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>
+  /// A shortcut is a key plus modifier combination that executes a macro
+  /// </summary>
+  public class KeyboardShortcut
+  {
+    /// <summary>Modifier key used for shortcut</summary>
+    public Rhino.UI.ModifierKey Modifier { get; set; } = Rhino.UI.ModifierKey.None;
+    /// <summary>Key used for shortcut</summary>
+    public Rhino.UI.KeyboardKey Key { get; set; } = Rhino.UI.KeyboardKey.None;
+    /// <summary>Macro to execute when key plus modifier are pressed</summary>
+    public string Macro { get; set; }
+  }
+
+  /// <summary>
   /// Contains static methods and properties to control keyboard shortcut keys
   /// </summary>
   public static class ShortcutKeySettings
   {
+
+    /// <summary>
+    /// Get all shortcuts registered with Rhino
+    /// </summary>
+    /// <returns></returns>
+    public static KeyboardShortcut[] GetShortcuts() => GetShortcuts(UnsafeNativeMethods.CRhinoAppShortcutKeys_GetShortcuts);
+
+    /// <summary>
+    /// Get all the default shortcuts registered with Rhino
+    /// </summary>
+    /// <returns></returns>
+    public static KeyboardShortcut[] GetDefaults() => GetShortcuts(UnsafeNativeMethods.CRhinoAppShortcutKeys_GetDefaults);
+
+    private static KeyboardShortcut[] GetShortcuts(Action<IntPtr, IntPtr, IntPtr> shortcutGetter)
+    {
+      List<KeyboardShortcut> rc = new List<KeyboardShortcut>();
+      using (var modifiers = new SimpleArrayInt())
+      using (var keys = new SimpleArrayInt())
+      using (var macros = new ClassArrayString())
+      {
+        IntPtr ptrModifiers = modifiers.NonConstPointer();
+        IntPtr ptrKeys = keys.NonConstPointer();
+        IntPtr ptrMacros = macros.NonConstPointer();
+        shortcutGetter(ptrModifiers, ptrKeys, ptrMacros);
+        int[] modifiersArray = modifiers.ToArray();
+        int[] keysArray = keys.ToArray();
+        string[] macrosArray = macros.ToArray();
+        for (int i = 0; i < modifiersArray.Length; i++)
+        {
+          KeyboardShortcut shortcut = new KeyboardShortcut();
+          shortcut.Modifier = (Rhino.UI.ModifierKey)modifiersArray[i];
+          shortcut.Key = (Rhino.UI.KeyboardKey)keysArray[i];
+          shortcut.Macro = macrosArray[i];
+          rc.Add(shortcut);
+        }
+      }
+      return rc.ToArray();
+    }
+
+    /// <summary>
+    /// Add or modify shortcuts with a list or KeyboardShortcut elements
+    /// </summary>
+    /// <param name="shortcuts"></param>
+    /// <param name="replaceAll"></param>
+    public static void Update(IEnumerable<KeyboardShortcut> shortcuts, bool replaceAll)
+    {
+      using (var macros = new ClassArrayString())
+      {
+        List<int> keys = new List<int>();
+        List<int> modifiers = new List<int>();
+        foreach (var shortcut in shortcuts)
+        {
+          if (shortcut == null)
+            continue;
+          macros.Add(shortcut.Macro);
+          keys.Add((int)shortcut.Key);
+          modifiers.Add((int)shortcut.Modifier);
+        }
+
+        if (keys.Count < 1)
+          return;
+
+        int[] keyArray = keys.ToArray();
+        int[] modifiersArray = modifiers.ToArray();
+        IntPtr ptrMacros = macros.ConstPointer();
+        UnsafeNativeMethods.CRhinoAppShortcutKeys_SetShortcuts(keyArray, modifiersArray, keyArray.Length, ptrMacros, replaceAll);
+      }
+    }
+
     /// <summary>
     /// Get macro associated with a given keyboard shortcut
     /// </summary>
@@ -4904,6 +5003,17 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
+    /// Set a macro for a given key and modifier combination
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="modifier"></param>
+    /// <param name="macro"></param>
+    public static void SetMacro(Rhino.UI.KeyboardKey key, Rhino.UI.ModifierKey modifier, string macro)
+    {
+      UnsafeNativeMethods.CRhinoAppShortcutKeys_SetMacro2((int)key, (int)modifier, macro);
+    }
+
+    /// <summary>
     /// Get the macro label associated with a given keyboard shortcut
     /// </summary>
     /// <param name="key"></param>
@@ -4919,7 +5029,16 @@ namespace Rhino.ApplicationSettings
       }
     }
 
-    //CRhinoAppShortcutKeys_Label
+    /// <summary>
+    /// Is a key plus modifier combination one that can be used with Rhino
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="modifier"></param>
+    /// <returns></returns>
+    public static bool IsAcceptableKeyCombo(Rhino.UI.KeyboardKey key, Rhino.UI.ModifierKey modifier)
+    {
+      return UnsafeNativeMethods.CRhinoAppShortcutKeys_IsAcceptableCombo((int)key, (int)modifier);
+    }
   }
 
   /// <summary>

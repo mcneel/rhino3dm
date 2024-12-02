@@ -172,6 +172,7 @@ namespace Rhino.Render
     /// Get the texture render hash for the referenced texture using the specified CrcRenderHashFlags.
     /// </summary>
     /// <since>8.0</since>
+    /// <deprecated>8.5</deprecated>
     [CLSCompliant(false)]
     [Obsolete("Do not use")]
     public uint TextureRenderHash(CrcRenderHashFlags flags)
@@ -188,6 +189,7 @@ namespace Rhino.Render
     /// and linear workflow.
     /// </summary>
     /// <since>8.0</since>
+    /// <deprecated>8.5</deprecated>
     [CLSCompliant(false)]
     [Obsolete("Do not use")]
     public uint TextureRenderHash(CrcRenderHashFlags flags, LinearWorkflow lw)
@@ -461,6 +463,7 @@ namespace Rhino.Render
     /// <param name="uvOut">the UV on the texture that the color point was read from.</param>
     /// <returns>true if the given point hits the decal, else false.</returns>
     /// <since>5.10</since>
+    /// <deprecated>8.5</deprecated>
     [Obsolete("Incredibly slow call")]
     public bool TryGetColor(Rhino.Geometry.Point3d point, Rhino.Geometry.Vector3d normal, ref Rhino.Display.Color4f colInOut, ref Rhino.Geometry.Point2d uvOut)
     {

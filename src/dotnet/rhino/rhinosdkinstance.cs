@@ -6,6 +6,7 @@ using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 using System.ComponentModel;
 using Rhino.FileIO;
+using Rhino.DocObjects.Custom;
 
 namespace Rhino.DocObjects
 {
@@ -195,9 +196,8 @@ namespace Rhino.DocObjects
     /// Explodes the instance reference into pieces.
     /// </summary>
     /// <param name="explodeNestedInstances">
-    /// If true, then nested instance references are recursively exploded into pieces
-    /// until actual geometry is found. If false, an InstanceObject is added to
-    /// the pieces out parameter when this InstanceObject has nested references.
+    /// If true, then nested instance references are recursively exploded into pieces until actual geometry is found.
+    /// If false, an InstanceObject is added to the pieces out parameter when this InstanceObject has nested references.
     /// </param>
     /// <param name="pieces">An array of Rhino objects will be assigned to this out parameter during this call.</param>
     /// <param name="pieceAttributes">An array of object attributes will be assigned to this out parameter during this call.</param>
@@ -205,8 +205,32 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public void Explode(bool explodeNestedInstances, out RhinoObject[] pieces, out ObjectAttributes[] pieceAttributes, out Transform[] pieceTransforms)
     {
+      Explode(false, Guid.Empty, explodeNestedInstances, out pieces, out pieceAttributes, out pieceTransforms);
+    }
+
+    /// <summary>
+    /// Explodes the instance reference into pieces.
+    /// </summary>
+    /// <param name="skipHiddenPieces">
+    /// If true, pieces that are not visible will not be appended to the pieces out parameter.
+    /// </param>
+    /// <param name="viewportId">
+    /// If skipHiddenPieces is false, then viewportId is ignored.
+    /// If bSkipHiddenPieces is true and and viewportId is not Guid.Empty, then layer and object per viewport visibility settings are used.
+    /// If bSkipHiddenPieces is true and and viewport_id is Guid.Empty, then layer and object global visibility settings are used.
+    /// </param>
+    /// <param name="explodeNestedInstances">
+    /// If true, then nested instance references are recursively exploded into pieces until actual geometry is found.
+    /// If false, an InstanceObject is added to the pieces out parameter when this InstanceObject has nested references.
+    /// </param>
+    /// <param name="pieces">An array of Rhino objects will be assigned to this out parameter during this call.</param>
+    /// <param name="pieceAttributes">An array of object attributes will be assigned to this out parameter during this call.</param>
+    /// <param name="pieceTransforms">An array of the previously applied transform matrices will be assigned to this out parameter during this call.</param>
+    /// <since>8.9</since>
+    public void Explode(bool skipHiddenPieces, Guid viewportId, bool explodeNestedInstances, out RhinoObject[] pieces, out ObjectAttributes[] pieceAttributes, out Transform[] pieceTransforms)
+    {
       IntPtr const_ptr_this = ConstPointer();
-      IntPtr ptr_piece_list = UnsafeNativeMethods.CRhinoInstanceObject_Explode(const_ptr_this, explodeNestedInstances);
+      IntPtr ptr_piece_list = UnsafeNativeMethods.CRhinoInstanceObject_Explode(const_ptr_this, skipHiddenPieces, viewportId, explodeNestedInstances);
       int count = UnsafeNativeMethods.CRhinoInstanceObjectPieceArray_Count(ptr_piece_list);
       pieces = new RhinoObject[count];
       pieceAttributes = new ObjectAttributes[count];
@@ -223,6 +247,7 @@ namespace Rhino.DocObjects
       }
       UnsafeNativeMethods.CRhinoInstanceObjectPieceArray_Delete(ptr_piece_list);
     }
+
 
     /// <summary>
     /// Get a RhinoObject in this block
@@ -661,19 +686,19 @@ namespace Rhino.DocObjects
     /// Creates a preview bitmap of the instance definition.
     /// </summary>
     /// <param name="definitionObjectId">Id of one of this definition's objects to draw selected.</param>
-    /// <param name="definedViewportProjection">The view projection.</param>
+    /// <param name="viewportProjection">The view projection.</param>
     /// <param name="displayMode">The display mode.</param>
     /// <param name="bitmapSize">The bitmap size in pixels.</param>
     /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
     /// <returns>The preview bitmap if successful, null otherwise.</returns>
     /// <since>6.21</since>
-    public System.Drawing.Bitmap CreatePreviewBitmap(Guid definitionObjectId, Display.DefinedViewportProjection definedViewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
+    public System.Drawing.Bitmap CreatePreviewBitmap(Guid definitionObjectId, Display.DefinedViewportProjection viewportProjection, DisplayMode displayMode, System.Drawing.Size bitmapSize, bool applyDpiScaling)
     {
       IntPtr const_ptr = ConstPointer();
       IntPtr ptr_rhino_dib = UnsafeNativeMethods.CRhinoInstanceDefinition_GetPreviewBitmap(
         const_ptr, 
         definitionObjectId, 
-        (int)definedViewportProjection, 
+        (int)viewportProjection, 
         (int)displayMode, 
         bitmapSize.Width, 
         bitmapSize.Height, 
@@ -683,6 +708,33 @@ namespace Rhino.DocObjects
       return bitmap;
     }
 
+    /// <summary>
+    /// Creates a preview bitmap of the instance definition.
+    /// </summary>
+    /// <param name="displayModeId">The id of the display mode to draw with.</param>
+    /// <param name="viewportProjection">The view projection.</param>
+    /// <param name="isometricCamera">The isometric camera angle.</param>
+    /// <param name="drawDecorations">Specify true to draw viewport decorations, such as grid and axes.</param>
+    /// <param name="bitmapSize">The bitmap size in pixels.</param>
+    /// <param name="applyDpiScaling">Specify true to apply DPI scaling (Windows-only).</param>
+    /// <returns>The preview bitmap if successful, null otherwise.</returns>
+    /// <since>8.10</since>
+    public System.Drawing.Bitmap CreatePreviewBitmap(Guid displayModeId, Display.DefinedViewportProjection viewportProjection, Display.IsometricCamera isometricCamera, bool drawDecorations, System.Drawing.Size bitmapSize, bool applyDpiScaling)
+    {
+      IntPtr const_ptr = ConstPointer();
+      IntPtr ptr_rhino_dib = UnsafeNativeMethods.CRhinoInstanceDefinition_GetPreviewBitmap2(
+        const_ptr,
+        displayModeId,
+        (int)viewportProjection,
+        (int)isometricCamera,
+        drawDecorations,
+        bitmapSize.Width,
+        bitmapSize.Height,
+        applyDpiScaling
+        );
+      var bitmap = RhinoDib.ToBitmap(ptr_rhino_dib, true);
+      return bitmap;
+    }
 
     /// <summary>
     /// Returns the archive file status of a linked instance definition.
@@ -1054,7 +1106,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newName">The new name.</param>
     /// <param name="newDescription">The new description string.</param>
     /// <param name="quiet">
-    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// If false, information message boxes pop up when illegal changes are attempted.
     /// </param>
     /// <returns>
     /// true if successful.
@@ -1075,7 +1127,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newUrl">The new URL or hyperlink.</param>
     /// <param name="newUrlTag">The new description of the URL or hyperlink.</param>
     /// <param name="quiet">
-    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// If false, information message boxes pop up when illegal changes are attempted.
     /// </param>
     /// <returns>
     /// true if successful.
@@ -1094,7 +1146,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newName">The new name.</param>
     /// <param name="newDescription">The new description string.</param>
     /// <param name="quiet">
-    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// If false, information message boxes pop up when illegal changes are attempted.
     /// </param>
     /// <returns>
     /// true if successful.
@@ -1120,7 +1172,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="newUrl">The new URL or hyperlink.</param>
     /// <param name="newUrlTag">The new description of the URL or hyperlink.</param>
     /// <param name="quiet">
-    /// If true, information message boxes pop up when illegal changes are attempted.
+    /// If false, information message boxes pop up when illegal changes are attempted.
     /// </param>
     /// <returns>
     /// true if successful.
@@ -1129,6 +1181,27 @@ namespace Rhino.DocObjects.Tables
     public bool Modify(int idefIndex, string newName, string newDescription, string newUrl, string newUrlTag, bool quiet)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinition2(m_doc.RuntimeSerialNumber, idefIndex, newName, newDescription, newUrl, newUrlTag, quiet);
+    }
+
+    /// <summary>
+    /// Modifies the instance definition user data.
+    /// Does not change instance definition ID or geometry.
+    /// </summary>
+    /// <param name="idefIndex">The index of the instance definition to be modified.</param>
+    /// <param name="userData">The user data to replace.</param>
+    /// <param name="quiet">
+    /// If false, information message boxes pop up when illegal changes are attempted.
+    /// </param>
+    /// <returns>
+    /// true if successful.
+    /// </returns>
+    public bool Modify(int idefIndex, UserData userData, bool quiet)
+    {
+      var rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinitionUserData(m_doc.RuntimeSerialNumber, idefIndex, userData.NonConstPointer(true), quiet);
+
+      UserData.StoreInRuntimeList(userData);
+
+      return rc;
     }
 
     /// <summary>

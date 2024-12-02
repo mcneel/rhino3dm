@@ -68,6 +68,14 @@ RH_C_FUNCTION bool ON_MassProperties_Sum(ON_MassProperties* pMassProp, ON_MassPr
   return rc;
 }
 
+RH_C_FUNCTION bool ON_MassProperties_Transform(ON_MassProperties* pMassProp, ON_Xform* pXform)
+{
+  bool rc = false;
+  if (pMassProp && pXform && pXform->IsValid())
+    rc = pMassProp->Transform(*pXform);
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_MassProperties_GetMoments(const ON_MassProperties* pConstMassProps, int which, ON_3dVector* moment, ON_3dVector* error )
 {
   const int idx_wc_firstmoments = 0;

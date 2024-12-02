@@ -308,9 +308,18 @@ namespace Rhino.DocObjects
     public HatchPattern() : base()
     {
       // Creates a new non-document control ON_HatchPattern
-      IntPtr pHP = UnsafeNativeMethods.ON_HatchPattern_New();
+      IntPtr pHP = UnsafeNativeMethods.ON_HatchPattern_New(IntPtr.Zero);
       ConstructNonConstObject(pHP);
     }
+
+    /// <since>8.15</since>
+    public HatchPattern(HatchPattern other) : base()
+    {
+      IntPtr pOther = other.ConstPointer();
+      IntPtr pHatchPattern = UnsafeNativeMethods.ON_HatchPattern_New(pOther);
+      ConstructNonConstObject(pHatchPattern);
+    }
+
 #if RHINO_SDK
     internal HatchPattern(int index, RhinoDoc doc) : base()
     {
@@ -434,6 +443,22 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <since>5.0</since>
     public override bool IsReference => base.IsReference;
+
+    /// <summary>
+    /// Returns true if the hatch pattern is in use by a Rhino object, 
+    /// a layer, an instance definition, or a section style.
+    /// </summary>
+    /// <since>8.15</since>
+    public bool InUse
+    {
+      get
+      {
+        if (null == m_doc)
+          return false;
+        int index = Index;
+        return UnsafeNativeMethods.CRhinoHatchPatternTable_InUse(m_doc.RuntimeSerialNumber, index);
+      }
+    }
 
     /// <summary>
     /// Creates preview line segments of the hatch pattern.
@@ -714,12 +739,163 @@ namespace Rhino.DocObjects
     }
 
     #endregion
+
+    #region user strings
+    /// <summary>
+    /// Attach a user string (key,value combination) to this geometry.
+    /// </summary>
+    /// <param name="key">id used to retrieve this string.</param>
+    /// <param name="value">string associated with key.</param>
+    /// <returns>true on success.</returns>
+    /// <since>8.9</since>
+    public bool SetUserString(string key, string value) => _SetUserString(key, value);
+
+    /// <summary>
+    /// Gets user string from this geometry.
+    /// </summary>
+    /// <param name="key">id used to retrieve the string.</param>
+    /// <returns>string associated with the key if successful. null if no key was found.</returns>
+    /// <since>8.9</since>
+    public string GetUserString(string key) => _GetUserString(key);
+
+    /// <summary>
+    /// Gets the amount of user strings.
+    /// </summary>
+    /// <since>8.9</since>
+    public int UserStringCount => _UserStringCount;
+
+    /// <summary>
+    /// Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+    /// </summary>
+    /// <returns>A new collection.</returns>
+    /// <since>8.9</since>
+    public System.Collections.Specialized.NameValueCollection GetUserStrings() => _GetUserStrings();
+
+    /// <since>8.9</since>
+    public bool DeleteUserString(string key) => SetUserString(key, null);
+
+    /// <since>8.9</since>
+    public void DeleteAllUserStrings() => _DeleteAllUserStrings();
+    #endregion
   }
 }
 
 #if RHINO_SDK
 namespace Rhino.DocObjects.Tables
 {
+  /// <summary>
+  /// HatchPattern event types
+  /// <since>8.15</since>
+  /// </summary>
+  public enum HatchPatternTableEventType
+  {
+    /// <summary>
+    /// A hatchpattern was added.
+    /// </summary>
+    Added = 0,
+    /// <summary>
+    /// A hatchpattern was deleted.
+    /// </summary>
+    Deleted = 1,
+    /// <summary>
+    /// A hatchpattern was undeleted.
+    /// </summary>
+    Undeleted = 2,
+    /// <summary>
+    /// A hatchpattern was modified.
+    /// </summary>
+    Modified = 3,
+    /// <summary>
+    /// The hatchpattern table was sorted.
+    /// </summary>
+    Sorted = 4,
+    /// <summary>
+    /// The current hatchpattern has changed.
+    /// </summary>
+    Current = 5
+  }
+
+  /// <summary>
+  /// LinetypeTable event arguments
+  /// <since>8.15</since>
+  /// </summary>
+  public class HatchPatternTableEventArgs : EventArgs
+  {
+    readonly private uint m_doc_sn;
+    readonly private HatchPatternTableEventType m_event_type;
+    readonly private int m_hatchpattern_index;
+    readonly private IntPtr m_ptr_old_hatchpattern;
+
+    internal HatchPatternTableEventArgs(uint docSerialNumber, int eventType, int index, IntPtr pConstOldHatchPattern)
+    {
+      m_doc_sn = docSerialNumber;
+      m_event_type = (HatchPatternTableEventType)eventType;
+      m_hatchpattern_index = index;
+      m_ptr_old_hatchpattern = pConstOldHatchPattern;
+    }
+
+    /// <summary>
+    /// The document in which the event occurred.
+    /// </summary>
+    /// <since>8.15</since>
+    public RhinoDoc Document
+    {
+      get { return m_doc ?? (m_doc = RhinoDoc.FromRuntimeSerialNumber(m_doc_sn)); }
+    }
+    private RhinoDoc m_doc;
+
+    /// <summary>
+    /// The event type.
+    /// </summary>
+    /// <since>8.15</since>
+    public HatchPatternTableEventType EventType
+    {
+      get { return m_event_type; }
+    }
+
+    /// <summary>
+    /// Index of the hatchpattern.
+    /// </summary>
+    /// <since>8.15</since>
+    public int HatchPatternIndex
+    {
+      get { return m_hatchpattern_index; }
+    }
+
+    /// <summary>
+    /// The new state.
+    /// </summary>
+    /// <since>8.15</since>
+    public HatchPattern NewState
+    {
+      get { return m_new_hatchpattern ?? (m_new_hatchpattern = new HatchPattern(HatchPatternIndex, Document)); }
+    }
+    private HatchPattern m_new_hatchpattern;
+
+    /// <summary>
+    /// The old state.
+    /// </summary>
+    /// <since>8.15</since>
+    public HatchPattern OldState
+    {
+      get
+      {
+        if (m_old_hatchpattern == null && m_ptr_old_hatchpattern != IntPtr.Zero)
+        {
+          // 14 July 2022 - S. Baer
+          // m_ptr_old_linetype is const and is deleted when this EventWatcher event
+          // completes. Make a copy when OldState is accessed so we don't end up
+          // with a double delete in the LineType finalizer.
+          IntPtr pHatchPattern = UnsafeNativeMethods.ON_HatchPattern_New(m_ptr_old_hatchpattern);
+          m_old_hatchpattern = new HatchPattern(pHatchPattern);
+        }
+        return m_old_hatchpattern;
+      }
+    }
+    private HatchPattern m_old_hatchpattern;
+  }
+
+
   /// <summary>
   /// All of the hatch pattern definitions contained in a rhino document.
   /// </summary>

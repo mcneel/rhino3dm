@@ -167,6 +167,9 @@ RH_C_FUNCTION void ON_HiddenLineDrawing_EnableObjOccludingSection(ON_HiddenLineD
 RH_C_FUNCTION bool ON_HiddenLineDrawing_EnableSelectiveClipping(ON_HiddenLineDrawing* pHiddenLineDrawing,
   int obj_ind, const ON_SimpleArray<unsigned int>* active_clip_ids )
 {
+  if (nullptr==pHiddenLineDrawing || nullptr==active_clip_ids)
+    return false;
+
   bool rc = false;
   ON_SimpleArray< ON__UINT_PTR> Arr2(ON_HiddenLineDrawing::PerspectiveViewClipCount + active_clip_ids->Count());
 
@@ -179,7 +182,7 @@ RH_C_FUNCTION bool ON_HiddenLineDrawing_EnableSelectiveClipping(ON_HiddenLineDra
 
   for (int i = 0; i < active_clip_ids->Count(); i++) 
     Arr2.Append((*active_clip_ids)[i]);
-  if (pHiddenLineDrawing && obj_ind>=0 && obj_ind< pHiddenLineDrawing->m_object.Count() && active_clip_ids)
+  if (obj_ind>=0 && obj_ind< pHiddenLineDrawing->m_object.Count())
   {
     const ON_HLD_Object* cobj = pHiddenLineDrawing->m_object[obj_ind];
     ON_HLD_Object*  obj = const_cast<ON_HLD_Object*>(cobj);
