@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Collections;
 using System.Runtime.InteropServices;
+#if RHINO_SDK
+using System.Collections.Immutable;
+#endif
 
 namespace Rhino.Runtime
 {
