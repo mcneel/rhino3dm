@@ -488,6 +488,7 @@ namespace Rhino.UI
     }
     internal delegate void SetCurrentLanguageIdDelegate(int localeId);
     internal static readonly SetCurrentLanguageIdDelegate g_set_current_language_id = SetCurrentLanguageId;
+    [MonoPInvokeCallback(typeof(SetCurrentLanguageIdDelegate))]
     private static void SetCurrentLanguageId(int localeId)
     {
       g_language_id = localeId;

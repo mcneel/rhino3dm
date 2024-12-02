@@ -22,6 +22,15 @@ using Rhino.FileIO;
 using System.Text.RegularExpressions;
 #endif
 
+
+/// <summary>
+/// Attribute used by the iOS AOT (Ahead of Time) compiler to wire up callbacks correctly.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+class MonoPInvokeCallbackAttribute : Attribute {
+    public MonoPInvokeCallbackAttribute (Type t) {}
+}
+
 namespace Rhino.Runtime
 {
   /// <summary>
@@ -1755,6 +1764,7 @@ namespace Rhino.Runtime
     /// <param name="rightMillimeters"></param>
     /// <param name="bottomMillimeters"></param>
     /// <returns>true on success</returns>
+    /// <since>8.5</since>
     public static bool GetPrinterFormMargins(string printerName, string formName, bool portrait,
       out double leftMillimeters, out double topMillimeters, out double rightMillimeters, out double bottomMillimeters)
     {
@@ -1775,6 +1785,7 @@ namespace Rhino.Runtime
     /// <returns>
     /// Dot per inch resolution for a given printer on success. 0 if an error occurred
     /// </returns>
+    /// <since>8.2</since>
     public static double GetPrinterDPI(string printerName, bool horizontal)
     {
       return UnsafeNativeMethods.RHC_GetPrinterDPI(printerName, horizontal);
@@ -1806,7 +1817,17 @@ namespace Rhino.Runtime
         g_platform_locator[assemblyPath] = new DoNothingLocator();
 #if RHINO_SDK
         var service_type = typeof(IPlatformServiceLocator);
-        var path = System.IO.Path.Combine(RhinoAssemblyDirectory, assemblyPath);
+        string path;
+        if (RunningOnWindows && RunningInNetCore)
+        {
+          path = System.IO.Path.Combine(RhinoAssemblyDirectory, "netcore", assemblyPath);
+          if (!File.Exists(path))
+            path = System.IO.Path.Combine(RhinoAssemblyDirectory, assemblyPath);
+        }
+        else
+        {
+          path = System.IO.Path.Combine(RhinoAssemblyDirectory, assemblyPath);
+        }
         var platform_assembly = LoadAssemblyFrom(path);
 
         if (typeFullName == null)
@@ -1897,6 +1918,7 @@ namespace Rhino.Runtime
       return UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
     }
 
+    [MonoPInvokeCallback(typeof(NamedCallback))]
     static int ExecuteNamedCallbackHelper(IntPtr name, IntPtr ptrNamedParams)
     {
       try
@@ -1913,9 +1935,9 @@ namespace Rhino.Runtime
           return 1;
         }
       }
-      catch (NotLicensedException nle)
+      catch (NotLicensedException)
       {
-        throw nle;
+        throw;
       }
       catch (Exception ex)
       {
@@ -2048,17 +2070,43 @@ namespace Rhino.Runtime
       }
     }
 
+    private static bool? _runningOnWindows = null;
+    private static bool? _runningOnOSX = null;
+
     /// <summary>
     /// Tests if this process is currently executing on the Windows platform.
     /// </summary>
     /// <since>5.0</since>
-    public static bool RunningOnWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    public static bool RunningOnWindows
+    {
+      get
+      {
+        if (!_runningOnWindows.HasValue)
+        {
+          _runningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        }
+        return _runningOnWindows.Value;
+      }
+    }
 
     /// <summary>
     /// Tests if this process is currently executing on the Mac OSX platform.
     /// </summary>
     /// <since>5.0</since>
-    public static bool RunningOnOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    public static bool RunningOnOSX
+    {
+      get
+      {
+        if (!_runningOnOSX.HasValue)
+        {
+          // TODO: S. Baer - Why is RunningOniOS part of this decision?
+          //       I'm assuming this is to get things running on iOS and that we
+          //       can tune this up over time by adding a RunningOnApple propery
+          _runningOnOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RunningOniOS;
+        }
+        return _runningOnOSX.Value;
+      }
+    }
 
     /// <summary>
     /// Tests if this process is currently executing on the iOS platform.
@@ -2107,6 +2155,23 @@ namespace Rhino.Runtime
         var psl = GetPlatformService<IOperatingSystemInformation>();
         return psl.IsRunningInWindowsContainer;
       }
+    }
+
+    internal static bool TryGetWindowsContainerId(out Guid containerId)
+    {
+      try
+      {
+        var key = @"HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control";
+        var containerIdObj = Microsoft.Win32.Registry.GetValue(key, "ContainerId", null);
+        if (containerIdObj is string containerIdStr && !string.IsNullOrEmpty(containerIdStr))
+        {
+          return Guid.TryParse(containerIdStr, out containerId);
+        }
+      }
+      catch { }
+
+      containerId = Guid.Empty;
+      return false;
     }
 
     /// <summary>
@@ -2187,6 +2252,10 @@ namespace Rhino.Runtime
         bool SerialNumberIsHardwareBased = true;
         if (m_device_id == Guid.Empty)
         {
+          // RH-62726 - use container id if running in a windows container
+          if (RunningInWindowsContainer && TryGetWindowsContainerId(out m_device_id))
+            return m_device_id;
+
           // Base the device ID solely on the HardwareSerialNumber, if one
           // exists. Otherwise, base it on the first Ethernet MacAddress.
           // The goal here is to generate a reasonably uniqe and stable
@@ -2443,7 +2512,7 @@ namespace Rhino.Runtime
           yield return file;
       }
 
-      // Common assemblies 
+      // Common assemblies
       yield return typeof(System.Windows.Forms.Appearance).Assembly.Location; // System.Windows.Forms.dll
       yield return typeof(System.Drawing.Bitmap).Assembly.Location; // System.Drawing.dll (net48) / System.Drawing.Common.dll (net6+)
 
@@ -2832,6 +2901,7 @@ namespace Rhino.Runtime
       assert = 4
     };
 
+#if RHINO_SDK
     /// <summary>
     /// Informs RhinoCommon of an message that has been handled but that the developer wants to screen.
     /// </summary>
@@ -2840,6 +2910,7 @@ namespace Rhino.Runtime
     /// <param name="pwStringMessage">The message.</param>
     /// <param name="msg_type">The messag type</param>
     /// <since>6.4</since>
+    [MonoPInvokeCallback(typeof(SendLogMessageToCloudCallback))]
     public static void SendLogMessageToCloudCallbackProc(LogMessageType msg_type, IntPtr pwStringClass, IntPtr pwStringDesc, IntPtr pwStringMessage)
     {
       if (IntPtr.Zero == pwStringClass)
@@ -2886,6 +2957,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <since>6.4</since>
     public static event SendLogMessageToCloudDelegate OnSendLogMessageToCloud;
+#endif
 
 
 
@@ -3044,7 +3116,8 @@ namespace Rhino.Runtime
       }
       return rc;
     }
-#endif
+
+    [MonoPInvokeCallback(typeof(GetNowCallback))]
     static int GetNowHelper(int localeId, IntPtr pStringHolderFormat, IntPtr pResultString)
     {
       int rc;
@@ -3069,6 +3142,7 @@ namespace Rhino.Runtime
       return rc;
     }
 
+    [MonoPInvokeCallback(typeof(GetFormattedTimeCallback))]
     static int GetFormattedTimeHelper(int localeId, int sec, int min, int hour, int day, int month, int year, IntPtr pStringHolderFormat, IntPtr pResultString)
     {
       int rc;
@@ -3090,10 +3164,10 @@ namespace Rhino.Runtime
       return rc;
     }
 
+    [MonoPInvokeCallback(typeof(EvaluateExpressionCallback))]
     static int EvaluateExpressionHelper(IntPtr statementsAsStringHolder, IntPtr expressionAsStringHolder, uint rhinoDocSerialNumber, IntPtr pResultString)
     {
       int rc = 0;
-#if RHINO_SDK
       try
       {
         // 11 July 2014 S. Baer (RH-28010)
@@ -3105,7 +3179,7 @@ namespace Rhino.Runtime
         PythonScript py = PythonScript.Create();
         if (py == null)
           return 0;
-        
+
         object eval_result = py.EvaluateExpression(state, expr);
         System.Threading.Thread.CurrentThread.CurrentCulture = current;
         if (null != eval_result)
@@ -3165,11 +3239,9 @@ namespace Rhino.Runtime
         UnsafeNativeMethods.ON_wString_Set(pResultString, ex.Message);
         rc = 0;
       }
-#endif
       return rc;
     }
 
-#if RHINO_SDK
     internal static object ParseFieldExpression(string expression, RhinoDoc doc,
       Rhino.DocObjects.RhinoObject rhinoObject, Rhino.DocObjects.RhinoObject topLevelRhinoObject,
       Rhino.DocObjects.InstanceObject immediateParentObject,
@@ -3188,7 +3260,7 @@ namespace Rhino.Runtime
 
 
       //v8 and newer requires proper casing of functions. Please don't add new functions to this list
-      //Repair the casing of older files to ensure compatibility. 
+      //Repair the casing of older files to ensure compatibility.
       #region Repair Function Casing
       var function_name_list = new List<string>()
       {
@@ -3238,7 +3310,7 @@ namespace Rhino.Runtime
       // Skipping ones like "Area" since those always required parentheses
       #region Add () to function names
       string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes", "ObjectName" };
-     
+
       foreach(var field in oldFields)
       {
         if (!formula.StartsWith(field))
@@ -3297,18 +3369,24 @@ namespace Rhino.Runtime
       {
         if (doc == null)
           doc = RhinoDoc.ActiveDoc;
-        TextFields.Setup(doc, rhinoObject, topLevelRhinoObject, immediateParentObject);
-        // Force the culture to invariant while running the evaluation
-        var current = System.Threading.Thread.CurrentThread.CurrentCulture;
-        System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-        PythonScript py = PythonScript.Create();
-        if (py == null)
-          return 0;
-        
 
-        string statements = "import clr\nfrom math import *\nfrom Rhino.Runtime.TextFields import *\n";
-        object eval_result = py.EvaluateExpression(statements, formula);
-        System.Threading.Thread.CurrentThread.CurrentCulture = current;
+        object eval_result = null;
+        {
+          try
+          {
+            TextFields.PushContext(doc, rhinoObject, topLevelRhinoObject, immediateParentObject);
+            PythonScript py = PythonScript.Create();
+            if (py == null)
+              return "####";
+
+            string statements = "import clr\nfrom math import *\nfrom Rhino.Runtime.TextFields import *\n";
+            eval_result = py.EvaluateExpression(statements, formula);
+          }
+          finally
+          {
+            TextFields.PopContext();
+          }
+        }
 
         if (null != eval_result)
         {
@@ -3333,10 +3411,10 @@ namespace Rhino.Runtime
               }
 
               var annotation = rhinoObject as AnnotationObjectBase;
-              
+
               //Look for block instances with BlockAttributesText and try to fish out an annotation base to get dimension style from
-              //NOTE this only supports 1 dimension style per block. 
-              if (rhinoObject is InstanceObject block) 
+              //NOTE this only supports 1 dimension style per block.
+              if (rhinoObject is InstanceObject block)
               {
                 annotation = block.InstanceDefinition.GetObjects().FirstOrDefault(c=>c.ObjectType == ObjectType.Annotation) as AnnotationObjectBase;
               }
@@ -3344,8 +3422,8 @@ namespace Rhino.Runtime
               if (annotation != null)
               {
                 //If the object containing the function is an annotation then
-                //We need to know the space of the object being referenced by the function, not the annotations space.  
-                //strip the referenced object guid out of the expression and figure out what space that object resides in. 
+                //We need to know the space of the object being referenced by the function, not the annotations space.
+                //strip the referenced object guid out of the expression and figure out what space that object resides in.
                 //Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-80815
                 var guid_pattern = @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
                 var regex = new Regex(guid_pattern);
@@ -3414,7 +3492,6 @@ namespace Rhino.Runtime
         return "####";
       }
     }
-#endif
 
     /// <summary>
     /// This function is called from the C++ textfield evaluator
@@ -3425,10 +3502,11 @@ namespace Rhino.Runtime
     /// <param name="pTopParent"></param>
     /// <param name="pImmediateParent">pointer to immediate instance object parent</param>
     /// <returns></returns>
+    [MonoPInvokeCallback(typeof(EvaluateTextFieldCallback))]
     static int EvaluateTextFieldHelper(IntPtr ptrFormula, IntPtr pRhinoObject, IntPtr ptrParseResult, IntPtr pTopParent, IntPtr pImmediateParent)
     {
       int rc = 0;
-#if RHINO_SDK
+
       RhinoDoc doc = null;
       var rhobj = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
       if (rhobj != null)
@@ -3474,11 +3552,9 @@ namespace Rhino.Runtime
 
       StringWrapper.SetStringOnPointer(ptrParseResult, result);
       rc = success ? 1 : 0;
-#endif
       return rc;
     }
 
-#if RHINO_SDK
     /// <summary>
     /// Gets the auto install plug-in folder for machine or current user.
     /// </summary>
@@ -3509,7 +3585,7 @@ namespace Rhino.Runtime
         catch (KeyNotFoundException)
         {
           // thrown the first time this is called (by the assembly resolver) on mac
-          // only happens if UseDebugFolder is *not* set, so let's ignore it      
+          // only happens if UseDebugFolder is *not* set, so let's ignore it
         }
       }
 
@@ -3517,6 +3593,7 @@ namespace Rhino.Runtime
       return path;
     }
 
+    [MonoPInvokeCallback(typeof(Action))]
     static void BuildRegisteredPlugInList()
     {
       try
@@ -3713,6 +3790,7 @@ namespace Rhino.Runtime
       }
     }
 
+    [MonoPInvokeCallback(typeof(GetAssemblyIdCallback))]
     static Guid GetAssemblyId(IntPtr path)
     {
       try
@@ -3755,14 +3833,16 @@ namespace Rhino.Runtime
 #endif
     }
 
-    static int LoadPlugInHelper(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, bool bIsDirectoryInstall)
+    [MonoPInvokeCallback(typeof(LoadPluginCallback))]
+    static int LoadPlugInHelper(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, int bIsDirectoryInstall)
     {
       string str_path = StringWrapper.GetStringFromPointer (path);
-      int rc = (int)PlugIn.LoadPlugInHelper(str_path, pluginInfo, errorMessage, displayDebugInfo != 0, bIsDirectoryInstall);
+      int rc = (int)PlugIn.LoadPlugInHelper(str_path, pluginInfo, errorMessage, displayDebugInfo != 0, bIsDirectoryInstall != 0);
       return rc;
     }
 
     static Skin g_skin;
+    [MonoPInvokeCallback(typeof(LoadSkinCallback))]
     static int LoadSkinHelper(IntPtr path, int displayDebugInfo)
     {
       if( g_skin!=null )
@@ -3817,7 +3897,7 @@ namespace Rhino.Runtime
     internal delegate void ShutdownRDKCallback();
     static readonly ShutdownRDKCallback m_rdk_shutdown_callback = ShutDownRhinoCommon_RDK;
 
-    internal delegate int LoadPluginCallback(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, bool bIsDirectoryInstall);
+    internal delegate int LoadPluginCallback(IntPtr path, IntPtr pluginInfo, IntPtr errorMessage, int displayDebugInfo, int bIsDirectoryInstall);
     static readonly LoadPluginCallback m_loadplugin_callback = LoadPlugInHelper;
     internal delegate int LoadSkinCallback(IntPtr path, int displayDebugInfo);
     static readonly LoadSkinCallback m_loadskin_callback = LoadSkinHelper;
@@ -3903,11 +3983,9 @@ namespace Rhino.Runtime
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
     /// <since>6.0</since>
+    [MonoPInvokeCallback(typeof(InitializeRDKCallback))]
     public static void InitializeRhinoCommon_RDK()
     {
-#if ON_RUNTIME_APPLE_IOS
-        // no rhcommonrdk_c on ios yet.
-#else
       if (m_rhinocommonrdkinitialized)
         return;
       m_rhinocommonrdkinitialized = true;
@@ -3919,12 +3997,14 @@ namespace Rhino.Runtime
       Rhino.Render.PostEffects.PostEffect.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(true);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
+      Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(true);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
       Rhino.UI.Controls.FactoryBase.Register();
 
       UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(Rhino.Render.InternalUtilities.OnDownloadFileProc, Rhino.Render.InternalUtilities.OnUrlResponseProc,
         Rhino.Render.InternalUtilities.OnBitmapFromSvgProc);
 
+#if !ON_RUNTIME_APPLE_IOS
       Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(true);
       Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(true);
 #endif
@@ -3935,6 +4015,7 @@ namespace Rhino.Runtime
     /// </summary>
     /// <remarks>Subsequent calls to this method will be ignored.</remarks>
     /// <since>6.0</since>
+    [MonoPInvokeCallback(typeof(ShutdownRDKCallback))]
     public static void ShutDownRhinoCommon_RDK()
     {
       UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null, null);
@@ -3946,6 +4027,7 @@ namespace Rhino.Runtime
       Rhino.Render.PostEffects.PostEffect.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
       Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
+      Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(false);
       Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
 
       Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(false);
@@ -3954,6 +4036,10 @@ namespace Rhino.Runtime
 #endif
 
     static bool g_ReportExceptions = true;
+
+    [DllImport("RhinoCore")]
+    private static extern void RHC_ShowCrashReporter();
+
     /// <summary>
     /// For internal use only!!!
     /// Unhanded exception handler, writes stack trace to RhinoDotNet.txt file
@@ -4163,6 +4249,8 @@ namespace Rhino.Runtime
 
     internal delegate void ReportCallback(int c);
     internal static ReportCallback m_ew_report = EventWatcherReport;
+
+    [MonoPInvokeCallback(typeof(ReportCallback))]
     internal static void EventWatcherReport(int c)
     {
       UnsafeNativeMethods.CRhinoEventWatcher_LogState("RhinoCommon delegate based event watcher\n");

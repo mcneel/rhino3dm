@@ -505,6 +505,13 @@ namespace Rhino.Geometry.Intersect
       if (list.Count < 1)
         return null;
 
+      bool reclaim_cache = false;
+      if (list.Count > 2 && cache == null)
+      {
+        cache = new MeshIntersectionCache();
+        reclaim_cache = true;
+      }
+
       IntPtr pMesh = mesh.ConstPointer();
       IntPtr pCache = (null != cache) ? cache.NonConstPointer() : IntPtr.Zero;
 
@@ -512,7 +519,13 @@ namespace Rhino.Geometry.Intersect
       IntPtr pOutPoints = out_points.NonConstPointer();
 
       int count = UnsafeNativeMethods.ON_Mesh_GetIntersections(pMesh, pCache, list.Count, list.m_items, tolerance, pOutPoints);
-      GC.KeepAlive(mesh);
+      GC.KeepAlive(mesh); GC.KeepAlive(cache);
+
+      if (reclaim_cache)
+      {
+        cache.Dispose();
+      }
+
       if (count > 0)
       {
         List<Polyline> out_polylines = new List<Polyline>(out_points.Count);
@@ -1060,6 +1073,22 @@ namespace Rhino.Geometry.Intersect
     /// <since>5.0</since>
     public static bool BrepBrep(Brep brepA, Brep brepB, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
+      return BrepBrep(brepA, brepB, tolerance, true, out intersectionCurves, out intersectionPoints);
+    }
+
+    /// <summary>
+    /// Intersects two Breps.
+    /// </summary>
+    /// <param name="brepA">First Brep for intersection.</param>
+    /// <param name="brepB">Second Brep for intersection.</param>
+    /// <param name="tolerance">Intersection tolerance.</param>
+    /// <param name="joinCurves">If true, join the resulting curves where possible.</param>
+    /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
+    /// <param name="intersectionPoints">The intersection points will be returned here.</param>
+    /// <returns>true on success; false on failure.</returns>
+    /// <since>8.12</since>
+    public static bool BrepBrep(Brep brepA, Brep brepB, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    {
       intersectionCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
 
@@ -1072,7 +1101,7 @@ namespace Rhino.Geometry.Intersect
       IntPtr brepPtrA = brepA.ConstPointer();
       IntPtr brepPtrB = brepB.ConstPointer();
 
-      bool rc = UnsafeNativeMethods.ON_Intersect_BrepBrep(brepPtrA, brepPtrB, tolerance, outputCurvesPtr, outputPointsPtr);
+      bool rc = UnsafeNativeMethods.ON_Intersect_BrepBrep(brepPtrA, brepPtrB, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
 
       if (rc)
       {
@@ -1099,6 +1128,22 @@ namespace Rhino.Geometry.Intersect
     /// <since>5.0</since>
     public static bool BrepSurface(Brep brep, Surface surface, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
+      return BrepSurface(brep, surface, tolerance, true, out intersectionCurves, out intersectionPoints);
+    }
+
+    /// <summary>
+    /// Intersects a Brep and a Surface.
+    /// </summary>
+    /// <param name="brep">A brep to be intersected.</param>
+    /// <param name="surface">A surface to be intersected.</param>
+    /// <param name="tolerance">A tolerance value.</param>
+    /// <param name="joinCurves">If true, join the resulting curves where possible.</param>
+    /// <param name="intersectionCurves">The intersection curves array argument. This out reference is assigned during the call.</param>
+    /// <param name="intersectionPoints">The intersection points array argument. This out reference is assigned during the call.</param>
+    /// <returns>true on success; false on failure.</returns>
+    /// <since>8.12</since>
+    public static bool BrepSurface(Brep brep, Surface surface, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    {
       intersectionCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
 
@@ -1113,7 +1158,7 @@ namespace Rhino.Geometry.Intersect
 
       bool rc = false;
 
-      rc = UnsafeNativeMethods.ON_Intersect_BrepSurface(brepPtr, surfacePtr, tolerance, outputCurvesPtr, outputPointsPtr);
+      rc = UnsafeNativeMethods.ON_Intersect_BrepSurface(brepPtr, surfacePtr, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
 
       if (rc)
       {
@@ -1135,40 +1180,22 @@ namespace Rhino.Geometry.Intersect
     /// <param name="meshB">Second mesh for intersection.</param>
     /// <returns>An array of intersection line segments, or null if no intersections were found.</returns>
     /// <since>5.0</since>
-    /// <deprecated>7.0</deprecated>
-    [Obsolete("Use the MeshMesh() method.")]
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
-      /*if (UseNewMeshIntersections) //temporarily remove new behavior
+      IntPtr ptrA = meshA.ConstPointer();
+      IntPtr ptrB = meshB.ConstPointer();
+      Line[] intersectionLines = new Line[0];
+
+      using (Runtime.InteropWrappers.SimpleArrayLine arr = new Runtime.InteropWrappers.SimpleArrayLine())
       {
-        const double fixed_tolerance = RhinoMath.SqrtEpsilon * 10;
-        var arr = new[] { meshA, meshB };
-
-        TextLog commandline = null;
-        if (PrintMeshIntersectionErrors) commandline = TextLog.NewCommandLine();
-
-        var made_it = MeshMesh(arr, fixed_tolerance, out Polyline[] result, false, out Polyline[] _, false, out Mesh _, commandline, System.Threading.CancellationToken.None, null);
-        if (!made_it) return null;
-        if (result == null) return new Line[0];
-        return result.SelectMany((pl) => pl.GetSegments()).ToArray();
+        IntPtr pLines = arr.NonConstPointer();
+        int rc = UnsafeNativeMethods.ON_Mesh_IntersectMesh(ptrA, ptrB, pLines);
+        if (rc > 0)
+          intersectionLines = arr.ToArray();
       }
-      else*/
-      {
-        IntPtr ptrA = meshA.ConstPointer();
-        IntPtr ptrB = meshB.ConstPointer();
-        Line[] intersectionLines = new Line[0];
+      Runtime.CommonObject.GcProtect(meshA, meshB);
 
-        using (Runtime.InteropWrappers.SimpleArrayLine arr = new Runtime.InteropWrappers.SimpleArrayLine())
-        {
-          IntPtr pLines = arr.NonConstPointer();
-          int rc = UnsafeNativeMethods.ON_Mesh_IntersectMesh(ptrA, ptrB, pLines);
-          if (rc > 0)
-            intersectionLines = arr.ToArray();
-        }
-        Runtime.CommonObject.GcProtect(meshA, meshB);
-
-        return intersectionLines;
-      }
+      return intersectionLines;
     }
 
     /// <summary>

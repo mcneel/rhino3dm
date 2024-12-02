@@ -155,11 +155,12 @@ namespace Rhino.Geometry
     {
       get
       {
+        var plane = Plane;
         var p2d = Points2D;
         var points3d = new Point3d[p2d.Length];
         for(int i = 0; i < p2d.Length; i++)
         {
-          points3d[i] = Plane.PointAt(p2d[i].X, p2d[i].Y);
+          points3d[i] = plane.PointAt(p2d[i].X, p2d[i].Y);
         }
         return points3d;
       }

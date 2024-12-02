@@ -434,6 +434,7 @@ namespace Rhino.DocObjects.SnapShots
 
 
     internal static GETGUIDPROC pluginid_proc = PlugInId;
+    [MonoPInvokeCallback(typeof(GETGUIDPROC))]
     private static Guid PlugInId(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -446,6 +447,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETGUIDPROC clientid_proc = ClientId;
+    [MonoPInvokeCallback(typeof(GETGUIDPROC))]
     private static Guid ClientId(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -458,6 +460,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static SETINTINT animationstop_proc = AnimationStop;
+    [MonoPInvokeCallback(typeof(SETINTINT))]
     private static void AnimationStop(int serial, uint doc_serial)
     {
       var client = FromSerialNumber(serial);
@@ -471,6 +474,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJTRANSFORMDOUBLEBUFFERBUFFERPROC animateobject_proc = AnimateObject;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJTRANSFORMDOUBLEBUFFERBUFFERPROC))]
     private static int AnimateObject(int serial, uint doc_serial, uint obj_serial, ref Geometry.Transform transform, double dPos, IntPtr pArchive_start, IntPtr pArchive_stop)
     {
       var client = FromSerialNumber(serial);
@@ -489,6 +493,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static SETBOOLDOCOBJTRANSFORMBUFFERBUFFERBBOXPROC extendboundingboxforobjectanimation_proc = ExtendBoundingBoxForObjectAnimation;
+    [MonoPInvokeCallback(typeof(SETBOOLDOCOBJTRANSFORMBUFFERBUFFERBBOXPROC))]
     private static void ExtendBoundingBoxForObjectAnimation(int serial, uint pDoc_serial, uint obj_serial, ref Geometry.Transform transform, IntPtr pArchive_start, IntPtr pArchive_stop, ref Geometry.BoundingBox bbox)
     {
       var client = FromSerialNumber(serial);
@@ -505,6 +510,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJTRANSFORMBUFFERBUFFERPROC prepareforobjectanimation_proc = PrepareForObjectAnimation;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJTRANSFORMBUFFERBUFFERPROC))]
     private static int PrepareForObjectAnimation(int serial, uint pDoc_serial, uint obj_serial, ref Geometry.Transform transform, IntPtr pArchive_start, IntPtr pArchive_stop)
     {
       var client = FromSerialNumber(serial);
@@ -523,6 +529,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETDOCDOUBLEBUFFERBUFFERPROC animatedocument_proc = AnimateDocument;
+    [MonoPInvokeCallback(typeof(GETDOCDOUBLEBUFFERBUFFERPROC))]
     private static int AnimateDocument(int serial, uint pDoc_serial, double dPos, IntPtr pArchive_start, IntPtr pArchive_stop)
     {
       var client = FromSerialNumber(serial);
@@ -540,6 +547,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static SETDOCBUFFERBUFFERBBOXPROC extendboundingboxfordocumentanimation_proc = ExtendBoundingBoxForDocumentAnimation;
+    [MonoPInvokeCallback(typeof(SETDOCBUFFERBUFFERBBOXPROC))]
     private static void ExtendBoundingBoxForDocumentAnimation(int serial, uint pDoc_serial, IntPtr pArchive_start, IntPtr pArchive_stop, ref Geometry.BoundingBox bbox)
     {
       var client = FromSerialNumber(serial);
@@ -555,6 +563,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static SETINTINTPROC animationstart_proc = AnimationStart;
+    [MonoPInvokeCallback(typeof(SETINTINTPROC))]
     private static void AnimationStart(int serial, uint doc_serial, int iFrames)
     {
       var client = FromSerialNumber(serial);
@@ -567,6 +576,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCBUFFERBUFFERPROC preparefordocumentanimation_proc = PrepareForDocumentAnimation;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCBUFFERBUFFERPROC))]
     private static int PrepareForDocumentAnimation(int serial, uint pDoc_serial, IntPtr pArchive_start, IntPtr pArchive_stop)
     {
       var client = FromSerialNumber(serial);
@@ -584,6 +594,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJECTTRANSFORMBUFFERPROC objecttransformnotification_proc = ObjectTransformNotification;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJECTTRANSFORMBUFFERPROC))]
     private static int ObjectTransformNotification(int serial, uint doc_serial, uint obj_serial, ref Geometry.Transform transform, IntPtr pArchive)
     {
       var client = FromSerialNumber(serial);
@@ -601,6 +612,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJECTTRANSFORMBUFFERPROC saveobject_proc = SaveObject;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJECTTRANSFORMBUFFERPROC))]
     private static int SaveObject(int serial, uint doc_serial, uint obj_serial, ref Geometry.Transform transform, IntPtr pArchive)
     {
       var client = FromSerialNumber(serial);
@@ -618,6 +630,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJECTTRANSFORMBUFFERPROC restoreobject_proc = RestoreObject;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJECTTRANSFORMBUFFERPROC))]
     private static int RestoreObject(int serial, uint doc_serial, uint obj_serial, ref Geometry.Transform transform, IntPtr pArchive)
     {
       var client = FromSerialNumber(serial);
@@ -635,6 +648,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static SETINTINT snapshotrestored_proc = SnapshotRestored;
+    [MonoPInvokeCallback(typeof(SETINTINT))]
     private static void SnapshotRestored(int serial, uint doc_serial)
     {
         var client = FromSerialNumber(serial);
@@ -648,6 +662,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLOBJECTPROC supportsobject_proc = SupportsObject;
+    [MonoPInvokeCallback(typeof(GETBOOLOBJECTPROC))]
     private static int SupportsObject(int serial, uint obj_serial)
     {
       var client = FromSerialNumber(serial);
@@ -663,6 +678,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCBUFFERPROC restoredocument_proc = RestoreDocument;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCBUFFERPROC))]
     private static int RestoreDocument(int serial, uint doc_serial, IntPtr pArchive)
     {
       var client = FromSerialNumber(serial);
@@ -678,6 +694,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCBUFFERPROC savedocument_proc = SaveDocument;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCBUFFERPROC))]
     private static int SaveDocument(int serial, uint doc_serial, IntPtr pArchive)
     {
       var client = FromSerialNumber(serial);
@@ -693,6 +710,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETSTRINGPROC gategory_proc = Category;
+    [MonoPInvokeCallback(typeof(GETSTRINGPROC))]
     private static void Category(int serial, IntPtr pON_wString)
     {
       var client = FromSerialNumber(serial);
@@ -705,6 +723,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLPROC supportsdoc_proc = SupportsDocument;
+    [MonoPInvokeCallback(typeof(GETBOOLPROC))]
     private static int SupportsDocument(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -718,6 +737,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLPROC supportsanimation_proc = SupportsAnimation;
+    [MonoPInvokeCallback(typeof(GETBOOLPROC))]
     private static int SupportsAnimation(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -731,6 +751,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLPROC supportsobjects_proc = SupportsObjects;
+    [MonoPInvokeCallback(typeof(GETBOOLPROC))]
     private static int SupportsObjects(int serial)
     {
       var client = FromSerialNumber(serial);
@@ -744,6 +765,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETSTRINGPROC name_proc = Name;
+    [MonoPInvokeCallback(typeof(GETSTRINGPROC))]
     private static void Name(int serial, IntPtr pON_wString)
     {
       var client = FromSerialNumber(serial);
@@ -756,6 +778,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCBUFFERBUFFERARRAYTEXTLOGPROC iscurrentmodelstateinanysnapshot_proc = IsCurrentModelStateInAnySnapshot;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCBUFFERBUFFERARRAYTEXTLOGPROC))]
     private static int IsCurrentModelStateInAnySnapshot(int serial, uint pDoc_serial, IntPtr pArchive, IntPtr pArchives, IntPtr pTextLog)
     {
         var client = FromSerialNumber(serial);
@@ -777,6 +800,7 @@ namespace Rhino.DocObjects.SnapShots
     }
 
     internal static GETBOOLDOCOBJBUFFERBUFFERARRAYTEXTLOGPROC iscurrentobjmodelstateinanysnapshot_proc = IsCurrentObjModelStateInAnySnapshot;
+    [MonoPInvokeCallback(typeof(GETBOOLDOCOBJBUFFERBUFFERARRAYTEXTLOGPROC))]
     private static int IsCurrentObjModelStateInAnySnapshot(int serial, uint pDoc_serial, uint obj_serial, IntPtr pArchive, IntPtr pArchives, IntPtr pTextLog)
     {
         var client = FromSerialNumber(serial);

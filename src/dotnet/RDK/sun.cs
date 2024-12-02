@@ -1,6 +1,7 @@
 
 using System;
 using System.Diagnostics;
+using Rhino.Runtime;
 
 #if RHINO_SDK
 using Rhino.UI.Controls;

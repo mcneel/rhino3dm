@@ -459,8 +459,17 @@ namespace Rhino.Display
       }
     }
 
+    public static Guid MonochromeId
+    {
+      get
+      {
+        return
+          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
+            UnsafeNativeMethods.DisplayModeSpecialType.Monochrome);
+      }
+    }
     #endregion
-    
+
   }
 }
 #endif

@@ -128,6 +128,21 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Update the image used for this DisplayBitmap
+    /// </summary>
+    /// <param name="bitmap"></param>
+    public void Update(System.Drawing.Bitmap bitmap)
+    {
+      IntPtr hbmp = bitmap.GetHbitmap();
+      if (m_ptr_display_bmp == IntPtr.Zero)
+      {
+        m_ptr_display_bmp = UnsafeNativeMethods.CRhCmnDisplayBitmap_New(null, hbmp);
+        return;
+      }
+      UnsafeNativeMethods.CRhCmnDisplayBitmap_Update(m_ptr_display_bmp, hbmp);
+    }
+
+    /// <summary>
     /// Load a DisplayBitmap from and image file on disk or from URL. If path starts
     /// with http:// or https:// then an attempt is made to load the bitmap from an
     /// online resource

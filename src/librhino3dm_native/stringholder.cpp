@@ -67,7 +67,7 @@ const RHMONO_STRING* CRhCmnStringHolder::Array() const
   return m_macString;
 #endif
 
-#if defined (ON_COMPILER_ANDROIDNDK) || defined(ON_RUNTIME_LINUX)
+#if defined (ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX)
   const ON__UINT32* sUTF32 = (const ON__UINT32*)m_winString.Array();
   int length = m_winString.Length();
   CRhCmnStringHolder* pThis = const_cast<CRhCmnStringHolder*>(this);

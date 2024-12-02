@@ -40,6 +40,7 @@ namespace Rhino.ObjectManager
     {
       None = UnsafeNativeMethods.RhinoEventWatcherObjectManagerHints.None,
       SelectionChanged = UnsafeNativeMethods.RhinoEventWatcherObjectManagerHints.SelectionChanged,
+      QuickAccessPropertyChanged = UnsafeNativeMethods.RhinoEventWatcherObjectManagerHints.QuickAccessPropertyChanged,
       RebuildRequired = UnsafeNativeMethods.RhinoEventWatcherObjectManagerHints.RebuildRequired,
     }
 
@@ -303,6 +304,7 @@ namespace Rhino.ObjectManager
     public delegate Guid PlugInIdDelegate(int serial);
 
     private static PlugInIdDelegate DelegatePlugInId = OnPlugInId;
+    [MonoPInvokeCallback(typeof(PlugInIdDelegate))]
     private static Guid OnPlugInId(int sn)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -315,6 +317,7 @@ namespace Rhino.ObjectManager
     public delegate Guid ExtensionIdDelegate(int serial);
 
     private static ExtensionIdDelegate DelegateExtensionId = OnExtensionId;
+    [MonoPInvokeCallback(typeof(ExtensionIdDelegate))]
     private static Guid OnExtensionId(int sn)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -327,6 +330,7 @@ namespace Rhino.ObjectManager
     public delegate void ExtensionEnglishNameDelegate(int serial, IntPtr pOut);
 
     private static ExtensionEnglishNameDelegate DelegateExtensionEnglishName = OnExtensionEnglishName;
+    [MonoPInvokeCallback(typeof(ExtensionEnglishNameDelegate))]
     private static void OnExtensionEnglishName(int sn, IntPtr pOut)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -343,6 +347,7 @@ namespace Rhino.ObjectManager
     public delegate void ExtensionLocalizedNameDelegate(int serial, IntPtr pOut);
 
     private static ExtensionLocalizedNameDelegate DelegateExtensionLocalizedName = OnExtensionLocalizedName;
+    [MonoPInvokeCallback(typeof(ExtensionLocalizedNameDelegate))]
     private static void OnExtensionLocalizedName(int sn, IntPtr pOut)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -359,6 +364,7 @@ namespace Rhino.ObjectManager
     public delegate IntPtr ExtensionNodeFromArchiveDelegate(int serial, Guid idType, FileIO.BinaryArchiveWriter archive);
 
     private static ExtensionNodeFromArchiveDelegate DelegateExtensionNodeFromArchive = OnExtensionNodeFromArchive;
+    [MonoPInvokeCallback(typeof(ExtensionNodeFromArchiveDelegate))]
     private static IntPtr OnExtensionNodeFromArchive(int sn, Guid idType, FileIO.BinaryArchiveWriter archive)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -375,6 +381,7 @@ namespace Rhino.ObjectManager
     public delegate void ExtensionChildNodesDelegate(int serial, IntPtr pNode, IntPtr pNodes);
 
     private static ExtensionChildNodesDelegate DelegateExtensionChildNodes = OnExtensionChildNodes;
+    [MonoPInvokeCallback(typeof(ExtensionChildNodesDelegate))]
     private static void OnExtensionChildNodes(int sn, IntPtr pNode, IntPtr pNodes)
     {
       var ext = ObjectManagerExtension.FromSerialNumber(sn);
@@ -785,7 +792,7 @@ namespace Rhino.ObjectManager
 
     public abstract bool WriteToArchive(BinaryArchiveWriter archive);
 
-    public abstract ObjectManagerNodeCommandEnumerator Commands { get; }
+    public abstract ObjectManagerNodeCommand[] Commands { get; }
 
     public abstract ObjectManagerNodeCommand[] CommandsForNodes(ObjectManagerNode[] nodes);
 
@@ -815,6 +822,7 @@ namespace Rhino.ObjectManager
     public delegate Guid NodeTypeIdDelegate(int serial);
 
     private static NodeTypeIdDelegate DelegateNodeTypeId = OnNodeTypeId;
+    [MonoPInvokeCallback(typeof(NodeTypeIdDelegate))]
     private static Guid OnNodeTypeId(int sn)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -827,6 +835,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeEnglishNameDelegate(int serial, IntPtr pOut);
 
     private static NodeEnglishNameDelegate DelegateNodeEnglishName = OnNodeEnglishName;
+    [MonoPInvokeCallback(typeof(NodeEnglishNameDelegate))]
     private static void OnNodeEnglishName(int sn, IntPtr pOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -843,6 +852,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeLocalizedNameDelegate(int serial, IntPtr pOut);
 
     private static NodeLocalizedNameDelegate DelegateNodeLocalizedName = OnNodeLocalizedName;
+    [MonoPInvokeCallback(typeof(NodeLocalizedNameDelegate))]
     private static void OnNodeLocalizedName(int sn, IntPtr pOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -859,6 +869,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeIdDelegate(int serial, IntPtr pOut);
 
     private static NodeIdDelegate DelegateNodeId = OnNodeId;
+    [MonoPInvokeCallback(typeof(NodeIdDelegate))]
     private static void OnNodeId(int sn, IntPtr pOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -875,6 +886,7 @@ namespace Rhino.ObjectManager
     public delegate IntPtr NodeParentDelegate(int serial);
 
     private static NodeParentDelegate DelegateParentNode = OnParentNode;
+    [MonoPInvokeCallback(typeof(NodeParentDelegate))]
     private static IntPtr OnParentNode(int sn)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -891,6 +903,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeImageDelegate(int serial, int width, int height, ObjectManagerImageUsage usage, IntPtr pDibOut);
 
     private static NodeImageDelegate DelegateNodeImage = OnNodeImage;
+    [MonoPInvokeCallback(typeof(NodeImageDelegate))]
     private static int OnNodeImage(int sn, int width, int height, ObjectManagerImageUsage usage, IntPtr pDibOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -912,6 +925,7 @@ namespace Rhino.ObjectManager
     public delegate int NodePreviewDelegate(int serial, int width, int height, IntPtr pDibOut);
 
     private static NodePreviewDelegate DelegateNodePreview = OnNodePreview;
+    [MonoPInvokeCallback(typeof(NodePreviewDelegate))]
     private static int OnNodePreview(int sn, int width, int height, IntPtr pDibOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -933,6 +947,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeChildrenDelegate(int serial, IntPtr pNode);
 
     private static NodeChildrenDelegate DelegateChildrenNode = OnChildrenNode;
+    [MonoPInvokeCallback(typeof(NodeChildrenDelegate))]
     private static void OnChildrenNode(int sn, IntPtr pNodeVector)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -952,6 +967,7 @@ namespace Rhino.ObjectManager
     public delegate void NodePropertiesDelegate(int serial, IntPtr pNodeVector);
 
     private static NodePropertiesDelegate DelegateNodeProperties = OnNodeProperties;
+    [MonoPInvokeCallback(typeof(NodePropertiesDelegate))]
     private static void OnNodeProperties(int sn, IntPtr pNodeVector)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -971,6 +987,7 @@ namespace Rhino.ObjectManager
     public delegate IntPtr NodeBeginChangeDelegate(int serial);
 
     private static NodeBeginChangeDelegate DelegateNodeBeginChange = OnNodeBeginChange;
+    [MonoPInvokeCallback(typeof(NodeBeginChangeDelegate))]
     private static IntPtr OnNodeBeginChange(int sn)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -987,6 +1004,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeEndChangeDelegate(int serial);
 
     private static NodeEndChangeDelegate DelegateNodeEndChange = OnNodeEndChange;
+    [MonoPInvokeCallback(typeof(NodeEndChangeDelegate))]
     private static int OnNodeEndChange(int sn)
     {
       var property = ObjectManagerNode.FromSerialNumber(sn);
@@ -1015,6 +1033,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeCommandsDelegate(int serial, IntPtr pNodeVector);
 
     private static NodeCommandsDelegate DelegateNodeCommands = OnNodeCommands;
+    [MonoPInvokeCallback(typeof(NodeCommandsDelegate))]
     private static void OnNodeCommands(int sn, IntPtr pNodeVector)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1034,6 +1053,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeCommandsForNodesDelegate(int serial, IntPtr pNodes, IntPtr pCommands);
 
     private static NodeCommandsForNodesDelegate DelegateNodeCommandsForNodes = OnNodeCommandsForNodes;
+    [MonoPInvokeCallback(typeof(NodeCommandsForNodesDelegate))]
     private static void OnNodeCommandsForNodes(int sn, IntPtr pNodes, IntPtr pCommands)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1069,6 +1089,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeWriteToBufferDelegate(int serial, IntPtr pArchive);
 
     private static NodeWriteToBufferDelegate DelegateNodeWriteToBuffer = OnNodeWriteToBuffer;
+    [MonoPInvokeCallback(typeof(NodeWriteToBufferDelegate))]
     private static int OnNodeWriteToBuffer(int sn, IntPtr pArchive)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1083,6 +1104,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeIsDragableDelegate(int serial);
 
     private static NodeIsDragableDelegate DelegateNodeIsDragable = OnNodeIsDragable;
+    [MonoPInvokeCallback(typeof(NodeIsDragableDelegate))]
     private static int OnNodeIsDragable(int sn)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1095,6 +1117,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeSupportsDropTargetDelegate(int serial, IntPtr pDropTarget);
 
     private static NodeSupportsDropTargetDelegate DelegateNodeSupportsDropTarget = OnNodeSupportsDropTarget;
+    [MonoPInvokeCallback(typeof(NodeSupportsDropTargetDelegate))]
     private static int OnNodeSupportsDropTarget(int sn, IntPtr pDropTarget)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1109,6 +1132,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeDropDelegate(int serial, IntPtr pDropTarget);
 
     private static NodeDropDelegate DelegateNodeDrop = OnNodeDrop;
+    [MonoPInvokeCallback(typeof(NodeDropDelegate))]
     private static int OnNodeDrop(int sn, IntPtr pDropTarget)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1123,6 +1147,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeAddUiSectionsDelegate(int serial, IntPtr pSectionHolder);
 
     private static NodeAddUiSectionsDelegate DelegateNodeAddUiSections = OnNodeAddUiSections;
+    [MonoPInvokeCallback(typeof(NodeAddUiSectionsDelegate))]
     private static void OnNodeAddUiSections(int sn, IntPtr pSectionHolder)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1136,6 +1161,7 @@ namespace Rhino.ObjectManager
     public delegate IntPtr NodeGetParameterDelegate(int serial, IntPtr pName);
 
     private static NodeGetParameterDelegate DelegateNodeGetParameter = OnNodeGetParameter;
+    [MonoPInvokeCallback(typeof(NodeGetParameterDelegate))]
     private static IntPtr OnNodeGetParameter(int sn, IntPtr pName)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1157,6 +1183,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeSetParameterDelegate(int serial, IntPtr pName, IntPtr pValue);
 
     private static NodeSetParameterDelegate DelegateNodeSetParameter = OnNodeSetParameter;
+    [MonoPInvokeCallback(typeof(NodeSetParameterDelegate))]
     private static int OnNodeSetParameter(int sn, IntPtr pName, IntPtr pValue)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1175,6 +1202,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeIsEqualDelegate(int serial, IntPtr pNode);
 
     private static NodeIsEqualDelegate DelegateNodeIsEqual = OnNodeIsEqual;
+    [MonoPInvokeCallback(typeof(NodeIsEqualDelegate))]
     private static int OnNodeIsEqual(int sn, IntPtr pNode)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1192,6 +1220,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeHighlightInViewDelegate(int serial, IntPtr pDisplayPipeline, uint channel, IntPtr pDisplayPen);
 
     private static NodeHighlightInViewDelegate DelegateNodeHighlightInView = OnNodeHighlightInView;
+    [MonoPInvokeCallback(typeof(NodeHighlightInViewDelegate))]
     private static void OnNodeHighlightInView(int sn, IntPtr pDisplayPipeline, uint channel, IntPtr pDisplayPen)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1212,6 +1241,7 @@ namespace Rhino.ObjectManager
     public delegate int NodeIsSelectedDelegate(int serial, IntPtr pNode);
 
     private static NodeIsSelectedDelegate DelegateNodeIsSelected = OnNodeIsSelected;
+    [MonoPInvokeCallback(typeof(NodeIsSelectedDelegate))]
     private static int OnNodeIsSelected(int sn, IntPtr pNode)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1227,6 +1257,7 @@ namespace Rhino.ObjectManager
     public delegate void NodeToolTipDelegate(int serial, IntPtr pOut);
 
     private static NodeToolTipDelegate DelegateNodeToolTip = OnNodeToolTip;
+    [MonoPInvokeCallback(typeof(NodeToolTipDelegate))]
     private static void OnNodeToolTip(int sn, IntPtr pOut)
     {
       var node = ObjectManagerNode.FromSerialNumber(sn);
@@ -1477,11 +1508,34 @@ namespace Rhino.ObjectManager
       return UnsafeNativeMethods.RhinoObjectManager_Node_EndChange(CppPointer);
     }
 
-    public override ObjectManagerNodeCommandEnumerator Commands
+    public override ObjectManagerNodeCommand[] Commands
     {
       get
       {
-        return new ObjectManagerNodeCommandEnumerator(CppPointer);
+        IntPtr pCommands = UnsafeNativeMethods.RhinoObjectManager_Node_Commands(CppPointer);
+        if (IntPtr.Zero != pCommands)
+        {
+          int count = UnsafeNativeMethods.RhinoObjectManager_NodeCommandVector_Count(pCommands);
+          if (count > 0)
+          {
+            var commands = new ObjectManagerNodeCommand[count];
+
+            for (int i = 0; i < count; i++)
+            {
+              IntPtr pCommand = UnsafeNativeMethods.RhinoObjectManager_NodeCommandVector_GetAt(pCommands, i);
+              if (IntPtr.Zero != pCommand)
+              {
+                commands[i] = new ObjectManagerNodeCommandNative(pCommand, true);
+              }
+            }
+
+            UnsafeNativeMethods.RhinoObjectManager_NodeCommandVector_Delete(pCommands);
+
+            return commands;
+          }
+        }
+
+        return new ObjectManagerNodeCommand[0];
       }
     }
 
@@ -1555,7 +1609,11 @@ namespace Rhino.ObjectManager
 
     public override void HighlightInView(Rhino.Display.DisplayPipeline displayPipeline, uint channel, Rhino.Display.DisplayPen pen)
     {
-      UnsafeNativeMethods.RhinoObjectManager_Node_HighlightInView(CppPointer, displayPipeline.NonConstPointer(), channel, pen.ToNativePointer());
+      // 29 July 2024 S. Baer (RH-83103)
+      // Remove memory leak for display pen
+      IntPtr ptrPen = pen.ToNativePointer();
+      UnsafeNativeMethods.RhinoObjectManager_Node_HighlightInView(CppPointer, displayPipeline.NonConstPointer(), channel, ptrPen);
+      Rhino.Display.DisplayPen.DeleteNativePointer(ptrPen);
     }
 
     public override bool IsSelected
@@ -1646,6 +1704,8 @@ namespace Rhino.ObjectManager
 
     public abstract bool Editable { get; }
 
+    public abstract Rhino.Render.Variant.Types ParameterType { get; }
+
     private static ObjectManagerNodeQuickAccessProperty FromSerialNumber(int serial)
     {
       foreach (var property in ObjectManagerNodeQuickAccessPropertyList.properties)
@@ -1734,16 +1794,29 @@ namespace Rhino.ObjectManager
       return property.Editable ? 1 : 0;
     }
 
+
+    public delegate Rhino.Render.Variant.Types NodePropertyTypeDelegate(int serial);
+
+    private static NodePropertyTypeDelegate DelegateNodePropertyParameterType = OnNodePropertyParameterType;
+    private static Rhino.Render.Variant.Types OnNodePropertyParameterType(int sn)
+    {
+      var property = ObjectManagerNodeQuickAccessProperty.FromSerialNumber(sn);
+      if (null == property)
+        return Rhino.Render.Variant.Types.Null;
+
+      return property.ParameterType;
+    }
+
     internal static void SetCppHooks(bool bInitialize)
     {
       if (bInitialize)
       {
         UnsafeNativeMethods.RhCmnObjectManagerNodeProperty_SetCallbacks(DelegateNodePropertyId, DelegateNodePropertyDisplayName,
-          DelegateNodePropertyParameterName,DelegateNodePropertyImage, DelegatePropertyEditable);
+          DelegateNodePropertyParameterName,DelegateNodePropertyImage, DelegatePropertyEditable, DelegateNodePropertyParameterType);
       }
       else
       {
-        UnsafeNativeMethods.RhCmnObjectManagerNodeProperty_SetCallbacks(null, null, null, null, null);
+        UnsafeNativeMethods.RhCmnObjectManagerNodeProperty_SetCallbacks(null, null, null, null, null, null);
       }
     }
   }
@@ -1807,6 +1880,14 @@ namespace Rhino.ObjectManager
         return UnsafeNativeMethods.RhinoObjectManager_Node_Property_Editable(CppPointer);
       }
     }
+
+    public override Rhino.Render.Variant.Types ParameterType
+    {
+      get
+      {
+        return (Rhino.Render.Variant.Types)UnsafeNativeMethods.RhinoObjectManager_Node_Property_ParameterType(CppPointer);
+      }
+    } 
   }
 
 
@@ -1903,6 +1984,8 @@ namespace Rhino.ObjectManager
     public abstract bool IsRadioButton { get; }
 
     public abstract bool SupportsMultipleSelection { get; }
+
+    public abstract int MenuOrder { get; }
 
     public abstract bool Execute();
 
@@ -2099,6 +2182,18 @@ namespace Rhino.ObjectManager
       }
     }
 
+    public delegate int NodeCommandMenuOrderDelegate(int serial);
+
+    private static NodeCommandMenuOrderDelegate DelegateNodeCommandMenuOrder = OnNodeCommandMenuOrder;
+    private static int OnNodeCommandMenuOrder(int sn)
+    {
+      var command = ObjectManagerNodeCommand.FromSerialNumber(sn);
+      if (null == command)
+        return 0;
+
+      return command.MenuOrder;
+    }
+
     internal static void SetCppHooks(bool bInitialize)
     {
       if (bInitialize)
@@ -2106,12 +2201,12 @@ namespace Rhino.ObjectManager
         UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(DelegateNodeCommandId, DelegateNodeCommandEnglishName,
           DelegateNodeCommandLocalizedName, DelegateNodeCommandImage, DelegateNodeCommandState, DelegateNodeCommandIsCheckbox,
           DelegateNodeCommandIsSeparator, DelegateNodeCommandExecute, DelegateNodeCommandIsDefault, DelegateNodeCommandIsEnabled,
-          DelegateNodeCommandIsRadioButton, DelegateNodeCommandSupportsMultipleSelection);
+          DelegateNodeCommandIsRadioButton, DelegateNodeCommandSupportsMultipleSelection, DelegateNodeCommandMenuOrder);
       }
       else
       {
         UnsafeNativeMethods.RhCmnObjectManagerNodeCommand_SetCallbacks(null, null, null, null, null, null, null, null, null,
-          null, null, null);
+          null, null, null, null);
       }
     }
   }
@@ -2221,6 +2316,14 @@ namespace Rhino.ObjectManager
       get
       {
         return UnsafeNativeMethods.RhinoObjectManager_Node_Command_IsDefault(CppPointer);
+      }
+    }
+
+    public override int MenuOrder
+    {
+      get
+      {
+        return UnsafeNativeMethods.RhinoObjectManager_Node_Command_MenuOrder(CppPointer);
       }
     }
 

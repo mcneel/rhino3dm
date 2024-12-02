@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
-RH_C_FUNCTION ON_HatchPattern* ON_HatchPattern_New()
+RH_C_FUNCTION ON_HatchPattern* ON_HatchPattern_New(const ON_HatchPattern* pConstHatchPattern)
 {
+  if (pConstHatchPattern) 
+    return new ON_HatchPattern(*pConstHatchPattern);
   return new ON_HatchPattern();
 }
 

@@ -4537,12 +4537,14 @@ namespace Rhino.FileIO
     /// <summary>
     /// Gets or sets a value indicating whether to write render meshes
     /// </summary>
+    /// <since>8.4</since>
     public bool WriteRenderMeshes { get; set; }
 
 
     /// <summary>
     /// Gets or sets a value indicating whether to write analysis meshes
     /// </summary>
+    /// <since>8.4</since>
     public bool WriteAnalysisMeshes { get; set; }
   }
 }

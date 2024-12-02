@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
@@ -217,6 +218,29 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_SubD_DuplicateEdgeCurves(const_ptr_this, ptr_output, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
       return output.ToNonConstArray();
     }
+
+    /// <summary>
+    /// Transforms an enumerable of SubD components.
+    /// </summary>
+    /// <param name="components">The SubD components to transform.</param>
+    /// <param name="xform">The transformation to apply.</param>
+    /// <param name="componentLocation">
+    /// Select between applying the transform to the control net (faster) or the surface points (slower).
+    /// </param>
+    /// <returns>The number of vertex locations that changed.</returns>
+    /// <remarks>
+    /// This method does not clear the evaluation cache.
+    /// </remarks>
+    /// <since>8.12</since>
+    [CLSCompliant(false)]
+    public uint TransformComponents(IEnumerable<ComponentIndex> components, Transform xform, SubDComponentLocation componentLocation)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      ComponentIndex[] arr_components = components.ToArray();
+      uint rc = UnsafeNativeMethods.ON_SubD_TransformComponents(ptr_this, ref xform, arr_components.Length, arr_components, componentLocation);
+      return rc;
+    }
+
 #endif
 
     /// <summary>
@@ -933,6 +957,28 @@ namespace Rhino.Geometry
         //if (rc > 0) DestroySubDDisplay();
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Checks that a surface mesh evaluation cache exists, and that it has the required options.
+    /// This cache is used by
+    ///   - <see cref="SubDVertex.SurfacePoint()"/>, 
+    ///   - <see cref="SubDEdge.ToNurbsCurve(bool)"/>, and
+    ///   - <see cref="Mesh.CreateFromSubD(SubD, int)"/>.
+    /// </summary>
+    /// <param name="bTextureCoordinatesExist">If True, the cache must contain texture coordinates information.</param>
+    /// <param name="bCurvaturesExist">If True, the cache must contain curvature information.</param>
+    /// <param name="bColorsExist">If True, the cache must contain color information.</param>
+    /// <returns>True if the cache exists on all face fragments and has the required options.</returns>
+    /// <remarks>This does not check that the cache is up to date, <see cref="SubD.UpdateSurfaceMeshCache(bool)"/>.</remarks>
+    /// <seealso cref="SubD.ClearEvaluationCache()"/>
+    /// <seealso cref="SubD.CopyEvaluationCache(in SubD)"/>
+    /// <since>8.9</since>
+    [CLSCompliant(false)]
+    public bool SurfaceMeshCacheExists(bool bTextureCoordinatesExist, bool bCurvaturesExist, bool bColorsExist)
+    {
+        var const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.ON_SubD_SurfaceMeshCacheExists(const_ptr_this, bTextureCoordinatesExist, bCurvaturesExist, bColorsExist);
     }
 
     /// <summary>
@@ -2446,7 +2492,7 @@ namespace Rhino.Geometry
     }
 
     #region properties
-    /// <summary> Number of faces for this edge </summary>
+    /// <summary>Number of faces for this edge.</summary>
     /// <since>7.0</since>
     public int FaceCount
     {
@@ -2458,7 +2504,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Line representing the control net end points
+    /// Gets the component index of this edge.
+    /// </summary>
+    /// <returns>The component index.</returns>
+    /// <since>8.12</since>
+    [ConstOperation]
+    public ComponentIndex ComponentIndex()
+    {
+      ComponentIndex ci = new ComponentIndex();
+      IntPtr const_edge_ptr = ConstPointer();
+      UnsafeNativeMethods.ON_SubDEdge_ComponentIndex(const_edge_ptr, ref ci);
+      return ci;
+    }
+
+    /// <summary>
+    /// Line representing the control net end points.
     /// </summary>
     /// <since>7.0</since>
     public Line ControlNetLine
@@ -2470,7 +2530,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Start vertex for this edge
+    /// Start vertex for this edge.
     /// </summary>
     /// <since>7.0</since>
     public SubDVertex VertexFrom
@@ -2487,7 +2547,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// End vertex for this edge
+    /// End vertex for this edge.
     /// </summary>
     /// <since>7.0</since>
     public SubDVertex VertexTo
@@ -2504,7 +2564,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// identifies the type of subdivision edge
+    /// identifies the type of subdivision edge.
     /// </summary>
     /// <since>7.0</since>
     public SubDEdgeTag Tag
@@ -2524,7 +2584,7 @@ namespace Rhino.Geometry
 #endregion
 
     /// <summary>
-    /// Retrieve a SubDFace from this edge
+    /// Retrieve a SubDFace from this edge.
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
