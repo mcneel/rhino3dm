@@ -63,7 +63,7 @@ class TestFile3dmObjectTable(unittest.TestCase):
 
         self.assertTrue(qtyObjects == 2 and qtyObjects2 == 1)
 
-        
+
 
 if __name__ == '__main__':
     print("running tests")
