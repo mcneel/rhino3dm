@@ -49,7 +49,7 @@ public:
   //Guid AddAngularDimension1(AngularDimension dimension)
   //Guid AddAngularDimension2(AngularDimension dimension, ObjectAttributes attributes)
   BND_UUID AddLine1(const ON_3dPoint& from, const ON_3dPoint& to);
-  //Guid AddLine2(Point3d from, Point3d to, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddLine2(const ON_3dPoint& from, const ON_3dPoint& to, const class BND_3dmObjectAttributes* attributes);
   //Guid AddLine3(Line line)
   //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
   BND_UUID AddPolyline1(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
