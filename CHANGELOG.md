@@ -21,6 +21,7 @@ diff:
 - (js) Added several methods and properties for Planes #568
 - (dotnet) Linux release builds in an Amazon Linux 2023 container
 - (py) AddPoint now supports attributes #665 @StudioWEngineers
+- (py) AddLine now supports attributes #666 @StudioWEngineers
 
 ### Changed
 
