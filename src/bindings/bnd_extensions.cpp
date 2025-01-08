@@ -432,6 +432,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddPoint1(double x, double y, double z)
   return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddPoint6(double x, double y, double z, const BND_3dmObjectAttributes* attributes)
+{
+  ON_Point point_geometry(x,y,z);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
 BND_UUID BND_ONXModel_ObjectTable::AddPointCloud(const BND_PointCloud& cloud, const BND_3dmObjectAttributes* attributes)
 {
   const ON_Geometry* g = cloud.GeometryPointer();
@@ -443,6 +450,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
 {
   ON_LineCurve lc(from, to);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddLine2(const ON_3dPoint& from, const ON_3dPoint& to, const BND_3dmObjectAttributes* attributes)
+{
+  ON_LineCurve lc(from, to);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
@@ -1705,10 +1719,14 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>(s.cast<BND_ONXModel_ObjectTable &>(), s); })
 #endif
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint6, py::arg("x"), py::arg("y"), py::arg("z"), py::arg("attributes"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint3, py::arg("point"), py::arg("attributes"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint5, py::arg("point"), py::arg("attributes"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
+    .def("AddLine", &BND_ONXModel_ObjectTable::AddLine2, py::arg("from"), py::arg("to"), py::arg("attributes"))
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
