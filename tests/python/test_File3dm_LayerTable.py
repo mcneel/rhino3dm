@@ -1,5 +1,6 @@
 import rhino3dm
 import unittest
+import os
 
 #objective: to test creating file with layers and reading a file with layers
 class TestFile3dmLayerTable(unittest.TestCase):
@@ -74,6 +75,11 @@ class TestFile3dmLayerTable(unittest.TestCase):
         l0 = file3dm.Layers.FindIndex(index)
 
         self.assertEqual(l0.Index, 0)
+
+    def test_ReadFileWithLayers(self):
+        file = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
+        qtyLayers = len(file.Layers)
+        self.assertTrue(qtyLayers == 6)
 
 if __name__ == '__main__':
     print("running tests")
