@@ -29,10 +29,11 @@ class BND_ONXModel_ObjectTable
 public:
   BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   BND_UUID AddPoint1(double x, double y, double z);
+  BND_UUID AddPoint6(double x, double y, double z, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddPoint2(const ON_3dPoint& point) { return AddPoint1(point.x, point.y, point.z); }
-  //Guid AddPoint3(Point3d point, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddPoint3(const ON_3dPoint& point, const class BND_3dmObjectAttributes* attributes) { return AddPoint6(point.x, point.y, point.z, attributes); }
   BND_UUID AddPoint4(const ON_3fPoint& point) { return AddPoint1(point.x, point.y, point.z); }
-  //Guid AddPoint5(Point3f point, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddPoint5(const ON_3fPoint& point, const class BND_3dmObjectAttributes* attributes) { return AddPoint6(point.x, point.y, point.z, attributes); }
   //Guid[] AddPoints1(IEnumerable<Point3d> points)
   //Guid[] AddPoints2(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
   //Guid[] AddPoints3(IEnumerable<Point3f> points)
