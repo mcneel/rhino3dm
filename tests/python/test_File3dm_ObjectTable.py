@@ -3,6 +3,28 @@ import unittest
 
 #objective: to test that passing a list of points or a Point3dList to the CreateControlPointCurve method returns the same curve
 class TestFile3dmObjectTable(unittest.TestCase):
+    def test_addLine(self) -> None:
+        """Tests for the `AddLine` method.
+        """
+        file_3dm = rhino3dm.File3dm()
+
+        # create layers
+        file_3dm.Layers.AddLayer("layer1", (30, 144, 255, 255))
+        file_3dm.Layers.AddLayer("layer2", (255, 215, 0, 255))
+
+        # lines added without attributes are added to the current layer, i.e., the first
+        # layer added to the model
+        file_3dm.Objects.AddLine(rhino3dm.Point3d(0, 0, 0), rhino3dm.Point3d(1, 0, 0))
+        with self.subTest(msg="AddLine without attributes"):
+            self.assertEqual(file_3dm.Objects[0].Attributes.LayerIndex, 0)
+
+        # add line with attributes
+        obj_attr = rhino3dm.ObjectAttributes()
+        obj_attr.LayerIndex = 1
+        file_3dm.Objects.AddLine(rhino3dm.Point3d(1, 1, 0), rhino3dm.Point3d(1, 0, 0), obj_attr)
+        with self.subTest(msg="AddLine with attributes"):
+            self.assertEqual(file_3dm.Objects[1].Attributes.LayerIndex, 1)
+
     def test_addPoint(self) -> None:
         """Tests for the `AddPoint` method.
         """

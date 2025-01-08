@@ -453,6 +453,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
   return ON_UUID_to_Binding(rc);
 }
 
+BND_UUID BND_ONXModel_ObjectTable::AddLine2(const ON_3dPoint& from, const ON_3dPoint& to, const BND_3dmObjectAttributes* attributes)
+{
+  ON_LineCurve lc(from, to);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, attributes);
+  return ON_UUID_to_Binding(rc);
+}
+
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline1(const BND_Point3dList& points, const BND_3dmObjectAttributes* attributes)
 {
   ON_PolylineCurve plc(points.m_polyline);
@@ -1719,6 +1726,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint5, py::arg("point"), py::arg("attributes"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
+    .def("AddLine", &BND_ONXModel_ObjectTable::AddLine2, py::arg("from"), py::arg("to"), py::arg("attributes"))
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
