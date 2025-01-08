@@ -54,12 +54,27 @@ BND_SubDVertexList::BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentRef
 
 void initSubDBindings(rh3dmpymodule& m)
 {
+  py::class_<BND_SubDFaceList>(m, "SubDFaceList")
+    .def("__len__", &BND_SubDFaceList::Count)
+    ;
+
+  py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")
+    .def("__len__", &BND_SubDEdgeList::Count)
+    ;
+
+  py::class_<BND_SubDVertexList>(m, "SubDVertexList")
+    .def("__len__", &BND_SubDVertexList::Count)
+    ;
+
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
     .def(py::init<>())
     .def_property_readonly("IsSolid", &BND_SubD::IsSolid)
     .def("ClearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .def("UpdateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .def("Subdivide", &BND_SubD::Subdivide, py::arg("count"))
+    .def_property_readonly("Faces", &BND_SubD::GetFaces)
+    .def_property_readonly("Edges", &BND_SubD::GetEdges)
+    .def_property_readonly("Vertices", &BND_SubD::GetVertices)
     ;
 }
 

@@ -10,7 +10,33 @@ void initSubDBindings(void* m);
 
 class BND_SubDFace {};
 class BND_SubDEdge {};
-class BND_SubDVertex {};
+
+class BND_SubDVertex {
+  ON_ModelComponentReference m_component_reference;
+  ON_SubDVertex* m_subdvertex = nullptr;
+
+  public:
+  BND_SubDVertex(ON_SubDVertex* vertex, const ON_ModelComponentReference& compref);
+
+  // properties
+
+  //public Point3d ControlNetPoint
+  //public int EdgeCount
+  int EdgeCount() const { return m_subdvertex->EdgeCount(); }
+  //public int FaceCount
+  int FaceCount() const { return m_subdvertex->FaceCount(); }
+  //public SubDVertex Next
+  //public SubDVertex Previous
+  //public SubDVertexTag Tag
+
+  //methods
+  //public SubDEdge EdgeAt(int index)
+  //public SubDFace FaceAt(int index)
+  //public IEnumerable<SubDEdge> Edges --> SubDEdgeList
+  //public Point3d SurfacePoint()
+  //public bool SetControlNetPoint(Point3d position, bool bClearNeighborhoodCache)
+  
+};
 
 class BND_SubDVertexList {
   ON_ModelComponentReference m_component_reference;
@@ -19,7 +45,7 @@ class BND_SubDVertexList {
  public:
   BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentReference& compref);
   int Count() const { return m_subd->VertexCount(); }
-  class BND_SubDVertex* GetFace(int i);
+  //class BND_SubDVertex* GetVertex(int i);
 };
 
 class BND_SubDEdgeList {
@@ -29,9 +55,8 @@ class BND_SubDEdgeList {
  public:
   BND_SubDEdgeList(ON_SubD* subd, const ON_ModelComponentReference& compref);
   int Count() const { return m_subd->EdgeCount(); }
-  class BND_SubDEdge* GetFace(int i);
+  //class BND_SubDEdge* GetEdge(int i);
 };
-
 
 class BND_SubDFaceList {
   ON_ModelComponentReference m_component_reference;
@@ -40,7 +65,7 @@ class BND_SubDFaceList {
  public:
   BND_SubDFaceList(ON_SubD* subd, const ON_ModelComponentReference& compref);
   int Count() const { return m_subd->FaceCount(); }
-  class BND_SubDFace* GetFace(int i);
+  //class BND_SubDFace* GetFace(int i);
 };
 
 class BND_SubD : public BND_GeometryBase
