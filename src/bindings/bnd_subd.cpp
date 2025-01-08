@@ -16,6 +16,16 @@ BND_SubD::BND_SubD()
   SetTrackedPointer(new ON_SubD(), nullptr);
 }
 
+BND_SubDFace::BND_SubDFace(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref)
+{
+  SetTrackedPointer(subdface, compref);
+}
+
+void BND_SubDFace::SetTrackedPointer(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref)
+{
+  //TODO: implement
+}
+
 BND_SubDFaceList BND_SubD::GetFaces()
 {
   return BND_SubDFaceList(m_subd, m_component_ref);
@@ -25,6 +35,14 @@ BND_SubDFaceList::BND_SubDFaceList(ON_SubD* subd, const ON_ModelComponentReferen
 {
   m_component_reference = compref;
   m_subd = subd;
+}
+
+BND_SubDFace* BND_SubDFaceList::Find(int index)
+{
+  const class ON_SubDFace* face = m_subd->FaceFromId(index);
+  if (nullptr == face)
+    return nullptr;
+  return new BND_SubDFace(face, &m_component_reference);
 }
 
 BND_SubDEdgeList BND_SubD::GetEdges()
@@ -54,8 +72,13 @@ BND_SubDVertexList::BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentRef
 
 void initSubDBindings(rh3dmpymodule& m)
 {
+  py::class_<BND_SubDFace>(m, "SubDFace")
+    .def_property_readonly("EdgeCount", &BND_SubDFace::EdgeCount)
+    ;
+
   py::class_<BND_SubDFaceList>(m, "SubDFaceList")
     .def("__len__", &BND_SubDFaceList::Count)
+    .def("Find", &BND_SubDFaceList::Find, py::arg("index"))
     ;
 
   py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")

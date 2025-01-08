@@ -8,7 +8,18 @@ void initSubDBindings(rh3dmpymodule& m);
 void initSubDBindings(void* m);
 #endif
 
-class BND_SubDFace {};
+class BND_SubDFace {
+
+  ON_SubDFace* m_subdface = nullptr;
+
+  public: 
+  BND_SubDFace(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref);
+  int EdgeCount() const { return m_subdface->m_edge_count; }
+
+  protected:
+  void SetTrackedPointer(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref);
+
+};
 class BND_SubDEdge {};
 
 class BND_SubDVertex {
@@ -65,7 +76,7 @@ class BND_SubDFaceList {
  public:
   BND_SubDFaceList(ON_SubD* subd, const ON_ModelComponentReference& compref);
   int Count() const { return m_subd->FaceCount(); }
-  //class BND_SubDFace* GetFace(int i);
+  class BND_SubDFace* Find(int index);
 };
 
 class BND_SubD : public BND_GeometryBase
