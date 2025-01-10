@@ -8,26 +8,37 @@ void initSubDBindings(rh3dmpymodule& m);
 void initSubDBindings(void* m);
 #endif
 
-class BND_SubDFace {
-
-  ON_SubDFace* m_subdface = nullptr;
-
-  public: 
-  BND_SubDFace(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref);
-  int EdgeCount() const { return m_subdface->m_edge_count; }
-
+class BND_SubDComponent
+{
+  ON_ModelComponentReference m_component_reference;
+  ON_SubDComponentBase* m_component = nullptr;
+  ON_SubD* m_subd = nullptr;
+  public:
+  //BND_SubDComponent(ON_SubDComponentBase* component, const ON_ModelComponentReference& compref);
   protected:
-  void SetTrackedPointer(const class ON_SubDFace* subdface, const ON_ModelComponentReference* compref);
 
 };
-class BND_SubDEdge {};
 
-class BND_SubDVertex {
+class BND_SubDFace {
+
   ON_ModelComponentReference m_component_reference;
+  const class ON_SubDFace* m_subdface = nullptr;
+  ON_SubD* m_subd = nullptr;
+  int m_index = -1;
+
+  public: 
+  BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentReference& compref);
+  int Index() const { return m_index; }
+  int EdgeCount() const;//<--- currently here
+
+};
+class BND_SubDEdge : public BND_SubDComponent {};
+
+class BND_SubDVertex : public BND_SubDComponent {
+
   ON_SubDVertex* m_subdvertex = nullptr;
 
   public:
-  BND_SubDVertex(ON_SubDVertex* vertex, const ON_ModelComponentReference& compref);
 
   // properties
 
