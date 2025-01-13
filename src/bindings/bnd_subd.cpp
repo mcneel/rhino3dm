@@ -16,15 +16,48 @@ BND_SubD::BND_SubD()
   SetTrackedPointer(new ON_SubD(), nullptr);
 }
 
-/*
-BND_SubDComponent::BND_SubDComponent(ON_SubDComponentBase* component, const ON_ModelComponentReference& compref)
+
+BND_SubDComponent::BND_SubDComponent(ON_SubD* subd, int index, const ON_ModelComponentReference& compref)
 {
-  //TODO
+  m_component_reference = compref;
+  m_subd = subd;
+  m_index = index;
 }
-*/
+
 
 // SubDFace
 
+BND_SubDFaceIterator::BND_SubDFaceIterator(ON_SubD* subd)
+{
+  m_it = subd->FaceIterator();
+}
+
+BND_SubDFace* BND_SubDFaceIterator::FirstFace()
+{
+  return new BND_SubDFace(m_it.FirstFace());
+}
+
+BND_SubDFace* BND_SubDFaceIterator::LastFace()
+{
+  return new BND_SubDFace(m_it.LastFace());
+}
+
+BND_SubDFace* BND_SubDFaceIterator::NextFace()
+{
+  return new BND_SubDFace(m_it.NextFace());
+}
+
+BND_SubDFace* BND_SubDFaceIterator::CurrentFace() const
+{
+  return new BND_SubDFace(m_it.CurrentFace());
+}
+
+BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face)
+{
+  m_subdface = face;
+}
+
+/*
 BND_SubDFace::BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentReference& compref)
 {
 
@@ -35,12 +68,6 @@ BND_SubDFace::BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentRefe
 
 }
 
-int BND_SubDFace::EdgeCount() const
-{
-  if (m_subdface)
-    return m_subdface->m_edge_count;
-  return -1;
-}
 
 BND_SubDFaceList BND_SubD::GetFaces()
 {
@@ -57,6 +84,37 @@ BND_SubDFace* BND_SubDFaceList::Find(int index)
 {
   return new BND_SubDFace(m_subd, index, m_component_reference);
 }
+*/
+
+
+// SubDEdge
+
+BND_SubDEdgeIterator::BND_SubDEdgeIterator(ON_SubD* subd)
+{
+  m_it = subd->EdgeIterator();
+}
+
+BND_SubDEdge* BND_SubDEdgeIterator::FirstEdge()
+{
+  return new BND_SubDEdge(m_it.FirstEdge());
+}
+
+BND_SubDEdge* BND_SubDEdgeIterator::LastEdge()
+{
+  return new BND_SubDEdge(m_it.LastEdge());
+}
+
+BND_SubDEdge* BND_SubDEdgeIterator::NextEdge()
+{
+  return new BND_SubDEdge(m_it.NextEdge());
+}
+
+BND_SubDEdge* BND_SubDEdgeIterator::CurrentEdge() const
+{
+  return new BND_SubDEdge(m_it.CurrentEdge());
+}
+
+// SubDVertex
 
 BND_SubDEdgeList BND_SubD::GetEdges()
 {
@@ -89,10 +147,23 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("EdgeCount", &BND_SubDFace::EdgeCount)
     .def_property_readonly("Index", &BND_SubDFace::Index)
     ;
-
+/*
   py::class_<BND_SubDFaceList>(m, "SubDFaceList")
     .def("__len__", &BND_SubDFaceList::Count)
     .def("Find", &BND_SubDFaceList::Find, py::arg("index"))
+    ;
+*/
+  py::class_<BND_SubDFaceIterator>(m, "SubDFaceIterator")
+    //.def("CurrentFace", &BND_SubDFaceIterator::CurrentFace)
+    //.def("NextFace", &BND_SubDFaceIterator::NextFace)
+    //.def("LastFace", &BND_SubDFaceIterator::LastFace)
+    .def("__len__", &BND_SubDFaceIterator::FaceCount)
+    .def("FirstFace", &BND_SubDFaceIterator::FirstFace)
+    .def("NextFace", &BND_SubDFaceIterator::NextFace)
+    .def("LastFace", &BND_SubDFaceIterator::LastFace)
+    .def("CurrentFace", &BND_SubDFaceIterator::CurrentFace)
+    .def_property_readonly("FaceCount", &BND_SubDFaceIterator::FaceCount)
+    .def_property_readonly("CurrentFaceIndex", &BND_SubDFaceIterator::CurrentFaceIndex)
     ;
 
   py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")
@@ -109,7 +180,8 @@ void initSubDBindings(rh3dmpymodule& m)
     .def("ClearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .def("UpdateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .def("Subdivide", &BND_SubD::Subdivide, py::arg("count"))
-    .def_property_readonly("Faces", &BND_SubD::GetFaces)
+    //.def_property_readonly("Faces", &BND_SubD::GetFaces)
+    .def_property_readonly("FaceIterator", &BND_SubD::GetFaceIterator)
     .def_property_readonly("Edges", &BND_SubD::GetEdges)
     .def_property_readonly("Vertices", &BND_SubD::GetVertices)
     ;
