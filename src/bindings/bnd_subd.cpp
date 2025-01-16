@@ -182,6 +182,27 @@ BND_SubDVertexList::BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentRef
 }
 
 */
+
+// --------------------- Iterator helpers ------- //
+#if defined(ON_PYTHON_COMPILE)
+
+template <typename IT, typename ET>
+struct PyBNDIterator {
+  PyBNDIterator(const IT table, py::object ref)
+    : seq(table), ref(ref) {}
+
+  ET next() {
+    if(index>=seq.FaceCount()) throw py::stop_iteration();
+    return const_cast<IT>(seq).NextFace();
+  }
+
+  const IT seq;
+  py::object ref;
+  int index = 0;
+};
+
+#endif
+
 #if defined(ON_PYTHON_COMPILE)
 
 void initSubDBindings(rh3dmpymodule& m)
@@ -206,8 +227,20 @@ void initSubDBindings(rh3dmpymodule& m)
     .def("Find", &BND_SubDFaceList::Find, py::arg("index"))
     ;
 */
+
+
+  py::class_<PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*> >(m, "__SubDFaceIterator")
+    .def("__iter__", [](PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*> &it) -> PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>& { return it; })
+    .def("__next__", &PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>::next)
+    ;
+
   py::class_<BND_SubDFaceIterator>(m, "SubDFaceIterator")
     .def("__len__", &BND_SubDFaceIterator::FaceCount)
+
+#if !defined(NANOBIND)
+    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>(s.cast<BND_SubDFaceIterator &>(), s); })
+#endif
+
     .def("FirstFace", &BND_SubDFaceIterator::FirstFace)
     .def("NextFace", &BND_SubDFaceIterator::NextFace)
     .def("LastFace", &BND_SubDFaceIterator::LastFace)
@@ -268,12 +301,29 @@ using namespace emscripten;
 
 void initSubDBindings(void*)
 {
+  class_<BND_SubDFace>("SubDFace")
+    .constructor<const class ON_SubDFace*>()
+    .property("edgeCount", &BND_SubDFace::EdgeCount)
+    .property("index", &BND_SubDFace::Index)
+    ;
+
+  class_<BND_SubDFaceIterator>("SubDFaceIterator")
+    .constructor<ON_SubD*, const ON_ModelComponentReference&>()
+    .function("firstFace", &BND_SubDFaceIterator::FirstFace)
+    .function("nextFace", &BND_SubDFaceIterator::NextFace)
+    .function("lastFace", &BND_SubDFaceIterator::LastFace)
+    .function("currentFace", &BND_SubDFaceIterator::CurrentFace)
+    .property("faceCount", &BND_SubDFaceIterator::FaceCount)
+    .property("currentFaceIndex", &BND_SubDFaceIterator::CurrentFaceIndex)
+    ;
+
   class_<BND_SubD, base<BND_GeometryBase>>("SubD")
     .constructor<>()
     .property("isSolid", &BND_SubD::IsSolid)
     .function("clearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .function("updateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .function("subdivide", &BND_SubD::Subdivide)
+    .property("faceIterator", &BND_SubD::GetFaceIterator)
     ;
 }
 #endif
