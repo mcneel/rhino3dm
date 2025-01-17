@@ -124,6 +124,11 @@ BND_SubDEdge* BND_SubDEdgeIterator::CurrentEdge() const
   return new BND_SubDEdge(m_it.CurrentEdge());
 }
 
+class BND_SubDVertex* BND_SubDEdge::Vertex(unsigned index) 
+{ 
+  return new class BND_SubDVertex(m_subdedge->Vertex(index)); 
+}
+
 // SubDVertex
 
 BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex)
@@ -249,6 +254,21 @@ void initSubDBindings(rh3dmpymodule& m)
   py::class_<BND_SubDEdge>(m, "SubDEdge")
     .def_property_readonly("VertexCount", &BND_SubDEdge::VertexCount)
     .def_property_readonly("Index", &BND_SubDEdge::Index)
+    .def_property_readonly("FaceCount", &BND_SubDEdge::FaceCount)
+    .def("VertexId", &BND_SubDEdge::VertexId, py::arg("index"))
+    .def("Vertex", &BND_SubDEdge::Vertex, py::arg("index"))
+    .def("ControlNetPoint", &BND_SubDEdge::ControlNetPoint, py::arg("index"))
+    .def_property_readonly("ControlNetDirection", &BND_SubDEdge::ControlNetDirection)
+    .def_property_readonly("IsSmooth", &BND_SubDEdge::IsSmooth)
+    .def_property_readonly("IsSharp", &BND_SubDEdge::IsSharp)
+    .def("EndSharpness", &BND_SubDEdge::EndSharpness, py::arg("endIndex"))
+    .def_property_readonly("IsCrease", &BND_SubDEdge::IsCrease)
+    .def_property_readonly("IsHardCrease", &BND_SubDEdge::IsHardCrease)
+    .def_property_readonly("IsDartCrease", &BND_SubDEdge::IsDartCrease)
+    .def_property_readonly("DartCount", &BND_SubDEdge::DartCount)
+    .def_property_readonly("SubdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
+    .def_property_readonly("ControlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
+    .def("ControlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal, py::arg("edge_face_index"))
     ;
 
   py::class_<BND_SubDVertex>(m, "SubDVertex")
@@ -265,7 +285,7 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("VertexSharpness", &BND_SubDVertex::VertexSharpness)
     .def("Next", &BND_SubDVertex::Next)
     .def("Previous", &BND_SubDVertex::Previous)
-    .def("EdgeAt", &BND_SubDVertex::EdgeAt)
+    .def("Edge", &BND_SubDVertex::Edge, py::arg("index"))
 
     ;
 /*

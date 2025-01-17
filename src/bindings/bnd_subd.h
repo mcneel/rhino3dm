@@ -42,7 +42,40 @@ class BND_SubDEdge {
   public:
   BND_SubDEdge(const ON_SubDEdge* edge);
   unsigned int Index() const { return m_subdedge->EdgeId(); }
-  int VertexCount() const { return m_subdedge->VertexCount(); }
+  unsigned int VertexCount() const { return m_subdedge->VertexCount(); }
+  unsigned int FaceCount() const { return m_subdedge->FaceCount(); }
+
+  unsigned int VertexId(unsigned index) const { return m_subdedge->Vertex(index)->VertexId(); }
+  class BND_SubDVertex* Vertex(unsigned index); //{ return new class BND_SubDVertex(m_subdedge->Vertex(index)); }
+
+  //ON_SubDEdgeType EdgeType() const;
+  ON_3dPoint ControlNetPoint(unsigned index) const { return m_subdedge->ControlNetPoint(index); }
+  ON_3dVector ControlNetDirection() const { return m_subdedge->ControlNetDirection(); }
+
+  bool IsSmooth() const { return m_subdedge->IsSmooth(); }
+  bool IsSharp() const { return m_subdedge->IsSharp(); }
+
+  /*const ON_SubDEdgeSharpness Sharpness(
+    bool bUseCreaseSharpness
+  ) const;*/
+
+  /*
+  double EndSharpness(
+    const class ON_SubDVertex* v
+  ) const;*/
+
+  double EndSharpness(unsigned endIndex) const { return m_subdedge->EndSharpness(endIndex); }
+
+  /*Other sharpness access*/
+
+  bool IsCrease() const { return m_subdedge->IsCrease(); }
+  bool IsHardCrease() const { return m_subdedge->IsHardCrease(); }
+  bool IsDartCrease() const { return m_subdedge->IsDartCrease(); }
+  unsigned int DartCount() const { return m_subdedge->DartCount(); }
+
+  ON_3dPoint SubdivisionPoint() const { return m_subdedge->SubdivisionPoint(); }
+  ON_3dPoint ControlNetCenterPoint() const { return m_subdedge->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return m_subdedge->ControlNetCenterNormal(edge_face_index); }
 
 };
 
@@ -68,10 +101,10 @@ class BND_SubDVertex {
   ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }
   int FaceCount() const { return m_subdvertex->FaceCount(); }
-  BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
-  BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
+  class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
+  class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
 
-  BND_SubDEdge* EdgeAt(int index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
+  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
   double VertexSharpness() const { return m_subdvertex->VertexSharpness(); }
 
   //public SubDVertexTag Tag
