@@ -256,9 +256,17 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("Index", &BND_SubDVertex::Index)
     .def_property_readonly("ControlNetPoint", &BND_SubDVertex::ControlNetPoint)
     .def_property_readonly("SurfacePoint", &BND_SubDVertex::SurfacePoint)
+    .def_property_readonly("IsSmooth", &BND_SubDVertex::IsSmooth)
+    .def("IsSharp", &BND_SubDVertex::IsSharp, py::arg("endCheck"))
+    .def_property_readonly("IsCrease", &BND_SubDVertex::IsCrease)
+    .def_property_readonly("IsDart", &BND_SubDVertex::IsDart)
+    .def_property_readonly("IsCorner", &BND_SubDVertex::IsCorner)
+
+    .def_property_readonly("VertexSharpness", &BND_SubDVertex::VertexSharpness)
     .def("Next", &BND_SubDVertex::Next)
     .def("Previous", &BND_SubDVertex::Previous)
     .def("EdgeAt", &BND_SubDVertex::EdgeAt)
+
     ;
 /*
   py::class_<BND_SubDFaceList>(m, "SubDFaceList")

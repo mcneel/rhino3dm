@@ -58,6 +58,12 @@ class BND_SubDVertex {
 
   // properties
 
+  bool IsCrease() const { return m_subdvertex->IsCrease(); }
+  bool IsDart() const { return m_subdvertex->IsDart(); }
+  bool IsSmooth() const { return m_subdvertex->IsSmooth(); }
+  bool IsSharp(bool endCheck) const { return m_subdvertex->IsSharp(endCheck); }
+  bool IsCorner() const { return m_subdvertex->IsCorner(); }
+
   ON_3dPoint ControlNetPoint() const { return m_subdvertex->ControlNetPoint(); }
   ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }
@@ -66,6 +72,7 @@ class BND_SubDVertex {
   BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
 
   BND_SubDEdge* EdgeAt(int index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
+  double VertexSharpness() const { return m_subdvertex->VertexSharpness(); }
 
   //public SubDVertexTag Tag
 
