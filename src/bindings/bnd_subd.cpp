@@ -34,12 +34,11 @@ BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face)
 
 BND_SubDFaceIterator BND_SubD::GetFaceIterator() const
 {
-  return BND_SubDFaceIterator(m_subd, m_component_ref);
+  return BND_SubDFaceIterator(m_subd);
 }
 
-BND_SubDFaceIterator::BND_SubDFaceIterator(ON_SubD* subd, const ON_ModelComponentReference& compref)
+BND_SubDFaceIterator::BND_SubDFaceIterator(ON_SubD* subd)
 {
-  m_component_reference = compref;
   m_it = subd->FaceIterator();
 }
 
@@ -186,19 +185,54 @@ BND_SubDVertexList::BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentRef
 // --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
 
-template <typename IT, typename ET>
-struct PyBNDIterator {
-  PyBNDIterator(const IT table, py::object ref)
+
+struct PyBNDFaceIterator {
+  PyBNDFaceIterator(BND_SubDFaceIterator table, py::object ref)
     : seq(table), ref(ref) {}
 
-  ET next() {
+  BND_SubDFace next() {
     if(index>=seq.FaceCount()) throw py::stop_iteration();
-    return const_cast<IT>(seq).NextFace();
+    index++;
+    if (index == 1) return *seq.FirstFace();
+    //return seq.NextFace();
+    return *seq.NextFace();
   }
 
-  const IT seq;
+  BND_SubDFaceIterator seq;
   py::object ref;
-  int index = 0;
+  unsigned int index = 0;
+};
+
+struct PyBNDEdgeIterator {
+  PyBNDEdgeIterator(BND_SubDEdgeIterator table, py::object ref)
+    : seq(table), ref(ref) {}
+
+  BND_SubDEdge next() {
+    if(index>=seq.EdgeCount()) throw py::stop_iteration();
+    index++;
+    if (index == 1) return *seq.FirstEdge();
+    return *seq.NextEdge();
+  }
+
+  BND_SubDEdgeIterator seq;
+  py::object ref;
+  unsigned int index = 0;
+};
+
+struct PyBNDVertexIterator {
+  PyBNDVertexIterator(BND_SubDVertexIterator table, py::object ref)
+    : seq(table), ref(ref) {}
+
+  BND_SubDVertex next() {
+    if(index>=seq.VertexCount()) throw py::stop_iteration();
+    index++;
+    if (index == 1) return *seq.FirstVertex();
+    return *seq.NextVertex();
+  }
+
+  BND_SubDVertexIterator seq;
+  py::object ref;
+  unsigned int index = 0;
 };
 
 #endif
@@ -220,6 +254,11 @@ void initSubDBindings(rh3dmpymodule& m)
   py::class_<BND_SubDVertex>(m, "SubDVertex")
     .def_property_readonly("EdgeCount", &BND_SubDVertex::EdgeCount)
     .def_property_readonly("Index", &BND_SubDVertex::Index)
+    .def_property_readonly("ControlNetPoint", &BND_SubDVertex::ControlNetPoint)
+    .def_property_readonly("SurfacePoint", &BND_SubDVertex::SurfacePoint)
+    .def("Next", &BND_SubDVertex::Next)
+    .def("Previous", &BND_SubDVertex::Previous)
+    .def("EdgeAt", &BND_SubDVertex::EdgeAt)
     ;
 /*
   py::class_<BND_SubDFaceList>(m, "SubDFaceList")
@@ -228,29 +267,36 @@ void initSubDBindings(rh3dmpymodule& m)
     ;
 */
 
-
-  py::class_<PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*> >(m, "__SubDFaceIterator")
-    .def("__iter__", [](PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*> &it) -> PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>& { return it; })
-    .def("__next__", &PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>::next)
+  py::class_<PyBNDVertexIterator>(m, "__SubDVertexIterator")
+    .def("__iter__", [](PyBNDVertexIterator &it) -> PyBNDVertexIterator& { return it; })
+    .def("__next__", &PyBNDVertexIterator::next)
     ;
 
-  py::class_<BND_SubDFaceIterator>(m, "SubDFaceIterator")
-    .def("__len__", &BND_SubDFaceIterator::FaceCount)
-
+  py::class_<BND_SubDVertexIterator>(m, "SubDVertexIterator")
+    .def("__len__", &BND_SubDVertexIterator::VertexCount)
 #if !defined(NANOBIND)
-    .def("__iter__", [](py::object s) { return PyBNDIterator<BND_SubDFaceIterator&, BND_SubDFace*>(s.cast<BND_SubDFaceIterator &>(), s); })
+    .def("__iter__", [](py::object s) { return PyBNDVertexIterator(s.cast<BND_SubDVertexIterator &>(), s); })
 #endif
-
-    .def("FirstFace", &BND_SubDFaceIterator::FirstFace)
-    .def("NextFace", &BND_SubDFaceIterator::NextFace)
-    .def("LastFace", &BND_SubDFaceIterator::LastFace)
-    .def("CurrentFace", &BND_SubDFaceIterator::CurrentFace)
-    .def_property_readonly("FaceCount", &BND_SubDFaceIterator::FaceCount)
-    .def_property_readonly("CurrentFaceIndex", &BND_SubDFaceIterator::CurrentFaceIndex)
+    .def("FirstVertex", &BND_SubDVertexIterator::FirstVertex)
+    .def("NextVertex", &BND_SubDVertexIterator::NextVertex)
+    .def("LastVertex", &BND_SubDVertexIterator::LastVertex)
+    .def("CurrentVertex", &BND_SubDVertexIterator::CurrentVertex)
+    .def_property_readonly("VertexCount", &BND_SubDVertexIterator::VertexCount)
+    .def_property_readonly("CurrentVertexIndex", &BND_SubDVertexIterator::CurrentVertexIndex)
     ;
-  
+
+  py::class_<PyBNDEdgeIterator>(m, "__SubDEdgeIterator")
+    .def("__iter__", [](PyBNDEdgeIterator &it) -> PyBNDEdgeIterator& { return it; })
+    .def("__next__", &PyBNDEdgeIterator::next)
+    ;
+
   py::class_<BND_SubDEdgeIterator>(m, "SubDEdgeIterator")
     .def("__len__", &BND_SubDEdgeIterator::EdgeCount)
+
+#if !defined(NANOBIND)
+    .def("__iter__", [](py::object s) { return PyBNDEdgeIterator(s.cast<BND_SubDEdgeIterator &>(), s); })
+#endif
+
     .def("FirstEdge", &BND_SubDEdgeIterator::FirstEdge)
     .def("NextEdge", &BND_SubDEdgeIterator::NextEdge)
     .def("LastEdge", &BND_SubDEdgeIterator::LastEdge)
@@ -259,14 +305,25 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("CurrentEdgeIndex", &BND_SubDEdgeIterator::CurrentEdgeIndex)
     ;
 
-  py::class_<BND_SubDVertexIterator>(m, "SubDVertexIterator")
-    .def("__len__", &BND_SubDVertexIterator::VertexCount)
-    .def("FirstVertex", &BND_SubDVertexIterator::FirstVertex)
-    .def("NextVertex", &BND_SubDVertexIterator::NextVertex)
-    .def("LastVertex", &BND_SubDVertexIterator::LastVertex)
-    .def("CurrentVertex", &BND_SubDVertexIterator::CurrentVertex)
-    .def_property_readonly("VertexCount", &BND_SubDVertexIterator::VertexCount)
-    .def_property_readonly("CurrentVertexIndex", &BND_SubDVertexIterator::CurrentVertexIndex)
+
+  py::class_<PyBNDFaceIterator>(m, "__SubDFaceIterator")
+    .def("__iter__", [](PyBNDFaceIterator &it) -> PyBNDFaceIterator& { return it; })
+    .def("__next__", &PyBNDFaceIterator::next)
+    ;
+
+  py::class_<BND_SubDFaceIterator>(m, "SubDFaceIterator")
+    .def("__len__", &BND_SubDFaceIterator::FaceCount)
+
+#if !defined(NANOBIND)
+    .def("__iter__", [](py::object s) { return PyBNDFaceIterator(s.cast<BND_SubDFaceIterator &>(), s); })
+#endif
+
+    .def("FirstFace", &BND_SubDFaceIterator::FirstFace)
+    .def("NextFace", &BND_SubDFaceIterator::NextFace)
+    .def("LastFace", &BND_SubDFaceIterator::LastFace)
+    .def("CurrentFace", &BND_SubDFaceIterator::CurrentFace)
+    .def_property_readonly("FaceCount", &BND_SubDFaceIterator::FaceCount)
+    .def_property_readonly("CurrentFaceIndex", &BND_SubDFaceIterator::CurrentFaceIndex)
     ;
 /*
   py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")

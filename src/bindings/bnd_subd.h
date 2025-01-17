@@ -58,20 +58,22 @@ class BND_SubDVertex {
 
   // properties
 
-  //public Point3d ControlNetPoint
-  //public int EdgeCount
+  ON_3dPoint ControlNetPoint() const { return m_subdvertex->ControlNetPoint(); }
+  ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }
-  //public int FaceCount
   int FaceCount() const { return m_subdvertex->FaceCount(); }
-  //public SubDVertex Next
-  //public SubDVertex Previous
+  BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
+  BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
+
+  BND_SubDEdge* EdgeAt(int index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
+
   //public SubDVertexTag Tag
 
   //methods
   //public SubDEdge EdgeAt(int index)
   //public SubDFace FaceAt(int index)
   //public IEnumerable<SubDEdge> Edges --> SubDEdgeList
-  //public Point3d SurfacePoint()
+
   //public bool SetControlNetPoint(Point3d position, bool bClearNeighborhoodCache)
   
 };
@@ -108,10 +110,10 @@ class BND_SubDFaceList {
 */
 
 class BND_SubDFaceIterator {
-  ON_ModelComponentReference m_component_reference;
+
   ON_SubDFaceIterator m_it;
   public:
-  BND_SubDFaceIterator(ON_SubD* subd, const ON_ModelComponentReference& compref);
+  BND_SubDFaceIterator(ON_SubD* subd);
 
   class BND_SubDFace* CurrentFace() const;// { return m_it->CurrentFace(); }
   class BND_SubDFace* NextFace(); //{ return m_it->NextFace(); }
