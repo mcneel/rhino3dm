@@ -14,16 +14,42 @@ class TestSubD(unittest.TestCase):
         self.assertTrue(subd.FaceIterator.FaceCount == len(subd.FaceIterator))
 
         for face in subd.FaceIterator:
-            print(face.Index)
+            print("Face Index:" + str(face.Index))
+            print("Face Edge Count:" + str(face.EdgeCount))
+            print("Face Material Channel Index:" + str(face.MaterialChannelIndex))
+            print("Per face color: " + str(face.PerFaceColor))
+            print("ControlNetCenterPoint: " + str(face.ControlNetCenterPoint))
+            print("ControlNetCenterNormal: " + str(face.ControlNetCenterNormal))
+            print("ControlNetCenterFrame Origin: " + str(face.ControlNetCenterFrame.Origin))
+            print("IsConvex: " + str(face.IsConvex))
+            print("IsNotConvex: " + str(face.IsNotConvex))
+            print("IsPlanar: " + str(face.IsPlanar(0.001)))
+            print("IsNotPlanar: " + str(face.IsNotPlanar(0.001)))
+            print("TexturePointsCapacity: " + str(face.TexturePointsCapacity))
+            print("TexturePointsAreSet: " + str(face.TexturePointsAreSet))
+            print("TexturePoint: " + str(face.TexturePoint(0)))
+            print("TextureCenterPoint: " + str(face.TextureCenterPoint))
+            print("HasEdges: " + str(face.HasEdges))
+            print("HasSharpEdges: " + str(face.HasSharpEdges))
+            print("SharpEdgeCount: " + str(face.SharpEdgeCount))
+            print("MaximumEdgeSharpness: " + str(face.MaximumEdgeSharpness))
+            print("ControlNetPoint: " + str(face.ControlNetPoint(0)))
+            print("Vertex: " + str(face.Vertex(0).Index))
+            print("Edge: " + str(face.Edge(0).Index))
+            print("SubdivisionPoint: " + str(face.SubdivisionPoint))
+            print("------")
+
+
 
         self.assertTrue(len(subd.EdgeIterator) == 434)
         self.assertTrue(subd.EdgeIterator.EdgeCount == len(subd.EdgeIterator))
 
-        for edge in subd.EdgeIterator:
-            print("Edge Index: " + str(edge.Index))
-            print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
-            print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
-            print("Edge End Vertex: " + str(edge.Vertex(1).Index))
+        # for edge in subd.EdgeIterator:
+        #     print("Edge Index: " + str(edge.Index))
+        #     print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
+        #     print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
+        #     print("Edge End Vertex: " + str(edge.Vertex(1).Index))
+        #     print("Edge End Coords: " + str(edge.Vertex(1).SurfacePoint))
 
         self.assertTrue(len(subd.VertexIterator) == 201)
         self.assertTrue(subd.VertexIterator.VertexCount == len(subd.VertexIterator))

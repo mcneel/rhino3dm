@@ -62,6 +62,21 @@ BND_SubDFace* BND_SubDFaceIterator::CurrentFace() const
   return new BND_SubDFace(m_it.CurrentFace());
 }
 
+BND_Color BND_SubDFace::PerFaceColor() const
+{
+  return ON_Color_to_Binding(m_subdface->PerFaceColor());
+}
+
+BND_SubDVertex* BND_SubDFace::Vertex(unsigned int i) const 
+{ 
+  return new BND_SubDVertex(m_subdface->Vertex(i)); 
+}
+
+BND_SubDEdge* BND_SubDFace::Edge(unsigned int i) const 
+{ 
+  return new BND_SubDEdge(m_subdface->Edge(i)); 
+}
+
 /*
 BND_SubDFace::BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentReference& compref)
 {
@@ -249,6 +264,27 @@ void initSubDBindings(rh3dmpymodule& m)
   py::class_<BND_SubDFace>(m, "SubDFace")
     .def_property_readonly("EdgeCount", &BND_SubDFace::EdgeCount)
     .def_property_readonly("Index", &BND_SubDFace::Index)
+    .def_property_readonly("MaterialChannelIndex", &BND_SubDFace::MaterialChannelIndex)
+    .def_property_readonly("PerFaceColor", &BND_SubDFace::PerFaceColor)
+    .def_property_readonly("ControlNetCenterPoint", &BND_SubDFace::ControlNetCenterPoint)
+    .def_property_readonly("ControlNetCenterNormal", &BND_SubDFace::ControlNetCenterNormal)
+    .def_property_readonly("ControlNetCenterFrame", &BND_SubDFace::ControlNetCenterFrame)
+    .def_property_readonly("IsConvex", &BND_SubDFace::IsConvex)
+    .def_property_readonly("IsNotConvex", &BND_SubDFace::IsNotConvex)
+    .def("IsPlanar", &BND_SubDFace::IsPlanar, py::arg("planar_tolerance"))
+    .def("IsNotPlanar", &BND_SubDFace::IsNotPlanar, py::arg("planar_tolerance"))
+    .def_property_readonly("TexturePointsCapacity", &BND_SubDFace::TexturePointsCapacity)
+    .def_property_readonly("TexturePointsAreSet", &BND_SubDFace::TexturePointsAreSet)
+    .def("TexturePoint", &BND_SubDFace::TexturePoint, py::arg("index"))
+    .def_property_readonly("TextureCenterPoint", &BND_SubDFace::TextureCenterPoint)
+    .def_property_readonly("HasEdges", &BND_SubDFace::HasEdges)
+    .def_property_readonly("HasSharpEdges", &BND_SubDFace::HasSharpEdges)
+    .def_property_readonly("SharpEdgeCount", &BND_SubDFace::SharpEdgeCount)
+    .def_property_readonly("MaximumEdgeSharpness", &BND_SubDFace::MaximumEdgeSharpness)
+    .def("ControlNetPoint", &BND_SubDFace::ControlNetPoint, py::arg("index"))
+    .def("Vertex", &BND_SubDFace::Vertex, py::arg("index"))
+    .def("Edge", &BND_SubDFace::Edge, py::arg("index"))
+    .def_property_readonly("SubdivisionPoint", &BND_SubDFace::SubdivisionPoint)
     ;
 
   py::class_<BND_SubDEdge>(m, "SubDEdge")

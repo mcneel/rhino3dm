@@ -33,6 +33,66 @@ class BND_SubDFace {
   unsigned int Index() const { return m_subdface->FaceId(); }
   int EdgeCount() const { return m_subdface->EdgeCount(); }
 
+  int MaterialChannelIndex() const { return m_subdface->MaterialChannelIndex(); }
+  BND_Color PerFaceColor() const;
+  ON_3dPoint ControlNetCenterPoint() const { return m_subdface->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal() const { return m_subdface->ControlNetCenterNormal(); }
+  BND_Plane ControlNetCenterFrame() const { return BND_Plane::FromOnPlane(m_subdface->ControlNetCenterFrame()); }
+  //bool IsConvex() const;
+  bool IsConvex() const { return m_subdface->IsConvex(); }
+  //bool IsNotConvex() const;
+  bool IsNotConvex() const { return m_subdface->IsNotConvex(); }
+  //bool IsPlanar(double planar_tolerance = ON_ZERO_TOLERANCE) const;
+  bool IsPlanar(double planar_tolerance) const { return m_subdface->IsPlanar(planar_tolerance); }
+  //bool IsNotPlanar(double planar_tolerance = ON_ZERO_TOLERANCE) const;
+  bool IsNotPlanar(double planar_tolerance) const { return m_subdface->IsNotPlanar(planar_tolerance); }
+  //unsigned int TexturePointsCapacity() const;
+  unsigned int TexturePointsCapacity() const { return m_subdface->TexturePointsCapacity(); }
+  //bool TexturePointsAreSet() const;
+  bool TexturePointsAreSet() const { return m_subdface->TexturePointsAreSet(); }
+  //const ON_3dPoint TexturePoint( unsigned int i ) const;
+  ON_3dPoint TexturePoint(unsigned int index) const { return m_subdface->TexturePoint(index); }
+  //const ON_3dPoint TextureCenterPoint() const;
+  ON_3dPoint TextureCenterPoint() const { return m_subdface->TextureCenterPoint(); }
+  //bool HasEdges() const;
+  bool HasEdges() const { return m_subdface->HasEdges(); }
+  //bool HasSharpEdges() const;
+  bool HasSharpEdges() const { return m_subdface->HasSharpEdges(); }
+  //unsigned int SharpEdgeCount(ON_SubDEdgeSharpness& sharpness_range) const;
+  //unsigned int SharpEdgeCount() const;
+  unsigned int SharpEdgeCount() const { return m_subdface->SharpEdgeCount(); }
+  //double MaximumEdgeSharpness() const;
+  double MaximumEdgeSharpness() const { return m_subdface->MaximumEdgeSharpness(); }
+  //const class ON_SubDVertex* Vertex(unsigned int i) const;
+  class BND_SubDVertex* Vertex(unsigned int index) const;// { return new class BND_SubDVertex(m_subdface->Vertex(i)); }
+  //const ON_3dPoint ControlNetPoint(unsigned int i) const;
+  ON_3dPoint ControlNetPoint(unsigned int index) const { return m_subdface->ControlNetPoint(index); }
+  //const class ON_SubDEdge* Edge(unsigned int i) const;
+  class BND_SubDEdge* Edge(unsigned int index) const;// { return new class BND_SubDEdge(m_subdface->Edge(i)); }
+  //ON__UINT_PTR EdgeDirection(unsigned int i) const;
+
+  /*
+    const ON_SubDEdge* PrevEdge(
+    const ON_SubDEdge* edge
+    ) const;
+
+  const ON_SubDEdge* NextEdge(
+    const ON_SubDEdge* edge
+    ) const;
+
+  unsigned int PrevEdgeArrayIndex(
+    unsigned int edge_array_index
+    ) const;
+
+  unsigned int NextEdgeArrayIndex(
+    unsigned int edge_array_index
+    ) const;
+  */
+
+  //const ON_3dPoint SubdivisionPoint() const;
+  ON_3dPoint SubdivisionPoint() const { return m_subdface->SubdivisionPoint(); }
+
+
 };
 
 class BND_SubDEdge {
