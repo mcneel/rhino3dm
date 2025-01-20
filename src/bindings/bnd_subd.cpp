@@ -1,5 +1,90 @@
 #include "bindings.h"
 
+// SubDComponentIterator
+template <typename BND_SubDTFrom>
+struct BND_SubDComponentIteratorAdapter<BND_SubDFace, BND_SubDTFrom> {
+  using IteratorT = ON_SubDFaceIterator;
+  using IteratorTTo = BND_SubDFace;
+  using ON_SubDTFrom = typename BND_SubDTFrom::ON_SubDTFrom;
+
+  static inline unsigned int Count(const IteratorT& it)        { return it.FaceCount(); }
+  static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentFaceIndex(); }
+  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentFace()); }
+  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstFace()); }
+  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextFace()); }
+  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastFace()); }
+
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
+                                                               { return new IteratorTTo(base->Face(id)); }
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(it.SubD().FaceFromId(id)); }
+};
+
+template <typename BND_SubDTFrom>
+struct BND_SubDComponentIteratorAdapter<BND_SubDEdge, BND_SubDTFrom> {
+  using IteratorT = ON_SubDEdgeIterator;
+  using IteratorTTo = BND_SubDEdge;
+  using ON_SubDTFrom = typename BND_SubDTFrom::ON_SubDTFrom;
+
+  static inline unsigned int Count(const IteratorT& it)        { return it.EdgeCount(); }
+  static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentEdgeIndex(); }
+  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentEdge()); }
+  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstEdge()); }
+  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextEdge()); }
+  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastEdge()); }
+
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
+                                                               { return new IteratorTTo(base->Edge(id)); }
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(it.SubD().EdgeFromId(id)); }
+};
+
+template <typename BND_SubDTFrom>
+struct BND_SubDComponentIteratorAdapter<BND_SubDVertex, BND_SubDTFrom> {
+  using IteratorT = ON_SubDVertexIterator;
+  using IteratorTTo = BND_SubDVertex;
+  using ON_SubDTFrom = typename BND_SubDTFrom::ON_SubDTFrom;
+
+  static inline unsigned int Count(const IteratorT& it)        { return it.VertexCount(); }
+  static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentVertexIndex(); }
+  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentVertex()); }
+  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstVertex()); }
+  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextVertex()); }
+  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastVertex()); }
+
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
+                                                               { return new IteratorTTo(base->Vertex(id)); }
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(it.SubD().VertexFromId(id)); }
+};
+
+template<typename BND_SubDTTo, typename BND_SubDTFrom>
+template<typename TFrom, EnableIfIsNotFromSubD<TFrom>*>
+BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator(
+  const BND_SubD& parent_subd, const BND_SubDTFrom& base) :
+  m_it(
+    parent_subd.GetONSubDComponent() != nullptr
+    ? ON_SubDTToIterator{ *parent_subd.GetONSubDComponent(), *base.GetONSubDComponent() }
+    : ON_SubDTToIterator{}),
+  m_base(base.GetONSubDComponent()) {}
+
+template<typename BND_SubDTTo, typename BND_SubDTFrom>
+template<typename TFrom, EnableIfIsFromSubD<TFrom>*>
+BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator(
+  const BND_SubD& base) :
+  m_it(
+    base.GetONSubDComponent() != nullptr
+    ? ON_SubDTToIterator{ *base.GetONSubDComponent() }
+    : ON_SubDTToIterator{}),
+  m_base(base.GetONSubDComponent()) {}
+
+// SubD
 BND_SubD::BND_SubD(ON_SubD* subd, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(subd, compref);
@@ -16,50 +101,10 @@ BND_SubD::BND_SubD()
   SetTrackedPointer(new ON_SubD(), nullptr);
 }
 
-/*
-BND_SubDComponent::BND_SubDComponent(ON_SubD* subd, int index, const ON_ModelComponentReference& compref)
-{
-  m_component_ref = compref;
-  m_subd = subd;
-  m_index = index;
-}
-*/
-
 // SubDFace
-
 BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face)
 {
   m_subdface = face;
-}
-
-BND_SubDFaceIterator BND_SubD::GetFaceIterator() const
-{
-  return BND_SubDFaceIterator(m_subd);
-}
-
-BND_SubDFaceIterator::BND_SubDFaceIterator(ON_SubD* subd)
-{
-  m_it = subd->FaceIterator();
-}
-
-BND_SubDFace* BND_SubDFaceIterator::FirstFace()
-{
-  return new BND_SubDFace(m_it.FirstFace());
-}
-
-BND_SubDFace* BND_SubDFaceIterator::LastFace()
-{
-  return new BND_SubDFace(m_it.LastFace());
-}
-
-BND_SubDFace* BND_SubDFaceIterator::NextFace()
-{
-  return new BND_SubDFace(m_it.NextFace());
-}
-
-BND_SubDFace* BND_SubDFaceIterator::CurrentFace() const
-{
-  return new BND_SubDFace(m_it.CurrentFace());
 }
 
 BND_Color BND_SubDFace::PerFaceColor() const
@@ -67,77 +112,23 @@ BND_Color BND_SubDFace::PerFaceColor() const
   return ON_Color_to_Binding(m_subdface->PerFaceColor());
 }
 
-BND_SubDVertex* BND_SubDFace::Vertex(unsigned int i) const 
-{ 
-  return new BND_SubDVertex(m_subdface->Vertex(i)); 
-}
-
-BND_SubDEdge* BND_SubDFace::Edge(unsigned int i) const 
-{ 
-  return new BND_SubDEdge(m_subdface->Edge(i)); 
-}
-
-/*
-BND_SubDFace::BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentReference& compref)
+BND_SubDVertex* BND_SubDFace::Vertex(unsigned int i) const
 {
-
-  m_component_ref = compref;
-  m_subd = subd;
-  m_index = index;
-  m_subdface = m_subd->FaceFromId(index);
-
+  return new BND_SubDVertex(m_subdface->Vertex(i));
 }
 
-
-BND_SubDFaceList BND_SubD::GetFaces()
+BND_SubDEdge* BND_SubDFace::Edge(unsigned int i) const
 {
-  return BND_SubDFaceList(m_subd, m_component_ref);
+  return new BND_SubDEdge(m_subdface->Edge(i));
 }
-
-BND_SubDFaceList::BND_SubDFaceList(ON_SubD* subd, const ON_ModelComponentReference& compref)
-{
-  m_component_ref = compref;
-  m_subd = subd;
-}
-
-BND_SubDFace* BND_SubDFaceList::Find(int index)
-{
-  return new BND_SubDFace(m_subd, index, m_component_ref);
-}
-*/
 
 
 // SubDEdge
-
 BND_SubDEdge::BND_SubDEdge(const class ON_SubDEdge* edge)
 {
   m_subdedge = edge;
 }
 
-BND_SubDEdgeIterator::BND_SubDEdgeIterator(ON_SubD* subd)
-{
-  m_it = subd->EdgeIterator();
-}
-
-BND_SubDEdge* BND_SubDEdgeIterator::FirstEdge()
-{
-  return new BND_SubDEdge(m_it.FirstEdge());
-}
-
-BND_SubDEdge* BND_SubDEdgeIterator::LastEdge()
-{
-  return new BND_SubDEdge(m_it.LastEdge());
-}
-
-BND_SubDEdge* BND_SubDEdgeIterator::NextEdge()
-{
-  return new BND_SubDEdge(m_it.NextEdge());
-}
-
-BND_SubDEdge* BND_SubDEdgeIterator::CurrentEdge() const
-{
-  return new BND_SubDEdge(m_it.CurrentEdge());
-}
 
 class BND_SubDVertex* BND_SubDEdge::Vertex(unsigned index) 
 { 
@@ -145,124 +136,103 @@ class BND_SubDVertex* BND_SubDEdge::Vertex(unsigned index)
 }
 
 // SubDVertex
-
 BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex)
 {
   m_subdvertex = vertex;
 }
 
-BND_SubDVertexIterator::BND_SubDVertexIterator(ON_SubD* subd)
+BND_SubD::BND_SubDFaceIterator BND_SubD::Faces() const
 {
-  m_it = subd->VertexIterator();
+  return this != nullptr ? BND_SubDFaceIterator(*this) : BND_SubDFaceIterator{};
 }
 
-BND_SubDVertex* BND_SubDVertexIterator::FirstVertex()
+BND_SubD::BND_SubDEdgeIterator BND_SubD::Edges() const
 {
-  return new BND_SubDVertex(m_it.FirstVertex());
+  return this != nullptr ? BND_SubDEdgeIterator(*this) : BND_SubDEdgeIterator{};
 }
 
-BND_SubDVertex* BND_SubDVertexIterator::LastVertex()
+BND_SubD::BND_SubDVertexIterator BND_SubD::Vertices() const
 {
-  return new BND_SubDVertex(m_it.LastVertex());
+  return this != nullptr ? BND_SubDVertexIterator(*this) : BND_SubDVertexIterator{};
 }
 
-BND_SubDVertex* BND_SubDVertexIterator::NextVertex()
+BND_SubDVertex::BND_SubDFaceIterator BND_SubDVertex::Faces(BND_SubD parent_subd) const
 {
-  return new BND_SubDVertex(m_it.NextVertex());
+  return this != nullptr ? BND_SubDFaceIterator(parent_subd, *this) : BND_SubDFaceIterator{};
 }
 
-BND_SubDVertex* BND_SubDVertexIterator::CurrentVertex() const
+BND_SubDVertex::BND_SubDEdgeIterator BND_SubDVertex::Edges(BND_SubD parent_subd) const
 {
-  return new BND_SubDVertex(m_it.CurrentVertex());
+  return this != nullptr ? BND_SubDEdgeIterator(parent_subd, *this) : BND_SubDEdgeIterator{};
 }
 
-//
-/*
-BND_SubDEdgeList BND_SubD::GetEdges()
+BND_SubDEdge::BND_SubDVertexIterator BND_SubDEdge::Vertices(BND_SubD parent_subd) const
 {
-  return BND_SubDEdgeList(m_subd, m_component_ref);
+  return this != nullptr ? BND_SubDVertexIterator(parent_subd, *this) : BND_SubDVertexIterator{};
 }
 
-BND_SubDEdgeList::BND_SubDEdgeList(ON_SubD* subd, const ON_ModelComponentReference& compref)
+BND_SubDEdge::BND_SubDFaceIterator BND_SubDEdge::Faces(BND_SubD parent_subd) const
 {
-  m_component_ref = compref;
-  m_subd = subd;
+  return this != nullptr ? BND_SubDFaceIterator(parent_subd, *this) : BND_SubDFaceIterator{};
 }
 
-BND_SubDVertexList BND_SubD::GetVertices()
+BND_SubDFace::BND_SubDEdgeIterator BND_SubDFace::Edges(BND_SubD parent_subd) const
 {
-  return BND_SubDVertexList(m_subd, m_component_ref);
+  return this != nullptr ? BND_SubDEdgeIterator(parent_subd, *this) : BND_SubDEdgeIterator{};
 }
 
-BND_SubDVertexList::BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentReference& compref)
+BND_SubDFace::BND_SubDVertexIterator BND_SubDFace::Vertices(BND_SubD parent_subd) const
 {
-  m_component_ref = compref;
-  m_subd = subd;
+  return this != nullptr ? BND_SubDVertexIterator(parent_subd, *this) : BND_SubDVertexIterator{};
 }
 
-*/
-
-// --------------------- Iterator helpers ------- //
 #if defined(ON_PYTHON_COMPILE)
-
-
-struct PyBNDFaceIterator {
-  PyBNDFaceIterator(BND_SubDFaceIterator table, py::object ref)
-    : seq(table), ref(ref) {}
-
-  BND_SubDFace next() {
-    if(index>=seq.FaceCount()) throw py::stop_iteration();
-    index++;
-    if (index == 1) return *seq.FirstFace();
-    //return seq.NextFace();
-    return *seq.NextFace();
-  }
-
-  BND_SubDFaceIterator seq;
-  py::object ref;
-  unsigned int index = 0;
-};
-
-struct PyBNDEdgeIterator {
-  PyBNDEdgeIterator(BND_SubDEdgeIterator table, py::object ref)
-    : seq(table), ref(ref) {}
-
-  BND_SubDEdge next() {
-    if(index>=seq.EdgeCount()) throw py::stop_iteration();
-    index++;
-    if (index == 1) return *seq.FirstEdge();
-    return *seq.NextEdge();
-  }
-
-  BND_SubDEdgeIterator seq;
-  py::object ref;
-  unsigned int index = 0;
-};
-
-struct PyBNDVertexIterator {
-  PyBNDVertexIterator(BND_SubDVertexIterator table, py::object ref)
-    : seq(table), ref(ref) {}
-
-  BND_SubDVertex next() {
-    if(index>=seq.VertexCount()) throw py::stop_iteration();
-    index++;
-    if (index == 1) return *seq.FirstVertex();
-    return *seq.NextVertex();
-  }
-
-  BND_SubDVertexIterator seq;
-  py::object ref;
-  unsigned int index = 0;
-};
-
+// TODO: constexpr the strings, make sure the binding is fully generated at compile time?
+template <typename BND_SubDTTo, typename BND_SubDTFrom>
+void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const std::string& type_from) {
+  using IteratorT = BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>;
+  py::class_<IteratorT>(m, ("BND_SubD" + type_to + "IteratorFrom" + type_from).c_str())
+    .def("__len__",  &IteratorT::Count)
+#if !defined(NANOBIND)
+    .def("__iter__",    [](IteratorT& it) -> IteratorT&   { return it; },
+                                           py::doc(("Initialize a new iterator for all " + type_to + " in this " + type_to + ", and return this iterator.").c_str()))
+    .def("__next__",    [](IteratorT& it) -> BND_SubDTTo* {
+                            if (it.Current()->GetONSubDComponent() == nullptr) throw py::stop_iteration();
+                            return it++; },
+                                           py::doc(("Advance the iterator to the next "    + type_to + " and return the previously current " + type_to + ".").c_str()))
 #endif
-
-#if defined(ON_PYTHON_COMPILE)
+    .def("__getitem__", [](IteratorT& it, size_t ind) -> BND_SubDTTo* {
+                            return it.Item((unsigned int)ind); },
+                                           py::doc((std::is_same<BND_SubD, BND_SubDTFrom>::value
+                                             ? "Find the " + type_to + " with the given Id in this "      + type_from + "."
+                                             : "Get the "  + type_to + " at the given index around this " + type_from + ".").c_str()))
+    .def("First",    &IteratorT::First,    py::doc(("Reset the iterator to the first "     + type_to + " and return this " + type_to + "."      ).c_str()))
+    .def("Next",     &IteratorT::Next,     py::doc(("Advance the iterator to the next "    + type_to + " and return this " + type_to + "."      ).c_str()))
+    .def("Last",     &IteratorT::Last,     py::doc(("Advance the iterator to the last "    + type_to + " and return this " + type_to + "."      ).c_str()))
+    .def("Current",  &IteratorT::Current,  py::doc(("Return the current "                  + type_to + " in this iterator."                     ).c_str()))
+    .def_property_readonly(
+         "Count",    &IteratorT::Count,    py::doc(("Number of " + type_to + "s in this iterator."                    ).c_str()))
+    .def_property_readonly(
+         "CurrentIndex", &IteratorT::CurrentIndex, py::doc(("Iterator index of the current "  + type_to + " in this iterator.").c_str()));
+}
 
 void initSubDBindings(rh3dmpymodule& m)
 {
+  bind_SubDComponentIterator<BND_SubDFace,   BND_SubD      >(m, "Face",   "SubD"  );
+  bind_SubDComponentIterator<BND_SubDFace,   BND_SubDEdge  >(m, "Face",   "Edge"  );
+  bind_SubDComponentIterator<BND_SubDFace,   BND_SubDVertex>(m, "Face",   "Vertex");
+  bind_SubDComponentIterator<BND_SubDEdge,   BND_SubD      >(m, "Edge",   "SubD"  );
+  bind_SubDComponentIterator<BND_SubDEdge,   BND_SubDFace  >(m, "Edge",   "Face"  );
+  bind_SubDComponentIterator<BND_SubDEdge,   BND_SubDVertex>(m, "Edge",   "Vertex");
+  bind_SubDComponentIterator<BND_SubDVertex, BND_SubD      >(m, "Vertex", "SubD"  );
+  bind_SubDComponentIterator<BND_SubDVertex, BND_SubDFace  >(m, "Vertex", "Face"  );
+  bind_SubDComponentIterator<BND_SubDVertex, BND_SubDEdge  >(m, "Vertex", "Edge"  );
+
   py::class_<BND_SubDFace>(m, "SubDFace")
     .def_property_readonly("EdgeCount", &BND_SubDFace::EdgeCount)
+    .def_property_readonly("VertexCount", &BND_SubDFace::VertexCount)
+    .def("Edges", &BND_SubDFace::Edges)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
+    .def("Vertices", &BND_SubDFace::Vertices)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
     .def_property_readonly("Index", &BND_SubDFace::Index)
     .def_property_readonly("MaterialChannelIndex", &BND_SubDFace::MaterialChannelIndex)
     .def_property_readonly("PerFaceColor", &BND_SubDFace::PerFaceColor)
@@ -288,9 +258,11 @@ void initSubDBindings(rh3dmpymodule& m)
     ;
 
   py::class_<BND_SubDEdge>(m, "SubDEdge")
-    .def_property_readonly("VertexCount", &BND_SubDEdge::VertexCount)
     .def_property_readonly("Index", &BND_SubDEdge::Index)
+    .def_property_readonly("VertexCount", &BND_SubDEdge::VertexCount)
     .def_property_readonly("FaceCount", &BND_SubDEdge::FaceCount)
+    .def("Vertices", &BND_SubDEdge::Vertices)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
+    .def("Faces", &BND_SubDEdge::Faces)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
     .def("VertexId", &BND_SubDEdge::VertexId, py::arg("index"))
     .def("Vertex", &BND_SubDEdge::Vertex, py::arg("index"))
     .def("ControlNetPoint", &BND_SubDEdge::ControlNetPoint, py::arg("index"))
@@ -309,6 +281,9 @@ void initSubDBindings(rh3dmpymodule& m)
 
   py::class_<BND_SubDVertex>(m, "SubDVertex")
     .def_property_readonly("EdgeCount", &BND_SubDVertex::EdgeCount)
+    .def_property_readonly("FaceCount", &BND_SubDVertex::FaceCount)
+    .def("Edges", &BND_SubDVertex::Edges)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
+    .def("Faces", &BND_SubDVertex::Faces)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
     .def_property_readonly("Index", &BND_SubDVertex::Index)
     .def_property_readonly("ControlNetPoint", &BND_SubDVertex::ControlNetPoint)
     .def_property_readonly("SurfacePoint", &BND_SubDVertex::SurfacePoint)
@@ -317,101 +292,24 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("IsCrease", &BND_SubDVertex::IsCrease)
     .def_property_readonly("IsDart", &BND_SubDVertex::IsDart)
     .def_property_readonly("IsCorner", &BND_SubDVertex::IsCorner)
-
     .def_property_readonly("VertexSharpness", &BND_SubDVertex::VertexSharpness)
     .def("Next", &BND_SubDVertex::Next)
     .def("Previous", &BND_SubDVertex::Previous)
     .def("Edge", &BND_SubDVertex::Edge, py::arg("index"))
-
-    ;
-/*
-  py::class_<BND_SubDFaceList>(m, "SubDFaceList")
-    .def("__len__", &BND_SubDFaceList::Count)
-    .def("Find", &BND_SubDFaceList::Find, py::arg("index"))
-    ;
-*/
-
-  py::class_<PyBNDVertexIterator>(m, "__SubDVertexIterator")
-    .def("__iter__", [](PyBNDVertexIterator &it) -> PyBNDVertexIterator& { return it; })
-    .def("__next__", &PyBNDVertexIterator::next)
     ;
 
-  py::class_<BND_SubDVertexIterator>(m, "SubDVertexIterator")
-    .def("__len__", &BND_SubDVertexIterator::VertexCount)
-#if !defined(NANOBIND)
-    .def("__iter__", [](py::object s) { return PyBNDVertexIterator(s.cast<BND_SubDVertexIterator &>(), s); })
-#endif
-    .def("FirstVertex", &BND_SubDVertexIterator::FirstVertex)
-    .def("NextVertex", &BND_SubDVertexIterator::NextVertex)
-    .def("LastVertex", &BND_SubDVertexIterator::LastVertex)
-    .def("CurrentVertex", &BND_SubDVertexIterator::CurrentVertex)
-    .def_property_readonly("VertexCount", &BND_SubDVertexIterator::VertexCount)
-    .def_property_readonly("CurrentVertexIndex", &BND_SubDVertexIterator::CurrentVertexIndex)
-    ;
-
-  py::class_<PyBNDEdgeIterator>(m, "__SubDEdgeIterator")
-    .def("__iter__", [](PyBNDEdgeIterator &it) -> PyBNDEdgeIterator& { return it; })
-    .def("__next__", &PyBNDEdgeIterator::next)
-    ;
-
-  py::class_<BND_SubDEdgeIterator>(m, "SubDEdgeIterator")
-    .def("__len__", &BND_SubDEdgeIterator::EdgeCount)
-
-#if !defined(NANOBIND)
-    .def("__iter__", [](py::object s) { return PyBNDEdgeIterator(s.cast<BND_SubDEdgeIterator &>(), s); })
-#endif
-
-    .def("FirstEdge", &BND_SubDEdgeIterator::FirstEdge)
-    .def("NextEdge", &BND_SubDEdgeIterator::NextEdge)
-    .def("LastEdge", &BND_SubDEdgeIterator::LastEdge)
-    .def("CurrentEdge", &BND_SubDEdgeIterator::CurrentEdge)
-    .def_property_readonly("EdgeCount", &BND_SubDEdgeIterator::EdgeCount)
-    .def_property_readonly("CurrentEdgeIndex", &BND_SubDEdgeIterator::CurrentEdgeIndex)
-    ;
-
-
-  py::class_<PyBNDFaceIterator>(m, "__SubDFaceIterator")
-    .def("__iter__", [](PyBNDFaceIterator &it) -> PyBNDFaceIterator& { return it; })
-    .def("__next__", &PyBNDFaceIterator::next)
-    ;
-
-  py::class_<BND_SubDFaceIterator>(m, "SubDFaceIterator")
-    .def("__len__", &BND_SubDFaceIterator::FaceCount)
-
-#if !defined(NANOBIND)
-    .def("__iter__", [](py::object s) { return PyBNDFaceIterator(s.cast<BND_SubDFaceIterator &>(), s); })
-#endif
-
-    .def("FirstFace", &BND_SubDFaceIterator::FirstFace)
-    .def("NextFace", &BND_SubDFaceIterator::NextFace)
-    .def("LastFace", &BND_SubDFaceIterator::LastFace)
-    .def("CurrentFace", &BND_SubDFaceIterator::CurrentFace)
-    .def_property_readonly("FaceCount", &BND_SubDFaceIterator::FaceCount)
-    .def_property_readonly("CurrentFaceIndex", &BND_SubDFaceIterator::CurrentFaceIndex)
-    ;
-/*
-  py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")
-    .def("__len__", &BND_SubDEdgeList::Count)
-    ;
-
-  py::class_<BND_SubDVertexList>(m, "SubDVertexList")
-    .def("__len__", &BND_SubDVertexList::Count)
-    ;
-*/
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
     .def(py::init<>())
     .def_property_readonly("IsSolid", &BND_SubD::IsSolid)
     .def("ClearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .def("UpdateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .def("Subdivide", &BND_SubD::Subdivide, py::arg("count"))
-    
-    .def_property_readonly("FaceIterator", &BND_SubD::GetFaceIterator)
-    .def_property_readonly("EdgeIterator", &BND_SubD::GetEdgeIterator)
-    .def_property_readonly("VertexIterator", &BND_SubD::GetVertexIterator)
-
-    //.def_property_readonly("Faces", &BND_SubD::GetFaces)
-    //.def_property_readonly("Edges", &BND_SubD::GetEdges)
-    //.def_property_readonly("Vertices", &BND_SubD::GetVertices)
+    .def_property_readonly("FaceCount", &BND_SubD::FaceCount)
+    .def_property_readonly("EdgeCount", &BND_SubD::EdgeCount)
+    .def_property_readonly("VertexCount", &BND_SubD::VertexCount)
+    .def_property_readonly("Faces", &BND_SubD::Faces)
+    .def_property_readonly("Edges", &BND_SubD::Edges)
+    .def_property_readonly("Vertices", &BND_SubD::Vertices)
     ;
 }
 

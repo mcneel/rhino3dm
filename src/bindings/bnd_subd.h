@@ -8,30 +8,70 @@ void initSubDBindings(rh3dmpymodule& m);
 void initSubDBindings(void* m);
 #endif
 
-/*
-class BND_SubDComponent
-{
-  ON_ModelComponentReference m_component_reference;
-  ON_SubDComponentBase* m_component = nullptr;
-  ON_SubD* m_subd = nullptr;
-  int m_index = -1;
-  public:
-  BND_SubDComponent(ON_SubD* subd, int index, const ON_ModelComponentReference& compref);
-  protected:
+template <typename BND_SubDTFrom>
+using EnableIfIsFromSubD = typename std::enable_if<std::is_same<BND_SubD, BND_SubDTFrom>::value>::type;
+template <typename BND_SubDTFrom>
+using EnableIfIsNotFromSubD = typename std::enable_if<!std::is_same<BND_SubD, BND_SubDTFrom>::value>::type;
 
+template <typename BND_SubDTTo, typename BND_SubDTFrom>
+struct BND_SubDComponentIteratorAdapter {};
+
+template <typename BND_SubDTTo, typename BND_SubDTFrom>
+class BND_SubDComponentIterator {
+  using ThisT = BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>;
+  using AdapterT = BND_SubDComponentIteratorAdapter<BND_SubDTTo, BND_SubDTFrom>;
+  using ON_SubDTToIterator = typename AdapterT::IteratorT;
+  using ON_SubDTFrom = typename BND_SubDTFrom::ON_SubDTFrom;
+  ON_SubDTToIterator m_it{};
+  const ON_SubDTFrom* m_base{};  // TODO: Make an accessor in ON for m_it.m_component_ptr and remove this, we only need it in ItemAtIndex()
+
+public:
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
+  BND_SubDComponentIterator(const BND_SubD& parent_subd, const BND_SubDTFrom& base);  // TODO: Remove parent_subd arg when BND_SubDFace etc hold a ref to their parent SubD
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
+  BND_SubDComponentIterator(const BND_SubD& base);
+
+  BND_SubDComponentIterator()                 = default;
+  BND_SubDComponentIterator(const ThisT& rhs) = default;
+  BND_SubDComponentIterator(ThisT&& rhs)      = default;
+  ~BND_SubDComponentIterator()                = default;
+  ThisT& operator=(const ThisT& rhs)          = default;
+  ThisT& operator=(ThisT&& rhs)               = default;
+
+  inline unsigned int Count()        const { return AdapterT::Count(m_it); }
+  inline unsigned int CurrentIndex() const { return AdapterT::CurrentIndex(m_it); }
+  inline BND_SubDTTo* Current()      const { return AdapterT::Current(m_it); }
+  inline BND_SubDTTo* First()              { return AdapterT::First(m_it); }
+  inline BND_SubDTTo* Next()               { return AdapterT::Next(m_it); }
+  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(++m_it); }  // TODO: Fix that in ON! operator++(int) should be the post-increment operator (m_it++)
+  inline BND_SubDTTo* Last()               { return AdapterT::Last(m_it); }
+
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
+  inline BND_SubDTTo* Item(unsigned int index) const
+                                           { return AdapterT::ItemAtIndex(m_base, index); }
+  template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
+  inline BND_SubDTTo* Item(unsigned int id) const
+                                           { return AdapterT::ItemFromId(m_it, id); }
 };
-*/
 
+// TODO: For BND_SubDFace, BND_SubDVertex, BND_SubDEdge, define robust == operators,
+// to be used in python == and is operators.
 class BND_SubDFace {
-
   const ON_SubDFace* m_subdface = nullptr;
 
-  public: 
+public:
+  using ON_SubDTFrom = ON_SubDFace;
+  using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDFace>;
+  using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDFace>;
   //BND_SubDFace() = default;
   //BND_SubDFace(ON_SubD* subd, int index, const ON_ModelComponentReference& compref);
   BND_SubDFace(const ON_SubDFace* face);
   unsigned int Index() const { return m_subdface->FaceId(); }
   int EdgeCount() const { return m_subdface->EdgeCount(); }
+  int VertexCount() const { return m_subdface->EdgeCount(); }
+  BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
+  BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
+  const ON_SubDFace* GetONSubDComponent() const { return m_subdface; }
 
   int MaterialChannelIndex() const { return m_subdface->MaterialChannelIndex(); }
   BND_Color PerFaceColor() const;
@@ -96,14 +136,18 @@ class BND_SubDFace {
 };
 
 class BND_SubDEdge {
-
   const ON_SubDEdge* m_subdedge = nullptr;
   
-  public:
+public:
+  using ON_SubDTFrom = ON_SubDEdge;
+  using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDEdge>;
+  using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDEdge>;
   BND_SubDEdge(const ON_SubDEdge* edge);
   unsigned int Index() const { return m_subdedge->EdgeId(); }
   unsigned int VertexCount() const { return m_subdedge->VertexCount(); }
   unsigned int FaceCount() const { return m_subdedge->FaceCount(); }
+  BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
+  BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
 
   unsigned int VertexId(unsigned index) const { return m_subdedge->Vertex(index)->VertexId(); }
   class BND_SubDVertex* Vertex(unsigned index); //{ return new class BND_SubDVertex(m_subdedge->Vertex(index)); }
@@ -137,13 +181,16 @@ class BND_SubDEdge {
   ON_3dPoint ControlNetCenterPoint() const { return m_subdedge->ControlNetCenterPoint(); }
   ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return m_subdedge->ControlNetCenterNormal(edge_face_index); }
 
+  const ON_SubDEdge* GetONSubDComponent() const { return m_subdedge; }
 };
 
 class BND_SubDVertex {
-
   const ON_SubDVertex* m_subdvertex = nullptr;
 
-  public:
+public:
+  using ON_SubDTFrom = ON_SubDVertex;
+  using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDVertex>;
+  using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDVertex>;
   BND_SubDVertex(const ON_SubDVertex* vertex);
 
   unsigned int Index() const { return m_subdvertex->VertexId(); }
@@ -161,6 +208,8 @@ class BND_SubDVertex {
   ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }
   int FaceCount() const { return m_subdvertex->FaceCount(); }
+  BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
+  BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
   class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
   class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
 
@@ -175,100 +224,35 @@ class BND_SubDVertex {
   //public IEnumerable<SubDEdge> Edges --> SubDEdgeList
 
   //public bool SetControlNetPoint(Point3d position, bool bClearNeighborhoodCache)
-  
-};
-/*
-class BND_SubDVertexList {
 
+  const ON_SubDVertex* GetONSubDComponent() const { return m_subdvertex; }
+};
+
+class BND_SubD : public BND_GeometryBase {
   ON_SubD* m_subd = nullptr;
 
- public:
-  BND_SubDVertexList(ON_SubD* subd, const ON_ModelComponentReference& compref);
-  int Count() const { return m_subd->VertexCount(); }
-  //class BND_SubDVertex* GetVertex(int i);
-};
-
-class BND_SubDEdgeList {
-
-  ON_SubD* m_subd = nullptr;
-
- public:
-  BND_SubDEdgeList(ON_SubD* subd, const ON_ModelComponentReference& compref);
-  int Count() const { return m_subd->EdgeCount(); }
-  //class BND_SubDEdge* GetEdge(int i);
-};
-
-
-class BND_SubDFaceList {
-  ON_SubD* m_subd = nullptr;
-
- public:
-  BND_SubDFaceList(ON_SubD* subd);
-  int Count() const { return m_subd->FaceCount(); }
-  class BND_SubDFace* Find(int index);
-};
-*/
-
-class BND_SubDFaceIterator {
-
-  ON_SubDFaceIterator m_it;
-  public:
-  BND_SubDFaceIterator(ON_SubD* subd);
-
-  class BND_SubDFace* CurrentFace() const;// { return m_it->CurrentFace(); }
-  class BND_SubDFace* NextFace(); //{ return m_it->NextFace(); }
-  class BND_SubDFace* LastFace();//    const { return m_it->LastFace(); }
-  class BND_SubDFace* FirstFace();
-  unsigned int FaceCount() { return m_it.FaceCount(); }
-  unsigned int CurrentFaceIndex() { return m_it.CurrentFaceIndex(); }
-};
-
-class BND_SubDEdgeIterator {
-  ON_SubDEdgeIterator m_it;
-  public:
-  BND_SubDEdgeIterator(ON_SubD* subd);
-
-  class BND_SubDEdge* CurrentEdge() const;// { return m_it->CurrentEdge(); }
-  class BND_SubDEdge* NextEdge(); //{ return m_it->NextEdge(); }
-  class BND_SubDEdge* LastEdge();//    const { return m_it->LastEdge(); }
-  class BND_SubDEdge* FirstEdge();
-  unsigned int EdgeCount() { return m_it.EdgeCount(); }
-  unsigned int CurrentEdgeIndex() { return m_it.CurrentEdgeIndex(); }
-};
-
-class BND_SubDVertexIterator {
-  ON_SubDVertexIterator m_it;
-  public:
-  BND_SubDVertexIterator(ON_SubD* subd);
-
-  class BND_SubDVertex* CurrentVertex() const;
-  class BND_SubDVertex* NextVertex(); 
-  class BND_SubDVertex* LastVertex();
-  class BND_SubDVertex* FirstVertex();
-  unsigned int VertexCount() { return m_it.VertexCount(); }
-  unsigned int CurrentVertexIndex() { return m_it.CurrentVertexIndex(); }
-};
-
-class BND_SubD : public BND_GeometryBase
-{
-  ON_SubD* m_subd = nullptr;
 public:
-  BND_SubD(ON_SubD* subd, const ON_ModelComponentReference* compref);
+  using ON_SubDTFrom = ON_SubD;
+  using BND_SubDFaceIterator   = BND_SubDComponentIterator<BND_SubDFace, BND_SubD>;
+  using BND_SubDEdgeIterator   = BND_SubDComponentIterator<BND_SubDEdge, BND_SubD>;
+  using BND_SubDVertexIterator = BND_SubDComponentIterator<BND_SubDVertex, BND_SubD>;
+
   BND_SubD();
+  BND_SubD(ON_SubD* subd, const ON_ModelComponentReference* compref);
 
-  //BND_SubDEdgeList GetEdges();
-  //BND_SubDVertexList GetVertices();
-  //BND_SubDFaceList GetFaces();
-
-  // iterators
-  BND_SubDFaceIterator GetFaceIterator() const;// { return BND_SubDFaceIterator(m_subd, m_component_ref); }
-  BND_SubDEdgeIterator GetEdgeIterator() { return BND_SubDEdgeIterator(m_subd); }
-  BND_SubDVertexIterator GetVertexIterator() { return BND_SubDVertexIterator(m_subd); }
+  unsigned int           FaceCount()   const { return m_subd->FaceCount(); }
+  unsigned int           EdgeCount()   const { return m_subd->EdgeCount(); }
+  unsigned int           VertexCount() const { return m_subd->VertexCount(); }
+  BND_SubDFaceIterator   Faces()       const;
+  BND_SubDEdgeIterator   Edges()       const;
+  BND_SubDVertexIterator Vertices()    const;
 
   bool IsSolid() const { return m_subd->IsSolid(); }
   void ClearEvaluationCache() const { m_subd->ClearEvaluationCache(); }
   unsigned int UpdateAllTagsAndSectorCoefficients() { return m_subd->UpdateAllTagsAndSectorCoefficients(false); }
   bool Subdivide(int count) { return m_subd->GlobalSubdivide(count); }
+
+  const ON_SubD* GetONSubDComponent() const { return m_subd; }
 
 protected:
   void SetTrackedPointer(ON_SubD* subd, const ON_ModelComponentReference* compref);

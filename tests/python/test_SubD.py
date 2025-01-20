@@ -3,17 +3,18 @@ import unittest
 import os 
 
 class TestSubD(unittest.TestCase):
-
-    #objective: to read a SubD from file and check the number of faces, edges and vertices
+    # objective: to read a SubD from file and check the number of faces, edges and vertices
     def test_readSubDFromFile(self):
         print(os.getcwd())
-        file = rhino3dm.File3dm.Read('/Users/luis.fraguada/dev/rhino3dm/tests/models/subd.3dm')
+        file = rhino3dm.File3dm.Read('../models/subd.3dm')
         subd = file.Objects[0].Geometry
 
-        self.assertTrue(len(subd.FaceIterator) == 235)
-        self.assertTrue(subd.FaceIterator.FaceCount == len(subd.FaceIterator))
-
-        for face in subd.FaceIterator:
+        self.assertTrue(len(subd.Faces) == 235)
+        self.assertTrue(subd.Faces.Count == len(subd.Faces))
+        self.assertTrue(subd.FaceCount == len(subd.Faces))
+        
+        print(f"Inspecting {subd.Faces.Count} faces")
+        for face in subd.Faces:
             print("Face Index:" + str(face.Index))
             print("Face Edge Count:" + str(face.EdgeCount))
             print("Face Material Channel Index:" + str(face.MaterialChannelIndex))
@@ -38,48 +39,176 @@ class TestSubD(unittest.TestCase):
             print("Edge: " + str(face.Edge(0).Index))
             print("SubdivisionPoint: " + str(face.SubdivisionPoint))
             print("------")
-
-
-
-        self.assertTrue(len(subd.EdgeIterator) == 434)
-        self.assertTrue(subd.EdgeIterator.EdgeCount == len(subd.EdgeIterator))
-
-        # for edge in subd.EdgeIterator:
-        #     print("Edge Index: " + str(edge.Index))
-        #     print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
-        #     print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
-        #     print("Edge End Vertex: " + str(edge.Vertex(1).Index))
-        #     print("Edge End Coords: " + str(edge.Vertex(1).SurfacePoint))
-
-        self.assertTrue(len(subd.VertexIterator) == 201)
-        self.assertTrue(subd.VertexIterator.VertexCount == len(subd.VertexIterator))
-
-        #for vertex in subd.VertexIterator:
-            # print("Vertex Index: " + str(vertex.Index))
-            # #print(vertex.Next().Index) #segfault
-            # #print(vertex.Previous().Index) #segfault
-            # print("Control Net Pt: " + str(vertex.ControlNetPoint))
-            # print("Surface Pt: " + str(vertex.SurfacePoint))
-            # print("Sharpness: " + str(vertex.VertexSharpness))
-            # print("IsSharp(T): " + str(vertex.IsSharp(True)))
-            # print("IsSharp(F): " + str(vertex.IsSharp(True)))
-            # print("IsSmooth: " + str(vertex.IsSmooth))
-            # print("IsCrease: " + str(vertex.IsCrease))
-            # print("IsDart: " + str(vertex.IsDart))
-            # print("IsCorner: " + str(vertex.IsCorner))
-
-            # for i in range(vertex.EdgeCount):
-            #     print("Edge " + str(i) + " index: " + str(vertex.Edge(i).Index))
-            # print('-------')
-
+        self.assertEqual(subd.Faces.CurrentIndex, 0)
+        self.assertEqual(subd.Faces.__next__().Index, 1)
+        self.assertEqual(subd.Faces.CurrentIndex, 0)
+        print("Faces done\n\n")
         
-
+        print(f"Inspecting {subd.Faces[1].Edges(subd).Count} edges of Face 1")
+        for edge in subd.Faces[1].Edges(subd):
+            print("Edge Index: " + str(edge.Index))
+            print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
+            print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
+            print("Edge End Vertex: " + str(edge.Vertex(1).Index))
+            print("Edge End Coords: " + str(edge.Vertex(1).SurfacePoint))
+            print("------")
+        self.assertEqual(subd.Faces[1].Edges(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Faces[1].Edges(subd).__next__().Index, 174)
+        # TODO: implement robust == and is operators so the following works:
+        # self.assertEqual(subd.Faces[1].Edges(subd).__next__(), subd.Edges[174])
+        self.assertEqual(subd.Faces[1].Edges(subd).__next__().Index, subd.Edges[174].Index)
+        self.assertEqual(subd.Faces[1].Edges(subd).CurrentIndex, 0)
+        print("Edges of Face 1 done\n\n")
         
-
+        print(f"Inspecting {subd.Faces[1].Vertices(subd).Count} vertices of Face 1")
+        for vertex in subd.Faces[1].Vertices(subd):
+            print("Vertex Index: " + str(vertex.Index))
+            print("Control Net Pt: " + str(vertex.ControlNetPoint))
+            print("Surface Pt: " + str(vertex.SurfacePoint))
+            print("Sharpness: " + str(vertex.VertexSharpness))
+            print("IsSharp(T): " + str(vertex.IsSharp(True)))
+            print("IsSharp(F): " + str(vertex.IsSharp(True)))
+            print("IsSmooth: " + str(vertex.IsSmooth))
+            print("IsCrease: " + str(vertex.IsCrease))
+            print("IsDart: " + str(vertex.IsDart))
+            print("IsCorner: " + str(vertex.IsCorner))
+            print('-------')
+        self.assertEqual(subd.Faces[1].Vertices(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Faces[1].Vertices(subd).__next__().Index, 77)
+        self.assertEqual(subd.Faces[1].Vertices(subd).__next__().Index, subd.Vertices[77].Index)
+        self.assertEqual(subd.Faces[1].Vertices(subd).CurrentIndex, 0)
+        print("Vertices of Face 1 done\n\n")
         
+        self.assertTrue(len(subd.Edges) == 434)
+        self.assertTrue(subd.Edges.Count == len(subd.Edges))
+        self.assertTrue(subd.EdgeCount == len(subd.Edges))
 
+        print(f"Inspecting {subd.Edges.Count} edges")
+        for edge in subd.Edges:
+            print("Edge Index: " + str(edge.Index))
+            print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
+            print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
+            print("Edge End Vertex: " + str(edge.Vertex(1).Index))
+            print("Edge End Coords: " + str(edge.Vertex(1).SurfacePoint))
+        print("Edges done\n\n")
+        
+        self.assertTrue(len(subd.Vertices) == 201)
+        self.assertTrue(subd.Vertices.Count == len(subd.Vertices))
+        self.assertTrue(subd.VertexCount == len(subd.Vertices))
+        
+        print(f"Inspecting {subd.Edges[1].Faces(subd).Count} faces of Edge 1")
+        for edge in subd.Edges[1].Faces(subd):
+            print("Face Index:" + str(face.Index))
+            print("Face Edge Count:" + str(face.EdgeCount))
+            print("Face Material Channel Index:" + str(face.MaterialChannelIndex))
+            print("Per face color: " + str(face.PerFaceColor))
+            print("ControlNetCenterPoint: " + str(face.ControlNetCenterPoint))
+            print("ControlNetCenterNormal: " + str(face.ControlNetCenterNormal))
+            print("ControlNetCenterFrame Origin: " + str(face.ControlNetCenterFrame.Origin))
+            print("IsConvex: " + str(face.IsConvex))
+            print("IsNotConvex: " + str(face.IsNotConvex))
+            print("IsPlanar: " + str(face.IsPlanar(0.001)))
+            print("IsNotPlanar: " + str(face.IsNotPlanar(0.001)))
+            print("TexturePointsCapacity: " + str(face.TexturePointsCapacity))
+            print("TexturePointsAreSet: " + str(face.TexturePointsAreSet))
+            print("TexturePoint: " + str(face.TexturePoint(0)))
+            print("TextureCenterPoint: " + str(face.TextureCenterPoint))
+            print("HasEdges: " + str(face.HasEdges))
+            print("HasSharpEdges: " + str(face.HasSharpEdges))
+            print("SharpEdgeCount: " + str(face.SharpEdgeCount))
+            print("MaximumEdgeSharpness: " + str(face.MaximumEdgeSharpness))
+            print("ControlNetPoint: " + str(face.ControlNetPoint(0)))
+            print("Vertex: " + str(face.Vertex(0).Index))
+            print("Edge: " + str(face.Edge(0).Index))
+            print("SubdivisionPoint: " + str(face.SubdivisionPoint))
+            print("------")
+        self.assertEqual(subd.Edges[1].Faces(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Edges[1].Faces(subd).__next__().Index, 100)
+        self.assertEqual(subd.Edges[1].Faces(subd).__next__().Index, subd.Faces[100].Index)
+        self.assertEqual(subd.Edges[1].Faces(subd).CurrentIndex, 0)
+        print("Faces of Edge 1 done\n\n")
+        
+        print(f"Inspecting {subd.Edges[1].Vertices(subd).Count} vertices of Edge 1")
+        for vertex in subd.Edges[1].Vertices(subd):
+            print("Vertex Index: " + str(vertex.Index))
+            print("Control Net Pt: " + str(vertex.ControlNetPoint))
+            print("Surface Pt: " + str(vertex.SurfacePoint))
+            print("Sharpness: " + str(vertex.VertexSharpness))
+            print("IsSharp(T): " + str(vertex.IsSharp(True)))
+            print("IsSharp(F): " + str(vertex.IsSharp(True)))
+            print("IsSmooth: " + str(vertex.IsSmooth))
+            print("IsCrease: " + str(vertex.IsCrease))
+            print("IsDart: " + str(vertex.IsDart))
+            print("IsCorner: " + str(vertex.IsCorner))
+            print('-------')
+        self.assertEqual(subd.Edges[1].Vertices(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Edges[1].Vertices(subd).__next__().Index, 1)
+        self.assertEqual(subd.Edges[1].Vertices(subd).__next__().Index, subd.Vertices[1].Index)
+        self.assertEqual(subd.Edges[1].Vertices(subd).CurrentIndex, 0)
+        print("Vertices of Edge 1 done\n\n")
 
-
+        print(f"Inspecting {subd.Vertices.Count} vertices")
+        for vertex in subd.Vertices:
+            print("Vertex Index: " + str(vertex.Index))
+            print("Control Net Pt: " + str(vertex.ControlNetPoint))
+            print("Surface Pt: " + str(vertex.SurfacePoint))
+            print("Sharpness: " + str(vertex.VertexSharpness))
+            print("IsSharp(T): " + str(vertex.IsSharp(True)))
+            print("IsSharp(F): " + str(vertex.IsSharp(True)))
+            print("IsSmooth: " + str(vertex.IsSmooth))
+            print("IsCrease: " + str(vertex.IsCrease))
+            print("IsDart: " + str(vertex.IsDart))
+            print("IsCorner: " + str(vertex.IsCorner))
+            for i in range(vertex.EdgeCount):
+                print("Edge " + str(i) + " index: " + str(vertex.Edge(i).Index))
+            print('-------')
+        print("Vertices done")
+        
+        print(f"Inspecting {subd.Vertices[1].Faces(subd).Count} faces of Vertex 1")
+        for edge in subd.Vertices[1].Faces(subd):
+            print("Face Index:" + str(face.Index))
+            print("Face Edge Count:" + str(face.EdgeCount))
+            print("Face Material Channel Index:" + str(face.MaterialChannelIndex))
+            print("Per face color: " + str(face.PerFaceColor))
+            print("ControlNetCenterPoint: " + str(face.ControlNetCenterPoint))
+            print("ControlNetCenterNormal: " + str(face.ControlNetCenterNormal))
+            print("ControlNetCenterFrame Origin: " + str(face.ControlNetCenterFrame.Origin))
+            print("IsConvex: " + str(face.IsConvex))
+            print("IsNotConvex: " + str(face.IsNotConvex))
+            print("IsPlanar: " + str(face.IsPlanar(0.001)))
+            print("IsNotPlanar: " + str(face.IsNotPlanar(0.001)))
+            print("TexturePointsCapacity: " + str(face.TexturePointsCapacity))
+            print("TexturePointsAreSet: " + str(face.TexturePointsAreSet))
+            print("TexturePoint: " + str(face.TexturePoint(0)))
+            print("TextureCenterPoint: " + str(face.TextureCenterPoint))
+            print("HasEdges: " + str(face.HasEdges))
+            print("HasSharpEdges: " + str(face.HasSharpEdges))
+            print("SharpEdgeCount: " + str(face.SharpEdgeCount))
+            print("MaximumEdgeSharpness: " + str(face.MaximumEdgeSharpness))
+            print("ControlNetPoint: " + str(face.ControlNetPoint(0)))
+            print("Vertex: " + str(face.Vertex(0).Index))
+            print("Edge: " + str(face.Edge(0).Index))
+            print("SubdivisionPoint: " + str(face.SubdivisionPoint))
+            print("------")
+        self.assertEqual(subd.Vertices[1].Faces(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Vertices[1].Faces(subd).__next__().Index, 100)
+        self.assertEqual(subd.Vertices[1].Faces(subd).__next__().Index, subd.Faces[100].Index)
+        self.assertEqual(subd.Vertices[1].Faces(subd).CurrentIndex, 0)
+        print("Faces of Vertex 1 done\n\n")
+        
+        print(f"Inspecting {subd.Vertices[1].Edges(subd).Count} edges of Vertex 1")
+        for edge in subd.Vertices[1].Edges(subd):
+            print("Edge Index: " + str(edge.Index))
+            print("Edge Start Vertex: " + str(edge.Vertex(0).Index))
+            print("Edge Start Coords: " + str(edge.Vertex(0).SurfacePoint))
+            print("Edge End Vertex: " + str(edge.Vertex(1).Index))
+            print("Edge End Coords: " + str(edge.Vertex(1).SurfacePoint))
+            print("------")
+        self.assertEqual(subd.Vertices[1].Edges(subd).CurrentIndex, 0)
+        self.assertEqual(subd.Vertices[1].Edges(subd).__next__().Index, 1)
+        self.assertEqual(subd.Vertices[1].Edges(subd).__next__().Index, subd.Edges[1].Index)
+        self.assertEqual(subd.Vertices[1].Edges(subd).CurrentIndex, 0)
+        print("Edges of Vertex 1 done\n\n")
 
 if __name__ == '__main__':
     print("running tests")
