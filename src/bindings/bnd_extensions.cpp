@@ -2010,12 +2010,12 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
     .def_static("ReadNotes", &BND_ONXModel::ReadNotes, py::arg("path"))
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion, py::arg("path"))
-/*
+#if !defined(NANOBIND)
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
-    */
+ #endif
     .def("Write", &BND_ONXModel::Write, py::arg("path"), py::arg("version")=0)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
