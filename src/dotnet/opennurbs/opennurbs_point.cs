@@ -501,7 +501,7 @@ namespace Rhino.Geometry
           x = (intervalParameter == m_t1) ? 1.0 : (intervalParameter - m_t0) / (m_t1 - m_t0);
         }
         else
-          x = m_t0;
+          x = 0.0;
       }
       else
       {
@@ -1899,7 +1899,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Gets the largest (both positive and negative) valid coordinate in this point,
-    /// or RhinoMath.UnsetValue if no coordinate is valid.
+    /// or RhinoMath.UnsetValue if no coordinate is valid, as an absolute value.
     /// </summary>
     /// <since>5.0</since>
     public double MaximumCoordinate
@@ -3957,7 +3957,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets the largest (both positive and negative) component value in this vector.
+    /// Gets the largest (both positive and negative) component value in this vector,  as an absolute value.
     /// </summary>
     /// <since>5.0</since>
     public double MaximumCoordinate

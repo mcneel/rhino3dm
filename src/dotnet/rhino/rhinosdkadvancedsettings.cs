@@ -82,6 +82,7 @@ namespace Rhino.Runtime
 
     static public void SetDarkModeToSystemValue() => DarkMode = UnsafeNativeMethods.RhColors_GetDefaultWindowsDarkMode();
 
+    [MonoPInvokeCallback(typeof(PersistentSettingsHooks.DarkModeDelegate))]
     internal static bool SetGetDarkModeHook(bool value, bool set)
     {
       if (set)

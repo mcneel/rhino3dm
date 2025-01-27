@@ -16,6 +16,7 @@ protected:
 
 public:
   static BND_Extrusion* Create(const class BND_Curve& planarCurve, double height, bool cap);
+  static BND_Extrusion* CreateWithPlane(const class BND_Curve& planarCurve, const class BND_Plane& plane, double height, bool cap);
   static BND_Extrusion* CreateBoxExtrusion(const class BND_Box& box, bool cap);
   static BND_Extrusion* CreateCylinderExtrusion(const class BND_Cylinder& cylinder, bool capBottom, bool capTop);
   static BND_Extrusion* CreatePipeExtrusion(const class BND_Cylinder& cylinder, double otherRadius, bool capTop, bool capBottom);

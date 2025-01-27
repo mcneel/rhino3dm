@@ -451,6 +451,9 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public static BezierCurve[] CreateBeziers(Curve sourceCurve)
     {
+      if (sourceCurve == null)
+        return new BezierCurve[0];
+
       IntPtr const_ptr_source = sourceCurve.ConstPointer();
       IntPtr ptr_bez_array = UnsafeNativeMethods.ON_SimpleArray_BezierCurveNew();
       int count = UnsafeNativeMethods.RHC_RhinoMakeBeziers(const_ptr_source, ptr_bez_array);

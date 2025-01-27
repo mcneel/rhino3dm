@@ -80,6 +80,14 @@ File3dmObjectTable
 
       :rtype: Guid
 
+   .. py:method:: AddPolyline(polyline, attributes)
+
+      Adds a polyline object to Rhino.
+
+      :return: A unique identifier for the object.
+
+      :rtype: Guid
+
    .. py:method:: AddArc(arc, attributes)
 
       Adds a curve object to the document representing an arc.

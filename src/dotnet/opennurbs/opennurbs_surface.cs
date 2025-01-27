@@ -1280,6 +1280,29 @@ namespace Rhino.Geometry
     #region statics
 
     /// <summary>
+    /// Create tween surfaces that gradually transition between two bounding surfaces using point sampling.
+    /// </summary>
+    /// <param name="surface0">The first, or starting, surface.</param>
+    /// <param name="surface1">The second, or ending, curve.</param>
+    /// <param name="numSurfaces">Number of tween surfaces to create.</param>
+    /// <param name="numSamples">Number of sample points along input surfaces.</param>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>>An array of tween surfaces if successful, an empty array on error.</returns>
+    /// <since>8.14</since>
+    public static Surface[] CreateTweenSurfacesWithSampling(Surface surface0, Surface surface1, int numSurfaces, int numSamples, double tolerance)
+    {
+      IntPtr ptr_const_srf0 = surface0.ConstPointer();
+      IntPtr ptr_const_srf1 = surface1.ConstPointer();
+      using (SimpleArraySurfacePointer output = new SimpleArraySurfacePointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoTweenSurfacesSamplePoints(ptr_const_srf0, ptr_const_srf1, numSurfaces, numSamples, tolerance, ptr_output);
+        Runtime.CommonObject.GcProtect(surface0, surface1);
+        return rc ? output.ToNonConstArray() : Array.Empty<Surface>();
+      }
+    }
+
+    /// <summary>
     /// Constructs a rolling ball fillet between two surfaces.
     /// </summary>
     /// <param name="surfaceA">A first surface.</param>

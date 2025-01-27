@@ -1160,6 +1160,18 @@ namespace Rhino.DocObjects
       return rc;
     }
 
+    /// <summary>
+    /// Determines if an object belong to a group or not.
+    /// </summary>
+    /// <param name="groupIndex">The index that will be tested.</param>
+    /// <returns></returns>
+    /// <since>8.11</since>
+    public bool IsInGroup(int groupIndex)
+    {
+      IntPtr ptr = ConstPointer();
+      return UnsafeNativeMethods.ON_3dmObjectAttributes_IsInGroup(ptr, groupIndex);
+    }
+
     // [skipping]
     // int TopGroup() const; I'm not sure how this is used
     // BOOL IsInGroup()

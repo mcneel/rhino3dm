@@ -975,6 +975,28 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Return true if the layer is visible in user interfaces that display layers.
+    /// Returns false if the layer not visible in user interfaces.
+    /// This is a runtime property that does not persist in .3dm files.
+    /// This property is also used by the Layers panel to filter layers.
+    /// </summary>
+    /// <since>8.9</since>
+    public bool IsVisibleInUserInterface
+    {
+      get
+      {
+        if (null != m_doc)
+          return UnsafeNativeMethods.CRhinoLayer_IsVisibleInRhinoUserInterface(m_doc.RuntimeSerialNumber, Index, false, false);
+        return false;
+      }
+      set
+      {
+        if (null != m_doc)
+          UnsafeNativeMethods.CRhinoLayer_IsVisibleInRhinoUserInterface(m_doc.RuntimeSerialNumber, Index, true, value);
+      }
+    }
+
+    /// <summary>
     /// Returns parent of a layer.
     /// </summary>
     /// <param name="rootLevelParent">
@@ -1012,9 +1034,18 @@ namespace Rhino.DocObjects
           var result = Render.RenderContent.FromId(m_doc, m_set_render_material) as RenderMaterial;
           return result;
         }
+
         // Get the document Id
         var doc_id = (null == m_doc ? 0 : m_doc.RuntimeSerialNumber);
         if (doc_id < 1) return null;
+
+        var materialIndex = RenderMaterialIndex;
+        if (materialIndex >= 0 && materialIndex < m_doc.Materials.Count)
+        {
+          var material = m_doc.Materials[materialIndex];
+          if (!material.IsDeleted) return material.RenderMaterial;
+        }
+
         var pointer = ConstPointer();
         // Get the render material associated with the layers render material
         // index into the documents material table.
@@ -1335,6 +1366,7 @@ namespace Rhino.DocObjects
       InternalCommitChanges();
       return rc;
     }
+
     /// <summary>
     /// Gets user string from this geometry.
     /// </summary>
@@ -1368,6 +1400,21 @@ namespace Rhino.DocObjects
       return _GetUserStrings();
     }
 
+    /// <since>8.9</since>
+    public bool DeleteUserString(string key)
+    {
+      return SetUserString(key, null);
+    }
+
+    /// <since>8.9</since>
+    public void DeleteAllUserStrings()
+    {
+      _DeleteAllUserStrings();
+      InternalCommitChanges();
+    }
+    #endregion
+
+    #region IEquatable
     /// <since>6.0</since>
     public bool Equals(Layer other)
     {

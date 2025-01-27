@@ -1,40 +1,18 @@
 
 #include "stdafx.h"
 
-static double DecimalHoursFromHMS(int iHour, int iMinute, int iSecond)
+static time_t TimeFromYMDH(int year, int month, int day, double dh)
 {
-  return iHour + (iMinute / 60.0) + (iSecond / 3600.0);
-}
-
-static void DecimalHoursToHMS(double dHours, int& iHour, int& iMinute, int& iSecond)
-{
-  while (dHours >= 24.0)
-    dHours -= 24.0;
-
-  while (dHours < 0.0)
-    dHours += 24.0;
-
-  iHour = (int)dHours;
-
-  const double dMinute = (dHours - iHour) * 60.0;
-  iMinute = (int)dMinute;
-
-  const double dSecond = (dMinute - iMinute) * 60.0;
-  iSecond = (int)dSecond;
-}
-
-static time_t TimeFromYMDH(int y, int m, int d, double dh)
-{
-  int h = 0, n = 0, s = 0;
-  DecimalHoursToHMS(dh, h, n, s);
+  int hour = 0, minute = 0, second = 0;
+  ON_DecimalHoursToHMS(dh, hour, minute, second, year, month, day);
 
   tm ttm = { 0 };
-  ttm.tm_sec = s;
-  ttm.tm_min = n;
-  ttm.tm_hour = h;
-  ttm.tm_mday = d;
-  ttm.tm_mon = m - 1;
-  ttm.tm_year = y - 1900;
+  ttm.tm_sec  = second;
+  ttm.tm_min  = minute;
+  ttm.tm_hour = hour;
+  ttm.tm_mday = day;
+  ttm.tm_mon  = month - 1;
+  ttm.tm_year = year - 1900;
   ttm.tm_isdst = -1;
   return mktime(&ttm);
 }
@@ -54,17 +32,17 @@ static void GetYMDH(const ON_XMLVariant& v, int& y, int& m, int& d, double& h)
   y = ttm.tm_year + 1900;
   m = ttm.tm_mon + 1;
   d = ttm.tm_mday;
-  h = DecimalHoursFromHMS(ttm.tm_hour, ttm.tm_min, ttm.tm_sec);
+  h = ON_DecimalHoursFromHMS(ttm.tm_hour, ttm.tm_min, ttm.tm_sec);
 }
 
 static time_t TimeFromSun(const ON_Sun& sun, bool local)
 {
-  int y = 0, m = 0, d = 0; double dh = 0.0;
+  int year = 0, month = 0, day = 0; double hours = 0.0;
 
-  if (local) sun.LocalDateTime(y, m, d, dh);
-  else       sun.UTCDateTime  (y, m, d, dh);
+  if (local) sun.LocalDateTime(year, month, day, hours);
+  else       sun.UTCDateTime  (year, month, day, hours);
 
-  return TimeFromYMDH(y, m, d, dh);
+  return TimeFromYMDH(year, month, day, hours);
 }
 
 enum class SunSetting : int
@@ -245,4 +223,25 @@ RH_C_FUNCTION double GetSunJulianDay(double timeZoneHours, int daylightMinutes,
 	engine.SetDaylightSavingMinutes(daylightMinutes);
 
 	return engine.JulianDay();
+}
+
+RH_C_FUNCTION double DecimalHoursFromHMS(int h, int m, int s)
+{
+  return ON_DecimalHoursFromHMS(h, m, s);
+}
+
+RH_C_FUNCTION void DecimalHoursToHMS(double hours, int* hour, int* min, int* sec)
+{
+  if (hour && min && sec)
+  {
+    ON_DecimalHoursToHMS(hours, *hour, *min, *sec);
+  }
+}
+
+RH_C_FUNCTION void DecimalHoursToHMSWithDate(double hours, int* hour, int* min, int* sec, int* year, int* month, int* day)
+{
+  if (hour && min && sec && year && month && day)
+  {
+    ON_DecimalHoursToHMS(hours, *hour, *min, *sec, *year, *month, *day);
+  }
 }

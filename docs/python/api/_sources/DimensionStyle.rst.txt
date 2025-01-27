@@ -58,6 +58,15 @@ DimensionStyle
    .. py:attribute:: LeaderArrowLength
 
 
+   .. py:attribute:: ArrowType1
+
+
+   .. py:attribute:: ArrowType2
+
+
+   .. py:attribute:: LeaderArrowType
+
+
    .. py:attribute:: CentermarkSize
 
 
@@ -65,6 +74,9 @@ DimensionStyle
 
 
    .. py:attribute:: TextHEight
+
+
+   .. py:attribute:: TextHeight
 
 
    .. py:attribute:: LengthFactor
@@ -94,6 +106,21 @@ DimensionStyle
    .. py:attribute:: LeaderLandingLength
 
 
+   .. py:attribute:: ExtensionLineExtension
+
+
+   .. py:attribute:: ExtensionLineOffset
+
+
+   .. py:attribute:: DimensionLineExtension
+
+
+   .. py:attribute:: FixedExtensionLength
+
+
+   .. py:attribute:: FixedExtensionLengthOn
+
+
    .. py:attribute:: HasFieldOverrides
 
       bool: Checks if any fields in this DimensionStyle are overrides
@@ -106,6 +133,9 @@ DimensionStyle
 
       Guid: Get or Set the Id of this DimensionStyle's parent.
       If ParentId is Guid.Empty, this DimensionStyle has no parent
+
+   .. py:attribute:: Id
+
 
    .. py:method:: ScaleLengthValues(scale)
 

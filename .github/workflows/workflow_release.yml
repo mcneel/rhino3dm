@@ -63,7 +63,7 @@ jobs:
     container: quay.io/pypa/manylinux_2_28_x86_64 #manylinux2014_x86_64
     strategy:
       matrix:
-        python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312]
+        python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312, cp313-cp313]
       fail-fast: false
     steps:
     - name: info
@@ -74,6 +74,8 @@ jobs:
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
       run: git submodule update --init
+    - name: install dependencies
+      run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
     - name: build python manylinux
       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
     - name: audit python wheel
@@ -103,12 +105,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, macos-12, macos-14]
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
+        os: [windows-2019, macos-13, macos-14]
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12', '3.13']
         include:
           - os: windows-2019
             target: windows
-          - os: macos-12
+          - os: macos-13
             target: macos
           - os: macos-14
             target: macos
@@ -169,23 +171,23 @@ jobs:
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    #container:
-      #image: ${{ matrix.image }}
+    container:
+      image: ${{ matrix.image }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-14, windows-2022]
         include:
           - os: ubuntu-latest
             target: linux
-            #image: mcneel/rhino3dm-dev-amzn2
+            image: mcneel/rhino3dm-dev-amazonlinux2023
             artifact-path: src/build/linux/librhino3dm_native.so
           - os: windows-2022
             target: windows
-            #image: ""
+            image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
           - os: macos-14
             target: macos
-            #image: ""
+            image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
       fail-fast: false
     steps:

@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace Rhino.DocObjects.Custom
 {
+  
   /// <summary>
   /// Provides a base class for custom classes of information which may be attached to
   /// geometry or attribute classes.
@@ -161,6 +163,7 @@ namespace Rhino.DocObjects.Custom
     private static DeleteUserDataCallback g_on_delete;
     private static ChangeSerialNumberCallback g_on_getchangeserialnumber;
 
+    [MonoPInvokeCallback(typeof(TransformUserDataCallback))]
     private static void OnTransformUserData(int serialNumber, ref Geometry.Transform xform)
     {
       UserData ud = FromSerialNumber(serialNumber);
@@ -176,6 +179,8 @@ namespace Rhino.DocObjects.Custom
         }
       }
     }
+
+    [MonoPInvokeCallback(typeof(ArchiveUserDataCallback))]
     private static int OnArchiveUserData(int serialNumber)
     {
       int rc = 0; //FALSE
@@ -196,6 +201,7 @@ namespace Rhino.DocObjects.Custom
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(ReadWriteUserDataCallback))]
     private static int OnReadWriteUserData(int serialNumber, int writing, IntPtr pBinaryArchive)
     {
       int rc = 0; //FALSE
@@ -222,6 +228,7 @@ namespace Rhino.DocObjects.Custom
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(DuplicateUserDataCallback))]
     private static int OnDuplcateUserData(int serialNumber, IntPtr pNativeUserData)
     {
       int rc = 0;
@@ -252,6 +259,7 @@ namespace Rhino.DocObjects.Custom
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(CreateUserDataCallback))]
     private static IntPtr OnCreateInstance(Guid managedTypeId)
     {
       IntPtr rc = IntPtr.Zero;
@@ -283,6 +291,7 @@ namespace Rhino.DocObjects.Custom
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(DeleteUserDataCallback))]
     private static void OnDelete(int serialNumber)
     {
       UserData ud = FromSerialNumber(serialNumber);
@@ -305,6 +314,7 @@ namespace Rhino.DocObjects.Custom
     /// <param name="serialNumber"></param>
     /// <param name="currentRemainder"></param>
     /// <returns></returns>
+    [MonoPInvokeCallback(typeof(ChangeSerialNumberCallback))]
     private static uint OnGetChangeSerialNumber(int serialNumber, uint currentRemainder)
     {
       UserData ud = FromSerialNumber(serialNumber);

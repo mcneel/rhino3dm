@@ -14,7 +14,7 @@ static bool SeekPastCompressedBuffer(ON_BinaryArchive& archive)
   size_t sizeof__outbuffer;
   if (!archive.ReadCompressedBufferSize(&sizeof__outbuffer))
     return false;
-  
+
   if (0 == sizeof__outbuffer)
     return true;
 
@@ -418,11 +418,24 @@ static ON_UUID Internal_ONX_Model_AddModelGeometry(
   return ON_ModelGeometryComponent::FromModelComponentRef(model_component_reference, &ON_ModelGeometryComponent::Unset)->Id();
 }
 
+static bool DeleteModelComponent(BND_UUID id, ON_ModelComponent::Type objectType, std::shared_ptr<ONX_Model> m_model)
+{
+  ON_UUID _id = Binding_to_ON_UUID(id);
+  ON_ModelComponentReference compref = m_model->RemoveModelComponent(objectType, _id);
+  return !compref.IsEmpty();
+}
 
 BND_UUID BND_ONXModel_ObjectTable::AddPoint1(double x, double y, double z)
 {
   ON_Point point_geometry(x,y,z);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddPoint6(double x, double y, double z, const BND_3dmObjectAttributes* attributes)
+{
+  ON_Point point_geometry(x,y,z);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &point_geometry, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
@@ -437,6 +450,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddLine1(const ON_3dPoint& from, const ON_3dP
 {
   ON_LineCurve lc(from, to);
   ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, nullptr);
+  return ON_UUID_to_Binding(rc);
+}
+
+BND_UUID BND_ONXModel_ObjectTable::AddLine2(const ON_3dPoint& from, const ON_3dPoint& to, const BND_3dmObjectAttributes* attributes)
+{
+  ON_LineCurve lc(from, to);
+  ON_UUID rc = Internal_ONX_Model_AddModelGeometry(m_model.get(), &lc, attributes);
   return ON_UUID_to_Binding(rc);
 }
 
@@ -464,13 +484,13 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& p
 BND_UUID BND_ONXModel_ObjectTable::AddPolyline3(emscripten::val points, const class BND_3dmObjectAttributes* attributes)
 {
   bool isArray = points.hasOwnProperty("length");
-  if( isArray ) 
+  if( isArray )
   {
     const std::vector<ON_3dPoint> array = emscripten::vecFromJSArray<ON_3dPoint>(points);
-    return AddPolyline2( array, attributes ); 
+    return AddPolyline2( array, attributes );
   }
   else
-    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes ); 
+    return AddPolyline1( points.as<const BND_Point3dList&>(), attributes );
 }
 
 #endif
@@ -669,10 +689,7 @@ static BND_FileObject* FileObjectFromCompRef(ON_ModelComponentReference& compref
 
 BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
 {
-#if defined(ON_PYTHON_COMPILE)
-  if (index < 0)
-    throw py::index_error();
-#else
+#if !defined(ON_PYTHON_COMPILE)
   if (index < 0)
     return nullptr;
 #endif
@@ -699,6 +716,11 @@ BND_FileObject* BND_ONXModel_ObjectTable::ModelObjectAt(int index)
       compref = iterator2.NextComponentReference();
     }
   }
+
+#if defined(ON_PYTHON_COMPILE)
+  if (index < 0)
+    index = m_compref_cache.Count() + index < 0 ? std::abs(index) : m_compref_cache.Count() + index;
+#endif
 
   if (index < m_compref_cache.Count())
   {
@@ -759,6 +781,11 @@ int BND_File3dmMaterialTable::Add(const BND_Material& material)
     ON_ERROR("failed to add material.");
   }
   return material_index;
+}
+
+bool BND_File3dmMaterialTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Material, m_model);
 }
 
 BND_Material* BND_File3dmMaterialTable::IterIndex(int index)
@@ -921,9 +948,14 @@ void BND_File3dmBitmapTable::Add(const BND_Bitmap& bitmap)
   m_model->AddModelComponent(*b);
 }
 
+bool BND_File3dmBitmapTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Image, m_model);
+}
+
 BND_Bitmap* BND_File3dmBitmapTable::FindIndex(int index)
 {
-  ON_ModelComponentReference compref = m_model->MaterialFromIndex(index);
+  ON_ModelComponentReference compref = m_model->ImageFromIndex(index);
   const ON_ModelComponent* model_component = compref.ModelComponent();
   ON_Bitmap* modelbitmap = const_cast<ON_Bitmap*>(ON_Bitmap::Cast(model_component));
   if (modelbitmap)
@@ -952,7 +984,6 @@ BND_Bitmap* BND_File3dmBitmapTable::FindId(BND_UUID id)
   return nullptr;
 }
 
-
 int BND_File3dmLayerTable::Add(const BND_Layer& layer)
 {
   const ON_Layer* l = layer.m_layer;
@@ -967,6 +998,11 @@ int BND_File3dmLayerTable::AddLayer(std::wstring name, BND_Color color)
   ON_Color c = Binding_to_ON_Color(color);
   int rc = m_model->AddLayer(name.c_str(), c);
   return rc;
+}
+
+bool BND_File3dmLayerTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::Layer, m_model);
 }
 
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
@@ -1167,6 +1203,11 @@ void BND_File3dmDimStyleTable::Add(const BND_DimensionStyle& dimstyle)
   m_model->AddModelComponent(*ds);
 }
 
+bool BND_File3dmDimStyleTable::Delete(BND_UUID id)
+{
+  return DeleteModelComponent(id, ON_ModelComponent::Type::DimStyle, m_model);
+}
+
 BND_DimensionStyle* BND_File3dmDimStyleTable::FindIndex(int index) const
 {
   ON_ModelComponentReference compref = m_model->DimensionStyleFromIndex(index);
@@ -1217,7 +1258,7 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
   const int count_a = attributes["length"].as<int>();
 #endif
 
-  if(m_model && count_g > 0) 
+  if(m_model && count_g > 0)
   {
     // Determine if we need to transform geometry to world origin
     ON_Xform xf;
@@ -1230,17 +1271,17 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
 
     ON_SimpleArray<ON_UUID> object_uuids;
 
-    for ( int i = 0; i < count_g; i ++ ) 
+    for ( int i = 0; i < count_g; i ++ )
     {
 
 #if defined(ON_PYTHON_COMPILE)
       BND_GeometryBase g = py::cast<BND_GeometryBase>(geometry[i]);
       BND_3dmObjectAttributes oa = py::cast<BND_3dmObjectAttributes>(attributes[i]);
 #else
-      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();  
+      BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();
       BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
 #endif
-      
+
       const ON_Geometry* pConstGeom = g.GeometryPointer();
       const ON_3dmObjectAttributes* pConstAtts = i < count_a ? oa.m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
 
@@ -1302,7 +1343,7 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
       }
     }
   }
-  
+
   return index;
 }
 
@@ -1614,7 +1655,7 @@ BND_TUPLE BND_FileObject::GetTextureMapping( const class BND_File3dm* file3dm, i
 
   if(tm == ON_TextureMapping::Unset)
     return NullTuple();
-  else 
+  else
   {
     SetTuple(rc, 0, BND_TextureMapping(tm, nullptr));
     SetTuple(rc, 1, BND_Transform(m_object_xform));
@@ -1678,10 +1719,14 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_ONXModel_ObjectTable&, BND_FileObject*>(s.cast<BND_ONXModel_ObjectTable &>(), s); })
 #endif
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint1, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint6, py::arg("x"), py::arg("y"), py::arg("z"), py::arg("attributes"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint2, py::arg("point"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint3, py::arg("point"), py::arg("attributes"))
     .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint4, py::arg("point"))
+    .def("AddPoint", &BND_ONXModel_ObjectTable::AddPoint5, py::arg("point"), py::arg("attributes"))
     .def("AddPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, py::arg("cloud"), py::arg("attributes")=nullptr)
     .def("AddLine", &BND_ONXModel_ObjectTable::AddLine1, py::arg("from"), py::arg("to"))
+    .def("AddLine", &BND_ONXModel_ObjectTable::AddLine2, py::arg("from"), py::arg("to"), py::arg("attributes"))
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline1, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddPolyline", &BND_ONXModel_ObjectTable::AddPolyline2, py::arg("polyline"), py::arg("attributes")=nullptr)
     .def("AddArc", &BND_ONXModel_ObjectTable::AddArc, py::arg("arc"), py::arg("attributes")=nullptr)
@@ -1716,6 +1761,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmMaterialTable&, BND_Material*>(s.cast<BND_File3dmMaterialTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmMaterialTable::Add, py::arg("material"))
+    .def("Delete", &BND_File3dmMaterialTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmMaterialTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmMaterialTable::FindId, py::arg("id"))
     .def("FindFromAttributes", &BND_File3dmMaterialTable::FromAttributes)
@@ -1757,6 +1803,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmBitmapTable&, BND_Bitmap*>(s.cast<BND_File3dmBitmapTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmBitmapTable::Add, py::arg("bitmap"))
+    .def("Delete", &BND_File3dmBitmapTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmBitmapTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmBitmapTable::FindId, py::arg("id"))
     ;
@@ -1774,6 +1821,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
 #endif
     .def("Add", &BND_File3dmLayerTable::Add, py::arg("layer"))
     .def("AddLayer", &BND_File3dmLayerTable::AddLayer, py::arg("name"), py::arg("color"))
+    .def("Delete", &BND_File3dmLayerTable::Delete, py::arg("id"))
     .def("FindName", &BND_File3dmLayerTable::FindName, py::arg("name"), py::arg("parentId"))
     .def("FindIndex", &BND_File3dmLayerTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmLayerTable::FindId, py::arg("id"))
@@ -1811,6 +1859,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("__iter__", [](py::object s) { return PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*>(s.cast<BND_File3dmDimStyleTable &>(), s); })
 #endif
     .def("Add", &BND_File3dmDimStyleTable::Add, py::arg("dimstyle"))
+    .def("Delete", &BND_File3dmDimStyleTable::Delete, py::arg("id"))
     .def("FindIndex", &BND_File3dmDimStyleTable::FindIndex, py::arg("index"))
     .def("FindId", &BND_File3dmDimStyleTable::FindId, py::arg("id"))
     ;
@@ -1961,12 +2010,12 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
     .def_static("ReadNotes", &BND_ONXModel::ReadNotes, py::arg("path"))
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion, py::arg("path"))
-    /* TODO: implement FromByteArray in py
+#if !defined(NANOBIND)
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
-    */
+ #endif
     .def("Write", &BND_ONXModel::Write, py::arg("path"), py::arg("version")=0)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
@@ -2049,7 +2098,7 @@ void initExtensionsBindings(void*)
     .function("addObject", &BND_ONXModel_ObjectTable::AddObject, allow_raw_pointers())
     .function("addInstanceObject", &BND_ONXModel_ObjectTable::AddInstanceObject2, allow_raw_pointers())
     .function("getBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
-    .function("deleteItem", &BND_ONXModel_ObjectTable::Delete)
+    .function("delete", &BND_ONXModel_ObjectTable::Delete)
     .function("findId", &BND_ONXModel_ObjectTable::FindId, allow_raw_pointers())
     ;
 
@@ -2057,6 +2106,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmMaterialTable::Count)
     .function("get", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmMaterialTable::Add)
+    .function("delete", &BND_File3dmMaterialTable::Delete)
     .function("findIndex", &BND_File3dmMaterialTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmMaterialTable::FindId, allow_raw_pointers())
     .function("findFromAttributes", &BND_File3dmMaterialTable::FromAttributes, allow_raw_pointers())
@@ -2078,6 +2128,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmBitmapTable::Count)
     .function("get", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmBitmapTable::Add)
+    .function("delete", &BND_File3dmBitmapTable::Delete)
     .function("findIndex", &BND_File3dmBitmapTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmBitmapTable::FindId, allow_raw_pointers())
     ;
@@ -2087,6 +2138,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmLayerTable::Add)
     .function("addLayer", &BND_File3dmLayerTable::AddLayer)
+    .function("delete", &BND_File3dmLayerTable::Delete)
     .function("findName", &BND_File3dmLayerTable::FindName, allow_raw_pointers())
     .function("findIndex", &BND_File3dmLayerTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmLayerTable::FindId, allow_raw_pointers())
@@ -2107,6 +2159,7 @@ void initExtensionsBindings(void*)
     .property("count", &BND_File3dmDimStyleTable::Count)
     .function("get", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("add", &BND_File3dmDimStyleTable::Add)
+    .function("delete", &BND_File3dmDimStyleTable::Delete)
     .function("findIndex", &BND_File3dmDimStyleTable::FindIndex, allow_raw_pointers())
     .function("findId", &BND_File3dmDimStyleTable::FindId, allow_raw_pointers())
     ;

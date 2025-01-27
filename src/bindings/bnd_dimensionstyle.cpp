@@ -97,6 +97,7 @@ void initDimensionStyleBindings(rh3dmpymodule& m)
     .def_property_readonly("IsChild", &BND_DimensionStyle::IsChild)
     .def("IsChildOf", &BND_DimensionStyle::IsChildOf, py::arg("id"))
     .def_property("ParentId", &BND_DimensionStyle::GetParentId, &BND_DimensionStyle::SetParentId)
+    .def_property_readonly("Id", &BND_DimensionStyle::GetId)
     ;
 
   py::enum_<ON_DimStyle::field>(pyDimStyle, "Field")
@@ -261,6 +262,7 @@ void initDimensionStyleBindings(void*)
     .property("isChild", &BND_DimensionStyle::IsChild)
     .function("isChildOf", &BND_DimensionStyle::IsChildOf)
     .property("parentId", &BND_DimensionStyle::GetParentId, &BND_DimensionStyle::SetParentId)
+    .property("id", &BND_DimensionStyle::GetId)
     ;
 }
 #endif

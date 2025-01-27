@@ -29,10 +29,11 @@ class BND_ONXModel_ObjectTable
 public:
   BND_ONXModel_ObjectTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   BND_UUID AddPoint1(double x, double y, double z);
+  BND_UUID AddPoint6(double x, double y, double z, const class BND_3dmObjectAttributes* attributes);
   BND_UUID AddPoint2(const ON_3dPoint& point) { return AddPoint1(point.x, point.y, point.z); }
-  //Guid AddPoint3(Point3d point, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddPoint3(const ON_3dPoint& point, const class BND_3dmObjectAttributes* attributes) { return AddPoint6(point.x, point.y, point.z, attributes); }
   BND_UUID AddPoint4(const ON_3fPoint& point) { return AddPoint1(point.x, point.y, point.z); }
-  //Guid AddPoint5(Point3f point, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddPoint5(const ON_3fPoint& point, const class BND_3dmObjectAttributes* attributes) { return AddPoint6(point.x, point.y, point.z, attributes); }
   //Guid[] AddPoints1(IEnumerable<Point3d> points)
   //Guid[] AddPoints2(IEnumerable<Point3d> points, DocObjects.ObjectAttributes attributes)
   //Guid[] AddPoints3(IEnumerable<Point3f> points)
@@ -48,7 +49,7 @@ public:
   //Guid AddAngularDimension1(AngularDimension dimension)
   //Guid AddAngularDimension2(AngularDimension dimension, ObjectAttributes attributes)
   BND_UUID AddLine1(const ON_3dPoint& from, const ON_3dPoint& to);
-  //Guid AddLine2(Point3d from, Point3d to, DocObjects.ObjectAttributes attributes)
+  BND_UUID AddLine2(const ON_3dPoint& from, const ON_3dPoint& to, const class BND_3dmObjectAttributes* attributes);
   //Guid AddLine3(Line line)
   //Guid AddLine4(Line line, DocObjects.ObjectAttributes attributes)
   BND_UUID AddPolyline1(const class BND_Point3dList& points, const class BND_3dmObjectAttributes* attributes);
@@ -105,6 +106,7 @@ public:
   BND_File3dmMaterialTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model->ActiveComponentCount(ON_ModelComponent::Type::RenderMaterial); }
   int Add(const class BND_Material& material);
+  bool Delete(BND_UUID id);
   class BND_Material* FindIndex(int index);
   class BND_Material* IterIndex(int index); // helper function for iterator
   class BND_Material* FindId(BND_UUID id);
@@ -140,6 +142,7 @@ public:
   BND_File3dmBitmapTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Image); }
   void Add(const class BND_Bitmap& bitmap);
+  bool Delete(BND_UUID id);
   class BND_Bitmap* FindIndex(int index);
   class BND_Bitmap* IterIndex(int index); // helper function for iterator
   class BND_Bitmap* FindId(BND_UUID id);
@@ -153,6 +156,7 @@ public:
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::Layer); }
   int Add(const class BND_Layer& layer);
   int AddLayer(std::wstring name, BND_Color color);
+  bool Delete(BND_UUID id);
   class BND_Layer* FindName(std::wstring name, BND_UUID parentId);
   //BND_Layer* FindNameHash(NameHash nameHash)
   class BND_Layer* FindIndex(int index);
@@ -183,6 +187,7 @@ public:
   BND_File3dmDimStyleTable(std::shared_ptr<ONX_Model> m) { m_model = m; }
   int Count() const { return m_model.get()->ActiveComponentCount(ON_ModelComponent::Type::DimStyle); }
   void Add(const class BND_DimensionStyle& dimstyle);
+  bool Delete(BND_UUID id);
   class BND_DimensionStyle* FindIndex(int index) const;
   class BND_DimensionStyle* IterIndex(int index) const; // helper function for iterator
   class BND_DimensionStyle* FindId(BND_UUID id) const;

@@ -2264,21 +2264,20 @@ namespace Rhino.DocObjects
     /// <since>8.0</since>
     public bool HasCustomRenderMeshes(MeshType mt, ViewportInfo vp, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
     {
-      if (Document == null)
+      RhinoDoc doc = Document;
+      if (doc == null)
         return false;
 
       uint f = (uint)flags;
 
-      if (Document is object)
-        f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
+      f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
 
-      if (vp == null)
-        vp = new ViewportInfo();
+      IntPtr ptrViewport = (vp != null) ? vp.ConstPointer() : IntPtr.Zero;
 
       var ret = UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_HasCustomMeshes(
         (int)mt, 
-        vp.ConstPointer(), 
-        Document.RuntimeSerialNumber, 
+        ptrViewport,
+        doc.RuntimeSerialNumber, 
         Id, 
         ref f, 
         (plugin==null) ? IntPtr.Zero : plugin.NonConstPointer(), 
@@ -2308,7 +2307,7 @@ namespace Rhino.DocObjects
       if (Document == null)
         return null;
 
-      var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0);
+      var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0, (uint)flags);
 
       uint f = (uint)flags;
 
@@ -3109,18 +3108,51 @@ namespace Rhino.DocObjects
       var p_const_this = ConstPointer();
       return UnsafeNativeMethods.CRhinoObject_HasHistoryRecord(p_const_this);
     }
+
     /// <summary>
-    /// Sets a history record on the 
+    /// For expert use only.
+    /// Sets the history record that describes how this object was created.
+    /// This information is used to update this object when Rhino history is enabled and an input object changes.
     /// </summary>
-    /// <param name="history">The history record to set for the object</param>
-    /// <returns>true if successful</returns>
+    /// <param name="history">The history record.</param>
+    /// <returns>true if successful, otherwise false.</returns>
     /// <since>8.0</since>
     public bool SetHistory(HistoryRecord history)
     {
-      var p_this = NonConstPointer();
-
+      var p_this = NonConstPointer_I_KnowWhatImDoing();
       return UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
     }
+
+    /// <summary>
+    /// Gets the ids of the parent Rhino objects of this object.
+    /// </summary>
+    /// <returns>An array of Rhino object ids if successful, an empty array if the object has no parents or on error.</returns>
+    /// <since>8.13</since>
+    public Guid[] HistoryParents()
+    {
+      using (var array = new SimpleArrayGuid())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        UnsafeNativeMethods.CRhinoObject_GetParents(ptr_const_this, array.NonConstPointer());
+        return array.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Gets the ids of the child Rhino objects of this object.
+    /// </summary>
+    /// <returns>An array of Rhino object ids if successful, an empty array if the object has no children or on error.</returns>
+    /// <since>8.13</since>
+    public Guid[] HistoryChildren()
+    {
+      using (var array = new SimpleArrayGuid())
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        UnsafeNativeMethods.CRhinoObject_GetChildren(ptr_const_this, array.NonConstPointer());
+        return array.ToArray();
+      }
+    }
+
     internal bool IsCustom
     {
       get
@@ -3884,7 +3916,7 @@ namespace Rhino.Runtime
       if (IntPtr.Zero == pRhinoObjectArray)
         return new DocObjects.RhinoObject[0];
 
-      var count = UnsafeNativeMethods.RhinoObjectArray_Count(pRhinoObjectArray);
+      int count = UnsafeNativeMethods.RhinoObjectArray_Count(pRhinoObjectArray);
       var rc = new DocObjects.RhinoObject[count];
       for (var i = 0; i < count; i++)
       {

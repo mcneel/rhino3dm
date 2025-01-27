@@ -17,7 +17,8 @@ SubD
 
    .. py:method:: ClearEvaluationCache()
 
-      Clear cached information that depends on the location of vertex control points
+      Clear all cached evaluation information (meshes, surface points, bounding boxes, ...)
+      that depends on edge tags, vertex tags, and the location of vertex control points.
 
 
       :rtype: void

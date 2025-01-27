@@ -8,7 +8,7 @@ declare module 'rhino3dm' {
 		PageSpace
 	}
 
-	enum AnnotationTypes {
+	enum AnnotationType {
 		Unset,
 		Aligned,
 		Angular,
@@ -382,7 +382,7 @@ declare module 'rhino3dm' {
 
 	class RhinoModule {
 		ActiveSpace: typeof ActiveSpace
-		AnnotationTypes: typeof AnnotationTypes
+		AnnotationType: typeof AnnotationType
 		ArrowheadTypes: typeof ArrowheadTypes
 		BasepointZero: typeof BasepointZero
 		ComponentIndexType: typeof ComponentIndexType
@@ -565,7 +565,7 @@ declare module 'rhino3dm' {
 		/**
 		 * Type of annotation
 		 */
-		annotationType: AnnotationTypes;
+		annotationType: AnnotationType;
 		/**
 		 * Id of this annotation's parent dimstyle
 		 * If this annotation has overrides to dimstyle properties,
@@ -885,7 +885,7 @@ declare module 'rhino3dm' {
 		split(t:number): object;
 	}
 
-	class Bitmap {
+	class Bitmap extends CommonObject {
 		/**
 		 */
 		width: number;
@@ -901,6 +901,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		sizeOfImage: number;
+		/**
+		 */
+		id: string;
 	}
 
 	class BoundingBox {
@@ -2558,6 +2561,19 @@ declare module 'rhino3dm' {
 		 */
 		static create(planarCurve:Curve,height:number,cap:boolean): Extrusion;
 		/**
+		 * @description Creates an extrusion of a 3d curve (which must be planar), a plane, and a height.
+		 * @param {Curve} planarCurve Planar curve used as profile
+		 * @param {Plane} plane The curve is projected to this plane
+		 * @param {number} height If the height > 0, the bottom of the extrusion will be in plane and
+		the top will be height units above the plane.
+		If the height < 0, the top of the extrusion will be in plane and
+		the bottom will be height units below the plane.
+		The plane used is the one that is returned from the curve's TryGetPlane function.
+		 * @param {boolean} cap If the curve is closed and cap is true, then the resulting extrusion is capped.
+		 * @returns {Extrusion} If the input is valid, then a new extrusion is returned. Otherwise null is returned
+		 */
+		static createWithPlane(planarCurve:Curve, plane: Plane, height:number,cap:boolean): Extrusion;
+		/**
 		 * @description Gets an extrusion from a box.
 		 * @param {Box} box IsValid must be true.
 		 * @param {boolean} cap If true, the base and the top of the box will be capped. Defaults to true.
@@ -2742,7 +2758,7 @@ declare module 'rhino3dm' {
 		 * @description Read a 3dm file from a byte array
 		 * @returns {File3dm} New File3dm on success, null on error.
 		 */
-		static fromByteArray(length:number, buffer: Uint8Array): File3dm;
+		static fromByteArray(buffer: Uint8Array): File3dm;
 		/** ... */
 		settings(): File3dmSettings;
 		/** ... */
@@ -2809,6 +2825,8 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(bitmap: Bitmap): void;
 		/** ... */
+		delete(id:string): boolean;
+		/** ... */
 		findIndex(index:number): Bitmap;
 		/** ... */
 		findId(id:string): Bitmap;
@@ -2832,6 +2850,8 @@ declare module 'rhino3dm' {
 		get(index:number): DimensionStyle;
 		/** ... */
 		add(dimStyle: DimensionStyle): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -2864,7 +2884,7 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(group:Group): void;
 		/** ... */
-		delete(Group): boolean;
+		delete(group:Group): boolean;
 		/** ... */
 		deleteIndex(index:number): boolean;
 		/** ... */
@@ -2925,6 +2945,8 @@ declare module 'rhino3dm' {
 		 * @returns {number} If layer_name is valid, the layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
 		addLayer(name:string,color:object): number;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Finds a Layer given its name.
 		 * @param {string} name The name of the Layer to be searched.
@@ -2982,6 +3004,8 @@ declare module 'rhino3dm' {
 		get(index:number): Material;
 		/** ... */
 		add(material:Material): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a material based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -3124,13 +3148,13 @@ declare module 'rhino3dm' {
 		addBrep(brep:Brep): string;
 		/**
 		 * @description Duplicates the object, then adds a copy of the object to the document.
-		 * @param {ObjectAttributes} attributes
 		 * @param {GeometryBase} geometry
+		 * @param {ObjectAttributes} attributes
 		 * @returns {string} A unique identifier for the object.
 		 */
-		add(attributes: ObjectAttributes, geometry: GeometryBase): string;
+		add(geometry: GeometryBase, attributes: ObjectAttributes): string;
 		/** ... */
-		addObject(): void;
+		addObject(object: File3dmObject): string;
 		/**
 		 * @description Adds an instance reference geometry object to the table.
 		 * @param {InstanceReferenceGeometry} instanceReference The instance reference geometry object.
@@ -3143,7 +3167,7 @@ declare module 'rhino3dm' {
 		 */
 		getBoundingBox(): BoundingBox;
 		/** ... */
-		deleteItem(id:string): void;
+		delete(id:string): void;
 		/** ... */
 		findId(id:string): File3dmObject;
 	}
@@ -3770,6 +3794,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		expanded: boolean;
+		/**
+		 */
+		index: number;
 		/**
 		 * @description Verifies that a layer has per viewport settings.
 		 * @param {string} viewportId If not Guid.Empty, then checks for settings for that specific viewport.
@@ -5470,6 +5497,12 @@ declare module 'rhino3dm' {
 	class Plane {
 		/** ... */
 		static worldXY(): Plane;
+		/** ... */
+		static worldYZ(): Plane;
+		/** ... */
+		static worldZX(): Plane;
+		/** ... */
+		static unset(): Plane;
 	}
 
 	class PlaneSurface extends Surface {
@@ -5709,6 +5742,8 @@ declare module 'rhino3dm' {
 		 * @returns {object} A Three.js bufferGeometry.
 		 */
 		toThreejsJSON(): object;
+		/** ... */
+		static createFromThreejsJSON(json: object): PointCloud;
 	}
 
 	class PointCloudItem {

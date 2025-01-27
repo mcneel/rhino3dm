@@ -72,6 +72,7 @@ ON_3dVector BND_PointCloudItem::GetNormal() const
     return m_pointcloud->m_N[m_index];
   return ON_3dVector::UnsetVector;
 }
+
 void BND_PointCloudItem::SetNormal(const ON_3dVector& v)
 {
   if((m_index >= 0) && (m_index < m_pointcloud->m_P.Count()))
@@ -802,6 +803,69 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 
 }
 
+BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
+{
+   if (emscripten::val::undefined() == json["data"])
+    return nullptr;
+  emscripten::val attributes = json["data"]["attributes"];
+
+  std::vector<double> position_array = emscripten::vecFromJSArray<double>(attributes["position"]["array"]);
+
+  std::vector<double> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<double>(attributes["normal"]["array"]);
+  }
+
+  std::vector<double> color_array;
+  int colorChannels = 3; // could be RGB (3) or RGBA (4)
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+    colorChannels = attributes["color"]["itemSize"].as<int>();
+  }
+
+  ON_PointCloud* pc = new ON_PointCloud();
+
+  const int vertex_count = position_array.size() / 3;
+  pc->m_P.SetCapacity(vertex_count);
+  pc->m_P.SetCount(vertex_count);
+  memcpy(pc->m_P.Array(), position_array.data(), sizeof(double) * position_array.size());
+
+  const int normal_count = normal_array.size() / 3;
+  pc->m_N.SetCapacity(normal_count);
+  pc->m_N.SetCount(normal_count);
+  memcpy(pc->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
+
+  const int color_count = color_array.size() / colorChannels;
+  pc->m_C.SetCapacity(color_count);
+  pc->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
+
+  ON_Color* color_array_ptr = pc->m_C.Array();
+  for (int i = 0; i < color_count; ++i) {
+      int r = static_cast<int>(color_array[i * colorChannels]);
+      int g = static_cast<int>(color_array[i * colorChannels + 1]);
+      int b = static_cast<int>(color_array[i * colorChannels + 2]);
+      if(colorChannels == 4)
+      {
+        int a = static_cast<int>(color_array[i * colorChannels + 3]);
+        color_array_ptr[i] = ON_Color(r, g, b, 255-a);
+      }
+      else
+        color_array_ptr[i] = ON_Color(r, g, b);
+  }
+
+  //memcpy(pc->m_C.Array(), color_array.data(), sizeof(ON_Color) * color_array.size());
+
+  // ON_Xform rotation(1);
+  // rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  // pc->Transform(rotation);
+
+  return new BND_PointCloud(pc, nullptr);
+}
+
+
 
 #endif
 
@@ -936,6 +1000,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
+    .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }
 #endif

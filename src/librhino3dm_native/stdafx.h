@@ -49,7 +49,7 @@
 
 // NOTE: THIS NEEDS TO BE CHANGED WHEN WE RELEASE A PUBLIC BUILD
 #define RHINO_CORE_COMPONENT 1
-#include "../lib//opennurbs/opennurbs.h"
+#include "../lib/opennurbs/opennurbs.h"
 #endif
 
 // Rhino System Plug-in linking pragmas

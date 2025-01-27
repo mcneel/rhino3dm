@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using Rhino.Runtime;
 using Rhino.Display;
 
+
 namespace Rhino.Geometry
 {
   /// <summary>
@@ -813,6 +814,47 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
+    private static Curve BuildRoundedCornerRectangle(Rectangle3d rectangle, bool arcMode, double value)
+    {
+      if (!rectangle.IsValid)
+        return null;
+
+      Point3d[] points = new Point3d[]
+      {
+        rectangle.Corner(0),
+        rectangle.Corner(1),
+        rectangle.Corner(2),
+        rectangle.Corner(3)
+      };
+
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhBuildRoundedCornerRectangle(4, points, arcMode, value);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Creates an arc-cornered (rounded) rectangular curve.
+    /// </summary>
+    /// <param name="rectangle">The rectangle.</param>
+    /// <param name="radius">The arc radius at each corner.</param>
+    /// <returns>Aa arc-cornered rectangular curve if successful, null otherwise.</returns>
+    /// <since>8.9</since>
+    public static Curve CreateArcCornerRectangle(Rectangle3d rectangle, double radius)
+    {
+      return BuildRoundedCornerRectangle(rectangle, true, radius);
+    }
+
+    /// <summary>
+    /// Creates a conic-corned (rounded) rectangular curve.
+    /// </summary>
+    /// <param name="rectangle">The rectangle.</param>
+    /// <param name="rho">The rho value at each corner, in the exclusive range (0.0, 1.0).</param>
+    /// <returns>A conic-cornered rectangular curve if successful, null otherwise.</returns>
+    /// <since>8.9</since>
+    public static Curve CreateConicCornerRectangle(Rectangle3d rectangle, double rho)
+    {
+      return BuildRoundedCornerRectangle(rectangle, false, rho);
+    }
+
 #endif //RHINO_SDK
 
     /// <summary>
@@ -918,6 +960,53 @@ namespace Rhino.Geometry
         return rc ? output.ToNonConstArray() : new Curve[0];
       }
     }
+
+    /// <summary>
+    /// Joins a collection of curve segments together.
+    /// </summary>
+    /// <param name="inputCurves">An array, a list or any enumerable set of curve segments to join.</param>
+    /// <param name="joinTolerance">Joining tolerance, 
+    /// i.e. the distance between segment end-points that is allowed.</param>
+    /// <param name="preserveDirection">
+    /// <para>If true, curve endpoints will be compared to curve start points.</para>
+    /// <para>If false, all start and endpoints will be compared and copies of input curves may be reversed in output.</para>
+    /// </param>
+    /// <param name="key">inputCurves[i] is part of returnValue[key[i]]</param>
+    /// <param name="simpleJoin">Set true to use the simple joining method. In general, set this parameter to false.</param>
+    /// <returns>An array of joined curves. This array can be empty.</returns>
+    /// <exception cref="ArgumentNullException">If inputCurves is null.</exception>
+    /// <since>8.12</since>
+    public static Curve[] JoinCurves(IEnumerable<Curve> inputCurves, double joinTolerance, bool preserveDirection, bool simpleJoin, out int[] key)
+    {
+      if (null == inputCurves)
+        throw new ArgumentNullException("inputCurves");
+
+      using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(inputCurves))
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      using (SimpleArrayInt indexMap = new SimpleArrayInt())
+      {
+        IntPtr inputPtr = input.ConstPointer();
+        IntPtr outputPtr = output.NonConstPointer();
+
+        //2-Jan-2024 Joshua Kennedy https://mcneel.myjetbrains.com/youtrack/issue/RH-79377/Index-tracking-in-Curve-Join.
+        IntPtr indexMapPtr = indexMap.NonConstPointer();
+
+        // 18-Jan-2021 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-67058
+        // 24-Sep-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-83945
+#if RHINO_SDK
+        bool rc = simpleJoin
+          ? UnsafeNativeMethods.RHC_RhinoJoinCurves(inputPtr, outputPtr, joinTolerance, preserveDirection, indexMapPtr)
+          : UnsafeNativeMethods.RHC_RhinoMergeCurves(inputPtr, outputPtr, joinTolerance, preserveDirection, indexMapPtr);
+#else
+        bool rc = UnsafeNativeMethods.ONC_JoinCurves(inputPtr, outputPtr, joinTolerance, preserveDirection, indexMapPtr);
+#endif
+
+        GC.KeepAlive(inputCurves);
+        key = indexMap.ToArray();
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
+    }
+
 
     /// <summary>
     /// Joins a collection of curve segments together.
@@ -1136,7 +1225,7 @@ namespace Rhino.Geometry
     /// <param name="curve0">The first, or starting, curve.</param>
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1156,7 +1245,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="tolerance"></param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurves(Curve curve0, Curve curve1, int numCurves, double tolerance)
     {
@@ -1178,7 +1267,7 @@ namespace Rhino.Geometry
     /// <param name="curve0">The first, or starting, curve.</param>
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1199,7 +1288,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="tolerance"></param>
-    /// <returns>An array of joint curves. This array can be empty.</returns>
+    /// <returns>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurvesWithMatching(Curve curve0, Curve curve1, int numCurves, double tolerance)
     {
@@ -1222,7 +1311,7 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="numSamples">Number of sample points along input curves.</param>
-    /// <returns>>An array of joint curves. This array can be empty.</returns>
+    /// <returns>>An array of tween curves. This array can be empty.</returns>
     /// <since>5.2</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use version that takes tolerance as input")]
@@ -1243,8 +1332,8 @@ namespace Rhino.Geometry
     /// <param name="curve1">The second, or ending, curve.</param>
     /// <param name="numCurves">Number of tween curves to create.</param>
     /// <param name="numSamples">Number of sample points along input curves.</param>
-    /// <param name="tolerance"></param>
-    /// <returns>>An array of joint curves. This array can be empty.</returns>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>>An array of tween curves. This array can be empty.</returns>
     /// <since>6.0</since>
     public static Curve[] CreateTweenCurvesWithSampling(Curve curve0, Curve curve1, int numCurves, int numSamples, double tolerance)
     {
@@ -1708,6 +1797,45 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Creates a revision cloud curve from a planar curve.
+    /// </summary>
+    /// <param name="curve">The input planar curve.</param>
+    /// <param name="segmentCount">
+    /// The number of segments in the output revision cloud curve.
+    /// If zero, the number of segments in the output revision cloud curve is based on the NURB form of the input curve.
+    /// </param>
+    /// <param name="angle">
+    /// The angle in radians, between PI/2.0 and PI radians (90 and 180 degrees). 
+    /// This angle indicates the amount of bulge in the segments.
+    /// </param>
+    /// <param name="flip">The arc segments in output revision cloud curve will be in the opposite direction to the input curve.</param>
+    /// <returns>A revision cloud curve is successful, false otherwise.</returns>
+    /// <since>8.4</since>
+    public static Curve CreateRevisionCloud(Curve curve, int segmentCount, double angle, bool flip)
+    {
+      IntPtr ptr_const_curve = curve.ConstPointer();
+      IntPtr ptr = UnsafeNativeMethods.RHC_RhCreateRevisionCloud(ptr_const_curve, segmentCount, angle, flip);
+      return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Creates a revision cloud curve from points that make up a planar polyline.
+    /// </summary>
+    /// <param name="points">The input points.</param>
+    /// <param name="angle">
+    /// The angle in radians, between PI/2.0 and PI radians (90 and 180 degrees). 
+    /// This angle indicates the amount of bulge in the segments.
+    /// </param>
+    /// <param name="flip">The arc segments in output revision cloud curve will be in the opposite direction to the input curve.</param>
+    /// <returns>A revision cloud curve is successful, false otherwise.</returns>
+    /// <since>8.4</since>
+    public static Curve CreateRevisionCloud(IEnumerable<Point3d> points, double angle, bool flip)
+    {
+      PolylineCurve curve = new PolylineCurve(points);
+      return CreateRevisionCloud(curve, 0, angle, flip);
+    }
+
+    /// <summary>
     /// Determines whether two curves travel more or less in the same direction.
     /// </summary>
     /// <param name="curveA">First curve to test.</param>
@@ -2125,6 +2253,18 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Repairs a curve.
+    /// </summary>
+    /// <param name="tolerance">The repair tolerance.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>8.12</since>
+    public bool Repair(double tolerance)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoRepairCurve(ptr_this, tolerance);
+    }
+
+    /// <summary>
     /// Local minimization for point on a curve with tangent perpendicular to N.
     /// </summary>
     /// <param name="N">
@@ -2199,7 +2339,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Smooths a curve by averaging the positions of control points in a specified region.
     /// </summary>
-    /// <param name="smoothFactor">The smoothing factor, which controls how much control points move towards the average of the neighboring control points.</param>
+    /// <param name="smoothFactor">
+    /// The smoothing factor, which controls how much control
+    /// points move towards the average of the neighboring control points.
+    /// Note that this smoothFactor is equivalent to twice the smooth factor used in
+    /// the Smooth command: on a polyline, Rhino _Smooth with a factor of 0.2 is the
+    /// same as <see cref="Polyline.Smooth(double)"/> with a factor of 0.4.
+    /// </param>
     /// <param name="bXSmooth">When true control points move in X axis direction.</param>
     /// <param name="bYSmooth">When true control points move in Y axis direction.</param>
     /// <param name="bZSmooth">When true control points move in Z axis direction.</param>
@@ -2215,7 +2361,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Smooths a curve by averaging the positions of control points in a specified region.
     /// </summary>
-    /// <param name="smoothFactor">The smoothing factor, which controls how much control points move towards the average of the neighboring control points.</param>
+    /// <param name="smoothFactor">
+    /// The smoothing factor, which controls how much control
+    /// points move towards the average of the neighboring control points.
+    /// Note that this smoothFactor is equivalent to twice the smooth factor used in
+    /// the Smooth command: on a polyline, Rhino _Smooth with a factor of 0.2 is the
+    /// same as <see cref="Polyline.Smooth(double)"/> with a factor of 0.4.
+    /// </param>
     /// <param name="bXSmooth">When true control points move in X axis direction.</param>
     /// <param name="bYSmooth">When true control points move in Y axis direction.</param>
     /// <param name="bZSmooth">When true control points move in Z axis direction.</param>
@@ -3493,6 +3645,7 @@ namespace Rhino.Geometry
     const int idxPointAtT = 0;
     const int idxPointAtStart = 1;
     const int idxPointAtEnd = 2;
+    const int idxPointAtMid = 3;
 
     /// <summary>Evaluates point at a curve parameter.</summary>
     /// <param name="t">Evaluation parameter.</param>
@@ -3512,6 +3665,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_Curve_PointAt(ptr, t, ref rc, idxPointAtT);
       return rc;
     }
+
     /// <summary>
     /// Evaluates point at the start of the curve.
     /// </summary>
@@ -3526,6 +3680,7 @@ namespace Rhino.Geometry
         return rc;
       }
     }
+
     /// <summary>
     /// Evaluates point at the end of the curve.
     /// </summary>
@@ -3541,7 +3696,41 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Evaluates point at the middle, or mid, of the curve.
+    /// </summary>
+    /// <since>8.14</since>
+    public Point3d PointAtMid
+    {
+      get
+      {
+        Point3d rc = new Point3d();
+        IntPtr ptr = ConstPointer();
+        UnsafeNativeMethods.ON_Curve_PointAt(ptr, 1, ref rc, idxPointAtMid);
+        return rc;
+      }
+    }
+
 #if RHINO_SDK
+
+    /// <summary>
+    /// Reparameterizes a curve using automatic parameterization.
+    /// </summary>
+    /// <returns>The reparameterized curve if successful, null otherwise.</returns>
+    /// <remarks>
+    /// Poorly parameterized objects may not intersect and trim properly when combined with other objects.
+    /// "Poorly parameterized" means the curve's domain or the surface's u or v spaces are tiny or huge compared to the size of the object.
+    /// When curves are parameterized with a [0,1] domain, both the accuracy and the precision of geometric calculations like intersections and closest points are reduced, sometimes dramatically.
+    /// Ideally the domain of a curve is close to it's length.
+    /// </remarks>
+    /// <since>8.14</since>
+    public Curve Reparameterize()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr rc = UnsafeNativeMethods.ON_Curve_Reparameterize(ptr_const_this);
+      return GeometryBase.CreateGeometryHelper(rc, null) as Curve;
+    }
+
     /// <summary>
     /// Gets a point at a certain length along the curve. The length must be 
     /// non-negative and less than or equal to the length of the curve. 
@@ -4457,6 +4646,11 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="distance">The distance between division points.</param>
     /// <returns>An array of equidistant points, or null on error.</returns>
+    /// <remarks>
+    /// Unlike the other divide methods, which divides a curve based on arc length, 
+    /// or the distance along the curve between two points, this function divides a curve
+    /// based on the linear distance between points.
+    /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
     public Point3d[] DivideEquidistant(double distance)
@@ -4465,9 +4659,46 @@ namespace Rhino.Geometry
       SimpleArrayPoint3d points = new SimpleArrayPoint3d();
       IntPtr pConstThis = ConstPointer();
       IntPtr pPoints = points.NonConstPointer();
-      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints) > 0)
+      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints, IntPtr.Zero) > 0)
         rc = points.ToArray();
       points.Dispose();
+      return rc;
+    }
+
+    /// <summary>
+    /// Calculates 3d points on a curve where the linear distance between the points is equal.
+    /// </summary>
+    /// <param name="distance">The distance between division points.</param>
+    /// <param name="curveParameters">If successful, an array of curve parameters at the point locations.</param>
+    /// <returns>An array of equidistant points, or null on error.</returns>
+    /// <remarks>
+    /// Unlike the other divide methods, which divides a curve based on arc length, 
+    /// or the distance along the curve between two points, this function divides a curve
+    /// based on the linear distance between points.
+    /// </remarks>
+    /// <since>8.14</since>
+    public Point3d[] DivideEquidistant(double distance, out double[] curveParameters)
+    {
+      Point3d[] rc = null;
+      curveParameters = new double[0];
+
+      IntPtr pConstThis = ConstPointer();
+
+      SimpleArrayPoint3d points = new SimpleArrayPoint3d();
+      IntPtr pPoints = points.NonConstPointer();
+
+      SimpleArrayDouble parameters = new SimpleArrayDouble();
+      IntPtr pParameters = parameters.NonConstPointer();
+
+      if (UnsafeNativeMethods.RHC_RhinoDivideCurveEquidistant(pConstThis, distance, pPoints, pParameters) > 0)
+      {
+        rc = points.ToArray();
+        curveParameters = parameters.ToArray();
+      }
+
+      points.Dispose();
+      parameters.Dispose();
+
       return rc;
     }
 
@@ -5647,6 +5878,24 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Ribbon offset method to mimic RibbonOffset command
+    /// </summary>
+    /// <param name="ribbonParameters">The ribbon offset parameters</param>
+    /// <param name="railCurves">on success an array of split curves representing the sweep rail segments, null on failure</param>
+    /// <param name="crossSectionCurves">on success an array of cross section curves used during brep creation, null on failure</param>
+    /// <param name="brepSurfaces">on success and array of breps representing the ribbon surfaces, null on failure</param>
+    /// <returns>return an offset curve on success, null on failure</returns>
+    public Curve RibbonOffset(RibbonOffsetParameters ribbonParameters, out Curve[] railCurves, out Curve[] crossSectionCurves, out Brep[] brepSurfaces)
+    {
+      var input_curve = this.DuplicateCurve();
+      //Generate ribbon surfaces and curves
+      var offset_curve = RibbonOffsets.RibbonOffsetSurfacing.CreateRibbonOffset(input_curve,ribbonParameters, out railCurves, out crossSectionCurves, out brepSurfaces);
+      
+      input_curve?.Dispose();
+      return offset_curve;
+    }
+
+    /// <summary>
     /// Offset this curve on a brep face surface. This curve must lie on the surface.
     /// </summary>
     /// <param name="face">The brep face on which to offset.</param>
@@ -6007,9 +6256,122 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(pOffsetCurve, null) as Curve;
     }
 
+    /// <summary>
+    /// Gets the curve's control polygon.
+    /// </summary>
+    /// <returns>The control polygon as a polyline if successful, null otherwise.</returns>
+    /// <since>8.11</since>
+    [ConstOperation]
+    public Polyline ControlPolygon()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      using (var points = new SimpleArrayPoint3d())
+      {
+        IntPtr ptr_points = points.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhExtractCurveControlPolygon(ptr_const_this, ptr_points);
+        if (rc)
+          return new Geometry.Polyline(points.ToArray());
+        return null;
+      }
+    }
 
 #endif
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public double[] SpanVector()
+    {
+      double[] vector = null;
+      using (SimpleArrayDouble output = new SimpleArrayDouble())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        UnsafeNativeMethods.ONC_SpanVector(this.ConstPointer(), outputPtr);
+        vector = output.ToArray();
+      }
+      return vector;
+    }
     #endregion methods
+  }
+
+  /// <summary>
+  /// Advanced parameters for RibbonOffset
+  /// Parameters mimic the RibbonOffset Command. 
+  /// </summary>
+  public class RibbonOffsetParameters
+  {
+    /// <summary>
+    /// Offset curve distance from input curve.
+    /// </summary>
+    public double OffsetDistance { get; set; } = 0;
+
+    /// <summary>
+    /// Inside or Outside point location 
+    /// </summary>
+    public Point3d OffsetLocation { get; set; }
+
+    /// <summary>
+    /// Used to determine self-intersections of offset curve, not offset error.
+    /// </summary>
+    public double OffsetTolerance { get; set; }
+    /// <summary>
+    /// A vector that indicates the normal of the plane in which the offset will occur.
+    /// This vector is typically similar to a logical extrude direction for the closed input curve. 
+    /// </summary>
+    public Vector3d OffsetPlaneVector3d { get; set; } = Vector3d.Unset;
+
+    /// <summary>
+    /// Positive, typically the same as distance. When the offset results in a self-intersection
+    /// that gets trimmed off at a kink, the kink will be blended out using this radius.
+    /// </summary>
+    public double BlendRadius { get; set; }
+
+    /// <summary>
+    /// Rebuild offset curve with defined number of control points
+    /// 0 for disabled
+    /// </summary>
+    public int RebuildPointCount { get; set; } = 0;
+
+    /// <summary>
+    /// Refit the offset curve to a specified tolerance
+    /// 0 for disabled
+    /// </summary>
+    public double RefitTolerance { get; set; } = 0;
+
+    /// <summary>
+    /// When false: cross section slashes between input and output curve are located at the ends of ruled spans.
+    /// When true: cross section slashes between input and output curve are located at the mid points of ruled spans and blends.
+    /// </summary>
+    public bool AlignCrossSections { get; set; }
+
+    /// <summary>
+    /// 0 - no surfaces will be created, curves only
+    /// 1 - Simple Sweep 2
+    /// 2 - Sweep 2 mixed with NetworkSrf corners
+    /// </summary>
+    public RibbonOffsetSurfaceMethod RibbonSurfaceGenerationMethod { get; set; } = RibbonOffsetSurfaceMethod.None;
+  }
+
+  /// <summary>
+  /// Enum for RibbonOffset surface generation
+  /// </summary>
+  public enum RibbonOffsetSurfaceMethod : int
+  {
+    /// <summary>
+    /// No Surfaces will be created
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Creates surfaces based off of Sweep 2 Rails
+    /// </summary>
+    Sweep2 = 1,
+
+    /// <summary>
+    /// Creates a mix of sweeps and network surfaces.
+    /// NetworkSrf will be applied in corners with 3 sides
+    /// </summary>
+    Sweep2NetworkSrf = 2,
   }
 }
 

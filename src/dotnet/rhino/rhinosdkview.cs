@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 using System;
 using Rhino.Render;
+using Rhino.Runtime;
 
 #if RHINO_SDK
 
@@ -209,6 +210,7 @@ namespace Rhino.Display
     /// <summary>
     /// true if the view is being dynamically changed by mouse moves, arrow keys, trackballs, etc.
     /// </summary>
+    /// <since>8.1</since>
     public bool InDynamicViewChange
     {
       get
@@ -837,6 +839,46 @@ namespace Rhino.Display
     private static ViewCallback g_on_view_modified;
     private static EventHandler<ViewEventArgs> g_view_modified;
 
+    //////////////////////////
+    // 22-Nov-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-84877
+    internal delegate void ViewEnableDrawingCallback(uint documentSerialNumber, bool drawingEnabled);
+    private static ViewEnableDrawingCallback g_view_enable_drawing_callback;
+    private static EventHandler<ViewEnableDrawingEventArgs> g_view_enable_drawing_handler;
+    private static void OnViewEnableDrawingChanged(uint documentSerialNumber, bool drawingEnabled)
+    {
+      g_view_enable_drawing_handler?.SafeInvoke(null, new ViewEnableDrawingEventArgs(documentSerialNumber, drawingEnabled));
+    }
+
+    /// <summary>
+    /// Called when the state of <seealso cref="EnableDrawing"/> changes.
+    /// </summary>
+    public static event EventHandler<ViewEnableDrawingEventArgs> EnableDrawingChanged
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_view_enable_drawing_handler, value))
+          return;
+        if (g_view_enable_drawing_handler == null)
+        {
+          g_view_enable_drawing_callback = OnViewEnableDrawingChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetViewEnableDrawingCallback(g_view_enable_drawing_callback);
+        }
+        g_view_enable_drawing_handler -= value;
+        g_view_enable_drawing_handler += value;
+      }
+      remove
+      {
+        g_view_enable_drawing_handler -= value;
+        if (g_view_enable_drawing_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetDetailEventCallback(null);
+          g_view_enable_drawing_handler = null;
+        }
+      }
+    }
+    // 22-Nov-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-84877
+    //////////////////////////
+
     //typedef int (CALLBACK* RHMOUSEEVENTCALLBACK_PROC)(unsigned int viewSerialNumber, unsigned int flags, int x, int y, int cancel);
     internal delegate int MouseCallback(uint viewSerialNumber, uint flags, int x, int y, int cancel);
     private static MouseCallback g_on_begin_mouse_move;
@@ -1215,6 +1257,7 @@ namespace Rhino.Display
         g_on_mouse_hover = null;
       }
     }
+    
     internal static event EventHandler<UI.MouseCallbackEventArgs> MouseLeave
     {
       add
@@ -1240,6 +1283,10 @@ namespace Rhino.Display
     #endregion
   }
 
+  /// <summary>
+  /// View event arguments.
+  /// </summary>
+  /// <since>5.0</since>
   public class ViewEventArgs : EventArgs
   {
     readonly IntPtr m_ptr_view;
@@ -1261,6 +1308,10 @@ namespace Rhino.Display
     }
   }
 
+  /// <summary>
+  /// PageView space change event arguments.
+  /// </summary>
+  /// <since>5.0</since>
   public class PageViewSpaceChangeEventArgs : EventArgs
   {
     readonly IntPtr m_ptr_pageview;
@@ -1301,6 +1352,84 @@ namespace Rhino.Display
     /// </summary>
     /// <since>5.0</since>
     public Guid OldActiveDetailId { get; private set; }
+  }
+
+  /// <summary>
+  /// PageView properties change event arguments.
+  /// </summary>
+  /// <since>8.9</since>
+  public class PageViewPropertiesChangeEventArgs : EventArgs
+  {
+    internal PageViewPropertiesChangeEventArgs(uint documentSerialNumber, uint pageViewSerialNumber)
+    {
+      DocumentSerialNumber = documentSerialNumber;
+      PageViewSerialNumber = pageViewSerialNumber;
+    }
+
+    /// <summary>
+    /// The serial number of the Rhino document.
+    /// </summary>
+    /// <since>8.9</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber { get; private set; }
+
+    /// <summary>
+    /// The serial number of the page view.
+    /// </summary>
+    /// <since>8.9</since>
+    [CLSCompliant(false)]
+    public uint PageViewSerialNumber { get; private set; }
+
+    /// <summary>
+    /// Gets the Rhino document.
+    /// </summary>
+    /// <since>8.9</since>
+    public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber);
+
+    /// <summary>
+    /// Gets the Rhino page view.
+    /// </summary>
+    /// <since>8.9</since>
+    public RhinoPageView PageView
+    {
+      get 
+      {
+        var view = RhinoView.FromRuntimeSerialNumber(PageViewSerialNumber);
+        return view is RhinoPageView pageView ? pageView : null;
+      }
+    }
+  }
+
+  /// <summary>
+  /// View enable drawing event argument.
+  /// </summary>
+  /// <since>8.15</since>
+  public class ViewEnableDrawingEventArgs : EventArgs
+  {
+    internal ViewEnableDrawingEventArgs(uint documentSerialNumber, bool drawingEnabled)
+    {
+      DocumentSerialNumber = documentSerialNumber;
+      DrawingEnabled = drawingEnabled;
+    }
+
+    /// <summary>
+    /// The serial number of the Rhino document.
+    /// </summary>
+    /// <since>8.15</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber { get; private set; }
+
+    /// <summary>
+    /// True if drawing is enabled, false otherwise.
+    /// </summary>
+    /// <since>8.15</since>
+    public bool DrawingEnabled { get; private set; }
+
+    /// <summary>
+    /// Gets the Rhino document.
+    /// </summary>
+    /// <since>8.15</since>
+    public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber);
   }
 }
 

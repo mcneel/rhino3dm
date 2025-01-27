@@ -76,6 +76,10 @@ Extrusion
 
       :rtype: Extrusion
 
+   .. py:staticmethod:: CreateWithPlane(planarCurve, plane, height, cap)
+
+      [todo] add documentation
+
    .. py:staticmethod:: CreateBoxExtrusion(box, cap)
 
       Gets an extrusion from a box.

@@ -655,6 +655,12 @@ namespace Rhino.DocObjects
     {
       return _GetUserStrings();
     }
+
+    /// <since>8.11</since>
+    public bool DeleteUserString(string key) => SetUserString(key, null);
+
+    /// <since>8.11</since>
+    public void DeleteAllUserStrings() => _DeleteAllUserStrings();
     #endregion
 
 

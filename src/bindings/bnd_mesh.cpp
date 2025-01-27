@@ -401,6 +401,14 @@ BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
     normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
   }
 
+  std::vector<double> color_array;
+  int colorChannels = 3;
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+    colorChannels = attributes["color"]["itemSize"].as<int>();
+  }
+
   std::vector<float> uv_array;
   if (emscripten::val::undefined() != attributes["uv"])
   {
@@ -442,6 +450,26 @@ BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
   mesh->m_N.SetCapacity(normal_count);
   mesh->m_N.SetCount(normal_count);
   memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(float) * normal_array.size());
+
+  const int color_count = color_array.size() / colorChannels;
+  mesh->m_C.SetCapacity(color_count);
+  mesh->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
+
+  ON_Color* color_array_ptr = mesh->m_C.Array();
+  for (int i = 0; i < color_count; ++i) {
+      int r = static_cast<int>(color_array[i * colorChannels]);
+      int g = static_cast<int>(color_array[i * colorChannels + 1]);
+      int b = static_cast<int>(color_array[i * colorChannels + 2]);
+
+      if(colorChannels == 4)
+      {
+        int a = static_cast<int>(color_array[i * colorChannels + 3]);
+        color_array_ptr[i] = ON_Color(r, g, b, 255-a);
+      }
+      else
+        color_array_ptr[i] = ON_Color(r, g, b);
+  }
 
   const int uv_count = uv_array.size() / 2;
   if (uv_count > 0)

@@ -267,3 +267,19 @@ RH_C_FUNCTION void ON_ClippingPlaneSurface_ClearParticipationLists(ON_ClippingPl
     pClippingPlaneSurface->m_clipping_plane.SetParticipationLists(nullptr, nullptr, true);
   }
 }
+
+RH_C_FUNCTION ON_ClippingPlaneSurface* ON_ClippingPlaneSurface_New()
+{
+  return new ON_ClippingPlaneSurface();
+}
+
+RH_C_FUNCTION ON_ClippingPlaneSurface* ON_ClippingPlaneSurface_New_FromPlane(const ON_PLANE_STRUCT* plane )
+{
+  ON_Plane temp = FromPlaneStruct(*plane);
+  return new ON_ClippingPlaneSurface(temp);
+}
+
+RH_C_FUNCTION ON_ClippingPlaneSurface* ON_ClippingPlaneSurface_New_FromPLaneSurface(const ON_PlaneSurface* planeSurface)
+{
+  return new ON_ClippingPlaneSurface(*planeSurface);
+}
