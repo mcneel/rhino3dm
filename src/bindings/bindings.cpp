@@ -96,7 +96,7 @@ std::string ToStdString(const py::str& str)
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-  BND_TUPLE rc = py::make_tuple(count);
+  BND_TUPLE rc = py::tuple(count);
 #else
   emscripten::val rc(emscripten::val::array());
 #endif
