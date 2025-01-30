@@ -96,7 +96,12 @@ std::string ToStdString(const py::str& str)
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
+
+#if defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(count);
+#else
   BND_TUPLE rc = py::tuple(count);
+#endif
 #else
   emscripten::val rc(emscripten::val::array());
 #endif

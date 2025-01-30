@@ -427,10 +427,12 @@ void initDracoBindings(rh3dmpymodule& m)
       return BND_Draco::DecompressByteArray(length, data);
     })
 #else
+
     .def_static("DecompressByteArray", [](py::buffer b) {
-      buffer_info info = b.request();
+      py::buffer_info info = b.request();
       return BND_Draco::DecompressByteArray(static_cast<int>(info.size), (const char*)info.ptr);
     })
+
 #endif
     .def_static("DecompressBase64String", &BND_Draco::DecompressBase64, py::arg("encoded"))
     .def("ToBase64String", &BND_Draco::ToBase64String)
