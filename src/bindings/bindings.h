@@ -15,6 +15,7 @@
   #include <nanobind/operators.h>
   #include <nanobind/stl/vector.h>
   #include <vector>
+  #include <tuple>
   namespace py = nanobind;
   typedef nanobind::module_ rh3dmpymodule;
 #define RH3DM_PYTHON_BINDING(name, variable) NB_MODULE(name, variable)

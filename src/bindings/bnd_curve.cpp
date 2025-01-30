@@ -159,9 +159,13 @@ BND_TUPLE BND_Curve::FrameAt(double t) const
 {
   ON_Plane plane;
   bool success = m_curve->FrameAt(t, plane);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, BND_Plane::FromOnPlane(plane));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Plane::FromOnPlane(plane));
+#endif
   return rc;
 }
 
@@ -190,9 +194,13 @@ BND_TUPLE BND_Curve::GetCurveParameterFromNurbsFormParameter(double nurbsParamet
 {
   double curve_t = 0;
   bool success = m_curve->GetCurveParameterFromNurbFormParameter(nurbsParameter, &curve_t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, curve_t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, curve_t);
+#endif
   return rc;
 }
 
@@ -200,9 +208,13 @@ BND_TUPLE BND_Curve::GetNurbsFormParameterFromCurveParameter(double curveParamet
 {
   double nurbs_t = 0;
   bool success = m_curve->GetNurbFormParameterFromCurveParameter(curveParameter, &nurbs_t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, nurbs_t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, nurbs_t);
+#endif
   return rc;
 }
 
@@ -224,12 +236,17 @@ BND_TUPLE BND_Curve::Split(double t) const
   ON_Curve* right = nullptr;
   if (m_curve->Split(t, left, right))
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    BND_TUPLE rc = py::make_tuple(BND_CommonObject::CreateWrapper(left, nullptr), BND_CommonObject::CreateWrapper(right, nullptr));
+#else
     BND_TUPLE rc = CreateTuple(2);
     SetTuple(rc, 0, BND_CommonObject::CreateWrapper(left, nullptr));
     SetTuple(rc, 1, BND_CommonObject::CreateWrapper(right, nullptr));
+#endif
     return rc;
   }
   return NullTuple();
+
 }
 
 
