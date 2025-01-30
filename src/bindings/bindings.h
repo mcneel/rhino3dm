@@ -10,8 +10,10 @@
 #if defined(NANOBIND)
   #include <nanobind/nanobind.h>
   #include <nanobind/stl/string.h>
+  #include <nanobind/stl/wstring.h>
   #include <nanobind/stl/tuple.h>
   #include <nanobind/operators.h>
+  #include <nanobind/stl/vector.h>
   #include <vector>
   namespace py = nanobind;
   typedef nanobind::module_ rh3dmpymodule;
