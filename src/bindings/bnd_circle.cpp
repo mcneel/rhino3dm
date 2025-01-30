@@ -54,9 +54,14 @@ BND_TUPLE BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
   bool success = false;
   double t = 0;
   success = m_circle.ClosestPointTo(testPoint, &t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, t);
+#endif
+  
   return rc;
 }
 
