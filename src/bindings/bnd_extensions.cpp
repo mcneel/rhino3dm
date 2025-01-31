@@ -1462,9 +1462,13 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
   const ON_UserString& us = strings[i];
   std::wstring key(us.m_key.Array());
   std::wstring sval(us.m_string_value.Array());
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(key, sval);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, key);
   SetTuple(rc, 1, sval);
+#endif
   return rc;
 }
 
