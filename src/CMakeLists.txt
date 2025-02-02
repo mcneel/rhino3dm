@@ -28,18 +28,23 @@ if (${RHINO3DM_PY})
     add_subdirectory(lib/nanobind)
   else()
     message("Using pybind11")
+    
+    # Get PyBind to stop complaining about the new FindPython
+    # TODO: Update CMake minimum required version and PyBind
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
+    
     add_subdirectory(lib/pybind11)
   endif()
 endif()
 
-message("NODE=${NODE}")
-if( NODE ) 
-    message("NODE evaluates to True")
+if (NODE)
+  message("NODE=${NODE}")
+  message("NODE evaluates to True")
 endif()
 
-message("MODULE=${MODULE}")
-if( MODULE ) 
-    message("MODULE evaluates to True")
+if (MODULE)
+  message("MODULE=${MODULE}")
+  message("MODULE evaluates to True")
 endif()
 
 # Add draco add_library
@@ -62,6 +67,7 @@ file(GLOB uuid_SRC "lib/opennurbs/android_uuid/*.h" "lib/opennurbs/android_uuid/
 file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.skip" "lib/opennurbs/android_uuid/gen_uuid_nt.c")
 
 if(${RHINO3DM_JS})
+  # TODO: Don't manually mess with CXX_FLAGS, use add_compile_options instead
   # we will eventually want the following warning flags on both compiles
   # for now, just WASM
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
@@ -80,6 +86,19 @@ if(${RHINO3DM_JS})
   endif()
 endif()
 
+if(MSVC)
+  # TODO: Deal with warning flags when not in MSVC, for PY compiles
+  # Remove default warning level from CMAKE_CXX_FLAGS_INIT and replace with /W4
+  # This is needed in CMake < 3.20 only
+  string (REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT}")
+  
+  add_compile_options("/MP")  # parallelize solution builds over projects
+  # parallelize project builds over files
+  set (CMAKE_VS_GLOBALS "${CMAKE_VS_GLOBALS};UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true")
+  add_compile_options("/openmp")  # openmp support
+  add_link_options("/INCREMENTAL")  # Incremental linking
+endif()
+
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DON_COMPILING_OPENNURBS)
 add_definitions(-DOPENNURBS_FREETYPE_INC_)
@@ -87,6 +106,7 @@ add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
+
 if(${RHINO3DM_JS})
   # temporary until we adjust opennurbs to be emscripten aware
   if(NODE)
@@ -99,9 +119,15 @@ if(${RHINO3DM_JS})
 
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
 
+  # Get Draco to stop complaining about the new FindPython
+  # TODO: Update CMake minimum version and Draco instead
+  set(_CMAKE_POLICY_DEFAULT_CMP0148_SAVE_ ${CMAKE_POLICY_DEFAULT_CMP0148})
+  set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
   add_subdirectory(lib/draco)
+  set(CMAKE_POLICY_DEFAULT_CMP0148 ${_CMAKE_POLICY_DEFAULT_CMP0148_SAVE_})
+  
   add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${uuid_SRC})
-  target_link_libraries( rhino3dm ${PROJECT_SOURCE_DIR}/build/javascript/draco_wasm/libdraco.a)
+  target_link_libraries(rhino3dm ${PROJECT_SOURCE_DIR}/build/javascript/draco_wasm/libdraco.a)
 endif()
 
 if (${RHINO3DM_PY})
@@ -136,11 +162,27 @@ if (${RHINO3DM_PY})
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
   endif()
 
+  # Get Draco to stop complaining about the new FindPython
+  # TODO: Update CMake minimum version and Draco instead
+  set(_CMAKE_POLICY_DEFAULT_CMP0148_SAVE_ ${CMAKE_POLICY_DEFAULT_CMP0148})
+  set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
   add_subdirectory(lib/draco)
+  set(CMAKE_POLICY_DEFAULT_CMP0148 ${_CMAKE_POLICY_DEFAULT_CMP0148_SAVE_})
+  
   if (MSVC)
-  target_link_libraries(_rhino3dm PRIVATE debug lib/draco/Debug/draco)
-  target_link_libraries(_rhino3dm PRIVATE optimized ${CMAKE_BINARY_DIR}/draco_static/Release/draco.lib)
+    target_link_libraries(_rhino3dm PRIVATE debug lib/draco/Debug/draco)
+    target_link_libraries(_rhino3dm PRIVATE optimized ${CMAKE_BINARY_DIR}/draco_static/Release/draco.lib)
   else()
     target_link_libraries(_rhino3dm PRIVATE ${CMAKE_BINARY_DIR}/draco_static/libdraco.a)
   endif()
+endif()
+
+if (MSVC)
+  # TODO: Use W4 or Wall
+  # TODO: Use /WX
+  # target_compile_options(_rhino3dm PRIVATE "/W3" "/WX")
+  target_compile_options(_rhino3dm PRIVATE "/W3")
+  # TODO: ON should compile with no level 4 warnings!
+  # target_compile_options(opennurbs_static PRIVATE "/W4" "/WX")
+  target_compile_options(opennurbs_static PRIVATE "/W3")
 endif()
