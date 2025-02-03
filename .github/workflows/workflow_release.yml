@@ -18,7 +18,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python sdist
         run: python setup.py sdist build --debug
       - name: check sdist
@@ -73,7 +73,7 @@ jobs:
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
-      run: git submodule update --init
+      run: git submodule update --init --recursive
     - name: install dependencies
       run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
     - name: build python manylinux
@@ -130,7 +130,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
       - name: code-sign native libraries
@@ -206,7 +206,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet ${{ matrix.target }}
         run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
@@ -247,7 +247,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -293,7 +293,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet
         run: python script/bootstrap.py -p windows
       - name: setup dotnet
@@ -343,7 +343,7 @@ jobs:
       - name: safe dir
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
       - name: setup js module
