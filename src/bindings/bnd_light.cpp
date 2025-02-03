@@ -23,10 +23,14 @@ BND_TUPLE BND_Light::GetSpotLightRadii() const
   double inner_radius = 0;
   double outer_radius = 0;
   success = m_light->GetSpotLightRadii(&inner_radius, &outer_radius);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, inner_radius, outer_radius);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, inner_radius);
   SetTuple(rc, 2, outer_radius);
+#endif
   return rc;
 }
 
