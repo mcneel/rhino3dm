@@ -161,20 +161,30 @@ BND_TUPLE BND_Viewport::GetScreenPort() const
 {
   int left, right, bottom, top, portNear, portFar;
   bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &portNear, &portFar);
-  BND_TUPLE rc = CreateTuple(4);
+  BND_TUPLE rc;
   if (success)
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    rc = py::make_tuple(left, top, fabs(right - left), fabs(bottom - top));
+#else
+    rc = CreateTuple(4);
     SetTuple(rc, 0, left);
     SetTuple(rc, 1, top);
     SetTuple(rc, 2, fabs(right - left));
     SetTuple(rc, 3, fabs(bottom - top));
+#endif
   }
   else
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    rc = py::make_tuple(0, 0, 0, 0);
+#else
+    rc = CreateTuple(4);
     SetTuple(rc, 0, 0);
     SetTuple(rc, 1, 0);
     SetTuple(rc, 2, 0);
     SetTuple(rc, 3, 0);
+#endif
   }
   return rc;
 }
