@@ -37,7 +37,7 @@ BND_TUPLE BND_File3dmRenderChannels::GetCustomList() const
   _rch->GetCustomList(list);
 
   const int count = list.Count();
-  auto tuple = CreateTuple(count);
+  BND_TUPLE tuple = CreateTuple(count);
   for (int i = 0; i < count; i++)
   {
     SetTuple(tuple, i, ON_UUID_to_Binding(list[i]));

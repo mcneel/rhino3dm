@@ -78,9 +78,14 @@ BND_TUPLE BND_Surface::ToNurbsSurface(double tolerance) const
 
   if (p_NurbForm == nullptr)
     return NullTuple();
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, new BND_NurbsSurface(p_NurbForm, &m_component_ref));
   SetTuple(rc, 1, accuracy);
+#endif
   return rc;
 }
 
@@ -92,9 +97,13 @@ BND_TUPLE BND_Surface::FrameAt(double u, double v) {
     success = m_surface->FrameAt(u, v, frame);
   }
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, BND_Plane::FromOnPlane(frame));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
+#endif
   return rc;
 }
 
@@ -103,10 +112,15 @@ BND_TUPLE BND_Surface::GetSurfaceParameterFromNurbsFormParameter(double nurbsS, 
   double s = 0;
   double t = 0;
   bool success = m_surface->GetSurfaceParameterFromNurbFormParameter(nurbsS, nurbsT, &s, &t);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, s, t);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, s);
   SetTuple(rc, 2, t);
+#endif
   return rc;
 }
 
@@ -115,10 +129,15 @@ BND_TUPLE BND_Surface::GetNurbsFormParameterFromSurfaceParameter(double surfaceS
   double s = 0;
   double t = 0;
   bool success = m_surface->GetNurbFormParameterFromSurfaceParameter(surfaceS, surfaceT, &s, &t);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, s, t);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, s);
   SetTuple(rc, 2, t);
+#endif
   return rc;
 }
 
