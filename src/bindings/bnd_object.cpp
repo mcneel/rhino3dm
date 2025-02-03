@@ -1537,12 +1537,17 @@ std::wstring BND_CommonObject::RdkXml() const
 
 BND_TUPLE BND_CommonObject::IsValidWithLog() const
 {
-  BND_TUPLE rc = CreateTuple(2);
   ON_wString str("");
   ON_TextLog log(str);
   bool isValid = m_object->IsValid(&log);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(isValid, std::wstring(str));
+#else
+  BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, isValid);
   SetTuple(rc, 1, std::wstring(str));
+#endif
   return rc;
 }
 

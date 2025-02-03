@@ -10,3 +10,8 @@ class TestLinetype(unittest.TestCase):
         self.assertTrue(len(segment) == 2)
         self.assertTrue(type(segment[0]) == float)
         self.assertTrue(type(segment[1]) == bool)
+
+if __name__ == '__main__':
+    print("running tests")
+    unittest.main()
+    print("tests complete")

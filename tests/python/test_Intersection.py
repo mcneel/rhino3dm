@@ -150,12 +150,6 @@ class TestIntersection(unittest.TestCase):
 
             self.assertTrue( resultSphereSphere[0] == rhino3dm.SphereSphereIntersection.Circle )
             self.assertTrue( resultSphereSphere[1].IsValid )
-            
-
-
-
-
-
 
 if __name__ == '__main__':
     print("running tests")
