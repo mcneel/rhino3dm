@@ -18,7 +18,8 @@ class TestFile3dmStringTable(unittest.TestCase):
         file3dm.Strings[key] = value
 
         result = file3dm.Strings[0]
-
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result[0]) == str and type(result[1]) == str)
         self.assertTrue(result[0] == key and result[1] == value)
 
 if __name__ == '__main__':
