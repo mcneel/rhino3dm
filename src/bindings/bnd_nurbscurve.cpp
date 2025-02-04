@@ -67,22 +67,16 @@ BND_TUPLE BND_NurbsCurveKnotList::ToList()
 
   return NullTuple();
 
-/*
-  return std::vector<double>(
-      m_nurbs_curve->m_knot,
-      m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
-      */
 }
 
 std::vector<double> BND_NurbsCurveKnotList::ToList2()
 {
   int count = m_nurbs_curve->KnotCount();
-  if( count > 0) {
-    std::vector<double> rc(count);
-    for (int i = 0; i < count; i++)
-      rc[i] = m_nurbs_curve->Knot(i);
-
-    return rc;
+  if( count > 0) 
+  {
+    return std::vector<double>(
+      m_nurbs_curve->m_knot,
+      m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
   }
 
   return std::vector<double>();

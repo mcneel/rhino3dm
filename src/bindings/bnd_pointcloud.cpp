@@ -672,6 +672,17 @@ BND_TUPLE BND_PointCloud::GetPoints() const
   return NullTuple();
 }
 
+std::vector<ON_3dPoint> BND_PointCloud::GetPoints2() const
+{
+  std::vector<ON_3dPoint> rc;
+  int count = m_pointcloud->m_P.Count();
+  rc.reserve(count);
+  for (int i = 0; i < count; i++)
+    rc.push_back(m_pointcloud->m_P[i]);
+    
+  return rc;
+}
+
 ON_3dPoint BND_PointCloud::PointAt(int index) const
 {
   if (index >= 0 && index < m_pointcloud->m_P.Count())
@@ -695,6 +706,21 @@ BND_TUPLE BND_PointCloud::GetNormals() const
   return NullTuple();
 }
 
+std::vector<ON_3dVector> BND_PointCloud::GetNormals2() const
+{
+  if (m_pointcloud->HasPointNormals())
+  {
+    std::vector<ON_3dVector> rc;
+    int count = m_pointcloud->m_N.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(m_pointcloud->m_N[i]);
+
+    return rc;
+  }
+  return std::vector<ON_3dVector>();
+}
+
 BND_TUPLE BND_PointCloud::GetColors() const
 {
 
@@ -712,6 +738,21 @@ BND_TUPLE BND_PointCloud::GetColors() const
   
 }
 
+std::vector<BND_Color> BND_PointCloud::GetColors2() const
+{
+  if (m_pointcloud->HasPointColors())
+  {
+    std::vector<BND_Color> rc;
+    int count = m_pointcloud->m_C.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(ON_Color_to_Binding(m_pointcloud->m_C[i]));
+
+    return rc;
+  }
+  return std::vector<BND_Color>();
+}
+
 BND_TUPLE BND_PointCloud::GetValues() const
 {
 
@@ -727,6 +768,21 @@ BND_TUPLE BND_PointCloud::GetValues() const
 
   return NullTuple();
   
+}
+
+std::vector<double> BND_PointCloud::GetValues2() const
+{
+  if (m_pointcloud->HasPointValues())
+  {
+    std::vector<double> rc;
+    int count = m_pointcloud->m_V.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(m_pointcloud->m_V[i]);
+
+    return rc;
+  }
+  return std::vector<double>();
 }
 
 int BND_PointCloud::ClosestPoint(const ON_3dPoint& testPoint)
@@ -926,10 +982,14 @@ void initPointCloudBindings(rh3dmpymodule& m)
     .def("InsertRange", &BND_PointCloud::InsertRangePoints, py::arg("index"), py::arg("points"))
     .def("RemoveAt", &BND_PointCloud::RemoveAt, py::arg("index"))
     .def("GetPoints", &BND_PointCloud::GetPoints)
+    .def("GetPoints2", &BND_PointCloud::GetPoints2)
     .def("PointAt", &BND_PointCloud::PointAt, py::arg("index"))
     .def("GetNormals", &BND_PointCloud::GetNormals)
+    .def("GetNormals2", &BND_PointCloud::GetNormals2)
     .def("GetColors", &BND_PointCloud::GetColors)
+    .def("GetColors2", &BND_PointCloud::GetColors2)
     .def("GetValues", &BND_PointCloud::GetValues)
+    .def("GetValues2", &BND_PointCloud::GetValues2)
     .def("ClosestPoint", &BND_PointCloud::ClosestPoint, py::arg("testPoint"))
     ;
 }
