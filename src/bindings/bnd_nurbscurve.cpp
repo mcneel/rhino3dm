@@ -74,6 +74,20 @@ BND_TUPLE BND_NurbsCurveKnotList::ToList()
       */
 }
 
+std::vector<double> BND_NurbsCurveKnotList::ToList2()
+{
+  int count = m_nurbs_curve->KnotCount();
+  if( count > 0) {
+    std::vector<double> rc(count);
+    for (int i = 0; i < count; i++)
+      rc[i] = m_nurbs_curve->Knot(i);
+
+    return rc;
+  }
+
+  return std::vector<double>();
+}
+
 BND_NurbsCurve::BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(nurbscurve, compref);
@@ -234,6 +248,7 @@ void initNurbsCurveBindings(rh3dmpymodule& m)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
     .def("ToList", &BND_NurbsCurveKnotList::ToList)
+    .def("ToList2", &BND_NurbsCurveKnotList::ToList2)
 #if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurveKnotList& kl) -> py::buffer_info
       {

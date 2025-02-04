@@ -44,6 +44,17 @@ BND_TUPLE BND_InstanceDefinitionGeometry::GetObjectIds() const
   return rc;
 }
 
+//TODO: This function is not working properly due to issues casting from BND_UUID
+std::vector<BND_UUID> BND_InstanceDefinitionGeometry::GetObjectIds2() const
+{
+  const ON_SimpleArray<ON_UUID>& list = m_idef->InstanceGeometryIdList();
+  int count = list.Count();
+  std::vector<BND_UUID> rc(count);
+  for (int i = 0; i < count; i++)
+    rc.push_back(ON_UUID_to_Binding(list[i]));
+  return rc;
+}
+
 BND_InstanceReferenceGeometry::BND_InstanceReferenceGeometry(ON_InstanceRef* iref, const ON_ModelComponentReference* compref)
 {
   SetTrackedPointer(iref, compref);
@@ -94,6 +105,7 @@ void initInstanceBindings(rh3dmpymodule& m)
     .def_property_readonly("SourceArchive", &BND_InstanceDefinitionGeometry::SourceArchive)
     .def_property_readonly("UpdateType", &BND_InstanceDefinitionGeometry::UpdateType)
     .def("GetObjectIds", &BND_InstanceDefinitionGeometry::GetObjectIds)
+    .def("GetObjectIds2", &BND_InstanceDefinitionGeometry::GetObjectIds2)
     .def("IsInstanceGeometryId", &BND_InstanceDefinitionGeometry::IsInstanceGeometryId, py::arg("id"))
     ;
 

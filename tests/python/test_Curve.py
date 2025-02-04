@@ -54,6 +54,34 @@ class TestCurve(unittest.TestCase):
             self.assertTrue( type(curveSplitResult[0]) == rhino3dm.NurbsCurve )
             self.assertTrue( type(curveSplitResult[1]) == rhino3dm.NurbsCurve )
 
+    def test_curveDerivativeAt2(self):
+
+        pointArray = []
+        for i in range(15):
+            point = rhino3dm.Point3d(i, i, i)
+            pointArray.append(point)
+
+        curve = rhino3dm.Curve.CreateControlPointCurve(pointArray, 3)
+
+        with self.subTest(msg="DerivativeAt3"):
+            result = curve.DerivativeAt(0.5, 2)
+
+            self.assertTrue( type(result) == list )
+            self.assertTrue( type(result[0]) == rhino3dm.Point3d )
+
+        with self.subTest(msg="DerivativeAt4"):
+            result2 = curve.DerivativeAt(0.5, 2, rhino3dm.CurveEvaluationSide.Below)
+
+            self.assertTrue( type(result2) == list )
+            self.assertTrue( type(result2[0]) == rhino3dm.Point3d )
+
+        with self.subTest(msg="DerivativeAt4"):
+            result3 = curve.DerivativeAt(0.5, 2, rhino3dm.CurveEvaluationSide.Above)
+
+            self.assertTrue( type(result3) == list )
+            self.assertTrue( type(result3[0]) == rhino3dm.Point3d )
+        
+
         
 
 if __name__ == '__main__':

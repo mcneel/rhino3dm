@@ -91,6 +91,7 @@ public:
 
   int GroupCount() const { return m_attributes->GroupCount(); }
   BND_TUPLE GetGroupList() const;
+  std::vector<int> GetGroupList2() const;
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }
   void RemoveFromAllGroups() { m_attributes->RemoveFromAllGroups(); }

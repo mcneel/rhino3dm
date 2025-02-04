@@ -133,7 +133,9 @@ public:
   ON_3dVector TangentAtEnd() const { return m_curve->TangentAt(m_curve->Domain().Max()); }
   BND_TUPLE FrameAt(double t) const;
   BND_TUPLE DerivativeAt(double t, int derivativeCount) const;
+  std::vector<ON_3dPoint> DerivativeAt3(double t, int derivativeCount) const;
   BND_TUPLE DerivativeAt2(double t, int derivativeCount, CurveEvaluationSide side) const;
+  std::vector<ON_3dPoint> DerivativeAt4(double t, int derivativeCount, CurveEvaluationSide side) const;
   ON_3dVector CurvatureAt(double t) const { return m_curve->CurvatureAt(t); }
   // public bool IsContinuous(Continuity continuityType, double t)
   // public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, out double t)

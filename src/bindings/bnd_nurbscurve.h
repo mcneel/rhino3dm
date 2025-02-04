@@ -44,6 +44,7 @@ class BND_NurbsCurveKnotList
 public:
   BND_NurbsCurveKnotList(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference& compref);
   BND_TUPLE ToList();
+  std::vector<double> ToList2();
   ON_NurbsCurve* GetCurve() { return m_nurbs_curve; }
   int Count() const { return m_nurbs_curve->KnotCount(); }
   double GetKnot(int index) const;

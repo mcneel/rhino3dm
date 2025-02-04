@@ -189,6 +189,28 @@ BND_TUPLE BND_Curve::DerivativeAt2(double t, int derivativeCount, CurveEvaluatio
   }
   return rc;
 }
+//TODO: CLEANUP
+std::vector<ON_3dPoint> BND_Curve::DerivativeAt3(double t, int derivativeCount) const
+{
+  return DerivativeAt4(t, derivativeCount, CurveEvaluationSide::Default);
+}
+
+std::vector<ON_3dPoint> BND_Curve::DerivativeAt4(double t, int derivativeCount, CurveEvaluationSide side) const
+{
+  std::vector<ON_3dPoint> rc;
+  ON_SimpleArray<ON_3dPoint> outVectors;
+  outVectors.Reserve(derivativeCount + 1);
+  if (m_curve->Evaluate(t, derivativeCount, 3, &outVectors.Array()->x, (int)side, nullptr))
+  {
+    outVectors.SetCount(derivativeCount + 1);
+    rc.reserve(outVectors.Count());
+    for (int i = 0; i < outVectors.Count(); i++)
+    {
+      rc.push_back(outVectors[i]);
+    }
+  }
+  return rc;
+}
 
 BND_TUPLE BND_Curve::GetCurveParameterFromNurbsFormParameter(double nurbsParameter)
 {
@@ -362,8 +384,10 @@ void initCurveBindings(rh3dmpymodule& m)
     .def_property_readonly("TangentAtEnd", &BND_Curve::TangentAtEnd)
     .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
     .def("FrameAt", &BND_Curve::FrameAt, py::arg("t"))
-    .def("DerivativeAt", &BND_Curve::DerivativeAt, py::arg("t"), py::arg("derivativeCount"))
-    .def("DerivativeAt", &BND_Curve::DerivativeAt2, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
+    //.def("DerivativeAt", &BND_Curve::DerivativeAt, py::arg("t"), py::arg("derivativeCount"))
+    //.def("DerivativeAt", &BND_Curve::DerivativeAt2, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt3, py::arg("t"), py::arg("derivativeCount"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt4, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
     .def("GetCurveParameterFromNurbsFormParameter", &BND_Curve::GetCurveParameterFromNurbsFormParameter, py::arg("nurbsParameter"))
     .def("GetNurbsFormParameterFromCurveParameter", &BND_Curve::GetNurbsFormParameterFromCurveParameter, py::arg("curveParameter"))
     .def("Trim", &BND_Curve::Trim, py::arg("t0"), py::arg("t1"))

@@ -174,6 +174,28 @@ BND_TUPLE BND_ONXModel::GetEmbeddedFilePaths()
   return rc;
 }
 
+std::vector<std::wstring> BND_ONXModel::GetEmbeddedFilePaths2()
+{
+  ON_ClassArray<ON_wString> paths;
+  ON_SimpleArray<ONX_Model_UserData*>& userdata_table = m_model->m_userdata_table;
+  for (int i = 0; i < userdata_table.Count(); i++)
+  {
+    ONX_Model_UserData* ud = userdata_table[i];
+    if (ud && m_model->GetRDKEmbeddedFilePaths(*ud, paths))
+    //if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr, false))
+      break;
+  }
+  int count = paths.Count();
+
+  std::vector<std::wstring> rc;
+  for (int i = 0; i < count; i++)
+  {
+    std::wstring path(paths[i].Array());
+    rc.push_back(path);
+  }
+  return rc;
+}
+
 ///////////////////////////////////////////////
 
 BND_ONXModel::BND_ONXModel()
@@ -1144,6 +1166,39 @@ BND_TUPLE BND_File3dmGroupTable::GroupMembers(int groupIndex)
   return rc;
 }
 
+std::vector<BND_FileObject*> BND_File3dmGroupTable::GroupMembers2(int groupIndex)
+{
+  ON_SimpleArray<BND_FileObject*> fileObjects;
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponentReference compref = iterator.FirstComponentReference();
+  while (!compref.IsEmpty())
+  {
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+    if (geometryComponent)
+    {
+      const ON_3dmObjectAttributes* attrs = geometryComponent->Attributes(nullptr);
+      if (attrs && attrs->IsInGroup(groupIndex))
+      {
+        BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(BND_CommonObject::CreateWrapper(compref));
+        if (geometry)
+        {
+          BND_FileObject* rc = FileObjectFromCompRef(compref);
+          if (rc)
+            fileObjects.Append(rc);
+        }
+      }
+    }
+    compref = iterator.NextComponentReference();
+  }
+
+  std::vector<BND_FileObject*> rc;
+  for (int i = 0; i < fileObjects.Count(); i++)
+    rc.push_back(fileObjects[i]);
+
+  return rc;
+}
+
 
 int BND_File3dmViewTable::Count() const
 {
@@ -1849,6 +1904,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
     .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
     .def("GroupMembers", &BND_File3dmGroupTable::GroupMembers, py::arg("groupIndex"))
+    .def("GroupMembers2", &BND_File3dmGroupTable::GroupMembers2, py::arg("groupIndex"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
@@ -2050,6 +2106,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
     .def("EmbeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
+    .def("EmbeddedFilePaths2", &BND_ONXModel::GetEmbeddedFilePaths2)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64Strict)
     .def("RdkXml", &BND_ONXModel::RdkXml)

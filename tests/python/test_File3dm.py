@@ -1,8 +1,9 @@
 import rhino3dm
 import unittest
 
-#objective: to test the number of objects in the file3dm tables
+
 class TestFile3dmTables(unittest.TestCase):
+    #objective: to test the number of objects in the file3dm tables
     def test_read3dmTables(self):
 
         file3dm = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
@@ -34,6 +35,15 @@ class TestFile3dmTables(unittest.TestCase):
         self.assertTrue(stringTableCnt          == 1)
         self.assertTrue(embeddedFileTableCnt    == 1)
         self.assertTrue(renderContentTableCnt   == 3)
+
+    def test_file3dmEmbeddedFilePaths(self):
+        file3dm = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
+        embeddedFiles = file3dm.EmbeddedFilePaths2()
+        print(embeddedFiles)
+
+        self.assertTrue(type(embeddedFiles) == list)
+        self.assertTrue(type(embeddedFiles[0]) == str)
+        
 
 if __name__ == '__main__':
     print("running tests")
