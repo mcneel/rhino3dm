@@ -51,6 +51,14 @@ class TestSurface(unittest.TestCase):
 
         self.assertTrue(result[0])
 
+    def test_surfaceGetSpanVector(self):
+
+        result = self.surface.GetSpanVector2(0)
+
+        self.assertTrue(type(result) == list)
+        self.assertTrue(len(result) > 0)
+        self.assertTrue(type(result[0]) == float)
+
 if __name__ == '__main__':
     print("running tests")
     unittest.main()

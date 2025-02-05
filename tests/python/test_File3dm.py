@@ -39,7 +39,7 @@ class TestFile3dmTables(unittest.TestCase):
     def test_file3dmEmbeddedFilePaths(self):
         file3dm = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
         embeddedFiles = file3dm.EmbeddedFilePaths2()
-        print(embeddedFiles)
+        #print(embeddedFiles)
 
         self.assertTrue(type(embeddedFiles) == list)
         self.assertTrue(type(embeddedFiles[0]) == str)

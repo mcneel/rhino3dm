@@ -10,7 +10,7 @@ class TestBrep(unittest.TestCase):
         bbox = sphere.ToBrep().GetBoundingBox()
         brep = rhino3dm.Brep.CreateFromBoundingBox(bbox)
         vertex = brep.Vertices[0]
-        get_edge_indices = vertex.GetEdgeIndices()
+        get_edge_indices = vertex.EdgeIndices()
 
         self.assertTrue(type(get_edge_indices) == list)
         self.assertEqual(len(get_edge_indices), 3)

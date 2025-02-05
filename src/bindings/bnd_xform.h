@@ -79,6 +79,7 @@ public:
   BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
   BND_TUPLE ToFloatArray(bool rowDominant) const;
+  std::vector<float> ToFloatArray2(bool rowDominant) const;
 
   double GetM00() const { return m_xform.m_xform[0][0]; }
   double GetM01() const { return m_xform.m_xform[0][1]; }

@@ -36,6 +36,26 @@ BND_TUPLE BND_Surface::GetSpanVector(int direction)
   return NullTuple();
 }
 
+std::vector<double> BND_Surface::GetSpanVector2(int direction)
+{
+  int count = m_surface->SpanCount(direction) + 1;
+  if (count < 1)
+    return std::vector<double>();
+
+  ON_SimpleArray<double> span(count);
+  span.SetCapacity(count);
+  span.SetCount(count);
+
+  if (m_surface->GetSpanVector(direction, span.Array()))
+  {
+    std::vector<double> rc(count);
+    for (int i = 0; i < count; i++)
+      rc[i] = span[i];
+    return rc;
+  }
+  return std::vector<double>();
+}
+
 BND_Curve* BND_Surface::IsoCurve(int direction, double constantParameter) const
 {
   ON_Curve* crv = m_surface->IsoCurve(direction, constantParameter);
@@ -155,6 +175,7 @@ void initSurfaceBindings(rh3dmpymodule& m)
     .def("FrameAt", &BND_Surface::FrameAt, py::arg("u"), py::arg("v"))
     .def("Domain", &BND_Surface::Domain, py::arg("direction"))
     .def("GetSpanVector", &BND_Surface::GetSpanVector, py::arg("direction"))
+    .def("GetSpanVector2", &BND_Surface::GetSpanVector2, py::arg("direction"))
     .def("NormalAt", &BND_Surface::NormalAt, py::arg("u"), py::arg("v"))
     .def("IsClosed", &BND_Surface::IsClosed, py::arg("direction"))
     .def("IsPeriodic", &BND_Surface::IsPeriodic, py::arg("direction"))
