@@ -676,6 +676,12 @@ void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
   m_model->RemoveModelComponent(ON_ModelComponent::Type::ModelGeometry, _id);
 }
 
+void BND_ONXModel_ObjectTable::Delete2(std::string id)
+{
+  ON_UUID _id = ON_UuidFromString(id.c_str());
+  m_model->RemoveModelComponent(ON_ModelComponent::Type::ModelGeometry, _id);
+}
+
 int BND_ONXModel_ObjectTable::Count() const
 {
   int count = m_model->ActiveComponentCount(ON_ModelComponent::Type::ModelGeometry) +
@@ -1805,6 +1811,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("AddObject", &BND_ONXModel_ObjectTable::AddObject, py::arg("object"))
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
+    .def("Delete", &BND_ONXModel_ObjectTable::Delete2, py::arg("id"))
     .def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
     ;
 

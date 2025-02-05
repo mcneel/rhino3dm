@@ -88,6 +88,10 @@ public:
   BND_UUID AddObject(const class BND_FileObject* object);
 
   void Delete(BND_UUID objectId);
+  void Delete2(std::string uuid);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  void Delete3(py::object objectId);
+#endif
   //int Delete(IEnumerable<Guid> objectIds)
 
   int Count() const;
