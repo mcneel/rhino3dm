@@ -23,7 +23,7 @@ ON_UUID Binding_to_ON_UUID(const BND_UUID& id)
 #if !defined(NANOBIND)
   std::string s = py::str(id);
 #else
-  std::string s = py::cast<std::string>(id);
+  std::string s = py::cast<std::string>(id.attr("hex"));
 #endif
   return ON_UuidFromString(s.c_str());
 }

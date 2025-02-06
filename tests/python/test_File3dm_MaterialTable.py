@@ -4,7 +4,6 @@ import unittest
 #objective: to test creating file with bitmaps
 class TestFile3dmMaterialTable(unittest.TestCase):
 
-    @unittest.skip("BAD CAST")
     def test_deleteMaterial(self):
         file3dm = rhino3dm.File3dm()
         file3dm.ApplicationName = 'python'

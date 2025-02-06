@@ -112,7 +112,7 @@ BND_TUPLE NullTuple()
 {
 #if defined(ON_PYTHON_COMPILE)
 #if defined(NANOBIND)
-  UNIMPLEMENTED_EXCEPTION;
+  return py::tuple();
 #else
   return py::none();
 #endif

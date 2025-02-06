@@ -44,12 +44,11 @@ BND_TUPLE BND_InstanceDefinitionGeometry::GetObjectIds() const
   return rc;
 }
 
-//TODO: This function is not working properly due to issues casting from BND_UUID
 std::vector<BND_UUID> BND_InstanceDefinitionGeometry::GetObjectIds2() const
 {
   const ON_SimpleArray<ON_UUID>& list = m_idef->InstanceGeometryIdList();
   int count = list.Count();
-  std::vector<BND_UUID> rc(count);
+  std::vector<BND_UUID> rc;
   for (int i = 0; i < count; i++)
     rc.push_back(ON_UUID_to_Binding(list[i]));
   return rc;

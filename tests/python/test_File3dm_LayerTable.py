@@ -31,8 +31,7 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 2)
 
-#objective: to test creating file with layers and deleting a layer
-    @unittest.skip("BAD CAST")
+    #objective: to test creating file with layers and deleting a layer
     def test_deleteLayer(self):
         file3dm = rhino3dm.File3dm()
         file3dm.ApplicationName = 'python'

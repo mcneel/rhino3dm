@@ -2,7 +2,6 @@ import rhino3dm
 import unittest
 
 #objective: to test creating file with bitmaps
-@unittest.skip("BAD CAST")
 class TestFile3dmBitmapTable(unittest.TestCase):
 
     def test_deleteDimStyle(self):
