@@ -246,8 +246,6 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux
-          - os: windows-2019
-            target: windows
           - os: macos-13
             target: macos
           - os: macos-14
