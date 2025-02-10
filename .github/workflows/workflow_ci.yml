@@ -241,13 +241,11 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macos-13, macos-14]
+        os: [ubuntu-latest, macos-13, macos-14]
         python-version: ['3.10', '3.11', '3.12', '3.13']
         include:
           - os: ubuntu-latest
             target: linux
-          - os: windows-2019
-            target: windows
           - os: macos-13
             target: macos
           - os: macos-14
@@ -398,11 +396,13 @@ jobs:
     needs: [build_py_all_bdist]
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-latest, windows-2019, macos-13, macos-14]
         python-version: ['3.10', '3.11', '3.12', '3.13']
         include:
           - os: ubuntu-latest
             target: linux
+          - os: windows-2019
+            target: windows
           - os: macos-13
             target: macos
           - os: macos-14
