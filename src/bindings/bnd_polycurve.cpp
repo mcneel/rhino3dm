@@ -62,6 +62,24 @@ BND_TUPLE BND_PolyCurve::Explode() const
   */
 }
 
+std::vector<BND_Curve*> BND_PolyCurve::Explode2() const
+{
+  int count = SegmentCount();
+  std::vector<BND_Curve*> rc;
+  for (int i = 0; i < count; i++)
+  {
+    BND_Curve* curve = SegmentCurve(i);
+    if (curve)
+    {
+      ON_Curve* crv = curve->m_curve->DuplicateCurve();
+      rc.push_back(dynamic_cast<BND_Curve*>(BND_CommonObject::CreateWrapper(crv, nullptr)));
+    }
+  }
+  return rc;
+}
+
+
+
 bool BND_PolyCurve::Append1(const ON_Line& line)
 {
   return m_polycurve->AppendAndMatch(new ON_LineCurve(line));
@@ -121,6 +139,7 @@ void initPolyCurveBindings(rh3dmpymodule& m)
     .def_property_readonly("HasGap", &BND_PolyCurve::HasGap)
     .def("RemoveNesting", &BND_PolyCurve::RemoveNesting)
     .def("Explode", &BND_PolyCurve::Explode)
+    .def("Explode2", &BND_PolyCurve::Explode2)
     .def("Append", &BND_PolyCurve::Append1, py::arg("line"))
     .def("Append", &BND_PolyCurve::Append2, py::arg("arc"))
     .def("Append", &BND_PolyCurve::Append3, py::arg("curve"))

@@ -10,8 +10,12 @@
 #if defined(NANOBIND)
   #include <nanobind/nanobind.h>
   #include <nanobind/stl/string.h>
+  #include <nanobind/stl/wstring.h>
   #include <nanobind/stl/tuple.h>
   #include <nanobind/operators.h>
+  #include <nanobind/stl/vector.h>
+  #include <vector>
+  #include <tuple>
   namespace py = nanobind;
   typedef nanobind::module_ rh3dmpymodule;
 #define RH3DM_PYTHON_BINDING(name, variable) NB_MODULE(name, variable)
@@ -77,6 +81,40 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
   tuple.set(index, value);
 #endif
 }
+
+//buffer_info for nanobind
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+
+struct buffer_info {
+  std::string format;
+  std::vector<ssize_t> shape;
+  std::vector<ssize_t> strides;
+
+  buffer_info(
+      std::string format,
+      std::vector<ssize_t> shape_in,
+      std::vector<ssize_t> strides_in)
+      : format(std::move(format)),
+        shape(std::move(shape_in)),
+        strides(std::move(strides_in)) {}
+
+  buffer_info(const buffer_info&) = delete;
+  buffer_info& operator=(const buffer_info&) = delete;
+
+  buffer_info(buffer_info&& other) noexcept {
+    (*this) = std::move(other);
+  }
+
+  buffer_info& operator=(buffer_info&& rhs) noexcept {
+    format = std::move(rhs.format);
+    shape = std::move(rhs.shape);
+    strides = std::move(rhs.strides);
+    return *this;
+  }
+};
+
+
+#endif
 
 BND_LIST CreateList(int count);
 BND_LIST NullList();

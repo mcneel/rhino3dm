@@ -95,7 +95,6 @@ BND_Color BND_3dmObjectAttributes::GetDrawColor(class BND_ONXModel* pDoc) const
   return ON_Color_to_Binding(m_attributes->m_color);
 }
 
-
 BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
 {
   const int count = m_attributes->GroupCount();
@@ -104,6 +103,13 @@ BND_TUPLE BND_3dmObjectAttributes::GetGroupList() const
   for (int i = 0; i < count; i++)
     SetTuple<int>(rc, i, groups[i]);
   return rc;
+}
+// TODO: NANOBIND CLEANUP
+std::vector<int> BND_3dmObjectAttributes::GetGroupList2() const
+{
+  const int count = m_attributes->GroupCount();
+  const int* groups = m_attributes->GroupList();
+  return std::vector<int>(groups, groups + count);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +152,7 @@ void init3dmAttributesBindings(rh3dmpymodule& m)
     .def_property_readonly("Decals", &BND_3dmObjectAttributes::Decals)
     .def_property_readonly("MeshModifiers", &BND_3dmObjectAttributes::MeshModifiers)
     .def("GetGroupList", &BND_3dmObjectAttributes::GetGroupList)
+    .def("GetGroupList2", &BND_3dmObjectAttributes::GetGroupList2)
     .def("AddToGroup", &BND_3dmObjectAttributes::AddToGroup)
     .def("RemoveFromGroup", &BND_3dmObjectAttributes::RemoveFromGroup)
     .def("RemoveFromAllGroups", &BND_3dmObjectAttributes::RemoveFromAllGroups)

@@ -65,10 +65,11 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
-        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND']
+        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug' if self.debug else 'Release'
+        #cfg = 'Debug'
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":

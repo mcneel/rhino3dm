@@ -26,5 +26,6 @@ public:
   void SetMode(ON_RenderChannels::Modes v) { _rch->SetMode(v); }
 
   BND_TUPLE GetCustomList() const;
+  std::vector<BND_UUID> GetCustomList2() const;
   void SetCustomList(BND_TUPLE v);
 };

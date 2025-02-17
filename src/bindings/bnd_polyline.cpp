@@ -147,6 +147,25 @@ BND_TUPLE BND_Polyline::GetSegments() const
 
 }
 
+std::vector<BND_LineCurve*> BND_Polyline::GetSegments2() const
+{
+  int count = m_polyline.Count();
+  if( count < 2 ) 
+  {
+    return std::vector<BND_LineCurve*>();
+  }
+  std::vector<BND_LineCurve*> rc;
+  rc.reserve(count - 1);
+
+  for (int i = 0; i < count - 1; i++)
+  {
+    rc.push_back(new BND_LineCurve(m_polyline[i], m_polyline[i+1]));
+  }
+
+  return rc;
+
+}
+
 BND_LineCurve* BND_Polyline::SegmentAt(int index) const
 {
 
@@ -233,6 +252,7 @@ void initPolylineBindings(rh3dmpymodule& m)
     .def("ToNurbsCurve", &BND_Polyline::ToNurbsCurve)
     .def("ToPolylineCurve", &BND_Polyline::ToPolylineCurve)
     .def("GetSegments", &BND_Polyline::GetSegments)
+    .def("GetSegments2", &BND_Polyline::GetSegments2)
     .def("SegmentAt", &BND_Polyline::SegmentAt, py::arg("index"))
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))

@@ -159,9 +159,13 @@ BND_TUPLE BND_Curve::FrameAt(double t) const
 {
   ON_Plane plane;
   bool success = m_curve->FrameAt(t, plane);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, BND_Plane::FromOnPlane(plane));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Plane::FromOnPlane(plane));
+#endif
   return rc;
 }
 
@@ -185,14 +189,40 @@ BND_TUPLE BND_Curve::DerivativeAt2(double t, int derivativeCount, CurveEvaluatio
   }
   return rc;
 }
+//TODO: CLEANUP
+std::vector<ON_3dPoint> BND_Curve::DerivativeAt3(double t, int derivativeCount) const
+{
+  return DerivativeAt4(t, derivativeCount, CurveEvaluationSide::Default);
+}
+
+std::vector<ON_3dPoint> BND_Curve::DerivativeAt4(double t, int derivativeCount, CurveEvaluationSide side) const
+{
+  std::vector<ON_3dPoint> rc;
+  ON_SimpleArray<ON_3dPoint> outVectors;
+  outVectors.Reserve(derivativeCount + 1);
+  if (m_curve->Evaluate(t, derivativeCount, 3, &outVectors.Array()->x, (int)side, nullptr))
+  {
+    outVectors.SetCount(derivativeCount + 1);
+    rc.reserve(outVectors.Count());
+    for (int i = 0; i < outVectors.Count(); i++)
+    {
+      rc.push_back(outVectors[i]);
+    }
+  }
+  return rc;
+}
 
 BND_TUPLE BND_Curve::GetCurveParameterFromNurbsFormParameter(double nurbsParameter)
 {
   double curve_t = 0;
   bool success = m_curve->GetCurveParameterFromNurbFormParameter(nurbsParameter, &curve_t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, curve_t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, curve_t);
+#endif
   return rc;
 }
 
@@ -200,9 +230,13 @@ BND_TUPLE BND_Curve::GetNurbsFormParameterFromCurveParameter(double curveParamet
 {
   double nurbs_t = 0;
   bool success = m_curve->GetNurbFormParameterFromCurveParameter(curveParameter, &nurbs_t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, nurbs_t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, nurbs_t);
+#endif
   return rc;
 }
 
@@ -224,12 +258,17 @@ BND_TUPLE BND_Curve::Split(double t) const
   ON_Curve* right = nullptr;
   if (m_curve->Split(t, left, right))
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    BND_TUPLE rc = py::make_tuple(BND_CommonObject::CreateWrapper(left, nullptr), BND_CommonObject::CreateWrapper(right, nullptr));
+#else
     BND_TUPLE rc = CreateTuple(2);
     SetTuple(rc, 0, BND_CommonObject::CreateWrapper(left, nullptr));
     SetTuple(rc, 1, BND_CommonObject::CreateWrapper(right, nullptr));
+#endif
     return rc;
   }
   return NullTuple();
+
 }
 
 
@@ -345,8 +384,10 @@ void initCurveBindings(rh3dmpymodule& m)
     .def_property_readonly("TangentAtEnd", &BND_Curve::TangentAtEnd)
     .def("CurvatureAt", &BND_Curve::CurvatureAt, py::arg("t"))
     .def("FrameAt", &BND_Curve::FrameAt, py::arg("t"))
-    .def("DerivativeAt", &BND_Curve::DerivativeAt, py::arg("t"), py::arg("derivativeCount"))
-    .def("DerivativeAt", &BND_Curve::DerivativeAt2, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
+    //.def("DerivativeAt", &BND_Curve::DerivativeAt, py::arg("t"), py::arg("derivativeCount"))
+    //.def("DerivativeAt", &BND_Curve::DerivativeAt2, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt3, py::arg("t"), py::arg("derivativeCount"))
+    .def("DerivativeAt", &BND_Curve::DerivativeAt4, py::arg("t"), py::arg("derivativeCount"), py::arg("side"))
     .def("GetCurveParameterFromNurbsFormParameter", &BND_Curve::GetCurveParameterFromNurbsFormParameter, py::arg("nurbsParameter"))
     .def("GetNurbsFormParameterFromCurveParameter", &BND_Curve::GetNurbsFormParameterFromCurveParameter, py::arg("curveParameter"))
     .def("Trim", &BND_Curve::Trim, py::arg("t0"), py::arg("t1"))
