@@ -19,16 +19,9 @@ class TestCurve(unittest.TestCase):
 
     def test_tuples(self):
 
-        pointArray = []
-        for i in range(15):
-            point = rhino3dm.Point3d(i, i, i)
-            pointArray.append(point)
-
-        curve = rhino3dm.Curve.CreateControlPointCurve(pointArray, 3)
-
         #FrameAt
         with self.subTest(msg="FrameAt"):
-            frameResult = curve.FrameAt(0.5)
+            frameResult = self.curveFromArray.FrameAt(0.5)
             self.assertTrue( len(frameResult) == 2 )
             self.assertTrue( type(frameResult[0]) == bool )
             self.assertTrue( type(frameResult[1]) == rhino3dm.Plane )
