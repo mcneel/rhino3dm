@@ -51,16 +51,16 @@ If you want to tests agains a published version of rhino3dm.py, you would need t
 If you have built rhino3dm.net from source, you need to follow a few additional steps to prepare the testing project:
 
 - `dotnet pack src/dotnet/Rhino3dm.csproj` to create a nuget package.
-- `dotnet nuget source add source "/Users/<username>/dev/rhino3dm/src/dotnet/Debug"` for example on macos
-- `cd tests/dotnet/rhino3dm_test`
-- `dotnet add package Rhino3dm -v 8.9.0-beta`
+- `dotnet nuget add source "/Users/<username>/dev/rhino3dm/src/dotnet/bin/Debug"` for example on macos
+- `cd tests/dotnet`
+- `dotnet add package Rhino3dm -v 8.15.0-beta`
 - `dotnet build`
 - `dotnet test`
 
 If you want to test with a published version:
 
-- `cd tests/dotnet/rhino3dm_test`
-- `dotnet add package Rhino3dm -v 8.9.0-beta`
+- `cd tests/dotnet`
+- `dotnet add package Rhino3dm -v 8.15.0-beta`
 - `dotnet build`
 - `dotnet test`
 
