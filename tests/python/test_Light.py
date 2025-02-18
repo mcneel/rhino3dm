@@ -6,9 +6,11 @@ class TestLight(unittest.TestCase):
 
     def test_lightGetSpotlightRadii(self):
         light = rhino3dm.Light()
-        light.LightStyle = 6
+        light.LightStyle = rhino3dm.LightStyle.CameraSpot
         light.SpotAngleRadians = 0.5
         slr = light.GetSpotLightRadii()
+
+        print(slr)
 
         self.assertTrue( len(slr) == 3 )
         self.assertTrue( type(slr) == tuple )
