@@ -53,14 +53,14 @@ If you have built rhino3dm.net from source, you need to follow a few additional 
 - `dotnet pack src/dotnet/Rhino3dm.csproj` to create a nuget package.
 - `dotnet nuget add source "/Users/<username>/dev/rhino3dm/src/dotnet/bin/Debug"` for example on macos
 - `cd tests/dotnet`
-- `dotnet add package Rhino3dm -v 8.15.0-beta`
+- `dotnet add package Rhino3dm -v 8.16.0-beta`
 - `dotnet build`
 - `dotnet test`
 
 If you want to test with a published version:
 
 - `cd tests/dotnet`
-- `dotnet add package Rhino3dm -v 8.15.0-beta`
+- `dotnet add package Rhino3dm -v 8.16.0-beta`
 - `dotnet build`
 - `dotnet test`
 
