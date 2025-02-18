@@ -31,7 +31,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
 
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string sbuffer)
 {
-  int length = sbuffer.length();
+  size_t length = sbuffer.length();
   const void* buffer = sbuffer.c_str();
 
   ON_Buffer b;

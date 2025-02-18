@@ -39,6 +39,20 @@ BND_TUPLE BND_Light::GetSpotLightRadii() const
 
 void initLightBindings(rh3dmpymodule& m)
 {
+
+  py::enum_<LightStyle>(m, "LightStyle")
+    .value("Unknown", LightStyle::Unknown)
+    .value("CameraDirectional", LightStyle::CameraDirectional)
+    .value("CameraPoint", LightStyle::CameraPoint)
+    .value("CameraSpot", LightStyle::CameraSpot)
+    .value("WorldDirectional", LightStyle::WorldDirectional)
+    .value("WorldPoint", LightStyle::WorldPoint)
+    .value("WorldSpot", LightStyle::WorldSpot)
+    .value("Ambient", LightStyle::Ambient)
+    .value("WorldLinear", LightStyle::WorldLinear)
+    .value("WorldRectangular", LightStyle::WorldRectangular)
+    ;
+
   py::class_<BND_Light, BND_GeometryBase>(m, "Light")
     .def(py::init<>())
     .def_property("IsEnabled", &BND_Light::IsEnabled, &BND_Light::SetEnabled)

@@ -8,6 +8,20 @@ void initLightBindings(rh3dmpymodule& m);
 void initLightBindings(void* m);
 #endif
 
+enum class LightStyle : int
+{
+  Unknown = 0,
+  CameraDirectional = 4,
+  CameraPoint = 5,
+  CameraSpot = 6,
+  WorldDirectional = 7,
+  WorldPoint = 8,
+  WorldSpot = 9,
+  Ambient = 10,
+  WorldLinear = 11,
+  WorldRectangular = 12
+};
+
 class BND_Light : public BND_GeometryBase
 {
   ON_Light* m_light = nullptr;
@@ -21,8 +35,8 @@ protected:
 public:
   bool IsEnabled() const { return m_light->IsEnabled(); }
   void SetEnabled(bool on) { m_light->Enable(on); }
-  ON::light_style GetLightStyle() const { return m_light->Style(); }
-  void SetLightStyle(ON::light_style ls) { m_light->SetStyle(ls); }
+  LightStyle GetLightStyle() const { return (LightStyle)m_light->Style(); }
+  void SetLightStyle(LightStyle ls) { m_light->SetStyle(ON::LightStyle((int)ls)); }
   bool IsPointLight() const { return m_light->IsPointLight(); }
   bool IsDirectionalLight() const { return m_light->IsDirectionalLight(); }
   bool IsSpotLight() const { return m_light->IsSpotLight(); }
