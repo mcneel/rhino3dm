@@ -10,8 +10,6 @@ class TestLight(unittest.TestCase):
         light.SpotAngleRadians = 0.5
         slr = light.GetSpotLightRadii()
 
-        print(slr)
-
         self.assertTrue( len(slr) == 3 )
         self.assertTrue( type(slr) == tuple )
         self.assertTrue( type(slr[0]) == bool )

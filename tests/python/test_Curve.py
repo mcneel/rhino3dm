@@ -22,7 +22,7 @@ class TestCurve(unittest.TestCase):
 
         #FrameAt
         with self.subTest(msg="FrameAt"):
-            frameResult = self.curveFromArray.FrameAt(0.5)
+            frameResult = self.curveFromArray.FrameAt(0)
             self.assertTrue( len(frameResult) == 2 )
             self.assertTrue( type(frameResult[0]) == bool )
             self.assertTrue( type(frameResult[1]) == rhino3dm.Plane )
