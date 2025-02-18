@@ -338,7 +338,7 @@ jobs:
     if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' ||  needs.check_tests_dotnet.outputs.any_changed == 'true'}}
     steps:
       - name: info
-        run: python3 --version && cmake --version && dotnet --version && git --version && dotnet--version
+        run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: safe directory
