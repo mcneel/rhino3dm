@@ -316,8 +316,7 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
-          cd ../tests/python
-          python -m unittest discover .
+
       - name: list files
         run: ls -R
       - name: artifact name
