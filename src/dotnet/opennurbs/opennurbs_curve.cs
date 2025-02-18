@@ -3696,6 +3696,8 @@ namespace Rhino.Geometry
       }
     }
 
+#if RHINO_SDK
+
     /// <summary>
     /// Evaluates point at the middle, or mid, of the curve.
     /// </summary>
@@ -3710,8 +3712,6 @@ namespace Rhino.Geometry
         return rc;
       }
     }
-
-#if RHINO_SDK
 
     /// <summary>
     /// Reparameterizes a curve using automatic parameterization.

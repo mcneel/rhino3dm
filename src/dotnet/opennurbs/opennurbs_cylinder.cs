@@ -226,6 +226,39 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Transforms this cylinder. Note that non-similarity preserving transformations 
+    /// cannot be applied to a cylinder.
+    /// </summary>
+    /// <param name="xform">Transformation matrix to apply.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>8.15</since>
+    public bool Transform(Transform xform)
+    {
+      Circle c = m_basecircle;
+      bool rc = c.Transform(xform);
+      if (rc)
+      {
+        Point3d p = m_basecircle.Plane.Origin;
+        Vector3d z = m_basecircle.Plane.ZAxis;
+        Point3d from = p + m_height1 * z;
+        Point3d to = p + m_height2 * z;
+        
+        from.Transform(xform);
+        to.Transform(xform);
+
+        Vector3d v = to - from;
+        rc = v.IsTiny() || c.Normal.IsParallelTo(v, 1e-6) != 0;
+        if (rc)
+        {
+          m_basecircle = c;
+          m_height1 = m_basecircle.Plane.DistanceTo(from);
+          m_height2 = m_basecircle.Plane.DistanceTo(to);
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
     /// Constructs a Brep representation of this Cylinder. 
     /// This is synonymous with calling NurbsSurface.CreateFromCylinder().
     /// </summary>

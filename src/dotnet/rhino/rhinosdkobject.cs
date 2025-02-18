@@ -2521,7 +2521,7 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public int SetTextureMapping(int channel, TextureMapping tm)
     {
-      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(ConstPointer(), channel, tm.ConstPointer());
+      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(ConstPointer(), channel, tm == null ? IntPtr.Zero : tm.ConstPointer());
      }
     
     
@@ -2529,13 +2529,13 @@ namespace Rhino.DocObjects
     /// Sets texture mapping and mapping object transform for a channel
     /// </summary>
     /// <param name="channel"></param>
-    /// <param name="tm"></param>
+    /// <param name="tm">The TextureMapping to set into this channel, or null to remove a texture mapping from a channel.</param>
     /// <param name="objectTransform">Mapping channel object transform</param>
     /// <returns></returns>
     /// <since>6.26</since>
     public int SetTextureMapping(int channel, TextureMapping tm, Transform objectTransform)
     {
-      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm.ConstPointer(), ref objectTransform);
+      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm==null ? IntPtr.Zero : tm.ConstPointer(), ref objectTransform);
     }
 
     /// <summary>
@@ -3595,6 +3595,36 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Gets the SubDEdge if the referenced geometry is one.
+    /// </summary>
+    /// <returns>A SubDEdge; or null if the referenced object is not a SubDEdge, or on error.</returns>
+    /// <since>8.15</since>
+    public SubDEdge SubDEdge()
+    {
+      uint id = 0;
+      IntPtr ptrSubD = UnsafeNativeMethods.CRhinoObjRef_SubDEdge(m_ptr, ref id);
+      SubD parentSubD = ObjRefToGeometryHelper(ptrSubD) as SubD;
+      if (parentSubD != null)
+        return parentSubD.Edges.Find(id);
+      return null;
+    }
+
+    /// <summary>
+    /// Gets the SubDVertex if the referenced geometry is one.
+    /// </summary>
+    /// <returns>A SubDVertex; or null if the referenced object is not a SubDVertex, or on error.</returns>
+    /// <since>8.15</since>
+    public SubDVertex SubDVertex()
+    {
+      uint id = 0;
+      IntPtr ptrSubD = UnsafeNativeMethods.CRhinoObjRef_SubDVertex(m_ptr, ref id);
+      SubD parentSubD = ObjRefToGeometryHelper(ptrSubD) as SubD;
+      if (parentSubD != null)
+        return parentSubD.Vertices.Find(id);
+      return null;
+    }
+
+    /// <summary>
     /// Gets the point if the referenced geometry is one.
     /// </summary>
     /// <returns>A point; or null if the referenced object is not a point, or on error.</returns>
@@ -3894,7 +3924,11 @@ namespace Rhino.Runtime
       for (var i = 0; i < count; i++)
       {
         var p_rhino_object = m_rhino_objects[i].ConstPointer();
-        UnsafeNativeMethods.RhinoObjectArray_Add(m_ptr, p_rhino_object);
+        if (p_rhino_object != IntPtr.Zero) 
+        {
+          UnsafeNativeMethods.RhinoObjectArray_Add(m_ptr, p_rhino_object);
+        }
+
       }
     }
 

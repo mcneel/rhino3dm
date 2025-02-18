@@ -4,6 +4,7 @@ using System.IO;
 using Rhino.Geometry;
 using Rhino.Render.PostEffects;
 using Rhino.Runtime.InteropWrappers;
+using System.Collections.Generic;
 
 // Most of these should not need to be wrapped. Some of their
 // functionality is merged into other wrapper classes
@@ -727,6 +728,31 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_3dmView_SetSectionBehavior(ptrThis, (int)value);
       }
     }
+
+    /// <summary>
+    /// Returns a list of clipping plane Ids associated with this view.
+    /// </summary>
+    public Guid[] ClippingPlanesIds
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+
+        var ptrArray = new SimpleArrayIntPtr();
+
+        UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer() );
+
+        var outList = new List<Guid>();
+
+        foreach (var ptr in ptrArray.ToArray())
+        {
+          outList.Add(UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlaneId(ptr));
+        }
+
+        return outList.ToArray();
+      }
+    }
+
 
     ViewportInfo m_viewport;
 

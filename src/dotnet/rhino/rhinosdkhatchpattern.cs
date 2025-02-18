@@ -2,11 +2,8 @@
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq.Expressions;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.FileIO;
-using Rhino.Collections;
 
 namespace Rhino.DocObjects
 {
@@ -377,6 +374,50 @@ namespace Rhino.DocObjects
       }
       return rc;
     }
+
+    /// <summary>
+    /// Writes a hatch pattern defintion to a file.
+    /// </summary>
+    /// <param name="filename">Name of file to create. If file exists, it will be overwritten.</param>
+    /// <param name="hatchPattern">The hatch pattern to write.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <remarks>Output file is in AutoCAD .PAT format.</remarks>
+    /// <since>8.15</since>
+    public static bool WriteToFile(string filename, HatchPattern hatchPattern)
+    {
+      if (string.IsNullOrEmpty(filename) || null == hatchPattern)
+        return false;
+
+      IntPtr ptr_const_pattern = hatchPattern.ConstPointer();
+      return UnsafeNativeMethods.RHC_RhinoWriteHatchPatternFile(filename, ptr_const_pattern);
+    }
+
+    /// <summary>
+    /// Writes one or more hatch pattern defintions to a file.
+    /// </summary>
+    /// <param name="filename">Name of file to create. If file exists, it will be overwritten.</param>
+    /// <param name="hatchPatterns">The enumeration of hatch patterns to write.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <remarks>Output file is in AutoCAD .PAT format.</remarks>
+    /// <since>8.15</since>
+    public static bool WriteToFile(string filename, IEnumerable<HatchPattern> hatchPatterns)
+    {
+      if (string.IsNullOrEmpty(filename))
+        return false;
+
+      IntPtr ptr_object_array = UnsafeNativeMethods.ON_ObjectArray_New();
+      foreach (var pattern in hatchPatterns)
+      {
+        IntPtr ptr_const_pattern = pattern.ConstPointer();
+        UnsafeNativeMethods.ON_ObjectArray_Append(ptr_object_array, ptr_const_pattern);
+      }
+
+      bool rc = UnsafeNativeMethods.RHC_RhinoWriteHatchPatternFile2(filename, ptr_object_array);
+      UnsafeNativeMethods.ON_ObjectArray_Delete(ptr_object_array);
+
+      return rc;
+    }
+
 #endif
 
     internal override IntPtr _InternalGetConstPointer()
