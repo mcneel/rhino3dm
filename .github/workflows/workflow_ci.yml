@@ -242,7 +242,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-13, macos-14]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
@@ -401,7 +401,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-13, macos-14]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
