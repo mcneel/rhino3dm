@@ -3390,11 +3390,22 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
 {
   if (nullptr == rhinoObject)
     return 0;
+
   CRhinoDoc* rhino_doc = rhinoObject->Document();
   if (nullptr == rhino_doc)
     return 0;
 
   const UUID plug_in_id = RhinoApp().GetDefaultRenderApp();
+
+  if (nullptr == mapping)
+  {
+    //This is a delete - do things differently.
+    const CRhMappingHost mappingHost(*rhino_doc);
+
+    return mappingHost.DeleteMappingChannelAndWidgets(rhinoObject, plug_in_id, iChannelId) ? 1 : 0;
+  }
+
+  
   const ON_MappingRef* mapping_ref = rhinoObject->Attributes().m_rendering_attributes.MappingRef(plug_in_id);
   ON_Xform xform(1);
   UUID mapping_id = ON_nil_uuid;

@@ -2152,8 +2152,12 @@ namespace Rhino.Runtime
     {
       get
       {
-        var psl = GetPlatformService<IOperatingSystemInformation>();
-        return psl.IsRunningInWindowsContainer;
+        if (RunningInRhino)
+        {
+          var psl = GetPlatformService<IOperatingSystemInformation>();
+          return psl.IsRunningInWindowsContainer;
+        }
+        return false;
       }
     }
 

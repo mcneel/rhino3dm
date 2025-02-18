@@ -2573,8 +2573,27 @@ namespace Rhino.Display
     /// <since>7.1</since>
     public void DrawLineNoClip(Point3d from, Point3d to, System.Drawing.Color color, int thickness)
     {
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineNoClip(m_ptr, from, to, color.ToArgb(), thickness);
+      DrawLinesNoClip(new Line[] { new Line(from, to) }, color, thickness);
     }
+
+    /// <summary>
+    /// Draws a multiple lines. This version of line drawing will draw the
+    /// segments of the line that extend beyond the near and far planes of the
+    /// view frustum with depths on those planes
+    /// </summary>
+    /// <param name="lines">the lines to draw</param>
+    /// <param name="color">Color to draw lines in</param>
+    /// <param name="thickness">Thickness (in pixels) of lines</param>
+    public void DrawLinesNoClip(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color, int thickness)
+    {
+      int count;
+      Line[] lines_array = Collections.RhinoListHelpers.GetConstArray(lines, out count);
+      if (null == lines_array || count < 1)
+        return;
+
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLinesNoClip(m_ptr, count, lines_array, color.ToArgb(), thickness);
+    }
+
     /// <summary>
     /// Draws a single dotted line.
     /// </summary>

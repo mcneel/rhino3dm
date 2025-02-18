@@ -293,6 +293,29 @@ RH_C_FUNCTION ON_UUID ON_3dmView_NamedViewId(const ON_3dmView* pView)
   return ON_nil_uuid;
 }
 
+RH_C_FUNCTION void ON_3dmView_GetClippingPlanes(const ON_3dmView* pView, ON_SimpleArray<ON_ClippingPlaneInfo>* array_to_fill)
+{
+  if (pView && array_to_fill)
+  {
+    *array_to_fill = pView->m_clipping_planes;
+  }
+}
+
+RH_C_FUNCTION ON_UUID ON_ClippingPlaneInfo_GetPlaneId(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->m_plane_id;
+  }
+  return ON_nil_uuid;
+}
+
+
+
+
+
+
+
 RH_C_FUNCTION ON_EarthAnchorPoint* ON_EarthAnchorPoint_New()
 {
   return new ON_EarthAnchorPoint();
