@@ -85,21 +85,20 @@ def print_ok_message(ok_message):
 def run_command(command, suppress_errors=False):
     print(command)
     verbose = True #we don't yet have a command-line switch for this, if we ever need one.
-    if suppress_errors == True:                
+    if suppress_errors:                
         dev_null = open(os.devnull, 'w')
-        if _platform == "win32" or _platform == "win64":
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=dev_null)
-        else:
-            process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null)
+        stderr = dev_null
     else:
-        if _platform == "win32" or _platform == "win64":
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        else:
-            process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stderr = subprocess.PIPE
+
+    if _platform == "win32" or _platform == "win64":
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=stderr)
+    else:
+            process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=stderr)
     
     while True:
-        line = process.stdout.readline()               
-        if process.poll() is not None:
+        line = process.stdout.readline()             
+        if process.poll() is not None and not line:
             break   
         if line:
             if sys.version_info[0] < 3:
@@ -109,7 +108,7 @@ def run_command(command, suppress_errors=False):
                 if verbose:
                     line = line.decode('utf-8').strip()
                     print(line)
-        elif suppress_errors == False:
+        elif not suppress_errors:
             error = process.stderr.readline()                
             if error:
                 if sys.version_info[0] < 3:
@@ -393,7 +392,7 @@ def setup_macos():
         print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
-    run_command(command)
+    run_command(command, True)
     
     #print(command)
     # methogen
