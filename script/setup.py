@@ -392,7 +392,7 @@ def setup_macos():
         print(bcolors.BOLD + "Generating xcodeproj files for macOS..." + bcolors.ENDC)
 
     command = "cmake -G \"Xcode\" -DMACOS_BUILD=1 " + librhino3dm_native_folder
-    run_command(command, True)
+    run_command(command)
     
     #print(command)
     # methogen

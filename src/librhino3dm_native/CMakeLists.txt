@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(librhino3dm_native)
 
 if(MACOS_BUILD)
-  message("macOS Compile")
+  #message("macOS Compile")
 endif()
 
 if(IOS)
