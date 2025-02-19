@@ -53,6 +53,7 @@ jobs:
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
             script/**
+            src/CMakeLists.txt
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
