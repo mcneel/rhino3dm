@@ -22,6 +22,7 @@ class TestCurve(unittest.TestCase):
 
         #FrameAt
         with self.subTest(msg="FrameAt"):
+            #NOTE: FrameAt(0.5) passes on macos-14, but fails on windows, and macos-13
             frameResult = self.curveFromArray.FrameAt(0)
             self.assertTrue( len(frameResult) == 2 )
             self.assertTrue( type(frameResult[0]) == bool )

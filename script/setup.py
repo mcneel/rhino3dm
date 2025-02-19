@@ -284,24 +284,24 @@ def setup_windows():
     
     # 32 bit version...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
-    #target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32"))
+    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32"))
     target_file_name = "librhino3dm_native.vcxproj"
 
-    #item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
-    #if not overwrite_check(item_to_check):
-    #    return False
+    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+    if not overwrite_check(item_to_check):
+        return False
 
     os.chdir(target_path)
  
     # generate the project files
     print("")
-    # if xcode_logging:
-    #     print("Generating vcxproj files for Windows 32-bit native build...")
-    # else:
-    #     print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
+    if xcode_logging:
+        print("Generating vcxproj files for Windows 32-bit native build...")
+    else:
+        print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
     librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    #command = ("cmake -G \"Visual Studio 17 2022\" -Tv142 -A Win32 " + librhino3dm_native_folder)
-    #run_command(command)
+    command = ("cmake -G \"Visual Studio 17 2022\" -Tv142 -A Win32 " + librhino3dm_native_folder)
+    run_command(command)
 
     # 64 bit version...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64"))
