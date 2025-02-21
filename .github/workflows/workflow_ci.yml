@@ -54,6 +54,7 @@ jobs:
             Current_Development_Tools.md
             script/**
             src/CMakeLists.txt
+            src/librhino3dm_native/CMakeLists.txt
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
