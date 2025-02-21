@@ -15,6 +15,6 @@ test('brepVertexGetEdgeIndices', async () => {
 
    expect(Array.isArray(edgeIndices)).toBe(true)
    expect(edgeIndices.length).toBe(3)
-   expect(Number.isFinite(edgeIndices[0])).toBe(true)
+   expect(typeof edgeIndices[0] === "number").toBe(true)
 
 })

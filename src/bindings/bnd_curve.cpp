@@ -403,6 +403,62 @@ using namespace emscripten;
 
 void initCurveBindings(void*)
 {
+
+  enum_<CurveEvaluationSide>("CurveEvaluationSide")
+    .value("Default", CurveEvaluationSide::Default)
+    .value("Below", CurveEvaluationSide::Below)
+    .value("Above", CurveEvaluationSide::Above)
+    ;
+
+  enum_<BlendContinuity>(m, "BlendContinuity")
+    .value("Position", BlendContinuity::Position)
+    .value("Tangency", BlendContinuity::Tangency)
+    .value("Curvature", BlendContinuity::Curvature)
+    ;
+
+  enum_<CurveOffsetCornerStyle>(m, "CurveOffsetCornerStyle")
+    .value("None", CurveOffsetCornerStyle::None)
+    .value("Sharp", CurveOffsetCornerStyle::Sharp)
+    .value("Round", CurveOffsetCornerStyle::Round)
+    .value("Smooth", CurveOffsetCornerStyle::Smooth)
+    .value("Chamfer", CurveOffsetCornerStyle::Chamfer)
+    ;
+
+  enum_<CurveKnotStyle>(m, "CurveKnotStyle")
+    .value("Uniform", CurveKnotStyle::Uniform)
+    .value("Chord", CurveKnotStyle::Chord)
+    .value("ChordSquareRoot", CurveKnotStyle::ChordSquareRoot)
+    .value("UniformPeriodic", CurveKnotStyle::UniformPeriodic)
+    .value("ChordPeriodic", CurveKnotStyle::ChordPeriodic)
+    .value("ChordSquareRootPeriodic", CurveKnotStyle::ChordSquareRootPeriodic)
+    ;
+
+  enum_<CurveOrientation>(m, "CurveOrientation")
+    .value("Undefined", CurveOrientation::Undefined)
+    .value("Clockwise", CurveOrientation::Clockwise)
+    .value("CounterClockwise", CurveOrientation::CounterClockwise)
+    ;
+
+  enum_<PointContainment>(m, "PointContainment")
+    .value("Unset", PointContainment::Unset)
+    .value("Inside", PointContainment::Inside)
+    .value("Outside", PointContainment::Outside)
+    .value("Coincident", PointContainment::Coincident)
+    ;
+
+  enum_<RegionContainment>(m, "RegionContainment")
+    .value("Disjoint", RegionContainment::Disjoint)
+    .value("MutualIntersection", RegionContainment::MutualIntersection)
+    .value("AInsideB", RegionContainment::AInsideB)
+    .value("BInsideA", RegionContainment::BInsideA)
+    ;
+
+  enum_<CurveExtensionStyle>(m, "CurveExtensionStyle")
+    .value("Line", CurveExtensionStyle::Line)
+    .value("Arc", CurveExtensionStyle::Arc)
+    .value("Smooth", CurveExtensionStyle::Smooth)
+    ;
+
   class_<BND_Curve, base<BND_GeometryBase>>("Curve")
     .class_function("createControlPointCurve", &BND_Curve::CreateControlPointCurve3, allow_raw_pointers())
     .property("domain", &BND_Curve::GetDomain, &BND_Curve::SetDomain)

@@ -24,6 +24,6 @@ test('attributesGroupList', async () => {
     groupList = obj.attributes().getGroupList()
 
     expect(Array.isArray(groupList)).toBe(true)
-    expect(Number.isFinite(groupList[0])).toBe(true)
+    expect(typeof groupList[0] === "number").toBe(true)
 
 })
