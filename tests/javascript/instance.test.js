@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const fs = require('fs')
 
 let rhino
 beforeAll(async () => {
