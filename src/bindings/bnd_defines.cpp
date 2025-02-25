@@ -547,7 +547,7 @@ void initDefines(void*)
     .value("CustomUnits", ON::LengthUnitSystem::CustomUnits)
     .value("Unset", ON::LengthUnitSystem::Unset)
     ;
-
+/*
   enum_<ON::light_style>("LightStyle")
     .value("None", ON::light_style::unknown_light_style)
     .value("CameraDirectional", ON::light_style::camera_directional_light)
@@ -560,7 +560,7 @@ void initDefines(void*)
     .value("WorldLinear", ON::light_style::world_linear_light)
     .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
-
+*/
   enum_<ON::EarthCoordinateSystem>("BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
