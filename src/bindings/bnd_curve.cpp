@@ -410,13 +410,13 @@ void initCurveBindings(void*)
     .value("Above", CurveEvaluationSide::Above)
     ;
 
-  enum_<BlendContinuity>(m, "BlendContinuity")
+  enum_<BlendContinuity>("BlendContinuity")
     .value("Position", BlendContinuity::Position)
     .value("Tangency", BlendContinuity::Tangency)
     .value("Curvature", BlendContinuity::Curvature)
     ;
 
-  enum_<CurveOffsetCornerStyle>(m, "CurveOffsetCornerStyle")
+  enum_<CurveOffsetCornerStyle>("CurveOffsetCornerStyle")
     .value("None", CurveOffsetCornerStyle::None)
     .value("Sharp", CurveOffsetCornerStyle::Sharp)
     .value("Round", CurveOffsetCornerStyle::Round)
@@ -424,7 +424,7 @@ void initCurveBindings(void*)
     .value("Chamfer", CurveOffsetCornerStyle::Chamfer)
     ;
 
-  enum_<CurveKnotStyle>(m, "CurveKnotStyle")
+  enum_<CurveKnotStyle>("CurveKnotStyle")
     .value("Uniform", CurveKnotStyle::Uniform)
     .value("Chord", CurveKnotStyle::Chord)
     .value("ChordSquareRoot", CurveKnotStyle::ChordSquareRoot)
@@ -433,27 +433,27 @@ void initCurveBindings(void*)
     .value("ChordSquareRootPeriodic", CurveKnotStyle::ChordSquareRootPeriodic)
     ;
 
-  enum_<CurveOrientation>(m, "CurveOrientation")
+  enum_<CurveOrientation>("CurveOrientation")
     .value("Undefined", CurveOrientation::Undefined)
     .value("Clockwise", CurveOrientation::Clockwise)
     .value("CounterClockwise", CurveOrientation::CounterClockwise)
     ;
 
-  enum_<PointContainment>(m, "PointContainment")
+  enum_<PointContainment>("PointContainment")
     .value("Unset", PointContainment::Unset)
     .value("Inside", PointContainment::Inside)
     .value("Outside", PointContainment::Outside)
     .value("Coincident", PointContainment::Coincident)
     ;
 
-  enum_<RegionContainment>(m, "RegionContainment")
+  enum_<RegionContainment>("RegionContainment")
     .value("Disjoint", RegionContainment::Disjoint)
     .value("MutualIntersection", RegionContainment::MutualIntersection)
     .value("AInsideB", RegionContainment::AInsideB)
     .value("BInsideA", RegionContainment::BInsideA)
     ;
 
-  enum_<CurveExtensionStyle>(m, "CurveExtensionStyle")
+  enum_<CurveExtensionStyle>("CurveExtensionStyle")
     .value("Line", CurveExtensionStyle::Line)
     .value("Arc", CurveExtensionStyle::Arc)
     .value("Smooth", CurveExtensionStyle::Smooth)

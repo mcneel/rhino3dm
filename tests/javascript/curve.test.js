@@ -102,7 +102,7 @@ test('deriativeAt', async () => {
 
 test('deriativeAt2', async () => {
 
-  const result = crvFromArray.derivativeAtSide(0.5, 2, 1)
+  const result = crvFromArray.derivativeAtSide(0.5, 2, rhino.CurveEvaluationSide.Below)
 
   expect(Array.isArray(result)).toBe(true)
   result.forEach( item => {
