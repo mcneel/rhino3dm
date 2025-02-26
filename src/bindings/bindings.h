@@ -46,6 +46,7 @@ std::string ToStdString(const py::str& str);
 
 #if defined(ON_WASM_COMPILE)
 #include <emscripten/bind.h>
+#include <emscripten/emscripten.h>
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
