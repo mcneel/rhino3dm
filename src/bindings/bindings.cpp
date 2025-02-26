@@ -12,6 +12,7 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 #endif
 
   ON::Begin();
+  initVersionBindings(m);
   initFileUtilitiesBindings(m);
   initDefines(m);
   initIntersectBindings(m);

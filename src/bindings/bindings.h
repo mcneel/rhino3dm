@@ -141,6 +141,8 @@ void Append(BND_LIST& list, const T& value)
 
 BND_DateTime CreateDateTime(struct tm t);
 
+
+#include "bnd_version.h"
 #include "bnd_color.h"
 #include "bnd_file_utilities.h"
 #include "bnd_uuid.h"
