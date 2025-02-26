@@ -93,6 +93,20 @@ using namespace emscripten;
 
 void initLightBindings(void*)
 {
+
+  enum_<LightStyle>("LightStyle")
+    .value("Unknown", LightStyle::Unknown)
+    .value("CameraDirectional", LightStyle::CameraDirectional)
+    .value("CameraPoint", LightStyle::CameraPoint)
+    .value("CameraSpot", LightStyle::CameraSpot)
+    .value("WorldDirectional", LightStyle::WorldDirectional)
+    .value("WorldPoint", LightStyle::WorldPoint)
+    .value("WorldSpot", LightStyle::WorldSpot)
+    .value("Ambient", LightStyle::Ambient)
+    .value("WorldLinear", LightStyle::WorldLinear)
+    .value("WorldRectangular", LightStyle::WorldRectangular)
+    ;
+
   class_<BND_Light, base<BND_GeometryBase>>("Light")
     .constructor<>()
     .property("isEnabled", &BND_Light::IsEnabled, &BND_Light::SetEnabled)
