@@ -1,6 +1,7 @@
 #include "bindings.h"
 
 #pragma once
+
 #if defined(ON_PYTHON_COMPILE)
 void initBrepBindings(rh3dmpymodule& m);
 #else

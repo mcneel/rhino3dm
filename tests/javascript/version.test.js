@@ -9,6 +9,7 @@ beforeEach(async () => {
 test('versionInfo', async () => { 
 
     console.log(rhino.Version)
-    console.log(typeof rhino.Version)
+    expect(typeof rhino.Version).toBe('string')
+    expect(rhino.Version.length).toBeGreaterThan(0)
 
 })
