@@ -1,13 +1,18 @@
 #include "bindings.h"
 
+const std::string version = ON::VersionQuartetAsString();
+
 #if defined(ON_PYTHON_COMPILE)
 RH3DM_PYTHON_BINDING(_rhino3dm, m) {
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
+  m.attr("Version") = py::cast(version);
 #endif
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
+
 EMSCRIPTEN_BINDINGS(rhino3dm) {
+  emscripten::constant("Version", version);
   void* m = nullptr;
 #endif
 
