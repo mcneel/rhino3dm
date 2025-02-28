@@ -590,7 +590,9 @@ namespace Rhino
       )
       {
         IntPtr const_ptr_options = options.ConstPointer(true);
-        return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
+        // 23-Jan-2024 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-78351
+        //return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, Path, const_ptr_options);
+        return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, Path, const_ptr_options);
       }
     }
 

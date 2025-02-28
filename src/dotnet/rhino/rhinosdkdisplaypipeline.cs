@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 #if RHINO_SDK
 using System;
+using System.Drawing;
 using System.Linq;
 using Rhino.DocObjects;
 using Rhino.Geometry;
@@ -1385,8 +1386,6 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void PushModelTransform(Transform xform)
     {
-      if( MeshCacheEnabled )
-        m_cache.Flush(this);
       UnsafeNativeMethods.CRhinoDisplayPipeline_PushModelTransform(m_ptr, ref xform);
     }
 
@@ -1396,8 +1395,6 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void PopModelTransform()
     {
-      if (MeshCacheEnabled)
-        m_cache.Flush(this);
       UnsafeNativeMethods.CRhinoDisplayPipeline_Pop(m_ptr, idxModelTransform);
     }
 
@@ -1923,7 +1920,9 @@ namespace Rhino.Display
 
     class MeshCache
     {
-      System.Collections.Generic.List<Mesh> m_meshes = new System.Collections.Generic.List<Mesh>();
+      System.Collections.Generic.List<Mesh> m_meshes = new System.Collections.Generic.List<Mesh>(32);
+      Transform[] m_transforms = new Transform[32];
+      int m_transforms_count = 0;
       DisplayMaterial m_material;
 
       public void Add(DisplayPipeline pipeline, Mesh mesh, DisplayMaterial material)
@@ -1941,6 +1940,15 @@ namespace Rhino.Display
           m_material.OneShotNonConstCallback = (s,e) => { Flush(pipeline); };
         mesh.OneShotNonConstCallback = (s, e) => { Flush(pipeline); };
         m_meshes.Add(mesh);
+
+        if (m_transforms.Length <= m_transforms_count)
+        {
+          var transforms = m_transforms;
+          m_transforms = new Transform[m_transforms.Length * 2];
+          Array.Copy(transforms, m_transforms, m_transforms_count);
+        }
+
+        m_transforms[m_transforms_count++] = pipeline.ModelTransform;
       }
 
       public void Flush(DisplayPipeline pipeline)
@@ -1972,11 +1980,14 @@ namespace Rhino.Display
 
           IntPtr ptr_pipeline = pipeline.NonConstPointer();
 
-          UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMeshes(ptr_pipeline, pMeshes, const_ptr_material, pCacheHandles);
+          pipeline.PushModelTransform(Transform.Identity);
+          UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMeshes(ptr_pipeline, pMeshes, const_ptr_material, pCacheHandles, m_transforms, m_transforms_count);
+          pipeline.PopModelTransform();
           UnsafeNativeMethods.ON_MeshArray_Delete(pMeshes);
           UnsafeNativeMethods.CRhinoCacheHandleArray_Delete(pCacheHandles);
         }
         m_meshes.Clear();
+        m_transforms_count = 0;
         m_material = null;
       }
     }
@@ -2394,6 +2405,43 @@ namespace Rhino.Display
       IntPtr ptr_cache = cloud.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawPointCloud(m_ptr, const_ptr_cloud, size, color.ToArgb(), ptr_cache);
       GC.KeepAlive(cloud);
+    }
+
+    public enum InferenceLineType : int
+    {
+      /// <summary>
+      /// A chord from P to Q
+      /// </summary>
+      Chord = 0,
+      /// <summary>
+      /// A ray from P through Q
+      /// </summary>
+      Ray = 1,
+      /// <summary>
+      /// An infinite line through P and Q
+      /// </summary>
+      InfiniteLine = 2,
+    }
+    /// <summary>
+    /// Draw an inference line used in gesture based snapping
+    /// </summary>
+    /// <param name="P">First point used to define the line in world coordinates</param>
+    /// <param name="O">Second point used to define the line in world coordinates</param>
+    /// <param name="color">Color of line</param>
+    /// <param name="type">Type of line <see cref="InferenceLineType"/></param>
+    public void DrawInferenceLine(Point3d P, Point3d O, Color color, InferenceLineType type)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferenceLine(m_ptr, P, O, color.ToArgb(), (int)type);
+    }
+
+    /// <summary>
+    /// Draw inference point used in gesture based snapping
+    /// </summary>
+    /// <param name="P">Location of point in world coordinates</param>
+    /// <param name="color">Color of the point</param>
+    public void DraweInferencePoint(Point3d P, Color color)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferencePoint(m_ptr, P, color.ToArgb());
     }
 
     /// <since>5.0</since>

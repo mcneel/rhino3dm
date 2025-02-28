@@ -542,6 +542,61 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Intersects a mesh with an (infinite) plane. This is the old version in v5
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
+    /// <since>5.0</since>
+    internal static Polyline[] MeshPlaneOld(Mesh mesh, Plane plane)
+    {
+      Rhino.Collections.RhinoList<Plane> planes = new Rhino.Collections.RhinoList<Plane>(1, plane);
+      return MeshPlaneOld(mesh, planes);
+    }
+
+    /// <summary>
+    /// Intersects a mesh with a collection of (infinite) planes. This is the old version in v5
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="planes">Planes to intersect with.</param>
+    /// <returns>An array of polylines describing the intersection loops or null (Nothing in Visual Basic) if no intersections could be found.</returns>
+    /// <exception cref="ArgumentNullException">If planes is null.</exception>
+    /// <since>5.0</since>
+    internal static Polyline[] MeshPlaneOld(Mesh mesh, IEnumerable<Plane> planes)
+    {
+      if (planes == null) throw new ArgumentNullException("planes");
+
+      Rhino.Collections.RhinoList<Plane> list = planes as Rhino.Collections.RhinoList<Plane> ??
+                                                new Rhino.Collections.RhinoList<Plane>(planes);
+      if (list.Count < 1)
+        return null;
+
+      IntPtr pMesh = mesh.ConstPointer();
+      int polylines_created = 0;
+      IntPtr pPolys = UnsafeNativeMethods.TL_Intersect_MeshPlanes1(pMesh, list.Count, list.m_items, ref polylines_created);
+      GC.KeepAlive(mesh);
+      if (polylines_created < 1 || IntPtr.Zero == pPolys)
+        return null;
+
+      // convert the C++ polylines created into .NET polylines
+      Polyline[] rc = new Polyline[polylines_created];
+      for (int i = 0; i < polylines_created; i++)
+      {
+        int point_count = UnsafeNativeMethods.ON_Intersect_MeshPlanes2(pPolys, i);
+        Polyline pl = new Polyline(point_count);
+        if (point_count > 0)
+        {
+          pl.m_size = point_count;
+          UnsafeNativeMethods.ON_Intersect_MeshPlanes3(pPolys, i, point_count, pl.m_items);
+        }
+        rc[i] = pl;
+      }
+      UnsafeNativeMethods.ON_Intersect_MeshPlanes4(pPolys);
+
+      return rc;
+    }
+
+    /// <summary>
     /// Intersects a Brep with an (infinite) plane.
     /// </summary>
     /// <param name="brep">Brep to intersect.</param>

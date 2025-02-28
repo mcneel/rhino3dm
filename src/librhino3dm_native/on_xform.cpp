@@ -49,9 +49,15 @@ RH_C_FUNCTION void ON_Xform_Mirror( ON_Xform* xf, ON_3DPOINT_STRUCT pointOnMirro
   }
 }
 
-RH_C_FUNCTION bool ON_Xform_ChangeBasis2( ON_Xform* xf,
-                                          ON_3DVECTOR_STRUCT x0, ON_3DVECTOR_STRUCT y0, ON_3DVECTOR_STRUCT z0,
-                                          ON_3DVECTOR_STRUCT x1, ON_3DVECTOR_STRUCT y1, ON_3DVECTOR_STRUCT z1)
+RH_C_FUNCTION bool ON_Xform_ChangeBasis2(
+  ON_Xform* xf,
+  ON_3DVECTOR_STRUCT x0, 
+  ON_3DVECTOR_STRUCT y0, 
+  ON_3DVECTOR_STRUCT z0,
+  ON_3DVECTOR_STRUCT x1, 
+  ON_3DVECTOR_STRUCT y1, 
+  ON_3DVECTOR_STRUCT z1
+)
 {
   bool rc = false;
   if( xf )
@@ -63,6 +69,35 @@ RH_C_FUNCTION bool ON_Xform_ChangeBasis2( ON_Xform* xf,
     const ON_3dVector* _y1 = (const ON_3dVector*)&y1;
     const ON_3dVector* _z1 = (const ON_3dVector*)&z1;
     rc = xf->ChangeBasis(*_x0, *_y0, *_z0, *_x1, *_y1, *_z1);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Xform_ChangeBasis3(
+  ON_Xform* xf,
+  ON_3DPOINT_STRUCT p0,
+  ON_3DVECTOR_STRUCT x0,
+  ON_3DVECTOR_STRUCT y0,
+  ON_3DVECTOR_STRUCT z0,
+  ON_3DPOINT_STRUCT p1,
+  ON_3DVECTOR_STRUCT x1,
+  ON_3DVECTOR_STRUCT y1,
+  ON_3DVECTOR_STRUCT z1
+)
+{
+  // 30-Jan-2025 Dale Fugier
+  bool rc = false;
+  if (xf)
+  {
+    const ON_3dPoint* _p0 = (const ON_3dPoint*)&p0;
+    const ON_3dVector* _x0 = (const ON_3dVector*)&x0;
+    const ON_3dVector* _y0 = (const ON_3dVector*)&y0;
+    const ON_3dVector* _z0 = (const ON_3dVector*)&z0;
+    const ON_3dPoint* _p1 = (const ON_3dPoint*)&p1;
+    const ON_3dVector* _x1 = (const ON_3dVector*)&x1;
+    const ON_3dVector* _y1 = (const ON_3dVector*)&y1;
+    const ON_3dVector* _z1 = (const ON_3dVector*)&z1;
+    rc = xf->ChangeBasis(*_p0, *_x0, *_y0, *_z0, *_p1, *_x1, *_y1, *_z1);
   }
   return rc;
 }

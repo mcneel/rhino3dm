@@ -753,6 +753,35 @@ namespace Rhino.DocObjects
       }
     }
 
+    /// <summary>
+    /// Returns a list of ClippingPlaneSurfaces for this view.
+    /// </summary>
+    /// <returns></returns>
+    public ClippingPlaneSurface[] ClippingPlaneSurfaces()
+    {
+      IntPtr constPtrThis = ConstPointer();
+
+      var ptrArray = new SimpleArrayIntPtr();
+
+      UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer());
+
+      var outList = new List<ClippingPlaneSurface>();
+
+      foreach (var ptr in ptrArray.ToArray())
+      {
+        var plane = new Geometry.Plane();
+        UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlane(ptr, ref plane);
+
+        var cps = new ClippingPlaneSurface(plane);
+
+        cps.PlaneDepth = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepth(ptr);
+        cps.PlaneDepthEnabled = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepthEnabled(ptr);
+
+        outList.Add(cps);
+      }
+
+      return outList.ToArray();
+    }
 
     ViewportInfo m_viewport;
 

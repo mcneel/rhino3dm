@@ -1859,7 +1859,7 @@ namespace Rhino.Geometry
     /// <param name="mesh">A mesh.</param>
     /// <param name="direction">A direction vector.</param>
     /// <param name="tolerance">A tolerance value.</param>
-    /// <returns>A curve array.</returns>
+    /// <returns>An array of curves if successful, an empty array otherwise.</returns>
     /// <since>5.0</since>
     public static Curve[] ProjectToMesh(Curve curve, Mesh mesh, Vector3d direction, double tolerance)
     {
@@ -1872,10 +1872,10 @@ namespace Rhino.Geometry
     /// Projects a curve to a set of meshes using a direction and tolerance.
     /// </summary>
     /// <param name="curve">A curve.</param>
-    /// <param name="meshes">A list, an array or any enumerable of meshes.</param>
+    /// <param name="meshes">A list, an array, or any enumerable of meshes.</param>
     /// <param name="direction">A direction vector.</param>
     /// <param name="tolerance">A tolerance value.</param>
-    /// <returns>A curve array.</returns>
+    /// <returns>An array of curves if successful, an empty array otherwise.</returns>
     /// <since>5.0</since>
     public static Curve[] ProjectToMesh(Curve curve, IEnumerable<Mesh> meshes, Vector3d direction, double tolerance)
     {
@@ -1886,24 +1886,40 @@ namespace Rhino.Geometry
     /// <summary>
     /// Projects a curve to a set of meshes using a direction and tolerance.
     /// </summary>
-    /// <param name="curves">A list, an array or any enumerable of curves.</param>
-    /// <param name="meshes">A list, an array or any enumerable of meshes.</param>
+    /// <param name="curves">A list, an array, or any enumerable of curves.</param>
+    /// <param name="meshes">A list, an array, or any enumerable of meshes.</param>
     /// <param name="direction">A direction vector.</param>
     /// <param name="tolerance">A tolerance value.</param>
-    /// <returns>A curve array.</returns>
+    /// <returns>An array of curves if successful, an empty array otherwise.</returns>
     /// <since>5.0</since>
     public static Curve[] ProjectToMesh(IEnumerable<Curve> curves, IEnumerable<Mesh> meshes, Vector3d direction, double tolerance)
+    {
+      return ProjectToMesh(curves, meshes, direction, tolerance, false);
+    }
+
+    /// <summary>
+    /// Projects a curve to a set of meshes using a direction and tolerance.
+    /// </summary>
+    /// <param name="curves">A list, an array, or any enumerable of curves.</param>
+    /// <param name="meshes">A list, an array, or any enumerable of meshes.</param>
+    /// <param name="direction">A direction vector.</param>
+    /// <param name="tolerance">A tolerance value.</param>
+    /// <param name="loose">If true, then project curve edit points onto meshes.</param>
+    /// <returns>An array of curves if successful, an empty array otherwise.</returns>
+    /// <since>8.17</since>
+    public static Curve[] ProjectToMesh(IEnumerable<Curve> curves, IEnumerable<Mesh> meshes, Vector3d direction, double tolerance, bool loose)
     {
       foreach (Curve crv in curves)
       {
         if (crv == null)
-          throw new ArgumentNullException("curves");
+          throw new ArgumentNullException(nameof(curves));
       }
+
       List<GeometryBase> g = new List<GeometryBase>();
       foreach (Mesh msh in meshes)
       {
         if (msh == null)
-          throw new ArgumentNullException("meshes");
+          throw new ArgumentNullException(nameof(meshes));
         g.Add(msh);
       }
 
@@ -1915,8 +1931,8 @@ namespace Rhino.Geometry
         IntPtr pMeshes = mesh_array.ConstPointer();
         IntPtr pCurvesOut = curves_out.NonConstPointer();
 
-        Curve[] rc = new Curve[0];
-        if (UnsafeNativeMethods.RHC_RhinoProjectCurveToMesh(pMeshes, pCurvesIn, direction, tolerance, pCurvesOut))
+        Curve[] rc = Array.Empty<Curve>();
+        if (UnsafeNativeMethods.RHC_RhinoProjectCurveToMesh(pMeshes, pCurvesIn, direction, tolerance, loose, pCurvesOut))
           rc = curves_out.ToNonConstArray();
         GC.KeepAlive(curves);
         GC.KeepAlive(meshes);
@@ -1963,6 +1979,7 @@ namespace Rhino.Geometry
       int[] brep_ids;
       return ProjectToBrep(curve, breps, direction, tolerance, out brep_ids);
     }
+
     /// <summary>
     /// Projects a Curve onto a collection of Breps along a given direction.
     /// </summary>
@@ -1979,6 +1996,7 @@ namespace Rhino.Geometry
       IEnumerable<Curve> crvs = new Curve[] { curve };
       return ProjectToBrep(crvs, breps, direction, tolerance, out curveIndices, out brepIndices);
     }
+
     /// <summary>
     /// Projects a collection of Curves onto a collection of Breps along a given direction.
     /// </summary>
@@ -2008,11 +2026,30 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Curve[] ProjectToBrep(IEnumerable<Curve> curves, IEnumerable<Brep> breps, Vector3d direction, double tolerance, out int[] curveIndices, out int[] brepIndices)
     {
+      return ProjectToBrep(curves, breps, direction, tolerance, false, out curveIndices, out brepIndices);
+    }
+
+    /// <summary>
+    /// Projects a collection of Curves onto a collection of Breps along a given direction.
+    /// </summary>
+    /// <param name="curves">Curves to project.</param>
+    /// <param name="breps">Breps to project onto.</param>
+    /// <param name="direction">Direction of projection.</param>
+    /// <param name="tolerance">Tolerance to use for projection.</param>
+    /// <param name="loose">
+    /// If true, then project curve edit points onto Brep surfaces.
+    /// </param>
+    /// <param name="curveIndices">Index of which curve in the input list was the source for a curve in the return array.</param>
+    /// <param name="brepIndices">Index of which brep was used to generate a curve in the return array.</param>
+    /// <returns>An array of projected curves. Array is empty if the projection set is empty.</returns>
+    /// <since>8.17</since>
+    public static Curve[] ProjectToBrep(IEnumerable<Curve> curves, IEnumerable<Brep> breps, Vector3d direction, double tolerance, bool loose, out int[] curveIndices, out int[] brepIndices)
+    {
       curveIndices = null;
       brepIndices = null;
 
-      foreach (Curve crv in curves) { if (crv == null) { throw new ArgumentNullException("curves"); } }
-      foreach (Brep brp in breps) { if (brp == null) { throw new ArgumentNullException("breps"); } }
+      foreach (Curve crv in curves) { if (crv == null) { throw new ArgumentNullException(nameof(curves)); } }
+      foreach (Brep brp in breps) { if (brp == null) { throw new ArgumentNullException(nameof(breps)); } }
 
       using (SimpleArrayCurvePointer crv_array = new SimpleArrayCurvePointer(curves))
       using (SimpleArrayBrepPointer brp_array = new SimpleArrayBrepPointer())
@@ -2028,21 +2065,16 @@ namespace Rhino.Geometry
         SimpleArrayCurvePointer rc = new SimpleArrayCurvePointer();
         IntPtr ptr_rc = rc.NonConstPointer();
 
-        if (UnsafeNativeMethods.RHC_RhinoProjectCurveToBrepEx(ptr_brp_array,
-                                                              ptr_crv_array,
-                                                              direction,
-                                                              tolerance,
-                                                              ptr_rc,
-                                                              brp_top.m_ptr,
-                                                              crv_top.m_ptr))
+        if (UnsafeNativeMethods.RHC_RhinoProjectCurveToBrepEx(ptr_brp_array, ptr_crv_array, direction, tolerance, loose, ptr_rc, brp_top.m_ptr, crv_top.m_ptr))
         {
           brepIndices = brp_top.ToArray();
           curveIndices = crv_top.ToArray();
           return rc.ToNonConstArray();
         }
+
         GC.KeepAlive(curves);
         GC.KeepAlive(breps);
-        return new Curve[0];
+        return Array.Empty<Curve>();
       }
     }
 
@@ -2071,18 +2103,35 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Curve[] PullToBrepFace(Curve curve, BrepFace face, double tolerance)
     {
+      return PullToBrepFace(curve, face, tolerance, false);
+    }
+
+    /// <summary>
+    /// Pull a curve to a BrepFace using closest point projection.
+    /// </summary>
+    /// <param name="curve">Curve to pull.</param>
+    /// <param name="face">Brep face that pulls.</param>
+    /// <param name="tolerance">Tolerance to use for pulling.</param>
+    /// <param name="loose">
+    /// If true, the curve's edit points are pulled back to the Brep face's underlying surface.
+    /// If any edit point misses the surface, the curve will not be created.
+    /// </param>
+    /// <returns>An array of pulled curves, or an empty array on failure.</returns>
+    /// <since>8.17</since>
+    public static Curve[] PullToBrepFace(Curve curve, BrepFace face, double tolerance, bool loose)
+    {
       IntPtr brep_ptr = face.m_brep.ConstPointer();
       IntPtr curve_ptr = curve.ConstPointer();
 
       using (SimpleArrayCurvePointer rc = new SimpleArrayCurvePointer())
       {
         IntPtr rc_ptr = rc.NonConstPointer();
-        if (UnsafeNativeMethods.RHC_RhinoPullCurveToBrep(brep_ptr, face.FaceIndex, curve_ptr, tolerance, rc_ptr))
+        if (UnsafeNativeMethods.RHC_RhinoPullCurveToBrep(brep_ptr, face.FaceIndex, curve_ptr, tolerance, loose, rc_ptr))
         {
           return rc.ToNonConstArray();
         }
         Runtime.CommonObject.GcProtect(curve, face);
-        return new Curve[0];
+        return Array.Empty<Curve>();
       }
     }
 
@@ -5614,8 +5663,8 @@ namespace Rhino.Geometry
     /// Then it "connects the points" so that you have a polyline on the mesh.
     /// </summary>
     /// <param name="mesh">Mesh to project onto.</param>
-    /// <param name="tolerance">Input tolerance (RhinoDoc.ModelAbsoluteTolerance is a good default)</param>
-    /// <returns>A polyline curve on success, null on failure.</returns>
+    /// <param name="tolerance">Input tolerance. When in doubt, the the document's model absolute tolerance.</param>
+    /// <returns>A curve if success, or null on failure.</returns>
     /// <since>5.0</since>
     [ConstOperation]
     public PolylineCurve PullToMesh(Mesh mesh, double tolerance)
@@ -5625,6 +5674,27 @@ namespace Rhino.Geometry
       IntPtr pPolylineCurve = UnsafeNativeMethods.RHC_RhinoPullCurveToMesh(pConstCurve, pConstMesh, tolerance);
       GC.KeepAlive(mesh);
       return GeometryBase.CreateGeometryHelper(pPolylineCurve, null) as PolylineCurve;
+    }
+
+    /// <summary>
+    /// Projects this curve onto a mesh.
+    /// </summary>
+    /// <param name="mesh">Mesh to project onto.</param>
+    /// <param name="tolerance">Input tolerance. When in doubt, the the document's model absolute tolerance.</param>
+    /// <param name="loose">
+    /// If true, the curve's edit points are pulled back to the mesh.
+    /// If any edit point misses the mesh, the curve will not be created.
+    /// </param>
+    /// <returns>A curve if success, or null on failure.</returns>
+    /// <since>8.17</since>
+    [ConstOperation]
+    public Curve PullToMesh(Mesh mesh, double tolerance, bool loose)
+    {
+      IntPtr pConstCurve = ConstPointer();
+      IntPtr pConstMesh = mesh.ConstPointer();
+      IntPtr pCurve = UnsafeNativeMethods.RHC_RhinoPullCurveToMesh2(pConstCurve, pConstMesh, tolerance, loose);
+      GC.KeepAlive(mesh);
+      return GeometryBase.CreateGeometryHelper(pCurve, null) as Curve;
     }
 
     /// <summary>

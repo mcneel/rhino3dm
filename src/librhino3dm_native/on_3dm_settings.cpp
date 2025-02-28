@@ -310,8 +310,33 @@ RH_C_FUNCTION ON_UUID ON_ClippingPlaneInfo_GetPlaneId(const ON_ClippingPlaneInfo
   return ON_nil_uuid;
 }
 
+RH_C_FUNCTION bool ON_ClippingPlaneInfo_GetPlane(const ON_ClippingPlaneInfo* pClippingPlaneInfo, ON_PLANE_STRUCT* plane)
+{
+  if (pClippingPlaneInfo && plane)
+  {
+    CopyToPlaneStruct(*plane, pClippingPlaneInfo->m_plane_equation);
+    return true;
+  }
+  return false;
+}
 
+RH_C_FUNCTION double ON_ClippingPlaneInfo_GetDepth(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->Depth();
+  }
+  return 0.0;
+}
 
+RH_C_FUNCTION bool ON_ClippingPlaneInfo_GetDepthEnabled(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->DepthEnabled();
+  }
+  return false;
+}
 
 
 

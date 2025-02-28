@@ -8,8 +8,8 @@ using Rhino.Runtime.InteropWrappers;
 namespace Rhino.DocObjects
 {
   /// <summary>
-  /// A detail view object is a nested Rhino viewport placed on a page view with a 2D closed curve
-  /// boundary. It can be any type of modeling view.
+  /// A detail view object is a nested Rhino viewport placed on a page view
+  /// with a 2D closed curve boundary. It can be any type of modeling view.
   /// </summary>
   public class DetailViewObject : RhinoObject 
   {
@@ -132,6 +132,34 @@ namespace Rhino.DocObjects
         bool rc = UnsafeNativeMethods.CRhinoDetailViewObject_GetPageXform(ptr_const_this, false, ref xform);
         return rc ? xform : Transform.Unset;
       }
+    }
+
+    /// <summary>
+    /// Converts a paper length into a model length.
+    /// </summary>
+    /// <param name="paper"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    /// <since>8.17</since>
+    public bool TryGetModelLength(double paper, out double model)
+    {
+      model = double.NaN;
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoDetailViewObject_GetModelLength(ptr_const_this, paper, ref model);
+    }
+
+    /// <summary>
+    /// Converts a paper length into a model length.
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="paper"></param>
+    /// <returns></returns>
+    /// <since>8.17</since>
+    public bool TryGetPaperLength(double model, out double paper)
+    {
+      paper = double.NaN;
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoDetailViewObject_GetPaperLength(ptr_const_this, model, ref paper);
     }
 
     /// <summary>
