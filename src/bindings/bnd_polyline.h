@@ -1,6 +1,7 @@
 #include "bindings.h"
 
 #pragma once
+
 #if defined(ON_PYTHON_COMPILE)
 void initPolylineBindings(rh3dmpymodule& m);
 #else
@@ -67,6 +68,7 @@ public:
   ON_3dPoint ClosestPoint(const ON_3dPoint& testPoint) const { return m_polyline.ClosestPointTo(testPoint); }
   double ClosestParameter(const ON_3dPoint& testPoint) const;
   BND_TUPLE GetSegments() const;
+  std::vector<BND_LineCurve*> GetSegments2() const;
   BND_LineCurve* SegmentAt(int index) const;
   class BND_NurbsCurve* ToNurbsCurve() const;
   class BND_PolylineCurve* ToPolylineCurve() const;

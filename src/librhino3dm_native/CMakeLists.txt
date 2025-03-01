@@ -3,15 +3,15 @@ cmake_minimum_required(VERSION 3.10)
 project(librhino3dm_native)
 
 if(MACOS_BUILD)
-  message("macOS Compile")
+  message(STATUS "macOS Compile")
 endif()
 
 if(IOS)
-  message("iOS Compile")
+  message(STATUS "iOS Compile")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android")
-  message("Android Compile")
+  message(STATUS "Android Compile")
 endif()
 
 file(GLOB bindings_SRC "./*.h" "./*.cpp")

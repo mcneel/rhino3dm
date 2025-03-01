@@ -520,6 +520,24 @@ namespace Rhino.Commands
     }
 
     /// <summary>
+    /// Returns a command's context help url.
+    /// </summary>
+    /// <param name="commandId">A command ID.</param>
+    /// <returns>The command's context url if provided.</returns>
+    /// <since>8.18</since>
+    public static string GetCommandContextHelpUrl(Guid commandId)
+    {
+
+      using (StringHolder stringHolder = new StringHolder())
+      {
+        IntPtr ptr_string = stringHolder.NonConstPointer();
+        if (UnsafeNativeMethods.CRhinoApp_CommandContextHelpUrl(commandId, ptr_string))
+          return stringHolder.ToString();
+        return null;
+      }
+    }
+
+    /// <summary>
     /// Gets list of command names in Rhino. This list does not include Test, Alpha, or System commands.
     /// </summary>
     /// <param name="english">

@@ -753,6 +753,7 @@ namespace Rhino.Render
     {
       m_delete = true;
       m_cpp = UnsafeNativeMethods.CRhRdkContentKindList_CopyNew(kind_list.CppPointer);
+      GC.KeepAlive(kind_list);
     }
 
     /// <summary>
@@ -1057,6 +1058,7 @@ namespace Rhino.Render
       if (CppPointer != IntPtr.Zero)
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Remove(CppPointer, collection.CppPointer);
+        GC.KeepAlive(collection);
       }
     }
 
@@ -1070,6 +1072,7 @@ namespace Rhino.Render
       if (CppPointer != IntPtr.Zero)
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Add(CppPointer, collection.CppPointer);
+        GC.KeepAlive(collection);
       }
     }
 
@@ -1083,6 +1086,7 @@ namespace Rhino.Render
       if (CppPointer != IntPtr.Zero)
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Set(CppPointer, collection.CppPointer);
+        GC.KeepAlive(collection);
       }
     }
 
@@ -1111,6 +1115,7 @@ namespace Rhino.Render
       if (m_cpp != IntPtr.Zero)
       {
         UnsafeNativeMethods.CRhRdkContentArray_Add(m_cpp, content.CppPointer);
+        GC.KeepAlive(content);
       }
     }
 
@@ -1921,9 +1926,16 @@ namespace Rhino.Render
 
       uint rValue = 0;
 
-      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateRenderedContentPreview(lwf.CppPointer, c.CppPointer, width, height, bSuppressLocalMapping, pjs.CppPointer, pa.CppPointer, ref rValue);
+      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateRenderedContentPreview(lwf.CppPointer, c.CppPointer,
+        width, height, bSuppressLocalMapping, pjs.CppPointer, pa.CppPointer, ref rValue);
 
-      if(rValue == 0)
+      GC.KeepAlive(lwf);
+      GC.KeepAlive(c);
+      GC.KeepAlive(lwf);
+      GC.KeepAlive(pjs);
+      GC.KeepAlive(pa);
+
+      if (rValue == 0)
         result = Utilities.PreviewRenderResult.Rendering;
       else if(rValue == 1)
         result = Utilities.PreviewRenderResult.CacheOK;
@@ -1955,17 +1967,41 @@ namespace Rhino.Render
     /// <returns>The Bitmap of the quick render content preview</returns>
     public static System.Drawing.Bitmap GenerateQuickContentPreview(RenderContent c, int width, int height, PreviewSceneServer psc, bool bSuppressLocalMapping, int reason, ref Rhino.Commands.Result result)
     {
-      uint rValue = 0;
-      result = Rhino.Commands.Result.Nothing;
+      return GenerateQuickContentPreview(null, c, width, height, psc, bSuppressLocalMapping, reason, ref result);
+    }
 
+    /// <summary>
+    /// Generate a quick render content preview
+    /// </summary>
+    /// <param name="lw">Linear workflow</param>
+    /// <param name="c">Render Content</param>
+    /// <param name="width">Image width</param>
+    /// <param name="height">Image height</param>
+    /// <param name="psc">PreviewSceneServer</param>
+    /// <param name="bSuppressLocalMapping">SuppressLocalMapping</param>
+    /// <param name="reason"> ContentChanged = 0, ViewChanged = 1, RefreshDisplay = 2, Other = 99</param>
+    /// <param name="result">Rhino.Command.Result value for successfull quick image creation</param>
+    /// <returns>The Bitmap of the quick render content preview</returns>
+    public static System.Drawing.Bitmap GenerateQuickContentPreview(LinearWorkflow lw, RenderContent c, int width, int height, PreviewSceneServer psc, bool bSuppressLocalMapping, int reason, ref Rhino.Commands.Result result)
+    {
       if (c == null)
         return null;
+
+      uint rValue = 0;
+      result = Rhino.Commands.Result.Nothing;
 
       IntPtr pPreviewSceneServer = IntPtr.Zero;
       if (psc != null)
         pPreviewSceneServer = psc.CppPointer;
 
-      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateQuickContentPreview(c.CppPointer, width, height, pPreviewSceneServer, bSuppressLocalMapping, reason, ref rValue);
+      IntPtr lwp = (lw != null) ? lw.CppPointer : IntPtr.Zero;
+
+      IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateQuickContentPreview(
+             lwp, c.CppPointer, width, height, pPreviewSceneServer, bSuppressLocalMapping, reason, ref rValue);
+
+      GC.KeepAlive(lw);
+      GC.KeepAlive(c);
+      GC.KeepAlive(psc);
 
       if(rValue == 0)
         result = Rhino.Commands.Result.Nothing;
@@ -1978,8 +2014,7 @@ namespace Rhino.Render
       if (rValue == 0)
         return null;
 
-      var bitmap = Rhino.Runtime.InteropWrappers.RhinoDib.ToBitmap(pDib, true);
-      return bitmap;
+      return RhinoDib.ToBitmap(pDib, true);
     }
 
     /// <summary>Specifies optional buttons for ShowContentInstanceBrowser().</summary>
@@ -2625,8 +2660,11 @@ namespace Rhino.Render
     [CLSCompliant(false)]
     public uint RenderHashExclude(CrcRenderHashFlags flags, string excludeParameterNames, LinearWorkflow lw)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
+      uint rc = UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
              ConstPointer(), (ulong)flags, excludeParameterNames, (lw==null) ? IntPtr.Zero : lw.CppPointer);
+
+      GC.KeepAlive(lw);
+      return rc;
     }
 
     internal delegate uint RenderCrcCallback(int serialNumber, ulong rcrcFlags, IntPtr pString_excludeParameterNames);
@@ -3163,7 +3201,9 @@ namespace Rhino.Render
         service?.StyleEtoControls(section);
       }
 
-      return UnsafeNativeMethods.Rdk_CoreContent_AddUISection(NonConstPointer(), OnAddUiSectionsUIId, section.CppPointer);
+      bool rc = UnsafeNativeMethods.Rdk_CoreContent_AddUISection(NonConstPointer(), OnAddUiSectionsUIId, section.CppPointer);
+      GC.KeepAlive(section);
+      return rc;
     }
 
     /// <summary>
@@ -3194,7 +3234,9 @@ namespace Rhino.Render
     /// DO NOT CALL THIS FUNCTION IN NEW CODE. IT WILL BE DEPRECATED ASAP.
     public bool GetUnderlyingInstances(ref RenderContentCollection collection) // TODO: JOHNC GetUnderlyingInstances
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_GetUnderlyingInstances(ConstPointer(), collection.CppPointer);
+      bool rc = UnsafeNativeMethods.Rdk_RenderContent_GetUnderlyingInstances(ConstPointer(), collection.CppPointer);
+      GC.KeepAlive(collection);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -3209,7 +3251,9 @@ namespace Rhino.Render
     /// <since>6.1</since>
     public virtual bool IsFactoryProductAcceptableAsChild(DataSources.ContentFactory factory, String childSlotName)
     {
-      return 1 == UnsafeNativeMethods.Rdk_RenderContent_IsFactoryProductAcceptableAsChild(ConstPointer(), factory.CppPointer, childSlotName);
+      bool rc = 1 == UnsafeNativeMethods.Rdk_RenderContent_IsFactoryProductAcceptableAsChild(ConstPointer(), factory.CppPointer, childSlotName);
+      GC.KeepAlive(factory);
+      return rc;
     }
 
     /// <summary>
@@ -3495,6 +3539,7 @@ namespace Rhino.Render
     public PreviewSceneServer NewPreviewSceneServer(SceneServerData ssd)
     {
       IntPtr pPreviewSceneServer = UnsafeNativeMethods.Rdk_RenderContent_NewPreviewSceneServer(ConstPointer(), ssd.CppPointer);
+      GC.KeepAlive(ssd);
       if (pPreviewSceneServer != IntPtr.Zero)
         return new PreviewSceneServer(ssd, pPreviewSceneServer);
 
@@ -3994,7 +4039,9 @@ namespace Rhino.Render
     /// <since>6.13</since>
     public bool Replace(RenderContent newcontent)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_ReplaceContentInDocument(DocumentOwner.RuntimeSerialNumber, CppPointer, newcontent.CppPointer);
+      bool rc = UnsafeNativeMethods.Rdk_RenderContent_ReplaceContentInDocument(DocumentOwner.RuntimeSerialNumber, CppPointer, newcontent.CppPointer);
+      GC.KeepAlive(newcontent);
+      return rc;
     }
 
     #endregion

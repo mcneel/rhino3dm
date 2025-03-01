@@ -1,7 +1,6 @@
+#include "bindings.h"
 
 #pragma once
-
-#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
 void initSunBindings(rh3dmpymodule& m);

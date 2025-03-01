@@ -23,10 +23,14 @@ BND_TUPLE BND_Light::GetSpotLightRadii() const
   double inner_radius = 0;
   double outer_radius = 0;
   success = m_light->GetSpotLightRadii(&inner_radius, &outer_radius);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, inner_radius, outer_radius);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, inner_radius);
   SetTuple(rc, 2, outer_radius);
+#endif
   return rc;
 }
 
@@ -35,6 +39,20 @@ BND_TUPLE BND_Light::GetSpotLightRadii() const
 
 void initLightBindings(rh3dmpymodule& m)
 {
+
+  py::enum_<LightStyle>(m, "LightStyle")
+    .value("Unknown", LightStyle::Unknown)
+    .value("CameraDirectional", LightStyle::CameraDirectional)
+    .value("CameraPoint", LightStyle::CameraPoint)
+    .value("CameraSpot", LightStyle::CameraSpot)
+    .value("WorldDirectional", LightStyle::WorldDirectional)
+    .value("WorldPoint", LightStyle::WorldPoint)
+    .value("WorldSpot", LightStyle::WorldSpot)
+    .value("Ambient", LightStyle::Ambient)
+    .value("WorldLinear", LightStyle::WorldLinear)
+    .value("WorldRectangular", LightStyle::WorldRectangular)
+    ;
+
   py::class_<BND_Light, BND_GeometryBase>(m, "Light")
     .def(py::init<>())
     .def_property("IsEnabled", &BND_Light::IsEnabled, &BND_Light::SetEnabled)
@@ -75,6 +93,20 @@ using namespace emscripten;
 
 void initLightBindings(void*)
 {
+
+  enum_<LightStyle>("LightStyle")
+    .value("Unknown", LightStyle::Unknown)
+    .value("CameraDirectional", LightStyle::CameraDirectional)
+    .value("CameraPoint", LightStyle::CameraPoint)
+    .value("CameraSpot", LightStyle::CameraSpot)
+    .value("WorldDirectional", LightStyle::WorldDirectional)
+    .value("WorldPoint", LightStyle::WorldPoint)
+    .value("WorldSpot", LightStyle::WorldSpot)
+    .value("Ambient", LightStyle::Ambient)
+    .value("WorldLinear", LightStyle::WorldLinear)
+    .value("WorldRectangular", LightStyle::WorldRectangular)
+    ;
+
   class_<BND_Light, base<BND_GeometryBase>>("Light")
     .constructor<>()
     .property("isEnabled", &BND_Light::IsEnabled, &BND_Light::SetEnabled)

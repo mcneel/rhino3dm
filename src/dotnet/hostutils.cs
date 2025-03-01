@@ -2152,8 +2152,12 @@ namespace Rhino.Runtime
     {
       get
       {
-        var psl = GetPlatformService<IOperatingSystemInformation>();
-        return psl.IsRunningInWindowsContainer;
+        if (RunningInRhino)
+        {
+          var psl = GetPlatformService<IOperatingSystemInformation>();
+          return psl.IsRunningInWindowsContainer;
+        }
+        return false;
       }
     }
 
@@ -3251,7 +3255,7 @@ namespace Rhino.Runtime
       int startIndex = expression.IndexOf("%<");
       int endIndex = expression.IndexOf(">%");
       string formula = expression;
-      if (startIndex >=0 && endIndex > startIndex)
+      if (startIndex >= 0 && endIndex > startIndex)
         formula = expression.Substring(startIndex + 2, endIndex - startIndex - 2).Trim();
 
       formula = formula.Replace("\n", "");
@@ -3311,13 +3315,13 @@ namespace Rhino.Runtime
       #region Add () to function names
       string[] oldFields = { "Date", "DateModified", "FileName", "ModelUnits", "NumPages", "PageNumber", "PageName", "Notes", "ObjectName" };
 
-      foreach(var field in oldFields)
+      foreach (var field in oldFields)
       {
         if (!formula.StartsWith(field))
           continue;
 
         int tokenSearchStart = 0;
-        while(true)
+        while (true)
         {
 
           int functionNameStart = formula.IndexOf(field, tokenSearchStart);
@@ -3326,14 +3330,14 @@ namespace Rhino.Runtime
           int functionNameEnd = functionNameStart + field.Length - 1;
 
           bool addParentheses = true;
-          for(int i=functionNameEnd+1; i<formula.Length; i++)
+          for (int i = functionNameEnd + 1; i < formula.Length; i++)
           {
             char c = formula[i];
             if (c == ' ')
               continue;
             if (c == '(')
               addParentheses = false;
-            if (i == (functionNameEnd+1))
+            if (i == (functionNameEnd + 1))
             {
               // if this is another char, then ignore
               if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
@@ -3343,7 +3347,7 @@ namespace Rhino.Runtime
           }
 
           tokenSearchStart = functionNameStart + field.Length;
-          if(addParentheses)
+          if (addParentheses)
           {
             tokenSearchStart += 2;
             formula = formula.Insert(functionNameStart + field.Length, "()");
@@ -3416,7 +3420,7 @@ namespace Rhino.Runtime
               //NOTE this only supports 1 dimension style per block.
               if (rhinoObject is InstanceObject block)
               {
-                annotation = block.InstanceDefinition.GetObjects().FirstOrDefault(c=>c.ObjectType == ObjectType.Annotation) as AnnotationObjectBase;
+                annotation = block.InstanceDefinition.GetObjects().FirstOrDefault(c => c.ObjectType == ObjectType.Annotation) as AnnotationObjectBase;
               }
 
               if (annotation != null)
@@ -3440,33 +3444,38 @@ namespace Rhino.Runtime
                 }
               }
 
-
-              // Basic CurveLength expression
+         
+              
+              // CurveLength
               if (annotation != null && formula.StartsWith("CurveLength", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
-                var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+                var function_unit = ExtractUnitFromFunctionString(formula, units);
+                var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
                 if (!string.IsNullOrWhiteSpace(stringResult))
                   return stringResult;
               }
 
-              //format area if it doesn't contain a comma which means there's a unit system already being specified in the formula
+              //Area
               if (annotation != null && formula.StartsWith("Area", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1) && !formula.Contains("\","))
               {
-                string stringResult = Rhino.UI.Localization.FormatArea(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+                var function_unit = ExtractUnitFromFunctionString(formula, units);
+                string stringResult = Rhino.UI.Localization.FormatArea(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
 
                 if (!string.IsNullOrWhiteSpace(stringResult))
                   return stringResult;
               }
 
+              //Volume
               if (annotation != null && formula.StartsWith("Volume", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
-                string stringResult = Rhino.UI.Localization.FormatVolume(double_result, units, annotation.AnnotationGeometry.DimensionStyle, false);
+                var function_unit = ExtractUnitFromFunctionString(formula, units); 
+                string stringResult = Rhino.UI.Localization.FormatVolume(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
 
                 if (!string.IsNullOrWhiteSpace(stringResult))
                   return stringResult;
               }
 
-              if (annotation!=null)
+              if (annotation != null)
               {
                 displayPrecision = annotation.AnnotationGeometry.DimensionStyle.LengthResolution;
               }
@@ -3492,6 +3501,43 @@ namespace Rhino.Runtime
         return "####";
       }
     }
+
+    /// <summary>
+    /// examines a text function string such as CurveLength to see if the function is using document units or some other unit defined within the function
+    /// </summary>
+    /// <param name="functionString"></param>
+    /// <param name="defaultUnit"></param>
+    /// <returns></returns>
+    private static UnitSystem ExtractUnitFromFunctionString(string functionString, UnitSystem defaultUnit)
+    {
+      if (string.IsNullOrEmpty(functionString))
+        return RhinoDoc.ActiveDoc.ModelUnitSystem;
+
+      // Use a regex to capture all quoted parameters.
+      // For example:
+      //   Volume("GUID","Inches","False") --> captures "GUID", "Inches", "False"
+      //   Volume("GUID","False")          --> captures "GUID", "False"
+      var matches = Regex.Matches(functionString, "\"(?<param>[^\"]+)\"");
+
+      // We assume the first parameter is always the GUID.
+      // The second parameter (if present) is a candidate for the unit.
+      if (matches.Count >= 2)
+      {
+        var candidate_unit = matches[1].Groups["param"].Value;
+
+        // Attempt to parse the candidate string as a RhinoCommon UnitSystem.
+        // If the candidate is "True" or "False", parsing will fail and we'll fall back to the default.
+        if (Enum.TryParse(candidate_unit, ignoreCase: true, out UnitSystem parsed_unit))
+        {
+          return parsed_unit;
+        }
+      }
+
+      // If no valid unit is provided, return the default.
+      return defaultUnit;
+    }
+
+
 
     /// <summary>
     /// This function is called from the C++ textfield evaluator

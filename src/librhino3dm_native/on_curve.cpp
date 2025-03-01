@@ -291,16 +291,14 @@ RH_C_FUNCTION void ON_Curve_PointAt(const ON_Curve* pCurve, double t, ON_3dPoint
       *pt = pCurve->PointAtStart();
     else if (idxPointAtEnd == which)
       *pt = pCurve->PointAtEnd();
+#if !defined(RHINO3DM_BUILD)
     else if (idxPointAtMid == which)
     {
-#if defined(RHINO3DM_BUILD)
-      return;
-#else
       double s = 0.0;
       if (pCurve->GetNormalizedArcLengthPoint(0.5, &s))
         *pt = pCurve->PointAt(s);
-#endif
     }
+#endif
   }
 }
 

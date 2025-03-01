@@ -187,10 +187,14 @@ BND_TUPLE BND_Mesh::IsManifold(bool topologicalTest) const
 {
   bool oriented = false;
   bool hasboundary = false;
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary), oriented, hasboundary);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple<bool>(rc, 0, m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary));
   SetTuple<bool>(rc, 1, oriented);
   SetTuple<bool>(rc, 2, hasboundary);
+#endif
   return rc;
 }
 
@@ -758,9 +762,13 @@ BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 #endif
 
   ON_MeshFace& face = m_mesh->m_F[i];
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(face.vi[0], face.vi[1], face.vi[2], face.vi[3]);
+#else
   BND_TUPLE rc = CreateTuple(4);
   for (int i = 0; i < 4; i++)
     SetTuple<int>(rc, i, face.vi[i]);
+#endif
   return rc;
 }
 
@@ -770,10 +778,14 @@ BND_TUPLE BND_MeshFaceList::GetFaceVertices(int faceIndex) const
   if(faceIndex >= 0 && faceIndex < count)
   {
     ON_MeshFace& face = m_mesh->m_F[faceIndex];
+  #if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    BND_TUPLE rc = py::make_tuple(true, m_mesh->m_V[face.vi[0]], m_mesh->m_V[face.vi[1]], m_mesh->m_V[face.vi[2]], m_mesh->m_V[face.vi[3]]);
+  #else
     BND_TUPLE rc = CreateTuple(5);
     SetTuple(rc, 0, true);
     for (int i = 0; i < 4; i++)
       SetTuple(rc, i+1, m_mesh->m_V[ face.vi[i] ]);
+  #endif
     return rc;
   }
   return NullTuple();
@@ -927,11 +939,15 @@ BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) const
 
   success = m_ctc.m_dim > 0 ? true : false;
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, u, v, w);
+#else
   BND_TUPLE rc = CreateTuple(4);
   SetTuple<bool>(rc, 0, success);
   SetTuple<double>(rc, 1, u);
   SetTuple<double>(rc, 2, v);
   SetTuple<double>(rc, 3, w);
+#endif
   return rc;
 
 }

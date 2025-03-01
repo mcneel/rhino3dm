@@ -1,13 +1,18 @@
 #include "bindings.h"
 
+const std::string version = ON::VersionQuartetAsString();
+
 #if defined(ON_PYTHON_COMPILE)
 RH3DM_PYTHON_BINDING(_rhino3dm, m) {
   m.doc() = "rhino3dm python package. OpenNURBS wrappers with a RhinoCommon style";
+  m.attr("Version") = py::cast(version);
 #endif
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
+
 EMSCRIPTEN_BINDINGS(rhino3dm) {
+  emscripten::constant("Version", version);
   void* m = nullptr;
 #endif
 
@@ -96,7 +101,12 @@ std::string ToStdString(const py::str& str)
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-  BND_TUPLE rc = py::make_tuple(count);
+
+#if defined(NANOBIND)
+  BND_TUPLE rc = py::tuple();
+#else
+  BND_TUPLE rc = py::tuple(count);
+#endif
 #else
   emscripten::val rc(emscripten::val::array());
 #endif
@@ -107,7 +117,7 @@ BND_TUPLE NullTuple()
 {
 #if defined(ON_PYTHON_COMPILE)
 #if defined(NANOBIND)
-  UNIMPLEMENTED_EXCEPTION;
+  return py::tuple();
 #else
   return py::none();
 #endif

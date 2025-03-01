@@ -49,6 +49,7 @@ class BND_NurbsSurfaceKnotList
 public:
   BND_NurbsSurfaceKnotList(ON_NurbsSurface* nurbssurface, int direction, const ON_ModelComponentReference& compref);
   BND_TUPLE ToList();
+  std::vector<double> ToList2();
   ON_NurbsSurface* GetSurface() { return m_surface; }
   int GetDirection() { return m_direction; }
   int Count() const { return m_surface->KnotCount(m_direction); }

@@ -4,33 +4,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.15.0-beta] - UNRELEASED
+## [8.17.0-beta] - UNRELEASED
 
-diff: 
+diff:
 
 ### Added
 
 - (js, py) DimensionStyle.Id
 - (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
-- (js, py) Added tests for various ::Delete methods. 
+- (js, py) Added tests for various ::Delete methods.
 - (js, py) Extrusion::CreateWithPlane #636
-- (py) Added python 3.13 target #654
-- (py) BND_MeshingParameters::Decode now supports more properties
+- (js, py) BND_Bitmap also inherits from Common object and now exposes an Id property.
+- (js, py) DimensionStyle now has an Id property
 - (js) Layer.Index #655
 - (js) BND_PointCloud::CreateFromThreeJSON #642
 - (js) Added several methods and properties for Planes #568
-- (dotnet) Linux release builds in an Amazon Linux 2023 container
+- (js) Layer.index
+- (js) Mesh.CreateFromThreeJSON inclides vertex color information
 - (py) AddPoint now supports attributes #665 @StudioWEngineers
 - (py) AddLine now supports attributes #666 @StudioWEngineers
 - (py) Improved stubs. WIP. #668 and #669 @StudioWEngineers
+- (py) Added python 3.13 target #654
+- (py) BND_MeshingParameters::Decode now supports more properties
+- (py) File3dm.ObjectTable.AddPoint with attributes - TODO for JS
+- (py) File3dm.ObjectTable.AddLine with attributes - TODO for JS
+- (py) Exposed a LightStyle enum which was previously only used internally
 
 ### Changed
 
-- (py) switching from pybind11 to nanobind. WIP. This affects a lot of the src/binding files, which now include many `#if defined()`. When the switch is complete these will be cleaned up.
+- (py) switching from pybind11 to nanobind. WIP. This affects a lot of the src/binding files, which now include many `#if defined()`. When the switch is complete these will be cleaned up. This involved adding conditions for methods that returned BND_TUPLE and adding new methods for where we were using TUPLES as arrays. For this release, we still use pybind11.
+- (py) BrepVertex.EdgeIndices() now returns a list
+- (py) Curve.DerivitiveAt() now returns a list
 - (py) File3dmObjectTable now accepts negative indexing #651 @StudioWEngineers
 - (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
+- (dotnet) Linux release builds in an Amazon Linux 2023 container
 
-### Fixed 
+### Fixed
 
 - (py) uuid conversion in c++ was broken
 - (js, py) Changes to ViewInfo.Viewport would not set.
@@ -48,7 +57,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0
 
 See changes in 8.9.0-beta.
 
-### Fixed 
+### Fixed
 
 - (js) AnnotationBase objects would be undefined due to new cast to Text in the bindings but no Text class exposed to emscripten
 
@@ -219,7 +228,7 @@ diff: https://github.com/mcneel/rhino3dm/pull/561/files
 - (py) Added Line.Transform, Brep.TryConvertBrep
 - (py) Added 3.11 support
 - (.net) Added macOS arm64 (Apple Silicon) builds
-- (.net) Addded .net 7.0 support 
+- (.net) Addded .net 7.0 support
 
 ### Removed
 

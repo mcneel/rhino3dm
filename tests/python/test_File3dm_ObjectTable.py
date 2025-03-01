@@ -1,5 +1,6 @@
 import rhino3dm
 import unittest
+import uuid
 
 #objective: to test that passing a list of points or a Point3dList to the CreateControlPointCurve method returns the same curve
 class TestFile3dmObjectTable(unittest.TestCase):
@@ -97,6 +98,8 @@ class TestFile3dmObjectTable(unittest.TestCase):
         circle = rhino3dm.Circle(5)
         point = rhino3dm.Point3d(0,0,0)
         id1 = file3dm.Objects.AddCircle(circle)
+
+  
         id2 = file3dm.Objects.AddPoint(rhino3dm.Point3d(0,0,0))
 
         qtyObjects = len(file3dm.Objects)

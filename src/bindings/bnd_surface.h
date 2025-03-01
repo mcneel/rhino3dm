@@ -24,6 +24,7 @@ public:
   int SpanCount(int direction) const { return m_surface->SpanCount(direction); }
   BND_Interval Domain(int direction) const { return m_surface->Domain(direction); }
   BND_TUPLE GetSpanVector(int direction);
+  std::vector<double> GetSpanVector2(int direction);
   //public Surface Reverse(int direction)
   //public Surface Reverse(int direction, bool inPlace)
   //public Surface Transpose()
