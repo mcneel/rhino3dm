@@ -21,13 +21,11 @@ diff:
 - (js) Added several methods and properties for Planes #568
 - (js) Layer.index
 - (js) Mesh.CreateFromThreeJSON inclides vertex color information
-- (py) AddPoint now supports attributes #665 @StudioWEngineers
-- (py) AddLine now supports attributes #666 @StudioWEngineers
+- (py) AddPoint now supports attributes #665 @StudioWEngineers - TODO for JS
+- (py) AddLine now supports attributes #666 @StudioWEngineers - TODO for JS
 - (py) Improved stubs. WIP. #668 and #669 @StudioWEngineers
 - (py) Added python 3.13 target #654
 - (py) BND_MeshingParameters::Decode now supports more properties
-- (py) File3dm.ObjectTable.AddPoint with attributes - TODO for JS
-- (py) File3dm.ObjectTable.AddLine with attributes - TODO for JS
 - (py) Exposed a LightStyle enum which was previously only used internally
 
 ### Changed
