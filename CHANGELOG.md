@@ -23,7 +23,7 @@ diff:
 - (js) Mesh.CreateFromThreeJSON inclides vertex color information
 - (py) File3dm.ObjectTable.AddPoint now supports attributes #665 @StudioWEngineers - TODO for JS
 - (py) File3dm.ObjectTable.AddLine now supports attributes #666 @StudioWEngineers - TODO for JS
-- (py) Improved stubs. WIP. #668 and #669 @StudioWEngineers
+- (py) Improved stubs. WIP. #668, #669 and #682 @StudioWEngineers
 - (py) Added python 3.13 target #654
 - (py) BND_MeshingParameters::Decode now supports more properties
 - (py) Exposed a LightStyle enum which was previously only used internally
