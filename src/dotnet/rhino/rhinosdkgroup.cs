@@ -3,7 +3,6 @@ using Rhino.FileIO;
 using Rhino.Runtime.InteropWrappers;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 //[skipping] CRhinoGroup
@@ -514,6 +513,55 @@ namespace Rhino.DocObjects
           UnsafeNativeMethods.CRhinoGroupTable_GroupMembers(m_doc.RuntimeSerialNumber, groupIndex, pRhinoObjects);
           return rhobjs.ToArray();
         }
+      }
+
+      /// <summary>
+      /// Remaps an enumeration of Rhino objects to new groups.
+      /// </summary>
+      /// <param name="rhinoObjects">The enumeration of Rhino objects.</param>
+      /// <param name="indexMap">A map from old group indices to new group indices.</param>
+      /// <returns>The number of Rhino objects that were modified.</returns>
+      /// <remarks>
+      /// In some situations, a bunch of Rhino objects are copied, new groups need to be created. This method handles the details.
+      /// </remarks>
+      /// <since>8.16</since>
+      public int RemapObjects(IEnumerable<RhinoObject> rhinoObjects, out Dictionary<int, int> indexMap)
+      {
+        var rc = 0;
+        indexMap = null;
+        using (var input_objects = new Runtime.InternalRhinoObjectArray(rhinoObjects))
+        using (var output_key = new SimpleArrayInt())
+        {
+          IntPtr ptr_objects = input_objects.NonConstPointer();
+          IntPtr ptr_output_key = output_key.NonConstPointer();
+          rc = UnsafeNativeMethods.RHC_RhinoUpdateObjectGroups(m_doc.RuntimeSerialNumber, ptr_objects, ptr_output_key);
+          if (rc > 0)
+          {
+            int[] keys = output_key.ToArray();
+            if (keys.Length % 2 == 0)
+            {
+              indexMap = new Dictionary<int, int>();
+              int index = 0;
+              while (index < keys.Length) 
+                indexMap[keys[index++]] = index++;
+            }
+          }
+          return rc;
+        }
+      }
+
+      /// <summary>
+      /// Remaps an enumeration of Rhino objects to new groups.
+      /// </summary>
+      /// <param name="rhinoObjects">The enumeration of Rhino objects.</param>
+      /// <returns>The number of Rhino objects that were modified.</returns>
+      /// <remarks>
+      /// In some situations, a bunch of Rhino objects are copied, new groups need to be created. This method handles the details.
+      /// </remarks>
+      /// <since>8.16</since>
+      public int RemapObjects(IEnumerable<RhinoObject> rhinoObjects)
+      {
+        return RemapObjects(rhinoObjects, out Dictionary<int, int> indexMap);
       }
     }
   }

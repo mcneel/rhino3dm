@@ -420,11 +420,19 @@ void initDracoBindings(rh3dmpymodule& m)
     .def_static("Compress", &BND_Draco::CompressMesh, py::arg("mesh"))
     .def_static("Compress", &BND_Draco::CompressMesh2, py::arg("mesh"), py::arg("options"))
     .def("Write", &BND_Draco::WriteToFile)
-#if !defined(NANOBIND)
+#if defined(NANOBIND)
+    .def_static("DecompressByteArray", [](py::bytes b) {
+      const char* data = b.c_str();
+      int length = b.size();
+      return BND_Draco::DecompressByteArray(length, data);
+    })
+#else
+
     .def_static("DecompressByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_Draco::DecompressByteArray(static_cast<int>(info.size), (const char*)info.ptr);
     })
+
 #endif
     .def_static("DecompressBase64String", &BND_Draco::DecompressBase64, py::arg("encoded"))
     .def("ToBase64String", &BND_Draco::ToBase64String)

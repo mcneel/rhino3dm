@@ -92,3 +92,18 @@ test('LayerIndex', async () => {
   expect(index1 === _index1).toBe(true)
 
 })
+
+test('readFileWithLayers', async () => {
+
+  // read model 
+  const model = '../models/file3dm_stuff.3dm'
+
+  const buffer = fs.readFileSync(model)
+  const arr = new Uint8Array(buffer)
+  const doc = rhino.File3dm.fromByteArray(arr)
+
+  expect(doc !== null).toBe(true)
+
+  expect(doc.layers().count === 6).toBe(true)
+
+})

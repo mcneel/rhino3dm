@@ -12,7 +12,7 @@ public class File3dm_ViewTable_Tests
     }
 
     [Test]
-    public void ViewTable_CreateFileWithVuew()
+    public void ViewTable_CreateFileWithView()
     {
         File3dm file3dm = new File3dm();
         file3dm.ApplicationName = "rhino3dm.net";

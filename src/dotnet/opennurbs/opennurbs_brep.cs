@@ -3137,6 +3137,101 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Separates, or splits, a disjoint Brep into separate Breps.
+    /// </summary>
+    /// <param name="brep">The disjoint Brep to separate.</param>
+    /// <returns>An array of Brep pieces if successful, otherwise an empty array if the Brep is not disjoint or on error.</returns>
+    /// <since>8.15</since>
+    public static Brep[] SplitDisjointPieces(Brep brep)
+    {
+      var rc = Array.Empty<Brep>();
+      if (null == brep)
+        return rc;
+
+      using (var output_breps = new SimpleArrayBrepPointer())
+      {
+        IntPtr ptr_brep = brep.ConstPointer();
+        IntPtr ptr_output_breps = output_breps.NonConstPointer();
+        var result = UnsafeNativeMethods.RHC_RhinoSeparateBreps(ptr_brep, ptr_output_breps);
+        if (result)
+        {
+          rc = output_breps.ToNonConstArray();
+          for (int i = 0; i < rc.Length; i++)
+          {
+            if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
+              rc[i].Flip();
+          }
+        }
+        GC.KeepAlive(brep);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Separates, or splits, a disjoint Brep into separate Breps.
+    /// </summary>
+    /// <param name="brep">The disjoint Brep to separate.</param>
+    /// <param name="indexMap">
+    /// List of integer arrays, one for each result, containing all input Brep face indices that went into making each result.
+    /// Note, this can be null.
+    /// </param>
+    /// <returns>An array of Brep pieces if successful, otherwise an empty array if the Brep is not disjoint or on error.</returns>
+    /// <since>8.15</since>
+    public static Brep[] SplitDisjointPieces(Brep brep, out List<int[]> indexMap)
+    {
+      indexMap = null;
+
+      var rc = Array.Empty<Brep>();
+      if (null == brep)
+        return rc;
+
+      using (var output_breps = new SimpleArrayBrepPointer())
+      using (var output_key = new SimpleArrayInt())
+      {
+        IntPtr ptr_brep = brep.ConstPointer();
+        IntPtr ptr_output_breps = output_breps.NonConstPointer();
+        IntPtr ptr_output_key = output_key.NonConstPointer();
+
+        var result = UnsafeNativeMethods.RHC_RhinoSeparateBreps2(ptr_brep, ptr_output_breps, ptr_output_key);
+        if (result)
+        {
+          rc = output_breps.ToNonConstArray();
+
+          int[] faceCounts = new int[rc.Length];
+          int totalCount = 0;
+
+          for (int i = 0; i < rc.Length; i++)
+          {
+            faceCounts[i] = rc[i].Faces.Count;
+            totalCount += faceCounts[i];
+
+            if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
+              rc[i].Flip();
+          }
+
+          // Sanity check
+          int[] keys = output_key.ToArray();
+          if (totalCount == keys.Length)
+          {
+            // OK to allocate output
+            indexMap = new List<int[]>(faceCounts.Length);
+            int index = 0;
+            // Convert linear map into jagged array
+            foreach (var count in faceCounts)
+            {
+              int[] map = new int[count];
+              for (int j = 0; j < count; j++)
+                map[j] = keys[index++];
+              indexMap.Add(map);
+            }
+          }
+
+        }
+        GC.KeepAlive(brep);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// Combines two or more breps into one. A merge is like a boolean union that keeps the inside pieces. This
@@ -4470,6 +4565,24 @@ namespace Rhino.Geometry
       }
 
       return ptr_newbrep != IntPtr.Zero ? new Brep(ptr_newbrep, null) : null;
+    }
+
+    /// <summary>
+    /// If the brep.Faces[faceIndex] is planar, and all the adjacent faces are planar, this function transforms brep.Faces[faceIndex]
+    /// with the transform parameter and recomputes the adjacent faces. See the PushPull commands extend mode.
+    /// </summary>
+    /// <param name="faceIndex">The index of the face being transformed</param>
+    /// <param name="transform">The transformation</param>
+    /// <param name="tolerance">The tolerance for planarity checks. When in doubt, use the document's absolute tolerance.</param>
+    /// <returns>The brep with the transformed face on success. Null on error.</returns>
+    /// <since>8.16</since>
+    public Brep PushPullExtend(int faceIndex, Transform transform, double tolerance)
+    {
+      IntPtr ptr_brep = ConstPointer();
+
+      IntPtr ptr_new_brep = UnsafeNativeMethods.RHC_RhinoPushPullExtend(ptr_brep, faceIndex, ref transform, tolerance);
+
+      return ptr_new_brep != IntPtr.Zero ? new Brep(ptr_new_brep, null) : null;
     }
 
 #endif

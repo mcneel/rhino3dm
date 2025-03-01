@@ -53,6 +53,8 @@ jobs:
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
             script/**
+            src/CMakeLists.txt
+            src/librhino3dm_native/CMakeLists.txt
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -199,7 +201,7 @@ jobs:
       - name: safe dir
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
       - name: setup js module
@@ -242,7 +244,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-13, macos-14]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
@@ -255,7 +257,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -265,7 +267,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel build --debug
       - name: artifacts
@@ -282,10 +284,10 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     steps:
       - name: setup python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.9.x'
+          python-version: '3.9'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
@@ -293,7 +295,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python sdist
         run: python setup.py sdist
       - name: check sdist
@@ -316,6 +318,7 @@ jobs:
 
           # test
           python -c "import rhino3dm; print(rhino3dm.__version__)"
+
       - name: list files
         run: ls -R
       - name: artifact name
@@ -344,7 +347,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p linux
       - name: setup
@@ -399,7 +402,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-13, macos-14]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
@@ -412,7 +415,7 @@ jobs:
       fail-fast: false
     steps:
     - name: set up python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5.0.0
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: info

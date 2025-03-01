@@ -1429,7 +1429,8 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
         int count;
         if (archive.ReadInt(&count) && count > 0)
         {
-          BND_TUPLE geometryList = CreateTuple(count);
+          //BND_TUPLE geometryList = CreateTuple(count);
+          std::vector<BND_CommonObject*> geometryList(count);
           int tupleIndex = 0;
           while(count>0)
           {
@@ -1438,7 +1439,8 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
             if (archive.ReadObject(&pObject))
             {
               BND_CommonObject* binding = BND_CommonObject::CreateWrapper(pObject, nullptr);
-              SetTuple(geometryList, tupleIndex, binding);
+              //SetTuple(geometryList, tupleIndex, binding);
+              geometryList.push_back(binding);
             }
             tupleIndex++;
           }
@@ -1460,9 +1462,6 @@ BND_DICT BND_ArchivableDictionary::DecodeToDictionary(BND_DICT jsonObject)
   archive.EndReadDictionary();
   return rc;
 }
-
-
-
 
 RH_C_FUNCTION ON_Object* ON_ReadBufferArchive(int archive_3dm_version, unsigned int archive_on_version, int length, /*ARRAY*/const unsigned char* buffer)
 {
@@ -1523,6 +1522,26 @@ BND_TUPLE BND_CommonObject::GetUserStrings() const
   return rc;
 }
 
+//TODO: Cleanup
+std::vector<std::vector<std::wstring>> BND_CommonObject::GetUserStrings2() const
+{
+  ON_ClassArray<ON_wString> keys;
+  m_object->GetUserStringKeys(keys);
+  std::vector<std::vector<std::wstring>> rc;
+  for (int i = 0; i < keys.Count(); i++)
+  {
+    ON_wString sval;
+    m_object->GetUserString(keys[i].Array(), sval);
+    std::vector<std::wstring> keyval;
+    keyval.push_back(std::wstring(keys[i].Array()));
+    keyval.push_back(std::wstring(sval.Array()));
+    rc.push_back(keyval);
+  }
+  return rc;
+}
+
+
+
 std::wstring BND_CommonObject::RdkXml() const
 {
   std::wstring rc;
@@ -1537,12 +1556,17 @@ std::wstring BND_CommonObject::RdkXml() const
 
 BND_TUPLE BND_CommonObject::IsValidWithLog() const
 {
-  BND_TUPLE rc = CreateTuple(2);
   ON_wString str("");
   ON_TextLog log(str);
   bool isValid = m_object->IsValid(&log);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(isValid, std::wstring(str));
+#else
+  BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, isValid);
   SetTuple(rc, 1, std::wstring(str));
+#endif
   return rc;
 }
 
@@ -1559,6 +1583,7 @@ void initObjectBindings(rh3dmpymodule& m)
     .def("GetUserString", &BND_CommonObject::GetUserString, py::arg("key"))
     .def_property_readonly("UserStringCount", &BND_CommonObject::UserStringCount)
     .def("GetUserStrings", &BND_CommonObject::GetUserStrings)
+    .def("GetUserStrings2", &BND_CommonObject::GetUserStrings2)
     .def("RdkXml", &BND_CommonObject::RdkXml)
     ;
 

@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: setup python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.7.x'
+          python-version: '3.9'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
@@ -18,7 +18,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python sdist
         run: python setup.py sdist build --debug
       - name: check sdist
@@ -73,7 +73,7 @@ jobs:
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
-      run: git submodule update --init
+      run: git submodule update --init --recursive
     - name: install dependencies
       run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
     - name: build python manylinux
@@ -120,7 +120,7 @@ jobs:
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -130,7 +130,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
       - name: code-sign native libraries
@@ -206,7 +206,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet ${{ matrix.target }}
         run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
@@ -247,7 +247,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -283,7 +283,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: set up python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: 3.7.x
       - name: setup cmake
@@ -293,7 +293,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet
         run: python script/bootstrap.py -p windows
       - name: setup dotnet
@@ -343,7 +343,7 @@ jobs:
       - name: safe dir
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
       - name: setup js module
@@ -496,7 +496,7 @@ jobs:
   #   runs-on: macos-11
   #   steps:
   #     - name: set up python
-  #       uses: actions/setup-python@v5.0.0
+  #       uses: actions/setup-python@v5.4.0
   #       with:
   #         python-version: 3.7.1
   #     - name: setup cmake

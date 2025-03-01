@@ -4,6 +4,7 @@ using System.IO;
 using Rhino.Geometry;
 using Rhino.Render.PostEffects;
 using Rhino.Runtime.InteropWrappers;
+using System.Collections.Generic;
 
 // Most of these should not need to be wrapped. Some of their
 // functionality is merged into other wrapper classes
@@ -726,6 +727,60 @@ namespace Rhino.DocObjects
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_SetSectionBehavior(ptrThis, (int)value);
       }
+    }
+
+    /// <summary>
+    /// Returns a list of clipping plane Ids associated with this view.
+    /// </summary>
+    public Guid[] ClippingPlanesIds
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+
+        var ptrArray = new SimpleArrayIntPtr();
+
+        UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer() );
+
+        var outList = new List<Guid>();
+
+        foreach (var ptr in ptrArray.ToArray())
+        {
+          outList.Add(UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlaneId(ptr));
+        }
+
+        return outList.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Returns a list of ClippingPlaneSurfaces for this view.
+    /// </summary>
+    /// <returns></returns>
+    public ClippingPlaneSurface[] ClippingPlaneSurfaces()
+    {
+      IntPtr constPtrThis = ConstPointer();
+
+      var ptrArray = new SimpleArrayIntPtr();
+
+      UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer());
+
+      var outList = new List<ClippingPlaneSurface>();
+
+      foreach (var ptr in ptrArray.ToArray())
+      {
+        var plane = new Geometry.Plane();
+        UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlane(ptr, ref plane);
+
+        var cps = new ClippingPlaneSurface(plane);
+
+        cps.PlaneDepth = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepth(ptr);
+        cps.PlaneDepthEnabled = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepthEnabled(ptr);
+
+        outList.Add(cps);
+      }
+
+      return outList.ToArray();
     }
 
     ViewportInfo m_viewport;

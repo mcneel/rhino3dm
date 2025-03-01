@@ -54,3 +54,28 @@ test('DeleteObject', async () => {
   expect(qtyObjects1 === 2 && qtyObjects2 === 1).toBe(true)
 
 })
+
+test('addPoint', async () => {
+
+  const file3dm = new rhino.File3dm()
+  file3dm.applicationName = 'rhino3dm.js'
+  file3dm.applicationDetails = 'rhino3dm-tests-objectTable-addPoint'
+  file3dm.applicationUrl = 'https://rhino3d.com'
+
+  // create layers
+  file3dm.layers().addLayer("layer1", {'r':30, 'g':144, 'b':255, 'a':255})
+  file3dm.layers().addLayer("layer2", {'r':255, 'g':215, 'b':0, 'a':255})
+
+  // points added without attributes are added to the current layer, i.e., the first layer added to the model
+
+  file3dm.objects().addPoint([0,0,0])
+  expect(file3dm.objects().get(0).attributes().layerIndex === 0).toBe(true)
+
+  const oa = new rhino.ObjectAttributes()
+  oa.layerIndex = 1
+
+  file3dm.objects().addPointAttributes([10,10,10], oa)
+
+  expect(file3dm.objects().get(1).attributes().layerIndex === 1).toBe(true)
+
+})

@@ -88,6 +88,10 @@ public:
   BND_UUID AddObject(const class BND_FileObject* object);
 
   void Delete(BND_UUID objectId);
+  void Delete2(std::string uuid);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  void Delete3(py::object objectId);
+#endif
   //int Delete(IEnumerable<Guid> objectIds)
 
   int Count() const;
@@ -178,6 +182,7 @@ public:
 	class BND_Group* IterIndex(int index); // helper function for iterator
   class BND_Group* FindName(std::wstring name);
   BND_TUPLE GroupMembers(int groupIndex);
+  std::vector<BND_FileObject*> GroupMembers2(int groupIndex);
 };
 
 class BND_File3dmDimStyleTable
@@ -340,6 +345,7 @@ public:
   //std::wstring DumpSummary() const;
   //public void DumpToTextLog(TextLog log)
   BND_TUPLE GetEmbeddedFilePaths();
+  std::vector<std::wstring> GetEmbeddedFilePaths2();
   std::string GetEmbeddedFileAsBase64(std::wstring path);
   std::string GetEmbeddedFileAsBase64Strict(std::wstring path, bool strict);
   std::wstring RdkXml() const;

@@ -37,13 +37,28 @@ BND_TUPLE BND_File3dmRenderChannels::GetCustomList() const
   _rch->GetCustomList(list);
 
   const int count = list.Count();
-  auto tuple = CreateTuple(count);
+  BND_TUPLE tuple = CreateTuple(count);
   for (int i = 0; i < count; i++)
   {
     SetTuple(tuple, i, ON_UUID_to_Binding(list[i]));
   }
 
   return tuple;
+}
+
+std::vector<BND_UUID> BND_File3dmRenderChannels::GetCustomList2() const
+{
+  ON_SimpleArray<ON_UUID> list;
+  _rch->GetCustomList(list);
+
+  const int count = list.Count();
+  std::vector<BND_UUID> uuids;
+  for (int i = 0; i < count; i++)
+  {
+    uuids.push_back(ON_UUID_to_Binding(list[i]));
+  }
+
+  return uuids;
 }
 
 void BND_File3dmRenderChannels::SetCustomList(BND_TUPLE tuple)
@@ -74,6 +89,7 @@ void initRenderChannelsBindings(rh3dmpymodule& m)
     .def(py::init<const BND_File3dmRenderChannels&>(), py::arg("other"))
     .def_property("Mode", &BND_File3dmRenderChannels::GetMode, &BND_File3dmRenderChannels::SetMode)
     .def_property("CustomIds", &BND_File3dmRenderChannels::GetCustomList, &BND_File3dmRenderChannels::SetCustomList)
+    .def_property_readonly("CustomIds", &BND_File3dmRenderChannels::GetCustomList2)
    ;
 }
 

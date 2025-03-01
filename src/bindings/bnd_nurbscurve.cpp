@@ -67,11 +67,19 @@ BND_TUPLE BND_NurbsCurveKnotList::ToList()
 
   return NullTuple();
 
-/*
-  return std::vector<double>(
+}
+
+std::vector<double> BND_NurbsCurveKnotList::ToList2()
+{
+  int count = m_nurbs_curve->KnotCount();
+  if( count > 0) 
+  {
+    return std::vector<double>(
       m_nurbs_curve->m_knot,
       m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
-      */
+  }
+
+  return std::vector<double>();
 }
 
 BND_NurbsCurve::BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref)
@@ -234,6 +242,7 @@ void initNurbsCurveBindings(rh3dmpymodule& m)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
     .def("ToList", &BND_NurbsCurveKnotList::ToList)
+    .def("ToList2", &BND_NurbsCurveKnotList::ToList2)
 #if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurveKnotList& kl) -> py::buffer_info
       {
@@ -279,6 +288,7 @@ void initNurbsCurveBindings(rh3dmpymodule& m)
         {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
       );
     })
+
 #endif
     .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
     .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))

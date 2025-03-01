@@ -372,6 +372,16 @@ BND_TUPLE BND_BrepVertex::EdgeIndices() const {
 
 }
 
+std::vector<int> BND_BrepVertex::GetEdgeIndices() const
+{
+  std::vector<int> rc;
+  int count = m_vertex->m_ei.Count();
+  rc.reserve(count);
+  for (int i = 0; i < count; i++)
+    rc.push_back(m_vertex->m_ei[i]);
+  return rc;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -385,7 +395,8 @@ void initBrepBindings(rh3dmpymodule& m)
   py::class_<BND_BrepVertex, BND_Point>(m, "BrepVertex")
     .def_property_readonly("VertexIndex", &BND_BrepVertex::VertexIndex)
     .def_property_readonly("EdgeCount", &BND_BrepVertex::EdgeCount)
-    .def("EdgeIndices", &BND_BrepVertex::EdgeIndices)
+    //.def("EdgeIndices", &BND_BrepVertex::EdgeIndices)
+    .def("EdgeIndices", &BND_BrepVertex::GetEdgeIndices)
     ;
 
   py::class_<BND_BrepFace, BND_SurfaceProxy>(m, "BrepFace")

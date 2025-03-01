@@ -38,10 +38,14 @@ BND_TUPLE BND_Sphere::ClosestParameter(const ON_3dPoint& testPoint) const
   double longitudeRadians = 0;
   double latitudeRadians = 0;
   success = m_sphere.ClosestPointTo(testPoint, &longitudeRadians, &latitudeRadians);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, longitudeRadians, latitudeRadians);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, longitudeRadians);
   SetTuple(rc, 2, latitudeRadians);
+#endif
   return rc;
 }
 

@@ -6,7 +6,7 @@
     <AssemblyName>MethodGen</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(OSX))">
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(Windows))">
     <TargetFramework>net48</TargetFramework>
@@ -14,6 +14,6 @@
     <OutputPath Condition="$(Configuration) == 'Release'">..\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(Linux))">
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 </Project>

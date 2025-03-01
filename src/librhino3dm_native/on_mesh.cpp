@@ -3390,11 +3390,22 @@ RH_C_FUNCTION int ON_TextureMapping_SetObjectMappingAndTransform(const CRhinoObj
 {
   if (nullptr == rhinoObject)
     return 0;
+
   CRhinoDoc* rhino_doc = rhinoObject->Document();
   if (nullptr == rhino_doc)
     return 0;
 
   const UUID plug_in_id = RhinoApp().GetDefaultRenderApp();
+
+  if (nullptr == mapping)
+  {
+    //This is a delete - do things differently.
+    const CRhMappingHost mappingHost(*rhino_doc);
+
+    return mappingHost.DeleteMappingChannelAndWidgets(rhinoObject, plug_in_id, iChannelId) ? 1 : 0;
+  }
+
+  
   const ON_MappingRef* mapping_ref = rhinoObject->Attributes().m_rendering_attributes.MappingRef(plug_in_id);
   ON_Xform xform(1);
   UUID mapping_id = ON_nil_uuid;
@@ -4324,6 +4335,45 @@ RH_C_FUNCTION int ON_Mesh_GetIntersections(
   }
 
   return pOutPoints->Count();
+}
+
+// return number of points in a certain polyline
+RH_C_FUNCTION int ON_Intersect_MeshPlanes2(ON_SimpleArray<ON_Polyline*>* pPolylines, int i)
+{
+  int rc = 0;
+  if (pPolylines && i >= 0 && i < pPolylines->Count())
+  {
+    ON_Polyline* polyline = (*pPolylines)[i];
+    if (polyline)
+      rc = polyline->Count();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_Intersect_MeshPlanes3(ON_SimpleArray<ON_Polyline*>* pPolylines, int i, int point_count, /*ARRAY*/ON_3dPoint* points)
+{
+  if (nullptr == pPolylines || i < 0 || i >= pPolylines->Count() || point_count < 0 || nullptr == points)
+    return;
+  ON_Polyline* polyline = (*pPolylines)[i];
+  if (NULL == polyline || polyline->Count() != point_count)
+    return;
+
+  const ON_3dPoint* source = polyline->Array();
+  ::memcpy(points, source, sizeof(ON_3dPoint) * point_count);
+}
+
+RH_C_FUNCTION void ON_Intersect_MeshPlanes4(ON_SimpleArray<ON_Polyline*>* pPolylines)
+{
+  if (NULL == pPolylines)
+    return;
+  int count = pPolylines->Count();
+  for (int i = 0; i < count; i++)
+  {
+    ON_Polyline* polyline = (*pPolylines)[i];
+    if (polyline)
+      delete polyline;
+  }
+  delete pPolylines;
 }
 
 #endif // #if !defined(RHINO3DM_BUILD)

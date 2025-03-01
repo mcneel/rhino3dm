@@ -57,6 +57,34 @@ RH_C_FUNCTION bool ONC_EvNormalPartials(
   return rc;
 }
 
+// https://mcneel.myjetbrains.com/youtrack/issue/RH-85153
+RH_C_FUNCTION bool ONC_EvSectionalCurvature(
+  ON_3DVECTOR_STRUCT ds,
+  ON_3DVECTOR_STRUCT dt,
+  ON_3DVECTOR_STRUCT dss,
+  ON_3DVECTOR_STRUCT dst,
+  ON_3DVECTOR_STRUCT dtt,
+  ON_3DVECTOR_STRUCT planeNormal,
+  ON_3dVector* k
+)
+{
+  bool rc = false;
+  if (k)
+  {
+    const ON_3dVector* _ds = (const ON_3dVector*)(&ds);
+    const ON_3dVector* _dt = (const ON_3dVector*)(&dt);
+    const ON_3dVector* _dss = (const ON_3dVector*)(&dss);
+    const ON_3dVector* _dst = (const ON_3dVector*)(&dst);
+    const ON_3dVector* _dtt = (const ON_3dVector*)(&dtt);
+    const ON_3dVector* _planeNormal = (const ON_3dVector*)(&planeNormal);
+    ON_3dVector _k;
+    rc = ON_EvSectionalCurvature(*_ds, *_dt, *_dss, *_dst, *_dtt, *_planeNormal, _k);
+    if (rc)
+      *k = _k;
+  }
+  return rc;
+}
+
 typedef double (*Callback1Delegate)(ON__UINT_PTR context, int limit_direction, double t);
 typedef double (*Callback2Delegate)(ON__UINT_PTR context, int limit_direction, double s, double t);
 

@@ -98,11 +98,18 @@ BND_TUPLE BND_NurbsSurfaceKnotList::ToList()
 
   return NullTuple();
 
-/*
-  return std::vector<double>(
+}
+
+std::vector<double> BND_NurbsSurfaceKnotList::ToList2()
+{
+  int count = m_surface->KnotCount(m_direction);
+  if( count > 0) 
+  {
+    return std::vector<double>(
       m_surface->m_knot[m_direction],
       m_surface->m_knot[m_direction] + m_surface->KnotCount(m_direction));
-      */
+  }
+  return std::vector<double>();
 }
 
 BND_NurbsSurface::BND_NurbsSurface(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference* compref)
@@ -209,6 +216,7 @@ void initNurbsSurfaceBindings(rh3dmpymodule& m)
     .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
     .def("ToList", &BND_NurbsSurfaceKnotList::ToList)
+    .def("ToList2", &BND_NurbsSurfaceKnotList::ToList2)
 #if !defined(NANOBIND)
     .def_buffer([](BND_NurbsSurfaceKnotList& kl) -> py::buffer_info
       {

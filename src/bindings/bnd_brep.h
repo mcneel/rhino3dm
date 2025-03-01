@@ -1,6 +1,7 @@
 #include "bindings.h"
 
 #pragma once
+
 #if defined(ON_PYTHON_COMPILE)
 void initBrepBindings(rh3dmpymodule& m);
 #else
@@ -30,6 +31,7 @@ public:
   //public Brep Brep { get; }
   int VertexIndex() const { return m_vertex->m_vertex_index; }
   BND_TUPLE EdgeIndices() const;
+  std::vector<int> GetEdgeIndices() const;
   int EdgeCount() const { return m_vertex->m_ei.Count();}
 };
 

@@ -174,6 +174,28 @@ BND_TUPLE BND_ONXModel::GetEmbeddedFilePaths()
   return rc;
 }
 
+std::vector<std::wstring> BND_ONXModel::GetEmbeddedFilePaths2()
+{
+  ON_ClassArray<ON_wString> paths;
+  ON_SimpleArray<ONX_Model_UserData*>& userdata_table = m_model->m_userdata_table;
+  for (int i = 0; i < userdata_table.Count(); i++)
+  {
+    ONX_Model_UserData* ud = userdata_table[i];
+    if (ud && m_model->GetRDKEmbeddedFilePaths(*ud, paths))
+    //if (ud && GetRDKEmbeddedFileHelper(*ud, paths, nullptr, nullptr, false))
+      break;
+  }
+  int count = paths.Count();
+
+  std::vector<std::wstring> rc;
+  for (int i = 0; i < count; i++)
+  {
+    std::wstring path(paths[i].Array());
+    rc.push_back(path);
+  }
+  return rc;
+}
+
 ///////////////////////////////////////////////
 
 BND_ONXModel::BND_ONXModel()
@@ -651,6 +673,12 @@ BND_UUID BND_ONXModel_ObjectTable::AddInstanceObject4(int idefIndex, const class
 void BND_ONXModel_ObjectTable::Delete(BND_UUID id)
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
+  m_model->RemoveModelComponent(ON_ModelComponent::Type::ModelGeometry, _id);
+}
+
+void BND_ONXModel_ObjectTable::Delete2(std::string id)
+{
+  ON_UUID _id = ON_UuidFromString(id.c_str());
   m_model->RemoveModelComponent(ON_ModelComponent::Type::ModelGeometry, _id);
 }
 
@@ -1144,6 +1172,39 @@ BND_TUPLE BND_File3dmGroupTable::GroupMembers(int groupIndex)
   return rc;
 }
 
+std::vector<BND_FileObject*> BND_File3dmGroupTable::GroupMembers2(int groupIndex)
+{
+  ON_SimpleArray<BND_FileObject*> fileObjects;
+  ONX_ModelComponentIterator iterator(*m_model.get(), ON_ModelComponent::Type::ModelGeometry);
+  ON_ModelComponentReference compref = iterator.FirstComponentReference();
+  while (!compref.IsEmpty())
+  {
+    const ON_ModelComponent* model_component = compref.ModelComponent();
+    const ON_ModelGeometryComponent* geometryComponent = ON_ModelGeometryComponent::Cast(model_component);
+    if (geometryComponent)
+    {
+      const ON_3dmObjectAttributes* attrs = geometryComponent->Attributes(nullptr);
+      if (attrs && attrs->IsInGroup(groupIndex))
+      {
+        BND_GeometryBase* geometry = dynamic_cast<BND_GeometryBase*>(BND_CommonObject::CreateWrapper(compref));
+        if (geometry)
+        {
+          BND_FileObject* rc = FileObjectFromCompRef(compref);
+          if (rc)
+            fileObjects.Append(rc);
+        }
+      }
+    }
+    compref = iterator.NextComponentReference();
+  }
+
+  std::vector<BND_FileObject*> rc;
+  for (int i = 0; i < fileObjects.Count(); i++)
+    rc.push_back(fileObjects[i]);
+
+  return rc;
+}
+
 
 int BND_File3dmViewTable::Count() const
 {
@@ -1462,9 +1523,13 @@ BND_TUPLE BND_File3dmStringTable::GetKeyValue(int i) const
   const ON_UserString& us = strings[i];
   std::wstring key(us.m_key.Array());
   std::wstring sval(us.m_string_value.Array());
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(key, sval);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, key);
   SetTuple(rc, 1, sval);
+#endif
   return rc;
 }
 
@@ -1746,6 +1811,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("AddObject", &BND_ONXModel_ObjectTable::AddObject, py::arg("object"))
     .def("GetBoundingBox", &BND_ONXModel_ObjectTable::GetBoundingBox)
     .def("Delete", &BND_ONXModel_ObjectTable::Delete, py::arg("id"))
+    .def("Delete", &BND_ONXModel_ObjectTable::Delete2, py::arg("id"))
     .def("FindId", &BND_ONXModel_ObjectTable::FindId, py::arg("id"))
     ;
 
@@ -1845,6 +1911,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("FindIndex", &BND_File3dmGroupTable::FindIndex, py::arg("index"))
     .def("FindName", &BND_File3dmGroupTable::FindName, py::arg("name"))
     .def("GroupMembers", &BND_File3dmGroupTable::GroupMembers, py::arg("groupIndex"))
+    .def("GroupMembers2", &BND_File3dmGroupTable::GroupMembers2, py::arg("groupIndex"))
     ;
 
   py::class_<PyBNDIterator<BND_File3dmDimStyleTable&, BND_DimensionStyle*> >(m, "__DimStyleIterator")
@@ -2010,12 +2077,12 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def_static("Read", &BND_ONXModel::Read, py::arg("path"))
     .def_static("ReadNotes", &BND_ONXModel::ReadNotes, py::arg("path"))
     .def_static("ReadArchiveVersion", &BND_ONXModel::ReadArchiveVersion, py::arg("path"))
-/*
+#if !defined(NANOBIND)
     .def_static("FromByteArray", [](py::buffer b) {
       py::buffer_info info = b.request();
       return BND_ONXModel::FromByteArray(static_cast<int>(info.size), info.ptr);
     })
-    */
+ #endif
     .def("Write", &BND_ONXModel::Write, py::arg("path"), py::arg("version")=0)
     .def_property("StartSectionComments", &BND_ONXModel::GetStartSectionComments, &BND_ONXModel::SetStartSectionComments)
     .def_property("ApplicationName", &BND_ONXModel::GetApplicationName, &BND_ONXModel::SetApplicationName)
@@ -2046,6 +2113,7 @@ void initExtensionsBindings(rh3dmpymodule& m)
     .def("Encode", &BND_ONXModel::Encode2)
     .def("Decode", &BND_ONXModel::Decode)
     .def("EmbeddedFilePaths", &BND_ONXModel::GetEmbeddedFilePaths)
+    .def("EmbeddedFilePaths2", &BND_ONXModel::GetEmbeddedFilePaths2)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64)
     .def("GetEmbeddedFileAsBase64", &BND_ONXModel::GetEmbeddedFileAsBase64Strict)
     .def("RdkXml", &BND_ONXModel::RdkXml)
@@ -2081,6 +2149,7 @@ void initExtensionsBindings(void*)
     .function("get", &BND_ONXModel_ObjectTable::ModelObjectAt, allow_raw_pointers())
     .function("addPointXYZ", &BND_ONXModel_ObjectTable::AddPoint1)
     .function("addPoint", &BND_ONXModel_ObjectTable::AddPoint2)
+    .function("addPointAttributes", &BND_ONXModel_ObjectTable::AddPoint3, allow_raw_pointers())
     .function("addPointCloud", &BND_ONXModel_ObjectTable::AddPointCloud, allow_raw_pointers())
     .function("addLine", &BND_ONXModel_ObjectTable::AddLine1)
     .function("addPolyline", &BND_ONXModel_ObjectTable::AddPolyline3, allow_raw_pointers())
@@ -2153,6 +2222,7 @@ void initExtensionsBindings(void*)
     .function("deleteId", &BND_File3dmGroupTable::DeleteId)
     .function("findIndex", &BND_File3dmGroupTable::FindIndex, allow_raw_pointers())
     .function("findName", &BND_File3dmGroupTable::FindName, allow_raw_pointers())
+    .function("groupMembers", &BND_File3dmGroupTable::GroupMembers)
     ;
 
   class_<BND_File3dmDimStyleTable>("File3dmDimStyleTable")

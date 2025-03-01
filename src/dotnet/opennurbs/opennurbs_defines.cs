@@ -1,7 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
 using Rhino.Geometry;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Rhino
 {
@@ -671,6 +672,38 @@ namespace Rhino
       return UnsafeNativeMethods.ONC_EvNormalPartials(ds, dt, dss, dst, dtt, ref ns, ref nt);
     }
 
+    /// <summary>
+    /// Expert tool to evaluate sectional curvature from surface derivatives and section plane normal.
+    /// </summary>
+    /// <param name="ds">First partial derivative.</param>
+    /// <param name="dt">First partial derivative.</param>
+    /// <param name="dss">Second partial derivative.</param>
+    /// <param name="dst">Second partial derivative.</param>
+    /// <param name="dtt">Second partial derivative.</param>
+    /// <param name="planeNormal">Unit normal to section plane.</param>
+    /// <param name="k">
+    /// Sectional curvature.
+    /// Curvature of the intersection curve of the surface and plane through the surface point where the partial derivatives were evaluated.
+    /// </param>
+    /// <returns>
+    /// True if successful.
+    /// False if first partials are not linearly independent, in which case the k is set to zero.
+    /// </returns>
+    /// <since>8.16</since>
+    public static bool EvaluateSectionalCurvature(
+      Rhino.Geometry.Vector3d ds,
+      Rhino.Geometry.Vector3d dt,
+      Rhino.Geometry.Vector3d dss,
+      Rhino.Geometry.Vector3d dst,
+      Rhino.Geometry.Vector3d dtt,
+      Rhino.Geometry.Vector3d planeNormal,
+      out Rhino.Geometry.Vector3d k
+      )
+    {
+      k = Rhino.Geometry.Vector3d.Zero;
+      return UnsafeNativeMethods.ONC_EvSectionalCurvature(ds, dt, dss, dst, dtt, planeNormal, ref k);
+    }
+
     #region Integration
 #if false // moving into rhino 9 for now
 
@@ -873,7 +906,7 @@ namespace Rhino
       }
       return 0.0;
     }
-    #endif
+#endif
     #endregion // Integration
   }
 
