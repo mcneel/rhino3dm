@@ -262,6 +262,10 @@ PointCloud
 
       :rtype: rhino3dm.Point3d[]
 
+   .. py:method:: GetPoints2()
+
+      [todo] add documentation
+
    .. py:method:: PointAt(index)
 
       Returns the location of the point at a specific index.
@@ -279,6 +283,10 @@ PointCloud
 
       :rtype: rhino3dm.Vector3d[]
 
+   .. py:method:: GetNormals2()
+
+      [todo] add documentation
+
    .. py:method:: GetColors()
 
       Copy all the point colors in this point cloud to an array.
@@ -287,7 +295,15 @@ PointCloud
 
       :rtype: Color[]
 
+   .. py:method:: GetColors2()
+
+      [todo] add documentation
+
    .. py:method:: GetValues()
+
+      [todo] add documentation
+
+   .. py:method:: GetValues2()
 
       [todo] add documentation
 

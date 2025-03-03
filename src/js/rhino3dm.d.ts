@@ -42,6 +42,12 @@ declare module 'rhino3dm' {
 		CenterOfEarth
 	}
 
+	enum BlendContinuity {
+		Position,
+		Tangency,
+		Curvature
+	}
+
 	enum ComponentIndexType {
 		InvalidType,
 		BrepVertex,
@@ -82,13 +88,36 @@ declare module 'rhino3dm' {
 		Screen
 	}
 
-	enum CurveEvaluationSide{
+	enum CurveEvaluationSide {
 		Default,
 		Below,
 		Above
 	}
 
-	enum CurveOrientation{
+	enum CurveExtensionStyle {
+		Line,
+		Arc,
+		Smooth
+	}
+
+	enum CurveKnotStyle {
+		Uniform,
+		Chord,
+		ChordSquareRoot,
+		UniformPeriodic,
+		ChordPeriodic,
+		ChordSquareRootPeriodic
+	}
+
+	enum CurveOffsetCornerStyle {
+		None,
+		Sharp,
+		Round,
+		Smooth,
+		Chamfer
+	}
+
+	enum CurveOrientation {
 		Undefined,
 		Clockwise,
 		CounterClockwise
@@ -147,7 +176,7 @@ declare module 'rhino3dm' {
 	}
 
 	enum LightStyle {
-		None,
+		Unknown,
 		CameraDirectional,
 		CameraPoint,
 		CameraSpot,
@@ -278,6 +307,13 @@ declare module 'rhino3dm' {
 		Circle
 	}
 
+	enum PointContainment {
+		Unset,
+		Inside,
+		Outside,
+		Coincident
+	}
+
 	enum PostEffectTypes {
 		Early,
 		ToneMapping,
@@ -289,6 +325,13 @@ declare module 'rhino3dm' {
 		Forward,
 		Backward,
 		Both
+	}
+
+	enum RegionContainment {
+		Disjoint,
+		MutualIntersection,
+		AInsideB,
+		BInsideA
 	}
 
 	enum RenderChannelsModes {
@@ -385,8 +428,13 @@ declare module 'rhino3dm' {
 		AnnotationType: typeof AnnotationType
 		ArrowheadTypes: typeof ArrowheadTypes
 		BasepointZero: typeof BasepointZero
+		BlendContinuity: typeof BlendContinuity
 		ComponentIndexType: typeof ComponentIndexType
 		CoordinateSystem: typeof CoordinateSystem
+		CurveEvaluationSide: typeof CurveEvaluationSide
+		CurveExtensionStyle: typeof CurveExtensionStyle
+		CurveKnotStyle: typeof CurveKnotStyle
+		CurveOffsetCornerStyle: typeof CurveOffsetCornerStyle
 		CurveOrientation: typeof CurveOrientation
 		CurvePipingCapTypes: typeof CurvePipingCapTypes
 		DecalMappings: typeof DecalMappings
@@ -410,8 +458,10 @@ declare module 'rhino3dm' {
 		ObjectPlotWeightSource: typeof ObjectPlotWeightSource
 		ObjectType: typeof ObjectType
 		PlaneSphereIntersection: typeof PlaneSphereIntersection
+		PointContainment: typeof PointContainment
 		PostEffectTypes: typeof PostEffectTypes
 		Projections: typeof Projections
+		RegionContainment: typeof RegionContainment
 		RenderChannelsModes: typeof RenderChannelsModes
 		SphereSphereIntersection: typeof SphereSphereIntersection
 		TextureType: typeof TextureType
@@ -444,7 +494,6 @@ declare module 'rhino3dm' {
 		Cone: typeof Cone;
 		ConstructionPlane: typeof ConstructionPlane;
 		Curve: typeof Curve;
-		CurveEvaluationSide: typeof CurveEvaluationSide
 		CurvePiping: typeof CurvePiping;
 		CurveProxy: typeof CurveProxy;
 		Cylinder: typeof Cylinder;
@@ -2071,7 +2120,9 @@ declare module 'rhino3dm' {
 		/**
 		 * The V min bounds of the decal.
 		 */
-		boundsMaxV: any;
+		boundsMinV: number;
+		boundsMaxU: number;
+		boundsMaxV: number;
 	}
 
 	class DimAngular extends Dimension {
@@ -2210,6 +2261,9 @@ declare module 'rhino3dm' {
 		 * If ParentId is Guid.Empty, this DimensionStyle has no parent
 		 */
 		parentId: string;
+		/**
+		 */
+		id: string;
 		/** ... */
 		getFont(): Font;
 		/** ... */
@@ -2902,6 +2956,12 @@ declare module 'rhino3dm' {
 		 * @returns {Group} A Group, or null on error.
 		 */
 		findName(name:string): Group;
+		/**
+		 * @description Gets an array of all of the objects in a group.
+		 * @param {number} groupIndex The index of the group in this table.
+		 * @returns {File3dmObject[]} Array of objects that belong to the specified group or empty array if no objects could be found.
+		 */
+		groupMembers(groupIndex:number): File3dmObject[];
 	}
 
 	class File3dmInstanceDefinitionTable {

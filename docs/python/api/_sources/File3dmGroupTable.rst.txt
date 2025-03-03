@@ -63,3 +63,7 @@ File3dmGroupTable
       :return: Array of objects that belong to the specified group or empty array if no objects could be found.
 
       :rtype: File3dmObject[]
+
+   .. py:method:: GroupMembers2(groupIndex)
+
+      [todo] add documentation

@@ -31,6 +31,10 @@ NurbsCurveKnotList
 
       [todo] add documentation
 
+   .. py:method:: ToList2()
+
+      [todo] add documentation
+
    .. py:method:: InsertKnot(value, multiplicity)
 
       Inserts a knot and update control point locations.

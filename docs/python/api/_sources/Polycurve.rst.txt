@@ -51,6 +51,10 @@ PolyCurve
 
       :rtype: rhino3dm.Curve[]
 
+   .. py:method:: Explode2()
+
+      [todo] add documentation
+
    .. py:method:: Append(line)
 
       Appends and matches the start of the line to the end of polycurve.

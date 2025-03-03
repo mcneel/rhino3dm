@@ -187,6 +187,10 @@ ObjectAttributes
 
       :rtype: int[]
 
+   .. py:method:: GetGroupList2()
+
+      [todo] add documentation
+
    .. py:method:: AddToGroup()
 
       Adds object to the group with specified index by appending index to
