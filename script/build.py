@@ -442,6 +442,17 @@ def build_js():
     if not overwrite_check(item_to_check):
         return False
 
+
+    item_to_check = os.path.abspath(os.path.join(target_path, "rhino3dm.js"))
+    if not overwrite_check(item_to_check):
+        return False
+
+    item_to_check = os.path.abspath(os.path.join(target_path, "rhino3dm.wasm"))
+    if not overwrite_check(item_to_check):
+        return False
+
+    
+
     # build draco_wasm static lib
     draco_path = os.path.join(target_path, "draco_wasm")
     os.chdir(draco_path)
