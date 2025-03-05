@@ -3126,7 +3126,7 @@ declare module 'rhino3dm' {
 		addPointXYZ(x:number, y:number,z:number): string;
 		/**
 		 * @description Adds a point object to Rhino.
-		 * @param {number[]} An array with three numbers which define the point.
+		 * @param {number[]} point array with three numbers which define the point.
 		 * @returns {string} A unique identifier of new rhino object.
 		 */
 		addPoint(point:number[]): string;
