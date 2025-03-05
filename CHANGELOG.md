@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.17.0-beta] - UNRELEASED
 
-diff:
+diff: https://github.com/mcneel/rhino3dm/compare/8.9.0...8.17.0-beta
 
 ### Added
 
@@ -16,13 +16,14 @@ diff:
 - (js, py) Extrusion::CreateWithPlane #636
 - (js, py) BND_Bitmap also inherits from Common object and now exposes an Id property.
 - (js, py) DimensionStyle now has an Id property
+- (js, py) File3dm.ObjectTable.AddPoint now supports attributes #665 @StudioWEngineers
+- (js, py) File3dm.ObjectTable.AddLine now supports attributes #666 @StudioWEngineers
 - (js) Layer.Index #655
-- (js) BND_PointCloud::CreateFromThreeJSON #642
+- (js) BND_PointCloud::CreateFromThreeJSON #642  @pedrocortesark
 - (js) Added several methods and properties for Planes #568
 - (js) Layer.index
 - (js) Mesh.CreateFromThreeJSON inclides vertex color information
-- (py) File3dm.ObjectTable.AddPoint now supports attributes #665 @StudioWEngineers - TODO for JS
-- (py) File3dm.ObjectTable.AddLine now supports attributes #666 @StudioWEngineers - TODO for JS
+- (js) calling rhino.Version will now return the openNURBS version the library is built against
 - (py) Improved stubs. WIP. #668, #669 and #682 @StudioWEngineers
 - (py) Added python 3.13 target #654
 - (py) BND_MeshingParameters::Decode now supports more properties

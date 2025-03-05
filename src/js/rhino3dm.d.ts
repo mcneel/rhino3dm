@@ -3124,8 +3124,19 @@ declare module 'rhino3dm' {
 		 * @returns {string} id of new object.
 		 */
 		addPointXYZ(x:number, y:number,z:number): string;
-		/** */
+		/**
+		 * @description Adds a point object to Rhino.
+		 * @param {number[]} An array with three numbers which define the point.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
 		addPoint(point:number[]): string;
+		/**
+		 * @description Adds a point object to Rhino.
+		 * @param {number[]} point An array with three numbers which define the point.
+		 * @param {ObjectAttributes} attributes The attributes to apply to the point.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
+		addPoint(point:number[], attributes: ObjectAttributes): string;
 		/**
 		 * @description Adds a point cloud object to the document.
 		 * @param {PointCloud} cloud PointCloud to add.
@@ -3139,6 +3150,14 @@ declare module 'rhino3dm' {
 		 * @returns {string} A unique identifier of new rhino object.
 		 */
 		addLine(from:number[],to:number[]): string;
+		/**
+		 * @description Adds a line object to Rhino.
+		 * @param {number[]} from A line start point.
+		 * @param {number[]} to A line end point.
+		 * @param {ObjectAttributes} attributes The attributes to apply to the line.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
+		addLine(from:number[],to:number[], attributes: ObjectAttributes): string;
 		/**
 		 * @description Adds a polyline object to Rhino.
 		 * @param {number[][] | Point3dList} points An array of points in [x, y, z] format or Point3dList. 
