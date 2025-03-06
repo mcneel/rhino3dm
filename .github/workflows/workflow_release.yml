@@ -62,7 +62,7 @@ jobs:
 
   build_py_manylinux:
     name: build python ${{ matrix.python-version }} manylinux_2_28 ${{ matrix.image.architecture }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.image.os }}
     container: ${{ matrix.image.container }}
     strategy:
       matrix:
@@ -70,8 +70,10 @@ jobs:
         image: 
           - container: quay.io/pypa/manylinux_2_28_x86_64
             architecture: x86_64
+            os: ubuntu-latest
           - container: quay.io/pypa/manylinux_2_28_aarch64
             architecture: aarch64
+            os: ubuntu-24.04-arm
       fail-fast: false
     steps:
     - name: info
