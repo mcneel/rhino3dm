@@ -615,6 +615,11 @@ class ObjectColorSource(Enum):
     ColorFromMaterial = 2
     ColorFromParent = 3
 
+class ObjectLinetypeSource(Enum):
+    LinetypeFromLayer = 0
+    LinetypeFromObject = 1
+    LinetypeFromParent = 2
+
 class ObjectMode(Enum):
     Normal = 0
     Hidden = 1
@@ -996,6 +1001,8 @@ class ObjectAttributes(CommonObject):
     def ReceivesShadows(self) -> bool: ...
     @property
     def LinetypeSource(self) -> ObjectLinetypeSource: ...
+    @LinetypeSource.setter
+    def LinetypeSource(self, line_type_source: ObjectLinetypeSource) -> None: ...
     @property
     def ColorSource(self) -> ObjectColorSource: ...
     @ColorSource.setter
