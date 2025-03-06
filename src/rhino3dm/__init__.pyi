@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Tuple, Set, Iterable, List, overload
 from uuid import UUID
 
@@ -608,6 +609,12 @@ class NurbsSurfacePointList:
     @property
     def CountV(self) -> int: ...
 
+class ObjectColorSource(Enum):
+    ColorFromLayer = 0
+    ColorFromObject = 1
+    ColorFromMaterial = 2
+    ColorFromParent = 3
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
@@ -983,6 +990,8 @@ class ObjectAttributes(CommonObject):
     def LinetypeSource(self) -> ObjectLinetypeSource: ...
     @property
     def ColorSource(self) -> ObjectColorSource: ...
+    @ColorSource.setter
+    def ColorSource(self, color_source: ObjectColorSource) -> None: ...
     @property
     def PlotColorSource(self) -> ObjectPlotColorSource: ...
     @property
