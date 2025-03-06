@@ -615,6 +615,12 @@ class ObjectColorSource(Enum):
     ColorFromMaterial = 2
     ColorFromParent = 3
 
+class ObjectMode(Enum):
+    Normal = 0
+    Hidden = 1
+    Locked = 2
+    InstanceDefinitionObject = 3
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
@@ -978,6 +984,8 @@ class ModelComponent(CommonObject):
 class ObjectAttributes(CommonObject):
     @property
     def Mode(self) -> ObjectMode: ...
+    @Mode.setter
+    def Mode(self, mode: ObjectMode) -> None: ...
     @property
     def IsInstanceDefinitionObject(self) -> bool: ...
     @property
