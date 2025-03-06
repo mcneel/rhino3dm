@@ -24,7 +24,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.9.0...8.17.0-beta
 - (js) Layer.index
 - (js) Mesh.CreateFromThreeJSON inclides vertex color information
 - (js) calling rhino.Version will now return the openNURBS version the library is built against
-- (py) Improved stubs. WIP. #668, #669 and #682 @StudioWEngineers
+- (py) Improved stubs. WIP. #668, #669, #682 and #685 @StudioWEngineers
 - (py) Added python 3.13 target #654
 - (py) BND_MeshingParameters::Decode now supports more properties
 - (py) Exposed a LightStyle enum which was previously only used internally
