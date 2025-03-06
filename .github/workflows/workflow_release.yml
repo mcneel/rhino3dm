@@ -256,7 +256,7 @@ jobs:
         run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
-        if: ${{ matrix.architecture != 'aarch64' }}
+        if: ${{ matrix.architecture != 'arm64' }}
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
