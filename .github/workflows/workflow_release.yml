@@ -111,7 +111,7 @@ jobs:
         name: ${{ steps.artifactname.outputs.file }}
 
   build_py_all_bdist:
-    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
+    name: build python ${{ matrix.python-version }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
