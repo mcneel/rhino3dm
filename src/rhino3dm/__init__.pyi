@@ -1,4 +1,4 @@
-from typing import Tuple, Set, Iterable, List, overload
+from typing import Any, Tuple, Set, Iterable, List, overload
 from uuid import UUID
 
 class Arc:
@@ -154,6 +154,24 @@ class Circle:
 class CommonObject:
     @property
     def IsValid(self) -> bool: ...
+
+    def Encode(self) -> dict[str, Any]: ...
+
+    def GetUserString(self, key: str) -> str: ...
+
+    def GetUserStrings(self) -> tuple[tuple[str, str]]: ...
+
+    def GetUserStrings2(self) -> list[list[str]]: ...
+
+    @property
+    def IsValidWithLog(self) -> tuple[bool, str]: ...
+
+    def RdkXml(self) -> str: ...
+
+    def SetUserString(self, key: str, value: str) -> bool: ...
+
+    @property
+    def UserStringCount(self) -> int: ...
 
 class ComponentIndex:
     @property
