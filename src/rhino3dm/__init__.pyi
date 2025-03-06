@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Set, Iterable, List, overload
+from typing import Any, Tuple, Iterable, List, overload
 from uuid import UUID
 
 class Arc:
