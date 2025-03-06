@@ -183,7 +183,7 @@ jobs:
           name: ${{ steps.artifactname.outputs.file }}
   
   build_dotnet_os:
-    name: build dotnet ${{ matrix.target }}
+    name: build dotnet ${{ matrix.target }} ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
     container:
       image: ${{ matrix.image }}
@@ -195,6 +195,7 @@ jobs:
             target: linux
             image: mcneel/rhino3dm-dev-amazonlinux2023
             artifact-path: src/build/linux/librhino3dm_native.so
+            architecture: ""
           - os: ubuntu-24.04-arm
             target: linux
             image: ""
@@ -204,10 +205,12 @@ jobs:
             target: windows
             image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
+            architecture: ""
           - os: macos-14
             target: macos
             image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+            architecture: ""
       fail-fast: false
     steps:
       #- name: setup dotnet
