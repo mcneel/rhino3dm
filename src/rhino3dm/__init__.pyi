@@ -615,6 +615,12 @@ class ObjectColorSource(Enum):
     ColorFromMaterial = 2
     ColorFromParent = 3
 
+class ObjectDecoration(Enum):
+    NoObjectDecoration = 0
+    StartArrowhead = 0x08
+    EndArrowhead = 0x10
+    BothArrowhead = 0x18
+
 class ObjectLinetypeSource(Enum):
     LinetypeFromLayer = 0
     LinetypeFromObject = 1
@@ -1055,6 +1061,8 @@ class ObjectAttributes(CommonObject):
     def PlotWeight(self) -> float: ...
     @property
     def ObjectDecoration(self) -> ObjectDecoration: ...
+    @ObjectDecoration.setter
+    def ObjectDecoration(self, object_decoration: ObjectDecoration) -> None: ...
     @property
     def WireDensity(self) -> int: ...
     @property
