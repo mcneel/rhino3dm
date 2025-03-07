@@ -553,6 +553,13 @@ class MeshNormalList: ...
 
 class MeshTextureCoordinateList: ...
 
+class MeshType(Enum):
+    Default = 0
+    Render = 1
+    Analysis = 2
+    Preview = 3
+    Any = 4
+
 class MeshTopologyEdgeList:
     def EdgeLine(self, topologyEdgeIndex: int) -> Line: ...
 
