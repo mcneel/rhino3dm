@@ -655,6 +655,37 @@ class ObjectPlotWeightSource(Enum):
     PlotWeightFromObject = 1
     PlotWeightFromParent = 3
 
+class ObjectType(Enum):
+    UnKnownType = 0
+    Point = 1
+    PointSet = 2
+    Curve = 4
+    Surface = 8
+    Brep = 0x10
+    Mesh = 0x20
+    Light = 0x100
+    Annotation = 0x200
+    InstanceDefinition = 0x800
+    InstanceReference = 0x1000
+    TextDot = 0x2000
+    Grip = 0x4000
+    Detail = 0x8000
+    Hatch = 0x10000
+    MorphControl = 0x20000
+    SubD = 0x40000
+    BrepLoop = 0x80000
+    PolysrfFilter = 0x200000
+    EdgeFilter = 0x400000
+    PolyedgeFilter = 0x800000
+    MeshVertex = 0x01000000
+    MeshEdge = 0x02000000
+    MeshFace = 0x04000000
+    Cage = 0x08000000
+    Phantom = 0x10000000
+    ClipPlane = 0x20000000
+    Extrusion = 0x40000000
+    AnyObject = 0xFFFFFFFF
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
