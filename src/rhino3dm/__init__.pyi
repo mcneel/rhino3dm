@@ -626,6 +626,12 @@ class ObjectMode(Enum):
     Locked = 2
     InstanceDefinitionObject = 3
 
+class ObjectPlotColorSource(Enum):
+    PlotColorFromLayer = 0
+    PlotColorFromObject = 1
+    PlotColorFromDisplay = 2
+    PlotColorFromParent = 3
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
@@ -1009,6 +1015,8 @@ class ObjectAttributes(CommonObject):
     def ColorSource(self, color_source: ObjectColorSource) -> None: ...
     @property
     def PlotColorSource(self) -> ObjectPlotColorSource: ...
+    @PlotColorSource.setter
+    def PlotColorSource(self, plot_color_source: ObjectPlotColorSource) -> None: ...
     @property
     def PlotWeightSource(self) -> ObjectPlotWeightSource: ...
     @property
