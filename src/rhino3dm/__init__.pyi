@@ -881,6 +881,35 @@ class Texture:
     @property
     def FileName(self) -> str: ...
 
+class TextureType(Enum):
+    NoTextureType = 0
+    Bitmap = 1
+    Diffuse = 1
+    Bump = 2
+    Transparency = 3
+    Opacity = 3
+    Emap = 86
+    PBR_BaseColor = 1
+    PBR_Subsurface = 10
+    PBR_SubsurfaceScattering = 11
+    PBR_SubsurfaceScatteringRadius = 12
+    PBR_Metallic = 13
+    PBR_Specular = 14
+    PBR_SpecularTint = 15
+    PBR_Roughness = 16
+    PBR_Anisotropic = 17
+    PBR_Anisotropic_Rotation = 18
+    PBR_Sheen = 19
+    PBR_SheenTint = 20
+    PBR_Clearcoat = 21
+    PBR_ClearcoatRoughness = 22
+    PBR_OpacityIor = 23
+    PBR_OpacityRoughness = 24
+    PBR_Emission = 25
+    PBR_AmbientOcclusion = 26
+    PBR_Displacement = 28
+    PBR_ClearcoatBump = 29
+
 class Transform:
     def __init__(self, diagonalValue: float) -> None: ...
     @property
