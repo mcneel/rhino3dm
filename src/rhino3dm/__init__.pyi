@@ -226,6 +226,12 @@ class ConstructionPlane:
     @property
     def Name(self) -> str: ...
 
+class CoordinateSystem(Enum):
+    World = 0
+    Camera = 1
+    Clip = 2
+    Screen = 3
+
 class Cylinder:
     @overload
     def __init__(self, baseCircle: Circle) -> None: ...
