@@ -849,6 +849,35 @@ class Transform:
     def Transpose(self) -> Transform: ...
     def ToFloatArray(self, rowDominant: bool) -> List[float]: ...
 
+class UnitSystem(Enum):
+    NoUnits = 0
+    Angstroms = 12
+    Nanometers = 13
+    Microns = 1
+    Millimeters = 2
+    Centimeters = 3
+    Decimeters = 14
+    Meters = 4
+    Dekameters = 15
+    Hectometers = 16
+    Kilometers = 5
+    Megameters = 17
+    Gigameters = 18
+    Microinches = 6
+    Mils = 7
+    Inches = 8
+    Feet = 9
+    Yards = 19
+    Miles = 10
+    PrinterPoints = 20
+    PrinterPicas = 21
+    NauticalMiles = 22
+    AstronomicalUnits = 23
+    LightYears = 24
+    Parsecs = 25
+    CustomUnits = 11
+    Unset = 255
+
 class Vector2d:
     def __init__(self, x: float, y: float) -> None: ...
     @property
