@@ -162,6 +162,38 @@ class ComponentIndex:
     @property
     def Index(self) -> int: ...
 
+class ComponentIndexType(Enum):
+    InvalidType = 0
+    BrepVertex = 1
+    BrepEdge = 2
+    BrepFace = 3
+    BrepTrim = 4
+    BrepLoop = 5
+    MeshVertex = 11
+    MeshTopologyVertex = 12
+    MeshTopologyEdge =13
+    MeshFace = 14
+    MeshNgon = 15
+    InstanceDefinitionPart = 21
+    PolycurveSegment = 31
+    PointCloudPoint = 41
+    GroupMember = 51
+    ExtrusionBottomProfile = 61
+    ExtrusionTopProfile = 62
+    ExtrusionWallEdge = 63
+    ExtrusionWallSurface = 64
+    ExtrusionCapSurface = 65
+    ExtrusionPath = 66
+    SubdVertex = 71
+    SubdEdge = 72
+    SubdFace = 73
+    DimLinearPoint = 100
+    DimRadialPoint = 101
+    DimAngularPoint = 102
+    DimOrdinatePoint = 103
+    DimTextPoint = 104
+    NoType = 0xFFFFFFFF
+
 class Cone:
     @property
     def Height(self) -> float: ...
