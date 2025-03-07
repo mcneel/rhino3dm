@@ -620,6 +620,11 @@ class ObjectLinetypeSource(Enum):
     LinetypeFromObject = 1
     LinetypeFromParent = 2
 
+class ObjectMaterialSource(Enum):
+    MaterialFromLayer = 0
+    MaterialFromObject = 1
+    MaterialFromParent = 3
+
 class ObjectMode(Enum):
     Normal = 0
     Hidden = 1
@@ -1038,6 +1043,8 @@ class ObjectAttributes(CommonObject):
     def MaterialIndex(self) -> int: ...
     @property
     def MaterialSource(self) -> ObjectMaterialSource: ...
+    @MaterialSource.setter
+    def MaterialSource(self, material_source: ObjectMaterialSource) -> None: ...
     @property
     def ObjectColor(self) -> Tuple[int, int, int, int]: ...
     @property
