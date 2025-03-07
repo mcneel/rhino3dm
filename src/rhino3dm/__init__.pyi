@@ -632,6 +632,11 @@ class ObjectPlotColorSource(Enum):
     PlotColorFromDisplay = 2
     PlotColorFromParent = 3
 
+class ObjectPlotWeightSource(Enum):
+    PlotWeightFromLayer = 0
+    PlotWeightFromObject = 1
+    PlotWeightFromParent = 3
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
@@ -1019,6 +1024,8 @@ class ObjectAttributes(CommonObject):
     def PlotColorSource(self, plot_color_source: ObjectPlotColorSource) -> None: ...
     @property
     def PlotWeightSource(self) -> ObjectPlotWeightSource: ...
+    @PlotWeightSource.setter
+    def PlotWeightSource(self, plot_weigth_source: ObjectPlotWeightSource) -> None: ...
     @property
     def Name(self) -> str: ...
     @property
