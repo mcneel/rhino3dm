@@ -778,6 +778,11 @@ class Plane:
     @property
     def ZAxis(self) -> Vector3d: ...
 
+class PlaneSphereIntersection(Enum):
+    NoIntersection = 0,
+    Point = 1,
+    Circle = 2,
+
 class Point2d:
     def __init__(self, x: float, y: float) -> None: ...
     @property
