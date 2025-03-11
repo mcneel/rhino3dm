@@ -779,14 +779,14 @@ class Plane:
     def ZAxis(self) -> Vector3d: ...
 
 class PlaneSphereIntersection(Enum):
-    NoIntersection = 0,
-    Point = 1,
-    Circle = 2,
+    NoIntersection = 0
+    Point = 1
+    Circle = 2
 
 class SphereSphereIntersection(Enum):
-    NoIntersection = 0,
-    Point = 1,
-    Circle = 2,
+    NoIntersection = 0
+    Point = 1
+    Circle = 2
     Overlap = 3
 
 class Point2d:
