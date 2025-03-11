@@ -783,6 +783,12 @@ class PlaneSphereIntersection(Enum):
     Point = 1,
     Circle = 2,
 
+class SphereSphereIntersection(Enum):
+    NoIntersection = 0,
+    Point = 1,
+    Circle = 2,
+    Overlap = 3
+
 class Point2d:
     def __init__(self, x: float, y: float) -> None: ...
     @property
