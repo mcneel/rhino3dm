@@ -145,7 +145,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='8.17.0-beta1',
+    version='8.17.0',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -160,7 +160,7 @@ CPython package based on OpenNURBS with a RhinoCommon style
 
 ### Supported platforms
 * Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 , 3.13 - Windows (64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 13 (installed through homebrew)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 13
 * Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 14, macos 15 universal
 * Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
 * other architectures, operating systems, and python versions are supported through source distributions
