@@ -212,7 +212,7 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.RenderPlugIn.RenderSettingsSectionsCallback renderSettingsSections,
     Rhino.PlugIns.RenderPlugIn.PlugInIconCallback pluginiconcallback,
     Rhino.PlugIns.RenderPlugIn.InitialChannelToDisplayCallback initialChannelToDisplay,
-    Rhino.PlugIns.RenderPlugIn.PlugInTextureNeedsBakingCallback pluginTextureNeedsBakingCallback,
+    Rhino.PlugIns.RenderPlugIn.PlugInIsTextureSupportedCallback pluginIsTextureSupportedCallback,
     Rhino.PlugIns.RenderPlugIn.CustomChannelNameCallback customChannelName
     );
 
@@ -341,6 +341,9 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetLinetypeTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetHatchPatternTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetDimStyleTableEventCallback(Rhino.RhinoDoc.RhinoTableCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -380,6 +383,12 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetDetailEventCallback(Rhino.Display.RhinoPageView.PageViewCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetViewEnableDrawingCallback(Rhino.Display.RhinoView.ViewEnableDrawingCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetPageViewPropertiesCallback(Rhino.Display.RhinoPageView.PageViewPropertiesCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetDisplayModeChangedEventCallback(Rhino.Display.DisplayPipeline.DisplayModeChangedCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -389,7 +398,10 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void CRhinoEventWatcher_SetTransformObjectsCallback(Rhino.RhinoDoc.RhinoTransformObjectsCallback cb);
+  internal static extern void CRhinoEventWatcher_SetBeforeTransformObjectsCallback(Rhino.RhinoDoc.RhinoBeforeTransformObjectsCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetAfterTransformObjectsCallback(Rhino.RhinoDoc.RhinoAfterTransformObjectsCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnMainLoopCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
@@ -844,6 +856,13 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.CLONE_POST_EFFECT_JOB_PROC clone,
     Rhino.RDK.Delegates.DELETE_THIS_POST_EFFECT_JOB delete,
     Rhino.RDK.Delegates.EXECUTE_POST_EFFECT_JOB execute
+  );
+
+  // CmnPostEffectExecutionControl
+  [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void Rdk_CRdkCmnPostEffectExecutionControl_SetCallbacks(
+    Rhino.RDK.Delegates.POST_EFFECT_EXECUTION_CONTROL_PROC__DELETE_THIS delete,
+    Rhino.RDK.Delegates.POST_EFFECT_EXECUTION_CONTROL_PROC__READY_TO_EXECUTE ready_to_execute
   );
 
   //CmnTask
@@ -1452,7 +1471,8 @@ internal partial class UnsafeNativeMethods
     Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyDisplayNameDelegate delegateDisplayName,
     Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyParameterNameDelegate delegateParameterName,
     Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyImageDelegate delegateImage,
-    Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyEditableDelegate delegateEditable
+    Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyEditableDelegate delegateEditable,
+    Rhino.ObjectManager.ObjectManagerNodeQuickAccessProperty.NodePropertyTypeDelegate delegateParameterType
     );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -1468,7 +1488,8 @@ internal partial class UnsafeNativeMethods
     Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandIsDefaultDelegate delegateIsDefault,
     Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandIsEnabledDelegate delegateIsEnabled,
     Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandIsRadioButtonDelegate delegateIsRadioButton,
-    Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandSupportsMultipleSelectionDelegate delegateMultipleSupport
+    Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandSupportsMultipleSelectionDelegate delegateMultipleSupport,
+    Rhino.ObjectManager.ObjectManagerNodeCommand.NodeCommandMenuOrderDelegate delegateMenuOrder
   );
 
   internal delegate void ConstraintAddRemProc(uint docSerial, IntPtr Constraints, IntPtr Constraint);

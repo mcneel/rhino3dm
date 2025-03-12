@@ -1410,6 +1410,29 @@ namespace Rhino.Geometry
       IntPtr pSum = summand.ConstPointer();
       return UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
     }
+
+    /// <summary>
+    /// On input, this contains the mass properties for some geometry G.
+		/// On exit, this contains the mass properties for the transformed geometry xform(G).
+    /// </summary>
+    /// <param name="xform">
+    /// The transformation.
+    /// When computing volumne mass properties, transform must be an affine transformation, or <see cref="Geometry.Transform.IsAffine"/>.	
+    /// When computing area mass properties, transform must be a similarity transformation, or <see cref="Geometry.Transform.IsSimilarity"/>.	
+    /// Perspective transformations are not allowed. 
+    /// </param>
+    /// <returns>
+    /// True if successful, false otherwise.
+    /// </returns>
+    /// <remarks>
+    /// The Area of a transformed object can not be calculated from the area of the original object
+    /// if the transform is not a similarity, like a non-uniform scaling.
+    /// </remarks>
+    /// <since>8.12</since>
+    public bool Transform(Transform xform)
+    {
+      return UnsafeNativeMethods.ON_MassProperties_Transform(m_ptr, ref xform); 
+    }
     #endregion
   }
 

@@ -87,6 +87,10 @@ Surface
 
       :rtype: float[]
 
+   .. py:method:: GetSpanVector2(direction)
+
+      [todo] add documentation
+
    .. py:method:: NormalAt(u, v)
 
       Computes the surface normal at a point.

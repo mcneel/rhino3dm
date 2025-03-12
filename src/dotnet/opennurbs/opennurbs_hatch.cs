@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.Runtime;
@@ -431,6 +432,18 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_Hatch_SetGradientData(ptr_this, fill.StartPoint, fill.EndPoint, (int)fill.GradientType, fill.Repeat, ptrColorStopArray);
       UnsafeNativeMethods.ON_ColorStopArray_Delete(ptrColorStopArray);
     }
+
+    /// <summary>
+    /// Constructs a Brep representation of this hatch.
+    /// </summary>
+    /// <returns>A Brep representation of this hatch if successful, null otherwise.</returns>
+    /// <since>8.9</since>
+    public Brep ToBrep()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_newbrep = UnsafeNativeMethods.ON_Geometry_BrepForm(ptr_const_this);
+      return IntPtr.Zero == ptr_newbrep ? null : new Brep(ptr_newbrep, null);
+    }
   }
 }
 
@@ -466,7 +479,20 @@ namespace Rhino.Display
   /// </summary>
   public class ColorGradient
   {
-    List<ColorStop> _stops = new List<ColorStop>();
+    /// <summary>
+    /// Create a duplicate of this color gradient.
+    /// </summary>
+    /// <returns>An exact duplicate of this color gradient.</returns>
+    /// <since>8.8</since>
+    public ColorGradient Duplicate()
+    {
+      // Since ColorGradient getters always return value types or copies of its values,
+      // and also setters never keep a reference to an external object.
+      // we can implement Duplicate like a MemberwiseClone.
+      return (ColorGradient)MemberwiseClone();
+    }
+
+    private ColorStop[] _stops = Array.Empty<ColorStop>();
 
     /// <summary>
     /// Gradient fill type associated with this hatch
@@ -485,7 +511,7 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public ColorStop[] GetColorStops()
     {
-      return _stops.ToArray();
+      return (ColorStop[]) _stops.Clone();
     }
 
     /// <summary>
@@ -495,7 +521,7 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public void SetColorStops(IEnumerable<ColorStop> stops)
     {
-      _stops = new List<ColorStop>(stops);
+      _stops = stops.ToArray();
     }
 
     /// <summary>

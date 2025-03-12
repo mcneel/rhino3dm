@@ -3,7 +3,7 @@
 
 BND_Viewport* BND_ViewInfo::GetViewport() const
 {
-  return new BND_Viewport(new ON_Viewport(m_view.m_vp), nullptr);
+  return new BND_Viewport(const_cast<ON_Viewport*>(&m_view.m_vp), nullptr);
 }
 
 void BND_ViewInfo::SetViewport(const BND_Viewport& viewport)
@@ -122,8 +122,8 @@ void BND_File3dmSettings::SetEarthAnchorPoint(const BND_EarthAnchorPoint& anchor
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void init3dmSettingsBindings(pybind11::module& m)
+
+void init3dmSettingsBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ConstructionPlane>(m, "ConstructionPlane")
     .def(py::init<>())
@@ -215,6 +215,7 @@ void init3dmSettingsBindings(pybind11::module& m)
     .def_property_readonly("RenderSettings", &BND_File3dmSettings::GetRenderSettings)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -234,6 +235,7 @@ void init3dmSettingsBindings(void*)
     ;
 
   class_<BND_ViewInfo>("ViewInfo")
+    .constructor<>()
     .property("name", &BND_ViewInfo::GetName, &BND_ViewInfo::SetName)
     .property("wallpaperName", &BND_ViewInfo::GetWallpaperFilename)
     .property("showWallpaperInGrayScale", &BND_ViewInfo::ShowWallpaperInGrayScale, &BND_ViewInfo::SetShowWallpaperInGrayScale)

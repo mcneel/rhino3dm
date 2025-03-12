@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initViewportBindings(pybind11::module& m);
+void initViewportBindings(rh3dmpymodule& m);
 #else
 void initViewportBindings(void* m);
 #endif

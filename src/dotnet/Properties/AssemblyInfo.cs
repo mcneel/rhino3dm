@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Robert McNeel & Associates")]
 [assembly: AssemblyProduct("Rhino")]
-[assembly: AssemblyCopyright("Copyright © 2023")]
+[assembly: AssemblyCopyright("Copyright © 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 // Brian Gillespie: 9/22/2010
@@ -74,7 +74,7 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyVersion("6.0.0.1")]
 //#endif
 
-[assembly: AssemblyVersion("8.9.0.0")]
+[assembly: AssemblyVersion("8.17.0.0")]
 
 // 2013-12-19, Brian Gillespie
 // AssemblyFileVersion is set in /src4/version.h

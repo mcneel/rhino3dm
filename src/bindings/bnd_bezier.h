@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBezierBindings(pybind11::module& m);
+void initBezierBindings(rh3dmpymodule& m);
 #else
 void initBezierBindings(void* m);
 #endif

@@ -22,8 +22,8 @@ void BND_ModelComponent::SetId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initModelComponentBindings(pybind11::module& m)
+
+void initModelComponentBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ModelComponent, BND_CommonObject>(m, "ModelComponent")
     .def("DataCRC", &BND_ModelComponent::DataCRC, py::arg("currentRemainder"))
@@ -32,6 +32,7 @@ void initModelComponentBindings(pybind11::module& m)
     .def("ClearId", &BND_ModelComponent::ClearId)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

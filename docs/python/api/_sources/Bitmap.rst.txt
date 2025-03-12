@@ -24,3 +24,6 @@ Bitmap
 
    .. py:attribute:: SizeOfImage
 
+
+   .. py:attribute:: Id
+

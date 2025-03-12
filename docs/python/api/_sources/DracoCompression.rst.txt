@@ -21,6 +21,10 @@ DracoCompression
 
       [todo] add documentation
 
+   .. py:staticmethod:: DecompressByteArray()
+
+      [todo] add documentation
+
    .. py:staticmethod:: DecompressBase64String(encoded)
 
       [todo] add documentation

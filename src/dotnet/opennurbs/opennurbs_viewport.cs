@@ -31,6 +31,29 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// If the viewport has a parent ViewInfo, return a NonConstPtr to the viewport.
+    /// </summary>
+    /// <returns>IntPtr</returns>
+    /// <since>8.10</since>
+    internal override IntPtr NonConstPointer()
+    {
+      if(m_parent != null && !IsNonConst) 
+      {
+        var vi = m_parent as ViewInfo;
+        if (vi != null)
+        {
+          IntPtr pView = vi.NonConstPointer();
+          IntPtr v = UnsafeNativeMethods.ON_3dmView_ViewportPointer(pView);
+          if (v != IntPtr.Zero)
+          {
+            return v;
+          }
+        }
+      }
+      return base.NonConstPointer();
+    }
+
+    /// <summary>
     /// Initializes a new instance.
     /// </summary>
     /// <since>5.0</since>
@@ -208,6 +231,16 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       return UnsafeNativeMethods.ON_Viewport_ChangeToParallelProjection(ptr_this, symmetricFrustum);
+    }
+
+    /// <summary>
+    /// When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
+    /// </summary>
+    /// <returns>true if successful</returns>
+    public bool ChangeToParallelReflectedProjection()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      return UnsafeNativeMethods.ON_Viewport_ChangeToParallelReflectedProjection(ptr_this);
     }
 
     /// <summary>

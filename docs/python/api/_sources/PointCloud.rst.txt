@@ -15,6 +15,11 @@ PointCloud
       PointCloud constructor
 
 
+   .. py:method:: PointCloud()
+
+      PointCloud constructor
+
+
    .. py:attribute:: Count
 
       int: Gets the number of points in this point cloud.
@@ -164,14 +169,14 @@ PointCloud
 
       :rtype: void
 
-   .. py:method:: AddRange(points, normals, colors)
+   .. py:method:: AddRange(points, values)
 
       Appends a collection of points to this point cloud.
 
 
       :rtype: void
 
-   .. py:method:: AddRange(points, values)
+   .. py:method:: AddRange(points, normals, colors)
 
       Appends a collection of points to this point cloud.
 
@@ -257,6 +262,10 @@ PointCloud
 
       :rtype: rhino3dm.Point3d[]
 
+   .. py:method:: GetPoints2()
+
+      [todo] add documentation
+
    .. py:method:: PointAt(index)
 
       Returns the location of the point at a specific index.
@@ -274,6 +283,10 @@ PointCloud
 
       :rtype: rhino3dm.Vector3d[]
 
+   .. py:method:: GetNormals2()
+
+      [todo] add documentation
+
    .. py:method:: GetColors()
 
       Copy all the point colors in this point cloud to an array.
@@ -282,7 +295,15 @@ PointCloud
 
       :rtype: Color[]
 
+   .. py:method:: GetColors2()
+
+      [todo] add documentation
+
    .. py:method:: GetValues()
+
+      [todo] add documentation
+
+   .. py:method:: GetValues2()
 
       [todo] add documentation
 

@@ -37,14 +37,15 @@ BND_RevSurface* BND_RevSurface::Create1(const BND_Curve& revoluteCurve, const ON
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initRevSurfaceBindings(pybind11::module& m)
+
+void initRevSurfaceBindings(rh3dmpymodule& m)
 {
   py::class_<BND_RevSurface, BND_Surface>(m, "RevSurface")
     .def(py::init<>())
     .def_static("Create", &BND_RevSurface::Create1, py::arg("revoluteCurve"), py::arg("axisOfRevolution"), py::arg("startAngle"), py::arg("endAngle"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

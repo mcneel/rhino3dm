@@ -54,9 +54,14 @@ BND_TUPLE BND_Circle::ClosestParameter(ON_3dPoint testPoint) const
   bool success = false;
   double t = 0;
   success = m_circle.ClosestPointTo(testPoint, &t);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, t);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, t);
+#endif
+  
   return rc;
 }
 
@@ -95,8 +100,8 @@ BND_DICT BND_Circle::Encode() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initCircleBindings(pybind11::module& m)
+
+void initCircleBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Circle>(m, "Circle")
     .def(py::init<double>(), py::arg("radius"))
@@ -122,6 +127,7 @@ void initCircleBindings(pybind11::module& m)
     .def("Encode", &BND_Circle::Encode)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

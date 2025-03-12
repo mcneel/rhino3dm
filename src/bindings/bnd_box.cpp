@@ -29,8 +29,8 @@ ON_3dPoint BND_Box::PointAt(double x, double y, double z) const
 //}
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBoxBindings(pybind11::module& m)
+
+void initBoxBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Box>(m, "Box")
     .def(py::init<const BND_BoundingBox&>(), py::arg("bbox"))

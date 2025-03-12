@@ -111,6 +111,10 @@ Polyline
 
       :rtype: Line[]
 
+   .. py:method:: GetSegments2()
+
+      [todo] add documentation
+
    .. py:method:: SegmentAt(index)
 
       Gets the line segment at the given index.
@@ -155,3 +159,11 @@ Polyline
       :return: A closed polyline if successful, None otherwise.
 
       :rtype: rhino3dm.Polyline
+
+   .. py:staticmethod:: CreateFromPoints(points)
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CreateFromPoints(points)
+
+      [todo] add documentation

@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void init3dmAttributesBindings(pybind11::module& m);
+void init3dmAttributesBindings(rh3dmpymodule& m);
 #else
 void init3dmAttributesBindings(void* m);
 #endif
@@ -91,6 +91,7 @@ public:
 
   int GroupCount() const { return m_attributes->GroupCount(); }
   BND_TUPLE GetGroupList() const;
+  std::vector<int> GetGroupList2() const;
   void AddToGroup(int i) { m_attributes->AddToGroup(i); }
   void RemoveFromGroup(int i) { m_attributes->RemoveFromGroup(i); }
   void RemoveFromAllGroups() { m_attributes->RemoveFromAllGroups(); }

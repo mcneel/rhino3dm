@@ -114,7 +114,7 @@ BND_DICT BND_Viewport::GetFrustum() const
     d["far"] = far_dist;
     return d;
   }
-  throw pybind11::value_error("Invalid viewport");
+  throw py::value_error("Invalid viewport");
 }
 #endif
 
@@ -143,10 +143,10 @@ emscripten::val BND_Viewport::GetFrustum() const
 void BND_Viewport::SetScreenPort(BND_TUPLE rect)
 {
 #if defined(ON_PYTHON_COMPILE)
-  int x = rect[0].cast<int>();
-  int y = rect[1].cast<int>();
-  int width = rect[2].cast<int>();
-  int height = rect[3].cast<int>();
+  int x = py::cast<int>(rect[0]);
+  int y = py::cast<int>(rect[1]);
+  int width = py::cast<int>(rect[2]);
+  int height = py::cast<int>(rect[3]);
   m_viewport->SetScreenPort(x, x + width, y + height, y);
 #else
   int x = rect[0].as<int>();
@@ -161,20 +161,30 @@ BND_TUPLE BND_Viewport::GetScreenPort() const
 {
   int left, right, bottom, top, portNear, portFar;
   bool success = m_viewport->GetScreenPort(&left, &right, &bottom, &top, &portNear, &portFar);
-  BND_TUPLE rc = CreateTuple(4);
+  BND_TUPLE rc;
   if (success)
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    rc = py::make_tuple(left, top, fabs(right - left), fabs(bottom - top));
+#else
+    rc = CreateTuple(4);
     SetTuple(rc, 0, left);
     SetTuple(rc, 1, top);
     SetTuple(rc, 2, fabs(right - left));
     SetTuple(rc, 3, fabs(bottom - top));
+#endif
   }
   else
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    rc = py::make_tuple(0, 0, 0, 0);
+#else
+    rc = CreateTuple(4);
     SetTuple(rc, 0, 0);
     SetTuple(rc, 1, 0);
     SetTuple(rc, 2, 0);
     SetTuple(rc, 3, 0);
+#endif
   }
   return rc;
 }
@@ -367,8 +377,8 @@ BND_UUID BND_Viewport::GetId() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initViewportBindings(pybind11::module& m)
+
+void initViewportBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Viewport, BND_CommonObject>(m, "ViewportInfo")
     .def(py::init<>())
@@ -408,9 +418,9 @@ void initViewportBindings(pybind11::module& m)
     .def_property_readonly("Id", &BND_Viewport::GetId)
     ;
 }
+#endif
 
-#else
-
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initViewportBindings(void*)

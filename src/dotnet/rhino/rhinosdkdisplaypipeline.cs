@@ -1,9 +1,11 @@
 #pragma warning disable 1591
 #if RHINO_SDK
 using System;
+using System.Drawing;
 using System.Linq;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.Runtime;
 using Rhino.UI;
 
 namespace Rhino.Display
@@ -979,6 +981,7 @@ namespace Rhino.Display
     /// true if a tiled capture is being performed. If false, the fullSize parameter will have the
     /// same size as currentTile
     /// </returns>
+    /// <since>8.2</since>
     public bool IsInTiledDraw(out System.Drawing.Size fullSize, out System.Drawing.Rectangle currentTile)
     {
       int fullWidth=0, fullHeight=0;
@@ -1383,8 +1386,6 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void PushModelTransform(Transform xform)
     {
-      if( MeshCacheEnabled )
-        m_cache.Flush(this);
       UnsafeNativeMethods.CRhinoDisplayPipeline_PushModelTransform(m_ptr, ref xform);
     }
 
@@ -1394,8 +1395,6 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public void PopModelTransform()
     {
-      if (MeshCacheEnabled)
-        m_cache.Flush(this);
       UnsafeNativeMethods.CRhinoDisplayPipeline_Pop(m_ptr, idxModelTransform);
     }
 
@@ -1921,7 +1920,9 @@ namespace Rhino.Display
 
     class MeshCache
     {
-      System.Collections.Generic.List<Mesh> m_meshes = new System.Collections.Generic.List<Mesh>();
+      System.Collections.Generic.List<Mesh> m_meshes = new System.Collections.Generic.List<Mesh>(32);
+      Transform[] m_transforms = new Transform[32];
+      int m_transforms_count = 0;
       DisplayMaterial m_material;
 
       public void Add(DisplayPipeline pipeline, Mesh mesh, DisplayMaterial material)
@@ -1939,6 +1940,15 @@ namespace Rhino.Display
           m_material.OneShotNonConstCallback = (s,e) => { Flush(pipeline); };
         mesh.OneShotNonConstCallback = (s, e) => { Flush(pipeline); };
         m_meshes.Add(mesh);
+
+        if (m_transforms.Length <= m_transforms_count)
+        {
+          var transforms = m_transforms;
+          m_transforms = new Transform[m_transforms.Length * 2];
+          Array.Copy(transforms, m_transforms, m_transforms_count);
+        }
+
+        m_transforms[m_transforms_count++] = pipeline.ModelTransform;
       }
 
       public void Flush(DisplayPipeline pipeline)
@@ -1970,11 +1980,14 @@ namespace Rhino.Display
 
           IntPtr ptr_pipeline = pipeline.NonConstPointer();
 
-          UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMeshes(ptr_pipeline, pMeshes, const_ptr_material, pCacheHandles);
+          pipeline.PushModelTransform(Transform.Identity);
+          UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMeshes(ptr_pipeline, pMeshes, const_ptr_material, pCacheHandles, m_transforms, m_transforms_count);
+          pipeline.PopModelTransform();
           UnsafeNativeMethods.ON_MeshArray_Delete(pMeshes);
           UnsafeNativeMethods.CRhinoCacheHandleArray_Delete(pCacheHandles);
         }
         m_meshes.Clear();
+        m_transforms_count = 0;
         m_material = null;
       }
     }
@@ -2065,10 +2078,38 @@ namespace Rhino.Display
     /// <since>7.0</since>
     public void DrawSubDWires(SubD subd, System.Drawing.Color color, float thickness)
     {
+      if (subd == null)
+        return;
       int argb = color.ToArgb();
       IntPtr const_ptr_subd = subd.ConstPointer();
       IntPtr subd_display = subd.SubDDisplay();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires(m_ptr, const_ptr_subd, argb, thickness, subd_display);
+      GC.KeepAlive(subd);
+    }
+
+    /// <summary>
+    /// Draws all the wireframe curves os a SubD object using different pens
+    /// </summary>
+    /// <param name="subd">SubD to draw</param>
+    /// <param name="boundaryPen">Pen to use for boundary wires. If null, no boundary wires will be drawn</param>
+    /// <param name="smoothInteriorPen">Pen to use for smooth interior wires. If null, no smooth interior wires will be drawn</param>
+    /// <param name="creasePen">Pen to use for crease wires. If null, no crease wires will be drawn</param>
+    /// <param name="nonmanifoldPen">Pen to use for non-manifold wires. If null, no non-manifold wires will be drawn</param>
+    public void DrawSubDWires(SubD subd, DisplayPen boundaryPen, DisplayPen smoothInteriorPen, DisplayPen creasePen, DisplayPen nonmanifoldPen)
+    {
+      if (subd == null)
+        return;
+      IntPtr const_ptr_subd = subd.ConstPointer();
+      IntPtr subd_display = subd.SubDDisplay();
+      IntPtr ptrBoundary = boundaryPen != null ? boundaryPen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrSmoothInterior = smoothInteriorPen != null ? smoothInteriorPen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrCrease = creasePen != null ? creasePen.ToNativePointer() : IntPtr.Zero;
+      IntPtr ptrNonmanifold = nonmanifoldPen != null ? nonmanifoldPen.ToNativePointer() : IntPtr.Zero;
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawSubDWires2(m_ptr, const_ptr_subd, subd_display, ptrBoundary, ptrSmoothInterior, ptrCrease, ptrNonmanifold);
+      DisplayPen.DeleteNativePointer(ptrBoundary);
+      DisplayPen.DeleteNativePointer(ptrSmoothInterior);
+      DisplayPen.DeleteNativePointer(ptrCrease);
+      DisplayPen.DeleteNativePointer(ptrNonmanifold);
       GC.KeepAlive(subd);
     }
 
@@ -2366,6 +2407,43 @@ namespace Rhino.Display
       GC.KeepAlive(cloud);
     }
 
+    public enum InferenceLineType : int
+    {
+      /// <summary>
+      /// A chord from P to Q
+      /// </summary>
+      Chord = 0,
+      /// <summary>
+      /// A ray from P through Q
+      /// </summary>
+      Ray = 1,
+      /// <summary>
+      /// An infinite line through P and Q
+      /// </summary>
+      InfiniteLine = 2,
+    }
+    /// <summary>
+    /// Draw an inference line used in gesture based snapping
+    /// </summary>
+    /// <param name="P">First point used to define the line in world coordinates</param>
+    /// <param name="O">Second point used to define the line in world coordinates</param>
+    /// <param name="color">Color of line</param>
+    /// <param name="type">Type of line <see cref="InferenceLineType"/></param>
+    public void DrawInferenceLine(Point3d P, Point3d O, Color color, InferenceLineType type)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferenceLine(m_ptr, P, O, color.ToArgb(), (int)type);
+    }
+
+    /// <summary>
+    /// Draw inference point used in gesture based snapping
+    /// </summary>
+    /// <param name="P">Location of point in world coordinates</param>
+    /// <param name="color">Color of the point</param>
+    public void DraweInferencePoint(Point3d P, Color color)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferencePoint(m_ptr, P, color.ToArgb());
+    }
+
     /// <since>5.0</since>
     public void DrawDirectionArrow(Point3d location, Vector3d direction, System.Drawing.Color color)
     {
@@ -2543,8 +2621,27 @@ namespace Rhino.Display
     /// <since>7.1</since>
     public void DrawLineNoClip(Point3d from, Point3d to, System.Drawing.Color color, int thickness)
     {
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLineNoClip(m_ptr, from, to, color.ToArgb(), thickness);
+      DrawLinesNoClip(new Line[] { new Line(from, to) }, color, thickness);
     }
+
+    /// <summary>
+    /// Draws a multiple lines. This version of line drawing will draw the
+    /// segments of the line that extend beyond the near and far planes of the
+    /// view frustum with depths on those planes
+    /// </summary>
+    /// <param name="lines">the lines to draw</param>
+    /// <param name="color">Color to draw lines in</param>
+    /// <param name="thickness">Thickness (in pixels) of lines</param>
+    public void DrawLinesNoClip(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color, int thickness)
+    {
+      int count;
+      Line[] lines_array = Collections.RhinoListHelpers.GetConstArray(lines, out count);
+      if (null == lines_array || count < 1)
+        return;
+
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLinesNoClip(m_ptr, count, lines_array, color.ToArgb(), thickness);
+    }
+
     /// <summary>
     /// Draws a single dotted line.
     /// </summary>

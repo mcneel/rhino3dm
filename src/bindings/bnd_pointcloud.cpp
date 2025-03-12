@@ -72,6 +72,7 @@ ON_3dVector BND_PointCloudItem::GetNormal() const
     return m_pointcloud->m_N[m_index];
   return ON_3dVector::UnsetVector;
 }
+
 void BND_PointCloudItem::SetNormal(const ON_3dVector& v)
 {
   if((m_index >= 0) && (m_index < m_pointcloud->m_P.Count()))
@@ -196,7 +197,7 @@ BND_PointCloudItem BND_PointCloud::GetItem(int index)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_pointcloud->PointCount())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   return BND_PointCloudItem(index, m_pointcloud, m_component_ref);
@@ -671,6 +672,17 @@ BND_TUPLE BND_PointCloud::GetPoints() const
   return NullTuple();
 }
 
+std::vector<ON_3dPoint> BND_PointCloud::GetPoints2() const
+{
+  std::vector<ON_3dPoint> rc;
+  int count = m_pointcloud->m_P.Count();
+  rc.reserve(count);
+  for (int i = 0; i < count; i++)
+    rc.push_back(m_pointcloud->m_P[i]);
+    
+  return rc;
+}
+
 ON_3dPoint BND_PointCloud::PointAt(int index) const
 {
   if (index >= 0 && index < m_pointcloud->m_P.Count())
@@ -694,6 +706,21 @@ BND_TUPLE BND_PointCloud::GetNormals() const
   return NullTuple();
 }
 
+std::vector<ON_3dVector> BND_PointCloud::GetNormals2() const
+{
+  if (m_pointcloud->HasPointNormals())
+  {
+    std::vector<ON_3dVector> rc;
+    int count = m_pointcloud->m_N.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(m_pointcloud->m_N[i]);
+
+    return rc;
+  }
+  return std::vector<ON_3dVector>();
+}
+
 BND_TUPLE BND_PointCloud::GetColors() const
 {
 
@@ -711,6 +738,21 @@ BND_TUPLE BND_PointCloud::GetColors() const
   
 }
 
+std::vector<BND_Color> BND_PointCloud::GetColors2() const
+{
+  if (m_pointcloud->HasPointColors())
+  {
+    std::vector<BND_Color> rc;
+    int count = m_pointcloud->m_C.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(ON_Color_to_Binding(m_pointcloud->m_C[i]));
+
+    return rc;
+  }
+  return std::vector<BND_Color>();
+}
+
 BND_TUPLE BND_PointCloud::GetValues() const
 {
 
@@ -726,6 +768,21 @@ BND_TUPLE BND_PointCloud::GetValues() const
 
   return NullTuple();
   
+}
+
+std::vector<double> BND_PointCloud::GetValues2() const
+{
+  if (m_pointcloud->HasPointValues())
+  {
+    std::vector<double> rc;
+    int count = m_pointcloud->m_V.Count();
+    rc.reserve(count);
+    for (int i = 0; i < count; i++)
+      rc.push_back(m_pointcloud->m_V[i]);
+
+    return rc;
+  }
+  return std::vector<double>();
 }
 
 int BND_PointCloud::ClosestPoint(const ON_3dPoint& testPoint)
@@ -802,14 +859,77 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 
 }
 
+BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
+{
+   if (emscripten::val::undefined() == json["data"])
+    return nullptr;
+  emscripten::val attributes = json["data"]["attributes"];
+
+  std::vector<double> position_array = emscripten::vecFromJSArray<double>(attributes["position"]["array"]);
+
+  std::vector<double> normal_array;
+  if (emscripten::val::undefined() != attributes["normal"])
+  {
+    normal_array = emscripten::vecFromJSArray<double>(attributes["normal"]["array"]);
+  }
+
+  std::vector<double> color_array;
+  int colorChannels = 3; // could be RGB (3) or RGBA (4)
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+    colorChannels = attributes["color"]["itemSize"].as<int>();
+  }
+
+  ON_PointCloud* pc = new ON_PointCloud();
+
+  const int vertex_count = position_array.size() / 3;
+  pc->m_P.SetCapacity(vertex_count);
+  pc->m_P.SetCount(vertex_count);
+  memcpy(pc->m_P.Array(), position_array.data(), sizeof(double) * position_array.size());
+
+  const int normal_count = normal_array.size() / 3;
+  pc->m_N.SetCapacity(normal_count);
+  pc->m_N.SetCount(normal_count);
+  memcpy(pc->m_N.Array(), normal_array.data(), sizeof(double) * normal_array.size());
+
+  const int color_count = color_array.size() / colorChannels;
+  pc->m_C.SetCapacity(color_count);
+  pc->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
+
+  ON_Color* color_array_ptr = pc->m_C.Array();
+  for (int i = 0; i < color_count; ++i) {
+      int r = static_cast<int>(color_array[i * colorChannels]);
+      int g = static_cast<int>(color_array[i * colorChannels + 1]);
+      int b = static_cast<int>(color_array[i * colorChannels + 2]);
+      if(colorChannels == 4)
+      {
+        int a = static_cast<int>(color_array[i * colorChannels + 3]);
+        color_array_ptr[i] = ON_Color(r, g, b, 255-a);
+      }
+      else
+        color_array_ptr[i] = ON_Color(r, g, b);
+  }
+
+  //memcpy(pc->m_C.Array(), color_array.data(), sizeof(ON_Color) * color_array.size());
+
+  // ON_Xform rotation(1);
+  // rotation.RotationZYX(0.0, 0.0, ON_PI / 2.0);
+  // pc->Transform(rotation);
+
+  return new BND_PointCloud(pc, nullptr);
+}
+
+
 
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPointCloudBindings(pybind11::module& m)
+
+void initPointCloudBindings(rh3dmpymodule& m)
 {
   py::class_<BND_PointCloudItem>(m, "PointCloudItem")
     .def_property("Location", &BND_PointCloudItem::GetLocation, &BND_PointCloudItem::SetLocation)
@@ -862,13 +982,18 @@ void initPointCloudBindings(pybind11::module& m)
     .def("InsertRange", &BND_PointCloud::InsertRangePoints, py::arg("index"), py::arg("points"))
     .def("RemoveAt", &BND_PointCloud::RemoveAt, py::arg("index"))
     .def("GetPoints", &BND_PointCloud::GetPoints)
+    .def("GetPoints2", &BND_PointCloud::GetPoints2)
     .def("PointAt", &BND_PointCloud::PointAt, py::arg("index"))
     .def("GetNormals", &BND_PointCloud::GetNormals)
+    .def("GetNormals2", &BND_PointCloud::GetNormals2)
     .def("GetColors", &BND_PointCloud::GetColors)
+    .def("GetColors2", &BND_PointCloud::GetColors2)
     .def("GetValues", &BND_PointCloud::GetValues)
+    .def("GetValues2", &BND_PointCloud::GetValues2)
     .def("ClosestPoint", &BND_PointCloud::ClosestPoint, py::arg("testPoint"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -935,6 +1060,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
+    .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }
 #endif

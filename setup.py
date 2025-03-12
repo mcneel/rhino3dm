@@ -25,6 +25,8 @@ def system(cmd : List, **kwargs):
     try:
         cmd_out = sp.run(cmd, encoding='utf-8', check=True, stdout=sp.PIPE, stderr=sp.PIPE, **kwargs)
     except sp.CalledProcessError as e:
+        print(e.stderr)
+        print(e.output)
         raise RuntimeError(f"Command execution failed.\n\n{e.stderr}\n\n{e.output}")
     print(cmd_out.stdout)
 
@@ -63,10 +65,11 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['cmake',
-                      f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}']
+        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug' if self.debug else 'Release'
+        #cfg = 'Debug'
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
@@ -142,7 +145,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='8.9.0',
+    version='8.17.0',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
@@ -156,11 +159,11 @@ CPython package based on OpenNURBS with a RhinoCommon style
 * Report issue: https://github.com/mcneel/rhino3dm/issues
 
 ### Supported platforms
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - Windows (32 and 64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 - macos 12 (installed through homebrew)
-* Python 3.8, 3.9, 3.10, 3.11, 3.12 - macos 14 arm 64
-* Python 3.8, 3.9, 3.10, 3.11 - Linux via manylinux2014_x86_64
-* other architectures, operating systems, and python versions are supported through source distributions\
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 , 3.13 - Windows (64 bit)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 13
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 14, macos 15 universal
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
+* other architectures, operating systems, and python versions are supported through source distributions
 
 ## Test
 

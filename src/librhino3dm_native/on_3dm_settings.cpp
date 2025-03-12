@@ -1,5 +1,55 @@
 #include "stdafx.h"
 
+RH_C_FUNCTION ON_3dmConstructionPlaneGridDefaults* ON_3dmConstructionPlaneGridDefaults_New()
+{
+  return new ON_3dmConstructionPlaneGridDefaults();
+}
+
+RH_C_FUNCTION void ON_3dmConstructionPlaneGridDefaults_Delete(ON_3dmConstructionPlaneGridDefaults* gridDefaults)
+{
+  if (gridDefaults)
+    delete gridDefaults;
+}
+
+RH_C_FUNCTION void ON_3dmConstructionPlaneGridDefaults_Get(const ON_3dmConstructionPlaneGridDefaults* defaults,
+  double* gridSpacing, double* snapSpacing,
+  int* gridLineCount, int* gridThickFrequency,
+  bool* showGrid, bool* showGridAxes, bool* showWorldAxes)
+{
+  if (nullptr == defaults)
+    return;
+  if (gridSpacing)
+    *gridSpacing = defaults->m_grid_spacing;
+  if (snapSpacing)
+    *snapSpacing = defaults->m_snap_spacing;
+  if (gridLineCount)
+    *gridLineCount = defaults->m_grid_line_count;
+  if (gridThickFrequency)
+    *gridThickFrequency = defaults->m_grid_thick_frequency;
+  if (showGrid)
+    *showGrid = defaults->m_bShowGrid;
+  if (showGridAxes)
+    *showGridAxes = defaults->m_bShowGridAxes;
+  if (showWorldAxes)
+    *showWorldAxes = defaults->m_bShowWorldAxes;
+}
+
+RH_C_FUNCTION void ON_3dmConstructionPlaneGridDefaults_Set(ON_3dmConstructionPlaneGridDefaults* defaults,
+  double gridSpacing, double snapSpacing,
+  int gridLineCount, int gridThickFrequency,
+  bool showGrid, bool showGridAxes, bool showWorldAxes)
+{
+  if (nullptr == defaults)
+    return;
+  defaults->m_grid_spacing = gridSpacing;
+  defaults->m_snap_spacing = snapSpacing;
+  defaults->m_grid_line_count = gridLineCount;
+  defaults->m_grid_thick_frequency = gridThickFrequency;
+  defaults->m_bShowGrid = showGrid;
+  defaults->m_bShowGridAxes = showGridAxes;
+  defaults->m_bShowWorldAxes = showWorldAxes;
+}
+
 RH_C_FUNCTION void ON_3dmConstructionPlane_Copy(const ON_3dmConstructionPlane* pCP, ON_PLANE_STRUCT* plane,
                                                 double* grid_spacing, double* snap_spacing,
                                                 int* grid_line_count, int* grid_thick_freq,
@@ -242,6 +292,54 @@ RH_C_FUNCTION ON_UUID ON_3dmView_NamedViewId(const ON_3dmView* pView)
 
   return ON_nil_uuid;
 }
+
+RH_C_FUNCTION void ON_3dmView_GetClippingPlanes(const ON_3dmView* pView, ON_SimpleArray<ON_ClippingPlaneInfo>* array_to_fill)
+{
+  if (pView && array_to_fill)
+  {
+    *array_to_fill = pView->m_clipping_planes;
+  }
+}
+
+RH_C_FUNCTION ON_UUID ON_ClippingPlaneInfo_GetPlaneId(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->m_plane_id;
+  }
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION bool ON_ClippingPlaneInfo_GetPlane(const ON_ClippingPlaneInfo* pClippingPlaneInfo, ON_PLANE_STRUCT* plane)
+{
+  if (pClippingPlaneInfo && plane)
+  {
+    CopyToPlaneStruct(*plane, pClippingPlaneInfo->m_plane_equation);
+    return true;
+  }
+  return false;
+}
+
+RH_C_FUNCTION double ON_ClippingPlaneInfo_GetDepth(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->Depth();
+  }
+  return 0.0;
+}
+
+RH_C_FUNCTION bool ON_ClippingPlaneInfo_GetDepthEnabled(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  if (pClippingPlaneInfo)
+  {
+    return pClippingPlaneInfo->DepthEnabled();
+  }
+  return false;
+}
+
+
+
 
 RH_C_FUNCTION ON_EarthAnchorPoint* ON_EarthAnchorPoint_New()
 {

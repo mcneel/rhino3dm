@@ -33,8 +33,8 @@ BND_File3dmDithering::BND_File3dmDithering(ON_Dithering* dit)
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initDitheringBindings(pybind11::module& m)
+
+void initDitheringBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmDithering>(m, "Dithering")
     .def(py::init<>())
@@ -43,6 +43,7 @@ void initDitheringBindings(pybind11::module& m)
     .def_property("Method", &BND_File3dmDithering::GetMethod, &BND_File3dmDithering::SetMethod)
    ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

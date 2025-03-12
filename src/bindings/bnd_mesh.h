@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initMeshBindings(pybind11::module& m);
+void initMeshBindings(rh3dmpymodule& m);
 #else
 void initMeshBindings(void* m);
 #endif
@@ -18,10 +18,10 @@ public:
   BND_MeshingParameters(const ON_MeshParameters& mp) : m_mesh_parameters(mp) {}
 
 #if defined(ON_PYTHON_COMPILE)
-  static BND_MeshingParameters Default(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
-  static BND_MeshingParameters FastRenderMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }
-  static BND_MeshingParameters QualityRenderMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::QualityRenderMesh); }
-  static BND_MeshingParameters DefaultAnalysisMesh(pybind11::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultAnalysisMesh); }
+  static BND_MeshingParameters Default(py::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
+  static BND_MeshingParameters FastRenderMesh(py::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }
+  static BND_MeshingParameters QualityRenderMesh(py::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::QualityRenderMesh); }
+  static BND_MeshingParameters DefaultAnalysisMesh(py::object /*self*/) { return BND_MeshingParameters(ON_MeshParameters::DefaultAnalysisMesh); }
 #else
   static BND_MeshingParameters Default() { return BND_MeshingParameters(ON_MeshParameters::DefaultMesh); }
   static BND_MeshingParameters FastRenderMesh() { return BND_MeshingParameters(ON_MeshParameters::FastRenderMesh); }

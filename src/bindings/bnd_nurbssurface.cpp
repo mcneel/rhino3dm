@@ -22,7 +22,7 @@ ON_4dPoint BND_NurbsSurfacePointList::GetControlPoint2(int u, int v) const
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
       u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
   m_surface->GetCV(u, v, pt);
@@ -34,7 +34,7 @@ ON_3dPoint BND_NurbsSurfacePointList::GetPoint(int u, int v) const
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
       u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_3dPoint pt;
   m_surface->GetCV(u, v, pt);
@@ -54,7 +54,7 @@ void BND_NurbsSurfacePointList::SetControlPoint2(int u, int v, ON_4dPoint point)
 #if defined(ON_PYTHON_COMPILE)
   if (u >= CountU() || v >= CountV() ||
      u < 0 || v < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_surface->SetCV(u, v, point);
 }
@@ -70,7 +70,7 @@ double BND_NurbsSurfaceKnotList::GetKnot(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   return m_surface->Knot(m_direction, index);
 }
@@ -79,7 +79,7 @@ void BND_NurbsSurfaceKnotList::SetKnot(int index, double k)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_surface->SetKnot(m_direction, index, k);
 }
@@ -98,11 +98,18 @@ BND_TUPLE BND_NurbsSurfaceKnotList::ToList()
 
   return NullTuple();
 
-/*
-  return std::vector<double>(
+}
+
+std::vector<double> BND_NurbsSurfaceKnotList::ToList2()
+{
+  int count = m_surface->KnotCount(m_direction);
+  if( count > 0) 
+  {
+    return std::vector<double>(
       m_surface->m_knot[m_direction],
       m_surface->m_knot[m_direction] + m_surface->KnotCount(m_direction));
-      */
+  }
+  return std::vector<double>();
 }
 
 BND_NurbsSurface::BND_NurbsSurface(ON_NurbsSurface* nurbssurface, const ON_ModelComponentReference* compref)
@@ -197,14 +204,20 @@ BND_NurbsSurfacePointList BND_NurbsSurface::Points()
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initNurbsSurfaceBindings(pybind11::module& m)
+
+void initNurbsSurfaceBindings(rh3dmpymodule& m)
 {
+#if defined(NANOBIND)
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList")
+#else
   py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsSurfaceKnotList::Count)
     .def("__getitem__", &BND_NurbsSurfaceKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsSurfaceKnotList::SetKnot)
     .def("ToList", &BND_NurbsSurfaceKnotList::ToList)
+    .def("ToList2", &BND_NurbsSurfaceKnotList::ToList2)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsSurfaceKnotList& kl) -> py::buffer_info
       {
         return py::buffer_info
@@ -217,6 +230,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
           {sizeof(double)}                          /* Strides (in bytes) for each index */
         );
       })
+#endif
     .def("InsertKnot", &BND_NurbsSurfaceKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsSurfaceKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsSurfaceKnotList::CreateUniformKnots, py::arg("knotSpacing"))
@@ -226,7 +240,11 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("SuperfluousKnot", &BND_NurbsSurfaceKnotList::SuperfluousKnot, py::arg("start"))
     ;
 
+#if defined(NANOBIND)
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList")
+#else
   py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsSurfacePointList::Count)
     .def_property_readonly("CountU", &BND_NurbsSurfacePointList::CountU)
     .def_property_readonly("CountV", &BND_NurbsSurfacePointList::CountV)
@@ -234,6 +252,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def("GetPoint", &BND_NurbsSurfacePointList::GetPoint, py::arg("u"), py::arg("v") )
     .def("GetControlPoint", &BND_NurbsSurfacePointList::GetControlPoint2, py::arg("u"), py::arg("v") )
     .def("__setitem__", &BND_NurbsSurfacePointList::SetControlPoint1)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsSurfacePointList& pl) -> py::buffer_info
     {
       return py::buffer_info
@@ -250,6 +269,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
         }                                         /* Strides (in bytes) for each index */
       );
     })
+#endif
     .def("MakeRational", &BND_NurbsSurfacePointList::MakeRational)
     .def("MakeNonRational", &BND_NurbsSurfacePointList::MakeNonRational)
     ;
@@ -271,6 +291,7 @@ void initNurbsSurfaceBindings(pybind11::module& m)
     .def_property_readonly("Points", &BND_NurbsSurface::Points)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

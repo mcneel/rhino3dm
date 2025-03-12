@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initBitmapBindings(pybind11::module& m);
+void initBitmapBindings(rh3dmpymodule& m);
 #else
 void initBitmapBindings(void* m);
 #endif
@@ -25,6 +25,7 @@ public:
   //const unsigned char* Bits(int scan_line_index) const;
   //const ON_FileReference& FileReference() const;
   //void SetFileReference(const ON_FileReference& file_reference);
+  BND_UUID GetId() const { return ON_UUID_to_Binding( m_bitmap->Id()); }
   void SetFileFullPath(std::wstring path) { m_bitmap->SetFileFullPath(path.c_str(), true); }
 
 protected:

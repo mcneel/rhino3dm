@@ -1,10 +1,9 @@
+#include "bindings.h"
 
 #pragma once
 
-#include "bindings.h"
-
 #if defined(ON_PYTHON_COMPILE)
-void initSafeFrameBindings(pybind11::module& m);
+void initSafeFrameBindings(rh3dmpymodule& m);
 #else
 void initSafeFrameBindings(void* m);
 #endif

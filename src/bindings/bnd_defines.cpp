@@ -29,8 +29,8 @@ static std::vector<ON_2dPoint> ArrowPoints(ON_Arrowhead::arrow_type arrowType, d
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initDefines(pybind11::module& m)
+
+void initDefines(rh3dmpymodule& m)
 {
   py::enum_<ON_COMPONENT_INDEX::TYPE>(m, "ComponentIndexType")
     .value("InvalidType", ON_COMPONENT_INDEX::TYPE::invalid_type)
@@ -225,19 +225,6 @@ void initDefines(pybind11::module& m)
     .def_static("UnitScale", [](ON::LengthUnitSystem a, ON::LengthUnitSystem b) { return ON::UnitScale(a, b);})
     ;
 
-  py::enum_<ON::light_style>(m, "LightStyle")
-    .value("None", ON::light_style::unknown_light_style)
-    .value("CameraDirectional", ON::light_style::camera_directional_light)
-    .value("CameraPoint", ON::light_style::camera_point_light)
-    .value("CameraSpot", ON::light_style::camera_spot_light)
-    .value("WorldDirectional", ON::light_style::world_directional_light)
-    .value("WorldPoint", ON::light_style::world_point_light)
-    .value("WorldSpot", ON::light_style::world_spot_light)
-    .value("Ambient", ON::light_style::ambient_light)
-    .value("WorldLinear", ON::light_style::world_linear_light)
-    .value("WorldRectangular", ON::light_style::world_rectangular_light)
-    ;
-
   py::enum_<ON::EarthCoordinateSystem>(m, "BasepointZero")
     .value("GroundLevel", ON::EarthCoordinateSystem::GroundLevel)
     .value("MeanSeaLevel", ON::EarthCoordinateSystem::MeanSeaLevel)
@@ -316,25 +303,25 @@ void initDefines(pybind11::module& m)
     ;
 }
 
-pybind11::dict PointToDict(const ON_3dPoint& point)
+py::dict PointToDict(const ON_3dPoint& point)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["X"] = point.x;
   rc["Y"] = point.y;
   rc["Z"] = point.z;
   return rc;
 }
-pybind11::dict VectorToDict(const ON_3dVector& vector)
+py::dict VectorToDict(const ON_3dVector& vector)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["X"] = vector.x;
   rc["Y"] = vector.y;
   rc["Z"] = vector.z;
   return rc;
 }
-pybind11::dict PlaneToDict(const ON_Plane& plane)
+py::dict PlaneToDict(const ON_Plane& plane)
 {
-  pybind11::dict rc;
+  py::dict rc;
   rc["Origin"] = PointToDict(plane.origin);
   rc["XAxis"] = VectorToDict(plane.xaxis);
   rc["YAxis"] = VectorToDict(plane.yaxis);
@@ -342,29 +329,29 @@ pybind11::dict PlaneToDict(const ON_Plane& plane)
   return rc;
 }
 
-ON_3dPoint PointFromDict(pybind11::dict& dict)
+ON_3dPoint PointFromDict(py::dict& dict)
 {
   ON_3dVector rc;
-  rc.x = dict["X"].cast<double>();
-  rc.y = dict["Y"].cast<double>();
-  rc.z = dict["Z"].cast<double>();
+  rc.x = py::cast<double>(dict["X"]);
+  rc.y = py::cast<double>(dict["Y"]);
+  rc.z = py::cast<double>(dict["Z"]);
   return rc;
 }
-ON_3dVector VectorFromDict(pybind11::dict& dict)
+ON_3dVector VectorFromDict(py::dict& dict)
 {
   ON_3dPoint pt = PointFromDict(dict);
   return ON_3dVector(pt.x, pt.y, pt.z);
 }
-ON_Plane PlaneFromDict(pybind11::dict& dict)
+ON_Plane PlaneFromDict(py::dict& dict)
 {
   ON_Plane plane;
-  pybind11::dict d = dict["Origin"].cast<pybind11::dict>();
+  py::dict d = dict["Origin"];
   plane.origin = PointFromDict(d);
-  d = dict["XAxis"].cast<pybind11::dict>();
+  d = dict["XAxis"];
   plane.xaxis = VectorFromDict(d);
-  d = dict["YAxis"].cast<pybind11::dict>();
+  d = dict["YAxis"];
   plane.yaxis = VectorFromDict(d);
-  d = dict["ZAxis"].cast<pybind11::dict>();
+  d = dict["ZAxis"];
   plane.zaxis = VectorFromDict(d);
   plane.UpdateEquation();
   return plane;
@@ -559,19 +546,6 @@ void initDefines(void*)
     .value("Parsecs", ON::LengthUnitSystem::Parsecs)
     .value("CustomUnits", ON::LengthUnitSystem::CustomUnits)
     .value("Unset", ON::LengthUnitSystem::Unset)
-    ;
-
-  enum_<ON::light_style>("LightStyle")
-    .value("None", ON::light_style::unknown_light_style)
-    .value("CameraDirectional", ON::light_style::camera_directional_light)
-    .value("CameraPoint", ON::light_style::camera_point_light)
-    .value("CameraSpot", ON::light_style::camera_spot_light)
-    .value("WorldDirectional", ON::light_style::world_directional_light)
-    .value("WorldPoint", ON::light_style::world_point_light)
-    .value("WorldSpot", ON::light_style::world_spot_light)
-    .value("Ambient", ON::light_style::ambient_light)
-    .value("WorldLinear", ON::light_style::world_linear_light)
-    .value("WorldRectangular", ON::light_style::world_rectangular_light)
     ;
 
   enum_<ON::EarthCoordinateSystem>("BasepointZero")

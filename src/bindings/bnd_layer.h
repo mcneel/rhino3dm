@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLayerBindings(pybind11::module& m);
+void initLayerBindings(rh3dmpymodule& m);
 #else
 void initLayerBindings(void* m);
 #endif

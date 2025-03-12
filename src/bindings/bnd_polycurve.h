@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPolyCurveBindings(pybind11::module& m);
+void initPolyCurveBindings(rh3dmpymodule& m);
 #else
 void initPolyCurveBindings(void* m);
 #endif
@@ -21,6 +21,7 @@ public:
   bool HasGap() const { return m_polycurve->FindNextGap(0); }
   bool RemoveNesting() { return m_polycurve->RemoveNesting(); }
   BND_TUPLE Explode() const;
+  std::vector<BND_Curve*> Explode2() const;
   bool Append1(const ON_Line& line);
   bool Append2(BND_Arc& arc);
   bool Append3(const BND_Curve& curve);

@@ -20,7 +20,7 @@ enum class Projections : int
 };
 
 #if defined(ON_PYTHON_COMPILE)
-void initDecalBindings(pybind11::module& m);
+void initDecalBindings(rh3dmpymodule& m);
 #else
 void initDecalBindings(void* m);
 #endif

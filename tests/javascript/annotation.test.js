@@ -14,6 +14,9 @@ test('createAnnotation', async () => {
     const buffer = fs.readFileSync(model)
     const arr = new Uint8Array(buffer)
     const doc = rhino.File3dm.fromByteArray(arr)
+
+    expect(doc !== null).toBe(true)
+
     const objects = doc.objects()
 
     const testArray = ["Hello World!", "Hello Cruel World!", "Hi there!", "WTF"]

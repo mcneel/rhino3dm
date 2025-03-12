@@ -35,6 +35,10 @@ CommonObject
 
       [todo] add documentation
 
+   .. py:method:: GetUserStrings2()
+
+      [todo] add documentation
+
    .. py:method:: RdkXml()
 
       [todo] add documentation

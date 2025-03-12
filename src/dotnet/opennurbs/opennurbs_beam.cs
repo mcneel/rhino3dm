@@ -182,6 +182,7 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="extrusionComponentIndex">The extrusion component index.</param>
     /// <returns>The Brep component index if successful. Otherwise, <see cref="ComponentIndex.Unset"/> is returned.</returns>
+    /// <since>8.1</since>
     public ComponentIndex GetBrepFormComponentIndex(ComponentIndex extrusionComponentIndex)
     {
       IntPtr ptr_const_this = ConstPointer();
@@ -607,6 +608,7 @@ namespace Rhino.Geometry
     /// <param name="mesh">The mesh.</param>
     /// <param name="meshType">The mesh type.</param>
     /// <returns>True on success.</returns>
+    /// <since>8.3</since>
     public bool SetMesh(Mesh mesh, MeshType meshType)
     {
       if (null == mesh ) return false;

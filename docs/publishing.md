@@ -31,8 +31,7 @@ There are several places where version numbers should be updated:
         - New System: 
           - change to `src/js/docs` directory
           - install dependencies (only first time): `npm i`
-          - generate docs: `npm run docs`
-          - copy these to `docs/javscript/api`
+          - generate docs: `npm run docs`. This also handles copying to `docs/javscript/api`
         - Old system: 
           - istall dependencies: `npm i -g docdash jsdoc`
           - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
@@ -99,7 +98,7 @@ Python packages can be uploaded to the corresponding `pypi.org` project: https:/
 
 1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including all Python packages.
 2. Download all of the `.whl` and `*.tar.gz` (source distribution) artifacts to a folder called `dist`.
-3. Extract all of the `.zip` files and delete them. For the tar.gz.zip, you can run `tar -xvzf rhino3dm-8.0.0b3.tar.gz.zip` to get a tar.gz file. You should be left with many `.whl` files and one `.tar.gz` file.
+3. Extract all of the `.zip` files and delete them. For the tar.gz.zip, you can run `tar -xvzf rhino3dm-8.17.0.tar.gz.zip` to get a tar.gz file. You should be left with many `.whl` files and one `.tar.gz` file.
 4. From the `dist` parent folder, upload all Python packages with `twine`
 
 ```bash

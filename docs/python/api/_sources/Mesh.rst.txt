@@ -117,6 +117,21 @@ Mesh
 
       :rtype: void
 
+   .. py:method:: SetCachedTextureCoordinates(tm, xf)
+
+      [todo] add documentation
+
+   .. py:method:: GetCachedTextureCoordinates(id)
+
+      Call this method to get cached texture coordinates for a texture
+      mapping with the specified Id.
+
+      :param Guid textureMappingId: Texture mapping Id
+
+      :return: Object which allows access to coordinates and other props.
+
+      :rtype: CachedTextureCoordinates
+
    .. py:method:: Compact()
 
       Removes any unreferenced objects from arrays, re-indexes as needed

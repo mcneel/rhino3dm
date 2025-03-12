@@ -36,6 +36,26 @@ BND_TUPLE BND_Surface::GetSpanVector(int direction)
   return NullTuple();
 }
 
+std::vector<double> BND_Surface::GetSpanVector2(int direction)
+{
+  int count = m_surface->SpanCount(direction) + 1;
+  if (count < 1)
+    return std::vector<double>();
+
+  ON_SimpleArray<double> span(count);
+  span.SetCapacity(count);
+  span.SetCount(count);
+
+  if (m_surface->GetSpanVector(direction, span.Array()))
+  {
+    std::vector<double> rc(count);
+    for (int i = 0; i < count; i++)
+      rc[i] = span[i];
+    return rc;
+  }
+  return std::vector<double>();
+}
+
 BND_Curve* BND_Surface::IsoCurve(int direction, double constantParameter) const
 {
   ON_Curve* crv = m_surface->IsoCurve(direction, constantParameter);
@@ -78,9 +98,14 @@ BND_TUPLE BND_Surface::ToNurbsSurface(double tolerance) const
 
   if (p_NurbForm == nullptr)
     return NullTuple();
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(new BND_NurbsSurface(p_NurbForm, &m_component_ref), accuracy);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, new BND_NurbsSurface(p_NurbForm, &m_component_ref));
   SetTuple(rc, 1, accuracy);
+#endif
   return rc;
 }
 
@@ -92,9 +117,13 @@ BND_TUPLE BND_Surface::FrameAt(double u, double v) {
     success = m_surface->FrameAt(u, v, frame);
   }
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, BND_Plane::FromOnPlane(frame));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Plane::FromOnPlane(frame));
+#endif
   return rc;
 }
 
@@ -103,10 +132,15 @@ BND_TUPLE BND_Surface::GetSurfaceParameterFromNurbsFormParameter(double nurbsS, 
   double s = 0;
   double t = 0;
   bool success = m_surface->GetSurfaceParameterFromNurbFormParameter(nurbsS, nurbsT, &s, &t);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, s, t);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, s);
   SetTuple(rc, 2, t);
+#endif
   return rc;
 }
 
@@ -115,17 +149,22 @@ BND_TUPLE BND_Surface::GetNurbsFormParameterFromSurfaceParameter(double surfaceS
   double s = 0;
   double t = 0;
   bool success = m_surface->GetNurbFormParameterFromSurfaceParameter(surfaceS, surfaceT, &s, &t);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, s, t);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, s);
   SetTuple(rc, 2, t);
+#endif
   return rc;
 }
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initSurfaceBindings(pybind11::module& m)
+
+void initSurfaceBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Surface, BND_GeometryBase>(m, "Surface")
     .def_property_readonly("IsSolid", &BND_Surface::IsSolid)
@@ -136,6 +175,7 @@ void initSurfaceBindings(pybind11::module& m)
     .def("FrameAt", &BND_Surface::FrameAt, py::arg("u"), py::arg("v"))
     .def("Domain", &BND_Surface::Domain, py::arg("direction"))
     .def("GetSpanVector", &BND_Surface::GetSpanVector, py::arg("direction"))
+    .def("GetSpanVector2", &BND_Surface::GetSpanVector2, py::arg("direction"))
     .def("NormalAt", &BND_Surface::NormalAt, py::arg("u"), py::arg("v"))
     .def("IsClosed", &BND_Surface::IsClosed, py::arg("direction"))
     .def("IsPeriodic", &BND_Surface::IsPeriodic, py::arg("direction"))
@@ -154,6 +194,7 @@ void initSurfaceBindings(pybind11::module& m)
     .def("GetNurbsFormParameterFromSurfaceParameter", &BND_Surface::GetNurbsFormParameterFromSurfaceParameter, py::arg("surfaceS"), py::arg("surfaceT"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

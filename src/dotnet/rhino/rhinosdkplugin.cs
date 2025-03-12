@@ -646,9 +646,10 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Called by Rhino to determine if the plug-in name should be added to the Rhino Help/Plug-ins menu.
     /// </summary>
+    /// <since>8.7</since>
     public virtual bool AddToHelpMenu
     {
-      get { return true; }
+      get { return false; }
     }
 
     /// <summary>
@@ -656,6 +657,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="windowHandle">Native Window handle of the active Rhino interface.</param>
     /// <returns>true  = Help displayed successfully, false = Error displaying help</returns>
+    /// <since>8.7</since>
     public virtual bool DisplayHelp(IntPtr windowHandle)
     {
       return false;
@@ -663,6 +665,8 @@ namespace Rhino.PlugIns
 
     internal delegate bool UnknownUserDataCallback(uint doc_serial, Guid plugin_id);
     private static readonly UnknownUserDataCallback g_unknown_userdata_callback = OnUnknownUserData;
+    
+    [MonoPInvokeCallback(typeof(UnknownUserDataCallback))]
     private static bool OnUnknownUserData(uint doc_serial, Guid plugin_id)
     {
       var doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
@@ -822,6 +826,7 @@ namespace Rhino.PlugIns
 
     }
 
+    [MonoPInvokeCallback(typeof(OnDisplayHelpDelegate))]
     private static bool InternalOnDisplayHelp(int pluginSerialNumber, IntPtr hwndParent)
     {
       PlugIn p = LookUpBySerialNumber(pluginSerialNumber);
@@ -840,6 +845,7 @@ namespace Rhino.PlugIns
 
     
 
+    [MonoPInvokeCallback(typeof(OnLoadDelegate))]
     private static int InternalOnLoad(int pluginSerialNumber)
     {
       LoadReturnCode rc = LoadReturnCode.Success;
@@ -912,6 +918,7 @@ namespace Rhino.PlugIns
       return (int)rc;
     }
 
+    [MonoPInvokeCallback(typeof(OnShutdownDelegate))]
     private static void InternalOnShutdown(int pluginSerialNumber)
     {
       PlugIn p = LookUpBySerialNumber(pluginSerialNumber);
@@ -943,6 +950,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(ResetMessageBoxesDelegate))]
     private static void InternalResetMessageBoxes(int pluginSerialNumber)
     {
       PlugIn p = LookUpBySerialNumber(pluginSerialNumber);
@@ -959,6 +967,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(OnGetPlugInObjectDelegate))]
     private static IntPtr InternalOnGetPlugInObject(int pluginSerialNumber)
     {
       IntPtr rc = IntPtr.Zero;
@@ -978,6 +987,7 @@ namespace Rhino.PlugIns
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(CallWriteDocumentDelegate))]
     private static int InternalCallWriteDocument(int pluginSerialNumber, IntPtr pWriteOptions)
     {
       int rc = 0; //FALSE
@@ -991,6 +1001,7 @@ namespace Rhino.PlugIns
       return rc;
     }
 
+    [MonoPInvokeCallback(typeof(DisplayOptionsDialogDelegate))]
     private static void DisplayOptionsDialogHook(int runtimeSerialNumber, IntPtr hwndParent, [MarshalAs(UnmanagedType.LPWStr)]string fileDescription, [MarshalAs(UnmanagedType.LPWStr)]string fileExtension)
     {
       var plugin = LookUpBySerialNumber(runtimeSerialNumber);
@@ -1001,6 +1012,7 @@ namespace Rhino.PlugIns
       var export_plugin = plugin as FileExportPlugIn;
       export_plugin?.CallDisplayOptionsDialog(hwndParent, fileDescription, fileExtension);
     }
+    [MonoPInvokeCallback(typeof(EventHandler<NamedParametersEventArgs>))]
     private static void InternalLocalPlugInName(object sender, Rhino.Runtime.NamedParametersEventArgs args)
     {
       if (args.TryGetInt("sn", out int sn) && sn > 0)
@@ -1008,6 +1020,7 @@ namespace Rhino.PlugIns
     }
 
 
+    [MonoPInvokeCallback(typeof(WriteDocumentDelegate))]
     private static int InternalWriteDocument(int pluginSerialNumber, uint docSerialNumber, IntPtr pBinaryArchive, IntPtr pWriteOptions)
     {
       int rc = 1; //TRUE
@@ -1033,6 +1046,7 @@ namespace Rhino.PlugIns
       }
       return rc;
     }
+    [MonoPInvokeCallback(typeof(ReadDocumentDelegate))]
     private static int InternalReadDocument(int pluginSerialNumber, uint docSerialNumber, IntPtr pBinaryArchive, IntPtr pReadOptions)
     {
       int rc = 1; //TRUE
@@ -1059,6 +1073,7 @@ namespace Rhino.PlugIns
       return rc;
     }
 
+    [MonoPInvokeCallback(typeof(OnAddPagesToObjectPropertiesDelegate))]
     private static void InternalAddPagesToObjectProperties(int pluginSerialNumber, int mode, uint documentRuntimeSerialNumber, IntPtr collectionPointer)
     {
       var plug_in = LookUpBySerialNumber(pluginSerialNumber);
@@ -1086,6 +1101,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(OnAddSectionsToSunPanelDelegate))]
     private static void InternalAddPagesToSunPanel(int pluginSerialNumber, uint modal, IntPtr pSectionList)
     {
       RenderPlugIn plug_in = LookUpBySerialNumber(pluginSerialNumber) as RenderPlugIn;
@@ -1120,6 +1136,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(OnAddSectionsToRenderSettingsPanelDelegate))]
     private static void InternalAddPagesToRenderSettingsPanel(int pluginSerialNumber, uint modal, IntPtr pSectionList)
     {
       RenderPlugIn plug_in = LookUpBySerialNumber(pluginSerialNumber) as RenderPlugIn;
@@ -1154,11 +1171,13 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(OnPlugInProcDelegate))]
     private static uint InternalPlugInProc(int pluginSerialNumber, uint message, IntPtr wParam, IntPtr lParam)
     {
       return 0;
     }
 
+    [MonoPInvokeCallback(typeof(OnAddPagesToOptionsDelegate))]
     private static void InternalAddPagesToOptions(int pluginSerialNumber, uint documentRuntimeSerialNumber, IntPtr collectionPointer, int addToDocProps)
     {
       var plugin = LookUpBySerialNumber(pluginSerialNumber);
@@ -2011,6 +2030,14 @@ namespace Rhino.PlugIns
           }
         }
       }
+      if (HostUtils.RunningInNetFramework)
+      {
+        // ensure we don't ever pass back System\netcore folder
+        // assemblies there are not compatible in this mode.
+        var netcorePath = Path.Combine(HostUtils.RhinoAssemblyDirectory, "netcore");
+        if (dirs.Contains(netcorePath))
+          dirs.Remove(netcorePath);
+      }
       return dirs.ToArray();
     }
 
@@ -2091,6 +2118,32 @@ namespace Rhino.PlugIns
         for (int i = 0; i < m_plugins.Count; i++)
         {
           if (string.Compare(m_plugins[i].Assembly.Location, pluginPath, true) == 0)
+          {
+            rc = m_plugins[i].Id;
+            break;
+          }
+        }
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Attempt to get a plugiin id from just the filename of a plug-in
+    /// </summary>
+    /// <param name="filename">plug-in filename</param>
+    /// <returns>id on success; Guid.Empty if no plug-in could be found</returns>
+    public static Guid IdFromFileName(string filename)
+    {
+      Guid rc = UnsafeNativeMethods.CRhinoPlugInManager_IdFromFileName(filename);
+      if (rc.Equals(Guid.Empty))
+      {
+        // Look in our local collection of plug-ins. We may be in "OnLoad"
+        // and the plug-in hasn't officially been registered with Rhino.
+        for (int i = 0; i < m_plugins.Count; i++)
+        {
+          string pluginFilename = m_plugins[i].Assembly.Location;
+          pluginFilename = Path.GetFileName(pluginFilename);
+          if (pluginFilename.Equals(filename, StringComparison.InvariantCultureIgnoreCase))
           {
             rc = m_plugins[i].Id;
             break;
@@ -2809,7 +2862,10 @@ namespace Rhino.PlugIns
       // write error stream if needed
       var errout = sbError.ToString();
       if (!string.IsNullOrWhiteSpace(errout))
+      {
         DebugStringSafe("ERROR: " + errout);
+        output += "\n\n" + errout;
+      }
 
       if (proc.ExitCode == 112 )
         System.Diagnostics.Debug.Write(output);
@@ -2966,6 +3022,16 @@ namespace Rhino.PlugIns
         rhcmn_plugin = null;
       }
       return (rhcmn_plugin!=null);
+    }
+
+    /// <summary>
+    /// Returns true if this renderer can render the texture natively without needing it to be baked into a bitmap, false otherwise.
+    /// By default, returns false for all textures.
+    /// </summary>
+    /// <since>8.6</since>
+    public virtual bool IsTextureSupported(RenderTexture texture)
+    {
+      return UnsafeNativeMethods.Rdk_PlugIn_BaseClassIsTextureSupported(NonConstPointer(), texture.ConstPointer());
     }
   }
 
@@ -3470,6 +3536,7 @@ namespace Rhino.PlugIns
     private static AddFileType m_OnAddFileType;
     private static ReadFileFunc m_OnReadFile;
 
+    [MonoPInvokeCallback(typeof(AddFileType))]
     private static void InternalOnAddFileType(int pluginSerialNumber, IntPtr pFileList, IntPtr readoptions)
     {
       var p = LookUpBySerialNumber(pluginSerialNumber) as FileImportPlugIn;
@@ -3509,6 +3576,7 @@ namespace Rhino.PlugIns
       }
     }
 
+    [MonoPInvokeCallback(typeof(ReadFileFunc))]
     private static int InternalOnReadFile(int pluginSerialNumber, IntPtr filename, int index, uint docSerialNumber, IntPtr readoptions)
     {
       int rc = 0;
@@ -3850,7 +3918,7 @@ namespace Rhino.PlugIns
         g_render_settings_sections_callback,
         g_plugin_icon_callback,
         g_initial_channel_to_display,
-        g_plugin_texture_needs_baking,
+        g_plugin_is_texture_supported,
         m_customChannelName
         );
     }
@@ -4054,27 +4122,18 @@ namespace Rhino.PlugIns
       return Guid.Empty;
     }
 
-    internal delegate bool PlugInTextureNeedsBakingCallback(int serialNumber, IntPtr pTexture);
-    private static readonly PlugInTextureNeedsBakingCallback g_plugin_texture_needs_baking = PlugInTextureNeedsBaking;
-    private static bool PlugInTextureNeedsBaking(int serialNumber, IntPtr pTexture)
+    internal delegate bool PlugInIsTextureSupportedCallback(int serialNumber, IntPtr pTexture);
+    private static readonly PlugInIsTextureSupportedCallback g_plugin_is_texture_supported = PlugInIsTextureSupported;
+    private static bool PlugInIsTextureSupported(int serialNumber, IntPtr pTexture)
     {
       // Get the runtime plug-in to call
-      var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
-      if (render_plug_in == null)
+      var plug_in = LookUpBySerialNumber(serialNumber) as PlugIn;
+      if (plug_in == null)
         return false;
 
       RenderTexture texture = (RenderTexture)RenderContent.FromPointer(pTexture, null);
 
-      return !render_plug_in.IsTextureSupported(texture);
-    }
-
-    /// <summary>
-    /// Returns true if this renderer can render the texture natively without needing it to be baked into a bitmap, false otherwise.
-    /// By default, returns false for all textures.
-    /// </summary>
-    public virtual bool IsTextureSupported(RenderTexture texture)
-    {
-      return UnsafeNativeMethods.Rdk_RenderPlugIn_BaseClassIsTextureSupported(NonConstPointer(), texture.ConstPointer());
+      return plug_in.IsTextureSupported(texture);
     }
 
     internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);

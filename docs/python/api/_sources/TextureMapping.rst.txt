@@ -16,6 +16,13 @@ TextureMapping
    .. py:attribute:: IsPeriodic
 
 
+   .. py:attribute:: HasId
+
+
+   .. py:attribute:: Id
+
+      Guid: The unique Id for this texture mapping object.
+
    .. py:staticmethod:: CreateSurfaceParameterMapping()
 
       Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.

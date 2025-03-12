@@ -1,6 +1,8 @@
+using Rhino.Geometry;
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Rhino
 {
@@ -669,6 +671,243 @@ namespace Rhino
       nt = Rhino.Geometry.Vector3d.Unset;
       return UnsafeNativeMethods.ONC_EvNormalPartials(ds, dt, dss, dst, dtt, ref ns, ref nt);
     }
+
+    /// <summary>
+    /// Expert tool to evaluate sectional curvature from surface derivatives and section plane normal.
+    /// </summary>
+    /// <param name="ds">First partial derivative.</param>
+    /// <param name="dt">First partial derivative.</param>
+    /// <param name="dss">Second partial derivative.</param>
+    /// <param name="dst">Second partial derivative.</param>
+    /// <param name="dtt">Second partial derivative.</param>
+    /// <param name="planeNormal">Unit normal to section plane.</param>
+    /// <param name="k">
+    /// Sectional curvature.
+    /// Curvature of the intersection curve of the surface and plane through the surface point where the partial derivatives were evaluated.
+    /// </param>
+    /// <returns>
+    /// True if successful.
+    /// False if first partials are not linearly independent, in which case the k is set to zero.
+    /// </returns>
+    /// <since>8.16</since>
+    public static bool EvaluateSectionalCurvature(
+      Rhino.Geometry.Vector3d ds,
+      Rhino.Geometry.Vector3d dt,
+      Rhino.Geometry.Vector3d dss,
+      Rhino.Geometry.Vector3d dst,
+      Rhino.Geometry.Vector3d dtt,
+      Rhino.Geometry.Vector3d planeNormal,
+      out Rhino.Geometry.Vector3d k
+      )
+    {
+      k = Rhino.Geometry.Vector3d.Zero;
+      return UnsafeNativeMethods.ONC_EvSectionalCurvature(ds, dt, dss, dst, dtt, planeNormal, ref k);
+    }
+
+    #region Integration
+#if false // moving into rhino 9 for now
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="side"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    public delegate double Integrate1Callback(Object context, Rhino.Geometry.CurveEvaluationSide side, double t);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="side"></param>
+    /// <param name="s"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    public delegate double Integrate2Callback(Object context, Rhino.Geometry.CurveEvaluationSide side, double s, double t);
+
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate double Integrate1CallbackWrapperDelegate(IntPtr gchContextWrapper, int limitDirection, double t);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate double Integrate2CallbackWrapperDelegate(IntPtr gchContextWrapper, int limitDirection, double s, double t);
+
+    private class Context1Wrapper
+    {
+      public Integrate1Callback func;
+      public Object context;
+
+      public Context1Wrapper(Integrate1Callback _func, Object _context)
+      {
+        func = _func;
+        context = _context;
+      }
+    }
+    private class Context2Wrapper
+    {
+      public Integrate2Callback func;
+      public Object context;
+
+      public Context2Wrapper(Integrate2Callback _func, Object _context)
+      {
+        func = _func;
+        context = _context;
+      }
+    }
+    private static double Integrate1CallbackWrapper(IntPtr ptrContextWrapper, int limitDirection, double t)
+    {
+      Context1Wrapper contextWrapper = (GCHandle.FromIntPtr(ptrContextWrapper).Target) as Context1Wrapper;
+      if (null == contextWrapper) return double.NaN;
+      if (null == contextWrapper.context || null == contextWrapper.func) return double.NaN;
+
+      // use the side enum
+      Rhino.Geometry.CurveEvaluationSide side;
+      if (limitDirection == 0) side = CurveEvaluationSide.Default;
+      else if (limitDirection < 0) side = CurveEvaluationSide.Below;
+      else side = CurveEvaluationSide.Above;
+
+      return contextWrapper.func(contextWrapper.context, side, t);
+    }
+
+    private static double Integrate2CallbackWrapper(IntPtr ptrContextWrapper, int limitDirection, double s, double t)
+    {
+      Context2Wrapper contextWrapper = (GCHandle.FromIntPtr(ptrContextWrapper).Target) as Context2Wrapper;
+      if (null == contextWrapper) return double.NaN;
+      if (null == contextWrapper.context || null == contextWrapper.func) return double.NaN;
+
+      Rhino.Geometry.CurveEvaluationSide side;
+      if (limitDirection == 0) side = CurveEvaluationSide.Default;
+      else if (limitDirection < 0) side = CurveEvaluationSide.Below;
+      else side = CurveEvaluationSide.Above;
+      return contextWrapper.func(contextWrapper.context, side, s, t);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="func"></param>
+    /// <param name="context"></param>
+    /// <param name="limits"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    public static double Integrate(Integrate1Callback func, object context, Interval limits, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    {
+      if (null != func && null != context)
+      {
+        Integrate1CallbackWrapperDelegate funcWrapper = new Integrate1CallbackWrapperDelegate(Integrate1CallbackWrapper);
+        Context1Wrapper contextWrapper = new Context1Wrapper(func, context);
+
+        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
+        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
+        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
+        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
+        double rc = UnsafeNativeMethods.ON_Integrate_1D(ptrCallbackWrapper, ptrContextWrapper, limits, relativeTolerance, absoluteTolerance, ref errorBound);
+
+        gchContextWrapper.Free();
+        gchCallbackWrapper.Free();
+
+        return rc;
+      }
+      return 0.0;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="func"></param>
+    /// <param name="context"></param>
+    /// <param name="curve"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    public static double Integrate(Integrate1Callback func, object context, Curve curve, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    {
+      if (null != func && null != context && null != curve)
+      {
+        Integrate1CallbackWrapperDelegate funcWrapper = new Integrate1CallbackWrapperDelegate(Integrate1CallbackWrapper);
+        Context1Wrapper contextWrapper = new Context1Wrapper(func, context);
+
+        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
+        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
+        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
+        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
+        double rc = UnsafeNativeMethods.ON_Integrate_1D_Curve(ptrCallbackWrapper, ptrContextWrapper, curve.ConstPointer(), relativeTolerance, absoluteTolerance, ref errorBound);
+
+        gchContextWrapper.Free();
+        gchCallbackWrapper.Free();
+
+        return rc;
+      }
+      return 0.0;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="func"></param>
+    /// <param name="context"></param>
+    /// <param name="limits1"></param>
+    /// <param name="limits2"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    public static double Integrate(Integrate2Callback func, object context, Interval limits1, Interval limits2, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    {
+      if (null != func && null != context)
+      {
+        Integrate2CallbackWrapperDelegate funcWrapper = new Integrate2CallbackWrapperDelegate(Integrate2CallbackWrapper);
+        Context2Wrapper contextWrapper = new Context2Wrapper(func, context);
+
+        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
+        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
+        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
+        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
+        double rc = UnsafeNativeMethods.ON_Integrate_2D(ptrCallbackWrapper, ptrContextWrapper, limits1, limits2, relativeTolerance, absoluteTolerance, ref errorBound);
+
+        gchContextWrapper.Free();
+        gchCallbackWrapper.Free();
+
+        return rc;
+      }
+      return 0.0;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="callback"></param>
+    /// <param name="context"></param>
+    /// <param name="surface"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    public static double Integrate(Integrate2Callback callback, object context, Surface surface, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    {
+      if (null != callback && null != context && null != surface)
+      {
+        Integrate2CallbackWrapperDelegate funcWrapper = new Integrate2CallbackWrapperDelegate(Integrate2CallbackWrapper);
+        Context2Wrapper contextWrapper = new Context2Wrapper(callback, context);
+
+        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
+        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
+        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
+        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
+        double rc = UnsafeNativeMethods.ON_Integrate_1D_Curve(ptrCallbackWrapper, ptrContextWrapper, surface.ConstPointer(), relativeTolerance, absoluteTolerance, ref errorBound);
+
+        gchContextWrapper.Free();
+        gchCallbackWrapper.Free();
+
+        return rc;
+      }
+      return 0.0;
+    }
+#endif
+    #endregion // Integration
   }
 
 

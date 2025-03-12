@@ -275,20 +275,30 @@ RH_C_FUNCTION bool ON_Curve_SetPoint( ON_Curve* pCurve, ON_3DPOINT_STRUCT pt, bo
   return rc;
 }
 
-RH_C_FUNCTION void ON_Curve_PointAt( const ON_Curve* pCurve, double t, ON_3dPoint* pt, int which )
+RH_C_FUNCTION void ON_Curve_PointAt(const ON_Curve* pCurve, double t, ON_3dPoint* pt, int which)
 {
   RHCHECK_LICENSE
   const int idxPointAtT = 0;
   const int idxPointAtStart = 1;
   const int idxPointAtEnd = 2;
-  if( pCurve && pt )
+  const int idxPointAtMid = 3;
+  if (pCurve && pt)
   {
-    if( idxPointAtT == which )
+    *pt = ON_3dPoint::UnsetPoint;
+    if (idxPointAtT == which)
       *pt = pCurve->PointAt(t);
-    else if( idxPointAtStart == which )
+    else if (idxPointAtStart == which)
       *pt = pCurve->PointAtStart();
-    else if( idxPointAtEnd == which )
+    else if (idxPointAtEnd == which)
       *pt = pCurve->PointAtEnd();
+#if !defined(RHINO3DM_BUILD)
+    else if (idxPointAtMid == which)
+    {
+      double s = 0.0;
+      if (pCurve->GetNormalizedArcLengthPoint(0.5, &s))
+        *pt = pCurve->PointAt(s);
+    }
+#endif
   }
 }
 
@@ -351,6 +361,14 @@ RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_P
 
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
+
+RH_C_FUNCTION ON_Curve* ON_Curve_Reparameterize(const ON_Curve* pConstCurve)
+{
+  ON_Curve* rc = nullptr;
+  if (pConstCurve)
+    rc = RhReparameterizeCurve(pConstCurve, ON_Interval(), true);
+  return rc;
+}
 
 RH_C_FUNCTION bool ON_Curve_GetClosestPoint( const ON_Curve* pCurve, ON_3DPOINT_STRUCT test_point, double* t, double maximum_distance)
 {
@@ -764,7 +782,14 @@ RH_C_FUNCTION bool RHC_RhinoCurve2View(const ON_Curve* curve1, const ON_Curve* c
 	}
 
 	return rc;
+}
 
+RH_C_FUNCTION ON_Curve* RHC_RhCreateRevisionCloud(const ON_Curve* pConstCurve, int segmentCount, double arcAngle, bool flip)
+{
+  ON_Curve* rc = nullptr;
+  if (pConstCurve)
+    rc = RhCreateRevisionCloud(pConstCurve, segmentCount, arcAngle, flip);
+  return rc;
 }
 
 RH_C_FUNCTION bool RHC_CreateTextOutlines(
@@ -835,5 +860,22 @@ RH_C_FUNCTION bool ONC_CombineShortSegments(ON_Curve* ptrCurve, double tolerance
   if (ptrCurve)
     return ON_CombineShortSegments(*ptrCurve, tolerance);
   return false;
+}
+
+RH_C_FUNCTION bool RHC_RhExtractCurveControlPolygon(const ON_Curve* pCurve, ON_Polyline* pPolyline)
+{
+  bool rc = false;
+  if (pCurve && pPolyline)
+    rc = RhExtractCurveControlPolygon(pCurve, *pPolyline);
+  return rc;
+}
+
+RH_C_FUNCTION void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>* vector)
+{
+  if (vector) vector->Empty();
+  if (curve)
+  {
+    *vector = curve->SpanVector();
+  }
 }
 #endif

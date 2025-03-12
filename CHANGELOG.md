@@ -4,13 +4,76 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.17.0] - 2025.03.12
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.9.0...8.17.0
+
+## [8.17.0-beta1] - 2025.03.07
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.17.0-beta...8.17.0-beta1
+
+### Added
+
+- (py) Added aarch64 builds for linux #683
+- (py) Added macos-15 builds #684
+
+### Changed
+
+- (dotnet) arm64 linux build now runs on ubuntu 24.04-arm runner #686
+
+## [8.17.0-beta] - 2025.03.05
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.9.0...8.17.0-beta
+
+### Added
+
+- (js, py) DimensionStyle.Id
+- (js, py) Several delete methods for File3dm Tables: File3dmMaterialTable::Delete, BND_File3dmLayerTable::Delete, BND_File3dmDimStyleTable::Delete
+- (js, py) Added tests for various ::Delete methods.
+- (js, py) Extrusion::CreateWithPlane #636
+- (js, py) BND_Bitmap also inherits from Common object and now exposes an Id property.
+- (js, py) DimensionStyle now has an Id property
+- (js, py) File3dm.ObjectTable.AddPoint now supports attributes #665 @StudioWEngineers
+- (js, py) File3dm.ObjectTable.AddLine now supports attributes #666 @StudioWEngineers
+- (js) Layer.Index #655
+- (js) BND_PointCloud::CreateFromThreeJSON #642  @pedrocortesark
+- (js) Added several methods and properties for Planes #568
+- (js) Layer.index
+- (js) Mesh.CreateFromThreeJSON inclides vertex color information
+- (js) calling rhino.Version will now return the openNURBS version the library is built against
+- (py) Improved stubs. WIP. #668, #669, #682 and #685 @StudioWEngineers
+- (py) Added python 3.13 target #654
+- (py) BND_MeshingParameters::Decode now supports more properties
+- (py) Exposed a LightStyle enum which was previously only used internally
+
+### Changed
+
+- (py) switching from pybind11 to nanobind. WIP. This affects a lot of the src/binding files, which now include many `#if defined()`. When the switch is complete these will be cleaned up. This involved adding conditions for methods that returned BND_TUPLE and adding new methods for where we were using TUPLES as arrays. For this release, we still use pybind11.
+- (py) BrepVertex.EdgeIndices() now returns a list
+- (py) Curve.DerivitiveAt() now returns a list
+- (py) File3dmObjectTable now accepts negative indexing #651 @StudioWEngineers
+- (js) File3dm.objects().deleteItem(id) -> File3dm.objects().delete(id)
+- (dotnet) Linux release builds in an Amazon Linux 2023 container
+
+### Fixed
+
+- (py) uuid conversion in c++ was broken
+- (js, py) Changes to ViewInfo.Viewport would not set.
+- (js) BND_Mesh::CreateFromThreeJSON did not pay attention to vertex colors #641
+- (js) BND_PointCloud::CreateFromThreeJSON did not pay attention to RGBA (4 channel) colors #641
+
+### Removed
+
+- (py) GitHub is deprecating macos-12 runners, so they have been removed from the python builds
+
+
 ## [8.9.0] - 2024.07.19
 
 diff: https://github.com/mcneel/rhino3dm/compare/8.6.1...8.9.0
 
 See changes in 8.9.0-beta.
 
-### Fixed 
+### Fixed
 
 - (js) AnnotationBase objects would be undefined due to new cast to Text in the bindings but no Text class exposed to emscripten
 
@@ -181,7 +244,7 @@ diff: https://github.com/mcneel/rhino3dm/pull/561/files
 - (py) Added Line.Transform, Brep.TryConvertBrep
 - (py) Added 3.11 support
 - (.net) Added macOS arm64 (Apple Silicon) builds
-- (.net) Addded .net 7.0 support 
+- (.net) Addded .net 7.0 support
 
 ### Removed
 

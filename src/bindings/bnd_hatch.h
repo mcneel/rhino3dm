@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initHatchBindings(pybind11::module& m);
+void initHatchBindings(rh3dmpymodule& m);
 #else
 void initHatchBindings(void* m);
 #endif

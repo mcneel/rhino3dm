@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initIntersectBindings(pybind11::module& m);
+void initIntersectBindings(rh3dmpymodule& m);
 #else
 void initIntersectBindings(void* m);
 #endif

@@ -1,3 +1,6 @@
+# for a list of available software on the different virtual environments, please see:
+# https://github.com/actions/virtual-environments/tree/main/images
+
 name: workflow release
 on: [workflow_dispatch]
 jobs:
@@ -7,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: setup python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           # Semantic version range syntax or exact version of a Python version
-          python-version: '3.7.x'
+          python-version: '3.9'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
@@ -18,7 +21,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python sdist
         run: python setup.py sdist build --debug
       - name: check sdist
@@ -58,12 +61,19 @@ jobs:
           name: ${{ steps.artifactname.outputs.file }}
 
   build_py_manylinux:
-    name: build python ${{ matrix.python-version }} manylinux_2_28
-    runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux_2_28_x86_64 #manylinux2014_x86_64
+    name: build python ${{ matrix.python-version }} manylinux_2_28 ${{ matrix.image.architecture }}
+    runs-on: ${{ matrix.image.os }}
+    container: ${{ matrix.image.container }}
     strategy:
       matrix:
-        python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312]
+        python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312, cp313-cp313]
+        image: 
+          - container: quay.io/pypa/manylinux_2_28_x86_64
+            architecture: x86_64
+            os: ubuntu-latest
+          - container: quay.io/pypa/manylinux_2_28_aarch64
+            architecture: aarch64
+            os: ubuntu-24.04-arm
       fail-fast: false
     steps:
     - name: info
@@ -73,7 +83,9 @@ jobs:
     - name: safe directory
       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
     - name: update submodules
-      run: git submodule update --init
+      run: git submodule update --init --recursive
+    - name: install dependencies
+      run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
     - name: build python manylinux
       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
     - name: audit python wheel
@@ -99,26 +111,30 @@ jobs:
         name: ${{ steps.artifactname.outputs.file }}
 
   build_py_all_bdist:
-    name: build python ${{ matrix.python-version }} ${{ matrix.target }} bdist
+    name: build python ${{ matrix.python-version }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, macos-12, macos-14]
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
+        os: [windows-2019, macos-13, macos-14, macos-15]
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12', '3.13']
         include:
           - os: windows-2019
             target: windows
-          - os: macos-12
+          - os: macos-13
             target: macos
           - os: macos-14
+            target: macos
+          - os: macos-15
             target: macos
         exclude:
           - os: macos-14
             python-version: 3.7
+          - os: macos-15
+            python-version: 3.7
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: info
@@ -128,7 +144,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
         run: python setup.py bdist_wheel
       - name: code-sign native libraries
@@ -167,26 +183,34 @@ jobs:
           name: ${{ steps.artifactname.outputs.file }}
   
   build_dotnet_os:
-    name: build dotnet ${{ matrix.target }}
+    name: build dotnet ${{ matrix.target }} ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
-    #container:
-      #image: ${{ matrix.image }}
+    container:
+      image: ${{ matrix.image }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-14, windows-2022]
+        os: [ubuntu-latest, macos-14, windows-2022, ubuntu-24.04-arm]
         include:
           - os: ubuntu-latest
             target: linux
-            #image: mcneel/rhino3dm-dev-amzn2
+            image: mcneel/rhino3dm-dev-amazonlinux2023
             artifact-path: src/build/linux/librhino3dm_native.so
+            architecture: ""
+          - os: ubuntu-24.04-arm
+            target: linux
+            image: ""
+            artifact-path: src/build/linux/librhino3dm_native.so
+            architecture: arm64
           - os: windows-2022
             target: windows
-            #image: ""
+            image: ""
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
+            architecture: ""
           - os: macos-14
             target: macos
-            #image: ""
+            image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
+            architecture: ""
       fail-fast: false
     steps:
       #- name: setup dotnet
@@ -204,7 +228,7 @@ jobs:
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet ${{ matrix.target }}
         run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
@@ -232,56 +256,63 @@ jobs:
         run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
+        if: ${{ matrix.architecture != 'arm64' }}
         with:
           path: ${{ matrix.artifact-path }}
           name: rhino3dm.net ${{ matrix.target }}
-
-  build_dotnet_arm64:
-    name: build dotnet arm 64
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4.1.1
-      - name: safe directory
-        run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
-      - name: update submodules
-        run: ls && git submodule update --init
-      - name: setup QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-      - name: build rhino3dm native lib
-        uses: addnab/docker-run-action@v3
-        with:
-          image: mcneel/rhino3dm-dev-arm64
-          options: -v ${{ github.workspace }}:/src
-          run: |
-            uname -a
-            cd src
-            echo 'info'
-            python3 --version && cmake --version && dotnet --version && git --version
-            echo 'bootstrap'
-            python3 script/bootstrap.py -p linux
-            echo 'setup'
-            python3 script/setup.py -p linux -v -l
-            echo 'build'
-            python3 script/build.py -p linux -v -l
-            ldd src/build/linux/librhino3dm_native.so
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
+        if: ${{ matrix.architecture == 'arm64' }}
         with:
-          path: |
-            src/build/linux/librhino3dm_native.so
-          name: rhino3dm.net linux arm64
-          retention-days: ${{ env.RETENTION_DAYS }}
+          path: ${{ matrix.artifact-path }}
+          name: rhino3dm.net ${{ matrix.target }} ${{ matrix.architecture }}
+
+  # build_dotnet_arm64:
+  #   name: build dotnet arm 64
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v4.1.1
+  #     - name: safe directory
+  #       run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
+  #     - name: update submodules
+  #       run: ls && git submodule update --init --recursive
+  #     - name: setup QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       with:
+  #         platforms: arm64
+  #     - name: build rhino3dm native lib
+  #       uses: addnab/docker-run-action@v3
+  #       with:
+  #         image: mcneel/rhino3dm-dev-arm64
+  #         options: -v ${{ github.workspace }}:/src
+  #         run: |
+  #           uname -a
+  #           cd src
+  #           echo 'info'
+  #           python3 --version && cmake --version && dotnet --version && git --version
+  #           echo 'bootstrap'
+  #           python3 script/bootstrap.py -p linux
+  #           echo 'setup'
+  #           python3 script/setup.py -p linux -v -l
+  #           echo 'build'
+  #           python3 script/build.py -p linux -v -l
+  #           ldd src/build/linux/librhino3dm_native.so
+  #     - name: artifacts
+  #       uses: actions/upload-artifact@v4.3.1
+  #       with:
+  #         path: |
+  #           src/build/linux/librhino3dm_native.so
+  #         name: rhino3dm.net linux arm64
+  #         retention-days: ${{ env.RETENTION_DAYS }}
 
   pack_dotnet:
     name: pack dotnet
-    needs: [build_dotnet_os, build_dotnet_arm64]
+    needs: [build_dotnet_os]
     runs-on: windows-2022
     steps:
       - name: set up python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: 3.7.x
       - name: setup cmake
@@ -291,7 +322,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
-        run: ls && git submodule update --init
+        run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet
         run: python script/bootstrap.py -p windows
       - name: setup dotnet
@@ -341,7 +372,7 @@ jobs:
       - name: safe dir
         run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
       - name: setup js module
@@ -494,7 +525,7 @@ jobs:
   #   runs-on: macos-11
   #   steps:
   #     - name: set up python
-  #       uses: actions/setup-python@v5.0.0
+  #       uses: actions/setup-python@v5.4.0
   #       with:
   #         python-version: 3.7.1
   #     - name: setup cmake

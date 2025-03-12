@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initDimensionStyleBindings(pybind11::module& m);
+void initDimensionStyleBindings(rh3dmpymodule& m);
 #else
 void initDimensionStyleBindings(void* m);
 #endif
@@ -29,6 +29,8 @@ public:
   //public Font Font | get; set;
   class BND_Font* GetFont() const;
   void SetFont(const class BND_Font* font);
+
+  BND_UUID GetId() const { return ON_UUID_to_Binding( m_dimstyle->Id()); }
 
   void ScaleLengthValues(double scale) { m_dimstyle->Scale(scale); }
   BND_UUID GetArrowBlockId1() const { return ON_UUID_to_Binding(m_dimstyle->ArrowBlockId1()); }

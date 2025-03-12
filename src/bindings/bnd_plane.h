@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPlaneBindings(pybind11::module& m);
+void initPlaneBindings(rh3dmpymodule& m);
 #else
 void initPlaneBindings(void* m);
 #endif
@@ -29,15 +29,15 @@ public:
   ON_3dPoint PointAtUV(double u, double v) const;
   ON_3dPoint PointAtUVW(double u, double v, double w) const;
 
-#if defined(__EMSCRIPTEN__)
+#if defined(ON_WASM_COMPILE)
   emscripten::val toJSON(emscripten::val key);
   emscripten::val Encode() const;
   static BND_Plane* Decode(emscripten::val jsonObject);
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_Plane* Decode(pybind11::dict jsonObject);
+  py::dict Encode() const;
+  static BND_Plane* Decode(py::dict jsonObject);
 #endif
 
   ON_3dPoint m_origin;
@@ -50,5 +50,8 @@ class BND_PlaneHelper
 {
 public:
   static BND_Plane WorldXY();
+  static BND_Plane WorldYZ();
+  static BND_Plane WorldZX();
+  static BND_Plane Unset();
 
 };

@@ -1,10 +1,10 @@
+#include "bindings.h"
 
 #pragma once
 
-#include "bindings.h"
 
 #if defined(ON_PYTHON_COMPILE)
-void initRenderChannelsBindings(pybind11::module& m);
+void initRenderChannelsBindings(rh3dmpymodule& m);
 #else
 void initRenderChannelsBindings(void* m);
 #endif
@@ -26,5 +26,6 @@ public:
   void SetMode(ON_RenderChannels::Modes v) { _rch->SetMode(v); }
 
   BND_TUPLE GetCustomList() const;
+  std::vector<BND_UUID> GetCustomList2() const;
   void SetCustomList(BND_TUPLE v);
 };

@@ -188,8 +188,8 @@ BND_File3dmMeshModifiers::BND_File3dmMeshModifiers(const BND_File3dmMeshModifier
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initMeshModifierBindings(pybind11::module& m)
+
+void initMeshModifierBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmDisplacement>(m, "Displacement")
     .def(py::init<>())
@@ -265,6 +265,7 @@ void initMeshModifierBindings(pybind11::module& m)
     .def("DeleteAllCurves", &BND_File3dmShutLining::DeleteAllCurves)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

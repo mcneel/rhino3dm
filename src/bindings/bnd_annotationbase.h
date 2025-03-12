@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initAnnotationBaseBindings(pybind11::module& m);
+void initAnnotationBaseBindings(rh3dmpymodule& m);
 #else
 void initAnnotationBaseBindings(void* m);
 #endif

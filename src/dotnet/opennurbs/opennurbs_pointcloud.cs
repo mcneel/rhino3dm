@@ -7,6 +7,9 @@ using Rhino.Collections;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 using System.Threading;
+#if RHINO_SDK
+using System.Security.Policy;
+#endif
 
 namespace Rhino.Geometry
 {
@@ -990,14 +993,7 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public Mesh ShrinkWrap(ShrinkWrapParameters parameters)
     {
-      var plugin_id = new Guid("768DD816-C492-48B4-8C1D-28665571F281");
-      var obj = Rhino.RhinoApp.GetPlugInObject(plugin_id);
-      if (!(obj is IShrinkWrapService sw))
-        return null;
-
-      var mesh = sw.ShrinkWrap(this, parameters);
-
-      return mesh;
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(this, parameters);
     }
 
     /// <summary>

@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initSphereBindings(pybind11::module& m);
+void initSphereBindings(rh3dmpymodule& m);
 #else
 void initSphereBindings(void* m);
 #endif
@@ -54,8 +54,8 @@ public:
 #endif
 
 #if defined(ON_PYTHON_COMPILE)
-  pybind11::dict Encode() const;
-  static BND_Sphere* Decode(pybind11::dict jsonObject);
+  py::dict Encode() const;
+  static BND_Sphere* Decode(py::dict jsonObject);
 #endif
 
 };

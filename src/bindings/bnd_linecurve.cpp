@@ -24,14 +24,15 @@ void BND_LineCurve::SetTrackedPointer(ON_LineCurve* linecurve, const ON_ModelCom
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initLineCurveBindings(pybind11::module& m)
+
+void initLineCurveBindings(rh3dmpymodule& m)
 {
   py::class_<BND_LineCurve, BND_Curve>(m, "LineCurve")
     .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("start"), py::arg("end"))
     .def_property("Line", &BND_LineCurve::GetLine, &BND_LineCurve::SetLine)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

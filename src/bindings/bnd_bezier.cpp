@@ -23,17 +23,21 @@ BND_TUPLE BND_BezierCurve::Split(double t)
     delete right;
     right = nullptr;
   }
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, left, right);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, left);
   SetTuple(rc, 2, right);
+#endif
   return rc;
 }
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBezierBindings(pybind11::module& m)
+
+void initBezierBindings(rh3dmpymodule& m)
 {
   py::class_<BND_BezierCurve>(m, "BezierCurve")
     .def_property_readonly("Dimension", &BND_BezierCurve::Dimension)

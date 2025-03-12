@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initPointCloudBindings(pybind11::module& m);
+void initPointCloudBindings(rh3dmpymodule& m);
 #else
 void initPointCloudBindings(void* m);
 #endif
@@ -118,13 +118,18 @@ public:
   
   void RemoveAt(int index);
   BND_TUPLE GetPoints() const;
+  std::vector<ON_3dPoint> GetPoints2() const;
   ON_3dPoint PointAt(int index) const;
   BND_TUPLE GetNormals() const;
+  std::vector<ON_3dVector> GetNormals2() const;
   BND_TUPLE GetColors() const;
+  std::vector<BND_Color> GetColors2() const;
   BND_TUPLE GetValues() const;
+  std::vector<double> GetValues2() const;
   int ClosestPoint(const ON_3dPoint& testPoint);
 
 #if defined(ON_WASM_COMPILE)
   BND_DICT ToThreejsJSON() const;
+  static BND_PointCloud* CreateFromThreejsJSON(BND_DICT json);
 #endif
 };

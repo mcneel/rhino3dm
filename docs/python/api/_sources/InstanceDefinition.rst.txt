@@ -29,6 +29,10 @@ InstanceDefinition
 
       [todo] add documentation
 
+   .. py:method:: GetObjectIds2()
+
+      [todo] add documentation
+
    .. py:method:: IsInstanceGeometryId(id)
 
       [todo] add documentation

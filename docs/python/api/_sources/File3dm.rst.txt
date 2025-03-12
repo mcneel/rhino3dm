@@ -181,6 +181,10 @@ File3dm
 
       [todo] add documentation
 
+   .. py:method:: EmbeddedFilePaths2()
+
+      [todo] add documentation
+
    .. py:method:: GetEmbeddedFileAsBase64()
 
       [todo] add documentation

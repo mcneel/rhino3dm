@@ -45,8 +45,8 @@ ON_Arrowhead::arrow_type BND_DimensionStyle::LeaderArrowType() const
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initDimensionStyleBindings(pybind11::module& m)
+
+void initDimensionStyleBindings(rh3dmpymodule& m)
 {
   py::class_<BND_DimensionStyle, BND_CommonObject> pyDimStyle(m, "DimensionStyle");
 
@@ -97,6 +97,7 @@ void initDimensionStyleBindings(pybind11::module& m)
     .def_property_readonly("IsChild", &BND_DimensionStyle::IsChild)
     .def("IsChildOf", &BND_DimensionStyle::IsChildOf, py::arg("id"))
     .def_property("ParentId", &BND_DimensionStyle::GetParentId, &BND_DimensionStyle::SetParentId)
+    .def_property_readonly("Id", &BND_DimensionStyle::GetId)
     ;
 
   py::enum_<ON_DimStyle::field>(pyDimStyle, "Field")
@@ -207,7 +208,9 @@ void initDimensionStyleBindings(pybind11::module& m)
     .value("AlternateDimensionLengthDisplay", ON_DimStyle::field::AlternateDimensionLengthDisplay)
     ;
 }
+
 #endif
+
 
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
@@ -259,6 +262,7 @@ void initDimensionStyleBindings(void*)
     .property("isChild", &BND_DimensionStyle::IsChild)
     .function("isChildOf", &BND_DimensionStyle::IsChildOf)
     .property("parentId", &BND_DimensionStyle::GetParentId, &BND_DimensionStyle::SetParentId)
+    .property("id", &BND_DimensionStyle::GetId)
     ;
 }
 #endif

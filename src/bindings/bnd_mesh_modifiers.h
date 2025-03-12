@@ -1,10 +1,9 @@
+#include "bindings.h"
 
 #pragma once
 
-#include "bindings.h"
-
 #if defined(ON_PYTHON_COMPILE)
-void initMeshModifierBindings(pybind11::module& m);
+void initMeshModifierBindings(rh3dmpymodule& m);
 #else
 void initMeshModifierBindings(void* m);
 #endif

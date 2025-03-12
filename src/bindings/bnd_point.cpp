@@ -1,8 +1,4 @@
 #include "bindings.h"
-#if defined(ON_PYTHON_COMPILE)
-#include <pybind11/operators.h>
-#endif
-
 
 BND_Interval::BND_Interval(const ON_Interval& i)
 {
@@ -34,14 +30,15 @@ ON_3dPoint BND_Point3d::Transform(const ON_3dPoint& pt, const BND_Transform& tra
 
 
 #if defined(ON_PYTHON_COMPILE)
-static ON_3dPoint GetUnsetPoint3d(pybind11::object /*self*/)
+
+static ON_3dPoint GetUnsetPoint3d(py::object /*self*/)
 {
   return ON_3dPoint::UnsetPoint;
 }
 
-static pybind11::dict EncodePoint2d(const ON_2dPoint& pt)
+static py::dict EncodePoint2d(const ON_2dPoint& pt)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   return d;
@@ -51,34 +48,34 @@ static double GetPoint3dX(const ON_3dPoint& pt)
 {
   return pt.x;
 }
-static pybind11::dict EncodePoint3d(const ON_3dPoint& pt)
+static py::dict EncodePoint3d(const ON_3dPoint& pt)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   d["Z"] = pt.z;
   return d;
 }
 
-static pybind11::dict EncodePoint4d(const ON_4dPoint& pt)
+static py::dict EncodePoint4d(const ON_4dPoint& pt)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   d["Z"] = pt.z;
   d["W"] = pt.w;
   return d;
 }
-static pybind11::dict EncodeVector2d(const ON_2dVector& v)
+static py::dict EncodeVector2d(const ON_2dVector& v)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = v.x;
   d["Y"] = v.y;
   return d;
 }
-static pybind11::dict EncodeVector3d(const ON_3dVector& v)
+static py::dict EncodeVector3d(const ON_3dVector& v)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = v.x;
   d["Y"] = v.y;
   d["Z"] = v.z;
@@ -217,24 +214,24 @@ static double ON_3dVectorDotProduct(const ON_3dVector& a, const ON_3dVector& b)
 }
 
 
-static pybind11::dict EncodePoint2f(const ON_2fPoint& pt)
+static py::dict EncodePoint2f(const ON_2fPoint& pt)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   return d;
 }
-static pybind11::dict EncodePoint3f(const ON_3fPoint& pt)
+static py::dict EncodePoint3f(const ON_3fPoint& pt)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = pt.x;
   d["Y"] = pt.y;
   d["Z"] = pt.z;
   return d;
 }
-static pybind11::dict EncodeVector3f(const ON_3fVector& v)
+static py::dict EncodeVector3f(const ON_3fVector& v)
 {
-  pybind11::dict d;
+  py::dict d;
   d["X"] = v.x;
   d["Y"] = v.y;
   d["Z"] = v.z;
@@ -304,9 +301,7 @@ static std::string ReprInterval(const BND_Interval& i)
   return repr.str();
 }
 
-
-namespace py = pybind11;
-void initPointBindings(pybind11::module& m)
+void initPointBindings(rh3dmpymodule& m)
 {
   py::class_<ON_2dPoint>(m, "Point2d")
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
@@ -415,7 +410,9 @@ void initPointBindings(pybind11::module& m)
     .def("__repr__", &ReprInterval);
 
 }
+
 #else
+
 using namespace emscripten;
 
 void initPointBindings(void*)

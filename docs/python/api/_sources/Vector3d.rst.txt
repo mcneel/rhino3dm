@@ -53,6 +53,36 @@ Vector3d
 
       :rtype: int
 
+   .. py:method:: Unitize()
+
+      Unitizes the vector in place. A unit vector has length 1 unit.
+      An invalid or zero length vector cannot be unitized.
+
+      :return: True on success or False on failure.
+
+      :rtype: bool
+
+   .. py:method:: Length()
+
+      [todo] add documentation
+
+   .. py:staticmethod:: CrossProduct(a, b)
+
+      Computes the cross product (or vector product, or exterior product) of two vectors.
+      This operation is not commutative.
+
+      :param rhino3dm.Vector3d a: First vector.
+      :param rhino3dm.Vector3d b: Second vector.
+
+      :return: A new vector that is perpendicular to both a and b, \
+         has Length == a.Length * b.Length * sin(theta) where theta is the angle between a and b.The resulting vector is oriented according to the right hand rule.
+
+      :rtype: rhino3dm.Vector3d
+
+   .. py:staticmethod:: DotProduct(a, b)
+
+      [todo] add documentation
+
    .. py:staticmethod:: VectorAngle(a, b)
 
       Compute the angle between two vectors.

@@ -41,7 +41,7 @@ ON_3dPoint BND_Point3dList::GetPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_polyline.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_polyline[index]; 
 }
@@ -147,6 +147,25 @@ BND_TUPLE BND_Polyline::GetSegments() const
 
 }
 
+std::vector<BND_LineCurve*> BND_Polyline::GetSegments2() const
+{
+  int count = m_polyline.Count();
+  if( count < 2 ) 
+  {
+    return std::vector<BND_LineCurve*>();
+  }
+  std::vector<BND_LineCurve*> rc;
+  rc.reserve(count - 1);
+
+  for (int i = 0; i < count - 1; i++)
+  {
+    rc.push_back(new BND_LineCurve(m_polyline[i], m_polyline[i+1]));
+  }
+
+  return rc;
+
+}
+
 BND_LineCurve* BND_Polyline::SegmentAt(int index) const
 {
 
@@ -192,8 +211,8 @@ void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPolylineBindings(pybind11::module& m)
+
+void initPolylineBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Point3dList>(m, "Point3dList")
     .def(py::init<>())
@@ -233,6 +252,7 @@ void initPolylineBindings(pybind11::module& m)
     .def("ToNurbsCurve", &BND_Polyline::ToNurbsCurve)
     .def("ToPolylineCurve", &BND_Polyline::ToPolylineCurve)
     .def("GetSegments", &BND_Polyline::GetSegments)
+    .def("GetSegments2", &BND_Polyline::GetSegments2)
     .def("SegmentAt", &BND_Polyline::SegmentAt, py::arg("index"))
     .def_static("CreateInscribedPolygon", &BND_Polyline::CreateInscribedPolygon, py::arg("circle"), py::arg("sideCount"))
     .def_static("CreateCircumscribedPolygon", &BND_Polyline::CreateCircumscribedPolygon, py::arg("circle"), py::arg("sideCount"))
@@ -241,6 +261,7 @@ void initPolylineBindings(pybind11::module& m)
     .def_static("CreateFromPoints", &BND_Polyline::CreateFromPoints2, py::arg("points"))
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

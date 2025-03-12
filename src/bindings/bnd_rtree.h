@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initRTreeBindings(pybind11::module& m);
+void initRTreeBindings(rh3dmpymodule& m);
 #else
 void initRTreeBindings(void* m);
 #endif

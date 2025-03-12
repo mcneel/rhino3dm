@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initCircleBindings(pybind11::module& m);
+void initCircleBindings(rh3dmpymodule& m);
 #else
 void initCircleBindings(void* m);
 #endif

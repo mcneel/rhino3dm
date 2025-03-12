@@ -90,23 +90,24 @@ BND_BoundingBox BND_BoundingBox::Union(const BND_BoundingBox& a, const BND_Bound
 
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_BoundingBox::Encode() const
+py::dict BND_BoundingBox::Encode() const
 {
-  pybind11::dict d;
+  py::dict d;
   d["Min"] = PointToDict(m_bbox.m_min);
   d["Max"] = PointToDict(m_bbox.m_max);
   return d;
 }
 
-BND_BoundingBox* BND_BoundingBox::Decode(pybind11::dict jsonObject)
+BND_BoundingBox* BND_BoundingBox::Decode(py::dict jsonObject)
 {
   ON_BoundingBox bbox;
-  pybind11::dict d = jsonObject["Min"].cast<pybind11::dict>();
+  py::dict d = py::cast<py::dict>(jsonObject["Min"]);
   bbox.m_min = PointFromDict(d);
-  d = jsonObject["Max"].cast<pybind11::dict>();
+  d = py::cast<py::dict>(jsonObject["Max"]);
   bbox.m_max = PointFromDict(d);
   return new BND_BoundingBox(bbox);
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)
@@ -150,8 +151,8 @@ BND_BoundingBox* BND_BoundingBox::Decode(emscripten::val jsonObject)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initBoundingBoxBindings(pybind11::module& m)
+
+void initBoundingBoxBindings(rh3dmpymodule& m)
 {
   py::class_<BND_BoundingBox>(m, "BoundingBox")
     .def(py::init<ON_3dPoint, ON_3dPoint>(), py::arg("minPoint"), py::arg("maxPoint"))
@@ -175,7 +176,9 @@ void initBoundingBoxBindings(pybind11::module& m)
     .def_static("Decode", &BND_BoundingBox::Decode, py::arg("jsonObject"))
     ;
 }
-#else
+#endif
+
+#if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
 void initBoundingBoxBindings(void*)

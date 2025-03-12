@@ -6,6 +6,143 @@ using System;
 
 namespace Rhino.UI
 {
+  /// <summary>
+  /// Keyboard key recognized by shortcuts
+  /// </summary>
+  public enum KeyboardKey : int
+  {
+    /// <summary>No key</summary>
+    None = 0,
+    /// <summary>Tab key</summary>
+    Tab = 0x09,
+    /// <summary>PageUp key</summary>
+    PageUp = 0x21,
+    /// <summary>PageDown key</summary>
+    PageDown = 0x22,
+    /// <summary>End key</summary>
+    End = 0x23,
+    /// <summary>Home key</summary>
+    Home = 0x24,
+    /// <summary>0 key</summary>
+    Num0 = 48,
+    /// <summary>1 key</summary>
+    Num1 = 49,
+    /// <summary>2 key</summary>
+    Num2 = 50,
+    /// <summary>3 key</summary>
+    Num3 = 51,
+    /// <summary>4 key</summary>
+    Num4 = 52,
+    /// <summary>5 key</summary>
+    Num5 = 53,
+    /// <summary>6 key</summary>
+    Num6 = 54,
+    /// <summary>7 key</summary>
+    Num7 = 55,
+    /// <summary>8 key</summary>
+    Num8 = 56,
+    /// <summary>9 key</summary>
+    Num9 = 57,
+    /// <summary>A key</summary>
+    A = 65,
+    /// <summary>B key</summary>
+    B = 66,
+    /// <summary>C key</summary>
+    C = 67,
+    /// <summary>D key</summary>
+    D = 68,
+    /// <summary>E key</summary>
+    E = 69,
+    /// <summary>F key</summary>
+    F = 70,
+    /// <summary>G key</summary>
+    G = 71,
+    /// <summary>H key</summary>
+    H = 72,
+    /// <summary>I key</summary>
+    I = 73,
+    /// <summary>J key</summary>
+    J = 74,
+    /// <summary>K key</summary>
+    K = 75,
+    /// <summary>L key</summary>
+    L = 76,
+    /// <summary>M key</summary>
+    M = 77,
+    /// <summary>N key</summary>
+    N = 78,
+    /// <summary>O key</summary>
+    O = 79,
+    /// <summary>P key</summary>
+    P = 80,
+    /// <summary>Q key</summary>
+    Q = 81,
+    /// <summary>R key</summary>
+    R = 82,
+    /// <summary>S key</summary>
+    S = 83,
+    /// <summary>T key</summary>
+    T = 84,
+    /// <summary>U key</summary>
+    U = 85,
+    /// <summary>V key</summary>
+    V = 86,
+    /// <summary>W key</summary>
+    W = 87,
+    /// <summary>X key</summary>
+    X = 88,
+    /// <summary>Y key</summary>
+    Y = 89,
+    /// <summary>Z key</summary>
+    Z = 90,
+    /// <summary>F1 key</summary>
+    F1 = 0x70,
+    /// <summary>F2 key</summary>
+    F2 = 0x71,
+    /// <summary>F3 key</summary>
+    F3 = 0x72,
+    /// <summary>F4 key</summary>
+    F4 = 0x73,
+    /// <summary>F5 key</summary>
+    F5 = 0x74,
+    /// <summary>F6 key</summary>
+    F6 = 0x75,
+    /// <summary>F7 key</summary>
+    F7 = 0x76,
+    /// <summary>F8 key</summary>
+    F8 = 0x77,
+    /// <summary>F9 key</summary>
+    F9 = 0x78,
+    /// <summary>F10 key</summary>
+    F10 = 0x79,
+    /// <summary>F11 key</summary>
+    F11 = 0x7A,
+    /// <summary>F12 key</summary>
+    F12 = 0x7B,
+    /// <summary>; key</summary>
+    Semicolon = 0xBA,
+    /// <summary>+ key</summary>
+    Equal = 0xBB,
+    /// <summary>, key</summary>
+    Comma = 0xBC,
+    /// <summary>- key</summary>
+    Minus = 0xBD,
+    /// <summary>. key</summary>
+    Period = 0xBE,
+    /// <summary>/ key</summary>
+    Slash = 0xBF,
+    /// <summary>Backtick key</summary>
+    Grave = 0xC0,
+    /// <summary>[ key</summary>
+    LeftBracket = 0xDB,
+    /// <summary>Back slash key</summary>
+    BackSlash = 0xDC,
+    /// <summary>] key</summary>
+    RightBracket = 0xDD,
+    /// <summary>Quote key</summary>
+    Quote = 0xDE,
+  }
+
   /// <since>6.0</since>
   [Flags]
   public enum MouseButton
@@ -16,13 +153,25 @@ namespace Rhino.UI
     Middle = 4,
   }
 
+  /// <summary>
+  /// Keyboard keys typically used in combination with other keys
+  /// </summary>
   /// <since>6.0</since>
   [Flags]
   public enum ModifierKey
   {
+    /// <summary>No key</summary>
     None = 0,
+    /// <summary>Ctrl key on Windows</summary>
     Control = 1,
-    Shift = 2
+    /// <summary>Command key on Mac. This is treated the same as Control key on Windows</summary>
+    MacCommand = 1,
+    /// <summary>Shift key</summary>
+    Shift = 2,
+    /// <summary>Alt key</summary>
+    Alt = 4,
+    /// <summary>Control key on Mac</summary>
+    MacControl = 8
   }
 
 
@@ -107,9 +256,10 @@ namespace Rhino.UI
       get { return m_point; }
     }
 
+    /// <since>8.8</since>
     public Gumball.GumballMode IsOverGumball()
     {
-      return (Gumball.GumballMode)UnsafeNativeMethods.CRhGumball_MouseOverMode(m_view_serial_number);
+      return (Gumball.GumballMode)UnsafeNativeMethods.RHC_Gumball_MouseOverMode(m_view_serial_number);
     }
   }
 

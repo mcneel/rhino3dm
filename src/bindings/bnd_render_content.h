@@ -1,10 +1,9 @@
-
 #include "bindings.h"
 
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initRenderContentBindings(pybind11::module& m);
+void initRenderContentBindings(rh3dmpymodule& m);
 #else
 void initRenderContentBindings(void* m);
 #endif

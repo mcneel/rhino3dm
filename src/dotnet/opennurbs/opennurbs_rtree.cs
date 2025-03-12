@@ -411,6 +411,12 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
     /// <since>5.0</since>
     public bool Search(BoundingBox box, EventHandler<RTreeEventArgs> callback)
     {
@@ -427,6 +433,12 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
     /// <since>5.0</since>
     public bool Search(BoundingBox box, EventHandler<RTreeEventArgs> callback, object tag)
     {
@@ -460,6 +472,12 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
     /// <since>5.0</since>
     public bool Search(Sphere sphere, EventHandler<RTreeEventArgs> callback)
     {
@@ -475,6 +493,12 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched. It is possible no results were found.
     /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
     /// <example>
     /// <code source='examples\vbnet\ex_closestpoint.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_closestpoint.cs' lang='cs'/>
@@ -518,6 +542,12 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if entire tree was searched.  It is possible no results were found.
     /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
     /// <since>5.0</since>
     public static bool SearchOverlaps(RTree treeA, RTree treeB, double tolerance, EventHandler<RTreeEventArgs> callback)
     {

@@ -17,12 +17,13 @@ BND_SurfaceProxy::BND_SurfaceProxy()
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initSurfaceProxyBindings(pybind11::module& m)
+
+void initSurfaceProxyBindings(rh3dmpymodule& m)
 {
   py::class_<BND_SurfaceProxy, BND_Surface>(m, "SurfaceProxy")
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

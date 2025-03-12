@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initObjectBindings(pybind11::module& m);
+void initObjectBindings(rh3dmpymodule& m);
 #else
 void initObjectBindings(void* m);
 #endif
@@ -33,6 +33,7 @@ public:
   std::wstring GetUserString(std::wstring key);
   int UserStringCount() const { return m_object->UserStringCount(); }
   BND_TUPLE GetUserStrings() const;
+  std::vector<std::vector<std::wstring>> GetUserStrings2() const;
   std::wstring RdkXml() const;
 protected:
   ON_ModelComponentReference m_component_ref; // holds shared pointer for this class

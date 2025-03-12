@@ -114,9 +114,26 @@ BND_TUPLE BND_Transform::ToFloatArray(bool rowDominant) const
 	return rc;
 }
 
+std::vector<float> BND_Transform::ToFloatArray2(bool rowDominant) const
+{
+  const int count = 16;
+  std::vector<float> rc(count);
+  if (rowDominant)
+  {
+    for (int i = 0; i < count; i++)
+      rc[i] = (float)m_xform.m_xform[i / 4][i % 4];
+  }
+  else
+  {
+    for (int i = 0; i < count; i++)
+      rc[i] = (float)m_xform.m_xform[i % 4][i / 4];
+  }
+  return rc;
+}
+
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initXformBindings(pybind11::module& m)
+
+void initXformBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Transform>(m, "Transform")
     .def(py::init<double>(), py::arg("diagonalValue"))
@@ -150,6 +167,7 @@ void initXformBindings(pybind11::module& m)
     .def("TransformBoundingBox", &BND_Transform::TransformBoundingBox, py::arg("bbox"))
     .def("Transpose", &BND_Transform::Transpose)
     .def("ToFloatArray", &BND_Transform::ToFloatArray)
+    .def("ToFloatArray2", &BND_Transform::ToFloatArray2)
     .def_property("M00", &BND_Transform::GetM00, &BND_Transform::SetM00)
     .def_property("M01", &BND_Transform::GetM01, &BND_Transform::SetM01)
     .def_property("M02", &BND_Transform::GetM02, &BND_Transform::SetM02)
@@ -180,6 +198,7 @@ void initXformBindings(pybind11::module& m)
     .value("Rigid", TransformRigidType::Rigid)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

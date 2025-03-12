@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'rhino3dm'
-copyright = u'2019, Robert McNeel & Associates'
+copyright = u'2025, Robert McNeel & Associates'
 author = u'Steve Baer'
 
 # The short X.Y version

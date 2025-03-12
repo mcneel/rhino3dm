@@ -1,10 +1,9 @@
+#include "bindings.h"
 
 #pragma once
 
-#include "bindings.h"
-
 #if defined(ON_PYTHON_COMPILE)
-void initDitheringBindings(pybind11::module& m);
+void initDitheringBindings(rh3dmpymodule& m);
 #else
 void initDitheringBindings(void* m);
 #endif

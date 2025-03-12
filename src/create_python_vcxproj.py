@@ -33,7 +33,7 @@ def createproject():
                 print(line.replace("WIN32;", "WIN64;"))
         #os.system("cmake --build . --config Release --target _rhino3dm")
     else:
-        rv = os.system("cmake -DPYTHON_EXECUTABLE:FILEPATH={} ../..".format(sys.executable))
+        rv = os.system('cmake -G "Xcode"  -DPYTHON_EXECUTABLE:FILEPATH={} ../..'.format(sys.executable))
         if int(rv) > 0: sys.exit(1)
         #rv = os.system("make")
         #if int(rv) > 0: sys.exit(1)

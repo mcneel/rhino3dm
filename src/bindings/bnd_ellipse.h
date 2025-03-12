@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initEllipseBindings(pybind11::module& m);
+void initEllipseBindings(rh3dmpymodule& m);
 #else
 void initEllipseBindings(void* m);
 #endif

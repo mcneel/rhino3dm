@@ -20,8 +20,8 @@ BND_Brep* BND_Cone::ToBrep(bool capBottom) const
 }
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initConeBindings(pybind11::module& m)
+
+void initConeBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Cone>(m, "Cone")
     .def_property("Height", &BND_Cone::GetHeight, &BND_Cone::SetHeight)

@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initGroupBindings(pybind11::module& m);
+void initGroupBindings(rh3dmpymodule& m);
 #else
 void initGroupBindings(void* m);
 #endif

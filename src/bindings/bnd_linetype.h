@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initLinetypeBindings(pybind11::module& m);
+void initLinetypeBindings(rh3dmpymodule& m);
 #else
 void initLinetypeBindings(void* m);
 #endif
@@ -46,15 +46,15 @@ public:
 
 
 #if defined(ON_PYTHON_COMPILE)
-  static BND_Linetype* Border(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Border); }
-  static BND_Linetype* ByLayer(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::ByLayer); }
-  static BND_Linetype* ByParent(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::ByParent); }
-  static BND_Linetype* Center(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Center); }
-  static BND_Linetype* Continuous(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Continuous); }
-  static BND_Linetype* DashDot(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::DashDot); }
-  static BND_Linetype* Dashed(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Dashed); }
-  static BND_Linetype* Dots(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Dots); }
-  static BND_Linetype* Hidden(pybind11::object /*self*/) { return new BND_Linetype(ON_Linetype::Hidden); }
+  static BND_Linetype* Border(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Border); }
+  static BND_Linetype* ByLayer(py::object /*self*/) { return new BND_Linetype(ON_Linetype::ByLayer); }
+  static BND_Linetype* ByParent(py::object /*self*/) { return new BND_Linetype(ON_Linetype::ByParent); }
+  static BND_Linetype* Center(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Center); }
+  static BND_Linetype* Continuous(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Continuous); }
+  static BND_Linetype* DashDot(py::object /*self*/) { return new BND_Linetype(ON_Linetype::DashDot); }
+  static BND_Linetype* Dashed(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Dashed); }
+  static BND_Linetype* Dots(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Dots); }
+  static BND_Linetype* Hidden(py::object /*self*/) { return new BND_Linetype(ON_Linetype::Hidden); }
 #else
   static BND_Linetype* Border() { return new BND_Linetype(ON_Linetype::Border); }
   static BND_Linetype* ByLayer() { return new BND_Linetype(ON_Linetype::ByLayer); }

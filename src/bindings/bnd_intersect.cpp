@@ -5,10 +5,14 @@ BND_TUPLE BND_Intersection::LineLine(const ON_Line& lineA, const ON_Line& lineB)
   double a = 0;
   double b = 0;
   bool success = ON_Intersect(lineA, lineB, &a, &b);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, a, b);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, a);
   SetTuple(rc, 2, b);
+#endif
   return rc;
 }
 
@@ -36,10 +40,14 @@ BND_TUPLE BND_Intersection::LineLine2(const ON_Line& lineA, const ON_Line& lineB
     }
   }
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, a, b);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, a);
   SetTuple(rc, 2, b);
+#endif
   return rc;
 }
 
@@ -48,9 +56,13 @@ BND_TUPLE BND_Intersection::LinePlane(const ON_Line& line, const BND_Plane& plan
 {
   double a = 0;
   bool success = ON_Intersect(line, plane.ToOnPlane(), &a);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, a);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, a);
+#endif
   return rc;
 }
 
@@ -58,9 +70,13 @@ BND_TUPLE BND_Intersection::PlanePlane(const BND_Plane& planeA, const BND_Plane&
 {
   ON_Line line;
   bool success = ON_Intersect(planeA.ToOnPlane(), planeB.ToOnPlane(), line);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, line);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, line);
+#endif
   return rc;
 }
 
@@ -69,9 +85,13 @@ BND_TUPLE BND_Intersection::PlanePlanePlane(const BND_Plane& planeA, const BND_P
   ON_3dPoint point;
   bool success = ON_Intersect(planeA.ToOnPlane(), planeB.ToOnPlane(), planeC.ToOnPlane(), point);
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, point);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, point);
+#endif
   return rc;
 }
 
@@ -124,10 +144,16 @@ enum class SphereSphereIntersection : int
 BND_TUPLE BND_Intersection::PlaneSphere(const BND_Plane& plane, const BND_Sphere& sphere)
 {
   ON_Circle circle;
-  int success = ON_Intersect(plane.ToOnPlane(), sphere.m_sphere, circle);
+  int success = ::ON_Intersect(plane.ToOnPlane(), sphere.m_sphere, circle);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple((PlaneSphereIntersection)success, BND_Circle(circle));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, (PlaneSphereIntersection)success);
   SetTuple(rc, 1, BND_Circle(circle));
+#endif
+
   return rc;
 }
 
@@ -140,22 +166,30 @@ BND_TUPLE BND_Intersection::LineCircle(const ON_Line& line, const BND_Circle& ci
 
   if (!line.IsValid() || !circle.IsValid())
   {
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    BND_TUPLE rc = py::make_tuple(LineCircleIntersection::None, 0.0, ON_3dPoint(0, 0, 0), 0.0, ON_3dPoint(0, 0, 0));
+#else
     BND_TUPLE rc = CreateTuple(5);
     SetTuple(rc, 0, LineCircleIntersection::None);
     SetTuple(rc, 1, 0.0);
     SetTuple(rc, 2, ON_3dPoint(0, 0, 0));
     SetTuple(rc, 3, 0.0);
     SetTuple(rc, 4, ON_3dPoint(0, 0, 0));
+#endif
     return rc;
   }
 
   int success = ::ON_Intersect(line, circle.m_circle, &t1, point1, &t2, point2);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple((LineCircleIntersection)success, t1, point1, t2, point2);
+#else
   BND_TUPLE rc = CreateTuple(5);
   SetTuple(rc, 0, (LineCircleIntersection)success);
   SetTuple(rc, 1, t1);
   SetTuple(rc, 2, point1);
   SetTuple(rc, 3, t2);
   SetTuple(rc, 4, point2);
+#endif
   return rc;
 }
 
@@ -164,10 +198,14 @@ BND_TUPLE BND_Intersection::LineSphere(const ON_Line& line, const BND_Sphere& sp
   ON_3dPoint point1(0, 0, 0);
   ON_3dPoint point2(0, 0, 0);
   int success = ::ON_Intersect(line, sphere.m_sphere, point1, point2);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple((LineSphereIntersection)success, point1, point2);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, (LineSphereIntersection)success);
   SetTuple(rc, 1, point1);
   SetTuple(rc, 2, point2);
+#endif
   return rc;
 }
 
@@ -176,10 +214,14 @@ BND_TUPLE BND_Intersection::LineCylinder(const ON_Line& line, const BND_Cylinder
   ON_3dPoint point1(0, 0, 0);
   ON_3dPoint point2(0, 0, 0);
   int success = ::ON_Intersect(line, cylinder.m_cylinder, point1, point2);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple((LineCylinderIntersection)success, point1, point2);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple(rc, 0, (LineCylinderIntersection)success);
   SetTuple(rc, 1, point1);
   SetTuple(rc, 2, point2);
+#endif
   return rc;
 }
 
@@ -187,12 +229,17 @@ BND_TUPLE BND_Intersection::SphereSphere(const BND_Sphere& sphereA, const BND_Sp
 {
   ON_Circle circle;
   int success = ::ON_Intersect(sphereA.m_sphere, sphereB.m_sphere, circle);
+
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple((SphereSphereIntersection)success, BND_Circle(circle));
+#else
   BND_TUPLE rc = CreateTuple(2);
   if (success <= 0 || success > 3)
     SetTuple(rc, 0, SphereSphereIntersection::None);
   else
     SetTuple(rc, 0, (SphereSphereIntersection)success);
   SetTuple(rc, 1, BND_Circle(circle));
+#endif
   return rc;
 }
 
@@ -200,9 +247,13 @@ BND_TUPLE BND_Intersection::LineBox(const ON_Line& line, const BND_BoundingBox& 
 {
   ON_Interval i = ON_Interval::EmptyInterval;
   bool success = ::ON_Intersect(box.m_bbox, line, tolerance, &i);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, BND_Interval(i));
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, success);
   SetTuple(rc, 1, BND_Interval(i));
+#endif
   return rc;
 }
 
@@ -210,8 +261,7 @@ BND_TUPLE BND_Intersection::LineBox(const ON_Line& line, const BND_BoundingBox& 
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initIntersectBindings(pybind11::module& m)
+void initIntersectBindings(py::module_& m)
 {
   //py::enum_<PlaneCircleIntersection>(m, "PlaneCircleIntersection")
   //  .value("None", PlaneCircleIntersection::None)

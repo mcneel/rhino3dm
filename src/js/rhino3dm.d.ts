@@ -8,7 +8,7 @@ declare module 'rhino3dm' {
 		PageSpace
 	}
 
-	enum AnnotationTypes {
+	enum AnnotationType {
 		Unset,
 		Aligned,
 		Angular,
@@ -40,6 +40,12 @@ declare module 'rhino3dm' {
 		GroundLevel,
 		MeanSeaLevel,
 		CenterOfEarth
+	}
+
+	enum BlendContinuity {
+		Position,
+		Tangency,
+		Curvature
 	}
 
 	enum ComponentIndexType {
@@ -82,13 +88,36 @@ declare module 'rhino3dm' {
 		Screen
 	}
 
-	enum CurveEvaluationSide{
+	enum CurveEvaluationSide {
 		Default,
 		Below,
 		Above
 	}
 
-	enum CurveOrientation{
+	enum CurveExtensionStyle {
+		Line,
+		Arc,
+		Smooth
+	}
+
+	enum CurveKnotStyle {
+		Uniform,
+		Chord,
+		ChordSquareRoot,
+		UniformPeriodic,
+		ChordPeriodic,
+		ChordSquareRootPeriodic
+	}
+
+	enum CurveOffsetCornerStyle {
+		None,
+		Sharp,
+		Round,
+		Smooth,
+		Chamfer
+	}
+
+	enum CurveOrientation {
 		Undefined,
 		Clockwise,
 		CounterClockwise
@@ -147,7 +176,7 @@ declare module 'rhino3dm' {
 	}
 
 	enum LightStyle {
-		None,
+		Unknown,
 		CameraDirectional,
 		CameraPoint,
 		CameraSpot,
@@ -278,6 +307,13 @@ declare module 'rhino3dm' {
 		Circle
 	}
 
+	enum PointContainment {
+		Unset,
+		Inside,
+		Outside,
+		Coincident
+	}
+
 	enum PostEffectTypes {
 		Early,
 		ToneMapping,
@@ -289,6 +325,13 @@ declare module 'rhino3dm' {
 		Forward,
 		Backward,
 		Both
+	}
+
+	enum RegionContainment {
+		Disjoint,
+		MutualIntersection,
+		AInsideB,
+		BInsideA
 	}
 
 	enum RenderChannelsModes {
@@ -382,11 +425,16 @@ declare module 'rhino3dm' {
 
 	class RhinoModule {
 		ActiveSpace: typeof ActiveSpace
-		AnnotationTypes: typeof AnnotationTypes
+		AnnotationType: typeof AnnotationType
 		ArrowheadTypes: typeof ArrowheadTypes
 		BasepointZero: typeof BasepointZero
+		BlendContinuity: typeof BlendContinuity
 		ComponentIndexType: typeof ComponentIndexType
 		CoordinateSystem: typeof CoordinateSystem
+		CurveEvaluationSide: typeof CurveEvaluationSide
+		CurveExtensionStyle: typeof CurveExtensionStyle
+		CurveKnotStyle: typeof CurveKnotStyle
+		CurveOffsetCornerStyle: typeof CurveOffsetCornerStyle
 		CurveOrientation: typeof CurveOrientation
 		CurvePipingCapTypes: typeof CurvePipingCapTypes
 		DecalMappings: typeof DecalMappings
@@ -410,8 +458,10 @@ declare module 'rhino3dm' {
 		ObjectPlotWeightSource: typeof ObjectPlotWeightSource
 		ObjectType: typeof ObjectType
 		PlaneSphereIntersection: typeof PlaneSphereIntersection
+		PointContainment: typeof PointContainment
 		PostEffectTypes: typeof PostEffectTypes
 		Projections: typeof Projections
+		RegionContainment: typeof RegionContainment
 		RenderChannelsModes: typeof RenderChannelsModes
 		SphereSphereIntersection: typeof SphereSphereIntersection
 		TextureType: typeof TextureType
@@ -444,7 +494,6 @@ declare module 'rhino3dm' {
 		Cone: typeof Cone;
 		ConstructionPlane: typeof ConstructionPlane;
 		Curve: typeof Curve;
-		CurveEvaluationSide: typeof CurveEvaluationSide
 		CurvePiping: typeof CurvePiping;
 		CurveProxy: typeof CurveProxy;
 		Cylinder: typeof Cylinder;
@@ -565,7 +614,7 @@ declare module 'rhino3dm' {
 		/**
 		 * Type of annotation
 		 */
-		annotationType: AnnotationTypes;
+		annotationType: AnnotationType;
 		/**
 		 * Id of this annotation's parent dimstyle
 		 * If this annotation has overrides to dimstyle properties,
@@ -885,7 +934,7 @@ declare module 'rhino3dm' {
 		split(t:number): object;
 	}
 
-	class Bitmap {
+	class Bitmap extends CommonObject {
 		/**
 		 */
 		width: number;
@@ -901,6 +950,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		sizeOfImage: number;
+		/**
+		 */
+		id: string;
 	}
 
 	class BoundingBox {
@@ -2068,7 +2120,9 @@ declare module 'rhino3dm' {
 		/**
 		 * The V min bounds of the decal.
 		 */
-		boundsMaxV: any;
+		boundsMinV: number;
+		boundsMaxU: number;
+		boundsMaxV: number;
 	}
 
 	class DimAngular extends Dimension {
@@ -2207,6 +2261,9 @@ declare module 'rhino3dm' {
 		 * If ParentId is Guid.Empty, this DimensionStyle has no parent
 		 */
 		parentId: string;
+		/**
+		 */
+		id: string;
 		/** ... */
 		getFont(): Font;
 		/** ... */
@@ -2558,6 +2615,19 @@ declare module 'rhino3dm' {
 		 */
 		static create(planarCurve:Curve,height:number,cap:boolean): Extrusion;
 		/**
+		 * @description Creates an extrusion of a 3d curve (which must be planar), a plane, and a height.
+		 * @param {Curve} planarCurve Planar curve used as profile
+		 * @param {Plane} plane The curve is projected to this plane
+		 * @param {number} height If the height > 0, the bottom of the extrusion will be in plane and
+		the top will be height units above the plane.
+		If the height < 0, the top of the extrusion will be in plane and
+		the bottom will be height units below the plane.
+		The plane used is the one that is returned from the curve's TryGetPlane function.
+		 * @param {boolean} cap If the curve is closed and cap is true, then the resulting extrusion is capped.
+		 * @returns {Extrusion} If the input is valid, then a new extrusion is returned. Otherwise null is returned
+		 */
+		static createWithPlane(planarCurve:Curve, plane: Plane, height:number,cap:boolean): Extrusion;
+		/**
 		 * @description Gets an extrusion from a box.
 		 * @param {Box} box IsValid must be true.
 		 * @param {boolean} cap If true, the base and the top of the box will be capped. Defaults to true.
@@ -2742,7 +2812,7 @@ declare module 'rhino3dm' {
 		 * @description Read a 3dm file from a byte array
 		 * @returns {File3dm} New File3dm on success, null on error.
 		 */
-		static fromByteArray(length:number, buffer: Uint8Array): File3dm;
+		static fromByteArray(buffer: Uint8Array): File3dm;
 		/** ... */
 		settings(): File3dmSettings;
 		/** ... */
@@ -2809,6 +2879,8 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(bitmap: Bitmap): void;
 		/** ... */
+		delete(id:string): boolean;
+		/** ... */
 		findIndex(index:number): Bitmap;
 		/** ... */
 		findId(id:string): Bitmap;
@@ -2832,6 +2904,8 @@ declare module 'rhino3dm' {
 		get(index:number): DimensionStyle;
 		/** ... */
 		add(dimStyle: DimensionStyle): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a DimensionStyle object based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -2864,7 +2938,7 @@ declare module 'rhino3dm' {
 		/** ... */
 		add(group:Group): void;
 		/** ... */
-		delete(Group): boolean;
+		delete(group:Group): boolean;
 		/** ... */
 		deleteIndex(index:number): boolean;
 		/** ... */
@@ -2882,6 +2956,12 @@ declare module 'rhino3dm' {
 		 * @returns {Group} A Group, or null on error.
 		 */
 		findName(name:string): Group;
+		/**
+		 * @description Gets an array of all of the objects in a group.
+		 * @param {number} groupIndex The index of the group in this table.
+		 * @returns {File3dmObject[]} Array of objects that belong to the specified group or empty array if no objects could be found.
+		 */
+		groupMembers(groupIndex:number): File3dmObject[];
 	}
 
 	class File3dmInstanceDefinitionTable {
@@ -2925,6 +3005,8 @@ declare module 'rhino3dm' {
 		 * @returns {number} If layer_name is valid, the layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
 		addLayer(name:string,color:object): number;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Finds a Layer given its name.
 		 * @param {string} name The name of the Layer to be searched.
@@ -2982,6 +3064,8 @@ declare module 'rhino3dm' {
 		get(index:number): Material;
 		/** ... */
 		add(material:Material): void;
+		/** ... */
+		delete(id:string): boolean;
 		/**
 		 * @description Retrieves a material based on Index. This search type of search is discouraged.
 		We are moving towards using only IDs for all tables.
@@ -3040,8 +3124,19 @@ declare module 'rhino3dm' {
 		 * @returns {string} id of new object.
 		 */
 		addPointXYZ(x:number, y:number,z:number): string;
-		/** */
+		/**
+		 * @description Adds a point object to Rhino.
+		 * @param {number[]} point array with three numbers which define the point.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
 		addPoint(point:number[]): string;
+		/**
+		 * @description Adds a point object to Rhino.
+		 * @param {number[]} point An array with three numbers which define the point.
+		 * @param {ObjectAttributes} attributes The attributes to apply to the point.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
+		addPoint(point:number[], attributes: ObjectAttributes): string;
 		/**
 		 * @description Adds a point cloud object to the document.
 		 * @param {PointCloud} cloud PointCloud to add.
@@ -3055,6 +3150,14 @@ declare module 'rhino3dm' {
 		 * @returns {string} A unique identifier of new rhino object.
 		 */
 		addLine(from:number[],to:number[]): string;
+		/**
+		 * @description Adds a line object to Rhino.
+		 * @param {number[]} from A line start point.
+		 * @param {number[]} to A line end point.
+		 * @param {ObjectAttributes} attributes The attributes to apply to the line.
+		 * @returns {string} A unique identifier of new rhino object.
+		 */
+		addLine(from:number[],to:number[], attributes: ObjectAttributes): string;
 		/**
 		 * @description Adds a polyline object to Rhino.
 		 * @param {number[][] | Point3dList} points An array of points in [x, y, z] format or Point3dList. 
@@ -3124,13 +3227,13 @@ declare module 'rhino3dm' {
 		addBrep(brep:Brep): string;
 		/**
 		 * @description Duplicates the object, then adds a copy of the object to the document.
-		 * @param {ObjectAttributes} attributes
 		 * @param {GeometryBase} geometry
+		 * @param {ObjectAttributes} attributes
 		 * @returns {string} A unique identifier for the object.
 		 */
-		add(attributes: ObjectAttributes, geometry: GeometryBase): string;
+		add(geometry: GeometryBase, attributes: ObjectAttributes): string;
 		/** ... */
-		addObject(): void;
+		addObject(object: File3dmObject): string;
 		/**
 		 * @description Adds an instance reference geometry object to the table.
 		 * @param {InstanceReferenceGeometry} instanceReference The instance reference geometry object.
@@ -3143,7 +3246,7 @@ declare module 'rhino3dm' {
 		 */
 		getBoundingBox(): BoundingBox;
 		/** ... */
-		deleteItem(id:string): void;
+		delete(id:string): void;
 		/** ... */
 		findId(id:string): File3dmObject;
 	}
@@ -3770,6 +3873,9 @@ declare module 'rhino3dm' {
 		/**
 		 */
 		expanded: boolean;
+		/**
+		 */
+		index: number;
 		/**
 		 * @description Verifies that a layer has per viewport settings.
 		 * @param {string} viewportId If not Guid.Empty, then checks for settings for that specific viewport.
@@ -5470,6 +5576,12 @@ declare module 'rhino3dm' {
 	class Plane {
 		/** ... */
 		static worldXY(): Plane;
+		/** ... */
+		static worldYZ(): Plane;
+		/** ... */
+		static worldZX(): Plane;
+		/** ... */
+		static unset(): Plane;
 	}
 
 	class PlaneSurface extends Surface {
@@ -5709,6 +5821,8 @@ declare module 'rhino3dm' {
 		 * @returns {object} A Three.js bufferGeometry.
 		 */
 		toThreejsJSON(): object;
+		/** ... */
+		static createFromThreejsJSON(json: object): PointCloud;
 	}
 
 	class PointCloudItem {

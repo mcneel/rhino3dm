@@ -1,13 +1,12 @@
 # rhino3dm.py
 **rhino3dm.py** is a Python package that is OpenNURBS plus additional python bindings compiled to a C-extension library that can be used on all current versions of CPython (3.7 +) and is available on all platforms [through PyPi.org](https://pypi.org/project/rhino3dm/)
 
-#### Supported Python platforms:
-
-- Windows (32 and 64 bit): Python 3.7 - 3.12
-- macOS 12: Python 3.7 - 3.12 (x86_64), Python 3.11 - 3.12 (Universal)
-- macOS 14: Python 3.8 - 3.12
-- linux: Python cp38-cp38 - cp312-cp312 via manylinux2014_x86_64
-- Other architectures, operating systems, and python versions are supported through source distributions on PyPi
+#### Supported platforms
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 , 3.13 - Windows (64 bit)
+* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 13 (installed through homebrew)
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 14, macos 15 universal
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
+* other architectures, operating systems, and python versions are supported through source distributions\
 
 ## Install using pip
 The easiest way to access the rhino3dm.py libraries is to use the pip installer from the Python console:

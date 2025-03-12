@@ -21,6 +21,10 @@ File3dmBitmapTable
 
       [todo] add documentation
 
+   .. py:method:: Delete(id)
+
+      [todo] add documentation
+
    .. py:method:: FindIndex(index)
 
       [todo] add documentation

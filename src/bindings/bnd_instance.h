@@ -11,7 +11,7 @@ enum class InstanceDefinitionUpdateType : int
 };
 
 #if defined(ON_PYTHON_COMPILE)
-void initInstanceBindings(pybind11::module& m);
+void initInstanceBindings(rh3dmpymodule& m);
 #else
 void initInstanceBindings(void* m);
 #endif
@@ -32,6 +32,7 @@ public:
   std::wstring SourceArchive() const { return std::wstring(m_idef->LinkedFilePath()); }
   InstanceDefinitionUpdateType UpdateType() const;
   BND_TUPLE GetObjectIds() const;
+  std::vector<BND_UUID> GetObjectIds2() const;
   bool IsInstanceGeometryId(BND_UUID id) const { return m_idef->IsInstanceGeometryId(Binding_to_ON_UUID(id));}
 };
 

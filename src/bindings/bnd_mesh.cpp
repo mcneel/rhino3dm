@@ -4,9 +4,9 @@
 
 
 #if defined(ON_PYTHON_COMPILE)
-pybind11::dict BND_MeshingParameters::Encode() const
+py::dict BND_MeshingParameters::Encode() const
 {
-  pybind11::dict d;
+  py::dict d;
   d["TextureRange"] = GetTextureRange();
   d["JaggedSeams"] = GetJaggedSeams();
   d["RefineGrid"] = GetRefineGrid();
@@ -27,9 +27,10 @@ pybind11::dict BND_MeshingParameters::Encode() const
   return d;
 }
 
-BND_MeshingParameters* BND_MeshingParameters::Decode(pybind11::dict jsonObject)
+BND_MeshingParameters* BND_MeshingParameters::Decode(py::dict jsonObject)
 {
   BND_MeshingParameters* mp = new BND_MeshingParameters();
+  /*
   mp->SetTextureRange(jsonObject["TextureRange"].cast<int>());
   mp->SetJaggedSeams(jsonObject["JaggedSeams"].cast<bool>());
   mp->SetRefineGrid(jsonObject["RefineGrid"].cast<bool>());
@@ -47,6 +48,24 @@ BND_MeshingParameters* BND_MeshingParameters::Decode(pybind11::dict jsonObject)
   mp->SetMinimumEdgeLength(jsonObject["MinimumEdgeLength"].cast<double>());
   mp->SetMaximumEdgeLength(jsonObject["MaximumEdgeLength"].cast<double>());
   mp->SetRefineAngle(jsonObject["RefineAngle"].cast<double>());
+   */
+  mp->SetTextureRange(py::cast<int>(jsonObject["TextureRange"]));
+  mp->SetJaggedSeams(py::cast<bool>(jsonObject["JaggedSeams"]));
+  mp->SetRefineGrid(py::cast<bool>(jsonObject["RefineGrid"]));
+  mp->SetSimplePlanes(py::cast<bool>(jsonObject["SimplePlanes"]));
+  mp->SetComputeCurvature(py::cast<bool>(jsonObject["ComputeCurvature"]));
+  mp->SetClosedObjectPostProcess(py::cast<bool>(jsonObject["ClosedObjectPostProcess"]));
+  mp->SetGridMinCount(py::cast<bool>(jsonObject["GridMinCount"]));
+  mp->SetGridMaxCount(py::cast<int>(jsonObject["GridMaxCount"]));
+  mp->SetGridAngle(py::cast<double>(jsonObject["GridAngle"]));
+  mp->SetGridAspectRatio(py::cast<double>(jsonObject["GridAspectRatio"]));
+  mp->SetGridAmplification(py::cast<double>(jsonObject["GridAmplification"]));
+  mp->SetTolerance(py::cast<double>(jsonObject["Tolerance"]));
+  mp->SetMinimumTolerance(py::cast<double>(jsonObject["MinimumTolerance"]));
+  mp->SetRelativeTolerance(py::cast<double>(jsonObject["RelativeTolerance"]));
+  mp->SetMinimumEdgeLength(py::cast<double>(jsonObject["MinimumEdgeLength"]));
+  mp->SetMaximumEdgeLength(py::cast<double>(jsonObject["MaximumEdgeLength"]));
+  mp->SetRefineAngle(py::cast<double>(jsonObject["RefineAngle"]));
   return mp;
 }
 #endif
@@ -168,10 +187,14 @@ BND_TUPLE BND_Mesh::IsManifold(bool topologicalTest) const
 {
   bool oriented = false;
   bool hasboundary = false;
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary), oriented, hasboundary);
+#else
   BND_TUPLE rc = CreateTuple(3);
   SetTuple<bool>(rc, 0, m_mesh->IsManifold(topologicalTest, &oriented, &hasboundary));
   SetTuple<bool>(rc, 1, oriented);
   SetTuple<bool>(rc, 2, hasboundary);
+#endif
   return rc;
 }
 
@@ -382,6 +405,14 @@ BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
     normal_array = emscripten::vecFromJSArray<float>(attributes["normal"]["array"]);
   }
 
+  std::vector<double> color_array;
+  int colorChannels = 3;
+  if (emscripten::val::undefined() != attributes["color"])
+  {
+    color_array = emscripten::vecFromJSArray<double>(attributes["color"]["array"]);
+    colorChannels = attributes["color"]["itemSize"].as<int>();
+  }
+
   std::vector<float> uv_array;
   if (emscripten::val::undefined() != attributes["uv"])
   {
@@ -423,6 +454,26 @@ BND_Mesh* BND_Mesh::CreateFromThreejsJSON(BND_DICT data)
   mesh->m_N.SetCapacity(normal_count);
   mesh->m_N.SetCount(normal_count);
   memcpy(mesh->m_N.Array(), normal_array.data(), sizeof(float) * normal_array.size());
+
+  const int color_count = color_array.size() / colorChannels;
+  mesh->m_C.SetCapacity(color_count);
+  mesh->m_C.SetCount(color_count);
+  std::transform(color_array.begin(), color_array.end(), color_array.begin(),[](double color) { return color * 255.0; });
+
+  ON_Color* color_array_ptr = mesh->m_C.Array();
+  for (int i = 0; i < color_count; ++i) {
+      int r = static_cast<int>(color_array[i * colorChannels]);
+      int g = static_cast<int>(color_array[i * colorChannels + 1]);
+      int b = static_cast<int>(color_array[i * colorChannels + 2]);
+
+      if(colorChannels == 4)
+      {
+        int a = static_cast<int>(color_array[i * colorChannels + 3]);
+        color_array_ptr[i] = ON_Color(r, g, b, 255-a);
+      }
+      else
+        color_array_ptr[i] = ON_Color(r, g, b);
+  }
 
   const int uv_count = uv_array.size() / 2;
   if (uv_count > 0)
@@ -473,7 +524,7 @@ ON_3fPoint BND_MeshVertexList::GetVertex(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i<0 || i>=m_mesh->m_V.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_mesh->m_V[i];
 }
@@ -482,7 +533,7 @@ void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_V.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_V[i] = pt;
 }
@@ -707,13 +758,17 @@ BND_TUPLE BND_MeshFaceList::GetFace(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_F.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   ON_MeshFace& face = m_mesh->m_F[i];
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(face.vi[0], face.vi[1], face.vi[2], face.vi[3]);
+#else
   BND_TUPLE rc = CreateTuple(4);
   for (int i = 0; i < 4; i++)
     SetTuple<int>(rc, i, face.vi[i]);
+#endif
   return rc;
 }
 
@@ -723,10 +778,14 @@ BND_TUPLE BND_MeshFaceList::GetFaceVertices(int faceIndex) const
   if(faceIndex >= 0 && faceIndex < count)
   {
     ON_MeshFace& face = m_mesh->m_F[faceIndex];
+  #if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+    BND_TUPLE rc = py::make_tuple(true, m_mesh->m_V[face.vi[0]], m_mesh->m_V[face.vi[1]], m_mesh->m_V[face.vi[2]], m_mesh->m_V[face.vi[3]]);
+  #else
     BND_TUPLE rc = CreateTuple(5);
     SetTuple(rc, 0, true);
     for (int i = 0; i < 4; i++)
       SetTuple(rc, i+1, m_mesh->m_V[ face.vi[i] ]);
+  #endif
     return rc;
   }
   return NullTuple();
@@ -784,7 +843,7 @@ BND_Color BND_MeshVertexColorList::GetColor(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_mesh->m_C.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return ON_Color_to_Binding(m_mesh->m_C[index]);
 }
@@ -793,7 +852,7 @@ void BND_MeshVertexColorList::SetColor(int index, BND_Color color)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index < 0 || index >= m_mesh->m_C.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   // if index == count, then we are appending
@@ -816,7 +875,7 @@ ON_3fVector BND_MeshNormalList::GetNormal(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_N.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
 
   return m_mesh->m_N[i];
@@ -826,7 +885,7 @@ void BND_MeshNormalList::SetNormal(int i, ON_3fVector v)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_N.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_N[i] = v;
 }
@@ -841,7 +900,7 @@ ON_2fPoint BND_MeshTextureCoordinateList::GetTextureCoordinate(int i) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i<0 || i >= m_mesh->m_T.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   return m_mesh->m_T[i];
 }
@@ -850,7 +909,7 @@ void BND_MeshTextureCoordinateList::SetTextureCoordinate(int i, ON_2fPoint tc)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (i < 0 || i >= m_mesh->m_T.Count())
-    throw pybind11::index_error();
+    throw py::index_error();
 #endif
   m_mesh->m_T[i] = tc;
 }
@@ -880,11 +939,15 @@ BND_TUPLE BND_CachedTextureCoordinates::TryGetAt(int index) const
 
   success = m_ctc.m_dim > 0 ? true : false;
 
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(success, u, v, w);
+#else
   BND_TUPLE rc = CreateTuple(4);
   SetTuple<bool>(rc, 0, success);
   SetTuple<double>(rc, 1, u);
   SetTuple<double>(rc, 2, v);
   SetTuple<double>(rc, 3, w);
+#endif
   return rc;
 
 }
@@ -937,8 +1000,8 @@ void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class B
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initMeshBindings(pybind11::module& m)
+
+void initMeshBindings(rh3dmpymodule& m)
 {
   py::class_<BND_MeshingParameters>(m, "MeshingParameters")
     .def(py::init<>())
@@ -1080,6 +1143,7 @@ void initMeshBindings(pybind11::module& m)
     .def_property_readonly("PartitionCount", &BND_Mesh::PartitionCount)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

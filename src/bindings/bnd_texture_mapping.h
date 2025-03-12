@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initTextureMappingBindings(pybind11::module& m);
+void initTextureMappingBindings(rh3dmpymodule& m);
 #else
 void initTextureMappingBindings(void* m);
 #endif

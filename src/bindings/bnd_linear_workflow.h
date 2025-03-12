@@ -1,10 +1,9 @@
+#include "bindings.h"
 
 #pragma once
 
-#include "bindings.h"
-
 #if defined(ON_PYTHON_COMPILE)
-void initLinearWorkflowBindings(pybind11::module& m);
+void initLinearWorkflowBindings(rh3dmpymodule& m);
 #else
 void initLinearWorkflowBindings(void* m);
 #endif

@@ -20,8 +20,7 @@ BND_FileReference BND_FileReference::CreateFromFullAndRelativePaths(std::wstring
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initFileUtilitiesBindings(pybind11::module& m)
+void initFileUtilitiesBindings(rh3dmpymodule& m)
 {
   py::class_<BND_FileReference>(m, "FileReference")
     .def_static("CreateFromFullPath", &BND_FileReference::CreateFromFullPath, py::arg("path"))

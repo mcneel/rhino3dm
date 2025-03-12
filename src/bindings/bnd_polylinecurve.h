@@ -1,8 +1,9 @@
 #include "bindings.h"
 
 #pragma once
+
 #if defined(ON_PYTHON_COMPILE)
-void initPolylineCurveBindings(pybind11::module& m);
+void initPolylineCurveBindings(rh3dmpymodule& m);
 #else
 void initPolylineCurveBindings(void* m);
 #endif

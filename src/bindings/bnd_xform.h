@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-void initXformBindings(pybind11::module& m);
+void initXformBindings(rh3dmpymodule& m);
 #else
 void initXformBindings(void* m);
 #endif
@@ -79,6 +79,7 @@ public:
   BND_Transform Transpose() const;
   //public float[] ToFloatArray(bool rowDominant)
   BND_TUPLE ToFloatArray(bool rowDominant) const;
+  std::vector<float> ToFloatArray2(bool rowDominant) const;
 
   double GetM00() const { return m_xform.m_xform[0][0]; }
   double GetM01() const { return m_xform.m_xform[0][1]; }

@@ -403,24 +403,6 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes a change of basis transformation. A basis change is essentially a remapping 
-    /// of geometry from one coordinate system to another.
-    /// </summary>
-    /// <param name="plane0">Coordinate system in which the geometry is currently described.</param>
-    /// <param name="plane1">Target coordinate system in which we want the geometry to be described.</param>
-    /// <returns>
-    /// A transformation matrix which orients geometry from one coordinate system to another on success.
-    /// Transform.Unset on failure.
-    /// </returns>
-    /// <since>5.0</since>
-    public static Transform ChangeBasis(Plane plane0, Plane plane1)
-    {
-      Transform rc = Transform.Identity;
-      bool success = UnsafeNativeMethods.ON_Xform_PlaneToPlane(ref rc, ref plane0, ref plane1, false);
-      return success ? rc : Transform.Unset;
-    }
-
-    /// <summary>
     /// Create a rotation transformation that orients plane0 to plane1. If you want to orient objects from
     /// one plane to another, use this form of transformation.
     /// </summary>
@@ -436,26 +418,95 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Computes a change of basis transformation. A basis change is essentially a remapping 
-    /// of geometry from one coordinate system to another.
+    /// Gets a change of basis transformation.
+    /// The change of basis transformation is not the same as the rotation transformation that rotates one orthonormal frame to another.
+    /// If you have geometry defined with respect to planes, this method takes two planes and computes the transformation to change coordinates from one plane to another.
     /// </summary>
-    /// <param name="initialBasisX">can be any 3d basis.</param>
-    /// <param name="initialBasisY">can be any 3d basis.</param>
-    /// <param name="initialBasisZ">can be any 3d basis.</param>
-    /// <param name="finalBasisX">can be any 3d basis.</param>
-    /// <param name="finalBasisY">can be any 3d basis.</param>
-    /// <param name="finalBasisZ">can be any 3d basis.</param>
+    /// <param name="plane0">Coordinate system in which the geometry is currently described.</param>
+    /// <param name="plane1">Target coordinate system in which we want the geometry to be described.</param>
     /// <returns>
-    /// A transformation matrix which orients geometry from one coordinate system to another on success.
-    /// Transform.Unset on failure.
+    /// A change of basis transformation if success, <seealso cref="Transform.Unset"/> on failure.
     /// </returns>
+    /// <remarks>
+    /// Change of basis transformations and rotation transformations are often confused.
+    /// This is a change of basis transformation.
+    /// If Q = P0 + a0*X0 + b0*Y0 + c0*Z0 = P1 + a1*X1 + b1*Y1 + c1*Z1, then this transform will map the point (a0,b0,c0) to (a1,b1,c1).
+    /// </remarks>
     /// <since>5.0</since>
-    public static Transform ChangeBasis(Vector3d initialBasisX, Vector3d initialBasisY, Vector3d initialBasisZ,
-      Vector3d finalBasisX, Vector3d finalBasisY, Vector3d finalBasisZ)
+    public static Transform ChangeBasis(Plane plane0, Plane plane1)
     {
       Transform rc = Transform.Identity;
-      bool success = UnsafeNativeMethods.ON_Xform_ChangeBasis2(ref rc,
-        initialBasisX, initialBasisY, initialBasisZ, finalBasisX, finalBasisY, finalBasisZ);
+      bool success = UnsafeNativeMethods.ON_Xform_PlaneToPlane(ref rc, ref plane0, ref plane1, false);
+      return success ? rc : Transform.Unset;
+    }
+
+    /// <summary>
+    /// Gets a change of basis transformation.
+    /// The change of basis transformation is not the same as the rotation transformation that rotates one orthonormal frame to another.
+    /// </summary>
+    /// <param name="X0">Initial basis X (can be any 3d basis).</param>
+    /// <param name="Y0">Initial basis Y (can be any 3d basis).</param>
+    /// <param name="Z0">Initial basis Z (can be any 3d basis).</param>
+    /// <param name="X1">Final basis X (can be any 3d basis).</param>
+    /// <param name="Y1">Final basis Y (can be any 3d basis).</param>
+    /// <param name="Z1">Final basis Z (can be any 3d basis).</param>
+    /// <returns>
+    /// A change of basis transformation if success, <seealso cref="Transform.Unset"/> on failure.
+    /// </returns>
+    /// <remarks>
+    /// Change of basis transformations and rotation transformations are often confused.
+    /// This is a change of basis transformation.
+    /// If Q = a0*X0 + b0*Y0 + c0*Z0 = a1*X1 + b1*Y1 + c1*Z1, then this transform will map the point (a0,b0,c0) to (a1,b1,c1).
+    /// </remarks>
+    /// <since>5.0</since>
+    public static Transform ChangeBasis(
+      Vector3d X0, 
+      Vector3d Y0, 
+      Vector3d Z0,
+      Vector3d X1, 
+      Vector3d Y1, 
+      Vector3d Z1
+      )
+    {
+      Transform rc = Transform.Identity;
+      bool success = UnsafeNativeMethods.ON_Xform_ChangeBasis2(ref rc, X0, Y0, Z0, X1, Y1, Z1);
+      return success ? rc : Transform.Unset;
+    }
+
+    /// <summary>
+    /// Gets a change of basis transformation.
+    /// The change of basis transformation is not the same as the rotation transformation that rotates one orthonormal frame to another.
+    /// </summary>
+    /// <param name="P0">Initial center.</param>
+    /// <param name="X0">Initial basis X (can be any 3d basis).</param>
+    /// <param name="Y0">Initial basis Y (can be any 3d basis).</param>
+    /// <param name="Z0">Initial basis Z (can be any 3d basis).</param>
+    /// <param name="P1">Final center.</param>
+    /// <param name="X1">Final basis X (can be any 3d basis).</param>
+    /// <param name="Y1">Final basis Y (can be any 3d basis).</param>
+    /// <param name="Z1">Final basis Z (can be any 3d basis).</param>
+    /// <returns>
+    /// A change of basis transformation if success, <seealso cref="Transform.Unset"/> on failure.
+    /// </returns>
+    /// <remarks>
+    /// Change of basis transformations and rotation transformations are often confused.
+    /// This is a change of basis transformation.
+    /// If Q = P0 + a0*X0 + b0*Y0 + c0*Z0 = P1 + a1*X1 + b1*Y1 + c1*Z1, then this transform will map the point (a0,b0,c0) to (a1,b1,c1).
+    /// </remarks>
+    /// <since>8.17</since>
+    public static Transform ChangeBasis(
+      Point3d P0,
+      Vector3d X0,
+      Vector3d Y0,
+      Vector3d Z0,
+      Point3d P1,
+      Vector3d X1,
+      Vector3d Y1,
+      Vector3d Z1
+    )
+    {
+      Transform rc = Transform.Identity;
+      bool success = UnsafeNativeMethods.ON_Xform_ChangeBasis3(ref rc, P0, X0, Y0, Z0, P1, X1, Y1, Z1);
       return success ? rc : Transform.Unset;
     }
 

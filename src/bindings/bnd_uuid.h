@@ -3,7 +3,7 @@
 #pragma once
 
 #if defined(ON_PYTHON_COMPILE)
-typedef pybind11::object BND_UUID;
+typedef py::object BND_UUID;
 #else
 typedef std::string BND_UUID;
 #endif

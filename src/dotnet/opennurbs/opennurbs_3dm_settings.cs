@@ -4,11 +4,73 @@ using System.IO;
 using Rhino.Geometry;
 using Rhino.Render.PostEffects;
 using Rhino.Runtime.InteropWrappers;
+using System.Collections.Generic;
 
 // Most of these should not need to be wrapped. Some of their
 // functionality is merged into other wrapper classes
 namespace Rhino.DocObjects
 {
+  /// <summary>
+  /// Default grid settings for a document
+  /// </summary>
+  public class ConstructionPlaneGridDefaults
+  {
+    internal static ConstructionPlaneGridDefaults FromConstPointer(IntPtr ptrConstructionPlaneDefaults)
+    {
+      ConstructionPlaneGridDefaults defaults = new ConstructionPlaneGridDefaults();
+      double gridSpacing = defaults.GridSpacing;
+      double snapSpacing = defaults.SnapSpacing;
+      int gridLineCount = defaults.GridLineCount;
+      int gridThickFrequency = defaults.GridThickFrequency;
+      bool showGrid = defaults.ShowGrid;
+      bool showGridAxes = defaults.ShowGridAxes;
+      bool showWorldAxes = defaults.ShowWorldAxes;
+      UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_Get(ptrConstructionPlaneDefaults, ref gridSpacing, ref snapSpacing, ref gridLineCount,
+        ref gridThickFrequency, ref showGrid, ref showGridAxes, ref showWorldAxes);
+      defaults.GridSpacing = gridSpacing;
+      defaults.SnapSpacing = snapSpacing;
+      defaults.GridLineCount = gridLineCount;
+      defaults.GridThickFrequency = gridThickFrequency;
+      defaults.ShowGrid = showGrid;
+      defaults.ShowGridAxes = showGridAxes;
+      defaults.ShowWorldAxes = showWorldAxes;
+      return defaults;
+    }
+
+    internal void SetupNativePointer(IntPtr ptrConstructionPlaneDefaults)
+    {
+      UnsafeNativeMethods.ON_3dmConstructionPlaneGridDefaults_Set(ptrConstructionPlaneDefaults, GridSpacing, SnapSpacing, GridLineCount,
+        GridThickFrequency, ShowGrid, ShowGridAxes, ShowWorldAxes);
+    }
+
+    /// <summary>Distance between grid lines</summary>
+    public double GridSpacing { get; set; } = 1.0;
+
+    /// <summary>
+    /// When grid snap is enabled, the distance between snap points. Typically
+    /// this is the same distance as grid spacing
+    /// </summary>
+    public double SnapSpacing { get; set; } = 1.0;
+
+    /// <summary>Number of grid lines in each direction</summary>
+    public int GridLineCount { get; set; } = 70;
+
+    /// <summary>
+    /// This line frequency. 0: none, 1: all lines are thick, 2: every other is
+    /// thick, ...
+    /// </summary>
+    public int GridThickFrequency { get; set; } = 5;
+
+    /// <summary>Show the grid</summary>
+    public bool ShowGrid { get; set; } = true;
+
+    /// <summary>Show the grid axes</summary>
+    public bool ShowGridAxes { get; set; } = true;
+
+    /// <summary>Show the world axes icon in the corner</summary>
+    public bool ShowWorldAxes { get; set; } = true;
+  }
+
   // Can't add a cref to an XML comment here since the NamedConstructionPlaneTable
   // is not included in the OpenNURBS flavor build of RhinoCommon
 
@@ -307,6 +369,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Create a default ViewInfo instance
     /// </summary>
+    /// <since>8.2</since>
     public ViewInfo()
     {
       m_parent = null;
@@ -664,6 +727,60 @@ namespace Rhino.DocObjects
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_SetSectionBehavior(ptrThis, (int)value);
       }
+    }
+
+    /// <summary>
+    /// Returns a list of clipping plane Ids associated with this view.
+    /// </summary>
+    public Guid[] ClippingPlanesIds
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+
+        var ptrArray = new SimpleArrayIntPtr();
+
+        UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer() );
+
+        var outList = new List<Guid>();
+
+        foreach (var ptr in ptrArray.ToArray())
+        {
+          outList.Add(UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlaneId(ptr));
+        }
+
+        return outList.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Returns a list of ClippingPlaneSurfaces for this view.
+    /// </summary>
+    /// <returns></returns>
+    public ClippingPlaneSurface[] ClippingPlaneSurfaces()
+    {
+      IntPtr constPtrThis = ConstPointer();
+
+      var ptrArray = new SimpleArrayIntPtr();
+
+      UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer());
+
+      var outList = new List<ClippingPlaneSurface>();
+
+      foreach (var ptr in ptrArray.ToArray())
+      {
+        var plane = new Geometry.Plane();
+        UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlane(ptr, ref plane);
+
+        var cps = new ClippingPlaneSurface(plane);
+
+        cps.PlaneDepth = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepth(ptr);
+        cps.PlaneDepthEnabled = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepthEnabled(ptr);
+
+        outList.Add(cps);
+      }
+
+      return outList.ToArray();
     }
 
     ViewportInfo m_viewport;
@@ -1155,6 +1272,7 @@ namespace Rhino.DocObjects
   /// <para>This is used in conjunction with the <see cref="EarthAnchorPoint"/> class.</para>
   /// </summary>
   /// <since>5.0</since>
+  /// <deprecated>8.6</deprecated>
   [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Please use EarthCoordinateSystem")]
   public enum BasepointZero
   {

@@ -30,9 +30,13 @@ void BND_Linetype::SetTrackedPointer(ON_Linetype* linetype, const ON_ModelCompon
 BND_TUPLE BND_Linetype::GetSegment(int index) const
 {
   ON_LinetypeSegment segment = m_linetype->Segment(index);
+#if defined(ON_PYTHON_COMPILE) && defined(NANOBIND)
+  BND_TUPLE rc = py::make_tuple(segment.m_length, segment.m_seg_type == ON_LinetypeSegment::eSegType::stLine);
+#else
   BND_TUPLE rc = CreateTuple(2);
   SetTuple(rc, 0, segment.m_length);
   SetTuple(rc, 1, segment.m_seg_type == ON_LinetypeSegment::eSegType::stLine);
+#endif
   return rc;
 }
 
@@ -52,9 +56,8 @@ int BND_Linetype::AppendSegment(double length, bool isSolid)
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
 
-void initLinetypeBindings(pybind11::module& m)
+void initLinetypeBindings(rh3dmpymodule& m)
 {
   py::class_<BND_Linetype, BND_ModelComponent>(m, "Linetype")
     .def(py::init<>())
@@ -78,6 +81,7 @@ void initLinetypeBindings(pybind11::module& m)
     .def_property_readonly_static("Hidden", &BND_Linetype::Hidden)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

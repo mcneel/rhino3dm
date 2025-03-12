@@ -347,6 +347,7 @@ namespace Rhino.DocObjects.Tables
     /// Returns the current selection in the Named Views panel. If more than one such panel is open,
     /// it will return the selection in the most recently opened panel.
     /// </summary>
+    /// <since>8.5</since>
     public string[] Selection
     {
       get
@@ -896,6 +897,9 @@ namespace Rhino.DocObjects.Tables
     }
   }
 
+  /// <summary>
+  /// Layer State restoration flags
+  /// </summary>
   /// <since>6.14</since>
   [Flags, CLSCompliant(false)]
   public enum RestoreLayerProperties : uint
@@ -903,66 +907,87 @@ namespace Rhino.DocObjects.Tables
     /// <summary>
     /// Restore nothing
     /// </summary>
+    /// <since>6.14</since>
     None = 0x0,
     /// <summary>
     /// Restore current layer
     /// </summary>
+    /// <since>6.14</since>
     Current = 0x1,
     /// <summary>
     /// Restore layer visibility
     /// </summary>
+    /// <since>6.14</since>
     Visible = 0x2,
     /// <summary>
     /// Restore layer locked status
     /// </summary>
+    /// <since>6.14</since>
     Locked = 0x4,
     /// <summary>
     /// Restore layer color
     /// </summary>
+    /// <since>6.14</since>
     Color = 0x8,
     /// <summary>
     /// Restore layer linetype
     /// </summary>
+    /// <since>6.14</since>
     Linetype = 0x10,
     /// <summary>
     /// Restore layer print color
     /// </summary>
+    /// <since>6.14</since>
     PrintColor = 0x20,
     /// <summary>
     /// Restore layer print width
     /// </summary>
+    /// <since>6.14</since>
     PrintWidth = 0x40,
     /// <summary>
     /// Restore per-viewport layer visibility
     /// </summary>
+    /// <since>6.14</since>
     ViewportVisible = 0x80,
     /// <summary>
     /// Restore per-viewport layer color
     /// </summary>
+    /// <since>6.14</since>
     ViewportColor = 0x100,
     /// <summary>
     /// Restore per-viewport layer print color
     /// </summary>
+    /// <since>6.14</since>
     ViewportPrintColor = 0x200,
     /// <summary>
     /// Restore per-viewport layer print width
     /// </summary>
+    /// <since>6.14</since>
     ViewportPrintWidth = 0x400,
     /// <summary>
     /// Restore render material
     /// </summary>
+    /// <since>6.14</since>
     RenderMaterial = 0x800,
     /// <summary>
     /// Section style
     /// </summary>
+    /// <since>8.0</since>
     SectionStyle = 0x1000,
     /// <summary>
     /// New Detail On
     /// </summary>
+    /// <since>8.0</since>
     NewDetailOn = 0x2000,
+    /// <summary>
+    /// Expanded/Collapsed state
+    /// </summary>
+    /// <since>8.12</since>
+    Expanded = 0x4000,
     /// <summary>
     /// Restore all layer properties
     /// </summary>
+    /// <since>6.14</since>
     All = 0xFFFFFFFF
   }
 

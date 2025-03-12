@@ -31,7 +31,7 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::Read(const std::wstring& f) //
 
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile::WasmFromByteArray(std::string sbuffer)
 {
-  int length = sbuffer.length();
+  size_t length = sbuffer.length();
   const void* buffer = sbuffer.c_str();
 
   ON_Buffer b;
@@ -111,8 +111,8 @@ BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFileTable::FindId(BND_UUID id)
 //////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initEmbeddedFileBindings(pybind11::module& m)
+
+void initEmbeddedFileBindings(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmEmbeddedFile>(m, "EmbeddedFile")
     .def(py::init<>())
@@ -124,6 +124,7 @@ void initEmbeddedFileBindings(pybind11::module& m)
     .def("Clear", &BND_File3dmEmbeddedFile::Clear)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

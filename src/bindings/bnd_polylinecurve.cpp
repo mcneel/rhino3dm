@@ -62,8 +62,8 @@ BND_Polyline* BND_PolylineCurve::ToPolyline() const
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initPolylineCurveBindings(pybind11::module& m)
+
+void initPolylineCurveBindings(rh3dmpymodule& m)
 {
   py::class_<BND_PolylineCurve, BND_Curve>(m, "PolylineCurve")
     .def(py::init<>())
@@ -75,6 +75,7 @@ void initPolylineCurveBindings(pybind11::module& m)
     .def("ToPolyline", &BND_PolylineCurve::ToPolyline)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

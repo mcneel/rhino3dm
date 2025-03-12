@@ -11,7 +11,7 @@ ON_4dPoint BND_NurbsCurvePointList::GetControlPoint(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   ON_4dPoint pt;
   m_nurbs_curve->GetCV(index, pt);
@@ -22,7 +22,7 @@ void BND_NurbsCurvePointList::SetControlPoint(int index, ON_4dPoint point)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_nurbs_curve->SetCV(index, point);
 }
@@ -40,7 +40,7 @@ double BND_NurbsCurveKnotList::GetKnot(int index) const
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   return m_nurbs_curve->Knot(index);
 }
@@ -49,7 +49,7 @@ void BND_NurbsCurveKnotList::SetKnot(int index, double k)
 {
 #if defined(ON_PYTHON_COMPILE)
   if (index >= Count() || index < 0)
-    throw pybind11::index_error("list index out of range");
+    throw py::index_error("list index out of range");
 #endif
   m_nurbs_curve->SetKnot(index, k);
 }
@@ -67,11 +67,19 @@ BND_TUPLE BND_NurbsCurveKnotList::ToList()
 
   return NullTuple();
 
-/*
-  return std::vector<double>(
+}
+
+std::vector<double> BND_NurbsCurveKnotList::ToList2()
+{
+  int count = m_nurbs_curve->KnotCount();
+  if( count > 0) 
+  {
+    return std::vector<double>(
       m_nurbs_curve->m_knot,
       m_nurbs_curve->m_knot + m_nurbs_curve->KnotCount());
-      */
+  }
+
+  return std::vector<double>();
 }
 
 BND_NurbsCurve::BND_NurbsCurve(ON_NurbsCurve* nurbscurve, const ON_ModelComponentReference* compref)
@@ -222,14 +230,20 @@ BND_BezierCurve* BND_NurbsCurve::ConvertSpanToBezier(int index) const
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initNurbsCurveBindings(pybind11::module& m)
+
+void initNurbsCurveBindings(rh3dmpymodule& m)
 {
+#if defined(NANOBIND) // temp workaround for buffer protocol
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList")
+#else
   py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsCurveKnotList::Count)
     .def("__getitem__", &BND_NurbsCurveKnotList::GetKnot)
     .def("__setitem__", &BND_NurbsCurveKnotList::SetKnot)
     .def("ToList", &BND_NurbsCurveKnotList::ToList)
+    .def("ToList2", &BND_NurbsCurveKnotList::ToList2)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurveKnotList& kl) -> py::buffer_info
       {
         return py::buffer_info
@@ -242,6 +256,7 @@ void initNurbsCurveBindings(pybind11::module& m)
           {sizeof(double)}                          /* Strides (in bytes) for each index */
         );
       })
+#endif
     .def("InsertKnot", &BND_NurbsCurveKnotList::InsertKnot, py::arg("value"), py::arg("multiplicity"))
     .def("KnotMultiplicity", &BND_NurbsCurveKnotList::KnotMultiplicity, py::arg("index"))
     .def("CreateUniformKnots", &BND_NurbsCurveKnotList::CreateUniformKnots, py::arg("knotSpacing"))
@@ -252,10 +267,15 @@ void initNurbsCurveBindings(pybind11::module& m)
     ;
   ;
 
+#if defined(NANOBIND) // temp workaround for buffer protocol
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList")
+#else
   py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
+#endif
     .def("__len__", &BND_NurbsCurvePointList::Count)
     .def("__getitem__", &BND_NurbsCurvePointList::GetControlPoint)
     .def("__setitem__", &BND_NurbsCurvePointList::SetControlPoint)
+#if !defined(NANOBIND)
     .def_buffer([](BND_NurbsCurvePointList& pl) -> py::buffer_info
     {
       return py::buffer_info
@@ -268,6 +288,8 @@ void initNurbsCurveBindings(pybind11::module& m)
         {pl.GetCurve()->m_cv_stride * sizeof(double), sizeof(double)}  /* Strides (in bytes) for each index */
       );
     })
+
+#endif
     .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::ControlPolygonLength)
     .def("ChangeEndWeights", &BND_NurbsCurvePointList::ChangeEndWeights, py::arg("w0"), py::arg("w1"))
     .def("MakeRational", &BND_NurbsCurvePointList::MakeRational)
@@ -296,6 +318,7 @@ void initNurbsCurveBindings(pybind11::module& m)
     .def_property_readonly("Knots", &BND_NurbsCurve::Knots)
     ;
 }
+
 #endif
 
 #if defined(ON_WASM_COMPILE)

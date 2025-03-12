@@ -50,8 +50,8 @@ void BND_ArcCurve::SetTrackedPointer(ON_ArcCurve* arccurve, const ON_ModelCompon
 
 
 #if defined(ON_PYTHON_COMPILE)
-namespace py = pybind11;
-void initArcCurveBindings(pybind11::module& m)
+
+void initArcCurveBindings(rh3dmpymodule& m)
 {
   py::class_<BND_ArcCurve, BND_Curve>(m, "ArcCurve")
     .def_static("CreateFromArc", &BND_ArcCurve::CreateFromArc, py::arg("arc"))
