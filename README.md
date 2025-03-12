@@ -53,7 +53,7 @@ rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3d
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://unpkg.com/rhino3dm@8.17.0-beta1/rhino3dm.module.min.js"
+            "rhino3dm":"https://unpkg.com/rhino3dm@8.17.0/rhino3dm.module.min.js"
           }
       }
   </script>
