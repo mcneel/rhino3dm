@@ -23,7 +23,7 @@ The easiest way to get started is to reference a specific version of the library
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.17.0-beta/rhino3dm.module.min.js"
+            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.17.0/rhino3dm.module.min.js"
           }
       }
   </script>
@@ -72,7 +72,7 @@ import App from "./App";
 const rootElement = document.getElementById("root");
 
 const script = document.createElement("script");
-script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@8.17.0-beta/rhino3dm.min.js";
+script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@8.17.0/rhino3dm.min.js";
 script.addEventListener("load", () => {
   ReactDOM.render(
     <StrictMode>
