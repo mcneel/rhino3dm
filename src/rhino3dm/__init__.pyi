@@ -232,6 +232,11 @@ class CoordinateSystem(Enum):
     Clip = 2
     Screen = 3
 
+class CurveOrientation(Enum):
+    Undefined = 0
+    Clockwise = -1
+    CounterClockwise = 1
+
 class Cylinder:
     @overload
     def __init__(self, baseCircle: Circle) -> None: ...
