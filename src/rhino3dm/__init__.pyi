@@ -1,4 +1,5 @@
-from typing import Any, Tuple, Iterable, List, overload
+from enum import Enum
+from typing import Any, Iterable, List, overload, Union
 from uuid import UUID
 
 class Arc:
@@ -179,6 +180,38 @@ class ComponentIndex:
     @property
     def Index(self) -> int: ...
 
+class ComponentIndexType(Enum):
+    InvalidType = 0
+    BrepVertex = 1
+    BrepEdge = 2
+    BrepFace = 3
+    BrepTrim = 4
+    BrepLoop = 5
+    MeshVertex = 11
+    MeshTopologyVertex = 12
+    MeshTopologyEdge =13
+    MeshFace = 14
+    MeshNgon = 15
+    InstanceDefinitionPart = 21
+    PolycurveSegment = 31
+    PointCloudPoint = 41
+    GroupMember = 51
+    ExtrusionBottomProfile = 61
+    ExtrusionTopProfile = 62
+    ExtrusionWallEdge = 63
+    ExtrusionWallSurface = 64
+    ExtrusionCapSurface = 65
+    ExtrusionPath = 66
+    SubdVertex = 71
+    SubdEdge = 72
+    SubdFace = 73
+    DimLinearPoint = 100
+    DimRadialPoint = 101
+    DimAngularPoint = 102
+    DimOrdinatePoint = 103
+    DimTextPoint = 104
+    NoType = 0xFFFFFFFF
+
 class Cone:
     @property
     def Height(self) -> float: ...
@@ -210,6 +243,17 @@ class ConstructionPlane:
     def DepthBuffered(self) -> bool: ...
     @property
     def Name(self) -> str: ...
+
+class CoordinateSystem(Enum):
+    World = 0
+    Camera = 1
+    Clip = 2
+    Screen = 3
+
+class CurveOrientation(Enum):
+    Undefined = 0
+    Clockwise = -1
+    CounterClockwise = 1
 
 class Cylinder:
     @overload
@@ -324,7 +368,7 @@ class File3dmInstanceDefinitionTable:
     def Add(self, name: str, description: str, url: str, urlTag: str, basePoint: Point3d, geometry: Iterable[GeometryBase], attributes: Iterable[ObjectAttributes]) -> int: ...
 
 class File3dmLayerTable:
-    def AddLayer(self, name: str, color: Tuple[int, int, int, int]) -> int: ...
+    def AddLayer(self, name: str, color: tuple[int, int, int, int]) -> int: ...
     def FindName(self, name: str, parentId: UUID) -> Layer: ...
     def FindIndex(self, index: int) -> Layer: ...
 
@@ -354,8 +398,11 @@ class File3dmObjectTable:
     @overload
     def AddLine(self, _from: Point3d, to: Point3d) -> UUID: ...
     @overload
-    def AddLine(self, _from: Point3d, to: Point3d, attributes: ObjectAttributes) -> Guid: ...
-    def AddPolyline(self, points: Iterable[Point3d]) -> UUID: ...
+    def AddLine(self, _from: Point3d, to: Point3d, attributes: ObjectAttributes) -> UUID: ...
+    @overload
+    def AddPolyline(self, points: Iterable[Point3d], attributes: Union[ObjectAttributes, None] = None) -> UUID: ...
+    @overload
+    def AddPolyline(self, points: Point3dList, attributes: Union[ObjectAttributes, None] = None) -> UUID: ...
     def AddArc(self, arc: Arc) -> UUID: ...
     def AddCircle(self, circle: Circle) -> UUID: ...
     def AddEllipse(self, ellipse: Ellipse) -> UUID: ...
@@ -570,6 +617,13 @@ class MeshNormalList: ...
 
 class MeshTextureCoordinateList: ...
 
+class MeshType(Enum):
+    Default = 0
+    Render = 1
+    Analysis = 2
+    Preview = 3
+    Any = 4
+
 class MeshTopologyEdgeList:
     def EdgeLine(self, topologyEdgeIndex: int) -> Line: ...
 
@@ -626,6 +680,76 @@ class NurbsSurfacePointList:
     @property
     def CountV(self) -> int: ...
 
+class ObjectColorSource(Enum):
+    ColorFromLayer = 0
+    ColorFromObject = 1
+    ColorFromMaterial = 2
+    ColorFromParent = 3
+
+class ObjectDecoration(Enum):
+    NoObjectDecoration = 0
+    StartArrowhead = 0x08
+    EndArrowhead = 0x10
+    BothArrowhead = 0x18
+
+class ObjectLinetypeSource(Enum):
+    LinetypeFromLayer = 0
+    LinetypeFromObject = 1
+    LinetypeFromParent = 2
+
+class ObjectMaterialSource(Enum):
+    MaterialFromLayer = 0
+    MaterialFromObject = 1
+    MaterialFromParent = 3
+
+class ObjectMode(Enum):
+    Normal = 0
+    Hidden = 1
+    Locked = 2
+    InstanceDefinitionObject = 3
+
+class ObjectPlotColorSource(Enum):
+    PlotColorFromLayer = 0
+    PlotColorFromObject = 1
+    PlotColorFromDisplay = 2
+    PlotColorFromParent = 3
+
+class ObjectPlotWeightSource(Enum):
+    PlotWeightFromLayer = 0
+    PlotWeightFromObject = 1
+    PlotWeightFromParent = 3
+
+class ObjectType(Enum):
+    UnKnownType = 0
+    Point = 1
+    PointSet = 2
+    Curve = 4
+    Surface = 8
+    Brep = 0x10
+    Mesh = 0x20
+    Light = 0x100
+    Annotation = 0x200
+    InstanceDefinition = 0x800
+    InstanceReference = 0x1000
+    TextDot = 0x2000
+    Grip = 0x4000
+    Detail = 0x8000
+    Hatch = 0x10000
+    MorphControl = 0x20000
+    SubD = 0x40000
+    BrepLoop = 0x80000
+    PolysrfFilter = 0x200000
+    EdgeFilter = 0x400000
+    PolyedgeFilter = 0x800000
+    MeshVertex = 0x01000000
+    MeshEdge = 0x02000000
+    MeshFace = 0x04000000
+    Cage = 0x08000000
+    Phantom = 0x10000000
+    ClipPlane = 0x20000000
+    Extrusion = 0x40000000
+    AnyObject = 0xFFFFFFFF
+
 class PhysicallyBasedMaterial:
     @property
     def Subsurface(self) -> float: ...
@@ -680,6 +804,17 @@ class Plane:
     @property
     def ZAxis(self) -> Vector3d: ...
 
+class PlaneSphereIntersection(Enum):
+    NoIntersection = 0
+    Point = 1
+    Circle = 2
+
+class SphereSphereIntersection(Enum):
+    NoIntersection = 0
+    Point = 1
+    Circle = 2
+    Overlap = 3
+
 class Point2d:
     def __init__(self, x: float, y: float) -> None: ...
     @property
@@ -709,14 +844,57 @@ class Point3d:
     def Transform(self, xform: Transform) -> None: ...
 
 class Point3dList:
-    def __init__(self, initialCapacity: int) -> None: ...
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self, initial_capacity: int) -> None: ...
+
+    @overload
+    def __init__(self, points: list[Point3d]) -> None: ...
+
+    def __getitem__(self, index: int) -> Point3d: ...
+
+    def __len__(self) -> int: ...
+
+    def __setitem__(self, index: int, point: Point3d) -> None: ...
+
     @property
     def BoundingBox(self) -> BoundingBox: ...
+
+    @property
+    def Capacity(self) -> int: ...
+
+    @Capacity.setter
+    def Capacity(self, new_capacity: int) -> None: ...
+
+    @property
+    def Count(self) -> int: ...
+
+    @Count.setter
+    def Count(self, new_count: int) -> None: ...
+
     def Add(self, x: float, y: float, z: float) -> None: ...
-    def Transform(self, xform: Transform) -> None: ...
+
+    @overload
+    def Append(self, points: Point3dList) -> None: ...
+
+    @overload
+    def Append(self, points: list[Point3d]) -> None: ...
+
+    def Clear(self) -> None: ...
+
+    def Insert(self, index: int, point: Point3d) -> None: ...
+
+    def RemoveAt(self, index: int) -> None: ...
+
     def SetAllX(self, xValue: float) -> None: ...
+
     def SetAllY(self, yValue: float) -> None: ...
+
     def SetAllZ(self, zValue: float) -> None: ...
+
+    def Transform(self, xform: Transform) -> None: ...
 
 class Point3f:
     def __init__(self, x: float, y: float, z: float) -> None: ...
@@ -750,7 +928,7 @@ class PointCloudItem:
     @property
     def Normal(self) -> Vector3d: ...
     @property
-    def Color(self) -> Tuple[int, int, int, int]: ...
+    def Color(self) -> tuple[int, int, int, int]: ...
     @property
     def Hidden(self) -> bool: ...
     @property
@@ -782,6 +960,35 @@ class Sphere:
 class Texture:
     @property
     def FileName(self) -> str: ...
+
+class TextureType(Enum):
+    NoTextureType = 0
+    Bitmap = 1
+    Diffuse = 1
+    Bump = 2
+    Transparency = 3
+    Opacity = 3
+    Emap = 86
+    PBR_BaseColor = 1
+    PBR_Subsurface = 10
+    PBR_SubsurfaceScattering = 11
+    PBR_SubsurfaceScatteringRadius = 12
+    PBR_Metallic = 13
+    PBR_Specular = 14
+    PBR_SpecularTint = 15
+    PBR_Roughness = 16
+    PBR_Anisotropic = 17
+    PBR_Anisotropic_Rotation = 18
+    PBR_Sheen = 19
+    PBR_SheenTint = 20
+    PBR_Clearcoat = 21
+    PBR_ClearcoatRoughness = 22
+    PBR_OpacityIor = 23
+    PBR_OpacityRoughness = 24
+    PBR_Emission = 25
+    PBR_AmbientOcclusion = 26
+    PBR_Displacement = 28
+    PBR_ClearcoatBump = 29
 
 class Transform:
     def __init__(self, diagonalValue: float) -> None: ...
@@ -819,6 +1026,35 @@ class Transform:
     def TransformBoundingBox(self, bbox: BoundingBox) -> BoundingBox: ...
     def Transpose(self) -> Transform: ...
     def ToFloatArray(self, rowDominant: bool) -> List[float]: ...
+
+class UnitSystem(Enum):
+    NoUnits = 0
+    Angstroms = 12
+    Nanometers = 13
+    Microns = 1
+    Millimeters = 2
+    Centimeters = 3
+    Decimeters = 14
+    Meters = 4
+    Dekameters = 15
+    Hectometers = 16
+    Kilometers = 5
+    Megameters = 17
+    Gigameters = 18
+    Microinches = 6
+    Mils = 7
+    Inches = 8
+    Feet = 9
+    Yards = 19
+    Miles = 10
+    PrinterPoints = 20
+    PrinterPicas = 21
+    NauticalMiles = 22
+    AstronomicalUnits = 23
+    LightYears = 24
+    Parsecs = 25
+    CustomUnits = 11
+    Unset = 255
 
 class Vector2d:
     def __init__(self, x: float, y: float) -> None: ...
@@ -952,28 +1188,42 @@ class InstanceDefinition(CommonObject): ...
 class Layer(CommonObject):
     @property
     def Name(self) -> str: ...
+    @Name.setter
+    def Name(self, name: str) -> None: ...
     @property
     def FullPath(self) -> str: ...
     @property
     def Id(self) -> UUID: ...
+    @Id.setter
+    def Id(self, new_id: UUID) -> None: ...
     @property
     def ParentLayerId(self) -> UUID: ...
+    @ParentLayerId.setter
+    def ParentLayerId(self, new_parent_layer_id: UUID) -> None: ...
     @property
     def IgesLevel(self) -> int: ...
+    @IgesLevel.setter
+    def IgesLevel(self, new_level: int) -> None: ...
     @property
-    def Color(self) -> Tuple[int, int, int, int]: ...
+    def Color(self) -> tuple[int, int, int, int]: ...
+    @Color.setter
+    def Color(self, color: tuple[int, int, int, int]) -> None: ...
     @property
-    def PlotColor(self) -> Tuple[int, int, int, int]: ...
+    def PlotColor(self) -> tuple[int, int, int, int]: ...
+    @PlotColor.setter
+    def PlotColor(self, new_plot_color: tuple[int, int, int, int]) -> None: ...
     @property
     def PlotWeight(self) -> float: ...
+    @PlotWeight.setter
+    def PlotWeight(self, new_plot_weight: float) -> None: ...
     @property
     def LinetypeIndex(self) -> int: ...
     @property
     def RenderMaterialIndex(self) -> int: ...
     def HasPerViewportSettings(self, viewportId: UUID) -> bool: ...
     def DeletePerViewportSettings(self, viewportId: UUID) -> None: ...
-    def PerViewportColor(self, viewportId: UUID) -> Tuple[int, int, int, int]: ...
-    def SetPerViewportColor(self, viewportId: UUID, color: Tuple[int, int, int, int]) -> None: ...
+    def PerViewportColor(self, viewportId: UUID) -> tuple[int, int, int, int]: ...
+    def SetPerViewportColor(self, viewportId: UUID, color: tuple[int, int, int, int]) -> None: ...
     def DeletePerViewportColor(self, viewportId: UUID) -> None: ...
     def GetPersistentVisibility(self) -> bool: ...
     def SetPersistentVisibility(self, persistentVisibility: bool) -> None: ...
@@ -989,6 +1239,8 @@ class ModelComponent(CommonObject):
 class ObjectAttributes(CommonObject):
     @property
     def Mode(self) -> ObjectMode: ...
+    @Mode.setter
+    def Mode(self, mode: ObjectMode) -> None: ...
     @property
     def IsInstanceDefinitionObject(self) -> bool: ...
     @property
@@ -999,12 +1251,20 @@ class ObjectAttributes(CommonObject):
     def ReceivesShadows(self) -> bool: ...
     @property
     def LinetypeSource(self) -> ObjectLinetypeSource: ...
+    @LinetypeSource.setter
+    def LinetypeSource(self, line_type_source: ObjectLinetypeSource) -> None: ...
     @property
     def ColorSource(self) -> ObjectColorSource: ...
+    @ColorSource.setter
+    def ColorSource(self, color_source: ObjectColorSource) -> None: ...
     @property
     def PlotColorSource(self) -> ObjectPlotColorSource: ...
+    @PlotColorSource.setter
+    def PlotColorSource(self, plot_color_source: ObjectPlotColorSource) -> None: ...
     @property
     def PlotWeightSource(self) -> ObjectPlotWeightSource: ...
+    @PlotWeightSource.setter
+    def PlotWeightSource(self, plot_weigth_source: ObjectPlotWeightSource) -> None: ...
     @property
     def Name(self) -> str: ...
     @property
@@ -1017,16 +1277,20 @@ class ObjectAttributes(CommonObject):
     def MaterialIndex(self) -> int: ...
     @property
     def MaterialSource(self) -> ObjectMaterialSource: ...
+    @MaterialSource.setter
+    def MaterialSource(self, material_source: ObjectMaterialSource) -> None: ...
     @property
-    def ObjectColor(self) -> Tuple[int, int, int, int]: ...
+    def ObjectColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def PlotColor(self) -> Tuple[int, int, int, int]: ...
+    def PlotColor(self) -> tuple[int, int, int, int]: ...
     @property
     def DisplayOrder(self) -> int: ...
     @property
     def PlotWeight(self) -> float: ...
     @property
     def ObjectDecoration(self) -> ObjectDecoration: ...
+    @ObjectDecoration.setter
+    def ObjectDecoration(self, object_decoration: ObjectDecoration) -> None: ...
     @property
     def WireDensity(self) -> int: ...
     @property
@@ -1042,11 +1306,11 @@ class ObjectAttributes(CommonObject):
 
 class RenderSettings(CommonObject):
     @property
-    def AmbientLight(self) -> Tuple[int, int, int, int]: ...
+    def AmbientLight(self) -> tuple[int, int, int, int]: ...
     @property
-    def BackgroundColorTop(self) -> Tuple[int, int, int, int]: ...
+    def BackgroundColorTop(self) -> tuple[int, int, int, int]: ...
     @property
-    def BackgroundColorBottom(self) -> Tuple[int, int, int, int]: ...
+    def BackgroundColorBottom(self) -> tuple[int, int, int, int]: ...
     @property
     def UseHiddenLights(self) -> bool: ...
     @property
@@ -1280,11 +1544,11 @@ class Light(GeometryBase):
     @property
     def PowerCandela(self) -> float: ...
     @property
-    def Ambient(self) -> Tuple[int, int, int, int]: ...
+    def Ambient(self) -> tuple[int, int, int, int]: ...
     @property
-    def Diffuse(self) -> Tuple[int, int, int, int]: ...
+    def Diffuse(self) -> tuple[int, int, int, int]: ...
     @property
-    def Specular(self) -> Tuple[int, int, int, int]: ...
+    def Specular(self) -> tuple[int, int, int, int]: ...
     @property
     def AttenuationVector(self) -> Vector3d: ...
     @property
@@ -1665,19 +1929,19 @@ class Material(ModelComponent):
     @property
     def Reflectivity(self) -> float: ...
     @property
-    def PreviewColor(self) -> Tuple[int, int, int, int]: ...
+    def PreviewColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def DiffuseColor(self) -> Tuple[int, int, int, int]: ...
+    def DiffuseColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def AmbientColor(self) -> Tuple[int, int, int, int]: ...
+    def AmbientColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def EmissionColor(self) -> Tuple[int, int, int, int]: ...
+    def EmissionColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def SpecularColor(self) -> Tuple[int, int, int, int]: ...
+    def SpecularColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def ReflectionColor(self) -> Tuple[int, int, int, int]: ...
+    def ReflectionColor(self) -> tuple[int, int, int, int]: ...
     @property
-    def TransparentColor(self) -> Tuple[int, int, int, int]: ...
+    def TransparentColor(self) -> tuple[int, int, int, int]: ...
     @property
     def PhysicallyBased(self) -> PhysicallyBasedMaterial: ...
     def Default(self) -> None: ...
