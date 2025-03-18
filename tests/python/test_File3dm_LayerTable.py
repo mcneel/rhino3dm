@@ -1,3 +1,4 @@
+from uuid import UUID
 import rhino3dm
 import unittest
 import os
@@ -84,6 +85,84 @@ class TestFile3dmLayerTable(unittest.TestCase):
         file = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
         qtyLayers = len(file.Layers)
         self.assertTrue(qtyLayers == 6)
+
+    def test_FindId(self) -> None:
+        """Tests for the `FindId` method.
+        """
+        file3dm = rhino3dm.File3dm()
+
+        layer_0 = rhino3dm.Layer()
+        layer_0.Name = "my_new_layer"
+        layer_0.Id = UUID(int=0x1)
+        layer_0.Color = (10, 20, 30, 255)
+        file3dm.Layers.Add(layer_0)
+
+        retrieved_layer_0 = file3dm.Layers.FindId(UUID(int=0x1))
+
+        with self.subTest(msg="Successful FindId - check return type"):
+            self.assertIsInstance(retrieved_layer_0, rhino3dm.Layer)
+
+        with self.subTest(msg="Successful FindId - check layer name"):
+            self.assertEqual(retrieved_layer_0.Name, "my_new_layer")
+
+        with self.subTest(msg="Successful FindId - check layer color"):
+            self.assertEqual(retrieved_layer_0.Color, (10, 20, 30, 255))
+
+        failed_retrieve = file3dm.Layers.FindId(UUID(int=0x0))
+
+        with self.subTest(msg="Unsuccessful FindId - check return type"):
+            self.assertIsNone(failed_retrieve)
+
+    def test_FindIndex(self) -> None:
+        """Tests for the `FindIndex` method.
+        """
+        file3dm = rhino3dm.File3dm()
+
+        layer_0 = rhino3dm.Layer()
+        layer_0.Name = "my_new_layer"
+        layer_0.Color = (10, 20, 30, 255)
+        layer_0_index = file3dm.Layers.Add(layer_0)
+
+        retrieved_layer_0 = file3dm.Layers.FindIndex(layer_0_index)
+
+        with self.subTest(msg="Successful FindIndex - check return type"):
+            self.assertIsInstance(retrieved_layer_0, rhino3dm.Layer)
+
+        with self.subTest(msg="Successful FindIndex - check layer name"):
+            self.assertEqual(retrieved_layer_0.Name, "my_new_layer")
+
+        with self.subTest(msg="Successful FindIndex - check layer color"):
+            self.assertEqual(retrieved_layer_0.Color, (10, 20, 30, 255))
+
+        with self.assertRaises(IndexError, msg="Unsuccessful FindIndex - check raise IndexError"):
+            file3dm.Layers.FindIndex(1)
+
+    def test_FindName(self) -> None:
+        """Tests for the `FindName` method.
+        """
+        file3dm = rhino3dm.File3dm()
+
+        layer_0 = rhino3dm.Layer()
+        layer_0.Name = "my_new_layer"
+        layer_0.Color = (10, 20, 30, 255)
+        file3dm.Layers.Add(layer_0)
+
+        retrieved_layer_0 = file3dm.Layers.FindName("my_new_layer", UUID(int=0x0))
+
+        with self.subTest(msg="Successful FindName - check return type"):
+            self.assertIsInstance(retrieved_layer_0, rhino3dm.Layer)
+
+        with self.subTest(msg="Successful FindName - check layer name"):
+            self.assertEqual(retrieved_layer_0.Name, "my_new_layer")
+
+        with self.subTest(msg="Successful FindName - check layer color"):
+            self.assertEqual(retrieved_layer_0.Color, (10, 20, 30, 255))
+
+        failed_retrieve = file3dm.Layers.FindName("not_existing_layer", UUID(int=0x0))
+
+        with self.subTest(msg="Unsuccessful FindName - check return type"):
+            self.assertIsNone(failed_retrieve)
+
 
 if __name__ == '__main__':
     print("running tests")
