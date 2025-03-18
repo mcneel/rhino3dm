@@ -1036,12 +1036,14 @@ bool BND_File3dmLayerTable::Delete(BND_UUID id)
 BND_Layer* BND_File3dmLayerTable::FindName(std::wstring name, BND_UUID parentId)
 {
   ON_UUID id = Binding_to_ON_UUID(parentId);
-  ON_ModelComponentReference compref  = m_model->LayerFromName(id, name.c_str());
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
-  if (modellayer)
-    return new BND_Layer(modellayer, &compref, m_model);
-  return nullptr;
+  ON_ModelComponentReference cr = m_model->ComponentFromName(ON_ModelComponent::Type::Layer, id, name.c_str());
+
+  if (cr.IsEmpty()){
+    return nullptr;
+  }
+
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(cr.ModelComponent()));
+  return new BND_Layer(modellayer, &cr, m_model);
 }
 
 BND_Layer* BND_File3dmLayerTable::IterIndex(int index)
