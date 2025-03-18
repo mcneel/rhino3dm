@@ -1053,17 +1053,18 @@ BND_Layer* BND_File3dmLayerTable::IterIndex(int index)
 
 BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
 {
-  ON_ModelComponentReference compref = m_model->LayerFromIndex(index);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
-  if (modellayer)
-    return new BND_Layer(modellayer, &compref, m_model);
+  ON_ModelComponentReference cr = m_model->ComponentFromIndex(ON_ModelComponent::Type::Layer, index);
 
-#if defined(ON_PYTHON_COMPILE)
-  throw py::index_error();
-#else
-  return nullptr;
-#endif
+  if (cr.IsEmpty()){
+    #if defined(ON_PYTHON_COMPILE)
+      throw py::index_error();
+    #else
+      return nullptr;
+    #endif
+  }
+
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(cr.ModelComponent()));
+  return new BND_Layer(modellayer, &cr, m_model);
 }
 
 BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
