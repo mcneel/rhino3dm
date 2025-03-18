@@ -1,11 +1,10 @@
 from uuid import UUID
 import rhino3dm
 import unittest
-import os
 
 #objective: to test creating file with layers and reading a file with layers
 class TestFile3dmLayerTable(unittest.TestCase):
-    def test_createFileWithLayers(self):
+    def test_createFileWithLayers(self) -> None:
 
         file3dm = rhino3dm.File3dm()
         file3dm.ApplicationName = 'python'
@@ -33,7 +32,7 @@ class TestFile3dmLayerTable(unittest.TestCase):
         self.assertTrue(qtyLayers == 2 and qtyLayers2 == 2)
 
     #objective: to test creating file with layers and deleting a layer
-    def test_deleteLayer(self):
+    def test_deleteLayer(self) -> None:
         file3dm = rhino3dm.File3dm()
         file3dm.ApplicationName = 'python'
         file3dm.ApplicationDetails = 'rhino3dm-tests-deleteLayer'
@@ -81,7 +80,7 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         self.assertEqual(l0.Index, 0)
 
-    def test_ReadFileWithLayers(self):
+    def test_ReadFileWithLayers(self) -> None:
         file = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
         qtyLayers = len(file.Layers)
         self.assertTrue(qtyLayers == 6)
