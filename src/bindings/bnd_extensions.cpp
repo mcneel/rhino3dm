@@ -1070,12 +1070,14 @@ BND_Layer* BND_File3dmLayerTable::FindIndex(int index)
 BND_Layer* BND_File3dmLayerTable::FindId(BND_UUID id)
 {
   ON_UUID _id = Binding_to_ON_UUID(id);
-  ON_ModelComponentReference compref = m_model->LayerFromId(_id);
-  const ON_ModelComponent* model_component = compref.ModelComponent();
-  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(model_component));
-  if (modellayer)
-    return new BND_Layer(modellayer, &compref, m_model);
-  return nullptr;
+  ON_ModelComponentReference cr = m_model->ComponentFromId(ON_ModelComponent::Type::Layer, _id);
+
+  if (cr.IsEmpty()){
+    return nullptr;
+  }
+
+  ON_Layer* modellayer = const_cast<ON_Layer*>(ON_Layer::Cast(cr.ModelComponent()));
+  return new BND_Layer(modellayer, &cr, m_model);
 }
 
 void BND_File3dmGroupTable::Add(const BND_Group& group)
