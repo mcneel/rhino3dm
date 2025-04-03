@@ -65,8 +65,8 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
-        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug' if self.debug else 'Release'
         #cfg = 'Debug'
@@ -145,7 +145,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='8.17.0',
+    version='9.0.0-beta0',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     description='Python library based on OpenNURBS with a RhinoCommon style',
