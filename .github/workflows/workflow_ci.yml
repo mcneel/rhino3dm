@@ -55,6 +55,8 @@ jobs:
             script/**
             src/CMakeLists.txt
             src/librhino3dm_native/CMakeLists.txt
+            setup.py
+            package.json
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
