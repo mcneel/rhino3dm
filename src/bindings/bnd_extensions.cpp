@@ -1336,15 +1336,24 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
     {
 
 #if defined(ON_PYTHON_COMPILE)
-      BND_GeometryBase g = py::cast<BND_GeometryBase>(geometry[i]);
-      BND_3dmObjectAttributes oa = py::cast<BND_3dmObjectAttributes>(attributes[i]);
+      const BND_GeometryBase& g = geometry[i].cast<const BND_GeometryBase&>();
+      const ON_3dmObjectAttributes* pConstAtts = &ON_3dmObjectAttributes::DefaultAttributes;
+      if (i < count_a)
+      {
+        const BND_3dmObjectAttributes& oa = attributes[i].cast<const BND_3dmObjectAttributes&>();
+        pConstAtts = oa.m_attributes;
+      }
 #else
       BND_GeometryBase g = geometry[i].as<BND_GeometryBase>();
-      BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
+      const ON_3dmObjectAttributes* pConstAtts = &ON_3dmObjectAttributes::DefaultAttributes;
+      if (i < count_a)
+      {
+        BND_3dmObjectAttributes oa = attributes[i].as<BND_3dmObjectAttributes>();
+        pConstAtts = oa.m_attributes;
+      }
 #endif
 
       const ON_Geometry* pConstGeom = g.GeometryPointer();
-      const ON_3dmObjectAttributes* pConstAtts = i < count_a ? oa.m_attributes : &ON_3dmObjectAttributes::DefaultAttributes;
 
       if (pConstGeom && pConstAtts)
       {
@@ -1368,10 +1377,13 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
             pGeom->Transform(*pXform);
           }
 
-          //have to pass in BND_3dmObjectAttributes to Internal_ONX_Model_AddModelGeometry
-          BND_3dmObjectAttributes _atts;
-          _atts.m_attributes = &atts;
-          ON_UUID uuid = Internal_ONX_Model_AddModelGeometry(m_model.get(), pGeom, &_atts);
+          // Call AddModelGeometryComponent directly to avoid creating a temporary
+          // BND_3dmObjectAttributes which causes memory corruption (the default
+          // constructor wraps a non-geometry ON_Object via CreateManaged, producing
+          // a broken managed component). AddModelGeometryComponent copies both
+          // geometry and attributes internally.
+          ON_ModelComponentReference mcr = m_model->AddModelGeometryComponent(pGeom, &atts);
+          ON_UUID uuid = ON_ModelGeometryComponent::FromModelComponentRef(mcr, &ON_ModelGeometryComponent::Unset)->Id();
           if (ON_UuidIsNotNil(uuid))
             object_uuids.Append(uuid);
 
