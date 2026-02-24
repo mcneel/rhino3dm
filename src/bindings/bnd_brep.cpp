@@ -268,13 +268,151 @@ bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
     return rc;
 
   ON_Mesh* mesh = m->m_mesh;
-  
+
   rc = m_brepface->SetMesh( mt, mesh );
 
   return rc;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepTrim
 
+BND_BrepTrim::BND_BrepTrim(ON_BrepTrim* trim, const ON_ModelComponentReference& compref)
+{
+  m_trim = trim;
+  m_component_reference = compref;
+}
+
+int BND_BrepTrim::EdgeIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_ei;
+}
+
+bool BND_BrepTrim::IsReversed() const
+{
+  if (nullptr == m_trim)
+    return false;
+  return m_trim->m_bRev3d;
+}
+
+int BND_BrepTrim::StartVertexIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_vi[0];
+}
+
+int BND_BrepTrim::EndVertexIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_vi[1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepTrimList
+
+BND_BrepTrimList::BND_BrepTrimList(ON_BrepLoop* loop, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_loop = loop;
+}
+
+int BND_BrepTrimList::Count() const
+{
+  if (nullptr == m_loop)
+    return 0;
+  return m_loop->m_ti.Count();
+}
+
+BND_BrepTrim* BND_BrepTrimList::GetTrim(int i)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw py::index_error();
+#endif
+
+  if (nullptr == m_loop || i < 0 || i >= m_loop->m_ti.Count())
+    return nullptr;
+
+  int trim_index = m_loop->m_ti[i];
+  ON_BrepTrim* trim = m_loop->Brep()->Trim(trim_index);
+  if (nullptr == trim)
+    return nullptr;
+  return new BND_BrepTrim(trim, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepLoop
+
+BND_BrepLoop::BND_BrepLoop(ON_BrepLoop* loop, const ON_ModelComponentReference& compref)
+{
+  m_loop = loop;
+  m_component_reference = compref;
+}
+
+int BND_BrepLoop::Type() const
+{
+  if (nullptr == m_loop)
+    return -1;
+  return (int)m_loop->m_type;
+}
+
+int BND_BrepLoop::TrimCount() const
+{
+  if (nullptr == m_loop)
+    return 0;
+  return m_loop->m_ti.Count();
+}
+
+BND_BrepTrimList BND_BrepLoop::GetTrims()
+{
+  return BND_BrepTrimList(m_loop, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepLoopList
+
+BND_BrepLoopList::BND_BrepLoopList(ON_BrepFace* face, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_face = face;
+}
+
+int BND_BrepLoopList::Count() const
+{
+  if (nullptr == m_face)
+    return 0;
+  return m_face->m_li.Count();
+}
+
+BND_BrepLoop* BND_BrepLoopList::GetLoop(int i)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw py::index_error();
+#endif
+
+  if (nullptr == m_face || i < 0 || i >= m_face->m_li.Count())
+    return nullptr;
+
+  int loop_index = m_face->m_li[i];
+  ON_BrepLoop* loop = m_face->Brep()->Loop(loop_index);
+  if (nullptr == loop)
+    return nullptr;
+  return new BND_BrepLoop(loop, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+BND_BrepLoopList BND_BrepFace::GetLoops()
+{
+  return BND_BrepLoopList(m_brepface, m_component_ref);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 BND_BrepSurfaceList BND_Brep::GetSurfaces()
 {
@@ -285,7 +423,6 @@ BND_BrepEdgeList BND_Brep::GetEdges()
 {
   return BND_BrepEdgeList(m_brep, m_component_ref);
 }
-
 
 BND_BrepSurfaceList::BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentReference& compref)
 {
