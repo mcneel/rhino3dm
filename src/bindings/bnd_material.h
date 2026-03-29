@@ -81,6 +81,7 @@ public:
   class BND_Texture* GetTransparencyTexture() const;
   bool SetTransparencyTexture(std::wstring filename);
   bool SetTransparencyTexture2(const class BND_Texture& texture);
+  bool SetTexture(const class BND_Texture& texture);
 };
 
 class BND_PhysicallyBasedMaterial

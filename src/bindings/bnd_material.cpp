@@ -125,6 +125,13 @@ bool BND_Material::SetTransparencyTexture2(const BND_Texture& texture)
 }
 
 
+bool BND_Material::SetTexture(const BND_Texture& texture)
+{
+  ON_Texture tx(*texture.m_texture);
+  m_material->DeleteTexture(nullptr, tx.m_type);
+  return m_material->AddTexture(tx);
+}
+
 bool BND_PhysicallyBasedMaterial::Supported() const
 {
   return m_material->IsPhysicallyBased();
@@ -198,6 +205,7 @@ void initMaterialBindings(rh3dmpymodule& m)
     .def("SetTransparencyTexture", &BND_Material::SetTransparencyTexture2, py::arg("texture"))
     .def_property_readonly("PhysicallyBased", &BND_Material::PhysicallyBased)
     .def("ToPhysicallyBased", &BND_Material::ToPhysicallyBased)
+    .def("SetTexture", &BND_Material::SetTexture, py::arg("texture"))
     ;
 }
 
