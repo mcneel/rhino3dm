@@ -83,7 +83,12 @@ void SetTuple(BND_TUPLE& tuple, int index, const T& value)
   tuple[index] = value;
 #endif
 #else
-  tuple.set(index, value);
+  // embind (emscripten >= ~4.0) forbids implicitly marshaling registered-class
+  // raw pointers into a val. Route through the policy-aware val constructor so
+  // pointer values (incl. polymorphic wrappers) are wrapped exactly as a
+  // function return with allow_raw_pointers() would be. The policy is harmless
+  // for non-pointer values.
+  tuple.set(index, emscripten::val(value, emscripten::allow_raw_pointers()));
 #endif
 }
 
@@ -129,7 +134,7 @@ void Insert(BND_LIST& list, int index, const T& value)
 #if defined(ON_PYTHON_COMPILE)
   list.insert(index, value);
 #else
-  list.set(index, value);
+  list.set(index, emscripten::val(value, emscripten::allow_raw_pointers()));
 #endif
 }
 
@@ -140,7 +145,7 @@ void Append(BND_LIST& list, const T& value)
   list.append(value);
 #else
   int count = list["length"].as<int>();
-  list.set(count++, value);
+  list.set(count++, emscripten::val(value, emscripten::allow_raw_pointers()));
 #endif
 }
 

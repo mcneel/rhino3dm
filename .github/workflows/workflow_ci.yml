@@ -192,7 +192,7 @@ jobs:
     needs: [check_bindings, check_workflow, check_build_scripts, check_tests_js]
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_js.outputs.any_changed == 'true' }}
     container:
-      image: emscripten/emsdk:3.1.30
+      image: emscripten/emsdk:5.0.7
     steps:
       - name: info
         run: python3 --version && emcc --version && cmake --version
