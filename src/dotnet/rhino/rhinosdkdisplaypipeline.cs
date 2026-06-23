@@ -1,6 +1,7 @@
 #pragma warning disable 1591
 #if RHINO_SDK
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Rhino.DocObjects;
@@ -100,6 +101,7 @@ namespace Rhino.Display
       IntPtr ptrNativePen = UnsafeNativeMethods.CRhinoDisplayPen_FromLinetype(ptrLinetype, patternScale, color.ToArgb());
       var rc = FromNativeCRhinoDisplayPen(ptrNativePen);
       UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrNativePen);
+      GC.KeepAlive(linetype);
       return rc;
     }
 
@@ -1279,7 +1281,7 @@ namespace Rhino.Display
       {
         return new DisplayPipeline(cloned_pipeline);
       }
-
+      GC.KeepAlive(viewport);
       return null;
     }
 
@@ -1854,7 +1856,10 @@ namespace Rhino.Display
       if (viewportRight == null) throw new ArgumentNullException(nameof(viewportRight));
       IntPtr const_ptr_vp_left = viewportLeft.ConstPointer();
       IntPtr const_ptr_vp_right = viewportRight.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDisplayPipeline_DrawStereoFrameBuffer(m_ptr, const_ptr_vp_left, const_ptr_vp_right, ref handleLeft, ref handleRight);
+      bool rc = UnsafeNativeMethods.CRhinoDisplayPipeline_DrawStereoFrameBuffer(m_ptr, const_ptr_vp_left, const_ptr_vp_right, ref handleLeft, ref handleRight);
+      GC.KeepAlive(viewportLeft);
+      GC.KeepAlive(viewportRight);
+      return rc;
     }
 
     /// <summary>
@@ -2024,7 +2029,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="mesh">Mesh to draw.</param>
     /// <param name="material">Material to draw faces with.</param>
-    /// <param name="faceIndices">Indices of specific faces to draw</param>
+    /// <param name="faceIndices">Indices of specific faces to draw.</param>
     /// <since>5.0</since>
     public void DrawMeshShaded(Mesh mesh, DisplayMaterial material, int[] faceIndices)
     {
@@ -2037,6 +2042,18 @@ namespace Rhino.Display
       GC.KeepAlive(mesh);
       if (material != null)
         GC.KeepAlive(material);
+    }
+
+    /// <summary>
+    /// Draws the shaded faces of a given mesh.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="material">Material to draw faces with.</param>
+    /// <param name="faceIndices">An enumeration of the indices of specific faces to draw.</param>
+    /// <since>8.20</since>
+    public void DrawMeshShaded(Mesh mesh, DisplayMaterial material, IEnumerable<int> faceIndices)
+    {
+      DrawMeshShaded(mesh, material, faceIndices as int[] ?? faceIndices.ToArray());
     }
 
     /// <summary>
@@ -2067,6 +2084,7 @@ namespace Rhino.Display
       IntPtr subd_display = subd.SubDDisplay();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedSubD(m_ptr, const_ptr_subd, const_ptr_material, subd_display);
       GC.KeepAlive(subd);
+      GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -2095,6 +2113,7 @@ namespace Rhino.Display
     /// <param name="smoothInteriorPen">Pen to use for smooth interior wires. If null, no smooth interior wires will be drawn</param>
     /// <param name="creasePen">Pen to use for crease wires. If null, no crease wires will be drawn</param>
     /// <param name="nonmanifoldPen">Pen to use for non-manifold wires. If null, no non-manifold wires will be drawn</param>
+    /// <since>8.11</since>
     public void DrawSubDWires(SubD subd, DisplayPen boundaryPen, DisplayPen smoothInteriorPen, DisplayPen creasePen, DisplayPen nonmanifoldPen)
     {
       if (subd == null)
@@ -2128,6 +2147,7 @@ namespace Rhino.Display
       IntPtr cache = brep.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedBrep(m_ptr, const_ptr_brep, const_ptr_material, cache);
       GC.KeepAlive(brep);
+      GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -2407,6 +2427,7 @@ namespace Rhino.Display
       GC.KeepAlive(cloud);
     }
 
+    /// <since>8.17</since>
     public enum InferenceLineType : int
     {
       /// <summary>
@@ -2429,6 +2450,7 @@ namespace Rhino.Display
     /// <param name="O">Second point used to define the line in world coordinates</param>
     /// <param name="color">Color of line</param>
     /// <param name="type">Type of line <see cref="InferenceLineType"/></param>
+    /// <since>8.17</since>
     public void DrawInferenceLine(Point3d P, Point3d O, Color color, InferenceLineType type)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferenceLine(m_ptr, P, O, color.ToArgb(), (int)type);
@@ -2439,6 +2461,7 @@ namespace Rhino.Display
     /// </summary>
     /// <param name="P">Location of point in world coordinates</param>
     /// <param name="color">Color of the point</param>
+    /// <since>8.17</since>
     public void DraweInferencePoint(Point3d P, Color color)
     {
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInferencePoint(m_ptr, P, color.ToArgb());
@@ -2632,6 +2655,7 @@ namespace Rhino.Display
     /// <param name="lines">the lines to draw</param>
     /// <param name="color">Color to draw lines in</param>
     /// <param name="thickness">Thickness (in pixels) of lines</param>
+    /// <since>8.15</since>
     public void DrawLinesNoClip(System.Collections.Generic.IEnumerable<Line> lines, System.Drawing.Color color, int thickness)
     {
       int count;
@@ -3349,6 +3373,7 @@ namespace Rhino.Display
         IntPtr ptr_this = NonConstPointer();
         IntPtr ptr_const_light = light.ConstPointer();
         UnsafeNativeMethods.CRhinoDisplayPipeline_DrawLight(ptr_this, ptr_const_light, wireframeColor.ToArgb());
+        GC.KeepAlive(light);
       }
     }
 
@@ -3530,7 +3555,14 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_text = text.ConstPointer();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_ON_V6_TextObject(ptr_this, const_ptr_text, scale, color.ToArgb());
+      DimensionStyle parentDimStyle = text.ParentDimensionStyle;
+      IntPtr const_ptr_dimstyle = IntPtr.Zero;
+      if (parentDimStyle != null)
+      {
+        const_ptr_dimstyle = parentDimStyle.ConstPointer();
+      }  
+      UnsafeNativeMethods.CRhinoDisplayPipeline_ON_V6_TextObject(ptr_this, const_ptr_text, const_ptr_dimstyle, scale, color.ToArgb());
+      GC.KeepAlive(parentDimStyle);
       GC.KeepAlive(text);
     }
     /// <since>6.0</since>
@@ -3621,6 +3653,41 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_idef = instanceDefinition.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawInstanceDefinition2(ptr_this, const_ptr_idef, ref xform);
+      GC.KeepAlive(instanceDefinition);
+    }
+
+    /// <summary>
+    /// Draws a shaded <see cref="DocObjects.InstanceDefinition">InstanceDefinition</see>.
+    /// </summary>
+    /// <param name="instanceDefinition">The instance definition.</param>
+    /// <param name="material">Material to draw faces with.</param>
+    /// <since>7.15</since>
+    public void DrawInstanceDefinitionShaded(DocObjects.InstanceDefinition instanceDefinition, DisplayMaterial material)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_idef = instanceDefinition.ConstPointer();
+      IntPtr const_ptr_material = IntPtr.Zero;
+      if (null != material)
+        const_ptr_material = material.ConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedInstanceDefinition(ptr_this, const_ptr_idef, const_ptr_material);
+      GC.KeepAlive(instanceDefinition);
+    }
+
+    /// <summary>
+    /// Draws a shaded <see cref="DocObjects.InstanceDefinition">InstanceDefinition</see>.
+    /// </summary>
+    /// <param name="instanceDefinition">The instance definition.</param>
+    /// <param name="material">Material to draw faces with.</param>
+    /// <param name="xform">The transformation.</param>
+    /// <since>7.15</since>
+    public void DrawInstanceDefinitionShaded(DocObjects.InstanceDefinition instanceDefinition, DisplayMaterial material, Transform xform)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_idef = instanceDefinition.ConstPointer();
+      IntPtr const_ptr_material = IntPtr.Zero;
+      if (null != material)
+        const_ptr_material = material.ConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedInstanceDefinition2(ptr_this, const_ptr_idef, const_ptr_material, ref xform);
       GC.KeepAlive(instanceDefinition);
     }
 
@@ -4381,6 +4448,7 @@ namespace Rhino.Display
       if( viewport!=null )
         pViewport = viewport.ConstPointer();
       m_ptr = UnsafeNativeMethods.CRhinoZBuffer_New(pViewport);
+      GC.KeepAlive(viewport);
     }
 
     /// <summary>
@@ -4428,12 +4496,14 @@ namespace Rhino.Display
     {
       IntPtr pThis = NonConstPointer(true);
       UnsafeNativeMethods.CRhinoZBuffer_SetDisplayMode(pThis, modeId);
+      GC.KeepAlive(this);
     }
 
     void SetBool(int which, bool on)
     {
       IntPtr pThis = NonConstPointer(true);
       UnsafeNativeMethods.CRhinoZBuffer_SetBool(pThis, which, on);
+      GC.KeepAlive(this);
     }
 
     const int IDX_SHOW_ISOCURVES = 0;
@@ -4463,25 +4533,33 @@ namespace Rhino.Display
     public int HitCount()
     {
       IntPtr pThis = NonConstPointer(false);
-      return UnsafeNativeMethods.CRhinoZBuffer_HitCount(pThis);
+      int rc = UnsafeNativeMethods.CRhinoZBuffer_HitCount(pThis);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.3</since>
     public float MaxZ()
     {
       IntPtr pThis = NonConstPointer(false);
-      return UnsafeNativeMethods.CRhinoZBuffer_MaxZ(pThis);
+      float rc = UnsafeNativeMethods.CRhinoZBuffer_MaxZ(pThis);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.3</since>
     public float MinZ()
     {
       IntPtr pThis = NonConstPointer(false);
-      return UnsafeNativeMethods.CRhinoZBuffer_MinZ(pThis);
+      float rc = UnsafeNativeMethods.CRhinoZBuffer_MinZ(pThis);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.3</since>
     public float ZValueAt(int x, int y)
     {
       IntPtr pThis = NonConstPointer(false);
-      return UnsafeNativeMethods.CRhinoZBuffer_ZValue(pThis, x, y);
+      float rc = UnsafeNativeMethods.CRhinoZBuffer_ZValue(pThis, x, y);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.3</since>
     public Point3d WorldPointAt(int x, int y)
@@ -4489,6 +4567,7 @@ namespace Rhino.Display
       IntPtr pThis = NonConstPointer(false);
       Point3d rc = new Point3d();
       UnsafeNativeMethods.CRhinoZBuffer_WorldPoint(pThis, x, y, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -4501,6 +4580,7 @@ namespace Rhino.Display
         IntPtr ptr_this = NonConstPointer(false);
         IntPtr hBitmap = UnsafeNativeMethods.CRhinoZBuffer_GrayscaleDib(ptr_this);
         m_bitmap = System.Drawing.Image.FromHbitmap(hBitmap);
+        GC.KeepAlive(this);
       }
       return m_bitmap;
     }
@@ -4599,6 +4679,7 @@ namespace Rhino.Display
       IntPtr ptrViewport = viewport.ConstPointer();
       Guid id = Guid.Empty;
       UnsafeNativeMethods.RhFlair_RhinoFlairEnabledViewport(ptrViewport, ref id);
+      GC.KeepAlive(viewport);
       return Find(id);
     }
   }

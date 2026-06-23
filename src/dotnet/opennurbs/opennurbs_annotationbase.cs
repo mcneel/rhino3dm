@@ -44,7 +44,12 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public virtual AnnotationType AnnotationType
     {
-      get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
+      get 
+      {
+        AnnotationType rc = UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
 
@@ -62,7 +67,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_GetDimstyleId(const_ptr_this);
+        Guid rc = UnsafeNativeMethods.ON_V6_Annotation_GetDimstyleId(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -70,6 +77,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_this = NonConstPointer();
           UnsafeNativeMethods.ON_V6_Annotation_SetDimstyleId(ptr_this, value);
+          GC.KeepAlive(this);
         }
 
         if (m_parent_dimstyle != null)
@@ -86,7 +94,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr = ConstPointer();
         bool b = UnsafeNativeMethods.ON_V6_Annotation_HasOverrideDimstyle(const_ptr);
-        GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return b;
       }
     }
@@ -102,7 +110,7 @@ namespace Rhino.Geometry
     {
       IntPtr const_ptr = ConstPointer();
       bool b = UnsafeNativeMethods.ON_V6_Annotation_FieldIsOverridden(const_ptr, field);
-      GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
       return b;
     }
 
@@ -112,7 +120,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_parent_dimstyle = ConstParentDimStylePointer();
       IntPtr rc = UnsafeNativeMethods.ON_Annotation_DimensionStyle(const_ptr_this, const_ptr_parent_dimstyle);
       //GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
-      //GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -124,8 +132,9 @@ namespace Rhino.Geometry
     public bool ClearPropertyOverrides()
     {
       var ptr_this = NonConstPointer();
-      //RhinoApp.WriteLine($"====SET= AnnotationBase: ClearOverrideDimstyle"); //debug
-      return UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
+      bool rc = UnsafeNativeMethods.ON_V6_Annotation_ClearOverrideDimstyle(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -148,8 +157,8 @@ namespace Rhino.Geometry
       // moment to minimize change.
       IntPtr ptr_new_dimstyle =
         UnsafeNativeMethods.ON_V6_Annotation_DimensionStyle(const_ptr_this, const_ptr_parentdimsytyle);
-      GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
-      GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(parentDimStyle);
+      GC.KeepAlive(this);
       if (IntPtr.Zero == ptr_new_dimstyle)
         return null;
       return new DimensionStyle(ptr_new_dimstyle);
@@ -173,7 +182,7 @@ namespace Rhino.Geometry
     /// Set a style including overrides for this annotation object.
     /// The DimensionStyle OverrideStyle must have the override fields marked 
     /// as overridden and must have it's Id set to nil.
-    /// Use DimensinoStyle.SetFieldOverride(Field field) and related functions
+    /// Use DimensionStyle.SetFieldOverride(Field field) and related functions
     /// to manage override settings. To override a field, the field value must be set
     /// and the field must be marked as an override. 
     /// The DimensionStyle passed in here must not be in the dimstyle table
@@ -185,7 +194,10 @@ namespace Rhino.Geometry
     {
       var ptr_this = NonConstPointer();
       var ptr_dimstyle = OverrideStyle.NonConstPointer();
-      return UnsafeNativeMethods.ON_V6_Annotation_SetOverrideDimstyle(ptr_this, ptr_dimstyle);
+      bool rc = UnsafeNativeMethods.ON_V6_Annotation_SetOverrideDimstyle(ptr_this, ptr_dimstyle);
+      GC.KeepAlive(OverrideStyle);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -270,6 +282,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         double d = UnsafeNativeMethods.ON_V6_Annotation_TextHeight(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return d;
       }
       set
@@ -278,6 +291,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetTextHeight(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -294,6 +308,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         bool b = UnsafeNativeMethods.ON_V6_Annotation_DrawTextMask(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return b;
       }
       set
@@ -301,7 +316,8 @@ namespace Rhino.Geometry
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetDrawTextMask(thisptr, styleptr, value);
-        GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018 
+        GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -328,6 +344,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.MaskType t = UnsafeNativeMethods.ON_V6_Annotation_MaskFillType(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return t;
       }
       set
@@ -336,6 +353,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetMaskFillType(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -372,6 +390,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.MaskFrame t = UnsafeNativeMethods.ON_V6_Annotation_MaskFrameType(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return t;
       }
       set
@@ -380,6 +399,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetMaskFrameType(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -397,6 +417,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         Color c = Color.FromArgb(UnsafeNativeMethods.ON_V6_Annotation_MaskColor(thisptr, styleptr));
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return c;
       }
       set
@@ -405,6 +426,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetMaskColor(thisptr, styleptr, value.ToArgb());
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -422,6 +444,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         double d = UnsafeNativeMethods.ON_V6_Annotation_MaskBorder(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return d;
       }
       set
@@ -430,6 +453,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetMaskBorder(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -445,6 +469,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         double d = UnsafeNativeMethods.ON_V6_Annotation_DimScale(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return d;
       }
       set
@@ -453,6 +478,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetDimScale(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -489,6 +515,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         bool b = UnsafeNativeMethods.ON_V6_Annotation_DrawForward(thisptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return b;
       }
       set
@@ -497,6 +524,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetDrawForward(thisptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -513,6 +541,7 @@ namespace Rhino.Geometry
         var font = new Rhino.DocObjects.Font(UnsafeNativeMethods.ON_V6_Annotation_Font(thisptr, styleptr));
         //RhinoApp.WriteLine($"====GET= AnnotationBase Font qn:{font.QuartetName},  fam:{font.FamilyName}, face:{font.FaceName}, b:{font.Bold}, i:{font.Italic}"); //debug
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return font;
       }
       set
@@ -524,6 +553,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_Annotation_SetFont(thisptr, styleptr, fontptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
         GC.KeepAlive(value);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -568,6 +598,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.LengthDisplay d = UnsafeNativeMethods.ON_V6_Annotation_GetDimensionLengthDisplay(dimptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return d;
       }
       set
@@ -576,6 +607,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetDimensionLengthDisplay(dimptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
 
     }
@@ -592,6 +624,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.LengthDisplay d = UnsafeNativeMethods.ON_V6_Annotation_GetAlternateDimensionLengthDisplay(dimptr, styleptr);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return d;
       }
       set
@@ -600,8 +633,8 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetAlternateDimensionLengthDisplay(dimptr, styleptr, value);
         GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
-
     }
 
     /// <summary>
@@ -652,12 +685,14 @@ namespace Rhino.Geometry
         var plane = new Plane();
         var const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_GetPlane(const_ptr_this, ref plane);
+        GC.KeepAlive(this);
         return plane;
       }
       set
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetPlane(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -674,6 +709,7 @@ namespace Rhino.Geometry
         var ptr_stringholder = sw.NonConstPointer;
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_GetTextString(const_ptr_this, ptr_stringholder, rich);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -686,6 +722,7 @@ namespace Rhino.Geometry
         var ptr_stringholder = sw.NonConstPointer;
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithFields(const_ptr_this, ptr_stringholder);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -706,6 +743,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_V6_Annotation_GetPlainTextWithRunMap(const_ptr_this, ptr_stringholder, runmap.m_ptr);
         map = runmap.ToArray();
         runmap.Dispose();
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -736,7 +774,7 @@ namespace Rhino.Geometry
       set
       {
         SetRichText(value, ConstPointerForDimStyle());
-        //GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -761,7 +799,7 @@ namespace Rhino.Geometry
       set
       {
         SetRichText(value, ConstPointerForDimStyle());
-        //GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -795,10 +833,10 @@ namespace Rhino.Geometry
     private const string Ph = "E368C572-BF39-4EA3-B02B-F7D9C63D6580";
 
     /// <summary>
-    /// 
+    /// Sets the annotation's text as rich text (RTF), optionally using a specified dimension style for formatting overrides.
     /// </summary>
-    /// <param name="rtfText"></param>
-    /// <param name="dimstyle"></param>
+    /// <param name="rtfText">The RTF (Rich Text Format) string to assign to the annotation.</param>
+    /// <param name="dimstyle">The dimension style to use for formatting overrides, or null to use the current style.</param>
     /// <since>6.0</since>
     public void SetRichText(string rtfText, DimensionStyle dimstyle)
     {
@@ -816,27 +854,30 @@ namespace Rhino.Geometry
         rtfText ?? string.Empty,
         const_ptr_dimstyle);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
     }
 
     /// <summary>
+    /// Gets a value indicating whether the annotation's text is formatted as RTF (Rich Text Format).
+    /// Returns true if the text begins with an RTF header; otherwise, false.
     /// </summary>
     /// <since>6.0</since>
     public bool TextHasRtfFormatting => Regex.Match(RichText ?? "", @"^{\\\\?rtf").Success; // sometimes the string only has one backslack - only seen it in Dimensions
 
     /// <summary>
-    /// 
+    /// Modifies the formatting of an RTF (Rich Text Format) string by setting or clearing bold, italic, underline, and font face properties on the first character run.
     /// </summary>
-    /// <param name="rtf_in"></param>
-    /// <param name="clear_bold"></param>
-    /// <param name="set_bold"></param>
-    /// <param name="clear_italic"></param>
-    /// <param name="set_italic"></param>
-    /// <param name="clear_underline"></param>
-    /// <param name="set_underline"></param>
-    /// <param name="clear_facename"></param>
-    /// <param name="set_facename"></param>
-    /// <param name="facename"></param>
-    /// <returns></returns>
+    /// <param name="rtf_in">The input RTF string to modify.</param>
+    /// <param name="clear_bold">If true, clears the bold formatting.</param>
+    /// <param name="set_bold">If true, sets the bold formatting.</param>
+    /// <param name="clear_italic">If true, clears the italic formatting.</param>
+    /// <param name="set_italic">If true, sets the italic formatting.</param>
+    /// <param name="clear_underline">If true, clears the underline formatting.</param>
+    /// <param name="set_underline">If true, sets the underline formatting.</param>
+    /// <param name="clear_facename">If true, clears the font face name.</param>
+    /// <param name="set_facename">If true, sets the font face name.</param>
+    /// <param name="facename">The font face name to set if <paramref name="set_facename"/> is true.</param>
+    /// <returns>The modified RTF string with the requested formatting changes applied.</returns>
     /// <since>6.0</since>
     static public string FormatRtfString(string rtf_in,
       bool clear_bold, bool set_bold,
@@ -857,15 +898,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// 
+    /// Extracts the font properties (bold, italic, underline, and facename) from the first character run of an RTF string.
     /// </summary>
-    /// <param name="rtf_str"></param>
-    /// <param name="bold"></param>
-    /// <param name="italic"></param>
-    /// <param name="underline"></param>
-    /// <param name="facename"></param>
-    /// <returns></returns>
-    ///     [Obsolete("Use AnnotationBase.FirstCharFont instead")]
+    /// <param name="rtf_str">The RTF string to analyze.</param>
+    /// <param name="bold">Set to true if the first run is bold; otherwise, false.</param>
+    /// <param name="italic">Set to true if the first run is italic; otherwise, false.</param>
+    /// <param name="underline">Set to true if the first run is underlined; otherwise, false.</param>
+    /// <param name="facename">Receives the font face name of the first run.</param>
+    /// <returns>True if the properties were successfully extracted; otherwise, false.</returns>
+    /// <remarks>Obsolete. Use <see cref="FirstCharFont"/> instead.</remarks>
     /// <since>6.0</since>
     static public bool FirstCharProperties(string rtf_str, ref bool bold, ref bool italic, ref bool underline, ref string facename)
     {
@@ -901,6 +942,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr= ConstPointer();
         IntPtr font_ptr = UnsafeNativeMethods.ON_Annotation_FirstCharFont(const_ptr);
+        GC.KeepAlive(this);
         return new Rhino.DocObjects.Font(font_ptr);
       }
     }
@@ -913,7 +955,9 @@ namespace Rhino.Geometry
     public bool IsAllBold()
     {
       IntPtr const_ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Annotation_IsAllBold(const_ptr);
+      bool rc = UnsafeNativeMethods.ON_Annotation_IsAllBold(const_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -924,7 +968,9 @@ namespace Rhino.Geometry
     public bool IsAllItalic()
     {
       IntPtr const_ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Annotation_IsAllItalic(const_ptr);
+      bool rc = UnsafeNativeMethods.ON_Annotation_IsAllItalic(const_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -935,7 +981,9 @@ namespace Rhino.Geometry
     public bool IsAllUnderlined()
     {
       IntPtr const_ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Annotation_IsAllUnderlined(const_ptr);
+      bool rc = UnsafeNativeMethods.ON_Annotation_IsAllUnderlined(const_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -960,12 +1008,15 @@ namespace Rhino.Geometry
       get
       {
         var const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_GetFormatWidth(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_V6_Annotation_GetFormatWidth(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetFormatWidth(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -978,12 +1029,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_TextIsWrapped(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_V6_Annotation_TextIsWrapped(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetTextIsWrapped(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -995,6 +1049,7 @@ namespace Rhino.Geometry
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_V6_Annotation_WrapText(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1006,13 +1061,15 @@ namespace Rhino.Geometry
       get
       {
         var ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_GetTextRotationRadians(ptr);
-
+        double rc = UnsafeNativeMethods.ON_V6_Annotation_GetTextRotationRadians(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         var ptr = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetTextRotationRadians(ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1039,6 +1096,7 @@ namespace Rhino.Geometry
       //RhinoApp.WriteLine($"====SET= ON_Annotation_SetBold: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetBold(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1055,6 +1113,7 @@ namespace Rhino.Geometry
       //RhinoApp.WriteLine($"====SET= ON_annotation_SetItalic: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetItalic(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1071,6 +1130,7 @@ namespace Rhino.Geometry
       //RhinoApp.WriteLine($"====SET= AnnotationBase SetUnderline: {set_on}"); //debug
       bool rc = UnsafeNativeMethods.ON_Annotation_SetUnderline(ptr, set_on, styleptr);
       GC.KeepAlive(m_parent_dimstyle);   // GC_KeepAlive: Nov. 1, 2018
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1083,10 +1143,12 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public virtual bool SetFacename(bool set_on, string facename)
     {
-        IntPtr ptr = NonConstPointer();
-        IntPtr styleptr = ConstPointerForDimStyle();
-        //RhinoApp.WriteLine($"====SET= AnnotationBase SetFacename:{facename}"); //debug
-        return UnsafeNativeMethods.ON_Annotation_SetFacename(ptr, set_on, facename, styleptr);
+      IntPtr ptr = NonConstPointer();
+      IntPtr styleptr = ConstPointerForDimStyle();
+      //RhinoApp.WriteLine($"====SET= AnnotationBase SetFacename:{facename}"); //debug
+      bool rc = UnsafeNativeMethods.ON_Annotation_SetFacename(ptr, set_on, facename, styleptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1134,6 +1196,7 @@ namespace Rhino.Geometry
       var this_ptr = NonConstPointer();
       IntPtr styleptr = ConstParentDimStylePointer();
       bool rc = UnsafeNativeMethods.ON_V6_Annotation_RunReplace(this_ptr, styleptr, replaceString, startRunIndex, startRunPosition, endRunIndex, endRunPosition);
+      GC.KeepAlive(this);
       return rc;
     }
 

@@ -217,18 +217,23 @@ RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveLine(
       RhinoExtendLineThroughBox(line, box, long_line);
       // Intersect the two curves
       ON_LineCurve line_curve(long_line);
-      pCurve->IntersectCurve(&line_curve, *rc, tolerance, overlap_tolerance);
-      if (rc->Count() > 0)
+
+      // 2025-02-19 - kike@mcneel.com : This allows this method work when pCurve is 2D
+      if (line_curve.ChangeDimension(pCurve->Dimension()))
       {
-        // Convert (line) curve parameter to line parameter
-        double t = ON_UNSET_VALUE;
-        for (int i = 0; i < rc->Count(); i++)
+        pCurve->IntersectCurve(&line_curve, *rc, tolerance, overlap_tolerance);
+        if (rc->Count() > 0)
         {
-          ON_X_EVENT& ccx = (*rc)[i];
-          if (line.ClosestPointTo(ccx.m_B[0], &t))
-            ccx.m_b[0] = t;
-          if (line.ClosestPointTo(ccx.m_B[1], &t))
-            ccx.m_b[1] = t;
+          // Convert (line) curve parameter to line parameter
+          double t = ON_UNSET_VALUE;
+          for (int i = 0; i < rc->Count(); i++)
+          {
+            ON_X_EVENT& ccx = (*rc)[i];
+            if (line.ClosestPointTo(ccx.m_B[0], &t))
+              ccx.m_b[0] = t;
+            if (line.ClosestPointTo(ccx.m_B[1], &t))
+              ccx.m_b[1] = t;
+          }
         }
       }
     }
@@ -246,7 +251,8 @@ RH_C_FUNCTION ON_SimpleArray<ON_X_EVENT>* ON_Intersect_CurveCurve(
 )
 {
   ON_SimpleArray<ON_X_EVENT>* rc = nullptr;
-  if (pCurveA && pCurveB)
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-89630
+  if (pCurveA && pCurveB && pCurveA->Dimension() == pCurveB->Dimension())
   {
     rc = new ON_SimpleArray<ON_X_EVENT>();
     pCurveA->IntersectCurve(pCurveB, *rc, tolerance, overlap_tolerance);

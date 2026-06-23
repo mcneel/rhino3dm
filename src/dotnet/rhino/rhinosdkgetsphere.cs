@@ -58,12 +58,15 @@ namespace Rhino.Input.Custom
     bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which, bool value)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -75,12 +78,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetDefaultSize(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -105,6 +111,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       sphere = Geometry.Sphere.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetSphere(ref sphere, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -124,6 +131,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       sphere = Geometry.Sphere.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshSphere(ref sphere, ref style, ref verticalFaces, ref aroundFaces, ref triangleSubdivisions, ref quadSubdivisions, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

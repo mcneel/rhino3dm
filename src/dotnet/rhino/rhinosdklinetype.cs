@@ -36,6 +36,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pOther = other.ConstPointer();
       IntPtr pLinetype = UnsafeNativeMethods.ON_Linetype_New(pOther);
+      GC.KeepAlive(other);
       ConstructNonConstObject(pLinetype);
     }
 
@@ -48,6 +49,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_linetype = UnsafeNativeMethods.ON_Linetype_DuplicateLinetype(ptr_const_this);
+      GC.KeepAlive(this);
       if (ptr_linetype != IntPtr.Zero)
         return new Linetype(ptr_linetype);
       return null;
@@ -88,7 +90,9 @@ namespace Rhino.DocObjects
       if (m_id == Guid.Empty || IsDocumentControlled)
         return false;
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoLinetypeTable_CommitChanges(m_doc.RuntimeSerialNumber, pThis, m_id);
+      bool rc = UnsafeNativeMethods.CRhinoLinetypeTable_CommitChanges(m_doc.RuntimeSerialNumber, pThis, m_id);
+      GC.KeepAlive(this);
+      return rc;
 #else
       return true;
 #endif
@@ -128,7 +132,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #region properties
@@ -163,6 +169,7 @@ namespace Rhino.DocObjects
           IntPtr pLinetype = ConstPointer();
           IntPtr pString = sh.NonConstPointer();
           UnsafeNativeMethods.ON_Linetype_GetLinetypeName(pLinetype, pString);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -170,6 +177,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_Linetype_SetLinetypeName(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -190,7 +198,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_Linetype_PatternLength(pConstThis);
+        double rc = UnsafeNativeMethods.ON_Linetype_PatternLength(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -266,12 +276,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Linetype_GetWidth(ptr);
+        double rc = UnsafeNativeMethods.ON_Linetype_GetWidth(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_Linetype_SetWidth(ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -285,12 +298,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Linetype_GetWidthUnits(ptr);
+        UnitSystem rc = UnsafeNativeMethods.ON_Linetype_GetWidthUnits(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_Linetype_SetWidthUnits(ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -306,6 +322,7 @@ namespace Rhino.DocObjects
         IntPtr ptr = ConstPointer();
         IntPtr ptArrayPtr = pointArray.NonConstPointer();
         UnsafeNativeMethods.ON_Linetype_GetTaperPoints(ptr, ptArrayPtr);
+        GC.KeepAlive(this);
         return pointArray.ToArray();
       }
     }
@@ -332,6 +349,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Linetype_SetTaper(ptr_this, startWidth, taperPoint, endWidth);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -342,6 +360,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Linetype_RemoveTaper(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -357,12 +376,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return UnsafeNativeMethods.ON_Linetype_AlwaysModelDistances(constPtrThis);
+        bool rc = UnsafeNativeMethods.ON_Linetype_AlwaysModelDistances(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.ON_Linetype_SetAlwaysModelDistances(ptrThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -370,12 +392,15 @@ namespace Rhino.DocObjects
     int GetInt(UnsafeNativeMethods.LinetypeInteger which)
     {
       IntPtr pConstLinetype = ConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_GetInt(pConstLinetype, which);
+      int rc = UnsafeNativeMethods.ON_Linetype_GetInt(pConstLinetype, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(UnsafeNativeMethods.LinetypeInteger which, int val)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_Linetype_SetInt(ptr, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -407,6 +432,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_Linetype_Default(pThis);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Adds a segment to the pattern.</summary>
@@ -420,7 +446,9 @@ namespace Rhino.DocObjects
     public int AppendSegment(double length, bool isSolid)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_AppendSegment(pThis, length, isSolid);
+      int rc = UnsafeNativeMethods.ON_Linetype_AppendSegment(pThis, length, isSolid);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Removes a segment in the linetype.</summary>
@@ -430,7 +458,9 @@ namespace Rhino.DocObjects
     public bool RemoveSegment(int index)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_RemoveSegment(pThis, index);
+      bool rc = UnsafeNativeMethods.ON_Linetype_RemoveSegment(pThis, index);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Set all segments.</summary>
@@ -451,7 +481,9 @@ namespace Rhino.DocObjects
       }
       var segment_list = new List<double>(segments);
       double[] segment_array = segment_list.ToArray();
-      return UnsafeNativeMethods.ON_Linetype_SetSegments(ptr_this, segment_array.Length, segment_array);
+      bool rc = UnsafeNativeMethods.ON_Linetype_SetSegments(ptr_this, segment_array.Length, segment_array);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Sets the length and type of the segment at index.</summary>
@@ -466,7 +498,9 @@ namespace Rhino.DocObjects
     public bool SetSegment(int index, double length, bool isSolid)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_SetSegment(pThis, index, length, isSolid);
+      bool rc = UnsafeNativeMethods.ON_Linetype_SetSegment(pThis, index, length, isSolid);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -488,6 +522,7 @@ namespace Rhino.DocObjects
       length = 0;
       isSolid = false;
       UnsafeNativeMethods.ON_Linetype_GetSegment(pConstThis, index, ref length, ref isSolid);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -550,6 +585,7 @@ namespace Rhino.DocObjects
         IntPtr ptr_string = sh.NonConstPointer();
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.RHC_RhPatternStringFromLinetype(ptr_const_this, millimeters, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -989,7 +1025,9 @@ namespace Rhino.DocObjects.Tables
     public int Add(DocObjects.Linetype linetype)
     {
       IntPtr pConstLinetype = linetype.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLinetypeTable_AddLinetype(m_doc.RuntimeSerialNumber, pConstLinetype, false);
+      int rc = UnsafeNativeMethods.CRhinoLinetypeTable_AddLinetype(m_doc.RuntimeSerialNumber, pConstLinetype, false);
+      GC.KeepAlive(linetype);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1030,7 +1068,9 @@ namespace Rhino.DocObjects.Tables
     public int AddReferenceLinetype(DocObjects.Linetype linetype)
     {
       IntPtr pConstLinetype = linetype.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLinetypeTable_AddLinetype(m_doc.RuntimeSerialNumber, pConstLinetype, true);
+      int rc = UnsafeNativeMethods.CRhinoLinetypeTable_AddLinetype(m_doc.RuntimeSerialNumber, pConstLinetype, true);
+      GC.KeepAlive(linetype);
+      return rc;
     }
 
     /// <summary>Modify linetype settings.</summary>
@@ -1047,7 +1087,9 @@ namespace Rhino.DocObjects.Tables
     public bool Modify(DocObjects.Linetype linetype, int index, bool quiet)
     {
       IntPtr pConstLinetype = linetype.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLinetypeTable_Modify(m_doc.RuntimeSerialNumber, pConstLinetype, index, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoLinetypeTable_Modify(m_doc.RuntimeSerialNumber, pConstLinetype, index, quiet);
+      GC.KeepAlive(linetype);
+      return rc;
     }
 
     /// <summary>

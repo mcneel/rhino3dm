@@ -28,6 +28,7 @@ namespace Rhino.Geometry
             }
 
             m_ptr = UnsafeNativeMethods.RHC_RhinoMeshExtruder_New(inputMesh.ConstPointer(), ComponentIndices.NonConstPointer());
+          GC.KeepAlive(this);
         }
         /// <summary>
         /// Destructor
@@ -66,6 +67,7 @@ namespace Rhino.Geometry
                 using (SimpleArrayLine pl = new SimpleArrayLine())
                 {
                     UnsafeNativeMethods.RHC_RhinoMeshExtruder_PreviewLines(m_ptr, pl.NonConstPointer());
+                    GC.KeepAlive(this);
                     ret = pl.ToArray();
                 }
                 return ret;
@@ -80,7 +82,9 @@ namespace Rhino.Geometry
         public bool ExtrudedMesh(out Mesh extrudedMeshOut)
         {
             extrudedMeshOut = new Mesh();
-            return UnsafeNativeMethods.RHC_RhinoMeshExtruder_ExtrudedMesh(m_ptr, extrudedMeshOut.NonConstPointer());
+            bool rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_ExtrudedMesh(m_ptr, extrudedMeshOut.NonConstPointer());
+            GC.KeepAlive(this);
+            return rc;
         }
 
         /// <summary>
@@ -102,6 +106,7 @@ namespace Rhino.Geometry
               componentIndicesOut.Add(new ComponentIndex(ci.ComponentIndexType, ci.Index));
             }
           }
+          GC.KeepAlive(this);
           return ret;
         }
 
@@ -119,6 +124,7 @@ namespace Rhino.Geometry
             UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetWallFaces(m_ptr, ptr_walFaces);
             res.AddRange(wallFaces.ToArray());
           }
+          GC.KeepAlive(this);
           return res;
         }
 
@@ -132,13 +138,15 @@ namespace Rhino.Geometry
             {
                 var transform = new Transform();
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetTransform(m_ptr, ref transform);
+                GC.KeepAlive(this);
                 return transform;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetTransform(m_ptr, ref value);
+                GC.KeepAlive(this);
             }
-        }
+          }
 
         /// <summary>
         /// Whether or not to perform extrude in UVN basis.
@@ -148,11 +156,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetUVN(m_ptr);
+                bool rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetUVN(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetUVN(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
 
@@ -164,11 +175,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetEdgeBasedUVN(m_ptr);
+                bool rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetEdgeBasedUVN(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetEdgeBasedUVN(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
 
@@ -180,11 +194,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetKeepOriginalFaces(m_ptr);
+                bool rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetKeepOriginalFaces(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetKeepOriginalFaces(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
 
@@ -196,11 +213,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetTextureCoordinateMode(m_ptr);
+                MeshExtruderParameterMode rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetTextureCoordinateMode(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetTextureCoordinateMode(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
 
@@ -212,11 +232,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetSurfaceParameterMode(m_ptr);
+                MeshExtruderParameterMode rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetSurfaceParameterMode(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetSurfaceParameterMode(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
 
@@ -228,11 +251,14 @@ namespace Rhino.Geometry
         {
             get
             {
-                return UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetFaceDirectionMode(m_ptr);
+                MeshExtruderFaceDirectionMode rc = UnsafeNativeMethods.RHC_RhinoMeshExtruder_GetFaceDirectionMode(m_ptr);
+                GC.KeepAlive(this);
+                return rc;
             }
             set
             {
                 UnsafeNativeMethods.RHC_RhinoMeshExtruder_SetFaceDirectionMode(m_ptr, value);
+                GC.KeepAlive(this);
             }
         }
     }

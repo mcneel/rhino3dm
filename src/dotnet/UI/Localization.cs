@@ -192,9 +192,28 @@ namespace Rhino.UI
     }
 
 
-
-
 #if RHINO_SDK
+    /// <summary>
+    /// Compares two strings. Digits in the strings are considered as numerical content rather than text. This test is not case-sensitive.
+    /// </summary>
+    /// <param name="string1">First string to be compared.</param>
+    /// <param name="string2">Second string to be compared.</param>
+    /// <returns>
+    /// Returns zero if the strings are identical.
+    /// Returns 1 if string1 has a greater value than string2.
+    /// Returns -1 if string1 has a lesser value than string2.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>8.32</since>
+    public static int LogicalSort(string string1, string string2)
+    {
+      if (null == string1)
+        throw new ArgumentNullException(nameof(string1));
+      if (null == string1)
+        throw new ArgumentNullException(nameof(string2));
+      return UnsafeNativeMethods.RHC_StrCmpLogicalW(string1, string2);
+    }
+
     /// <summary>
     /// Gets localized unit system name.  Uses current application locale id.
     /// </summary>

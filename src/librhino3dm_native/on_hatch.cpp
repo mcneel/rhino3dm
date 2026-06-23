@@ -317,18 +317,33 @@ RH_C_FUNCTION void ON_Hatch_Explode(const ON_Hatch* pConstHatch,
 }
 #endif
 
-RH_C_FUNCTION void ON_Hatch_LoopCurve3d(const ON_Hatch* pConstHatch, ON_SimpleArray<ON_Curve*>* pCurveArray, bool outer)
+RH_C_FUNCTION void ON_Hatch_LoopCurve(const ON_Hatch* pConstHatch, ON_SimpleArray<ON_Curve*>* pCurveArray, bool outer, int dim)
 {
-  if( pConstHatch && pCurveArray )
+  if( pConstHatch && pCurveArray && dim >= 2 && dim <= 3)
   {
     ON_HatchLoop::eLoopType looptype = outer ? ON_HatchLoop::ltOuter : ON_HatchLoop::ltInner;
     int count = pConstHatch->LoopCount();
     for( int i=0; i<count; i++ )
     {
       const ON_HatchLoop* pLoop = pConstHatch->Loop(i);
-      if( pLoop && pLoop->Type()==looptype )
+      if (pLoop && pLoop->Type() == looptype)
       {
-        ON_Curve* crv = pConstHatch->LoopCurve3d(i);
+        ON_Curve* crv = nullptr;
+        switch (dim)
+        {
+        case 2:
+          if (const ON_Curve* loop_crv = pLoop->Curve())
+            crv = loop_crv->DuplicateCurve();
+          break;
+
+        case 3:
+          crv = pConstHatch->LoopCurve3d(i);
+          break;
+
+        default:
+          break;
+        }
+
         if( crv )
           pCurveArray->Append(crv);
       }

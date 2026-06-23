@@ -101,6 +101,7 @@ namespace Rhino.DocObjects.Custom
       Guid type_id = GetType().GUID;
       IntPtr const_ptr_brep = brep.ConstPointer();
       m_pRhinoObject = UnsafeNativeMethods.CRhinoCustomObject_New2(type_id, const_ptr_brep);
+      GC.KeepAlive(brep);
     }
 
     ~CustomBrepObject() { Dispose(false); }

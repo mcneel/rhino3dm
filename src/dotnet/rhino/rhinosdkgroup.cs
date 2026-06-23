@@ -510,7 +510,8 @@ namespace Rhino.DocObjects
         using (Rhino.Runtime.InternalRhinoObjectArray rhobjs = new Runtime.InternalRhinoObjectArray())
         {
           IntPtr pRhinoObjects = rhobjs.NonConstPointer();
-          UnsafeNativeMethods.CRhinoGroupTable_GroupMembers(m_doc.RuntimeSerialNumber, groupIndex, pRhinoObjects);
+          // 29-Apr-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-87223
+          UnsafeNativeMethods.CRhinoDoc_LookupObjectsByGroup(m_doc.RuntimeSerialNumber, groupIndex, pRhinoObjects);
           return rhobjs.ToArray();
         }
       }

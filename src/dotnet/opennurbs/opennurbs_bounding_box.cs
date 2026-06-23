@@ -70,13 +70,11 @@ namespace Rhino.Geometry
     /// <param name="xform">Transformation.</param>
     /// <since>6.0</since>
     public BoundingBox(System.Collections.Generic.IEnumerable<Point3d> points, Transform xform)
-      : this()
     {
+      this = Empty;
+
       if (!xform.IsValid)
-      {
-        this = BoundingBox.Empty;
         return;
-      }
 
       bool perform_transform = !xform.IsIdentity;
 
@@ -115,24 +113,13 @@ namespace Rhino.Geometry
     /// Gets an [Empty] bounding box. An Empty box is an invalid structure that has negative width.
     /// </summary>
     /// <since>5.0</since>
-    public static BoundingBox Empty
-    {
-      get
-      {
-        return new BoundingBox(1, 0, 0, -1, 0, 0);
-      }
-    }
+    public static BoundingBox Empty { get; } = new BoundingBox(1, 0, 0, -1, 0, 0);
 
     /// <summary>
     /// Gets a bounding box that has Unset coordinates for Min and Max.
     /// </summary>
     /// <since>5.0</since>
-    public static BoundingBox Unset
-    {
-      get { return m_unset; }
-    }
-    static readonly BoundingBox m_unset = new BoundingBox(Point3d.Unset, Point3d.Unset);
-
+    public static BoundingBox Unset { get; } = new BoundingBox(Point3d.Unset, Point3d.Unset);
     #endregion
 
     /// <summary>

@@ -755,6 +755,25 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ON_3dmOb
   }
 }
 
+RH_C_FUNCTION void ON_3dmObjectAttributes_GetDecalArray(
+              const ON_3dmObjectAttributes* attr, ON_SimpleArray<std::shared_ptr<ON_Decal>*>* decal_array)
+{
+  if ((nullptr == attr) || (nullptr == decal_array))
+    return;
+
+  std::vector<std::shared_ptr<ON_Decal>> decals;
+  attr->GetDecalArray(decals);
+
+  for (const auto& decal_sp : decals)
+  {
+    decal_array->Append(new std::shared_ptr<ON_Decal>(decal_sp));
+  }
+}
+
+// rhino3dm-local (sync exception): the legacy raw-pointer decal API below was removed
+// upstream in favor of the shared_ptr API (GetDecalArray(vector)/AddDecalEx). rhino3dm
+// keeps it so the existing rdk_decals.cs binding compiles; it uses opennurbs' deprecated
+// (but still present) ON_Decal accessors. TODO(9.x): migrate decals to the shared_ptr API.
 RH_C_FUNCTION int ON_3dmObjectAttributes_DecalCount(const ON_3dmObjectAttributes* attr)
 {
   if (nullptr == attr)
@@ -857,6 +876,12 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomSectionStyle(ON_3dmObjectAttr
     else
       attr->RemoveCustomSectionStyle();
   }
+}
+
+RH_C_FUNCTION void ON_3dmObjectAttributes_ClearRenderingAttributes(ON_3dmObjectAttributes* ptr)
+{
+  if (ptr)
+    ptr->m_rendering_attributes = ON_3dmObjectAttributes::DefaultAttributes.m_rendering_attributes;
 }
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ObjectFrame(ON_3dmObjectAttributes* const_ptr, ON_Xform* xform)

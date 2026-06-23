@@ -70,6 +70,7 @@ namespace Rhino.Geometry
       set
       {
         UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_SetSymmetryPlane(m_ptr, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -81,7 +82,9 @@ namespace Rhino.Geometry
     /// <since>7.14</since>
     public bool Unwrap(MeshUnwrapMethod method)
     {
-      return UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_Unwrap(m_ptr, method);
+      bool rc = UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_Unwrap(m_ptr, method);
+      GC.KeepAlive(this);
+      return rc;
     }
   }
 }

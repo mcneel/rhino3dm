@@ -57,6 +57,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pConstLine = hatchLine.ConstPointer();
         m_ptr = UnsafeNativeMethods.ON_HatchLine_New(pConstLine);
+        GC.KeepAlive(hatchLine);
       }
     }
 
@@ -71,7 +72,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_HatchLine_IsValid(pConstThis);
+        bool rc = UnsafeNativeMethods.ON_HatchLine_IsValid(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -87,6 +90,7 @@ namespace Rhino.DocObjects
         double angle = 0.0;
         IntPtr pConstThis = ConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetAngle(pConstThis, ref angle, false);
+        GC.KeepAlive(this);
         return angle;
       }
       set
@@ -94,6 +98,7 @@ namespace Rhino.DocObjects
         double angle = value;
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetAngle(pThis, ref angle, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -108,6 +113,7 @@ namespace Rhino.DocObjects
         Rhino.Geometry.Point2d basePoint = new Rhino.Geometry.Point2d();
         IntPtr pConstThis = ConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetBasePoint(pConstThis, ref basePoint, false);
+        GC.KeepAlive(this);
         return basePoint;
       }
       set
@@ -115,6 +121,7 @@ namespace Rhino.DocObjects
         Rhino.Geometry.Point2d basePoint = value;
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetBasePoint(pThis, ref basePoint, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -131,6 +138,7 @@ namespace Rhino.DocObjects
         Rhino.Geometry.Vector2d offset = new Rhino.Geometry.Vector2d();
         IntPtr pConstThis = ConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetOffset(pConstThis, ref offset, false);
+        GC.KeepAlive(this);
         return offset;
       }
       set
@@ -138,6 +146,7 @@ namespace Rhino.DocObjects
         Rhino.Geometry.Vector2d offset = value;
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchLine_GetSetOffset(pThis, ref offset, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -150,7 +159,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_HatchLine_DashCount(pConstThis);
+        int rc = UnsafeNativeMethods.ON_HatchLine_DashCount(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -179,7 +190,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_HatchLine_GetPatternLength(pConstThis);
+        double rc = UnsafeNativeMethods.ON_HatchLine_GetPatternLength(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -196,7 +209,9 @@ namespace Rhino.DocObjects
     public double DashAt(int dashIndex)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.ON_HatchLine_Dash(pConstThis, dashIndex);
+      double rc = UnsafeNativeMethods.ON_HatchLine_Dash(pConstThis, dashIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -208,6 +223,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_HatchLine_AppendDash(pThis, dash);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -223,6 +239,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchLine_SetDashes(pThis, count, list.ToArray());
+        GC.KeepAlive(this);
       }
     }
 
@@ -314,6 +331,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pOther = other.ConstPointer();
       IntPtr pHatchPattern = UnsafeNativeMethods.ON_HatchPattern_New(pOther);
+      GC.KeepAlive(other);
       ConstructNonConstObject(pHatchPattern);
     }
 
@@ -389,7 +407,9 @@ namespace Rhino.DocObjects
         return false;
 
       IntPtr ptr_const_pattern = hatchPattern.ConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoWriteHatchPatternFile(filename, ptr_const_pattern);
+      bool rc = UnsafeNativeMethods.RHC_RhinoWriteHatchPatternFile(filename, ptr_const_pattern);
+      GC.KeepAlive(hatchPattern);
+      return rc;
     }
 
     /// <summary>
@@ -411,7 +431,6 @@ namespace Rhino.DocObjects
         IntPtr ptr_const_pattern = pattern.ConstPointer();
         UnsafeNativeMethods.ON_ObjectArray_Append(ptr_object_array, ptr_const_pattern);
       }
-
       bool rc = UnsafeNativeMethods.RHC_RhinoWriteHatchPatternFile2(filename, ptr_object_array);
       UnsafeNativeMethods.ON_ObjectArray_Delete(ptr_object_array);
 
@@ -458,7 +477,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #region properties
@@ -516,6 +537,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_lines = line_array.NonConstPointer();
         int rc = UnsafeNativeMethods.RHC_RhCreateHatchPatternPreviewGeometry(const_ptr_this, width, height, angle, ptr_lines);
+        GC.KeepAlive(this);
         if (rc == 0)
           return new Rhino.Geometry.Line[0];
         return line_array.ToArray();
@@ -557,6 +579,7 @@ namespace Rhino.DocObjects
         {
           IntPtr pString = sh.NonConstPointer();
           UnsafeNativeMethods.ON_HatchPattern_GetDescription(pConstThis, pString);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -564,6 +587,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchPattern_SetDescription(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -576,12 +600,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return (HatchPatternFillType)UnsafeNativeMethods.ON_HatchPattern_GetFillType(pConstThis);
+        HatchPatternFillType rc = (HatchPatternFillType)UnsafeNativeMethods.ON_HatchPattern_GetFillType(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_HatchPattern_SetFillType(pThis, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -597,7 +624,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_HatchPattern_HatchLineCount(pConstThis);
+        int rc = UnsafeNativeMethods.ON_HatchPattern_HatchLineCount(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -611,7 +640,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstHatchLine = hatchLine.ConstPointer();
-      return UnsafeNativeMethods.ON_HatchPattern_AddHatchLine(pThis, pConstHatchLine);
+      int rc = UnsafeNativeMethods.ON_HatchPattern_AddHatchLine(pThis, pConstHatchLine);
+      GC.KeepAlive(hatchLine);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -626,6 +658,7 @@ namespace Rhino.DocObjects
       IntPtr pHatchLine = UnsafeNativeMethods.ON_HatchPattern_HatchLine(pConstThis, hatchLineIndex);
       if (IntPtr.Zero != pHatchLine)
         return new HatchLine(pHatchLine);
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -638,7 +671,9 @@ namespace Rhino.DocObjects
     public bool RemoveHatchLine(int hatchLineIndex)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_HatchPattern_RemoveHatchLine(pThis, hatchLineIndex);
+      bool rc = UnsafeNativeMethods.ON_HatchPattern_RemoveHatchLine(pThis, hatchLineIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -649,6 +684,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_HatchPattern_RemoveAllHatchLines(pThis);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -679,7 +715,9 @@ namespace Rhino.DocObjects
       {
         IntPtr pHatchLines = hatchLinePointers.ConstPointer();
         IntPtr pThis = NonConstPointer();
-        return UnsafeNativeMethods.ON_HatchPattern_SetHatchLines(pThis, pHatchLines);
+        int rc = UnsafeNativeMethods.ON_HatchPattern_SetHatchLines(pThis, pHatchLines);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1077,7 +1115,9 @@ namespace Rhino.DocObjects.Tables
       if (null == pattern)
         return -1;
       IntPtr pPattern = pattern.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHatchPatternTable_AddPattern(m_doc.RuntimeSerialNumber, pPattern, false);
+      int rc = UnsafeNativeMethods.CRhinoHatchPatternTable_AddPattern(m_doc.RuntimeSerialNumber, pPattern, false);
+      GC.KeepAlive(pattern);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1101,7 +1141,9 @@ namespace Rhino.DocObjects.Tables
     {
       if (null == hatchPattern) return false;
       IntPtr ptr_const_pattern = hatchPattern.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHatchPatternTable_Modify(m_doc.RuntimeSerialNumber, ptr_const_pattern, hatchPatternIndex, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoHatchPatternTable_Modify(m_doc.RuntimeSerialNumber, ptr_const_pattern, hatchPatternIndex, quiet);
+      GC.KeepAlive(hatchPattern);
+      return rc;
     }
 
     /// <summary>
@@ -1126,7 +1168,9 @@ namespace Rhino.DocObjects.Tables
     {
       if (null == item) return false;
       IntPtr pPattern = item.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHatchPatternTable_DeleteHatchPattern(m_doc.RuntimeSerialNumber, pPattern, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoHatchPatternTable_DeleteHatchPattern(m_doc.RuntimeSerialNumber, pPattern, quiet);
+      GC.KeepAlive(item);
+      return rc;
     }
 
     /// <summary>
@@ -1164,7 +1208,9 @@ namespace Rhino.DocObjects.Tables
       if (null == item) return false;
       if (string.IsNullOrEmpty(hatchPatternName)) return false;
       IntPtr pPattern = item.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHatchPatternTable_RenameHatchPattern2(m_doc.RuntimeSerialNumber, pPattern, hatchPatternName);
+      bool rc = UnsafeNativeMethods.CRhinoHatchPatternTable_RenameHatchPattern2(m_doc.RuntimeSerialNumber, pPattern, hatchPatternName);
+      GC.KeepAlive(item);
+      return rc;
     }
 
     /// <summary>

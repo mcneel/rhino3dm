@@ -212,7 +212,8 @@ enum OnGeometryTypeConsts : int
   idxON_DimRadial = 42,
   idxON_DimOrdinate = 43,
   idxON_Centermark = 44,
-  idxON_Text = 45
+  idxON_Text = 45,
+  idxON_Viewport = 46 // https://mcneel.myjetbrains.com/youtrack/issue/RH-86439
 };
 
 RH_C_FUNCTION OnGeometryTypeConsts ON_Geometry_GetGeometryType( const ON_Object* pOnObject)
@@ -371,6 +372,11 @@ RH_C_FUNCTION OnGeometryTypeConsts ON_Geometry_GetGeometryType( const ON_Object*
     pCastTest = ON_Text::Cast(pGeometry);
     if (pCastTest)
       return idxON_Text; //37
+
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-86439
+    pCastTest = ON_Viewport::Cast(pGeometry);
+    if (pCastTest)
+      return idxON_Viewport; // 46
   }
   return rc;
 }

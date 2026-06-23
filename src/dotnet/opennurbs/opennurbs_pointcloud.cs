@@ -193,12 +193,14 @@ namespace Rhino.Geometry
         Point3d rc = new Point3d();
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetPoint(ptr, m_index, ref rc);
+        GC.KeepAlive(m_parent);
         return rc;
       }
       set
       {
         IntPtr ptr = m_parent.NonConstPointer();
         UnsafeNativeMethods.ON_PointCloud_SetPoint(ptr, m_index, value);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -269,12 +271,14 @@ namespace Rhino.Geometry
         Vector3d rc = Vector3d.Unset;
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetNormal(ptr, m_index, ref rc);
+        GC.KeepAlive(m_parent);
         return rc;
       }
       set
       {
         IntPtr ptr = m_parent.NonConstPointer();
         UnsafeNativeMethods.ON_PointCloud_SetNormal(ptr, m_index, value);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -290,12 +294,14 @@ namespace Rhino.Geometry
         int argb = 0;
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetColor(ptr, m_index, ref argb);
+        GC.KeepAlive(m_parent);
         return Color.FromArgb(argb);
       }
       set
       {
         IntPtr ptr = m_parent.NonConstPointer();
         UnsafeNativeMethods.ON_PointCloud_SetColor(ptr, m_index, value.ToArgb());
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -311,12 +317,14 @@ namespace Rhino.Geometry
         bool rc = false;
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetHiddenFlag(ptr, m_index, ref rc);
+        GC.KeepAlive(m_parent);
         return rc;
       }
       set
       {
         IntPtr ptr = m_parent.NonConstPointer();
         UnsafeNativeMethods.ON_PointCloud_SetHiddenFlag(ptr, m_index, value);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -333,12 +341,14 @@ namespace Rhino.Geometry
         double rc = RhinoMath.UnsetValue;
         IntPtr ptr = m_parent.ConstPointer();
         UnsafeNativeMethods.ON_PointCloud_GetExtra(ptr, m_index, ref rc);
+        GC.KeepAlive(m_parent);
         return rc;
       }
       set
       {
         IntPtr ptr = m_parent.NonConstPointer();
         UnsafeNativeMethods.ON_PointCloud_SetExtra(ptr, m_index, value);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -419,6 +429,25 @@ namespace Rhino.Geometry
       ApplyMemoryPressure();
     }
 
+    /// <summary>
+    /// Creates a point cloud from a mesh.
+    /// </summary>
+    /// <param name="mesh">Mesh to copy vertices, vertex normals, and colors.</param>
+    /// <returns>A point cloud if successful, otherwise null.</returns>
+    /// <since>8.29</since>
+    public static PointCloud CreateFromMesh(Mesh mesh)
+    {
+      PointCloud rc = null;
+      if (null != mesh)
+      { 
+        IntPtr ptr_const_mesh = mesh.ConstPointer();
+        IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_CreateFromMesh(ptr_const_mesh);
+        if (ptr != IntPtr.Zero)
+          rc = new PointCloud(ptr, null);
+      }
+      return rc;
+    }
+
     internal override GeometryBase DuplicateShallowHelper()
     {
       return new PointCloud(IntPtr.Zero, null);
@@ -453,7 +482,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetInt(const_ptr_this, idx_PointCount);
+        int rc = UnsafeNativeMethods.ON_PointCloud_GetInt(const_ptr_this, idx_PointCount);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
     /// <summary>
@@ -480,7 +511,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetInt(const_ptr_this, idx_HiddenPointCount);
+        int rc = UnsafeNativeMethods.ON_PointCloud_GetInt(const_ptr_this, idx_HiddenPointCount);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -499,7 +532,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Colors);
+        bool rc = UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Colors);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -513,7 +548,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Normals);
+        bool rc = UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Normals);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -527,7 +564,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Hidden);
+        bool rc = UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Hidden);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -541,7 +580,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Extra);
+        bool rc = UnsafeNativeMethods.ON_PointCloud_GetBool(const_ptr_this, idx_Extra);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -560,6 +601,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Colors);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -573,6 +615,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Normals);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -586,6 +629,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Hidden);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -600,6 +644,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer(); 
       UnsafeNativeMethods.ON_PointCloud_DestroyArray(ptr_this, idx_Extra);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -635,6 +680,8 @@ namespace Rhino.Geometry
       IntPtr const_ptr_other = other.ConstPointer();
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_MergeCloud(ptr_this, const_ptr_other);
+      GC.KeepAlive(other);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -646,6 +693,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint1(ptr_this, point);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -658,6 +706,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint3(ptr_this, point, normal);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -670,6 +719,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint2(ptr_this, point, color.ToArgb());
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -683,6 +733,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint4(ptr_this, point, color.ToArgb(), normal);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -700,6 +751,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoint5(ptr_this, point, color.ToArgb(), normal, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -716,6 +768,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints(ptr_this, count, point_array, null);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -742,6 +795,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints(ptr_this, point_count, point_array, normal_array);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -778,6 +832,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints2(ptr, count, ptArray, argbArray);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -810,6 +865,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints4(ptr_this, point_count, point_array, normal_array, argb_array);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -851,6 +907,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_AppendPoints5(ptr_this, point_count, point_array, normal_array, argb_array, value_array);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Inserts a new point into the point list.</summary>
@@ -864,6 +921,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint1(ptr_this, index, point);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Inserts a new point into the point list.</summary>
@@ -878,6 +936,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint3(ptr_this, index, point, normal);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -894,6 +953,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint2(ptr, index, point, color.ToArgb());
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -911,6 +971,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint4(ptr, index, point, color.ToArgb(), normal);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -932,6 +993,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoint5(ptr, index, point, color.ToArgb(), normal, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -952,6 +1014,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_InsertPoints(ptr, index, count, point_array);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -966,6 +1029,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PointCloud_RemovePoint(ptr_this, index);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -980,7 +1044,9 @@ namespace Rhino.Geometry
       using (var indexes = new SimpleArrayInt(indices))
       {
         IntPtr ptr_const_indexes = indexes.ConstPointer();
-        return UnsafeNativeMethods.ON_PointCloud_RemoveRange(ptr_this, ptr_const_indexes);
+        int rc = UnsafeNativeMethods.ON_PointCloud_RemoveRange(ptr_this, ptr_const_indexes);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1038,6 +1104,7 @@ namespace Rhino.Geometry
         IntPtr ptr_this = ConstPointer();
         IntPtr ptr_out_curves = out_curves.NonConstPointer();
         int curve_count = UnsafeNativeMethods.RHC_RhinoCreatePointCloudSection(ptr_this, ref plane, absoluteTolerance, maxDistance, minDistance, openCurves, createSpline, createPolyline, fitTolerance, ptr_out_curves);
+        GC.KeepAlive(this);
         if (curve_count > 0)
           return out_curves.ToNonConstArray();
         return Array.Empty<Curve>();
@@ -1090,6 +1157,7 @@ namespace Rhino.Geometry
         IntPtr ptr_this = ConstPointer();
         IntPtr ptr_out_curves = out_curves.NonConstPointer();
         int curve_count = UnsafeNativeMethods.RHC_RhinoCreatePointCloudContours(ptr_this, startPoint, endPoint, interval, absoluteTolerance, maxDistance, minDistance, openCurves, createSpline, createPolyline, fitTolerance, ptr_out_curves);
+        GC.KeepAlive(this);
         if (curve_count > 0)
           return out_curves.ToNonConstArray();
         return Array.Empty<Curve>();
@@ -1113,6 +1181,7 @@ namespace Rhino.Geometry
 
       Point3d[] rc = new Point3d[count];
       UnsafeNativeMethods.ON_PointCloud_GetPoints(const_ptr_this, count, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1132,6 +1201,7 @@ namespace Rhino.Geometry
         if (index < 0) { throw new IndexOutOfRangeException("index must be larger than or equal to zero"); }
         if (index >= Count) { throw new IndexOutOfRangeException("index must be smaller than the Number of points in the PointCloud"); }
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1150,6 +1220,7 @@ namespace Rhino.Geometry
 
       Vector3d[] rc = new Vector3d[count];
       UnsafeNativeMethods.ON_PointCloud_GetNormals(const_ptr_this, count, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1168,6 +1239,7 @@ namespace Rhino.Geometry
 
       int[] rc = new int[count];
       UnsafeNativeMethods.ON_PointCloud_GetColors(const_ptr_this, count, rc);
+      GC.KeepAlive(this);
 
       Color[] res = new Color[count];
       for (int i = 0; i < count; i++)
@@ -1191,6 +1263,7 @@ namespace Rhino.Geometry
 
       double[] rc = new double[count];
       UnsafeNativeMethods.ON_PointCloud_GetExtras(const_ptr_this, count, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1204,7 +1277,9 @@ namespace Rhino.Geometry
     public int ClosestPoint(Point3d testPoint)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_PointCloud_GetClosestPoint(const_ptr_this, testPoint);
+      int rc = UnsafeNativeMethods.ON_PointCloud_GetClosestPoint(const_ptr_this, testPoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1219,6 +1294,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, IntPtr.Zero, 0);
+      GC.KeepAlive(this);
       if (IntPtr.Zero == ptr)
         return null;
       return new PointCloud(ptr, null);
@@ -1242,6 +1318,7 @@ namespace Rhino.Geometry
         out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
 
       IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, ptr_terminator, progress_report_serial_number);
+      GC.KeepAlive(this);
 
       if (terminator != null) terminator.Dispose();
       if (reporter != null) reporter.Disable();

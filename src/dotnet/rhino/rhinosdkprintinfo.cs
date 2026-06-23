@@ -712,6 +712,7 @@ namespace Rhino.Display
     {
       IntPtr ptrOther = other != null ? other.ConstPointer() : IntPtr.Zero;
       _ptrPrintInfo = UnsafeNativeMethods.CRhinoPrintInfo_New(ptrOther);
+      GC.KeepAlive(other);
     }
 
     /// <summary>Constructor</summary>
@@ -763,6 +764,7 @@ namespace Rhino.Display
       IntPtr ptrNewSettings = UnsafeNativeMethods.CRhinoPrintInfo_GetPreviewLayout(constPtrThis, size.Width, size.Height);
       if (ptrNewSettings != IntPtr.Zero)
         return new ViewCaptureSettings(ptrNewSettings);
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -779,7 +781,10 @@ namespace Rhino.Display
         return false;
       IntPtr constPointerThis = ConstPointer();
       IntPtr constPointerOther = other.ConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_Equals(constPointerThis, constPointerOther);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_Equals(constPointerThis, constPointerOther);
+      GC.KeepAlive(other);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -804,6 +809,7 @@ namespace Rhino.Display
       }
 
       UnsafeNativeMethods.CRhinoPrintInfo_SetViewport(_ptrPrintInfo, ptrRhinoViewport);
+      GC.KeepAlive(viewport);
     }
 
     /// <summary>
@@ -819,6 +825,7 @@ namespace Rhino.Display
       IntPtr constPtrThis = ConstPointer();
       Guid viewportId = UnsafeNativeMethods.CRhinoPrintInfo_GetViewportId(constPtrThis);
       var viewport = RhinoViewport.FromId(viewportId);
+      GC.KeepAlive(this);
       return viewport;
     }
 
@@ -917,6 +924,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetLayout(ptr_this, mediaSize.Width, mediaSize.Height,
         cropRectangle.Left, cropRectangle.Top, cropRectangle.Right, cropRectangle.Bottom);
+      GC.KeepAlive(this);
     }
 
     /// <summary> Total size of the image or page in dots </summary>
@@ -930,6 +938,7 @@ namespace Rhino.Display
         double dpi = 0;
         int margin_left = 0, margin_top = 0, margin_right = 0, margin_bottom = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_PageSize(const_ptr_this, ref width, ref height, ref dpi, ref margin_left, ref margin_top, ref margin_right, ref margin_bottom);
+        GC.KeepAlive(this);
         return new Size(width, height);
       }
     }
@@ -945,6 +954,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         int left = 0, top = 0, right = 0, bottom = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_DrawRect(const_ptr_this, ref left, ref top, ref right, ref bottom);
+        GC.KeepAlive(this);
         return Rectangle.FromLTRB(left, top, right, bottom);
       }
     }
@@ -960,6 +970,7 @@ namespace Rhino.Display
         double dpi = 0;
         int margin_left = 0, margin_top = 0, margin_right = 0, margin_bottom = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_PageSize(const_ptr_this, ref width, ref height, ref dpi, ref margin_left, ref margin_top, ref margin_right, ref margin_bottom);
+        GC.KeepAlive(this);
         return dpi;
       }
       set
@@ -980,6 +991,7 @@ namespace Rhino.Display
         double dpi = 0;
         int margin_left = 0, margin_top = 0, margin_right = 0, margin_bottom = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_PageSize(const_ptr_this, ref width, ref height, ref dpi, ref margin_left, ref margin_top, ref margin_right, ref margin_bottom);
+        GC.KeepAlive(this);
         return new Rectangle(margin_left, margin_top, margin_right - margin_left, margin_bottom - margin_top);
       }
     }
@@ -992,6 +1004,7 @@ namespace Rhino.Display
     {
       IntPtr ptrThis = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_MaximizeDrawRect(ptrThis);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1003,7 +1016,9 @@ namespace Rhino.Display
     public bool MatchViewportAspectRatio()
     {
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_MatchViewportAspectRatio(ptrThis);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_MatchViewportAspectRatio(ptrThis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1024,7 +1039,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       left = top = right = bottom = 0;
-      return UnsafeNativeMethods.CRhinoPrintInfo_GetMargins(const_ptr_this, lengthUnits, ref left, ref top, ref right, ref bottom);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_GetMargins(const_ptr_this, lengthUnits, ref left, ref top, ref right, ref bottom);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1044,7 +1061,9 @@ namespace Rhino.Display
     public bool SetMargins(UnitSystem lengthUnits, double left, double top, double right, double bottom)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_SetMargins(ptr_this, lengthUnits, left, top, right, bottom);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_SetMargins(ptr_this, lengthUnits, left, top, right, bottom);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1115,6 +1134,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetOffset(ptr_this, lengthUnits, fromMargin, x, y);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.2</since>
@@ -1124,6 +1144,7 @@ namespace Rhino.Display
       x = y = 0;
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_GetOffset(const_ptr_this, lengthUnits, ref fromMargin, ref x, ref y);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.2</since>
@@ -1144,37 +1165,45 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         int anchor = 0;
         UnsafeNativeMethods.CRhinoPrintInfo_GetAnchor(const_ptr_this, ref anchor);
+        GC.KeepAlive(this);
         return (AnchorLocation)anchor;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetAnchor(ptr_this, (UnsafeNativeMethods.PrintInfoAnchor)value);
+        GC.KeepAlive(this);
       }
     }
 
     private bool GetBool(UnsafeNativeMethods.PrintInfoBool which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     private void SetBool(UnsafeNativeMethods.PrintInfoBool which, bool val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetBool(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     private double GetDouble(UnsafeNativeMethods.PrintInfoDouble which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_GetDouble(const_ptr_this, which);
+      double rc = UnsafeNativeMethods.CRhinoPrintInfo_GetDouble(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     private void SetDouble(UnsafeNativeMethods.PrintInfoDouble which, double val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetDouble(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
@@ -1350,12 +1379,15 @@ namespace Rhino.Display
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return (ColorMode)UnsafeNativeMethods.CRhinoPrintInfo_GetColorMode(constPtrThis);
+        ColorMode rc = (ColorMode)UnsafeNativeMethods.CRhinoPrintInfo_GetColorMode(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetColorMode(ptrThis, (UnsafeNativeMethods.PrintInfoColorMode)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1372,6 +1404,7 @@ namespace Rhino.Display
         {
           IntPtr ptrString = sw.NonConstPointer;
           UnsafeNativeMethods.CRhinoPrintInfo_GetHeaderFooter(constPtrThis, true, ptrString);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -1379,6 +1412,7 @@ namespace Rhino.Display
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetHeaderFooter(ptrThis, true, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1395,6 +1429,7 @@ namespace Rhino.Display
         {
           IntPtr ptrString = sw.NonConstPointer;
           UnsafeNativeMethods.CRhinoPrintInfo_GetHeaderFooter(constPtrThis, false, ptrString);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -1402,6 +1437,7 @@ namespace Rhino.Display
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetHeaderFooter(ptrThis, false, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1415,7 +1451,9 @@ namespace Rhino.Display
     public double GetModelScale(UnitSystem pageUnits, UnitSystem modelUnits)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPrintInfo_GetModelScale(ptr_const_this, pageUnits, modelUnits);
+      double rc = UnsafeNativeMethods.CRhinoPrintInfo_GetModelScale(ptr_const_this, pageUnits, modelUnits);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1427,6 +1465,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleToValue(ptr_this, scale);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1438,6 +1477,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleToFit(ptr_this, promptOnChange);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1449,7 +1489,9 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoPrintInfo_IsScaledToFit(ptr_const_this);
+        bool rc = UnsafeNativeMethods.CRhinoPrintInfo_IsScaledToFit(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1459,12 +1501,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoPrintInfo_GetModelScaleType(ptr_const_this);
+        int rc = UnsafeNativeMethods.CRhinoPrintInfo_GetModelScaleType(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPrintInfo_SetModelScaleType(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1482,6 +1527,7 @@ namespace Rhino.Display
       Point3d pt1 = new Point3d(screenPoint1.X, screenPoint1.Y, 0);
       Point3d pt2 = new Point3d(screenPoint2.X, screenPoint2.Y, 0);
       UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, pt1, pt2, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1498,6 +1544,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPrintInfo_SetWindowRect(ptr_this, worldPoint1, worldPoint2, false);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -1518,7 +1565,9 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       string command_name = settings.Key;
-      return UnsafeNativeMethods.CRhinoPrintInfo_Load(ptr_this, command_name, name);
+      bool rc = UnsafeNativeMethods.CRhinoPrintInfo_Load(ptr_this, command_name, name);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>8.1</since>
@@ -1527,6 +1576,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       string command_name = settings.Key;
       UnsafeNativeMethods.CRhinoPrintInfo_Save(const_ptr_this, command_name, name);
+      GC.KeepAlive(this);
     }
 
     #region IDisposable implementation
@@ -1903,7 +1953,41 @@ namespace Rhino.Runtime
         var loc = m_current_path[m_current_path.Count - 1].Location;
         Point2d loc_2d = new Point2d(loc.X, loc.Y);
         if (loc_2d.DistanceTo(pt) > 0.5)
+        {
           gap_exists = true;
+          
+          // 21 Dec 2025 S. Baer (RH-85924)
+          // If the list is currently just a polyline, see if the point matches
+          // the beginning of the list as well. In that case, we can reverse
+          // the list without haven't to flush. This helps minimize the number
+          // of MoveTo operations in the final PDF (making it a bit smaller)
+          Point2d first = new Point2d(m_current_path[0].Location.X, m_current_path[0].Location.Y);
+          double firstDist = first.DistanceTo(pt);
+          if (firstDist < 0.5)
+          {
+            // check that the list is a polyline and if so, flip it
+            bool isPolyline = true;
+            for(int i=1; i<m_current_path.Count; i++)
+            {
+              if (m_current_path[i].PointType != PointType.Line)
+              {
+                isPolyline = false;
+                break;
+              }
+            }
+            if (isPolyline)
+            {
+              m_current_path.Reverse();
+              var temp = m_current_path[0];
+              temp.PointType = PointType.Move;
+              m_current_path[0] = temp;
+              temp = m_current_path[m_current_path.Count - 1];
+              temp.PointType = PointType.Line;
+              m_current_path[m_current_path.Count - 1] = temp;
+              gap_exists = false;
+            }
+          }
+        }
       }
 
       bool pen_changed = PensAreDifferent(m_pen, pen);

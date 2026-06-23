@@ -1746,6 +1746,7 @@ namespace Rhino.Geometry
       IntPtr intptr_callback = Marshal.GetFunctionPointerForDelegate(cb);
       bool rc = UnsafeNativeMethods.ON_SpaceMorph_MorphGeometry(pGeometry, m_tolerance, m_bQuickPreview, m_bPreserveStructure, intptr_callback);
       pinnedCallback.Free();
+      GC.KeepAlive(geometry);
       return rc;
     }
 
@@ -1806,12 +1807,14 @@ namespace Rhino.Geometry.Morphs
         IntPtr pConstThis = ConstPointer();
         Line rc = new Line();
         UnsafeNativeMethods.CRhinoTwistSpaceMorph_GetLine(pConstThis, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoTwistSpaceMorph_SetLine(pThis, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1824,12 +1827,15 @@ namespace Rhino.Geometry.Morphs
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoTwistSpaceMorph_GetTwistAngle(pConstThis);
+        double rc = UnsafeNativeMethods.CRhinoTwistSpaceMorph_GetTwistAngle(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoTwistSpaceMorph_SetTwistAngle(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1843,12 +1849,15 @@ namespace Rhino.Geometry.Morphs
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoTwistSpaceMorph_GetInfiniteTwist(pConstThis);
+        bool rc = UnsafeNativeMethods.CRhinoTwistSpaceMorph_GetInfiniteTwist(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoTwistSpaceMorph_SetInfiniteTwist(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 

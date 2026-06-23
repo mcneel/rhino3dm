@@ -2287,6 +2287,7 @@ namespace Rhino.Collections
       {
         IntPtr pNativeArray = pts.ConstPointer();
         UnsafeNativeMethods.ON_3dPointArray_CopyValues(pNativeArray, list.m_items);
+        GC.KeepAlive(pts);
         list.m_size = count;
       }
       return list;

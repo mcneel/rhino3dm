@@ -285,6 +285,8 @@ namespace Rhino.Geometry
       var style_pointer = style?.ConstPointer() ?? IntPtr.Zero;
       var pointer = NonConstPointer();
       var success = UnsafeNativeMethods.ON_V6_TextObject_Transform(pointer, ref transform, style_pointer);
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -299,6 +301,8 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       IntPtr const_ptr_dimstyle = dimstyle.ConstPointer();
       UnsafeNativeMethods.ON_V6_TextObject_GetTextXform(const_ptr_this, const_ptr_dimstyle, textscale, ref xform);
+      GC.KeepAlive(dimstyle);
+      GC.KeepAlive(this);
       return xform;
     }
 
@@ -335,6 +339,7 @@ namespace Rhino.Geometry
 
         GC.KeepAlive(dimstyle);   // GC_KeepAlive: Nov. 1, 2018
         GC.KeepAlive(parent);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
 
         return curves.ToNonConstArray();
       }
@@ -365,6 +370,7 @@ namespace Rhino.Geometry
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps, IntPtr.Zero);
+        GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
     }
@@ -419,6 +425,7 @@ namespace Rhino.Geometry
           if (dict.ContainsKey(i))
             rc.Add(dict[i].ToArray());
         }
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -474,6 +481,7 @@ namespace Rhino.Geometry
           if (dict.ContainsKey(i))
             rc.Add(dict[i].ToArray());
         }
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -504,6 +512,7 @@ namespace Rhino.Geometry
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps, IntPtr.Zero);
+        GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
     }
@@ -560,6 +569,7 @@ namespace Rhino.Geometry
           if (dict.ContainsKey(i))
             rc.Add(dict[i].ToArray());
         }
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -590,6 +600,7 @@ namespace Rhino.Geometry
         IntPtr ptr_extrusions = extrusions.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions, IntPtr.Zero);
+        GC.KeepAlive(this);
         return extrusions.ToNonConstArray();
       }
     }
@@ -621,6 +632,7 @@ namespace Rhino.Geometry
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !allowOpen, smallCapsScale, spacing, ptr_curves, IntPtr.Zero);
         GC.KeepAlive(dimstyle);
+        GC.KeepAlive(this);
         return curves.ToNonConstArray();
       }
     }
@@ -676,6 +688,7 @@ namespace Rhino.Geometry
           if (dict.ContainsKey(i))
             rc.Add(dict[i].ToArray());
         }
+        GC.KeepAlive(this);
         return rc;
       }
     }

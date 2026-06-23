@@ -346,26 +346,28 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Point3d ClosestPoint(Point3d point)
     {
-      // David: This code is untested.
+      return ClosestPoint(point, includeInterior: true);
+    }
 
+    /// <summary>
+    /// Finds the closest point on or in the Box. The box should be Valid for this to work.
+    /// </summary>
+    /// <param name="point">Sample point.</param>
+    /// <param name="includeInterior">If false, the point is projected onto the boundary faces only, 
+    /// otherwise the interior of the box is also taken into consideration.</param>
+    /// <returns>The point on or in the box that is closest to the sample point.</returns>
+    /// <since>8.29</since>
+    [ConstOperation]
+    public Point3d ClosestPoint(Point3d point, bool includeInterior)
+    {
       // Remap point to m_plane coordinates
-      Point3d pt;
-      if (!m_plane.RemapToPlaneSpace(point, out pt)) { return Point3d.Unset; }
+      if (!m_plane.RemapToPlaneSpace(point, out var pt)) return Point3d.Unset;
 
-      // Project x, y and z onto/into the box
-      double x = pt.m_x;
-      double y = pt.m_y;
-      double z = pt.m_z;
-
-      x = Math.Max(x, m_dx.T0);
-      y = Math.Max(y, m_dy.T0);
-      z = Math.Max(z, m_dz.T0);
-
-      x = Math.Min(x, m_dx.T1);
-      y = Math.Min(y, m_dy.T1);
-      z = Math.Min(z, m_dz.T1);
-
-      return m_plane.PointAt(x, y, z);
+      var bbox = new BoundingBox(new Point3d(m_dx.T0, m_dy.T0, m_dz.T0), new Point3d(m_dx.T1, m_dy.T1, m_dz.T1));
+      var c = bbox.ClosestPoint(pt, includeInterior);
+      if (!c.IsValid) return Point3d.Unset;
+      
+      return m_plane.PointAt(c.X, c.Y) + m_plane.Normal * c.Z;
     }
 
     /// <summary>

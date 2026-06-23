@@ -37,7 +37,9 @@ namespace Rhino.DocObjects
     public uint DataCRC(uint currentRemainder)
     {
       var const_ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_ModelComponent_DataCRC(const_ptr, currentRemainder);
+      uint rc = UnsafeNativeMethods.ON_ModelComponent_DataCRC(const_ptr, currentRemainder);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -78,7 +80,9 @@ namespace Rhino.DocObjects
       get
       {
         var const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_IsSystemComponent(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_IsSystemComponent(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -95,7 +99,9 @@ namespace Rhino.DocObjects
           return false;
 
         var const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_IsDeleted(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_IsDeleted(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -112,7 +118,9 @@ namespace Rhino.DocObjects
           return false;
 
         var const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_IsReference(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_IsReference(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -129,12 +137,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_GetId(const_ptr);
+        Guid rc = UnsafeNativeMethods.ON_ModelComponent_GetId(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr non_const_ptr = NonConstPointer();
         bool rc = UnsafeNativeMethods.ON_ModelComponent_SetId(non_const_ptr, value);
+        GC.KeepAlive(this);
 
         if (!rc)
           throw new InvalidOperationException(
@@ -151,6 +162,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_ModelComponent_ClearId(non_const_ptr);
+      GC.KeepAlive(this);
 
       if (!rc)
         throw new InvalidOperationException(
@@ -166,7 +178,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_HasId(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_HasId(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -179,7 +193,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_IdIsLocked(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_IdIsLocked(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -191,6 +207,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_ModelComponent_LockId(non_const_ptr);
+      GC.KeepAlive(this);
     }
 
 
@@ -207,12 +224,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_GetIndex(const_ptr);
+        int rc = UnsafeNativeMethods.ON_ModelComponent_GetIndex(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr non_const_ptr = NonConstPointer();
         bool rc = UnsafeNativeMethods.ON_ModelComponent_SetIndex(non_const_ptr, value);
+        GC.KeepAlive(this);
 
         if (!rc)
           throw new InvalidOperationException(
@@ -229,6 +249,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_ModelComponent_ClearIndex(non_const_ptr);
+      GC.KeepAlive(this);
 
       if (!rc)
         throw new InvalidOperationException(
@@ -244,7 +265,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_HasIndex(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_HasIndex(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -257,7 +280,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_IndexIsLocked(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_IndexIsLocked(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -269,6 +294,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_ModelComponent_LockIndex(non_const_ptr);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -281,6 +307,7 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr = ConstPointer();
         var rc = UnsafeNativeMethods.ON_ModelComponent_GetComponentStatus(const_ptr);
+        GC.KeepAlive(this);
         return new ComponentStatus((byte)rc);
       }
       set
@@ -288,6 +315,7 @@ namespace Rhino.DocObjects
         IntPtr ptr_this = NonConstPointer();
         if (!UnsafeNativeMethods.ON_ModelComponent_SetComponentStatus(ptr_this, value.PrivateBytes()))
           throw new NotSupportedException("Could not set component status.");
+        GC.KeepAlive(this);
       }
     }
 
@@ -300,7 +328,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_GetComponentStatusIsLocked(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_GetComponentStatusIsLocked(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -339,6 +369,7 @@ namespace Rhino.DocObjects
         {
           var non_const_ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_ModelComponent_GetName(const_ptr, non_const_ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -346,6 +377,7 @@ namespace Rhino.DocObjects
       {
         IntPtr non_const_ptr = NonConstPointer();
         bool rc = UnsafeNativeMethods.ON_ModelComponent_SetName(non_const_ptr, value);
+        GC.KeepAlive(this);
 
         if (!rc)
           throw new InvalidOperationException(
@@ -362,6 +394,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_ModelComponent_ClearName(non_const_ptr);
+      GC.KeepAlive(this);
 
       if (!rc)
         throw new InvalidOperationException(
@@ -377,7 +410,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_HasName(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_HasName(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -390,7 +425,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_NameIsLocked(const_ptr);
+        bool rc = UnsafeNativeMethods.ON_ModelComponent_NameIsLocked(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -402,6 +439,7 @@ namespace Rhino.DocObjects
     {
       IntPtr non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_ModelComponent_LockName(non_const_ptr);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -419,6 +457,7 @@ namespace Rhino.DocObjects
         {
           var non_const_ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_ModelComponent_GetDeletedName(const_ptr, non_const_ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -459,7 +498,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_ModelSerialNumber(const_ptr);
+        uint rc = UnsafeNativeMethods.ON_ModelComponent_ModelSerialNumber(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -478,7 +519,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_ReferenceModelSerialNumber(const_ptr);
+        uint rc = UnsafeNativeMethods.ON_ModelComponent_ReferenceModelSerialNumber(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -498,7 +541,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ModelComponent_InstanceDefinitionModelSerialNumber(const_ptr);
+        uint rc = UnsafeNativeMethods.ON_ModelComponent_InstanceDefinitionModelSerialNumber(const_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
    }
 
@@ -514,7 +559,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = true;
       var const_pointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(const_pointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(const_pointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>

@@ -125,10 +125,6 @@ namespace Rhino
     /// <since>6.0</since>
     public void CopyTo(int[] array, int arrayIndex)
     {
-      if (array == null) throw new ArgumentNullException(nameof(array));
-      if (arrayIndex < 0 || arrayIndex >= array.Length - 2) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-      if (array.Length < 2) throw new ArgumentException("Array needs to be at least 2 items long for this IndexPair to fit.", nameof(array));
-
       array[arrayIndex] = m_i;
       array[arrayIndex + 1] = m_j;
     }
@@ -1728,6 +1724,11 @@ namespace Rhino.Geometry
     SubdFace = 73,   // SubDFacePtr.Id
 
     /// <summary>
+    /// Targets a hatch loop.
+    /// </summary>
+    HatchLoop = 81,
+
+    /// <summary>
     /// Targets a linear dimension point index.
     /// </summary>
     DimLinearPoint = 100,
@@ -1751,6 +1752,16 @@ namespace Rhino.Geometry
     /// Targets a text point index.
     /// </summary>
     DimTextPoint = 104,
+
+    /// <summary>
+    /// Targets a centermark point
+    /// </summary>
+    DimCentermarkPoint = 105,
+
+    /// <summary>
+    /// Targets a leader point
+    /// </summary>
+    DimLeaderPoint = 106,
 
     /// <summary>
     /// Targets no specific type.
@@ -1837,6 +1848,65 @@ namespace Rhino.Geometry
     public int Index
     {
       get { return m_index; }
+    }
+
+    /// <summary>
+    /// True if <seealso cref="ComponentIndexType"/> is set to a value between
+    /// <seealso cref="ComponentIndexType.BrepVertex"/> and <seealso cref="ComponentIndexType.DimLeaderPoint"/>.
+    /// </summary>
+    /// <since>8.26</since>
+    public bool IsSet
+    {
+      get
+      {
+        // from opennurbs_objref.cpp
+        bool rc = false;
+        switch(ComponentIndexType)
+        {
+          case ComponentIndexType.InvalidType:
+          case ComponentIndexType.NoType:
+            rc = false;
+            break;
+
+          case ComponentIndexType.BrepVertex:
+          case ComponentIndexType.BrepEdge:
+          case ComponentIndexType.BrepFace:
+          case ComponentIndexType.BrepTrim:
+          case ComponentIndexType.BrepLoop:
+
+          case ComponentIndexType.MeshVertex:
+          case ComponentIndexType.MeshTopologyVertex:
+          case ComponentIndexType.MeshTopologyEdge:
+          case ComponentIndexType.MeshFace:
+          case ComponentIndexType.MeshNgon:
+
+          case ComponentIndexType.InstanceDefinitionPart:
+          case ComponentIndexType.PolycurveSegment:
+          case ComponentIndexType.PointCloudPoint:
+          case ComponentIndexType.GroupMember:
+
+          case ComponentIndexType.SubdVertex:
+          case ComponentIndexType.SubdEdge:
+          case ComponentIndexType.SubdFace:
+
+          case ComponentIndexType.HatchLoop:
+
+          case ComponentIndexType.DimLinearPoint:
+          case ComponentIndexType.DimRadialPoint:
+          case ComponentIndexType.DimAngularPoint:
+          case ComponentIndexType.DimOrdinatePoint:
+          case ComponentIndexType.DimTextPoint:
+          case ComponentIndexType.DimCentermarkPoint:
+          case ComponentIndexType.DimLeaderPoint:
+            rc = Index != -1;
+            break;
+
+          default:
+            rc = false;
+            break;
+        }
+        return rc;
+      }
     }
 
     /// <summary>

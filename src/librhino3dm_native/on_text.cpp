@@ -533,7 +533,10 @@ RH_C_FUNCTION void ON_V6_Annotation_AlternateSuffix(const ON_Annotation* annotat
   if (nullptr != annotation && nullptr != wstring)
     *wstring = annotation->AlternateSuffix(parent_style);
   else
-    *wstring = ON_wString::EmptyString;
+  {
+    if (wstring)
+      *wstring = ON_wString::EmptyString;
+  }
 }
 
 RH_C_FUNCTION void ON_V6_Annotation_SetAlternateSuffix(ON_Annotation* annotation, const ON_DimStyle* parent_style, const RHMONO_STRING* str)

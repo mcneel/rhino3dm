@@ -186,10 +186,11 @@ namespace Rhino.DocObjects
     {
       nestingLevel = 0;
       IntPtr const_ptr_this = ConstPointer();
+      // 0    No
+      // >= 1 This CRhinoInstanceObject uses the instance definition and the returned value is the nesting depth.
       int rc = UnsafeNativeMethods.CRhinoInstanceObject_UsesDefinition(const_ptr_this, definitionIndex);
-      if (rc >= 0)
-        nestingLevel = rc;
-      return rc >= 0;
+      nestingLevel = rc;
+      return rc >= 1;
     }
 
     /// <summary>
@@ -244,6 +245,7 @@ namespace Rhino.DocObjects
         pieces[i] = CreateRhinoObjectHelper(ptr_rhino_object);
         pieceAttributes[i] = attrs;
         pieceTransforms[i] = xform;
+        GC.KeepAlive(attrs);
       }
       UnsafeNativeMethods.CRhinoInstanceObjectPieceArray_Delete(ptr_piece_list);
     }
@@ -1195,6 +1197,7 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// true if successful.
     /// </returns>
+    /// <since>8.10</since>
     public bool Modify(int idefIndex, UserData userData, bool quiet)
     {
       var rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInstanceDefinitionUserData(m_doc.RuntimeSerialNumber, idefIndex, userData.NonConstPointer(true), quiet);

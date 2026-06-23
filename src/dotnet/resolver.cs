@@ -7,7 +7,7 @@ using System.Linq;
 using System.Collections;
 using System.Runtime.InteropServices;
 #if RHINO_SDK
-using System.Collections.Immutable;
+using System.Collections.Immutable;   // rhino3dm-local: ImmutableHashSet is only used in RHINO_SDK code; keep guarded so rhino3dm needs no System.Collections.Immutable package
 #endif
 
 namespace Rhino.Runtime
@@ -263,7 +263,7 @@ namespace Rhino.Runtime
 #if RHINO_SDK
           // 7 Feb 2017 S. Baer (RH-30818)
           // Remove native DLLs from the list of potentials
-          exclude |= !HostUtils.IsManagedDll(file);
+          exclude = exclude || !HostUtils.IsManagedDll(file);
 #endif
           if (exclude)
             potential_files.RemoveAt(i);

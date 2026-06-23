@@ -133,7 +133,8 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Initializes a new arc from end points and a tangent vector. 
-    /// If the tangent is parallel with the endpoints this will result in an Invalid arc.
+    /// If the tangent is parallel with the line segment between the two 
+    /// endpoints this will result in an Invalid arc.
     /// </summary>
     /// <param name="pointA">Start point of arc.</param>
     /// <param name="tangentA">Tangent at start of arc.</param>
@@ -351,12 +352,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Sets arc's angle domain (in Radians) as a sub-domain of the circle.
+    /// Sets the arc's angle domain (in radians) to the specified interval, provided it is increasing and its length does not exceed 2.0 * Math.PI (plus a small tolerance).
+    /// If the interval length exceeds 2.0 * Math.PI it will be clamped to exactly 2.0 * Math.PI. Returns true if the domain was set successfully, false otherwise.
     /// </summary>
     /// <param name="domain">
-    /// 0 &lt; domain[1] - domain[0] &lt;= 2.0 * RhinoMath.Pi.
+    /// The desired angle domain in radians. Must satisfy domain[0] &lt; domain[1] and domain[1] - domain[0] &lt;= 2.0 * Math.PI + tolerance.
     /// </param>
-    /// <returns>true on success, false on failure.</returns>
+    /// <returns>
+    /// True if the domain was set successfully; false if the interval is not increasing or exceeds the allowed length.
+    /// </returns>
     /// <since>5.0</since>
     public bool Trim(Interval domain)
     {

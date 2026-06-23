@@ -735,6 +735,20 @@ RH_C_FUNCTION bool ON_Brep_IsSolid(const ON_Brep* pConstBrep)
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Brep_HasPerFaceColors(const ON_Brep* pConstBrep)
+{
+  if (pConstBrep)
+    return pConstBrep->HasPerFaceColors();
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_Brep_ClearPerFaceColors(ON_Brep* pBrep)
+{
+  if (pBrep)
+    return pBrep->ClearPerFaceColors();
+  return 0;
+}
+
 enum BrepInt : int
 {
   idxSolidOrientation = 0,
@@ -763,7 +777,7 @@ RH_C_FUNCTION int ON_Brep_GetInt(const ON_Brep* pConstBrep, enum BrepInt which)
       rc = pConstBrep->m_F.Count();
       break;
     case idxIsManifold:
-      rc = pConstBrep->IsManifold()?1:0;
+      rc = pConstBrep->IsManifold(nullptr, nullptr) ? 1 : 0;
       break;
     case idxEdgeCount:
       rc = pConstBrep->m_E.Count();
@@ -793,6 +807,14 @@ RH_C_FUNCTION int ON_Brep_GetInt(const ON_Brep* pConstBrep, enum BrepInt which)
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Brep_IsManifold(const ON_Brep* pBrep, bool* pbIsOriented, bool* pbHasBoundary)
+{
+  bool rc = false;
+  if (pBrep)
+    rc = pBrep->IsManifold(pbIsOriented, pbHasBoundary);
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Brep_FaceIsSurface(const ON_Brep* pConstBrep, int faceIndex)
 {
   bool rc = false;
@@ -813,6 +835,14 @@ RH_C_FUNCTION const ON_BrepFace* ON_Brep_BrepFacePointer( const ON_Brep* pConstB
   {
     rc = pConstBrep->Face(faceIndex);
   }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Brep_LoopIsSurfaceBoundary(const ON_Brep* pConstBrep, int loopIndex)
+{
+  bool rc = false;
+  if (pConstBrep)
+    rc = pConstBrep->LoopIsSurfaceBoundary(loopIndex);
   return rc;
 }
 
@@ -1335,9 +1365,14 @@ RH_C_FUNCTION ON_Brep* ON_Brep_CopyTrims( const ON_BrepFace* pConstBrepFace, con
     brp->m_F[0].ChangeSurface(si);
 
     if (brp->RebuildEdges(brp->m_F[0], tolerance, TRUE, TRUE))
-    { brp->Compact(); }
+    {
+      brp->Compact();
+    }
     else
-    { delete brp; }
+    {
+      delete brp;
+      brp = nullptr;
+    }
 
     rc = brp;
   }
@@ -2151,8 +2186,7 @@ RH_C_FUNCTION double ON_Brep_Volume(const ON_Brep* pBrep, double relativeToleran
   if( pBrep )
   {
     ON_MassProperties rc;
-    bool success = false;
-    success = pBrep->VolumeMassProperties(rc, true, false, false, false, ON_UNSET_POINT, relativeTolerance, absoluteTolerance);
+    pBrep->VolumeMassProperties(rc, true, false, false, false, ON_UNSET_POINT, relativeTolerance, absoluteTolerance);
     volume = rc.Volume();
   }
   return volume;

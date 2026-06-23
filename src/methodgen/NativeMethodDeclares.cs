@@ -702,7 +702,17 @@ using Rhino.Runtime.InteropWrappers;
           }
 
           if (s.Equals("ON_Xform") || s.Equals("AR_Transform"))
-            return "ref Transform";
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "Transform[]";
+              else
+                return "[In,Out] Transform[]";
+            }
+            s = "ref Transform";
+            return s;
+          }
 
           if (s.Equals("PointF"))
           {

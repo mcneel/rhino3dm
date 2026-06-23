@@ -395,7 +395,7 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetOnIDocUserStringChangedCallback(Rhino.RhinoDoc.UserStringChangedCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
-  internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnEmptyCallback cb);
+  internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnIntActionCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetBeforeTransformObjectsCallback(Rhino.RhinoDoc.RhinoBeforeTransformObjectsCallback cb);
@@ -564,7 +564,8 @@ internal partial class UnsafeNativeMethods
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_HasCustomRenderMeshes_Callback hasmeshes_func,
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_RenderMeshes_Callback meshes_func,
     Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_NonObjectIds_Callback nonobjectids_func,
-    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_Progress_Callback progress_func
+    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_Progress_Callback progress_func,
+    Rhino.Render.CustomRenderMeshes.RenderMeshProvider.RenderMeshProvider_HasCustomRenderMeshesDotnetHelper_Callback dotnethelper_proc
     );
 
   [DllImport(Import.librdk, CallingConvention = CallingConvention.Cdecl)]

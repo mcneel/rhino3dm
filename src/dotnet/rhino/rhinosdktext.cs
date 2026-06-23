@@ -41,6 +41,7 @@ namespace Rhino.DocObjects
         if (rc && corners.Count > 0)
           return corners.ToArray();
       }
+      GC.KeepAlive(viewport);
       return new Point3d[0];
     }
 

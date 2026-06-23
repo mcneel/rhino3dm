@@ -349,7 +349,7 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_name = name.NonConstPointer();
         IntPtr ptr_url = url.NonConstPointer();
-        IntPtr ptr_details = url.NonConstPointer();
+        IntPtr ptr_details = details.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_ReadApplicationDetails(path, ptr_name, ptr_url, ptr_details);
         applicationName = name.ToString();
         applicationUrl = url.ToString();
@@ -373,7 +373,9 @@ namespace Rhino.FileIO
         return false;
 
       IntPtr ptr_const_geometry = geometry.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_WriteOneObject(path, ptr_const_geometry);
+      bool rc = UnsafeNativeMethods.ONX_Model_WriteOneObject(path, ptr_const_geometry);
+      GC.KeepAlive(geometry);
+      return rc;
     }
 
     /// <summary>
@@ -399,6 +401,7 @@ namespace Rhino.FileIO
       }
       bool rc = UnsafeNativeMethods.ONX_Model_WriteMultipleObjects(path, ptr_object_array);
       UnsafeNativeMethods.ON_ObjectArray_Delete(ptr_object_array);
+      GC.KeepAlive(geometry);
       return rc;
     }
 
@@ -414,9 +417,6 @@ namespace Rhino.FileIO
     /// <since>5.0</since>
     public static System.Drawing.Bitmap ReadPreviewImage(string path)
     {
-      // 4-28-2021 Dale Fugier, as of today this code only run on Windows,
-      // either with or without Rhino.
-
       if (!File.Exists(path))
         throw new FileNotFoundException("The provided path is null, does not exist or cannot be accessed.", path);
 
@@ -429,18 +429,16 @@ namespace Rhino.FileIO
           rc = System.Drawing.Image.FromHbitmap(ptr_bitmap);
         }
       }
-      // 4-28-2021 Dale Fugier, until librhino3dm_native included the AppKit framework
-      // leave this commented out
-      //else if(Rhino.Runtime.HostUtils.RunningOnOSX)
-      //{
-      //  var nsimage = UnsafeNativeMethods.ONX_Model_MacReadPreviewImage(path);
-      //  if(nsimage != IntPtr.Zero)
-      //    rc = System.Drawing.Image.FromHbitmap(nsimage);
-      //}
+      else if (Rhino.Runtime.HostUtils.RunningOnOSX)
+      {
+        var nsimage = UnsafeNativeMethods.ONX_Model_MacReadPreviewImage(path);
+        if (nsimage != IntPtr.Zero)
+          rc = System.Drawing.Image.FromHbitmap(nsimage);
+      }
       return rc;
     }
 #endif // #if !MOBILE_BUILD
-#endif
+#endif // RHINO_SDK
 
 #if RHINO_SDK
     /// <summary>
@@ -515,10 +513,12 @@ namespace Rhino.FileIO
       options = options ?? new File3dmWriteOptions();
 
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_WriteFile(ptr_this, path, options.File3dmValidVersion,
+      bool rc = UnsafeNativeMethods.ONX_Model_WriteFile(ptr_this, path, options.File3dmValidVersion,
         (uint)options.RenderMeshFlags, 
         (uint)options.AnalysisMeshFlags, 
         options.SaveUserData, IntPtr.Zero);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -571,6 +571,7 @@ namespace Rhino.FileIO
           (uint)options.AnalysisMeshFlags,
           options.SaveUserData,
           ptr_string);
+        GC.KeepAlive(this);
         errorLog = sh.ToString();
         return rc;
       }
@@ -610,6 +611,7 @@ namespace Rhino.FileIO
         System.Runtime.InteropServices.Marshal.Copy(pByteArray, bytearray, 0, sz);
       }
       UnsafeNativeMethods.ON_WriteBufferArchive_Delete(ptrBufferArchive);
+      GC.KeepAlive(this);
       return bytearray;
     }
 
@@ -702,6 +704,7 @@ namespace Rhino.FileIO
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ONX_Model_GetStartSectionComments(ptr_const_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -709,6 +712,7 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ONX_Model_SetStartSectionComments(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -721,7 +725,9 @@ namespace Rhino.FileIO
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ONX_Model_GetArchiveVersion(ptr_const_this);
+        int rc = UnsafeNativeMethods.ONX_Model_GetArchiveVersion(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -756,6 +762,7 @@ namespace Rhino.FileIO
         IntPtr ptr_const_this = ConstPointer();
         IntPtr ptr_string = sh.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_GetString(ptr_const_this, which, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -763,6 +770,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ONX_Model_SetString(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -827,6 +835,7 @@ namespace Rhino.FileIO
         int second = 0, minute = 0, hour = 0, month = 0, day = 0, year = 0;
         if (UnsafeNativeMethods.ON_3dmRevisionHistory_GetDate(ptr_revhist, true, ref second, ref minute, ref hour, ref day, ref month, ref year))
           return new DateTime(year, month, day, hour, minute, second);
+        GC.KeepAlive(this);
         return DateTime.MinValue;
       }
     }
@@ -845,6 +854,7 @@ namespace Rhino.FileIO
         int second = 0, minute = 0, hour = 0, month = 0, day = 0, year = 0;
         if (UnsafeNativeMethods.ON_3dmRevisionHistory_GetDate(ptr_revhist, false, ref second, ref minute, ref hour, ref day, ref month, ref year))
           return new DateTime(year, month, day, hour, minute, second);
+        GC.KeepAlive(this);
         return DateTime.MinValue;
       }
     }
@@ -858,12 +868,15 @@ namespace Rhino.FileIO
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ONX_Model_GetRevision(const_ptr_this);
+        int rc = UnsafeNativeMethods.ONX_Model_GetRevision(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ONX_Model_SetRevision(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -882,6 +895,8 @@ namespace Rhino.FileIO
       set
       {
         UnsafeNativeMethods.ONX_Model_SetEarthAnchorPoint(NonConstPointer(), value.ConstPointer());
+        GC.KeepAlive(value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -897,19 +912,28 @@ namespace Rhino.FileIO
         if( UnsafeNativeMethods.ONX_Model_GetPreviewImage(const_ptr_this, ptr_dib))
           return dib.ToBitmap();
       }
+      GC.KeepAlive(this);
       return null;
     }
 
-    /// <summary> Preview image used for file explorer </summary>
+    /// <summary>Preview image used for file explorer </summary>
     /// <since>6.0</since>
     public void SetPreviewImage(System.Drawing.Bitmap image)
     {
       IntPtr ptr_this = NonConstPointer();
-      using (var dib = RhinoDib.FromBitmap(image))
+      if (null == image)
       {
-        IntPtr const_ptr_dib = dib.ConstPointer;
-        UnsafeNativeMethods.ONX_Model_SetPreviewImage(ptr_this, const_ptr_dib);
+        UnsafeNativeMethods.ONX_Model_SetPreviewImage(ptr_this, IntPtr.Zero);
       }
+      else
+      {
+        using (var dib = RhinoDib.FromBitmap(image))
+        {
+          IntPtr const_ptr_dib = dib.ConstPointer;
+          UnsafeNativeMethods.ONX_Model_SetPreviewImage(ptr_this, const_ptr_dib);
+        }
+      }
+      GC.KeepAlive(this);
     }
 #endif
 
@@ -1207,6 +1231,7 @@ namespace Rhino.FileIO
         IntPtr pConstThis = ConstPointer();
         IntPtr pString = sh.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_Dump(pConstThis, which, pString);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1218,6 +1243,7 @@ namespace Rhino.FileIO
         IntPtr pConstThis = ConstPointer();
         IntPtr pString = sh.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_Dump3(pConstThis, type, pString);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1247,6 +1273,7 @@ namespace Rhino.FileIO
       IntPtr pConstThis = ConstPointer();
       IntPtr pTextLog = log.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_Dump2(pConstThis, pTextLog);
+      GC.KeepAlive(this);
     }
     /*
     /// <summary>text dump of bitmap table.</summary>
@@ -1340,9 +1367,9 @@ namespace Rhino.FileIO
       return Dump(idxDumpUserDataTable);
     }
     */
-#endregion
+    #endregion
 
-#region constructor-dispose logic
+    #region constructor-dispose logic
     /// <summary>
     /// Initializes a new instance of a 3dm file.
     /// </summary>
@@ -1566,6 +1593,7 @@ namespace Rhino.FileIO
         IntPtr pGeometry = GetGeometryConstPointer();
         if( m_geometry==null || m_geometry.ConstPointer()!=pGeometry )
           m_geometry = Rhino.Geometry.GeometryBase.CreateGeometryHelper(pGeometry, this);
+        GC.KeepAlive(this);
         return m_geometry;
       }
     }
@@ -1581,6 +1609,7 @@ namespace Rhino.FileIO
         IntPtr pAttributes = GetAttributesConstPointer();
         if (m_attributes == null || m_attributes.ConstPointer() != pAttributes)
           m_attributes = new ObjectAttributes(this);
+        GC.KeepAlive(this);
         return m_attributes;
       }
     }
@@ -1664,6 +1693,7 @@ namespace Rhino.FileIO
       BinaryArchiveReader archive = new BinaryArchiveReader(ptr_buffer_archive);
       bool rc = dataReader(m_parent, archive);
       UnsafeNativeMethods.ONX_Model_UserData_DeleteArchive(ptr_buffer_archive);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -1680,6 +1710,8 @@ namespace Rhino.FileIO
       IntPtr const_ptr_object = GetGeometryConstPointer();
       Transform xformOut = new Transform();
       IntPtr ptr_mapping = UnsafeNativeMethods.ON_TextureMapping_GetMappingFromONXModelObject(const_ptr_model, m_id, mappingChannelId, ref xformOut);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(this);
       xform = xformOut;
       return ptr_mapping == IntPtr.Zero ? null : new TextureMapping(ptr_mapping);
     }
@@ -1967,7 +1999,9 @@ namespace Rhino.FileIO
       if (item == null) return false;
 
       IntPtr pParent = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_RemoveModelComponent_Id(pParent, ComponentType, item.Id);
+      bool rc = UnsafeNativeMethods.ONX_Model_RemoveModelComponent_Id(pParent, ComponentType, item.Id);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -1982,6 +2016,7 @@ namespace Rhino.FileIO
       {
         if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
       }
+      GC.KeepAlive(m_parent);
     }
 
     /// <summary>
@@ -1997,6 +2032,8 @@ namespace Rhino.FileIO
       IntPtr pConstComponent = item.ConstPointer();
       if (!UnsafeNativeMethods.ONX_Model_AddModelComponent(pParent, pConstComponent))
         throw new NotSupportedException("Addition of model component failed.");
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(item);
     }
 
     void ICollection<T>.Add(T item)
@@ -2074,7 +2111,7 @@ namespace Rhino.FileIO
       where T : ModelComponent
     {
       var type = GetModelComponentTypeFromGenericType<T>();
-      return (T)FindId(id, type);
+      return FindId(id, type) as T;
     }
 
     /// <summary>
@@ -2539,14 +2576,16 @@ namespace Rhino.FileIO
       case 1: return new File3dmRenderEnvironment(id, parent);
       case 2: return new File3dmRenderTexture(id, parent);
       }
-
+      GC.KeepAlive(parent);
       return null;
     }
 
     internal override IntPtr GetConstOnComponentManifestPtr()
     {
       IntPtr file_3dm_ptr = m_parent.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_GetConstOnComponentManifestPtr(file_3dm_ptr);
+      IntPtr rc = UnsafeNativeMethods.ONX_Model_GetConstOnComponentManifestPtr(file_3dm_ptr);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     public override object Parent
@@ -2578,6 +2617,7 @@ namespace Rhino.FileIO
           UnsafeNativeMethods.ONX_ModelComponentIterator_Delete(iteratorPtr);
         }
       }
+      GC.KeepAlive(m_parent);
     }
   }
 
@@ -2684,6 +2724,7 @@ namespace Rhino.FileIO
       Rhino.Geometry.BoundingBox bbox = new Geometry.BoundingBox();
       IntPtr pConstModel = m_parent.ConstPointer();
       UnsafeNativeMethods.ONX_Model_BoundingBox(pConstModel, ref bbox);
+      GC.KeepAlive(m_parent);
       return bbox;
     }
 #endregion
@@ -2706,6 +2747,8 @@ namespace Rhino.FileIO
       IntPtr parent = m_parent.NonConstPointer();
       if (!UnsafeNativeMethods.ONX_Model_AddModelComponent(parent, ptr_item))
         throw new NotSupportedException("Addition of model component failed.");
+      GC.KeepAlive(item);
+      GC.KeepAlive(m_parent);
     }
 
     /// <summary>
@@ -2778,7 +2821,10 @@ namespace Rhino.FileIO
     {
       IntPtr pConstAttributes = (attributes==null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddPoint(pThis, point, pConstAttributes);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddPoint(pThis, point, pConstAttributes);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a point object to the document.</summary>
@@ -2901,7 +2947,11 @@ namespace Rhino.FileIO
       IntPtr pAttrs = IntPtr.Zero;
       if (null != attributes)
         pAttrs = attributes.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddPointCloud2(pThis, pCloud, pAttrs);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddPointCloud2(pThis, pCloud, pAttrs);
+      GC.KeepAlive(cloud);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(attributes);
+      return rc;
     }
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of <see cref="Point3d"/>.</param>
@@ -2928,7 +2978,10 @@ namespace Rhino.FileIO
       IntPtr pAttrs = IntPtr.Zero;
       if (null != attributes)
         pAttrs = attributes.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddPointCloud(pThis, count, ptArray, pAttrs);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddPointCloud(pThis, count, ptArray, pAttrs);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <summary>
@@ -2984,6 +3037,8 @@ namespace Rhino.FileIO
         return Guid.Empty;
       IntPtr pThis = m_parent.NonConstPointer();
       Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddClippingPlane(pThis, ref plane, uMagnitude, vMagnitude, count, clippedIds, pAttrs);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -3010,7 +3065,11 @@ namespace Rhino.FileIO
       IntPtr pConstDimension = dimension.ConstPointer();
       IntPtr pAttributes = (attributes==null)?IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddLinearDimension(pThis, pConstDimension, pAttributes);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddLinearDimension(pThis, pConstDimension, pAttributes);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3036,7 +3095,11 @@ namespace Rhino.FileIO
       IntPtr ptr_const_dim = dimension.ConstPointer();
       IntPtr ptr_const_atts = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_this = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddAngularDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddAngularDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3062,7 +3125,11 @@ namespace Rhino.FileIO
       IntPtr ptr_const_dim = dimension.ConstPointer();
       IntPtr ptr_const_atts = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_this = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddOrdinateDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddOrdinateDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3088,7 +3155,11 @@ namespace Rhino.FileIO
       IntPtr ptr_const_dim = dimension.ConstPointer();
       IntPtr ptr_const_atts = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_this = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddRadialDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddRadialDimension(ptr_this, ptr_const_dim, ptr_const_atts);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a line object to Rhino.</summary>
@@ -3110,7 +3181,10 @@ namespace Rhino.FileIO
     {
       IntPtr pAttr = (null == attributes) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddLine(pThis, from, to, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddLine(pThis, from, to, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
     /// <summary>Adds a line object to Rhino.</summary>
     /// <returns>A unique identifier for the object.</returns>
@@ -3151,7 +3225,10 @@ namespace Rhino.FileIO
 
       IntPtr pAttrs = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddPolyLine(pThis, count, ptArray, pAttrs);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddPolyLine(pThis, count, ptArray, pAttrs);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the document representing an arc.</summary>
@@ -3171,7 +3248,10 @@ namespace Rhino.FileIO
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddArc(pThis, ref arc, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddArc(pThis, ref arc, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the document representing a circle.</summary>
@@ -3191,7 +3271,10 @@ namespace Rhino.FileIO
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddCircle(pThis, ref circle, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddCircle(pThis, ref circle, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the document representing an ellipse.</summary>
@@ -3211,7 +3294,10 @@ namespace Rhino.FileIO
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddEllipse(pThis, ref ellipse, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddEllipse(pThis, ref ellipse, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
     /// <summary>
     /// Adds a surface object to the document representing a sphere.
@@ -3234,7 +3320,10 @@ namespace Rhino.FileIO
     {
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddSphere(pThis, ref sphere, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddSphere(pThis, ref sphere, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the table.</summary>
@@ -3255,7 +3344,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr curvePtr = curve.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddCurve(pThis, curvePtr, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddCurve(pThis, curvePtr, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(curve);
+      return rc;
     }
 
     /// <summary>Adds a text dot object to the table.</summary>
@@ -3301,7 +3394,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr pDot = dot.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddTextDot(pThis, pDot, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddTextDot(pThis, pDot, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(dot);
+      return rc;
     }
 
     /// <summary>
@@ -3328,7 +3425,11 @@ namespace Rhino.FileIO
       IntPtr ptr_const_iref = instanceReference.ConstPointer();
       IntPtr ptr_const_attributes = attributes?.ConstPointer() ?? IntPtr.Zero;
       IntPtr ptr_this = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddInstanceRef(ptr_this, ptr_const_iref, ptr_const_attributes);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddInstanceRef(ptr_this, ptr_const_iref, ptr_const_attributes);
+      GC.KeepAlive(instanceReference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3355,7 +3456,10 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_const_attributes = attributes?.ConstPointer() ?? IntPtr.Zero;
       IntPtr ptr_this = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddInstanceRef2(ptr_this, instanceDefinitionIndex, ref instanceXform, ptr_const_attributes);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddInstanceRef2(ptr_this, instanceDefinitionIndex, ref instanceXform, ptr_const_attributes);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -3467,6 +3571,8 @@ namespace Rhino.FileIO
       if (italic)
         fontStyle |= 2;
       Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddText(pThis, text, ref plane, height, fontName, fontStyle, (int)justification, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -3505,7 +3611,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr pSurface = surface.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddSurface(pThis, pSurface, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddSurface(pThis, pSurface, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(surface);
+      return rc;
     }
 
     /// <summary>Adds an extrusion object to Rhino.</summary>
@@ -3526,7 +3636,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr pConstExtrusion = extrusion.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddExtrusion(pThis, pConstExtrusion, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddExtrusion(pThis, pConstExtrusion, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(extrusion);
+      return rc;
     }
 
     /// <summary>Adds a mesh object to Rhino.</summary>
@@ -3547,7 +3661,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr pConstMesh = mesh.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddMesh(pThis, pConstMesh, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddMesh(pThis, pConstMesh, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(mesh);
+      return rc;
     }
 
     /// <summary>Adds a brep object to Rhino.</summary>
@@ -3568,7 +3686,11 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
       IntPtr pConstBrep = brep.ConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddBrep(pThis, pConstBrep, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddBrep(pThis, pConstBrep, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(brep);
+      return rc;
     }
 
     /// <summary>
@@ -3620,7 +3742,10 @@ namespace Rhino.FileIO
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
 
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddLeader(pThis, s, ref plane, count, pts.m_items, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddLeader(pThis, s, ref plane, count, pts.m_items, pAttr);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3703,7 +3828,11 @@ namespace Rhino.FileIO
       IntPtr pConstHatch = hatch.ConstPointer();
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddHatch(pThis, pConstHatch, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddHatch(pThis, pConstHatch, pAttr);
+      GC.KeepAlive(hatch);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -3729,7 +3858,11 @@ namespace Rhino.FileIO
       IntPtr pConstSubD = subd.ConstPointer();
       IntPtr pAttr = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_AddSubD(pThis, pConstSubD, pAttr);
+      Guid rc = UnsafeNativeMethods.ONX_Model_ObjectTable_AddSubD(pThis, pConstSubD, pAttr);
+      GC.KeepAlive(subd);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
     #endregion
 
@@ -3743,7 +3876,9 @@ namespace Rhino.FileIO
     public bool Delete(Guid objectId)
     {
       IntPtr pThis = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ObjectTable_Delete(pThis, objectId);
+      bool rc = UnsafeNativeMethods.ONX_Model_ObjectTable_Delete(pThis, objectId);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
     /// <summary>
     /// Deletes a collection of objects from the document.
@@ -3846,7 +3981,9 @@ namespace Rhino.FileIO
       get
       {
         IntPtr pConstParent = m_parent.ConstPointer();
-        return UnsafeNativeMethods.ONX_Model_ExtraTableCount(pConstParent, File3dm.idxUserDataTable);
+        int rc = UnsafeNativeMethods.ONX_Model_ExtraTableCount(pConstParent, File3dm.idxUserDataTable);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -3906,6 +4043,7 @@ namespace Rhino.FileIO
     {
       IntPtr pParent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_UserDataTable_Clear(pParent);
+      GC.KeepAlive(m_parent);
     }
 
 #region IEnumerable Implementation
@@ -3969,7 +4107,10 @@ namespace Rhino.FileIO
     public int AddMaterial(DocObjects.Material material) 
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_AddMaterial(ptrFile3dm, material.ConstPointer());
+      int rc = UnsafeNativeMethods.ONX_Model_AddMaterial(ptrFile3dm, material.ConstPointer());
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(material);
+      return rc;
     }
   }
 
@@ -4068,6 +4209,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
       int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb(), false);
+      GC.KeepAlive(m_parent);
       return index;
     }
 
@@ -4085,6 +4227,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
       int index = UnsafeNativeMethods.ONX_Model_AddLayer2(ptrFile3dm, name, color.ToArgb(), parentId);
+      GC.KeepAlive(m_parent);
       return index;
     }
 
@@ -4104,6 +4247,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
       int index = UnsafeNativeMethods.ONX_Model_AddLayer(ptrFile3dm, name, color.ToArgb(), true);
+      GC.KeepAlive(m_parent);
       return index;
     }
 
@@ -4224,6 +4368,7 @@ namespace Rhino.FileIO
 
       IntPtr ptrFile3dm = m_parent.NonConstPointer();
       int index = UnsafeNativeMethods.ONX_Model_AddGroup(ptrFile3dm);
+      GC.KeepAlive(m_parent);
       return index;
 
     }
@@ -4417,6 +4562,9 @@ namespace Rhino.FileIO
         int rc = UnsafeNativeMethods.ONX_Model_File3dmInstanceDefinitionTable_Add(ptr_this, name, description, url, urlTag, basePoint, const_ptr_geometry, ptr_array_attributes);
 
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_array_attributes);
+        GC.KeepAlive(geometry);
+        GC.KeepAlive(attributes);
+        GC.KeepAlive(m_parent);
         return rc;
       }
     }
@@ -4484,6 +4632,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_this = m_parent.NonConstPointer();
       int rc = UnsafeNativeMethods.ONX_Model_File3dmInstanceDefinitionTable_AddLinked(ptr_this, filename, name, description);
+      GC.KeepAlive(m_parent);
       return rc;
     }
   }
@@ -4540,6 +4689,8 @@ namespace Rhino.FileIO
         IntPtr pModelPtr = m_parent.ConstPointer();
         return UnsafeNativeMethods.ONX_Model_ViewTable_Index(pModelPtr, pViewPtr, m_named_views);
       }
+      GC.KeepAlive(item);
+      GC.KeepAlive(m_parent);
       return -1;
     }
 
@@ -4551,6 +4702,8 @@ namespace Rhino.FileIO
       IntPtr pParent = m_parent.NonConstPointer();
       IntPtr pConstView = item.ConstPointer();
       UnsafeNativeMethods.ONX_Model_ViewTable_Insert(pParent, pConstView, index, m_named_views);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(item);
     }
 
     /// <summary>
@@ -4564,7 +4717,9 @@ namespace Rhino.FileIO
       if (index < 0 || index >= Count)
         throw new IndexOutOfRangeException();
       IntPtr pParent = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_ViewTable_RemoveAt(pParent, index, m_named_views);
+      bool rc = UnsafeNativeMethods.ONX_Model_ViewTable_RemoveAt(pParent, index, m_named_views);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -4582,6 +4737,7 @@ namespace Rhino.FileIO
         IntPtr pView = UnsafeNativeMethods.ONX_Model_ViewTable_Pointer(pConstParent, index, m_named_views);
         if (IntPtr.Zero == pView)
           throw new IndexOutOfRangeException();
+        GC.KeepAlive(m_parent);
         return new DocObjects.ViewInfo(m_parent, id, pView, m_named_views);
       }
     }
@@ -4605,6 +4761,8 @@ namespace Rhino.FileIO
       IntPtr pParent = m_parent.NonConstPointer();
       IntPtr pConstView = item.ConstPointer();
       UnsafeNativeMethods.ONX_Model_ViewTable_Add(pParent, pConstView, m_named_views);
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(item);
     }
 
     /// <summary>
@@ -4615,6 +4773,7 @@ namespace Rhino.FileIO
     {
       IntPtr pParent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_ViewTable_Clear(pParent, m_named_views);
+      GC.KeepAlive(m_parent);
     }
 
     /// <summary>
@@ -4656,7 +4815,9 @@ namespace Rhino.FileIO
       {
         IntPtr pConstParent = m_parent.ConstPointer();
         int which = m_named_views ? File3dm.idxNamedViewTable : File3dm.idxViewTable;
-        return UnsafeNativeMethods.ONX_Model_ExtraTableCount(pConstParent, which);
+        int rc = UnsafeNativeMethods.ONX_Model_ExtraTableCount(pConstParent, which);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -4773,6 +4934,7 @@ namespace Rhino.FileIO
         IntPtr ptr_parent = m_parent.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Insert(ptr_parent, ptr_cplane, index);
         UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -4788,7 +4950,9 @@ namespace Rhino.FileIO
         throw new IndexOutOfRangeException();
 
       IntPtr ptr_parent = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Delete(ptr_parent, index);
+      bool rc = UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Delete(ptr_parent, index);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -4821,7 +4985,9 @@ namespace Rhino.FileIO
 
         IntPtr ptr_const_parent = m_parent.ConstPointer();
         IntPtr ptr_construction_plane = UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Get(ptr_const_parent, index);
-        return ConstructionPlane.FromIntPtr(ptr_construction_plane);
+        ConstructionPlane rc = ConstructionPlane.FromIntPtr(ptr_construction_plane);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -4849,7 +5015,9 @@ namespace Rhino.FileIO
         throw new ArgumentNullException(nameof(name));
 
       IntPtr ptr_parent = m_parent.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Add(ptr_parent, name, ref plane);
+      int rc = UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Add(ptr_parent, name, ref plane);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -4868,6 +5036,7 @@ namespace Rhino.FileIO
         IntPtr ptr_parent = m_parent.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Add2(ptr_parent, ptr_cplane);
         UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+        GC.KeepAlive(m_parent);
       }
     }
 
@@ -4879,6 +5048,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_parent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Clear(ptr_parent);
+      GC.KeepAlive(m_parent);
     }
 
     /// <summary>
@@ -4919,7 +5089,9 @@ namespace Rhino.FileIO
       get
       {
         IntPtr ptr_const_parent = m_parent.ConstPointer();
-        return UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Count(ptr_const_parent);
+        int rc = UnsafeNativeMethods.ONX_Model_NamedCPlaneTable_Count(ptr_const_parent);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -4976,7 +5148,9 @@ namespace Rhino.FileIO
       get
       {
         IntPtr ptr_parent = m_parent.NonConstPointer();
-        return UnsafeNativeMethods.ONX_Model_DocumentUserString_Count(ptr_parent);
+        int rc = UnsafeNativeMethods.ONX_Model_DocumentUserString_Count(ptr_parent);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -5008,6 +5182,7 @@ namespace Rhino.FileIO
         IntPtr ptr_string = sh.NonConstPointer();
         IntPtr ptr_parent = m_parent.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_DocumentUserString_GetString(ptr_parent, i, true, ptr_string);
+        GC.KeepAlive(m_parent);
         return sh.ToString();
       }
     }
@@ -5025,6 +5200,7 @@ namespace Rhino.FileIO
         IntPtr ptr_string = sh.NonConstPointer();
         IntPtr ptr_parent = m_parent.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_DocumentUserString_GetString(ptr_parent, i, false, ptr_string);
+        GC.KeepAlive(m_parent);
         return sh.ToString();
       }
     }
@@ -5042,6 +5218,7 @@ namespace Rhino.FileIO
         IntPtr ptr_string = sh.NonConstPointer();
         IntPtr ptr_parent = m_parent.NonConstPointer();
         UnsafeNativeMethods.ONX_Model_DocumentUserString_GetString2(ptr_parent, key, ptr_string);
+        GC.KeepAlive(m_parent);
         return sh.ToString();
       }
     }
@@ -5143,6 +5320,7 @@ namespace Rhino.FileIO
       string rc = GetValue(key);
       IntPtr ptr_parent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_DocumentUserString_SetString(ptr_parent, key, value);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -5185,6 +5363,7 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_parent = m_parent.NonConstPointer();
       UnsafeNativeMethods.ONX_Model_DocumentUserString_Delete(ptr_parent, key);
+      GC.KeepAlive(m_parent);
     }
   }
 

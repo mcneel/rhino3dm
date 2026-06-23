@@ -50,6 +50,12 @@ RH_C_FUNCTION void ON_Layer_SetColor(ON_Layer* pLayer, int argb, bool regularCol
   }
 }
 
+RH_C_FUNCTION void ON_Layer_DeletePlotColor(ON_Layer* pLayer)
+{
+  if (pLayer)
+    pLayer->SetPlotColor(ON_UNSET_COLOR);
+}
+
 RH_C_FUNCTION int ON_Layer_GetIndex(const ON_Layer* pLayer)
 {
   int rc = -1;

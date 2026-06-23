@@ -44,30 +44,37 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>Distance between grid lines</summary>
+    /// <since>8.13</since>
     public double GridSpacing { get; set; } = 1.0;
 
     /// <summary>
     /// When grid snap is enabled, the distance between snap points. Typically
     /// this is the same distance as grid spacing
     /// </summary>
+    /// <since>8.13</since>
     public double SnapSpacing { get; set; } = 1.0;
 
     /// <summary>Number of grid lines in each direction</summary>
+    /// <since>8.13</since>
     public int GridLineCount { get; set; } = 70;
 
     /// <summary>
     /// This line frequency. 0: none, 1: all lines are thick, 2: every other is
     /// thick, ...
     /// </summary>
+    /// <since>8.13</since>
     public int GridThickFrequency { get; set; } = 5;
 
     /// <summary>Show the grid</summary>
+    /// <since>8.13</since>
     public bool ShowGrid { get; set; } = true;
 
     /// <summary>Show the grid axes</summary>
+    /// <since>8.13</since>
     public bool ShowGridAxes { get; set; } = true;
 
     /// <summary>Show the world axes icon in the corner</summary>
+    /// <since>8.13</since>
     public bool ShowWorldAxes { get; set; } = true;
   }
 
@@ -418,6 +425,7 @@ namespace Rhino.DocObjects
       m_named_view_table = false;
       m_index = -1;
       m_ptr = UnsafeNativeMethods.CRhinoViewport_View(rhinoViewPort.ConstPointer());
+      GC.KeepAlive(rhinoViewPort);
       m_dontdelete = true;
     }
 
@@ -472,6 +480,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_const_this = ConstPointer();
         m_ptr = UnsafeNativeMethods.ON_3dmView_New(ptr_const_this);
+        GC.KeepAlive(this);
 #if RHINO_SDK
         m_index = -1;
         m_parent = null;
@@ -528,6 +537,7 @@ namespace Rhino.DocObjects
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmView_NameGet(ptr_const_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -535,6 +545,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_NameSet(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -547,7 +558,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_NamedViewId(const_ptr_this);
+        Guid id = UnsafeNativeMethods.ON_3dmView_NamedViewId(const_ptr_this);
+        GC.KeepAlive(this);
+        return id;
       }
     }
 
@@ -564,6 +577,7 @@ namespace Rhino.DocObjects
         {
           IntPtr ptr_sh = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmView_WallpaperGetFilename(ptr_const_this, ptr_sh);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -578,7 +592,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_WallpaperGetGrayScale(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_3dmView_WallpaperGetGrayScale(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -591,7 +607,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_WallpaperGetHidden(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_3dmView_WallpaperGetHidden(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -604,13 +622,16 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_FocalBlurDistance_Get(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_3dmView_FocalBlurDistance_Get(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
 
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_FocalBlurDistance_Set(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -623,13 +644,16 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_FocalBlurAperture_Get(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_3dmView_FocalBlurAperture_Get(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
 
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_FocalBlurAperture_Set(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -642,13 +666,16 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_FocalBlurJitter_Get(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_3dmView_FocalBlurJitter_Get(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
 
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_FocalBlurJitter_Set(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -663,13 +690,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmView_FocalBlurSampleCount_Get(const_ptr_this);
+        uint rc = UnsafeNativeMethods.ON_3dmView_FocalBlurSampleCount_Get(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
-
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_FocalBlurSampleCount_Set(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -684,7 +713,7 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         uint blur_mode = UnsafeNativeMethods.ON_3dmView_FocalBlurMode_Get(const_ptr_this);
-
+        GC.KeepAlive(this);
         if (blur_mode == 0)
           return ViewInfoFocalBlurModes.None;
         if (blur_mode == 1)
@@ -708,6 +737,7 @@ namespace Rhino.DocObjects
           blur_mode = 2;
 
         UnsafeNativeMethods.ON_3dmView_FocalBlurMode_Set(ptr_this, blur_mode);
+        GC.KeepAlive(this);
       }
     }
 
@@ -720,18 +750,22 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return (ViewSectionBehavior)UnsafeNativeMethods.ON_3dmView_GetSectionBehavior(constPtrThis);
+        DocObjects.ViewSectionBehavior rc = (ViewSectionBehavior)UnsafeNativeMethods.ON_3dmView_GetSectionBehavior(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.ON_3dmView_SetSectionBehavior(ptrThis, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
     /// Returns a list of clipping plane Ids associated with this view.
     /// </summary>
+    /// <since>8.15</since>
     public Guid[] ClippingPlanesIds
     {
       get
@@ -748,7 +782,8 @@ namespace Rhino.DocObjects
         {
           outList.Add(UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlaneId(ptr));
         }
-
+        GC.KeepAlive(this);
+        GC.KeepAlive(ptrArray);
         return outList.ToArray();
       }
     }
@@ -757,30 +792,34 @@ namespace Rhino.DocObjects
     /// Returns a list of ClippingPlaneSurfaces for this view.
     /// </summary>
     /// <returns></returns>
+    /// <since>8.17</since>
     public ClippingPlaneSurface[] ClippingPlaneSurfaces()
     {
-      IntPtr constPtrThis = ConstPointer();
-
-      var ptrArray = new SimpleArrayIntPtr();
-
-      UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(constPtrThis, ptrArray.NonConstPointer());
-
-      var outList = new List<ClippingPlaneSurface>();
-
-      foreach (var ptr in ptrArray.ToArray())
+      using (var ptrArray = new SimpleArrayIntPtr())
       {
-        var plane = new Geometry.Plane();
-        UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlane(ptr, ref plane);
+        UnsafeNativeMethods.ON_3dmView_GetClippingPlanes(ConstPointer(), ptrArray.NonConstPointer());
 
-        var cps = new ClippingPlaneSurface(plane);
+        var outList = new List<ClippingPlaneSurface>();
 
-        cps.PlaneDepth = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepth(ptr);
-        cps.PlaneDepthEnabled = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepthEnabled(ptr);
+        var ptrArrayArray = ptrArray.ToArray();
 
-        outList.Add(cps);
+        foreach (var ptr in ptrArrayArray)
+        {
+          var plane = new Geometry.Plane();
+          UnsafeNativeMethods.ON_ClippingPlaneInfo_GetPlane(ptr, ref plane);
+
+          var cps = new ClippingPlaneSurface(plane);
+
+          cps.PlaneDepth = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepth(ptr);
+          cps.PlaneDepthEnabled = UnsafeNativeMethods.ON_ClippingPlaneInfo_GetDepthEnabled(ptr);
+
+          outList.Add(cps);
+
+          UnsafeNativeMethods.ON_ClippingPlaneInfo_Delete(ptr);
+        }
+
+        return outList.ToArray();
       }
-
-      return outList.ToArray();
     }
 
     ViewportInfo m_viewport;
@@ -885,12 +924,15 @@ namespace Rhino.DocObjects
     double GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble which)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_EarthAnchorPoint_GetDouble(ptr_const_this, which);
+      double rc = UnsafeNativeMethods.ON_EarthAnchorPoint_GetDouble(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(UnsafeNativeMethods.EarthAnchorPointDouble which, double val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_EarthAnchorPoint_SetDouble(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -933,12 +975,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return (EarthCoordinateSystem)UnsafeNativeMethods.ON_EarthAnchorPoint_GetEarthCoordinateSystem(ptr_const_this);
+        EarthCoordinateSystem rc = (EarthCoordinateSystem)UnsafeNativeMethods.ON_EarthAnchorPoint_GetEarthCoordinateSystem(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_SetEarthCoordinateSystem(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -952,19 +997,22 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return (BasepointZero)UnsafeNativeMethods.ON_EarthAnchorPoint_GetEarthBasepointElevationZero(ptr_const_this);
+        BasepointZero rc = (BasepointZero)UnsafeNativeMethods.ON_EarthAnchorPoint_GetEarthBasepointElevationZero(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_SetEarthBasepointElevationZero(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
-         /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
-         /// </summary>
-         /// <since>7.11</since>
+    /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+    /// </summary>
+    /// <since>7.11</since>
     public double KMLOrientationHeadingAngleDegrees
     {
       get { return GetDouble(UnsafeNativeMethods.EarthAnchorPointDouble.KMLOrientationHeadingAngleDegrees); }
@@ -989,7 +1037,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+    /// Gets Keyhole Markup Language (KML) orientation heading angle in radians.
     /// </summary>
     /// <since>7.11</since>
     public double KMLOrientationHeadingAngleRadians
@@ -1024,12 +1072,14 @@ namespace Rhino.DocObjects
         Point3d rc = new Point3d(0, 0, 0);
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelBasePoint(ptr_const_this, false, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelBasePoint(ptr_this, true, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1042,12 +1092,14 @@ namespace Rhino.DocObjects
         Vector3d rc = new Vector3d(0, 0, 0);
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelDirection(ptr_const_this, true, false, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelDirection(ptr_this, true, true, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1060,12 +1112,14 @@ namespace Rhino.DocObjects
         Vector3d rc = new Vector3d(0, 0, 0);
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelDirection(ptr_const_this, false, false, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_ModelDirection(ptr_this, false, true, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1085,6 +1139,7 @@ namespace Rhino.DocObjects
           IntPtr ptr_const_this = ConstPointer();
           IntPtr ptr_this = sh.NonConstPointer();
           UnsafeNativeMethods.ON_EarthAnchorPoint_GetString(ptr_const_this, true, ptr_this);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1092,6 +1147,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_SetString(ptr_this, true, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1108,6 +1164,7 @@ namespace Rhino.DocObjects
           IntPtr ptr_const_this = ConstPointer();
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_EarthAnchorPoint_GetString(ptr_const_this, false, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1115,6 +1172,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_EarthAnchorPoint_SetString(ptr_this, false, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1130,6 +1188,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       bool is_set = UnsafeNativeMethods.ON_EarthAnchorPoint_EarthLocationIsSet(const_ptr_this);
+      GC.KeepAlive(this);
       return is_set;
     }
 
@@ -1141,7 +1200,8 @@ namespace Rhino.DocObjects
     public bool ModelLocationIsSet()
     {
       IntPtr const_ptr_this = ConstPointer();
-      bool is_set = UnsafeNativeMethods.ON_EarthAnchorPoint_EarthLocationIsSet(const_ptr_this);
+      bool is_set = UnsafeNativeMethods.ON_EarthAnchorPoint_ModelLocationIsSet(const_ptr_this);
+      GC.KeepAlive(this);
       return is_set;
     }
 
@@ -1157,6 +1217,7 @@ namespace Rhino.DocObjects
       Plane rc = Plane.Unset;
       IntPtr ptr_const_this = ConstPointer();
       UnsafeNativeMethods.ON_EarthAnchorPoint_GetModelCompass(ptr_const_this, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1195,6 +1256,7 @@ namespace Rhino.DocObjects
       Transform rc = Transform.Unset;
       IntPtr ptr_const_this = ConstPointer();
       UnsafeNativeMethods.ON_EarthAnchorPoint_GetModelToEarthTransform(ptr_const_this, modelUnitSystem, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1316,6 +1378,7 @@ namespace Rhino.DocObjects
     public AnimationProperties(AnimationProperties source)
     {
       m_ptr = UnsafeNativeMethods.ON_3dmAnimationProperties_New(source.ConstPointer());
+      GC.KeepAlive(source);
     }
 
 #if RHINO_SDK
@@ -1405,6 +1468,7 @@ namespace Rhino.DocObjects
       get
       {
         var type = UnsafeNativeMethods.ON_3dmAnimationProperties_CaptureType(ConstPointer());
+        GC.KeepAlive(this);
         if (UnsafeNativeMethods.AnimationPropertiesCaptureTypes.Path == type)
         {
           return CaptureTypes.Path;
@@ -1465,6 +1529,7 @@ namespace Rhino.DocObjects
         {
           UnsafeNativeMethods.ON_3dmAnimationProperties_SetCaptureType(NonConstPointer(), UnsafeNativeMethods.AnimationPropertiesCaptureTypes.None);
         }
+        GC.KeepAlive(this);
       }
     }
 
@@ -1479,6 +1544,7 @@ namespace Rhino.DocObjects
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetFileExtension(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1487,6 +1553,7 @@ namespace Rhino.DocObjects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_FileExtension(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1503,6 +1570,7 @@ namespace Rhino.DocObjects
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetCaptureMethod(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1511,6 +1579,7 @@ namespace Rhino.DocObjects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_CaptureMethod(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1527,6 +1596,7 @@ namespace Rhino.DocObjects
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetViewportName(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1535,6 +1605,7 @@ namespace Rhino.DocObjects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_ViewportName(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1550,7 +1621,8 @@ namespace Rhino.DocObjects
       {
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
-        UnsafeNativeMethods.ON_3dmAnimationProperties_SetHtmlFilename(NonConstPointer(), p_string);
+        UnsafeNativeMethods.ON_3dmAnimationProperties_SetHtmlFileName(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1558,7 +1630,8 @@ namespace Rhino.DocObjects
         using (var sh = new Rhino.Runtime.InteropWrappers.StringHolder())
         {
           var p_string = sh.NonConstPointer();
-          UnsafeNativeMethods.ON_3dmAnimationProperties_HtmlFilename(ConstPointer(), p_string);
+          UnsafeNativeMethods.ON_3dmAnimationProperties_HtmlFileName(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1573,11 +1646,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetDisplayMode(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_DisplayMode(ConstPointer());
+        Guid rc = UnsafeNativeMethods.ON_3dmAnimationProperties_DisplayMode(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1590,6 +1666,7 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetCameraPoints(ConstPointer(),value.Length, value);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1601,6 +1678,7 @@ namespace Rhino.DocObjects
           IntPtr output_points_ptr = output_points.NonConstPointer();
 
           UnsafeNativeMethods.ON_3dmAnimationProperties_CameraPoints(const_ptr_this, output_points_ptr);
+          GC.KeepAlive(this);
           return output_points.ToArray();
         }
       }
@@ -1615,6 +1693,7 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetTargetPoints(ConstPointer(), value.Length, value);
+        GC.KeepAlive(this);
       }
 
       get
@@ -1626,6 +1705,7 @@ namespace Rhino.DocObjects
           IntPtr output_points_ptr = output_points.NonConstPointer();
 
           UnsafeNativeMethods.ON_3dmAnimationProperties_TargetPoints(const_ptr_this, output_points_ptr);
+          GC.KeepAlive(this);
           return output_points.ToArray();
         }
       }
@@ -1640,11 +1720,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetFrameCount(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_FrameCount(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_FrameCount(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1657,11 +1740,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetCurrentFrame(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_CurrentFrame(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_CurrentFrame(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1674,11 +1760,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetCameraPathId(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_CameraPathId(ConstPointer());
+        Guid rc = UnsafeNativeMethods.ON_3dmAnimationProperties_CameraPathId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1691,11 +1780,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetTargetPathId(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_TargetPathId(ConstPointer());
+        Guid rc = UnsafeNativeMethods.ON_3dmAnimationProperties_TargetPathId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1708,11 +1800,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetLatitude(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_Latitude(ConstPointer());
+        double rc = UnsafeNativeMethods.ON_3dmAnimationProperties_Latitude(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1725,11 +1820,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetLongitude(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_Longitude(ConstPointer());
+        double rc = UnsafeNativeMethods.ON_3dmAnimationProperties_Longitude(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1743,11 +1841,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetNorthAngle(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_NorthAngle(ConstPointer());
+        double rc = UnsafeNativeMethods.ON_3dmAnimationProperties_NorthAngle(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1760,11 +1861,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartDay(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartDay(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartDay(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1777,11 +1881,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartMonth(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartMonth(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartMonth(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1794,11 +1901,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartYear(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartYear(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartYear(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1811,11 +1921,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartHour(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartHour(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartHour(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1828,11 +1941,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartMinutes(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartMinutes(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartMinutes(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1845,11 +1961,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetStartSeconds(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_StartSeconds(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_StartSeconds(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1862,11 +1981,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndDay(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndDay(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndDay(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1879,11 +2001,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndMonth(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndMonth(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndMonth(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1896,11 +2021,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndYear(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndYear(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndYear(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1913,11 +2041,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndHour(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndHour(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndHour(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1930,11 +2061,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndMinutes(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndMinutes(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndMinutes(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1947,11 +2081,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetEndSeconds(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_EndSeconds(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_EndSeconds(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1964,11 +2101,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetDaysBetweenFrames(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_DaysBetweenFrames(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_DaysBetweenFrames(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1981,11 +2121,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetMinutesBetweenFrames(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_MinutesBetweenFrames(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_MinutesBetweenFrames(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1998,11 +2141,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetLightIndex(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_LightIndex(ConstPointer());
+        int rc = UnsafeNativeMethods.ON_3dmAnimationProperties_LightIndex(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -2017,6 +2163,7 @@ namespace Rhino.DocObjects
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetFolderName(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2025,13 +2172,14 @@ namespace Rhino.DocObjects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_FolderName(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
     }
 
     /// <summary>
-    /// Gets or sets the HTML file name.
+    /// Gets or sets the HTML file name. This property is the same as <see cref="AnimationName"/>.
     /// </summary>
     /// <since>7.12</since>
     public string HtmlFileName
@@ -2041,6 +2189,7 @@ namespace Rhino.DocObjects
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetHtmlFileName(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2049,6 +2198,7 @@ namespace Rhino.DocObjects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_HtmlFileName(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -2075,6 +2225,7 @@ namespace Rhino.DocObjects
           UnsafeNativeMethods.ON_StringArray_Append(pStrings, v);
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetImages(NonConstPointer(), pStrings);
         UnsafeNativeMethods.ON_StringArray_Delete(pStrings);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2083,6 +2234,7 @@ namespace Rhino.DocObjects
         {
           var ptr_list = list.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_Images(ConstPointer(), ptr_list);
+          GC.KeepAlive(this);
           return list.ToArray();
         }
       }
@@ -2101,6 +2253,7 @@ namespace Rhino.DocObjects
           UnsafeNativeMethods.ON_StringArray_Append(pStrings, v);
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetDates(NonConstPointer(), pStrings);
         UnsafeNativeMethods.ON_StringArray_Delete(pStrings);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2109,6 +2262,7 @@ namespace Rhino.DocObjects
         {
           var ptr_list = list.NonConstPointer();
           UnsafeNativeMethods.ON_3dmAnimationProperties_Dates(ConstPointer(), ptr_list);
+          GC.KeepAlive(this);
           return list.ToArray();
         }
       }
@@ -2123,11 +2277,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetRenderFull(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_RenderFull(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_3dmAnimationProperties_RenderFull(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -2140,11 +2297,14 @@ namespace Rhino.DocObjects
       set
       {
         UnsafeNativeMethods.ON_3dmAnimationProperties_SetRenderPreview(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
 
       get
       {
-        return UnsafeNativeMethods.ON_3dmAnimationProperties_RenderPreview(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_3dmAnimationProperties_RenderPreview(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
   }
@@ -2196,6 +2356,7 @@ namespace Rhino.Render
       var const_ptr_source = source == null ? IntPtr.Zero : source.ConstPointer();
       IntPtr ptr_this = UnsafeNativeMethods.ON_3dmRenderSettings_New(const_ptr_source);
       ConstructNonConstObject(ptr_this);
+      GC.KeepAlive(source);
     }
 
     /// <summary> Initialize a new instance of the RenderSettings class.</summary>
@@ -2255,7 +2416,9 @@ namespace Rhino.Render
     {
       var const_ptr_this = ConstPointer();
       var native = UnsafeNativeMethods.ON_3dmRenderSettings_New(const_ptr_this);
-      return new RenderSettings(native);
+      RenderSettings rc = new RenderSettings(native);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     internal override IntPtr _InternalDuplicate(out bool applymempressure)
@@ -2290,12 +2453,14 @@ namespace Rhino.Render
         IntPtr ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_3dmRenderSettings_ONX_Model_Commit(ptr_this, m_file3dm.NonConstPointer());
       }
+      GC.KeepAlive(this);
     }
 
     System.Drawing.Color GetColor(UnsafeNativeMethods.RenderSettingColor which)
     {
       IntPtr ptr_const_this = ConstPointer();
       int argb = UnsafeNativeMethods.ON_3dmRenderSettings_GetColor(ptr_const_this, which);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
 
@@ -2304,6 +2469,7 @@ namespace Rhino.Render
       IntPtr ptr_this = NonConstPointer();
       int argb = c.ToArgb();
       UnsafeNativeMethods.ON_3dmRenderSettings_SetColor(ptr_this, which, argb);
+      GC.KeepAlive(this);
       Commit();
     }
 
@@ -2341,12 +2507,15 @@ namespace Rhino.Render
     bool GetBool(UnsafeNativeMethods.RenderSettingBool which)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetBool(ptr_const_this, which);
+      bool rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetBool(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.RenderSettingBool which, bool b)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmRenderSettings_SetBool(ptr_this, which, b);
+      GC.KeepAlive(this);
       Commit();
     }
 
@@ -2445,12 +2614,15 @@ namespace Rhino.Render
     int GetInt(UnsafeNativeMethods.RenderSettingInt which)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetInt(ptr_const_this, which);
+      int rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetInt(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(UnsafeNativeMethods.RenderSettingInt which, int i)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmRenderSettings_SetInt(ptr_this, which, i);
+      GC.KeepAlive(this);
       Commit();
     }
 
@@ -2507,12 +2679,15 @@ namespace Rhino.Render
       get
       {
         var pointer = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmRenderSettings_GetUnitSystem(pointer);
+        UnitSystem rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetUnitSystem(pointer);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         var pointer = NonConstPointer();
         UnsafeNativeMethods.ON_3dmRenderSettings_SetUnitSystem(pointer, value);
+        GC.KeepAlive(this);
         Commit();
       }
     }
@@ -2526,12 +2701,15 @@ namespace Rhino.Render
       get
       {
         var pointer = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmRenderSettings_GetImageDpi(pointer);
+        double rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetImageDpi(pointer);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         var pointer = NonConstPointer();
         UnsafeNativeMethods.ON_3dmRenderSettings_SetImageDpi(pointer, value);
+        GC.KeepAlive(this);
         Commit();
       }
     }
@@ -2596,6 +2774,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetLinearWorkflow(cpp);
+        GC.KeepAlive(this);
         return new LinearWorkflow(native_ptr);
       }
     }
@@ -2619,6 +2798,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetDithering(cpp);
+        GC.KeepAlive(this);
         return new Dithering(native_ptr);
       }
     }
@@ -2641,6 +2821,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderChannels(cpp);
+        GC.KeepAlive(this);
         return new RenderChannels(native_ptr);
       }
     }
@@ -2664,6 +2845,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetGroundPlane(cpp);
+        GC.KeepAlive(this);
         return new GroundPlane(native_ptr);
       }
     }
@@ -2687,6 +2869,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSafeFrame(cpp);
+        GC.KeepAlive(this);
         return new SafeFrame(native_ptr);
       }
     }
@@ -2710,6 +2893,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSkylight(cpp);
+        GC.KeepAlive(this);
         return new Skylight(native_ptr);
       }
     }
@@ -2733,6 +2917,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetSun(cpp);
+        GC.KeepAlive(this);
         return new Sun(native_ptr);
       }
     }
@@ -2784,7 +2969,9 @@ namespace Rhino.Render
     public bool RenderEnvironmentOverride(EnvironmentUsage usage)
     {
       var rs = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironmentOverride(rs, (int)usage);
+      bool rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironmentOverride(rs, (int)usage);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2795,6 +2982,7 @@ namespace Rhino.Render
     {
       var rs = NonConstPointer();
       UnsafeNativeMethods.ON_3dmRenderSettings_SetRenderEnvironmentOverride(rs, (int)usage, on);
+      GC.KeepAlive(this);
       Commit();
     }
 
@@ -2807,7 +2995,9 @@ namespace Rhino.Render
     public Guid RenderEnvironmentId(EnvironmentUsage usage, EnvironmentPurpose purpose)
     {
       var rs = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironment(rs, (int)usage, (int)purpose);
+      Guid rc = UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderEnvironment(rs, (int)usage, (int)purpose);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2819,6 +3009,7 @@ namespace Rhino.Render
     {
       var rs = NonConstPointer();
       UnsafeNativeMethods.ON_3dmRenderSettings_SetRenderEnvironment(rs, (int)usage, ref guid);
+      GC.KeepAlive(this);
       Commit();
     }
 
@@ -2872,6 +3063,7 @@ namespace Rhino.Render
 
         var cpp = ConstPointer();
         var native_ptr = UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(cpp);
+        GC.KeepAlive(this);
         return new PostEffectCollection(native_ptr);
       }
     }
@@ -2887,6 +3079,7 @@ namespace Rhino.Render
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmSettings_SetNamedView(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2895,6 +3088,7 @@ namespace Rhino.Render
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmSettings_GetNamedView(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -2911,6 +3105,7 @@ namespace Rhino.Render
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmSettings_SetSnapshot(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2919,6 +3114,7 @@ namespace Rhino.Render
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmSettings_GetSnapshot(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -2935,6 +3131,7 @@ namespace Rhino.Render
         var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(value);
         var p_string = sh.ConstPointer;
         UnsafeNativeMethods.ON_3dmSettings_SetSpecificViewport(NonConstPointer(), p_string);
+        GC.KeepAlive(this);
       }
 
       get
@@ -2943,6 +3140,7 @@ namespace Rhino.Render
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmSettings_GetSpecificViewport(ConstPointer(), p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -2959,6 +3157,7 @@ namespace Rhino.Render
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_3dmSettings_GetRenderingSource(ptr_const_this);
+        GC.KeepAlive(this);
         return (RenderingSources)rc;
       }
       set
@@ -2966,6 +3165,7 @@ namespace Rhino.Render
         IntPtr ptr_this = NonConstPointer();
         int set_val = (int)value;
         UnsafeNativeMethods.ON_3dmSettings_SetRenderingSource(ptr_this, set_val);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3047,6 +3247,7 @@ namespace Rhino.FileIO
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_3dmSettings_GetModelUrl(ptr_const_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -3054,6 +3255,7 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmSettings_SetModelUrl(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3069,24 +3271,29 @@ namespace Rhino.FileIO
         IntPtr ptr_const_this = ConstPointer();
         Point3d rc = new Point3d();
         UnsafeNativeMethods.ON_3dmSettings_GetModelBasepoint(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmSettings_SetModelBasepoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
     double GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble which)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmSettings_GetDouble(ptr_const_this, which);
+      double rc = UnsafeNativeMethods.ON_3dmSettings_GetDouble(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble which, double val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmSettings_SetDouble(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Gets or sets the model space absolute tolerance.</summary>
@@ -3131,7 +3338,7 @@ namespace Rhino.FileIO
     public double PageAbsoluteTolerance
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageAbsTol); }
-      set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageRelTol, value); }
+      set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.PageAbsTol, value); }
     }
     /// <summary>Gets or sets the page space angle tolerance.</summary>
     /// <since>5.0</since>
@@ -3174,6 +3381,7 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_3dmSettings_GetSetUnitSystem(ptr_const_this, true, false, 0);
+        GC.KeepAlive(this);
         return (UnitSystem)rc;
       }
       set
@@ -3181,6 +3389,7 @@ namespace Rhino.FileIO
         IntPtr ptr_this = NonConstPointer();
         int set_val = (int)value;
         UnsafeNativeMethods.ON_3dmSettings_GetSetUnitSystem(ptr_this, true, true, set_val);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3194,6 +3403,7 @@ namespace Rhino.FileIO
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_3dmSettings_GetSetUnitSystem(ptr_const_this, false, false, 0);
+        GC.KeepAlive(this);
         return (UnitSystem)rc;
       }
       set
@@ -3201,6 +3411,7 @@ namespace Rhino.FileIO
         IntPtr ptr_this = NonConstPointer();
         int set_val = (int)value;
         UnsafeNativeMethods.ON_3dmSettings_GetSetUnitSystem(ptr_this, false, true, set_val);
+        GC.KeepAlive(this);
       }
     }
 

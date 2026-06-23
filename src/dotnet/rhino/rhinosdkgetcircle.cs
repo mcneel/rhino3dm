@@ -58,12 +58,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.AllowDeformable);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.AllowDeformable);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.AllowDeformable, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -74,12 +77,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Deformable);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Deformable);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Deformable, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -89,12 +95,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.PointCount);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.PointCount);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetInt(ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.PointCount, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -104,12 +113,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.Degree);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.Degree);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetInt(ptr_this, UnsafeNativeMethods.ArgsGetCircleIntConsts.Degree, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -122,12 +134,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetDefaultSize(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -140,12 +155,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -155,12 +173,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_UseLayerLinetype(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_UseLayerLinetype(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetUseLayerLinetype(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 

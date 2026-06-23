@@ -135,8 +135,8 @@ namespace Rhino.Geometry
     /// If cylinder.Radius is less than other radius, then the cylinder will be the inside
     /// of the pipe.
     /// </param>
-    /// <param name="capBottom">If true, the end at cylinder.Height1 will be capped.</param>
     /// <param name="capTop">If true, the end at cylinder.Height2 will be capped.</param>
+    /// <param name="capBottom">If true, the end at cylinder.Height1 will be capped.</param>
     /// <returns>Extrusion on success. null on failure.</returns>
     /// <since>5.0</since>
     public static Extrusion CreatePipeExtrusion(Cylinder cylinder, double otherRadius, bool capTop, bool capBottom)
@@ -172,6 +172,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_brep = UnsafeNativeMethods.ON_Extrusion_BrepForm(ptr_const_this, splitKinkyFaces);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_brep, null) as Brep;
     }
 
@@ -189,6 +190,7 @@ namespace Rhino.Geometry
       ComponentIndex rc = Rhino.Geometry.ComponentIndex.Unset;
       if (UnsafeNativeMethods.ON_Extrusion_GetBrepFormComponentIndex(ptr_const_this, ref extrusionComponentIndex, ref rc))
         return rc;
+      GC.KeepAlive(this);
       return Rhino.Geometry.ComponentIndex.Unset;
     }
 
@@ -204,7 +206,9 @@ namespace Rhino.Geometry
     public bool SetPathAndUp(Point3d a, Point3d b, Vector3d up)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Extrusion_SetPathAndUp(ptr_this, a, b, up);
+      bool rc = UnsafeNativeMethods.ON_Extrusion_SetPathAndUp(ptr_this, a, b, up);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -218,6 +222,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         var rc = new Point3d();
         UnsafeNativeMethods.ON_Extrusion_GetPoint(ptr_const_this, true, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -233,6 +238,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         var rc = new Point3d();
         UnsafeNativeMethods.ON_Extrusion_GetPoint(ptr_const_this, false, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -248,6 +254,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         var rc = new Vector3d();
         UnsafeNativeMethods.ON_Extrusion_GetPathTangent(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -264,12 +271,14 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         var rc = new Vector3d();
         UnsafeNativeMethods.ON_Extrusion_GetMiterPlaneNormal(ptr_const_this, 0, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Extrusion_SetMiterPlaneNormal(ptr_this, 0, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -285,12 +294,14 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         var rc = new Vector3d();
         UnsafeNativeMethods.ON_Extrusion_GetMiterPlaneNormal(ptr_const_this, 1, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Extrusion_SetMiterPlaneNormal(ptr_this, 1, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -304,6 +315,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Extrusion_IsMitered(ptr_const_this);
+        GC.KeepAlive(this);
         return (1 == rc || 3 == rc);
       }
     }
@@ -318,6 +330,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Extrusion_IsMitered(ptr_const_this);
+        GC.KeepAlive(this);
         return (2 == rc || 3 == rc);
       }
     }
@@ -331,7 +344,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Extrusion_IsSolid(ptr_const_this);
+        bool rc = UnsafeNativeMethods.ON_Extrusion_IsSolid(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -345,6 +360,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Extrusion_IsCapped(ptr_const_this);
+        GC.KeepAlive(this);
         return (1 == rc || 3 == rc);
       }
     }
@@ -359,6 +375,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Extrusion_IsCapped(ptr_const_this);
+        GC.KeepAlive(this);
         return (2 == rc || 3 == rc);
       }
     }
@@ -372,7 +389,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Extrusion_CapCount(ptr_const_this);
+        int rc = UnsafeNativeMethods.ON_Extrusion_CapCount(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -393,6 +412,7 @@ namespace Rhino.Geometry
       if (!UnsafeNativeMethods.ON_Extrusion_GetProfileTransformation(ptr_const_this, s, ref xform))
         xform = Geometry.Transform.Unset;
 
+      GC.KeepAlive(this);
       return xform;
     }
 
@@ -415,6 +435,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = ConstPointer();
       if( !UnsafeNativeMethods.ON_Extrusion_GetPlane(ptr_const_this, true, s, ref plane) )
         plane = Plane.Unset;
+      GC.KeepAlive(this);
       return plane;
     }
 
@@ -437,6 +458,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = ConstPointer();
       if( !UnsafeNativeMethods.ON_Extrusion_GetPlane(ptr_const_this, false, s, ref plane) )
         plane = Plane.Unset;
+      GC.KeepAlive(this);
       return plane;
     }
 
@@ -461,6 +483,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_curve = outerProfile.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Extrusion_SetOuterProfile(ptr_this, ptr_const_curve, cap);
       GC.KeepAlive(outerProfile);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -476,6 +499,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_curve = innerProfile.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Extrusion_AddInnerProfile(ptr_this, ptr_const_curve);
       GC.KeepAlive(innerProfile);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -488,7 +512,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Extrusion_ProfileCount(ptr_const_this);
+        int rc = UnsafeNativeMethods.ON_Extrusion_ProfileCount(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -511,6 +537,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_new_curve = UnsafeNativeMethods.ON_Extrusion_Profile3d(ptr_const_this, profileIndex, s);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_new_curve, null) as Curve;
     }
 
@@ -525,6 +552,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_new_curve = UnsafeNativeMethods.ON_Extrusion_Profile3d2(ptr_const_this, ci);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_new_curve, null) as Curve;
     }
 
@@ -539,6 +567,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_new_curve = UnsafeNativeMethods.ON_Extrusion_WallEdge(ptr_const_this, ci);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_new_curve, null) as Curve;
     }
 
@@ -553,6 +582,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_new_surface = UnsafeNativeMethods.ON_Extrusion_WallSurface(ptr_const_this, ci);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_new_surface, null) as Surface;
     }
 
@@ -566,6 +596,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_linecurve = UnsafeNativeMethods.ON_Extrusion_PathLineCurve(ptr_const_this);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_linecurve, null) as LineCurve;
     }
 
@@ -583,7 +614,9 @@ namespace Rhino.Geometry
     public int ProfileIndex(double profileParameter)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Extrusion_ProfileIndex(ptr_const_this, profileParameter);
+      int rc = UnsafeNativeMethods.ON_Extrusion_ProfileIndex(ptr_const_this, profileParameter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -618,6 +651,7 @@ namespace Rhino.Geometry
       
       bool result = UnsafeNativeMethods.ON_Extrusion_SetMesh( ptr_this, ptr_const_mesh, (int)meshType );
       GC.KeepAlive(mesh);
+      GC.KeepAlive(this);
       return result;
     }
 
@@ -639,6 +673,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_curve_array = output.NonConstPointer();
         UnsafeNativeMethods.CRhinoExtrusionObject_GetWireFrame(ptr_const_this, ptr_curve_array);
+        GC.KeepAlive(this);
         return output.ToNonConstArray();
       }
     }

@@ -86,6 +86,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_DESCRIPTION, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -93,6 +94,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_DESCRIPTION, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -109,6 +111,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_URL, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -116,6 +119,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_URL, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -132,6 +136,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_URLTAG, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -139,6 +144,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_SetString(ptr, IDX_URLTAG, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -155,6 +161,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_SOURCEARCHIVE, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -206,9 +213,9 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// list of object ids in the instance geometry table
+    /// Returns the unique identifiers of all objects that are part of this instance definition's geometry table.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An array of <see cref="Guid"/> values representing the object IDs in the instance geometry table.</returns>
     /// <since>5.6</since>
     [ConstOperation]
     public Guid[] GetObjectIds()
@@ -218,6 +225,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         IntPtr ptr_id_array = ids.NonConstPointer();
         UnsafeNativeMethods.ON_InstanceDefinition_GetObjectIds(ptr_const_this, ptr_id_array);
+        GC.KeepAlive(this);
         return ids.ToArray();
       }
     }
@@ -253,9 +261,17 @@ namespace Rhino.Geometry
     /// <since>8.9</since>
     public System.Collections.Specialized.NameValueCollection GetUserStrings() => _GetUserStrings();
 
+    /// <summary>
+    /// Deletes the user string with the specified key from this geometry.
+    /// </summary>
+    /// <param name="key">The key of the user string to delete.</param>
+    /// <returns>True if the user string was deleted or did not exist; otherwise, false.</returns>
     /// <since>8.9</since>
     public bool DeleteUserString(string key) => SetUserString(key, null);
 
+    /// <summary>
+    /// Deletes all user strings attached to this geometry.
+    /// </summary>
     /// <since>8.9</since>
     public void DeleteAllUserStrings() => _DeleteAllUserStrings();
     #endregion
@@ -305,7 +321,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_InstanceRef_IDefId (ptr_const_this);
+        Guid rc = UnsafeNativeMethods.ON_InstanceRef_IDefId (ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -318,6 +336,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         Transform rc = new Transform();
         UnsafeNativeMethods.ON_InstanceRef_GetTransform (ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }

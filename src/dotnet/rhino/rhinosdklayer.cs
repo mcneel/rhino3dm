@@ -101,6 +101,7 @@ namespace Rhino.DocObjects
       Layer layer = new Layer();
       IntPtr ptr = layer.NonConstPointer();
       UnsafeNativeMethods.CRhinoLayerTable_GetDefaultLayerProperties(ptr);
+      GC.KeepAlive(layer);
       return layer;
     }
 #endif
@@ -355,12 +356,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Layer_GetGuid(const_ptr_this, true);
+        Guid rc = UnsafeNativeMethods.ON_Layer_GetGuid(const_ptr_this, true);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Layer_SetGuid(ptr_this, true, value);
+        GC.KeepAlive(this);
         InternalCommitChanges();
       }
     }
@@ -381,12 +385,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Layer_GetGuid(const_ptr_this, false);
+        Guid rc = UnsafeNativeMethods.ON_Layer_GetGuid(const_ptr_this, false);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Layer_SetGuid(ptr_this, false, value);
+        GC.KeepAlive(this);
         InternalCommitChanges();
       }
     }
@@ -426,7 +433,9 @@ namespace Rhino.DocObjects
     public bool HasPerViewportSettings(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_HasPerViewportSettings(const_ptr_this, viewportId, (uint)PerViewportSettings.All);
+      bool rc = UnsafeNativeMethods.ON_Layer_HasPerViewportSettings(const_ptr_this, viewportId, (uint)PerViewportSettings.All);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -441,6 +450,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.All);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -454,6 +464,7 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int argb = UnsafeNativeMethods.ON_Layer_GetColor(const_ptr_this, true);
+        GC.KeepAlive(this);
         return System.Drawing.Color.FromArgb(argb);
       }
       set
@@ -461,6 +472,7 @@ namespace Rhino.DocObjects
         IntPtr ptr_this = NonConstPointer();
         int argb = value.ToArgb();
         UnsafeNativeMethods.ON_Layer_SetColor(ptr_this, argb, true);
+        GC.KeepAlive(this);
         InternalCommitChanges();
       }
     }
@@ -475,6 +487,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       int argb = UnsafeNativeMethods.ON_Layer_GetPerViewportColor(const_ptr_this, viewportId, true);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
 
@@ -488,6 +501,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetPerViewportColor(ptr_this, viewportId, color.ToArgb(), true);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -503,6 +517,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.Color);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -516,6 +531,7 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int argb = UnsafeNativeMethods.ON_Layer_GetColor(const_ptr_this, false);
+        GC.KeepAlive(this);
         return System.Drawing.Color.FromArgb(argb);
       }
       set
@@ -523,8 +539,21 @@ namespace Rhino.DocObjects
         IntPtr ptr_this = NonConstPointer();
         int argb = value.ToArgb();
         UnsafeNativeMethods.ON_Layer_SetColor(ptr_this, argb, false);
+        GC.KeepAlive(this);
         InternalCommitChanges();
       }
+    }
+
+    /// <summary>
+    /// Removes the plot color for layer. The layer's color will be used for the plot color.
+    /// </summary>
+    /// <since>8.26</since>
+    public void DeletePlotColor()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_Layer_DeletePlotColor(ptr_this);
+      GC.KeepAlive(this);
+      InternalCommitChanges();
     }
 
     /// <summary>
@@ -537,6 +566,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       int argb = UnsafeNativeMethods.ON_Layer_GetPerViewportColor(const_ptr_this, viewportId, false);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
 
@@ -550,6 +580,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetPerViewportColor(ptr_this, viewportId, color.ToArgb(), false);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -565,6 +596,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.PlotColor);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -579,12 +611,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Layer_GetPlotWeight(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Layer_GetPlotWeight(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Layer_SetPlotWeight(ptr_this, value);
+        GC.KeepAlive(this);
         InternalCommitChanges();
       }
     }
@@ -598,7 +633,9 @@ namespace Rhino.DocObjects
     public double PerViewportPlotWeight(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_GetPerViewportPlotWeight(const_ptr_this, viewportId);
+      double rc = UnsafeNativeMethods.ON_Layer_GetPerViewportPlotWeight(const_ptr_this, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -615,6 +652,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetPerViewportPlotWeight(ptr_this, viewportId, plotWeight);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -630,6 +668,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.PlotWeight);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -679,7 +718,9 @@ namespace Rhino.DocObjects
     public bool PerViewportIsVisible(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_PerViewportVisibility(const_ptr_this, viewportId, true);
+      bool rc = UnsafeNativeMethods.ON_Layer_PerViewportVisibility(const_ptr_this, viewportId, true);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -695,6 +736,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetPerViewportVisibility(ptr_this, viewportId, visible, true);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -710,6 +752,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.Visible);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -729,7 +772,9 @@ namespace Rhino.DocObjects
     public bool PerViewportPersistentVisibility(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_PerViewportVisibility(const_ptr_this, viewportId, false);
+      bool rc = UnsafeNativeMethods.ON_Layer_PerViewportVisibility(const_ptr_this, viewportId, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -752,6 +797,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetPerViewportVisibility(ptr_this, viewportId, persistentVisibility, false);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -767,6 +813,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeletePerViewportSettings(ptr_this, viewportId, (uint)PerViewportSettings.PersistentVisibility);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -861,6 +908,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_UnsetModelPersistentVisibility(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -871,6 +919,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeleteModelVisible(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -881,6 +930,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_UnsetPersistentVisibility(ptr_this);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -916,6 +966,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_UnsetPersistentLocking(ptr_this);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -1051,6 +1102,7 @@ namespace Rhino.DocObjects
         // index into the documents material table.
         var id = UnsafeNativeMethods.Rdk_RenderContent_LayerMaterialInstanceId(doc_id, pointer);
         var content = Render.RenderContent.FromId(m_doc, id) as RenderMaterial;
+        GC.KeepAlive(this);
         return content;
       }
       set
@@ -1089,24 +1141,30 @@ namespace Rhino.DocObjects
     int GetInt(UnsafeNativeMethods.LayerInt which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_GetInt(const_ptr_this, which);
+      int rc = UnsafeNativeMethods.ON_Layer_GetInt(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(UnsafeNativeMethods.LayerInt which, int val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetInt(ptr_this, which, val);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
     bool GetBool(UnsafeNativeMethods.LayerBool which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Layer_GetSetBool(const_ptr_this, which, false, false);
+      bool rc = UnsafeNativeMethods.ON_Layer_GetSetBool(const_ptr_this, which, false, false);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.LayerBool which, bool val)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_GetSetBool(ptr_this, which, true, val);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
     #endregion
@@ -1119,6 +1177,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_Default(ptr_this);
+      GC.KeepAlive(this);
       InternalCommitChanges();
     }
 
@@ -1134,6 +1193,8 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_other = otherLayer.ConstPointer();
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_CopyAttributes(ptr_this, const_ptr_other);
+      GC.KeepAlive(otherLayer);
+      GC.KeepAlive(this);
     }
 
 #if RHINO_SDK
@@ -1325,6 +1386,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_Layer_GetCustomSectionStyle(const_ptr_this);
+      GC.KeepAlive(this);
       if (ptr_sectionstyle == IntPtr.Zero)
         return null;
       return new SectionStyle(ptr_sectionstyle);
@@ -1342,6 +1404,8 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
       UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
+      GC.KeepAlive(sectionStyle);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -1349,6 +1413,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -1900,7 +1965,9 @@ namespace Rhino.DocObjects.Tables
       if (null == layer)
         return -1;
       IntPtr const_ptr_layer = layer.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, false);
+      int rc = UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, false);
+      GC.KeepAlive(layer);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1958,7 +2025,9 @@ namespace Rhino.DocObjects.Tables
       if (null == layer)
         return -1;
       IntPtr const_ptr_layer = layer.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, true);
+      int rc = UnsafeNativeMethods.CRhinoLayerTable_AddLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, true);
+      GC.KeepAlive(layer);
+      return rc;
     }
 
     /// <summary>
@@ -2060,7 +2129,9 @@ namespace Rhino.DocObjects.Tables
         return RhinoMath.UnsetIntIndex;
 
       IntPtr const_ptr_layer = newLayer.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLayerTable_CreateLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, (int)layerType, worksessionReferenceModelSerialNumber, linkedInstanceDefinitionSerialNumber);
+      int rc = UnsafeNativeMethods.CRhinoLayerTable_CreateLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, (int)layerType, worksessionReferenceModelSerialNumber, linkedInstanceDefinitionSerialNumber);
+      GC.KeepAlive(newLayer);
+      return rc;
     }
 
     /// <summary>Modifies layer settings.</summary>
@@ -2079,7 +2150,9 @@ namespace Rhino.DocObjects.Tables
       if (null == newSettings)
         return false;
       IntPtr const_ptr_layer = newSettings.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLayerTable_ModifyLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, layerIndex, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoLayerTable_ModifyLayer(m_doc.RuntimeSerialNumber, const_ptr_layer, layerIndex, quiet);
+      GC.KeepAlive(newSettings);
+      return rc;
     }
     /// <summary>Modifies layer settings.</summary>
     /// <param name="newSettings">This information is copied.</param>

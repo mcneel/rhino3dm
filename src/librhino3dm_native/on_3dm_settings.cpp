@@ -293,11 +293,16 @@ RH_C_FUNCTION ON_UUID ON_3dmView_NamedViewId(const ON_3dmView* pView)
   return ON_nil_uuid;
 }
 
-RH_C_FUNCTION void ON_3dmView_GetClippingPlanes(const ON_3dmView* pView, ON_SimpleArray<ON_ClippingPlaneInfo>* array_to_fill)
+RH_C_FUNCTION void ON_3dmView_GetClippingPlanes(const ON_3dmView* pView, ON_SimpleArray<ON_ClippingPlaneInfo*>* array_to_fill)
 {
   if (pView && array_to_fill)
   {
-    *array_to_fill = pView->m_clipping_planes;
+    const auto& planes = pView->m_clipping_planes;
+
+    for (int i = 0; i < planes.Count(); i++)
+    {
+      array_to_fill->Append(new ON_ClippingPlaneInfo(planes[i]));
+    }
   }
 }
 
@@ -318,6 +323,11 @@ RH_C_FUNCTION bool ON_ClippingPlaneInfo_GetPlane(const ON_ClippingPlaneInfo* pCl
     return true;
   }
   return false;
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneInfo_Delete(ON_ClippingPlaneInfo* pClippingPlaneInfo)
+{
+  delete pClippingPlaneInfo;
 }
 
 RH_C_FUNCTION double ON_ClippingPlaneInfo_GetDepth(const ON_ClippingPlaneInfo* pClippingPlaneInfo)
@@ -1273,20 +1283,6 @@ RH_C_FUNCTION void ON_3dmAnimationProperties_SetViewportName(ON_3dmAnimationProp
 	if (p && s)
 	{
 		p->SetViewportName(*s);
-	}
-}
-
-RH_C_FUNCTION void ON_3dmAnimationProperties_HtmlFilename(const ON_3dmAnimationProperties* pConst, CRhCmnStringHolder* pString)
-{
-	if (pConst && pString)
-		pString->Set(pConst->HtmlFilename());
-}
-
-RH_C_FUNCTION void ON_3dmAnimationProperties_SetHtmlFilename(ON_3dmAnimationProperties* p, const ON_wString* s)
-{
-	if (p && s)
-	{
-		p->SetHtmlFilename(*s);
 	}
 }
 

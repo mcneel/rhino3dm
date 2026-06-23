@@ -1349,7 +1349,18 @@ namespace Rhino
 
     /// <summary>
     /// Returns
-    ///   true if Rhino is compiled a s pre-release build (Beta, WIP)
+    ///   true if Rhino is licensed as an Evaluation product
+    ///   false otherwise
+    /// </summary>
+    public static bool IsEvaluation
+    {
+      // RH-92168 (eirannejad 2026-02-05)
+      get { return GetBool(UnsafeNativeMethods.RhinoAppBool.IsEvaluation); }
+    }
+
+    /// <summary>
+    /// Returns
+    ///   true if Rhino is compiled as pre-release build (Beta, WIP)
     ///   false otherwise
     /// </summary>
     /// <since>6.0</since>
@@ -1599,6 +1610,7 @@ namespace Rhino
 #region events
     // Callback that doesn't pass any parameters or return values
     internal delegate void RhCmnEmptyCallback();
+    internal delegate void RhCmnIntActionCallback(int i);
 
     private static RhCmnEmptyCallback m_OnEscapeKey;
     private static void OnEscapeKey() => m_escape_key?.SafeInvoke();
@@ -1806,9 +1818,43 @@ namespace Rhino
       }
     }
 
-    private static RhCmnEmptyCallback m_OnIdle;
-    [MonoPInvokeCallback(typeof(RhCmnEmptyCallback))]
-    private static void OnIdle() => m_idle_occured?.SafeInvoke();
+    private static RhCmnIntActionCallback m_OnIdle;
+    [MonoPInvokeCallback(typeof(RhCmnIntActionCallback))]
+    private static void OnIdle(int tracingEnabled)
+    {
+      if (m_idle_occured == null)
+        return;
+
+      if (tracingEnabled!=0)
+      {
+        foreach (var h in m_idle_occured.GetInvocationList())
+        {
+          try
+          {
+            double startTimeStamp = UnsafeNativeMethods.CRhTrace_TimeStamp();
+            h.DynamicInvoke(null, EventArgs.Empty);
+            string name = h.Method.DeclaringType.FullName;
+            UnsafeNativeMethods.CRhTrace_LogIdleTrace(startTimeStamp, name);
+          }
+          catch (Exception ex)
+          {
+            HostUtils.ExceptionReport(ex.InnerException ?? ex);
+          }
+        }
+      }
+
+      foreach (var h in m_idle_occured.GetInvocationList())
+      {
+        try
+        {
+          h.DynamicInvoke(null, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+          HostUtils.ExceptionReport(ex.InnerException ?? ex);
+        }
+      }
+    }
 
     private static EventHandler m_idle_occured;
 

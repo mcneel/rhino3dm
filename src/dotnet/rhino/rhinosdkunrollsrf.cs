@@ -343,6 +343,7 @@ namespace Rhino.Geometry
         }
       }
       UnsafeNativeMethods.CRhinoUnroll_Delete(ptr_unroller);
+      GC.KeepAlive(flatbreps);
       return brep_count;
     }
 
@@ -357,7 +358,9 @@ namespace Rhino.Geometry
       if (dot == null) throw new ArgumentNullException("dot");
 
       IntPtr ptr_const_textdot = dot.ConstPointer();
-      return UnsafeNativeMethods.CRhinoUnrollResults_FollowingGeometryIndex(ptr_const_textdot);
+      int rc = UnsafeNativeMethods.CRhinoUnrollResults_FollowingGeometryIndex(ptr_const_textdot);
+      GC.KeepAlive(dot);
+      return rc;
     }
 
     /// <summary>
@@ -371,7 +374,9 @@ namespace Rhino.Geometry
       if (curve == null) throw new ArgumentNullException("curve");
 
       IntPtr ptr_const_curve = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoUnrollResults_FollowingGeometryIndex(ptr_const_curve);
+      int rc = UnsafeNativeMethods.CRhinoUnrollResults_FollowingGeometryIndex(ptr_const_curve);
+      GC.KeepAlive(curve);
+      return rc;
     }
   }
 
@@ -406,7 +411,10 @@ namespace Rhino.Geometry
       IntPtr r0 = rail0.ConstPointer();
       IntPtr r1 = rail1.ConstPointer();
 
-      return UnsafeNativeMethods.RHC_RhGetLocalDevopableRuling(r0, t0, dom0, r1, t1, dom1, ref t0_out, ref t1_out);
+      int rc = UnsafeNativeMethods.RHC_RhGetLocalDevopableRuling(r0, t0, dom0, r1, t1, dom1, ref t0_out, ref t1_out);
+      GC.KeepAlive(rail0);
+      GC.KeepAlive(rail1);
+      return rc;
     }
 
     /// <summary>
@@ -431,7 +439,10 @@ namespace Rhino.Geometry
     {
       IntPtr r0 = rail0.ConstPointer();
       IntPtr r1 = rail1.ConstPointer();
-      return UnsafeNativeMethods.RHC_DevRulingMinTwist(r0, t0, r1, t1, dom1, ref t1_out, ref cos_twist_out);
+      bool rc = UnsafeNativeMethods.RHC_DevRulingMinTwist(r0, t0, r1, t1, dom1, ref t1_out, ref cos_twist_out);
+      GC.KeepAlive(rail0);
+      GC.KeepAlive(rail1);
+      return rc;
     }
 
 
@@ -459,7 +470,10 @@ namespace Rhino.Geometry
     {
       IntPtr r0 = rail0.ConstPointer();
       IntPtr r1 = rail1.ConstPointer();
-      return UnsafeNativeMethods.RHC_DevRulingMinTwist2(r0, t0, dom0, r1, t1, dom1, ref t0_out, ref t1_out, ref cos_twist_out);
+      bool rc = UnsafeNativeMethods.RHC_DevRulingMinTwist2(r0, t0, dom0, r1, t1, dom1, ref t0_out, ref t1_out, ref cos_twist_out);
+      GC.KeepAlive(rail0);
+      GC.KeepAlive(rail1);
+      return rc;
     }
 
     /// <summary>
@@ -483,6 +497,8 @@ namespace Rhino.Geometry
         if(rc)
           rulings = ruling_array;
       }
+      GC.KeepAlive(rail0);
+      GC.KeepAlive(rail1);
       return rc;
     }
   }

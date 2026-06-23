@@ -75,6 +75,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr const_ptr_this = ConstPointer();
         var rc = UnsafeNativeMethods.CArgsRhinoGetCircle_ConeCylConstraint(const_ptr_this);
+        GC.KeepAlive(this);
         if (rc == UnsafeNativeMethods.GetConeConstraint.AroundCurve)
           return Custom.ConeConstraint.AroundCurve;
         if (rc == UnsafeNativeMethods.GetConeConstraint.Vertical)
@@ -85,6 +86,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetConeCylConstraint(ptr_this, (UnsafeNativeMethods.GetConeConstraint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -97,12 +99,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetDefaultSize(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -115,12 +120,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.UseDiameterMode, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -130,12 +138,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.ApexAngle);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.ApexAngle);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCone_SetDouble(ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.ApexAngle, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -145,12 +156,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.BaseAngle);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.BaseAngle);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCone_SetDouble(ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.BaseAngle, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -160,24 +174,30 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.Height);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCone_GetDouble(const_ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.Height);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCone_SetDouble(ptr_this, UnsafeNativeMethods.GetConeDoubleConsts.Height, value);
+        GC.KeepAlive(this);
       }
     }
 
     bool GetBool(UnsafeNativeMethods.GetConeBoolConsts which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetCone_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CArgsRhinoGetCone_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.GetConeBoolConsts which, bool value)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetCone_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -189,12 +209,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetCircleBoolConsts.Cap, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -216,6 +239,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cone = Geometry.Cone.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCone(ref cone, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -232,6 +256,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cone = Geometry.Cone.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCone(ref cone, ref verticalFaces, ref aroundFaces, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -252,6 +277,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cone = Geometry.Cone.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshConeWithCapStyle(ref cone, ref verticalFaces, ref aroundFaces, ref capStyle, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

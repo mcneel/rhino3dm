@@ -58,12 +58,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.AllowDeformable);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.AllowDeformable);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.AllowDeformable, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -74,12 +77,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.Deformable);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.Deformable);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.Deformable, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -89,12 +95,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.PointCount);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetArc_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.PointCount);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetInt(ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.PointCount, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -104,12 +113,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.Degree);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetArc_GetInt(const_ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.Degree);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetInt(ptr_this, UnsafeNativeMethods.ArgsGetArcIntConsts.Degree, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -122,12 +134,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_DefaultRadius(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetArc_DefaultRadius(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetDefaultRadius(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -137,12 +152,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.UseLayerLinetype);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetArc_GetBool(const_ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.UseLayerLinetype);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetArc_SetBool(ptr_this, UnsafeNativeMethods.ArgsGetArcBoolConsts.UseLayerLinetype, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -156,6 +174,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       arc = Geometry.Arc.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetArc(ref arc, ptr_this, IntPtr.Zero);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

@@ -168,3 +168,11 @@ RH_C_FUNCTION bool ON_Polyline_IsClosed(const ON_Polyline* pPolyline, double tol
     rc = pPolyline->IsClosed(tolerance);
   return rc;
 }
+
+RH_C_FUNCTION bool ON_Polyline_IsConvexLoop(const ON_Polyline* pPolyline, bool bStrictlyConvex)
+{
+  bool rc = false;
+  if (pPolyline)
+    rc = pPolyline->IsConvexLoop(bStrictlyConvex);
+  return rc;
+}

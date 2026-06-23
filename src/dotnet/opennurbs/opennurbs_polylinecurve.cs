@@ -108,6 +108,7 @@ namespace Rhino.Geometry
       IntPtr pDisplayPipeline = pipeline.NonConstPointer();
       int argb = color.ToArgb();
       UnsafeNativeMethods.ON_PolylineCurve_Draw(ptr, pDisplayPipeline, argb, thickness);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -151,7 +152,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_PolylineCurve_PointCount(ptr);
+        int rc = UnsafeNativeMethods.ON_PolylineCurve_PointCount(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -167,6 +170,7 @@ namespace Rhino.Geometry
       IntPtr ptr = ConstPointer();
       Point3d pt = new Point3d();
       UnsafeNativeMethods.ON_PolylineCurve_GetSetPoint(ptr, index, ref pt, false);
+      GC.KeepAlive(this);
       return pt;
     }
 
@@ -181,6 +185,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PolylineCurve_GetSetPoint(ptr, index, ref point, true);
+      GC.KeepAlive(this);
     }
 
 
@@ -196,6 +201,7 @@ namespace Rhino.Geometry
       IntPtr ptr = ConstPointer();
       double t = 0.0;
       UnsafeNativeMethods.ON_PolylineCurve_GetSetParameter(ptr, index, ref t, false);
+      GC.KeepAlive(this);
       return t;
     }
 
@@ -210,6 +216,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PolylineCurve_GetSetParameter(ptr, index, ref parameter, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -221,6 +228,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_PolylineCurve_SetArcLengthParameterization(ptr, tolerance);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -237,6 +245,7 @@ namespace Rhino.Geometry
       {
         IntPtr output_points_ptr = output_points.NonConstPointer();
         UnsafeNativeMethods.ON_PolylineCurve_CopyValues(const_ptr_this, output_points_ptr);
+        GC.KeepAlive(this);
         return Polyline.PolyLineFromNativeArray(output_points);
       }
     }
@@ -253,6 +262,7 @@ namespace Rhino.Geometry
       {
         IntPtr output_points_ptr = output_points.NonConstPointer();
         UnsafeNativeMethods.ON_PolylineCurve_CopyValues(const_ptr_this, output_points_ptr);
+        GC.KeepAlive(this);
         if (output_points.Count > 0)
           return output_points.ToArray();
         return Array.Empty<Point3d>();

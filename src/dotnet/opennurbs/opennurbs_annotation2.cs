@@ -139,12 +139,14 @@ namespace Rhino.Geometry
         var rc = new Point3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_TextDot_GetSetPoint(const_ptr_this, false, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer(true);
         UnsafeNativeMethods.ON_TextDot_GetSetPoint(ptr_this, true, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -161,6 +163,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_TextDot_GetSetText(const_ptr_this, false, null, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -168,6 +171,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_TextDot_GetSetText(ptr_this, true, value, IntPtr.Zero);
+        GC.KeepAlive(this);
       }
     }
 
@@ -184,6 +188,7 @@ namespace Rhino.Geometry
         {
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_TextDot_GetSetSecondaryText(const_ptr_this, false, null, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -191,6 +196,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_this = NonConstPointer(true);
         UnsafeNativeMethods.ON_TextDot_GetSetSecondaryText(ptr_this, true, value, IntPtr.Zero);
+        GC.KeepAlive(this);
       }
     }
 
@@ -203,12 +209,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_TextDot_GetHeight(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_TextDot_GetHeight(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_TextDot_SetHeight(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -223,6 +232,7 @@ namespace Rhino.Geometry
         {
           var ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_TextDot_GetFontFace(const_ptr_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -230,6 +240,7 @@ namespace Rhino.Geometry
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_TextDot_SetFontFace(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
   }

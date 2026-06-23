@@ -262,7 +262,10 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstLight = light.ConstPointer();
       IntPtr pConstAttributes = IntPtr.Zero;
       if (attributes != null) pConstAttributes = attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoLightTable_Add(m_doc.RuntimeSerialNumber, pConstLight, pConstAttributes);
+      int rc = UnsafeNativeMethods.CRhinoLightTable_Add(m_doc.RuntimeSerialNumber, pConstLight, pConstAttributes);
+      GC.KeepAlive(light);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -306,6 +309,7 @@ namespace Rhino.DocObjects.Tables
       {
         IntPtr pConstLight = light.ConstPointer();
         rc = UnsafeNativeMethods.CRhinoLightTable_Modify(m_doc.RuntimeSerialNumber, index, pConstLight);
+        GC.KeepAlive(light);
       }
       return rc;
     }

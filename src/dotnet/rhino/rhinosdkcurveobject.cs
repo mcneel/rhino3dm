@@ -67,6 +67,7 @@ namespace Rhino.DocObjects
         IntPtr ptr_viewport = (null != viewport) ? viewport.ConstPointer() : IntPtr.Zero;
         IntPtr ptr_geometry_array = geometry_array.NonConstPointer();
         int rc = UnsafeNativeMethods.CRhinoCurveObject_GetLinetypeSegments(ptr_const_this, ptr_viewport, ptr_geometry_array);
+        GC.KeepAlive(viewport);
         if (rc > 0)
           return geometry_array.ToNonConstArray();
         return new GeometryBase[0];

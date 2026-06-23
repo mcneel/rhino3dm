@@ -36,6 +36,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoGetString_Get(ptr, false);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
 
@@ -47,6 +48,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoGetString_Get(ptr, true);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
   }
@@ -75,6 +77,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoGetOption_Get(ptr);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
   }
@@ -108,6 +111,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoGetNumber_Get(ptr);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
 
@@ -129,6 +133,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetNumber_SetLimit(ptr, lowerLimit, strictlyGreaterThan, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -142,6 +147,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetNumber_SetLimit(ptr, upperLimit, strictlyLessThan, false);
+      GC.KeepAlive(this);
     }
 
   }
@@ -166,6 +172,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoGetInteger_Get(ptr);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
 
@@ -173,7 +180,9 @@ namespace Rhino.Input.Custom
     public new int Number()
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetInteger_Number(ptr);
+      int rc = UnsafeNativeMethods.CRhinoGetInteger_Number(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -189,6 +198,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetInteger_SetLimit(ptr, lowerLimit, strictlyGreaterThan, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -202,6 +212,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetInteger_SetLimit(ptr, upperLimit, strictlyLessThan, false);
+      GC.KeepAlive(this);
     }
   }
 

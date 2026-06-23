@@ -30,6 +30,7 @@ namespace Rhino.DocObjects
     {
       IntPtr pOther = other.ConstPointer();
       IntPtr pSectionStyle = UnsafeNativeMethods.ON_SectionStyle_New(pOther);
+      GC.KeepAlive(other);
       ConstructNonConstObject(pSectionStyle);
     }
 
@@ -55,7 +56,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #region properties
@@ -70,6 +73,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = ConstPointer();
       int argb = UnsafeNativeMethods.ON_SectionStyle_GetSetColor(ptr, which, false, 0);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(UnsafeNativeMethods.SectionStyleColor which, System.Drawing.Color c)
@@ -77,12 +81,14 @@ namespace Rhino.DocObjects
       IntPtr ptr = NonConstPointer();
       int argb = c.ToArgb();
       UnsafeNativeMethods.ON_SectionStyle_GetSetColor(ptr, which, true, argb);
+      GC.KeepAlive(this);
     }
 
     double GetDouble(UnsafeNativeMethods.SectionStyleDouble which)
     {
       IntPtr ptr = ConstPointer();
       double rc = UnsafeNativeMethods.ON_SectionStyle_GetSetDouble(ptr, which, false, 0);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -90,12 +96,14 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_GetSetDouble(ptr, which, true, d);
+      GC.KeepAlive(this);
     }
 
     int GetInt(UnsafeNativeMethods.SectionStyleInt which)
     {
       IntPtr ptr = ConstPointer();
       int rc = UnsafeNativeMethods.ON_SectionStyle_GetSetInt(ptr, which, false, 0);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -103,12 +111,14 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_GetSetInt(ptr, which, true, d);
+      GC.KeepAlive(this);
     }
 
     bool GetBool(UnsafeNativeMethods.SectionStyleBool which)
     {
       IntPtr ptr = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_SectionStyle_GetSetBool(ptr, which, false, false);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -116,6 +126,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_GetSetBool(ptr, which, true, b);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -270,6 +281,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_linetype = UnsafeNativeMethods.ON_SectionStyle_GetCustomLinetype(const_ptr_this);
+      GC.KeepAlive(this);
       if (ptr_linetype == IntPtr.Zero)
         return null;
       return new Linetype(ptr_linetype);
@@ -287,6 +299,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_linetype = linetype.ConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_SetCustomLinetype(ptr_this, const_ptr_linetype);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -294,6 +307,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_SetCustomLinetype(ptr_this, IntPtr.Zero);
+      GC.KeepAlive(this);
     }
 
   }

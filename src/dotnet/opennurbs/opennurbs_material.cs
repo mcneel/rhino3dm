@@ -1,4 +1,5 @@
 #pragma warning disable 1591
+using System;
 
 // moved from rdk_material.cs so we can export this to rhino3dm
 namespace Rhino.DocObjects
@@ -61,6 +62,7 @@ namespace Rhino.DocObjects
     public void SynchronizeLegacyMaterial()
     {
       UnsafeNativeMethods.ON_Material_PBR_SynchronizeLegacyMaterial(m_material.NonConstPointer());
+      GC.KeepAlive(m_material);
     }
 
     /// <since>7.0</since>
@@ -70,11 +72,13 @@ namespace Rhino.DocObjects
       {
         var color = new Rhino.Display.Color4f();
         UnsafeNativeMethods.ON_Material_PBR_BaseColor(m_material.ConstPointer(), ref color);
+        GC.KeepAlive(m_material);
         return color;
       }
       set
       {
         UnsafeNativeMethods.ON_Material_PBR_SetBaseColor(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
       }
     }
 
@@ -88,8 +92,17 @@ namespace Rhino.DocObjects
     /// <since>7.0</since>
     public BRDFs BRDF
     {
-      get { return (BRDFs)UnsafeNativeMethods.ON_Material_PBR_BRDF(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetBRDF(m_material.NonConstPointer(), (int)value); }
+      get
+      {
+        BRDFs rc = (BRDFs)UnsafeNativeMethods.ON_Material_PBR_BRDF(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetBRDF(m_material.NonConstPointer(), (int)value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
@@ -99,61 +112,126 @@ namespace Rhino.DocObjects
       {
         var color = new Rhino.Display.Color4f();
         UnsafeNativeMethods.ON_Material_PBR_SubsurfaceScatteringColor(m_material.ConstPointer(), ref color);
+        GC.KeepAlive(m_material);
         return color;
       }
       set
       {
         UnsafeNativeMethods.ON_Material_PBR_SetSubsurfaceScatteringColor(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
       }
     }
 
     /// <since>7.0</since>
     public double Subsurface
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Subsurface(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSubsurface(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Subsurface(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSubsurface(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double SubsurfaceScatteringRadius
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_SubsurfaceScatteringRadius(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSubsurfaceScatteringRadius(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_SubsurfaceScatteringRadius(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSubsurfaceScatteringRadius(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Metallic
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Metallic(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetMetallic(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Metallic(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetMetallic(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Specular
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Specular(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSpecular(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Specular(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSpecular(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double ReflectiveIOR
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_ReflectiveIOR(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetReflectiveIOR(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_ReflectiveIOR(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetReflectiveIOR(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double SpecularTint
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_SpecularTint(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSpecularTint(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_SpecularTint(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSpecularTint(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Roughness
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Roughness(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetRoughness(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Roughness(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetRoughness(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
@@ -166,71 +244,161 @@ namespace Rhino.DocObjects
     /// <since>7.0</since>
     public double AnisotropicRotation
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_AnisotropicRotation(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetAnisotropicRotation(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_AnisotropicRotation(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetAnisotropicRotation(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Sheen
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Sheen(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSheen(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Sheen(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSheen(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double SheenTint
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_SheenTint(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetSheenTint(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_SheenTint(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetSheenTint(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Clearcoat
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Clearcoat(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetClearcoat(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Clearcoat(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetClearcoat(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double ClearcoatRoughness
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_ClearcoatRoughness(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetClearcoatRoughness(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_ClearcoatRoughness(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetClearcoatRoughness(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double OpacityIOR
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_OpacityIOR(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetOpacityIOR(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_OpacityIOR(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetOpacityIOR(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double Opacity
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Opacity(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetOpacity(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Opacity(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetOpacity(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
     public double OpacityRoughness
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_OpacityRoughness(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetOpacityRoughness(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_OpacityRoughness(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetOpacityRoughness(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.1</since>
     public double Alpha
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Alpha(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetAlpha(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Alpha(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetAlpha(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.1</since>
     public bool UseBaseColorTextureAlphaForObjectAlphaTransparencyTexture
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_BaseColorTextureAlphaForObjectAlphaTransparencyTexture(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetBaseColorTextureAlphaForObjectAlphaTransparencyTexture(m_material.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_Material_PBR_BaseColorTextureAlphaForObjectAlphaTransparencyTexture(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetBaseColorTextureAlphaForObjectAlphaTransparencyTexture(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>
@@ -240,11 +408,13 @@ namespace Rhino.DocObjects
       {
         var color = new Rhino.Display.Color4f();
         UnsafeNativeMethods.ON_Material_PBR_Emission(m_material.ConstPointer(), ref color);
+        GC.KeepAlive(m_material);
         return color;
       }
       set
       {
         UnsafeNativeMethods.ON_Material_PBR_SetEmission(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
       }
     }
   }

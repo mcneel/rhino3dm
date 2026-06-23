@@ -47,12 +47,14 @@ namespace Rhino.Geometry
         Point3d pt = new Point3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_Point_GetSetPoint(ptr, false, ref pt);
+        GC.KeepAlive(this);
         return pt;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_Point_GetSetPoint(ptr, true, ref value);
+        GC.KeepAlive(this);
       }
     }
 

@@ -84,6 +84,7 @@ namespace Rhino.Collections
       BoundingBox rc = BoundingBox.Unset;
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.CRhinoXformObjectList_BoundingBox(const_ptr_this, regularObjects, grips, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -93,12 +94,15 @@ namespace Rhino.Collections
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoXformObjectList_DisplayFeedbackEnabled(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CRhinoXformObjectList_DisplayFeedbackEnabled(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoXformObjectList_SetDisplayFeedback(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -106,7 +110,9 @@ namespace Rhino.Collections
     public bool UpdateDisplayFeedbackTransform(Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoXformObjectList_UpdateDisplayFeedbackTransform(ptr_this, ref xform);
+      bool rc = UnsafeNativeMethods.CRhinoXformObjectList_UpdateDisplayFeedbackTransform(ptr_this, ref xform);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary> Remove all elements from this list </summary>
@@ -115,6 +121,7 @@ namespace Rhino.Collections
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoXformObjectList_Empty(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary> Number of elements in this list </summary>
@@ -124,7 +131,9 @@ namespace Rhino.Collections
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoXformObjectList_ObjectCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CRhinoXformObjectList_ObjectCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -135,7 +144,9 @@ namespace Rhino.Collections
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoXformObjectList_GripCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CRhinoXformObjectList_GripCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -146,7 +157,9 @@ namespace Rhino.Collections
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoXformObjectList_GripOwnerCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CRhinoXformObjectList_GripOwnerCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -158,6 +171,7 @@ namespace Rhino.Collections
       IntPtr const_ptr_rhinoobject = rhinoObject.ConstPointer();
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoXformObjectList_AddObject2(ptr_this, const_ptr_rhinoobject);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -170,6 +184,8 @@ namespace Rhino.Collections
       IntPtr const_ptr_objref = objref.ConstPointer();
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoXformObjectList_AddObject(ptr_this, const_ptr_objref);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -185,7 +201,10 @@ namespace Rhino.Collections
     {
       IntPtr const_ptr_getobj = go.ConstPointer();
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoXformObjectList_AddObjects(ptr_this, const_ptr_getobj, allowGrips);
+      int rc = UnsafeNativeMethods.CRhinoXformObjectList_AddObjects(ptr_this, const_ptr_getobj, allowGrips);
+      GC.KeepAlive(go);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -206,6 +225,7 @@ namespace Rhino.Collections
         var ptr_grip_owner = UnsafeNativeMethods.CRhinoXformObjectList_GetObject(const_ptr_this, i);
         rc[i] = RhinoObject.CreateRhinoObjectHelper(ptr_grip_owner);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -227,6 +247,7 @@ namespace Rhino.Collections
         var ptr_grip = UnsafeNativeMethods.CRhinoXformObjectList_GetGrip(const_ptr_this, i);
         rc[i] = RhinoObject.CreateRhinoObjectHelper(ptr_grip) as GripObject;
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -251,6 +272,7 @@ namespace Rhino.Collections
         var ptr_grip_owner = UnsafeNativeMethods.CRhinoXformObjectList_GetGripOwner(const_ptr_this, i);
         rc[i] = RhinoObject.CreateRhinoObjectHelper(ptr_grip_owner);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -332,12 +354,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoGetXform_HaveTransform(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CRhinoGetXform_HaveTransform(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoGetXform_SetHaveTransform(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
     /// <since>5.0</since>
@@ -348,12 +373,14 @@ namespace Rhino.Input.Custom
         Transform rc = Transform.Unset;
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.CRhinoGetXform_Transform(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoGetXform_SetTransform(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
     /*

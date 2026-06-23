@@ -51,6 +51,7 @@ namespace Rhino.Input
         IntPtr.Zero, 
         ref parsed_unit_system);
 
+      GC.KeepAlive(parse_settings_in);
       return rc;
     }
 
@@ -114,6 +115,8 @@ namespace Rhino.Input
         settings_out_ptr,
         ref parsed_unit_system);
 
+      GC.KeepAlive(parse_settings_in);
+      GC.KeepAlive(parse_results);
       return rc;
     }
 
@@ -189,6 +192,8 @@ namespace Rhino.Input
         settings_out_ptr,
         ref parsed_unit_system);
 
+      GC.KeepAlive(parse_settings_in);
+      GC.KeepAlive(parse_results);
       return rc;
     }
     
@@ -233,6 +238,8 @@ namespace Rhino.Input
       IntPtr settings_ptr = settings_in.ConstPointer();
       IntPtr results_ptr = null == settings_out ? IntPtr.Zero : settings_out.NonConstPointer();
       rc = UnsafeNativeMethods.ON_ParseDouble(expression, max_count, settings_ptr, results_ptr, ref answer);
+      GC.KeepAlive(settings_in);
+      GC.KeepAlive(settings_out);
       return rc;
     }
   }
@@ -374,240 +381,529 @@ namespace Rhino.Input
     /// <since>6.0</since>
     public AngleUnitSystem DefaultAngleUnitSystem
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_GetDefaultAngleUnitSystem(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetDefaultAngleUnitSystem(NonConstPointer(), value); }
+      get
+      {
+        AngleUnitSystem rc = UnsafeNativeMethods.ON_ParseSettings_GetDefaultAngleUnitSystem(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetDefaultAngleUnitSystem(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public UnitSystem DefaultLengthUnitSystem
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_GetDefaultLengthUnitSystem(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetDefaultLengthUnitSystem(NonConstPointer(), value); }
+      get
+      {
+        UnitSystem rc = UnsafeNativeMethods.ON_ParseSettings_GetDefaultLengthUnitSystem(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetDefaultLengthUnitSystem(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public void SetAllFieldsToFalse()
     {
       UnsafeNativeMethods.ON_ParseSettings_SetAllToFalse(NonConstPointer());
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
     public void SetAllExpressionSettingsToFalse()
     {
       UnsafeNativeMethods.ON_ParseSettings_SetAllExpressionSettingsToFalse(NonConstPointer());
+      GC.KeepAlive(this);
     }
-    
+
     #region properties
 
     /// <since>6.0</since>
     public bool ParseLeadingWhiteSpace
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseLeadingWhiteSpace(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseLeadingWhiteSpace(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseLeadingWhiteSpace(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseLeadingWhiteSpace(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseArithmeticExpression
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseArithmeticExpression(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseArithmeticExpression(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseArithmeticExpression(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseArithmeticExpression(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseMathFunctions
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseMathFunctions(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseMathFunctions(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseMathFunctions(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseMathFunctions(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseExplicitFormulaExpression
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseExplicitFormulaExpression(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseExplicitFormulaExpression(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseExplicitFormulaExpression(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseExplicitFormulaExpression(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseUnaryMinus
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseUnaryMinus(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryMinus(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseUnaryMinus(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryMinus(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseUnaryPlus
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseUnaryPlus(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryPlus(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseUnaryPlus(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseUnaryPlus(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSignificandIntegerPart
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandIntegerPart(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandIntegerPart(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSignificandIntegerPart(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandIntegerPart(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSignificandFractionalPart
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandFractionalPart(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandFractionalPart(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSignificandFractionalPart(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandFractionalPart(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSignificandDigitSeparators
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSignificandDigitSeparators(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandDigitSeparators(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSignificandDigitSeparators(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSignificandDigitSeparators(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseScientificENotation
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseScientificENotation(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseScientificENotation(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseScientificENotation(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseScientificENotation(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseDAsExponentInScientificENotation
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseDAsExponentInScientificENotation(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseDAsExponentInScientificENotation(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseDAsExponentInScientificENotation(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseDAsExponentInScientificENotation(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseFullStopAsDecimalPoint
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDecimalPoint(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDecimalPoint(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDecimalPoint(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDecimalPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseFullStopAsDigitSeparator
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDigitSeparator(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDigitSeparator(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseFullStopAsDigitSeparator(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseFullStopAsDigitSeparator(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseCommaAsDecimalPoint
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDecimalPoint(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDecimalPoint(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDecimalPoint(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDecimalPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseCommaAsDigitSeparator
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDigitSeparator(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDigitSeparator(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseCommaAsDigitSeparator(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseCommaAsDigitSeparator(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSpaceAsDigitSeparator
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSpaceAsDigitSeparator(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSpaceAsDigitSeparator(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSpaceAsDigitSeparator(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSpaceAsDigitSeparator(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseHyphenMinusAsNumberDash
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseHyphenMinusAsNumberDash(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenMinusAsNumberDash(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseHyphenMinusAsNumberDash(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenMinusAsNumberDash(NonConstPointer(), value);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseHyphenAsNumberDash
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseHyphenAsNumberDash(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenAsNumberDash(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseHyphenAsNumberDash(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseHyphenAsNumberDash(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseRationalNumber
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseRationalNumber(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseRationalNumber(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseRationalNumber(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseRationalNumber(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParsePi
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParsePi(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParsePi(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParsePi(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParsePi(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseMultiplication
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseMultiplication(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseMultiplication(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseMultiplication(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseMultiplication(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseDivision
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseDivision(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseDivision(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseDivision(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseDivision(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseAddition
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseAddition(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseAddition(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseAddition(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseAddition(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSubtraction
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSubtraction(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSubtraction(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSubtraction(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSubtraction(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParsePairedParentheses
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParsePairedParentheses(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParsePairedParentheses(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParsePairedParentheses(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParsePairedParentheses(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseIntegerDashFraction
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseIntegerDashFraction(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseIntegerDashFraction(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseIntegerDashFraction(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseIntegerDashFraction(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseFeetInches
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseFeetInches(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseFeetInches(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseFeetInches(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseFeetInches(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseArcDegreesMinutesSeconds
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseArcDegreesMinutesSeconds(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseArcDegreesMinutesSeconds(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseArcDegreesMinutesSeconds(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseArcDegreesMinutesSeconds(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public bool ParseSurveyorsNotation
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_ParseSurveyorsNotation(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetParseSurveyorsNotation(NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_ParseSettings_ParseSurveyorsNotation(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetParseSurveyorsNotation(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint PreferedLocaleId
     {
-      get { return UnsafeNativeMethods.ON_ParseSettings_PreferedLocaleId(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_ParseSettings_SetPreferedLocaleId(NonConstPointer(), value); }
+      get
+      {
+        uint rc = UnsafeNativeMethods.ON_ParseSettings_PreferedLocaleId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_ParseSettings_SetPreferedLocaleId(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     #endregion properties

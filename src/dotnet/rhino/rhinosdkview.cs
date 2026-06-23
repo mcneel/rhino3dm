@@ -544,8 +544,7 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public bool Close()
     {
-      uint serial_number = Document.RuntimeSerialNumber;
-      return UnsafeNativeMethods.CRhinoDoc_CloseRhinoView(serial_number, m_runtime_serial_number);
+      return UnsafeNativeMethods.CRhinoView_Close(m_runtime_serial_number);
     }
 
     /// <summary>

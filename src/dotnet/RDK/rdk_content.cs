@@ -10,6 +10,9 @@ using Rhino.Render.Fields;
 using Rhino.Runtime.InteropWrappers;
 using System.Collections;
 using Rhino.Runtime;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Rhino.Render.UI
 {
@@ -225,6 +228,7 @@ namespace Rhino.Render.UI
       {
         var pointer = UnsafeNativeMethods.Rdk_CoreContent_RenderContentFromUISection(SerialNumber, ref m_search_hint);
         var found = RenderContent.FromPointer(pointer, null);
+        GC.KeepAlive(this);
         return found;
       }
     }
@@ -294,6 +298,7 @@ namespace Rhino.Render.UI
       // This function is obsolete. Sections must hide and show by using Hidden [ANDYLOOK]
       var serial_number = SerialNumber;
       UnsafeNativeMethods.Rdk_CoreContent_UiSectionShow(serial_number, ref m_search_hint, visible);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// Expand or collapse this content section.
@@ -305,6 +310,7 @@ namespace Rhino.Render.UI
     {
       var serial_number = SerialNumber;
       UnsafeNativeMethods.Rdk_CoreContent_UiSectionExpand(serial_number, ref m_search_hint, expand);
+      GC.KeepAlive(this);
     }
     #endregion Public methods
 
@@ -334,6 +340,7 @@ namespace Rhino.Render.UI
         var pointer_to_id_list = id_list.NonConstPointer();
         var serial_number = SerialNumber;
         UnsafeNativeMethods.Rdk_CoreContent_UiSectionContentIdList(serial_number, ref m_search_hint, pointer_to_id_list);
+        GC.KeepAlive(this);
         return id_list.ToArray();
       }
     }
@@ -803,6 +810,7 @@ namespace Rhino.Render
     public void Add(RenderContentKind kind)
     {
       UnsafeNativeMethods.CRhRdkContentKindList_Add(m_cpp, (int)kind);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -812,7 +820,9 @@ namespace Rhino.Render
     /// <since>6.1</since>
     public int Count()
     {
-      return UnsafeNativeMethods.CRhRdkContentKindList_Count(m_cpp);
+      var ret = UnsafeNativeMethods.CRhRdkContentKindList_Count(m_cpp);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -829,6 +839,8 @@ namespace Rhino.Render
       case 4: return RenderContentKind.Texture;
       }
 
+      GC.KeepAlive(this);
+
       return RenderContentKind.None;
     }
 
@@ -840,7 +852,11 @@ namespace Rhino.Render
     /// <since>6.3</since>
     public bool Contains(RenderContentKind kind)
     {
-      return UnsafeNativeMethods.CRhRdkContentKindList_Contains(m_cpp, (uint)kind);
+      var ret = UnsafeNativeMethods.CRhRdkContentKindList_Contains(m_cpp, (uint)kind);
+
+      GC.KeepAlive(this);
+
+      return ret;
     }
   }
 
@@ -941,7 +957,11 @@ namespace Rhino.Render
     /// <since>6.9</since>
     public FilterContentByUsage GetFilterContentByUsage()
     {
-      switch (UnsafeNativeMethods.IRhRdkContentCollection_GetFilterContentByUsage(m_cpp))
+      var f = UnsafeNativeMethods.IRhRdkContentCollection_GetFilterContentByUsage(m_cpp);
+
+      GC.KeepAlive(this);
+
+      switch (f)
       {
       default:
       case 0: return FilterContentByUsage.None;
@@ -958,7 +978,9 @@ namespace Rhino.Render
     /// <since>6.9</since>
     public bool GetForcedVaries()
     {
-      return UnsafeNativeMethods.IRhRdkContentCollection_GetForcedVaries(m_cpp);
+      var ret = UnsafeNativeMethods.IRhRdkContentCollection_GetForcedVaries(m_cpp);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -971,6 +993,7 @@ namespace Rhino.Render
     public void SetForcedVaries(bool b)
     {
       UnsafeNativeMethods.IRhRdkContentCollection_SetForcedVaries(m_cpp, b);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -986,6 +1009,7 @@ namespace Rhino.Render
       var p_string = sh.ConstPointer;
 
       UnsafeNativeMethods.IRhRdkContentCollection_SetSearchPattern(m_cpp, p_string);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -999,6 +1023,7 @@ namespace Rhino.Render
       {
         var p_string = sh.NonConstPointer();
         UnsafeNativeMethods.IRhRdkContentCollection_GetSearchPattern(m_cpp, p_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1014,6 +1039,7 @@ namespace Rhino.Render
       {
         var p_string = sh.NonConstPointer();
         UnsafeNativeMethods.IRhRdkContentCollection_FirstTag(m_cpp, p_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1029,6 +1055,7 @@ namespace Rhino.Render
       {
         var p_string = sh.NonConstPointer();
         UnsafeNativeMethods.IRhRdkContentCollection_NextTag(m_cpp, p_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1043,7 +1070,14 @@ namespace Rhino.Render
     public bool ContentNeedsPreviewThumbnail(Rhino.Render.RenderContent c, bool includeChildren)
     {
       if (c != null)
-        return UnsafeNativeMethods.IRhRdkContentCollection_ContentNeedsPreviewThumbnailWithChildren(m_cpp, c.NonConstPointer(), includeChildren);
+      {
+        var ret = UnsafeNativeMethods.IRhRdkContentCollection_ContentNeedsPreviewThumbnailWithChildren(m_cpp, c.NonConstPointer(), includeChildren);
+
+        GC.KeepAlive(this);
+        GC.KeepAlive(c);
+
+        return ret;
+      }
 
       return false;
     }
@@ -1059,6 +1093,7 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Remove(CppPointer, collection.CppPointer);
         GC.KeepAlive(collection);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1073,6 +1108,7 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Add(CppPointer, collection.CppPointer);
         GC.KeepAlive(collection);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1087,6 +1123,7 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Set(CppPointer, collection.CppPointer);
         GC.KeepAlive(collection);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1099,6 +1136,7 @@ namespace Rhino.Render
       if (CppPointer != IntPtr.Zero)
       {
         UnsafeNativeMethods.IRhRdkContentCollection_Clear(CppPointer);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1116,6 +1154,7 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.CRhRdkContentArray_Add(m_cpp, content.CppPointer);
         GC.KeepAlive(content);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1128,7 +1167,9 @@ namespace Rhino.Render
     {
       if (m_cpp != IntPtr.Zero)
       {
-        return UnsafeNativeMethods.CRhRdkContentArray_Count(m_cpp);
+        var ret = UnsafeNativeMethods.CRhRdkContentArray_Count(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
       }
 
       return -1;
@@ -1146,6 +1187,7 @@ namespace Rhino.Render
       if (CppPointer != IntPtr.Zero)
       {
         value = new ContentCollectionIterator(UnsafeNativeMethods.IRhRdkContentCollection_IIterator(CppPointer));
+        GC.KeepAlive(this);
       }
 
       return value;
@@ -1193,6 +1235,7 @@ namespace Rhino.Render
       if (m_cpp != IntPtr.Zero)
       {
         IntPtr pContent = UnsafeNativeMethods.CRhRdkContentArray_ContentAt(m_cpp, index);
+        GC.KeepAlive(this);
         if (pContent != IntPtr.Zero)
         {
           return RenderContent.FromPointer(pContent, null);
@@ -1287,6 +1330,7 @@ namespace Rhino.Render
       if (m_cpp != IntPtr.Zero)
       {
         content = RenderContent.FromPointer(UnsafeNativeMethods.IIterator_First(m_cpp), null);
+        GC.KeepAlive(this);
       }
 
       return content;
@@ -1300,6 +1344,7 @@ namespace Rhino.Render
       if (m_cpp != IntPtr.Zero)
       {
         content = RenderContent.FromPointer(UnsafeNativeMethods.IIterator_Next(m_cpp), null);
+        GC.KeepAlive(this);
       }
 
       return content;
@@ -1399,7 +1444,9 @@ namespace Rhino.Render
     /// <returns></returns>
     internal bool IsInUseBySelectedObject()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_IsInUseBySelectedObject(CppPointer);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_IsInUseBySelectedObject(CppPointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -1408,7 +1455,9 @@ namespace Rhino.Render
     /// </summary>
     internal bool HasId(Guid id)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_HasId(ConstPointer(), id);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_HasId(ConstPointer(), id);
+      GC.KeepAlive(this);
+      return ret;
     }
     #endregion
 
@@ -1492,6 +1541,7 @@ namespace Rhino.Render
     public static RenderContent Create(Guid type, RenderContent parent, String childSlotName, ShowContentChooserFlags flags, RhinoDoc doc)
     {
       IntPtr ptr_content = UnsafeNativeMethods.Rdk_Globals_CreateContentByType(type, parent.ConstPointer(), childSlotName, (int)flags, doc.RuntimeSerialNumber);
+      GC.KeepAlive(parent);
       return ptr_content == IntPtr.Zero ? null : FromPointer(ptr_content, parent);
     }
 
@@ -1565,6 +1615,7 @@ namespace Rhino.Render
     public static RenderContent Create(RhinoDoc doc, Guid type, RenderContent parent, string childSlotName)
     {
       IntPtr ptr_content = UnsafeNativeMethods.Rdk_Globals_CreateContentByType(type, parent.ConstPointer(), childSlotName, 0, doc.RuntimeSerialNumber);
+      GC.KeepAlive(parent);
       return ptr_content == IntPtr.Zero ? null : FromPointer(ptr_content, parent);
     }
 
@@ -1690,6 +1741,7 @@ namespace Rhino.Render
     public static RenderContent LoadFromFile(String filename)
     {
       var p_content = UnsafeNativeMethods.Rdk_RenderContent_LoadContentFromFile(filename);
+      GC.KeepAlive(filename);
       if (p_content == IntPtr.Zero)
         return null;
 
@@ -1727,7 +1779,10 @@ namespace Rhino.Render
     /// <since>8.6</since>
     public bool SaveToFile(String filename, EmbedFilesChoice embedFilesChoice)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_SaveContentToFile(ConstPointer(), filename, (int)embedFilesChoice);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_SaveContentToFile(ConstPointer(), filename, (int)embedFilesChoice);
+      GC.KeepAlive(this);
+      GC.KeepAlive(filename);
+      return ret;
     }
 
 
@@ -1770,7 +1825,9 @@ namespace Rhino.Render
         throw new ArgumentNullException(nameof(document));
 
       var serial_number = document.RuntimeSerialNumber;
-      return 1 == UnsafeNativeMethods.Rdk_Globals_AddPersistentContent(serial_number, renderContent.ConstPointer());
+      var ret = 1 == UnsafeNativeMethods.Rdk_Globals_AddPersistentContent(serial_number, renderContent.ConstPointer());
+      GC.KeepAlive(renderContent);
+      return ret;
     }
 
     /// <summary>
@@ -1811,6 +1868,8 @@ namespace Rhino.Render
       // Note that copy can be null.
       if (copy != null)
         copy.AutoDelete = true;
+
+      GC.KeepAlive(this);
 
       return copy;
     }
@@ -1899,6 +1958,8 @@ namespace Rhino.Render
     public static RenderContent FromXml(String xml, RhinoDoc doc)
     {
       IntPtr pContent = UnsafeNativeMethods.Rdk_RenderContent_FromXml(xml, doc==null ? 0 : doc.RuntimeSerialNumber);
+      GC.KeepAlive(xml);
+
       if (pContent == IntPtr.Zero)
         return null;
 
@@ -1917,6 +1978,7 @@ namespace Rhino.Render
     /// <param name="pa">Preivew Appearance</param>
     /// <param name="result">Reference to PreviewRenderResult value</param>
     /// <returns>The Bitmap of the render content preview</returns>
+    /// <since>8.9</since>
     public static System.Drawing.Bitmap GenerateRenderContentPreview(LinearWorkflow lwf, RenderContent c, int width, int height, bool bSuppressLocalMapping, PreviewJobSignature pjs, PreviewAppearance pa, ref Utilities.PreviewRenderResult result)
     {
       if (lwf == null || c == null || pjs == null || pa == null)
@@ -1965,6 +2027,7 @@ namespace Rhino.Render
     /// <param name="reason"> ContentChanged = 0, ViewChanged = 1, RefreshDisplay = 2, Other = 99</param>
     /// <param name="result">Rhino.Command.Result value for successfull quick image creation</param>
     /// <returns>The Bitmap of the quick render content preview</returns>
+    /// <since>8.9</since>
     public static System.Drawing.Bitmap GenerateQuickContentPreview(RenderContent c, int width, int height, PreviewSceneServer psc, bool bSuppressLocalMapping, int reason, ref Rhino.Commands.Result result)
     {
       return GenerateQuickContentPreview(null, c, width, height, psc, bSuppressLocalMapping, reason, ref result);
@@ -1982,6 +2045,7 @@ namespace Rhino.Render
     /// <param name="reason"> ContentChanged = 0, ViewChanged = 1, RefreshDisplay = 2, Other = 99</param>
     /// <param name="result">Rhino.Command.Result value for successfull quick image creation</param>
     /// <returns>The Bitmap of the quick render content preview</returns>
+    /// <since>8.16</since>
     public static System.Drawing.Bitmap GenerateQuickContentPreview(LinearWorkflow lw, RenderContent c, int width, int height, PreviewSceneServer psc, bool bSuppressLocalMapping, int reason, ref Rhino.Commands.Result result)
     {
       if (c == null)
@@ -2018,6 +2082,7 @@ namespace Rhino.Render
     }
 
     /// <summary>Specifies optional buttons for ShowContentInstanceBrowser().</summary>
+    /// <since>8.15</since>
     public enum ContentInstanceBrowserButtons
     {
       /// <summary>No optional buttons.</summary>
@@ -2037,6 +2102,7 @@ namespace Rhino.Render
     /// <param name="buttons">Specifies which optional buttons to display.</param>
     /// Returns true if the user chooses a content or false if the dialog is cancelled.
     /// </summary>
+    /// <since>8.15</since>
     public static bool ShowContentInstanceBrowser(RhinoDoc doc, ref Guid instance_id, RenderContentKind kinds, ContentInstanceBrowserButtons buttons)
     {
       return UnsafeNativeMethods.Rdk_Globals_ShowContentInstanceBrowser(doc.RuntimeSerialNumber, ref instance_id, (uint)kinds, (uint)buttons);
@@ -2298,6 +2364,7 @@ namespace Rhino.Render
       {
         var p_string = sh.NonConstPointer();
         UnsafeNativeMethods.Rdk_RenderContent_GetString(p_const_this, p_string, which);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -2332,6 +2399,7 @@ namespace Rhino.Render
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetInstanceName(ConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2345,6 +2413,7 @@ namespace Rhino.Render
     public void SetName(string name, bool renameEvents, bool ensureNameUnique)
     {
       UnsafeNativeMethods.Rdk_RenderContent_SetInstanceNameEx(ConstPointer(), name, renameEvents, ensureNameUnique);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2357,6 +2426,7 @@ namespace Rhino.Render
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetNotes(ConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2369,6 +2439,7 @@ namespace Rhino.Render
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetTags (NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2398,7 +2469,9 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_InstanceId(ConstPointer());
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_InstanceId(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
@@ -2407,6 +2480,7 @@ namespace Rhino.Render
         {
           native.Id = value;
         }
+        GC.KeepAlive(this);
       }
     }
 
@@ -2414,7 +2488,15 @@ namespace Rhino.Render
     /// Type identifier for this content
     /// </summary>
     /// <since>6.0</since>
-    public Guid TypeId => UnsafeNativeMethods.Rdk_RenderContent_TypeId(ConstPointer());
+    public Guid TypeId
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_TypeId(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// **** This method is for proxies and will be marked obsolete in the future ****
@@ -2430,6 +2512,7 @@ namespace Rhino.Render
     public RenderContent ForDisplay()
     {
       IntPtr pContent = UnsafeNativeMethods.Rdk_RenderContent_ForDisplay(ConstPointer());
+      GC.KeepAlive(this);
       if (pContent != IntPtr.Zero)
         return RenderContent.FromPointer(pContent, this);
       
@@ -2443,7 +2526,9 @@ namespace Rhino.Render
     /// <since>6.9</since>
     public bool IsReference()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_IsReference(ConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_IsReference(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2454,11 +2539,14 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_GroupId(ConstPointer());
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_GroupId(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetGroupId(ConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2475,6 +2563,7 @@ namespace Rhino.Render
     public RenderContent MakeGroupInstance()
     {
       var render_content = UnsafeNativeMethods.Rdk_RenderContent_MakeGroupInstance(ConstPointer());
+      GC.KeepAlive(this);
 
       var copy = FromPointer(render_content, this);
       if (copy != null)
@@ -2493,7 +2582,9 @@ namespace Rhino.Render
     /// <since>6.26</since>
     public bool Ungroup()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_Ungroup(ConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_Ungroup(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2504,7 +2595,9 @@ namespace Rhino.Render
     /// <since>6.26</since>
     public bool UngroupRecursive()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_UngroupRecursive(ConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_UngroupRecursive(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2518,7 +2611,9 @@ namespace Rhino.Render
     /// <since>6.26</since>
     public bool SmartUngroupRecursive()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_SmartUngroupRecursive(ConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_SmartUngroupRecursive(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2527,7 +2622,9 @@ namespace Rhino.Render
     /// <since>6.9</since>
     public int UseCount()
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_UseCount(ConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_UseCount(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2569,7 +2666,9 @@ namespace Rhino.Render
     protected virtual uint CalculateRenderHash(ulong rcrcFlags)
     {
       var const_pointer = ConstPointer();
-      return UnsafeNativeMethods.Rdk_RenderContent_CallCalculateRenderCRCBase(const_pointer, rcrcFlags, "");
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_CallCalculateRenderCRCBase(const_pointer, rcrcFlags, "");
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2586,7 +2685,9 @@ namespace Rhino.Render
 
       var names = string.Join(";", excludeParameterNames);
 
-      return UnsafeNativeMethods.Rdk_RenderContent_CallCalculateRenderCRCBase(const_pointer, (ulong)flags, names);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_CallCalculateRenderCRCBase(const_pointer, (ulong)flags, names);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2603,7 +2704,9 @@ namespace Rhino.Render
       get
       {
         var const_pointer = ConstPointer();
-        return UnsafeNativeMethods.Rdk_RenderContent_RenderCRC(const_pointer, 0);
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_RenderCRC(const_pointer, 0);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -2618,6 +2721,7 @@ namespace Rhino.Render
     public void SetIsRenderHashRecursive(bool recursive)
     {
       UnsafeNativeMethods.Rdk_RenderContent_SetIsRenderCRCRecursive(ConstPointer(), recursive);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2628,8 +2732,10 @@ namespace Rhino.Render
     [CLSCompliant(false)]
     public uint RenderHashExclude(TextureRenderHashFlags flags, string excludeParameterNames)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
              ConstPointer(), (ulong)flags, excludeParameterNames, IntPtr.Zero);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2642,8 +2748,10 @@ namespace Rhino.Render
     [CLSCompliant(false)]
     public uint RenderHashExclude(CrcRenderHashFlags flags, string excludeParameterNames)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_RenderCRC_ExcludeParamNames(
              ConstPointer(), (ulong)flags, excludeParameterNames, IntPtr.Zero);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2664,6 +2772,7 @@ namespace Rhino.Render
              ConstPointer(), (ulong)flags, excludeParameterNames, (lw==null) ? IntPtr.Zero : lw.CppPointer);
 
       GC.KeepAlive(lw);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2704,7 +2813,12 @@ namespace Rhino.Render
     /// <since>5.1</since>
     public bool TopLevel
     {
-      get { return UnsafeNativeMethods.Rdk_RenderContent_IsTopLevel(ConstPointer()); }
+      get
+      { 
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_IsTopLevel(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -2713,7 +2827,12 @@ namespace Rhino.Render
     /*public*/ // Hiding for the time being. It may be better to just have a Document property
     bool InDocument
     {
-      get { return UnsafeNativeMethods.Rdk_RenderContent_IsInDocument(ConstPointer()); }
+      get 
+      { 
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_IsInDocument(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -2729,8 +2848,17 @@ namespace Rhino.Render
     /// <since>5.1</since>
     public bool Hidden
     {
-      get { return UnsafeNativeMethods.Rdk_RenderContent_IsHidden(ConstPointer()); }
-      set { UnsafeNativeMethods.Rdk_RenderContent_SetIsHidden(NonConstPointer(), value); }
+      get
+      {
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_IsHidden(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+      set
+      {
+        UnsafeNativeMethods.Rdk_RenderContent_SetIsHidden(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -2741,7 +2869,12 @@ namespace Rhino.Render
     /// <since>6.15</since>
     public bool IsHiddenByAutoDelete
     {
-      get { return UnsafeNativeMethods.Rdk_RenderContent_IsHiddenByAutoDelete(ConstPointer()); }
+      get
+      {
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_IsHiddenByAutoDelete(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -2752,7 +2885,9 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_CanBeEdited(ConstPointer());
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_CanBeEdited(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -2764,7 +2899,9 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_IsDefaultInstance(ConstPointer());
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_IsDefaultInstance(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -2776,7 +2913,9 @@ namespace Rhino.Render
     {
       get
       {
-        switch (UnsafeNativeMethods.Rdk_RenderContent_ProxyType(ConstPointer()))
+        var i = UnsafeNativeMethods.Rdk_RenderContent_ProxyType(ConstPointer());
+        GC.KeepAlive(this);
+        switch (i)
         {
         default:
         case 0: return ProxyTypes.None;
@@ -2796,6 +2935,7 @@ namespace Rhino.Render
       get
       {
         var p_content = UnsafeNativeMethods.Rdk_RenderContent_Parent(ConstPointer());
+        GC.KeepAlive(this);
         return FromPointer(p_content, this);
       }
     }
@@ -2809,6 +2949,7 @@ namespace Rhino.Render
       get
       {
         var p_content = UnsafeNativeMethods.Rdk_RenderContent_FirstChild(ConstPointer());
+        GC.KeepAlive(this);
         return FromPointer(p_content, this);
       }
     }
@@ -2822,6 +2963,7 @@ namespace Rhino.Render
       get
       {
         var p_content = UnsafeNativeMethods.Rdk_RenderContent_NextSibling(ConstPointer());
+        GC.KeepAlive(this);
         return FromPointer(p_content, this);
       }
     }
@@ -2835,6 +2977,7 @@ namespace Rhino.Render
       get
       {
         var p_content = UnsafeNativeMethods.Rdk_RenderContent_TopLevelParent(ConstPointer());
+        GC.KeepAlive(this);
         return FromPointer(p_content, this);
       }
     }
@@ -2849,6 +2992,7 @@ namespace Rhino.Render
       get
       {
         var doc_sn = UnsafeNativeMethods.Rdk_RenderContent_DocumentOwner(ConstPointer());
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(doc_sn);
       }
     }
@@ -2864,6 +3008,7 @@ namespace Rhino.Render
       get
       {
         var doc_sn = UnsafeNativeMethods.Rdk_RenderContent_DocumentOwner(ConstPointer());
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(doc_sn);
       }
     }
@@ -2878,6 +3023,7 @@ namespace Rhino.Render
       get
       {
         var doc_sn = UnsafeNativeMethods.Rdk_RenderContent_DocumentOwner(ConstPointer());
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(doc_sn);
       }
     }
@@ -2892,11 +3038,13 @@ namespace Rhino.Render
       get
       {
         var doc_sn = UnsafeNativeMethods.Rdk_RenderContent_DocumentAssoc(ConstPointer());
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(doc_sn);
       }
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetDocumentAssoc(NonConstPointer(), (null != value) ? value.RuntimeSerialNumber : (uint)0);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2912,7 +3060,9 @@ namespace Rhino.Render
     public bool OpenInEditor()
     {
       var const_pointer = ConstPointer();
-      return UnsafeNativeMethods.Rdk_RenderContent_OpenInMainEditor(const_pointer);
+      var ret =  UnsafeNativeMethods.Rdk_RenderContent_OpenInMainEditor(const_pointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2931,7 +3081,9 @@ namespace Rhino.Render
         return false;
 
       var const_pointer = ConstPointer();
-      return UnsafeNativeMethods.Rdk_RenderContent_OpenInMainEditor(const_pointer);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_OpenInMainEditor(const_pointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2951,6 +3103,7 @@ namespace Rhino.Render
     {
       var const_pointer = ConstPointer();
       var new_content_ptr = UnsafeNativeMethods.Rdk_RenderContent_Edit(const_pointer);
+      GC.KeepAlive(this);
       var new_content = RenderContent.FromPointer(new_content_ptr, this);
       if (null != new_content)
       {
@@ -2991,6 +3144,7 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.Rdk_CallAddUISectionsBase(NonConstPointer(), OnAddUiSectionsUIId);
       }
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3013,6 +3167,7 @@ namespace Rhino.Render
     {
       var const_pointer = ConstPointer();
       UnsafeNativeMethods.CRhRdkContent_BeginChange(const_pointer, (int)changeContext);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3029,6 +3184,7 @@ namespace Rhino.Render
     {
       var const_pointer = ConstPointer();
       UnsafeNativeMethods.CRhRdkContent_EndChange(const_pointer);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3085,6 +3241,8 @@ namespace Rhino.Render
 
       var h_wnd = Rhino.UI.Dialogs.Service.ObjectToWindowHandle(window, false);
       var serial_number = UnsafeNativeMethods.Rdk_CoreContent_AddNewContentUiSection(type, NonConstPointer(), UIId, classId, caption, h_wnd, createExpanded, createVisible);
+      GC.KeepAlive(this);
+      GC.KeepAlive(window);
       return ((serial_number < 1) ? null : new UI.UserInterfaceSection(serial_number, window));
     }
 
@@ -3178,7 +3336,9 @@ namespace Rhino.Render
         throw new Exception("AddAutomaticUserInterfaceSection can only be called from OnAddUserInterfaceSections");
       }
 
-      return UnsafeNativeMethods.Rdk_CoreContent_AddAutomaticUISection(NonConstPointer(), OnAddUiSectionsUIId, caption, id);
+      var ret = UnsafeNativeMethods.Rdk_CoreContent_AddAutomaticUISection(NonConstPointer(), OnAddUiSectionsUIId, caption, id);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     static readonly List<Rhino.UI.Controls.ICollapsibleSection> m_sections_to_keep_alive =
@@ -3202,7 +3362,10 @@ namespace Rhino.Render
       }
 
       bool rc = UnsafeNativeMethods.Rdk_CoreContent_AddUISection(NonConstPointer(), OnAddUiSectionsUIId, section.CppPointer);
+
       GC.KeepAlive(section);
+      GC.KeepAlive(this);
+
       return rc;
     }
 
@@ -3223,6 +3386,7 @@ namespace Rhino.Render
     public DataSources.ContentFactory Factory()
     {
       IntPtr pFactory = UnsafeNativeMethods.Rdk_RenderContent_Factory(ConstPointer());
+      GC.KeepAlive(this);
 
       if (pFactory != IntPtr.Zero)
         return new DataSources.ContentFactory(pFactory);
@@ -3236,23 +3400,36 @@ namespace Rhino.Render
     {
       bool rc = UnsafeNativeMethods.Rdk_RenderContent_GetUnderlyingInstances(ConstPointer(), collection.CppPointer);
       GC.KeepAlive(collection);
+      GC.KeepAlive(this);
       return rc;
     }
 
     /// <since>6.0</since>
     public virtual bool IsContentTypeAcceptableAsChild(Guid type, String childSlotName)
     {
-      if (IsNativeWrapper())
-        return 1 == UnsafeNativeMethods.Rdk_RenderContent_IsContentTypeAcceptableAsChild(ConstPointer(), type, childSlotName);
+      bool ret;
 
-      return 1 == UnsafeNativeMethods.Rdk_RenderContent_CallIsContentTypeAcceptableAsChildBase(ConstPointer(), type, childSlotName);
+      if (IsNativeWrapper())
+      {
+        ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_IsContentTypeAcceptableAsChild(ConstPointer(), type, childSlotName));
+      }
+      else
+      {
+        ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallIsContentTypeAcceptableAsChildBase(ConstPointer(), type, childSlotName));
+      }
+
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <since>6.1</since>
     public virtual bool IsFactoryProductAcceptableAsChild(DataSources.ContentFactory factory, String childSlotName)
     {
       bool rc = 1 == UnsafeNativeMethods.Rdk_RenderContent_IsFactoryProductAcceptableAsChild(ConstPointer(), factory.CppPointer, childSlotName);
+
       GC.KeepAlive(factory);
+      GC.KeepAlive(this);
+
       return rc;
     }
 
@@ -3293,8 +3470,12 @@ namespace Rhino.Render
         {
           UnsafeNativeMethods.Rdk_RenderContent_CallGetVariantParameterBase(ConstPointer(),
                                                 parameterName, value.NonConstPointer());
+          
         }
       }
+
+      GC.KeepAlive(this);
+      GC.KeepAlive(value);
 
       return value.IsNull ? null : value;
     }
@@ -3327,24 +3508,34 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public virtual bool SetParameter(String parameterName, object value)
     {
+      bool ret = false;
       var v = new Variant(value);
       if (v != null)
       {
         if (IsNativeWrapper())
         {
-          return 1 == UnsafeNativeMethods.Rdk_RenderContent_SetVariantParameter(ConstPointer(), parameterName, v.ConstPointer());
+          ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_SetVariantParameter(ConstPointer(), parameterName, v.ConstPointer()));
         }
-
-        var key = BindingKey(parameterName, null);
-        if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+        else
         {
-          bound_field.Field.Set(v);
-          return true;
+          var key = BindingKey(parameterName, null);
+          if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+          {
+            bound_field.Field.Set(v);
+            ret = true;
+          }
+          else
+          {
+            ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetVariantParameterBase(ConstPointer(), parameterName, v.ConstPointer()));
+          }
         }
-
-        return 1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetVariantParameterBase(ConstPointer(), parameterName, v.ConstPointer());
       }
-      return false;
+
+      GC.KeepAlive(this);
+      GC.KeepAlive(v);
+      GC.KeepAlive(parameterName);
+
+      return ret;
     }
 
     /// <summary>
@@ -3363,7 +3554,9 @@ namespace Rhino.Render
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_GetLocked(ConstPointer()) != 0;
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_GetLocked(ConstPointer()) != 0;
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
@@ -3373,6 +3566,7 @@ namespace Rhino.Render
         if (value)
         {
           UnsafeNativeMethods.Rdk_RenderContent_SetLocked(NonConstPointer());
+          GC.KeepAlive(this);
         }
       }
     }
@@ -3414,6 +3608,9 @@ namespace Rhino.Render
                               contentParameterName, extraRequirementParameter, value.NonConstPointer());
         }
       }
+
+      GC.KeepAlive(this);
+
       return value;
     }
 
@@ -3449,24 +3646,33 @@ namespace Rhino.Render
     /// <since>5.7</since>
     public virtual bool SetChildSlotParameter(String contentParameterName, String extraRequirementParameter, object value, ExtraRequirementsSetContexts sc)
     {
+      bool ret = false;
+
       if (value is Variant v)
       {
         if (IsNativeWrapper())
         {
-          return 1 == UnsafeNativeMethods.Rdk_RenderContent_SetExtraRequirementParameter(ConstPointer(), contentParameterName, extraRequirementParameter, v.ConstPointer(), (int)sc);
+          ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_SetExtraRequirementParameter(ConstPointer(), contentParameterName, extraRequirementParameter, v.ConstPointer(), (int)sc));
         }
-
-        var key = BindingKey(contentParameterName, extraRequirementParameter);
-        if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+        else
         {
-          bound_field.Field.Set(v);
-          return true;
+          var key = BindingKey(contentParameterName, extraRequirementParameter);
+          if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+          {
+            bound_field.Field.Set(v);
+            ret = true;
+          }
+          else
+          {
+            ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetExtraRequirementParameterBase(ConstPointer(), contentParameterName, extraRequirementParameter, v.ConstPointer(), (int)sc));
+          }
         }
-
-        return 1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetExtraRequirementParameterBase(ConstPointer(), contentParameterName, extraRequirementParameter, v.ConstPointer(), (int)sc);
+        GC.KeepAlive(v);
       }
 
-      return false;
+      GC.KeepAlive(this);
+
+      return ret;
     }
 
     /// <summary>
@@ -3492,7 +3698,9 @@ namespace Rhino.Render
     /// <since>5.7</since>
     public bool ChildSlotOn(String childSlotName)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_GetChildSlotOn(ConstPointer(), childSlotName);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_GetChildSlotOn(ConstPointer(), childSlotName);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -3504,7 +3712,10 @@ namespace Rhino.Render
     /// <since>5.7</since>
     public void SetChildSlotOn(String childSlotName, bool bOn, ChangeContexts cc)
     {
-      SetExtraRequirementParameter(childSlotName, "texture-on", new Variant(bOn), ExtraRequirementsSetContextFromChangeContext(cc));
+      using (var v = new Variant(bOn))
+      {
+        SetExtraRequirementParameter(childSlotName, "texture-on", v, ExtraRequirementsSetContextFromChangeContext(cc));
+      }
     }
 
     /// <summary>
@@ -3515,7 +3726,9 @@ namespace Rhino.Render
     /// <since>5.7</since>
     public double ChildSlotAmount(String childSlotName)
     {
-      return UnsafeNativeMethods.Rdk_RenderContent_GetChildSlotAmount(ConstPointer(), childSlotName);
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_GetChildSlotAmount(ConstPointer(), childSlotName);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -3527,7 +3740,10 @@ namespace Rhino.Render
     /// <since>5.7</since>
     public void SetChildSlotAmount(String childSlotName, double amount, ChangeContexts cc)
     {
-      SetExtraRequirementParameter(childSlotName, "texture-amount", new Variant(amount), ExtraRequirementsSetContextFromChangeContext(cc));
+      using (var v = new Variant(amount))
+      {
+        SetExtraRequirementParameter(childSlotName, "texture-amount", v, ExtraRequirementsSetContextFromChangeContext(cc));
+      }
     }
 
     /// <summary>
@@ -3539,7 +3755,10 @@ namespace Rhino.Render
     public PreviewSceneServer NewPreviewSceneServer(SceneServerData ssd)
     {
       IntPtr pPreviewSceneServer = UnsafeNativeMethods.Rdk_RenderContent_NewPreviewSceneServer(ConstPointer(), ssd.CppPointer);
+
       GC.KeepAlive(ssd);
+      GC.KeepAlive(this);
+
       if (pPreviewSceneServer != IntPtr.Zero)
         return new PreviewSceneServer(ssd, pPreviewSceneServer);
 
@@ -3575,10 +3794,20 @@ namespace Rhino.Render
     public virtual
     MatchDataResult MatchData(RenderContent oldContent)
     {
+      int ret;
       if (IsNativeWrapper())
-        return (MatchDataResult)UnsafeNativeMethods.Rdk_RenderContent_HarvestData(ConstPointer(), oldContent.ConstPointer());
+      {
+        ret = UnsafeNativeMethods.Rdk_RenderContent_HarvestData(ConstPointer(), oldContent.ConstPointer());
+      }
+      else
+      {
+        ret = UnsafeNativeMethods.Rdk_RenderContent_CallHarvestDataBase(ConstPointer(), oldContent.ConstPointer());
+      }
 
-      return (MatchDataResult)UnsafeNativeMethods.Rdk_RenderContent_CallHarvestDataBase(ConstPointer(), oldContent.ConstPointer());
+      GC.KeepAlive(this);
+      GC.KeepAlive(oldContent);
+
+      return (MatchDataResult)ret;
     }
 
     #region Operations
@@ -3732,21 +3961,35 @@ namespace Rhino.Render
     /*public virtual*/
     IntPtr GetShader(Guid renderEngineId, IntPtr privateData)
     {
+      IntPtr ret = IntPtr.Zero;
+
       if (IsNativeWrapper())
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_GetShader(ConstPointer(), renderEngineId, privateData);
+        ret = UnsafeNativeMethods.Rdk_RenderContent_GetShader(ConstPointer(), renderEngineId, privateData);
       }
-      return IntPtr.Zero;
+
+      GC.KeepAlive(this);
+
+      return ret;
     }
 
     /// <since>6.0</since>
     public virtual bool IsCompatible(Guid renderEngineId)
     {
+      bool ret;
+
       if (IsNativeWrapper())
       {
-        return 1 == UnsafeNativeMethods.Rdk_RenderContent_IsCompatible(ConstPointer(), renderEngineId);
+        ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_IsCompatible(ConstPointer(), renderEngineId));
       }
-      return 1 == UnsafeNativeMethods.Rdk_RenderContent_CallIsCompatibleBase(ConstPointer(), renderEngineId);
+      else
+      {
+        ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallIsCompatibleBase(ConstPointer(), renderEngineId));
+      }
+
+      GC.KeepAlive(this);
+
+      return ret;
     }
 
     #region Child content support
@@ -3771,6 +4014,9 @@ namespace Rhino.Render
         var p_string = sh.NonConstPointer();
         var p_const_this = ConstPointer();
         UnsafeNativeMethods.Rdk_RenderContent_ChildSlotNameFromParamName(p_const_this, paramName, p_string);
+
+        GC.KeepAlive(this);
+
         return sh.ToString();
       }
     }
@@ -3789,7 +4035,11 @@ namespace Rhino.Render
       {
         var p_string = sh.NonConstPointer();
         var p_const_this = ConstPointer();
+
         UnsafeNativeMethods.Rdk_RenderContent_ParamNameFromChildSlotName(p_const_this, childSlotName, p_string);
+
+        GC.KeepAlive(this);
+
         return sh.ToString();
       }
     }
@@ -3813,6 +4063,7 @@ namespace Rhino.Render
     public void BeginCreateDynamicFields(bool automatic)
     {
       UnsafeNativeMethods.Rdk_RenderContent_BeginCreateDynamicFields(ConstPointer(), automatic);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3832,9 +4083,16 @@ namespace Rhino.Render
       var varMin   = new Variant(minValue);
       var varMax   = new Variant(maxValue);
 
-      return UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(),
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(),
              internalName, localName, englishName,
              varValue.ConstPointer(), varMin.ConstPointer(), varMax.ConstPointer(), sectionId);
+
+      GC.KeepAlive(this);
+      GC.KeepAlive(varValue);
+      GC.KeepAlive(varMin);
+      GC.KeepAlive(varMax);
+
+      return ret;
     }
 
     /// <summary>
@@ -3845,6 +4103,7 @@ namespace Rhino.Render
     public void EndCreateDynamicFields()
     {
       UnsafeNativeMethods.Rdk_RenderContent_EndCreateDynamicFields(ConstPointer());
+      GC.KeepAlive(this);
     }
 
     /// <since>5.1</since>
@@ -3852,6 +4111,7 @@ namespace Rhino.Render
     {
       var p_const_this = ConstPointer();
       var p_child = UnsafeNativeMethods.Rdk_RenderContent_FindChild(p_const_this, childSlotName);
+      GC.KeepAlive(this);
       return FromPointer(p_child, this);
     }
 
@@ -3887,6 +4147,9 @@ namespace Rhino.Render
       var pointer = NonConstPointer();
       var child_pointer = null == renderContent ? IntPtr.Zero : renderContent.NonConstPointer();
       var success = UnsafeNativeMethods.Rdk_RenderContent_SetChild(pointer, child_pointer, childSlotName);
+
+      GC.KeepAlive(this);
+      GC.KeepAlive(renderContent);
 
       // If successfully added to the child content list then make sure the newContent
       // pointer does not get deleted when the managed object is disposed of since the
@@ -3937,6 +4200,9 @@ namespace Rhino.Render
       var child_pointer = null == renderContent ? IntPtr.Zero : renderContent.NonConstPointer();
       var success = UnsafeNativeMethods.Rdk_RenderContent_SetChild(pointer, child_pointer, childSlotName);
 
+      GC.KeepAlive(this);
+      GC.KeepAlive(renderContent);
+
       // If successfully added to the child content list then make sure the newContent
       // pointer does not get deleted when the managed object is disposed of since the
       // content is now included in this objects child content list
@@ -3976,6 +4242,9 @@ namespace Rhino.Render
       var pointer = NonConstPointer();
       var success = UnsafeNativeMethods.Rdk_RenderContent_DeleteChild(pointer, childSlotName);
       EndChange();
+
+      GC.KeepAlive(this);
+
       return success;
     }
 
@@ -3987,6 +4256,8 @@ namespace Rhino.Render
       var pointer = NonConstPointer();
       UnsafeNativeMethods.Rdk_RenderContent_DeleteAllChildren(pointer);
       EndChange();
+
+      GC.KeepAlive(this);
     }
 
     /// <since>5.6</since>
@@ -4007,6 +4278,7 @@ namespace Rhino.Render
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetChildSlotName(ConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -4017,6 +4289,7 @@ namespace Rhino.Render
       {
         var p_non_const_list = list.NonConstPointer();
         UnsafeNativeMethods.Rdk_RenderContent_GetEmbeddedFiles(ConstPointer(), p_non_const_list);
+        GC.KeepAlive(this);
         return list.ToArray();
       }
     }
@@ -4026,7 +4299,9 @@ namespace Rhino.Render
     [Obsolete("This method should not be called.")]
     public bool Initialize()
     {
-       return UnsafeNativeMethods.Rdk_RenderContent_Initialize(NonConstPointer());
+      var ret = UnsafeNativeMethods.Rdk_RenderContent_Initialize(NonConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <since>6.1</since>
@@ -4035,12 +4310,15 @@ namespace Rhino.Render
     public void Uninitialize()
     {
       UnsafeNativeMethods.Rdk_RenderContent_Uninitialize(NonConstPointer());
+      GC.KeepAlive(this);
     }
+
     /// <since>6.13</since>
     public bool Replace(RenderContent newcontent)
     {
       bool rc = UnsafeNativeMethods.Rdk_RenderContent_ReplaceContentInDocument(DocumentOwner.RuntimeSerialNumber, CppPointer, newcontent.CppPointer);
       GC.KeepAlive(newcontent);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -4327,6 +4605,7 @@ namespace Rhino.Render
           {
             var p_string = sw.NonConstPointer;
             bool ret = UnsafeNativeMethods.Rdk_RenderContent_Filename(ConstPointer(), p_string);
+            GC.KeepAlive(this);
             if (ret)
             {
               return sw.ToString();
@@ -4341,6 +4620,8 @@ namespace Rhino.Render
         if (IsNativeWrapper())
         {
           UnsafeNativeMethods.Rdk_RenderContent_SetFilename(NonConstPointer(), value);
+          GC.KeepAlive(this);
+          GC.KeepAlive(value);
         }
       }
     }
@@ -4407,7 +4688,9 @@ namespace Rhino.Render
         {
           // Call into the C RDK to get the Icon
           var const_pointer = content.ConstPointer();
-          return UnsafeNativeMethods.Rdk_RenderContent_GetVirtualIcon(const_pointer, width, height, dibOut, 1);
+          var ret = UnsafeNativeMethods.Rdk_RenderContent_GetVirtualIcon(const_pointer, width, height, dibOut, 1);
+          GC.KeepAlive(content);
+          return ret;
         }
 
         // Call the .NET RDK to get the bitmap
@@ -4450,15 +4733,24 @@ namespace Rhino.Render
     virtual public bool VirtualIcon(Size size, out Bitmap bitmap)
     {
       bitmap = null;
+
       var const_ptr_this = ConstPointer();
+
       using (var rhinodib = new RhinoDib())
       {
         var ptr_rhino_dib = rhinodib.NonConstPointer;
-        var success = UnsafeNativeMethods.Rdk_RenderContent_GetVirtualIcon(const_ptr_this, size.Width, size.Height, ptr_rhino_dib, 1);
-        if (success != 0)
-          bitmap = rhinodib.ToBitmap();
+        var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetVirtualIcon(const_ptr_this, size.Width, size.Height, ptr_rhino_dib, 1));
 
-        return (success != 0);
+        Debug.Assert(success);
+
+        if (success)
+        {
+          bitmap = rhinodib.ToBitmap();
+        }
+
+        GC.KeepAlive(this);
+
+        return success;
       }
     }
 
@@ -4469,12 +4761,18 @@ namespace Rhino.Render
 
       using (var rhinodib = new RhinoDib())
       {
-        if (0 == UnsafeNativeMethods.Rdk_RenderContent_GetIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer))
-          return false;
+        var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer));
 
-        bitmap = rhinodib.ToBitmap();
+        Debug.Assert(success);
 
-        return true;
+        if (success)
+        {
+          bitmap = rhinodib.ToBitmap();
+        }
+
+        GC.KeepAlive(this);
+
+        return success;
       }
     }
 
@@ -4485,12 +4783,18 @@ namespace Rhino.Render
 
       using (var rhinodib = new RhinoDib())
       {
-        if (0 == UnsafeNativeMethods.Rdk_RenderContent_GetDynamicIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer, (int)usage))
-          return false;
+        var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetDynamicIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer, (int)usage));
 
-        bitmap = rhinodib.ToBitmap();
+        Debug.Assert(success);
 
-        return true;
+        if (success)
+        {
+          bitmap = rhinodib.ToBitmap();
+        }
+
+        GC.KeepAlive(this);
+
+        return success;
       }
     }
     
@@ -4622,7 +4926,14 @@ namespace Rhino.Render
     /// <since>7.5</since>
     public RenderContentStyles Styles
     {
-      get { return (RenderContentStyles)UnsafeNativeMethods.Rdk_RenderContent_BitFlags(ConstPointer()); }
+      get
+      {
+        var ret = (RenderContentStyles)UnsafeNativeMethods.Rdk_RenderContent_BitFlags(ConstPointer());
+
+        GC.KeepAlive(this);
+
+        return ret;
+      }
     }
 
     private RenderContentStyles m_styles_to_add = RenderContentStyles.None;

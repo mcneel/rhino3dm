@@ -16,7 +16,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a light that represents the Sun.
     /// </summary>
-    /// <param name="northAngleDegrees">The angle of North in degrees. North is the angle between positive World Y axis and model North, as measured on World XY plane.</param>
+    /// <param name="northAngleDegrees">The angle of North in degrees. North is the angle between positive World X axis and model North, as measured on World XY plane.</param>
     /// <param name="azimuthDegrees">The Azimuth angle value in degrees. Azimuth is the compass angle from North.</param>
     /// <param name="altitudeDegrees">The Altitude angle in degrees. Altitude is the angle above the ground plane.</param>
     /// <returns>A new sun light.</returns>
@@ -39,7 +39,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs a light which simulates the Sun based on a given time and location on Earth.
     /// </summary>
-    /// <param name="northAngleDegrees">The angle of North in degrees. North is the angle between positive World Y axis and model North, as measured on World XY plane.</param>
+    /// <param name="northAngleDegrees">The angle of North in degrees. North is the angle between positive World X axis and model North, as measured on World XY plane.</param>
     /// <param name="when">The time of the measurement. The Kind property of DateTime specifies whether this is in local or universal time.
     /// <para>Local and Undefined <see cref="DateTimeKind">date-time kinds</see> in this argument are considered local.</para></param>
     /// <param name="latitudeDegrees">The latitude, in degrees, of the location on Earth.</param>
@@ -137,12 +137,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_Light_IsEnabled(pConstThis);
+        bool rc = UnsafeNativeMethods.ON_Light_IsEnabled(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_Light_SetEnabled(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -152,12 +155,15 @@ namespace Rhino.Geometry
     int GetInt(int which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.ON_Light_GetInt(pConstThis, which);
+      int rc = UnsafeNativeMethods.ON_Light_GetInt(pConstThis, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(int which, int val)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_Light_SetInt(pThis, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -252,7 +258,9 @@ namespace Rhino.Geometry
       {
         Runtime.HostUtils.CheckForRdk(true, true);
         var pointer = ConstPointer();
-        return (UnsafeNativeMethods.RhRdk_ON_Light_IsSunLight(pointer) != 0);
+        bool rc = (UnsafeNativeMethods.RhRdk_ON_Light_IsSunLight(pointer) != 0);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 #endif
@@ -278,12 +286,14 @@ namespace Rhino.Geometry
         IntPtr pConstThis = ConstPointer();
         Point3d rc = new Point3d();
         UnsafeNativeMethods.ON_Light_GetLocation(pConstThis, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_Light_SetLocation(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -296,12 +306,14 @@ namespace Rhino.Geometry
       IntPtr pConstThis = ConstPointer();
       Vector3d rc = new Vector3d();
       UnsafeNativeMethods.ON_Light_GetVector(pConstThis, ref rc, which);
+      GC.KeepAlive(this);
       return rc;
     }
     void SetVector(int which, Vector3d v)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_Light_SetVector(pThis, v, which);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -334,12 +346,15 @@ namespace Rhino.Geometry
     double GetDouble(int which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.ON_Light_GetDouble(pConstThis, which);
+      double rc = UnsafeNativeMethods.ON_Light_GetDouble(pConstThis, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(int which, double val)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_Light_SetDouble(pThis, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -389,6 +404,7 @@ namespace Rhino.Geometry
     {
       IntPtr pConstThis = ConstPointer();
       int argb = UnsafeNativeMethods.ON_Light_GetColor(pConstThis, which);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(int which, System.Drawing.Color c)
@@ -396,6 +412,7 @@ namespace Rhino.Geometry
       IntPtr pThis = NonConstPointer();
       int argb = c.ToArgb();
       UnsafeNativeMethods.ON_Light_SetColor(pThis, which, argb);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -445,6 +462,7 @@ namespace Rhino.Geometry
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_Light_SetAttenuation(pThis, a0, a1, a2);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -458,6 +476,7 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         Vector3d rc = new Vector3d();
         UnsafeNativeMethods.ON_Light_GetAttenuationVector(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
 
@@ -478,7 +497,9 @@ namespace Rhino.Geometry
     public double GetAttenuation(double d)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.ON_Light_GetAttenuation(pConstThis, d);
+      double rc = UnsafeNativeMethods.ON_Light_GetAttenuation(pConstThis, d);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -537,7 +558,9 @@ namespace Rhino.Geometry
       innerRadius = 0;
       outerRadius = 0;
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.ON_Light_GetSpotLightRadii(pConstThis, ref innerRadius, ref outerRadius);
+      bool rc = UnsafeNativeMethods.ON_Light_GetSpotLightRadii(pConstThis, ref innerRadius, ref outerRadius);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -585,7 +608,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the spot light name.
+    /// Gets or sets the light name.
     /// </summary>
     /// <since>5.0</since>
     public string Name
@@ -597,6 +620,7 @@ namespace Rhino.Geometry
         {
           IntPtr pString = sh.NonConstPointer();
           UnsafeNativeMethods.ON_Light_GetName(pConstThis, pString);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -604,6 +628,7 @@ namespace Rhino.Geometry
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_Light_SetName(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -614,13 +639,16 @@ namespace Rhino.Geometry
       get
       {
         var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Light_ModelObjectId(ptr_const_this);
+        Guid rc = UnsafeNativeMethods.ON_Light_ModelObjectId(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
 
       set 
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_Light_SetModelObjectId(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 

@@ -62,6 +62,7 @@ namespace Rhino
       int scnt = s.Length;
       IntPtr ptr = UnsafeNativeMethods.ON_LengthValue_CreateFromSubString(const_ptr_parse_settings, s, scnt, ref scnt);
       parsedAll = (IntPtr.Zero != ptr && scnt == s.Length);
+      GC.KeepAlive(ps);
       return FromIntPtr(ptr);
     }
 
@@ -106,7 +107,9 @@ namespace Rhino
     public double Length(UnitSystem units)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_LengthValue_Length(const_ptr_this, units);
+      double rc = UnsafeNativeMethods.ON_LengthValue_Length(const_ptr_this, units);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -123,6 +126,7 @@ namespace Rhino
           IntPtr ptr_string = sh.NonConstPointer();
           IntPtr const_ptr_this = ConstPointer();
           UnsafeNativeMethods.ON_LengthValue_LengthAsStringPointer(const_ptr_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -139,6 +143,7 @@ namespace Rhino
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr lv_ptr = UnsafeNativeMethods.ON_LengthValue_ChangeLength(const_ptr_this, newLength);
+      GC.KeepAlive(this);
       return new LengthValue(lv_ptr);
     }
     
@@ -165,6 +170,7 @@ namespace Rhino
       get
       {
         IntPtr ptr = UnsafeNativeMethods.ON_LengthValue_LengthStringParseSettings(ConstPointer());
+        GC.KeepAlive(this);
         return new StringParserSettings(ptr);
       }
     }
@@ -175,7 +181,12 @@ namespace Rhino
     /// <since>6.0</since>
     public UnitSystem UnitSystem
     {
-      get { return UnsafeNativeMethods.ON_LengthValue_LengthUnitSystem(ConstPointer()); }
+      get
+      {
+        UnitSystem rc = UnsafeNativeMethods.ON_LengthValue_LengthUnitSystem(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -184,7 +195,12 @@ namespace Rhino
     /// <since>6.0</since>
     public StringFormat LengthStringFormat
     {
-      get { return UnsafeNativeMethods.ON_LengthValue_LengthStringFormat(ConstPointer()); }
+      get
+      {
+        StringFormat rc =UnsafeNativeMethods.ON_LengthValue_LengthStringFormat(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -194,7 +210,12 @@ namespace Rhino
     [CLSCompliant(false)]
     public uint ContextLocaleId
     {
-      get { return UnsafeNativeMethods.ON_LengthValue_ContextLocaleId(ConstPointer()); }
+      get
+      {
+        uint rc = UnsafeNativeMethods.ON_LengthValue_ContextLocaleId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -203,7 +224,12 @@ namespace Rhino
     /// <since>6.0</since>
     public AngleUnitSystem ContextAngleUnitSystem
     {
-      get { return UnsafeNativeMethods.ON_LengthValue_ContextAngleUnitSystem(ConstPointer()); }
+      get
+      {
+        AngleUnitSystem rc = UnsafeNativeMethods.ON_LengthValue_ContextAngleUnitSystem(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
     
     /// <summary>
@@ -213,7 +239,9 @@ namespace Rhino
     /// <since>6.0</since>
     public bool IsUnset()
     {
-      return UnsafeNativeMethods.ON_LengthValue_IsUnset(ConstPointer());
+      bool rc = UnsafeNativeMethods.ON_LengthValue_IsUnset(ConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
   }
 
@@ -415,6 +443,7 @@ namespace Rhino
     {
       IntPtr const_ptr_settings = ps.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_CreateFromString(const_ptr_settings, s);
+      GC.KeepAlive(ps);
       return FromIntPtr(ptr);
     }
 
@@ -430,6 +459,8 @@ namespace Rhino
       IntPtr const_ptr_left = left.ConstPointer();
       IntPtr const_ptr_right = right.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_Create(const_ptr_left, const_ptr_right, format);
+      GC.KeepAlive(left);
+      GC.KeepAlive(right);
       return FromIntPtr(ptr);
     }
 
@@ -465,7 +496,9 @@ namespace Rhino
     public bool IsUnset()
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_ScaleValue_IsUnset(const_ptr_this);
+      bool rc = UnsafeNativeMethods.ON_ScaleValue_IsUnset(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -476,7 +509,9 @@ namespace Rhino
     public LengthValue LeftLengthValue()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_LeftLengthValue(ConstPointer());
-      return LengthValue.FromIntPtr(ptr);
+      LengthValue rc = LengthValue.FromIntPtr(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -487,7 +522,9 @@ namespace Rhino
     public LengthValue RightLengthValue()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ScaleValue_RightLengthValue(ConstPointer());
-      return LengthValue.FromIntPtr(ptr);
+      LengthValue rc = LengthValue.FromIntPtr(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -496,7 +533,12 @@ namespace Rhino
     /// <since>6.0</since>
     public double LeftToRightScale
     {
-      get { return UnsafeNativeMethods.ON_ScaleValue_LeftToRightScale(ConstPointer()); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_ScaleValue_LeftToRightScale(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
     /// <summary>
     /// RightLengthValue / LeftLengthValue
@@ -504,7 +546,12 @@ namespace Rhino
     /// <since>6.0</since>
     public double RightToLeftScale
     {
-      get { return UnsafeNativeMethods.ON_ScaleValue_RightToLeftScale(ConstPointer()); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_ScaleValue_RightToLeftScale(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
   }
 }

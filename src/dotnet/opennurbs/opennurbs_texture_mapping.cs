@@ -54,6 +54,7 @@ namespace Rhino.Render
   ///   texture space.  
   ///   
   /// </summary>
+  /// <since>8.15</since>
   public enum TextureSpace : int
   {
     /// <summary>
@@ -74,6 +75,7 @@ namespace Rhino.Render
   ///   or cylinder, is used, there are two projection options.
   ///If m_type = srfp_mapping, then m_projection is ignored.
   /// </summary>
+  /// <since>8.15</since>
   public enum Projection : int
   {
     /// <summary>
@@ -165,6 +167,7 @@ namespace Rhino.Render
           case UnsafeNativeMethods.TextureMappingType.FalseColors:
             return TextureMappingType.FalseColors;
         }
+        GC.KeepAlive(this);
         throw new Exception("Unknown TextureMappingType");
       }
     }
@@ -175,45 +178,57 @@ namespace Rhino.Render
     /// In planar mappings, m_bCapped=false means "the Z texture coordinate will always be 0.0"
     /// this is now the default behaviour in Rhino 5.0 - it's what users expect apparently.
     /// </summary>
+    /// <since>8.15</since>
     public bool Capped
     {
       get
       {
-        return UnsafeNativeMethods.ON_TextureMapping_GetCapped(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_TextureMapping_GetCapped(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.ON_TextureMapping_SetCapped(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
     /// See TextureSpace
     /// </summary>
+    /// <since>8.15</since>
     public TextureSpace TextureSpace
     {
       get
       {
-        return (TextureSpace)UnsafeNativeMethods.ON_TextureMapping_GetTextureSpace(ConstPointer());
+        TextureSpace rc = (TextureSpace)UnsafeNativeMethods.ON_TextureMapping_GetTextureSpace(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.ON_TextureMapping_SetTextureSpace(NonConstPointer(), (int)value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
     /// See Projection
     /// </summary>
+    /// <since>8.15</since>
     public Projection Projection
     {
       get
       {
-        return (Projection)UnsafeNativeMethods.ON_TextureMapping_GetProjection(ConstPointer());
+        Projection rc = (Projection)UnsafeNativeMethods.ON_TextureMapping_GetProjection(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.ON_TextureMapping_SetProjection(NonConstPointer(), (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -227,7 +242,9 @@ namespace Rhino.Render
     {
       get
       {
-        return IsDocumentControlled ? m_id : UnsafeNativeMethods.ON_TextureMapping_GetId(ConstPointer());
+        Guid rc = IsDocumentControlled ? m_id : UnsafeNativeMethods.ON_TextureMapping_GetId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -244,12 +261,14 @@ namespace Rhino.Render
         var ptr = ConstPointer();
         var value = Transform.Identity;
         UnsafeNativeMethods.ON_TextureMapping_GetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.UVW, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         var ptr = NonConstPointer();
         UnsafeNativeMethods.ON_TextureMapping_SetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.UVW, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -291,12 +310,14 @@ namespace Rhino.Render
         var ptr = ConstPointer();
         var value = Transform.Identity;
         UnsafeNativeMethods.ON_TextureMapping_GetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.Pxyz, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         var ptr = NonConstPointer();
         UnsafeNativeMethods.ON_TextureMapping_SetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.Pxyz, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -316,12 +337,14 @@ namespace Rhino.Render
         var ptr = ConstPointer();
         var value = Transform.Identity;
         UnsafeNativeMethods.ON_TextureMapping_GetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.Nxyz, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         var ptr = NonConstPointer();
         UnsafeNativeMethods.ON_TextureMapping_SetTransform(ptr, UnsafeNativeMethods.TextureMappingGetTransform.Nxyz, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -355,7 +378,9 @@ namespace Rhino.Render
     {
       IntPtr const_ptr_this = ConstPointer();
       t = new Point3d(0, 0, 0);
-      return UnsafeNativeMethods.ON_TextureMapping_Evaluate(const_ptr_this, p, n, ref t);
+      int rc = UnsafeNativeMethods.ON_TextureMapping_Evaluate(const_ptr_this, p, n, ref t);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -384,7 +409,9 @@ namespace Rhino.Render
     {
       IntPtr const_ptr_this = ConstPointer();
       t = new Point3d(0, 0, 0);
-      return UnsafeNativeMethods.ON_TextureMapping_Evaluate2(const_ptr_this, p, n, ref t, ref pXform, ref nXform);
+      int rc = UnsafeNativeMethods.ON_TextureMapping_Evaluate2(const_ptr_this, p, n, ref t, ref pXform, ref nXform);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -429,6 +456,7 @@ namespace Rhino.Render
       dz = Interval.Unset;
       bool capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingBox(ptr, ref plane, ref dx, ref dy, ref dz, ref capped);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -476,6 +504,7 @@ namespace Rhino.Render
       dz = Interval.Unset;
       capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingBox(ptr, ref plane, ref dx, ref dy, ref dz, ref capped);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -498,6 +527,7 @@ namespace Rhino.Render
       var ptr = ConstPointer();
       sphere = Sphere.Unset;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingSphere(ptr, ref sphere);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -522,6 +552,7 @@ namespace Rhino.Render
       bool capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingCylinder(ptr, ref cylinder, ref capped);
 
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -546,6 +577,7 @@ namespace Rhino.Render
       cylinder = Cylinder.Unset;
       capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingCylinder(ptr, ref cylinder, ref capped);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -581,6 +613,7 @@ namespace Rhino.Render
       dz = Interval.Unset;
       bool capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingPlane(ptr, ref plane, ref dx, ref dy, ref dz, ref capped);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -619,6 +652,7 @@ namespace Rhino.Render
       dz = Interval.Unset;
       capped = false;
       var success = UnsafeNativeMethods.ON_TextureMapping_GetMappingPlane(ptr, ref plane, ref dx, ref dy, ref dz, ref capped);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -635,6 +669,7 @@ namespace Rhino.Render
       var success = UnsafeNativeMethods.ON_TextureMapping_CopyCustomMappingMeshPrimitive(ptr, mesh.NonConstPointer());
       if (!success)
         mesh = null;
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -830,6 +865,7 @@ namespace Rhino.Render
         rc.Dispose();
         rc = null;
       }
+      GC.KeepAlive(mesh);
       return rc;
     }
 
@@ -856,7 +892,9 @@ namespace Rhino.Render
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
   }
 }

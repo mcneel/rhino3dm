@@ -1,6 +1,5 @@
 
 using System;
-using System.Diagnostics;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 
@@ -72,7 +71,11 @@ namespace Rhino.Render
       if (rs == null)
         return IntPtr.Zero;
 
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetGroundPlane(rs.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmRenderSettings_GetGroundPlane(rs.ConstPointer());
+
+      GC.KeepAlive(rs);
+
+      return ret;
     }
 #endif
 
@@ -96,7 +99,11 @@ namespace Rhino.Render
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
-      return UnsafeNativeMethods.ON_GroundPlane_FromONX_Model(f.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_GroundPlane_FromONX_Model(f.ConstPointer());
+
+      GC.KeepAlive(f);
+
+      return ret;
     }
 
 #if RHINO_SDK
@@ -147,11 +154,14 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_GroundPlane_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_GroundPlane_Delete(CppPointer);
+      GC.KeepAlive(this);
     }
 
     ~GroundPlane()
@@ -172,13 +182,18 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.GroundPlaneSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+
+      GC.KeepAlive(v);
+
+      return ret;
     }
 
     private Variant GetValue(UnsafeNativeMethods.GroundPlaneSetting which)
     {
       var v = new Variant();
       UnsafeNativeMethods.ON_GroundPlane_GetValue(CppPointer, which, v.NonConstPointer());
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -200,6 +215,12 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.ON_GroundPlane_SetValue(CppPointer, which, v.ConstPointer());
       }
+
+      GC.KeepAlive(this);
+#if RHINO_SDK
+      GC.KeepAlive(rs);   // rhino3dm-local: rs only exists in the RHINO_SDK branch above
+#endif
+      GC.KeepAlive(v);
     }
 
     /// <summary>
@@ -331,7 +352,11 @@ namespace Rhino.Render
       if (rs == null)
         return IntPtr.Zero;
 
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderChannels(rs.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmRenderSettings_GetRenderChannels(rs.ConstPointer());
+
+      GC.KeepAlive(rs);
+
+      return ret;
     }
 #endif
 
@@ -342,12 +367,18 @@ namespace Rhino.Render
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
-      return UnsafeNativeMethods.ON_RenderChannels_FromONX_Model(f.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_RenderChannels_FromONX_Model(f.ConstPointer());
+
+      GC.KeepAlive(f);
+
+      return ret;
     }
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_RenderChannels_Delete(CppPointer);
+
+      GC.KeepAlive(this);
     }
 
 #if RHINO_SDK
@@ -412,6 +443,8 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_RenderChannels_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     ~RenderChannels()
@@ -433,6 +466,7 @@ namespace Rhino.Render
     private Modes GetMode()
     {
       var m = UnsafeNativeMethods.ON_RenderChannels_GetMode(CppPointer);
+      GC.KeepAlive(this);
       return (m == 0) ? Modes.Automatic : Modes.Custom;
     }
 
@@ -455,6 +489,7 @@ namespace Rhino.Render
 #endif
       {
         UnsafeNativeMethods.ON_RenderChannels_SetMode(CppPointer, v);
+        GC.KeepAlive(this);
       }
     }
 
@@ -462,6 +497,7 @@ namespace Rhino.Render
     {
       var array = new SimpleArrayGuid();
       UnsafeNativeMethods.ON_RenderChannels_GetCustomList(CppPointer, array.NonConstPointer());
+      GC.KeepAlive(this);
       return array.ToArray();
     }
 
@@ -481,6 +517,7 @@ namespace Rhino.Render
 #endif
       {
         UnsafeNativeMethods.ON_RenderChannels_SetCustomList(CppPointer, array.ConstPointer());
+        GC.KeepAlive(this);
       }
     }
 

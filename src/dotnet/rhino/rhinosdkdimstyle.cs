@@ -82,6 +82,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_style = UnsafeNativeMethods.ON_DimStyle_New(const_ptr_this);
+      GC.KeepAlive(this);
       return new DimensionStyle(ptr_style);
     }
 
@@ -92,6 +93,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_style = UnsafeNativeMethods.ON_DimStyle_New(const_ptr_this);
+      GC.KeepAlive(this);
       var rc = new DimensionStyle(ptr_style)
       {
         Name = newName,
@@ -117,6 +119,8 @@ namespace Rhino.DocObjects
       var const_ptr_source = source.ConstPointer();
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_CopySettingsFrom(const_ptr_source, ptr_this, copy_name);
+      GC.KeepAlive(source);
+      GC.KeepAlive(this);
     }
 
     internal override IntPtr _InternalGetConstPointer()
@@ -174,13 +178,16 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         IntPtr const_on_font = UnsafeNativeMethods.ON_DimStyle_GetManagedFont(const_ptr_this);
-        return new Font(const_on_font);
+        Font rc = new Font(const_on_font);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         IntPtr const_ptr_font = value.ConstPointer();
         UnsafeNativeMethods.ON_DimStyle_SetFont(ptr_this, const_ptr_font, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -190,6 +197,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr dibptr = UnsafeNativeMethods.ON_Dimstyle_GetPreview_Bitmap(const_ptr_this, width, height);
+      GC.KeepAlive(this);
       return RhinoDib.ToBitmap(dibptr, true);
     }
 #endif
@@ -203,6 +211,7 @@ namespace Rhino.DocObjects
     {
       IntPtr dimstyle = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_ScaleLengthValues(dimstyle, scale);
+      GC.KeepAlive(this);
     }
 
     //public static UnitSystem UnitSystemFromDimstyleUnitSystem(LengthDisplay style_units)
@@ -234,16 +243,19 @@ namespace Rhino.DocObjects
     //                        : throw new Exception("missing DimStyleLengthUnits need to be added here");
 
 
-#region guid properties
+    #region guid properties
     Guid GetGuid(Field field)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_DimStyle_GetGuid(const_ptr_this, field);
+      Guid rc = UnsafeNativeMethods.ON_DimStyle_GetGuid(const_ptr_this, field);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetGuid(Field field, Guid id)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetGuid(ptr_this, field, id, true);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
@@ -273,12 +285,15 @@ namespace Rhino.DocObjects
     bool GetBool(Field field)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_DimStyle_GetBool(const_ptr_this, field);
+      bool rc = UnsafeNativeMethods.ON_DimStyle_GetBool(const_ptr_this, field);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(Field field, bool b)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetBool(ptr_this, field, b, true);
+      GC.KeepAlive(this);
     }
     /// <since>6.0</since>
     public bool SuppressExtension1
@@ -363,12 +378,15 @@ namespace Rhino.DocObjects
     double GetDouble(Field field)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_DimStyle_GetDouble(const_ptr_this, field);
+      double rc = UnsafeNativeMethods.ON_DimStyle_GetDouble(const_ptr_this, field);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(Field field, double d)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetDouble(ptr_this, field, d, true);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
@@ -567,12 +585,14 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         IntPtr scaleptr = UnsafeNativeMethods.ON_Dimstyle_GetDimScaleValue(const_ptr_this);
+        GC.KeepAlive(this);
         return ScaleValue.FromIntPtr(scaleptr);
       }
       set
       {
         IntPtr const_ptr_scale = value.ConstPointer();
         UnsafeNativeMethods.ON_Dimstyle_SetDimScaleValue(NonConstPointer(), const_ptr_scale);
+        GC.KeepAlive(this);
       }
     }
 
@@ -582,6 +602,7 @@ namespace Rhino.DocObjects
       get
       {
         double mm = UnsafeNativeMethods.ON_Dimstyle_GetScaleLeftLength_mm(ConstPointer());
+        GC.KeepAlive(this);
         return mm;
       }
       set
@@ -605,6 +626,7 @@ namespace Rhino.DocObjects
       get
       {
         double mm = UnsafeNativeMethods.ON_Dimstyle_GetScaleRightLength_mm(ConstPointer());
+        GC.KeepAlive(this);
         return mm;
       }
       set
@@ -628,12 +650,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_DimStyle_TextFit(ptr_this);
+        DimensionStyle.TextFit rc = UnsafeNativeMethods.ON_DimStyle_TextFit(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_DimStyle_SetTextFit(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -643,12 +668,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_DimStyle_ArrowFit(ptr_this);
+        DimensionStyle.ArrowFit rc = UnsafeNativeMethods.ON_DimStyle_ArrowFit(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_DimStyle_SetArrowFit(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -662,12 +690,15 @@ namespace Rhino.DocObjects
     int GetInt(Field field)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_DimStyle_GetInt(const_ptr_this, field);
+      int rc = UnsafeNativeMethods.ON_DimStyle_GetInt(const_ptr_this, field);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(Field field, int i)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetInt(ptr_this, field, i, true);
+      GC.KeepAlive(this);
     }
 
     //public TextDisplayAlignment TextAlignment
@@ -696,7 +727,9 @@ namespace Rhino.DocObjects
     {
       // model_serial_number must be unsigned because ON_UNSET_UINT_INDEX has meaning as a parameter
       IntPtr ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Dimstyle_GetDimensionLengthDisplayUnit(ptr_this, model_serial_number);
+      UnitSystem rc = UnsafeNativeMethods.ON_Dimstyle_GetDimensionLengthDisplayUnit(ptr_this, model_serial_number);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -705,7 +738,9 @@ namespace Rhino.DocObjects
     {
       // model_serial_number must be unsigned because ON_UNSET_UINT_INDEX has meaning as a parameter
       IntPtr ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Dimstyle_GetAlternateDimensionLengthDisplayUnit(ptr_this, model_serial_number);
+      UnitSystem rc = UnsafeNativeMethods.ON_Dimstyle_GetAlternateDimensionLengthDisplayUnit(ptr_this, model_serial_number);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -963,6 +998,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       int argb = UnsafeNativeMethods.ON_DimStyle_GetColor(const_ptr_this, field);
+      GC.KeepAlive(this);
       return Color.FromArgb(argb);
     }
     void SetColor(Field field, Color c)
@@ -970,6 +1006,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       int argb = c.ToArgb();
       UnsafeNativeMethods.ON_DimStyle_SetColor(ptr_this, field, argb, true);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
@@ -1000,6 +1037,7 @@ namespace Rhino.DocObjects
               return str[0];
             }
           }
+          GC.KeepAlive(this);
         }
         return '.';
       }
@@ -1009,6 +1047,7 @@ namespace Rhino.DocObjects
         string s = string.Empty;
         s += value;
         UnsafeNativeMethods.ON_DimStyle_SetDecimalSeparator(ptr_this, s);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1019,6 +1058,7 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         IntPtr ptr_string = sh.NonConstPointer;
         UnsafeNativeMethods.ON_DimStyle_GetString(const_ptr_this, field, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1027,6 +1067,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetString(ptr_this, field, s, true);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -1084,7 +1125,9 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public bool IsFieldOverriden(Field field)
     {
-      return UnsafeNativeMethods.ON_DimStyle_IsFieldOverride(ConstPointer(), field);
+      bool rc = UnsafeNativeMethods.ON_DimStyle_IsFieldOverride(ConstPointer(), field);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary> Set a field as overridden </summary>
@@ -1094,6 +1137,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetFieldOverride(ptr_this, field, true);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// Set the field as not overridden
@@ -1104,6 +1148,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_SetFieldOverride(ptr_this, field, false);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1115,6 +1160,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_DimStyle_ClearAllFieldOverrides(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1130,7 +1176,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_DimStyle_HasFieldOverrides(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_DimStyle_HasFieldOverrides(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1147,7 +1195,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_DimStyle_IsChildDimStyle(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_DimStyle_IsChildDimStyle(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1162,7 +1212,9 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public bool IsChildOf(Guid parentId)
     {
-      return UnsafeNativeMethods.ON_DimStyle_IsChildOf(ConstPointer(), parentId);
+      bool rc = UnsafeNativeMethods.ON_DimStyle_IsChildOf(ConstPointer(), parentId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1172,8 +1224,17 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public Guid ParentId
     {
-      get { return UnsafeNativeMethods.ON_DimStyle_GetParentId(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_DimStyle_SetParentId(NonConstPointer(), value); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_DimStyle_GetParentId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_DimStyle_SetParentId(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
 #endregion field overrides
@@ -1376,6 +1437,7 @@ namespace Rhino.DocObjects.Tables
         dimstyle.ClearAllFieldOverrides();
       IntPtr const_ptr_dimstyle = dimstyle.ConstPointer();
       int value = UnsafeNativeMethods.CRhinoDimStyleTable_AddDimStyle(m_doc.RuntimeSerialNumber, const_ptr_dimstyle, reference);
+      GC.KeepAlive(dimstyle);
       return value;
     }
 
@@ -1593,7 +1655,9 @@ namespace Rhino.DocObjects.Tables
         newSettings.ClearAllFieldOverrides();
       IntPtr const_ptr_dimstyle = newSettings.ConstPointer();
       uint doc_sn = m_doc.RuntimeSerialNumber;
-      return UnsafeNativeMethods.CRhinoDimStyleTable_ModifyDimStyle(doc_sn, const_ptr_dimstyle, dimstyleIndex, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoDimStyleTable_ModifyDimStyle(doc_sn, const_ptr_dimstyle, dimstyleIndex, quiet);
+      GC.KeepAlive(newSettings);
+      return rc;
     }
 
     /// <summary>Modifies dimension style settings.</summary>

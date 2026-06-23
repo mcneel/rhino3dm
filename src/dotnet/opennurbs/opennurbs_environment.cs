@@ -47,7 +47,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// <return>The background color.</return>
+    /// <returns>The background color.</returns>
     /// </summary>
     /// <since>8.0</since>
     public System.Drawing.Color BackgroundColor
@@ -55,12 +55,13 @@ namespace Rhino.DocObjects
       get
       {
         var col = UnsafeNativeMethods.ON_Environment_BackgroundColor(ConstPointer());
+        GC.KeepAlive(this);
         return Runtime.Interop.ColorFromWin32(col);
       }
     }
 
     /// <summary>
-    /// <return>The background image texture.</return>
+    /// <returns>The background image texture.</returns>
     /// </summary>
     /// <since>8.0</since>
     public Texture BackgroundImage
@@ -69,12 +70,14 @@ namespace Rhino.DocObjects
       {
         var tex = new Texture();
         UnsafeNativeMethods.ON_Environment_BackgroundImage(ConstPointer(), tex.NonConstPointer());
+        GC.KeepAlive(tex);
+        GC.KeepAlive(this);
         return tex;
       }
     }
 
     /// <summary>
-    /// <return>The background projection.</return>
+    /// <returns>The background projection.</returns>
     /// </summary>
     /// <since>8.0</since>
     public BackgroundProjections BackgroundProjection
@@ -82,6 +85,7 @@ namespace Rhino.DocObjects
       get
       {
         var p = UnsafeNativeMethods.ON_Environment_BackgroundProjection(ConstPointer());
+        GC.KeepAlive(this);
         return (BackgroundProjections)p;
       }
     }
@@ -92,7 +96,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
   }
 }

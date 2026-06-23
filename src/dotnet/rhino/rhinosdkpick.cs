@@ -83,6 +83,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr const_ptr_this = ConstPointer();
         uint serial_number = UnsafeNativeMethods.CRhinoPickContext_GetView(const_ptr_this);
+        GC.KeepAlive(this);
         return Display.RhinoView.FromRuntimeSerialNumber(serial_number);
       }
       set
@@ -90,6 +91,7 @@ namespace Rhino.Input.Custom
         IntPtr ptr_this = NonConstPointer();
         uint serial_number = value.RuntimeSerialNumber;
         UnsafeNativeMethods.CRhinoPickContext_SetView(ptr_this, serial_number);
+        GC.KeepAlive(this);
       }
     }
 
@@ -104,12 +106,14 @@ namespace Rhino.Input.Custom
         IntPtr const_ptr_this = ConstPointer();
         var rc = new Geometry.Line();
         UnsafeNativeMethods.CRhinoPickContext_PickLine(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPickContext_SetPickLine(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -120,12 +124,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return (PickStyle)UnsafeNativeMethods.CRhinoPickContext_PickStyle(const_ptr_this);
+        PickStyle rc = (PickStyle)UnsafeNativeMethods.CRhinoPickContext_PickStyle(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPickContext_SetPickStyle(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -135,12 +142,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return (PickMode)UnsafeNativeMethods.CRhinoPickContext_PickMode(const_ptr_this);
+        PickMode rc = (PickMode)UnsafeNativeMethods.CRhinoPickContext_PickMode(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPickContext_SetPickMode(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -153,12 +163,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoPickContext_GetPickGroups(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CRhinoPickContext_GetPickGroups(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPickContext_SetPickGroups(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -171,12 +184,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoPickContext_GetSubSelect(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CRhinoPickContext_GetSubSelect(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoPickContext_SetSubSelect(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -197,6 +213,7 @@ namespace Rhino.Input.Custom
             m_cached_get_object = active;
           else
             m_cached_get_object = new GetObject(const_ptr_getobject);
+          GC.KeepAlive(this);
         }
         return m_cached_get_object;
       }
@@ -207,6 +224,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPickContext_SetPickTransform(ptr_this, ref transform);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -219,6 +237,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoPickContext_UpdateClippingPlanes(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -238,7 +257,9 @@ namespace Rhino.Input.Custom
     {
       boxCompletelyInFrustum = false;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickBox(const_ptr_this, ref box, ref boxCompletelyInFrustum);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickBox(const_ptr_this, ref box, ref boxCompletelyInFrustum);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Utility for picking 3d point</summary>
@@ -259,7 +280,9 @@ namespace Rhino.Input.Custom
       depth = -1;
       distance = -1;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickPoint(const_ptr_this, point, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickPoint(const_ptr_this, point, ref depth, ref distance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -271,7 +294,9 @@ namespace Rhino.Input.Custom
       if (points == null || points.Length < 1)
         return false;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickPointCloud(const_ptr_this, points.Length, points, ref pointIndex, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickPointCloud(const_ptr_this, points.Length, points, ref pointIndex, ref depth, ref distance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -282,7 +307,10 @@ namespace Rhino.Input.Custom
       distance = -1;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr const_ptr_cloud = cloud.ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickPointCloud2(const_ptr_this, const_ptr_cloud, ref pointIndex, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickPointCloud2(const_ptr_this, const_ptr_cloud, ref pointIndex, ref depth, ref distance);
+      GC.KeepAlive(cloud);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -292,7 +320,9 @@ namespace Rhino.Input.Custom
       depth = -1;
       distance = -1;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickLine2(const_ptr_this, line.From, line.To, ref t, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickLine2(const_ptr_this, line.From, line.To, ref t, ref depth, ref distance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -303,7 +333,10 @@ namespace Rhino.Input.Custom
       distance = -1;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr const_ptr_bezier = bezier.ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickBezier(const_ptr_this, const_ptr_bezier, ref t, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickBezier(const_ptr_this, const_ptr_bezier, ref t, ref depth, ref distance);
+      GC.KeepAlive(bezier);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -314,7 +347,10 @@ namespace Rhino.Input.Custom
       distance = -1;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr const_ptr_curve = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoPickContext_PickNurbsCurve(const_ptr_this, const_ptr_curve, ref t, ref depth, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoPickContext_PickNurbsCurve(const_ptr_this, const_ptr_curve, ref t, ref depth, ref distance);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Utility for picking meshes</summary>
@@ -362,6 +398,8 @@ namespace Rhino.Input.Custom
       int vef_flag = -1;
       bool rc = UnsafeNativeMethods.CRhinoPickContext_PickMesh(const_ptr_this, const_ptr_mesh, (int)pickStyle, ref hitPoint, ref hitSurfaceUV, ref hitTextureCoordinate, ref depth, ref distance, ref vef_flag, ref hitIndex);
       hitFlag = (MeshHitFlag)vef_flag;
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -398,6 +436,8 @@ namespace Rhino.Input.Custom
       int vef_flag = -1;
       bool rc = UnsafeNativeMethods.CRhinoPickContext_PickMesh2(const_ptr_this, const_ptr_mesh, (int)pickStyle, ref hitPoint, ref depth, ref distance, ref vef_flag, ref hitIndex);
       hitFlag = (MeshHitFlag)vef_flag;
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -415,6 +455,8 @@ namespace Rhino.Input.Custom
         IntPtr const_ptr_mesh = mesh.ConstPointer();
         IntPtr ptr_indices = indices.NonConstPointer();
         int rc = UnsafeNativeMethods.CRhinoPickContext_PickMeshTopologyVertices(const_ptr_this, const_ptr_mesh, ptr_indices);
+        GC.KeepAlive(mesh);
+        GC.KeepAlive(this);
         return rc < 1 ? new int[0] : indices.ToArray();
       }
     }

@@ -47,7 +47,11 @@ namespace Rhino.Commands
     /// <summary>
     /// By default, all commands are undo-able.
     /// </summary>
-    NotUndoable = 16
+    NotUndoable = 16,
+    /// <summary>
+    /// reserved
+    /// </summary>
+    System = 32
   }
 
   /// <summary>
@@ -1046,6 +1050,7 @@ namespace Rhino.Commands
     {
       IntPtr pList = list.NonConstPointer();
       int rc = UnsafeNativeMethods.CRhinoTransformCommand_SelectFilteredObjects(Id, prompt, (uint)filter, pList);
+      GC.KeepAlive(list);
       return (Result)rc;
     }
 
@@ -1146,69 +1151,91 @@ namespace Rhino.DocObjects
     public bool SetBool( int id, bool value )
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetBool(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetBool(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetInt(int id, int value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetInt(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetInt(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetDouble(int id, double value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetDouble(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetDouble(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetPoint3d(int id, Rhino.Geometry.Point3d value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetPoint3d(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetPoint3d(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetVector3d(int id, Rhino.Geometry.Vector3d value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetVector3d(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetVector3d(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetTransorm(int id, Rhino.Geometry.Transform value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetXform(pThis, id, ref value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetXform(pThis, id, ref value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetColor(int id, System.Drawing.Color value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetColor(pThis, id, value.ToArgb());
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetColor(pThis, id, value.ToArgb());
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetObjRef(int id, ObjRef value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = value.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetObjRef(pThis, id, pConstObjRef);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetObjRef(pThis, id, pConstObjRef);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetPoint3dOnObject(int id, ObjRef objref, Rhino.Geometry.Point3d value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetPoint3dOnObject(pThis, id, pConstObjRef, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetPoint3dOnObject(pThis, id, pConstObjRef, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetGuid(int id, Guid value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetUuid(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetUuid(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetString(int id, string value)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetString(pThis, id, value);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetString(pThis, id, value);
+      GC.KeepAlive(this);
+      return rc;
     }
     // ON_Geometry* is non-const. I think we can't delete it from under the history record.
     // Don't wrap until we really need it
@@ -1219,28 +1246,36 @@ namespace Rhino.DocObjects
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstCurve = value.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetCurve(pThis, id, pConstCurve);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetCurve(pThis, id, pConstCurve);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetSurface(int id, Geometry.Surface value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstSurface = value.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetSurface(pThis, id, pConstSurface);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetSurface(pThis, id, pConstSurface);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetBrep(int id, Geometry.Brep value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstBrep = value.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetBrep(pThis, id, pConstBrep);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetBrep(pThis, id, pConstBrep);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetMesh(int id, Geometry.Mesh value)
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstMesh = value.ConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetMesh(pThis, id, pConstMesh);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetMesh(pThis, id, pConstMesh);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     // PolyEdge not wrapped yet
@@ -1252,7 +1287,9 @@ namespace Rhino.DocObjects
       List<bool> v = new List<bool>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetBools(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetBools(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetInts(int id, IEnumerable<int> values)
@@ -1260,7 +1297,9 @@ namespace Rhino.DocObjects
       List<int> v = new List<int>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetInts(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetInts(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetDoubles(int id, IEnumerable<double> values)
@@ -1268,7 +1307,9 @@ namespace Rhino.DocObjects
       List<double> v = new List<double>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetDoubles(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetDoubles(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetPoint3ds(int id, IEnumerable<Rhino.Geometry.Point3d> values)
@@ -1276,7 +1317,9 @@ namespace Rhino.DocObjects
       List<Geometry.Point3d> v = new List<Geometry.Point3d>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetPoints(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetPoints(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <since>5.0</since>
     public bool SetVector3ds(int id, IEnumerable<Rhino.Geometry.Vector3d> values)
@@ -1284,7 +1327,9 @@ namespace Rhino.DocObjects
       List<Geometry.Vector3d> v = new List<Geometry.Vector3d>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetVectors(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetVectors(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
     //public bool SetTransorms(int id, IEnumerable<Rhino.Geometry.Transform> values)
     //{
@@ -1302,7 +1347,9 @@ namespace Rhino.DocObjects
         argb.Add(c.ToArgb());
       var _v = argb.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetColors(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetColors(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     // need ON_ClassArray<CRhinoObjRef>* wrapper
@@ -1314,7 +1361,9 @@ namespace Rhino.DocObjects
       List<Guid> v = new List<Guid>(values);
       var _v = v.ToArray();
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetUuids(pThis, id, _v.Length, _v);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetUuids(pThis, id, _v.Length, _v);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1326,7 +1375,9 @@ namespace Rhino.DocObjects
           strings.Add(v);
         IntPtr ptr_strings = strings.NonConstPointer();
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoHistory_SetStrings(ptr_this, id, ptr_strings);
+        bool rc = UnsafeNativeMethods.CRhinoHistory_SetStrings(ptr_this, id, ptr_strings);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
     // ON_Geometry* is non-const. I think we can't delete it from under the history record.
@@ -1349,7 +1400,9 @@ namespace Rhino.DocObjects
     public bool SetHistoryVersion(int historyVersion)
     {
       IntPtr p_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoHistory_SetHistoryVersion(p_this, historyVersion);
+      bool rc = UnsafeNativeMethods.CRhinoHistory_SetHistoryVersion(p_this, historyVersion);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1364,12 +1417,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr p_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoHistory_CopyOnReplaceObject(p_this);
+        bool rc = UnsafeNativeMethods.CRhinoHistory_CopyOnReplaceObject(p_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr p_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoHistory_SetCopyOnReplaceObject(p_this, value);
+        GC.KeepAlive(this);
       }
     }
   }
@@ -1414,6 +1470,7 @@ namespace Rhino.DocObjects
       IntPtr pObjRef = objref.NonConstPointer();
       if (UnsafeNativeMethods.CRhinoHistoryRecord_GetRhinoObjRef(m_pConstRhinoHistoryRecord, id, pObjRef))
         return objref;
+      GC.KeepAlive(objref);
       return null;
     }
 
@@ -1799,7 +1856,9 @@ namespace Rhino.DocObjects
     public bool UpdateToPoint(Rhino.Geometry.Point3d point, ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult1(m_parent.m_pObjectPairArray, m_index, point, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult1(m_parent.m_pObjectPairArray, m_index, point, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1807,7 +1866,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pCloud = cloud.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult2(m_parent.m_pObjectPairArray, m_index, pCloud, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult2(m_parent.m_pObjectPairArray, m_index, pCloud, pConstAttributes);
+      GC.KeepAlive(cloud);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1819,7 +1881,9 @@ namespace Rhino.DocObjects
         return false;
 
       IntPtr pAttrs = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult3(m_parent.m_pObjectPairArray, m_index, count, ptArray, pAttrs);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult3(m_parent.m_pObjectPairArray, m_index, count, ptArray, pAttrs);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1837,7 +1901,9 @@ namespace Rhino.DocObjects
         return false;
 
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult4(m_parent.m_pObjectPairArray, m_index, ref plane, uMagnitude, vMagnitude, count, clippedIds, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult4(m_parent.m_pObjectPairArray, m_index, ref plane, uMagnitude, vMagnitude, count, clippedIds, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1846,7 +1912,10 @@ namespace Rhino.DocObjects
       IntPtr pConstDimension = dimension.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult5(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult5(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1855,7 +1924,10 @@ namespace Rhino.DocObjects
       IntPtr pConstDimension = dimension.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult6(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult6(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1864,14 +1936,19 @@ namespace Rhino.DocObjects
       IntPtr pConstDimension = dimension.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult7(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult7(m_parent.m_pObjectPairArray, m_index, pConstDimension, pConstAttributes);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool UpdateToLine(Geometry.Point3d from, Geometry.Point3d to, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult8(m_parent.m_pObjectPairArray, m_index, from, to, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateResult8(m_parent.m_pObjectPairArray, m_index, from, to, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1882,35 +1959,45 @@ namespace Rhino.DocObjects
       if (null == ptArray || count < 1)
         return false;
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToPolyline(m_parent.m_pObjectPairArray, m_index, count, ptArray, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToPolyline(m_parent.m_pObjectPairArray, m_index, count, ptArray, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool UpdateToArc(Geometry.Arc arc, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToArc(m_parent.m_pObjectPairArray, m_index, ref arc, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToArc(m_parent.m_pObjectPairArray, m_index, ref arc, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool UpdateToCircle(Geometry.Circle circle, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCircle(m_parent.m_pObjectPairArray, m_index, ref circle, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCircle(m_parent.m_pObjectPairArray, m_index, ref circle, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool UpdateToEllipse(Geometry.Ellipse ellipse, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToEllipse(m_parent.m_pObjectPairArray, m_index, ref ellipse, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToEllipse(m_parent.m_pObjectPairArray, m_index, ref ellipse, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool UpdateToSphere(Geometry.Sphere sphere, DocObjects.ObjectAttributes attributes)
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSphere(m_parent.m_pObjectPairArray, m_index, ref sphere, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSphere(m_parent.m_pObjectPairArray, m_index, ref sphere, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1918,7 +2005,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstCurve = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCurve(m_parent.m_pObjectPairArray, m_index, pConstCurve, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToCurve(m_parent.m_pObjectPairArray, m_index, pConstCurve, pConstAttributes);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(curve);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1926,7 +2016,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstDot = dot.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToTextDot(m_parent.m_pObjectPairArray, m_index, pConstDot, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToTextDot(m_parent.m_pObjectPairArray, m_index, pConstDot, pConstAttributes);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(dot);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1942,7 +2035,9 @@ namespace Rhino.DocObjects
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       RhinoDoc doc = m_parent.Document;
       uint docId = (doc == null) ? 0 : doc.RuntimeSerialNumber;
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText(m_parent.m_pObjectPairArray, docId, m_index, text, ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText(m_parent.m_pObjectPairArray, docId, m_index, text, ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1950,7 +2045,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstText = text.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText2(m_parent.m_pObjectPairArray, m_index, pConstText, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToText2(m_parent.m_pObjectPairArray, m_index, pConstText, pConstAttributes);
+      GC.KeepAlive(text);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1958,7 +2056,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstSurface = surface.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSurface(m_parent.m_pObjectPairArray, m_index, pConstSurface, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSurface(m_parent.m_pObjectPairArray, m_index, pConstSurface, pConstAttributes);
+      GC.KeepAlive(surface);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1966,7 +2067,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstExtrusion = extrusion.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToExtrusion(m_parent.m_pObjectPairArray, m_index, pConstExtrusion, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToExtrusion(m_parent.m_pObjectPairArray, m_index, pConstExtrusion, pConstAttributes);
+      GC.KeepAlive(extrusion);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1974,7 +2078,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstMesh = mesh.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToMesh(m_parent.m_pObjectPairArray, m_index, pConstMesh, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToMesh(m_parent.m_pObjectPairArray, m_index, pConstMesh, pConstAttributes);
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>7.18</since>
@@ -1982,7 +2089,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstSubD = subD.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSubD(m_parent.m_pObjectPairArray, m_index, pConstSubD, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToSubD(m_parent.m_pObjectPairArray, m_index, pConstSubD, pConstAttributes);
+      GC.KeepAlive(subD);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1990,7 +2100,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstBrep = brep.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToBrep(m_parent.m_pObjectPairArray, m_index, pConstBrep, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToBrep(m_parent.m_pObjectPairArray, m_index, pConstBrep, pConstAttributes);
+      GC.KeepAlive(brep);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1999,7 +2112,10 @@ namespace Rhino.DocObjects
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstLeader = leader.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToLeader(m_parent.m_pObjectPairArray, m_index, pConstLeader, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToLeader(m_parent.m_pObjectPairArray, m_index, pConstLeader, pConstAttributes);
+      GC.KeepAlive(leader);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -2007,7 +2123,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstHatch = hatch.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToHatch(m_parent.m_pObjectPairArray, m_index, pConstHatch, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToHatch(m_parent.m_pObjectPairArray, m_index, pConstHatch, pConstAttributes);
+      GC.KeepAlive(hatch);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <since>7.30</since>
@@ -2015,7 +2134,10 @@ namespace Rhino.DocObjects
     {
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pConstInstanceReference = instanceReference.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToInstanceReferenceGeometry(m_parent.m_pObjectPairArray, m_index, pConstInstanceReference, pConstAttributes);
+      bool rc = UnsafeNativeMethods.CRhinoObjectPairArray_UpdateToInstanceReferenceGeometry(m_parent.m_pObjectPairArray, m_index, pConstInstanceReference, pConstAttributes);
+      GC.KeepAlive(instanceReference);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
   }

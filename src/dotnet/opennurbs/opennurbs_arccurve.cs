@@ -140,6 +140,7 @@ namespace Rhino.Geometry
         IntPtr ptr = ConstPointer();
         Arc rc = new Arc();
         UnsafeNativeMethods.ON_ArcCurve_GetArc(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -154,7 +155,9 @@ namespace Rhino.Geometry
       {
         //Do not use IsCircle as a property name. IsCircle is a function on the base class
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ArcCurve_IsCircle(ptr);
+        bool rc = UnsafeNativeMethods.ON_ArcCurve_IsCircle(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -167,7 +170,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxRadius);
+        double rc = UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxRadius);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -180,7 +185,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxAngleRadians);
+        double rc = UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxAngleRadians);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -193,7 +200,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxAngleDegrees);
+        double rc = UnsafeNativeMethods.ON_ArcCurve_GetDouble(ptr, idxAngleDegrees);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
     #endregion
@@ -206,6 +215,7 @@ namespace Rhino.Geometry
         IntPtr pThis = ConstPointer();
         m_pCurveDisplay = UnsafeNativeMethods.CurveDisplay_FromArcCurve(pThis);
       }
+      GC.KeepAlive(this);
       return m_pCurveDisplay;
     }
 

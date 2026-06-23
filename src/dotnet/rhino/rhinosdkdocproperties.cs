@@ -86,6 +86,28 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Adds named construction plane to document.
+    /// </summary>
+    /// <param name="constructionPlane">The construction plane value.</param>
+    /// <returns>
+    /// 0 based index of named construction plane.
+    /// -1 on failure.
+    /// </returns>
+    /// <since>8.18</since>
+    public int Add(ConstructionPlane constructionPlane)
+    {
+      IntPtr constPtr = constructionPlane.CopyToNative();
+      try
+      {
+        return UnsafeNativeMethods.CRhinoDocProperties_AddNamedConstructionPlane(m_doc.RuntimeSerialNumber, constPtr);
+      }
+      finally 
+      {
+        UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(constPtr);
+      }
+    }
+
+    /// <summary>
     /// Remove named construction plane from the document.
     /// </summary>
     /// <param name="index">zero based array index.</param>
@@ -264,29 +286,37 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public bool Restore(int index, Display.RhinoViewport viewport)
     {
-        IntPtr ptr_const_viewport = viewport.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
+      IntPtr ptr_const_viewport = viewport.NonConstPointer();
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <since>6.0</since>
     public bool RestoreWithAspectRatio(int index, Display.RhinoViewport viewport)
     {
-        IntPtr ptr_const_viewport = viewport.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, true, false, false, 0, 0.0, 0);
+      IntPtr ptr_const_viewport = viewport.NonConstPointer();
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, true, false, false, 0, 0.0, 0);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <since>6.0</since>
     public bool RestoreAnimatedConstantSpeed(int index, Display.RhinoViewport viewport, double units_per_frame, int ms_delay)
     {
-        IntPtr ptr_const_viewport = viewport.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, true, 10, units_per_frame, ms_delay);
+      IntPtr ptr_const_viewport = viewport.NonConstPointer();
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, true, 10, units_per_frame, ms_delay);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <since>6.0</since>
     public bool RestoreAnimatedConstantTime(int index, Display.RhinoViewport viewport, int frames, int ms_delay)
     {
-        IntPtr ptr_const_viewport = viewport.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, ms_delay);
+      IntPtr ptr_const_viewport = viewport.NonConstPointer();
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, ms_delay);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -305,7 +335,9 @@ namespace Rhino.DocObjects.Tables
     public bool Restore(int index, Display.RhinoViewport viewport, bool backgroundBitmap)
     {
       IntPtr ptr_const_viewport = viewport.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, false, false, 0, 0.0, 0);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -340,7 +372,9 @@ namespace Rhino.DocObjects.Tables
     public bool RestoreAnimated(int index, Display.RhinoViewport viewport, bool backgroundBitmap, int frames, int frameRate)
     {
       IntPtr ptr_const_viewport = viewport.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, frameRate);
+      bool rc = UnsafeNativeMethods.RHC_RhinoRestoreNamedView(m_doc.RuntimeSerialNumber, index, ptr_const_viewport, false, true, false, frames, 1.0, frameRate);
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <summary>

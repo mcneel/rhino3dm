@@ -33,6 +33,7 @@ namespace Rhino.Geometry
       applymempressure = true;
       IntPtr const_ptr_this = ConstPointer();
       IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(const_ptr_this);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -142,6 +143,17 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Is this instance a 'shallow copy'. Shallow copies are no different
+    /// than regular instances with the exception that they will convert to
+    /// complete independent 'deep' copies if a non const operation is
+    /// perform on the instance (something that mutates the internal data)
+    /// </summary>
+    public bool IsShallowDuplicate
+    {
+      get { return m_shallow_parent != null; }
+    }
+
+    /// <summary>
     /// Constructs a deep (full) copy of this object.
     /// </summary>
     /// <returns>An object of the same type as this, with the same properties and behavior.</returns>
@@ -150,6 +162,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = ConstPointer();
       IntPtr ptr_new_geometry = UnsafeNativeMethods.ON_Object_Duplicate(ptr);
+      GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_new_geometry, null);
     }
 
@@ -350,6 +363,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr = ConstPointer();
         uint rc = UnsafeNativeMethods.ON_Object_ObjectType(ptr);
+        GC.KeepAlive(this);
         return (ObjectType)rc;
       }
     }
@@ -372,7 +386,9 @@ namespace Rhino.Geometry
         return true;
 
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_Transform(ptr, ref xform);
+      bool rc = UnsafeNativeMethods.ON_Geometry_Transform(ptr, ref xform);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Translates the object along the specified vector.</summary>
@@ -382,7 +398,9 @@ namespace Rhino.Geometry
     public bool Translate(Vector3d translationVector)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_Translate(ptr, translationVector);
+      bool rc = UnsafeNativeMethods.ON_Geometry_Translate(ptr, translationVector);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Translates the object along the specified vector.</summary>
@@ -406,7 +424,9 @@ namespace Rhino.Geometry
     public bool Scale(double scaleFactor)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_Scale(ptr, scaleFactor);
+      bool rc = UnsafeNativeMethods.ON_Geometry_Scale(ptr, scaleFactor);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -421,7 +441,9 @@ namespace Rhino.Geometry
     public bool Rotate(double angleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_Rotate(ptr, angleRadians, rotationAxis, rotationCenter);
+      bool rc = UnsafeNativeMethods.ON_Geometry_Rotate(ptr, angleRadians, rotationAxis, rotationCenter);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
@@ -435,7 +457,9 @@ namespace Rhino.Geometry
     public uint MemoryEstimate()
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_SizeOf(const_ptr_this);
+      uint rc = UnsafeNativeMethods.ON_Object_SizeOf(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -450,7 +474,9 @@ namespace Rhino.Geometry
     {
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-68961
       var const_ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_DataCRC(const_ptr, currentRemainder);
+      uint rc = UnsafeNativeMethods.ON_Geometry_DataCRC(const_ptr, currentRemainder);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -498,7 +524,9 @@ namespace Rhino.Geometry
           return ann.InternalGetBoundingBox();
 
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Geometry_GetTightBoundingBox(ptr, ref bbox, ref xf, false) ? bbox : BoundingBox.Empty;
+        bool rc = UnsafeNativeMethods.ON_Geometry_GetTightBoundingBox(ptr, ref bbox, ref xf, false);
+        GC.KeepAlive(this);
+        return rc ? bbox : BoundingBox.Empty;
       }
       else
       {
@@ -517,6 +545,7 @@ namespace Rhino.Geometry
 
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_Geometry_BoundingBox(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -545,7 +574,9 @@ namespace Rhino.Geometry
       }
 #endif
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_GetTightBoundingBox(ptr, ref bbox, ref xform, true) ? bbox : BoundingBox.Empty;
+      bool rc = UnsafeNativeMethods.ON_Geometry_GetTightBoundingBox(ptr, ref bbox, ref xform, true);
+      GC.KeepAlive(this);
+      return rc ? bbox : BoundingBox.Empty;
     }
     /// <summary>
     /// Aligned Bounding box solver. Gets the plane aligned bounding box.
@@ -605,7 +636,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxIsDeformable);
+        bool rc = UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxIsDeformable);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -621,7 +654,9 @@ namespace Rhino.Geometry
     public bool MakeDeformable()
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxMakeDeformable);
+      bool rc = UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxMakeDeformable);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     // [skipping] BOOL SwapCoordinates( int i, int j );
@@ -640,7 +675,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxHasBrepForm);
+        bool rc = UnsafeNativeMethods.ON_Geometry_GetBool(ptr, idxHasBrepForm);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -665,6 +702,7 @@ namespace Rhino.Geometry
       ComponentIndex ci = new ComponentIndex();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_Geometry_ComponentIndex(ptr, ref ci);
+      GC.KeepAlive(this);
       return ci;
     }
 
@@ -818,6 +856,8 @@ namespace Rhino.Geometry
       if (other.m_shallow_parent != null && one.ConstPointer() != IntPtr.Zero && other.m_shallow_parent.ConstPointer() == one.ConstPointer()) return true;
       if (one.m_shallow_parent != null && other.m_shallow_parent != null && other.m_shallow_parent.ConstPointer() != IntPtr.Zero
         && one.m_shallow_parent.ConstPointer() == one.m_shallow_parent.ConstPointer()) return true;
+      GC.KeepAlive(one);
+      GC.KeepAlive(other);
       return false;
     }
   }

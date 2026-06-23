@@ -22,8 +22,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool On
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -32,8 +41,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public Guid TextureId
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetTextureId(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetTextureId(m_attr.NonConstPointer(), value); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetTextureId(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetTextureId(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -42,8 +60,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int MappingChannel
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMappingChannel(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetMappingChannel(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMappingChannel(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetMappingChannel(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -52,8 +79,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double BlackPoint
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetBlackPoint(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetBlackPoint(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetBlackPoint(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetBlackPoint(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -62,8 +98,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double WhitePoint
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetWhitePoint(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetWhitePoint(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetWhitePoint(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetWhitePoint(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -73,8 +118,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int InitialQuality
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetInitialQuality(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetInitialQuality(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetInitialQuality(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetInitialQuality(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -83,8 +137,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool FinalMaxFacesOn
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFinalMaxFacesOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFinalMaxFacesOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -93,8 +156,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int FinalMaxFaces
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFaces(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFinalMaxFaces(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFinalMaxFaces(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFinalMaxFaces(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -103,8 +175,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool FairingOn
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairingOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFairingOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairingOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFairingOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -113,8 +194,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int Fairing
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairing(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFairing(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetFairing(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetFairing(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -123,8 +213,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double PostWeldAngle
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetPostWeldAngle(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetPostWeldAngle(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetPostWeldAngle(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetPostWeldAngle(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -133,8 +232,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int MeshMemoryLimit
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMeshMemoryLimit(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetMeshMemoryLimit(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetMeshMemoryLimit(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetMeshMemoryLimit(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -143,8 +251,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int RefineSteps
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSteps(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetRefineSteps(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSteps(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetRefineSteps(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -156,8 +273,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double RefineSensitivity
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSensitivity(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetRefineSensitivity(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetRefineSensitivity(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetRefineSensitivity(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -182,8 +308,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public SweepResolutionFormulas SweepResolutionFormula
     {
-      get { return (SweepResolutionFormulas)UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSweepResolutionFormula(m_attr.ConstPointer()); }
-      set {                                 UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSweepResolutionFormula(m_attr.NonConstPointer(), (int)value); }
+      get
+      {
+        SweepResolutionFormulas rc = (SweepResolutionFormulas)UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSweepResolutionFormula(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSweepResolutionFormula(m_attr.NonConstPointer(), (int)value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -197,6 +332,7 @@ namespace Rhino.FileIO
       using (var list = new SimpleArrayInt())
       {
         UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItems(m_attr.ConstPointer(), list.NonConstPointer());
+        GC.KeepAlive(m_attr);
         return list.ToArray();
       }
     }
@@ -213,8 +349,10 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool AddSubItem(int face_index, bool on, Guid texture, int mapping_channel, double black_point, double white_point)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_AddSubItem(m_attr.ConstPointer(),
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_AddSubItem(m_attr.ConstPointer(),
                                  face_index, on, texture, mapping_channel, black_point, white_point);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -225,6 +363,7 @@ namespace Rhino.FileIO
     public void DeleteSubItem(int face_index)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_DeleteSubItem(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -243,7 +382,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool SubItemOn(int face_index)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemOn(m_attr.ConstPointer(), face_index);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemOn(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -254,6 +395,7 @@ namespace Rhino.FileIO
     public void SetSubItemOn(int face_index, bool on)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemOn(m_attr.NonConstPointer(), face_index, on);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -263,7 +405,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public Guid SubItemTexture(int face_index)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemTexture(m_attr.ConstPointer(), face_index);
+      Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemTexture(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -274,6 +418,7 @@ namespace Rhino.FileIO
     public void SetSubItemTexture(int face_index, Guid texture_id)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemTexture(m_attr.NonConstPointer(), face_index, texture_id);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -283,7 +428,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int SubItemMappingChannel(int face_index)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemMappingChannel(m_attr.ConstPointer(), face_index);
+      int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemMappingChannel(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -294,6 +441,7 @@ namespace Rhino.FileIO
     public void SetSubItemMappingChannel(int face_index, int chan)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemMappingChannel(m_attr.NonConstPointer(), face_index, chan);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -303,7 +451,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double SubItemBlackPoint(int face_index)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemBlackPoint(m_attr.ConstPointer(), face_index);
+      double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemBlackPoint(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -314,6 +464,7 @@ namespace Rhino.FileIO
     public void SetSubItemBlackPoint(int face_index, double black_point)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemBlackPoint(m_attr.NonConstPointer(), face_index, black_point);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -323,7 +474,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double SubItemWhitePoint(int face_index)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemWhitePoint(m_attr.ConstPointer(), face_index);
+      double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_GetSubItemWhitePoint(m_attr.ConstPointer(), face_index);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -334,6 +487,7 @@ namespace Rhino.FileIO
     public void SetSubItemWhitePoint(int face_index, double white_point)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_SetSubItemWhitePoint(m_attr.NonConstPointer(), face_index, white_point);
+      GC.KeepAlive(m_attr);
     }
   }
 
@@ -355,8 +509,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool On
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -365,8 +528,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double Softening
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetSoftening(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetSoftening(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetSoftening(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetSoftening(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -375,8 +547,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Chamfer
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetChamfer(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetChamfer(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetChamfer(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetChamfer(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -385,8 +566,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Faceted
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetFaceted(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetFaceted(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetFaceted(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetFaceted(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -396,8 +586,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double EdgeAngleThreshold
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetEdgeAngleThreshold(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetEdgeAngleThreshold(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetEdgeAngleThreshold(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetEdgeAngleThreshold(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -406,8 +605,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool ForceSoftening
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetForceSoftening(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetForceSoftening(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_GetForceSoftening(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_EdgeSoftening_SetForceSoftening(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
   }
 
@@ -429,8 +637,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool On
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -439,8 +656,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double Distance
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetDistance(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetDistance(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetDistance(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetDistance(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -449,8 +675,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Solid
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetSolid(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetSolid(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetSolid(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetSolid(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -459,8 +694,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool OffsetOnly
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOffsetOnly(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetOffsetOnly(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetOffsetOnly(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetOffsetOnly(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -469,8 +713,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool BothSides
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetBothSides(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetBothSides(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_GetBothSides(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Thickening_SetBothSides(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
   }
 
@@ -492,8 +745,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool On
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -502,8 +764,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double Radius
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetRadius(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetRadius(m_attr.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetRadius(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetRadius(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -512,8 +783,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int Segments
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetSegments(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetSegments(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetSegments(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetSegments(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -522,8 +802,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Faceted
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetFaceted(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetFaceted(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetFaceted(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetFaceted(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -532,8 +821,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int Accuracy
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetAccuracy(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetAccuracy(m_attr.NonConstPointer(), value); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetAccuracy(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetAccuracy(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -566,8 +864,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public CapTypes CapType
     {
-      get { return (CapTypes)UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetCapType(m_attr.ConstPointer()); }
-      set {                  UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetCapType(m_attr.NonConstPointer(), (int)value); }
+      get
+      {
+        CapTypes rc = (CapTypes)UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_GetCapType(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_CurvePiping_SetCapType(m_attr.NonConstPointer(), (int)value);
+        GC.KeepAlive(m_attr);
+      }
     }
   }
 
@@ -589,8 +896,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool On
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetOn(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetOn(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetOn(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetOn(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -599,8 +915,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Faceted
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetFaceted(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetFaceted(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetFaceted(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetFaceted(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -609,8 +934,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool AutoUpdate
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetAutoUpdate(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetAutoUpdate(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetAutoUpdate(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetAutoUpdate(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -619,8 +953,17 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool ForceUpdate
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetForceUpdate(m_attr.ConstPointer()); }
-      set {        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetForceUpdate(m_attr.NonConstPointer(), value); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetForceUpdate(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetForceUpdate(m_attr.NonConstPointer(), value);
+        GC.KeepAlive(m_attr);
+      }
     }
 
     /// <summary>
@@ -633,6 +976,7 @@ namespace Rhino.FileIO
       using (var list = new SimpleArrayGuid())
       {
         UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurves(m_attr.ConstPointer(), list.NonConstPointer());
+        GC.KeepAlive(m_attr);
         return list.ToArray();
       }
     }
@@ -645,7 +989,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public Guid AddCurve()
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_AddCurve(m_attr.NonConstPointer());
+      Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_AddCurve(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -655,6 +1001,7 @@ namespace Rhino.FileIO
     public void DeleteAllCurves()
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_DeleteAllCurves(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -663,7 +1010,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool CurveEnabled(Guid curve_id)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveEnabled(m_attr.ConstPointer(), curve_id);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveEnabled(m_attr.ConstPointer(), curve_id);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -673,6 +1022,7 @@ namespace Rhino.FileIO
     public void SetCurveEnabled(Guid curve_id, bool enabled)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveEnabled(m_attr.NonConstPointer(), curve_id, enabled);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -681,7 +1031,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public double CurveRadius(Guid curve_id)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveRadius(m_attr.ConstPointer(), curve_id);
+      double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveRadius(m_attr.ConstPointer(), curve_id);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -691,6 +1043,7 @@ namespace Rhino.FileIO
     public void SetCurveRadius(Guid curve_id, double radius)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveRadius(m_attr.NonConstPointer(), curve_id, radius);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -699,7 +1052,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public int CurveProfile(Guid curve_id)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveProfile(m_attr.ConstPointer(), curve_id);
+      int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveProfile(m_attr.ConstPointer(), curve_id);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -709,6 +1064,7 @@ namespace Rhino.FileIO
     public void SetCurveProfile(Guid curve_id, int profile)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveProfile(m_attr.NonConstPointer(), curve_id, profile);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -717,7 +1073,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool CurvePull(Guid curve_id)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurvePull(m_attr.ConstPointer(), curve_id);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurvePull(m_attr.ConstPointer(), curve_id);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -727,6 +1085,7 @@ namespace Rhino.FileIO
     public void SetCurvePull(Guid curve_id, bool pull)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurvePull(m_attr.NonConstPointer(), curve_id, pull);
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -735,7 +1094,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool CurveIsBump(Guid curve_id)
     {
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveIsBump(m_attr.ConstPointer(), curve_id);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_GetCurveIsBump(m_attr.ConstPointer(), curve_id);
+      GC.KeepAlive(m_attr);
+      return rc;
     }
 
     /// <summary>
@@ -745,6 +1106,7 @@ namespace Rhino.FileIO
     public void SetCurveIsBump(Guid curve_id, bool b)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_SetCurveIsBump(m_attr.NonConstPointer(), curve_id, b);
+      GC.KeepAlive(m_attr);
     }
   }
 

@@ -273,7 +273,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr pConstPointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(pConstPointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -298,6 +300,7 @@ namespace Rhino.DocObjects
         {
           IntPtr pString = sh.NonConstPointer();
           UnsafeNativeMethods.ON_Texture_GetFileName(pConstTexture, pString);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -305,6 +308,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pTexture = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetFileName(pTexture, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -320,6 +324,7 @@ namespace Rhino.DocObjects
       {
         IntPtr pConstTexture = ConstPointer();
         IntPtr pFileRef = UnsafeNativeMethods.ON_Texture_GetFileReference(pConstTexture);
+        GC.KeepAlive(this);
         return FileReference.ConstructAndOwnFromConstPtr(pFileRef);
       }
       set
@@ -331,6 +336,7 @@ namespace Rhino.DocObjects
         {
           throw new NotSupportedException("Setting the texture failed.");
         }
+        GC.KeepAlive(this);
       }
     }
 
@@ -343,7 +349,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_Texture_GetId(pConstThis);
+        Guid rc = UnsafeNativeMethods.ON_Texture_GetId(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -357,12 +365,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Texture_GetEnabled(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_Texture_GetEnabled(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetEnabled(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -376,12 +387,14 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Texture_TextureType(const_ptr_this);
+        GC.KeepAlive(this);
         return (TextureType)rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetTextureType(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -397,12 +410,14 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Texture_MinFilter(const_ptr_this);
+        GC.KeepAlive(this);
         return (TextureFilter)rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetMinFilter(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -418,12 +433,14 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Texture_MagFilter(const_ptr_this);
+        GC.KeepAlive(this);
         return (TextureFilter)rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetMagFilter(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -433,7 +450,12 @@ namespace Rhino.DocObjects
     /// <since>5.10</since>
     public int MappingChannelId
     {
-      get { return UnsafeNativeMethods.ON_Texture_GetMappingChannelId(ConstPointer()); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_Texture_GetMappingChannelId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -444,11 +466,14 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Texture_GetProjectionMode(ConstPointer());
+        TextureProjectionModes rc = UnsafeNativeMethods.ON_Texture_GetProjectionMode(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.ON_Texture_SetProjectionMode(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -462,7 +487,9 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Texture_IsWcsProjected(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_Texture_IsWcsProjected(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -475,11 +502,14 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Texture_TreatAsLinear(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_Texture_TreatAsLinear(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.ON_Texture_SetTreatAsLinear(ConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -493,7 +523,9 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Texture_IsWcsBoxProjected(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_Texture_IsWcsBoxProjected(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -508,12 +540,14 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Texture_Mode(const_ptr_this);
+        GC.KeepAlive(this);
         return (TextureCombineMode)rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetMode(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -535,6 +569,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_texture = ConstPointer();
       int value = UnsafeNativeMethods.ON_Texture_wrapuvw(const_ptr_texture, mode);
+      GC.KeepAlive(this);
       return (value == (int)TextureUvwWrapping.Clamp ? TextureUvwWrapping.Clamp : TextureUvwWrapping.Repeat);
     }
 
@@ -549,6 +584,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_Set_wrapuvw(ptr_this, IDX_WRAPMODE_U, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -563,6 +599,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_Set_wrapuvw(ptr_this, IDX_WRAPMODE_V, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -577,6 +614,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_Set_wrapuvw(ptr_this, IDX_WRAPMODE_W, (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -611,12 +649,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         Transform value = new Transform(1);
         UnsafeNativeMethods.ON_Texture_uvw(const_ptr_this, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_Setuvw(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -631,12 +671,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         Vector2d value = new Vector2d();
         UnsafeNativeMethods.ON_Texture_Repeat(const_ptr_this, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetRepeat(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -651,12 +693,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         Vector2d value = new Vector2d();
         UnsafeNativeMethods.ON_Texture_Offset(const_ptr_this, ref value);
+        GC.KeepAlive(this);
         return value;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetOffset(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -669,12 +713,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Texture_Rotation(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Texture_Rotation(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Texture_SetRotation(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -710,6 +757,7 @@ namespace Rhino.DocObjects
       a3 = 0;
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.ON_Texture_GetAlphaBlendValues(const_ptr_this, ref constant, ref a0, ref a1, ref a2, ref a3);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -733,6 +781,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Texture_SetAlphaBlendValues(ptr_this, constant, a0, a1, a2, a3);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -756,6 +805,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Texture_SetRGBBlendValues(ptr_this, (uint)color.ToArgb(), a0, a1, a2, a3);
+      GC.KeepAlive(this);
     }
 
 

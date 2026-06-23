@@ -141,6 +141,8 @@ namespace Rhino.Geometry
         if (hatch != null)
           hatches.Add(hatch);
       }
+      GC.KeepAlive(curvearray);
+      GC.KeepAlive(hatcharray);
       GC.KeepAlive(curves);
       return hatches.ToArray();
     }
@@ -213,6 +215,7 @@ namespace Rhino.Geometry
         lines = line_array.ToArray();
       }
       GC.KeepAlive(pattern);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -243,11 +246,31 @@ namespace Rhino.Geometry
 
         UnsafeNativeMethods.ON_Hatch_Explode(const_ptr_this, ptr_parent_rhinoobject, ptr_geometry_array);
         GeometryBase[] rc = geometry.ToNonConstArray();
+        GC.KeepAlive(this);
         return rc;
       }
     }
 #endif
 
+    /// <summary>
+    /// Gets 2d curves that define the boundaries of the hatch
+    /// </summary>
+    /// <param name="outer">true to get the outer curves, false to get the inner curves</param>
+    /// <returns></returns>
+    /// <since>8.18</since>
+    [ConstOperation]
+    public Curve[] Get2dCurves(bool outer)
+    {
+      using (Runtime.InteropWrappers.SimpleArrayCurvePointer curves = new Runtime.InteropWrappers.SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_curve_array = curves.NonConstPointer();
+        IntPtr const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_Hatch_LoopCurve(const_ptr_this, ptr_curve_array, outer, dim: 2);
+        GC.KeepAlive(this);
+        return curves.ToNonConstArray();
+      }
+    }
+    
     /// <summary>
     /// Gets 3d curves that define the boundaries of the hatch
     /// </summary>
@@ -261,7 +284,8 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_curve_array = curves.NonConstPointer();
         IntPtr const_ptr_this = ConstPointer();
-        UnsafeNativeMethods.ON_Hatch_LoopCurve3d(const_ptr_this, ptr_curve_array, outer);
+        UnsafeNativeMethods.ON_Hatch_LoopCurve(const_ptr_this, ptr_curve_array, outer, dim: 3);
+        GC.KeepAlive(this);
         return curves.ToNonConstArray();
       }
     }
@@ -280,12 +304,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Hatch_PatternIndex(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_Hatch_PatternIndex(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Hatch_SetPatternIndex(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -298,12 +325,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Hatch_GetRotation(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Hatch_GetRotation(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Hatch_SetRotation(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -318,12 +348,14 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         Point3d p = new Point3d();
         UnsafeNativeMethods.ON_Hatch_GetBasePoint(const_ptr_this, ref p);
+        GC.KeepAlive(this);
         return p;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Hatch_SetBasePoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -338,12 +370,14 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         Plane p = new Plane();
         UnsafeNativeMethods.ON_Hatch_GetPlane(const_ptr_this, ref p);
+        GC.KeepAlive(this);
         return p;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Hatch_SetPlane(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -356,12 +390,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Hatch_GetScale(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Hatch_GetScale(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Hatch_SetScale(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -374,6 +411,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Hatch_ScalePattern(ptr_this, ref xform);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -407,6 +445,7 @@ namespace Rhino.Geometry
       }
       rc.SetColorStops(stops);
       UnsafeNativeMethods.ON_ColorStopArray_Delete(ptrColorStopArray);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -431,6 +470,7 @@ namespace Rhino.Geometry
       }
       UnsafeNativeMethods.ON_Hatch_SetGradientData(ptr_this, fill.StartPoint, fill.EndPoint, (int)fill.GradientType, fill.Repeat, ptrColorStopArray);
       UnsafeNativeMethods.ON_ColorStopArray_Delete(ptrColorStopArray);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -442,6 +482,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_newbrep = UnsafeNativeMethods.ON_Geometry_BrepForm(ptr_const_this);
+      GC.KeepAlive(this);
       return IntPtr.Zero == ptr_newbrep ? null : new Brep(ptr_newbrep, null);
     }
   }

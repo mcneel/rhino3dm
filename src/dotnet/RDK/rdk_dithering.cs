@@ -24,7 +24,9 @@ namespace Rhino.Render
       if (rs == null)
         return IntPtr.Zero;
 
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetDithering(rs.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmRenderSettings_GetDithering(rs.ConstPointer());
+      GC.KeepAlive(rs);
+      return ret;
     }
 #endif
 
@@ -48,7 +50,9 @@ namespace Rhino.Render
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
-      return UnsafeNativeMethods.ON_Dithering_FromONX_Model(f.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_Dithering_FromONX_Model(f.ConstPointer());
+      GC.KeepAlive(f);
+      return ret;
     }
 
     /// <summary></summary>
@@ -78,6 +82,7 @@ namespace Rhino.Render
     {
       var v = new Variant();
       UnsafeNativeMethods.ON_Dithering_GetValue(CppPointer, which, v.NonConstPointer());
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -99,6 +104,8 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.ON_Dithering_SetValue(CppPointer, which, v.ConstPointer());
       }
+
+      GC.KeepAlive(this);
     }
 
 #if !RHINO_SDK
@@ -120,11 +127,14 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_Dithering_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_Dithering_Delete(CppPointer);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>

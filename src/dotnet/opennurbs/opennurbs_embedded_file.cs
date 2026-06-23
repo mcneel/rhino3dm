@@ -51,7 +51,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool Add(string filename)
     {
-      return UnsafeNativeMethods.ONX_Model_AddEmbeddedFile(_file3dm.NonConstPointer(), filename);
+      bool rc = UnsafeNativeMethods.ONX_Model_AddEmbeddedFile(_file3dm.NonConstPointer(), filename);
+      GC.KeepAlive(_file3dm);
+      return rc;
     }
 
     /// <summary></summary>
@@ -102,6 +104,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_EmbeddedFile_GetFilename(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -117,6 +120,7 @@ namespace Rhino.FileIO
       if (!UnsafeNativeMethods.ON_EmbeddedFile_SaveToFile(NonConstPointer(), filename))
         return false;
 
+      GC.KeepAlive(this);
       return true;
     }
 
@@ -135,7 +139,7 @@ namespace Rhino.FileIO
       {
         return UnsafeNativeMethods.ONX_Model_GetModelComponentPointer(parent.NonConstPointer(), m_id);
       }
-
+      GC.KeepAlive(m__parent);
       return IntPtr.Zero;
     }
   }

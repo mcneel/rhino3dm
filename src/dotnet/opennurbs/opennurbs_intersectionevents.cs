@@ -400,9 +400,11 @@ namespace Rhino.Geometry.Intersect
     {
       x = new IntersectionEvent();
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Intersect_CurveIntersectData(ptr, index,
+      bool rc = UnsafeNativeMethods.ON_Intersect_CurveIntersectData(ptr, index,
         ref x.m_type, ref x.m_A0, ref x.m_A1, ref x.m_B0, ref x.m_B1,
         ref x.m_a0, ref x.m_a1, ref x.m_b0, ref x.m_b1, ref x.m_b2, ref x.m_b3);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
