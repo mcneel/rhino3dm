@@ -268,13 +268,151 @@ bool BND_BrepFace::SetMesh(const class BND_Mesh* m, ON::mesh_type mt)
     return rc;
 
   ON_Mesh* mesh = m->m_mesh;
-  
+
   rc = m_brepface->SetMesh( mt, mesh );
 
   return rc;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepTrim
 
+BND_BrepTrim::BND_BrepTrim(ON_BrepTrim* trim, const ON_ModelComponentReference& compref)
+{
+  m_trim = trim;
+  m_component_reference = compref;
+}
+
+int BND_BrepTrim::EdgeIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_ei;
+}
+
+bool BND_BrepTrim::IsReversed() const
+{
+  if (nullptr == m_trim)
+    return false;
+  return m_trim->m_bRev3d;
+}
+
+int BND_BrepTrim::StartVertexIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_vi[0];
+}
+
+int BND_BrepTrim::EndVertexIndex() const
+{
+  if (nullptr == m_trim)
+    return -1;
+  return m_trim->m_vi[1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepTrimList
+
+BND_BrepTrimList::BND_BrepTrimList(ON_BrepLoop* loop, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_loop = loop;
+}
+
+int BND_BrepTrimList::Count() const
+{
+  if (nullptr == m_loop)
+    return 0;
+  return m_loop->m_ti.Count();
+}
+
+BND_BrepTrim* BND_BrepTrimList::GetTrim(int i)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw py::index_error();
+#endif
+
+  if (nullptr == m_loop || i < 0 || i >= m_loop->m_ti.Count())
+    return nullptr;
+
+  int trim_index = m_loop->m_ti[i];
+  ON_BrepTrim* trim = m_loop->Brep()->Trim(trim_index);
+  if (nullptr == trim)
+    return nullptr;
+  return new BND_BrepTrim(trim, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepLoop
+
+BND_BrepLoop::BND_BrepLoop(ON_BrepLoop* loop, const ON_ModelComponentReference& compref)
+{
+  m_loop = loop;
+  m_component_reference = compref;
+}
+
+int BND_BrepLoop::Type() const
+{
+  if (nullptr == m_loop)
+    return -1;
+  return (int)m_loop->m_type;
+}
+
+int BND_BrepLoop::TrimCount() const
+{
+  if (nullptr == m_loop)
+    return 0;
+  return m_loop->m_ti.Count();
+}
+
+BND_BrepTrimList BND_BrepLoop::GetTrims()
+{
+  return BND_BrepTrimList(m_loop, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// BND_BrepLoopList
+
+BND_BrepLoopList::BND_BrepLoopList(ON_BrepFace* face, const ON_ModelComponentReference& compref)
+{
+  m_component_reference = compref;
+  m_face = face;
+}
+
+int BND_BrepLoopList::Count() const
+{
+  if (nullptr == m_face)
+    return 0;
+  return m_face->m_li.Count();
+}
+
+BND_BrepLoop* BND_BrepLoopList::GetLoop(int i)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i >= Count())
+    throw py::index_error();
+#endif
+
+  if (nullptr == m_face || i < 0 || i >= m_face->m_li.Count())
+    return nullptr;
+
+  int loop_index = m_face->m_li[i];
+  ON_BrepLoop* loop = m_face->Brep()->Loop(loop_index);
+  if (nullptr == loop)
+    return nullptr;
+  return new BND_BrepLoop(loop, m_component_reference);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+BND_BrepLoopList BND_BrepFace::GetLoops()
+{
+  return BND_BrepLoopList(m_brepface, m_component_ref);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 BND_BrepSurfaceList BND_Brep::GetSurfaces()
 {
@@ -285,7 +423,6 @@ BND_BrepEdgeList BND_Brep::GetEdges()
 {
   return BND_BrepEdgeList(m_brep, m_component_ref);
 }
-
 
 BND_BrepSurfaceList::BND_BrepSurfaceList(ON_Brep* brep, const ON_ModelComponentReference& compref)
 {
@@ -407,13 +544,37 @@ void initBrepBindings(rh3dmpymodule& m)
     .def("GetMesh", &BND_BrepFace::GetMesh, py::arg("meshType"))
     .def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
     .def_property("OrientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
+    .def_property_readonly("Loops", &BND_BrepFace::GetLoops)
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
     .def("__len__", &BND_BrepFaceList::Count)
     .def("__getitem__", &BND_BrepFaceList::GetFace)
     ;
-  
+
+  py::class_<BND_BrepTrim>(m, "BrepTrim")
+    .def_property_readonly("EdgeIndex", &BND_BrepTrim::EdgeIndex)
+    .def_property_readonly("IsReversed", &BND_BrepTrim::IsReversed)
+    .def_property_readonly("StartVertexIndex", &BND_BrepTrim::StartVertexIndex)
+    .def_property_readonly("EndVertexIndex", &BND_BrepTrim::EndVertexIndex)
+    ;
+
+  py::class_<BND_BrepTrimList>(m, "BrepTrimList")
+    .def("__len__", &BND_BrepTrimList::Count)
+    .def("__getitem__", &BND_BrepTrimList::GetTrim)
+    ;
+
+  py::class_<BND_BrepLoop>(m, "BrepLoop")
+    .def_property_readonly("Type", &BND_BrepLoop::Type)
+    .def_property_readonly("TrimCount", &BND_BrepLoop::TrimCount)
+    .def_property_readonly("Trims", &BND_BrepLoop::GetTrims)
+    ;
+
+  py::class_<BND_BrepLoopList>(m, "BrepLoopList")
+    .def("__len__", &BND_BrepLoopList::Count)
+    .def("__getitem__", &BND_BrepLoopList::GetLoop)
+    ;
+
   py::class_<BND_BrepSurfaceList>(m, "BrepSurfaceList")
     .def("__len__", &BND_BrepSurfaceList::Count)
     .def("__getitem__", &BND_BrepSurfaceList::GetSurface)
@@ -477,12 +638,37 @@ void initBrepBindings(void*)
     .function("getMesh", &BND_BrepFace::GetMesh, allow_raw_pointers())
     .function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
     .property("orientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
+    .property("loops", &BND_BrepFace::GetLoops)
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
     .property("count", &BND_BrepFaceList::Count)
     .function("get", &BND_BrepFaceList::GetFace, allow_raw_pointers())
     ;
+
+  class_<BND_BrepTrim>("BrepTrim")
+    .property("edgeIndex", &BND_BrepTrim::EdgeIndex)
+    .property("isReversed", &BND_BrepTrim::IsReversed)
+    .property("startVertexIndex", &BND_BrepTrim::StartVertexIndex)
+    .property("endVertexIndex", &BND_BrepTrim::EndVertexIndex)
+    ;
+
+  class_<BND_BrepTrimList>("BrepTrimList")
+    .property("count", &BND_BrepTrimList::Count)
+    .function("get", &BND_BrepTrimList::GetTrim, allow_raw_pointers())
+    ;
+
+  class_<BND_BrepLoop>("BrepLoop")
+    .property("type", &BND_BrepLoop::Type)
+    .property("trimCount", &BND_BrepLoop::TrimCount)
+    .property("trims", &BND_BrepLoop::GetTrims)
+    ;
+
+  class_<BND_BrepLoopList>("BrepLoopList")
+    .property("count", &BND_BrepLoopList::Count)
+    .function("get", &BND_BrepLoopList::GetLoop, allow_raw_pointers())
+    ;
+
 
   class_<BND_BrepSurfaceList>("BrepSurfaceList")
     .property("count", &BND_BrepSurfaceList::Count)
