@@ -362,9 +362,102 @@ BND_DICT BND_Mesh::ToThreejsJSONRotate(bool rotateToYUp) const
 
   emscripten::val rc(emscripten::val::object());
   rc.set("data", data);
-  
+
   return rc;
 }
+
+// RH3DM-191: zero-copy alternative to ToThreejsJSON. Fills contiguous buffers and returns one
+// JS typed array per attribute via a single bulk copy each (Float32Array/Uint32Array
+// constructed from emscripten::typed_memory_view), avoiding the per-element val.set() boundary
+// crossings that dominate parse time for large meshes. The typed-array constructor copies out
+// of the WASM heap, so the local std::vector buffers can be freed when this returns.
+BND_DICT BND_Mesh::ToThreejsBuffers(bool rotateToYUp) const
+{
+  ON_Mesh* pMesh = m_mesh;
+  ON_Mesh tempMesh;
+  if (rotateToYUp)
+  {
+    tempMesh = *m_mesh;
+    ON_Xform rotation(1);
+    rotation.RotationZYX(0.0, 0.0, -ON_PI / 2.0);
+    tempMesh.Transform(rotation);
+    pMesh = &tempMesh;
+  }
+
+  // triangulated face indices (split quads into two triangles), matching ToThreejsJSONRotate
+  std::vector<uint32_t> indices;
+  indices.reserve((size_t)pMesh->m_F.Count() * 6);
+  for (int i = 0; i < pMesh->m_F.Count(); i++)
+  {
+    const ON_MeshFace& face = pMesh->m_F[i];
+    indices.push_back((uint32_t)face.vi[0]);
+    indices.push_back((uint32_t)face.vi[1]);
+    indices.push_back((uint32_t)face.vi[2]);
+    if (face.vi[2] != face.vi[3])
+    {
+      indices.push_back((uint32_t)face.vi[2]);
+      indices.push_back((uint32_t)face.vi[3]);
+      indices.push_back((uint32_t)face.vi[0]);
+    }
+  }
+
+  const int vcount = pMesh->m_V.Count();
+  std::vector<float> positions((size_t)vcount * 3);
+  for (int i = 0; i < vcount; i++)
+  {
+    positions[i * 3] = pMesh->m_V[i].x;
+    positions[i * 3 + 1] = pMesh->m_V[i].y;
+    positions[i * 3 + 2] = pMesh->m_V[i].z;
+  }
+
+  if (pMesh->m_N.Count() == 0)
+    pMesh->ComputeVertexNormals();
+  const int ncount = pMesh->m_N.Count();
+  std::vector<float> normals((size_t)ncount * 3);
+  for (int i = 0; i < ncount; i++)
+  {
+    normals[i * 3] = pMesh->m_N[i].x;
+    normals[i * 3 + 1] = pMesh->m_N[i].y;
+    normals[i * 3 + 2] = pMesh->m_N[i].z;
+  }
+
+  emscripten::val Float32Array = emscripten::val::global("Float32Array");
+  emscripten::val Uint32Array = emscripten::val::global("Uint32Array");
+
+  emscripten::val rc(emscripten::val::object());
+  rc.set("position", Float32Array.new_(emscripten::typed_memory_view(positions.size(), positions.data())));
+  rc.set("normal", Float32Array.new_(emscripten::typed_memory_view(normals.size(), normals.data())));
+  rc.set("index", Uint32Array.new_(emscripten::typed_memory_view(indices.size(), indices.data())));
+  rc.set("vertexCount", vcount);
+
+  if (pMesh->HasTextureCoordinates())
+  {
+    const int tcount = pMesh->m_T.Count();
+    std::vector<float> uvs((size_t)tcount * 2);
+    for (int i = 0; i < tcount; i++)
+    {
+      uvs[i * 2] = pMesh->m_T[i].x;
+      uvs[i * 2 + 1] = pMesh->m_T[i].y;
+    }
+    rc.set("uv", Float32Array.new_(emscripten::typed_memory_view(uvs.size(), uvs.data())));
+  }
+
+  if (pMesh->HasVertexColors())
+  {
+    const int ccount = pMesh->m_C.Count();
+    std::vector<float> colors((size_t)ccount * 3);
+    for (int i = 0; i < ccount; i++)
+    {
+      colors[i * 3] = pMesh->m_C[i].Red() / 255.0f;
+      colors[i * 3 + 1] = pMesh->m_C[i].Green() / 255.0f;
+      colors[i * 3 + 2] = pMesh->m_C[i].Blue() / 255.0f;
+    }
+    rc.set("color", Float32Array.new_(emscripten::typed_memory_view(colors.size(), colors.data())));
+  }
+
+  return rc;
+}
+
 BND_DICT BND_Mesh::ToThreejsJSONMerged(BND_TUPLE meshes, bool rotateYUp)
 {
   int length = meshes["length"].as<int>();
@@ -1294,6 +1387,7 @@ void initMeshBindings(void*)
     .property("partitionCount", &BND_Mesh::PartitionCount)
     .function("toThreejsJSON", &BND_Mesh::ToThreejsJSON)
     .function("toThreejsJSONRotate", &BND_Mesh::ToThreejsJSONRotate)
+    .function("toThreejsBuffers", &BND_Mesh::ToThreejsBuffers)
     .class_function("createFromThreejsJSON", &BND_Mesh::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }

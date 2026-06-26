@@ -337,6 +337,11 @@ public:
   BND_DICT ToThreejsJSONRotate(bool rotateToYUp) const;
   static BND_DICT ToThreejsJSONMerged(BND_TUPLE meshes, bool rotateYUp);
   static BND_Mesh* CreateFromThreejsJSON(BND_DICT data);
+  // RH3DM-191: zero-copy alternative to ToThreejsJSON. Returns one JS typed array per
+  // attribute (position/normal/uv/color = Float32Array, index = Uint32Array) built with a
+  // single bulk copy each (emscripten::typed_memory_view) instead of N per-element val.set()
+  // boundary crossings. The three.js 3DMLoader can feed these straight into BufferAttributes.
+  BND_DICT ToThreejsBuffers(bool rotateToYUp) const;
 #endif
 
 protected:
