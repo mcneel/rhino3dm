@@ -20,7 +20,11 @@
     <PackageIcon>icon.png</PackageIcon>
     <Title>Rhino3dm</Title>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo> 
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- MeshingParameters (opennurbs_mesh.cs) uses BinaryFormatter for its encoded-string
+         (de)serialization, mirroring RhinoCommon. .NET 7+ escalates SYSLIB0011 to an error,
+         so suppress it here exactly as RhinoCommon.csproj does. -->
+    <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
