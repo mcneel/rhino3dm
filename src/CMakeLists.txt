@@ -111,6 +111,11 @@ add_definitions(-DON_COMPILING_OPENNURBS)
 add_definitions(-DOPENNURBS_FREETYPE_INC_)
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
+# RH3DM-179: we link zlib via CMake, not the MSVC #pragma comment(lib,...) path, so tell
+# opennurbs to skip that pragma block (otherwise OPENNURBS_ZLIB_LIB_DIR being valueless
+# yields a malformed string -> MSVC C4081). The native librhino3dm_native build already
+# defines this; mirror it here for the JS/Python build.
+add_definitions(-DON_CMAKE_BUILD)
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})

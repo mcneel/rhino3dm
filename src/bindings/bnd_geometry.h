@@ -28,6 +28,7 @@ public:
   bool Rotate(double rotation_angle, const ON_3dVector& rotation_axis, const ON_3dPoint& rotation_center);
   //public uint MemoryEstimate()
   BND_BoundingBox BoundingBox() const;
+  BND_BoundingBox GetTightBoundingBox() const;
   bool IsDeformable() const { return m_geometry->IsDeformable(); }
   bool MakeDeformable() { return m_geometry->MakeDeformable(); }
   bool HasBrepForm() const { return m_geometry->HasBrepForm(); }

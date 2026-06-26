@@ -32,6 +32,24 @@ namespace Rhino.DocObjects
       return rc;
     }
 
+    // rhino3dm-local (sync exception): when this ViewportInfo belongs to a parent
+    // ViewInfo, edits must write straight into the parent view's ON_Viewport
+    // (&ON_3dmView.m_vp) so camera changes persist (e.g. ViewInfo.Viewport.SetCameraLocation
+    // followed by File3dm.Views.Add + write/read). ON_3dmView_ViewportPointer returns a
+    // pointer INTO the view (non-owning), so this proxy allocates nothing and cannot leak.
+    // Upstream reverted the original fix for RH-83697 (two-point perspective), but that only
+    // affected full-Rhino UI code (ViewportPropertiesPanel / SetViewProjection) which rhino3dm
+    // does not ship. We deliberately avoid the parent==null/IsNonConst fall-through that made
+    // the original revert-prone version leak an untracked copy. TODO(9.x): adopt upstream's
+    // reworked ownership model if/when it lands.
+    internal override IntPtr NonConstPointer()
+    {
+      var vi = m_parent as ViewInfo;
+      if (vi != null)
+        return vi.NonConstViewportPointer();
+      return base.NonConstPointer();
+    }
+
     /// <summary>
     /// Initializes a new instance.
     /// </summary>

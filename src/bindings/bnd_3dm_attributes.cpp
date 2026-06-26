@@ -13,6 +13,17 @@ BND_3dmObjectAttributes::BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, 
   SetTrackedPointer(attrs, compref);
 }
 
+// RH-86691: delegate to the (attrs, compref) ctor with a freshly-allocated, independently
+// owned deep copy of the source attributes (compref = nullptr => this wrapper owns it). This
+// avoids the default copy ctor's shared/double-free of the source's ON_3dmObjectAttributes.
+BND_3dmObjectAttributes::BND_3dmObjectAttributes(const BND_3dmObjectAttributes& other)
+  :
+  BND_3dmObjectAttributes(
+    (nullptr != other.m_attributes) ? new ON_3dmObjectAttributes(*other.m_attributes) : new ON_3dmObjectAttributes(),
+    nullptr)
+{
+}
+
 void BND_3dmObjectAttributes::SetTrackedPointer(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)
 {
   m_attributes = attrs;

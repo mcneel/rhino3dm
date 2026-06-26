@@ -493,7 +493,7 @@ BND_UUID BND_ONXModel_ObjectTable::AddPolyline2(const std::vector<ON_3dPoint>& p
 {
   BND_Point3dList list;
 
-  for (int i = 0; i < points.size(); i++)
+  for (int i = 0; i < (int)points.size(); i++)
   {
     list.Add(points[i].x, points[i].y, points[i].z);
   }
@@ -1312,8 +1312,8 @@ int BND_File3dmInstanceDefinitionTable::Add(std::wstring name, std::wstring desc
 
   int index = -1;
 #if defined(ON_PYTHON_COMPILE)
-  const int count_g = geometry.size();
-  const int count_a = attributes.size();
+  const int count_g = (int)geometry.size();
+  const int count_a = (int)attributes.size();
 #else
   const int count_g = geometry["length"].as<int>();
   const int count_a = attributes["length"].as<int>();

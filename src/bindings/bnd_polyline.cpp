@@ -19,7 +19,7 @@ BND_Polyline* BND_Polyline::CreateFromPoints1(const class BND_Point3dList& point
 BND_Polyline* BND_Polyline::CreateFromPoints2(const std::vector<ON_3dPoint>& points) 
 {
   BND_Polyline* rc = new BND_Polyline();
-  rc->m_polyline.Append(points.size(), points.data());
+  rc->m_polyline.Append((int)points.size(), points.data());
   return rc;
 }
 
@@ -200,7 +200,7 @@ void BND_Point3dList::Append1 (const BND_Point3dList& points)
 void BND_Point3dList::Append2 (const std::vector<ON_3dPoint>& points)
 {
   BND_Point3dList list;
-  for (int i = 0; i < points.size(); i++)
+  for (int i = 0; i < (int)points.size(); i++)
   {
     list.Add(points[i].x, points[i].y, points[i].z);
   }
