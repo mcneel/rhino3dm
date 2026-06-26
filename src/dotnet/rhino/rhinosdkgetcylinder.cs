@@ -75,6 +75,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr const_ptr_this = ConstPointer();
         var rc = UnsafeNativeMethods.CArgsRhinoGetCircle_ConeCylConstraint(const_ptr_this);
+        GC.KeepAlive(this);
         if (rc == UnsafeNativeMethods.GetConeConstraint.AroundCurve)
           return CylinderConstraint.AroundCurve;
         if (rc == UnsafeNativeMethods.GetConeConstraint.Vertical)
@@ -85,6 +86,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetConeCylConstraint(ptr_this, (UnsafeNativeMethods.GetConeConstraint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -97,12 +99,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetDefaultSize(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -125,12 +130,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCylinder_BothSides(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetCylinder_BothSides(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCylinder_SetBothSides(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -141,24 +149,30 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCylinder_Height(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCylinder_Height(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCylinder_SetHeight(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
     bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which, bool value)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -182,6 +196,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cylinder = Geometry.Cylinder.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCylinder(ref cylinder, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -198,6 +213,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cylinder = Geometry.Cylinder.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinder(ref cylinder, ref verticalFaces, ref aroundFaces, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -218,6 +234,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       cylinder = Geometry.Cylinder.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshCylinderWithCapStyle(ref cylinder, ref verticalFaces, ref aroundFaces, ref capStyle, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

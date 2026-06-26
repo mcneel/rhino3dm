@@ -22,7 +22,9 @@ namespace Rhino.Render
       if (rs == null)
         return IntPtr.Zero;
 
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetLinearWorkflow(rs.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmRenderSettings_GetLinearWorkflow(rs.ConstPointer());
+      GC.KeepAlive(rs);
+      return ret;
     }
 
 #endif
@@ -34,12 +36,15 @@ namespace Rhino.Render
 
     internal override IntPtr CppFromFile3dm(FileIO.File3dm f)
     {
-      return UnsafeNativeMethods.ON_LinearWorkflow_FromONX_Model(f.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_LinearWorkflow_FromONX_Model(f.ConstPointer());
+      GC.KeepAlive(f);
+      return ret;
     }
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_LinearWorkflow_Delete(CppPointer);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -63,6 +68,8 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_LinearWorkflow_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     /// <summary></summary>
@@ -85,13 +92,16 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.LinearWorkflowSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      GC.KeepAlive(v);
+      return ret;
     }
 
     private Variant GetValue(UnsafeNativeMethods.LinearWorkflowSetting which)
     {
       var v = new Variant();
       UnsafeNativeMethods.ON_LinearWorkflow_GetValue(CppPointer, which, v.NonConstPointer());
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -113,6 +123,9 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.ON_LinearWorkflow_SetValue(CppPointer, which, v.ConstPointer());
       }
+
+      GC.KeepAlive(v);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -198,7 +211,12 @@ namespace Rhino.Render
     [CLSCompliant(false)]
     public uint Hash
     {
-      get => UnsafeNativeMethods.ON_LinearWorkflow_ComputeCRC(CppPointer);
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_LinearWorkflow_ComputeCRC(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>

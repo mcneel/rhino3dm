@@ -74,6 +74,7 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_other = other.ConstPointer();
       m_ptr = UnsafeNativeMethods.CRhinoViewport_New(const_ptr_other);
+      GC.KeepAlive(other);
       m_delete_ptr = true;
     }
 
@@ -170,6 +171,7 @@ namespace Rhino.Display
           IntPtr const_ptr_this = ConstPointer();
           IntPtr ptr_parent_view = UnsafeNativeMethods.CRhinoViewport_ParentView(const_ptr_this);
           m_parent_view = RhinoView.FromIntPtr(ptr_parent_view);
+          GC.KeepAlive(this);
         }
         return m_parent_view;
       }
@@ -182,7 +184,9 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_ViewportId(ptr_this);
+        Guid rc = UnsafeNativeMethods.CRhinoViewport_ViewportId(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -200,7 +204,9 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_ChangeCounter(ptr_this);
+        uint rc = UnsafeNativeMethods.CRhinoViewport_ChangeCounter(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -214,7 +220,9 @@ namespace Rhino.Display
     public bool IsVisible(BoundingBox bbox)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_IsVisible(ptr_this, bbox.Min, bbox.Max, true);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_IsVisible(ptr_this, bbox.Min, bbox.Max, true);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Determines if a world coordinate point is visible in the viewing frustum.
@@ -225,7 +233,9 @@ namespace Rhino.Display
     public bool IsVisible(Point3d point)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_IsVisible(ptr_this, point, Point3d.Unset, false);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_IsVisible(ptr_this, point, Point3d.Unset, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -244,12 +254,14 @@ namespace Rhino.Display
         IntPtr ptr_this = NonConstPointer();
         int width = 0, height = 0;
         bool rc = UnsafeNativeMethods.CRhinoViewport_GetScreenSize(ptr_this, ref width, ref height);
+        GC.KeepAlive(this);
         return (rc) ? new System.Drawing.Size(width, height) : Bounds.Size; 
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_SetScreenSize(ptr_this, value.Width, value.Height);
+        GC.KeepAlive(this);
       }
     }
 
@@ -262,12 +274,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_GetSetLockProjection(ptr_this, false, false);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_GetSetLockProjection(ptr_this, false, false);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_GetSetLockProjection(ptr_this, true, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -280,6 +295,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_SetClippingPlanes(ptr_this, box.Min, box.Max);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Name associated with this viewport.</summary>
@@ -298,6 +314,7 @@ namespace Rhino.Display
           IntPtr const_ptr_this = ConstPointer();
           IntPtr ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.CRhinoViewport_GetSetName(const_ptr_this, null, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -305,6 +322,7 @@ namespace Rhino.Display
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_GetSetName(ptr, value, IntPtr.Zero);
+        GC.KeepAlive(this);
       }
     }
 
@@ -319,6 +337,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var target = new Point3d();
         UnsafeNativeMethods.CRhinoViewport_Target(const_ptr_this, ref target);
+        GC.KeepAlive(this);
         return target;
       }
     }
@@ -349,6 +368,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_SetCameraTarget(ptr_this, targetLocation, updateCameraLocation, idxSetCameraTarget);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -363,6 +383,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_SetCameraLocations(ptr_this, targetLocation, cameraLocation);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -387,6 +408,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_SetCameraTarget(ptr_this, cameraLocation, updateTargetLocation, idxSetCameraLocation);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -411,6 +433,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       var dir_as_point = new Point3d(cameraDirection);
       UnsafeNativeMethods.CRhinoViewport_SetCameraTarget(ptr_this, dir_as_point, updateTargetLocation, idxSetCameraDirection);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -421,6 +444,7 @@ namespace Rhino.Display
       IntPtr const_ptr_viewport = UnsafeNativeMethods.CRhinoViewport_VP(const_ptr_this);
       var bbox = new BoundingBox();
       UnsafeNativeMethods.ON_Viewport_GetCameraExtents(const_ptr_viewport, point_list.Count, point_list.m_items, ref bbox);
+      GC.KeepAlive(this);
       return bbox;
     }
 
@@ -439,6 +463,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       var plane = new Plane();
       UnsafeNativeMethods.CRhinoViewport_ConstructionPlane(const_ptr_this, ref plane, false);
+      GC.KeepAlive(this);
       return plane;
     }
 
@@ -447,7 +472,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_cplane = UnsafeNativeMethods.CRhinoViewport_GetConstructionPlane(const_ptr_this);
-      return DocObjects.ConstructionPlane.FromIntPtr(ptr_cplane);
+      DocObjects.ConstructionPlane rc = DocObjects.ConstructionPlane.FromIntPtr(ptr_cplane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -455,6 +482,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_ConstructionPlane(ptr_this, ref plane, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -471,6 +499,7 @@ namespace Rhino.Display
         UnsafeNativeMethods.CRhinoViewport_SetConstructionPlane(ptr_this, ptr_cplane, false);
         UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
       }
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -489,6 +518,7 @@ namespace Rhino.Display
         UnsafeNativeMethods.CRhinoViewport_SetConstructionPlane(ptr_this, ptr_cplane, true);
         UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
       }
+      GC.KeepAlive(this);
     }
 
     const int idxPopConstructionPlane = 0;
@@ -504,7 +534,9 @@ namespace Rhino.Display
     public bool PopConstructionPlane()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxPopConstructionPlane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxPopConstructionPlane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -516,7 +548,9 @@ namespace Rhino.Display
     public bool NextConstructionPlane()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxNextConstructionPlane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxNextConstructionPlane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -529,7 +563,9 @@ namespace Rhino.Display
     public bool PreviousConstructionPlane()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxPrevConstructionPlane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_GetBool(ptr_this, idxPrevConstructionPlane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     const int idxConstructionGridVisible = 0;
@@ -542,12 +578,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxConstructionGridVisible);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxConstructionGridVisible);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_View_SetBool(ptr_this, idxConstructionGridVisible, value);
+        GC.KeepAlive(this);
       }
     }
     /// <since>5.0</since>
@@ -556,12 +595,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxConstructionAxesVisible);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxConstructionAxesVisible);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_View_SetBool(ptr_this, idxConstructionAxesVisible, value);
+        GC.KeepAlive(this);
       }
     }
     /// <since>5.0</since>
@@ -570,12 +612,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxWorldAxesVisible);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_View_GetBool(const_ptr_this, idxWorldAxesVisible);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_View_SetBool(ptr_this, idxWorldAxesVisible, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -583,7 +628,9 @@ namespace Rhino.Display
     public bool SetToPlanView(Point3d planeOrigin, Vector3d planeXaxis, Vector3d planeYaxis, bool setConstructionPlane)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_SetToPlanView(ptr_this, planeOrigin, planeXaxis, planeYaxis, setConstructionPlane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_SetToPlanView(ptr_this, planeOrigin, planeXaxis, planeYaxis, setConstructionPlane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -601,7 +648,9 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       if (string.IsNullOrEmpty(viewName))
         viewName = null;
-      return UnsafeNativeMethods.CRhinoViewport_SetProjection(ptr_this, (int)projection, viewName, updateConstructionPlane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_SetProjection(ptr_this, (int)projection, viewName, updateConstructionPlane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -617,6 +666,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_PushViewProjection(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -633,7 +683,9 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_viewport = projection.ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_SetVP(ptr_this, const_ptr_viewport, updateTargetLocation);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_SetVP(ptr_this, const_ptr_viewport, updateTargetLocation);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -650,7 +702,9 @@ namespace Rhino.Display
     public bool PopViewProjection()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_PopViewProjection(ptr_this);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_PopViewProjection(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -658,7 +712,10 @@ namespace Rhino.Display
     {      
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_view = viewinfo.ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_PushViewInfo(ptr_this, const_ptr_view, includeTraceImage);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_PushViewInfo(ptr_this, const_ptr_view, includeTraceImage);
+      GC.KeepAlive(viewinfo);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -670,7 +727,9 @@ namespace Rhino.Display
     public bool NextViewProjection()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_NextPrevViewProjection(ptr_this, true);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_NextPrevViewProjection(ptr_this, true);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -682,7 +741,9 @@ namespace Rhino.Display
     public bool PreviousViewProjection()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_NextPrevViewProjection(ptr_this, false);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_NextPrevViewProjection(ptr_this, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     //[skipping]
@@ -697,7 +758,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_IsPlanView(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_IsPlanView(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -716,7 +779,9 @@ namespace Rhino.Display
     public bool ZoomExtents()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoDollyExtents(ptr_this, false);
+      bool rc = UnsafeNativeMethods.RHC_RhinoDollyExtents(ptr_this, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -729,7 +794,9 @@ namespace Rhino.Display
     public bool ZoomExtentsSelected()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoDollyExtents(ptr_this, true);
+      bool rc = UnsafeNativeMethods.RHC_RhinoDollyExtents(ptr_this, true);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -741,7 +808,9 @@ namespace Rhino.Display
     public bool ZoomBoundingBox(BoundingBox box)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhZoomExtentsHelper(ptr_this, box.m_min, box.m_max);
+      bool rc = UnsafeNativeMethods.RHC_RhZoomExtentsHelper(ptr_this, box.m_min, box.m_max);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -756,14 +825,18 @@ namespace Rhino.Display
     public bool ZoomWindow(Rectangle rect)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhZoomWindowsHelper(ptr_this, rect.Left, rect.Top, rect.Right, rect.Bottom);
+      bool rc = UnsafeNativeMethods.RHC_RhZoomWindowsHelper(ptr_this, rect.Left, rect.Top, rect.Right, rect.Bottom);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #region mouse
     bool MouseAdjust(UnsafeNativeMethods.ViewportMouseAdjust which, System.Drawing.Point prev, System.Drawing.Point current)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_MouseAdjust(ptr_this, which, prev.X, prev.Y, current.X, current.Y);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_MouseAdjust(ptr_this, which, prev.X, prev.Y, current.X, current.Y);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -830,8 +903,10 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public bool MouseAdjustLensLength(System.Drawing.Point mousePreviousPoint, System.Drawing.Point mouseCurrentPoint, bool moveTarget)
     {
-        IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_MouseAdjustLensLength(ptr_this, UnsafeNativeMethods.ViewportMouseAdjust.MouseAdjustLensLength, mousePreviousPoint.X, mousePreviousPoint.Y, mouseCurrentPoint.X, mouseCurrentPoint.Y, moveTarget);  
+      IntPtr ptr_this = NonConstPointer();
+      bool rc = UnsafeNativeMethods.CRhinoViewport_MouseAdjustLensLength(ptr_this, UnsafeNativeMethods.ViewportMouseAdjust.MouseAdjustLensLength, mousePreviousPoint.X, mousePreviousPoint.Y, mouseCurrentPoint.X, mouseCurrentPoint.Y, moveTarget);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -873,7 +948,9 @@ namespace Rhino.Display
     public bool KeyboardRotate(bool leftRight, double angleRadians)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_KeyboardRotate(ptr_this, leftRight, angleRadians);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_KeyboardRotate(ptr_this, leftRight, angleRadians);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -886,7 +963,9 @@ namespace Rhino.Display
     public bool KeyboardDolly(bool leftRight, double amount)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_KeyboardDolly(ptr_this, leftRight, amount);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_KeyboardDolly(ptr_this, leftRight, amount);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -898,7 +977,9 @@ namespace Rhino.Display
     public bool KeyboardDollyInOut(double amount)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_KeyboardDollyInOut(ptr_this, amount);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_KeyboardDollyInOut(ptr_this, amount);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -936,7 +1017,9 @@ namespace Rhino.Display
     {
       int imode = mode ? 1 : 0;
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_Magnify(ptr_this, magnificationFactor, imode, fixedScreenPoint.X, fixedScreenPoint.Y);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_Magnify(ptr_this, magnificationFactor, imode, fixedScreenPoint.X, fixedScreenPoint.Y);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -955,6 +1038,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       Transform rc = Transform.Unset;
       UnsafeNativeMethods.CRhinoViewport_GetPickXform(const_ptr_this, clientX, clientY, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -987,12 +1071,39 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       Transform rc = Transform.Unset;
       UnsafeNativeMethods.CRhinoViewport_GetPickXform2(const_ptr_this, clientRectangle.Left, clientRectangle.Top, clientRectangle.Right, clientRectangle.Bottom, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
     //  CRhinoDisplayPipeline* DisplayPipeline(void) const;
 
     #region user strings
+    /// <summary>
+    /// Attach a user string (key,value combination) to this viewport.
+    /// </summary>
+    /// <param name="items">collection of key-value pairs to set.</param>
+    /// <param name="replace">If True, the previous user string will be removed</param>
+    /// <returns>true on success.</returns>
+    /// <since>8.18</since>
+    public bool SetUserStrings(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> items, bool replace)
+    {
+      if (items == null) return false;
+
+      IntPtr ptrThis = NonConstPointer();
+      IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(ptrThis);
+      using (ViewportInfo vi = new ViewportInfo(ptrViewport))
+      {
+        if (replace)
+          vi._DeleteAllUserStrings();
+
+        foreach (var item in items)
+          vi._SetUserString(item.Key, item.Value);
+
+        var rc = UnsafeNativeMethods.CRhinoViewport_SetVP(ptrThis, vi.ConstPointer(), false);
+        return rc;
+      }
+    }
+
     /// <summary>
     /// Attach a user string (key,value combination) to this geometry.
     /// </summary>
@@ -1008,6 +1119,7 @@ namespace Rhino.Display
       {
         var rc = vi._SetUserString(key, value);
         UnsafeNativeMethods.CRhinoViewport_SetVP(ptrThis, vi.ConstPointer(), false);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1024,6 +1136,7 @@ namespace Rhino.Display
       {
         IntPtr pStringHolder = sh.NonConstPointer();
         UnsafeNativeMethods.ON_Object_GetUserString(ptrViewport, key, pStringHolder);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -1034,7 +1147,9 @@ namespace Rhino.Display
       get
       {
         IntPtr ptrViewport = UnsafeNativeMethods.CRhinoViewport_VP(NonConstPointer());
-        return UnsafeNativeMethods.ON_Object_UserStringCount(ptrViewport);
+        int rc = UnsafeNativeMethods.ON_Object_UserStringCount(ptrViewport);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1049,6 +1164,7 @@ namespace Rhino.Display
       using (ViewportInfo vi = new ViewportInfo(ptrViewport))
       {
         var rc = vi._GetUserStrings();
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1068,6 +1184,7 @@ namespace Rhino.Display
       {
         vi._DeleteAllUserStrings();
         UnsafeNativeMethods.CRhinoViewport_SetVP(ptrThis, vi.ConstPointer(), false);
+        GC.KeepAlive(this);
       }
     }
     #endregion
@@ -1083,6 +1200,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       if( !UnsafeNativeMethods.CRhinoViewport_GetBBox(const_ptr_this, ref a, ref b) )
         return BoundingBox.Unset;
+      GC.KeepAlive(this);
       return new BoundingBox(a, b);
     }
 
@@ -1098,7 +1216,9 @@ namespace Rhino.Display
     public bool Rotate(double angleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_Rotate(ptr_this, angleRadians, rotationAxis, rotationCenter);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_Rotate(ptr_this, angleRadians, rotationAxis, rotationCenter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -1113,7 +1233,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsValidCamera);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsValidCamera);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
     /// <since>5.0</since>
@@ -1122,7 +1244,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsValidFrustum);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsValidFrustum);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1132,7 +1256,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsPerspectiveProjection);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsPerspectiveProjection);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1142,7 +1268,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsTwoPointPerspectiveProjection);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsTwoPointPerspectiveProjection);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1152,7 +1280,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsParallelProjection);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetBool(const_ptr_this, idxIsParallelProjection);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1169,6 +1299,7 @@ namespace Rhino.Display
       IntPtr constPtrThis = ConstPointer();
       IntPtr constPtrViewport = UnsafeNativeMethods.CRhinoViewport_VP(constPtrThis);
       UnsafeNativeMethods.ON_Viewport_GetViewScale(constPtrViewport, ref scaleX, ref scaleY, ref scaleZ);
+      GC.KeepAlive(this);
       return new double[] { scaleX, scaleY, scaleZ };
     }
     /// <summary>
@@ -1185,7 +1316,9 @@ namespace Rhino.Display
     public bool ChangeToParallelProjection(bool symmetricFrustum)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToParallelProjection(ptr_this, symmetricFrustum);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_ChangeToParallelProjection(ptr_this, symmetricFrustum);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1232,7 +1365,9 @@ namespace Rhino.Display
     public bool ChangeToPerspectiveProjection(double targetDistance, bool symmetricFrustum, double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToPerspectiveProjection(ptr_this, targetDistance, symmetricFrustum, lensLength);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_ChangeToPerspectiveProjection(ptr_this, targetDistance, symmetricFrustum, lensLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1254,8 +1389,10 @@ namespace Rhino.Display
     public bool ChangeToTwoPointPerspectiveProjection(double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToTwoPointPerspectiveProjection(ptr_this, RhinoMath.UnsetValue, Vector3d.Zero,
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_ChangeToTwoPointPerspectiveProjection(ptr_this, RhinoMath.UnsetValue, Vector3d.Zero,
         lensLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1288,18 +1425,23 @@ namespace Rhino.Display
       double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToTwoPointPerspectiveProjection(ptr_this, targetDistance, up,
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_ChangeToTwoPointPerspectiveProjection(ptr_this, targetDistance, up,
         lensLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
     ///   When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
     /// </summary>
     /// <returns></returns>
+    /// <since>8.14</since>
     public bool ChangeToParallelReflectedProjection()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_ChangeToParallelReflectedProjection(ptr_this);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_ChangeToParallelReflectedProjection(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
   const int idxCameraLocation = 0;
@@ -1317,6 +1459,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraLocation, ref v);
+        GC.KeepAlive(this);
         return new Point3d(v);
       }
     }
@@ -1328,6 +1471,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraDirection, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -1344,12 +1488,14 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraUp, ref v);
+        GC.KeepAlive(this);
         return v;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_VP_SetVector(ptr_this, idxCameraUp, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1363,7 +1509,9 @@ namespace Rhino.Display
     {
       frame = new Plane();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetCameraFrame(const_ptr_this, ref frame);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetCameraFrame(const_ptr_this, ref frame);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Gets the "unit to the right" vector.</summary>
@@ -1375,6 +1523,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraX, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -1387,6 +1536,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraY, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -1399,6 +1549,7 @@ namespace Rhino.Display
         IntPtr const_ptr_this = ConstPointer();
         var v = new Vector3d();
         UnsafeNativeMethods.CRhinoViewport_VP_GetVector(const_ptr_this, idxCameraZ, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -1425,6 +1576,7 @@ namespace Rhino.Display
       top = items[3];
       nearDistance = items[4];
       farDistance = items[5];
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1439,7 +1591,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxFrustumAspect);
+        double rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxFrustumAspect);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1453,7 +1607,9 @@ namespace Rhino.Display
     {
       center = new Point3d();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetFrustumCenter(const_ptr_this, ref center);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetFrustumCenter(const_ptr_this, ref center);
+      GC.KeepAlive(this);
+      return rc;
     }
     
     /// <summary>Gets clipping distance of a point.</summary>
@@ -1468,7 +1624,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       distance = 0;
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetDepth1(const_ptr_this, point, ref distance);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDepth1(const_ptr_this, point, ref distance);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Gets near and far clipping distances of a bounding box.
@@ -1485,7 +1643,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       nearDistance = farDistance = 0;
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetDepth2(const_ptr_this, bbox.m_min, bbox.m_max, ref nearDistance, ref farDistance);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDepth2(const_ptr_this, bbox.m_min, bbox.m_max, ref nearDistance, ref farDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Gets near and far clipping distances of a sphere.
@@ -1502,7 +1662,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       nearDistance = farDistance = 0;
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetDepth3(const_ptr_this, ref sphere, ref nearDistance, ref farDistance);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDepth3(const_ptr_this, ref sphere, ref nearDistance, ref farDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     const int idxGetFrustumNearPlane = 0;
@@ -1527,7 +1689,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumNearPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumNearPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Get far clipping plane.</summary>
     /// <param name="plane">
@@ -1544,7 +1708,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumFarPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumFarPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Get left world frustum clipping plane.</summary>
     /// <param name="plane">
@@ -1559,7 +1725,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumLeftPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumLeftPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Get right world frustum clipping plane.</summary>
     /// <param name="plane">
@@ -1574,7 +1742,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumRightPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumRightPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Get bottom world frustum clipping plane.</summary>
     /// <param name="plane">
@@ -1589,7 +1759,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumBottomPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumBottomPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Get top world frustum clipping plane.</summary>
     /// <param name="plane">
@@ -1604,7 +1776,9 @@ namespace Rhino.Display
     {
       IntPtr const_ptr_this = ConstPointer();
       plane = new Plane();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumTopPlane, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetPlane(const_ptr_this, idxGetFrustumTopPlane, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Get corners of near clipping plane rectangle.</summary>
@@ -1619,6 +1793,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.CRhinoViewport_VP_GetRect(const_ptr_this, true, rc))
         rc = null;
+      GC.KeepAlive(this);
       return rc;
     }
     /// <summary>Get corners of far clipping plane rectangle.</summary>
@@ -1633,6 +1808,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.CRhinoViewport_VP_GetRect(const_ptr_this, false, rc))
         rc = null;
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1659,6 +1835,7 @@ namespace Rhino.Display
       portTop = items[3];
       portNear = items[4];
       portFar = items[5];
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1687,7 +1864,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxScreenPortAspect);
+        double rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxScreenPortAspect);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1696,7 +1875,9 @@ namespace Rhino.Display
     {
       halfDiagonalAngle = halfVerticalAngle = halfHorizontalAngle = 0;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetCameraAngle(const_ptr_this, ref halfDiagonalAngle, ref halfVerticalAngle, ref halfHorizontalAngle);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetCameraAngle(const_ptr_this, ref halfDiagonalAngle, ref halfVerticalAngle, ref halfHorizontalAngle);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1705,12 +1886,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxCamera35mmLensLength);
+        double rc = UnsafeNativeMethods.CRhinoViewport_VP_GetDouble(const_ptr_this, idxCamera35mmLensLength);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CRhinoViewport_VP_SetCamera35mmLensLength(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1734,6 +1918,7 @@ namespace Rhino.Display
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.CRhinoViewport_VP_GetXform(const_ptr_this, (int)sourceSystem, (int)destinationSystem, ref matrix))
         return Transform.Identity;
+      GC.KeepAlive(this);
       return matrix;
     }
 
@@ -1755,7 +1940,9 @@ namespace Rhino.Display
     {
       worldLine = new Line();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetFrustumLine(const_ptr_this, screenX, screenY, ref worldLine);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetFrustumLine(const_ptr_this, screenX, screenY, ref worldLine);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1772,7 +1959,9 @@ namespace Rhino.Display
     {
       pixelsPerUnit = 0;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_VP_GetWorldToScreenScale(ptr, pointInFrustum, ref pixelsPerUnit);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_GetWorldToScreenScale(ptr, pointInFrustum, ref pixelsPerUnit);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1853,6 +2042,7 @@ namespace Rhino.Display
           IntPtr ptr_string = sh.NonConstPointer();
           IntPtr const_ptr_this = ConstPointer();
           UnsafeNativeMethods.CRhinoViewport_GetWallpaperFilename(const_ptr_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -1863,7 +2053,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_GetWallpaperBool(const_ptr_this, true);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_GetWallpaperBool(const_ptr_this, true);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
     /// <since>5.0</since>
@@ -1872,7 +2064,9 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoViewport_GetWallpaperBool(const_ptr_this, false);
+        bool rc = UnsafeNativeMethods.CRhinoViewport_GetWallpaperBool(const_ptr_this, false);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1885,7 +2079,9 @@ namespace Rhino.Display
     public bool SetWallpaper(string imageFilename, bool grayscale, bool visible)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_SetWallpaper(ptr_this, imageFilename, grayscale, visible);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_SetWallpaper(ptr_this, imageFilename, grayscale, visible);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -1897,6 +2093,7 @@ namespace Rhino.Display
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoViewport_ClearTraceImage(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1918,7 +2115,9 @@ namespace Rhino.Display
     public bool SetTraceImage(string bitmapFileName, Plane plane, double width, double height, bool grayscale, bool filtered)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoViewport_SetTraceImage(ptr_this, bitmapFileName, ref plane, width, height, grayscale, filtered);
+      bool rc = UnsafeNativeMethods.CRhinoViewport_SetTraceImage(ptr_this, bitmapFileName, ref plane, width, height, grayscale, filtered);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -1928,6 +2127,7 @@ namespace Rhino.Display
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.CRhinoViewport_ViewportType(const_ptr_this);
+        GC.KeepAlive(this);
         return (ViewportType)rc;
       }
     }
@@ -1939,6 +2139,7 @@ namespace Rhino.Display
       {
         IntPtr const_ptr_this = ConstPointer();
         Guid id = UnsafeNativeMethods.CRhinoViewport_DisplayModeId(const_ptr_this);
+        GC.KeepAlive(this);
         return DisplayModeDescription.GetDisplayMode(id);
       }
       set
@@ -1946,6 +2147,7 @@ namespace Rhino.Display
         IntPtr ptr_this = NonConstPointer();
         Guid id = value.Id;
         UnsafeNativeMethods.CRhinoViewport_SetDisplayMode(ptr_this, id);
+        GC.KeepAlive(this);
       }
     }
   }

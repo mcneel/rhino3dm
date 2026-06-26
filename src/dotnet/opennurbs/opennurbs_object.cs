@@ -104,6 +104,11 @@ namespace Rhino.Runtime
     }
 #endif
 
+    internal static void GcProtect(object item0)
+    {
+      GC.KeepAlive(item0);
+    }
+
     internal static void GcProtect(object item0, object item1)
     {
       GC.KeepAlive(item0);
@@ -401,7 +406,9 @@ namespace Rhino.Runtime
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Object_IsValid(const_ptr_this, IntPtr.Zero);
+        bool rc = UnsafeNativeMethods.ON_Object_IsValid(const_ptr_this, IntPtr.Zero);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -419,6 +426,7 @@ namespace Rhino.Runtime
       {
         IntPtr ptr_string = sh.NonConstPointer();
         bool rc = UnsafeNativeMethods.ON_Object_IsValid(const_ptr_this, ptr_string);
+        GC.KeepAlive(this);
         log = sh.ToString();
         return rc;
       }
@@ -429,6 +437,7 @@ namespace Rhino.Runtime
       if (IntPtr.Zero != m_ptr)
       {
         uint current_size = UnsafeNativeMethods.ON_Object_SizeOf(m_ptr);
+        GC.KeepAlive(this);
         long difference = current_size - m_unmanaged_memory;
         if (difference > 0)
         {
@@ -583,7 +592,9 @@ namespace Rhino.Runtime
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Object_FirstUserData(const_ptr_this) != IntPtr.Zero;
+        bool rc = UnsafeNativeMethods.ON_Object_FirstUserData(const_ptr_this) != IntPtr.Zero;
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -640,6 +651,7 @@ namespace Rhino.Runtime
       //const lie
       IntPtr pThis = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Object_SetUserString(pThis, key, value);
+      GC.KeepAlive(this);
       return rc;
     }
     /// <summary>
@@ -654,6 +666,7 @@ namespace Rhino.Runtime
       {
         IntPtr pStringHolder = sh.NonConstPointer();
         UnsafeNativeMethods.ON_Object_GetUserString(pThis, key, pStringHolder);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -667,6 +680,7 @@ namespace Rhino.Runtime
       {
         IntPtr const_ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.ON_Object_UserStringCount(const_ptr_this);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -701,6 +715,7 @@ namespace Rhino.Runtime
 
       if (IntPtr.Zero != ptr_userstrings)
         UnsafeNativeMethods.ON_UserStringList_Delete(ptr_userstrings);
+      GC.KeepAlive(this);
 
       return rc;
     }
@@ -709,6 +724,7 @@ namespace Rhino.Runtime
     {
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.ON_Object_DeleteUserStrings(const_ptr_this);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -742,22 +758,14 @@ namespace Rhino.Runtime
     internal static void SerializeWriteON_Object(IntPtr pConstOnObject, SerializationInfo info, StreamingContext context)
     {
       Rhino.FileIO.SerializationOptions options = context.Context as Rhino.FileIO.SerializationOptions;
+      if (options is null)
+        options = new FileIO.SerializationOptions();
 
-      uint length = 0;
-      bool writeuserdata = true;
-      bool writerendermeshes = true;
-      bool writeanalysismeshes = true;
-      if (options != null)
-      {
-        writeuserdata = options.WriteUserData;
-        writerendermeshes = options.WriteRenderMeshes;
-        writeanalysismeshes = options.WriteAnalysisMeshes;
-      }
-#if RHINO_SDK
-      int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
-#else
-      int rhino_version = (options != null) ? options.RhinoVersion : 7;
-#endif
+      int rhino_version = options.RhinoVersion;
+      bool writeuserdata = options.WriteUserData;
+      bool writerendermeshes = options.WriteRenderMeshes;
+      bool writeanalysismeshes = options.WriteAnalysisMeshes;
+
       // 28 Aug 2014 S. Baer (RH-28446)
       // We switched to 50,60,70,... type numbers after Rhino 4
       if (rhino_version > 4 && rhino_version < 50)
@@ -766,6 +774,7 @@ namespace Rhino.Runtime
       // NOTE: 
       //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
       //   if it is too big or the object type requires a different archive version.
+      uint length = 0;
       IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, writerendermeshes, writeanalysismeshes, ref length);
 
       if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
@@ -795,6 +804,7 @@ namespace Rhino.Runtime
     {
       IntPtr pConstThis = ConstPointer();
       SerializeWriteON_Object(pConstThis, info, context);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -886,21 +896,15 @@ namespace Rhino.Runtime
     public string ToJSON(Rhino.FileIO.SerializationOptions options)
     {
       string json = null;
-      uint length = 0;
-      bool writeuserdata = true;
-      bool writerendermeshes = true;
-      bool writeanalysismeshes = true;
-      if (options != null)
-      {
-        writeuserdata = options.WriteUserData;
-        writerendermeshes = options.WriteRenderMeshes;
-        writeanalysismeshes = options.WriteAnalysisMeshes;
-      }
-#if RHINO_SDK
-      int rhino_version = (options != null) ? options.RhinoVersion : RhinoApp.ExeVersion;
-#else
-      int rhino_version = (options != null) ? options.RhinoVersion : 7;
-#endif
+
+      if (options is null)
+        options = new FileIO.SerializationOptions();
+
+      int rhino_version = options.RhinoVersion;
+      bool writeuserdata = options.WriteUserData;
+      bool writerendermeshes = options.WriteRenderMeshes;
+      bool writeanalysismeshes = options.WriteAnalysisMeshes;
+
       // 28 Aug 2014 S. Baer (RH-28446)
       // We switched to 50,60,70,... type numbers after Rhino 4
       if (rhino_version > 4 && rhino_version < 50)
@@ -909,6 +913,7 @@ namespace Rhino.Runtime
       // NOTE: 
       //   ON_WriteBufferArchive_NewWriter may change value of rhino_version
       //   if it is too big or the object type requires a different archive version.
+      uint length = 0;
       IntPtr pConstOnObject = ConstPointer();
       IntPtr pWriteBuffer = UnsafeNativeMethods.ON_WriteBufferArchive_NewWriter(pConstOnObject, ref rhino_version, writeuserdata, writerendermeshes, writeanalysismeshes, ref length);
       if (length < int.MaxValue && length > 0 && pWriteBuffer != IntPtr.Zero)
@@ -927,14 +932,30 @@ namespace Rhino.Runtime
         json = sb.ToString();
       }
       UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
+      GC.KeepAlive(this);
       return json;
     }
 
-    static CommonObject CreateCommonObjectHelper(IntPtr pObject)
+    internal static CommonObject CreateCommonObjectHelper(IntPtr pObject)
     {
       var geometry = Geometry.GeometryBase.CreateGeometryHelper(pObject, null);
       if (null != geometry)
-        return geometry;
+      {
+        // 7-Mar-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-86439
+        // ON_Viewport inherits from ON_Geometry. But ViewportInfo does not inherit from GeometryBase.
+        if (geometry is Geometry.UnknownGeometry)
+        {
+          var geometryType = UnsafeNativeMethods.ON_Geometry_GetGeometryType(pObject);
+          if (geometryType == UnsafeNativeMethods.OnGeometryTypeConsts.ON_Viewport)
+            return new ViewportInfo(pObject);
+          else
+            return null;
+        }
+        else
+        {
+          return geometry;
+        }
+      }
 
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-66667
       var classType = UnsafeNativeMethods.ON_Object_ClassType(pObject);

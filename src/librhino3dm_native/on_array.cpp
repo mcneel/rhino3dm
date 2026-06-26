@@ -806,6 +806,23 @@ RH_C_FUNCTION int ON_UUIDArray_Count(const ON_SimpleArray<ON_UUID>* ptr)
 	return rc;
 }
 
+RH_C_FUNCTION void ON_UUIDArray_SetCapacity(ON_SimpleArray<ON_UUID>* ptr, int capacity)
+{
+  if (ptr)
+  {
+    ptr->SetCapacity(capacity);
+  }
+}
+
+RH_C_FUNCTION int ON_UUIDArray_Capacity(const ON_SimpleArray<ON_UUID>* ptr)
+{
+  if (ptr)
+  {
+    return ptr->Capacity();
+  }
+  return -1;
+}
+
 RH_C_FUNCTION ON_UUID ON_UUIDArray_Get(ON_SimpleArray<ON_UUID>* ptr, int index)
 {
   if( ptr && index>=0 && index<ptr->Count() )

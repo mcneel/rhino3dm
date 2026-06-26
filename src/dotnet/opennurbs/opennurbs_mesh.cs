@@ -86,6 +86,7 @@ namespace Rhino.Render
     {
       u = v = w = -1.0;
       var success = UnsafeNativeMethods.ON_TextureCoordinates_GetTextureCoordinate(ConstPointer(), index, ref u, ref v, ref w);
+      GC.KeepAlive(this);
       return (success > 0);
     }
 
@@ -95,7 +96,12 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public int Dim
     {
-      get { return UnsafeNativeMethods.ON_TextureCoordinates_GetDimension(ConstPointer()); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_TextureCoordinates_GetDimension(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
     /// <summary>
     /// The texture mapping Id.
@@ -103,7 +109,12 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public Guid MappingId
     {
-      get { return UnsafeNativeMethods.ON_TextureCoordinates_GetMappingId(ConstPointer()); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_TextureCoordinates_GetMappingId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     internal override IntPtr _InternalGetConstPointer()
@@ -115,7 +126,9 @@ namespace Rhino.Render
     {
       applymempressure = false;
       var const_pointer = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(const_pointer);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(const_pointer);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #region IList<Point3d> implementation
@@ -197,7 +210,12 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_TextureCoordinates_GetPointListCount(ConstPointer()); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_TextureCoordinates_GetPointListCount(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
     /// <summary>
     /// This collection is always read-only
@@ -342,6 +360,7 @@ namespace Rhino.Render
         var v = 0.0;
         var w = 0.0;
         UnsafeNativeMethods.ON_TextureCoordinates_GetTextureCoordinate(m_const_pointer, m_position, ref u, ref v, ref w);
+        GC.KeepAlive(this);
         return new Point3d(u, v, w);
       }
     }
@@ -1053,7 +1072,9 @@ namespace Rhino.Geometry
       if (null == subd)
         throw new ArgumentNullException(nameof(subd));
       IntPtr ptr_const_subd = subd.ConstPointer();
-      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(adaptiveSubDDisplayDensity, ptr_const_subd);
+      uint rc = UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(adaptiveSubDDisplayDensity, ptr_const_subd);
+      GC.KeepAlive(subd);
+      return rc;
     }
 
     /// <summary>
@@ -1142,7 +1163,9 @@ namespace Rhino.Geometry
       if (null == subd)
         throw new ArgumentNullException(nameof(subd));
       IntPtr ptr_const_subd = subd.ConstPointer();
-      return UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensity(m_ptr, ptr_const_subd);
+      uint rc = UnsafeNativeMethods.ON_SubDDisplayParameters_DisplayDensity(m_ptr, ptr_const_subd);
+      GC.KeepAlive(subd);
+      return rc;
     }
 
     /// <summary>
@@ -1281,16 +1304,12 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public static string ToEncodedString(ISerializable objectToEncode)
     {
-#if RHINO_SDK
       using (var stream = new System.IO.MemoryStream())
       {
         var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
         formatter.Serialize(stream, objectToEncode);
         return Convert.ToBase64String(stream.ToArray());
       }
-#else
-      throw new NotImplementedException();
-#endif
     }
 
     /// <summary>
@@ -1306,7 +1325,6 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public static T FromEncodedString<T>(string value) where T : class
     {
-#if RHINO_SDK
       try
       {
         if (string.IsNullOrWhiteSpace(value))
@@ -1322,9 +1340,6 @@ namespace Rhino.Geometry
       {
         return null;
       }
-#else
-      throw new NotImplementedException();
-#endif
     }
   }
 
@@ -1559,7 +1574,10 @@ namespace Rhino.Geometry
 
       IntPtr const_ptr_this = this.ConstPointer();
       IntPtr const_ptr_other = other.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
+      bool rc = UnsafeNativeMethods.ON_MeshParameters_OperatorEqualEqual(const_ptr_this, const_ptr_other);
+      GC.KeepAlive(other);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
@@ -1773,7 +1791,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return (MeshingParameterTextureRange)UnsafeNativeMethods.ON_MeshParameters_GetTextureRange(ptr);
+        MeshingParameterTextureRange rc = (MeshingParameterTextureRange)UnsafeNativeMethods.ON_MeshParameters_GetTextureRange(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -1787,19 +1807,23 @@ namespace Rhino.Geometry
         {
           throw new NotSupportedException("Could not set texture range.");
         }
+        GC.KeepAlive(this);
       }
     }
 
     bool GetBool(UnsafeNativeMethods.MeshParametersBoolConst which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MeshParameters_GetBool(ptr, which);
+      bool rc = UnsafeNativeMethods.ON_MeshParameters_GetBool(ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetBool(UnsafeNativeMethods.MeshParametersBoolConst which, bool val)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_MeshParameters_SetBool(ptr, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1875,13 +1899,16 @@ namespace Rhino.Geometry
     int GetGridCount(bool min)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MeshParameters_GetGridCount(ptr, min);
+      int rc = UnsafeNativeMethods.ON_MeshParameters_GetGridCount(ptr, min);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetGridCount(bool min, int val)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_MeshParameters_SetGridCount(ptr, min, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1907,13 +1934,16 @@ namespace Rhino.Geometry
     double GetDouble(UnsafeNativeMethods.MeshParametersDoubleConst which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MeshParameters_GetDouble(ptr, which);
+      double rc = UnsafeNativeMethods.ON_MeshParameters_GetDouble(ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetDouble(UnsafeNativeMethods.MeshParametersDoubleConst which, double val)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_MeshParameters_SetDouble(ptr, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2044,6 +2074,8 @@ namespace Rhino.Geometry
         throw new ArgumentNullException(nameof(subDDisplayParameters));
       IntPtr ptr_const_params = subDDisplayParameters.ConstPointer();
       UnsafeNativeMethods.ON_MeshParameters_SetSubDDisplayParameters(m_ptr, ptr_const_params);
+      GC.KeepAlive(subDDisplayParameters);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2055,6 +2087,8 @@ namespace Rhino.Geometry
     {
       if (source != null)
         UnsafeNativeMethods.ON_MeshParameters_OperatorEqual(source.ConstPointer(), NonConstPointer());
+      GC.KeepAlive(source);
+      GC.KeepAlive(this);
     }
   }
 
@@ -2197,8 +2231,8 @@ namespace Rhino.Geometry
       Accuracy = 10;
       NormalizeMeshSize = false;
       Error = string.Empty;
-      FaceTags = null;
-      LockedComponents = null;
+      FaceTags = Array.Empty<int>();
+      LockedComponents = Array.Empty<ComponentIndex>();
       CancelToken = CancellationToken.None;
       ProgressReporter = null;
     }
@@ -2393,7 +2427,10 @@ namespace Rhino.Geometry
         throw new ArgumentNullException(nameof(textLog));
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_textlog = textLog.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCheckMesh(ptr_const_this, ptr_textlog, ref parameters);
+      bool rc = UnsafeNativeMethods.RHC_RhinoCheckMesh(ptr_const_this, ptr_textlog, ref parameters);
+      GC.KeepAlive(textLog);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -3093,6 +3130,62 @@ namespace Rhino.Geometry
       GC.KeepAlive(meshingParameters);
       return null;
     }
+
+    /// <summary>
+    /// Some file formats and rendering engines are only able to process small batches of triangles.
+    /// Use this function to split the mesh into subsets of vertices and faces that those file formats
+    /// and rendering engines can handle.
+    /// </summary>
+    /// <param name="mesh">Mesh to split.</param>
+    /// <param name="maxCount">Maximum count.</param>
+    /// <param name="countSum">
+    /// If true, split if total vertices + faces is greater than maxCount.
+    /// If false, split if either total vertices or faces is greater than maxCount.
+    /// </param>
+    /// <param name="countTriangles">
+    /// If true, count triangles.
+    /// If false, count triangles and quads.
+    /// </param>
+    /// <returns>An array of sub-meshes if successful, otherwise an empty array.</returns>
+    /// <since>8.25</since>
+    public static Mesh[] SplitMesh(Mesh mesh, int maxCount, bool countSum, bool countTriangles)
+    {
+      using (var meshes = new SimpleArrayMeshPointer())
+      {
+        IntPtr ptr_const_mesh = mesh.ConstPointer();
+        IntPtr ptr_mesh_array = meshes.NonConstPointer();
+        int count = UnsafeNativeMethods.RHC_RhinoSplitMesh(ptr_const_mesh, maxCount, countSum, countTriangles, ptr_mesh_array);
+        GC.KeepAlive(mesh);
+        return (count > 0) ? meshes.ToNonConstArray() : Array.Empty<Mesh>();
+      }
+    }
+
+    /// <summary>
+    /// Some file formats and rendering engines are only able to process small batches of triangles.
+    /// Use this function to partition the mesh into subsets of vertices and faces that those file formats
+    /// and rendering engines can handle.
+    /// </summary>
+    /// <param name="mesh">Mesh to partition.</param>
+    /// <param name="maxVertexCount">Maximum number of vertices in a partition./// </param>
+    /// <param name="maxFaceCount">Maximum number of faces in a partition.</param>
+    /// <returns>An array of sub-meshes if successful, otherwise an empty array.</returns>
+    /// <remarks>
+    /// The resulting sub-meshes tend to be less disjoint than the output of <seealso cref="SplitMesh"/>.
+    /// The less disjoint meshes will take more time to compute.
+    /// </remarks>
+    /// <since>8.25</since>
+    public static Mesh[] PartitionMesh(Mesh mesh, int maxVertexCount, int maxFaceCount)
+    {
+      using (var meshes = new SimpleArrayMeshPointer())
+      {
+        IntPtr ptr_const_mesh = mesh.ConstPointer();
+        IntPtr ptr_mesh_array = meshes.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoPartitionMesh(ptr_const_mesh, maxVertexCount, maxFaceCount, ptr_mesh_array);
+        GC.KeepAlive(mesh);
+        return (rc) ? meshes.ToNonConstArray() : Array.Empty<Mesh>();
+      }
+    }
+
 #endif
 
     /// <summary>Create a mesh from a SubD control net</summary>
@@ -3455,13 +3548,13 @@ namespace Rhino.Geometry
     /// Constructs a new mesh pipe from a curve.
     /// </summary>
     /// <param name="curve">A curve to pipe.</param>
-    /// <param name="radius">The radius of the pipe.</param>
-    /// <param name="segments">The number of segments in the pipe.</param>
-    /// <param name="accuracy">The accuracy of the pipe.</param>
+    /// <param name="radius">The radius of the pipe, a measure from the curve to the surface of the mesh pipe.</param>
+    /// <param name="segments">The number of mesh faces that surround the curve. For example with three segments, the cross-section of the pipe looks like an equilateral triangle. The more segments there are, the rounder the pipe is.</param>
+    /// <param name="accuracy">The accuracy of the pipe. Changes the visual fidelity of the pipe along the curve. Higher value means that the center of the pipe is closer to the curve. By increasing the accuracy, the mesh will get more faces along the curve.</param>
     /// <param name="capType">The type of cap to be created at the end of the pipe.</param>
-    /// <param name="faceted">Specifies whether the pipe is faceted, or not.</param>
-    /// <param name="intervals">A series of intervals to pipe. This value can be null.</param>
-    /// <returns>A new mesh, or null on failure.</returns>
+    /// <param name="faceted">Specifies whether the pipe is faceted, or not. This setting only affects the normals of the pipe mesh.</param>
+    /// <param name="intervals">A series of intervals to pipe, or null to pipe the entire curve.</param>
+    /// <returns>A new mesh if successful, or null on failure.</returns>
     /// <since>6.0</since>
     public static Mesh CreateFromCurvePipe(Curve curve, double radius, int segments, int accuracy,
       MeshPipeCapStyle capType, bool faceted, IEnumerable<Interval> intervals = null)
@@ -3672,6 +3765,41 @@ namespace Rhino.Geometry
       return result;
     }
 
+    /// <summary>
+    /// Use this function to rebuild meshes that are not acting properly.
+    /// Vertices and faces are kept. Face normals and vertex normals are recalculated. 
+    /// Texture coordinates, vertex colors, surface curvatures, and surfaces parameters are not replaced. 
+    /// </summary>
+    /// <param name="mesh">Mesh to be rebuilt.</param>
+    /// <returns>The rebuilt mesh if successful, null otherwise.</returns>
+    /// <since>8.23</since>
+    public static Mesh RebuildMesh(Mesh mesh)
+    {
+      return RebuildMesh(mesh, false, false);
+    }
+
+    /// <summary>
+    /// Use this function to rebuild meshes that are not acting properly.
+    /// Vertices and faces are kept. Face normals and vertex normals are recalculated. 
+    /// Surface curvatures, and surfaces parameters are not replaced. 
+    /// </summary>
+    /// <param name="mesh">Mesh to be rebuilt.</param>
+    /// <param name="preserveTextureCoordinates">Retains mesh texture coordinates.</param>
+    /// <param name="preserveVertexColors">Retains mesh vertex colors.</param>
+    /// <returns>The rebuilt mesh if successful, null otherwise.</returns>
+    /// <since>8.23</since>
+    public static Mesh RebuildMesh(Mesh mesh, bool preserveTextureCoordinates, bool preserveVertexColors)
+    {
+      Mesh rc = null;
+      if (null != mesh)
+      {
+        IntPtr ptr = UnsafeNativeMethods.RHC_RebuildMesh(mesh.ConstPointer(), preserveTextureCoordinates, preserveVertexColors);
+        if (ptr != IntPtr.Zero)
+          rc = new Mesh(ptr, null);
+      }
+      return rc;
+    }
+
 #endif
     #endregion
 
@@ -3769,6 +3897,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_CopyFrom(const_ptr_other, ptr_this);
       GC.KeepAlive(other);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3781,6 +3910,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = ConstPointer();
       IntPtr ptr_new_mesh = UnsafeNativeMethods.ON_Mesh_New(ptr);
+      GC.KeepAlive(this);
       return new Mesh(ptr_new_mesh, null);
     }
 
@@ -3810,7 +3940,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.DisjointMeshCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.DisjointMeshCount);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 #endif
@@ -3824,7 +3956,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsClosed);
+        bool rc = UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsClosed);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3837,7 +3971,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsOriented);
+        bool rc = UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsOriented);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3850,7 +3986,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsSolid);
+        bool rc = UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsSolid);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3862,7 +4000,9 @@ namespace Rhino.Geometry
     public bool IsManifold()
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsManifold);
+      bool rc = UnsafeNativeMethods.ON_Mesh_GetBool(ptr, UnsafeNativeMethods.MeshBoolConst.IsManifold);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -3887,7 +4027,9 @@ namespace Rhino.Geometry
       isOriented = false;
       hasBoundary = false;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_IsManifold(ptr, topologicalTest, ref isOriented, ref hasBoundary);
+      bool rc = UnsafeNativeMethods.ON_Mesh_IsManifold(ptr, topologicalTest, ref isOriented, ref hasBoundary);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -3901,6 +4043,7 @@ namespace Rhino.Geometry
       {
         var const_pointer = ConstPointer();
         var value = UnsafeNativeMethods.ON_Mesh_HasCachedTextureCoordinates(const_pointer);
+        GC.KeepAlive(this);
         return value;
       }
     }
@@ -3915,6 +4058,7 @@ namespace Rhino.Geometry
       {
         var const_pointer = ConstPointer();
         var value = UnsafeNativeMethods.ON_Mesh_GetBool(const_pointer, UnsafeNativeMethods.MeshBoolConst.HasPrincipalCurvatures);
+        GC.KeepAlive(this);
         return value;
       }
     }
@@ -4062,6 +4206,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroyTextureData(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4072,6 +4217,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroySurfaceData(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4094,7 +4240,9 @@ namespace Rhino.Geometry
     public bool SetSurfaceParametersFromTextureCoordinates()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetSurfaceParametersFromTextureCoordinates(ptr_this);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetSurfaceParametersFromTextureCoordinates(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4105,6 +4253,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroyTopology(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4115,6 +4264,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroyTree(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4125,6 +4275,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_DestroyPartition(ptr_this);
+      GC.KeepAlive(this);
     }
     #endregion
     #endregion properties
@@ -4147,6 +4298,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_surface = surface.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Mesh_EvaluateMeshGeometry(ptr_this, const_ptr_surface);
       GC.KeepAlive(surface);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -4163,6 +4315,7 @@ namespace Rhino.Geometry
     {
       UnsafeNativeMethods.ON_Mesh_SetTextureCoordinatesFromMappingAndTransform(NonConstPointer(), tm.ConstPointer(), ref xf, lazy);
       GC.KeepAlive(tm);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4181,6 +4334,8 @@ namespace Rhino.Geometry
     public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy, bool seamCheck)
     {
       UnsafeNativeMethods.ON_Mesh_SetTextureCoordinatesFromMappingAndTransformEx(NonConstPointer(), tm.ConstPointer(), ref xf, lazy, seamCheck);
+      GC.KeepAlive(tm);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4193,6 +4348,7 @@ namespace Rhino.Geometry
     {
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinates(NonConstPointer(), tm.ConstPointer(), ref xf, false);
       GC.KeepAlive(tm);
+      GC.KeepAlive(this);
     }
 #if RHINO_SDK
     /// <summary>
@@ -4211,6 +4367,7 @@ namespace Rhino.Geometry
     public void SetCachedTextureCoordinatesFromMaterial(RhinoObject rhinoObject, Rhino.DocObjects.Material material)
     {
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinatesFromMaterial(NonConstPointer(), rhinoObject.ConstPointer(), material.ConstPointer());
+      GC.KeepAlive(this);
     }
 #endif
     /// <summary>
@@ -4246,6 +4403,8 @@ namespace Rhino.Geometry
       if (tc_pointer == IntPtr.Zero)
         return null;
       var tc = new CachedTextureCoordinates(tc_pointer);
+      GC.KeepAlive(texture);
+      GC.KeepAlive(this);
       return tc;
     }
 #endif
@@ -4263,6 +4422,7 @@ namespace Rhino.Geometry
     public void InvalidateCachedTextureCoordinates(bool bOnlyInvalidateCachedSurfaceParameterMapping = false)
     {
       UnsafeNativeMethods.ON_Mesh_InvalidateCachedTextureCoordinates(NonConstPointer(), bOnlyInvalidateCachedSurfaceParameterMapping);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4279,7 +4439,9 @@ namespace Rhino.Geometry
     public bool Compact()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_this, UnsafeNativeMethods.MeshNonConstBoolConst.Compact);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_this, UnsafeNativeMethods.MeshNonConstBoolConst.Compact);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -4292,8 +4454,9 @@ namespace Rhino.Geometry
     public double Volume()
     {
       IntPtr ptr_this = ConstPointer();
-      GC.KeepAlive(this); // https://mcneel.myjetbrains.com/youtrack/issue/RH-76654
-      return UnsafeNativeMethods.ON_Mesh_Volume(ptr_this);
+      double rc = UnsafeNativeMethods.ON_Mesh_Volume(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4318,6 +4481,7 @@ namespace Rhino.Geometry
       perVertexCurvatures = null;
       using (var array = new Rhino.Runtime.InteropWrappers.SimpleArrayDouble())
         if (UnsafeNativeMethods.RHC_RhinoMeshDiscreteCurvature(this.ConstPointer(), type, array.NonConstPointer())) {
+          GC.KeepAlive(this);
           perVertexCurvatures = array.ToArray();
           return true;
         }
@@ -4346,6 +4510,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_Flip(ptr_this, vertexNormals, faceNormals, faceOrientation, ngonsBoundaryDirection);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4361,7 +4526,9 @@ namespace Rhino.Geometry
     public int SolidOrientation()
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.SolidOrientation);
+      int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_this, UnsafeNativeMethods.MeshIntConst.SolidOrientation);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -4392,7 +4559,9 @@ namespace Rhino.Geometry
     public bool IsPointInside(Point3d point, double tolerance, bool strictlyIn)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_IsPointInside(const_ptr_this, point, tolerance, strictlyIn);
+      bool rc = UnsafeNativeMethods.ON_Mesh_IsPointInside(const_ptr_this, point, tolerance, strictlyIn);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     // need to implement
@@ -4452,7 +4621,9 @@ namespace Rhino.Geometry
     public bool Smooth(double smoothFactor, int numSteps, bool bXSmooth, bool bYSmooth, bool bZSmooth, bool bFixBoundaries, SmoothingCoordinateSystem coordinateSystem, Plane plane)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+      bool rc = UnsafeNativeMethods.RHC_RhinoSmoothMesh(ptr_this, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4493,7 +4664,9 @@ namespace Rhino.Geometry
       using (var indices = new SimpleArrayInt(vertexIndices))
       {
         IntPtr ptr_indices = indices.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+        bool rc = UnsafeNativeMethods.RHC_RhinoSmoothMesh2(ptr_this, ptr_indices, smoothFactor, numSteps, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, (int)coordinateSystem, ref plane);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -4512,6 +4685,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.RHC_RhinoUnWeldMesh(ptr_this, angleToleranceRadians, modifyNormals);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4532,7 +4706,9 @@ namespace Rhino.Geometry
         return false;
 
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, edges.m_items, modifyNormals);
+      bool rc = UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, edges.m_items, modifyNormals);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4553,11 +4729,13 @@ namespace Rhino.Geometry
         return false;
 
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, vertices.m_items, modifyNormals);
+      bool rc = UnsafeNativeMethods.RHC_RhinoUnweldMeshEdge(ptr_this, count, vertices.m_items, modifyNormals);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
-    /// Makes sure that faces sharing an edge and having a difference of normal greater
+    /// Makes sure that faces sharing an edge and having a difference of normal less
     /// than or equal to angleToleranceRadians share vertices along that edge, vertex normals
     /// are averaged.
     /// </summary>
@@ -4567,6 +4745,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.RHC_RhinoWeldMesh(ptr_this, angleToleranceRadians);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4582,6 +4761,7 @@ namespace Rhino.Geometry
 
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_CreateUnweldedMesh(ptr_const_mesh);
+      GC.KeepAlive(mesh);
       if (IntPtr.Zero == ptr)
         return null;
       return new Mesh(ptr, null);
@@ -4602,7 +4782,9 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       ComponentIndex[] arr_components = components.ToArray();
-      return UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace(ptr_this, arr_components.Length, arr_components);
+      bool rc = UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace(ptr_this, arr_components.Length, arr_components);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4624,6 +4806,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = mesh.ConstPointer();
       ComponentIndex[] arr_components = components.ToArray();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoPatchSingleMeshFace2(ptr_const_this, arr_components.Length, arr_components);
+      GC.KeepAlive(mesh);
       if (IntPtr.Zero == ptr)
         return null;
       return new Mesh(ptr, null);
@@ -4637,7 +4820,9 @@ namespace Rhino.Geometry
     public bool Subdivide()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoMeshSubdivide(ptr_this);
+      bool rc = UnsafeNativeMethods.RHC_RhinoMeshSubdivide(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4654,7 +4839,9 @@ namespace Rhino.Geometry
         foreach (var index in faceIndices)
           ciArray.Add(new ComponentIndex(ComponentIndexType.MeshFace, index));
         IntPtr pCiArray = ciArray.NonConstPointer();
-        return UnsafeNativeMethods.RHC_RhinoMeshSubdivideFaces(ptr_this, pCiArray);
+        bool rc = UnsafeNativeMethods.RHC_RhinoMeshSubdivideFaces(ptr_this, pCiArray);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -4667,6 +4854,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.RHC_RhinoRebuildMeshNormals(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -4679,6 +4867,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoExtractNonManifoldMeshEdges(ptr_this, selective);
+      GC.KeepAlive(this);
       return ptr != IntPtr.Zero ? new Mesh(ptr, null) : null;
     }
 
@@ -4695,7 +4884,9 @@ namespace Rhino.Geometry
     public bool HealNakedEdges(double distance)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoHealMesh(ptr_this, distance);
+      bool rc = UnsafeNativeMethods.RHC_RhinoHealMesh(ptr_this, distance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4710,7 +4901,9 @@ namespace Rhino.Geometry
     public bool FillHoles()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoFillMeshHoles(ptr_this);
+      bool rc = UnsafeNativeMethods.RHC_RhinoFillMeshHoles(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4724,7 +4917,9 @@ namespace Rhino.Geometry
     public bool FileHole(int topologyEdgeIndex)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoFillMeshHole(ptr_this, topologyEdgeIndex);
+      bool rc = UnsafeNativeMethods.RHC_RhinoFillMeshHole(ptr_this, topologyEdgeIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4743,7 +4938,9 @@ namespace Rhino.Geometry
     public bool MatchEdges(double distance, bool rachet)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoMatchMeshEdge(ptr_this, distance, rachet);
+      bool rc = UnsafeNativeMethods.RHC_RhinoMatchMeshEdge(ptr_this, distance, rachet);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4772,6 +4969,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       int rc = UnsafeNativeMethods.RHC_RhinoUnifyMeshNormals(ptr_this, countOnly);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -4805,7 +5003,9 @@ namespace Rhino.Geometry
     public bool MergeAllCoplanarFaces(double tolerance, double angleTolerance)
     {
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoMergeAllCoplanarFaces(ptrThis, tolerance, angleTolerance);
+      bool rc = UnsafeNativeMethods.RHC_RhinoMergeAllCoplanarFaces(ptrThis, tolerance, angleTolerance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4821,6 +5021,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_mesh_array = meshes.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoSplitDisjointMesh(const_ptr_this, ptr_mesh_array);
+        GC.KeepAlive(this);
         return meshes.ToNonConstArray();
       }
     }
@@ -4839,6 +5040,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_mesh_array = meshes.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoMeshSplitWithPlane(const_ptr_this, ptr_mesh_array, ref plane);
+        GC.KeepAlive(this);
         return meshes.ToNonConstArray();
       }
     }
@@ -4927,6 +5129,7 @@ namespace Rhino.Geometry
           GC.KeepAlive(meshes);
           GC.KeepAlive(textLog);
           GC.KeepAlive(progress);
+          GC.KeepAlive(this);
           var rc = on_meshes.ToNonConstArray();
 
           if ((cancel != null && cancel.IsCancellationRequested) || results < 0)
@@ -4957,6 +5160,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       int polylines_created = 0;
       IntPtr ptr_polylines = UnsafeNativeMethods.TL_GetMeshOutline(const_ptr_this, ref plane, ref polylines_created);
+      GC.KeepAlive(this);
       if (polylines_created < 1 || IntPtr.Zero == ptr_polylines)
         return null;
 
@@ -5009,6 +5213,7 @@ namespace Rhino.Geometry
       }
       UnsafeNativeMethods.ON_SimpleArray_PolylineCurve_Delete(ptr_polylines, true);
       GC.KeepAlive(viewport);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -5044,6 +5249,7 @@ namespace Rhino.Geometry
       }
       UnsafeNativeMethods.ON_SimpleArray_PolylineCurve_Delete(ptr_polylines, true);
       GC.KeepAlive(viewportInfo);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -5081,6 +5287,7 @@ namespace Rhino.Geometry
         rc[i] = pl;
       }
       UnsafeNativeMethods.ON_SimpleArray_PolylineCurve_Delete(ptr_polylines, true);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -5102,6 +5309,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_mesh_array = meshes.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoExplodeMesh(const_ptr_this, ptr_mesh_array);
+        GC.KeepAlive(this);
         return meshes.ToNonConstArray();
       }
     }
@@ -5126,6 +5334,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_other = other.ConstPointer();
       UnsafeNativeMethods.ON_Mesh_Append(ptr_this, const_ptr_other);
       GC.KeepAlive(other);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -5150,6 +5359,7 @@ namespace Rhino.Geometry
         IntPtr ptr_meshes = mesh_array.ConstPointer();
         UnsafeNativeMethods.ON_Mesh_Append2(ptr_this, ptr_meshes);
         GC.KeepAlive(meshes);
+        GC.KeepAlive(this);
       }
     }
 
@@ -5193,6 +5403,7 @@ namespace Rhino.Geometry
       var ds = new MeshPointDataStruct();
       if (UnsafeNativeMethods.ON_Mesh_GetClosestPoint3(const_ptr_this, testPoint, ref ds, maximumDistance))
         return new MeshPoint(this, ds);
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -5218,7 +5429,9 @@ namespace Rhino.Geometry
     {
       pointOnMesh = Point3d.Unset;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_GetClosestPoint(const_ptr_this, testPoint, ref pointOnMesh, maximumDistance);
+      int rc = UnsafeNativeMethods.ON_Mesh_GetClosestPoint(const_ptr_this, testPoint, ref pointOnMesh, maximumDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5245,7 +5458,9 @@ namespace Rhino.Geometry
       pointOnMesh = Point3d.Unset;
       normalAtPoint = Vector3d.Unset;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_GetClosestPoint2(const_ptr_this, testPoint, ref pointOnMesh, ref normalAtPoint, maximumDistance);
+      int rc = UnsafeNativeMethods.ON_Mesh_GetClosestPoint2(const_ptr_this, testPoint, ref pointOnMesh, ref normalAtPoint, maximumDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5280,6 +5495,7 @@ namespace Rhino.Geometry
 
       if (UnsafeNativeMethods.ON_Mesh_MeshPointAt(const_ptr_this, faceIndex, t0, t1, t2, t3, ref pt))
         return pt;
+      GC.KeepAlive(this);
       return Point3d.Unset;
     }
 
@@ -5315,6 +5531,7 @@ namespace Rhino.Geometry
 
       if (UnsafeNativeMethods.ON_Mesh_MeshNormalAt(const_ptr_this, faceIndex, t0, t1, t2, t3, ref nr))
         return nr;
+      GC.KeepAlive(this);
       return Vector3d.Unset;
     }
 
@@ -5355,6 +5572,7 @@ namespace Rhino.Geometry
         return Color.Transparent;
       Color col = Color.FromArgb(argb);
       col = Color.FromArgb(255, col.B, col.G, col.R);
+      GC.KeepAlive(this);
       return col;
     }
 
@@ -5395,6 +5613,7 @@ namespace Rhino.Geometry
       IntPtr curve_constptr = curve.ConstPointer();
       UnsafeNativeMethods.ON_Mesh_PullCurveToMesh(curve_constptr, mesh_constptr, ref new_polyline_crv_ptr, tolerance);
       GC.KeepAlive(curve);
+      GC.KeepAlive(this);
 
       if (new_polyline_crv_ptr == IntPtr.Zero) return null;
 
@@ -5454,6 +5673,7 @@ namespace Rhino.Geometry
         GC.KeepAlive(curves);
         GC.KeepAlive(textLog);
         GC.KeepAlive(progress);
+        GC.KeepAlive(this);
       }
       finally
       {
@@ -5495,6 +5715,7 @@ namespace Rhino.Geometry
       IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction, IntPtr.Zero);
       if (IntPtr.Zero == ptr_new_mesh)
         return null;
+      GC.KeepAlive(this);
       return new Mesh(ptr_new_mesh, null);
     }
 
@@ -5515,6 +5736,7 @@ namespace Rhino.Geometry
       IntPtr ptr_new_mesh = UnsafeNativeMethods.RHC_RhinoMeshOffset(const_ptr_this, distance, solidify, ref direction, IntPtr.Zero);
       if (IntPtr.Zero == ptr_new_mesh)
         return null;
+      GC.KeepAlive(this);
       return new Mesh(ptr_new_mesh, null);
     }
 
@@ -5540,6 +5762,7 @@ namespace Rhino.Geometry
         if (IntPtr.Zero == ptr_new_mesh)
           return null;
         wallFacesOut.AddRange(wfo.ToArray());
+        GC.KeepAlive(this);
         return new Mesh(ptr_new_mesh, null);
       }
     }
@@ -5561,7 +5784,9 @@ namespace Rhino.Geometry
     public int CollapseFacesByEdgeLength(bool bGreaterThan, double edgeLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCollapseMeshEdges(ptr_this, bGreaterThan, edgeLength);
+      int rc = UnsafeNativeMethods.RHC_RhinoCollapseMeshEdges(ptr_this, bGreaterThan, edgeLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5582,7 +5807,9 @@ namespace Rhino.Geometry
     public int CollapseFacesByArea(double lessThanArea, double greaterThanArea)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCollapseMeshFacesByArea(ptr_this, lessThanArea, greaterThanArea);
+      int rc = UnsafeNativeMethods.RHC_RhinoCollapseMeshFacesByArea(ptr_this, lessThanArea, greaterThanArea);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5599,7 +5826,9 @@ namespace Rhino.Geometry
     public int CollapseFacesByByAspectRatio(double aspectRatio)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCollapseMeshFacesByAspectRatio(ptr_this, aspectRatio);
+      int rc = UnsafeNativeMethods.RHC_RhinoCollapseMeshFacesByAspectRatio(ptr_this, aspectRatio);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5660,6 +5889,7 @@ namespace Rhino.Geometry
             new IntPtr(ptr_to_array));
         }
       }
+      GC.KeepAlive(this);
 
       Array.ForEach(native_args, ShutLiningCurveInfo.DeleteNativeArgument);
 
@@ -5726,6 +5956,8 @@ namespace Rhino.Geometry
         throw new InvalidOperationException(error_text);
 
       var rc = new Mesh(new_mesh, null);
+      GC.KeepAlive(displacement);
+      GC.KeepAlive(this);
 
       return rc;
     }
@@ -5758,6 +5990,7 @@ namespace Rhino.Geometry
         faceted,
         force,
         angleThreshold);
+      GC.KeepAlive(this);
 
       if (new_mesh == IntPtr.Zero)
         throw new InvalidOperationException("WithEdgeSoftening failed.");
@@ -5770,12 +6003,16 @@ namespace Rhino.Geometry
     internal bool IndexOpBool(UnsafeNativeMethods.MeshIndexOpBoolConst which, int index)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_IndexOpBool(ptr_this, which, index);
+      bool rc = UnsafeNativeMethods.ON_Mesh_IndexOpBool(ptr_this, which, index);
+      GC.KeepAlive(this);
+      return rc;
     }
     internal bool TopItemIsHidden(UnsafeNativeMethods.MeshTopologyHiddenConst which, int index)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_MeshTopology_TopItemIsHidden(const_ptr_this, which, index);
+      bool rc = UnsafeNativeMethods.ON_MeshTopology_TopItemIsHidden(const_ptr_this, which, index);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     ///// <summary>
@@ -5833,6 +6070,7 @@ namespace Rhino.Geometry
         }
         return rc;
       }
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -5880,7 +6118,9 @@ namespace Rhino.Geometry
     public bool CreatePartitions(int maximumVertexCount, int maximumTriangleCount)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_CreatePartition(ptr_this, maximumVertexCount, maximumTriangleCount);
+      bool rc = UnsafeNativeMethods.ON_Mesh_CreatePartition(ptr_this, maximumVertexCount, maximumTriangleCount);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -5893,7 +6133,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_PartitionCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_Mesh_PartitionCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -5912,6 +6154,7 @@ namespace Rhino.Geometry
       int tri_count = 0;
       if (UnsafeNativeMethods.ON_Mesh_GetMeshPart(const_ptr_this, which, ref vi0, ref vi1, ref fi0, ref fi1, ref vert_count, ref tri_count))
         return new MeshPart(vi0, vi1, fi0, fi1, vert_count, tri_count);
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -5940,7 +6183,9 @@ namespace Rhino.Geometry
     public int GetNgonAndFacesCount()
     {
       var const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NgonIterator_Count(const_ptr_this);
+      int rc = UnsafeNativeMethods.ON_Mesh_NgonIterator_Count(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     private class MeshNgonCompleteEnumerable : IEnumerable<MeshNgon>
@@ -5976,6 +6221,7 @@ namespace Rhino.Geometry
         if (mesh == null)
           throw new ArgumentNullException("mesh");
         m_unmanaged_iterator_const_ptr = UnsafeNativeMethods.ON_Mesh_NgonIterator_New(mesh.ConstPointer());
+        GC.KeepAlive(mesh);
         Reset();
       }
 
@@ -6036,12 +6282,15 @@ namespace Rhino.Geometry
     /// <since>7.10</since>
     public bool CreateVertexColorsFromBitmap(RhinoDoc doc, TextureMapping mapping, Transform xform, System.Drawing.Bitmap bitmap)
     {
-      return UnsafeNativeMethods.Rhino_CreateVertexColors(
+      bool rc = UnsafeNativeMethods.Rhino_CreateVertexColors(
         doc.RuntimeSerialNumber, 
         this.ConstPointer(), 
         (null!=mapping) ? mapping.ConstPointer() : IntPtr.Zero, 
         ref xform, 
         RhinoDib.FromBitmap(bitmap).ConstPointer);
+      GC.KeepAlive(mapping);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -6236,15 +6485,16 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Returns a ShrinkWrapped mesh or
-    /// null when a mesh was not created or error. 
+    /// null when a mesh was not created or error.
+    /// Supports cancellation during volumetric calculations.
     /// </summary>
     /// <param name="parameters">A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process. </param>
-    /// <param name="token">A cancellation token</param>
+    /// <param name="token">Supports cancellation during volumetric calculations.</param>
     /// <returns></returns>
     /// <since>8.0</since>
     public Mesh ShrinkWrap(ShrinkWrapParameters parameters, CancellationToken token)
     {
-      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(this, parameters);
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(this, parameters, token);
     }
 
     /// <summary>
@@ -6261,6 +6511,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a collection of input meshes.
+    /// Returns null on error or failure.
+    /// Supports cancellation during volumetric calculations.
+    /// </summary>
+    /// <param name="meshes"></param>
+    /// <param name="parameters"></param>
+    /// <param name="token">Supports cancellation during volumetric calculations.</param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    public static Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters, CancellationToken token)
+    {
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(meshes, parameters, token);
+    }
+
+    /// <summary>
     /// Creates a unified ShrinkWrap mesh from a point cloud
     /// returns null on error or failure
     /// </summary>
@@ -6271,6 +6536,21 @@ namespace Rhino.Geometry
     public static Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters)
     {
       return Runtime.ShrinkWrap.Service()?.ShrinkWrap(pointCloud, parameters);
+    }
+
+    /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a point cloud
+    /// returns null on error or failure
+    /// Supports cancellation during volumetric calculations. 
+    /// </summary>
+    /// <param name="pointCloud"></param>
+    /// <param name="parameters"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    public static Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters, CancellationToken token)
+    {
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(pointCloud, parameters, token);
     }
 
     /// <summary>
@@ -6285,6 +6565,22 @@ namespace Rhino.Geometry
     public static Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters)
     {
       return Runtime.ShrinkWrap.Service()?.ShrinkWrap(geometryBases, parameters, meshingParameters);
+    }
+
+    /// <summary>
+    /// Creates a unified ShrinkWrap mesh from a collection of GeometryBase objects.
+    /// returns null or error on failure
+    /// Supports cancellation during volumetric calculations. geometryBase mesh creation is not cancellable
+    /// </summary>
+    /// <param name="geometryBases"></param>
+    /// <param name="parameters">A ShrinkWrapParameters object that specifies the configuration settings for the ShrinkWrap process. </param>
+    /// <param name="meshingParameters">GeometryBase objects are converted to meshes first using the MeshingParameters provided. Those meshes are then used in the ShrinkWrap process.</param>
+    /// <param name="token">Supports cancellation during volumetric calculations. geometryBase mesh creation is not cancellable</param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    public static Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters, CancellationToken token)
+    {
+      return Runtime.ShrinkWrap.Service()?.ShrinkWrap(geometryBases, parameters, meshingParameters, token);
     }
 
 
@@ -6325,8 +6621,10 @@ namespace Rhino.Geometry
     public bool Reduce(int desiredPolygonCount, bool allowDistortion, int accuracy, bool normalizeSize, bool threaded)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this, desiredPolygonCount, allowDistortion, accuracy, normalizeSize,
+      bool rc = UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this, desiredPolygonCount, allowDistortion, accuracy, normalizeSize,
         IntPtr.Zero, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, threaded);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Reduce polygon count</summary>
@@ -6384,6 +6682,7 @@ namespace Rhino.Geometry
       }
       if (terminator != null) terminator.Dispose();
       if (reporter != null) reporter.Disable();
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -6444,6 +6743,9 @@ namespace Rhino.Geometry
       }
       if (terminator != null) terminator.Dispose();
       if (reporter != null) reporter.Disable();
+      GC.KeepAlive(faceTags);
+      GC.KeepAlive(lockedComponents);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -6939,7 +7241,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -6948,6 +7252,7 @@ namespace Rhino.Geometry.Collections
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCount, value);
           UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr_mesh);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -6961,7 +7266,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -6972,6 +7279,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -6997,6 +7305,7 @@ namespace Rhino.Geometry.Collections
           if (index < 0 || index >= Count)
             throw new IndexOutOfRangeException();
         }
+        GC.KeepAlive(m_mesh);
         return new Point3f((float)rc.X, (float)rc.Y, (float)rc.Z);
       }
       set
@@ -7007,6 +7316,7 @@ namespace Rhino.Geometry.Collections
           if (index < 0 || index >= Count)
             throw new IndexOutOfRangeException();
         }
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -7019,7 +7329,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetBool(const_ptr_mesh, UnsafeNativeMethods.MeshBoolConst.HasDoublePrecisionVerts);
+        bool rc = UnsafeNativeMethods.ON_Mesh_GetBool(const_ptr_mesh, UnsafeNativeMethods.MeshBoolConst.HasDoublePrecisionVerts);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -7027,6 +7339,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_UseDoublePrecisionVertices(ptr_mesh, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -7043,6 +7356,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr, UnsafeNativeMethods.MeshClearListConst.ClearVertices);
       UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -7054,6 +7368,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -7113,6 +7428,7 @@ namespace Rhino.Geometry.Collections
 
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr_mesh);
+      GC.KeepAlive(m_mesh);
       return count;
     }
 
@@ -7136,6 +7452,7 @@ namespace Rhino.Geometry.Collections
         index++;
       }
       UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr_mesh);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -7158,6 +7475,7 @@ namespace Rhino.Geometry.Collections
         index++;
       }
       UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr_mesh);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -7176,6 +7494,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, x, y, z);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7196,6 +7515,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_Mesh_SetVertexWithNormal(ptr_mesh, index, x, y, z, updateNormals);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7215,6 +7535,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, x, y, z);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
     /// <summary>
@@ -7255,7 +7576,9 @@ namespace Rhino.Geometry.Collections
     public bool IsHidden(int vertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_GetHiddenValue(const_ptr_mesh, vertexIndex);
+      bool rc = UnsafeNativeMethods.ON_Mesh_GetHiddenValue(const_ptr_mesh, vertexIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -7273,6 +7596,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.EnsureHiddenList);
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, vertexIndex, UnsafeNativeMethods.MeshHiddenVertexOpConst.HideVertex);
+      GC.KeepAlive(m_mesh);
     }
     /// <summary>
     /// Shows the vertex at the given index.
@@ -7289,6 +7613,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.EnsureHiddenList);
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, vertexIndex, UnsafeNativeMethods.MeshHiddenVertexOpConst.ShowVertex);
+      GC.KeepAlive(m_mesh);
     }
     /// <summary>
     /// Hides all vertices in the mesh.
@@ -7299,6 +7624,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.EnsureHiddenList);
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.HideAll);
+      GC.KeepAlive(m_mesh);
     }
     /// <summary>
     /// Shows all vertices in the mesh.
@@ -7308,6 +7634,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_HiddenVertexOp(ptr_mesh, 0, UnsafeNativeMethods.MeshHiddenVertexOpConst.ShowAll);
+      GC.KeepAlive(m_mesh);
     }
     #endregion
 
@@ -7320,7 +7647,9 @@ namespace Rhino.Geometry.Collections
     public int CullUnused()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_CullOp(ptr_mesh, false);
+      int rc = UnsafeNativeMethods.ON_Mesh_CullOp(ptr_mesh, false);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -7340,7 +7669,9 @@ namespace Rhino.Geometry.Collections
     public bool CombineIdentical(bool ignoreNormals, bool ignoreAdditional)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_CombineIdenticalVertices(ptr, ignoreNormals, ignoreAdditional);
+      bool rc = UnsafeNativeMethods.ON_Mesh_CombineIdenticalVertices(ptr, ignoreNormals, ignoreAdditional);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -7435,6 +7766,7 @@ namespace Rhino.Geometry.Collections
       if (count > 0)
         ids = face_ids.ToArray();
       face_ids.Dispose();
+      GC.KeepAlive(m_mesh);
       return ids;
     }
 
@@ -7458,6 +7790,7 @@ namespace Rhino.Geometry.Collections
         if (count > 0)
           ids = vertex_ids.ToArray();
       }
+      GC.KeepAlive(m_mesh);
       return ids;
     }
 
@@ -7477,6 +7810,7 @@ namespace Rhino.Geometry.Collections
         if (count > 0)
           ids = vertex_ids.ToArray();
       }
+      GC.KeepAlive(m_mesh);
       return ids;
     }
 
@@ -7491,6 +7825,7 @@ namespace Rhino.Geometry.Collections
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       var pt = new Point3d();
       UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, index, ref pt);
+      GC.KeepAlive(m_mesh);
       return pt;
     }
 
@@ -7510,6 +7845,7 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, i, ref pt);
         rc[i] = new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z);
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7529,6 +7865,7 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, i, ref pt);
         rc[i] = pt;
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7554,6 +7891,7 @@ namespace Rhino.Geometry.Collections
         rc[index++] = (float)pt.Y;
         rc[index++] = (float)pt.Z;
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7874,6 +8212,7 @@ namespace Rhino.Geometry.Collections
         UnsafeNativeMethods.ON_Mesh_Vertex(const_ptr_mesh, i, ref rc);
         yield return new Point3f((float)rc.X, (float)rc.Y, (float)rc.Z);
       }
+      GC.KeepAlive(m_mesh);
     }
 
     /// <since>5.0</since>
@@ -7910,7 +8249,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.MeshTopologyVertexCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.MeshTopologyVertexCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
 
@@ -7931,6 +8272,7 @@ namespace Rhino.Geometry.Collections
         var rc = new Point3f();
         IntPtr ptr = m_mesh.ConstPointer();
         UnsafeNativeMethods.ON_Mesh_TopologyVertex(ptr, index, ref rc);
+        GC.KeepAlive(m_mesh);
         return rc;
       }
       set
@@ -7940,6 +8282,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetTopologyVertex(ptr_mesh, index, value);
+        GC.KeepAlive(m_mesh);
       }
     }
     #endregion
@@ -7958,6 +8301,7 @@ namespace Rhino.Geometry.Collections
       int rc = UnsafeNativeMethods.ON_Mesh_TopologyVertexIndex(const_ptr_mesh, vertexIndex);
       if (-1 == rc)
         throw new IndexOutOfRangeException();
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7979,6 +8323,7 @@ namespace Rhino.Geometry.Collections
         return null;
       var rc = new int[count];
       UnsafeNativeMethods.ON_MeshTopologyVertex_GetIndices(const_ptr_mesh, topologyVertexIndex, count, rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -7999,6 +8344,7 @@ namespace Rhino.Geometry.Collections
       }
       else
         rc = new int[0];
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8021,6 +8367,7 @@ namespace Rhino.Geometry.Collections
         return null;
       var rc = new int[count];
       UnsafeNativeMethods.ON_MeshTopologyVertex_ConnectedVertices(ptr, topologyVertexIndex, count, rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8053,7 +8400,9 @@ namespace Rhino.Geometry.Collections
     public bool SortEdges()
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshTopologyVertex_SortEdges(const_ptr_mesh, -1);
+      bool rc = UnsafeNativeMethods.ON_MeshTopologyVertex_SortEdges(const_ptr_mesh, -1);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -8069,7 +8418,9 @@ namespace Rhino.Geometry.Collections
     public bool SortEdges(int topologyVertexIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshTopologyVertex_SortEdges(const_ptr_mesh, topologyVertexIndex);
+      bool rc = UnsafeNativeMethods.ON_MeshTopologyVertex_SortEdges(const_ptr_mesh, topologyVertexIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -8101,6 +8452,7 @@ namespace Rhino.Geometry.Collections
       using (var arr = new SimpleArrayInt())
       {
         UnsafeNativeMethods.ON_MeshTopologyVertex_ConnectedFaces(ptr, topologyVertexIndex, arr.m_ptr);
+        GC.KeepAlive(m_mesh);
         return arr.ToArray();
       }
     }
@@ -8116,6 +8468,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr = m_mesh.ConstPointer();
       int count = UnsafeNativeMethods.ON_MeshTopologyVertex_Count(ptr, topologyVertexIndex, false);
       if (count == -1) throw new ArgumentOutOfRangeException("topologyVertexIndex");
+      GC.KeepAlive(m_mesh);
       return count;
     }
 
@@ -8140,6 +8493,7 @@ namespace Rhino.Geometry.Collections
         else
           throw new ArgumentOutOfRangeException("edgeAtVertexIndex");
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8163,6 +8517,7 @@ namespace Rhino.Geometry.Collections
         return null;
       var rc = new int[count];
       UnsafeNativeMethods.ON_MeshTopologyVertex_ConnectedEdges(ptr, topologyVertexIndex, count, rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8330,7 +8685,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(ptr, UnsafeNativeMethods.MeshIntConst.MeshTopologyEdgeCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(ptr, UnsafeNativeMethods.MeshIntConst.MeshTopologyEdgeCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
     #endregion
@@ -8344,6 +8701,7 @@ namespace Rhino.Geometry.Collections
       int i = -1, j = -1;
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       UnsafeNativeMethods.ON_MeshTopologyEdge_TopVi(const_ptr_mesh, topologyEdgeIndex, ref i, ref j);
+      GC.KeepAlive(m_mesh);
       return new IndexPair(i, j);
     }
 
@@ -8361,6 +8719,7 @@ namespace Rhino.Geometry.Collections
         return new int[0];
       var rc = new int[count];
       UnsafeNativeMethods.ON_MeshTopologyEdge_TopfList(const_ptr_mesh, topologyEdgeIndex, count, rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8383,6 +8742,7 @@ namespace Rhino.Geometry.Collections
       var rc = new int[count];
       faceOrientationMatchesEdgeDirection = new bool[count];
       UnsafeNativeMethods.ON_MeshTopologyEdge_TopfList2(const_ptr_mesh, topologyEdgeIndex, count, rc, faceOrientationMatchesEdgeDirection);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8407,6 +8767,7 @@ namespace Rhino.Geometry.Collections
 
       if (c == d)
         return new int[] { a, b, c };
+      GC.KeepAlive(m_mesh);
       return new int[] { a, b, c, d };
     }
 
@@ -8440,6 +8801,7 @@ namespace Rhino.Geometry.Collections
         return new int[] { a, b, c };
       }
       sameOrientation = new bool[] { orientation[0] == 1, orientation[1] == 1, orientation[2] == 1, orientation[3] == 1 };
+      GC.KeepAlive(m_mesh);
       return new int[] { a, b, c, d };
     }
 
@@ -8454,7 +8816,9 @@ namespace Rhino.Geometry.Collections
     public int GetEdgeIndex(int topologyVertex1, int topologyVertex2)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshTopology_TopEdge(const_ptr_mesh, topologyVertex1, topologyVertex2);
+      int rc = UnsafeNativeMethods.ON_MeshTopology_TopEdge(const_ptr_mesh, topologyVertex1, topologyVertex2);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>Gets the 3d line along an edge.</summary>
@@ -8468,6 +8832,7 @@ namespace Rhino.Geometry.Collections
       var rc = new Line();
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       UnsafeNativeMethods.ON_MeshTopology_TopEdgeLine(const_ptr_mesh, topologyEdgeIndex, ref rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -8513,7 +8878,9 @@ namespace Rhino.Geometry.Collections
     public bool SplitEdge(int topologyEdgeIndex, Point3d point)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SplitMeshEdge(ptr_mesh, topologyEdgeIndex, point);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SplitMeshEdge(ptr_mesh, topologyEdgeIndex, point);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -8525,7 +8892,9 @@ namespace Rhino.Geometry.Collections
     public bool IsEdgeUnwelded(int topologyEdgeIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.TLC_IsMeshEdgeUnwelded(const_ptr_mesh, topologyEdgeIndex);
+      bool rc = UnsafeNativeMethods.TLC_IsMeshEdgeUnwelded(const_ptr_mesh, topologyEdgeIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 #endif
 
@@ -8608,7 +8977,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -8616,6 +8987,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -8629,7 +9001,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -8640,6 +9014,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -8662,6 +9037,7 @@ namespace Rhino.Geometry.Collections
           if (index < 0 || index >= Count)
             throw new IndexOutOfRangeException();
         }
+        GC.KeepAlive(m_mesh);
         return rc;
       }
       set
@@ -8673,6 +9049,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, value, false);
+        GC.KeepAlive(m_mesh);
       }
     }
     #endregion
@@ -8686,6 +9063,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearNormals);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -8697,6 +9075,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.NormalCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
 
     private bool SetNormalsHelper(Vector3f[] normals, bool append)
@@ -8704,7 +9083,9 @@ namespace Rhino.Geometry.Collections
       if (null == normals || normals.Length < 1)
         return false;
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetNormals(ptr_mesh, normals.Length, normals, append);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetNormals(ptr_mesh, normals.Length, normals, append);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -8810,7 +9191,9 @@ namespace Rhino.Geometry.Collections
     public bool SetNormal(int index, Vector3f normal)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetNormal(ptr, index, normal, false);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetNormal(ptr, index, normal, false);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     /// <summary>
     /// Sets or adds a vertex normal to the list.
@@ -8858,6 +9241,7 @@ namespace Rhino.Geometry.Collections
         rc[index++] = vec.Y;
         rc[index++] = vec.Z;
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
     /// <summary>
@@ -8873,7 +9257,9 @@ namespace Rhino.Geometry.Collections
     public bool ComputeNormals()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeVertexNormals);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeVertexNormals);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -8884,7 +9270,9 @@ namespace Rhino.Geometry.Collections
     public bool UnitizeNormals()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.UnitizeVertexNormals);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.UnitizeVertexNormals);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9026,6 +9414,7 @@ namespace Rhino.Geometry.Collections
       {
         var rc = new Vector3f();
         UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, i, ref rc, false);
+        GC.KeepAlive(m_mesh);
         yield return rc;
       }
     }
@@ -9061,7 +9450,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -9069,6 +9460,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -9082,7 +9474,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.QuadCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.QuadCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
 
@@ -9095,7 +9489,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TriangleCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TriangleCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
 
@@ -9107,7 +9503,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.VertexCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
 
@@ -9130,7 +9528,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -9141,6 +9541,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -9156,6 +9557,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearFaces);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -9167,6 +9569,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -9208,7 +9611,9 @@ namespace Rhino.Geometry.Collections
     public int AddFace(int vertex1, int vertex2, int vertex3, int vertex4)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_AddFace(ptr, vertex1, vertex2, vertex3, vertex4);
+      int rc = UnsafeNativeMethods.ON_Mesh_AddFace(ptr, vertex1, vertex2, vertex3, vertex4);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9241,6 +9646,7 @@ namespace Rhino.Geometry.Collections
       bool rc = UnsafeNativeMethods.ON_Mesh_InsertFace(ptr_mesh, index, face.A, face.B, face.C, face.D);
       if (!rc && (index < 0 || index >= Count))
         throw new ArgumentOutOfRangeException("index");
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -9281,7 +9687,9 @@ namespace Rhino.Geometry.Collections
     public bool SetFace(int index, int vertex1, int vertex2, int vertex3, int vertex4)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetFace(ptr_mesh, index, vertex1, vertex2, vertex3, vertex4);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetFace(ptr_mesh, index, vertex1, vertex2, vertex3, vertex4);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9298,6 +9706,7 @@ namespace Rhino.Geometry.Collections
       if (UnsafeNativeMethods.ON_Mesh_GetFace(const_ptr_mesh, index, ref rc))
         return rc;
 
+      GC.KeepAlive(m_mesh);
       return MeshFace.Unset;
     }
 
@@ -9311,7 +9720,9 @@ namespace Rhino.Geometry.Collections
     public bool MergeAdjacentFaces(int edgeIndex)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhMerge2AdjacentMeshFaces(ptr_mesh, edgeIndex);
+      bool rc = UnsafeNativeMethods.RHC_RhMerge2AdjacentMeshFaces(ptr_mesh, edgeIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9370,6 +9781,7 @@ namespace Rhino.Geometry.Collections
       c = new Point3f();
       d = new Point3f();
       bool rc = UnsafeNativeMethods.ON_Mesh_GetFaceVertices(const_ptr_mesh, faceIndex, ref a, ref b, ref c, ref d);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -9406,6 +9818,7 @@ namespace Rhino.Geometry.Collections
       var rc = new Point3d();
       if (!UnsafeNativeMethods.ON_Mesh_GetFaceCenter(const_ptr_mesh, faceIndex, ref rc))
         throw new IndexOutOfRangeException();
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -9476,6 +9889,7 @@ namespace Rhino.Geometry.Collections
         }
         rc = triangles.ToArray();
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -9541,6 +9955,7 @@ namespace Rhino.Geometry.Collections
       }
 
       if (cleanup) replacedIndices.AddRange(replacements);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -9574,7 +9989,9 @@ namespace Rhino.Geometry.Collections
         return 0;
       var f = face_indexes.m_items;
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr, face_indexes.Count, f, compact);
+      int rc = UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr, face_indexes.Count, f, compact);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
 
@@ -9603,6 +10020,7 @@ namespace Rhino.Geometry.Collections
       int count = UnsafeNativeMethods.ON_Mesh_DeleteFace(ptr_mesh, 1, indices, compact);
       if (count != 1 && (index < 0 || index > Count))
         throw new ArgumentOutOfRangeException("index");
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>Splits all quads along the short diagonal.</summary>
@@ -9611,7 +10029,9 @@ namespace Rhino.Geometry.Collections
     public bool ConvertQuadsToTriangles()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ConvertQuadsToTriangles);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ConvertQuadsToTriangles);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9654,7 +10074,9 @@ namespace Rhino.Geometry.Collections
     public int ConvertNonPlanarQuadsToTriangles(double planarTolerance, double angleToleranceRadians, int splitMethod)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return (int)UnsafeNativeMethods.ON_Mesh_ConvertNonPlanarQuadsToTriangles(ptr_mesh, planarTolerance, angleToleranceRadians, (uint)splitMethod);
+      int rc = (int)UnsafeNativeMethods.ON_Mesh_ConvertNonPlanarQuadsToTriangles(ptr_mesh, planarTolerance, angleToleranceRadians, (uint)splitMethod);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9676,7 +10098,9 @@ namespace Rhino.Geometry.Collections
     public bool ConvertTrianglesToQuads(double angleToleranceRadians, double minimumDiagonalLengthRatio)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_ConvertTrianglesToQuads(ptr_mesh, angleToleranceRadians, minimumDiagonalLengthRatio);
+      bool rc = UnsafeNativeMethods.ON_Mesh_ConvertTrianglesToQuads(ptr_mesh, angleToleranceRadians, minimumDiagonalLengthRatio);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9691,7 +10115,9 @@ namespace Rhino.Geometry.Collections
     public int CullDegenerateFaces()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_CullOp(ptr_mesh, true);
+      int rc = UnsafeNativeMethods.ON_Mesh_CullOp(ptr_mesh, true);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9704,7 +10130,9 @@ namespace Rhino.Geometry.Collections
     public bool IsHidden(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_FaceIsHidden(const_ptr_mesh, faceIndex);
+      bool rc = UnsafeNativeMethods.ON_Mesh_FaceIsHidden(const_ptr_mesh, faceIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9717,7 +10145,9 @@ namespace Rhino.Geometry.Collections
     public bool HasNakedEdges(int faceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_FaceHasNakedEdges(const_ptr_mesh, faceIndex);
+      bool rc = UnsafeNativeMethods.ON_Mesh_FaceHasNakedEdges(const_ptr_mesh, faceIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9732,6 +10162,7 @@ namespace Rhino.Geometry.Collections
       var v = new int[4];
       if (!UnsafeNativeMethods.ON_Mesh_FaceTopologicalVertices(const_ptr_mesh, faceIndex, v))
         return new int[0];
+      GC.KeepAlive(m_mesh);
       return v;
     }
 
@@ -9753,6 +10184,7 @@ namespace Rhino.Geometry.Collections
         IntPtr const_ptr_this = m_mesh.ConstPointer();
         IntPtr ptr_face_indices = face_indices.NonConstPointer();
         int rc = UnsafeNativeMethods.ON_Mesh_GetClashingFacePairs(const_ptr_this, maxPairCount, ptr_face_indices);
+        GC.KeepAlive(m_mesh);
         if (rc > 0)
           return face_indices.ToArray();
       }
@@ -9777,6 +10209,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_simplearray_int = indices.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoMakeConnectedMeshFaceList(ptr_const_mesh, faceIndex, angleRadians, greaterThanAngle, ptr_simplearray_int);
+        GC.KeepAlive(m_mesh);
         return indices.ToArray();
       }
     }
@@ -9794,6 +10227,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_simplearray_int = indices.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoMakeConnectedMeshFaceList(ptr_const_mesh, faceIndex, 0, true, ptr_simplearray_int);
+        GC.KeepAlive(m_mesh);
         return indices.ToArray();
       }
     }
@@ -9816,6 +10250,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_simplearray_int = indices.NonConstPointer();
         UnsafeNativeMethods.RHC_RhinoMakeMeshPartFaceList(ptr_const_mesh, startFaceIndex, treatNonmanifoldLikeUnwelded, ptr_simplearray_int);
+        GC.KeepAlive(m_mesh);
         return indices.ToArray();
       }
     }
@@ -9839,6 +10274,7 @@ namespace Rhino.Geometry.Collections
         bool rc = UnsafeNativeMethods.RHC_RhinoGetZeroAreaMeshFaces(ptr_const_mesh, ptr_wholly, ptr_partially);
         whollyDegenerateFaces = (rc) ? wholly.ToArray() : new int[0];
         partiallyDegenerateFaces = (rc) ? partially.ToArray() : new int[0];
+        GC.KeepAlive(m_mesh);
         return rc;
       }
     }
@@ -9852,7 +10288,9 @@ namespace Rhino.Geometry.Collections
     public int RemoveZeroAreaFaces(ref int fixedFaceCount)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCullZeroAreaMeshFaces(ptr_mesh, ref fixedFaceCount);
+      int rc = UnsafeNativeMethods.RHC_RhinoCullZeroAreaMeshFaces(ptr_mesh, ref fixedFaceCount);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -9870,6 +10308,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_duplicates = duplicates.NonConstPointer();
         int rc = UnsafeNativeMethods.RHC_RhinoGetDuplicateMeshFaces(ptr_const_mesh, ptr_duplicates);
+        GC.KeepAlive(m_mesh);
         return 0 == rc ? new int[0] : duplicates.ToArray();
       }
     }
@@ -9883,6 +10322,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoExtractDuplicateMeshFaces(ptr_mesh);
+      GC.KeepAlive(m_mesh);
       return IntPtr.Zero == ptr ? null : new Mesh(ptr, null);
     }
 
@@ -9899,6 +10339,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_indices = indices.NonConstPointer();
         IntPtr ptr = UnsafeNativeMethods.RHC_RhinoExtractMeshFaces(ptr_mesh, ptr_indices);
+        GC.KeepAlive(m_mesh);
         return IntPtr.Zero == ptr ? null : new Mesh(ptr, null);
       }
     }
@@ -10075,12 +10516,15 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_NgonCount(const_ptr_mesh);
+        int rc = UnsafeNativeMethods.ON_Mesh_NgonCount(const_ptr_mesh);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetNgonCount(ptr_mesh, value);
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -10094,12 +10538,15 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_NgonUnsignedCount(const_ptr_mesh);
+        uint rc = UnsafeNativeMethods.ON_Mesh_NgonUnsignedCount(const_ptr_mesh);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetNgonUnsignedCount(ptr_mesh, value);
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -10115,6 +10562,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetNgonCount(ptr_mesh, 0);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -10126,7 +10574,9 @@ namespace Rhino.Geometry.Collections
     public int AddNgon(MeshNgon ngon)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_AddNgon(ptr_mesh, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi);
+      int rc = UnsafeNativeMethods.ON_Mesh_AddNgon(ptr_mesh, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -10149,7 +10599,9 @@ namespace Rhino.Geometry.Collections
       if (boundary.Length < 3) throw new ArgumentOutOfRangeException("boundary", "There need to be at least 3 vertices.");
 
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_AddNgon_Boundary(ptr_mesh, boundary, boundary.Length);
+      int rc = UnsafeNativeMethods.ON_Mesh_AddNgon_Boundary(ptr_mesh, boundary, boundary.Length);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 #endif
 
@@ -10168,6 +10620,7 @@ namespace Rhino.Geometry.Collections
         int index = AddNgon(ngon);
         ngon_id_list.Add(index);
       }
+      GC.KeepAlive(m_mesh);
       return ngon_id_list.ToArray();
     }
 
@@ -10180,7 +10633,9 @@ namespace Rhino.Geometry.Collections
     public int AddPlanarNgons(double planarTolerance)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_AddPlanarNgons(ptr_mesh, planarTolerance, 0, 0, false);
+      int rc = UnsafeNativeMethods.ON_Mesh_AddPlanarNgons(ptr_mesh, planarTolerance, 0, 0, false);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10195,7 +10650,9 @@ namespace Rhino.Geometry.Collections
     public int AddPlanarNgons(double planarTolerance, int minimumNgonVertexCount, int minimumNgonFaceCount, bool allowHoles)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_AddPlanarNgons(ptr_mesh, planarTolerance, minimumNgonVertexCount, minimumNgonFaceCount, allowHoles);
+      int rc = UnsafeNativeMethods.ON_Mesh_AddPlanarNgons(ptr_mesh, planarTolerance, minimumNgonVertexCount, minimumNgonFaceCount, allowHoles);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10216,6 +10673,7 @@ namespace Rhino.Geometry.Collections
         if (count > 0)
           ngon_bdry_point_list = ngon_bdry_pts.ToArray();
       }
+      GC.KeepAlive(m_mesh);
       return ngon_bdry_point_list;
     }
 
@@ -10230,7 +10688,9 @@ namespace Rhino.Geometry.Collections
     bool OrientNgons(bool permitHoles)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_OrientNgons(ptr_mesh, permitHoles);
+      bool rc = UnsafeNativeMethods.ON_Mesh_OrientNgons(ptr_mesh, permitHoles);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10247,6 +10707,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         rc = UnsafeNativeMethods.ON_Mesh_InsertNgon(ptr_mesh, index, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi);
+        GC.KeepAlive(m_mesh);
       }
       if (!rc)
         throw new ArgumentOutOfRangeException("index");
@@ -10266,6 +10727,7 @@ namespace Rhino.Geometry.Collections
       {
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         rc = UnsafeNativeMethods.ON_Mesh_ModifyNgon(ptr_mesh, index, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi);
+        GC.KeepAlive(m_mesh);
       }
       if (!rc)
         throw new ArgumentOutOfRangeException("index");
@@ -10282,6 +10744,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       IntPtr ptr_ngon = UnsafeNativeMethods.ON_Mesh_Ngon(ptr_mesh, index);
+      GC.KeepAlive(m_mesh);
       return new MeshNgon(ptr_ngon);
     }
 
@@ -10294,7 +10757,9 @@ namespace Rhino.Geometry.Collections
     public int NgonIndexFromFaceIndex(int meshFaceIndex)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NgonIndexFromFaceIndex(const_ptr_mesh, meshFaceIndex);
+      int rc = UnsafeNativeMethods.ON_Mesh_NgonIndexFromFaceIndex(const_ptr_mesh, meshFaceIndex);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10309,6 +10774,7 @@ namespace Rhino.Geometry.Collections
         // TODO: Check to see if this really needs to be a NonConstPointer
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         IntPtr ngon_ptr = UnsafeNativeMethods.ON_Mesh_Ngon(ptr_mesh, index);
+        GC.KeepAlive(m_mesh);
         return new MeshNgon(ngon_ptr);
       }
       set
@@ -10328,6 +10794,7 @@ namespace Rhino.Geometry.Collections
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       BoundingBox bbox = BoundingBox.Empty;
       UnsafeNativeMethods.ON_Mesh_GetNgonBoundingBoxFromNgonIndex(const_ptr_mesh, index, ref bbox);
+      GC.KeepAlive(m_mesh);
       return bbox;
     }
 
@@ -10342,6 +10809,7 @@ namespace Rhino.Geometry.Collections
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
       BoundingBox bbox = BoundingBox.Empty;
       UnsafeNativeMethods.ON_Mesh_GetNgonBoundingBoxFromNgon(const_ptr_mesh, ref bbox, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi);
+      GC.KeepAlive(m_mesh);
       return bbox;
     }
 
@@ -10354,7 +10822,9 @@ namespace Rhino.Geometry.Collections
     public int GetNgonOuterEdgeCount(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshNgon_OuterBoundaryEdgeCount(const_ptr_mesh, (uint)index);
+      int rc = UnsafeNativeMethods.ON_MeshNgon_OuterBoundaryEdgeCount(const_ptr_mesh, (uint)index);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10377,7 +10847,9 @@ namespace Rhino.Geometry.Collections
     public int Orientation(int index, bool permitHoles)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshNgon_Orientation(const_ptr_mesh, (uint)index, permitHoles);
+      int rc = UnsafeNativeMethods.ON_MeshNgon_Orientation(const_ptr_mesh, (uint)index, permitHoles);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10389,6 +10861,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_MeshNgon_ReverseOuterBoundary(ptr_mesh, (uint)index);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -10400,7 +10873,9 @@ namespace Rhino.Geometry.Collections
     public int GetNgonEdgeCount(int index)
     {
       IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshNgon_BoundaryEdgeCount(const_ptr_mesh, (uint)index);
+      int rc = UnsafeNativeMethods.ON_MeshNgon_BoundaryEdgeCount(const_ptr_mesh, (uint)index);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10429,6 +10904,7 @@ namespace Rhino.Geometry.Collections
       Point3d center = Point3d.Unset;
       if (!UnsafeNativeMethods.ON_Mesh_GetNgonCenterFromNgonIndex(const_ptr_mesh, index, ref center))
         throw new IndexOutOfRangeException();
+      GC.KeepAlive(m_mesh);
       return center;
     }
 
@@ -10445,6 +10921,7 @@ namespace Rhino.Geometry.Collections
       Point3d center = Point3d.Unset;
       if (!UnsafeNativeMethods.ON_Mesh_GetNgonCenterFromNgon(const_ptr_mesh, ref center, (uint)ngon.m_vi.LongLength, ngon.m_vi, (uint)ngon.m_fi.LongLength, ngon.m_fi))
         throw new IndexOutOfRangeException();
+      GC.KeepAlive(m_mesh);
       return center;
     }
 
@@ -10465,7 +10942,22 @@ namespace Rhino.Geometry.Collections
         return 0;
       int[] ngon_index_array = ngon_index_list.m_items;
       IntPtr mesh_ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_RemoveNgons(mesh_ptr, ngon_index_list.Count, ngon_index_array);
+      int rc = UnsafeNativeMethods.ON_Mesh_RemoveNgons(mesh_ptr, ngon_index_list.Count, ngon_index_array);
+      GC.KeepAlive(m_mesh);
+      return rc;
+    }
+
+    /// <summary>
+    /// Removes all ngons from the mesh.
+    /// </summary>
+    /// <returns>The number deleted ngons.</returns>
+    /// <since>8.23</since>
+    public int RemoveAllNgons()
+    {
+      IntPtr mesh_ptr = m_mesh.NonConstPointer();
+      int rc = UnsafeNativeMethods.ON_Mesh_RemoveAllNgons(mesh_ptr);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10477,6 +10969,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_RemoveNgon(ptr_mesh, index);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -10501,6 +10994,7 @@ namespace Rhino.Geometry.Collections
             if (vertex_count > 0)
               ngon_vertex_list = ngon_vi.ToArray();
           }
+          GC.KeepAlive(m_mesh);
         }
       }
       return ngon_vertex_list;
@@ -10532,7 +11026,10 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_textlog = textLog?.NonConstPointer() ?? IntPtr.Zero;
       IntPtr ptr_const_mesh = m_mesh.ConstPointer();
-      return UnsafeNativeMethods.ON_MeshNgon_IsValid(ptr_const_mesh, index, ptr_textlog);
+      uint rc = UnsafeNativeMethods.ON_MeshNgon_IsValid(ptr_const_mesh, index, ptr_textlog);
+      GC.KeepAlive(textLog);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     #endregion
@@ -10705,7 +11202,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -10713,6 +11212,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -10734,6 +11234,7 @@ namespace Rhino.Geometry.Collections
         var rc = new Vector3f();
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
         UnsafeNativeMethods.ON_Mesh_GetNormal(const_ptr_mesh, index, ref rc, true);
+        GC.KeepAlive(m_mesh);
         return rc;
       }
       set
@@ -10743,6 +11244,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, value, true);
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -10755,7 +11257,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -10763,6 +11267,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -10778,6 +11283,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearFaceNormals);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -10789,6 +11295,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.FaceNormalCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -10887,7 +11394,9 @@ namespace Rhino.Geometry.Collections
     public bool SetFaceNormal(int index, Vector3f normal)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, normal, true);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetNormal(ptr_mesh, index, normal, true);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     #endregion
 
@@ -10899,7 +11408,9 @@ namespace Rhino.Geometry.Collections
     public bool UnitizeFaceNormals()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.UnitizeFaceNormals);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.UnitizeFaceNormals);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -10910,7 +11421,9 @@ namespace Rhino.Geometry.Collections
     public bool ComputeFaceNormals()
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeFaceNormals);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr_mesh, UnsafeNativeMethods.MeshNonConstBoolConst.ComputeFaceNormals);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     #endregion
 
@@ -11071,7 +11584,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -11079,6 +11594,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -11099,6 +11615,7 @@ namespace Rhino.Geometry.Collections
         // get color will return false when the index is out of range
         if (!UnsafeNativeMethods.ON_Mesh_GetColor(const_ptr_mesh, index, ref argb))
           throw new IndexOutOfRangeException();
+        GC.KeepAlive(m_mesh);
         return Color.FromArgb(argb);
       }
       set
@@ -11108,6 +11625,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetColor(ptr_mesh, index, value.ToArgb());
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -11136,6 +11654,7 @@ namespace Rhino.Geometry.Collections
           MappingType = (TextureMappingType)mapping_type,
           MeshTransform = xf
         };
+        GC.KeepAlive(m_mesh);
         return mt;
       }
       set
@@ -11143,6 +11662,7 @@ namespace Rhino.Geometry.Collections
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         Transform xf = value.MeshTransform;
         UnsafeNativeMethods.ON_Mesh_SetMappingTag(ptr_mesh, 0, value.Id, (int)value.MappingType, value.MappingCRC, ref xf);
+        GC.KeepAlive(m_mesh);
       }
     }
     #endregion
@@ -11159,6 +11679,7 @@ namespace Rhino.Geometry.Collections
       int colorCount = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCount);
       int[] rc = new int[colorCount];
       UnsafeNativeMethods.ON_Mesh_GetVertexColorsAsArgb(const_ptr_mesh, colorCount, rc);
+      GC.KeepAlive(m_mesh);
       return rc;
     }
 
@@ -11171,6 +11692,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearColors);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -11247,7 +11769,9 @@ namespace Rhino.Geometry.Collections
       }
 
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetColor(ptr_mesh, index, color.ToArgb());
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetColor(ptr_mesh, index, color.ToArgb());
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -11274,7 +11798,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -11285,6 +11811,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -11303,7 +11830,9 @@ namespace Rhino.Geometry.Collections
       for (int i = 0; i < count; i++)
         argb[i] = colors[i].ToArgb();
 
-      return UnsafeNativeMethods.ON_Mesh_SetVertexColors(ptr_mesh, count, argb, append);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetVertexColors(ptr_mesh, count, argb, append);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -11360,6 +11889,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.ColorCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
     #endregion
 
@@ -11552,7 +12082,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -11560,6 +12092,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -11573,7 +12106,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -11584,6 +12119,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -11606,6 +12142,7 @@ namespace Rhino.Geometry.Collections
         float s = 0;
         float t = 0;
         if (!UnsafeNativeMethods.ON_Mesh_GetTextureCoordinate(const_ptr_mesh, index, ref s, ref t)) { return Point2f.Unset; }
+        GC.KeepAlive(m_mesh);
         return new Point2f(s, t);
       }
       set
@@ -11615,6 +12152,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetTextureCoordinate(ptr_mesh, index, value.m_x, value.m_y);
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -11629,6 +12167,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearTextureCoordinates);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -11701,7 +12240,9 @@ namespace Rhino.Geometry.Collections
     public bool SetTextureCoordinate(int index, float s, float t)
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetTextureCoordinate(ptr_mesh, index, s, t);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetTextureCoordinate(ptr_mesh, index, s, t);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     /// <summary>
     /// Sets or adds a texture coordinate to the Texture Coordinate List.
@@ -11762,7 +12303,9 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       if (textureCoordinates == null)
         return false;
-      return UnsafeNativeMethods.ON_Mesh_SetTextureCoordinates(ptr_mesh, textureCoordinates.Length, textureCoordinates, append);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetTextureCoordinates(ptr_mesh, textureCoordinates.Length, textureCoordinates, append);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -11775,7 +12318,10 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       IntPtr const_ptr_mapping = mapping.ConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_SetTextureCoordinates2(ptr_mesh, const_ptr_mapping);
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetTextureCoordinates2(ptr_mesh, const_ptr_mapping);
+      GC.KeepAlive(mapping);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -11787,6 +12333,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.TextureCoordinateCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
     #endregion
 
@@ -11800,7 +12347,9 @@ namespace Rhino.Geometry.Collections
     public bool NormalizeTextureCoordinates()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.NormalizeTextureCoordinates);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.NormalizeTextureCoordinates);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     /// <summary>
     /// Transposes texture coordinates.
@@ -11812,7 +12361,9 @@ namespace Rhino.Geometry.Collections
     public bool TransposeTextureCoordinates()
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.TransposeTextureCoordinates);
+      bool rc = UnsafeNativeMethods.ON_Mesh_NonConstBoolOp(ptr, UnsafeNativeMethods.MeshNonConstBoolConst.TransposeTextureCoordinates);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
     /// <summary>
     /// Reverses one coordinate direction of the texture coordinates.
@@ -11828,7 +12379,9 @@ namespace Rhino.Geometry.Collections
     public bool ReverseTextureCoordinates(int direction)
     {
       IntPtr ptr = m_mesh.NonConstPointer();
-      return UnsafeNativeMethods.ON_Mesh_Reverse(ptr, true, direction);
+      bool rc = UnsafeNativeMethods.ON_Mesh_Reverse(ptr, true, direction);
+      GC.KeepAlive(m_mesh);
+      return rc;
     }
 
     /// <summary>
@@ -11853,6 +12406,7 @@ namespace Rhino.Geometry.Collections
         rc[index++] = s;
         rc[index++] = t;
       }
+      GC.KeepAlive(m_mesh);
       return rc;
     }
     #endregion
@@ -12021,7 +12575,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -12029,6 +12585,7 @@ namespace Rhino.Geometry.Collections
         {
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCount, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -12042,7 +12599,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexHiddenCount);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexHiddenCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
     }
 
@@ -12055,7 +12614,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
-        return UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity);
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
       }
       set
       {
@@ -12066,6 +12627,7 @@ namespace Rhino.Geometry.Collections
 
           IntPtr ptr_mesh = m_mesh.NonConstPointer();
           UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity, value);
+          GC.KeepAlive(m_mesh);
         }
       }
     }
@@ -12087,6 +12649,7 @@ namespace Rhino.Geometry.Collections
         IntPtr const_ptr_mesh = m_mesh.ConstPointer();
         bool h = false;
         if (!UnsafeNativeMethods.ON_Mesh_GetHiddenVertexFlag(const_ptr_mesh, index, ref h)) { return false; }
+        GC.KeepAlive(m_mesh);
         return h;
       }
       set
@@ -12096,6 +12659,7 @@ namespace Rhino.Geometry.Collections
 
         IntPtr ptr_mesh = m_mesh.NonConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetHiddenVertexFlag(ptr_mesh, index, value);
+        GC.KeepAlive(m_mesh);
       }
     }
 
@@ -12110,6 +12674,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearHiddenVertices);
+      GC.KeepAlive(m_mesh);
     }
 
     /// <summary>
@@ -12123,6 +12688,7 @@ namespace Rhino.Geometry.Collections
       int n = Count;
       var ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetHiddenVertexFlag(ptr_mesh, n, hidden);
+      GC.KeepAlive(m_mesh);
     }
     /// <summary>
     /// Appends an array, a list or any enumerable of flags to the end of the list.
@@ -12148,6 +12714,7 @@ namespace Rhino.Geometry.Collections
     {
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
       UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.HiddenVertexCapacity, 0);
+      GC.KeepAlive(m_mesh);
     }
     #endregion
 
@@ -13860,6 +14427,17 @@ namespace Rhino.Runtime
     Mesh ShrinkWrap(Mesh mesh,ShrinkWrapParameters parameters);
 
     /// <summary>
+    /// Create a shrinkwrap from a single mesh
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    Mesh ShrinkWrap(Mesh mesh, ShrinkWrapParameters parameters, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Create mesh from input meshes.
     /// Null on error or incompatible settings
     /// </summary>
@@ -13868,6 +14446,17 @@ namespace Rhino.Runtime
     /// <returns></returns>
     /// <since>8.0</since>
     Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters);
+
+    /// <summary>
+    /// Create mesh from input meshes.
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="meshes"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    Mesh ShrinkWrap(IEnumerable<Mesh> meshes, ShrinkWrapParameters parameters, CancellationToken cancellationToken);
 
     /// <summary>
     /// Create mesh from point cloud input.
@@ -13880,6 +14469,17 @@ namespace Rhino.Runtime
     Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters);
 
     /// <summary>
+    /// Create mesh from point cloud input.
+    /// Null on error or incompatible settings
+    /// </summary>
+    /// <param name="pointCloud"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    Mesh ShrinkWrap(PointCloud pointCloud, ShrinkWrapParameters parameters, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Create a mesh from a collection of geometry base objects
     /// Null on error or incompatible settings
     /// </summary>
@@ -13889,6 +14489,18 @@ namespace Rhino.Runtime
     /// <returns></returns>
     /// <since>8.3</since>
     Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters);
+
+    /// <summary>
+    /// Create a mesh from a collection of geometry base objects
+    /// Null on error or incompatible settings 
+    /// </summary>
+    /// <param name="geometryBases"></param>
+    /// <param name="parameters"></param>
+    /// <param name="meshingParameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    Mesh ShrinkWrap(IEnumerable<GeometryBase> geometryBases, ShrinkWrapParameters parameters, MeshingParameters meshingParameters, CancellationToken cancellationToken);
   }
 }
 

@@ -377,6 +377,7 @@ namespace Rhino.DocObjects.Custom
       IntPtr ptr_destination = destination.NonConstPointer();
       UnsafeNativeMethods.ON_Object_CopyUserData(const_source, ptr_destination);
       GC.KeepAlive(source);
+      GC.KeepAlive(destination);
     }
 
     /// <summary>
@@ -545,7 +546,9 @@ namespace Rhino.DocObjects.Custom
       get
       {
         IntPtr const_ptr_onobject = m_parent.ConstPointer();
-        return UnsafeNativeMethods.ON_Object_UserDataCount(const_ptr_onobject);
+        int rc = UnsafeNativeMethods.ON_Object_UserDataCount(const_ptr_onobject);
+        GC.KeepAlive(m_parent);
+        return rc;
       }
     }
 
@@ -582,6 +585,7 @@ namespace Rhino.DocObjects.Custom
       bool rc = UnsafeNativeMethods.ON_Object_AttachUserData(const_ptr_onobject, ptr_userdata, detach_if_needed);
       if (rc)
         UserData.StoreInRuntimeList(userdata);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -600,6 +604,7 @@ namespace Rhino.DocObjects.Custom
       bool rc = UnsafeNativeMethods.ON_Object_DetachUserData(const_ptr_onobject, ptr_userdata);
       if( rc )
         UserData.RemoveFromRuntimeList(userdata);
+      GC.KeepAlive(m_parent);
       return rc;
     }
 
@@ -617,6 +622,7 @@ namespace Rhino.DocObjects.Custom
       Guid id = userdataType.GUID;
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
       int serial_number = UnsafeNativeMethods.CRhCmnUserData_Find(const_ptr_onobject, id);
+      GC.KeepAlive(m_parent);
       return UserData.FromSerialNumber(serial_number);
     }
 
@@ -631,6 +637,7 @@ namespace Rhino.DocObjects.Custom
       {
         IntPtr const_ptr_onobject = m_parent.ConstPointer();
         int serial_number = UnsafeNativeMethods.CRhCmnUserData_GetIdx(const_ptr_onobject, index);
+        GC.KeepAlive(m_parent);
         return UserData.FromSerialNumber(serial_number);
       }
     }
@@ -645,7 +652,9 @@ namespace Rhino.DocObjects.Custom
     public bool Contains(Guid userdataId)
     {
       IntPtr const_ptr_onobject = m_parent.ConstPointer();
-      return UnsafeNativeMethods.CRhCmnUserData_Contains(const_ptr_onobject, userdataId);
+      bool rc = UnsafeNativeMethods.CRhCmnUserData_Contains(const_ptr_onobject, userdataId);
+      GC.KeepAlive(m_parent);
+      return rc;
     }
 
     /// <summary>
@@ -676,6 +685,7 @@ namespace Rhino.DocObjects.Custom
     {
       IntPtr non_const_ptr_onobject = m_parent.NonConstPointer();
       UnsafeNativeMethods.ON_UserData_PurgeUserData(non_const_ptr_onobject);
+      GC.KeepAlive(m_parent);
     }
   }
 

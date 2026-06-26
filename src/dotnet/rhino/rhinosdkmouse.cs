@@ -9,6 +9,7 @@ namespace Rhino.UI
   /// <summary>
   /// Keyboard key recognized by shortcuts
   /// </summary>
+  /// <since>8.12</since>
   public enum KeyboardKey : int
   {
     /// <summary>No key</summary>

@@ -494,6 +494,15 @@ RH_C_FUNCTION ON_Curve* ON_Curve_TrimExtend( const ON_Curve* pCurve, double t0, 
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Curve_Trim(ON_Curve* pCurve, double t0, double t1)
+{
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-89686
+  bool rc = false;
+  if (pCurve)
+     rc = pCurve->Trim(ON_Interval(t0, t1));
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Curve_Split( const ON_Curve* pCurve, double t, ON_Curve** left, ON_Curve** right )
 {
   bool rc = false;
@@ -872,10 +881,13 @@ RH_C_FUNCTION bool RHC_RhExtractCurveControlPolygon(const ON_Curve* pCurve, ON_P
 
 RH_C_FUNCTION void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>* vector)
 {
-  if (vector) vector->Empty();
-  if (curve)
+  if (vector)
   {
-    *vector = curve->SpanVector();
+    vector->Empty();
+    if (curve)
+    {
+      *vector = curve->SpanVector();
+    }
   }
 }
 #endif

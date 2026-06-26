@@ -20,6 +20,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_crv_array = crvArray.ConstPointer();
         m_ptr = UnsafeNativeMethods.RHC_TlMultiMatchSrf_New(input_srf.ConstPointer(), ptr_crv_array);
+        GC.KeepAlive(input_srf);
       }
     }
 
@@ -55,11 +56,14 @@ namespace Rhino.Geometry
     {
       get
       {
-        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetDelayedSolve(m_ptr);
+        bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetDelayedSolve(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetDelayedSolve(m_ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -70,11 +74,14 @@ namespace Rhino.Geometry
     {
       get
       {
-        return (InteriorMovementOption)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetInteriorMovement(m_ptr);
+        InteriorMovementOption rc = (InteriorMovementOption)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetInteriorMovement(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetInteriorMovement(m_ptr, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -85,11 +92,14 @@ namespace Rhino.Geometry
     {
       get
       {
-        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetInteriorStiffness(m_ptr);
+        double rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetInteriorStiffness(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetInteriorStiffness(m_ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -100,11 +110,14 @@ namespace Rhino.Geometry
     {
       get
       {
-        return (FreeEdgeMovementOption)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetFreeEdgeMovement(m_ptr);
+        FreeEdgeMovementOption rc = (FreeEdgeMovementOption)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetFreeEdgeMovement(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetFreeEdgeMovement(m_ptr, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -117,11 +130,13 @@ namespace Rhino.Geometry
       {
         IndexPair spans = new IndexPair();
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetSpanCount(m_ptr, spans);
+        GC.KeepAlive(this);
         return spans;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetSpanCount(m_ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -134,6 +149,7 @@ namespace Rhino.Geometry
       {
         NurbsSurface srf = new NurbsSurface();
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetLastResult(m_ptr, srf.NonConstPointer());
+        GC.KeepAlive(this);
         return srf;
       }
     }
@@ -145,7 +161,9 @@ namespace Rhino.Geometry
     {
       get
       {
-        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetLastTolerance(m_ptr);
+        double rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetLastTolerance(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -159,6 +177,7 @@ namespace Rhino.Geometry
         using (var msg = new Rhino.Runtime.InteropWrappers.StringHolder())
         {
           UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetLastMessage(m_ptr, msg.NonConstPointer());
+          GC.KeepAlive(this);
           return msg.ToString();
         }
       }
@@ -173,6 +192,7 @@ namespace Rhino.Geometry
       {
         NurbsSurface srf = new NurbsSurface();
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetBestResult(m_ptr, srf.NonConstPointer());
+        GC.KeepAlive(this);
         return srf;
       }
     }
@@ -184,7 +204,9 @@ namespace Rhino.Geometry
     {
       get
       {
-        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetBestTolerance(m_ptr);
+        double rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetBestTolerance(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -196,12 +218,15 @@ namespace Rhino.Geometry
     {
       get
       {
-        return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetResultsMaxCount(m_ptr);
+        int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetResultsMaxCount(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         if (value < 0) { throw new ArgumentOutOfRangeException("value"); }
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetResultsMaxCount(m_ptr, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -213,11 +238,14 @@ namespace Rhino.Geometry
     {
       get
       {
-        return UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetSaveIntermediateResults(m_ptr);
+        bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_GetSaveIntermediateResults(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.RHC_TlMultiMatchSrf_SetSaveIntermediateResults(m_ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -227,7 +255,9 @@ namespace Rhino.Geometry
     public bool InsertKnot(int dir, double knot_value, int knot_multiplicity)
     {
       if (dir < 0) return false;
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_InsertKnot(m_ptr, (uint)dir, knot_value, knot_multiplicity);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_InsertKnot(m_ptr, (uint)dir, knot_value, knot_multiplicity);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -236,7 +266,9 @@ namespace Rhino.Geometry
     public bool IncreaseDegree(int dir, int degree)
     {
       if (dir < 0) return false;
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_IncreaseDegree(m_ptr, (uint)dir, degree);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_IncreaseDegree(m_ptr, (uint)dir, degree);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -245,7 +277,9 @@ namespace Rhino.Geometry
     public bool MatchStructureOneSide(int side)
     {
       if (side < 0) return false;
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureOneSide(m_ptr, (uint)side);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureOneSide(m_ptr, (uint)side);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -254,7 +288,9 @@ namespace Rhino.Geometry
     public bool MatchStructureBothSidesOneDir(int dir)
     {
       if (dir < 0) return false;
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureBothSidesOneDir(m_ptr, (uint)dir);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureBothSidesOneDir(m_ptr, (uint)dir);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -262,7 +298,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public bool MatchStructureAllSides()
     {
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureAllSides(m_ptr);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_MatchStructureAllSides(m_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -270,7 +308,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public bool RefineSrf(double tolerance)
     {
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_RefineSrf(m_ptr, tolerance);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_RefineSrf(m_ptr, tolerance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -278,7 +318,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public int AddConstraint(NurbsCurve target_curve, EdgeContinuityOption continuity)
     {
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -287,7 +329,9 @@ namespace Rhino.Geometry
     public int AddConstraintSide(int side, NurbsCurve target_curve, EdgeContinuityOption continuity)
     {
       if (side < 0) return -1;
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraintSide(m_ptr, (uint)side, target_curve.NonConstPointer(), (uint)continuity);
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraintSide(m_ptr, (uint)side, target_curve.NonConstPointer(), (uint)continuity);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -295,7 +339,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public int EditConstraint(NurbsCurve target_curve, EdgeContinuityOption continuity)
     {
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -305,7 +351,9 @@ namespace Rhino.Geometry
     {
       if (side < 0) return -1;
       IntPtr target_curve_ptr = target_curve == null ? IntPtr.Zero : target_curve.NonConstPointer();
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraintSide(m_ptr, (uint)side, target_curve_ptr, (uint)continuity);
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraintSide(m_ptr, (uint)side, target_curve_ptr, (uint)continuity);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -313,7 +361,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public int RemoveConstraint(NurbsCurve target_curve)
     {
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromCurve(m_ptr, target_curve.NonConstPointer());
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromCurve(m_ptr, target_curve.NonConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -322,7 +372,9 @@ namespace Rhino.Geometry
     public int RemoveConstraintSide(int side)
     {
       if (side < 0) return -1;
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromSide(m_ptr, (uint)side);
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromSide(m_ptr, (uint)side);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -330,7 +382,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public int EditInitialSurface(NurbsSurface new_surface)
     {
-      return (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditInitialSurface(m_ptr, new_surface.NonConstPointer());
+      int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditInitialSurface(m_ptr, new_surface.NonConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -338,7 +392,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public bool Solve()
     {
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_Solve(m_ptr);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_Solve(m_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -346,7 +402,9 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public bool SolveOrderedEdges()
     {
-      return UnsafeNativeMethods.RHC_TlMultiMatchSrf_SolveOrderedEdges(m_ptr);
+      bool rc = UnsafeNativeMethods.RHC_TlMultiMatchSrf_SolveOrderedEdges(m_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 

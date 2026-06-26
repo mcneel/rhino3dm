@@ -93,6 +93,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_string = sh.NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetLine_GetString(ptr_const_this, which, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -100,6 +101,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetLine_SetString(ptr_this, which, s);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Prompt when getting first point</summary>
@@ -129,13 +131,16 @@ namespace Rhino.Input.Custom
     bool GetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts which)
     {
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetLine_GetBool(ptr_const_this, which);
+      bool rc = UnsafeNativeMethods.CArgsRhinoGetLine_GetBool(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetBoolHelper(UnsafeNativeMethods.ArgsGetLineBoolConsts which, bool value)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetLine_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
     }
 
 
@@ -174,6 +179,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_const_this = ConstPointer();
         int argb = UnsafeNativeMethods.CArgsRhinoGetLine_GetFeedbackColor(ptr_const_this);
+        GC.KeepAlive(this);
         return System.Drawing.Color.FromArgb(argb);
       }
       set
@@ -181,6 +187,7 @@ namespace Rhino.Input.Custom
         IntPtr ptr_this = NonConstPointer();
         int argb = value.ToArgb();
         UnsafeNativeMethods.CArgsRhinoGetLine_SetFeedbackColor(ptr_this, argb);
+        GC.KeepAlive(this);
       }
     }
 
@@ -193,12 +200,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetLine_GetFixedLength(ptr_const_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetLine_GetFixedLength(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetLine_SetFixedLength(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -243,6 +253,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetLine_SetFirstPoint(ptr_this, point);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -255,12 +266,14 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_const_this = ConstPointer();
         int rc = UnsafeNativeMethods.CArgsRhinoGetLine_GetLineMode(ptr_const_this);
+        GC.KeepAlive(this);
         return (GetLineMode)rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetLine_SetLineMode(ptr_this, (int)value);
+        GC.KeepAlive(this);
       }
     }
 

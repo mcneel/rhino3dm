@@ -42,6 +42,7 @@ namespace Rhino.Display
     {
       IntPtr ptr = other.ConstPointer();
       m_ptr = UnsafeNativeMethods.CDisplayPipelineMaterial_New(ptr);
+      GC.KeepAlive(other);
     }
 
     /// <since>5.0</since>
@@ -49,6 +50,7 @@ namespace Rhino.Display
     {
       IntPtr pConstMaterial = material.ConstPointer();
       m_ptr = UnsafeNativeMethods.CDisplayPipelineMaterial_New4(pConstMaterial);
+      GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -251,12 +253,15 @@ namespace Rhino.Display
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineMaterial_GetBool(pConstThis, idxIsTwoSided);
+        bool rc = UnsafeNativeMethods.CDisplayPipelineMaterial_GetBool(pConstThis, idxIsTwoSided);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineMaterial_SetBool(pThis, idxIsTwoSided, value);
+        GC.KeepAlive(this);
       }
     }
     #endregion
@@ -281,6 +286,7 @@ namespace Rhino.Display
     {
       IntPtr ptr = ConstPointer();
       int abgr = UnsafeNativeMethods.CDisplayPipelineMaterial_GetColor(ptr, which);
+      GC.KeepAlive(this);
       return Rhino.Runtime.Interop.ColorFromWin32(StripAlpha(abgr));
     }
     private void SetColor(int which, Color c)
@@ -288,6 +294,7 @@ namespace Rhino.Display
       IntPtr ptr = NonConstPointer();
       int argb = StripAlpha(c.ToArgb());
       UnsafeNativeMethods.CDisplayPipelineMaterial_SetColor(ptr, which, argb);
+      GC.KeepAlive(this);
     }
 
     const int idxShine = 0;
@@ -298,12 +305,15 @@ namespace Rhino.Display
     private double GetDouble(int which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineMaterial_GetSetDouble(ptr, which, false, 0);
+      double rc = UnsafeNativeMethods.CDisplayPipelineMaterial_GetSetDouble(ptr, which, false, 0);
+      GC.KeepAlive(this);
+      return rc;
     }
     private void SetDouble(int which, double value)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineMaterial_GetSetDouble(ptr, which, true, value);
+      GC.KeepAlive(this);
     }
 
     IntPtr NonConstMaterialPointer(bool front)
@@ -320,13 +330,17 @@ namespace Rhino.Display
     bool AddTexture(string filename, Rhino.DocObjects.TextureType which, bool front)
     {
       IntPtr pMaterial = NonConstMaterialPointer(front);
-      return UnsafeNativeMethods.ON_Material_AddTexture(pMaterial, filename, (int)which);
+      bool rc = UnsafeNativeMethods.ON_Material_AddTexture(pMaterial, filename, (int)which);
+      GC.KeepAlive(this);
+      return rc;
     }
     bool SetTexture(Rhino.DocObjects.Texture texture, Rhino.DocObjects.TextureType which, bool front)
     {
       IntPtr pMaterial = NonConstMaterialPointer(front);
       IntPtr pTexture = texture.ConstPointer();
-      return UnsafeNativeMethods.ON_Material_SetTexture(pMaterial, pTexture, (int)which);
+      bool rc = UnsafeNativeMethods.ON_Material_SetTexture(pMaterial, pTexture, (int)which);
+      GC.KeepAlive(this);
+      return rc;
     }
     Rhino.DocObjects.Texture GetTexture(Rhino.DocObjects.TextureType which, bool front)
     {
@@ -334,6 +348,7 @@ namespace Rhino.Display
       int index = UnsafeNativeMethods.ON_Material_GetTexture(pConstMaterial, (int)which);
       if (index >= 0)
         return new Rhino.DocObjects.Texture(index, this, front);
+      GC.KeepAlive(this);
       return null;
     }
     #endregion

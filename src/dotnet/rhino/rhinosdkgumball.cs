@@ -139,7 +139,9 @@ namespace Rhino.UI.Gumball
     public bool SetFromBoundingBox(BoundingBox boundingBox)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromBoundingBox(pThis, boundingBox.Min, boundingBox.Max);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromBoundingBox(pThis, boundingBox.Min, boundingBox.Max);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -155,42 +157,54 @@ namespace Rhino.UI.Gumball
     public bool SetFromBoundingBox(Plane frame, BoundingBox frameBoundingBox)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromBoundingBox2(pThis, ref frame, frameBoundingBox.Min, frameBoundingBox.Max);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromBoundingBox2(pThis, ref frame, frameBoundingBox.Min, frameBoundingBox.Max);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool SetFromLine(Line line)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromLine(pThis, line.From, line.To);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromLine(pThis, line.From, line.To);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool SetFromPlane(Plane plane)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromPlane(pThis, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromPlane(pThis, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool SetFromArc(Arc arc)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromArc(pThis, ref arc);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromArc(pThis, ref arc);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool SetFromCircle(Circle circle)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromCircle(pThis, ref circle);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromCircle(pThis, ref circle);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
     public bool SetFromEllipse(Ellipse ellipse)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromEllipse(pThis, ref ellipse);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromEllipse(pThis, ref ellipse);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -198,7 +212,10 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstLight = light.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromLight(pThis, pConstLight);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromLight(pThis, pConstLight);
+      GC.KeepAlive(light);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -206,7 +223,10 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstHatch = hatch.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromHatch(pThis, pConstHatch);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromHatch(pThis, pConstHatch);
+      GC.KeepAlive(hatch);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -214,7 +234,10 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstCurve = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromCurve(pThis, pConstCurve);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromCurve(pThis, pConstCurve);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -222,7 +245,10 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pThis = NonConstPointer();
       IntPtr pConstExtrusion = extrusion.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGumball_SetFromExtrusion(pThis, pConstExtrusion);
+      bool rc = UnsafeNativeMethods.CRhinoGumball_SetFromExtrusion(pThis, pConstExtrusion);
+      GC.KeepAlive(extrusion);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -235,6 +261,7 @@ namespace Rhino.UI.Gumball
         Vector3d sgd = new Vector3d();
         int mode = 0;
         UnsafeNativeMethods.CRhinoGumball_GetFrame(pConstThis, ref pl, ref sgd, ref mode);
+        GC.KeepAlive(this);
         return new GumballFrame(pl, sgd, (GumballScaleMode)mode);
       }
       set
@@ -242,6 +269,7 @@ namespace Rhino.UI.Gumball
         IntPtr pThis = NonConstPointer();
         Plane pl = value.Plane;
         UnsafeNativeMethods.CRhinoGumball_SetFrame(pThis, ref pl, value.ScaleGripDistance, (int)value.ScaleMode);
+        GC.KeepAlive(this);
       }
     }
   }
@@ -533,12 +561,15 @@ namespace Rhino.UI.Gumball
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoGumballDisplayConduit_Enabled(pConstThis);
+        bool rc = UnsafeNativeMethods.CRhinoGumballDisplayConduit_Enabled(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoGumballDisplayConduit_SetEnabled(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -548,7 +579,9 @@ namespace Rhino.UI.Gumball
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoGumballDisplayConduit_InRelocate(pConstThis);
+        bool rc = UnsafeNativeMethods.CRhinoGumballDisplayConduit_InRelocate(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -560,6 +593,7 @@ namespace Rhino.UI.Gumball
       IntPtr pConstThis = ConstPointer();
       Transform rc = new Transform();
       UnsafeNativeMethods.CRhinoGumballDisplayConduit_GetTransform(pConstThis, which, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -575,6 +609,7 @@ namespace Rhino.UI.Gumball
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoGumballDisplayConduit_SetPreTransform(pThis, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -644,15 +679,25 @@ namespace Rhino.UI.Gumball
       UnsafeNativeMethods.CRhinoGumballDisplayConduit_SetBaseGumball(pThis, pConstGumball, pAppearanceSettings);
       if (pAppearanceSettings != IntPtr.Zero)
         GumballAppearanceSettings.DisposePointer(pAppearanceSettings);
+      GC.KeepAlive(gumball);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
     public bool UpdateGumball(Point3d point, Line worldLine)
     {
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumballDisplayConduit_UpdateGumball(pThis, point, ref worldLine);
+      bool rc = UnsafeNativeMethods.CRhinoGumballDisplayConduit_UpdateGumball(pThis, point, ref worldLine);
+      GC.KeepAlive(this);
+      return rc;
     }
 
+    /// <since>8.19</since>
+    public bool UpdateGumball(Plane frame)
+    {
+      IntPtr pThis = NonConstPointer();
+      return UnsafeNativeMethods.CRhinoGumballDisplayConduit_UpdateGumballFrame(pThis, ref frame);
+    }
 
     GumballPickResult m_pick_result;
     /// <summary>The initial mouse down event sets PickResult.</summary>
@@ -673,7 +718,11 @@ namespace Rhino.UI.Gumball
       IntPtr pGetPoint = IntPtr.Zero;
       if( getPoint!=null)
         getPoint.NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGumballDisplayConduit_PickGumball(pThis, pConstPickContext, pGetPoint);
+      bool rc = UnsafeNativeMethods.CRhinoGumballDisplayConduit_PickGumball(pThis, pConstPickContext, pGetPoint);
+      GC.KeepAlive(pickContext);
+      GC.KeepAlive(getPoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -681,6 +730,7 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CRhinoGumballDisplayConduit_CheckShiftAndCtrlKeys(pThis);
+      GC.KeepAlive(this);
     }
   }
 
@@ -724,6 +774,7 @@ namespace Rhino.UI.Gumball
     {
       IntPtr pConduit = m_parent.NonConstPointer();
       UnsafeNativeMethods.CRhinoGumballPickResult_SetToDefault(pConduit);
+      GC.KeepAlive(m_parent);
     }
 
     /// <since>5.0</since>
@@ -733,6 +784,7 @@ namespace Rhino.UI.Gumball
       {
         IntPtr pConstConduit = m_parent.ConstPointer();
         int rc = UnsafeNativeMethods.CRhinoGumballPickResult_Mode(pConstConduit);
+        GC.KeepAlive(m_parent);
         return (GumballMode)rc;
       }
     }

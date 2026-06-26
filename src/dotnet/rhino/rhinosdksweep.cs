@@ -210,6 +210,7 @@ namespace Rhino.Geometry
         double[] tvals = xsec_t.ToArray();
         rc.m_ptr = UnsafeNativeMethods.CArgsRhinoSweep1_New(pConstRail, pSections, tvals, roadlike_up, closed, sweep_tol, angle_tol, miter_type);
         sections.Dispose();
+        GC.KeepAlive(rail);
         return rc;
       }
 
@@ -770,7 +771,10 @@ namespace Rhino.Geometry
           double[] tvals1 = xsec_t1.ToArray();
           double[] tvals2 = xsec_t2.ToArray();
           rc.m_ptr = UnsafeNativeMethods.CArgsRhinoSweep2_New(pConstRail1, pConstRail2, pSections, tvals1, tvals2, closed, sweep_tol, angle_tol, maintain_height);
+          GC.KeepAlive(sections);
         }
+        GC.KeepAlive(rail1);
+        GC.KeepAlive(rail2);
         return rc;
       }
 

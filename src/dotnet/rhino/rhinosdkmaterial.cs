@@ -39,6 +39,7 @@ namespace Rhino.DocObjects
       var pointer = ConstPointer;
       var value = Guid.Empty;
       UnsafeNativeMethods.ON_3dmObjectAttributes_MaterialId(pointer, PlugInId, ref value, backFace);
+      GC.KeepAlive(this);
       return value;
     }
 
@@ -47,6 +48,7 @@ namespace Rhino.DocObjects
       var pointer = ConstPointer;
       var value = -1;
       UnsafeNativeMethods.ON_3dmObjectAttributes_MaterialIndex(pointer, PlugInId, ref value, backFace);
+      GC.KeepAlive(this);
       return value;
     }
     #endregion Internal/Private methods
@@ -73,6 +75,7 @@ namespace Rhino.DocObjects
           case (int)ObjectMaterialSource.MaterialFromParent:
             return ObjectMaterialSource.MaterialFromParent;
         }
+        GC.KeepAlive(this);
         throw new Exception("Unknown ObjectMaterialSource type");
       }
     }
@@ -644,6 +647,7 @@ namespace Rhino.DocObjects
     public Material(Material other) : base()
     {
       IntPtr ptr_material = UnsafeNativeMethods.ON_Material_New(other.ConstPointer());
+      GC.KeepAlive(other);
       ConstructNonConstObject(ptr_material);
     }
 
@@ -651,6 +655,8 @@ namespace Rhino.DocObjects
     public void CopyFrom(Material other)
     {
       UnsafeNativeMethods.ON_Material_CopyFrom(NonConstPointer(), other.ConstPointer());
+      GC.KeepAlive(other);
+      GC.KeepAlive(this);
     }
 
 
@@ -678,11 +684,14 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.Rdk_RenderContent_MaterialInstanceId(ConstPointer());
+        Guid rc = UnsafeNativeMethods.Rdk_RenderContent_MaterialInstanceId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetMaterialInstanceId(NonConstPointer(), value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -787,7 +796,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       var ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(ptr_const_this);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(ptr_const_this);
+      GC.KeepAlive(this);
+      return rc;
     }
     protected override void OnSwitchToNonConst()
     {
@@ -840,12 +851,15 @@ namespace Rhino.DocObjects
       get
       {
         var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Material_PlugInId(ptr_const_this);
+        Guid rc = UnsafeNativeMethods.ON_Material_PlugInId(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Material_SetPlugInId(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -861,7 +875,9 @@ namespace Rhino.DocObjects
           return false;
 #if RHINO_SDK
         var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoMaterial_GetBool(ptr_const_this, IDX_IS_DEFAULT_MATERIAL);
+        bool rc= UnsafeNativeMethods.CRhinoMaterial_GetBool(ptr_const_this, IDX_IS_DEFAULT_MATERIAL);
+        GC.KeepAlive(this);
+        return rc;
 #else
         return MaterialIndex == -1;
 #endif
@@ -888,7 +904,9 @@ namespace Rhino.DocObjects
         if (!IsDocumentControlled)
           return 0;
         var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.CRhinoMaterial_InUse(ptr_const_this);
+        int rc = UnsafeNativeMethods.CRhinoMaterial_InUse(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -922,6 +940,7 @@ namespace Rhino.DocObjects
         {
           var ptr_string = sh.NonConstPointer();
           UnsafeNativeMethods.ON_Material_GetName(ptr_const_this, ptr_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -929,6 +948,7 @@ namespace Rhino.DocObjects
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Material_SetName(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -943,23 +963,29 @@ namespace Rhino.DocObjects
     double GetDouble(int which)
     {
       var ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Material_GetDouble(ptr_const_this, which);
+      double rc = UnsafeNativeMethods.ON_Material_GetDouble(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(int which, double val)
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Material_SetDouble(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     bool GetBool(UnsafeNativeMethods.MaterialBool which)
     {
       var ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Material_GetBool(ptr_const_this, which);
+      bool rc = UnsafeNativeMethods.ON_Material_GetBool(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.MaterialBool which, bool val)
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Material_SetBool(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -1077,7 +1103,9 @@ namespace Rhino.DocObjects
     {
       get
       {
-        return UnsafeNativeMethods.ON_Material_IsPhysicallyBased(ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_Material_IsPhysicallyBased(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1094,6 +1122,7 @@ namespace Rhino.DocObjects
     public void ToPhysicallyBased()
     {
       UnsafeNativeMethods.ON_Material_ConvertToPBR(NonConstPointer());
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1117,6 +1146,7 @@ namespace Rhino.DocObjects
       {
         var ptr_const_this = ConstPointer();
         var abgr = UnsafeNativeMethods.ON_Material_PreviewColor(ptr_const_this);
+        GC.KeepAlive(this);
         return Runtime.Interop.ColorFromWin32(abgr);
       }
     }
@@ -1134,7 +1164,9 @@ namespace Rhino.DocObjects
       get 
       {
         var ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Material_RdkMaterialID(ptr_const_this);
+        Guid rc = UnsafeNativeMethods.ON_Material_RdkMaterialID(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1148,6 +1180,7 @@ namespace Rhino.DocObjects
     {
       var ptr_const_this = ConstPointer();
       var abgr = UnsafeNativeMethods.ON_Material_GetColor(ptr_const_this, which);
+      GC.KeepAlive(this);
       return Runtime.Interop.ColorFromWin32(abgr);
     }
     void SetColor(int which, System.Drawing.Color c)
@@ -1155,6 +1188,7 @@ namespace Rhino.DocObjects
       var ptr_this = NonConstPointer();
       var argb = c.ToArgb();
       UnsafeNativeMethods.ON_Material_SetColor(ptr_this, which, argb);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -1203,12 +1237,15 @@ namespace Rhino.DocObjects
     {
       var ptr_const_this = NonConstPointer();
       UnsafeNativeMethods.ON_Material_Default(ptr_const_this);
+      GC.KeepAlive(this);
     }
 
     bool AddTexture(string filename, TextureType which)
     {
       var ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Material_AddTexture(ptr_this, filename, (int)which);
+      bool rc = UnsafeNativeMethods.ON_Material_AddTexture(ptr_this, filename, (int)which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1222,7 +1259,10 @@ namespace Rhino.DocObjects
     {
       var ptr_this = NonConstPointer();
       var ptr_const_texture = texture.ConstPointer();
-      return UnsafeNativeMethods.ON_Material_SetTexture(ptr_this, ptr_const_texture, (int)which);
+      bool rc = UnsafeNativeMethods.ON_Material_SetTexture(ptr_this, ptr_const_texture, (int)which);
+      GC.KeepAlive(texture);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1237,6 +1277,7 @@ namespace Rhino.DocObjects
       var index = UnsafeNativeMethods.ON_Material_GetTexture(ptr_const_this, (int)which);
       if (index >= 0)
         return new Texture(index, this);
+      GC.KeepAlive(this);
       return null;
     }
 
@@ -1252,6 +1293,7 @@ namespace Rhino.DocObjects
       var rc = new Texture[count];
       for (var i = 0; i < count; i++)
         rc[i] = new Texture(i, this);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1353,7 +1395,9 @@ namespace Rhino.DocObjects
     public Guid MaterialChannelIdFromIndex(int material_channel_index)
     {
       var ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Material_MaterialChannelIdFromIndex(ptr_const_this, material_channel_index);
+      Guid rc = UnsafeNativeMethods.ON_Material_MaterialChannelIdFromIndex(ptr_const_this, material_channel_index);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1367,7 +1411,9 @@ namespace Rhino.DocObjects
     public int MaterialChannelIndexFromId(Guid material_channel_id, bool bAddIdIfNotPresent)
     {
       var ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Material_MaterialChannelIndexFromId(ptr_this, material_channel_id, bAddIdIfNotPresent);
+      int rc = UnsafeNativeMethods.ON_Material_MaterialChannelIndexFromId(ptr_this, material_channel_id, bAddIdIfNotPresent);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1378,6 +1424,7 @@ namespace Rhino.DocObjects
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Material_ClearMaterialChannels(ptr_this);
+      GC.KeepAlive(this);
     }
 #endif
 
@@ -1388,7 +1435,9 @@ namespace Rhino.DocObjects
       if (m_id == Guid.Empty || IsDocumentControlled)
         return false;
       var ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoMaterialTable_CommitChanges(m_doc.RuntimeSerialNumber, ptr_this, m_id);
+      bool rc = UnsafeNativeMethods.CRhinoMaterialTable_CommitChanges(m_doc.RuntimeSerialNumber, ptr_this, m_id);
+      GC.KeepAlive(this);
+      return rc;
 #else
       return true;
 #endif
@@ -1632,7 +1681,10 @@ namespace Rhino.DocObjects.Tables
     public int Add(Material material, bool reference)
     {
       IntPtr ptr_const_material = material.ConstPointer();
-      return UnsafeNativeMethods.CRhinoMaterialTable_Add(m_doc.RuntimeSerialNumber, ptr_const_material, reference);
+      int rc = UnsafeNativeMethods.CRhinoMaterialTable_Add(m_doc.RuntimeSerialNumber, ptr_const_material, reference);
+      GC.KeepAlive(material);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1648,7 +1700,10 @@ namespace Rhino.DocObjects.Tables
     public int Find(Material material, bool ignoreDeletedMaterials)
     {
       IntPtr ptr_const_material = material.ConstPointer();
-      return UnsafeNativeMethods.CRhinoMaterialTable_FindByMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, ignoreDeletedMaterials);
+      int rc = UnsafeNativeMethods.CRhinoMaterialTable_FindByMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, ignoreDeletedMaterials);
+      GC.KeepAlive(material);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1693,7 +1748,10 @@ namespace Rhino.DocObjects.Tables
     public bool Modify(Material newSettings, int materialIndex, bool quiet)
     {
       IntPtr ptr_const_material = newSettings.ConstPointer();
-      return UnsafeNativeMethods.CRhinoMaterialTable_ModifyMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, materialIndex, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoMaterialTable_ModifyMaterial(m_doc.RuntimeSerialNumber, ptr_const_material, materialIndex, quiet);
+      GC.KeepAlive(newSettings);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>5.0</since>

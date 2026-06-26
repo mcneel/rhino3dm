@@ -31,6 +31,7 @@ namespace Rhino.Geometry
       if( null != other )
         pOther = other.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_LineCurve_New(pOther);
+      GC.KeepAlive(other);
       ConstructNonConstObject(ptr);
     }
 
@@ -119,6 +120,7 @@ namespace Rhino.Geometry
       IntPtr pDisplayPipeline = pipeline.NonConstPointer();
       int argb = color.ToArgb();
       UnsafeNativeMethods.ON_LineCurve_Draw(ptr, pDisplayPipeline, argb, thickness);
+      GC.KeepAlive(this);
     }
 #endif
 
@@ -133,12 +135,14 @@ namespace Rhino.Geometry
         IntPtr ptr = ConstPointer();
         Line line = new Line();
         UnsafeNativeMethods.ON_LineCurve_GetSetLine(ptr, false, ref line);
+        GC.KeepAlive(this);
         return line;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_LineCurve_GetSetLine(ptr, true, ref value);
+        GC.KeepAlive(this);
       }
     }
   }

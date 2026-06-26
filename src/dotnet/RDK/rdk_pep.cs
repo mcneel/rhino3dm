@@ -180,30 +180,52 @@ namespace Rhino.Render.PostEffects
 
   public static class PostEffectUuids
   {
+    /// <since>8.13</since>
     public static Guid Glare           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Glare);
+    /// <since>8.13</since>
     public static Guid Bloom           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Bloom);
+    /// <since>8.13</since>
     public static Guid Glow            => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Glow);
+    /// <since>8.13</since>
     public static Guid Fog             => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Fog);
+    /// <since>8.13</since>
     public static Guid DepthOfField    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_DepthOfField);
+    /// <since>8.13</since>
     public static Guid Multiplier      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Multiplier);
+    /// <since>8.13</since>
     public static Guid Noise           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Noise);
+    /// <since>8.13</since>
     public static Guid GaussianBlur    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_GaussianBlur);
 
+    /// <since>8.13</since>
     public static Guid WireframePointsRGBA      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframePointsRGBA);
+    /// <since>8.13</since>
     public static Guid WireframeCurvesRGBA      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeCurvesRGBA);
+    /// <since>8.13</since>
     public static Guid WireframeIsocurvesRGBA   => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeIsocurvesRGBA);
+    /// <since>8.13</since>
     public static Guid WireframeAnnotationsRGBA => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_WireframeAnnotationsRGBA);
 
+    /// <since>8.13</since>
     public static Guid ToneMapper_Clamp           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Clamp);
+    /// <since>8.13</since>
     public static Guid ToneMapper_BlackWhitePoint => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_BlackWhitePoint);
+    /// <since>8.13</since>
     public static Guid ToneMapper_Logarithmic     => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Logarithmic);
+    /// <since>8.13</since>
     public static Guid ToneMapper_FalseColor      => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_FalseColor);
+    /// <since>8.13</since>
     public static Guid ToneMapper_Filmic          => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_ToneMapper_Filmic);
 
+    /// <since>8.13</since>
     public static Guid Gamma     => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Gamma);
+    /// <since>8.13</since>
     public static Guid Dithering => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Dithering);
+    /// <since>8.13</since>
     public static Guid Watermark => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Watermark);
+    /// <since>8.13</since>
     public static Guid HueSatLum => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_HueSatLum);
+    /// <since>8.13</since>
     public static Guid BriCon    => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_BriCon);
   }
 
@@ -278,7 +300,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffect_UUID(CppPointer);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_UUID(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -287,7 +311,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return (PostEffectType)UnsafeNativeMethods.IRhRdkPostEffect_Type(CppPointer);
+        var ret = (PostEffectType)UnsafeNativeMethods.IRhRdkPostEffect_Type(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -296,7 +322,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return (PostEffectStyles)UnsafeNativeMethods.IRhRdkPostEffect_UsageFlags(CppPointer);
+        var ret = (PostEffectStyles)UnsafeNativeMethods.IRhRdkPostEffect_UsageFlags(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -309,6 +337,7 @@ namespace Rhino.Render.PostEffects
         {
           var p_string = sh.NonConstPointer();
           UnsafeNativeMethods.IRhRdkPostEffect_LocalName(CppPointer, p_string);
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -319,7 +348,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffect_CanDisplayHelp(CppPointer);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_CanDisplayHelp(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -328,7 +359,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return (PostEffectExecuteWhileRenderingOptions)UnsafeNativeMethods.IRhRdkPostEffect_GetExecuteWhileRenderingOption(CppPointer);
+        var ret = (PostEffectExecuteWhileRenderingOptions)UnsafeNativeMethods.IRhRdkPostEffect_GetExecuteWhileRenderingOption(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -350,11 +383,14 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffect_Listable_On(CppPointer);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_Listable_On(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.IRhRdkPostEffect_Listable_SetOn(CppPointer, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -363,11 +399,14 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffect_Listable_Shown(CppPointer);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_Listable_Shown(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.IRhRdkPostEffect_Listable_SetShown(CppPointer, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -395,6 +434,7 @@ namespace Rhino.Render.PostEffects
         {
           // Delete m_cpp
           UnsafeNativeMethods.CRdkCmnPostEffect_Delete(m_cmn_cpp);
+          GC.KeepAlive(this);
           m_cmn_cpp = IntPtr.Zero;
         }
       }
@@ -684,7 +724,9 @@ namespace Rhino.Render.PostEffects
     {
       get 
        {
-        return UnsafeNativeMethods.IRhRdkPostEffect_IsSelected(CppPointer);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_IsSelected(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -768,6 +810,8 @@ namespace Rhino.Render.PostEffects
       if(pipeline != null)
       {
         rc = UnsafeNativeMethods.CRdkCmnPostEffect_Base_CanExecute(CppPointer, pipeline.CppPointer);
+        GC.KeepAlive(this);
+        GC.KeepAlive(pipeline);
       }
 
       return rc;
@@ -788,6 +832,7 @@ namespace Rhino.Render.PostEffects
         var aChannels = new SimpleArrayGuid();
 
         UnsafeNativeMethods.CRdkCmnPostEffect_Base_RequiredChannels(CppPointer, aChannels.NonConstPointer());
+        GC.KeepAlive(this);
 
         return aChannels.ToArray();
       }
@@ -822,26 +867,32 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public override int GetHashCode() // [ANDYLOOK] This does not need to be virtual but I can't understand why the overrides even exist.
     {
-      return (int)UnsafeNativeMethods.IRhRdkPostEffect_CRC(CppPointer);
+      var ret = (int)UnsafeNativeMethods.IRhRdkPostEffect_CRC(CppPointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <since>7.0</since>
     public void BeginChange(RenderContent.ChangeContexts changeContext)
     {
       UnsafeNativeMethods.IRhRdkPostEffect_BeginChange(CppPointer, (int)changeContext);
-      
+      GC.KeepAlive(this);
+
     }
 
     /// <since>7.0</since>
     public bool EndChange()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_EndChange(CppPointer);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_EndChange(CppPointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <since>7.0</since>
     public void Changed()
     {
       UnsafeNativeMethods.IRhRdkPostEffect_Changed(CppPointer);
+      GC.KeepAlive(this);
     }
   }
 
@@ -894,6 +945,9 @@ namespace Rhino.Render.PostEffects
         // do the call
         bool ret = UnsafeNativeMethods.IRhRdkPostEffect_IState_GetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
 
+        GC.KeepAlive(this);
+        GC.KeepAlive(v);
+
         vValue = (T)v.AsObject();
 
         return ret;
@@ -906,7 +960,10 @@ namespace Rhino.Render.PostEffects
       using (var sf = new StringWrapper(name))
       {
         var v = new Variant(vValue);
-        return UnsafeNativeMethods.IRhRdkPostEffect_IState_SetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_IState_SetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
+        GC.KeepAlive(this);
+        GC.KeepAlive(v);
+        return ret;
       }
     }
   }
@@ -959,6 +1016,8 @@ namespace Rhino.Render.PostEffects
     public void AddSection(ICollapsibleSection section)
     {
       UnsafeNativeMethods.IRhRdkPostEffectUI_AddSection(m_cpp, section.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(section);
     }
 #endif
   }
@@ -1002,6 +1061,7 @@ namespace Rhino.Render.PostEffects
     {
       m_cpp = UnsafeNativeMethods.CRdkCmnPostEffectFactory_New(serial_number);
       UnsafeNativeMethods.RdkAddExtension(m_cpp);
+      GC.KeepAlive(this);
       return m_cpp;
     }
 
@@ -1172,7 +1232,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffectPipeline_RenderingId(m_cpp);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_RenderingId(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -1185,7 +1247,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffectPipeline_AllowGPU(m_cpp);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_AllowGPU(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -1200,6 +1264,8 @@ namespace Rhino.Render.PostEffects
       int height = 0;
       UnsafeNativeMethods.IRhRdkPostEffectPipeline_Dimensions(m_cpp, ref width, ref height);
 
+      GC.KeepAlive(this);
+
       return new Size(width, height);
     }
 
@@ -1212,6 +1278,7 @@ namespace Rhino.Render.PostEffects
     PostEffect IPostEffects.PostEffectFromId(Guid uuid)
     {
       var pep = UnsafeNativeMethods.IRhRdkPostEffectPipeline_FindPostEffect(m_cpp, uuid);
+      GC.KeepAlive(this);
       if (pep == IntPtr.Zero)
         return null;
 
@@ -1250,6 +1317,7 @@ namespace Rhino.Render.PostEffects
     {
       SimpleArrayGuid array = new SimpleArrayGuid();
       UnsafeNativeMethods.IRhRdkPostEffectPipeline_PostEffects(m_cpp, array.NonConstPointer());
+      GC.KeepAlive(this);
       return array.ToArray();
     }
 
@@ -1265,8 +1333,10 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public bool Execute(Rectangle p, bool renderingInProgress, PostEffectExecuteContexts usageContexts, PostEffectHistograms histogramsToUpdate)
     {
-      return UnsafeNativeMethods.IRhRdkPostEffectPipeline_Execute(m_cpp, p.X, p.Y, p.Width, p.Height,
+      var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_Execute(m_cpp, p.X, p.Y, p.Width, p.Height,
                                  renderingInProgress, (int)usageContexts, (int)histogramsToUpdate);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     ///<summary>
@@ -1280,6 +1350,7 @@ namespace Rhino.Render.PostEffects
     void IProgress<int>.Report(int rowsCompleted)
     {
       UnsafeNativeMethods.IRhRdkPostEffectPipeline_ReportProgress(m_cpp, rowsCompleted);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1289,7 +1360,9 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public float GetMaxLuminance()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetMaxLuminance(m_cpp);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetMaxLuminance(m_cpp);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -1300,6 +1373,7 @@ namespace Rhino.Render.PostEffects
     public void SetStartTimeInMilliseconds(ulong ms)
     {
       UnsafeNativeMethods.IRhRdkPostEffectPipeline_SetStartTimeInMilliseconds(m_cpp, ms);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1311,7 +1385,9 @@ namespace Rhino.Render.PostEffects
     [CLSCompliant(false)]
     public ulong GetStartTimeInMilliseconds()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetStartTimeInMilliseconds(m_cpp);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetStartTimeInMilliseconds(m_cpp);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -1323,7 +1399,9 @@ namespace Rhino.Render.PostEffects
     [CLSCompliant(false)]
     public ulong GetEndTimeInMilliseconds()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetEndTimeInMilliseconds(m_cpp);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetEndTimeInMilliseconds(m_cpp);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -1335,7 +1413,9 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        return UnsafeNativeMethods.IRhRdkPostEffectPipeline_IsRendering(m_cpp);
+        var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_IsRendering(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -1355,6 +1435,7 @@ namespace Rhino.Render.PostEffects
     public PostEffectChannel GetChannelForRead(Guid id)
     {
       IntPtr pChannel = UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetChannelForRead(m_cpp, id);
+      GC.KeepAlive(this);
       if (pChannel != IntPtr.Zero)
       {
         PostEffectChannel channel = new PostEffectChannel(pChannel);
@@ -1376,6 +1457,7 @@ namespace Rhino.Render.PostEffects
     public PostEffectChannel GetChannelForWrite(Guid id)
     {
       IntPtr pChannel = UnsafeNativeMethods.IRhRdkPostEffectPipeline_GetChannelForWrite(m_cpp, id);
+      GC.KeepAlive(this);
       if (pChannel != IntPtr.Zero)
       {
         PostEffectChannel channel = new PostEffectChannel(pChannel);
@@ -1391,6 +1473,7 @@ namespace Rhino.Render.PostEffects
     public PostEffectThreadEngine ThreadEngine()
     {
       IntPtr pThreadEngine = UnsafeNativeMethods.IRhRdkPostEffectPipeline_ThreadEngine(m_cpp);
+      GC.KeepAlive(this);
       if (pThreadEngine != IntPtr.Zero)
         return new PostEffectThreadEngine(pThreadEngine);
 
@@ -1443,7 +1526,12 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     virtual public Guid Id
     {
-      get => UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_Id(m_cpp);
+      get
+      {
+        var ret = UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_Id(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -1452,7 +1540,12 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public int PixelSize
     {
-      get => (int)UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_PixelSize(m_cpp);
+      get
+      {
+        var ret = (int)UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_PixelSize(m_cpp);
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -1462,6 +1555,8 @@ namespace Rhino.Render.PostEffects
     public RenderWindow.Channel CPU()
     {
       var channel = UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_CPU(m_cpp);
+      GC.KeepAlive(this);
+
       if (channel == IntPtr.Zero)
         return null;
 
@@ -1475,6 +1570,8 @@ namespace Rhino.Render.PostEffects
     public RenderWindow.ChannelGPU GPU()
     {
       var channel = UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_GPU(m_cpp);
+      GC.KeepAlive(this);
+
       if (channel == IntPtr.Zero)
         return null;
 
@@ -1488,6 +1585,8 @@ namespace Rhino.Render.PostEffects
     public PostEffectChannel Clone()
     {
       var channel = UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_Clone(m_cpp);
+      GC.KeepAlive(this);
+
       if (channel == IntPtr.Zero)
         return null;
 
@@ -1506,6 +1605,7 @@ namespace Rhino.Render.PostEffects
     public void Commit()
     {
       UnsafeNativeMethods.IRhRdkPostEffectPipeline_IChannel_Commit(m_cpp);
+      GC.KeepAlive(this);
     }
   }
 
@@ -1558,6 +1658,7 @@ namespace Rhino.Render.PostEffects
         {
           // Delete m_cpp
           UnsafeNativeMethods.CRdkCmnPostEffectJob_Delete(CppPointer);
+          GC.KeepAlive(this);
           CppPointer = IntPtr.Zero;
         }
 
@@ -1672,6 +1773,7 @@ namespace Rhino.Render.PostEffects
     public PostEffectChannel GetChannel(Guid channelId)
     {
       var p = UnsafeNativeMethods.IRhRdkPostEffectThreadEngine_IJob_IChannels_GetChannel(CppPointer, channelId);
+      GC.KeepAlive(this);
       if (IntPtr.Zero == p)
         return null;
 
@@ -1723,6 +1825,9 @@ namespace Rhino.Render.PostEffects
       // "job" needs to not be garbage collected until IRhRdkPostEffectThreadEngine_RunPostEffect has executed.
       // Fixes RH-65311.
       GC.KeepAlive(job);
+      GC.KeepAlive(this);
+      GC.KeepAlive(pipeline);
+      GC.KeepAlive(plugin);
 
       return rc;
     }
@@ -1768,6 +1873,7 @@ namespace Rhino.Render.PostEffects
     public PostEffect PostEffectFromId(Guid uuid)
     {
       IntPtr pPEP = UnsafeNativeMethods.IRhRdkPostEffects_PostEffectFromId(CppPointer, uuid);
+      GC.KeepAlive(this);
       if (pPEP != IntPtr.Zero)
       {
         return new PostEffectNative(pPEP);
@@ -1780,6 +1886,7 @@ namespace Rhino.Render.PostEffects
     {
       var array = new PostEffectArray();
       UnsafeNativeMethods.IRhRdkPostEffects_GetPostEffects(CppPointer, (uint)type, array.CppPointer);
+      GC.KeepAlive(this);
       return array.ToArray();
     }
   }
@@ -1825,6 +1932,7 @@ namespace Rhino.Render.PostEffects
         if (m_owner)
         {
           UnsafeNativeMethods.PostEffectArray_Delete(m_cpp);
+          GC.KeepAlive(this);
         }
         m_cpp = IntPtr.Zero;
       }
@@ -1836,7 +1944,9 @@ namespace Rhino.Render.PostEffects
       {
         if (m_cpp != IntPtr.Zero)
         {
-          return UnsafeNativeMethods.PostEffectArray_Count(m_cpp);
+          var ret = UnsafeNativeMethods.PostEffectArray_Count(m_cpp);
+          GC.KeepAlive(this);
+          return ret;
         }
 
         return 0;
@@ -1848,6 +1958,8 @@ namespace Rhino.Render.PostEffects
       if (m_cpp != IntPtr.Zero)
       {
         UnsafeNativeMethods.PostEffectArray_Add(m_cpp, plugin.CppPointer);
+        GC.KeepAlive(this);
+        GC.KeepAlive(plugin);
       }
     }
 
@@ -1856,6 +1968,7 @@ namespace Rhino.Render.PostEffects
       if (m_cpp != IntPtr.Zero)
       {
         IntPtr pPlugin = UnsafeNativeMethods.PostEffectArray_At(m_cpp, index);
+        GC.KeepAlive(this);
         return new PostEffectNative(pPlugin);
       }
 
@@ -1898,6 +2011,7 @@ namespace Rhino.Render.PostEffects
       {
         var v = new Variant(vValue);
         bool ret = UnsafeNativeMethods.IRhRdkPostEffect_GetParameter(CppPointer, sf.ConstPointer, v.NonConstPointer());
+        GC.KeepAlive(this);
         vValue = v.AsObject();
         return ret;
       }
@@ -1908,53 +2022,73 @@ namespace Rhino.Render.PostEffects
       using (var sf = new StringWrapper(param))
       {
         var v = new Variant(vValue);
-        return UnsafeNativeMethods.IRhRdkPostEffect_SetParameter(CppPointer, sf.ConstPointer, v.NonConstPointer());
+        var ret = UnsafeNativeMethods.IRhRdkPostEffect_SetParameter(CppPointer, sf.ConstPointer, v.NonConstPointer());
+        GC.KeepAlive(this);
+        GC.KeepAlive(v);
+        return ret;
       }
     }
 
     public override void AddUISections(PostEffectUI ui)
     {
       UnsafeNativeMethods.IRhRdkPostEffect_AddUISections(CppPointer, ui.CppPointer);
+      GC.KeepAlive(this);
     }
 
     public override bool Execute(PostEffectPipeline pipeline, Rectangle rect)
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_Execute(CppPointer, pipeline.CppPointer, rect.Top, rect.Left, rect.Width, rect.Height);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_Execute(CppPointer, pipeline.CppPointer, rect.Top, rect.Left, rect.Width, rect.Height);
+      GC.KeepAlive(this);
+      GC.KeepAlive(pipeline);
+      return ret;
     }
 
     public override bool DisplayHelp()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_DisplayHelp(CppPointer);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_DisplayHelp(CppPointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public override bool ReadState(PostEffectState state)
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_ReadState(CppPointer, state.CppPointer);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_ReadState(CppPointer, state.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(state);
+      return ret;
     }
 
     public override void ResetToFactoryDefaults()
     {
       UnsafeNativeMethods.IRhRdkPostEffect_ResetToFactoryDefaults(CppPointer);
+      GC.KeepAlive(this);
     }
 
     public override bool WriteState(ref PostEffectState state)
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_WriteState(CppPointer, state.CppPointer);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_WriteState(CppPointer, state.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(state);
+      return ret;
     }
 
     new public void BeginChange(RenderContent.ChangeContexts changeContext)
     {
       UnsafeNativeMethods.IRhRdkPostEffect_BeginChange(CppPointer, (int)changeContext);
+      GC.KeepAlive(this);
     }
 
     new public bool EndChange()
     {
-      return UnsafeNativeMethods.IRhRdkPostEffect_EndChange(CppPointer);
+      var ret = UnsafeNativeMethods.IRhRdkPostEffect_EndChange(CppPointer);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     new public void Changed()
     {
       UnsafeNativeMethods.IRhRdkPostEffect_Changed(CppPointer);
+      GC.KeepAlive(this);
     }
   }
 }
@@ -2023,6 +2157,7 @@ namespace Rhino.Render.PostEffects
       {
         var id = new Guid();
         UnsafeNativeMethods.ON_PostEffect_GetId(CppPointer, ref id);
+        GC.KeepAlive(this);
         return id;
       }
     }
@@ -2035,7 +2170,10 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        switch (UnsafeNativeMethods.ON_PostEffect_GetType(CppPointer))
+        var s = UnsafeNativeMethods.ON_PostEffect_GetType(CppPointer);
+        GC.KeepAlive(this);
+
+        switch (s)
         {
         default:
         case 1: return PostEffectType.Early;
@@ -2056,6 +2194,7 @@ namespace Rhino.Render.PostEffects
         using (var sh = new StringHolder())
         {
           UnsafeNativeMethods.ON_PostEffect_GetLocalName(CppPointer, sh.NonConstPointer());
+          GC.KeepAlive(this);
           return sh.ToString();
         }
       }
@@ -2067,8 +2206,18 @@ namespace Rhino.Render.PostEffects
     /// <since>8.0</since>
     public bool On
     {
-      get => UnsafeNativeMethods.ON_PostEffect_GetOn(CppPointer);
-      set {  UnsafeNativeMethods.ON_PostEffect_SetOn(CppPointer, value); }
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_PostEffect_GetOn(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.ON_PostEffect_SetOn(CppPointer, value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -2077,8 +2226,18 @@ namespace Rhino.Render.PostEffects
     /// <since>8.0</since>
     public bool Shown
     {
-      get => UnsafeNativeMethods.ON_PostEffect_GetShown(CppPointer);
-      set {  UnsafeNativeMethods.ON_PostEffect_SetShown(CppPointer, value); }
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_PostEffect_GetShown(CppPointer);
+        GC.KeepAlive(this);
+        return ret;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.ON_PostEffect_SetShown(CppPointer, value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -2092,7 +2251,11 @@ namespace Rhino.Render.PostEffects
     {
       var v = new Variant();
 
-      if (!UnsafeNativeMethods.ON_PostEffect_GetParameter(CppPointer, param_name, v.NonConstPointer()))
+      var b = UnsafeNativeMethods.ON_PostEffect_GetParameter(CppPointer, param_name, v.NonConstPointer());
+
+      GC.KeepAlive(this);
+
+      if (!b)
         return null;
 
       return v;
@@ -2107,7 +2270,10 @@ namespace Rhino.Render.PostEffects
     public bool SetParameter(string param_name, object param_value)
     {
       var v = new Variant(param_value);
-      return UnsafeNativeMethods.ON_PostEffect_SetParameter(CppPointer, param_name, v.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_PostEffect_SetParameter(CppPointer, param_name, v.ConstPointer());
+      GC.KeepAlive(this);
+      GC.KeepAlive(v);
+      return ret;
     }
 
     /// <summary>
@@ -2117,7 +2283,9 @@ namespace Rhino.Render.PostEffects
     [CLSCompliant(false)]
     public uint DataCRC(uint current_remainder)
     {
-      return UnsafeNativeMethods.ON_PostEffect_GetDataCRC(CppPointer, current_remainder);
+      var ret = UnsafeNativeMethods.ON_PostEffect_GetDataCRC(CppPointer, current_remainder);
+      GC.KeepAlive(this);
+      return ret;
     }
   }
 
@@ -2135,6 +2303,8 @@ namespace Rhino.Render.PostEffects
     public bool MoveNext()
     {
       var native_pep = UnsafeNativeMethods.ON_PostEffects_GetAt(_collection.CppPointer, _index);
+      GC.KeepAlive(this);
+
       if (native_pep == IntPtr.Zero)
         return false;
 
@@ -2169,7 +2339,9 @@ namespace Rhino.Render.PostEffects
       if (rs == null)
         return IntPtr.Zero;
 
-      return UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(rs.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmRenderSettings_GetPostEffects(rs.ConstPointer());
+      GC.KeepAlive(rs);
+      return ret;
     }
 #endif
 
@@ -2193,7 +2365,9 @@ namespace Rhino.Render.PostEffects
 
     internal override IntPtr CppFromFile3dm(File3dm f)
     {
-      return UnsafeNativeMethods.ON_PostEffects_FromONX_Model(f.ConstPointer());
+      var ret = UnsafeNativeMethods.ON_PostEffects_FromONX_Model(f.ConstPointer());
+      GC.KeepAlive(f);
+      return ret;
     }
 
     ~PostEffectCollection()
@@ -2232,7 +2406,9 @@ namespace Rhino.Render.PostEffects
     /// <since>8.0</since>
     public bool MovePostEffectBefore(Guid id_move, Guid id_before)
     {
-      return UnsafeNativeMethods.ON_PostEffects_MovePostEffectBefore(CppPointer, ref id_move, ref id_before);
+      var ret = UnsafeNativeMethods.ON_PostEffects_MovePostEffectBefore(CppPointer, ref id_move, ref id_before);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2243,7 +2419,9 @@ namespace Rhino.Render.PostEffects
     public bool GetSelectedPostEffect(PostEffectType type, out Guid id)
     {
       id = Guid.Empty;
-      return UnsafeNativeMethods.ON_PostEffects_GetSelectedPostEffect(CppPointer, (int)type, ref id);
+      var ret = UnsafeNativeMethods.ON_PostEffects_GetSelectedPostEffect(CppPointer, (int)type, ref id);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -2253,17 +2431,21 @@ namespace Rhino.Render.PostEffects
     public void SetSelectedPostEffect(PostEffectType type, Guid id)
     {
       UnsafeNativeMethods.ON_PostEffects_SetSelectedPostEffect(CppPointer, (int)type, ref id);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_PostEffects_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()
     {
       UnsafeNativeMethods.ON_PostEffects_Delete(CppPointer);
+      GC.KeepAlive(this);
     }
 
     /// <summary></summary>
@@ -2282,7 +2464,9 @@ namespace Rhino.Render.PostEffects
 
     internal IntPtr FindPostEffect(Guid id)
     {
-      return UnsafeNativeMethods.ON_PostEffects_PostEffectFromId(CppPointer, id);
+      var ret = UnsafeNativeMethods.ON_PostEffects_PostEffectFromId(CppPointer, id);
+      GC.KeepAlive(this);
+      return ret;
     }
   }
 
@@ -2314,10 +2498,12 @@ namespace Rhino.Render.PostEffects
       Dispose(false);
     }
 
+    /// <since>8.13</since>
     public abstract bool ReadyToExecutePostEffect(Guid pep_id);
 
     private bool disposed = false;
 
+    /// <since>8.13</since>
     public void Dispose()
     {
       Dispose(true);
@@ -2334,6 +2520,7 @@ namespace Rhino.Render.PostEffects
         if (CppPointer != IntPtr.Zero)
         {
           UnsafeNativeMethods.CRdkCmnPostEffectExecutionControl_DeleteThis(CppPointer);
+          GC.KeepAlive(this);
           CppPointer = IntPtr.Zero;
         }
 #endif
@@ -2357,6 +2544,7 @@ namespace Rhino.Render.PostEffects
       return null;
     }
 
+    /// <since>8.13</since>
     public IntPtr Detach()
     {
       var p = CppPointer;

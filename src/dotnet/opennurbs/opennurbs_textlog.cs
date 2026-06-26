@@ -78,6 +78,7 @@ namespace Rhino.FileIO
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_TextLog_PushPopIndent(pThis, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -93,6 +94,7 @@ namespace Rhino.FileIO
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_TextLog_PushPopIndent(pThis, false);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -104,12 +106,15 @@ namespace Rhino.FileIO
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_TextLog_IndentSize_Get(pConstThis);
+        int rc = UnsafeNativeMethods.ON_TextLog_IndentSize_Get(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_TextLog_IndentSize_Set(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -123,6 +128,7 @@ namespace Rhino.FileIO
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_TextLog_PrintWrappedText(pThis, text, lineLength);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -139,6 +145,7 @@ namespace Rhino.FileIO
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_TextLog_Print(pThis, text);
+      GC.KeepAlive(this);
     }
 
     /// <summary>

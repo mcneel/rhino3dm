@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeometryBase &mdash; rhino3dm 8.17.0-beta documentation</title>
+  <title>GeometryBase &mdash; rhino3dm 8.32.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=fccd7490"></script>
+        <script src="_static/documentation_options.js?v=65727893"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.17.0-beta
+                8.32.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -129,6 +129,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.Scale"><code class="docutils literal notranslate"><span class="pre">GeometryBase.Scale()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.Rotate"><code class="docutils literal notranslate"><span class="pre">GeometryBase.Rotate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.GetBoundingBox"><code class="docutils literal notranslate"><span class="pre">GeometryBase.GetBoundingBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.GetTightBoundingBox"><code class="docutils literal notranslate"><span class="pre">GeometryBase.GetTightBoundingBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.MakeDeformable"><code class="docutils literal notranslate"><span class="pre">GeometryBase.MakeDeformable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.GeometryBase.Duplicate"><code class="docutils literal notranslate"><span class="pre">GeometryBase.Duplicate()</span></code></a></li>
 </ul>
@@ -166,6 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectTable.html">ObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
@@ -191,6 +193,7 @@
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RhinoDoc.html">RhinoDoc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
@@ -356,6 +359,12 @@ angle results in a counter-clockwise rotation about the axis (right hand rule).<
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.GeometryBase.GetTightBoundingBox">
+<span class="sig-name descname"><span class="pre">GetTightBoundingBox</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.GetTightBoundingBox" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.GeometryBase.MakeDeformable">
 <span class="sig-name descname"><span class="pre">MakeDeformable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.GeometryBase.MakeDeformable" title="Link to this definition"></a></dt>
 <dd><p>If possible, converts the object into a form that can be accurately modified
@@ -399,7 +408,7 @@ with “squishy” transformations like projections, shears, an non-uniform scal
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
+    <p>&#169; Copyright 2025, Robert McNeel &amp; Associates.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

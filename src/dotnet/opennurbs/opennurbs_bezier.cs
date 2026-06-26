@@ -61,6 +61,7 @@ namespace Rhino.Geometry
       double[] cvs = new double[capacity];
       UnsafeNativeMethods.ON_BezierCurve_SetCvs(const_ptr_this, cvs.Length, cvs);
       info.AddValue("CVs", cvs);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -136,7 +137,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierCurve_Dimension(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_BezierCurve_Dimension(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -147,7 +150,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierCurve_IsValid(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_BezierCurve_IsValid(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -198,6 +203,7 @@ namespace Rhino.Geometry
       var bbox = new BoundingBox();
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.ON_BezierCurve_BoundingBox(const_ptr_this, accurate, ref bbox);
+      GC.KeepAlive(this);
       return bbox;
     }
 
@@ -212,6 +218,7 @@ namespace Rhino.Geometry
       var rc = new Point3d();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_BezierCurve_PointAt(ptr, t, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -226,6 +233,7 @@ namespace Rhino.Geometry
       var rc = new Vector3d();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_BezierCurve_TangentAt(ptr, t, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -240,6 +248,7 @@ namespace Rhino.Geometry
       var rc = new Vector3d();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_BezierCurve_CurvatureAt(ptr, t, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -253,6 +262,7 @@ namespace Rhino.Geometry
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_nurbs_crv = UnsafeNativeMethods.ON_BezierCurve_GetNurbForm(const_ptr_this);
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(ptr_nurbs_crv, null) as NurbsCurve;
     }
 
@@ -266,7 +276,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierCurve_IsRational(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_BezierCurve_IsRational(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -279,7 +291,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierCurve_CVCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_BezierCurve_CVCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -299,14 +313,15 @@ namespace Rhino.Geometry
       return new Point2d(pt.X, pt.Y);
     }
 
-    /// <summary>Get location of a control vertex.</summary>
+    /// <summary>Gets the 3D location of a control vertex at the specified index.</summary>
     /// <param name="index">
-    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount).
     /// </param>
     /// <returns>
-    /// If the bezier is rational, the euclidean location is returned.
+    /// The 3D location of the control vertex. If the Bezier is rational, the euclidean location is returned.
+    /// Returns <see cref="Point3d.Unset"/> if the index is out of range or the control vertex cannot be retrieved.
     /// </returns>
-    /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when index is out of range.</exception>
     /// <since>5.0</since>
     [ConstOperation]
     public Point3d GetControlVertex3d(int index)
@@ -317,18 +332,21 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_BezierCurve_GetCV3d(const_ptr_this, index, ref rc))
         return Point3d.Unset;
+      GC.KeepAlive(this);
       return rc;
     }
 
-    /// <summary>Get location of a control vertex.</summary>
+    /// <summary>
+    /// Gets the homogeneous (4D) value of a control vertex at the specified index.
+    /// </summary>
     /// <param name="index">
-    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount)
+    /// Control vertex index (0 &lt;= index &lt; ControlVertexCount).
     /// </param>
     /// <returns>
-    /// Homogeneous value of control vertex. If the bezier is not
-    /// rational, the weight is 1.
+    /// The homogeneous value of the control vertex. If the Bezier is not rational, the weight is 1.
+    /// Returns <see cref="Point4d.Unset"/> if the index is out of range or the control vertex cannot be retrieved.
     /// </returns>
-    /// <exception cref="ArgumentOutOfRangeException">when index is out of range</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when index is out of range.</exception>
     /// <since>5.0</since>
     [ConstOperation]
     public Point4d GetControlVertex4d(int index)
@@ -339,6 +357,7 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_BezierCurve_GetCV4d(const_ptr_this, index, ref rc))
         return Point4d.Unset;
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -348,7 +367,9 @@ namespace Rhino.Geometry
     public bool MakeRational()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierCurve_MakeRational(ptr_this, true);
+      bool rc = UnsafeNativeMethods.ON_BezierCurve_MakeRational(ptr_this, true);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Make bezier non-rational</summary>
     /// <returns>true if successful</returns>
@@ -356,7 +377,9 @@ namespace Rhino.Geometry
     public bool MakeNonRational()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierCurve_MakeRational(ptr_this, false);
+      bool rc = UnsafeNativeMethods.ON_BezierCurve_MakeRational(ptr_this, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Increase degree of bezier</summary>
@@ -366,7 +389,9 @@ namespace Rhino.Geometry
     public bool IncreaseDegree(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierCurve_ChangeInt(ptr_this, true, desiredDegree);
+      bool rc = UnsafeNativeMethods.ON_BezierCurve_ChangeInt(ptr_this, true, desiredDegree);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Change dimension of bezier.</summary>
@@ -376,7 +401,9 @@ namespace Rhino.Geometry
     public bool ChangeDimension(int desiredDimension)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierCurve_ChangeInt(ptr_this, false, desiredDimension);
+      bool rc = UnsafeNativeMethods.ON_BezierCurve_ChangeInt(ptr_this, false, desiredDimension);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -406,6 +433,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_BezierCurve_Delete(ptr_left);
         UnsafeNativeMethods.ON_BezierCurve_Delete(ptr_right);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -528,7 +556,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierSurface_IsValid(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_BezierSurface_IsValid(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -539,7 +569,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierSurface_Dimension(const_ptr_this);
+        int rc = UnsafeNativeMethods.ON_BezierSurface_Dimension(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -559,6 +591,7 @@ namespace Rhino.Geometry
       }
       IntPtr ptrNewBez = UnsafeNativeMethods.ON_BezierSurface_Loft(ptrSimpleArray);
       UnsafeNativeMethods.ON_BezierCurve_DeleteSimpleArray(ptrSimpleArray);
+      GC.KeepAlive(curves);
       if (ptrNewBez == IntPtr.Zero)
         return null;
       return new BezierSurface(ptrNewBez);
@@ -567,6 +600,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Bounding box solver. Gets the world axis aligned bounding box for the surface.
     /// </summary>
+    /// <param name="accurate">This parameter is currently ignored.</param>
     /// <returns>
     /// The bounding box of the geometry in world coordinates or BoundingBox.Empty 
     /// if not bounding box could be found.
@@ -578,6 +612,7 @@ namespace Rhino.Geometry
       var bbox = new BoundingBox();
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.ON_BezierSurface_BoundingBox(const_ptr_this, ref bbox);
+      GC.KeepAlive(this);
       return bbox;
     }
     
@@ -593,7 +628,9 @@ namespace Rhino.Geometry
         return true;
 
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierSurface_Transform(ptrThis, ref xform);
+      bool rc = UnsafeNativeMethods.ON_BezierSurface_Transform(ptrThis, ref xform);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Gets the domain in a direction.</summary>
@@ -608,6 +645,7 @@ namespace Rhino.Geometry
       Interval domain = new Interval();
       IntPtr constPtrThis = ConstPointer();
       UnsafeNativeMethods.ON_BezierSurface_Domain(constPtrThis, direction, ref domain);
+      GC.KeepAlive(this);
       return domain;
     }
 
@@ -624,6 +662,7 @@ namespace Rhino.Geometry
     {
       IntPtr constPtrThis = ConstPointer();
       IntPtr ptrNewSurface = UnsafeNativeMethods.ON_BezierSurface_Reverse(constPtrThis, direction);
+      GC.KeepAlive(this);
       if (ptrNewSurface == IntPtr.Zero)
         return null;
       return new BezierSurface(ptrNewSurface);
@@ -639,6 +678,7 @@ namespace Rhino.Geometry
     {
       IntPtr constPtrThis = ConstPointer();
       IntPtr ptrNewSurface = UnsafeNativeMethods.ON_BezierSurface_Transpose(constPtrThis);
+      GC.KeepAlive(this);
       if (ptrNewSurface == IntPtr.Zero)
         return null;
       return new BezierSurface(ptrNewSurface);
@@ -656,6 +696,7 @@ namespace Rhino.Geometry
       var rc = new Point3d();
       IntPtr constPtrThis = ConstPointer();
       UnsafeNativeMethods.ON_BezierSurface_PointAt(constPtrThis, u, v, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -669,6 +710,7 @@ namespace Rhino.Geometry
     {
       IntPtr constPtrThis = ConstPointer();
       IntPtr ptrNurbsSurface = UnsafeNativeMethods.ON_BezierSurface_GetNurbForm(constPtrThis);
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(ptrNurbsSurface, null) as NurbsSurface;
     }
 
@@ -682,7 +724,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierSurface_IsRational(constPtrThis);
+        bool rc = UnsafeNativeMethods.ON_BezierSurface_IsRational(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -695,8 +739,10 @@ namespace Rhino.Geometry
     /// <since>7.1</since>
     public int ControlVertexCount(int direction)
     {
-        IntPtr constPtrThis = ConstPointer();
-        return UnsafeNativeMethods.ON_BezierSurface_CVCount(constPtrThis, direction);
+      IntPtr constPtrThis = ConstPointer();
+      int rc = UnsafeNativeMethods.ON_BezierSurface_CVCount(constPtrThis, direction);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Get location of a control vertex.</summary>
@@ -742,6 +788,7 @@ namespace Rhino.Geometry
       IntPtr constPtrThis = ConstPointer();
       if (!UnsafeNativeMethods.ON_BezierSurface_GetCV3d(constPtrThis, i, j, ref rc))
         return Point3d.Unset;
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -770,6 +817,7 @@ namespace Rhino.Geometry
       IntPtr constPtrThis = ConstPointer();
       if (!UnsafeNativeMethods.ON_BezierSurface_GetCV4d(constPtrThis, i, j, ref rc))
         return Point4d.Unset;
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -788,7 +836,9 @@ namespace Rhino.Geometry
     public bool MakeNonRational()
     {
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_BezierSurface_MakeRational(ptrThis, false);
+      bool rc = UnsafeNativeMethods.ON_BezierSurface_MakeRational(ptrThis, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -819,6 +869,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_BezierSurface_Delete(ptr_left);
         UnsafeNativeMethods.ON_BezierSurface_Delete(ptr_right);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 

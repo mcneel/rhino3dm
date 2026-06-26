@@ -86,7 +86,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_PolyCurve_Count(ptr);
+        int rc = UnsafeNativeMethods.ON_PolyCurve_Count(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -100,6 +102,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = ConstPointer();
       IntPtr pCurve = UnsafeNativeMethods.ON_PolyCurve_SegmentCurve(ptr, index);
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(pCurve, this, index) as Curve;
     }
 
@@ -142,7 +145,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_PolyCurve_GetBool(ptr, idxIsNested);
+        bool rc = UnsafeNativeMethods.ON_PolyCurve_GetBool(ptr, idxIsNested);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -155,7 +160,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return (UnsafeNativeMethods.ON_PolyCurve_HasGap(ptr) > 0);
+        bool rc = (UnsafeNativeMethods.ON_PolyCurve_HasGap(ptr) > 0);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -181,7 +188,9 @@ namespace Rhino.Geometry
       if (!IsNested)
         return false;
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_PolyCurve_GetBool(ptr, idxRemoveNestingEx);
+      bool rc = UnsafeNativeMethods.ON_PolyCurve_GetBool(ptr, idxRemoveNestingEx);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -209,6 +218,7 @@ namespace Rhino.Geometry
         rc[i] = GeometryBase.CreateGeometryHelper(pNewCurve, null) as Curve;
       }
       curves.Dispose();
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -251,6 +261,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_PolyCurve_AppendAndMatch(ptr, ref arc);
+      GC.KeepAlive(this);
       return rc;
     }
     /// <summary>
@@ -268,6 +279,7 @@ namespace Rhino.Geometry
       IntPtr pCurve = curve.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_PolyCurve_AppendAndMatch2(ptr, pCurve);
       GC.KeepAlive(curve);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -286,6 +298,7 @@ namespace Rhino.Geometry
       IntPtr pCurve = curve.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_PolyCurve_Append(ptr, pCurve);
       GC.KeepAlive(curve);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -302,7 +315,9 @@ namespace Rhino.Geometry
     public double SegmentCurveParameter(double polycurveParameter)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_PolyCurve_SegmentCurveParameter(ptr, polycurveParameter);
+      double rc = UnsafeNativeMethods.ON_PolyCurve_SegmentCurveParameter(ptr, polycurveParameter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -318,7 +333,9 @@ namespace Rhino.Geometry
     public double PolyCurveParameter(int segmentIndex, double segmentCurveParameter)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_PolyCurve_PolyCurveParameter(ptr, segmentIndex, segmentCurveParameter);
+      double rc = UnsafeNativeMethods.ON_PolyCurve_PolyCurveParameter(ptr, segmentIndex, segmentCurveParameter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -336,6 +353,7 @@ namespace Rhino.Geometry
       Interval rc = new Interval();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_PolyCurve_SegmentDomain(ptr, segmentIndex, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -353,7 +371,9 @@ namespace Rhino.Geometry
     public int SegmentIndex(double polycurveParameter)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_PolyCurve_SegmentIndex(ptr, polycurveParameter);
+      int rc = UnsafeNativeMethods.ON_PolyCurve_SegmentIndex(ptr, polycurveParameter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Finds the segments that overlap the Polycurve sub domain.</summary>
@@ -372,7 +392,9 @@ namespace Rhino.Geometry
       segmentIndex0 = -1;
       segmentIndex1 = -1;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_PolyCurve_SegmentIndexes(ptr, subdomain, ref segmentIndex0, ref segmentIndex1);
+      int rc = UnsafeNativeMethods.ON_PolyCurve_SegmentIndexes(ptr, subdomain, ref segmentIndex0, ref segmentIndex1);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
@@ -390,6 +412,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoCleanUpPolyCurve(ptr_const_this);
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
 
@@ -399,6 +422,7 @@ namespace Rhino.Geometry
       {
         IntPtr pThis = ConstPointer();
         m_pCurveDisplay = UnsafeNativeMethods.CurveDisplay_FromPolyCurve(pThis);
+        GC.KeepAlive(this);
       }
       return m_pCurveDisplay;
     }

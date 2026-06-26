@@ -41,7 +41,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsParallelProjection);
+        bool rc = UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsParallelProjection);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -49,6 +51,7 @@ namespace Rhino.Geometry
         {
           IntPtr pThis = NonConstPointer();
           UnsafeNativeMethods.ON_DetailView_SetBool(pThis, idxIsParallelProjection, value);
+          GC.KeepAlive(this);
         }
       }
     }
@@ -62,7 +65,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsPerspectiveProjection);
+        bool rc = UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsPerspectiveProjection);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -70,6 +75,7 @@ namespace Rhino.Geometry
         {
           IntPtr pThis = NonConstPointer();
           UnsafeNativeMethods.ON_DetailView_SetBool(pThis, idxIsPerspectiveProjection, value);
+          GC.KeepAlive(this);
         }
       }
     }
@@ -88,7 +94,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsProjectionLocked);
+        bool rc = UnsafeNativeMethods.ON_DetailView_GetBool(pConstThis, idxIsProjectionLocked);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -96,13 +104,19 @@ namespace Rhino.Geometry
         {
           IntPtr pThis = NonConstPointer();
           UnsafeNativeMethods.ON_DetailView_SetBool(pThis, idxIsProjectionLocked, value);
+          GC.KeepAlive(this);
         }
       }
     }
 
     /// <summary>
-    /// Gets the page units/model units quotient.
+    /// Gets the ratio of page units to model units for this detail view.
+    /// Returns 0 if the projection is not parallel.
     /// </summary>
+    /// <remarks>
+    /// This property is only meaningful when <see cref="IsParallelProjection"/> is true.
+    /// For non-parallel projections, the ratio is undefined and this property returns 0.
+    /// </remarks>
     /// <since>5.0</since>
     public double PageToModelRatio
     {
@@ -111,7 +125,9 @@ namespace Rhino.Geometry
         if (!IsParallelProjection)
           return 0;
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_DetailView_GetPageToModelRatio(pConstThis);
+        double rc = UnsafeNativeMethods.ON_DetailView_GetPageToModelRatio(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -138,7 +154,9 @@ namespace Rhino.Geometry
         return false;
 
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_DetailView_SetScale(pThis, modelLength, (int)modelUnits, pageLength, (int)pageUnits);
+      bool rc = UnsafeNativeMethods.ON_DetailView_SetScale(pThis, modelLength, (int)modelUnits, pageLength, (int)pageUnits);
+      GC.KeepAlive(this);
+      return rc;
     }
   }
 }

@@ -114,12 +114,15 @@ namespace Rhino.Geometry
       get 
       { 
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.PreserveTopology);
+        bool rc = UnsafeNativeMethods.ON_SquishParameters_GetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.PreserveTopology);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.PreserveTopology, value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>
@@ -135,12 +138,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.SaveMapping);
+        bool rc = UnsafeNativeMethods.ON_SquishParameters_GetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.SaveMapping);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetBool(ptr, UnsafeNativeMethods.SquishParametersBoolConst.SaveMapping, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -164,12 +170,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryStretchConstant);
+        double rc = UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryStretchConstant);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryStretchConstant, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -182,12 +191,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryCompressConstant);
+        double rc = UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryCompressConstant);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.BoundaryCompressConstant, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -200,12 +212,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorStretchConstant);
+        double rc = UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorStretchConstant);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorStretchConstant, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -218,12 +233,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorCompressConstant);
+        double rc = UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorCompressConstant);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.InteriorCompressConstant, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -267,12 +285,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.AbsoluteLimit);
+        double rc = UnsafeNativeMethods.ON_SquishParameters_GetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.AbsoluteLimit);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetDouble(ptr, UnsafeNativeMethods.SquishParametersDoubleConst.AbsoluteLimit, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -289,12 +310,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer(); 
-        return (SquishFlatteningAlgorithm)UnsafeNativeMethods.ON_SquishParameters_GetMaterial(ptr); 
+        SquishFlatteningAlgorithm rc = (SquishFlatteningAlgorithm)UnsafeNativeMethods.ON_SquishParameters_GetMaterial(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_SquishParameters_SetMaterial(ptr, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 #endregion
@@ -318,6 +342,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_SquishParameters_SetSpringConstants(ptr, boundaryBias, deformationBias);
+      GC.KeepAlive(this);
     }
     /// <summary>
     ///  See if the spring constants could have been set with SetSpringConstants().
@@ -347,7 +372,9 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = ConstPointer();
       boundaryBias = 0.0; deformationBias = 0.0;
-      return UnsafeNativeMethods.ON_SquishParameters_GetSpringConstants(ptr, ref boundaryBias, ref deformationBias);
+      bool rc = UnsafeNativeMethods.ON_SquishParameters_GetSpringConstants(ptr, ref boundaryBias, ref deformationBias);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Sets the squish deformation characteristics
@@ -367,6 +394,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_SquishParameters_SetDeformation(ptr, (int)deformation, bPreserveBoundary,
         boundaryStretchConstant, boundaryCompressConstant,
         interiorStretchConstant, interiorCompressConstant);
+      GC.KeepAlive(this);
     }
 
   }
@@ -478,6 +506,7 @@ namespace Rhino.Geometry
         if (IntPtr.Zero == mesh_ptr)
           return null;
       }
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(mesh_ptr, null) as Mesh;
     }
 
@@ -494,7 +523,9 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr mesh_ptr = IntPtr.Zero;
       mesh_ptr = UnsafeNativeMethods.ON_Squisher_SquishMesh(ptr_this, sp.ConstPointer(), mesh3d.ConstPointer());
-      GC.KeepAlive(sp); GC.KeepAlive(mesh3d);
+      GC.KeepAlive(sp);
+      GC.KeepAlive(mesh3d);
+      GC.KeepAlive(this);
       if (IntPtr.Zero == mesh_ptr)
         return null;
       return GeometryBase.CreateGeometryHelper(mesh_ptr, null) as Mesh;
@@ -536,6 +567,7 @@ namespace Rhino.Geometry
         if (IntPtr.Zero == brep_ptr)
           return null;
       }
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(brep_ptr, null) as Brep;
     }
     /// <summary>
@@ -554,6 +586,7 @@ namespace Rhino.Geometry
       GC.KeepAlive(sp); GC.KeepAlive(surface);
       if (IntPtr.Zero == brep_ptr)
         return null;
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(brep_ptr, null) as Brep;
     }
 
@@ -569,6 +602,7 @@ namespace Rhino.Geometry
       squishedPoint = new Point3d();
       IntPtr ptr_this = ConstPointer();
       var rc = UnsafeNativeMethods.ON_Squisher_SquishPoint(ptr_this, ref point, ref squishedPoint);
+      GC.KeepAlive(this);
       return rc;
     }
     /// <summary>
@@ -583,6 +617,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr ptr_squished = UnsafeNativeMethods.ON_Squisher_SquishCurve(ptr_this, curve.ConstPointer());
       GC.KeepAlive(curve);
+      GC.KeepAlive(this);
       if (ptr_squished == IntPtr.Zero) return null;
       return GeometryBase.CreateGeometryHelper(ptr_squished, null) as PolylineCurve;
     }
@@ -599,6 +634,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr ptr_squished = UnsafeNativeMethods.ON_Squisher_SquishTextDot(ptr_this, textDot.ConstPointer());
       GC.KeepAlive(textDot);
+      GC.KeepAlive(this);
       if (ptr_squished == IntPtr.Zero) return null;
       return GeometryBase.CreateGeometryHelper(ptr_squished, null) as TextDot;
     }
@@ -613,6 +649,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr ptr_squished = UnsafeNativeMethods.ON_Squisher_SquishPointCloud(ptr_this, pointCloud.ConstPointer());
       GC.KeepAlive(pointCloud);
+      GC.KeepAlive(this);
       if (ptr_squished == IntPtr.Zero) return null;
       return GeometryBase.CreateGeometryHelper(ptr_squished, null) as PointCloud;
     }
@@ -626,6 +663,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr ptr_mesh = UnsafeNativeMethods.ON_Squisher_GetMesh2d(ptr_this);
       if (ptr_mesh == IntPtr.Zero) return null;
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(ptr_mesh, null) as Mesh;
     }
     /// <summary>
@@ -638,6 +676,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = ConstPointer();
       IntPtr ptr_mesh = UnsafeNativeMethods.ON_Squisher_GetMesh3d(ptr_this);
       if (ptr_mesh == IntPtr.Zero) return null;
+      GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(ptr_mesh, null) as Mesh;
     }
 
@@ -656,6 +695,7 @@ namespace Rhino.Geometry
       if (count <= 0) return null;
       Line[] edges = new Line[count];
       UnsafeNativeMethods.ON_LineArray_CopyValues(ptr_edges, edges);
+      GC.KeepAlive(this);
       return edges;
     }
 
@@ -684,6 +724,7 @@ namespace Rhino.Geometry
       if (count <= 0) return null;
       Line[] edges = new Line[count];
       UnsafeNativeMethods.ON_LineArray_CopyValues(ptr_edges, edges);
+      GC.KeepAlive(this);
       return edges;
     }
 
@@ -712,6 +753,7 @@ namespace Rhino.Geometry
       if (count <= 0) return null;
       MeshFace[] faces = new MeshFace[count];
       UnsafeNativeMethods.ON_MeshFaceArray_CopyValues(ptr_faces, faces);
+      GC.KeepAlive(this);
       return faces;
     }
 

@@ -71,6 +71,7 @@ namespace Rhino.Input.Custom
         var rc = (Commands.Result)UnsafeNativeMethods.RHC_RhinoGetPolyline2(ptr_this, ptr_points, IntPtr.Zero);
         if( rc == Commands.Result.Success )
           polyline = new Geometry.Polyline(points.ToArray());
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -82,6 +83,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_string = sh.NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetPolyline_GetString(ptr_const_this, which, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -89,6 +91,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetPolyline_SetString(ptr_this, which, s);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Prompt when getting first point</summary>
@@ -128,7 +131,9 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetPolyline_GetMinPointCount(ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetPolyline_GetMinPointCount(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -136,6 +141,7 @@ namespace Rhino.Input.Custom
         {
           IntPtr ptr_this = NonConstPointer();
           UnsafeNativeMethods.CArgsRhinoGetPolyline_SetMinPointCount(ptr_this, value);
+          GC.KeepAlive(this);
         }
       }
     }
@@ -146,7 +152,9 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr ptr_this = NonConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetPolyline_GetMaxPointCount(ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetPolyline_GetMaxPointCount(ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
@@ -154,6 +162,7 @@ namespace Rhino.Input.Custom
         {
           IntPtr ptr_this = NonConstPointer();
           UnsafeNativeMethods.CArgsRhinoGetPolyline_SetMaxPointCount(ptr_this, value);
+          GC.KeepAlive(this);
         }
       }
     }
@@ -168,6 +177,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetPolyline_SetFirstPoint(ptr_this, point);
+      GC.KeepAlive(this);
     }
 
   }

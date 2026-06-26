@@ -57,6 +57,8 @@ namespace Rhino.Render
       {
         var variant = new Variant(item.Value);
         UnsafeNativeMethods.Rdk_XmlSection_SetParam(pXmlSection, item.Name, variant.ConstPointer());
+        GC.KeepAlive(variant);
+
       }
     }
 
@@ -156,6 +158,7 @@ namespace Rhino.Render
     {
       IntPtr ptr_const_this = ConstPointer();
       UnsafeNativeMethods.ON_XMLVariant_Copy(ptr_const_this, pOtherVarient);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -197,11 +200,14 @@ namespace Rhino.Render
     {
       get
       {
-        return (Rhino.UnitSystem)UnsafeNativeMethods.ON_XMLVariant_GetUnits(ConstPointer());
+        var ret = (Rhino.UnitSystem)UnsafeNativeMethods.ON_XMLVariant_GetUnits(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.ON_XMLVariant_SetUnits(NonConstPointer(), (int)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -209,11 +215,14 @@ namespace Rhino.Render
     {
       get
       {
-        return 1 == UnsafeNativeMethods.ON_XMLVariant_IsNull(ConstPointer());
+        var ret = (1 == UnsafeNativeMethods.ON_XMLVariant_IsNull(ConstPointer()));
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.ON_XMLVariant_SetNull(NonConstPointer());
+        GC.KeepAlive(this);
       }
     }
 
@@ -221,70 +230,80 @@ namespace Rhino.Render
     {
       get
       {
-        return 1 == UnsafeNativeMethods.ON_XMLVariant_Varies(ConstPointer());
+        var ret = ( 1 == UnsafeNativeMethods.ON_XMLVariant_Varies(ConstPointer()));
+        GC.KeepAlive(this);
+        return ret;
       }
       set
       {
         UnsafeNativeMethods.ON_XMLVariant_SetVaries(NonConstPointer());
+        GC.KeepAlive(this);
       }
     }
 
     public Types Type
     {
-      get => (Types)UnsafeNativeMethods.ON_XMLVariant_Type(ConstPointer());
+      get
+      {
+        var ret = (Types)UnsafeNativeMethods.ON_XMLVariant_Type(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     #region value setters
     public void SetValue(int v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetIntValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetIntValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(bool v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetBoolValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetBoolValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(double v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetDoubleValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetDoubleValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(float v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetFloatValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetFloatValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(string v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetStringValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetStringValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Color v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetOnColorValue(NonConstPointer(), v.ToArgb()); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetOnColorValue(NonConstPointer(), v.ToArgb()); GC.KeepAlive(this); }
 
     public void SetValue(Color4f v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetColor4fValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetColor4fValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Vector2d v)
-    { UnsafeNativeMethods.ON_XMLVariant_Set2dVectorValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_Set2dVectorValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Vector3d v)
-    { UnsafeNativeMethods.ON_XMLVariant_Set3dVectorValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_Set3dVectorValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Point2d p)
     {
       var value = new Vector2d(p.X, p.Y);
       UnsafeNativeMethods.ON_XMLVariant_Set2dVectorValue(NonConstPointer(), value);
+      GC.KeepAlive(this);
     }
 
     public void SetValue(Point3d p)
     {
       var value = new Vector3d(p.X, p.Y, p.Z);
       UnsafeNativeMethods.ON_XMLVariant_Set3dVectorValue(NonConstPointer(), value);
+      GC.KeepAlive(this);
     }
 
     public void SetValue(Point4d v)
-    { UnsafeNativeMethods.ON_XMLVariant_Set4dPointValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_Set4dPointValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Guid v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetUuidValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetUuidValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(Transform v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetXformValue(NonConstPointer(), v); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetXformValue(NonConstPointer(), v); GC.KeepAlive(this); }
 
     public void SetValue(byte[] v)
-    { UnsafeNativeMethods.ON_XMLVariant_SetByteArrayValue(NonConstPointer(), v, null == v ? 0 : v.Length); }
+    { UnsafeNativeMethods.ON_XMLVariant_SetByteArrayValue(NonConstPointer(), v, null == v ? 0 : v.Length); GC.KeepAlive(this); }
 
     public void SetValue(DateTime v)
     {
@@ -302,6 +321,7 @@ namespace Rhino.Render
 
       var time_t = (UInt32)TimeHelpers.ToUnixEpoch(v);
       UnsafeNativeMethods.ON_XMLVariant_SetTimeValue(NonConstPointer(), time_t);
+      GC.KeepAlive(this);
     }
 
     public void SetValue(object v)
@@ -328,6 +348,8 @@ namespace Rhino.Render
       else if (v is byte[] ba)       SetValue(ba);
       else if (v == null) IsNull = true;
       else throw new InvalidOperationException("Type not supported for Rhino.Render.Variant");
+
+      GC.KeepAlive(v);
     }
 
     #endregion
@@ -356,13 +378,16 @@ namespace Rhino.Render
 
     public Color ToSystemColor()
     {
-      return Color.FromArgb(UnsafeNativeMethods.ON_XMLVariant_GetOnColorValue(ConstPointer()));
+      var ret = Color.FromArgb(UnsafeNativeMethods.ON_XMLVariant_GetOnColorValue(ConstPointer()));
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public Color4f ToColor4f()
     {
       var v = new Color4f();
       UnsafeNativeMethods.ON_XMLVariant_GetColor4fValue(ConstPointer(), ref v);
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -370,6 +395,7 @@ namespace Rhino.Render
     {
       var v = new Vector2d();
       UnsafeNativeMethods.ON_XMLVariant_Get2dVectorValue(ConstPointer(), ref v);
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -377,6 +403,7 @@ namespace Rhino.Render
     {
       var v = new Vector3d();
       UnsafeNativeMethods.ON_XMLVariant_Get3dVectorValue(ConstPointer(), ref v);
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -384,16 +411,22 @@ namespace Rhino.Render
     {
       var v = new Point4d();
       UnsafeNativeMethods.ON_XMLVariant_Get4dPointValue(ConstPointer(), ref v);
+      GC.KeepAlive(this);
       return v;
     }
 
     public Guid ToGuid()
-    { return UnsafeNativeMethods.ON_XMLVariant_GetUuidValue(ConstPointer()); }
+    { 
+      var ret = UnsafeNativeMethods.ON_XMLVariant_GetUuidValue(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
+    }
 
     public Transform ToTransform()
     {
       var v = new Transform();
       UnsafeNativeMethods.ON_XMLVariant_GetXformValue(ConstPointer(), ref v);
+      GC.KeepAlive(this);
       return v;
     }
     #endregion
@@ -413,6 +446,7 @@ namespace Rhino.Render
       if (m_auto_delete && (m_native_ptr != IntPtr.Zero))
       {
         UnsafeNativeMethods.ON_XMLVariant_Delete(m_native_ptr);
+        GC.KeepAlive(this);
         m_native_ptr = IntPtr.Zero;
         m_auto_delete = false;
       }
@@ -427,22 +461,30 @@ namespace Rhino.Render
 
     public bool ToBool()
     {
-      return UnsafeNativeMethods.ON_XMLVariant_GetBoolValue(ConstPointer()) != 0;
+      var ret = UnsafeNativeMethods.ON_XMLVariant_GetBoolValue(ConstPointer()) != 0;
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public int ToInt()
     {
-      return UnsafeNativeMethods.ON_XMLVariant_GetIntValue(ConstPointer());
+      var ret = UnsafeNativeMethods.ON_XMLVariant_GetIntValue(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public float ToFloat()
     {
-      return UnsafeNativeMethods.ON_XMLVariant_GetFloatValue(ConstPointer());
+      var ret = UnsafeNativeMethods.ON_XMLVariant_GetFloatValue(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public double ToDouble()
     {
-      return UnsafeNativeMethods.ON_XMLVariant_GetDoubleValue(ConstPointer());
+      var ret = UnsafeNativeMethods.ON_XMLVariant_GetDoubleValue(ConstPointer());
+      GC.KeepAlive(this);
+      return ret;
     }
 
     public byte ToByte(IFormatProvider provider)
@@ -523,6 +565,7 @@ namespace Rhino.Render
       using (var sw = new StringWrapper())
       {
         UnsafeNativeMethods.ON_XMLVariant_GetStringValue(ConstPointer(), sw.NonConstPointer);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -543,6 +586,7 @@ namespace Rhino.Render
       //return dt;
 
       var time_t = (ulong)UnsafeNativeMethods.ON_XMLVariant_GetTimeValue(ConstPointer());
+      GC.KeepAlive(this);
       return TimeHelpers.FromUnixEpoch(time_t);
     }
 

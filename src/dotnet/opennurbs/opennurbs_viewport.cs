@@ -27,29 +27,26 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_New(const_ptr_this);
+      IntPtr rc = UnsafeNativeMethods.ON_Viewport_New(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
-    /// <summary>
-    /// If the viewport has a parent ViewInfo, return a NonConstPtr to the viewport.
-    /// </summary>
-    /// <returns>IntPtr</returns>
-    /// <since>8.10</since>
+    // rhino3dm-local (sync exception): when this ViewportInfo belongs to a parent
+    // ViewInfo, edits must write straight into the parent view's ON_Viewport
+    // (&ON_3dmView.m_vp) so camera changes persist (e.g. ViewInfo.Viewport.SetCameraLocation
+    // followed by File3dm.Views.Add + write/read). ON_3dmView_ViewportPointer returns a
+    // pointer INTO the view (non-owning), so this proxy allocates nothing and cannot leak.
+    // Upstream reverted the original fix for RH-83697 (two-point perspective), but that only
+    // affected full-Rhino UI code (ViewportPropertiesPanel / SetViewProjection) which rhino3dm
+    // does not ship. We deliberately avoid the parent==null/IsNonConst fall-through that made
+    // the original revert-prone version leak an untracked copy. TODO(9.x): adopt upstream's
+    // reworked ownership model if/when it lands.
     internal override IntPtr NonConstPointer()
     {
-      if(m_parent != null && !IsNonConst) 
-      {
-        var vi = m_parent as ViewInfo;
-        if (vi != null)
-        {
-          IntPtr pView = vi.NonConstPointer();
-          IntPtr v = UnsafeNativeMethods.ON_3dmView_ViewportPointer(pView);
-          if (v != IntPtr.Zero)
-          {
-            return v;
-          }
-        }
-      }
+      var vi = m_parent as ViewInfo;
+      if (vi != null)
+        return vi.NonConstViewportPointer();
       return base.NonConstPointer();
     }
 
@@ -72,6 +69,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_other_vp = other.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_Viewport_New(const_ptr_other_vp);
+      GC.KeepAlive(other);
       ConstructNonConstObject(ptr);
     }
 
@@ -85,6 +83,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_other_vp = rhinoViewport.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_Viewport_New2(const_ptr_other_vp);
+      GC.KeepAlive(rhinoViewport);
       ConstructNonConstObject(ptr);
     }
 
@@ -156,7 +155,9 @@ namespace Rhino.DocObjects
     bool GetBool(int which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     
     /// <summary>
@@ -188,6 +189,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetProjection(ptr_this, !value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -202,6 +204,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetProjection(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -230,17 +233,22 @@ namespace Rhino.DocObjects
     public bool ChangeToParallelProjection(bool symmetricFrustum)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ChangeToParallelProjection(ptr_this, symmetricFrustum);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ChangeToParallelProjection(ptr_this, symmetricFrustum);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
     /// When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
     /// </summary>
     /// <returns>true if successful</returns>
+    /// <since>8.14</since>
     public bool ChangeToParallelReflectedProjection()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ChangeToParallelReflectedProjection(ptr_this);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ChangeToParallelReflectedProjection(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -270,7 +278,9 @@ namespace Rhino.DocObjects
     public bool ChangeToPerspectiveProjection( double targetDistance, bool symmetricFrustum, double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ChangeToPerspectiveProjection(ptr_this, targetDistance, symmetricFrustum, lensLength);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ChangeToPerspectiveProjection(ptr_this, targetDistance, symmetricFrustum, lensLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -305,7 +315,9 @@ namespace Rhino.DocObjects
     public bool ChangeToTwoPointPerspectiveProjection(double targetDistance, Vector3d up, double lensLength)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ChangeToTwoPointPerspectiveProjection(ptr_this, targetDistance, up, lensLength);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ChangeToTwoPointPerspectiveProjection(ptr_this, targetDistance, up, lensLength);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -319,6 +331,7 @@ namespace Rhino.DocObjects
         var loc = new Point3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraLocation(const_ptr_this, ref loc);
+        GC.KeepAlive(this);
         return loc;
       }
     }
@@ -331,7 +344,9 @@ namespace Rhino.DocObjects
     public bool SetCameraLocation(Point3d location)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetCameraLocation(ptr_this, location);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetCameraLocation(ptr_this, location);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -345,6 +360,7 @@ namespace Rhino.DocObjects
         var loc = new Vector3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraDirection(const_ptr_this, ref loc);
+        GC.KeepAlive(this);
         return loc;
       }
     }
@@ -358,7 +374,9 @@ namespace Rhino.DocObjects
     public bool SetCameraDirection(Vector3d direction)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetCameraDirection(ptr_this, direction);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetCameraDirection(ptr_this, direction);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -372,6 +390,7 @@ namespace Rhino.DocObjects
         var loc = new Vector3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraUp(const_ptr_this, ref loc);
+        GC.KeepAlive(this);
         return loc;
       }
     }
@@ -385,7 +404,9 @@ namespace Rhino.DocObjects
     public bool SetCameraUp(Vector3d up)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetCameraUp(ptr_this, up);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetCameraUp(ptr_this, up);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     const int idxCameraLocationLock = 0;
@@ -395,6 +416,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Viewport_SetLocked(ptr_this, which, val);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -438,6 +460,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetIsFrustumSymmetry(ptr_this, true, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -452,6 +475,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetIsFrustumSymmetry(ptr_this, false, value);
+        GC.KeepAlive(this);
       }
     }
     
@@ -463,6 +487,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Viewport_Unlock(ptr_this, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -473,6 +498,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Viewport_Unlock(ptr_this, false);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -491,7 +517,9 @@ namespace Rhino.DocObjects
       cameraY = new Vector3d(0, 0, 0);
       cameraZ = new Vector3d(0, 0, 0);
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_GetCameraFrame(const_ptr_this, ref location, ref cameraX, ref cameraY, ref cameraZ);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetCameraFrame(const_ptr_this, ref location, ref cameraX, ref cameraY, ref cameraZ);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -505,6 +533,7 @@ namespace Rhino.DocObjects
         var v = new Vector3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraAxis(const_ptr_this, 0, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -520,6 +549,7 @@ namespace Rhino.DocObjects
         var v = new Vector3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraAxis(const_ptr_this, 1, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -535,6 +565,7 @@ namespace Rhino.DocObjects
         var v = new Vector3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_CameraAxis(const_ptr_this, 2, ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -566,7 +597,9 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public bool SetFrustum(double left, double right, double bottom, double top, double nearDistance, double farDistance)
     {
-      return UnsafeNativeMethods.ON_Viewport_SetFrustum(NonConstPointer(), left, right, bottom, top, nearDistance, farDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetFrustum(NonConstPointer(), left, right, bottom, top, nearDistance, farDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -589,7 +622,9 @@ namespace Rhino.DocObjects
       nearDistance = 0;
       farDistance = 0;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_GetFrustum(const_ptr_this, ref left, ref right, ref bottom, ref top, ref nearDistance, ref farDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetFrustum(const_ptr_this, ref left, ref right, ref bottom, ref top, ref nearDistance, ref farDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -609,12 +644,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         if (!UnsafeNativeMethods.ON_Viewport_GetFrustrumAspect(const_ptr_this, ref aspect))
           aspect = 0;
+        GC.KeepAlive(this);
         return aspect;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetFrustumAspect(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -629,6 +666,7 @@ namespace Rhino.DocObjects
         var cen = new Point3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_GetFrustumCenter(const_ptr_this, ref cen);
+        GC.KeepAlive(this);
         return cen;
       }
     }
@@ -644,7 +682,9 @@ namespace Rhino.DocObjects
     double GetDouble(int which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_GetDouble(const_ptr_this, which);
+      double rc = UnsafeNativeMethods.ON_Viewport_GetDouble(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -720,7 +760,9 @@ namespace Rhino.DocObjects
     public bool SetFrustumNearFar(BoundingBox boundingBox)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetFrustumNearFarBoundingBox(ptr_this, boundingBox.Min, boundingBox.Max);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetFrustumNearFarBoundingBox(ptr_this, boundingBox.Min, boundingBox.Max);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -733,7 +775,9 @@ namespace Rhino.DocObjects
     public bool SetFrustumNearFar(Point3d center, double radius)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetFrustumNearFarSphere(ptr_this, center, radius);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetFrustumNearFarSphere(ptr_this, center, radius);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -746,7 +790,9 @@ namespace Rhino.DocObjects
     public bool SetFrustumNearFar(double nearDistance, double farDistance)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetFrustumNearFar(ptr_this, nearDistance, farDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetFrustumNearFar(ptr_this, nearDistance, farDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -769,7 +815,9 @@ namespace Rhino.DocObjects
     public bool ChangeToSymmetricFrustum(bool isLeftRightSymmetric, bool isTopBottomSymmetric, double targetDistance)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ChangeToSymmetricFrustum(ptr_this, isLeftRightSymmetric, isTopBottomSymmetric, targetDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ChangeToSymmetricFrustum(ptr_this, isLeftRightSymmetric, isTopBottomSymmetric, targetDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -793,7 +841,9 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       double far_distance = 0;
       distance = 0;
-      return UnsafeNativeMethods.ON_Viewport_GetPointDepth(const_ptr_this, point, ref distance, ref far_distance, false);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetPointDepth(const_ptr_this, point, ref distance, ref far_distance, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -820,7 +870,9 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       nearDistance = 0;
       farDistance = 0;
-      return UnsafeNativeMethods.ON_Viewport_GetBoundingBoxDepth(const_ptr_this, bbox.Min, bbox.Max, ref nearDistance, ref farDistance, false);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetBoundingBoxDepth(const_ptr_this, bbox.Min, bbox.Max, ref nearDistance, ref farDistance, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -837,7 +889,9 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       nearDistance = 0;
       farDistance = 0;
-      return UnsafeNativeMethods.ON_Viewport_GetSphereDepth(const_ptr_this, sphere.Center, sphere.Radius, ref nearDistance, ref farDistance, false);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetSphereDepth(const_ptr_this, sphere.Center, sphere.Radius, ref nearDistance, ref farDistance, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -868,7 +922,9 @@ namespace Rhino.DocObjects
     public bool SetFrustumNearFar(double nearDistance, double farDistance, double minNearDistance, double minNearOverFar, double targetDistance)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetFrustrumNearFar(ptr_this, nearDistance, farDistance, minNearDistance, minNearOverFar, targetDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetFrustrumNearFar(ptr_this, nearDistance, farDistance, minNearDistance, minNearOverFar, targetDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     const int idxNearPlane = 0;
@@ -883,6 +939,7 @@ namespace Rhino.DocObjects
       var plane = new Plane();
       if (!UnsafeNativeMethods.ON_Viewport_GetPlane(const_ptr_this, which, ref plane))
         plane = Plane.Unset;
+      GC.KeepAlive(this);
       return plane;
     }
 
@@ -968,6 +1025,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_Viewport_GetNearFarRect(const_ptr_this, true, ref left_bottom, ref right_bottom, ref left_top, ref right_top))
         return new Point3d[0];
+      GC.KeepAlive(this);
       return new[] { left_bottom, right_bottom, left_top, right_top };
     }
 
@@ -990,6 +1048,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_Viewport_GetNearFarRect(const_ptr_this, false, ref left_bottom, ref right_bottom, ref left_top, ref right_top))
         return new Point3d[0];
+      GC.KeepAlive(this);
       return new[] { left_bottom, right_bottom, left_top, right_top };
     }
 
@@ -1056,7 +1115,9 @@ namespace Rhino.DocObjects
     public bool SetScreenPort(int left, int right, int bottom, int top, int near, int far)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_SetScreenPort(ptr_this, left, right, bottom, top, near, far);
+      bool rc = UnsafeNativeMethods.ON_Viewport_SetScreenPort(ptr_this, left, right, bottom, top, near, far);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1124,6 +1185,7 @@ namespace Rhino.DocObjects
       // .NET/Windows uses Y down so make sure the top and bottom are passed correctly to Rectangle.FromLTRB()
       // OpenNurbs appears to by Y-Down and the RDK appears to by Y-Up so this check should ensure a Rectangle
       // with a positive height.
+      GC.KeepAlive(this);
       return System.Drawing.Rectangle.FromLTRB(left, top > bottom ? bottom : top, right, top > bottom ? top : bottom);
     }
 
@@ -1169,6 +1231,7 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         if (!UnsafeNativeMethods.ON_Viewport_GetScreenPortAspect(const_ptr_this, ref aspect))
           aspect = 0;
+        GC.KeepAlive(this);
         return aspect;
       }
     }
@@ -1187,7 +1250,9 @@ namespace Rhino.DocObjects
       halfDiagonalAngleRadians = 0;
       halfHorizontalAngleRadians = 0;
       halfVerticalAngleRadians = 0;
-      return UnsafeNativeMethods.ON_Viewport_GetCameraAngle2(const_ptr_this, ref halfDiagonalAngleRadians, ref halfVerticalAngleRadians, ref halfHorizontalAngleRadians);
+      bool rc = UnsafeNativeMethods.ON_Viewport_GetCameraAngle2(const_ptr_this, ref halfDiagonalAngleRadians, ref halfVerticalAngleRadians, ref halfHorizontalAngleRadians);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1202,12 +1267,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         if (!UnsafeNativeMethods.ON_Viewport_GetCameraAngle(const_ptr_this, ref d))
           d = 0;
+        GC.KeepAlive(this);
         return d;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetCameraAngle(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1227,12 +1294,14 @@ namespace Rhino.DocObjects
         IntPtr const_ptr_this = ConstPointer();
         if (!UnsafeNativeMethods.ON_Viewport_GetCamera35mmLensLength(const_ptr_this, ref d))
           d = 0;
+        GC.KeepAlive(this);
         return d;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetCamera35mmLensLength(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1249,6 +1318,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_Viewport_GetXform(const_ptr_this, (int)sourceSystem, (int)destinationSystem, ref matrix))
         matrix = Transform.Unset;
+      GC.KeepAlive(this);
       return matrix;
     }
 
@@ -1266,6 +1336,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_Viewport_GetFrustumLine(const_ptr_this, screenX, screenY, ref line))
         line = Line.Unset;
+      GC.KeepAlive(this);
       return line;
     }
 
@@ -1305,6 +1376,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (!UnsafeNativeMethods.ON_Viewport_GetWorldToScreenScale(const_ptr_this, pointInFrustum, ref d))
         d = 0;
+      GC.KeepAlive(this);
       return d;
     }
 
@@ -1321,7 +1393,9 @@ namespace Rhino.DocObjects
     public bool Extents(double halfViewAngleRadians, BoundingBox bbox)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ExtentsBBox(ptr_this, halfViewAngleRadians, bbox.Min, bbox.Max);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ExtentsBBox(ptr_this, halfViewAngleRadians, bbox.Min, bbox.Max);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1337,7 +1411,9 @@ namespace Rhino.DocObjects
     public bool Extents(double halfViewAngleRadians, Sphere sphere)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ExtentsSphere(ptr_this, halfViewAngleRadians, sphere.Center, sphere.Radius);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ExtentsSphere(ptr_this, halfViewAngleRadians, sphere.Center, sphere.Radius);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1355,7 +1431,9 @@ namespace Rhino.DocObjects
     public bool ZoomToScreenRect(int left, int top, int right, int bottom)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_ZoomToScreenRect(ptr_this, left, top, right, bottom);
+      bool rc = UnsafeNativeMethods.ON_Viewport_ZoomToScreenRect(ptr_this, left, top, right, bottom);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1385,7 +1463,9 @@ namespace Rhino.DocObjects
     public bool DollyCamera(Vector3d dollyVector)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_DollyCamera(ptr_this, dollyVector);
+      bool rc = UnsafeNativeMethods.ON_Viewport_DollyCamera(ptr_this, dollyVector);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1404,6 +1484,7 @@ namespace Rhino.DocObjects
       IntPtr const_ptr_this = ConstPointer();
       if (UnsafeNativeMethods.ON_Viewport_GetDollyCameraVector(const_ptr_this, screenX0, screenY0, screenX1, screenY1, projectionPlaneDistance, ref v))
         v = Vector3d.Unset;
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -1429,7 +1510,9 @@ namespace Rhino.DocObjects
     public bool DollyFrustum(double dollyDistance)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_DollyFrustum(ptr_this, dollyDistance);
+      bool rc = UnsafeNativeMethods.ON_Viewport_DollyFrustum(ptr_this, dollyDistance);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1488,6 +1571,7 @@ namespace Rhino.DocObjects
         }
         IntPtr ptr_this = NonConstPointer();
         rc = UnsafeNativeMethods.ON_Viewport_DollyExtents(ptr_this, cameraCoordinateBoundingBox.Min, cameraCoordinateBoundingBox.Max);
+        GC.KeepAlive(this);
       }
       return rc;
     }
@@ -1524,6 +1608,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptrThis = NonConstPointer();
       UnsafeNativeMethods.ON_Viewport_SetViewScale(ptrThis, scaleX, scaleY, scaleZ);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1539,6 +1624,7 @@ namespace Rhino.DocObjects
       double scaleZ = 1.0;
       IntPtr constPtrThis = ConstPointer();
       UnsafeNativeMethods.ON_Viewport_GetViewScale(constPtrThis, ref scaleX, ref scaleY, ref scaleZ);
+      GC.KeepAlive(this);
       return new double[] { scaleX, scaleY, scaleZ };
     }
 
@@ -1563,6 +1649,7 @@ namespace Rhino.DocObjects
       Point3d point = Point3d.Unset;
       IntPtr const_ptr_this = ConstPointer();
       UnsafeNativeMethods.ON_Viewport_FrustumCenterPoint(const_ptr_this, targetDistance, ref point);
+      GC.KeepAlive(this);
       return point;
     }
 
@@ -1583,12 +1670,14 @@ namespace Rhino.DocObjects
         var point = new Point3d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_Viewport_TargetPoint(const_ptr_this, ref point);
+        GC.KeepAlive(this);
         return point;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetTargetPoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1610,7 +1699,9 @@ namespace Rhino.DocObjects
     public double TargetDistance( bool useFrustumCenterFallback )
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_TargetDistance(const_ptr_this, useFrustumCenterFallback);
+      double rc = UnsafeNativeMethods.ON_Viewport_TargetDistance(const_ptr_this, useFrustumCenterFallback);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /*
@@ -1653,12 +1744,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearOverFar(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearOverFar(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearOverFar(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1673,12 +1767,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearDist(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_Viewport_GetPerspectiveMinNearDist(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_Viewport_SetPerspectiveMinNearDist(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1696,7 +1793,9 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_Viewport_GetViewportId(const_ptr_this);
+        Guid rc = UnsafeNativeMethods.ON_Viewport_GetViewportId(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       //set
       //{
@@ -1715,7 +1814,9 @@ namespace Rhino.DocObjects
     public bool TransformCamera(Transform xform)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_Transform(ptr_this, ref xform);
+      bool rc = UnsafeNativeMethods.ON_Viewport_Transform(ptr_this, ref xform);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1729,7 +1830,9 @@ namespace Rhino.DocObjects
     public bool RotateCamera(double rotationAngleRadians, Vector3d rotationAxis, Point3d rotationCenter)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_Viewport_Rotate(ptr_this, rotationAngleRadians, rotationAxis, rotationCenter);
+      bool rc = UnsafeNativeMethods.ON_Viewport_Rotate(ptr_this, rotationAngleRadians, rotationAxis, rotationCenter);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /*

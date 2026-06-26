@@ -345,8 +345,8 @@ Curve
 
       Removes portions of the curve outside the specified interval.
 
-      :param float t0: Start of the trimming interval. Portions of the curve before curve(t0) are removed.
-      :param float t1: End of the trimming interval. Portions of the curve after curve(t1) are removed.
+      :param float t0: Start of the trimming interval.
+      :param float t1: End of the trimming interval.
 
       :return: Trimmed portion of this curve is successful, None on failure.
 

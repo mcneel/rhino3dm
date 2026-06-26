@@ -846,6 +846,7 @@ namespace Rhino.Input
     {
       var ptr_mesh_parameters = parameters.NonConstPointer();
       Result rc = (Result)UnsafeNativeMethods.RHC_RhinoGetMeshParameters(doc.RuntimeSerialNumber, ptr_mesh_parameters, ref uiStyle);
+      GC.KeepAlive(parameters);
       return rc;
     }
 
@@ -1130,7 +1131,9 @@ namespace Rhino.Input
     public static Result GetPrintWindow(ref ViewCaptureSettings settings)
     {
       IntPtr ptrSettings = settings.NonConstPointer();
-      return (Result)UnsafeNativeMethods.RHC_GetPrintWindow(ptrSettings);
+      Result rc = (Result)UnsafeNativeMethods.RHC_GetPrintWindow(ptrSettings);
+      GC.KeepAlive(settings);
+      return rc;
     }
     #endregion
   }
@@ -1299,6 +1302,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetString(ptr, prompt, idxCommandPrompt);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1327,6 +1331,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetString(ptr, defaultValue, idxCommandPromptDefault);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1344,6 +1349,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetDefaultPoint(ptr, point);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1361,6 +1367,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetDefaultNumber(ptr, defaultNumber);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1378,6 +1385,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetDefaultInteger(ptr, defaultValue);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1402,6 +1410,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetString(ptr, defaultValue, idxDefaultString);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1420,6 +1429,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       int argb = defaultColor.ToArgb();
       UnsafeNativeMethods.CRhinoGet_SetDefaultColor(ptr, argb);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1435,6 +1445,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       double seconds = milliseconds * 0.001;
       UnsafeNativeMethods.CRhinoGet_SetWaitDuration(ptr, seconds);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1445,6 +1456,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_ClearDefault(ptr);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1456,11 +1468,36 @@ namespace Rhino.Input.Custom
     public bool GotDefault()
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.CRhinoGet_GotDefault(ptr);
+      bool rc = UnsafeNativeMethods.CRhinoGet_GotDefault(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
     #region commandlineoptions
+
+    /// <summary>
+    /// Test a string to see if it can be used as an option name in any of the AddOption...() functions.
+    /// </summary>
+    /// <param name="optionName">String to test.</param>
+    /// <returns>True if string can be used as an option name.</returns>
+    /// <since>8.24</since>
+    public static bool IsValidOptionName(string optionName)
+    {
+      return UnsafeNativeMethods.CRhinoGet_IsValidOptionName(optionName, true);
+    }
+
+    /// <summary>
+    /// Test a string to see if it can be used as an option value name in the AddOption, AddOptionToggle, AddOptionList functions.
+    /// </summary>
+    /// <param name="optionValueName"></param>
+    /// <returns>True if string can be used as an option value.</returns>
+    /// <since>8.24</since>
+    public static bool IsValidOptionValueName(string optionValueName)
+    {
+      return UnsafeNativeMethods.CRhinoGet_IsValidOptionName(optionValueName, false);
+    }
+
     /// <summary>
     /// Adds a command line option.
     /// </summary>
@@ -1500,7 +1537,9 @@ namespace Rhino.Input.Custom
     public int AddOption(string englishOption, string englishOptionValue, bool hiddenOption)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGet_AddCommandOption(ptr, englishOption, englishOptionValue, hiddenOption);
+      int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOption(ptr, englishOption, englishOptionValue, hiddenOption);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1544,7 +1583,9 @@ namespace Rhino.Input.Custom
         val_local = optionValue.Local;
       }
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGet_AddCommandOptionLoc(ptr, optionName.English, optionName.Local, val_english, val_local, hiddenOption);
+      int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOptionLoc(ptr, optionName.English, optionName.Local, val_english, val_local, hiddenOption);
+      GC.KeepAlive(this);
+      return rc;
     }
     
     // 9 Feb 2010 S. Baer
@@ -1603,6 +1644,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       IntPtr ptr_holder = numberValue.OptionHolderPointer;
       int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOption3Loc(ptr, optionName.English, optionName.Local, ptr_holder, numberValue.m_lowerLimit, numberValue.m_upperLimit, prompt);
+      GC.KeepAlive(numberValue);
+      GC.KeepAlive(this);
       return rc;
     }
     /// <summary>
@@ -1687,6 +1730,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       IntPtr ptr_holder = intValue.OptionHolderPointer;
       int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOption4Loc(ptr, optionName.English, optionName.Local, ptr_holder, intValue.m_lowerLimit, intValue.m_upperLimit, prompt);
+      GC.KeepAlive(intValue);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1745,6 +1790,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_option = colorValue.OptionHolderPointer;
       int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOption5Loc(ptr_this, optionName.English, optionName.Local, ptr_option, prompt);
+      GC.KeepAlive(colorValue);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1824,6 +1871,8 @@ namespace Rhino.Input.Custom
       IntPtr ptr_toggle = toggleValue.OptionHolderPointer;
       int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOptionToggleLoc(ptr_this, ptr_toggle, optionName.English, optionName.Local,
         toggleValue.m_offValue.English, toggleValue.m_offValue.Local, toggleValue.m_onValue.English, toggleValue.m_onValue.Local);
+      GC.KeepAlive(toggleValue);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1851,6 +1900,7 @@ namespace Rhino.Input.Custom
         IntPtr ptr_strings = strings.NonConstPointer();
         IntPtr ptr_this = NonConstPointer();
         int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOptionListLoc(ptr_this, englishOptionName, englishOptionName, ptr_strings, ptr_strings, listCurrentIndex);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1884,6 +1934,7 @@ namespace Rhino.Input.Custom
         }
         IntPtr ptr_this = NonConstPointer();
         int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOptionListLoc(ptr_this, optionName.English, optionName.Local, ptr_english, ptr_local, listCurrentIndex);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -2019,6 +2070,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetOptionVaries(ptr_this, optionIndex, varies);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Clear all command options.</summary>
@@ -2032,6 +2084,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_ClearCommandOptions(ptr);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -2040,6 +2093,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_SetBool(ptr, which, b);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2123,6 +2177,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_AcceptNumber(ptr, enable, acceptZero);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2172,6 +2227,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoGet_AcceptCustomMessage(ptr_this, custom_message_id, enable);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -2196,6 +2252,7 @@ namespace Rhino.Input.Custom
         m_local_message_data = m_message_data;
         m_message_data = null;
       }
+      GC.KeepAlive(this);
       return m_local_message_data;
     }
 
@@ -2207,6 +2264,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = ConstPointer();
       uint rc = UnsafeNativeMethods.CRhinoGet_Result(ptr);
+      GC.KeepAlive(this);
       return (GetResult)rc;
     }
 
@@ -2224,6 +2282,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = ConstPointer();
       uint rc = UnsafeNativeMethods.CRhinoGet_CommandResult(ptr);
+      GC.KeepAlive(this);
       return (Result)rc;
     }
 
@@ -2244,6 +2303,7 @@ namespace Rhino.Input.Custom
       if (m_option == null)
         m_option = new CommandLineOption();
       m_option.m_ptr = ptr_option;
+      GC.KeepAlive(this);
       return m_option;
     }
 
@@ -2269,7 +2329,9 @@ namespace Rhino.Input.Custom
     public double Number()
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.CRhinoGet_Number(ptr);
+      double rc = UnsafeNativeMethods.CRhinoGet_Number(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2288,6 +2350,7 @@ namespace Rhino.Input.Custom
       IntPtr rc = UnsafeNativeMethods.CRhinoGet_String(ptr);
       if (IntPtr.Zero == rc)
         return String.Empty;
+      GC.KeepAlive(this);
       return Marshal.PtrToStringUni(rc);
     }
 
@@ -2306,6 +2369,7 @@ namespace Rhino.Input.Custom
       Point3d rc = new Point3d();
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.CRhinoGet_Point(ptr, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2319,6 +2383,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr = ConstPointer();
       Vector3d rc = new Vector3d();
       UnsafeNativeMethods.CRhinoGet_Vector(ptr, ref rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2329,6 +2394,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = ConstPointer();
       uint abgr = UnsafeNativeMethods.CRhinoGet_Color(ptr);
+      GC.KeepAlive(this);
       return Interop.ColorFromWin32((int)abgr);
     }
 
@@ -2346,6 +2412,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr const_ptr_this = ConstPointer();
       IntPtr ptr_view = UnsafeNativeMethods.CRhinoGet_View(const_ptr_this);
+      GC.KeepAlive(this);
       return RhinoView.FromIntPtr(ptr_view);
     }
 
@@ -2366,6 +2433,7 @@ namespace Rhino.Input.Custom
       int[] lrtb = new int[4];
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.CRhinoGet_GetRectangle(ptr, lrtb, idxPickRectangle);
+      GC.KeepAlive(this);
       return Rectangle.FromLTRB(lrtb[0], lrtb[1], lrtb[2], lrtb[3]);
     }
 
@@ -2381,6 +2449,7 @@ namespace Rhino.Input.Custom
       int x = 0;
       int y = 0;
       UnsafeNativeMethods.CRhinoGet_Point2d(ptr, ref x, ref y);
+      GC.KeepAlive(this);
       return new System.Drawing.Point(x, y);
     }
 
@@ -2400,6 +2469,7 @@ namespace Rhino.Input.Custom
       int[] lrtb = new int[4];
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.CRhinoGet_GetRectangle(ptr, lrtb, idxRectangle2d);
+      GC.KeepAlive(this);
       return Rectangle.FromLTRB(lrtb[0], lrtb[1], lrtb[2], lrtb[3]);
     }
 
@@ -2418,6 +2488,7 @@ namespace Rhino.Input.Custom
       System.Drawing.Point[] rc = new System.Drawing.Point[2];
       rc[0] = new System.Drawing.Point(x0, y0);
       rc[1] = new System.Drawing.Point(x1, y1);
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -2686,6 +2757,7 @@ namespace Rhino.Input.Custom
         if (IntPtr.Zero != m_pOptionHolder)
         {
           rc = UnsafeNativeMethods.CRhCommonOptionHolder_Bool(m_pOptionHolder);
+          GC.KeepAlive(this);
         }
         return rc;
       }
@@ -2693,6 +2765,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr pThis = OptionHolderPointer;
         UnsafeNativeMethods.CRhCommonOptionHolder_SetBool(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2805,6 +2878,7 @@ namespace Rhino.Input.Custom
         if (IntPtr.Zero != m_pOptionHolder)
         {
           rc = UnsafeNativeMethods.CRhCommonOptionHolder_Double(m_pOptionHolder);
+          GC.KeepAlive(this);
         }
         return rc;
       }
@@ -2812,6 +2886,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr pThis = OptionHolderPointer;
         UnsafeNativeMethods.CRhCommonOptionHolder_SetDouble(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2924,6 +2999,7 @@ namespace Rhino.Input.Custom
         if (IntPtr.Zero != m_pOptionHolder)
         {
           rc = UnsafeNativeMethods.CRhCommonOptionHolder_Integer(m_pOptionHolder);
+          GC.KeepAlive(this);
         }
         return rc;
       }
@@ -2931,6 +3007,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr pThis = OptionHolderPointer;
         UnsafeNativeMethods.CRhCommonOptionHolder_SetInt(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2991,6 +3068,7 @@ namespace Rhino.Input.Custom
         if (IntPtr.Zero != m_pOptionHolder)
         {
           int abgr = UnsafeNativeMethods.CRhCommonOptionHolder_Color(m_pOptionHolder);
+          GC.KeepAlive(this);
           rc = Interop.ColorFromWin32(abgr);
         }
         return rc;
@@ -3000,6 +3078,7 @@ namespace Rhino.Input.Custom
         IntPtr pThis = OptionHolderPointer;
         int argb = value.ToArgb();
         UnsafeNativeMethods.CRhCommonOptionHolder_SetColor(pThis, argb);
+        GC.KeepAlive(this);
       }
     }
 

@@ -33,6 +33,10 @@ Vector3d
 
       [todo] add documentation
 
+   .. py:method:: __str__()
+
+      [todo] add documentation
+
    .. py:method:: IsParallelTo(other)
 
       Determines whether this vector is parallel to another vector, within one degree (within Pi / 180).

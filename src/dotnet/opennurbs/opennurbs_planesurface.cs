@@ -84,12 +84,14 @@ namespace Rhino.Geometry
         IntPtr ptr_const_this = ConstPointer();
         Plane plane = new Plane();
         UnsafeNativeMethods.ON_PlaneSurface_GetPlane(ptr_const_this, ref plane);
+        GC.KeepAlive(this);
         return plane;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_PlaneSurface_SetPlane(ptr_this, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -107,6 +109,7 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = ConstPointer();
       Interval extents = new Interval();
       UnsafeNativeMethods.ON_PlaneSurface_GetExtents(ptr_const_this, direction, ref extents);
+      GC.KeepAlive(this);
       return extents;
     }
 
@@ -127,6 +130,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_PlaneSurface_SetExtents(ptr_this, direction, extents, syncDomain);
+      GC.KeepAlive(this);
     }
 
 
@@ -139,6 +143,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_mesh = UnsafeNativeMethods.ON_PlaneSurface_CreateMesh(ptr_const_this);
+      GC.KeepAlive(this);
       if (IntPtr.Zero != ptr_mesh)
         return new Mesh(ptr_mesh, null);
       return null;
@@ -191,6 +196,7 @@ namespace Rhino.Geometry
     /// <summary>
     /// Constructs an empty clipping plane surface
     /// </summary>
+    /// <since>8.11</since>
     public ClippingPlaneSurface()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New();
@@ -200,6 +206,7 @@ namespace Rhino.Geometry
     /// Constructs a clipping plane surface from a Plane
     /// </summary>
     /// <param name="plane"></param>
+    /// <since>8.11</since>
     public ClippingPlaneSurface(Plane plane)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New_FromPlane(ref plane);
@@ -209,9 +216,11 @@ namespace Rhino.Geometry
     /// Constructs a ClippingPlaneSurface from a PlaneSurface
     /// </summary>
     /// <param name="planeSurface"></param>
+    /// <since>8.11</since>
     public ClippingPlaneSurface(PlaneSurface planeSurface)
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New_FromPLaneSurface(planeSurface.ConstPointer());
+      GC.KeepAlive(this);
       ConstructNonConstObject(ptr);
     }
     internal ClippingPlaneSurface(IntPtr ptr, object parent)
@@ -242,12 +251,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepth(pConstThis);
+        double rc = UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepth(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDepth(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -260,12 +272,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepthEnabled(pConstThis);
+        bool rc = UnsafeNativeMethods.ON_ClippingPlaneSurface_GetDepthEnabled(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDepthEnabled(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -282,6 +297,7 @@ namespace Rhino.Geometry
       Guid[] rc = new Guid[count];
       for (int i = 0; i < count; i++)
         rc[i] = UnsafeNativeMethods.ON_ClippingPlaneSurface_ViewportId(ptr_const_this, i);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -294,7 +310,9 @@ namespace Rhino.Geometry
     public bool AddClipViewportId(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_ClippingPlaneSurface_AddClipViewport(ptr_this, viewportId);
+      bool rc = UnsafeNativeMethods.ON_ClippingPlaneSurface_AddClipViewport(ptr_this, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -306,7 +324,9 @@ namespace Rhino.Geometry
     public bool RemoveClipViewportId(Guid viewportId)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_ClippingPlaneSurface_RemoveClipViewport(ptr_this, viewportId);
+      bool rc = UnsafeNativeMethods.ON_ClippingPlaneSurface_RemoveClipViewport(ptr_this, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -318,12 +338,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_ClippingPlaneSurce_ParticipationEnabled(ptr_const_this);
+        bool rc = UnsafeNativeMethods.ON_ClippingPlaneSurce_ParticipationEnabled(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_ClippingPlaneSurface_SetParticipationEnabled(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -343,6 +366,7 @@ namespace Rhino.Geometry
         IntPtr idListPtr = idlist.ConstPointer();
         IntPtr layerListPtr = layerlist.ConstPointer();
         UnsafeNativeMethods.ON_ClippingPlaneSurface_SetClipList(ptr_this, idListPtr, layerListPtr, isExclusionList);
+        GC.KeepAlive(this);
       }
     }
 
@@ -365,6 +389,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_ClippingPlaneSurface_GetClipList(constPtrThis, idListPtr, layerListPtr, ref isExclusionList);
         objectIds = idlist.ToArray();
         layerIndices = layerlist.ToArray();
+        GC.KeepAlive(this);
       }
     }
 
@@ -377,6 +402,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_ClippingPlaneSurface_ClearParticipationLists(ptr_this);
+      GC.KeepAlive(this);
     }
   }
 }

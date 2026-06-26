@@ -98,12 +98,12 @@ namespace Rhino.Geometry
     /// Add geometry that should be included in the calculation
     /// </summary>
     /// <param name="geometry">
-    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </param>
     /// <param name="tag">arbitrary data to be associated with this geometry</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, object tag)
@@ -114,14 +114,14 @@ namespace Rhino.Geometry
     /// Add geometry that should be included in the calculation
     /// </summary>
     /// <param name="geometry">
-    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </param>
     /// <param name="tag">arbitrary data to be associated with this geometry
     /// </param>
     /// <param name="occluding_sections">sections of this geometry occlude</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, object tag, bool occluding_sections)
@@ -139,7 +139,7 @@ namespace Rhino.Geometry
     /// <param name="tag">arbitrary data to be associated with this geometry</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, Transform xform, object tag)
@@ -159,7 +159,7 @@ namespace Rhino.Geometry
     /// <param name="occluding_sections">sections of this geometry occlude</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometry(GeometryBase geometry, Transform xform, object tag, bool occluding_sections)
@@ -183,13 +183,13 @@ namespace Rhino.Geometry
     /// Add geometry and its active clipping planes to be included in the calculation
     /// </summary>
     /// <param name="geometry">
-    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </param>
     /// <param name="tag">arbitrary data to be associated with this geometry</param>
     /// <param name="clips">Active clipping planes for this object</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometryAndPlanes(GeometryBase geometry, object tag, List<Plane> clips)
@@ -200,7 +200,7 @@ namespace Rhino.Geometry
     /// Add geometry and its active clipping planes to be included in the calculation
     /// </summary>
     /// <param name="geometry">
-    /// Currently only curves, meshes, breps, surfaces, and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </param>
     /// <param name="tag">arbitrary data to be associated with this geometry
     /// </param>
@@ -208,7 +208,7 @@ namespace Rhino.Geometry
     /// <param name="clips">Active clipping planes for this object</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometryAndPlanes(GeometryBase geometry, object tag, bool occluding_sections, List<Plane> clips)
@@ -227,7 +227,7 @@ namespace Rhino.Geometry
     /// <param name="clips">Active clipping planes for this object</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometryAndPlanes(GeometryBase geometry, Transform xform, object tag, List<Plane> clips)
@@ -248,7 +248,7 @@ namespace Rhino.Geometry
     /// <param name="clips">Active clipping planes for this object</param>
     /// <returns>
     /// true if the type of geometry can be added for calculations.
-    /// Currently only points, point clouds, curves, meshes, breps, surfaces and extrusions are supported
+    /// Currently only points, point clouds, curves, meshes, breps, surfaces, and extrusions are supported
     /// </returns>
     /// <since>6.0</since>
     public bool AddGeometryAndPlanes(GeometryBase geometry, Transform xform, object tag, bool occluding_sections, List<Plane> clips)
@@ -407,6 +407,7 @@ namespace Rhino.Geometry
           {
             var array_intptr = array_clipid.ConstPointer();
             UnsafeNativeMethods.ON_HiddenLineDrawing_EnableSelectiveClipping(ptr_hld, obji, array_intptr);
+            GC.KeepAlive(array_clipid);
           }
         }
       }
@@ -428,7 +429,8 @@ namespace Rhino.Geometry
         rc.Dispose();
         rc = null;
       }
-
+      GC.KeepAlive(rc);
+      GC.KeepAlive(parameters);
       return rc;
     }
 
@@ -539,7 +541,11 @@ namespace Rhino.Geometry
       var const_ptr_geometry = geometry.ConstPointer();
       if (brep != null)
         const_ptr_geometry = brep.ConstPointer();
-      return UnsafeNativeMethods.ON_HiddenLineDrawing_AddObject(ptr_this, const_ptr_geometry, ref xform, Guid.Empty, (uint)tagIndex);
+      int rc = UnsafeNativeMethods.ON_HiddenLineDrawing_AddObject(ptr_this, const_ptr_geometry, ref xform, Guid.Empty, (uint)tagIndex);
+      GC.KeepAlive(geometry);
+      GC.KeepAlive(brep);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -550,7 +556,9 @@ namespace Rhino.Geometry
     private bool Compute(bool allowUseThreads)
     {
       var ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_HiddenLineDrawing_Draw(ptr_this, allowUseThreads);
+      bool rc = UnsafeNativeMethods.ON_HiddenLineDrawing_Draw(ptr_this, allowUseThreads);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -571,6 +579,7 @@ namespace Rhino.Geometry
 
       if (reporter != null) reporter.Disable();
       if (terminator != null) terminator.Dispose();
+      GC.KeepAlive(this);
 
       return rc;
     }
@@ -578,25 +587,22 @@ namespace Rhino.Geometry
     /// <summary>
     /// Flatten, or project, all full curves to the x-y plane in HLD-coordinates.
     /// </summary>
-    /// <returns>true if successful, false otherwise.</returns>
     private void Flatten()
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HiddenLineDrawing_Flatten(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
-    /// /// <summary>
     /// Join consecutive visible curves from a single FullCurve
     /// </summary>
-    /// <returns>true if successful, false otherwise.</returns>
-    /// </summary>
-    /// <returns>true if successful, false otherwise.</returns>
     /// <since>8.0</since>
     public void RejoinCompatibleVisible()
     {
       var ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HiddenLineDrawing_RejoinCompatibleVisible(ptr_this);
+      GC.KeepAlive(this);
     }
 
     /// <summary> Returns the ViewportInfo used by the hidden line drawing.</summary>
@@ -608,6 +614,7 @@ namespace Rhino.Geometry
       {
         var ptr_this = NonConstPointer();
         var ptr_viewport = UnsafeNativeMethods.ON_HiddenLineDrawing_GetViewport(ptr_this);
+        GC.KeepAlive(this);
         return ptr_viewport != IntPtr.Zero ? new ViewportInfo(ptr_viewport) : null;
       }
     }
@@ -623,6 +630,7 @@ namespace Rhino.Geometry
       var ptr_this = NonConstPointer();
       var rc = new BoundingBox();
       UnsafeNativeMethods.ON_HiddenLineDrawing_BoundingBox(ptr_this, ref rc, includeHidden);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -637,6 +645,7 @@ namespace Rhino.Geometry
         var ptr_this = NonConstPointer();
         var xform = Transform.Identity;
         UnsafeNativeMethods.ON_HiddenLineDrawing_WorldToHiddenLine(ptr_this, ref xform);
+        GC.KeepAlive(this);
         return xform;
       }
     }
@@ -673,13 +682,15 @@ namespace Rhino.Geometry
       {
         var ptr = m_owner.NonConstPointer();
         var rc = UnsafeNativeMethods.ON_HLD_Object_OccludingSectionOption(ptr);
+        GC.KeepAlive(m_owner);
         return rc;
       }
       set
       {
         var ptr = m_owner.NonConstPointer();
         UnsafeNativeMethods.ON_HLD_Object_EnableOccludingSection(ptr, value );
-       // OccludingSections = value;
+        GC.KeepAlive(m_owner);
+        // OccludingSections = value;
       }
     }
 
@@ -697,6 +708,7 @@ namespace Rhino.Geometry
         var ptr_geometry = UnsafeNativeMethods.ON_HLD_Object_Geometry(ptr, m_index);
         if (ptr_geometry != IntPtr.Zero)
           return GeometryBase.CreateGeometryHelper(ptr_geometry, null);
+        GC.KeepAlive(m_owner);
         return null;
       }
     }
@@ -713,6 +725,7 @@ namespace Rhino.Geometry
         var ptr = m_owner.NonConstPointer();
         var rc = new Transform();
         UnsafeNativeMethods.ON_HLD_Object_GetXform(ptr, m_index, ref rc);
+        GC.KeepAlive(m_owner);
         return rc;
       }
     }
@@ -728,6 +741,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr_owner = m_owner.ConstPointer();
         uint tag_index = UnsafeNativeMethods.ON_HLD_Object_GetExtra(const_ptr_owner, m_index);
+        GC.KeepAlive(m_owner);
         return m_owner.TagData((int)tag_index);
       }
     }
@@ -765,6 +779,7 @@ namespace Rhino.Geometry
         var index = UnsafeNativeMethods.ON_HLDPoint_SourceObject(ptr, m_index);
         if (index >= 0 && index < m_owner.Objects.Count)
           return m_owner.Objects[index];
+        GC.KeepAlive(m_owner);
         return null;
       }
     }
@@ -780,6 +795,7 @@ namespace Rhino.Geometry
         var ptr = m_owner.NonConstPointer();
         var ci = new ComponentIndex();
         UnsafeNativeMethods.ON_HLDPoint_SourceObjectComponentIndex(ptr, m_index, ref ci);
+        GC.KeepAlive(m_owner);
         return ci;
       }
     }
@@ -793,7 +809,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDPoint_ClippingPlaneIndex(ptr, m_index);
+        int rc = UnsafeNativeMethods.ON_HLDPoint_ClippingPlaneIndex(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -808,6 +826,7 @@ namespace Rhino.Geometry
         var ptr = m_owner.NonConstPointer();
         Point3d pt = new Point3d();
         UnsafeNativeMethods.ON_HLDPoint_Location(ptr, m_index, ref pt);
+        GC.KeepAlive(m_owner);
         return pt;
       }
     }
@@ -821,7 +840,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDPoint_Index(ptr, m_index);
+        int rc = UnsafeNativeMethods.ON_HLDPoint_Index(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -859,6 +880,7 @@ namespace Rhino.Geometry
       {
         var ptr = m_owner.NonConstPointer();
         var rc = UnsafeNativeMethods.ON_HLDPoint_Visibility(ptr, m_index);
+        GC.KeepAlive(m_owner);
         return (Visibility)rc;
       }
     }
@@ -897,7 +919,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDFullCurve_IsValid(ptr, m_index);
+        bool rc = UnsafeNativeMethods.ON_HLDFullCurve_IsValid(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -913,6 +937,7 @@ namespace Rhino.Geometry
         var index = UnsafeNativeMethods.ON_HLDFullCurve_SourceObject(ptr, m_index);
         if (index >= 0 && index < m_owner.Objects.Count)
           return m_owner.Objects[index];
+        GC.KeepAlive(m_owner);
         return null;
       }
     }
@@ -928,6 +953,7 @@ namespace Rhino.Geometry
         var ptr = m_owner.NonConstPointer();
         var ci = new ComponentIndex();
         UnsafeNativeMethods.ON_HLDFullCurve_SourceObjectComponentIndex(ptr, m_index, ref ci);
+        GC.KeepAlive(m_owner);
         return ci;
       }
     }
@@ -941,7 +967,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDFullCurve_ClippingPlaneIndex(ptr, m_index);
+        int rc = UnsafeNativeMethods.ON_HLDFullCurve_ClippingPlaneIndex(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -954,7 +982,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDFullCurve_Index(ptr, m_index);
+        int rc = UnsafeNativeMethods.ON_HLDFullCurve_Index(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -968,6 +998,7 @@ namespace Rhino.Geometry
       {
         var ptr = m_owner.NonConstPointer();
         var rc = UnsafeNativeMethods.ON_HLDFullCurve_SilhouetteType(ptr, m_index);
+        GC.KeepAlive(m_owner);
         return (SilhouetteType)rc; // Steve, don't yell at me for this...
       }
     }
@@ -983,7 +1014,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDFullCurve_OriginalDomainStart(ptr, m_index);
+        double rc = UnsafeNativeMethods.ON_HLDFullCurve_OriginalDomainStart(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1000,6 +1033,7 @@ namespace Rhino.Geometry
           var ptr = m_owner.NonConstPointer();
           var ptr_array_double = array_double.NonConstPointer();
           var rc = UnsafeNativeMethods.ON_HLDFullCurve_Parameters(ptr, m_index, ptr_array_double);
+          GC.KeepAlive(m_owner);
           return rc > 0 ? array_double.ToArray() : new double[0];
         }
       }
@@ -1029,6 +1063,7 @@ namespace Rhino.Geometry
             }
             return curves;
           }
+          GC.KeepAlive(m_owner);
           return new HiddenLineDrawingSegment[0];
         }
       }
@@ -1043,7 +1078,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDFullCurve_IsProjecting(ptr, m_index);
+        bool rc = UnsafeNativeMethods.ON_HLDFullCurve_IsProjecting(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1081,6 +1118,7 @@ namespace Rhino.Geometry
       var curve_list = m_owner.GetSegmentList();
       if (index >= 0 && index < curve_list.Count)
         return curve_list[index];
+      GC.KeepAlive(m_owner);
       return null;
     }
 
@@ -1139,7 +1177,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDCurve_Index(ptr, m_index);
+        int rc = UnsafeNativeMethods.ON_HLDCurve_Index(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1159,6 +1199,7 @@ namespace Rhino.Geometry
         var index = UnsafeNativeMethods.ON_HLDCurve_FullCurve(ptr, m_index);
         if (index >= 0 && index < m_owner.FullCurves.Count)
           return m_owner.FullCurves[index];
+        GC.KeepAlive(m_owner);
         return null;
       }
     }
@@ -1205,6 +1246,7 @@ namespace Rhino.Geometry
       {
         var ptr = m_owner.NonConstPointer();
         var rc = UnsafeNativeMethods.ON_HLDCurve_Visibility(ptr, m_index);
+        GC.KeepAlive(m_owner);
         return (Visibility)rc;
       }
     }
@@ -1218,7 +1260,9 @@ namespace Rhino.Geometry
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HLDCurve_IsSceneSilhouette(ptr, m_index);
+        bool rc = UnsafeNativeMethods.ON_HLDCurve_IsSceneSilhouette(ptr, m_index);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1266,6 +1310,7 @@ namespace Rhino.Geometry
           var ptr = m_owner.NonConstPointer();
           var ptr_array_int = array_int.NonConstPointer();
           UnsafeNativeMethods.ON_HLDCurve_SideFill(ptr, m_index, ptr_array_int);
+          GC.KeepAlive(m_owner);
           if (array_int.Count > 0)
           {
             var values = array_int.ToArray();
@@ -1312,7 +1357,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HiddenLineDrawing_ObjectCount(ptr);
+        int rc = UnsafeNativeMethods.ON_HiddenLineDrawing_ObjectCount(ptr);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1389,7 +1436,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HiddenLineDrawing_FullCurveCount(ptr);
+        int rc = UnsafeNativeMethods.ON_HiddenLineDrawing_FullCurveCount(ptr);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1466,7 +1515,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HiddenLineDrawing_PointCount(ptr);
+        int rc = UnsafeNativeMethods.ON_HiddenLineDrawing_PointCount(ptr);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 
@@ -1545,7 +1596,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         var ptr = m_owner.NonConstPointer();
-        return UnsafeNativeMethods.ON_HiddenLineDrawing_CurveCount(ptr);
+        int rc = UnsafeNativeMethods.ON_HiddenLineDrawing_CurveCount(ptr);
+        GC.KeepAlive(m_owner);
+        return rc;
       }
     }
 

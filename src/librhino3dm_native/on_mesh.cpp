@@ -3983,6 +3983,18 @@ RH_C_FUNCTION int ON_Mesh_RemoveNgons(
   return (mesh ? mesh->RemoveNgons(ngon_index_count, (const unsigned int*)ngon_index_list) : 0);
 }
 
+RH_C_FUNCTION int ON_Mesh_RemoveAllNgons(ON_Mesh* mesh)
+{
+  int rc = 0;
+  if (nullptr != mesh)
+  {
+    const int ngon_count = mesh->m_Ngon.Count();
+    mesh->RemoveAllNgons();
+    rc = mesh->m_Ngon.Count() - ngon_count;
+  }
+  return rc;
+}
+
 RH_C_FUNCTION int ON_Mesh_AddPlanarNgons(
   ON_Mesh* mesh,
   double planar_tolerance,

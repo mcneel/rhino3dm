@@ -48,6 +48,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_SetBasePoint(ptr, basePoint, showDistanceInStatusBar);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -56,6 +57,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr = ConstPointer();
       basePoint = new Point3d();
       bool rc = UnsafeNativeMethods.CRhinoGetPoint_GetBasePoint(ptr, ref basePoint);
+      GC.KeepAlive(this);
       if (!rc)
         basePoint = Point3d.Unset;
       return rc;
@@ -73,6 +75,8 @@ namespace Rhino.Input.Custom
       bool rc = UnsafeNativeMethods.CRhinoGetPoint_GetPlanarConstraint(ptr, ptr_viewport, ref plane);
       if(!rc)
         plane = Plane.Unset;
+      GC.KeepAlive(vp);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -93,6 +97,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_ConstrainDistanceFromBasePoint(ptr, distance);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -107,6 +112,7 @@ namespace Rhino.Input.Custom
         IntPtr const_ptr_this = ConstPointer();
         int argb = 0;
         int abgr = UnsafeNativeMethods.CRhinoGetPoint_DynamicDrawColor(const_ptr_this, ref argb, false);
+        GC.KeepAlive(this);
         return Runtime.Interop.ColorFromWin32(abgr);
       }
       set
@@ -114,6 +120,7 @@ namespace Rhino.Input.Custom
         IntPtr ptr_this = NonConstPointer();
         int argb = value.ToArgb();
         UnsafeNativeMethods.CRhinoGetPoint_DynamicDrawColor(ptr_this, ref argb, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -127,6 +134,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_SetCursor(ptr_this, cursor);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -165,12 +173,14 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_DrawLineFromPoint(ptr, startPoint, showDistanceInStatusBar);
+      GC.KeepAlive(this);
     }
 
     void EnableItem(UnsafeNativeMethods.GetPointEnable which, bool enable)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_EnableItem(ptr, which, enable);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -278,6 +288,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_PermitElevatorMode(ptr, permitMode);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -309,7 +320,9 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       Point3d[] pts = new Point3d[] { point };
-      return UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, 1, pts, true);
+      int rc = UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, 1, pts, true);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Adds points to the list of osnap points.
@@ -328,7 +341,9 @@ namespace Rhino.Input.Custom
         return 0;
       int count = points.Length;
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, count, points, true);
+      int rc = UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, count, points, true);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -348,7 +363,9 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       Point3d[] pts = new Point3d[] { point };
-      return UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, 1, pts, false);
+      int rc = UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, 1, pts, false);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>
     /// Adds points to the list of construction points.
@@ -368,7 +385,9 @@ namespace Rhino.Input.Custom
         return 0;
       int count = points.Length;
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, count, points, false);
+      int rc = UnsafeNativeMethods.CRhinoGetPoint_AddSnapPoints(ptr, count, points, false);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -384,6 +403,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_ClearSnapPoints(ptr, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -401,6 +421,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_ClearSnapPoints(ptr, false);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -416,6 +437,7 @@ namespace Rhino.Input.Custom
       UnsafeNativeMethods.CRhinoGetPoint_GetSnapPoints(conrt_ptr_this, ptr_array, true);
       Point3d[] rc = pts.ToArray();
       pts.Dispose();
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -439,6 +461,7 @@ namespace Rhino.Input.Custom
       UnsafeNativeMethods.CRhinoGetPoint_GetSnapPoints(const_ptr_this, ptr_array, false);
       Point3d[] rc = pts.ToArray();
       pts.Dispose();
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -464,6 +487,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_EnableItem2(ptr, idxEnableCurveSnapTangentBar, drawTangentBarAtSnapPoint, drawEndPoints);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// Controls display of the curve snap perpendicular bar icon.
@@ -479,6 +503,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_EnableItem2(ptr, idxEnableCurveSnapPerpBar, drawPerpBarAtSnapPoint, drawEndPoints);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// Controls display of the curve snap arrow icon.
@@ -498,6 +523,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_EnableItem2(ptr, idxEnableCurveSnapArrow, drawDirectionArrowAtSnapPoint, reverseArrow);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -525,7 +551,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Point3d from, Point3d to)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain1(ptr, from, to);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain1(ptr, from, to);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a line.</summary>
     /// <param name="line">A line to use as constraint.</param>
@@ -548,7 +576,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Arc arc)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain2(ptr, ref arc);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain2(ptr, ref arc);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a circle.</summary>
     /// <param name="circle">A circle to use as constraint.</param>
@@ -557,7 +587,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Circle circle)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain3(ptr, ref circle);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain3(ptr, ref circle);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>constrain the picked point to lie on a plane.</summary>
     /// <param name="plane">A plane to use as constraint.</param>
@@ -567,7 +599,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Plane plane, bool allowElevator)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain4(ptr, ref plane, allowElevator);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain4(ptr, ref plane, allowElevator);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a sphere.</summary>
     /// <param name="sphere">A sphere to use as constraint.</param>
@@ -576,7 +610,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Sphere sphere)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain5(ptr, ref sphere);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain5(ptr, ref sphere);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a cylinder.</summary>
     /// <param name="cylinder">A cylinder to use as constraint.</param>
@@ -585,7 +621,9 @@ namespace Rhino.Input.Custom
     public bool Constrain(Cylinder cylinder)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain6(ptr, ref cylinder);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain6(ptr, ref cylinder);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Constrains the picked point to lie on a curve.</summary>
@@ -607,7 +645,10 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_curve = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain7(ptr_this, const_ptr_curve, allowPickingPointOffObject);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain7(ptr_this, const_ptr_curve, allowPickingPointOffObject);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a surface.</summary>
     /// <param name="surface">A surface to use as constraint.</param>
@@ -628,7 +669,10 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_surface = surface.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain8(ptr_this, const_ptr_surface, allowPickingPointOffObject);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain8(ptr_this, const_ptr_surface, allowPickingPointOffObject);
+      GC.KeepAlive(surface);
+      GC.KeepAlive(this);
+      return rc;
     }
     /// <summary>Constrains the picked point to lie on a brep.</summary>
     /// <param name="brep">A brep to use as constraint.</param>
@@ -651,7 +695,10 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_brep = brep.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_Constrain9(ptr_this, const_ptr_brep, wireDensity, faceIndex, allowPickingPointOffObject);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain9(ptr_this, const_ptr_brep, wireDensity, faceIndex, allowPickingPointOffObject);
+      GC.KeepAlive(brep);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Constrains the picked point to lie on a mesh.</summary>
@@ -668,7 +715,10 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_mesh = mesh.ConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_ConstrainToMesh(ptr_this, const_ptr_mesh, allowPickingPointOffObject);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_ConstrainToMesh(ptr_this, const_ptr_mesh, allowPickingPointOffObject);
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -693,7 +743,9 @@ namespace Rhino.Input.Custom
     public bool ConstrainToConstructionPlane(bool throughBasePoint)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_ConstrainToConstructionPlane(ptr, throughBasePoint);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_ConstrainToConstructionPlane(ptr, throughBasePoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -718,7 +770,9 @@ namespace Rhino.Input.Custom
     public bool ConstrainToVirtualCPlaneIntersection(Plane plane)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_ConstrainToVirtualCPlaneIntersection(ptr, ref plane);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_ConstrainToVirtualCPlaneIntersection(ptr, ref plane);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -735,6 +789,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_ClearConstraints(ptr);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -747,7 +802,9 @@ namespace Rhino.Input.Custom
     public bool InterruptMouseMove()
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.CRhinoGetPoint_InterruptMouseMose(ptr);
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_InterruptMouseMose(ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     internal static GetPoint m_active_gp; // = null; [runtime default]
@@ -1021,6 +1078,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       GetTransform.CalculateXformCallack calcXformCB = GetTransform.CustomCalcXform;
       uint rc = UnsafeNativeMethods.CRhinoGetXform_GetXform(ptr, mouseCB, drawCB, postDrawCB, calcXformCB);
+      GC.KeepAlive(this);
       m_active_gp = old;
 
       return (GetResult)rc;
@@ -1051,6 +1109,7 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr_this = ConstPointer();
         int rc = UnsafeNativeMethods.CRhinoGetPoint_SnapEventMode(ptr_this);
+        GC.KeepAlive(this);
         return (Rhino.ApplicationSettings.OsnapModes)rc;
       }
     }
@@ -1068,6 +1127,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoGetPoint_NumberPreview(ptr_this, ref d);
       number = d;
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1087,6 +1147,7 @@ namespace Rhino.Input.Custom
         rc.Dispose();
         rc = null;
       }
+      GC.KeepAlive(this);
       return rc;
     }
 

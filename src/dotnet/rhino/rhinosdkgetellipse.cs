@@ -76,12 +76,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetEllipse_MarkFoci(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetEllipse_MarkFoci(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetEllipse_SetMarkFoci(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -94,7 +97,9 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetEllipse_IsModeFromFoci(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetEllipse_IsModeFromFoci(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -109,6 +114,7 @@ namespace Rhino.Input.Custom
         Geometry.Point3d rc = Rhino.Geometry.Point3d.Unset;
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetEllipse_FirstPoint(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -124,6 +130,7 @@ namespace Rhino.Input.Custom
         Geometry.Point3d rc = Rhino.Geometry.Point3d.Unset;
         IntPtr ptr_const_this = ConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetEllipse_SecondPoint(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -140,6 +147,7 @@ namespace Rhino.Input.Custom
       ellipse = new Geometry.NurbsCurve();
       IntPtr ptr_ellipse = ellipse.NonConstPointer();
       uint rc = UnsafeNativeMethods.RHC_RhinoGetEllipse(ptr_ellipse, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
   }

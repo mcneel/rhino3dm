@@ -26,6 +26,13 @@ BND_BoundingBox BND_GeometryBase::BoundingBox() const
   return BND_BoundingBox(bbox);
 }
 
+BND_BoundingBox BND_GeometryBase::GetTightBoundingBox() const
+{
+  ON_BoundingBox bbox;
+  m_geometry->GetTightBoundingBox(bbox, false, nullptr);
+  return BND_BoundingBox(bbox);
+}
+
 bool BND_GeometryBase::Rotate(double rotation_angle, const ON_3dVector& rotation_axis, const ON_3dPoint& rotation_center)
 {
   return m_geometry->Rotate(rotation_angle, rotation_axis, rotation_center);
@@ -43,6 +50,7 @@ void initGeometryBindings(rh3dmpymodule& m)
     .def("Scale", &BND_GeometryBase::Scale, py::arg("scaleFactor"))
     .def("Rotate", &BND_GeometryBase::Rotate, py::arg("rotationAngle"), py::arg("rotationAxis"), py::arg("rotationCenter"))
     .def("GetBoundingBox", &BND_GeometryBase::BoundingBox)
+    .def("GetTightBoundingBox", &BND_GeometryBase::GetTightBoundingBox)
     .def_property_readonly("IsDeformable", &BND_GeometryBase::IsDeformable)
     .def("MakeDeformable", &BND_GeometryBase::MakeDeformable)
     .def_property_readonly("HasBrepForm", &BND_GeometryBase::HasBrepForm)
@@ -64,6 +72,7 @@ void initGeometryBindings(void*)
     .function("scale", &BND_GeometryBase::Scale)
     .function("rotate", &BND_GeometryBase::Rotate)
     .function("getBoundingBox", &BND_GeometryBase::BoundingBox)
+    .function("getTightBoundingBox", &BND_GeometryBase::GetTightBoundingBox)
     .property("isDeformable", &BND_GeometryBase::IsDeformable)
     .function("makeDeformable", &BND_GeometryBase::MakeDeformable)
     .property("hasBrepForm", &BND_GeometryBase::HasBrepForm)

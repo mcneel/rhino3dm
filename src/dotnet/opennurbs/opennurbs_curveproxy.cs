@@ -31,7 +31,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_CurveProxy_IsReversed(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_CurveProxy_IsReversed(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
   }

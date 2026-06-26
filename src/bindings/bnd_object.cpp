@@ -36,7 +36,9 @@ void SetDictValue(BND_DICT& d, const char* key, T& value)
 #if defined(ON_PYTHON_COMPILE)
   d[key] = value;
 #else
-  d.set(key, emscripten::val(value));
+  // embind (emscripten >= ~4.0) forbids implicitly marshaling registered-class
+  // raw pointers into a val; the policy is harmless for non-pointer values.
+  d.set(key, emscripten::val(value, emscripten::allow_raw_pointers()));
 #endif
 }
 

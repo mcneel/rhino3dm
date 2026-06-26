@@ -37,6 +37,9 @@ namespace Rhino.Geometry
       IntPtr const_ptr_dimstyle = style.ConstPointer();
       UnsafeNativeMethods.ON_V6_Dimension_GetTextXform(
         const_ptr_this, const_ptr_viewport, const_ptr_dimstyle, textScale, ref xform);
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
       return xform;
     }
 
@@ -51,6 +54,8 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_const_dimstyle = style.ConstPointer();
       UnsafeNativeMethods.ON_V6_Dimension_UpdateDimensionText(ptr_this, ptr_const_dimstyle, units);
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
     }
 
     /// <since>6.0</since>
@@ -59,12 +64,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_UseDefaultTextPoint(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_V6_Dimension_UseDefaultTextPoint(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetUseDefaultTextPoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -79,12 +87,14 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         Point2d position = new Point2d();
         UnsafeNativeMethods.ON_V6_Dimension_GetTextPoint(const_ptr_this, ref position);
+        GC.KeepAlive(this);
         return position;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetTextPoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -98,6 +108,7 @@ namespace Rhino.Geometry
           IntPtr ptr_string = sw.NonConstPointer;
           IntPtr const_ptr_this = ConstPointer();
           UnsafeNativeMethods.ON_V6_Dimension_GetPlainUserText(const_ptr_this, ptr_string);
+          GC.KeepAlive(this);
           var str = sw.ToString();
           //RhinoApp.WriteLine($"get PlainUserText:{str}"); //debug
           return sw.ToString();
@@ -115,6 +126,7 @@ namespace Rhino.Geometry
           IntPtr ptr_string = sw.NonConstPointer;
           IntPtr const_ptr_this = ConstPointer();
           UnsafeNativeMethods.ON_V6_Dimension_GetUserText(const_ptr_this, ptr_string);
+          GC.KeepAlive(this);
 
           var str = sw.ToString();
           //RhinoApp.WriteLine($"get TextFormula:{str}"); //debug
@@ -126,6 +138,7 @@ namespace Rhino.Geometry
         IntPtr ptr_this = NonConstPointer();
         //RhinoApp.WriteLine($"set TextFormula:{value}"); //debug
         UnsafeNativeMethods.ON_V6_Dimension_SetUserText(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -135,12 +148,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_GetTextRotation(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_V6_Dimension_GetTextRotation(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetTextRotation(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -156,22 +172,42 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_Measurement(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_V6_Dimension_Measurement(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
     /// <since>6.0</since>
     public Guid DetailMeasured
     {
-      get { return UnsafeNativeMethods.ON_V6_Dimension_GetDetailMeasured(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_Dimension_SetDetailMeasured(NonConstPointer(), value); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_V6_Dimension_GetDetailMeasured(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_Dimension_SetDetailMeasured(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public double DistanceScale
     {
-      get { return UnsafeNativeMethods.ON_V6_Dimension_GetDistanceScale(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_Dimension_SetDistanceScale(NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_V6_Dimension_GetDistanceScale(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_Dimension_SetDistanceScale(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -199,13 +235,16 @@ namespace Rhino.Geometry
       {
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+        bool rc = UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetForceDimLine(dimptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -216,13 +255,16 @@ namespace Rhino.Geometry
       {
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_ArrowFit(dimptr, styleptr);
+        DimensionStyle.ArrowFit rc = UnsafeNativeMethods.ON_V6_Dimension_ArrowFit(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetArrowFit(dimptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -233,13 +275,16 @@ namespace Rhino.Geometry
       {
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+        bool rc = UnsafeNativeMethods.ON_V6_Dimension_ForceDimLine(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetForceDimLine(dimptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -250,13 +295,16 @@ namespace Rhino.Geometry
       {
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Dimension_TextFit(dimptr, styleptr);
+        DimensionStyle.TextFit rc = UnsafeNativeMethods.ON_V6_Dimension_TextFit(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Dimension_SetTextFit(dimptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -268,7 +316,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         TextOrientation rc = UnsafeNativeMethods.ON_Dim_GetDimTextOrientation(dimptr, styleptr);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return rc;
       }
       set
@@ -276,7 +324,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_Dim_SetDimTextOrientation(dimptr, styleptr, value);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -288,7 +336,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.TextLocation rc = UnsafeNativeMethods.ON_Dim_GetDimTextocation(dimptr, styleptr);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return rc;
       }
       set
@@ -298,7 +346,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_Dim_SetDimTextLocation(dimptr, styleptr, value);
         if (value == DimensionStyle.TextLocation.AboveDimLine)
           TextAngleType = DimensionStyle.LeaderContentAngleStyle.Aligned;
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -310,7 +358,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         DimensionStyle.LeaderContentAngleStyle rc = UnsafeNativeMethods.ON_Dim_GetDimTextAngleStyle(dimptr, styleptr);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return rc;
       }
       set
@@ -320,7 +368,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_Dim_SetDimTextAngleStyle(dimptr, styleptr, value);
         if (value == DimensionStyle.LeaderContentAngleStyle.Horizontal)
           TextLocation = DimensionStyle.TextLocation.InDimLine;
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -332,7 +380,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         double rc = UnsafeNativeMethods.ON_V6_Annotation_DimExtension(dimptr, styleptr);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return rc;
       }
       set
@@ -340,7 +388,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetDimExtension(dimptr, styleptr, value);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -352,7 +400,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         double rc = UnsafeNativeMethods.ON_V6_Annotation_ExtensionLineExtension(dimptr, styleptr);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return rc;
       }
       set
@@ -360,7 +408,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetExtensionLineExtension(dimptr, styleptr, value);
-        GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
       }
     }
 
@@ -1120,6 +1168,7 @@ namespace Rhino.Geometry
 
         GC.KeepAlive(dimstyle);
         GC.KeepAlive(parent);
+        GC.KeepAlive(this);
 
         return out_geometry.ToArray();
       }
@@ -1216,6 +1265,7 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_V6_DimLinear_SetDefPoint(ptr_this, extensionLine1End, true);
       UnsafeNativeMethods.ON_V6_DimLinear_SetDefPoint(ptr_this, p2, false);
       UnsafeNativeMethods.ON_V6_DimLinear_SetDimlinePoint(ptr_this, pD);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1237,8 +1287,17 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public new AnnotationType AnnotationType
     {
-      get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_DimLinear_SetDimensionType(NonConstPointer(), value); }
+      get
+      {
+        AnnotationType rc = UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimLinear_SetDimensionType(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -1289,8 +1348,10 @@ namespace Rhino.Geometry
       dimlinepoint = new Point3d();
       textpoint = new Point3d();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_V6_DimLinear_Get3dPoints(const_ptr_this,
+      bool rc = UnsafeNativeMethods.ON_V6_DimLinear_Get3dPoints(const_ptr_this,
         ref extensionLine1End, ref extensionLine2End, ref arrowhead1End, ref arrowhead2End, ref dimlinepoint, ref textpoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1304,12 +1365,14 @@ namespace Rhino.Geometry
         Point2d defpt1 = new Point2d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_DefPoint(const_ptr_this, ref defpt1, true);
+        GC.KeepAlive(this);
         return defpt1;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_SetDefPoint(ptr_this, value, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1324,12 +1387,14 @@ namespace Rhino.Geometry
         Point2d defpt2 = new Point2d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_DefPoint(const_ptr_this, ref defpt2, false);
+        GC.KeepAlive(this);
         return defpt2;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_SetDefPoint(ptr_this, value, false);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1344,6 +1409,7 @@ namespace Rhino.Geometry
         Point2d arrowpt1 = new Point2d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_ArrowPoint(const_ptr_this, ref arrowpt1, true);
+        GC.KeepAlive(this);
         return arrowpt1;
       }
     }
@@ -1359,6 +1425,7 @@ namespace Rhino.Geometry
         Point2d arrowpt2 = new Point2d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_ArrowPoint(const_ptr_this, ref arrowpt2, false);
+        GC.KeepAlive(this);
         return arrowpt2;
       }
     }
@@ -1374,12 +1441,14 @@ namespace Rhino.Geometry
         Point2d dimlinept = new Point2d();
         IntPtr const_ptr_this = ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_DimlinePoint(const_ptr_this, ref dimlinept);
+        GC.KeepAlive(this);
         return dimlinept;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_SetDimlinePoint(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1389,7 +1458,9 @@ namespace Rhino.Geometry
     public bool GetTextRectangle(out Point3d[] corners)
     {
       corners = new Point3d[4];
-      return UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      bool rc = UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     [ConstOperation]
@@ -1415,6 +1486,8 @@ namespace Rhino.Geometry
           }
         }
       }
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1428,6 +1501,8 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
         UnsafeNativeMethods.ON_V6_DimLinear_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
+        GC.KeepAlive(style);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -1670,7 +1745,7 @@ namespace Rhino.Geometry
       Point3d dimlinepoint
       )
     {
-      return UnsafeNativeMethods.ON_V6_DimAngular_AdjustFromPoints(
+      bool rc = UnsafeNativeMethods.ON_V6_DimAngular_AdjustFromPoints(
         NonConstPointer(),
         plane,
         centerpoint,
@@ -1678,6 +1753,8 @@ namespace Rhino.Geometry
         defpoint2,
         dimlinepoint
         );
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <deprecated>8.0</deprecated>
@@ -1766,7 +1843,7 @@ namespace Rhino.Geometry
       Point3d dimlinepoint
       )
     {
-      return UnsafeNativeMethods.ON_V6_DimAngular_AdjustFromPoints2(
+      bool rc = UnsafeNativeMethods.ON_V6_DimAngular_AdjustFromPoints2(
         NonConstPointer(),
         plane,
         extpoint1,
@@ -1775,6 +1852,8 @@ namespace Rhino.Geometry
         dirpoint2,
         dimlinepoint
         );
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1835,7 +1914,7 @@ namespace Rhino.Geometry
         pointOnAngularDimensionArc,
         bSetExtensionPoints
         );
-
+      GC.KeepAlive(dimStyle);
       if (IntPtr.Zero == ptr_dim)
         return null;
 
@@ -1873,8 +1952,10 @@ namespace Rhino.Geometry
       dimlinepoint = new Point3d();
       textpoint = new Point3d();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_V6_DimAngular_Get3dPoints(const_ptr_this,
+      bool rc= UnsafeNativeMethods.ON_V6_DimAngular_Get3dPoints(const_ptr_this,
         ref centerpoint, ref defpoint1, ref defpoint2, ref arrowpoint1, ref arrowpoint2, ref dimlinepoint, ref textpoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -1884,9 +1965,14 @@ namespace Rhino.Geometry
       {
         Point2d centerpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_CenterPoint(ConstPointer(), ref centerpt);
+        GC.KeepAlive(this);
         return centerpt;
       }
-      set { UnsafeNativeMethods.ON_V6_DimAngular_SetCenterPoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimAngular_SetCenterPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -1896,9 +1982,14 @@ namespace Rhino.Geometry
       {
         Point2d defpt1 = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_DefPoint1(ConstPointer(), ref defpt1);
+        GC.KeepAlive(this);
         return defpt1;
       }
-      set { UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint1(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint1(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -1908,9 +1999,14 @@ namespace Rhino.Geometry
       {
         Point2d defpt2 = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_DefPoint2(ConstPointer(), ref defpt2);
+        GC.KeepAlive(this);
         return defpt2;
       }
-      set { UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint2(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimAngular_SetDefPoint2(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -1920,9 +2016,14 @@ namespace Rhino.Geometry
       {
         Point2d dimlinept = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_DimlinePoint(ConstPointer(), ref dimlinept);
+        GC.KeepAlive(this);
         return dimlinept;
       }
-      set { UnsafeNativeMethods.ON_V6_DimAngular_SetDimlinePoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimAngular_SetDimlinePoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -1932,6 +2033,7 @@ namespace Rhino.Geometry
       {
         Point2d arrowpt1 = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_ArrowPoint1(ConstPointer(), ref arrowpt1);
+        GC.KeepAlive(this);
         return arrowpt1;
       }
     }
@@ -1943,6 +2045,7 @@ namespace Rhino.Geometry
       {
         Point2d arrowpt2 = new Point2d();
         UnsafeNativeMethods.ON_V6_DimAngular_ArrowPoint2(ConstPointer(), ref arrowpt2);
+        GC.KeepAlive(this);
         return arrowpt2;
       }
     }
@@ -1952,7 +2055,9 @@ namespace Rhino.Geometry
     public bool GetTextRectangle(out Point3d[] corners)
     {
       corners = new Point3d[4];
-      return UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      bool rc = UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -1972,6 +2077,7 @@ namespace Rhino.Geometry
         UnsafeNativeMethods.ON_V6_DimAngular_GetDisplayLines(const_ptr_this, styleptr, scale, text_rect, lines, isline, arcs, isarc, 2, 2);
         GC.KeepAlive(style);   // GC_KeepAlive: Nov. 1, 2018
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1986,6 +2092,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = style.ConstPointer();
         UnsafeNativeMethods.ON_V6_DimAngular_GetDisplayText(dimptr, styleptr, strptr);
         GC.KeepAlive(style);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -2125,8 +2232,17 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public new AnnotationType AnnotationType
     {
-      get { return UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_DimRadial_SetDimensionType(NonConstPointer(), value); }
+      get
+      {
+        AnnotationType rc = UnsafeNativeMethods.ON_V6_Annotation_AnnotationType(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimRadial_SetDimensionType(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -2165,7 +2281,7 @@ namespace Rhino.Geometry
     /// <param name="centerpoint">Dimension's center point</param>
     /// <param name="radiuspoint">Point on dimension radius</param>
     /// <param name="dimlinepoint">Point on dimension line</param>
-    /// <param name="rotationInPlane">Rotation around plane origin</param>
+    /// <param name="rotationInPlane">This parameter is currently ignored</param>
     /// <returns></returns>
     /// <since>6.0</since>
     public bool AdjustFromPoints(
@@ -2176,13 +2292,15 @@ namespace Rhino.Geometry
       double rotationInPlane
       )
     {
-      return UnsafeNativeMethods.ON_V6_DimRadial_AdjustFromPoints(
+      bool rc = UnsafeNativeMethods.ON_V6_DimRadial_AdjustFromPoints(
         NonConstPointer(),
         plane,
         centerpoint,
         radiuspoint,
         dimlinepoint
         );
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2207,8 +2325,10 @@ namespace Rhino.Geometry
       dimlinepoint = new Point3d();
       kneepoint = new Point3d();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_V6_DimRadial_Get3dPoints(const_ptr_this,
+      bool rc = UnsafeNativeMethods.ON_V6_DimRadial_Get3dPoints(const_ptr_this,
         ref centerpoint, ref radiuspoint, ref dimlinepoint, ref kneepoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -2218,9 +2338,14 @@ namespace Rhino.Geometry
       {
         Point2d centerpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimRadial_CenterPoint(ConstPointer(), ref centerpt);
+        GC.KeepAlive(this);
         return centerpt;
       }
-      set { UnsafeNativeMethods.ON_V6_DimRadial_SetCenterPoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimRadial_SetCenterPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2230,9 +2355,14 @@ namespace Rhino.Geometry
       {
         Point2d radiuspt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimRadial_RadiusPoint(ConstPointer(), ref radiuspt);
+        GC.KeepAlive(this);
         return radiuspt;
       }
-      set { UnsafeNativeMethods.ON_V6_DimRadial_SetRadiusPoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimRadial_SetRadiusPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2242,9 +2372,14 @@ namespace Rhino.Geometry
       {
         Point2d dimlinept = new Point2d();
         UnsafeNativeMethods.ON_V6_DimRadial_DimlinePoint(ConstPointer(), ref dimlinept);
+        GC.KeepAlive(this);
         return dimlinept;
       }
-      set { UnsafeNativeMethods.ON_V6_DimRadial_SetDimlinePoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimRadial_SetDimlinePoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2254,6 +2389,7 @@ namespace Rhino.Geometry
       {
         Point2d kneept = new Point2d();
         UnsafeNativeMethods.ON_V6_DimRadial_KneePoint(ConstPointer(), ref kneept);
+        GC.KeepAlive(this);
         return kneept;
       }
     }
@@ -2263,7 +2399,9 @@ namespace Rhino.Geometry
     public bool GetTextRectangle(out Point3d[] corners)
     {
       corners = new Point3d[4];
-      return UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      bool rc = UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     [ConstOperation]
@@ -2287,6 +2425,7 @@ namespace Rhino.Geometry
           }
         }
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2301,6 +2440,7 @@ namespace Rhino.Geometry
         IntPtr styleptr = style.ConstPointer();
         UnsafeNativeMethods.ON_V6_DimRadial_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
         GC.KeepAlive(style);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -2575,8 +2715,10 @@ namespace Rhino.Geometry
       )
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_V6_DimOrdinate_AdjustFromPoints(ptr_this,
+      bool rc = UnsafeNativeMethods.ON_V6_DimOrdinate_AdjustFromPoints(ptr_this,
         plane, direction, basepoint, defpoint, leaderpoint, kinkoffset1, kinkoffset2);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2604,8 +2746,10 @@ namespace Rhino.Geometry
       kinkpoint1 = new Point3d();
       kinkpoint2 = new Point3d();
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_V6_DimOrdinate_Get3dPoints(const_ptr_this,
+      bool rc =  UnsafeNativeMethods.ON_V6_DimOrdinate_Get3dPoints(const_ptr_this,
         ref basepoint, ref defpoint, ref leaderpoint, ref kinkpoint1, ref kinkpoint2);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <since>6.0</since>
@@ -2615,9 +2759,14 @@ namespace Rhino.Geometry
       {
         Point2d defpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimOrdinate_DefPoint(ConstPointer(), ref defpt);
+        GC.KeepAlive(this);
         return defpt;
       }
-      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetDefPoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimOrdinate_SetDefPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2627,9 +2776,14 @@ namespace Rhino.Geometry
       {
         Point2d leaderpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimOrdinate_LeaderPoint(ConstPointer(), ref leaderpt);
+        GC.KeepAlive(this);
         return leaderpt;
       }
-      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetDefPoint(NonConstPointer(), value); }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimOrdinate_SetLeaderPoint(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2639,6 +2793,7 @@ namespace Rhino.Geometry
       {
         Point2d kinkpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimOrdinate_KinkPoint1(ConstPointer(), ref kinkpt);
+        GC.KeepAlive(this);
         return kinkpt;
       }
     }
@@ -2650,6 +2805,7 @@ namespace Rhino.Geometry
       {
         Point2d kinkpt = new Point2d();
         UnsafeNativeMethods.ON_V6_DimOrdinate_KinkPoint2(ConstPointer(), ref kinkpt);
+        GC.KeepAlive(this);
         return kinkpt;
       }
     }
@@ -2657,15 +2813,33 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public double KinkOffset1
     {
-      get { return UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset1(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset1(NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset1(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset1(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
     public double KinkOffset2
     {
-      get { return UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset2(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset2(NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_V6_DimOrdinate_KinkOffset2(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimOrdinate_SetKinkOffset2(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -2674,8 +2848,17 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public MeasuredDirection Direction
     {
-      get { return UnsafeNativeMethods.ON_V6_DimOrdinate_GetMeasuredDirection(ConstPointer()); }
-      set { UnsafeNativeMethods.ON_V6_DimOrdinate_SetMeasuredDirection(NonConstPointer(), value); }
+      get
+      {
+        MeasuredDirection rc = UnsafeNativeMethods.ON_V6_DimOrdinate_GetMeasuredDirection(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_V6_DimOrdinate_SetMeasuredDirection(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <since>6.0</since>
@@ -2683,7 +2866,9 @@ namespace Rhino.Geometry
     public bool GetTextRectangle(out Point3d[] corners)
     {
       corners = new Point3d[4];
-      return UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      bool rc = UnsafeNativeMethods.ON_V6_Dimension_GetTextRect(ConstPointer(), corners);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     [ConstOperation]
@@ -2700,13 +2885,15 @@ namespace Rhino.Geometry
         rc = UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayLines(ConstPointer(), style.ConstPointer(), scale, text_rect, linearray, isline, 3);
         if (rc)
         {
-          for (int i = 0; i < 9; i++)
+          for (int i = 0; i < 3; i++)
           {
             if (isline[i])
               linelist.Add(linearray[i]);
           }
         }
       }
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2720,6 +2907,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
         UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -2785,6 +2973,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_const_curve = curve.ConstPointer();
         ptr = UnsafeNativeMethods.ON_V6_Centermark_Create2(Guid.Empty, plane, ptr_const_curve, curveParameter);
+        GC.KeepAlive(curve);
       }
       if (IntPtr.Zero == ptr)
         ptr = UnsafeNativeMethods.ON_Centermark_New();
@@ -2822,6 +3011,7 @@ namespace Rhino.Geometry
       Guid style_id = dimStyle.Id;
       IntPtr ptr_const_curve = curve.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.ON_V6_Centermark_Create2(style_id, plane, ptr_const_curve, curveParameter);
+      GC.KeepAlive(curve);
       return IntPtr.Zero == ptr ? null : new Centermark(ptr, null) { ParentDimensionStyle = dimStyle };
     }
 
@@ -2835,7 +3025,9 @@ namespace Rhino.Geometry
     public bool AdjustFromPoints(Plane plane, Point3d centerPoint)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_V6_Centermark_AdjustFromPoints(ptr_this, plane, centerPoint);
+      bool rc = UnsafeNativeMethods.ON_V6_Centermark_AdjustFromPoints(ptr_this, plane, centerPoint);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -2847,12 +3039,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_V6_Centermark_Radius(ptr_const_this);
+        double rc = UnsafeNativeMethods.ON_V6_Centermark_Radius(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Centermark_SetRadius(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 

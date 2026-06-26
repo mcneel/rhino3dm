@@ -314,6 +314,7 @@ namespace Rhino.Geometry
         Point3d rc = new Point3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_Centroid(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -329,6 +330,7 @@ namespace Rhino.Geometry
         Vector3d rc = new Vector3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_CentroidError(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -351,6 +353,7 @@ namespace Rhino.Geometry
       error = new Vector3d();
       IntPtr pConstThis = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_MassProperties_GetMoments(pConstThis, which, ref moment, ref error);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -641,7 +644,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -664,7 +669,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -687,7 +694,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -710,7 +719,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #endregion
@@ -995,6 +1006,7 @@ namespace Rhino.Geometry
         Point3d rc = new Point3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_Centroid(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1010,6 +1022,7 @@ namespace Rhino.Geometry
         Vector3d rc = new Vector3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_CentroidError(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1032,6 +1045,7 @@ namespace Rhino.Geometry
       error = new Vector3d();
       IntPtr pConstThis = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_MassProperties_GetMoments(pConstThis, which, ref moment, ref error);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1324,7 +1338,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1347,7 +1363,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1370,7 +1388,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1393,7 +1413,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #endregion
@@ -1408,7 +1430,9 @@ namespace Rhino.Geometry
     public bool Sum(VolumeMassProperties summand)
     {
       IntPtr pSum = summand.ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
+      GC.KeepAlive(summand);
+      return rc;
     }
 
     /// <summary>
@@ -1597,6 +1621,7 @@ namespace Rhino.Geometry
         Point3d rc = new Point3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_Centroid(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1612,6 +1637,7 @@ namespace Rhino.Geometry
         Vector3d rc = new Vector3d();
         IntPtr ptr = ConstPointer();
         UnsafeNativeMethods.ON_MassProperties_CentroidError(ptr, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -1634,6 +1660,7 @@ namespace Rhino.Geometry
       error = new Vector3d();
       IntPtr pConstThis = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_MassProperties_GetMoments(pConstThis, which, ref moment, ref error);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1925,7 +1952,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1948,7 +1977,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, true, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1971,7 +2002,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMoments(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1994,7 +2027,9 @@ namespace Rhino.Geometry
       yaxis = Vector3d.Unset;
       zaxis = Vector3d.Unset;
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      bool rc = UnsafeNativeMethods.ON_MassProperties_GetPrincipalMomentsOfInertia(ptr, false, ref x, ref xaxis, ref y, ref yaxis, ref z, ref zaxis);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #endregion

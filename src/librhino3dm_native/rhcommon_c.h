@@ -3,26 +3,29 @@
 #ifndef RH_C_FUNCTION
 
 struct ON_2DPOINT_STRUCT { double val[2]; };
-struct ON_2DVECTOR_STRUCT { double val[2]; };
-struct ON_INTERVAL_STRUCT { double val[2]; };
-struct ON_2FVECTOR_STRUCT { double val[2]; };
-
 struct ON_3DPOINT_STRUCT { double val[3]; };
-struct ON_LINE_STRUCT { ON_3DPOINT_STRUCT from; ON_3DPOINT_STRUCT to; };
+
+struct ON_2DVECTOR_STRUCT { double val[2]; };
 struct ON_3DVECTOR_STRUCT { double val[3]; };
 
 struct ON_4DPOINT_STRUCT { double val[4]; };
 struct ON_4DVECTOR_STRUCT { double val[4]; };
-//struct ON_PLANEEQ_STRUCT{ double val[4]; };
-struct ON_2INTS { int val[2]; };
 
-struct ON_3FVECTOR_STRUCT { float val[3]; };
+struct ON_2FVECTOR_STRUCT { float val[2]; };
+
 struct ON_3FPOINT_STRUCT { float val[3]; };
+struct ON_3FVECTOR_STRUCT { float val[3]; };
 
 struct ON_4FVECTOR_STRUCT { float val[4]; };
 struct ON_4FPOINT_STRUCT { float val[4]; };
 
 struct ON_XFORM_STRUCT { double val[16]; };
+
+struct ON_INTERVAL_STRUCT { double val[2]; };
+struct ON_LINE_STRUCT { ON_3DPOINT_STRUCT from; ON_3DPOINT_STRUCT to; };
+
+//struct ON_PLANEEQ_STRUCT{ double val[4]; };
+struct ON_2INTS { int val[2]; };
 
 struct ON_PLANE_STRUCT
 {

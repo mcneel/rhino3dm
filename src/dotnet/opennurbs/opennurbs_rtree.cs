@@ -261,7 +261,9 @@ namespace Rhino.Geometry
     {
       m_count = -1; 
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_RTree_InsertRemove(pThis, true, box.Min, box.Max, elementId);
+      bool rc = UnsafeNativeMethods.ON_RTree_InsertRemove(pThis, true, box.Min, box.Max, elementId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Inserts an element into the tree.</summary>
@@ -323,7 +325,9 @@ namespace Rhino.Geometry
     {
       m_count = -1; 
       IntPtr pThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_RTree_InsertRemove(pThis, false, box.Min, box.Max, elementId);
+      bool rc = UnsafeNativeMethods.ON_RTree_InsertRemove(pThis, false, box.Min, box.Max, elementId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Removes an element from the tree.</summary>
@@ -345,6 +349,7 @@ namespace Rhino.Geometry
       m_count = -1; 
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.ON_RTree_RemoveAll(pThis);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -359,6 +364,7 @@ namespace Rhino.Geometry
         {
           IntPtr pThis = NonConstPointer();
           m_count = UnsafeNativeMethods.ON_RTree_ElementCount(pThis);
+          GC.KeepAlive(this);
         }
         return m_count;
       }
@@ -461,6 +467,7 @@ namespace Rhino.Geometry
           break;
         }
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -526,6 +533,7 @@ namespace Rhino.Geometry
           break;
         }
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -570,6 +578,8 @@ namespace Rhino.Geometry
           break;
         }
       }
+      GC.KeepAlive(treeA);
+      GC.KeepAlive(treeB);
       return rc;
     }
 

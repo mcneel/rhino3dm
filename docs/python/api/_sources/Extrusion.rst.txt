@@ -110,8 +110,8 @@ Extrusion
       :param Cylinder cylinder: IsFinite must be true.
       :param float otherRadius: If cylinder.Radius is less than other radius, then the cylinder will be the inside \
          of the pipe.
-      :param bool capBottom: If true, the end at cylinder.Height1 will be capped.
       :param bool capTop: If true, the end at cylinder.Height2 will be capped.
+      :param bool capBottom: If true, the end at cylinder.Height1 will be capped.
 
       :return: Extrusion on success. None on failure.
 

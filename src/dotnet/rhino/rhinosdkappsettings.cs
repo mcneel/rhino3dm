@@ -3532,6 +3532,20 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>8.1</since>
     public ViewSettings.ViewRotationStyle ViewRotation { get; set; }
+
+    /// <summary>
+    /// Gets the three point perspective lens length.
+    /// The default is 50mm.
+    /// </summary>
+    /// <since>8.20</since>
+    public double ThreePointPerspectiveLensLength { get; internal set; }
+
+    /// <summary>
+    /// Gets the two point perspective lens length.
+    /// The default is 20mm.
+    /// </summary>
+    /// <since>8.20</since>
+    public double TwoPointPerspectiveLensLength { get; internal set; }
   }
 
   /// <summary>
@@ -3557,7 +3571,9 @@ namespace Rhino.ApplicationSettings
         ZoomScale = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomScale, pViewSettings),
         ZoomExtentsParallelViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsParallelViewBorder, pViewSettings),
         ZoomExtentsPerspectiveViewBorder = GetDouble(UnsafeNativeMethods.AppViewSettings.ZoomExtentsPerspectiveViewBorder, pViewSettings),
-        ViewRotation = GetViewRotation(pViewSettings)
+        ViewRotation = GetViewRotation(pViewSettings),
+        ThreePointPerspectiveLensLength = GetDouble(UnsafeNativeMethods.AppViewSettings.ThreePointPerspectiveLensLength, pViewSettings),
+        TwoPointPerspectiveLensLength = GetDouble(UnsafeNativeMethods.AppViewSettings.TwoPointPerspectiveLensLength, pViewSettings),
       };
       UnsafeNativeMethods.CRhinoAppViewSettings_Delete(pViewSettings);
       return rc;
@@ -3624,6 +3640,12 @@ namespace Rhino.ApplicationSettings
     const int idxDefinedViewSetProjection = 5;
     const int idxSingleClickMaximize = 6;
     const int idxLinkedViewports = 7;
+    const int idxDefinedViewSetClippingPlanes = 8;
+    const int idxDefinedViewSetDisplayMode = 9;
+    const int idxAutoAdjustTargetDepth = 10;
+    const int idxRotateViewAroundAutogumball = 11;
+    const int idxPanPlanParallelViewsWithControlShiftRMB = 12;
+    const int idxRotateViewAroundObjectAtMouseCursor = 13;
 
     // int items
     const int idxRotateCircleIncrement = 0;
@@ -3753,7 +3775,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or sets the 'named views set CPlane' value.
+    /// Gets or sets the 'Named views set CPlane' value.
     /// <para>When true, restoring a named view causes the construction plane saved with that view to also restore.</para>
     /// </summary>
     /// <since>5.0</since>
@@ -3764,7 +3786,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// Gets or sets the 'named views set projection' value.
+    /// Gets or sets the 'Named views set projection' value.
     /// <para>When true, restoring a named view causes the viewport projection saved with the view to also restore.</para>
     /// </summary>
     /// <since>5.0</since>
@@ -3796,6 +3818,66 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetBool(idxLinkedViewports); }
       set { SetBool(idxLinkedViewports, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Named views set clipping planes' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool DefinedViewSetClippingPlanes
+    {
+      get { return GetBool(idxDefinedViewSetClippingPlanes); }
+      set { SetBool(idxDefinedViewSetClippingPlanes, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Named views set display mode' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool DefinedViewSetDisplayMode
+    {
+      get { return GetBool(idxDefinedViewSetDisplayMode); }
+      set { SetBool(idxDefinedViewSetDisplayMode, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Auto adjust camera target after Pan and Zoom' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool AutoAdjustTargetDepth
+    {
+      get { return GetBool(idxAutoAdjustTargetDepth); }
+      set { SetBool(idxAutoAdjustTargetDepth, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Rotate view around auto gumball' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool RotateViewAroundAutogumball
+    {
+      get { return GetBool(idxRotateViewAroundAutogumball); }
+      set { SetBool(idxRotateViewAroundAutogumball, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Pan plan parallel views with Control+Shift+RMB' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool PanPlanParallelViewsWithControlShiftRMB
+    {
+      get { return GetBool(idxPanPlanParallelViewsWithControlShiftRMB); }
+      set { SetBool(idxPanPlanParallelViewsWithControlShiftRMB, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the 'Rotate view around object at mouse cursor' value.
+    /// </summary>
+    /// <since>8.19</since>
+    public static bool RotateViewAroundObjectAtMouseCursor
+    {
+      get { return GetBool(idxRotateViewAroundObjectAtMouseCursor); }
+      set { SetBool(idxRotateViewAroundObjectAtMouseCursor, value); }
     }
 
     /// <summary>
@@ -3831,6 +3913,26 @@ namespace Rhino.ApplicationSettings
     {
       get => GetViewRotation();
       set => SetViewRotation(value);
+    }
+
+    /// <summary>
+    /// Gets the three point perspective lens length.
+    /// The default is 50mm.
+    /// </summary>
+    /// <since>8.20</since>
+    public static double ThreePointPerspectiveLensLength
+    {
+      get { return GetDouble(UnsafeNativeMethods.AppViewSettings.ThreePointPerspectiveLensLength); }
+    }
+
+    /// <summary>
+    /// Gets the two point perspective lens length.
+    /// The default is 20mm.
+    /// </summary>
+    /// <since>8.20</since>
+    public static double TwoPointPerspectiveLensLength
+    {
+      get { return GetDouble(UnsafeNativeMethods.AppViewSettings.TwoPointPerspectiveLensLength); }
     }
   }
 
@@ -4894,10 +4996,13 @@ namespace Rhino.ApplicationSettings
   public class KeyboardShortcut
   {
     /// <summary>Modifier key used for shortcut</summary>
+    /// <since>8.12</since>
     public Rhino.UI.ModifierKey Modifier { get; set; } = Rhino.UI.ModifierKey.None;
     /// <summary>Key used for shortcut</summary>
+    /// <since>8.12</since>
     public Rhino.UI.KeyboardKey Key { get; set; } = Rhino.UI.KeyboardKey.None;
     /// <summary>Macro to execute when key plus modifier are pressed</summary>
+    /// <since>8.12</since>
     public string Macro { get; set; }
   }
 
@@ -4911,12 +5016,14 @@ namespace Rhino.ApplicationSettings
     /// Get all shortcuts registered with Rhino
     /// </summary>
     /// <returns></returns>
+    /// <since>8.12</since>
     public static KeyboardShortcut[] GetShortcuts() => GetShortcuts(UnsafeNativeMethods.CRhinoAppShortcutKeys_GetShortcuts);
 
     /// <summary>
     /// Get all the default shortcuts registered with Rhino
     /// </summary>
     /// <returns></returns>
+    /// <since>8.13</since>
     public static KeyboardShortcut[] GetDefaults() => GetShortcuts(UnsafeNativeMethods.CRhinoAppShortcutKeys_GetDefaults);
 
     private static KeyboardShortcut[] GetShortcuts(Action<IntPtr, IntPtr, IntPtr> shortcutGetter)
@@ -4950,6 +5057,7 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <param name="shortcuts"></param>
     /// <param name="replaceAll"></param>
+    /// <since>8.12</since>
     public static void Update(IEnumerable<KeyboardShortcut> shortcuts, bool replaceAll)
     {
       using (var macros = new ClassArrayString())
@@ -5008,6 +5116,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="key"></param>
     /// <param name="modifier"></param>
     /// <param name="macro"></param>
+    /// <since>8.12</since>
     public static void SetMacro(Rhino.UI.KeyboardKey key, Rhino.UI.ModifierKey modifier, string macro)
     {
       UnsafeNativeMethods.CRhinoAppShortcutKeys_SetMacro2((int)key, (int)modifier, macro);
@@ -5035,6 +5144,7 @@ namespace Rhino.ApplicationSettings
     /// <param name="key"></param>
     /// <param name="modifier"></param>
     /// <returns></returns>
+    /// <since>8.12</since>
     public static bool IsAcceptableKeyCombo(Rhino.UI.KeyboardKey key, Rhino.UI.ModifierKey modifier)
     {
       return UnsafeNativeMethods.CRhinoAppShortcutKeys_IsAcceptableCombo((int)key, (int)modifier);
@@ -5087,6 +5197,12 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the active point color.</summary>
     /// <since>5.0</since>
     public Color ActivePointColor { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the active guide color
+    /// </summary>
+    /// <since>8.21</since>
+    public Color GuideColor { get; set; }
   }
 
   /// <summary>
@@ -5107,6 +5223,7 @@ namespace Rhino.ApplicationSettings
       rc.TanPerpLineColor = GetColor(idxTanPerpLineColor, pSettings);
       rc.UseDottedLines = GetBool(idxDottedLines, pSettings);
       rc.UseSmartTrack = GetBool(idxUseSmartTrack, pSettings);
+      rc.GuideColor = GetColor(idxGuideColor, pSettings);
 
       UnsafeNativeMethods.CRhinoAppSmartTrackSettings_Delete(pSettings);
       return rc;
@@ -5148,6 +5265,7 @@ namespace Rhino.ApplicationSettings
       TanPerpLineColor = state.TanPerpLineColor;
       UseDottedLines = state.UseDottedLines;
       UseSmartTrack = state.UseSmartTrack;
+      GuideColor = state.GuideColor;
     }
 
     const int idxUseSmartTrack = 0;
@@ -5228,6 +5346,7 @@ namespace Rhino.ApplicationSettings
     const int idxTanPerpLineColor = 1;
     const int idxPointColor = 2;
     const int idxActivePointColor = 3;
+    const int idxGuideColor = 4;
 
     static Color GetColor(int which, IntPtr pSmartTrackSettings)
     {
@@ -5273,6 +5392,14 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetColor(idxActivePointColor); }
       set { SetColor(idxActivePointColor, value); }
+    }
+
+    /// <summary>Gets or sets the active guide color.</summary>
+    /// <since>8.21</since>
+    public static Color GuideColor
+    {
+      get { return GetColor(idxGuideColor); }
+      set { SetColor(idxGuideColor, value); }
     }
   }
 
@@ -5783,30 +5910,27 @@ namespace Rhino.ApplicationSettings
       IntPtr ptr_settings = UnsafeNativeMethods.CRhinoCurvatureGraphSettings_New(current);
       CurvatureGraphSettingsState rc = new CurvatureGraphSettingsState();
 
-      int color = 0;
-      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 0, false))
-        rc.CurveHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
-
-      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 1, false))
-        rc.SurfaceUHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
-
-      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref color, 2, false))
-        rc.SurfaceVHairColor = Rhino.Runtime.Interop.ColorFromWin32(color);
+      int argb = 0;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref argb, 0, false))
+        rc.CurveHairColor = System.Drawing.Color.FromArgb(argb);
+      argb = 0;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref argb, 1, false))
+        rc.SurfaceUHairColor = System.Drawing.Color.FromArgb(argb);
+      argb = 0;
+      if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(ptr_settings, ref argb, 2, false))
+        rc.SurfaceVHairColor = System.Drawing.Color.FromArgb(argb);
 
       bool bValue = false;
       if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(ptr_settings, ref bValue, 0, false))
         rc.SrfUHair = bValue;
-
       if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(ptr_settings, ref bValue, 1, false))
         rc.SrfVHair = bValue;
 
       int iValue = 0;
       if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 0, false))
         rc.HairScale = iValue;
-
       if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 1, false))
         rc.HairDensity = iValue;
-
       if (true == UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(ptr_settings, ref iValue, 2, false))
         rc.SampleDensity = iValue;
 
@@ -5862,49 +5986,157 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the curve hair color;
     /// </summary>
     /// <since>8.0</since>
-    public static Color CurveHairColor { get; set; }
+    public static Color CurveHairColor
+    {
+      get
+      {
+        int argb = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 0, false);
+        return System.Drawing.Color.FromArgb(argb);
+      }
+
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 0, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the surface U hair color;
     /// </summary>
     /// <since>8.0</since>
-    public static Color SurfaceUHairColor { get; set; }
+    public static Color SurfaceUHairColor
+    {
+      get
+      {
+        int argb = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 1, false);
+        return System.Drawing.Color.FromArgb(argb);
+      }
+
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 1, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the surface V hair color;
     /// </summary>
     /// <since>8.0</since>
-    public static Color SurfaceVHairColor { get; set; }
+    public static Color SurfaceVHairColor
+    {
+      get
+      {
+        int argb = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 2, false);
+        return System.Drawing.Color.FromArgb(argb);
+      }
+
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Color(IntPtr.Zero, ref argb, 2, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the surface U hairs are on;
     /// </summary>
     /// <since>8.0</since>
-    public static bool SrfUHair { get; set; }
+    public static bool SrfUHair 
+    {
+      get
+      {
+        bool bValue = false;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(IntPtr.Zero, ref bValue, 0, false);
+        return bValue;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(IntPtr.Zero, ref value, 0, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the surface V hairs are on;
     /// </summary>
     /// <since>8.0</since>
-    public static bool SrfVHair { get; set; }
+    public static bool SrfVHair
+    {
+      get
+      {
+        bool bValue = false;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(IntPtr.Zero, ref bValue, 1, false);
+        return bValue;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Bool(IntPtr.Zero, ref value, 1, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the hair scale;
     /// </summary>
     /// <since>8.0</since>
-    public static int HairScale { get; set; }
+    public static int HairScale
+    {
+      get
+      {
+        int iValue = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref iValue, 0, false);
+        return iValue;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref value, 0, true);
+      }
+    }
 
     /// <summary>
     /// Gets or sets the hair density;
     /// </summary>
     /// <since>8.0</since>
-    public static int HairDensity { get; set; }
+    public static int HairDensity
+    {
+      get
+      {
+        int iValue = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref iValue, 1, false);
+        return iValue;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref value, 1, true);
+      }
+    }
+
 
     /// <summary>
     /// Gets or sets the sampling density;
     /// </summary>
     /// <since>8.0</since>
-    public static int SampleDensity { get; set; }
+    public static int SampleDensity
+    {
+      get
+      {
+        int iValue = 0;
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref iValue, 2, false);
+        return iValue;
+      }
+
+      set
+      {
+        UnsafeNativeMethods.CRhinoCurvatureGraphSettings_Int(IntPtr.Zero, ref value, 2, true);
+      }
+    }
   }
 
   /// <summary>
@@ -6517,7 +6749,8 @@ namespace Rhino.ApplicationSettings
       int abgr = UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_GetSetColor(idxHighlight_color, false, 0, ptr_settings);
       rc.HighlightColor = Rhino.Runtime.Interop.ColorFromWin32(abgr);
 
-      UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Delete(ptr_settings);
+      // https://mcneel.myjetbrains.com/youtrack/issue/RH-86673
+      UnsafeNativeMethods.CRhinoAppChooseOneObjectSettings_Delete(ptr_settings);
       return rc;
     }
 

@@ -112,6 +112,27 @@ RH_C_FUNCTION bool ON_SubD_IsSolid(const ON_SubD* constSubD)
   return false;
 }
 
+RH_C_FUNCTION ON_SubDTextureCoordinateType ON_SubD_GetTextureCoordinateType(const ON_SubD* constSubD)
+{
+  if (constSubD)
+    return constSubD->TextureCoordinateType();
+  return ON_SubDTextureCoordinateType::Unset;
+}
+
+RH_C_FUNCTION bool ON_SubD_HasPerFaceColors(const ON_SubD* pConstSubD)
+{
+  if (pConstSubD)
+    return pConstSubD->HasPerFaceColors();
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_SubD_ClearPerFaceColors(ON_SubD* pSubD)
+{
+  if (pSubD)
+    return pSubD->ClearPerFaceColors();
+  return 0;
+}
+
 RH_C_FUNCTION bool ON_SubD_GlobalSubdivide(ON_SubD* subd, unsigned int level)
 {
   bool rc = false;
@@ -377,6 +398,14 @@ RH_C_FUNCTION void ON_SubD_SetEdgeTags(ON_SubD* pSubD, const ON_SubDEdgeTag tag,
   if (pSubD && componentIndices)
   {
     pSubD->SetEdgeTags(componentIndices->Array(), componentIndices->UnsignedCount(), tag);
+  }
+}
+
+RH_C_FUNCTION void ON_SubD_SetVertexTags(ON_SubD* pSubD, const ON_SubDVertexTag tag, const ON_SimpleArray<ON_COMPONENT_INDEX>* componentIndices)
+{
+  if (pSubD && componentIndices)
+  {
+    pSubD->SetVertexTags(componentIndices->Array(), componentIndices->UnsignedCount(), tag);
   }
 }
 
@@ -723,6 +752,20 @@ RH_C_FUNCTION void ON_ToSubDParameters_SetConcaveCornerOption(ON_SubDFromMeshPar
     parameters->SetConcaveCornerOption(op);
 }
 
+RH_C_FUNCTION unsigned int ON_ToSubDParameters_TextureCoordinatesOption(const ON_SubDFromMeshParameters* constParameters)
+{
+  if (constParameters)
+    return (unsigned int)constParameters->GetTextureCoordinatesOption();
+  return (unsigned int)ON_SubDFromMeshParameters::TextureCoordinatesOption::Unset;
+}
+
+RH_C_FUNCTION void ON_ToSubDParameters_SetTextureCoordinatesOption(ON_SubDFromMeshParameters* parameters, unsigned int option)
+{
+  ON_SubDFromMeshParameters::TextureCoordinatesOption op = ON_SubDFromMeshParameters::TextureCoordinatesOptionFromUnsigned(option);
+  if (parameters)
+    parameters->SetTextureCoordinatesOption(op);
+}
+
 RH_C_FUNCTION double ON_ToSubDParameters_MinimumConcaveCornerAngleRadians(const ON_SubDFromMeshParameters* constParameters)
 {
   if (constParameters)
@@ -815,6 +858,14 @@ RH_C_FUNCTION const ON_SubDVertex* ON_SubDVertex_FromId(const ON_SubD* constSubD
   return constSubDPtr->VertexFromId(index);
 }
 
+RH_C_FUNCTION void ON_SubDVertex_ComponentIndex(const ON_SubDVertex* constVertexPtr, ON_COMPONENT_INDEX* ci)
+{
+  if (constVertexPtr && ci)
+  {
+    *ci = constVertexPtr->ComponentIndex();
+  }
+}
+
 RH_C_FUNCTION void ON_SubDVertex_ControlNetPoint(const ON_SubDVertex* constVertexPtr, ON_3dPoint* value)
 {
   if (value && constVertexPtr)
@@ -891,10 +942,22 @@ RH_C_FUNCTION ON_SubDVertexTag ON_SubDVertex_GetVertexTag(const ON_SubDVertex* c
   return ON_SubDVertexTag::Unset;
 }
 
+// Experts function, it does not check that edge tags are consistent after changing the vertex tag
+RH_C_FUNCTION void ON_SubDVertex_SetVertexTag_ClearCache(ON_SubDVertex* vertexPtr, const ON_SubDVertexTag tag, const bool bUpdateCache)
+{
+  if (vertexPtr && vertexPtr->m_vertex_tag != tag) {
+    vertexPtr->m_vertex_tag = tag;
+    if (bUpdateCache)
+      vertexPtr->VertexModifiedNofification();
+  }
+}
+
+// Experts function, it does not check that edge tags are consistent after changing the vertex tag
 RH_C_FUNCTION void ON_SubDVertex_SetVertexTag(ON_SubDVertex* vertexPtr, const ON_SubDVertexTag tag)
 {
-  if (vertexPtr)
-    vertexPtr->m_vertex_tag = tag;
+  // 2026-02-13, Pierre, RH-92469: A simple setter should refresh caches everytime.
+  // Use ON_SubDVertex_SetVertexTag_ClearCache(ON_SubDVertex* vertexPtr, const ON_SubDVertexTag tag, bool bUpdateCache) for more control
+  ON_SubDVertex_SetVertexTag_ClearCache(vertexPtr, tag, true);
 }
 
 RH_C_FUNCTION void ON_SubDVertex_SurfacePoint(const ON_SubDVertex* constVertexPtr, ON_3dPoint* value)
@@ -969,10 +1032,22 @@ RH_C_FUNCTION ON_SubDEdgeTag ON_SubDEdge_GetEdgeTag(const ON_SubDEdge* constEdge
   return ON_SubDEdgeTag::Unset;
 }
 
+// Experts function, it does not check that neighboring tags are consistent after changing the edge tag
+RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag_ClearCache(ON_SubDEdge* edgePtr, const ON_SubDEdgeTag tag, const bool bUpdateCache)
+{
+  if (edgePtr && edgePtr->m_edge_tag != tag) {
+    edgePtr->m_edge_tag = tag;
+    if (bUpdateCache)
+      edgePtr->EdgeModifiedNofification();
+  }
+}
+
+// Experts function, it does not check that neighboring tags are consistent after changing the edge tag
 RH_C_FUNCTION void ON_SubDEdge_SetEdgeTag(ON_SubDEdge* edgePtr, const ON_SubDEdgeTag tag)
 {
-  if (edgePtr)
-    edgePtr->m_edge_tag = tag;
+  // 2026-02-13, Pierre, RH-92469: A simple setter should refresh caches everytime.
+  // Use ON_SubDVertex_SetVertexTag_ClearCache(ON_SubDVertex* vertexPtr, const ON_SubDVertexTag tag, bool bUpdateCache) for more control
+  ON_SubDEdge_SetEdgeTag_ClearCache(edgePtr, tag, true);
 }
 
 #if !defined(RHINO3DM_BUILD)

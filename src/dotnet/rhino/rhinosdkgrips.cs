@@ -286,7 +286,9 @@ namespace Rhino.DocObjects.Custom
 
       IntPtr pGrip = grip.NonConstPointer();
       IntPtr pThis = NonConstPointer();
-      UnsafeNativeMethods.CRhinoObjectGrips_AddGrip(pThis, pGrip);      
+      UnsafeNativeMethods.CRhinoObjectGrips_AddGrip(pThis, pGrip);
+      GC.KeepAlive(grip);
+      GC.KeepAlive(this);
     }
 
     /// <since>5.0</since>
@@ -326,12 +328,15 @@ namespace Rhino.DocObjects.Custom
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoObjectGrips_GetBool(pConstThis, idxNewLocation);
+        bool rc = UnsafeNativeMethods.CRhinoObjectGrips_GetBool(pConstThis, idxNewLocation);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CRhinoObjectGrips_SetBool(pThis, idxNewLocation, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -345,7 +350,9 @@ namespace Rhino.DocObjects.Custom
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CRhinoObjectGrips_GetBool(pConstThis, idxGripsMoved);
+        bool rc = UnsafeNativeMethods.CRhinoObjectGrips_GetBool(pConstThis, idxGripsMoved);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -358,7 +365,9 @@ namespace Rhino.DocObjects.Custom
       {
         IntPtr pThis = NonConstPointer();
         IntPtr pRhinoObject = UnsafeNativeMethods.CRhinoObjectGrips_OwnerObject(pThis);
-        return Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
+        Rhino.DocObjects.RhinoObject rc = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pRhinoObject);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -374,6 +383,7 @@ namespace Rhino.DocObjects.Custom
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CRhCmnObjectGrips_ResetBase(pThis, true);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -385,6 +395,7 @@ namespace Rhino.DocObjects.Custom
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CRhCmnObjectGrips_ResetBase(pThis, false);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -434,6 +445,7 @@ namespace Rhino.DocObjects.Custom
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CRhinoObjectGrips_DrawBase(pThis, args.m_pGripsDrawSettings);
+      GC.KeepAlive(this);
     }
 
     /// <summary>Get neighbors.</summary>

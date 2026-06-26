@@ -131,6 +131,7 @@ namespace Rhino.Display
     /// Update the image used for this DisplayBitmap
     /// </summary>
     /// <param name="bitmap"></param>
+    /// <since>8.14</since>
     public void Update(System.Drawing.Bitmap bitmap)
     {
       IntPtr hbmp = bitmap.GetHbitmap();
@@ -140,6 +141,7 @@ namespace Rhino.Display
         return;
       }
       UnsafeNativeMethods.CRhCmnDisplayBitmap_Update(m_ptr_display_bmp, hbmp);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -189,6 +191,7 @@ namespace Rhino.Display
     public void SetBlendFunction(BlendMode source, BlendMode destination)
     {
       UnsafeNativeMethods.CRhCmnDisplayBitmap_SetBlendFunction(m_ptr_display_bmp, (int)source, (int)destination);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -203,6 +206,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhCmnDisplayBitmap_GetBlendFunction(m_ptr_display_bmp, ref s, ref d);
       source = (BlendMode)s;
       destination = (BlendMode)d;
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -215,6 +219,7 @@ namespace Rhino.Display
       {
         int width = 0, height = 0;
         UnsafeNativeMethods.CRhCmnDisplayBitmap_Size(m_ptr_display_bmp, ref width, ref height);
+        GC.KeepAlive(this);
         return new System.Drawing.Size(width, height);
       }
     }
@@ -830,9 +835,9 @@ namespace Rhino.Geometry
           particle.Index = -1;
           particle.ParentSystem = null;
         }
-        m_particles.Clear();
         m_empty_slot_count = 0;
       }
+      m_particles.Clear();
       m_bbox = BoundingBox.Unset;
     }
 

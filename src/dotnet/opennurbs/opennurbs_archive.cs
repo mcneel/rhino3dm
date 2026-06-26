@@ -264,25 +264,28 @@ namespace Rhino.Collections
 
     internal static IntPtr ToInternalDictionary(ArchivableDictionary dictionary)
     {
-      // Create a temporary memory buffer for writing the contents of an
-      // ON_ArchivableDictionary into and then read the buffer with .NET to
-      // create the RhinoCommon ArchivableDictionary
-      IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
-      try
+      if (dictionary != null)
       {
-        FileIO.BinaryArchiveWriter archive = new FileIO.BinaryArchiveWriter(internal_archive);
-        if (dictionary.Write(archive))
+        // Create a temporary memory buffer for writing the contents of an
+        // ON_ArchivableDictionary into and then read the buffer with .NET to
+        // create the RhinoCommon ArchivableDictionary
+        IntPtr internal_archive = UnsafeNativeMethods.ON_BinaryArchiveBuffer_NewSwapArchive();
+        try
         {
-          UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
+          FileIO.BinaryArchiveWriter archive = new FileIO.BinaryArchiveWriter(internal_archive);
+          if (dictionary.Write(archive))
+          {
+            UnsafeNativeMethods.ON_BinaryArchive_SeekFromStart(internal_archive, 0);
 
-          IntPtr internal_dictionary = UnsafeNativeMethods.ON_ArchivableDictionary_New();
-          if(UnsafeNativeMethods.ON_ArchivableDictionary_Read(internal_dictionary, internal_archive))
-            return internal_dictionary;
+            IntPtr internal_dictionary = UnsafeNativeMethods.ON_ArchivableDictionary_New();
+            if (UnsafeNativeMethods.ON_ArchivableDictionary_Read(internal_dictionary, internal_archive))
+              return internal_dictionary;
+          }
         }
-      }
-      finally 
-      { 
-        UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+        finally
+        {
+          UnsafeNativeMethods.ON_BinaryArchiveBuffer_DeleteSwapArchive(internal_archive);
+        }
       }
 
       return IntPtr.Zero;
@@ -682,6 +685,7 @@ namespace Rhino.Collections
               // some other ON_Object
               UnsafeNativeMethods.ON_Object_Delete(ptr_object);
             }
+            GC.KeepAlive(archive);
           }
           break;
         case ItemType.OnMeshParameters: //46
@@ -2211,7 +2215,7 @@ namespace Rhino.Collections
     }
 
     /// <summary>
-    /// This is not supported and always throws <see cref="NotSupportedException"/> at the moment.
+    /// This is not supported and always throws <see cref="NotSupportedException"/>.
     /// </summary>
     /// <param name="key">Unused.</param>
     /// <param name="value">Unused.</param>
@@ -2944,6 +2948,7 @@ namespace Rhino.FileIO
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteObjRef(m_ptr, ptr_const_objref);
       if (m_write_error_occured)
         throw new BinaryArchiveException("WriteObjRef failed");
+      GC.KeepAlive(objref);
     }
 
     /// <summary>
@@ -2960,6 +2965,7 @@ namespace Rhino.FileIO
         m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteObjRefArray(m_ptr, ptr_objrefs);
         if (m_write_error_occured)
           throw new BinaryArchiveException("WriteObjRefArray failed");
+        GC.KeepAlive(objrefs);
       }
     }
 #endif //RHINO_SDK
@@ -3164,6 +3170,7 @@ namespace Rhino.FileIO
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteMeshParameters(m_ptr, pMeshParameters);
       if( m_write_error_occured )
         throw new BinaryArchiveException("WriteMeshParameters failed");
+      GC.KeepAlive(value);
     }
 
     /// <summary>
@@ -3177,6 +3184,7 @@ namespace Rhino.FileIO
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteGeometry(m_ptr, pGeometry);
       if( m_write_error_occured )
         throw new BinaryArchiveException("WriteGeometry failed");
+      GC.KeepAlive(value);
     }
 
     /// <summary>
@@ -3190,6 +3198,7 @@ namespace Rhino.FileIO
       m_write_error_occured = m_write_error_occured || !UnsafeNativeMethods.ON_BinaryArchive_WriteOn3dmRenderSettings(m_ptr, pointer);
       if (m_write_error_occured)
         throw new BinaryArchiveException("WriteGeometry failed");
+      GC.KeepAlive(value);
     }
     /// <summary>
     /// Reads a legacy ON_CheckSum, only provided to read data chunks from old
@@ -4317,6 +4326,7 @@ namespace Rhino.FileIO
         version = 0;
         bool rc = UnsafeNativeMethods.ON_BinaryArchive_Read3dmStartSection(ptr_this, ref version, ptr_string);
         comment = sh.ToString();
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -4338,7 +4348,10 @@ namespace Rhino.FileIO
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_textlog = log.NonConstPointer();
-      return UnsafeNativeMethods.ON_BinaryArchive_Dump3dmChunk(ptr_this, ptr_textlog);
+      uint rc = UnsafeNativeMethods.ON_BinaryArchive_Dump3dmChunk(ptr_this, ptr_textlog);
+      GC.KeepAlive(log);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4349,7 +4362,9 @@ namespace Rhino.FileIO
     public bool AtEnd()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_BinaryArchive_AtEnd(ptr_this);
+      bool rc = UnsafeNativeMethods.ON_BinaryArchive_AtEnd(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -4463,6 +4478,7 @@ namespace Rhino.FileIO
           if (m_mode != BinaryArchiveMode.Read && m_mode != BinaryArchiveMode.Read3dm && m_mode != BinaryArchiveMode.ReadWrite)
             throw new BinaryArchiveException("File not created with a read mode");
           m_reader = new BinaryArchiveReader(ptr_this);
+          GC.KeepAlive(this);
         }
         return m_reader;
       }
@@ -4479,6 +4495,7 @@ namespace Rhino.FileIO
           if (m_mode != BinaryArchiveMode.Write && m_mode != BinaryArchiveMode.Write3dm && m_mode != BinaryArchiveMode.ReadWrite)
             throw new BinaryArchiveException("File not created with a write mode");
           m_writer = new BinaryArchiveWriter(ptr_this);
+          GC.KeepAlive(this);
         }
         return m_writer;
       }
@@ -4512,15 +4529,23 @@ namespace Rhino.FileIO
     /// <since>5.0</since>
     public SerializationOptions()
     {
-#if RHINO_SDK
-      RhinoVersion = RhinoApp.ExeVersion;
-#else
-      RhinoVersion = 7;
-#endif
+      RhinoVersion = MaxRhinoVersion;
       WriteUserData = true;
       WriteRenderMeshes = true;
       WriteAnalysisMeshes = true;
     }
+
+    /// <summary>
+    /// Gets the earliest serialization version available.
+    /// </summary>
+    /// <since>8.19</since>
+    public static int MinRhinoVersion => 2;
+
+    /// <summary>
+    /// Gets the most recent serialization version available.
+    /// </summary>
+    /// <since>8.19</since>
+    public static int MaxRhinoVersion => UnsafeNativeMethods.ON_BinaryArchive_CurrentArchiveVersion() / 10;
 
     /// <summary>
     /// Gets or sets a value indicating the Rhino version.

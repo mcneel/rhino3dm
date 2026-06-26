@@ -98,6 +98,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_other = other.ConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_CopyContents(ptr_this, const_ptr_other);
+      GC.KeepAlive(other);
     }
     #endregion
 
@@ -119,6 +120,7 @@ namespace Rhino.Display
       UnsafeNativeMethods.CDisplayPipelineAttributes_SaveProfile(const_ptr_this, ptr_profile_context, "DisplayPipelineAttributes");
       Runtime.HostUtils.WriteIntoSerializationInfo(ptr_profile_context, info, "DisplayPipelineAttributes");
       UnsafeNativeMethods.CRhinoProfileContext_Delete(ptr_profile_context);
+      GC.KeepAlive(this);
     }
 
     ~DisplayPipelineAttributes()
@@ -202,13 +204,16 @@ namespace Rhino.Display
     FrameBufferFillMode GetFillMode()
     {
       IntPtr const_ptr_this = ConstPointer();
-      return (FrameBufferFillMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetFillMode(const_ptr_this);
+      FrameBufferFillMode rc = (FrameBufferFillMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetFillMode(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetFillMode(UnsafeNativeMethods.FrameBufferFillMode mode)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetFillMode(ptr_this, mode);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// Get or set the frame buffer fill mode.
@@ -254,6 +259,7 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetFillColors(ptr_this,
         gradientTopLeft.ToArgb(), gradientBottomLeft.ToArgb(), gradientTopRight.ToArgb(), gradientBottomRight.ToArgb());
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -272,6 +278,7 @@ namespace Rhino.Display
       int tr = 0;
       int br = 0;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetFillColors(const_ptr_this, ref tl, ref bl, ref tr, ref br);
+      GC.KeepAlive(this);
       topLeft = Color.FromArgb(tl);
       topRight = Color.FromArgb(tr);
       bottomLeft = Color.FromArgb(bl);
@@ -292,12 +299,15 @@ namespace Rhino.Display
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return (BoundingBoxDisplayMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetBBoxMode(constPtrThis);
+        BoundingBoxDisplayMode rc = (BoundingBoxDisplayMode)UnsafeNativeMethods.CDisplayPipelineAttributes_GetBBoxMode(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptrThis = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetBBoxMode(ptrThis, (UnsafeNativeMethods.DisplayPipelineAttributesBBox)value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>Show clipping planes.</summary>
@@ -468,12 +478,15 @@ namespace Rhino.Display
     bool GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool which, bool b)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetBool(ptr_this, which, b);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -523,6 +536,135 @@ namespace Rhino.Display
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial, value); }
     }
+
+    /// <summary>
+    /// Values for changing the display of the backface (the side opposite of the surface normal direction).
+    /// </summary>
+    /// <since>8.20</since>
+    public enum BackfaceStyle : byte
+    {
+      /// <summary>
+      /// No color change.
+      /// </summary>
+      /// <since>8.20</since>
+      UseFrontFaceSettings = 0,
+      /// <summary>
+      /// Surfaces viewed from the back will be transparent.
+      /// </summary>
+      /// <since>8.20</since>
+      CullBackfaces = 1,
+      /// <summary>
+      /// Surfaces viewed from the back use the color specified in the object's display properties.
+      /// </summary>
+      /// <since>8.20</since>
+      UseObjectColor = 2,
+      /// <summary>
+      /// All backfaces display a specified color regardless of the object color.
+      /// </summary>
+      /// <since>8.20</since>
+      SingleColorAllBackfaces = 3,
+      /// <summary>
+      /// Shades using rendering material.
+      /// </summary>
+      /// <since>8.20</since>
+      UseRenderMaterial = 4,
+      /// <summary>
+      /// Use a custom material for all backfaces.
+      /// </summary>
+      /// <since>8.20</since>
+      CustomMaterialAllBackfaces = 5,
+    }
+
+    private static BackfaceStyle BackfaceStyleFromUnsafe(UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage value)
+    {
+      switch (value)
+      {
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseFrontFaceSettings:
+          return BackfaceStyle.UseFrontFaceSettings;
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.CullBackFaces:
+          return BackfaceStyle.CullBackfaces;
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseObjectColor:
+          return BackfaceStyle.UseObjectColor;
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.SingleColorAllBackFaces:
+          return BackfaceStyle.SingleColorAllBackfaces;
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseRenderMaterial:
+          return BackfaceStyle.UseRenderMaterial;
+        case UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.CustomMaterialAllBackfaces:
+          return BackfaceStyle.CustomMaterialAllBackfaces;
+        default:
+          return BackfaceStyle.UseFrontFaceSettings;
+      }
+    }
+
+    private static UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage UnsafeFromBackfaceStyle(BackfaceStyle value)
+    {
+      switch (value)
+      {
+        case BackfaceStyle.UseFrontFaceSettings:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseFrontFaceSettings;
+        case BackfaceStyle.CullBackfaces:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.CullBackFaces;
+        case BackfaceStyle.UseObjectColor:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseObjectColor;
+        case BackfaceStyle.SingleColorAllBackfaces:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.SingleColorAllBackFaces;
+        case BackfaceStyle.UseRenderMaterial:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseRenderMaterial;
+        case BackfaceStyle.CustomMaterialAllBackfaces:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.CustomMaterialAllBackfaces;
+        default:
+          return UnsafeNativeMethods.DisplayPipelineAttributesBackColorUsage.UseFrontFaceSettings;
+      }
+    }
+
+    /// <summary>
+    /// Changes the display of the backfaces (the side opposite of the surface normal direction).
+    /// </summary>
+    /// <since>8.20</since>
+    public BackfaceStyle BackfaceDisplayStyle
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        return BackfaceStyleFromUnsafe(UnsafeNativeMethods.CDisplayPipelineAttributes_GetBackColorUsage(const_ptr_this));
+      }
+      set
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_SetBackColorUsage2(const_ptr_this, UnsafeFromBackfaceStyle(value));
+      }
+    }
+
+    /// <summary>
+    /// Use the backface material for displaying backfaces.
+    /// </summary>
+    /// <since>8.20</since>
+    public bool UseBackfaceMaterial
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseBackMaterial, value); }
+    }
+
+    /// <summary>
+    /// Use the backface material of the object for displaying its backfaces.
+    /// </summary>
+    /// <since>8.20</since>
+    public bool UseObjectBackfaceMaterial
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseObjectBFMaterial); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseObjectBFMaterial, value); }
+    }
+
+    /// <summary>
+    /// Use a custom material for displaying backfaces.
+    /// </summary>
+    /// <since>8.20</since>
+    public bool UseCustomBackface
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BackIsCustom); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BackIsCustom, value); }
+    }
+
     #endregion
 
     #region color
@@ -534,12 +676,14 @@ namespace Rhino.Display
     {
       IntPtr pConstThis = ConstPointer();
       int argb = UnsafeNativeMethods.CDisplayPipelineAttributes_GetColor(pConstThis, which);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(UnsafeNativeMethods.DisplayAttrsColor which, Color c)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetColor(pThis, which, c.ToArgb());
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -547,12 +691,15 @@ namespace Rhino.Display
     double GetDouble(UnsafeNativeMethods.DisplayAttributesDouble which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetDouble(pConstThis, which);
+      double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetDouble(pConstThis, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(UnsafeNativeMethods.DisplayAttributesDouble which, double d)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetDouble(pThis, which, d);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -560,12 +707,15 @@ namespace Rhino.Display
     float GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetFloat(pConstThis, which);
+      float rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetFloat(pConstThis, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat which, float d)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetFloat(pThis, which, d);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -573,12 +723,15 @@ namespace Rhino.Display
     int GetInt(UnsafeNativeMethods.DisplayAttributesInt which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetInt(const_ptr_this, which);
+      int rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetInt(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(UnsafeNativeMethods.DisplayAttributesInt which, int i)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetInt(ptr_this, which, i);
+      GC.KeepAlive(this);
     }
     #endregion
 
@@ -586,12 +739,15 @@ namespace Rhino.Display
     int GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetByte(const_ptr_this, which);
+      int rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetByte(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte which, int i)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetByte(ptr_this, which, i);
+      GC.KeepAlive(this);
     }
     #endregion
     #region Curves specific attributes...
@@ -783,6 +939,7 @@ namespace Rhino.Display
       AllSurfaceFixedWidth = EdgeFixedWidth | NakedEdgeFixedWidth | IsoFixedWidth
     }
 
+    /// <since>8.10</since>
     public enum SurfaceThicknessUse : int
     {
       ObjectWidth = 0,
@@ -805,6 +962,7 @@ namespace Rhino.Display
     /// Helper function for getting the SurfaceEdgeThicknessFlags
     /// </summary>
     /// <returns></returns>
+    /// <since>8.10</since>
     public void SetSurfaceEdgeThicknessUsage(SurfaceThicknessUse use)
     {
       SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage);
@@ -909,6 +1067,7 @@ namespace Rhino.Display
     public void SetSurfaceIsoApplyPattern(bool u, bool v, bool w)
     {
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetIsoApplyPattern(ConstPointer(), u, v, w);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// 
@@ -921,6 +1080,7 @@ namespace Rhino.Display
     {
       u = v = w = false;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetIsoApplyPattern(NonConstPointer(), ref u, ref v, ref w);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.6</since>
@@ -1418,12 +1578,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointStyle(const_ptr_this);
+        PointStyle rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointStyle(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetPointStyle(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1469,12 +1632,15 @@ namespace Rhino.Display
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointCloudStyle(const_ptr_this);
+        PointStyle rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetPointCloudStyle(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetPointCloudStyle(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1512,6 +1678,7 @@ namespace Rhino.Display
       }
 
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetColorFadeEffect(ConstPointer(), fade_color_argb, fadeAmount);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1526,6 +1693,7 @@ namespace Rhino.Display
       fadeAmount = 0.0f;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetColorFadeEffect(ConstPointer(), ref fade_color_argb, ref fadeAmount);
       fadeColor = Color.FromArgb(fade_color_argb);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1535,7 +1703,9 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public bool HasColorFadeEffect()
     {
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasColorFadeEffect(ConstPointer());
+      bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_HasColorFadeEffect(ConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1558,6 +1728,7 @@ namespace Rhino.Display
       }
 
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetDitherTransparencyEffect(ConstPointer(), transparencyAmount);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1568,6 +1739,7 @@ namespace Rhino.Display
     {
       float transparency_amount = 0.0f;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetDitherTransparencyEffect(ConstPointer(), ref transparency_amount);
+      GC.KeepAlive(this);
       return transparency_amount;
     }
 
@@ -1578,7 +1750,9 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public bool HasDitherTransparencyEffect()
     {
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasDitherTransparencyEffect(ConstPointer());
+      bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_HasDitherTransparencyEffect(ConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -1604,6 +1778,7 @@ namespace Rhino.Display
       }
 
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetDiagonalHatchEffect(ConstPointer(), hatchStrength, hatchWidth);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1617,6 +1792,7 @@ namespace Rhino.Display
       hatchStrength = 0.0f;
       hatchWidth = 0.0f;
       UnsafeNativeMethods.CDisplayPipelineAttributes_GetDiagonalHatchEffect(ConstPointer(), ref hatchStrength, ref hatchWidth);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1626,7 +1802,9 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public bool HasDiagonalHatchEffect()
     {
-      return UnsafeNativeMethods.CDisplayPipelineAttributes_HasDiagonalHatchEffect(ConstPointer());
+      bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_HasDiagonalHatchEffect(ConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     #endregion
@@ -1646,7 +1824,9 @@ namespace Rhino.Display
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetId(pConstThis);
+        Guid rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetId(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1660,6 +1840,7 @@ namespace Rhino.Display
         {
           IntPtr ptrName = sw.NonConstPointer;
           UnsafeNativeMethods.CDisplayPipelineAttributes_GetName(constPtrThis, true, ptrName);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -1667,6 +1848,7 @@ namespace Rhino.Display
       {
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetEnglishName(pThis, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1680,6 +1862,7 @@ namespace Rhino.Display
         {
           IntPtr ptrName = sw.NonConstPointer;
           UnsafeNativeMethods.CDisplayPipelineAttributes_GetName(constPtrThis, false, ptrName);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -1703,7 +1886,9 @@ namespace Rhino.Display
       get
       {
         IntPtr constPtrThis = ConstPointer();
-        return (ContextsForDraw)UnsafeNativeMethods.CDisplayPipelineAttributes_GetContextDrawToDC(constPtrThis);
+        ContextsForDraw rc = (ContextsForDraw)UnsafeNativeMethods.CDisplayPipelineAttributes_GetContextDrawToDC(constPtrThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1721,7 +1906,9 @@ namespace Rhino.Display
       get
       {
         IntPtr pConstThis = ConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_GetRealtimeDisplayId(pConstThis);
+        Guid rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetRealtimeDisplayId(pConstThis);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1755,12 +1942,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = ConstPointer();
-        return (StereoContext)UnsafeNativeMethods.CDisplayPipelineAttributes_GetStereoRenderContext(ptr);
+        StereoContext rc = (StereoContext)UnsafeNativeMethods.CDisplayPipelineAttributes_GetStereoRenderContext(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_SetStereoRenderContext(ptr, (UnsafeNativeMethods.StereoRenderContext)value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>
@@ -1772,12 +1962,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>
@@ -1789,12 +1982,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>
@@ -1806,12 +2002,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
+        GC.KeepAlive(this);
       }
     }
     /// <summary>
@@ -1823,12 +2022,15 @@ namespace Rhino.Display
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1860,6 +2062,7 @@ namespace Rhino.Display
     /// <summary>
     /// Color reduction percentage
     /// </summary>
+    /// <since>8.9</since>
     public int SubDSmoothInteriorColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorColorReduction); }
@@ -1868,6 +2071,7 @@ namespace Rhino.Display
     /// <summary>
     /// Color reduction percentage
     /// </summary>
+    /// <since>8.9</since>
     public int SubDCreaseInteriorColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorColorReduction); }
@@ -1876,6 +2080,7 @@ namespace Rhino.Display
     /// <summary>
     /// Color reduction percentage
     /// </summary>
+    /// <since>8.9</since>
     public int SubDNonManifoldColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldColorReduction); }
@@ -1884,6 +2089,7 @@ namespace Rhino.Display
     /// <summary>
     /// Color reduction percentage
     /// </summary>
+    /// <since>8.9</since>
     public int SubDBoundaryColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryColorReduction); }
@@ -1892,6 +2098,7 @@ namespace Rhino.Display
     /// <summary>
     /// SubD edge color use
     /// </summary>
+    /// <since>8.9</since>
     public enum SubDEdgeColorUse : int
     {
       ObjectColor = 0,
@@ -1900,6 +2107,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color usage
     /// </summary>
+    /// <since>8.9</since>
     public SubDEdgeColorUse SubDSmoothInteriorEdgeColorUsage
     {
       get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage); }
@@ -1908,6 +2116,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color usage
     /// </summary>
+    /// <since>8.9</since>
     public SubDEdgeColorUse SubDCreaseInteriorEdgeColorUsage
     {
       get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage); }
@@ -1916,6 +2125,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color usage
     /// </summary>
+    /// <since>8.9</since>
     public SubDEdgeColorUse SubDNonManifoldEdgeColorUsage
     {
       get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage); }
@@ -1924,6 +2134,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color usage
     /// </summary>
+    /// <since>8.9</since>
     public SubDEdgeColorUse SubDBoundaryEdgeColorUsage
     {
       get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage); }
@@ -1932,6 +2143,7 @@ namespace Rhino.Display
     /// <summary>
     /// SubD replection plane color use
     /// </summary>
+    /// <since>8.9</since>
     public enum SubDReflectionPlaneColorUse : int
     {
       ObjectColor = 0,
@@ -1941,6 +2153,7 @@ namespace Rhino.Display
     /// <summary>
     /// SubD replection plane color use
     /// </summary>
+    /// <since>8.9</since>
     public SubDReflectionPlaneColorUse SubDReflectionPlaneColorUsage
     {
       get { return (SubDReflectionPlaneColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorUsage); }
@@ -1949,6 +2162,7 @@ namespace Rhino.Display
     /// <summary>
     /// SubD replection plane color reduction percentage
     /// </summary>
+    /// <since>8.9</since>
     public int SubDReflectionPlaneColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDReflectionPlaneColorReduction); }
@@ -1957,6 +2171,7 @@ namespace Rhino.Display
     /// <summary>
     /// Mesh edge width in pixels
     /// </summary>
+    /// <since>8.11</since>
     public int MeshEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeThickness); }
@@ -1965,6 +2180,7 @@ namespace Rhino.Display
     /// <summary>
     /// Naked mesh edge width in pixels.}
     /// </summary>
+    /// <since>8.11</since>
     public int MeshNakedEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeThickness); }
@@ -1973,6 +2189,7 @@ namespace Rhino.Display
     /// <summary>
     /// Non-manifold mesh edge width in pixels
     /// </summary>
+    /// <since>8.11</since>
     public int MeshNonmanifoldEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeThickness); }
@@ -1981,6 +2198,7 @@ namespace Rhino.Display
     /// <summary>
     /// Mesh vertex size in pixels
     /// </summary>
+    /// <since>8.11</since>
     public int MeshVertexSize
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshVertexSize); }
@@ -1989,6 +2207,7 @@ namespace Rhino.Display
     /// <summary>
     /// The darken percentage of the color
     /// </summary>
+    /// <since>8.11</since>
     public int MeshEdgeColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshEdgeColorReduction); }
@@ -1997,6 +2216,7 @@ namespace Rhino.Display
     /// <summary>
     /// The darken percentage of the color
     /// </summary>
+    /// <since>8.11</since>
     public int MeshNakedEdgeColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNakedEdgeColorReduction); }
@@ -2005,6 +2225,7 @@ namespace Rhino.Display
     /// <summary>
     /// The darken percentage of the color
     /// </summary>
+    /// <since>8.11</since>
     public int MeshNonmanifoldEdgeColorReduction
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.MeshNonmanifoldEdgeColorReduction); }
@@ -2013,6 +2234,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness scale
     /// </summary>
+    /// <since>8.9</since>
     public float SubDSmoothInteriorThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorThicknessScale); }
@@ -2021,6 +2243,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness scale
     /// </summary>
+    /// <since>8.9</since>
     public float SubDCreaseInteriorThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorThicknessScale); }
@@ -2029,6 +2252,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness scale
     /// </summary>
+    /// <since>8.9</since>
     public float SubDNonManifoldThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldThicknessScale); }
@@ -2037,6 +2261,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness scale
     /// </summary>
+    /// <since>8.9</since>
     public float SubDBoundaryThicknessScale
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryThicknessScale); }
@@ -2045,40 +2270,45 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness (pixels).
     /// </summary>
-    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    /// <since>8.9</since>
     public float SubDSmoothInteriorEdgeThickness
     {
+      // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorEdgeThickness); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDSmoothInteriorEdgeThickness, value); }
     }
     /// <summary>
     /// Edge thickness (pixels).
     /// </summary>
-    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    /// <since>8.9</since>
     public float SubDCreaseInteriorEdgeThickness
     {
+      // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorEdgeThickness); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDCreaseInteriorEdgeThickness, value); }
     }
     /// <summary>
     /// Edge thickness (pixels).
     /// </summary>
-    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    /// <since>8.9</since>
     public float SubDNonManifoldEdgeThickness
     {
+      // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldEdgeThickness); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDNonManifoldEdgeThickness, value); }
     }
     /// <summary>
     /// Edge thickness (pixels).
     /// </summary>
-    // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
+    /// <since>8.9</since>
     public float SubDBoundaryEdgeThickness
     {
+      // This isn't an int for some reason, even though the UI acts like it is and it would be more consistent
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryEdgeThickness); }
       set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDBoundaryEdgeThickness, value); }
     }
 
+    /// <since>8.9</since>
     public enum SubDThicknessUse : int
     {
       ObjectWidth = 0,
@@ -2088,26 +2318,31 @@ namespace Rhino.Display
     /// <summary>
     /// Thickness usage, pixel thickness or a scale thickness
     /// </summary>
+    /// <since>8.9</since>
     public SubDThicknessUse SubDThicknessUsage
     {
       get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDThicknessUsage); }
       set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDThicknessUsage, (int)value); }
     }
+    /// <since>8.9</since>
     public SubDThicknessUse SubDSmoothInteriorThicknessUsage
     {
       get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDSmoothInteriorThicknessUsage); }
       set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDSmoothInteriorThicknessUsage, (int)value); }
     }
+    /// <since>8.9</since>
     public SubDThicknessUse SubDCreaseInteriorThicknessUsage
     {
       get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDCreaseInteriorThicknessUsage); }
       set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDCreaseInteriorThicknessUsage, (int)value); }
     }
+    /// <since>8.9</since>
     public SubDThicknessUse SubDNonManifoldThicknessUsage
     {
       get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDNonManifoldThicknessUsage); }
       set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDNonManifoldThicknessUsage, (int)value); }
     }
+    /// <since>8.9</since>
     public SubDThicknessUse SubDBoundaryThicknessUsage
     {
       get { return (SubDThicknessUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SubDBoundaryThicknessUsage); }
@@ -2116,6 +2351,7 @@ namespace Rhino.Display
     /// <summary>
     /// Apply pattern to the edge
     /// </summary>
+    /// <since>8.9</since>
     public bool SubDSmoothInteriorApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDSmoothInteriorApplyPattern); }
@@ -2124,6 +2360,7 @@ namespace Rhino.Display
     /// <summary>
     /// Apply pattern to the edge
     /// </summary>
+    /// <since>8.9</since>
     public bool SubDCreaseInteriorApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDCreaseInteriorApplyPattern); }
@@ -2132,6 +2369,7 @@ namespace Rhino.Display
     /// <summary>
     /// Apply pattern to the edge
     /// </summary>
+    /// <since>8.9</since>
     public bool SubDNonManifoldApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDNonManifoldApplyPattern); }
@@ -2140,6 +2378,7 @@ namespace Rhino.Display
     /// <summary>
     /// Apply pattern to the edge
     /// </summary>
+    /// <since>8.9</since>
     public bool SubDBoundaryApplyPattern
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDBoundaryApplyPattern); }
@@ -2148,6 +2387,7 @@ namespace Rhino.Display
     /// <summary>
     /// Apply Turnh on or off the reflection plane axis line
     /// </summary>
+    /// <since>8.9</since>
     public bool SubDReflectionPlaneAxisLineOn
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectionPlaneAxisLineOn); }
@@ -2156,6 +2396,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDSmoothInteriorEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDSmoothInteriorEdgeColor); }
@@ -2164,6 +2405,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDCreaseInteriorEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDCreaseInteriorEdgeColor); }
@@ -2172,6 +2414,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDNonManifoldEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDNonManifoldEdgeColor); }
@@ -2180,6 +2423,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDBoundaryEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDBoundaryEdgeColor); }
@@ -2188,6 +2432,7 @@ namespace Rhino.Display
     /// <summary>
     /// Reflection axis line color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDReflectionAxisLineColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionAxisLineColor); }
@@ -2196,6 +2441,7 @@ namespace Rhino.Display
     /// <summary>
     /// Reflection plane color
     /// </summary>
+    /// <since>8.9</since>
     public Color SubDReflectionPlaneColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.SubDReflectionPlaneColor); }
@@ -2204,6 +2450,7 @@ namespace Rhino.Display
     /// <summary>
     /// Sets the mesh edge color
     /// </summary>
+    /// <since>8.11</since>
     public Color MeshEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshEdgeColor); }
@@ -2212,6 +2459,7 @@ namespace Rhino.Display
     /// <summary>
     /// Sets the naked edge color
     /// </summary>
+    /// <since>8.11</since>
     public Color MeshNakedEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNakedEdgeColor); }
@@ -2220,6 +2468,7 @@ namespace Rhino.Display
     /// <summary>
     /// Sets the nonmanifold edge color
     /// </summary>
+    /// <since>8.11</since>
     public Color MeshNonmanifoldEdgeColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.MeshNonmanifoldEdgeColor); }
@@ -2229,6 +2478,7 @@ namespace Rhino.Display
     /// <summary>
     /// Height above the world XY plane in model units
     /// </summary>
+    /// <since>8.10</since>
     public double CustomGroundPlaneAltitude
     {
       get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.CustomGroundPlaneAltitude); }
@@ -2237,6 +2487,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turn the custom ground plane on or off
     /// </summary>
+    /// <since>8.10</since>
     public bool CustomGroundPlaneOn
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneOn); }
@@ -2245,6 +2496,7 @@ namespace Rhino.Display
     /// <summary>
     /// Makes the ground plane transparent, but allows shadows to still be cast on it.
     /// </summary>
+    /// <since>8.10</since>
     public bool CustomGroundPlaneShadowOnly
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneShadowOnly); }
@@ -2254,6 +2506,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turns on auto-elevation that moves Ground Plane to the lowest point of the objects in the model.
     /// </summary>
+    /// <since>8.10</since>
     public bool CustomGroundPlaneAutomaticAltitude
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CustomGroundPlaneAutomaticAltitude); }
@@ -2262,6 +2515,7 @@ namespace Rhino.Display
     /// <summary>
     /// Set visibility of SubD smooth edges.
     /// </summary>
+    /// <since>8.10</since>
     public bool ShowSubDEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDEdges); }
@@ -2270,6 +2524,7 @@ namespace Rhino.Display
     /// <summary>
     /// Set visibility of SubD creased edges.
     /// </summary>
+    /// <since>8.10</since>
     public bool ShowSubDCreases
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDCreases); }
@@ -2278,6 +2533,7 @@ namespace Rhino.Display
     /// <summary>
     /// Set visibility of SubD naked edges.
     /// </summary>
+    /// <since>8.10</since>
     public bool ShowSubDBoundary
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDBoundary); }
@@ -2286,11 +2542,13 @@ namespace Rhino.Display
     /// <summary>
     /// Turn on/off color differentiation of SubD symmetry children.
     /// </summary>
+    /// <since>8.10</since>
     public bool ShowSubDNonmanifoldEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDNonmanifoldEdges); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowSubDNonmanifoldEdges, value); }
     }
+    /// <since>8.10</since>
     public bool ShowSubDReflectionPlanePreview
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectedPreview); }
@@ -2299,6 +2557,7 @@ namespace Rhino.Display
     /// <summary>
     /// Display mesh edges on/off
     /// </summary>
+    /// <since>8.11</since>
     public bool ShowMeshEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshEdges); }
@@ -2307,6 +2566,7 @@ namespace Rhino.Display
     /// <summary>
     /// Display mesh naked edges on/off
     /// </summary>
+    /// <since>8.11</since>
     public bool ShowMeshNakedEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNakedEdges); }
@@ -2316,6 +2576,7 @@ namespace Rhino.Display
     /// <summary>
     /// Display mesh manifold edges on/off
     /// </summary>
+    /// <since>8.11</since>
     public bool ShowMeshNonmanifoldEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowMeshNonmanifoldEdges); }
@@ -2324,6 +2585,7 @@ namespace Rhino.Display
     /// <summary>
     /// Draw lights using light color
     /// </summary>
+    /// <since>8.11</since>
     public bool UseLightColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.UseLightColor); }
@@ -2332,6 +2594,7 @@ namespace Rhino.Display
     /// <summary>
     /// When a clipping plane intersects a 3-D object and the section is closed, the section is filled.
     /// </summary>
+    /// <since>8.11</since>
     public bool ShowClippingFills
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXSurface); }
@@ -2340,6 +2603,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shows the edges between the clipping plane and clipped objects.
     /// </summary>
+    /// <since>8.11</since>
     public bool ShowClippingEdges
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowXEdges); }
@@ -2348,6 +2612,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shades the selected clipping plane.
     /// </summary>
+    /// <since>8.11</since>
     public bool ClippingShadeSelectedPlane
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingShowCP); }
@@ -2356,6 +2621,7 @@ namespace Rhino.Display
     /// <summary>
     /// Clips the highlight wires. Shaded selections always clip.
     /// </summary>
+    /// <since>8.11</since>
     public bool ClipSelectionHighlight
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ClippingClipSelected); }
@@ -2365,6 +2631,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.11</since>
     public enum ClippingPlaneFillColorUse : int
     {
       /// <summary>
@@ -2388,6 +2655,7 @@ namespace Rhino.Display
     /// <summary>
     /// Specifies how the color for the clipping plane object fill is determined.
     /// </summary>
+    /// <since>8.11</since>
     public ClippingPlaneFillColorUse ClippingPlaneFillColorUsage
     {
       get { return (ClippingPlaneFillColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingSurfaceUsage); }
@@ -2396,6 +2664,7 @@ namespace Rhino.Display
     /// <summary>
     /// Clipping plane fill color
     /// </summary>
+    /// <since>8.11</since>
     public Color ClippingFillColor
     {
       get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingSurfaceColor); }
@@ -2405,6 +2674,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.11</since>
     public enum ClippingEdgeColorUse : int
     {
       /// <summary>
@@ -2423,6 +2693,7 @@ namespace Rhino.Display
     /// <summary>
     /// Specifies how the color for the Edges is determined
     /// </summary>
+    /// <since>8.11</since>
     public ClippingEdgeColorUse ClippingEdgeColorUsage
     {
       get { return (ClippingEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgesUsage); }
@@ -2431,6 +2702,7 @@ namespace Rhino.Display
     /// <summary>
     /// Clipping edge color
     /// </summary>
+    /// <since>8.11</since>
     public Color ClippingEdgeColor
     {
       get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingEdgeColor); }
@@ -2440,6 +2712,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.11</since>
     public enum ClippingShadeColorUse : int
     {
       /// <summary>
@@ -2458,6 +2731,7 @@ namespace Rhino.Display
     /// <summary>
     /// Specifies how to shade the clipping plane
     /// </summary>
+    /// <since>8.11</since>
     public ClippingShadeColorUse ClippingShadeColorUsage
     {
       get { return (ClippingShadeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPUsage); }
@@ -2466,6 +2740,7 @@ namespace Rhino.Display
     /// <summary>
     /// Clipping plane solid color
     /// </summary>
+    /// <since>8.11</since>
     public Color ClippingShadeColor
     {
       get { return (Color)GetColor(UnsafeNativeMethods.DisplayAttrsColor.ClippingCPColor); }
@@ -2474,6 +2749,7 @@ namespace Rhino.Display
     /// <summary>
     /// Edge thickness in pixels.
     /// </summary>
+    /// <since>8.11</since>
     public int ClippingEdgeThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingEdgeThickness); }
@@ -2482,6 +2758,7 @@ namespace Rhino.Display
     /// <summary>
     /// Specifies the clipping plane transparency percentage.
     /// </summary>
+    /// <since>8.11</since>
     public int ClippingShadeTransparency
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ClippingCPTrans); }
@@ -2490,6 +2767,7 @@ namespace Rhino.Display
     /// <summary>
     /// When enabled, the appearances of clipping fills and edges are based on objects' section style properties.
     /// </summary>
+    /// <since>8.11</since>
     public bool UseSectionStyles
     {
       get { return (1 == GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage)); }
@@ -2499,6 +2777,7 @@ namespace Rhino.Display
     /// <summary>
     /// The width of the control polygon lines in pixels.
     /// </summary>
+    /// <since>8.11</since>
     public int ControlPolygonWireThickness
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CPWireThickness); }
@@ -2507,6 +2786,7 @@ namespace Rhino.Display
     /// <summary>
     /// PointStyle for the control polygon. Supported values are ControlPoint, RoundControlPoint, VariableDot, and RoundDot
     /// </summary>
+    /// <since>8.11</since>
     public PointStyle ControlPolygonStyle
     {
       get { return (PointStyle)GetInt(UnsafeNativeMethods.DisplayAttributesInt.CVStyle); }
@@ -2521,6 +2801,7 @@ namespace Rhino.Display
     /// <summary>
     /// The control point size in pixels.
     /// </summary>
+    /// <since>8.11</since>
     public int ControlPolygonGripSize
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.CVSize); }
@@ -2530,12 +2811,14 @@ namespace Rhino.Display
     /// <summary>
     /// LockedObjectTransparency.
     /// </summary>
+    /// <since>8.11</since>
     public int LockedObjectTransparency
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedTrans); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedTrans, value); }
     }
 
+    /// <since>8.11</since>
     public enum LockedObjectUse : int
     {
       /// <summary>
@@ -2555,6 +2838,7 @@ namespace Rhino.Display
     /// <summary>
     /// Set asource of display attributes for locked objects
     /// </summary>
+    /// <since>8.11</since>
     public LockedObjectUse LockedObjectUsage
     {
       get { return (LockedObjectUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.LockedUsage); }
@@ -2564,6 +2848,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.11</since>
     public enum DynamicDisplayUse
     {
       /// <summary>
@@ -2578,6 +2863,7 @@ namespace Rhino.Display
     /// <summary>
     /// Sets the appearance of objects in the display
     /// </summary>
+    /// <since>8.11</since>
     public DynamicDisplayUse DynamicDisplayUsage
     {
       get { return (DynamicDisplayUse)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.BBoxMode); }
@@ -2586,6 +2872,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shades entire object with highlight color.
     /// </summary>
+    /// <since>8.11</since>
     public bool HighlightSurfaces
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HighlightSurfaces); }
@@ -2594,6 +2881,7 @@ namespace Rhino.Display
     /// <summary>
     /// Use dotted / solid lines
     /// </summary>
+    /// <since>8.11</since>
     public bool ControlPolygonUseSolidLines
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSolidLines); }
@@ -2604,6 +2892,7 @@ namespace Rhino.Display
     /// </summary>
     /// <value>true = Use a specified color for all control polygons.</value>
     /// <value>false = Use the color specified in the object's Properties.</value>
+    /// <since>8.11</since>
     public bool ControlPolygonUseFixedSingleColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPSingleColor); }
@@ -2612,6 +2901,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shows the control points while the control polygon is displayed.
     /// </summary>
+    /// <since>8.11</since>
     public bool ControlPolygonShowPoints
     {
       get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidePoints); }
@@ -2620,6 +2910,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shows the object while the control polygon is displayed.
     /// </summary>
+    /// <since>8.11</since>
     public bool ControlPolygonShowSurface
     {
       get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHideSurface); }
@@ -2628,6 +2919,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shows the control polygon and only shows the control points.
     /// </summary>
+    /// <since>8.11</since>
     public bool ControlPolygonShow
     {
       get { return !GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHidden); }
@@ -2636,6 +2928,7 @@ namespace Rhino.Display
     /// <summary>
     /// Highlights the segments of the control polygon on either side of the control points.
     /// </summary>
+    /// <since>8.11</since>
     public bool ControlPolygonHighlight
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.CPHighlight); }
@@ -2646,6 +2939,7 @@ namespace Rhino.Display
     /// </summary>
     /// <value>true = Locked objects appear transparent</value>
     /// <value>false = Locked objects appear solid</value>
+    /// <since>8.11</since>
     public bool GhostLockedObjects
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.GhostLockedObjects); }
@@ -2654,6 +2948,7 @@ namespace Rhino.Display
     /// <summary>
     /// Applies the settings for locked objects to locked layers.
     /// </summary>
+    /// <since>8.11</since>
     public bool LayersFollowLockUsage
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.LayersFollowLockUsage); }
@@ -2662,6 +2957,7 @@ namespace Rhino.Display
     /// <summary>
     /// Control polygon color
     /// </summary>
+    /// <since>8.11</since>
     public Color ControlPolygonColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.CPColor); }
@@ -2670,6 +2966,7 @@ namespace Rhino.Display
     /// <summary>
     /// Locked Object Color
     /// </summary>
+    /// <since>8.11</since>
     public Color LockedColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.LockedColor); }
@@ -2679,6 +2976,7 @@ namespace Rhino.Display
     /// <summary>
     /// Enable shadows
     /// </summary>
+    /// <since>8.11</since>
     public bool ShadowsOn
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.Shadows); }
@@ -2687,6 +2985,7 @@ namespace Rhino.Display
     /// <summary>
     /// Shadow intensity (percentage 0-100)
     /// </summary>
+    /// <since>8.11</since>
     public int ShadowIntensity
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowIntensity); }
@@ -2701,6 +3000,7 @@ namespace Rhino.Display
     /// Value from 1 to 16384 indicating how much memory is to be allocated. Actual memory use
     /// is ShadowMemoryUsage*ShadowMemoryUsage*4.
     /// </summary>
+    /// <since>8.11</since>
     public int ShadowMemoryUsage
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadowMemoryUsage); }
@@ -2714,6 +3014,7 @@ namespace Rhino.Display
     /// <summary>
     /// Skylight shadow quality, from 0 (lowest) to 8 (highest)
     /// </summary>
+    /// <since>8.11</since>
     public int SkylightShadowQuality
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.SkylightQuality); }
@@ -2748,6 +3049,7 @@ namespace Rhino.Display
     /// <summary>
     /// Soft edge quality, from 0 (none/faster) to 12 (softer/slower)
     /// </summary>
+    /// <since>8.11</since>
     public int ShadowSoftEdgeQuality
     {
       get
@@ -2779,6 +3081,7 @@ namespace Rhino.Display
     /// <summary>
     /// Set blurring from 0 (no blurring) to 16 (maximum blurring)
     /// </summary>
+    /// <since>8.11</since>
     public double ShadowEdgeBlur
     {
       get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBlur); }
@@ -2792,6 +3095,7 @@ namespace Rhino.Display
     /// <summary>
     /// ShadowBiasX (Self shadowing artifacts) from 0 (dirty) to 50 (cleaner).
     /// </summary>
+    /// <since>8.11</since>
     public double ShadowBiasX
     {
       get { return GetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX); }
@@ -2804,6 +3108,7 @@ namespace Rhino.Display
     /// <summary>
     /// Transparency tolerance from 0 (never cast shadows) to 100 (always case shadows)
     /// </summary>
+    /// <since>8.11</since>
     public int ShadowTransparencyTolerance
     {
       get { return (int)GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.TransparencyTolerance); }
@@ -2817,6 +3122,7 @@ namespace Rhino.Display
     /// <summary>
     /// Camera-based shadow clipping radius
     /// </summary>
+    /// <since>8.11</since>
     public float ShadowClippingRadius
     {
       get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.ShadowClippingRadius); }
@@ -2835,6 +3141,7 @@ namespace Rhino.Display
     /// <summary>
     /// If true, shadows ignore user-defined clipping planes
     /// </summary>
+    /// <since>8.11</since>
     public bool ShadowsIgnoreUserDefinedClippingPlanes
     {
       get { return (0 != (0x10 & GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ShadowClippingUsage))); }
@@ -2850,6 +3157,7 @@ namespace Rhino.Display
     /// <summary>
     /// Size of axes as a percentage of the grid extents.
     /// </summary>
+    /// <since>8.11</since>
     public int AxesSizePercentage
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.AxesPercentage); }
@@ -2864,6 +3172,7 @@ namespace Rhino.Display
     /// <summary>
     /// Transparency of the grid, percentage (0-100)
     /// </summary>
+    /// <since>8.11</since>
     public int GridTransparency
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.GridTrans); }
@@ -2878,6 +3187,7 @@ namespace Rhino.Display
     /// <summary>
     /// Transparency of the grid plane, percentage (0-100)
     /// </summary>
+    /// <since>8.11</since>
     public int GridPlaneTransparency
     {
       get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.GridPlaneTrans); }
@@ -2888,6 +3198,7 @@ namespace Rhino.Display
         SetInt(UnsafeNativeMethods.DisplayAttributesInt.GridPlaneTrans, value);
       }
     }
+    /// <since>8.11</since>
     public enum GridPlaneVisibilityMode : int
     {
       /// <summary>
@@ -2902,12 +3213,14 @@ namespace Rhino.Display
     /// <summary>
     /// Set when to show the grid plane
     /// </summary>
+    /// <since>8.11</since>
     public GridPlaneVisibilityMode GridPlaneVisibility
     {
       get { return (GridPlaneVisibilityMode)GetInt(UnsafeNativeMethods.DisplayAttributesInt.PlaneVisibility); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.PlaneVisibility, (int)value); }
     }
 
+    /// <since>8.11</since>
     public enum WorldAxesIconColorUse : int
     {
       /// <summary>
@@ -2923,6 +3236,7 @@ namespace Rhino.Display
       /// </summary>
       Custom = 2
     }
+    /// <since>8.11</since>
     public WorldAxesIconColorUse WorldAxesIconColorUsage
     {
       get { return (WorldAxesIconColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.WorldAxesColor); }
@@ -2932,6 +3246,7 @@ namespace Rhino.Display
     /// <summary>
     /// If true, use the grid thin line color in App settings
     /// </summary>
+    /// <since>8.11</since>
     public bool PlaneUsesGridColor
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PlaneUsesGridColor); }
@@ -2941,6 +3256,7 @@ namespace Rhino.Display
     /// <summary>
     /// The color of the grid plane
     /// </summary>
+    /// <since>8.11</since>
     public Color GridPlaneColor
     {
       get { return GetColor(UnsafeNativeMethods.DisplayAttrsColor.GridPlaneColor); }
@@ -2950,6 +3266,7 @@ namespace Rhino.Display
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.14</since>
     public enum GroundPlaneUsages
     {
       ByDocument = 0,
@@ -2959,6 +3276,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turn on or off custom Ground plane settungs
     /// </summary>
+    /// <since>8.14</since>
     public GroundPlaneUsages GroundPlaneUsage
     {
       get { return (GroundPlaneUsages)GetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage); }
@@ -2968,6 +3286,7 @@ namespace Rhino.Display
     /// <summary>
     ///
     /// </summary>
+    /// <since>8.14</since>
     public enum LinearWorkflowUsages
     {
       ByDocument=0,
@@ -2977,6 +3296,7 @@ namespace Rhino.Display
     /// <summary>
     /// Turn on or off custom linear workflow settings
     /// </summary>
+    /// <since>8.14</since>
     public LinearWorkflowUsages LinearWorkflowUsage
     {
       get { return (LinearWorkflowUsages)GetInt(UnsafeNativeMethods.DisplayAttributesInt.LinearWorkflowUsage); }
@@ -2986,6 +3306,7 @@ namespace Rhino.Display
     /// <summary>
     /// Linear workflow input colors
     /// </summary>
+    /// <since>8.14</since>
     public bool PreProcessColors
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessColors); }
@@ -2995,6 +3316,7 @@ namespace Rhino.Display
     /// <summary>
     /// Linear workflow input textures
     /// </summary>
+    /// <since>8.14</since>
     public bool PreProcessTextures
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessTextures); }
@@ -3004,15 +3326,17 @@ namespace Rhino.Display
     /// <summary>
     /// Linear workflow input gamma
     /// </summary>
-    public bool PreProcessGamma
+    /// <since>8.14</since>
+    public float PreProcessGamma
     {
-      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessGamma); }
-      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PreProcessGamma, value); }
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.PreProcessGamma); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.PreProcessGamma, value); }
     }
 
     /// <summary>
     /// Linear workflow Adjust output image
     /// </summary>
+    /// <since>8.14</since>
     public bool PostProcessFrameBuffer
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessFrameBuffer); }
@@ -3022,6 +3346,7 @@ namespace Rhino.Display
     /// <summary>
     /// Linear workflow Output image gamma
     /// </summary>
+    /// <since>8.14</since>
     public bool PostProcessGamma
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessGamma); }
@@ -3031,57 +3356,153 @@ namespace Rhino.Display
     /// <summary>
     /// Shades the current viewport with no smoothing so the individual render mesh faces are visible.
     /// </summary>
+    /// <since>8.14</since>
     public bool FrontFlatShaded
     {
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded, value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
     /// 
     /// </summary>
+    /// <since>8.14</since>
     public bool FrontOverrideObjectColor
     {
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor, value);
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
+    /// Objects acquire transparency from render materials.
+    /// </summary>
+    /// <since>8.21</since>
+    public bool FrontOverrideObjectTransparency
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Objects acquire reflectivity from render materials.
+    /// </summary>
+    /// <since>8.21</since>
+    public bool FrontOverrideObjectReflectivity
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Objects acquire transparency from render materials.
+    /// </summary>
+    /// <since>8.21</since>
+    public bool BackOverrideObjectTransparency
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Objects acquire reflectivity from render materials.
+    /// </summary>
+    /// <since>8.21</since>
+    public bool BackOverrideObjectReflectivity
+    {
+      get
+      {
+        IntPtr ptr = NonConstPointer();
+        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
+        GC.KeepAlive(this);
+      }
+    }
+    /// <summary>
     /// Shades the current viewport with no smoothing so the individual render mesh faces are visible.
     /// </summary>
+    /// <since>8.14</since>
     public Color FrontDiffuse
     {
       get
       {
         IntPtr ptr = NonConstPointer();
-        return System.Drawing.Color.FromArgb(UnsafeNativeMethods.CDisplayAttributeMaterial_GetColor(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse));
+        Color rc = System.Drawing.Color.FromArgb(UnsafeNativeMethods.CDisplayAttributeMaterial_GetColor(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse));
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CDisplayAttributeMaterial_SetColor(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse, value.ToArgb());
+        GC.KeepAlive(this);
       }
     }
 
     /// <summary>
     /// Adds the ability to display procedural textures in viewports. When it is turned off, procedural textures in viewports look different from the rendering.
     /// </summary>
+    /// <since>8.14</since>
     public bool BakeTextures
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BakeTextures); }

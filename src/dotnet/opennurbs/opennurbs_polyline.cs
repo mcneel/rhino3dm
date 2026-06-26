@@ -52,6 +52,7 @@ namespace Rhino.Geometry
       {
         IntPtr pNativeArray = pts.ConstPointer();
         UnsafeNativeMethods.ON_3dPointArray_CopyValues(pNativeArray, list.m_items);
+        GC.KeepAlive(pts);
         list.m_size = count;
       }
       return list;
@@ -139,6 +140,21 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr = points.ConstPointer();
         return UnsafeNativeMethods.ON_Polyline_IsClosed(const_ptr, tolerance);
+      }
+    }
+
+    /// <summary>
+    /// Determines if a polyline is convex.
+    /// </summary>
+    /// <param name="strictlyConvex">If false, collinear segments are considered convex.</param>
+    /// <returns>True if the polyline is a closed, convex loop.</returns>
+    /// <since>8.28</since>
+    public bool IsConvexLoop(bool strictlyConvex)
+    {
+      using (var points = new SimpleArrayPoint3d(GetRange(0, Count)))
+      {
+        IntPtr const_ptr = points.ConstPointer();
+        return UnsafeNativeMethods.ON_Polyline_IsConvexLoop(const_ptr, strictlyConvex);
       }
     }
 

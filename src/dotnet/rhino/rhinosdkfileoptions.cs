@@ -43,12 +43,15 @@ namespace Rhino.FileIO
 
     bool GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts which)
     {
-      return UnsafeNativeMethods.CRhinoFileWriteOptions_GetBool(m_ptr, which);
+      bool rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetBool(m_ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts which, bool value)
     {
       if (m_delete_pointer) // means this is not "const"
         UnsafeNativeMethods.CRhinoFileWriteOptions_SetBool(m_ptr, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -164,12 +167,15 @@ namespace Rhino.FileIO
     {
       get
       {
-        return UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileVersion(m_ptr);
+        int rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileVersion(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         if (m_delete_pointer)
           UnsafeNativeMethods.CRhinoFileWriteOptions_SetFileVersion(m_ptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -180,12 +186,14 @@ namespace Rhino.FileIO
       {
         Geometry.Transform xf = new Geometry.Transform();
         UnsafeNativeMethods.CRhinoFileWriteOptions_Transform(m_ptr, true, ref xf);
+        GC.KeepAlive(this);
         return xf;
       }
       set
       {
         if (m_delete_pointer)
           UnsafeNativeMethods.CRhinoFileWriteOptions_Transform(m_ptr, false, ref value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -202,6 +210,7 @@ namespace Rhino.FileIO
         {
           IntPtr ptr_string = str.NonConstPointer();
           bool rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetDestinationFileName(m_ptr, ptr_string);
+          GC.KeepAlive(this);
           return rc ? str.ToString() : null;
         }
       }
@@ -214,6 +223,7 @@ namespace Rhino.FileIO
       get
       {
         uint sn = UnsafeNativeMethods.CRhinoFileWriteOption_DocumentSerialNumber(m_ptr);
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(sn);
       }
     }
@@ -295,12 +305,15 @@ namespace Rhino.FileIO
 
     bool GetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts which)
     {
-      return UnsafeNativeMethods.CRhinoFileReadOptions_GetBool(m_ptr, which);
+      bool rc = UnsafeNativeMethods.CRhinoFileReadOptions_GetBool(m_ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.FileReadOptionsBoolConsts which, bool value)
     {
       if (m_delete_pointer) // means this is not "const"
         UnsafeNativeMethods.CRhinoFileReadOptions_SetBool(m_ptr, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -416,7 +429,9 @@ namespace Rhino.FileIO
 
     uint GetUnsignedInt(UnsafeNativeMethods.FileReadOptionsUnsignedIntConsts which)
     {
-      return UnsafeNativeMethods.CRhinoFileReadOptions_GetUnsignedInt(m_ptr, which);
+      uint rc = UnsafeNativeMethods.CRhinoFileReadOptions_GetUnsignedInt(m_ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -450,7 +465,12 @@ namespace Rhino.FileIO
     /// <since>8.6</since>
     public Guid ReferenceModelGrandParentLayerId
     {
-      get { return UnsafeNativeMethods.CRhinoFileReadOptions_ReferenceModelGrandParentLayerId(m_ptr); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.CRhinoFileReadOptions_ReferenceModelGrandParentLayerId(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
   /// <summary>

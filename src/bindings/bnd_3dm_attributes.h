@@ -18,6 +18,13 @@ public:
 public:
   BND_3dmObjectAttributes();
   BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref);
+  // RH-86691: explicit deep-copy copy ctor. embind's val::as<T>() materializes a by-value
+  // copy; the compiler-default copy would shallow-copy m_attributes plus the BND_CommonObject
+  // ownership state, so a temporary copy frees the ON_3dmObjectAttributes that the originating
+  // (e.g. JS-owned) wrapper still owns -> use-after-free (seen as a WASM "memory access out of
+  // bounds" when adding instance definitions whose objects carry meshes). Deep-copy into an
+  // independently-owned ON_3dmObjectAttributes instead.
+  BND_3dmObjectAttributes(const BND_3dmObjectAttributes& other);
 
   ON::object_mode GetMode() const { return m_attributes->Mode(); }
   void SetMode(ON::object_mode mode) { m_attributes->SetMode(mode); }

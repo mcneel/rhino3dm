@@ -149,7 +149,9 @@ namespace Rhino.Display
     public static Guid AddDisplayMode(DisplayModeDescription displayMode)
     {
       IntPtr pDisplayMode = displayMode.NonConstPointer();
-      return UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Add(pDisplayMode);
+      Guid rc = UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Add(pDisplayMode);
+      GC.KeepAlive(displayMode);
+      return rc;
     }
 
     /// <summary>
@@ -188,7 +190,9 @@ namespace Rhino.Display
     public static bool UpdateDisplayMode(DisplayModeDescription displayMode)
     {
       IntPtr pConstDisplayMode = displayMode.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Update(pConstDisplayMode);
+      bool rc = UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Update(pConstDisplayMode);
+      GC.KeepAlive(displayMode);
+      return rc;
     }
 
     /// <summary>
@@ -223,9 +227,21 @@ namespace Rhino.Display
     /// <since>6.0</since>
     public static Guid ImportFromFile(string filename)
     {
+      return ImportFromFile(filename, false);
+    }
+
+    /// <summary>
+    /// Imports a DisplayModeDescription from a Windows-style .ini file.
+    /// </summary>
+    /// <param name="filename">The name of the file to import.</param>
+    /// <param name="interactive">True to show user interface messages, false to suppress any user interface messages.</param>
+    /// <returns>The id of the DisplayModeDescription if successful.</returns>
+    /// <since>8.27</since>
+    public static Guid ImportFromFile(string filename, bool interactive)
+    {
       if (string.IsNullOrEmpty(filename))
         return Guid.Empty;
-      return UnsafeNativeMethods.RHC_RhImportDisplayAttrsMgrListDesc(filename);
+      return UnsafeNativeMethods.RHC_RhImportDisplayAttrsMgrListDesc(filename, interactive);
     }
 
     /// <summary>
@@ -257,14 +273,17 @@ namespace Rhino.Display
     bool GetBool(int which)
     {
       IntPtr pConstThis = ConstPointer();
-      return UnsafeNativeMethods.DisplayAttrsMgrListDesc_GetBool(pConstThis, which);
+      bool rc = UnsafeNativeMethods.DisplayAttrsMgrListDesc_GetBool(pConstThis, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(int which, bool b)
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.DisplayAttrsMgrListDesc_SetBool(pThis, which, b);
+      GC.KeepAlive(this);
     }
-    
+
     /// <since>5.0</since>
     public bool InMenu
     {
@@ -459,6 +478,7 @@ namespace Rhino.Display
       }
     }
 
+    /// <since>8.14</since>
     public static Guid MonochromeId
     {
       get

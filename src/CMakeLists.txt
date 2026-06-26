@@ -76,12 +76,25 @@ if(${RHINO3DM_JS})
   else()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
-  if(NODE)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MEMORY64=1")
+  # WASM64 (wasm memory64) is its own build dimension, independent of NODE.
+  # It produces a 64-bit-memory binary that breaks the 4GB limit. Chrome ships
+  # memory64 unflagged and Node supports it; Firefox/Safari are still gated, so
+  # the default build stays wasm32 and WASM64 is opt-in.
+  if(WASM64)
+    message("WASM64 (memory64) build")
+    # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied
+    # at compile time to C sources (zlib, uuid) as well as C++, and to the draco
+    # sub-build (see script/setup.py), or the objects link as mixed
+    # wasm32/wasm64 and fail. (It also reaches the link line via CXX flags.)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMEMORY64=1")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sMEMORY64=1")
   endif()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=rhino3dm  -s ALLOW_MEMORY_GROWTH=1 --bind")
+  # The remaining -s settings and -lembind are link-only; keep them out of the
+  # compile flags so every object doesn't emit a "linker setting ignored during
+  # compilation" / "linker input unused" warning.
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMODULARIZE=1 -sEXPORT_NAME=rhino3dm -sALLOW_MEMORY_GROWTH=1 -lembind")
   if(MODULE)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s EXPORT_ES6=1")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORT_ES6=1")
   endif()
 endif()
 
@@ -98,17 +111,18 @@ add_definitions(-DON_COMPILING_OPENNURBS)
 add_definitions(-DOPENNURBS_FREETYPE_INC_)
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
+# RH3DM-179: we link zlib via CMake, not the MSVC #pragma comment(lib,...) path, so tell
+# opennurbs to skip that pragma block (otherwise OPENNURBS_ZLIB_LIB_DIR being valueless
+# yields a malformed string -> MSVC C4081). The native librhino3dm_native build already
+# defines this; mirror it here for the JS/Python build.
+add_definitions(-DON_CMAKE_BUILD)
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 if(${RHINO3DM_JS})
-  # temporary until we adjust opennurbs to be emscripten aware
-  if(NODE)
-    add_definitions(-DON_64BIT_RUNTIME)
-  else()
-    add_definitions(-DON_32BIT_RUNTIME)
-  endif()
-  add_definitions(-DON_LITTLE_ENDIAN)
-  add_definitions(-DON_RUNTIME_WASM)
+  # opennurbs (>= 8.32) is emscripten-aware: it auto-defines ON_RUNTIME_WASM,
+  # ON_LITTLE_ENDIAN, and selects ON_64BIT_RUNTIME / ON_32BIT_RUNTIME from the
+  # actual wasm pointer size. So a WASM64 build only needs -sMEMORY64=1 (set
+  # above) and opennurbs derives the 64-bit runtime itself. No manual defines.
 
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
 

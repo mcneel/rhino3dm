@@ -189,6 +189,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderContent_Kind(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -205,6 +206,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderContent_TypeName(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -214,25 +216,57 @@ namespace Rhino.FileIO
     /// <return>The unique id of the content type.</return>
     /// </summary>
     /// <since>8.0</since>
-    public Guid TypeId => UnsafeNativeMethods.ON_RenderContent_TypeId(ConstPointer());
+    public Guid TypeId
+    {
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_RenderContent_TypeId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>The content's render-engine id.</return>
     /// </summary>
     /// <since>8.0</since>
-    public Guid RenderEngineId => UnsafeNativeMethods.ON_RenderContent_RenderEngineId(ConstPointer());
+    public Guid RenderEngineId
+    {
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_RenderContent_RenderEngineId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>The content's plug-in id.</return>
     /// </summary>
     /// <since>8.0</since>
-    public Guid PlugInId => UnsafeNativeMethods.ON_RenderContent_PlugInId(ConstPointer());
+    public Guid PlugInId
+    {
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_RenderContent_PlugInId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>The content's group id.</return>
     /// </summary>
     /// <since>8.0</since>
-    public Guid GroupId => UnsafeNativeMethods.ON_RenderContent_GroupId(ConstPointer());
+    public Guid GroupId
+    {
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_RenderContent_GroupId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>The content's notes.</return>
@@ -245,6 +279,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderContent_Notes(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -261,6 +296,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderContent_Tags(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -270,19 +306,44 @@ namespace Rhino.FileIO
     /// <return>True if the content is hidden.</return>
     /// </summary>
     /// <since>8.0</since>
-    public bool Hidden => UnsafeNativeMethods.ON_RenderContent_Hidden(ConstPointer());
+    public bool Hidden
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_RenderContent_Hidden(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>True if the content is a reference content.</return>
     /// </summary>
     /// <since>8.0</since>
-    public bool Reference => UnsafeNativeMethods.ON_RenderContent_Reference(ConstPointer());
+    public bool Reference
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_RenderContent_Reference(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
 
     /// <summary>
     /// <return>True if the content is automatically deleted when not in use.</return>
     /// </summary>
     /// <since>8.0</since>
-    public bool AutoDelete => UnsafeNativeMethods.ON_RenderContent_AutoDelete(ConstPointer());
+    public bool AutoDelete
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_RenderContent_AutoDelete(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// Gets a named parameter.
@@ -296,6 +357,7 @@ namespace Rhino.FileIO
       if (!UnsafeNativeMethods.ON_RenderContent_GetParameter(ConstPointer(), param, v.NonConstPointer()))
         return null;
 
+      GC.KeepAlive(this);
       return v;
     }
 
@@ -310,7 +372,9 @@ namespace Rhino.FileIO
       {
         // I have to use ConstPointer here. It's a hack to prevent a copy being made. If a copy is
         // made, the changes get written to the copy and subsequently lost.
-        return UnsafeNativeMethods.ON_RenderContent_SetParameter(ConstPointer(), param, v.ConstPointer());
+        bool rc = UnsafeNativeMethods.ON_RenderContent_SetParameter(ConstPointer(), param, v.ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -384,7 +448,7 @@ namespace Rhino.FileIO
         case 2: return new File3dmRenderTexture(child_id, parent);
         }
       }
-
+      GC.KeepAlive(file3dm);
       return null;
     }
 
@@ -397,6 +461,7 @@ namespace Rhino.FileIO
         using (var children = new SimpleArrayGuid())
         {
           UnsafeNativeMethods.ON_RenderContent_Children(ConstPointer(), children.NonConstPointer());
+          GC.KeepAlive(this);
 
           for (int i = 0; i < children.Count; i++)
           {
@@ -414,13 +479,29 @@ namespace Rhino.FileIO
     /// <return>True if this is a top-level render content (i.e., has no parent; is not a child).</return>
     /// </summary>
     /// <since>8.0</since>
-    public bool IsTopLevel => UnsafeNativeMethods.ON_RenderContent_IsTopLevel(ConstPointer());
+    public bool IsTopLevel
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_RenderContent_IsTopLevel(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>True if this is a child of another render content (i.e., has a parent; is not top-level).</return>
     /// </summary>
     /// <since>8.0</since>
-    public bool IsChild => UnsafeNativeMethods.ON_RenderContent_IsChild(ConstPointer());
+    public bool IsChild
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_RenderContent_IsChild(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
 
     /// <summary>
     /// <return>The render content's child slot name.</return>
@@ -433,6 +514,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderContent_ChildSlotName(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }
@@ -444,7 +526,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool ChildSlotOn(string child_slot_name)
     {
-      return UnsafeNativeMethods.ON_RenderContent_ChildSlotOn(ConstPointer(), child_slot_name);
+      bool rc = UnsafeNativeMethods.ON_RenderContent_ChildSlotOn(ConstPointer(), child_slot_name);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -454,7 +538,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public bool DeleteChild(string child_slot_name)
     {
-      return UnsafeNativeMethods.ON_RenderContent_DeleteChild(ConstPointer(), child_slot_name);
+      bool rc = UnsafeNativeMethods.ON_RenderContent_DeleteChild(ConstPointer(), child_slot_name);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -463,8 +549,9 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public File3dmRenderContent FindChild(string child_slot_name)
     {
-     var child_id = UnsafeNativeMethods.ON_RenderContent_FindChild(ConstPointer(), child_slot_name);
-     return NewFile3dmRenderContent(this, child_id);
+      var child_id = UnsafeNativeMethods.ON_RenderContent_FindChild(ConstPointer(), child_slot_name);
+      GC.KeepAlive(this);
+      return NewFile3dmRenderContent(this, child_id);
     }
 
     /// <summary>
@@ -476,6 +563,7 @@ namespace Rhino.FileIO
       using (var sw = new StringWrapper())
       {
         UnsafeNativeMethods.ON_RenderContent_XML(ConstPointer(), recursive, sw.NonConstPointer);
+        GC.KeepAlive(this);
         return sw.ToString();
       }
     }
@@ -497,7 +585,9 @@ namespace Rhino.FileIO
         return IntPtr.Zero;
 
       var model = file3dm.NonConstPointer();
-      return UnsafeNativeMethods.ONX_Model_FindRenderContentFromId(model, m_id);
+      IntPtr rc = UnsafeNativeMethods.ONX_Model_FindRenderContentFromId(model, m_id);
+      GC.KeepAlive(file3dm);
+      return rc;
     }
   }
 
@@ -531,6 +621,7 @@ namespace Rhino.FileIO
     {
       var m = new Material();
       UnsafeNativeMethods.ON_RenderMaterial_To_ON_Material(ConstPointer(), m.NonConstPointer());
+      GC.KeepAlive(this);
       return m;
     }
   }
@@ -560,6 +651,7 @@ namespace Rhino.FileIO
     {
       var e = new Rhino.DocObjects.Environment();
       UnsafeNativeMethods.ON_RenderEnvironment_To_ON_Environment(ConstPointer(), e.NonConstPointer());
+      GC.KeepAlive(this);
       return e;
     }
   }
@@ -589,6 +681,7 @@ namespace Rhino.FileIO
     {
       var t = new Texture();
       UnsafeNativeMethods.ON_RenderTexture_To_ON_Texture(ConstPointer(), t.NonConstPointer());
+      GC.KeepAlive(this);
       return t;
     }
 
@@ -603,6 +696,7 @@ namespace Rhino.FileIO
         using (var sw = new StringWrapper())
         {
           UnsafeNativeMethods.ON_RenderTexture_Filename(ConstPointer(), sw.NonConstPointer);
+          GC.KeepAlive(this);
           return sw.ToString();
         }
       }

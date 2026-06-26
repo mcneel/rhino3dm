@@ -58,13 +58,16 @@ namespace Rhino.Input.Custom
     bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      bool rc = UnsafeNativeMethods.CArgsRhinoGetCircle_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     void SetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which, bool value)
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CArgsRhinoGetCircle_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -76,12 +79,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetCircle_DefaultSize(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetCircle_SetDefaultSize(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -104,12 +110,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_FixInnerRadius(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetTorus_FixInnerRadius(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetFixInnerRadius(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -122,12 +131,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_DiameterRadius(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetTorus_DiameterRadius(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetDiameterRadius(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -140,12 +152,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_SecondRadius(const_ptr_this);
+        double rc = UnsafeNativeMethods.CArgsRhinoGetTorus_SecondRadius(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetSecondRadius(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -158,12 +173,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_PromptForMeshDensity(const_ptr_this);
+        bool rc = UnsafeNativeMethods.CArgsRhinoGetTorus_PromptForMeshDensity(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetPromptForMeshDensity(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -176,12 +194,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetVerticalDirectionCount(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -194,12 +215,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionMinCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetTorus_VerticalDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetVerticalDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -212,12 +236,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetAroundDirectionCount(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -230,12 +257,15 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionMinCount(const_ptr_this);
+        int rc = UnsafeNativeMethods.CArgsRhinoGetTorus_AroundDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.CArgsRhinoGetTorus_SetAroundDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -250,6 +280,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       torus = Geometry.Torus.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetTorus(ref torus, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 
@@ -266,6 +297,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       torus = Geometry.Torus.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetMeshTorus(ref torus, ref verticalFaces, ref aroundFaces, ptr_this);
+      GC.KeepAlive(this);
       return (Commands.Result)rc;
     }
 

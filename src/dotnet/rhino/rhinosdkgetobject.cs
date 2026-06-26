@@ -84,12 +84,14 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr = NonConstPointer();
         uint rc = UnsafeNativeMethods.CRhinoGetObject_GetSetGeometryFilter(ptr, false, 0);
+        GC.KeepAlive(this);
         return (ObjectType)rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CRhinoGetObject_GetSetGeometryFilter(ptr, true, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -115,12 +117,14 @@ namespace Rhino.Input.Custom
       {
         IntPtr ptr = NonConstPointer();
         uint filter = UnsafeNativeMethods.CRhinoGetObject_GetSetGeometryAttrFilter(ptr, false, 0);
+        GC.KeepAlive(this);
         return (GeometryAttributeFilter)filter;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CRhinoGetObject_GetSetGeometryAttrFilter(ptr, true, (uint)value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -202,7 +206,9 @@ namespace Rhino.Input.Custom
       if (geometry != null)
         const_ptr_geometry = geometry.ConstPointer();
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetObject_PassesGeometryAttributeFilter(ptr, const_ptr_rhino_object, const_ptr_geometry, componentIndex);
+      bool rc = UnsafeNativeMethods.CRhinoGetObject_PassesGeometryAttributeFilter(ptr, const_ptr_rhino_object, const_ptr_geometry, componentIndex);
+      GC.KeepAlive(geometry);
+      return rc;
     }
 
     /// <summary>
@@ -224,6 +230,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_EnablePreSelect(ptr, enable, ignoreUnacceptablePreselectedObjects);
+      GC.KeepAlive(this);
     }
     /// <since>5.0</since>
     public void DisablePreSelect()
@@ -234,12 +241,15 @@ namespace Rhino.Input.Custom
     bool GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts which)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.CRhinoGetObject_GetSetBool(ptr, which, false, false);
+      bool rc = UnsafeNativeMethods.CRhinoGetObject_GetSetBool(ptr, which, false, false);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts which, bool setValue)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_GetSetBool(ptr, which, true, setValue);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -449,6 +459,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_SetPressEnterWhenDonePrompt(ptr, prompt);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -544,6 +555,7 @@ namespace Rhino.Input.Custom
 
       IntPtr ptr = NonConstPointer();
       uint rc = UnsafeNativeMethods.CRhinoGetObject_GetObjects(ptr, minimumNumber, maximumNumber, cb);
+      GC.KeepAlive(this);
 
       g_active_go = old;
       return (GetResult)rc;
@@ -558,7 +570,9 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoGetObject_ObjectCount(ptr);
+        int rc = UnsafeNativeMethods.CRhinoGetObject_ObjectCount(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -573,6 +587,7 @@ namespace Rhino.Input.Custom
       ObjRef rc = new ObjRef();
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_Object(ptr, index, rc.NonConstPointer());
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -606,7 +621,9 @@ namespace Rhino.Input.Custom
       get
       {
         IntPtr ptr = NonConstPointer();
-        return UnsafeNativeMethods.CRhinoGetObject_SerialNumber(ptr);
+        uint rc = UnsafeNativeMethods.CRhinoGetObject_SerialNumber(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -645,6 +662,7 @@ namespace Rhino.Input.Custom
       IntPtr ptrThis = NonConstPointer();
       IntPtr constPtrObjRef = objref.ConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_AppendToPickList(ptrThis, constPtrObjRef);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -655,6 +673,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptrThis = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_ClearObjects(ptrThis);
+      GC.KeepAlive(this);
     }
 
 

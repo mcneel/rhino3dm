@@ -33,6 +33,11 @@ RH_C_FUNCTION double ONC_MetersPerUnit(ON::LengthUnitSystem us)
   return unitSystem.MetersPerUnit(ON_DBL_QNAN);
 }
 
+RH_C_FUNCTION bool ONC_IsMetricLengthUnit(ON::LengthUnitSystem us)
+{
+  return ON::IsMetricLengthUnit(us);
+}
+
 RH_C_FUNCTION void ON_Revision(CRhCmnStringHolder* pStringHolder)
 {
   if( pStringHolder )

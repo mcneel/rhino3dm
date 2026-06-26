@@ -602,11 +602,11 @@ namespace Rhino.Geometry.Intersect
     /// <param name="brep">Brep to intersect.</param>
     /// <param name="plane">Plane to intersect with.</param>
     /// <param name="tolerance">Tolerance to use for intersections.</param>
+    /// <param name="joinCurves">If true, join the resulting curves where possible.</param>
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <returns>true on success, false on failure.</returns>
-    /// <since>5.0</since>
-    public static bool BrepPlane(Brep brep, Plane plane, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    public static bool BrepPlane(Brep brep, Plane plane, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionPoints = null;
       intersectionCurves = null;
@@ -615,14 +615,47 @@ namespace Rhino.Geometry.Intersect
       if (!plane.IsValid)
         return false;
 
-      PlaneSurface section = ExtendThroughBox(plane, brep.GetBoundingBox(false), 1.0); //should this be 1.0 or 100.0*tolerance?
       bool rc = false;
-      if (section != null)
+
+      intersectionCurves = new Curve[0];
+      intersectionPoints = new Point3d[0];
+
+      Runtime.InteropWrappers.SimpleArrayPoint3d outputPoints = new Runtime.InteropWrappers.SimpleArrayPoint3d();
+      IntPtr outputPointsPtr = outputPoints.NonConstPointer();
+
+      Runtime.InteropWrappers.SimpleArrayCurvePointer outputCurves = new Runtime.InteropWrappers.SimpleArrayCurvePointer();
+      IntPtr outputCurvesPtr = outputCurves.NonConstPointer();
+
+      IntPtr brepPtr = brep.ConstPointer();
+
+      rc = UnsafeNativeMethods.ON_Intersect_BrepPlane(brepPtr, plane, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
+
+      if (rc)
       {
-        rc = BrepSurface(brep, section, tolerance, out intersectionCurves, out intersectionPoints);
-        section.Dispose();
+        intersectionCurves = outputCurves.ToNonConstArray();
+        intersectionPoints = outputPoints.ToArray();
       }
+
+      outputPoints.Dispose();
+      outputCurves.Dispose();
+      Runtime.CommonObject.GcProtect(brep);
+
       return rc;
+    }
+
+    /// <summary>
+    /// Intersects a Brep with an (infinite) plane.
+    /// </summary>
+    /// <param name="brep">Brep to intersect.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <param name="tolerance">Tolerance to use for intersections.</param>
+    /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
+    /// <param name="intersectionPoints">The intersection points will be returned here.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>5.0</since>
+    public static bool BrepPlane(Brep brep, Plane plane, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    {
+      return BrepPlane(brep, plane, tolerance, true, out intersectionCurves, out intersectionPoints);
     }
 #endif
 
@@ -1124,7 +1157,10 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">Intersection tolerance.</param>
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
-    /// <returns>true on success; false on failure.</returns>
+    /// <returns>
+    /// true if the operation was success, false otherwise.
+    /// Check the output arrays to determine how the input intersects.
+    /// </returns>
     /// <since>5.0</since>
     public static bool BrepBrep(Brep brepA, Brep brepB, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
@@ -1140,7 +1176,10 @@ namespace Rhino.Geometry.Intersect
     /// <param name="joinCurves">If true, join the resulting curves where possible.</param>
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
-    /// <returns>true on success; false on failure.</returns>
+    /// <returns>
+    /// true if the operation was success, false otherwise.
+    /// Check the output arrays to determine how the input intersects.
+    /// </returns>
     /// <since>8.12</since>
     public static bool BrepBrep(Brep brepA, Brep brepB, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
@@ -1179,7 +1218,10 @@ namespace Rhino.Geometry.Intersect
     /// <param name="tolerance">A tolerance value.</param>
     /// <param name="intersectionCurves">The intersection curves array argument. This out reference is assigned during the call.</param>
     /// <param name="intersectionPoints">The intersection points array argument. This out reference is assigned during the call.</param>
-    /// <returns>true on success; false on failure.</returns>
+    /// <returns>
+    /// true if the operation was success, false otherwise.
+    /// Check the output arrays to determine how the input intersects.
+    /// </returns>
     /// <since>5.0</since>
     public static bool BrepSurface(Brep brep, Surface surface, double tolerance, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
@@ -1195,7 +1237,10 @@ namespace Rhino.Geometry.Intersect
     /// <param name="joinCurves">If true, join the resulting curves where possible.</param>
     /// <param name="intersectionCurves">The intersection curves array argument. This out reference is assigned during the call.</param>
     /// <param name="intersectionPoints">The intersection points array argument. This out reference is assigned during the call.</param>
-    /// <returns>true on success; false on failure.</returns>
+    /// <returns>
+    /// true if the operation was success, false otherwise.
+    /// Check the output arrays to determine how the input intersects.
+    /// </returns>
     /// <since>8.12</since>
     public static bool BrepSurface(Brep brep, Surface surface, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {

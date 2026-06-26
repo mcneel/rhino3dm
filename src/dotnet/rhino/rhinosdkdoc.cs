@@ -18,63 +18,8 @@ using System.Diagnostics;
 using Rhino.Render.CustomRenderMeshes;
 using Rhino.Runtime;
 
-namespace Rhino.Commands
-{
-  /// <summary>
-  /// Argument package that is passed to a custom undo delegate
-  /// </summary>
-  public class CustomUndoEventArgs : EventArgs
-  {
-    internal CustomUndoEventArgs(Guid commandId, string description, bool createdByRedo, uint eventSn, object tag, RhinoDoc doc)
-    {
-      CommandId = commandId;
-      ActionDescription = description;
-      CreatedByRedo = createdByRedo;
-      UndoSerialNumber = eventSn;
-      Tag = tag;
-      Document = doc;
-    }
-
-    /// <since>5.0</since>
-    public Guid CommandId { get; }
-
-    /// <since>5.0</since>
-    [CLSCompliant(false)]
-    public uint UndoSerialNumber { get; }
-
-    /// <since>5.0</since>
-    public string ActionDescription { get; }
-
-    /// <since>5.0</since>
-    public bool CreatedByRedo { get; }
-
-    /// <since>5.0</since>
-    public object Tag { get; }
-
-    /// <since>5.0</since>
-    public RhinoDoc Document { get; }
-  }
-}
-
 namespace Rhino
 {
-  class CustomUndoCallback
-  {
-    public CustomUndoCallback(uint serialNumber, EventHandler<Commands.CustomUndoEventArgs> handler, object tag, string description, RhinoDoc document)
-    {
-      Handler = handler;
-      SerialNumber = serialNumber;
-      Tag = tag;
-      Description = description;
-      Document = document;
-    }
-    public uint SerialNumber { get; }
-    public EventHandler<Commands.CustomUndoEventArgs> Handler { get; }
-    public object Tag { get; }
-    public RhinoDoc Document { get; }
-    public string Description { get; }
-  }
-
   namespace Render
   {
     public class ImageFileEventArgs : EventArgs
@@ -298,6 +243,29 @@ namespace Rhino
   }
 
   /// <summary>
+  /// Linked and linked and embedded instance definition update style.
+  /// </summary>
+  /// <since>8.29</since>
+  public enum LinkedInstanceDefinitionUpdateStyle
+  {
+    /// <summary>
+    /// Ask the user if the linked and linked and embedded instance definitions should be updated.
+    /// </summary>
+    /// <since>8.29</since>
+    Prompt = 1,
+    /// <summary>
+    /// Always update linked and linked and embedded instance definitions.
+    /// </summary>
+    /// <since>8.29</since>
+    AlwaysUpdate = 2,
+    /// <summary>
+    /// Never update linked and linked and embedded instance definitions.
+    /// </summary>
+    /// <since>8.29</since>
+    NeverUpdate = 3
+  }
+
+  /// <summary>
   /// Represents an active model.
   /// </summary>
   public sealed class RhinoDoc : IDisposable
@@ -399,7 +367,9 @@ namespace Rhino
         return false;
 
       IntPtr const_ptr_options = options.ConstPointer(true);
-      return UnsafeNativeMethods.RHC_RhinoReadFile(ActiveDoc.RuntimeSerialNumber, path, const_ptr_options);
+      bool rc = UnsafeNativeMethods.RHC_RhinoReadFile(ActiveDoc.RuntimeSerialNumber, path, const_ptr_options);
+      GC.KeepAlive(options);
+      return rc;
     }
 
     #endregion
@@ -489,11 +459,11 @@ namespace Rhino
       {
         var info = new System.IO.FileInfo(file3dmTemplatePath);
 
-        if (string.Compare(info.Extension, ".3DM", true) != 0)
+        if (!string.Equals(info.Extension, ".3DM", StringComparison.OrdinalIgnoreCase))
           throw new ArgumentException("Template file path should have a 3DM extension", "file3DMTemplatePath");
       }
 
-      uint serial_number = UnsafeNativeMethods.CRhinoDoc_New(file3dmTemplatePath);
+      uint serial_number = UnsafeNativeMethods.CRhinoDoc_CreateHeadless(file3dmTemplatePath);
       return RhinoDoc.FromRuntimeSerialNumber(serial_number);
     }
 
@@ -507,16 +477,45 @@ namespace Rhino
     /// <since>7.0</since>
     public static RhinoDoc OpenHeadless(string file3dmPath)
     {
+      if (file3dmPath is null)
+        return null;
+
       // This line checks filePath is a valid path, well formatted, not too long...
-      if (file3dmPath != null)
-      {
-        var info = new System.IO.FileInfo(file3dmPath);
+      var info = new System.IO.FileInfo(file3dmPath);
 
-        if (string.Compare(info.Extension, ".3DM", true) != 0)
-          throw new ArgumentException("Source file path should have a 3DM extension", "file3DMPath");
-      }
+      // 2025-05-16 : kike@mcneel.com
+      // CRhinoDoc_OpenHeadless is now able to open any supported extension
+      // Remove checking for .3DM in v9?
+      if (!string.Equals(info.Extension, ".3DM", StringComparison.OrdinalIgnoreCase))
+        throw new ArgumentException("Source file path should have a 3DM extension", "file3DMPath");
 
-      uint serial_number = UnsafeNativeMethods.CRhinoDoc_Load(file3dmPath);
+      if (!info.Exists)
+        return null;
+
+      uint serial_number = UnsafeNativeMethods.CRhinoDoc_OpenHeadless(file3dmPath, IntPtr.Zero);
+      return RhinoDoc.FromRuntimeSerialNumber(serial_number);
+    }
+
+    /// <summary>
+    /// Opens a file into a new headless RhinoDoc.
+    /// </summary>
+    /// <param name="filePath">Path of a Rhino model to load.</param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    /// <since>8.21</since>
+    public static RhinoDoc OpenHeadless(string filePath, ArchivableDictionary options)
+    {
+      if (filePath is null)
+        return null;
+
+      // This line checks filePath is a valid path, well formatted, not too long...
+      var info = new System.IO.FileInfo(filePath);
+      if (!info.Exists)
+        return null;
+
+      IntPtr pDictionary = Collections.ArchivableDictionary.ToInternalDictionary(options);
+      uint serial_number = UnsafeNativeMethods.CRhinoDoc_OpenHeadless(filePath, pDictionary);
+      UnsafeNativeMethods.ON_ArchivableDictionary_Delete(pDictionary);
       return RhinoDoc.FromRuntimeSerialNumber(serial_number);
     }
 
@@ -868,7 +867,9 @@ namespace Rhino
     public bool WriteFile(string path, FileWriteOptions options)
     {
       IntPtr const_ptr_options = options.ConstPointer(true);
-      return UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, path, const_ptr_options);
+      bool rc = UnsafeNativeMethods.RHC_RhinoWriteFile(RuntimeSerialNumber, path, const_ptr_options);
+      GC.KeepAlive(options);
+      return rc;
     }
 
     /// <summary>
@@ -882,7 +883,9 @@ namespace Rhino
     public bool Write3dmFile(string path, FileWriteOptions options)
     {
       IntPtr const_ptr_options = options.ConstPointer(true);
-      return UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, path, const_ptr_options);
+      bool rc = UnsafeNativeMethods.RHC_RhinoWrite3dmFile(RuntimeSerialNumber, path, const_ptr_options);
+      GC.KeepAlive(options);
+      return rc;
     }
     #endregion
 
@@ -1025,9 +1028,13 @@ namespace Rhino
           if (HeadlessDocuments.TryGetValue(serialNumber, out WeakReference<RhinoDoc> reference))
           {
             reference.TryGetTarget(out value);
-            // if 'value' is null here means the object is collected
+            // 2026-01-27 - kike@mcneel.com : See RH-91832
+            // if 'value' is null here means the object has no reference
+            // but the CRhinoDoc still exists because CRhinoDoc_IsHeadless returned 1,
+            // else it would returned -1.
           }
-          else
+
+          if (value is null)
           {
             value = new RhinoDoc(serialNumber);
             HeadlessDocuments[serialNumber] = new WeakReference<RhinoDoc>(value);
@@ -1195,6 +1202,24 @@ namespace Rhino
         if (year < 1980)
           return DateTime.MinValue;
         return new DateTime(year, month, day, hour, minute, 0);
+      }
+    }
+
+    /// <summary>
+    /// Controls if, when, and how linked and linked and embedded instance definitions are updated
+    /// when the source archive that was used to create the instance definition has changed.
+    /// </summary>
+    /// <since>8.29</since>
+    public LinkedInstanceDefinitionUpdateStyle LinkedInstanceDefinitionUpdate
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.CRhinoDoc_LinkedInstanceDefinitionUpdate(RuntimeSerialNumber);
+        return (LinkedInstanceDefinitionUpdateStyle)rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDoc_SetLinkedInstanceDefinitionUpdate(RuntimeSerialNumber, (int)value);
       }
     }
 
@@ -1441,7 +1466,7 @@ namespace Rhino
     /// <since>8.6</since>
     public bool IsMetricUnitSystem(bool modelUnits)
     {
-      return UnsafeNativeMethods.CRhinoDocProperties_IsMetricUnitSystem(RuntimeSerialNumber, modelUnits);
+      return UnsafeNativeMethods.ONC_IsMetricLengthUnit(modelUnits ? ModelUnitSystem : PageUnitSystem);
     }
 
     /// <since>5.0</since>
@@ -1492,12 +1517,14 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDocProperties_SetCustomUnitSystem(RuntimeSerialNumber, modelUnits, customUnitName, metersPerCustomUnit, scale);
     }
 
+    /// <since>8.13</since>
     public ConstructionPlaneGridDefaults GetGridDefaults()
     {
       IntPtr ptrGridDefaults = UnsafeNativeMethods.CRhinoDocProperties_GetGridDefaults(RuntimeSerialNumber);
       return ConstructionPlaneGridDefaults.FromConstPointer(ptrGridDefaults);
     }
 
+    /// <since>8.13</since>
     public void SetGridDefaults(ConstructionPlaneGridDefaults defaults)
     {
       if (defaults == null)
@@ -1546,7 +1573,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Get the space associated with the active view for this document
+    /// Get the space associated with the active viewport for this document
     /// </summary>
     /// <since>8.0</since>
     public ActiveSpace ActiveSpace => (ActiveSpace)UnsafeNativeMethods.RHC_GetActiveSpce(RuntimeSerialNumber);
@@ -1606,6 +1633,7 @@ namespace Rhino
       {
         IntPtr const_ptr_anchor = value.ConstPointer();
         UnsafeNativeMethods.CRhinoDocProperties_SetEarthAnchorPoint(RuntimeSerialNumber, const_ptr_anchor);
+        GC.KeepAlive(value);
       }
     }
 
@@ -1617,6 +1645,7 @@ namespace Rhino
       {
         IntPtr const_ptr_rendersettings = value.ConstPointer();
         UnsafeNativeMethods.CRhinoDocProperties_SetRenderSettings(RuntimeSerialNumber, const_ptr_rendersettings);
+        GC.KeepAlive(value);
       }
     }
 
@@ -1628,6 +1657,7 @@ namespace Rhino
       {
         IntPtr const_ptr = value.ConstPointer();
         UnsafeNativeMethods.CRhinoDocProperties_SetAnimationProperties(RuntimeSerialNumber, const_ptr);
+        GC.KeepAlive(value);
       }
     }
 
@@ -1709,6 +1739,7 @@ namespace Rhino
     {
       IntPtr const_ptr_meshingparameters = mp.ConstPointer();
       UnsafeNativeMethods.CRhinoDocProperties_SetCustomRenderMeshParameters(RuntimeSerialNumber, const_ptr_meshingparameters);
+      GC.KeepAlive(mp);
     }
 
     /// <summary>
@@ -2074,7 +2105,7 @@ namespace Rhino
       }
 
       flags = (RenderMeshProvider.Flags)f;
-
+      GC.KeepAlive(vp);
       return ret;
     }
 
@@ -2116,7 +2147,7 @@ namespace Rhino
       
       
       flags = (RenderMeshProvider.Flags)f;
-
+      GC.KeepAlive(vp);
       return outList.ToArray();
     }
 
@@ -2164,7 +2195,7 @@ namespace Rhino
       }
 
       flags = (RenderMeshProvider.Flags)f;
-
+      GC.KeepAlive(vp);
       return boundingBox.IsValid;
     }
 
@@ -2226,6 +2257,29 @@ namespace Rhino
     internal bool InGetObject => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGetObject);
 
     #endregion
+
+    /// <summary>
+    /// Audits the contents of the document.  
+    /// </summary>
+    /// <param name="textLog">If an error is detected, then a description of the error is logged here.</param>
+    /// <param name="attemptRepair">If true, then the method attempts to repair any detected errors.</param>
+    /// <returns>True if document is valid.</returns>
+    /// <since>8.19</since>
+    public bool Audit(TextLog textLog, bool attemptRepair)
+    {
+      IntPtr ptr_textlog = IntPtr.Zero;
+      TextLog privateLog;
+      if (null == textLog)
+      {
+        privateLog = new TextLog();
+        ptr_textlog = privateLog.NonConstPointer();
+      }
+      else
+      {
+        ptr_textlog = textLog.NonConstPointer();
+      }
+      return UnsafeNativeMethods.CRhinoDoc_Audit(RuntimeSerialNumber, ptr_textlog, attemptRepair);
+    }
 
     /// <summary>
     /// true if Rhino is in the process of sending this document as an email attachment.
@@ -2336,61 +2390,13 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDoc_Redo(RuntimeSerialNumber);
     }
 
-    static List<CustomUndoCallback> g_custom_undo_callbacks;
     internal delegate void RhinoUndoEventHandlerCallback(Guid commandId, IntPtr actionDescription, int createdByRedo, uint sn);
     internal delegate void RhinoDeleteUndoEventHandlerCallback(uint sn);
-
-    static RhinoUndoEventHandlerCallback g_undo_event_handler;
-    static RhinoDeleteUndoEventHandlerCallback g_delete_undo_event_handler;
-
-    static void OnUndoEventHandler(Guid commandId, IntPtr actionDescription, int createdByRedo, uint sn)
-    {
-      if (g_custom_undo_callbacks != null)
-      {
-        foreach (CustomUndoCallback callback in g_custom_undo_callbacks)
-        {
-          if (callback.SerialNumber == sn)
-          {
-            var handler = callback.Handler;
-            if( handler!=null )
-            {
-              try
-              {
-                object tag = callback.Tag;
-                string description = callback.Description;
-                RhinoDoc doc = callback.Document;
-                handler(null, new Commands.CustomUndoEventArgs(commandId, description, createdByRedo == 1, sn, tag, doc));
-              }
-              catch (Exception ex)
-              {
-                Runtime.HostUtils.ExceptionReport("OnUndoEventHandler", ex);
-              }
-            }
-            break;
-          }
-        }
-      }
-    }
-
-    static void OnDeleteUndoEventHandler(uint sn)
-    {
-      if (g_custom_undo_callbacks != null)
-      {
-        for (int i = 0; i < g_custom_undo_callbacks.Count; i++)
-        {
-          if (g_custom_undo_callbacks[i].SerialNumber == sn)
-          {
-            g_custom_undo_callbacks.RemoveAt(i);
-            return;
-          }
-        }
-      }
-    }
 
     /// <since>5.0</since>
     public bool AddCustomUndoEvent(string description, EventHandler<Commands.CustomUndoEventArgs> handler)
     {
-      return AddCustomUndoEvent(description, handler, null);
+      return CustomUndoCallback.AddCustomUndoEvent(this, description, handler, null);
     }
 
     /// <summary>
@@ -2409,20 +2415,7 @@ namespace Rhino
     /// <since>5.0</since>
     public bool AddCustomUndoEvent(string description, EventHandler<Commands.CustomUndoEventArgs> handler, object tag)
     {
-      if (string.IsNullOrEmpty(description) || handler == null)
-        return false;
-
-      g_undo_event_handler = OnUndoEventHandler;
-      g_delete_undo_event_handler = OnDeleteUndoEventHandler;
-
-      uint rc = UnsafeNativeMethods.CRhinoDoc_AddCustomUndoEvent(RuntimeSerialNumber, description, g_undo_event_handler, g_delete_undo_event_handler);
-      if (rc == 0)
-        return false;
-
-      if (g_custom_undo_callbacks == null)
-        g_custom_undo_callbacks = new List<CustomUndoCallback>();
-      g_custom_undo_callbacks.Add(new CustomUndoCallback(rc, handler, tag, description, this));
-      return true;
+      return CustomUndoCallback.AddCustomUndoEvent(this, description, handler, tag);
     }
 
     /// <summary>
@@ -2566,7 +2559,14 @@ namespace Rhino
       if (!System.IO.File.Exists(path))
         return null;
 
-      return File3dm.ReadPreviewImage(path);
+      using (var dib = new RhinoDib())
+      {
+        IntPtr ptr_dib = dib.NonConstPointer;
+        if (UnsafeNativeMethods.CRhinoDoc_ExtractPreviewImage(path, ptr_dib))
+          return dib.ToBitmap();
+      }
+
+      return null;
     }
 
     /// <summary>
@@ -2612,7 +2612,10 @@ namespace Rhino
       // The plug-in Id is optionally used by the custom mesh provider to determine if the plug-in
       // is allowed access to the custom meshes.  Currently none of our custom mesh providers
       // pay attention to the Id.
-      return UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), IntPtr.Zero, RuntimeSerialNumber, Guid.Empty, attrs == null ? IntPtr.Zero : attrs.ConstPointer());
+      bool rc = UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), IntPtr.Zero, RuntimeSerialNumber, Guid.Empty, attrs == null ? IntPtr.Zero : attrs.ConstPointer());
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
+      return rc;
     }
 
     /// <summary>
@@ -2641,6 +2644,8 @@ namespace Rhino
       if (success)
         return primitives;
       primitives.Dispose();
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
       return null;
     }
 
@@ -2682,7 +2687,8 @@ namespace Rhino
         boundingBox = new BoundingBox(min, max);
         return boundingBox.IsValid;
       }
-
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
       return false;
     }
 #pragma warning restore 0618
@@ -2707,7 +2713,7 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDoc_InCommand(RuntimeSerialNumber, bIgnoreScriptRunnerCommands);
     }
 
-#region events
+    #region Document events
     internal delegate void DocumentCallback(uint docSerialNumber);
     private static DocumentCallback g_on_close_document_callback;
     private static DocumentCallback g_on_new_document_callback;
@@ -3235,7 +3241,9 @@ namespace Rhino
         }
       }
     }
+    #endregion
 
+    #region Object table events
     internal delegate void RhinoObjectCallback(uint docSerialNumber, IntPtr pObject, IntPtr pObject2);
 
     private static RhinoObjectCallback g_on_add_rhino_object;
@@ -3637,6 +3645,7 @@ namespace Rhino
         }
       }
     }
+    #endregion
 
     #region Before transform event
     internal delegate void RhinoBeforeTransformObjectsCallback(IntPtr pRhinoOnTransformObject);
@@ -3940,6 +3949,7 @@ namespace Rhino
     }
     #endregion
 
+    #region InstanceDefinition table event
     private static RhinoTableCallback g_on_idef_table_event_callback;
     [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnIdefTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
@@ -3982,7 +3992,54 @@ namespace Rhino
         }
       }
     }
+    #endregion
 
+    #region GroupTable events
+    private static RhinoTableCallback g_on_group_table_event_callback;
+    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
+    private static void OnGroupTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
+    {
+      m_group_table_event?.SafeInvoke(null, new GroupTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
+    }
+    internal static EventHandler<GroupTableEventArgs> m_group_table_event;
+
+    /// <summary>
+    /// Called when any modification happens to a document's group table.
+    /// </summary>
+    /// <since>5.0</since>
+    public static event EventHandler<GroupTableEventArgs> GroupTableEvent
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (m_group_table_event == null)
+          {
+            g_on_group_table_event_callback = OnGroupTableEvent;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetGroupTableEventCallback(g_on_group_table_event_callback, Runtime.HostUtils.m_ew_report);
+          }
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_group_table_event -= value;
+          m_group_table_event += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          // ReSharper disable once DelegateSubtraction - okay for single value
+          m_group_table_event -= value;
+          if (m_group_table_event == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetGroupTableEventCallback(null, Runtime.HostUtils.m_ew_report);
+            g_on_group_table_event_callback = null;
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region Light table event
     private static RhinoTableCallback g_on_light_table_event_callback;
     [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnLightTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
@@ -4025,8 +4082,9 @@ namespace Rhino
         }
       }
     }
+    #endregion
 
-
+    #region Material table event
     private static RhinoTableCallback g_on_material_table_event_callback;
     [MonoPInvokeCallback(typeof(RhinoTableCallback))]
     private static void OnMaterialTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
@@ -4070,50 +4128,6 @@ namespace Rhino
           {
             UnsafeNativeMethods.CRhinoEventWatcher_SetMaterialTableEventCallback(null, Runtime.HostUtils.m_ew_report);
             g_on_material_table_event_callback = null;
-          }
-        }
-      }
-    }
-
-
-    private static RhinoTableCallback g_on_group_table_event_callback;
-    [MonoPInvokeCallback(typeof(RhinoTableCallback))]
-    private static void OnGroupTableEvent(uint docSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
-    {
-      m_group_table_event?.SafeInvoke(null, new GroupTableEventArgs(docSerialNumber, eventType, index, pConstOldSettings));
-    }
-    internal static EventHandler<GroupTableEventArgs> m_group_table_event;
-
-    /// <summary>
-    /// Called when any modification happens to a document's group table.
-    /// </summary>
-    /// <since>5.0</since>
-    public static event EventHandler<GroupTableEventArgs> GroupTableEvent
-    {
-      add
-      {
-        lock (g_event_lock)
-        {
-          if (m_group_table_event == null)
-          {
-            g_on_group_table_event_callback = OnGroupTableEvent;
-            UnsafeNativeMethods.CRhinoEventWatcher_SetGroupTableEventCallback(g_on_group_table_event_callback, Runtime.HostUtils.m_ew_report);
-          }
-          // ReSharper disable once DelegateSubtraction - okay for single value
-          m_group_table_event -= value;
-          m_group_table_event += value;
-        }
-      }
-      remove
-      {
-        lock (g_event_lock)
-        {
-          // ReSharper disable once DelegateSubtraction - okay for single value
-          m_group_table_event -= value;
-          if (m_group_table_event == null)
-          {
-            UnsafeNativeMethods.CRhinoEventWatcher_SetGroupTableEventCallback(null, Runtime.HostUtils.m_ew_report);
-            g_on_group_table_event_callback = null;
           }
         }
       }
@@ -4485,6 +4499,7 @@ namespace Rhino
 
     #endregion RenderTexturesTable events
 
+    #region TextureMapping events
     /// <since>5.8</since>
     public enum TextureMappingEventType
     {
@@ -4619,6 +4634,7 @@ namespace Rhino
       }
     }
     private static EventHandler<TextureMappingEventArgs> g_texture_mapping_event;
+    #endregion
   }
 
   /// <summary>
@@ -4870,6 +4886,7 @@ namespace Rhino
       /// <summary>
       /// Can be faster to call than RhinoObjects.Length
       /// </summary>
+      /// <since>8.10</since>
       public int RhinoObjectCount
       {
         get
@@ -4913,6 +4930,10 @@ namespace Rhino
       }
     }
 
+    /// <summary>
+    /// <seealso cref="RhinoDoc.ReplaceRhinoObject"/> event arguments.
+    /// </summary>
+    /// <since>5.0</since>
     public class RhinoReplaceObjectEventArgs : EventArgs
     {
       private readonly IntPtr m_pOldRhinoObject;
@@ -4930,6 +4951,10 @@ namespace Rhino
         m_pNewRhinoObject = pNewRhinoObject;
       }
 
+      /// <summary>
+      /// The id of the existing object, or the object about to be deleted.
+      /// At the time <seealso cref="RhinoDoc.ReplaceRhinoObject"/> is called, this object has not been deleted.
+      /// </summary>
       /// <since>5.0</since>
       public Guid ObjectId
       {
@@ -4943,6 +4968,10 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// The existing object, or the object about to be deleted.
+      /// At the time <seealso cref="RhinoDoc.ReplaceRhinoObject"/> is called, this object has not been deleted.
+      /// </summary>
       /// <since>5.0</since>
       public RhinoObject OldRhinoObject
       {
@@ -4958,6 +4987,11 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// The new replacement object, or the object about to be added.
+      /// At the time <seealso cref="RhinoDoc.ReplaceRhinoObject"/> is called, this object has not been added to the document.
+      /// Thus, this object's id will be <seealso cref="Guid.Empty"/>.
+      /// </summary>
       /// <since>5.0</since>
       public RhinoObject NewRhinoObject
       {
@@ -4975,6 +5009,9 @@ namespace Rhino
         }
       }
 
+      /// <summary>
+      /// The document where the event occurred.
+      /// </summary>
       /// <since>5.0</since>
       public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(m_doc_serial_number);
     }
@@ -5910,7 +5947,7 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_iterator = it.NonConstPointer();
 
       UnsafeNativeMethods.CRhinoDoc_LookupObjectsByUserText(key, value, caseSensitive, searchGeometry, searchAttributes, ptr_iterator, ptr_array);
-
+      GC.KeepAlive(it);
       RhinoObject[] objs = rhobjs.ToArray();
       rhobjs.Dispose();
       return objs;
@@ -5958,6 +5995,7 @@ namespace Rhino.DocObjects.Tables
           if (rhobj != null)
             rc.Add(rhobj);
         }
+        GC.KeepAlive(viewport);
         return rc.ToArray();
       }
     }
@@ -6184,6 +6222,7 @@ namespace Rhino.DocObjects.Tables
         }
         IntPtr const_ptr_geometry = geometry.ConstPointer();
         pRhinoObject = UnsafeNativeMethods.CRhinoCustomObject_New(pRhinoObject, const_ptr_geometry);
+        GC.KeepAlive(geometry);
       }
       else
       {
@@ -6446,7 +6485,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddPoint(m_doc.RuntimeSerialNumber, point, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPoint(m_doc.RuntimeSerialNumber, point, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a point object and its geometry-linked information to the document</summary>
@@ -6468,7 +6510,10 @@ namespace Rhino.DocObjects.Tables
       IntPtr const_ptr_pt = point.ConstPointer();
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddPoint2(m_doc.RuntimeSerialNumber, const_ptr_pt, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPoint2(m_doc.RuntimeSerialNumber, const_ptr_pt, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a point object to the document.</summary>
@@ -6611,13 +6656,17 @@ namespace Rhino.DocObjects.Tables
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
 
-      return UnsafeNativeMethods.CRhinoDoc_AddPointCloud2(m_doc.RuntimeSerialNumber, const_ptr_cloud, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPointCloud2(m_doc.RuntimeSerialNumber, const_ptr_cloud, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(cloud);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
 
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="xCt">Number of points in X dir.</param>
-    /// <param name="yCt">Number of points in Y dir.</param>
+    /// <param name="yCt">Number of points in Y dir.</param> 
     /// <param name="zCt">Number of points in Z dir.</param>
     /// <param name="min">point at x0,y0,z0 of bounding box of the pointcloud</param>
     /// <param name="max">point at x1,y1,z1 of bounding box of the pointcloud</param>
@@ -6635,9 +6684,35 @@ namespace Rhino.DocObjects.Tables
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
 
-      return UnsafeNativeMethods.CRhinoDoc_AddOrderedPointCloud(m_doc.RuntimeSerialNumber, xCt, yCt, zCt, min, max, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddOrderedPointCloud(m_doc.RuntimeSerialNumber, xCt, yCt, zCt, min, max, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
+    /// <summary>Adds a point cloud object to the document.</summary>
+    /// <param name="xCt">Number of points in X dir.</param>
+    /// <param name="yCt">Number of points in Y dir.</param> 
+    /// <param name="zCt">Number of points in Z dir.</param>
+    /// <param name="box">box to use for output, does not need to be a boundingbox.  The function that takes to points assumes it's a bounding box.</param>
+    /// <param name="attributes">Attributes to apply to point cloud. null is acceptable</param>
+    /// <param name="history">history associated with this point cloud. null is acceptable</param>
+    /// <param name="reference">
+    /// true if the object is from a reference file.  Reference objects do
+    /// not persist in archives
+    /// </param>
+    /// <returns>A unique identifier for the object.</returns>
+    /// <since>8.0</since>    
+    public Guid AddOrderedPointCloud(int xCt, int yCt, int zCt, Point3d[] box, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    {
+      IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
+      IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
+
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddOrderedPointCloud2(m_doc.RuntimeSerialNumber, xCt, yCt, zCt, box, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
+    }
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="points">A list, an array or any enumerable set of points.</param>
     /// <returns>A unique identifier for the object.</returns>
@@ -6662,7 +6737,9 @@ namespace Rhino.DocObjects.Tables
       if (null != attributes)
         const_ptr_attributes = attributes.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoDoc_AddPointCloud(m_doc.RuntimeSerialNumber, count, point_array, const_ptr_attributes, IntPtr.Zero, false);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPointCloud(m_doc.RuntimeSerialNumber, count, point_array, const_ptr_attributes, IntPtr.Zero, false);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <summary>Adds a point cloud object to the document.</summary>
@@ -6685,7 +6762,10 @@ namespace Rhino.DocObjects.Tables
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
 
-      return UnsafeNativeMethods.CRhinoDoc_AddPointCloud(m_doc.RuntimeSerialNumber, count, point_array, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPointCloud(m_doc.RuntimeSerialNumber, count, point_array, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>
@@ -6757,6 +6837,7 @@ namespace Rhino.DocObjects.Tables
         return Guid.Empty;
       IntPtr pAttrs = attributes.ConstPointer();
       Guid rc = UnsafeNativeMethods.CRhinoDoc_AddClippingPlane(m_doc.RuntimeSerialNumber, ref plane, uMagnitude, vMagnitude, count, clippedIds, pAttrs, IntPtr.Zero, false);
+      GC.KeepAlive(attributes);
       return rc;
     }
 
@@ -6777,6 +6858,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       Guid rc = UnsafeNativeMethods.CRhinoDoc_AddClippingPlane(m_doc.RuntimeSerialNumber, ref plane, uMagnitude, vMagnitude, count, clippedIds, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return rc;
     }
 
@@ -6817,6 +6900,9 @@ namespace Rhino.DocObjects.Tables
       var attributes_pointer = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddV6RadialDimension(doc_id, const_ptr_dimradial, attributes_pointer, p_history, reference);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -6933,7 +7019,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddLine(m_doc.RuntimeSerialNumber, from, to, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddLine(m_doc.RuntimeSerialNumber, from, to, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a line object to Rhino.</summary>
@@ -6987,7 +7076,10 @@ namespace Rhino.DocObjects.Tables
 
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddPolyLine(m_doc.RuntimeSerialNumber, count, ptArray, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPolyLine(m_doc.RuntimeSerialNumber, count, ptArray, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the document representing an arc.</summary>
@@ -7013,7 +7105,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddArc(m_doc.RuntimeSerialNumber, ref arc, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddArc(m_doc.RuntimeSerialNumber, ref arc, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a curve object to the document representing a circle.</summary>
@@ -7044,7 +7139,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddCircle(m_doc.RuntimeSerialNumber, ref circle, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddCircle(m_doc.RuntimeSerialNumber, ref circle, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
 
@@ -7071,7 +7169,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddEllipse(m_doc.RuntimeSerialNumber, ref ellipse, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddEllipse(m_doc.RuntimeSerialNumber, ref ellipse, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <example>
@@ -7095,7 +7196,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddSphere(m_doc.RuntimeSerialNumber, ref sphere, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddSphere(m_doc.RuntimeSerialNumber, ref sphere, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     //[skipping]
@@ -7133,7 +7237,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       IntPtr curvePtr = curve.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_AddCurve(m_doc.RuntimeSerialNumber, curvePtr, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddCurve(m_doc.RuntimeSerialNumber, curvePtr, pAttributes, pHistory, reference);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a text dot object to Rhino.</summary>
@@ -7186,7 +7294,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr cpnst_ptr_dot = dot.ConstPointer();
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddTextDot(m_doc.RuntimeSerialNumber, cpnst_ptr_dot, const_ptr_attributes, ptr_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddTextDot(m_doc.RuntimeSerialNumber, cpnst_ptr_dot, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(dot);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary> Adds a v6_TextObject to the document. </summary>
@@ -7225,6 +7337,9 @@ namespace Rhino.DocObjects.Tables
       var const_ptr_attributes = null == attributes ? IntPtr.Zero : attributes.ConstPointer();
       var ptr_history = null == history ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddRichTextObject(doc_id, const_ptr_text, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(text);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -7267,6 +7382,9 @@ namespace Rhino.DocObjects.Tables
       var const_ptr_attributes = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr ptr_history = (null == history) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddRhinoLeader(doc_id, const_ptr_leader, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(leader);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -7321,6 +7439,9 @@ namespace Rhino.DocObjects.Tables
       var attributes_pointer = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddV6LinearDimension(doc_id, pointer, attributes_pointer, p_history, reference);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -7370,6 +7491,9 @@ namespace Rhino.DocObjects.Tables
       var attributes_pointer = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddV6AngularDimension(doc_id, pointer, attributes_pointer, p_history, reference);
+      GC.KeepAlive(dimension);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -7393,6 +7517,9 @@ namespace Rhino.DocObjects.Tables
       var attributes_pointer = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddV6OrdinateDimension(doc_id, pointer, attributes_pointer, p_history, reference);
+      GC.KeepAlive(dimordinate);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
 
@@ -7415,6 +7542,9 @@ namespace Rhino.DocObjects.Tables
       var attributes_pointer = (null == attributes ? IntPtr.Zero : attributes.ConstPointer());
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddV6Centermark(doc_id, pointer, attributes_pointer, p_history, reference);
+      GC.KeepAlive(centermark);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return success;
     }
     /// <summary>
@@ -7540,7 +7670,10 @@ namespace Rhino.DocObjects.Tables
 
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddText(m_doc.RuntimeSerialNumber, AnnotationBase.PlainTextToRtf(text), ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddText(m_doc.RuntimeSerialNumber, AnnotationBase.PlainTextToRtf(text), ref plane, height, fontName, fontStyle, (int)justification, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a SubD object to Rhino.</summary>
@@ -7590,6 +7723,8 @@ namespace Rhino.DocObjects.Tables
       {
         subD.ChangeToConstObject(null);
       }
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
       return id;
     }
 
@@ -7624,7 +7759,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       IntPtr surfacePtr = surface.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_AddSurface(m_doc.RuntimeSerialNumber, surfacePtr, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddSurface(m_doc.RuntimeSerialNumber, surfacePtr, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(surface);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds an extrusion object to Rhino.</summary>
@@ -7653,16 +7792,25 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstExtrusion = extrusion.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddExtrusion(m_doc.RuntimeSerialNumber, pConstExtrusion, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddExtrusion(m_doc.RuntimeSerialNumber, pConstExtrusion, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(extrusion);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
-    
+
+    /// <since>8.11</since>
     public Guid AddClippingPlaneSurface(Geometry.ClippingPlaneSurface clippingPlane, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr pConstClippingPlane = clippingPlane.ConstPointer();
       IntPtr pConstAttributes = IntPtr.Zero;
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       if (attributes != null) pConstAttributes = attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_AddClippingPlaneSurface(m_doc.RuntimeSerialNumber, pConstClippingPlane, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddClippingPlaneSurface(m_doc.RuntimeSerialNumber, pConstClippingPlane, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(clippingPlane);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a mesh object to Rhino.</summary>
@@ -7702,7 +7850,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
       IntPtr meshPtr = mesh.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_AddMesh(m_doc.RuntimeSerialNumber, meshPtr, pConstAttributes, pHistory, reference, requireValidMesh);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddMesh(m_doc.RuntimeSerialNumber, meshPtr, pConstAttributes, pHistory, reference, requireValidMesh);
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>Adds a brep object to Rhino.</summary>
@@ -7736,7 +7888,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr brepPtr = brep.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, -1);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, -1);
+      GC.KeepAlive(brep);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -7747,7 +7903,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr brepPtr = brep.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, splitKinkySurfaces ? 1 : 0);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddBrep(m_doc.RuntimeSerialNumber, brepPtr, pConstAttributes, pHistory, reference, splitKinkySurfaces ? 1 : 0);
+      GC.KeepAlive(brep);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <since>5.11</since>
@@ -7809,7 +7969,9 @@ namespace Rhino.DocObjects.Tables
     public Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform, ObjectAttributes attributes)
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_AddInstanceObject(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddInstanceObject(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes);
+      GC.KeepAlive(attributes);
+      return rc;
     }
 
     /// <summary>
@@ -7826,7 +7988,10 @@ namespace Rhino.DocObjects.Tables
     {
       IntPtr pAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddInstanceObject2(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddInstanceObject2(m_doc.RuntimeSerialNumber, instanceDefinitionIndex, ref instanceXform, pAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <example>
@@ -7863,7 +8028,10 @@ namespace Rhino.DocObjects.Tables
         return Guid.Empty;
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddLeader(m_doc.RuntimeSerialNumber, s, ref plane, count, pts.m_items, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddLeader(m_doc.RuntimeSerialNumber, s, ref plane, count, pts.m_items, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -7923,7 +8091,11 @@ namespace Rhino.DocObjects.Tables
       IntPtr pConstHatch = hatch.ConstPointer();
       IntPtr pConstAttributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr pHistory = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddHatch(m_doc.RuntimeSerialNumber, pConstHatch, pConstAttributes, pHistory, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddHatch(m_doc.RuntimeSerialNumber, pConstHatch, pConstAttributes, pHistory, reference);
+      GC.KeepAlive(hatch);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <since>5.0</since>
@@ -7946,7 +8118,11 @@ namespace Rhino.DocObjects.Tables
       if (attributes != null)
         pAttributes = attributes.ConstPointer();
       IntPtr p_history = (history == null) ? IntPtr.Zero : history.Handle;
-      return UnsafeNativeMethods.CRhinoDoc_AddMorphControl(m_doc.RuntimeSerialNumber, pConstMorph, pAttributes, p_history, reference);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_AddMorphControl(m_doc.RuntimeSerialNumber, pConstMorph, pAttributes, p_history, reference);
+      GC.KeepAlive(morphControl);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     //public Guid AddMorphControl(MorphControl morphControl, IEnumerable<RhinoObject> captives)
@@ -8010,7 +8186,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return false;
       IntPtr pObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_DeleteObject(m_doc.RuntimeSerialNumber, pObjRef, quiet, ignoreModes);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_DeleteObject(m_doc.RuntimeSerialNumber, pObjRef, quiet, ignoreModes);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// Deletes objref.Object(). The deletion can be undone by calling UndeleteObject().
@@ -8257,7 +8435,9 @@ namespace Rhino.DocObjects.Tables
       var objref = new ObjRef(owner);
       IntPtr ptr_const_owner = objref.ConstPointer();
 
-      return UnsafeNativeMethods.CRhinoDoc_DeleteGripObjects(m_doc.RuntimeSerialNumber, ptr_const_owner, array_grip_indices.Length, array_grip_indices);
+      int rc = UnsafeNativeMethods.CRhinoDoc_DeleteGripObjects(m_doc.RuntimeSerialNumber, ptr_const_owner, array_grip_indices.Length, array_grip_indices);
+      GC.KeepAlive(objref);
+      return rc;
     }
 
 
@@ -8589,7 +8769,10 @@ namespace Rhino.DocObjects.Tables
         return false;
       IntPtr pObjRef = objref.ConstPointer();
       IntPtr pAttrs = newAttributes.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_ModifyObjectAttributes(m_doc.RuntimeSerialNumber, pObjRef, pAttrs, quiet);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_ModifyObjectAttributes(m_doc.RuntimeSerialNumber, pObjRef, pAttrs, quiet);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(newAttributes);
+      return rc;
     }
     /// <summary>
     /// Modifies an object's attributes.  Cannot be used to change object id.
@@ -8621,6 +8804,7 @@ namespace Rhino.DocObjects.Tables
       IntPtr pObjRef = objref.ConstPointer();
       IntPtr pAttrs = newAttributes.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ModifyObjectAttributes(m_doc.RuntimeSerialNumber, pObjRef, pAttrs, quiet);
+      GC.KeepAlive(newAttributes);
       objref.Dispose();
       return rc;
     }
@@ -8721,6 +8905,7 @@ namespace Rhino.DocObjects.Tables
       var pointer = obj.ConstPointer();
       var mapping_pointer = (null == mapping ? IntPtr.Zero : mapping.ConstPointer());
       var success = UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(pointer, channel, mapping_pointer);
+      GC.KeepAlive(mapping);
       return (success != 0);
     }
     /// <summary>
@@ -8773,6 +8958,7 @@ namespace Rhino.DocObjects.Tables
         newObject.m_pRhinoObject = ptr_rhino_object;
         GC.ReRegisterForFinalize(newObject);
       }
+      GC.KeepAlive(objref);
       return rc;
     }
 
@@ -8807,6 +8993,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_geometry = geometry.ConstPointer();
       IntPtr ptr_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObjectEx(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_geometry, ignoreModes);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(geometry);
       return IntPtr.Zero != ptr_object;
     }
 
@@ -8827,6 +9015,7 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return false;
       IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject2(m_doc.RuntimeSerialNumber, objref.ConstPointer(), point);
+      GC.KeepAlive(objref);
       return IntPtr.Zero != ptr_rhino_object;
     }
 
@@ -8856,6 +9045,8 @@ namespace Rhino.DocObjects.Tables
         return false;
       IntPtr ptr_const_point = point.ConstPointer();
       IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject9(m_doc.RuntimeSerialNumber, objref.ConstPointer(), ptr_const_point);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(point);
       return IntPtr.Zero != ptr_rhino_object;
     }
 
@@ -8886,6 +9077,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_text = text.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ReplaceONText(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_text);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(text);
       return rc;
     }
 
@@ -8916,6 +9109,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_leader = leader.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ReplaceONLeader(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_leader);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(leader);
       return rc;
     }
 
@@ -8946,6 +9141,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_dot = dot.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ReplaceTextDot(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_dot);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(dot);
       return rc;
     }
 
@@ -8976,6 +9173,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_hatch = hatch.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ReplaceHatch(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_hatch);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(hatch);
       return rc;
     }
 
@@ -9113,6 +9312,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_curve = curve.ConstPointer();
       IntPtr ptr_curve_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject3(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_curve);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(curve);
       return (IntPtr.Zero != ptr_curve_object);
     }
 
@@ -9148,6 +9349,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_surface = surface.ConstPointer();
       IntPtr ptr_surface_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject4(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_surface);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(surface);
       return (IntPtr.Zero != ptr_surface_object);
     }
 
@@ -9191,6 +9394,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr pre_const_brep = brep.ConstPointer();
       IntPtr pre_brep_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject5(m_doc.RuntimeSerialNumber, ptr_const_objref, pre_const_brep, splitKinkySurfaces);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(brep);
       return (IntPtr.Zero != pre_brep_object);
     }
 
@@ -9228,6 +9433,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr pre_const_extrusion = extrusion.ConstPointer();
       IntPtr pre_extrusion_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject8(m_doc.RuntimeSerialNumber, ptr_const_objref, pre_const_extrusion);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(extrusion);
       return (IntPtr.Zero != pre_extrusion_object);
     }
 
@@ -9261,6 +9468,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_mesh = mesh.ConstPointer();
       IntPtr ptr_mesh_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject6(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_mesh);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(mesh);
       return (IntPtr.Zero != ptr_mesh_object);
     }
 
@@ -9283,6 +9492,7 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_subd_object = UnsafeNativeMethods.CRhinoDoc_ReplaceObject7(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_subdref);
       if (ptr_subd_object != IntPtr.Zero)
         subD.ChangeToConstObject(null);
+      GC.KeepAlive(objref);
       return (IntPtr.Zero != ptr_subd_object);
     }
 
@@ -9335,6 +9545,8 @@ namespace Rhino.DocObjects.Tables
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_const_pointcloud = pointcloud.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoDoc_ReplacePointCloud(m_doc.RuntimeSerialNumber, ptr_const_objref, ptr_const_pointcloud);
+      GC.KeepAlive(objref);
+      GC.KeepAlive(pointcloud);
       return rc;
     }
 
@@ -9385,6 +9597,7 @@ namespace Rhino.DocObjects.Tables
         return false;
       IntPtr ptr_const_objref = objref.ConstPointer();
       IntPtr ptr_iref_object = UnsafeNativeMethods.CRhinoDoc_ReplaceInstanceObject(m_doc.RuntimeSerialNumber, ptr_const_objref, instanceDefinitionIndex);
+      GC.KeepAlive(objref);
       return (IntPtr.Zero != ptr_iref_object);
     }
 
@@ -9459,9 +9672,48 @@ namespace Rhino.DocObjects.Tables
     {
       if (null == objref)
         return false;
+
       IntPtr pObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxHideObject);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxHideObject);
+      GC.KeepAlive(objref);
+
+      return rc;
     }
+
+    /// <summary>
+    /// Hides object that is referenced by objref and optionally assigns it to a hide group.
+    /// If objref.Object().IsNormal() is true, then the object will be hidden.
+    /// </summary>
+    /// <param name="objref">reference to object to hide.</param>
+    /// <param name="ignoreLayerMode">
+    /// if true, the object will be hidden even if it is on a layer that is locked or off.
+    /// </param>
+    /// <param name="hideGroup">
+    /// name of the hide group to attach to the hidden object. If null or empty, no hide group is assigned.
+    /// </param>
+    /// <returns>true if the object was successfully hidden.</returns>
+    /// <since>8.0</since>
+    public bool Hide(ObjRef objref, bool ignoreLayerMode, string hideGroup)
+    {
+      bool rc = Hide(objref, ignoreLayerMode);
+      
+      if (rc)
+      {
+        if (!String.IsNullOrEmpty(hideGroup))
+        {
+          var obj = objref.Object();
+          if (obj != null)
+          {
+            UnsafeNativeMethods.CRhinoObject_AttachHideSetName(obj.ConstPointer(), hideGroup);
+          }
+        }
+      }
+
+      GC.KeepAlive(objref);
+
+      return rc;
+    }
+
     /// <summary>
     /// If obj.IsNormal() is true, then the object will be hidden.
     /// </summary>
@@ -9475,7 +9727,16 @@ namespace Rhino.DocObjects.Tables
     {
       if (null == obj)
         return false;
+
       return Hide(obj.Id, ignoreLayerMode);
+    }
+
+    public bool Hide(RhinoObject obj, bool ignoreLayerMode, string hideGroup)
+    {
+      if (null == obj)
+        return false;
+
+      return Hide(obj.Id, ignoreLayerMode, hideGroup);
     }
     /// <summary>
     /// If Object().IsNormal() is true, then the object will be hidden.
@@ -9488,13 +9749,18 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Hide(Guid objectId, bool ignoreLayerMode)
     {
+      return Hide(objectId, ignoreLayerMode, null);
+    }
+
+    public bool Hide(Guid objectId, bool ignoreLayerMode, string hideGroup)
+    {
       if (Guid.Empty == objectId)
         return false;
-      var objref = new ObjRef(Document, objectId);
-      IntPtr pObjRef = objref.ConstPointer();
-      bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxHideObject);
-      objref.Dispose();
-      return rc;
+
+      using (var objref = new ObjRef(Document, objectId))
+      {
+        return Hide(objref, ignoreLayerMode, hideGroup);
+      }
     }
 
     /// <summary>
@@ -9511,7 +9777,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return false;
       IntPtr pObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxShowObject);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxShowObject);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// If obj.IsHidden() is true, then the object will be returned to normal (visible and selectable) mode.
@@ -9562,7 +9830,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return false;
       IntPtr pObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxLockObject);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxLockObject);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// If obj.IsNormal() is true, then the object will be locked.
@@ -9613,7 +9883,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return false;
       IntPtr pObjRef = objref.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxUnlockObject);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_SetObjectState(m_doc.RuntimeSerialNumber, pObjRef, ignoreLayerMode, idxUnlockObject);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// If obj.IsLocked() is true, then the object will be returned to normal (visible and selectable) mode.
@@ -9739,7 +10011,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return Guid.Empty;
       IntPtr pObjRef = objref.NonConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_TransformObject(m_doc.RuntimeSerialNumber, pObjRef, ref xform, deleteOriginal, false, false);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_TransformObject(m_doc.RuntimeSerialNumber, pObjRef, ref xform, deleteOriginal, false, false);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// Constructs a new object that is the transformation of the existing object
@@ -9821,7 +10095,9 @@ namespace Rhino.DocObjects.Tables
       if (null == objref)
         return Guid.Empty;
       IntPtr pObjRef = objref.NonConstPointer();
-      return UnsafeNativeMethods.CRhinoDoc_TransformObject(m_doc.RuntimeSerialNumber, pObjRef, ref xform, false, false, true);
+      Guid rc = UnsafeNativeMethods.CRhinoDoc_TransformObject(m_doc.RuntimeSerialNumber, pObjRef, ref xform, false, false, true);
+      GC.KeepAlive(objref);
+      return rc;
     }
     /// <summary>
     /// Constructs a new object that is the transformation of the existing object
@@ -10010,6 +10286,7 @@ namespace Rhino.DocObjects.Tables
       {
         IntPtr ptr_array = objref_array.NonConstPointer();
         UnsafeNativeMethods.CRhinoDoc_PickObjects(m_doc.RuntimeSerialNumber, const_ptr_pickcontext, ptr_array);
+        GC.KeepAlive(pickContext);
         return objref_array.ToArray();
       }
     }
@@ -10045,10 +10322,10 @@ namespace Rhino.DocObjects.Tables
       return it;
     }
 
-    private class EnumeratorWrapper : IEnumerable<RhinoObject>, IDisposable
+    private class EnumeratorWrapper<T> : IEnumerable<T>, IDisposable
     {
-      readonly IEnumerator<RhinoObject> m_enumerator;
-      public EnumeratorWrapper(IEnumerator<RhinoObject> enumerator)
+      readonly IEnumerator<T> m_enumerator;
+      public EnumeratorWrapper(IEnumerator<T> enumerator)
       {
         m_enumerator = enumerator;
       }
@@ -10060,7 +10337,7 @@ namespace Rhino.DocObjects.Tables
           eDisposable.Dispose();
       }
 
-      public IEnumerator<RhinoObject> GetEnumerator()
+      public IEnumerator<T> GetEnumerator()
       {
         return m_enumerator;
       }
@@ -10112,7 +10389,19 @@ namespace Rhino.DocObjects.Tables
     public IEnumerable<RhinoObject> GetObjectList(ObjectEnumeratorSettings settings)
     {
       IEnumerator<RhinoObject> e = GetEnumerator(settings);
-      return new EnumeratorWrapper(e);
+      return new EnumeratorWrapper<RhinoObject>(e);
+    }
+
+    /// <summary>
+    /// Returns an enumerable based on a <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> filter.
+    /// </summary>
+    /// <param name="settings">The <see cref="Rhino.DocObjects.ObjectEnumeratorSettings"/> settings.</param>
+    /// <returns>The enumerable.</returns>
+    /// <since>8.25</since>
+    public IEnumerable<Guid> GetObjectIdList(ObjectEnumeratorSettings settings)
+    {
+      IEnumerator<Guid> e = new ObjectIdIterator(m_doc, settings);
+      return new EnumeratorWrapper<Guid>(e);
     }
 
     /// <example>
@@ -10125,7 +10414,7 @@ namespace Rhino.DocObjects.Tables
     {
       var settings = new ObjectEnumeratorSettings { ClassTypeFilter = typeFilter };
       var it = new ObjectIterator(m_doc, settings);
-      return new EnumeratorWrapper(it);
+      return new EnumeratorWrapper<RhinoObject>(it);
     }
 
     /// <summary>
@@ -10178,6 +10467,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectType">the type of objects to test for</param>
     /// <param name="checkSubObjects">Check to see if subobjects are selected</param>
     /// <returns></returns>
+    /// <since>8.10</since>
     [CLSCompliant(false)]
     public bool SelectedObjectsExist(ObjectType objectType, bool checkSubObjects)
     {
@@ -10197,6 +10487,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="checkSubObjects">Check to see if subobjects are selected</param>
     /// <returns></returns>
+    /// <since>8.10</since>
     [CLSCompliant(false)]
     public uint GetSelectedObjectCount(bool checkSubObjects)
     {
@@ -10651,6 +10942,7 @@ namespace Rhino.DocObjects
     internal object_state m_object_state = object_state.normal_or_locked_objects;
     internal ObjectType m_objectfilter = ObjectType.None;
     int m_layerindex_filter = -1;
+    int m_materialindex_filter = RhinoMath.UnsetIntIndex;
 
     /// <summary>
     /// Constructs object enumerator settings that will iterate the document looking for
@@ -10882,6 +11174,17 @@ namespace Rhino.DocObjects
       set { m_layerindex_filter = value; }
     }
 
+    /// <summary>
+    /// The material filter property can be used to limit the iteration to objects that use a specific material.
+    /// The default is to iterate through all objects no matter the material assignment.
+    /// </summary>
+    /// <since>8.25</since>
+    public int MaterialIndexFilter
+    {
+      get { return m_materialindex_filter; }
+      set { m_materialindex_filter = value; }
+    }
+
     internal string m_name_filter; // = null; initialized to null by runtime
     /// <summary>
     /// The name filter property can be used to limit the iteration to objects with a specific name.
@@ -10917,6 +11220,121 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <since>5.6</since>
     public RhinoViewport ViewportFilter { get; set; }
+  }
+
+  class ObjectIdIterator : IEnumerator<Guid>
+  {
+    #region IEnumerator Members
+    bool m_first = true;
+    Guid m_current;
+
+    object System.Collections.IEnumerator.Current
+    {
+      get
+      {
+        return m_current;
+      }
+    }
+
+    public bool MoveNext()
+    {
+      while (MoveNextHelper())
+      {
+        if (m_settings != null && m_settings.ClassTypeFilter != null && m_current != null)
+        {
+          if (!m_settings.ClassTypeFilter.IsInstanceOfType(m_current))
+          {
+            m_current = Guid.Empty;
+            continue;
+          }
+        }
+        return true;
+      }
+      return false;
+    }
+
+    bool MoveNextHelper()
+    {
+      bool first = m_first;
+      m_first = false;
+      IntPtr ptr = NonConstPointer();
+      string name_filter = null;
+      if (null != m_settings)
+        name_filter = m_settings.m_name_filter;
+      IntPtr ptr_rhino_object = UnsafeNativeMethods.CRhinoObjectIterator_FirstNext(ptr, first, name_filter);
+      if (IntPtr.Zero == ptr_rhino_object)
+        return false;
+      m_current = UnsafeNativeMethods.ON_ModelComponent_GetId(ptr_rhino_object);
+
+      return true;
+    }
+
+    public void Reset()
+    {
+      m_first = true;
+      m_current = Guid.Empty;
+    }
+
+    #endregion
+
+    #region IEnumerator<RhinoObject> Members
+
+    public Guid Current
+    {
+      get { return m_current; }
+    }
+
+    #endregion
+
+    // This class is always constructed inside .NET and is
+    // therefore never const
+    IntPtr m_ptr; // CRhinoObjectIterator*
+    internal IntPtr NonConstPointer() { return m_ptr; }
+    readonly ObjectEnumeratorSettings m_settings;
+
+    public ObjectIdIterator(RhinoDoc doc, ObjectEnumeratorSettings s)
+    {
+      m_settings = s;
+      uint doc_id = 0;
+      if (doc != null)
+        doc_id = doc.RuntimeSerialNumber;
+
+      IntPtr const_ptr_viewport = IntPtr.Zero;
+      if (s.ViewportFilter != null)
+        const_ptr_viewport = s.ViewportFilter.ConstPointer();
+      m_ptr = UnsafeNativeMethods.CRhinoObjectIterator_New(doc_id, (int)s.m_object_state, (int)s.m_object_category);
+      UnsafeNativeMethods.CRhinoObjectIterator_Initialize(m_ptr,
+        s.IncludeLights,
+        s.IncludeGrips,
+        s.IncludePhantoms,
+        s.SelectedObjectsFilter,
+        s.SubObjectSelected,
+        s.VisibleFilter,
+        (uint)s.m_objectfilter,
+        s.LayerIndexFilter,
+        s.MaterialIndexFilter,
+        const_ptr_viewport);
+    }
+
+    ~ObjectIdIterator()
+    {
+      Dispose(false);
+    }
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.CRhinoObjectIterator_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
   }
 
   // ObjectIterator is not public. We only want to give the user an enumerator
@@ -11009,6 +11427,7 @@ namespace Rhino.DocObjects
         s.VisibleFilter,
         (uint)s.m_objectfilter,
         s.LayerIndexFilter,
+        s.MaterialIndexFilter,
         const_ptr_viewport);
     }
 

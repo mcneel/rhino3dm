@@ -19,7 +19,12 @@ namespace Rhino.Runtime.InteropWrappers
 
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_ComponentIndexArray_Count(m_ptr); }
+      get
+      {
+        int rc =UnsafeNativeMethods.ON_ComponentIndexArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     public ComponentIndex[] ToArray()
@@ -29,6 +34,7 @@ namespace Rhino.Runtime.InteropWrappers
         return null;
       ComponentIndex[] rc = new ComponentIndex[count];
       UnsafeNativeMethods.ON_ComponentIndexArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -124,7 +130,9 @@ namespace Rhino.Runtime.InteropWrappers
     /// <returns></returns>
     public override string ToString()
     {
-      return GetString(m_ptr);
+      string rc = GetString(m_ptr);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -135,6 +143,7 @@ namespace Rhino.Runtime.InteropWrappers
     public string ToStringSafe()
     {
       var p = GetString(m_ptr);
+      GC.KeepAlive(this);
       if (p != null) return p; 
       return "";
     }
@@ -208,7 +217,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_IntArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_IntArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -223,6 +237,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new int[0];
       int[] rc = new int[count];
       UnsafeNativeMethods.ON_IntArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -305,7 +320,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>6.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_UintArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_UintArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -315,7 +335,12 @@ namespace Rhino.Runtime.InteropWrappers
     [CLSCompliant(false)]
     public uint UnsignedCount
     {
-      get { return UnsafeNativeMethods.ON_UintArray_UnsignedCount(m_ptr); }
+      get
+      {
+        uint rc = UnsafeNativeMethods.ON_UintArray_UnsignedCount(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -331,6 +356,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new uint[0];
       uint[] rc = new uint[count];
       UnsafeNativeMethods.ON_UintArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -408,7 +434,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>8.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_IntPtrArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_IntPtrArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -429,6 +460,7 @@ namespace Rhino.Runtime.InteropWrappers
           list.Add(p);
         }
       }
+      GC.KeepAlive(this);
 
       return list.ToArray();
     }
@@ -508,6 +540,7 @@ namespace Rhino.Runtime.InteropWrappers
       else
       {
         m_ptr = UnsafeNativeMethods.ON_ByteArray_CopyNew(other.ConstPointer());
+        GC.KeepAlive(other);
       }
     }
 
@@ -520,6 +553,8 @@ namespace Rhino.Runtime.InteropWrappers
       if (other != null)
       {
         UnsafeNativeMethods.ON_ByteArray_CopyTo(ConstPointer(), other.NonConstPointer());
+        GC.KeepAlive(other);
+        GC.KeepAlive(this);
       }
     }
 
@@ -548,7 +583,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>7.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_ByteArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_ByteArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -572,6 +612,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new byte[0];
       byte[] rc = new byte[count];
       UnsafeNativeMethods.ON_ByteArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -660,6 +701,7 @@ namespace Rhino.Runtime.InteropWrappers
       else
       {
         m_ptr = UnsafeNativeMethods.ON_ByteVector_CopyNew(other.ConstPointer());
+        GC.KeepAlive(other);
       }
     }
 
@@ -672,6 +714,8 @@ namespace Rhino.Runtime.InteropWrappers
       if (other != null)
       {
         UnsafeNativeMethods.ON_ByteVector_CopyTo(ConstPointer(), other.NonConstPointer());
+        GC.KeepAlive(other);
+        GC.KeepAlive(this);
       }
     }
 
@@ -701,7 +745,12 @@ namespace Rhino.Runtime.InteropWrappers
     [CLSCompliant(false)]
     public ulong Count
     {
-      get { return UnsafeNativeMethods.ON_ByteVector_Count(m_ptr); }
+      get
+      {
+        ulong rc = UnsafeNativeMethods.ON_ByteVector_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -725,6 +774,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new byte[0];
       byte[] rc = new byte[count];
       UnsafeNativeMethods.ON_ByteVector_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -813,6 +863,7 @@ namespace Rhino.Runtime.InteropWrappers
       else
       {
         m_ptr = UnsafeNativeMethods.ON_FloatArray_CopyNew(other.ConstPointer());
+        GC.KeepAlive(other);
       }
     }
 
@@ -825,6 +876,8 @@ namespace Rhino.Runtime.InteropWrappers
       if (other != null)
       {
         UnsafeNativeMethods.ON_FloatArray_CopyTo(ConstPointer(), other.NonConstPointer());
+        GC.KeepAlive(other);
+        GC.KeepAlive(this);
       }
     }
 
@@ -853,7 +906,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>7.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_FloatArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_FloatArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -878,6 +936,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new float[0];
       float[] rc = new float[count];
       UnsafeNativeMethods.ON_FloatArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -971,6 +1030,7 @@ namespace Rhino.Runtime.InteropWrappers
       else
       {
         m_ptr = UnsafeNativeMethods.ON_FloatVector_CopyNew(other.ConstPointer());
+        GC.KeepAlive(other);
       }
     }
 
@@ -983,6 +1043,8 @@ namespace Rhino.Runtime.InteropWrappers
       if (other != null)
       {
         UnsafeNativeMethods.ON_FloatVector_CopyTo(ConstPointer(), other.NonConstPointer());
+        GC.KeepAlive(other);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1012,7 +1074,12 @@ namespace Rhino.Runtime.InteropWrappers
     [CLSCompliant(false)]
     public ulong Count
     {
-      get { return UnsafeNativeMethods.ON_FloatVector_Count(m_ptr); }
+      get
+      {
+        ulong rc = UnsafeNativeMethods.ON_FloatVector_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1037,6 +1104,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new float[0];
       float[] rc = new float[count];
       UnsafeNativeMethods.ON_FloatVector_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1112,7 +1180,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <returns></returns>
     public Guid this[int index]
     {
-      get { return UnsafeNativeMethods.ON_UUIDPtrArray_Get(m_ptr, index); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_UUIDPtrArray_Get(m_ptr, index);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     // Create a SimpleArrayGuid from a pointer owned elsewhere. Need
@@ -1129,7 +1202,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>6.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_UUIDPtrArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_UUIDPtrArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1235,7 +1313,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <returns></returns>
     public Guid this[int index]
     {
-      get { return UnsafeNativeMethods.ON_UUIDArray_Get(m_ptr, index); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_UUIDArray_Get(m_ptr, index);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1246,6 +1329,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       var non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_UUIDArray_Append(non_const_ptr, uuid);
+      GC.KeepAlive(this);
     }
 
     // Create a SimpleArrayGuid from a pointer owned elsewhere. Need
@@ -1262,7 +1346,31 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_UUIDArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_UUIDArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// The capacity for the array
+    /// </summary>
+    /// <since>8.21</since>
+    public int Capacity
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_UUIDArray_Capacity(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_UUIDArray_SetCapacity(m_ptr, value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -1277,6 +1385,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new Guid[0];
       Guid[] rc = new Guid[count];
       UnsafeNativeMethods.ON_UUIDArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1347,6 +1456,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       var non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_IntervalArray_Add(non_const_ptr, interval);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1355,7 +1465,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_IntervalArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_IntervalArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1370,6 +1485,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new Interval[0];
       var rc = new Interval[count];
       UnsafeNativeMethods.ON_IntervalArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1444,6 +1560,7 @@ namespace Rhino.Runtime.InteropWrappers
 
       Rhino.Collections.RhinoList<double> list = new Rhino.Collections.RhinoList<double>(items);
       UnsafeNativeMethods.ON_DoubleArray_Append(m_ptr, list.Count, list.m_items);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1452,7 +1569,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_DoubleArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_DoubleArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1467,6 +1589,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new double[0];
       double[] rc = new double[count];
       UnsafeNativeMethods.ON_DoubleArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1545,6 +1668,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_2dPointArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -1562,6 +1686,7 @@ namespace Rhino.Runtime.InteropWrappers
 
       Point2d[] rc = new Point2d[count];
       UnsafeNativeMethods.ON_2dPointArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1647,6 +1772,7 @@ namespace Rhino.Runtime.InteropWrappers
         Point3d pt = p;
         UnsafeNativeMethods.ON_3dPointArray_Append(m_ptr, ref pt);
       }
+      GC.KeepAlive(this);
     }
 
     // not used and internal class, so comment out
@@ -1665,6 +1791,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_3dPointArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -1678,6 +1805,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dPointArray_Append(ptr, ref pt);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1693,6 +1821,7 @@ namespace Rhino.Runtime.InteropWrappers
 
       Point3d[] rc = new Point3d[count];
       UnsafeNativeMethods.ON_3dPointArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1773,6 +1902,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_3dPointArrayArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -1783,9 +1913,10 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>7.0</since>
     public int PointCountAt(int index)
     {
-        IntPtr ptr = ConstPointer();
-        int count = UnsafeNativeMethods.ON_3dPointArrayArray_PointCountAt(ptr, index);
-        return count;
+      IntPtr ptr = ConstPointer();
+      int count = UnsafeNativeMethods.ON_3dPointArrayArray_PointCountAt(ptr, index);
+      GC.KeepAlive(this);
+      return count;
     }
 
     /// <summary>
@@ -1799,6 +1930,7 @@ namespace Rhino.Runtime.InteropWrappers
         Point3d pt = Point3d.Unset;
         bool rc = UnsafeNativeMethods.ON_3dPointArrayArray_Indexer(ptr, index, pointIndex, ref pt);
         if (!rc) throw new ArgumentOutOfRangeException("The combination of index and pointIndex is out of bounds.");
+        GC.KeepAlive(this);
         return pt;
       }
     }
@@ -1821,6 +1953,7 @@ namespace Rhino.Runtime.InteropWrappers
           pline.m_size = point_count;
           return pline;
         }
+        GC.KeepAlive(this);
       }
       return null;
     }
@@ -1905,7 +2038,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>6.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_PlaneArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_PlaneArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -1920,6 +2058,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new Plane[0];
       Plane[] rc = new Plane[count];
       UnsafeNativeMethods.ON_PlaneArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1995,7 +2134,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_LineArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_LineArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2010,6 +2154,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new Line[0];
       Line[] rc = new Line[count];
       UnsafeNativeMethods.ON_LineArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2097,7 +2242,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>6.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_2dexArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_2dexArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2112,6 +2262,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new IndexPair[0];
       IndexPair[] rc = new IndexPair[count];
       UnsafeNativeMethods.ON_2dexArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2193,6 +2344,7 @@ namespace Rhino.Runtime.InteropWrappers
           continue;
         rc[i] = GeometryBase.CreateGeometryHelper(surface, null) as Surface;
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2286,6 +2438,8 @@ namespace Rhino.Runtime.InteropWrappers
           UnsafeNativeMethods.ON_CurveArray_Append(m_ptr, curvePtr);
         }
       }
+      GC.KeepAlive(curves);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2306,6 +2460,7 @@ namespace Rhino.Runtime.InteropWrappers
           continue;
         rc[i] = GeometryBase.CreateGeometryHelper(curve, null) as Curve;
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2390,6 +2545,8 @@ namespace Rhino.Runtime.InteropWrappers
         IntPtr geomPtr = gb.ConstPointer();
         UnsafeNativeMethods.ON_GeometryArray_Append(m_ptr, geomPtr);
       }
+      GC.KeepAlive(geometry);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2410,6 +2567,8 @@ namespace Rhino.Runtime.InteropWrappers
           UnsafeNativeMethods.ON_GeometryArray_Append(m_ptr, geomPtr);
         }
       }
+      GC.KeepAlive(geometry);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -2426,6 +2585,7 @@ namespace Rhino.Runtime.InteropWrappers
         IntPtr pGeometry = UnsafeNativeMethods.ON_GeometryArray_Get(m_ptr, i);
         rc[i] = GeometryBase.CreateGeometryHelper(pGeometry, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2514,6 +2674,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_MeshArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -2533,6 +2694,8 @@ namespace Rhino.Runtime.InteropWrappers
           pMesh = mesh.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_MeshArray_Append(ptr, pMesh);
+        GC.KeepAlive(mesh);
+        GC.KeepAlive(this);
       }
     }
     
@@ -2585,6 +2748,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pMesh)
           rc[i] = new Mesh(pMesh, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2603,6 +2767,7 @@ namespace Rhino.Runtime.InteropWrappers
         Rhino.DocObjects.ObjRef objref = new DocObjects.ObjRef(parent, pMesh);
         rc[i] = objref.Mesh();
       }
+      GC.KeepAlive(this);
       return rc;
     }
 #endif
@@ -2667,7 +2832,12 @@ namespace Rhino.Runtime.InteropWrappers
     [CLSCompliant(false)]
     public Guid this[ulong index]
     {
-      get { return UnsafeNativeMethods.ON_UUIDVector_Get(m_ptr, index); }
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_UUIDVector_Get(m_ptr, index);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2678,6 +2848,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       var non_const_ptr = NonConstPointer();
       UnsafeNativeMethods.ON_UUIDVector_Append(non_const_ptr, uuid);
+      GC.KeepAlive(this);
     }
 
     // Create a StdVectorGuid from a pointer owned elsewhere. Need
@@ -2695,7 +2866,12 @@ namespace Rhino.Runtime.InteropWrappers
     [CLSCompliant(false)]
     public ulong Count
     {
-      get { return UnsafeNativeMethods.ON_UUIDVector_Count(m_ptr); }
+      get
+      {
+        ulong rc = UnsafeNativeMethods.ON_UUIDVector_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2711,6 +2887,7 @@ namespace Rhino.Runtime.InteropWrappers
 
       Guid[] rc = new Guid[count];
       UnsafeNativeMethods.ON_UUIDVector_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2792,6 +2969,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_size(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -2811,6 +2989,8 @@ namespace Rhino.Runtime.InteropWrappers
           pMesh = mesh.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_StdVectorOfSharedPtrToMesh_push_back(ptr, pMesh);
+        GC.KeepAlive(mesh);
+        GC.KeepAlive(this);
       }
     }
 
@@ -2863,6 +3043,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pMesh)
           rc[i] = new Mesh(pMesh, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -2881,6 +3062,7 @@ namespace Rhino.Runtime.InteropWrappers
         Rhino.DocObjects.ObjRef objref = new DocObjects.ObjRef(parent, pMesh);
         rc[i] = objref.Mesh();
       }
+      GC.KeepAlive(this);
       return rc;
     }
 #endif
@@ -2929,7 +3111,12 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>8.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_MeshFaceArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_MeshFaceArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2944,6 +3131,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new MeshFace[0];
       MeshFace[] rc = new MeshFace[count];
       UnsafeNativeMethods.ON_MeshFaceArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -3019,6 +3207,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_SubDArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -3038,6 +3227,8 @@ namespace Rhino.Runtime.InteropWrappers
           pSubD = subd.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SubDArray_Append(ptr, pSubD);
+        GC.KeepAlive(subd);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3090,6 +3281,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pSubD)
           rc[i] = new SubD(pSubD, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3135,6 +3327,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_BrepArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -3154,6 +3347,8 @@ namespace Rhino.Runtime.InteropWrappers
           pBrep = brep.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_BrepArray_Append(ptr, pBrep);
+        GC.KeepAlive(brep);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3206,6 +3401,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pBrep)
           rc[i] = new Brep(pBrep, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3252,6 +3448,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_LinetypeArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -3305,6 +3502,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pLinetype)
           rc[i] = new DocObjects.Linetype(pLinetype);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3351,6 +3549,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.ON_ExtrusionArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -3370,6 +3569,8 @@ namespace Rhino.Runtime.InteropWrappers
           pExtrusion = extrusion.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_ExtrusionArray_Append(ptr, pExtrusion);
+        GC.KeepAlive(extrusion);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3422,6 +3623,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pExtrusion)
           rc[i] = new Extrusion(pExtrusion, null);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3470,7 +3672,7 @@ namespace Rhino.Runtime.InteropWrappers
     }
 
     /// <summary>
-    /// Adds a new <see cref="Interval"/> at the end of this array.
+    /// Adds a new <see cref="BinaryArchiveReader"/> at the end of this array.
     /// </summary>
     /// <since>6.0</since>
     public void Add(BinaryArchiveReader reader)
@@ -3478,6 +3680,8 @@ namespace Rhino.Runtime.InteropWrappers
       var non_const_ptr = NonConstPointer();
       IntPtr pReader = reader.NonConstPointer();
       UnsafeNativeMethods.ON_BinaryArchiveArray_Add(non_const_ptr, pReader);
+      GC.KeepAlive(reader);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3486,19 +3690,25 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>6.0</since>
     public int Count
     {
-      get { return UnsafeNativeMethods.ON_BinaryArchiveArray_Count(m_ptr); }
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_BinaryArchiveArray_Count(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
-    /// Get the Guid at index
+    /// Get the BinaryArchiveReader at index.
     /// </summary>
     /// <param name="index"></param>
-    /// <returns></returns>
+    /// <returns>The BinaryArchiveReader at the specified index.</returns>
     /// <since>6.0</since>
     public BinaryArchiveReader Get(int index)
     {
       IntPtr p = UnsafeNativeMethods.ON_BufferArray_Get(m_ptr, index);
       BinaryArchiveReader reader = new BinaryArchiveReader(p);
+      GC.KeepAlive(this);
       return reader;
     }
 
@@ -3568,7 +3778,9 @@ namespace Rhino.Runtime.InteropWrappers
       get
       {
         IntPtr const_pointer_this = ConstPointer();
-        return UnsafeNativeMethods.ON_StringArray_Count(const_pointer_this);
+        int rc = UnsafeNativeMethods.ON_StringArray_Count(const_pointer_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3581,6 +3793,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_StringArray_Append(ptr_this, s);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3634,6 +3847,7 @@ namespace Rhino.Runtime.InteropWrappers
           rc[i] = sh.ToString();
         }
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3706,7 +3920,9 @@ namespace Rhino.Runtime.InteropWrappers
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_Count(ptr);
+        int rc = UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_Count(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3722,6 +3938,8 @@ namespace Rhino.Runtime.InteropWrappers
         IntPtr pConstObjRef = objref.ConstPointer();
         IntPtr pThis = NonConstPointer();
         UnsafeNativeMethods.ON_ClassArrayCRhinoObjRef_Append(pThis, pConstObjRef);
+        GC.KeepAlive(objref);
+        GC.KeepAlive(this);
       }
     }
     
@@ -3774,6 +3992,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != pObjRef)
           rc[i] = new DocObjects.ObjRef(pObjRef);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -3833,7 +4052,9 @@ namespace Rhino.Runtime.InteropWrappers
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ClassArrayON_ObjRef_Count(ptr);
+        int rc = UnsafeNativeMethods.ON_ClassArrayON_ObjRef_Count(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3849,6 +4070,8 @@ namespace Rhino.Runtime.InteropWrappers
         IntPtr ptr_const_objref = objref.ConstPointer();
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_ClassArrayON_ObjRef_Append(ptr_this, ptr_const_objref);
+        GC.KeepAlive(objref);
+        GC.KeepAlive(this);
       }
     }
 
@@ -3898,6 +4121,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != ptr_const_objref)
           rc[i] = new DocObjects.ObjRef(null, ptr_const_objref, false);
       }
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -3924,6 +4148,7 @@ namespace Rhino.Runtime.InteropWrappers
         if (IntPtr.Zero != ptr_const_objref)
           rc[i] = new DocObjects.ObjRef(doc, ptr_const_objref, false);
       }
+      GC.KeepAlive(this);
       return rc;
     }
   }
@@ -4103,6 +4328,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr ptr = ConstPointer();
         int count = UnsafeNativeMethods.CRhinoClippingPlaneObjectArray_Count(ptr);
+        GC.KeepAlive(this);
         return count;
       }
     }
@@ -4122,6 +4348,8 @@ namespace Rhino.Runtime.InteropWrappers
           pClippingPlaneObject = clippingplane.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.CRhinoClippingPlaneObjectArray_Append(ptr, pClippingPlaneObject);
+        GC.KeepAlive(clippingplane);
+        GC.KeepAlive(this);
       }
     }
 
@@ -4225,7 +4453,9 @@ namespace Rhino.Runtime.InteropWrappers
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionCount(ptr);
+        int rc = UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionCount(ptr);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -4235,7 +4465,9 @@ namespace Rhino.Runtime.InteropWrappers
     public int RegionBoundaryCount(int regionIndex)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryCount(ptr, regionIndex);
+      int rc = UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryCount(ptr, regionIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4244,7 +4476,9 @@ namespace Rhino.Runtime.InteropWrappers
     public int RegionBoundaryElementCount(int regionIndex, int boundaryIndex)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryElementCount(ptr, regionIndex, boundaryIndex);
+      int rc = UnsafeNativeMethods.ON_ClassArrayCurveRegion_RegionBoundaryElementCount(ptr, regionIndex, boundaryIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -4284,6 +4518,7 @@ namespace Rhino.Runtime.InteropWrappers
         return new CurveSegment[0];
       var rc = new CurveSegment[count];
       UnsafeNativeMethods.ON_ClassArrayCurveRegion_CopyRegionBoundaryElements(m_ptr, regionIndex, boundaryIndex, count, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -4370,6 +4605,7 @@ namespace Rhino.Runtime.InteropWrappers
         {
           IntPtr ptr_line = line.ConstPointer();
           UnsafeNativeMethods.ON_HatchLineArray_Append(m_ptr, ptr_line);
+          GC.KeepAlive(line);
         }
       }
     }

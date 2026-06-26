@@ -4523,9 +4523,17 @@ declare module 'rhino3dm' {
 		 * @param {boolean} rotateToYUp Rotate the result to Y up.
 		 * @returns {object} A Three.js bufferGeometry.
 		 */
-		toThreejsJSON(rotateToYUp: boolean): object;	
+		toThreejsJSON(rotateToYUp: boolean): object;
 		/**
-		 * @description Creates a Rhino mesh from a Three.js buffer geometry. 
+		 * @description Exports the mesh as zero-copy typed arrays for Three.js BufferAttributes.
+		 * Faster than toThreejsJSON for large meshes: each attribute is bulk-copied out of the
+		 * WASM heap once instead of element-by-element across the binding boundary.
+		 * @param {boolean} rotateToYUp Rotate the result to Y up.
+		 * @returns {object} An object { position: Float32Array, normal: Float32Array, index: Uint32Array, vertexCount: number, uv?: Float32Array, color?: Float32Array }. uv is present only when the mesh has texture coordinates; color only when it has vertex colors.
+		 */
+		toThreejsBuffers(rotateToYUp: boolean): object;
+		/**
+		 * @description Creates a Rhino mesh from a Three.js buffer geometry.
 		 * @param {object} object A js object in the form of { data: bufferGeometry }
 		 * @returns {Mesh}
 		 */

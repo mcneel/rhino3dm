@@ -35,7 +35,9 @@ namespace Rhino.DocObjects
     {
       applymempressure = false;
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_Object_Duplicate(const_ptr_this);
+      IntPtr rc = UnsafeNativeMethods.ON_Object_Duplicate(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     internal override IntPtr _InternalGetConstPointer()
@@ -128,29 +130,36 @@ namespace Rhino.DocObjects
 #endif
       if (IntPtr.Zero == ptr_new)
         return null;
+      GC.KeepAlive(this);
       return new ObjectAttributes(ptr_new);
     }
 
     int GetInt(UnsafeNativeMethods.ObjectAttrsInteger which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetInt(ptr, which, false, 0);
+      int rc = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetInt(ptr, which, false, 0);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetInt(UnsafeNativeMethods.ObjectAttrsInteger which, int setValue)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetInt(ptr, which, true, setValue);
+      GC.KeepAlive(this);
     }
 
     double GetDouble(UnsafeNativeMethods.ObjectAttrsDouble which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetDouble(ptr, which, false, 0);
+      double rc = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetDouble(ptr, which, false, 0);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetDouble(UnsafeNativeMethods.ObjectAttrsDouble which, double setValue)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetDouble(ptr, which, true, setValue);
+      GC.KeepAlive(this);
     }
 
 
@@ -175,12 +184,15 @@ namespace Rhino.DocObjects
     bool GetBool(UnsafeNativeMethods.ObjectAttrsBool which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetBool(ptr, which, false, false);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetBool(ptr, which, false, false);
+      GC.KeepAlive(this);
+      return rc;
     }
     void SetBool(UnsafeNativeMethods.ObjectAttrsBool which, bool setValue)
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetBool(ptr, which, true, setValue);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -193,6 +205,7 @@ namespace Rhino.DocObjects
     {
       var pointer = NonConstPointer();
       var success = UnsafeNativeMethods.ON_3dmObjectAttributes_Transform(pointer, ref xform);
+      GC.KeepAlive(this);
       return success;
     }
 
@@ -310,6 +323,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_sectionstyle = UnsafeNativeMethods.ON_3dmObjectAttributes_GetCustomSectionStyle(const_ptr_this);
       if (ptr_sectionstyle == IntPtr.Zero)
         return null;
+      GC.KeepAlive(this);
       return new SectionStyle(ptr_sectionstyle);
     }
 
@@ -325,6 +339,8 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_sectionstyle = sectionStyle.ConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
+      GC.KeepAlive(sectionStyle);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -332,6 +348,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -399,6 +416,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_linetype = UnsafeNativeMethods.ON_3dmObjectAttributes_GetCustomLinetype(const_ptr_this);
       if (ptr_linetype == IntPtr.Zero)
         return null;
+      GC.KeepAlive(this);
       return new Linetype(ptr_linetype);
     }
 
@@ -414,6 +432,8 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_linetype = linetype.ConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, const_ptr_linetype);
+      GC.KeepAlive(linetype);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -421,6 +441,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, IntPtr.Zero);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -437,7 +458,9 @@ namespace Rhino.DocObjects
     public bool HasDisplayModeOverride(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_HasDisplayModeOverride(const_ptr_this, viewportId);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_HasDisplayModeOverride(const_ptr_this, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -449,7 +472,9 @@ namespace Rhino.DocObjects
     public Guid GetDisplayModeOverride(Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_GetDisplayModeOverride(const_ptr_this, viewportId);
+      Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_GetDisplayModeOverride(const_ptr_this, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -485,7 +510,9 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       Guid mode_id = mode.Id;
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_UseDisplayMode(ptr_this, rhinoViewportId, mode_id);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_UseDisplayMode(ptr_this, rhinoViewportId, mode_id);
+      GC.KeepAlive(this);
+      return rc;
     }
 #endif
 
@@ -519,6 +546,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_ClearDisplayMode(ptr_this, rhinoViewportId);
+      GC.KeepAlive(this);
     }
 
     /// <summary> Make this object hidden in a given detail </summary>
@@ -528,7 +556,9 @@ namespace Rhino.DocObjects
     public bool AddHideInDetailOverride(Guid detailId)
     {
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetail(ptrThis, true, detailId);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetail(ptrThis, true, detailId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary> Remove hidden in detail flag for a specific detail </summary>
@@ -538,7 +568,9 @@ namespace Rhino.DocObjects
     public bool RemoveHideInDetailOverride(Guid detailId)
     {
       IntPtr ptrThis = NonConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetail(ptrThis, false, detailId);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetail(ptrThis, false, detailId);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>Is this object supposed to be hidden in a given detail</summary>
@@ -567,6 +599,7 @@ namespace Rhino.DocObjects
       {
         IntPtr constPtrThis = ConstPointer();
         UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetailIds(constPtrThis, guids.NonConstPointer());
+        GC.KeepAlive(this);
         return guids.ToArray();
       }
     }
@@ -585,6 +618,7 @@ namespace Rhino.DocObjects
         IntPtr ptr_meshingparameters = UnsafeNativeMethods.ON_3dmObjectAttributes_CustomRenderMeshParameters(ptr_const_this);
         if (IntPtr.Zero == ptr_meshingparameters)
           return null;
+        GC.KeepAlive(this);
         return new MeshingParameters(ptr_meshingparameters);
       }
       set
@@ -594,6 +628,8 @@ namespace Rhino.DocObjects
         if (null != value)
           ptr_const_meshingparameters = value.ConstPointer();
         UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ptr_this, ptr_const_meshingparameters);
+        GC.KeepAlive(value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -666,12 +702,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmObjectAttributes_m_uuid(const_ptr_this); 
+        Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_m_uuid(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmObjectAttributes_set_m_uuid(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -685,6 +724,7 @@ namespace Rhino.DocObjects
       {
         IntPtr ptr_string = sh.NonConstPointer();
         UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetString(ptr, which, false, null, ptr_string);
+        GC.KeepAlive(this);
         return sh.ToString();
       }
     }
@@ -692,6 +732,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetString(ptr, which, true, str, IntPtr.Zero);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -819,6 +860,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = ConstPointer();
       int argb = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, false, 0);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
     void SetColor(int which, System.Drawing.Color c)
@@ -826,6 +868,7 @@ namespace Rhino.DocObjects
       IntPtr ptr = NonConstPointer();
       int argb = c.ToArgb();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, true, argb);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -897,6 +940,7 @@ namespace Rhino.DocObjects
         return plane;
       }
 
+      GC.KeepAlive(this);
       return Plane.Unset;
     }
 
@@ -904,6 +948,7 @@ namespace Rhino.DocObjects
     public void SetObjectFrame(Transform xform)
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetObjectFrame(NonConstPointer(), ref xform);
+      GC.KeepAlive(this);
     }
 
     /// <since>8.0</since>
@@ -913,7 +958,15 @@ namespace Rhino.DocObjects
       SetObjectFrame(xform);
     }
 
-
+    /// <summary>
+    /// Clears, or resets the rendering attributes.
+    /// </summary>
+    /// <since>8.28</since>
+    public void ClearRenderingAttributes()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_ClearRenderingAttributes(ptr_this);
+    }
 
     /// <summary>
     /// Get an object that provides access to mesh modifiers when the attributes is for a File3dmObject.
@@ -972,7 +1025,12 @@ namespace Rhino.DocObjects
     /// <since>5.10</since>
     public bool HasMapping
     {
-      get { return UnsafeNativeMethods.ON_3dmObjectAttributes_HasMapping(NonConstPointer()); }
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_HasMapping(NonConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
 
@@ -999,6 +1057,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       int argb = UnsafeNativeMethods.CRhinoObjectAttributes_DrawColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
 
@@ -1012,6 +1071,7 @@ namespace Rhino.DocObjects
     {
       IntPtr const_ptr_this = ConstPointer();
       int argb = UnsafeNativeMethods.CRhinoObjectAttributes_PlotColor(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
 
@@ -1024,7 +1084,9 @@ namespace Rhino.DocObjects
     public double ComputedPlotWeight(RhinoDoc document, Guid viewportId)
     {
       IntPtr const_ptr_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoObjectAttributes_PlotWeight(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      double rc = UnsafeNativeMethods.CRhinoObjectAttributes_PlotWeight(const_ptr_this, document.RuntimeSerialNumber, viewportId);
+      GC.KeepAlive(this);
+      return rc;
     }
 #endif
 
@@ -1115,12 +1177,15 @@ namespace Rhino.DocObjects
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_3dmObjectAttributes_ViewportId(ptr, false, Guid.Empty);
+        Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ViewportId(ptr, false, Guid.Empty);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_3dmObjectAttributes_ViewportId(ptr, true, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1157,6 +1222,7 @@ namespace Rhino.DocObjects
       int[] rc = new int[count];
       IntPtr ptr = ConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GroupList(ptr, rc);
+      GC.KeepAlive(this);
       return rc;
     }
 
@@ -1169,7 +1235,9 @@ namespace Rhino.DocObjects
     public bool IsInGroup(int groupIndex)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_IsInGroup(ptr, groupIndex);
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_IsInGroup(ptr, groupIndex);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     // [skipping]
@@ -1193,6 +1261,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GroupOp(ptr, IDX_ADD_TO_GROUP, groupIndex);
+      GC.KeepAlive(this);
     }
     /// <summary>
     /// removes object from the group with specified index.
@@ -1204,6 +1273,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GroupOp(ptr, IDX_REMOVE_FROM_GROUP, groupIndex);
+      GC.KeepAlive(this);
     }
 
     // [skipping]
@@ -1215,6 +1285,7 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_GroupOp(ptr, IDX_REMOVE_FROM_ALL_GROUPS, -1);
+      GC.KeepAlive(this);
     }
 
     // [skipping]

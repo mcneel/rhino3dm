@@ -27,7 +27,7 @@ namespace Rhino
       bool bz = false;
 
       bool rc = UnsafeNativeMethods.CRhinoDib_IsNormalMap(dib.ConstPointer, bLossyCompressionSource, ref bz);
-
+      GC.KeepAlive(dib);
       bPositiveZComponent = bz;
       return rc;
     }

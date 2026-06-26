@@ -630,6 +630,7 @@ namespace Rhino.DocObjects
           attributes[i] = new ObjectAttributes(ptr_attribute);
         }
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        GC.KeepAlive(parameters);
         return (Commands.Result)rc;
       }
     }
@@ -662,6 +663,7 @@ namespace Rhino.DocObjects
           attributes[i] = new ObjectAttributes(ptr_attribute);
         }
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        GC.KeepAlive(parameters);
         return (Commands.Result)rc;
       }
     }
@@ -695,6 +697,7 @@ namespace Rhino.DocObjects
           attributes[i] = new ObjectAttributes(ptr_attribute);
         }
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        GC.KeepAlive(parameters);
         return (Commands.Result)rc;
       }
     }
@@ -727,6 +730,7 @@ namespace Rhino.DocObjects
           attributes[i] = new ObjectAttributes(ptr_attribute);
         }
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributesarray);
+        GC.KeepAlive(parameters);
         return (Commands.Result)rc;
       }
     }
@@ -1120,6 +1124,27 @@ namespace Rhino.DocObjects
     public bool IsHidden
     {
       get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.IsHidden); }
+    }
+
+    internal string HideGroupName
+    {
+      get
+      {
+        using (var sw = new StringWrapper())
+        {
+          if (UnsafeNativeMethods.CRhinoObject_AttachHideGetName(ConstPointer(), sw.NonConstPointer))
+          {
+            return sw.ToString();
+          }
+        }
+
+        return null;
+      }
+    }
+
+    internal bool RemoveHideGroup()
+    {
+      return UnsafeNativeMethods.CRhinoObject_RemoveHideName(ConstPointer());
     }
 
     /// <summary>
@@ -1919,6 +1944,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_textlog = textLog.NonConstPointer();
       IntPtr ptr_const_this = ConstPointer();
       UnsafeNativeMethods.RHC_RhinoDescribeObject(ptr_const_this, ptr_textlog);
+      GC.KeepAlive(textLog);
     }
 
     /// <summary>
@@ -1963,7 +1989,9 @@ namespace Rhino.DocObjects
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_const_mesh_parameters = (null != mp) ? mp.ConstPointer() : IntPtr.Zero;
-      return UnsafeNativeMethods.RHC_RhinoObjectSetMeshParameters(ptr_const_this, ptr_const_mesh_parameters);
+      bool rc = UnsafeNativeMethods.RHC_RhinoObjectSetMeshParameters(ptr_const_this, ptr_const_mesh_parameters);
+      GC.KeepAlive(mp);
+      return rc;
     }
 
     /// <summary>
@@ -2023,7 +2051,9 @@ namespace Rhino.DocObjects
       var p_mesh_parameters = IntPtr.Zero;
       if (parameters != null)
         p_mesh_parameters = parameters.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObject_MeshCount(p_const_this, (int)meshType, p_mesh_parameters);
+      int rc = UnsafeNativeMethods.CRhinoObject_MeshCount(p_const_this, (int)meshType, p_mesh_parameters);
+      GC.KeepAlive(parameters);
+      return rc;
     }
 
     /// <summary>
@@ -2043,7 +2073,9 @@ namespace Rhino.DocObjects
     {
       var p_this = NonConstPointer_I_KnowWhatImDoing();
       var p_const_mesh_parameters = parameters.ConstPointer();
-      return UnsafeNativeMethods.CRhinoObject_CreateMeshes(p_this, (int)meshType, p_const_mesh_parameters, ignoreCustomParameters);
+      int rc = UnsafeNativeMethods.CRhinoObject_CreateMeshes(p_this, (int)meshType, p_const_mesh_parameters, ignoreCustomParameters);
+      GC.KeepAlive(parameters);
+      return rc;
     }
 
     /// <summary>
@@ -2125,16 +2157,19 @@ namespace Rhino.DocObjects
     }
 
     /// <since>8.0</since>
+    [Obsolete("Use Attributes.SetObjectFrame instead")]
     public void SetObjectFrame(Transform xform)
     {
-      UnsafeNativeMethods.CRhinoObject_SetObjectFrame(NonConstPointer(), ref xform);
+      Attributes.SetObjectFrame(xform);
+      CommitChanges();
     }
 
     /// <since>8.0</since>
+    [Obsolete("Use Attributes.SetObjectFrame instead")]
     public void SetObjectFrame(Plane plane)
     {
-      var xform = Transform.ChangeBasis(plane, Plane.WorldXY);
-      SetObjectFrame(xform);
+      Attributes.SetObjectFrame(plane);
+      CommitChanges();
     }
 
     /// <summary>
@@ -2161,7 +2196,10 @@ namespace Rhino.DocObjects
       // pay attention to the Id.
       var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero);
 
-      return UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
+      bool rc = UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(da);
+      return rc;
     }
 
     /// <summary>
@@ -2186,7 +2224,10 @@ namespace Rhino.DocObjects
       // The plug-in Id is optionally used by the custom mesh provider to determine if the plug-in
       // is allowed access to the custom meshes.  Currently none of our custom mesh providers
       // pay attention to the Id.
-      return UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, attrs == null ? IntPtr.Zero : attrs.ConstPointer());
+      bool rc = UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, attrs == null ? IntPtr.Zero : attrs.ConstPointer());
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
+      return rc;
     }
 
     /// <summary>
@@ -2218,6 +2259,7 @@ namespace Rhino.DocObjects
       if (success)
         return primitives;
       primitives.Dispose();
+      GC.KeepAlive(viewport);
       return null;
     }
 
@@ -2248,6 +2290,8 @@ namespace Rhino.DocObjects
       if (success)
         return primitives;
       primitives.Dispose();
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
       return null;
     }
 
@@ -2268,9 +2312,10 @@ namespace Rhino.DocObjects
       if (doc == null)
         return false;
 
-      uint f = (uint)flags;
+      //Note that this is always a document object, so we can set that flag
+      flags |= RenderMeshProvider.Flags.IsDocumentObject;
 
-      f |= 8 /*RenderMeshProvider.Flags.IsDocumentObject*/;
+      uint f = (uint)flags;
 
       IntPtr ptrViewport = (vp != null) ? vp.ConstPointer() : IntPtr.Zero;
 
@@ -2285,7 +2330,8 @@ namespace Rhino.DocObjects
         );
 
       flags = (RenderMeshProvider.Flags)f;
-
+      GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return ret;
     }
 
@@ -2307,6 +2353,9 @@ namespace Rhino.DocObjects
       if (Document == null)
         return null;
 
+      //Note that this is always a document object, so we can set that flag
+      flags |= RenderMeshProvider.Flags.IsDocumentObject;
+
       var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0, (uint)flags);
 
       uint f = (uint)flags;
@@ -2317,7 +2366,9 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp.ConstPointer(), Document.RuntimeSerialNumber, Id, ref f, null == plugin ? IntPtr.Zero : plugin.NonConstPointer(), attrs == null ? IntPtr.Zero : attrs.ConstPointer(), IntPtr.Zero);
 
       flags = (RenderMeshProvider.Flags)f;
-
+      GC.KeepAlive(primitives);
+      GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return primitives;
     }
 
@@ -2349,6 +2400,8 @@ namespace Rhino.DocObjects
       flags = (RenderMeshProvider.Flags)f;
 
       boundingBox = new BoundingBox(min, max);
+      GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return boundingBox.IsValid;
     }
 
@@ -2393,7 +2446,7 @@ namespace Rhino.DocObjects
         boundingBox = new BoundingBox(min, max);
         return boundingBox.IsValid;
       }
-
+      GC.KeepAlive(viewport);
       return false;
     }
 
@@ -2436,7 +2489,8 @@ namespace Rhino.DocObjects
         boundingBox = new BoundingBox(min, max);
         return boundingBox.IsValid;
       }
-
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(attrs);
       return false;
     }
 #pragma warning restore 0618
@@ -2521,7 +2575,9 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public int SetTextureMapping(int channel, TextureMapping tm)
     {
-      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(ConstPointer(), channel, tm == null ? IntPtr.Zero : tm.ConstPointer());
+      int rc = UnsafeNativeMethods.ON_TextureMapping_SetObjectMapping(ConstPointer(), channel, tm == null ? IntPtr.Zero : tm.ConstPointer());
+      GC.KeepAlive(tm);
+      return rc;
      }
     
     
@@ -2535,7 +2591,9 @@ namespace Rhino.DocObjects
     /// <since>6.26</since>
     public int SetTextureMapping(int channel, TextureMapping tm, Transform objectTransform)
     {
-      return UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm==null ? IntPtr.Zero : tm.ConstPointer(), ref objectTransform);
+      int rc = UnsafeNativeMethods.ON_TextureMapping_SetObjectMappingAndTransform(ConstPointer(), channel, tm==null ? IntPtr.Zero : tm.ConstPointer(), ref objectTransform);
+      GC.KeepAlive(tm);
+      return rc;
     }
 
     /// <summary>
@@ -2705,6 +2763,7 @@ namespace Rhino.DocObjects
       var pointer = ConstPointer();
       var att_pointer = attributes == null ? IntPtr.Zero : attributes.ConstPointer();
       var id = UnsafeNativeMethods.Rdk_RenderContent_ObjectRdkMaterial(pointer, componentIndex, plugInId, att_pointer);
+      GC.KeepAlive(attributes);
       return Render.RenderContent.FromId(Document, id) as RenderMaterial;
     }
 
@@ -2854,6 +2913,7 @@ namespace Rhino.DocObjects
       var pointer = ConstPointer();
       var att_pointer = attributes == null ? IntPtr.Zero : attributes.ConstPointer();
       var index = UnsafeNativeMethods.CRhinoObject_ObjectMaterial(pointer, componentIndex, plugInId, att_pointer);
+      GC.KeepAlive(attributes);
       return (index < 0 ? Material.DefaultMaterial : doc.Materials[index]);
     }
 
@@ -2936,6 +2996,7 @@ namespace Rhino.DocObjects
       var v = new Variant(value);
 
       UnsafeNativeMethods.Rdk_SetCRMParameter(ConstPointer(), providerId, parameterName, v.ConstPointer());
+      GC.KeepAlive(v);
     }
 
 
@@ -2964,6 +3025,7 @@ namespace Rhino.DocObjects
       IntPtr ptrViewport = IntPtr.Zero;
       if (viewport != null) ptrViewport = viewport.ConstPointer();
       UnsafeNativeMethods.CRhinoObject_BoundingBoxViewport(p_const_this, ptrViewport, ref bbox);
+      GC.KeepAlive(viewport);
       return bbox;
     }
     /// <summary>
@@ -3015,7 +3077,9 @@ namespace Rhino.DocObjects
     public virtual bool IsActiveInViewport(Display.RhinoViewport viewport)
     {
       var p_const_this = ConstPointer();
-      return UnsafeNativeMethods.CRhinoObject_IsActiveInViewport(p_const_this, viewport.ConstPointer());
+      bool rc = UnsafeNativeMethods.CRhinoObject_IsActiveInViewport(p_const_this, viewport.ConstPointer());
+      GC.KeepAlive(viewport);
+      return rc;
     }
 
     /// <summary>
@@ -3030,6 +3094,7 @@ namespace Rhino.DocObjects
       var p_obj_ref_array = UnsafeNativeMethods.CRhinoObject_Pick(p_const_this, p_const_context);
       if (IntPtr.Zero == p_obj_ref_array)
         return null;
+      GC.KeepAlive(context);
       return new Runtime.InternalRhinoObjRefArray(p_obj_ref_array);
     }
 
@@ -3267,6 +3332,7 @@ namespace Rhino.DocObjects
       {
         var const_ptr = ConstPointer();
         var sn = UnsafeNativeMethods.CRhinoObjRef_DocumentRuntimeSerailNumber(const_ptr);
+        GC.KeepAlive(this);
         return RhinoDoc.FromRuntimeSerialNumber(sn);
       }
     }
@@ -3279,6 +3345,7 @@ namespace Rhino.DocObjects
     public ObjRef(ObjRef other)
     {
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_Copy(other.m_ptr);
+      GC.KeepAlive(other);
     }
     internal ObjRef(IntPtr pOtherObjRef)
     {
@@ -3372,6 +3439,7 @@ namespace Rhino.DocObjects
       var p_object = rhinoObject.ConstPointer();
       var p_pick_context = pickContext.ConstPointer();
       m_ptr = UnsafeNativeMethods.CRhinoObjRef_New4(p_object, p_pick_context);
+      GC.KeepAlive(pickContext);
     }
 
     /// <summary>Returns the id of the referenced Rhino object.</summary>
@@ -3891,6 +3959,7 @@ namespace Rhino.DocObjects
     {
       var p_this = NonConstPointer();
       UnsafeNativeMethods.CRhinoObjRef_SetSelectionComponent(p_this, componentIndex);
+      GC.KeepAlive(this);
     }
   }
 #endif

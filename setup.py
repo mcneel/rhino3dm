@@ -65,7 +65,9 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        # pybind11 3.0 defaults toward CMake's modern FindPython; opt into it explicitly so the
+        # exact interpreter running setup.py is used (classic FindPythonLibs is unreliable for 3.14+).
+        cmake_args = ['cmake', f'-DPYBIND11_FINDPYTHON=ON', f'-DPython_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
         #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug' if self.debug else 'Release'
@@ -110,6 +112,8 @@ class CMakeBuild(build_ext):
 
             command = ['cmake', '-A',
                         f"{osplatform}",
+                        f'-DPYBIND11_FINDPYTHON=ON',
+                        f'-DPython_EXECUTABLE:FILEPATH={pyexec}',
                         f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}',
                         ext.sourcedir+"/src"]
             system(command, cwd=build_temp_dir)
@@ -145,7 +149,8 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='8.17.0',
+    version='8.32.0',
+    python_requires='>=3.8',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',
     license="MIT",
@@ -153,6 +158,13 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
@@ -167,10 +179,9 @@ CPython package based on OpenNURBS with a RhinoCommon style
 * Report issue: https://github.com/mcneel/rhino3dm/issues
 
 ### Supported platforms
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 , 3.13 - Windows (64 bit)
-* Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 13
-* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - macos 14, macos 15 universal
-* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14 - Windows (64 bit)
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14 - macos 14, macos 15 universal
+* Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
 * other architectures, operating systems, and python versions are supported through source distributions
 
 ## Test

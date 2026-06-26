@@ -301,12 +301,33 @@ static std::string ReprInterval(const BND_Interval& i)
   return repr.str();
 }
 
+// RH3DM-180: __str__ for the point/vector types, defined here in the bindings rather
+// than monkey-patched onto the module in __init__.py. Comma-separated, matching the
+// previous __init__.py behavior.
+static std::string StrPoint2d(const ON_2dPoint& p)
+{
+  std::ostringstream s; s << p.x << "," << p.y; return s.str();
+}
+static std::string StrPoint3d(const ON_3dPoint& p)
+{
+  std::ostringstream s; s << p.x << "," << p.y << "," << p.z; return s.str();
+}
+static std::string StrVector2d(const ON_2dVector& v)
+{
+  std::ostringstream s; s << v.x << "," << v.y; return s.str();
+}
+static std::string StrVector3d(const ON_3dVector& v)
+{
+  std::ostringstream s; s << v.x << "," << v.y << "," << v.z; return s.str();
+}
+
 void initPointBindings(rh3dmpymodule& m)
 {
   py::class_<ON_2dPoint>(m, "Point2d")
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodePoint2d)
     .def("__repr__", &ReprPoint2d)
+    .def("__str__", &StrPoint2d)
     .def_readwrite("X", &ON_2dPoint::x)
     .def_readwrite("Y", &ON_2dPoint::y)
     .def(py::self + py::self)
@@ -319,6 +340,7 @@ void initPointBindings(rh3dmpymodule& m)
     .def_property_readonly_static("Unset", &GetUnsetPoint3d)
     .def("Encode", &EncodePoint3d)
     .def("__repr__", &ReprPoint3d)
+    .def("__str__", &StrPoint3d)
     .def_readwrite("X", &ON_3dPoint::x)
     .def_readwrite("Y", &ON_3dPoint::y)
     .def_readwrite("Z", &ON_3dPoint::z)
@@ -346,6 +368,7 @@ void initPointBindings(rh3dmpymodule& m)
     .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
     .def("Encode", &EncodeVector2d)
     .def("__repr__", &ReprVector2d)
+    .def("__str__", &StrVector2d)
     .def_readwrite("X", &ON_2dVector::x)
     .def_readwrite("Y", &ON_2dVector::y)
     .def(py::self == py::self)
@@ -355,6 +378,7 @@ void initPointBindings(rh3dmpymodule& m)
     .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
     .def("Encode", &EncodeVector3d)
     .def("__repr__", &ReprVector3d)
+    .def("__str__", &StrVector3d)
     .def("IsParallelTo", &ON_3dVectorIsParallelTo, py::arg("other"))
     .def("IsParallelTo", &ON_3dVectorIsParallelTo2, py::arg("other"), py::arg("angleTolerance"))
     .def("Unitize", &ON_3dVectorUnitize)

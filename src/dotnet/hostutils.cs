@@ -1433,7 +1433,7 @@ namespace Rhino.Runtime
   {
 #if RHINO_SDK
     /// <summary>
-    /// Calls Assembly.LoadFrom in .NET 4.8. May call a different routine under .NET 7
+    /// Calls Assembly.LoadFrom in .NET 4.8. May call a different routine under .NET Core
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
@@ -1444,6 +1444,17 @@ namespace Rhino.Runtime
       return System.Reflection.Assembly.LoadFrom(path);
 #else
       string fullPath = Path.GetFullPath(path);
+
+      var loadContext = RhinoLoadContext;
+      if (RunningOnWindows && RhinoLoadContext != AssemblyLoadContext.Default)
+      {
+        // 2025-08-11 - kike@mcneel.com:
+        // VisualARQ has MixedMode .dll files that should load into AssemblyLoadContext.Default.
+        // See https://github.com/dotnet/runtime/issues/62754
+        const int COMIMAGE_FLAGS_ILONLY = 0x00000001;
+        if (IsManagedDll(fullPath, out var clrFlags) && (clrFlags & COMIMAGE_FLAGS_ILONLY) == 0)
+          loadContext = AssemblyLoadContext.Default;
+      }
 
       if (!s_loadFromHandlerSet)
       {
@@ -1461,10 +1472,7 @@ namespace Rhino.Runtime
       // before handling the resolves in our handler.
       lock (s_loadFromAssemblyList)
       {
-        if (!s_loadFromAssemblyList.Contains(fullPath))
-        {
-          s_loadFromAssemblyList.Add(fullPath);
-        }
+        s_loadFromAssemblyList[fullPath] = loadContext;
       }
 
       // LoadFromAssemblyPath can generate an error so let's check for previous errors here.
@@ -1474,7 +1482,7 @@ namespace Rhino.Runtime
       // Load in the same context as Rhino vs. always the Default context.
       // this should be the default context when running Rhino normally,
       // however this will be a separate context when running Rhino.Inside on Mac.
-      Assembly assembly = RhinoLoadContext.LoadFromAssemblyPath(fullPath);
+      Assembly assembly = loadContext.LoadFromAssemblyPath(fullPath);
 
       // Discard error produced by LoadFromAssemblyPath.
       // Error: "The system cannot find the file specified."
@@ -1484,6 +1492,58 @@ namespace Rhino.Runtime
       UnsafeNativeMethods.RHC_GetLastWindowsError();
 
       return assembly;
+#endif
+    }
+
+    /// <summary>
+    /// Calls Assembly.Load(byte[]) in .NET 4.8. May call a different routine under .NET Core
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
+    /// <since>8.23</since>
+    public static System.Reflection.Assembly LoadAssemblyFromStream(Stream stream)
+    {
+      Assembly assembly = null;
+
+#if NETFRAMEWORK
+      using (var ms = new MemoryStream())
+      {
+        stream.CopyTo(ms);
+        assembly = Assembly.Load(ms.ToArray());
+      }
+#else
+      // LoadFromAssemblyPath can generate an error so let's check for previous errors here.
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+
+      // Curtis:
+      // Load in the same context as Rhino vs. always the Default context.
+      // this should be the default context when running Rhino normally,
+      // however this will be a separate context when running Rhino.Inside on Mac.
+      assembly = RhinoLoadContext.LoadFromStream(stream);
+
+      // Discard error produced by LoadFromAssemblyPath.
+      // Error: "The system cannot find the file specified."
+      // The error doesn't seem to be causing any problems so let's discard it.
+      // NOTE: Investigation into why this error happens in RH-78218.
+      UnsafeNativeMethods.RHC_MaskLastWindowsError(2); // ERROR_FILE_NOT_FOUND
+      UnsafeNativeMethods.RHC_GetLastWindowsError();
+#endif
+
+      return assembly;
+    }
+
+    /// <summary>
+    /// Calls Assembly.Load(AssemblyName) in .NET 4.8. May call a different routine under .NET Core
+    /// </summary>
+    /// <param name="assemblyName"></param>
+    /// <returns></returns>
+    /// <since>8.32</since>
+    public static System.Reflection.Assembly LoadAssemblyFromName(AssemblyName assemblyName)
+    {
+#if NETFRAMEWORK
+      return Assembly.Load(assemblyName);
+#else
+      return RhinoLoadContext.LoadFromAssemblyName(assemblyName);
 #endif
     }
 
@@ -1510,7 +1570,7 @@ namespace Rhino.Runtime
 #if NET
     // Modified from https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Reflection/Assembly.cs
 
-    private static readonly List<string> s_loadFromAssemblyList = new List<string>();
+    private static readonly Dictionary<string, AssemblyLoadContext> s_loadFromAssemblyList = new Dictionary<string, AssemblyLoadContext>();
     private static bool s_loadFromHandlerSet;
     private static AssemblyLoadContext s_RhinoLoadContext;
     private static AssemblyLoadContext RhinoLoadContext => s_RhinoLoadContext ?? (s_RhinoLoadContext = AssemblyLoadContext.GetLoadContext(typeof(HostUtils).Assembly));
@@ -1519,11 +1579,6 @@ namespace Rhino.Runtime
     {
       Assembly requestingAssembly = args.RequestingAssembly;
       if (requestingAssembly == null)
-        return null;
-
-      // Requesting assembly for LoadFrom is always loaded in defaultContext - proceed only if that
-      // is the case.
-      if (RhinoLoadContext != AssemblyLoadContext.GetLoadContext(requestingAssembly))
         return null;
 
       // Get the path where requesting assembly lives and check if it is in the list
@@ -1537,7 +1592,8 @@ namespace Rhino.Runtime
       lock (s_loadFromAssemblyList)
       {
         // If the requestor assembly was not loaded using LoadFrom, exit.
-        if (!s_loadFromAssemblyList.Contains(requestorPath))
+        if (!s_loadFromAssemblyList.TryGetValue(requestorPath, out var loadContext) || 
+            loadContext != AssemblyLoadContext.GetLoadContext(requestingAssembly))
         {
           return null;
         }
@@ -1633,10 +1689,10 @@ namespace Rhino.Runtime
     }
 #endif
 
-    /// <summary>
-    /// Returns Operating System Edition: "Professional" | "ServerDatacenter" | ... | "Unknown"
-    /// </summary>
-    /// <since>6.15</since>
+      /// <summary>
+      /// Returns Operating System Edition: "Professional" | "ServerDatacenter" | ... | "Unknown"
+      /// </summary>
+      /// <since>6.15</since>
     public static string OperatingSystemEdition
     {
       get
@@ -1864,6 +1920,12 @@ namespace Rhino.Runtime
       return UnsafeNativeMethods.RHC_IsManagedDll(path);
     }
 
+    private static bool IsManagedDll(string path, out int clrFlags)
+    {
+      clrFlags = default;
+      return UnsafeNativeMethods.RHC_IsManagedDll2(path, ref clrFlags);
+    }
+
     /// <summary>
     /// Clear FPU exception and busy flags (Intel assembly fnclex)
     /// </summary>
@@ -2030,17 +2092,34 @@ namespace Rhino.Runtime
 
       // include all auto-install directories (that aren't already included)
       // grasshopper will prune the folders that it doesn't care about
-      foreach (var dir in GetActivePlugInVersionFolders())
-      {
-        if (!directories.Contains(dir.FullName))
-        {
-          directories.Add(dir.FullName);
-        }
-      }
+      AddSearchPathsWithoutDuplicatePackages(ref directories, GetActivePlugInVersionFolders());
       return directories.ToArray();
 #else
       return new string[0];
 #endif
+    }
+
+    /// <summary>
+    /// Add packageVersionDirs to directories unless a version or runtime dir for that package already exists.
+    /// Used in GetAssemblySearchPaths().
+    /// </summary>
+    internal static void AddSearchPathsWithoutDuplicatePackages(ref List<string> directories, IEnumerable<DirectoryInfo> packageVersionDirs)
+    {
+      foreach (var dir in packageVersionDirs)
+      {
+        // also do not add a package version dir if another version is already in the list (RH-86392)
+        if (directories.Contains(dir.FullName))
+          continue;
+
+        var isRuntimeDir = dir.Name.StartsWith("net", StringComparison.OrdinalIgnoreCase);
+
+        if (!isRuntimeDir && directories.Any(x => x.StartsWith(dir.Parent.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+          continue;
+        else if (isRuntimeDir && directories.Any(x => x.StartsWith(dir.Parent.Parent.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+          continue;
+
+        directories.Add(dir.FullName);
+      }
     }
 
     /// <summary>
@@ -2293,6 +2372,14 @@ namespace Rhino.Runtime
         }
         return m_device_id;
       }
+      set
+      {
+        if (RunningInRhino)
+        {
+          throw new Exception("Nope. Can't do this.");
+        }
+        m_device_id = value;
+      }
     }
 
     private static string m_serial_number = "";
@@ -2522,8 +2609,8 @@ namespace Rhino.Runtime
 
       // Rhino-specific assemblies
       yield return typeof(RhinoApp).Assembly.Location; // RhinoCommon.dll
-      yield return System.Reflection.Assembly.Load("Eto").Location; // Eto.dll
-      yield return System.Reflection.Assembly.Load("Rhino.UI").Location; // Rhino.UI.dll
+      yield return LoadAssemblyFromName(new AssemblyName("Eto")).Location; // Eto.dll
+      yield return LoadAssemblyFromName(new AssemblyName("Rhino.UI")).Location; // Rhino.UI.dll
     }
 
     static IEnumerable<string> GetFacadeAssemblies()
@@ -2739,7 +2826,7 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// Invokes safely (catching exceptions) the method represented by the provided <paramref name="handler"/>.
     /// </summary>
     /// <param name="handler">Event handler</param>
     /// <param name="sender">Event sender</param>
@@ -3829,7 +3916,17 @@ namespace Rhino.Runtime
         string[] lines = System.IO.File.ReadAllLines(manifest_path);
         if (null == lines || lines.Length < 1)
           continue;
-        var active_version_directory = new System.IO.DirectoryInfo(System.IO.Path.Combine(child_directory.FullName, lines[0]));
+        string version = lines[0].Trim();
+        DirectoryInfo active_version_directory;
+        try
+        {
+          active_version_directory = new DirectoryInfo(Path.Combine(child_directory.FullName, version));
+        }
+        catch (Exception)
+        {
+          // skip packages that have invalid version strings in their manifest
+          continue;
+        }
         if (!active_version_directory.Exists)
           continue;
         yield return active_version_directory;
@@ -4222,6 +4319,11 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
+    /// Used to call the above method from unmanaged code.  Do not remove.
+    /// </summary>
+    private static int OnNetCoreShutdown(IntPtr args, int count) => CallFromCoreRhino("shutdown");
+
+    /// <summary>
     /// Instantiates a plug-in type and registers the associated commands and classes.
     /// </summary>
     /// <param name="pluginType">A plug-in type. This type must derive from <see cref="PlugIn"/>.</param>
@@ -4416,9 +4518,11 @@ namespace Rhino.Runtime
       g_ReportExceptions = false;
       try
       {
-#if RHINO_SDK
-        UnsafeNativeMethods.RHC_SetSendLogMessageToCloudProc(null);
-#endif
+        // 21 Feb 2020 S. Baer (RH-57124)
+        // Turn off raygun non-fatal messages for now. We can turn them back on
+        // in the future by uncommmenting the next line
+        //UnsafeNativeMethods.RHC_SetSendLogMessageToCloudProc(null);
+
         UnsafeNativeMethods.RhCmn_SetInShutDown();
         // Remove callbacks that should not happen after this point in time
 #if RHINO_SDK

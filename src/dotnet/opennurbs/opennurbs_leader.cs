@@ -104,6 +104,7 @@ namespace Rhino.Geometry
         return null;
       var rc = new Leader(ptr_leader, null);
       rc.ParentDimensionStyle = dimstyle;
+      GC.KeepAlive(dimstyle);
       return rc;
     }
 
@@ -119,6 +120,7 @@ namespace Rhino.Geometry
           IntPtr const_ptr_this = ConstPointer();
           IntPtr const_ptr_crv = UnsafeNativeMethods.ON_V6_Leader_Curve(const_ptr_this, IntPtr.Zero); //Null Dimstyle
           m_curve = CreateGeometryHelper(const_ptr_crv, new CurveHolder(this)) as NurbsCurve;
+          GC.KeepAlive(this);
         }
         return m_curve;
       }
@@ -137,6 +139,7 @@ namespace Rhino.Geometry
           var points = pointsarray.NonConstPointer();
           IntPtr const_ptr_this = ConstPointer();
           UnsafeNativeMethods.ON_V6_Leader_Get2dPoints(const_ptr_this, points);
+          GC.KeepAlive(this);
           return pointsarray.ToArray();
         }
       }
@@ -144,6 +147,7 @@ namespace Rhino.Geometry
       {
         var ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Leader_Set2dPoints(ptr_this, value.Length, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -168,6 +172,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_V6_Leader_Set3dPoints(ptr_this, value.Length, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -183,13 +188,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderTextHorizontalAlignment(thisptr, styleptr);
+        TextHorizontalAlignment rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderTextHorizontalAlignment(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderTextHorizontalAlignment(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -203,13 +211,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderTextVerticalAlignment(thisptr, styleptr);
+        TextVerticalAlignment rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderTextVerticalAlignment(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderTextVerticalAlignment(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -223,13 +234,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowType(thisptr, styleptr);
+        DimensionStyle.ArrowType rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowType(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderArrowType(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -243,13 +257,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowBlockId(thisptr, styleptr);
+        Guid rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowBlockId(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderArrowBlockId(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -263,13 +280,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowSize(thisptr, styleptr);
+        double rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderArrowSize(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderArrowSize(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -283,13 +303,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderCurveType(thisptr, styleptr);
+        DimensionStyle.LeaderCurveStyle rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderCurveType(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderCurveType(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -303,13 +326,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderContentAngleStyle(thisptr, styleptr);
+        DimensionStyle.LeaderContentAngleStyle rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderContentAngleStyle(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderContentAngleStyle(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -323,13 +349,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderHasLanding(thisptr, styleptr);
+        bool rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderHasLanding(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderHasLanding(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
     
@@ -343,13 +372,16 @@ namespace Rhino.Geometry
       {
         IntPtr thisptr = ConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
-        return UnsafeNativeMethods.ON_V6_Annotation_LeaderLandingLength(thisptr, styleptr);
+        double rc = UnsafeNativeMethods.ON_V6_Annotation_LeaderLandingLength(thisptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr thisptr = NonConstPointer();
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetLeaderLandingLength(thisptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
     #endregion properties originating from dim style that can be overridden
@@ -404,6 +436,7 @@ namespace Rhino.Geometry
 
         GC.KeepAlive(dimstyle);
         GC.KeepAlive(parent);
+        GC.KeepAlive(this);
 
         return out_geometry.ToArray();
       }

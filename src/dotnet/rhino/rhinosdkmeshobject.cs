@@ -106,7 +106,9 @@ namespace Rhino.DocObjects
       var rharray = new Runtime.InternalRhinoObjectArray(meshObjects);
       IntPtr ptr_const_array = rharray.NonConstPointer();
       IntPtr ptr_textlog = textLog.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoCheckMesh2(ptr_const_array, ptr_textlog, ref parameters);
+      bool rc = UnsafeNativeMethods.RHC_RhinoCheckMesh2(ptr_const_array, ptr_textlog, ref parameters);
+      GC.KeepAlive(textLog);
+      return rc;
     }
 
     internal override CommitGeometryChangesFunc GetCommitFunc()

@@ -31,6 +31,8 @@ namespace Rhino.Geometry
       // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
       //     "this case is really never going to happen."
       if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceFillet.");
+      GC.KeepAlive(FaceA);
+      GC.KeepAlive(FaceB);
     }
     /// <summary>
     /// 
@@ -50,6 +52,8 @@ namespace Rhino.Geometry
       // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
       //     "this case is really never going to happen."
       if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceFillet.");
+      GC.KeepAlive(FaceA);
+      GC.KeepAlive(FaceB);
     }
     /// <summary>
     /// 
@@ -66,6 +70,9 @@ namespace Rhino.Geometry
       // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
       //     "this case is really never going to happen."
       if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceToRailFillet.");
+      GC.KeepAlive(RailFace);
+      GC.KeepAlive(Rail3d);
+      GC.KeepAlive(Face);
     }
     /// <summary>
     /// 
@@ -83,6 +90,8 @@ namespace Rhino.Geometry
       // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
       //     "this case is really never going to happen."
       if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceToRailFillet.");
+      GC.KeepAlive(face);
+      GC.KeepAlive(rail3d);
     }
     /// <summary>
     /// 
@@ -123,7 +132,9 @@ namespace Rhino.Geometry
     /// <returns>true if successful</returns>
     protected bool ChangeFilletRadius(double radius)
     {
-      return UnsafeNativeMethods.CRhinoSurfaceFillet_ChangeRadius(m_ptr, radius);
+      bool rc = UnsafeNativeMethods.CRhinoSurfaceFillet_ChangeRadius(m_ptr, radius);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -151,6 +162,7 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -174,6 +186,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -197,6 +211,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -222,6 +238,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -245,6 +263,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -270,6 +290,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -293,6 +315,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
     /// <summary>
@@ -316,6 +340,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -339,6 +365,8 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(Fillets);
+      GC.KeepAlive(this);
       return false;
     }
 
@@ -382,6 +410,10 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
       return false;
     }
 
@@ -424,6 +456,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -468,6 +505,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -510,6 +552,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -554,6 +601,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -596,6 +648,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -639,6 +696,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
 
@@ -681,6 +743,11 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(faceA);
+      GC.KeepAlive(faceB);
+      GC.KeepAlive(trimmedBrepsA);
+      GC.KeepAlive(trimmedBrepsB);
+      GC.KeepAlive(Fillets);
       return false;
     }
     /// <summary>

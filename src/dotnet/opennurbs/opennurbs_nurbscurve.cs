@@ -96,6 +96,19 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Changes a NURBS curve so each control point affects the curve exactly the same way.
+    /// This make the knot vectors uniform without changing the control point locations.
+    /// This will change the object shape slightly.
+    /// </summary>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.24</since>
+    public bool MakeUniform()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhMakeNurbsCurveUniform(ptr_const_this);
+    }
+
+    /// <summary>
     /// Constructs a NURBS curve with the start and end matching the start and end of targetCurve, and Greville points on targetCurve.
     /// </summary>
     /// <param name="targetCurve">The target curve.</param>
@@ -121,6 +134,8 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_const_target = targetCurve.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoMatchNURBSToCurve(ptr_const_this, ptr_const_target, maxEndDistance, maxInteriorDistance, matchTolerance, maxLevel);
+      GC.KeepAlive(targetCurve);
+      GC.KeepAlive(this);
       return (ptr == IntPtr.Zero) ? null : CreateGeometryHelper(ptr, null) as NurbsCurve;
     }
 
@@ -137,7 +152,9 @@ namespace Rhino.Geometry
     {
       uDir = vDir = nDir = Vector3d.Unset;
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoNurbsCurveDirectionsAt(ptr_const_this, t, ref uDir, ref vDir, ref nDir);
+      bool rc = UnsafeNativeMethods.RHC_RhinoNurbsCurveDirectionsAt(ptr_const_this, t, ref uDir, ref vDir, ref nDir);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -404,6 +421,7 @@ namespace Rhino.Geometry
         var ptr_in_params = in_params.ConstPointer();
         var ptr_out_frames = out_frames.NonConstPointer();
         var rc = UnsafeNativeMethods.TLC_GetPlanarRailFrames(ptr_this, ptr_in_params, normal, ptr_out_frames);
+        GC.KeepAlive(this);
         if (rc)
           return out_frames.ToArray();
         return new Plane[0];
@@ -425,6 +443,7 @@ namespace Rhino.Geometry
         var ptr_in_params = in_params.ConstPointer();
         var ptr_out_frames = out_frames.NonConstPointer();
         var rc = UnsafeNativeMethods.TLC_GetRailFrames(ptr_this, ptr_in_params, ptr_out_frames);
+        GC.KeepAlive(this);
         if (rc)
           return out_frames.ToArray();
         return new Plane[0];
@@ -639,7 +658,9 @@ namespace Rhino.Geometry
     {
       // keeping internal for now
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_Create(ptr, dimension, isRational, order, cvCount);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_Create(ptr, dimension, isRational, order, cvCount);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     internal NurbsCurve(IntPtr ptr, object parent, int subobjectIndex)
@@ -677,7 +698,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr = ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, idxIsRational);
+        bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, idxIsRational);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -726,7 +749,9 @@ namespace Rhino.Geometry
     internal int GetInt(int which)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GetInt(ptr, which);
+      int rc = UnsafeNativeMethods.ON_NurbsCurve_GetInt(ptr, which);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
@@ -798,6 +823,7 @@ namespace Rhino.Geometry
         tangent,
         curvature
         );
+      GC.KeepAlive(this);
       if (0 == rc)
         return false;
       else
@@ -819,7 +845,9 @@ namespace Rhino.Geometry
     public bool IncreaseDegree(int desiredDegree)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_IncreaseDegree(ptr, desiredDegree);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_IncreaseDegree(ptr, desiredDegree);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -831,7 +859,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_GetBool(const_ptr_this, idxHasBezierSpans);
+        bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(const_ptr_this, idxHasBezierSpans);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -848,7 +878,9 @@ namespace Rhino.Geometry
     public bool MakePiecewiseBezier(bool setEndWeightsToOne)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_MakePiecewiseBezier(ptr_this, setEndWeightsToOne);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_MakePiecewiseBezier(ptr_this, setEndWeightsToOne);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -870,7 +902,9 @@ namespace Rhino.Geometry
     public bool Reparameterize(double c)
     {
       IntPtr ptr = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_Reparameterize(ptr, c);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_Reparameterize(ptr, c);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -887,6 +921,8 @@ namespace Rhino.Geometry
         IntPtr ptr_this = NonConstPointer();
         IntPtr ptr_const_nurb = nurbsCurve.ConstPointer();
         rc = UnsafeNativeMethods.ON_NurbsCurve_Append(ptr_this, ptr_const_nurb);
+        GC.KeepAlive(nurbsCurve);
+        GC.KeepAlive(this);
       }
       return rc;
     }
@@ -902,7 +938,9 @@ namespace Rhino.Geometry
     public double GrevilleParameter(int index)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GrevilleAbcissa(ptr, index);
+      double rc = UnsafeNativeMethods.ON_NurbsCurve_GrevilleAbcissa(ptr, index);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -929,6 +967,7 @@ namespace Rhino.Geometry
       double[] rc = new double[count];
       IntPtr ptr = ConstPointer();
       bool success = UnsafeNativeMethods.ON_NurbsCurve_GetGrevilleAbcissae(ptr, rc);
+      GC.KeepAlive(this);
       if (!success) { return null; }
       return rc;
     }
@@ -973,6 +1012,7 @@ namespace Rhino.Geometry
         IntPtr ptr_out_points = out_points.NonConstPointer();
         IntPtr ptr_const_curve = ConstPointer();
         bool rc = UnsafeNativeMethods.TLC_GetEditNurbsCurvePoints(ptr_const_curve, ptr_out_points);
+        GC.KeepAlive(this);
         if (rc)
           return new Point3dList(out_points.ToArray());
       }  
@@ -998,7 +1038,9 @@ namespace Rhino.Geometry
       int count;
       Point3d[] pt_array = RhinoListHelpers.GetConstArray(points, out count);
 
-      return UnsafeNativeMethods.TLC_EditNurbsCurvePoints(ptr_this, count, pt_array);
+      bool rc = UnsafeNativeMethods.TLC_EditNurbsCurvePoints(ptr_this, count, pt_array);
+      GC.KeepAlive(this);
+      return rc;
     }
 #endif
 
@@ -1068,6 +1110,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_bezier_cure = UnsafeNativeMethods.ON_NurbsCurve_ConvertSpanToBezier(ptr_const_this, spanIndex);
+      GC.KeepAlive(this);
       if (ptr_bezier_cure == IntPtr.Zero)
         return null;
       return new BezierCurve(ptr_bezier_cure);
@@ -1168,6 +1211,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr_this = ConstPointer();
         m_pCurveDisplay = UnsafeNativeMethods.CurveDisplay_FromNurbsCurve(const_ptr_this);
+        GC.KeepAlive(this);
       }
       return m_pCurveDisplay;
     }
@@ -1420,7 +1464,9 @@ namespace Rhino.Geometry.Collections
         if (index < 0) { throw new IndexOutOfRangeException("Index must be larger than or equal to zero."); }
         if (index >= Count) { throw new IndexOutOfRangeException("Index must be less than the number of knots."); }
         IntPtr ptr = m_curve.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_Knot(ptr, index);
+        double rc = UnsafeNativeMethods.ON_NurbsCurve_Knot(ptr, index);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
       set
       {
@@ -1428,6 +1474,7 @@ namespace Rhino.Geometry.Collections
         if (index >= Count) { throw new IndexOutOfRangeException("Index must be less than the number of knots."); }
         IntPtr ptr = m_curve.NonConstPointer();
         UnsafeNativeMethods.ON_NurbsCurve_SetKnot(ptr, index, value);
+        GC.KeepAlive(m_curve);
       }
     }
     #endregion
@@ -1472,7 +1519,9 @@ namespace Rhino.Geometry.Collections
     public bool InsertKnot(double value, int multiplicity)
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_InsertKnot(ptr, value, multiplicity);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_InsertKnot(ptr, value, multiplicity);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>Get knot multiplicity.</summary>
@@ -1482,7 +1531,9 @@ namespace Rhino.Geometry.Collections
     public int KnotMultiplicity(int index)
     {
       IntPtr ptr = m_curve.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_KnotMultiplicity(ptr, index);
+      int rc = UnsafeNativeMethods.ON_NurbsCurve_KnotMultiplicity(ptr, index);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1496,7 +1547,9 @@ namespace Rhino.Geometry.Collections
     public bool CreateUniformKnots(double knotSpacing)
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_MakeUniformKnotVector(ptr, knotSpacing, true);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_MakeUniformKnotVector(ptr, knotSpacing, true);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1510,7 +1563,9 @@ namespace Rhino.Geometry.Collections
     public bool CreatePeriodicKnots(double knotSpacing)
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_MakeUniformKnotVector(ptr, knotSpacing, false);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_MakeUniformKnotVector(ptr, knotSpacing, false);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1523,7 +1578,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr = m_curve.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxIsClampedStart);
+        bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxIsClampedStart);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
     }
 
@@ -1537,7 +1594,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr = m_curve.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxIsClampedEnd);
+        bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxIsClampedEnd);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
     }
 
@@ -1563,6 +1622,7 @@ namespace Rhino.Geometry.Collections
         rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxClampStart);
       if (CurveEnd.End == end || CurveEnd.Both == end)
         rc = rc && UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxClampEnd);
+      GC.KeepAlive(m_curve);
       return rc;
     }
 
@@ -1577,7 +1637,9 @@ namespace Rhino.Geometry.Collections
     public double SuperfluousKnot(bool start)
     {
       IntPtr const_ptr_curve = m_curve.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_SuperfluousKnot(const_ptr_curve, start ? 0 : 1);
+      double rc = UnsafeNativeMethods.ON_NurbsCurve_SuperfluousKnot(const_ptr_curve, start ? 0 : 1);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1589,7 +1651,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_curve = m_curve.ConstPointer();
-        return (KnotStyle)UnsafeNativeMethods.ON_NurbsCurve_KnotStyle(const_ptr_curve);
+        KnotStyle rc = (KnotStyle)UnsafeNativeMethods.ON_NurbsCurve_KnotStyle(const_ptr_curve);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
     }
 
@@ -1613,7 +1677,9 @@ namespace Rhino.Geometry.Collections
     public int RemoveMultipleKnots(int minimumMultiplicity, int maximumMultiplicity, double tolerance)
     {
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RemoveMultiKnotCrv(ptr_curve, minimumMultiplicity, maximumMultiplicity, tolerance);
+      int rc = UnsafeNativeMethods.RHC_RemoveMultiKnotCrv(ptr_curve, minimumMultiplicity, maximumMultiplicity, tolerance);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1627,7 +1693,9 @@ namespace Rhino.Geometry.Collections
     public bool RemoveKnots(int index0, int index1)
     {
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_RemoveKnots(ptr_curve, index0, index1);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_RemoveKnots(ptr_curve, index0, index1);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1832,7 +1900,7 @@ namespace Rhino.Geometry.Collections
         IntPtr ptr = m_curve.ConstPointer();
         if (UnsafeNativeMethods.ON_NurbsCurve_GetCV4(ptr, index, ref pt))
           return new ControlPoint(pt);
-
+        GC.KeepAlive(m_curve);
         return ControlPoint.Unset;
       }
       set
@@ -1845,6 +1913,7 @@ namespace Rhino.Geometry.Collections
 
         Point4d pt = value.m_vertex;
         UnsafeNativeMethods.ON_NurbsCurve_SetCV4(ptr, index, ref pt);
+        GC.KeepAlive(m_curve);
       }
     }
 
@@ -1857,7 +1926,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr = m_curve.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_ControlPolygonLength(ptr);
+        double rc = UnsafeNativeMethods.ON_NurbsCurve_ControlPolygonLength(ptr);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
     }
 
@@ -1900,7 +1971,9 @@ namespace Rhino.Geometry.Collections
     public bool ChangeEndWeights(double w0, double w1)
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_ChangeEndWeights(ptr, w0, w1);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_ChangeEndWeights(ptr, w0, w1);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1911,7 +1984,9 @@ namespace Rhino.Geometry.Collections
     public bool MakeRational()
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxMakeRational);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxMakeRational);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1922,7 +1997,9 @@ namespace Rhino.Geometry.Collections
     public bool MakeNonRational()
     {
       IntPtr ptr = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxMakeNonRational);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetBool(ptr, NurbsCurve.idxMakeNonRational);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     private void ValidateIndex(int index)
@@ -1980,7 +2057,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_SetCV3(ptr_curve, index, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_SetCV3(ptr_curve, index, ref point);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -1999,7 +2078,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_SetCV4(ptr_curve, index, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_SetCV4(ptr_curve, index, ref point);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -2030,7 +2111,9 @@ namespace Rhino.Geometry.Collections
       point = new Point3d();
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GetCV3(ptr_curve, index, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetCV3(ptr_curve, index, ref point);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -2050,7 +2133,9 @@ namespace Rhino.Geometry.Collections
       point = new Point4d();
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_GetCV4(ptr_curve, index, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_GetCV4(ptr_curve, index, ref point);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -2065,7 +2150,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_SetWeight(ptr_curve, index, weight);
+      bool rc = UnsafeNativeMethods.ON_NurbsCurve_SetWeight(ptr_curve, index, weight);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -2079,7 +2166,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndex(index);
       IntPtr ptr_curve = m_curve.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsCurve_Weight(ptr_curve, index);
+      double rc = UnsafeNativeMethods.ON_NurbsCurve_Weight(ptr_curve, index);
+      GC.KeepAlive(m_curve);
+      return rc;
     }
 
     /// <summary>
@@ -2093,7 +2182,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr_curve = m_curve.NonConstPointer();
-        return UnsafeNativeMethods.ON_NurbsCurve_CVSize(ptr_curve);
+        int rc = UnsafeNativeMethods.ON_NurbsCurve_CVSize(ptr_curve);
+        GC.KeepAlive(m_curve);
+        return rc;
       }
     }
 
@@ -2119,6 +2210,7 @@ namespace Rhino.Geometry.Collections
         rc = UnsafeNativeMethods.ONC_ValidateCurveCVSpacing(const_ptr_curve, closeTolerance, stackTolerance, ptr_close, ptr_stack);
         closeIndices = close_indices.ToArray();
         stackedIndices = stack_indices.ToArray();
+        GC.KeepAlive(m_curve);
       }
       return rc;
     }

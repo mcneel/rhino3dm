@@ -496,7 +496,10 @@ def setup_js():
     draco_path = check_or_create_path(os.path.join(target_path, "draco_wasm"))
     os.chdir(draco_path)
     try:
-        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco")
+        # For a WASM64 build, draco's objects must also be memory64 or they
+        # won't link against the wasm64 rhino3dm objects.
+        draco_flags = ' -DCMAKE_C_FLAGS=-sMEMORY64=1 -DCMAKE_CXX_FLAGS=-sMEMORY64=1' if wasm64 else ''
+        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco") + draco_flags
         environment = os.environ
         emcmake_path = shutil.which("emcmake")
         emscripten_path = emcmake_path[:-len("emcmake")]
@@ -526,6 +529,10 @@ def setup_js():
     if node:
         print("generating node build")
         cmakecommand = cmakecommand + "-D NODE=TRUE "
+
+    if wasm64:
+        print("generating WASM64 (memory64) build")
+        cmakecommand = cmakecommand + "-D WASM64=TRUE "
     try:
         if debug:
             print("generating debug build")
@@ -612,6 +619,8 @@ def main():
                         help="generate a debug build (wasm only)")
     parser.add_argument('--module', '-m', action='store_true',
                         help="generate a ES6 module build (wasm only)")
+    parser.add_argument('--wasm64', '-w', action='store_true',
+                        help="generate a WASM64 (memory64) build that breaks the 4GB limit (wasm only, opt-in)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     
@@ -642,6 +651,9 @@ def main():
 
     global module
     module = args.module
+
+    global wasm64
+    wasm64 = args.wasm64
 
     global node
     node = False

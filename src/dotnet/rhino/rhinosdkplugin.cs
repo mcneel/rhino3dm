@@ -326,6 +326,9 @@ namespace Rhino.PlugIns
       Assembly assembly;
       try
       {
+        // 28 Feb 2025 S. Baer (RH-86326)
+        // Make sure the path is to the correctly targetted plug-in
+        path = GetMultiTargetPath(path) ?? path;
         assembly = HostUtils.LoadAssemblyFrom(path);
       }
       catch
@@ -2132,6 +2135,7 @@ namespace Rhino.PlugIns
     /// </summary>
     /// <param name="filename">plug-in filename</param>
     /// <returns>id on success; Guid.Empty if no plug-in could be found</returns>
+    /// <since>8.15</since>
     public static Guid IdFromFileName(string filename)
     {
       Guid rc = UnsafeNativeMethods.CRhinoPlugInManager_IdFromFileName(filename);
@@ -4847,12 +4851,7 @@ namespace Rhino.PlugIns
     {
       var p = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
 
-      // JohnC: 1. This never gets called. There is no icon in the Decal UI for it.
-      //        2. The code below seems to be wrong. pXmlSection!=IntPtr.Zero polarity is backwards.
-      //
-      // This seems to indicate that this code has never been tested. Am I confused? [JOHN-DECAL-FIX]
-
-      if (null == p || pXmlSection!=IntPtr.Zero)
+      if ((null == p) || (IntPtr.Zero == pXmlSection))
       {
         HostUtils.DebugString("ERROR: Invalid input for OnDecalProperties");
       }

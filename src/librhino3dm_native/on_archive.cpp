@@ -1,5 +1,13 @@
 #include "stdafx.h"
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #if defined(ON_RUNTIME_APPLE_MACOS) && !defined(RHINO3DM_BUILD)
 #import "../../../rhino4/MacOS/NSImage+QuickLook.h"
 #endif
@@ -21,6 +29,10 @@ RH_C_FUNCTION const RHMONO_STRING* StringHolder_Get(CRhCmnStringHolder* pStringH
   return rc;
 }
 
+RH_C_FUNCTION int ON_BinaryArchive_CurrentArchiveVersion()
+{
+  return ON_BinaryArchive::CurrentArchiveVersion();
+}
 
 RH_C_FUNCTION bool ON_BinaryArchive_AtEnd(const ON_BinaryArchive* pConstArchive)
 {
@@ -783,46 +795,43 @@ RH_C_FUNCTION void ON_ReadBufferArchive_Delete(ON_Read3dmBufferArchive* pReadBuf
     delete pReadBufferArchive;
 }
 
+// From https://learn.microsoft.com/dotnet/api/system.array.maxlength
+const size_t Array_MaxLength = 0x7FFFFFC7;
+
 RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewWriter(const ON_Object* pConstObject, int* rhinoversion, bool writeuserdata, bool writerendermeshes, bool writeanalysismeshes, unsigned int* length)
 {
+  *length = 0;
   ON_Write3dmBufferArchive* rc = nullptr;
   
   if( pConstObject && length && nullptr != rhinoversion)
   {
-    ON_UserDataHolder holder;
-    if( !writeuserdata )
-      holder.MoveUserDataFrom(*pConstObject);
-    *length = 0;
-    size_t sz = pConstObject->SizeOf() + 512; // 256 was too small on x86 builds to account for extra data written
-
     // 23 Oct 2019 - If .NET user passes a huge value, just clamp it and continue.
     const int current_3dm_version = ON_BinaryArchive::CurrentArchiveVersion();
     if (*rhinoversion > current_3dm_version)
       *rhinoversion = current_3dm_version;
 
-    if (*rhinoversion < 70 && nullptr != ON_SubD::Cast(pConstObject))
+    size_t sz = std::max(pConstObject->SizeOf(), 1024u); // 256 was too small on x86 builds to account for extra data written
+    std::unique_ptr<ON_Write3dmBufferArchive> archive(new ON_Write3dmBufferArchive(sz, Array_MaxLength, 0, 0));
     {
-      // SubD objects require at least a version 7 3dm archive.
-      *rhinoversion = 70;
+      // figure out the appropriate version number
+      if (!archive->SetArchive3dmVersion(*rhinoversion)) return nullptr;
+      *rhinoversion = archive->Archive3dmVersion();
+
+      unsigned int on_version = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
+      if (!archive->SetOpenNURBS3dmVersion(on_version)) return nullptr;
+
+      archive->EnableSave3dmRenderMeshes((unsigned int)ON::object_type::any_object, writerendermeshes);
+      archive->EnableSave3dmAnalysisMeshes((unsigned int)ON::object_type::any_object, writeanalysismeshes);
     }
 
-    // figure out the appropriate version number
-    unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(*rhinoversion, ON::Version());
-
-    rc = new ON_Write3dmBufferArchive(sz, 0, *rhinoversion, on_version__to_write);
-    rc->EnableSave3dmRenderMeshes((unsigned int)ON::object_type::any_object, writerendermeshes);
-    rc->EnableSave3dmAnalysisMeshes((unsigned int)ON::object_type::any_object, writeanalysismeshes);
-    if( rc->WriteObject(pConstObject) )
+    ON_UserDataHolder holder;
+    if (!writeuserdata) holder.MoveUserDataFrom(*pConstObject);
+    if(archive->WriteObject(pConstObject) )
     {
-      *length = (unsigned int)rc->SizeOfArchive();
+      *length = (unsigned int)archive->SizeOfArchive();
+      rc = archive.release();
     }
-    else
-    {
-      delete rc;
-      rc = nullptr;
-    }
-    if( !writeuserdata )
-      holder.MoveUserDataTo(*pConstObject, false);
+    if (!writeuserdata) holder.MoveUserDataTo(*pConstObject, false);
   }
   return rc;
 }
@@ -832,7 +841,7 @@ RH_C_FUNCTION ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(in
   // figure out the appropriate version number
   unsigned int on_version__to_write = ON_BinaryArchive::ArchiveOpenNURBSVersionToWrite(rhinoversion, ON::Version());
 
-  ON_Write3dmBufferArchive* rc = new ON_Write3dmBufferArchive(0, 0, rhinoversion, on_version__to_write);
+  ON_Write3dmBufferArchive* rc = new ON_Write3dmBufferArchive(1024, Array_MaxLength, rhinoversion, on_version__to_write);
   return rc;
 }
 
@@ -2972,18 +2981,26 @@ RH_C_FUNCTION bool ONX_Model_GetPreviewImage(const ONX_Model* constModel, CRhino
   return rc;
 }
 
-RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib* constRhinoDib)
+RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib* pRhinoDib)
 {
   bool rc = false;
-  if (nullptr == pModel || nullptr == constRhinoDib)
+  if (nullptr == pModel)
     return false;
 
 #if defined(ON_RUNTIME_WIN)
-  ON_WindowsBitmap* onbmp = constRhinoDib->ToOnWindowsBitmap();
-  if (onbmp)
+  if (pRhinoDib)
   {
-    pModel->m_properties.m_PreviewImage = *onbmp;
-    delete onbmp;
+    ON_WindowsBitmap* pWindowsBitmap = pRhinoDib->ToOnWindowsBitmap();
+    if (pWindowsBitmap)
+    {
+      pModel->m_properties.m_PreviewImage = *pWindowsBitmap;
+      delete pWindowsBitmap;
+      rc = true;
+    }
+  }
+  else
+  {
+    pModel->m_properties.m_PreviewImage = ON_WindowsBitmap::Unset;
     rc = true;
   }
 #endif

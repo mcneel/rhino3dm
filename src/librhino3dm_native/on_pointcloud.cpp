@@ -16,6 +16,41 @@ RH_C_FUNCTION ON_PointCloud* ON_PointCloud_New1(int count, /*ARRAY*/const ON_3dP
   return rc;
 }
 
+RH_C_FUNCTION ON_PointCloud* ON_PointCloud_CreateFromMesh(const ON_Mesh* pMesh)
+{
+  ON_PointCloud* rc = nullptr;
+  if (pMesh && pMesh->IsValid())
+  {
+    rc = new ON_PointCloud();
+    
+    // vertices
+    const ON_3dPointArray& vertices = pMesh->DoublePrecisionVertices();
+    rc->m_P.Append(vertices.Count(), vertices.Array());
+    
+    // vertex normals
+    const int point_count = rc->m_P.Count();
+    const int normal_count = pMesh->m_N.Count();
+    if (point_count == normal_count)
+    {
+      // arrays types differ
+      rc->m_N.SetCapacity(normal_count);
+      for (int i = 0; i < normal_count; i++)
+        rc->m_N.Append(pMesh->m_N[i]);
+    }
+
+    // colors
+    const int color_count = pMesh->m_C.Count();
+    if (point_count == color_count)
+      rc->m_C.Append(color_count, pMesh->m_C.Array());
+
+    // vertex visibility
+    const int hidden_count = pMesh->m_H.Count();
+    if (point_count == hidden_count)
+      rc->m_H.Append(hidden_count, pMesh->m_H.Array());
+  }
+  return rc;
+}
+
 RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureExtra)
 {
   if (pPointCloud)

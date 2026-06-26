@@ -22,6 +22,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr_this = ConstPointer();
         IntPtr const_ptr_curve = UnsafeNativeMethods.ON_RevSurface_Curve(const_ptr_this);
+        GC.KeepAlive(this);
         CurveHolder ch = new CurveHolder(this);
         return GeometryBase.CreateGeometryHelper(const_ptr_curve, ch) as Curve;
       }
@@ -38,6 +39,7 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         var rc = new Line();
         UnsafeNativeMethods.ON_RevSurface_Axis(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -55,6 +57,7 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         var rc = new Interval();
         UnsafeNativeMethods.ON_RevSurface_Angle(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -73,6 +76,7 @@ namespace Rhino.Geometry
         IntPtr const_ptr_this = ConstPointer();
         Interval rc = new Interval();
         UnsafeNativeMethods.ON_RevSurface_Interval(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
         return rc;
       }
     }
@@ -87,7 +91,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_RevSurface_IsTransposed(const_ptr_this);
+        bool rc = UnsafeNativeMethods.ON_RevSurface_IsTransposed(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 

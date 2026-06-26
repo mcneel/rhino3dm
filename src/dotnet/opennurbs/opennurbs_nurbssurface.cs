@@ -122,6 +122,22 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
+    /// Changes a NURBS surface so each control point affects the surface exactly the same way.
+    /// This make the knot vectors uniform without changing the control point locations.
+    /// This will change the object shape slightly.
+    /// </summary>
+    /// <param name="direction">
+    /// Specify 0 for "u" direction, 1 for "v" direction, or 2 for both directions.
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>8.24</since>
+    public bool MakeUniform(int direction)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.RHC_RhMakeNurbsSurfaceUniform(ptr_const_this, direction);
+    }
+
+    /// <summary>
     /// Find the closest isoparamentric curve, given a test point.
     /// </summary>
     /// <param name="testPoint">The test point.</param>
@@ -131,6 +147,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       int rc = UnsafeNativeMethods.RHC_RhFindBestIsoCurve(ptr_const_this, testPoint);
+      GC.KeepAlive(this);
       return (IsoStatus)rc;
     }
 
@@ -161,6 +178,8 @@ namespace Rhino.Geometry
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_const_target = targetCurve.ConstPointer();
       IntPtr ptr = UnsafeNativeMethods.RHC_RhinoMatchNurbsSurfaceEdgeToCurve(ptr_const_this, (int)side, ptr_const_target, maxEndDistance, maxInteriorDistance, matchTolerance, maxLevel);
+      GC.KeepAlive(targetCurve);
+      GC.KeepAlive(this);
       return (ptr == IntPtr.Zero) ? null : new NurbsSurface(ptr, null);
     }
 
@@ -546,7 +565,9 @@ namespace Rhino.Geometry
     {
       uDir = vDir = nDir = Vector3d.Unset;
       IntPtr ptr_const_this = ConstPointer();
-      return UnsafeNativeMethods.RHC_RhinoNurbsSurfaceDirectionsAt(ptr_const_this, u, v, ref uDir, ref vDir, ref nDir);
+      bool rc = UnsafeNativeMethods.RHC_RhinoNurbsSurfaceDirectionsAt(ptr_const_this, u, v, ref uDir, ref vDir, ref nDir);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 
@@ -649,7 +670,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsSurface_GetBool(const_ptr_this, idxIsRational);
+        bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetBool(const_ptr_this, idxIsRational);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -661,7 +684,9 @@ namespace Rhino.Geometry
     public bool MakeRational()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_GetBool(ptr_this, idxMakeRational);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetBool(ptr_this, idxMakeRational);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -672,7 +697,9 @@ namespace Rhino.Geometry
     public bool MakeNonRational()
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_GetBool(ptr_this, idxMakeNonRational);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetBool(ptr_this, idxMakeNonRational);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -690,7 +717,9 @@ namespace Rhino.Geometry
     public bool IncreaseDegreeU(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_IncreaseDegree(ptr_this, 0, desiredDegree);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_IncreaseDegree(ptr_this, 0, desiredDegree);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
@@ -708,7 +737,9 @@ namespace Rhino.Geometry
     public bool IncreaseDegreeV(int desiredDegree)
     {
       IntPtr ptr_this = NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_IncreaseDegree(ptr_this, 1, desiredDegree);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_IncreaseDegree(ptr_this, 1, desiredDegree);
+      GC.KeepAlive(this);
+      return rc;
     }
     #endregion
 
@@ -723,6 +754,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_NurbsSurface_CopyFrom(const_ptr_other, ptr_this);
       GC.KeepAlive(other);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -737,6 +769,7 @@ namespace Rhino.Geometry
     {
       IntPtr constPtrThis = ConstPointer();
       IntPtr ptrBezierSurface = UnsafeNativeMethods.ON_NurbsSurface_ConvertSpanToBezier(constPtrThis, spanIndex0, spanIndex1);
+      GC.KeepAlive(this);
       if (ptrBezierSurface == IntPtr.Zero)
         return null;
       return new BezierSurface(ptrBezierSurface);
@@ -775,7 +808,9 @@ namespace Rhino.Geometry
     internal int GetIntDir(int which, int direction)
     {
       IntPtr ptr = ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_GetIntDir(ptr, which, direction);
+      int rc = UnsafeNativeMethods.ON_NurbsSurface_GetIntDir(ptr, which, direction);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -785,6 +820,7 @@ namespace Rhino.Geometry
       IntPtr ptr = ConstPointer();
       int argb = color.ToArgb();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawNurbsSurface(ptr_display_pipeline, ptr, argb, density);
+      GC.KeepAlive(this);
     }
 #endif
 
@@ -910,12 +946,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_MorphControl_GetSporhTolerance(const_ptr_this);
+        double rc = UnsafeNativeMethods.ON_MorphControl_GetSporhTolerance(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_MorphControl_SetSporhTolerance(ptr_this, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -931,12 +970,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_MorphControl_GetBool(const_ptr_this, true);
+        bool rc = UnsafeNativeMethods.ON_MorphControl_GetBool(const_ptr_this, true);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_MorphControl_SetBool(ptr_this, value, true);
+        GC.KeepAlive(this);
       }
     }
 
@@ -952,12 +994,15 @@ namespace Rhino.Geometry
       get
       {
         IntPtr const_ptr_this = ConstPointer();
-        return UnsafeNativeMethods.ON_MorphControl_GetBool(const_ptr_this, false);
+        bool rc = UnsafeNativeMethods.ON_MorphControl_GetBool(const_ptr_this, false);
+        GC.KeepAlive(this);
+        return rc;
       }
       set
       {
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_MorphControl_SetBool(ptr_this, value, false);
+        GC.KeepAlive(this);
       }
     }
 
@@ -972,7 +1017,7 @@ namespace Rhino.Geometry
       {
         IntPtr const_ptr_this = ConstPointer();
         IntPtr ptr = UnsafeNativeMethods.ON_MorphControl_GetCurve(const_ptr_this);
-
+        GC.KeepAlive(this);
 
         if (ptr == IntPtr.Zero)
           return null;
@@ -994,7 +1039,7 @@ namespace Rhino.Geometry
         // 23 March 2018, Mikko, RH-44990:
         // Typo fix, ON_MorphControl_GetCurve -> ON_MorphControl_GetSurface
         IntPtr ptr = UnsafeNativeMethods.ON_MorphControl_GetSurface(const_ptr_this);
-
+        GC.KeepAlive(this);
 
         if (ptr == IntPtr.Zero)
           return null;
@@ -1017,6 +1062,7 @@ namespace Rhino.Geometry
       IntPtr ptr_geometry = geometry.NonConstPointer();
       bool rc = UnsafeNativeMethods.ON_MorphControl_MorphGeometry(const_ptr_this, ptr_geometry);
       GC.KeepAlive(geometry);
+      GC.KeepAlive(this);
       return rc;
     }
 #endif
@@ -1079,7 +1125,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_HermiteSurface_IsValid(ptr_const_this);
+        bool rc = UnsafeNativeMethods.ON_HermiteSurface_IsValid(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1092,7 +1140,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, true);
+        int rc = UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, true);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1105,7 +1155,9 @@ namespace Rhino.Geometry
       get
       {
         IntPtr ptr_const_this = ConstPointer();
-        return UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, false);
+        int rc = UnsafeNativeMethods.ON_HermiteSurface_Count(ptr_const_this, false);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -1120,6 +1172,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       double parameter = RhinoMath.UnsetValue;
       UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, true, false, index, ref parameter);
+      GC.KeepAlive(this);
       return parameter;
     }
 
@@ -1133,6 +1186,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, true, true, index, ref parameter);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1146,6 +1200,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       double parameter = RhinoMath.UnsetValue;
       UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, false, false, index, ref parameter);
+      GC.KeepAlive(this);
       return parameter;
     }
 
@@ -1159,6 +1214,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_ParameterAt(ptr_this, false, true, index, ref parameter);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1173,6 +1229,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       Point3d point = Point3d.Unset;
       UnsafeNativeMethods.ON_HermiteSurface_PointAt(ptr_this, uIndex, vIndex, false, ref point);
+      GC.KeepAlive(this);
       return point;
     }
 
@@ -1187,6 +1244,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_PointAt(ptr_this, uIndex, vIndex, true, ref point);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1201,6 +1259,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       Vector3d tangent = Vector3d.Unset;
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 0, uIndex, vIndex, false, ref tangent);
+      GC.KeepAlive(this);
       return tangent;
     }
 
@@ -1215,6 +1274,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 0, uIndex, vIndex, true, ref tangent);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1229,6 +1289,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       Vector3d tangent = Vector3d.Unset;
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 1, uIndex, vIndex, false, ref tangent);
+      GC.KeepAlive(this);
       return tangent;
     }
 
@@ -1243,6 +1304,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 1, uIndex, vIndex, true, ref tangent);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1257,6 +1319,7 @@ namespace Rhino.Geometry
       IntPtr ptr_this = NonConstPointer();
       Vector3d tangent = Vector3d.Unset;
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 2, uIndex, vIndex, false, ref tangent);
+      GC.KeepAlive(this);
       return tangent;
     }
 
@@ -1271,6 +1334,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_HermiteSurface_VectorAt(ptr_this, 2, uIndex, vIndex, true, ref twist);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -1282,6 +1346,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_nurbs_surface = UnsafeNativeMethods.ON_HermiteSurface_NurbsSurface(ptr_this);
+      GC.KeepAlive(this);
       if (IntPtr.Zero == ptr_nurbs_surface)
         return null;
       return new NurbsSurface(ptr_nurbs_surface, null);
@@ -1392,6 +1457,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr = m_surface.ConstPointer();
       Point2d gp = Point2d.Unset;
       UnsafeNativeMethods.ON_NurbsSurface_GetGrevillePoint(ptr, u, v, ref gp);
+      GC.KeepAlive(m_surface);
       return gp;
     }
 
@@ -1486,7 +1552,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.ConstPointer(); ;
-      return UnsafeNativeMethods.ON_NurbsSurface_SetCV3(ptr_srf, u, v, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_SetCV3(ptr_srf, u, v, ref point);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1506,7 +1574,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_SetCV4(ptr_srf, u, v, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_SetCV4(ptr_srf, u, v, ref point);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1539,7 +1609,9 @@ namespace Rhino.Geometry.Collections
       point = new Point3d();
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_GetCV3(ptr_srf, u, v, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetCV3(ptr_srf, u, v, ref point);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1560,7 +1632,9 @@ namespace Rhino.Geometry.Collections
       point = new Point4d();
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_GetCV4(ptr_srf, u, v, ref point);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetCV4(ptr_srf, u, v, ref point);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1576,7 +1650,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_SetWeight(ptr_srf, u, v, weight);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_SetWeight(ptr_srf, u, v, weight);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1591,7 +1667,9 @@ namespace Rhino.Geometry.Collections
     {
       ValidateIndices(u, v);
       IntPtr ptr_srf = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_Weight(ptr_srf, u, v);
+      double rc = UnsafeNativeMethods.ON_NurbsSurface_Weight(ptr_srf, u, v);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1605,7 +1683,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr ptr_srf = m_surface.NonConstPointer();
-        return UnsafeNativeMethods.ON_NurbsSurface_CVSize(ptr_srf);
+        int rc = UnsafeNativeMethods.ON_NurbsSurface_CVSize(ptr_srf);
+        GC.KeepAlive(m_surface);
+        return rc;
       }
     }
 
@@ -1662,6 +1742,7 @@ namespace Rhino.Geometry.Collections
         rc = UnsafeNativeMethods.ONC_ValidateSurfaceCVSpacing(const_ptr_surface, closeTolerance, stackTolerance, ptr_close, ptr_stack);
         closeIndices = close_indices.ToArray();
         stackedIndices = stack_indices.ToArray();
+        GC.KeepAlive(m_surface);
       }
       return rc;
     }
@@ -1829,7 +1910,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_surface = m_surface.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsSurface_GetBoolDir(const_ptr_surface, NurbsSurface.idxIsClampedStart, m_direction);
+        bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetBoolDir(const_ptr_surface, NurbsSurface.idxIsClampedStart, m_direction);
+        GC.KeepAlive(m_surface);
+        return rc;
       }
     }
     /// <summary>Determines if a knot vector is clamped.</summary>
@@ -1839,7 +1922,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_surface = m_surface.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsSurface_GetBoolDir(const_ptr_surface, NurbsSurface.idxIsClampedEnd, m_direction);
+        bool rc = UnsafeNativeMethods.ON_NurbsSurface_GetBoolDir(const_ptr_surface, NurbsSurface.idxIsClampedEnd, m_direction);
+        GC.KeepAlive(m_surface);
+        return rc;
       }
     }
 
@@ -1854,7 +1939,9 @@ namespace Rhino.Geometry.Collections
     public double SuperfluousKnot(bool start)
     {
       IntPtr const_ptr_surface = m_surface.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_SuperfluousKnot(const_ptr_surface, m_direction, start ? 0 : 1);
+      double rc = UnsafeNativeMethods.ON_NurbsSurface_SuperfluousKnot(const_ptr_surface, m_direction, start ? 0 : 1);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1866,7 +1953,9 @@ namespace Rhino.Geometry.Collections
       get
       {
         IntPtr const_ptr_surface = m_surface.ConstPointer();
-        return (KnotStyle)UnsafeNativeMethods.ON_NurbsSurface_KnotStyle(const_ptr_surface, m_direction);
+        KnotStyle rc = (KnotStyle)UnsafeNativeMethods.ON_NurbsSurface_KnotStyle(const_ptr_surface, m_direction);
+        GC.KeepAlive(m_surface);
+        return rc;
       }
     }
 
@@ -1882,7 +1971,9 @@ namespace Rhino.Geometry.Collections
         if (index < 0) { throw new IndexOutOfRangeException("Index must be larger than or equal to zero."); }
         if (index >= Count) { throw new IndexOutOfRangeException("Index must be less than the number of knots."); }
         IntPtr ptr = m_surface.ConstPointer();
-        return UnsafeNativeMethods.ON_NurbsSurface_Knot(ptr, m_direction, index);
+        double rc = UnsafeNativeMethods.ON_NurbsSurface_Knot(ptr, m_direction, index);
+        GC.KeepAlive(m_surface);
+        return rc;
       }
       set
       {
@@ -1890,6 +1981,7 @@ namespace Rhino.Geometry.Collections
         if (index >= Count) { throw new IndexOutOfRangeException("Index must be less than the number of knots."); }
         IntPtr ptr = m_surface.NonConstPointer();
         UnsafeNativeMethods.ON_NurbsSurface_SetKnot(ptr, m_direction, index, value);
+        GC.KeepAlive(m_surface);
       }
     }
 #endregion
@@ -1939,7 +2031,9 @@ namespace Rhino.Geometry.Collections
     public int KnotMultiplicity(int index)
     {
       IntPtr ptr = m_surface.ConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_KnotMultiplicity(ptr, m_direction, index);
+      int rc = UnsafeNativeMethods.ON_NurbsSurface_KnotMultiplicity(ptr, m_direction, index);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1953,7 +2047,9 @@ namespace Rhino.Geometry.Collections
     public bool CreateUniformKnots(double knotSpacing)
     {
       IntPtr ptr = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_MakeUniformKnotVector(ptr, m_direction, knotSpacing, true);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_MakeUniformKnotVector(ptr, m_direction, knotSpacing, true);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -1967,7 +2063,9 @@ namespace Rhino.Geometry.Collections
     public bool CreatePeriodicKnots(double knotSpacing)
     {
       IntPtr ptr = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.ON_NurbsSurface_MakeUniformKnotVector(ptr, m_direction, knotSpacing, false);
+      bool rc = UnsafeNativeMethods.ON_NurbsSurface_MakeUniformKnotVector(ptr, m_direction, knotSpacing, false);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
 #if RHINO_SDK
@@ -1989,7 +2087,9 @@ namespace Rhino.Geometry.Collections
     public int RemoveMultipleKnots(int minimumMultiplicity, int maximumMultiplicity, double tolerance)
     {
       IntPtr ptr_surface = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.RHC_RemoveMultiKnotSrf(ptr_surface, m_direction, minimumMultiplicity, maximumMultiplicity, tolerance);
+      int rc = UnsafeNativeMethods.RHC_RemoveMultiKnotSrf(ptr_surface, m_direction, minimumMultiplicity, maximumMultiplicity, tolerance);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
@@ -2003,7 +2103,9 @@ namespace Rhino.Geometry.Collections
     public bool RemoveKnots(int index0, int index1)
     {
       IntPtr ptr_surface = m_surface.NonConstPointer();
-      return UnsafeNativeMethods.TL_NurbsSurface_RemoveKnots(ptr_surface, m_direction, index0, index1);
+      bool rc = UnsafeNativeMethods.TL_NurbsSurface_RemoveKnots(ptr_surface, m_direction, index0, index1);
+      GC.KeepAlive(m_surface);
+      return rc;
     }
 
     /// <summary>
