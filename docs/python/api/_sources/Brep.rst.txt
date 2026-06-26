@@ -33,7 +33,7 @@ Brep
    .. py:attribute:: IsManifold
 
       bool: Gets a value indicating whether or not the Brep is manifold.
-      Non-Manifold breps have at least one edge that is shared among three or more faces.
+      Non manifold breps have at least one edge that is shared among three or more faces.
 
    .. py:attribute:: IsSurface
 

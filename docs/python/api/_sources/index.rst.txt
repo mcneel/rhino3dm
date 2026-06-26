@@ -112,6 +112,7 @@ Welcome to rhino3dm's documentation!
    NurbsSurfaceKnotList
    NurbsSurfacePointList
    ObjectAttributes
+   ObjectTable
    PhysicallyBasedMaterial
    Plane
    PlaneSurface
@@ -137,6 +138,7 @@ Welcome to rhino3dm's documentation!
    RenderSettings
    RenderTexture
    RevSurface
+   RhinoDoc
    SafeFrame
    ShutLining
    ShutLiningCurve

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arc &mdash; rhino3dm 8.17.0-beta documentation</title>
+  <title>Arc &mdash; rhino3dm 8.32.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=fccd7490"></script>
+        <script src="_static/documentation_options.js?v=65727893"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.17.0-beta
+                8.32.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -187,6 +187,7 @@
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurfaceKnotList.html">NurbsSurfaceKnotList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="NurbsSurfacePointList.html">NurbsSurfacePointList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObjectAttributes.html">ObjectAttributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObjectTable.html">ObjectTable</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PhysicallyBasedMaterial.html">PhysicallyBasedMaterial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plane.html">Plane</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PlaneSurface.html">PlaneSurface</a></li>
@@ -212,6 +213,7 @@
 <li class="toctree-l1"><a class="reference internal" href="RenderSettings.html">RenderSettings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RenderTexture.html">RenderTexture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RevSurface.html">RevSurface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RhinoDoc.html">RhinoDoc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SafeFrame.html">SafeFrame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ShutLining.html">ShutLining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ShutLiningCurve.html">ShutLiningCurve</a></li>
@@ -312,7 +314,8 @@ or co-linear, this will result in an Invalid arc.</p>
 <dt class="sig sig-object py" id="id2">
 <span class="sig-name descname"><span class="pre">Arc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pointA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tangentA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointB</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Initializes a new arc from end points and a tangent vector.
-If the tangent is parallel with the endpoints this will result in an Invalid arc.</p>
+If the tangent is parallel with the line segment between the two
+endpoints this will result in an Invalid arc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -436,13 +439,14 @@ Radius&gt;0 and 0&lt;AngleRadians()&lt;=2*Math.Pi.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.Arc.Trim">
 <span class="sig-name descname"><span class="pre">Trim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.Arc.Trim" title="Link to this definition"></a></dt>
-<dd><p>Sets arc’s angle domain (in Radians) as a sub-domain of the circle.</p>
+<dd><p>Sets the arc’s angle domain (in radians) to the specified interval, provided it is increasing and its length does not exceed 2.0 * Math.PI (plus a small tolerance).
+If the interval length exceeds 2.0 * Math.PI it will be clamped to exactly 2.0 * Math.PI. Returns True if the domain was set successfully, False otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – 0 &lt; domain[1] - domain[0] &lt;= 2.0 * RhinoMath.Pi.</p>
+<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="Interval.html#rhino3dm.Interval" title="rhino3dm.Interval"><em>rhino3dm.Interval</em></a>) – The desired angle domain in radians. Must satisfy domain[0] &lt; domain[1] and domain[1] - domain[0] &lt;= 2.0 * Math.PI + tolerance.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True on success, False on failure.</p>
+<dd class="field-even"><p>True if the domain was set successfully; False if the interval is not increasing or exceeds the allowed length.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -591,7 +595,7 @@ This amounts to the same as calling NurbsCurve.CreateFromArc().</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, Robert McNeel &amp; Associates.</p>
+    <p>&#169; Copyright 2025, Robert McNeel &amp; Associates.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

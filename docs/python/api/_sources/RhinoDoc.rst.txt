@@ -1,0 +1,10 @@
+RhinoDoc
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: RhinoDoc
+
+   .. py:staticmethod:: ActiveDoc()
+
+      [todo] add documentation

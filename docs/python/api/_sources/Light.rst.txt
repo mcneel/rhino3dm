@@ -127,7 +127,7 @@ Light
 
    .. py:attribute:: Name
 
-      str: Gets or sets the spot light name.
+      str: Gets or sets the light name.
 
    .. py:method:: SetAttenuation(a0, a1, a2)
 

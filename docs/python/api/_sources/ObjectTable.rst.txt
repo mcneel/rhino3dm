@@ -1,0 +1,22 @@
+ObjectTable
+===========
+
+.. py:module:: rhino3dm
+
+.. py:class:: ObjectTable
+
+   .. py:method:: AddPoint(x, y, z)
+
+      [todo] add documentation
+
+   .. py:method:: AddPoint(point)
+
+      [todo] add documentation
+
+   .. py:method:: AddLine(from, to)
+
+      [todo] add documentation
+
+   .. py:method:: AddLine(line)
+
+      [todo] add documentation

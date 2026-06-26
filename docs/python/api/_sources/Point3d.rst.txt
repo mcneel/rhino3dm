@@ -37,6 +37,10 @@ Point3d
 
       [todo] add documentation
 
+   .. py:method:: __str__()
+
+      [todo] add documentation
+
    .. py:method:: DistanceTo(other)
 
       Computes the distance between two points.

@@ -32,7 +32,8 @@ Arc
    .. py:method:: Arc(pointA, tangentA, pointB)
 
       Initializes a new arc from end points and a tangent vector.
-      If the tangent is parallel with the endpoints this will result in an Invalid arc.
+      If the tangent is parallel with the line segment between the two
+      endpoints this will result in an Invalid arc.
 
       :param rhino3dm.Point3d pointA: Start point of arc.
       :param rhino3dm.Vector3d tangentA: Tangent at start of arc.
@@ -113,11 +114,12 @@ Arc
 
    .. py:method:: Trim(domain)
 
-      Sets arc's angle domain (in Radians) as a sub-domain of the circle.
+      Sets the arc's angle domain (in radians) to the specified interval, provided it is increasing and its length does not exceed 2.0 * Math.PI (plus a small tolerance).
+      If the interval length exceeds 2.0 * Math.PI it will be clamped to exactly 2.0 * Math.PI. Returns True if the domain was set successfully, False otherwise.
 
-      :param rhino3dm.Interval domain: 0 < domain[1] - domain[0] <= 2.0 * RhinoMath.Pi.
+      :param rhino3dm.Interval domain: The desired angle domain in radians. Must satisfy domain[0] < domain[1] and domain[1] - domain[0] <= 2.0 * Math.PI + tolerance.
 
-      :return: True on success, False on failure.
+      :return: True if the domain was set successfully; False if the interval is not increasing or exceeds the allowed length.
 
       :rtype: bool
 

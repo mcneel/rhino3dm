@@ -80,6 +80,10 @@ GeometryBase
 
       :rtype: rhino3dm.BoundingBox
 
+   .. py:method:: GetTightBoundingBox()
+
+      [todo] add documentation
+
    .. py:method:: MakeDeformable()
 
       If possible, converts the object into a form that can be accurately modified
