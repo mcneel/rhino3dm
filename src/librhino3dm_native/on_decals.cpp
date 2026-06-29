@@ -20,17 +20,28 @@ enum ON_DecalProjection : int
   projBoth
 };
 
-RH_C_FUNCTION void ON_Decal_Delete(ON_Decal* decal)
+RH_C_FUNCTION std::shared_ptr<ON_Decal>* SharedPtr_ON_Decal_Copy(std::shared_ptr<ON_Decal>* decal_sp)
 {
-  delete decal;
-}
-
-RH_C_FUNCTION ON_Decal* ON_Decal_NewDecal(const ON_Decal* other)
-{
-  if (nullptr == other)
+  if (nullptr == decal_sp)
     return nullptr;
 
-  return new ON_Decal(*other);
+  // Copy the shared pointer so that a new reference to the same decal is created.
+  return new std::shared_ptr<ON_Decal>(*decal_sp);
+}
+
+RH_C_FUNCTION ON_Decal* SharedPtr_ON_Decal_RawPtr(std::shared_ptr<ON_Decal>* decal_sp)
+{
+  if (nullptr == decal_sp)
+    return nullptr;
+
+  // Return the decal that the shared pointer is pointing to.
+  return decal_sp->get();
+}
+
+RH_C_FUNCTION void SharedPtr_ON_Decal_Delete(std::shared_ptr<ON_Decal>* decal_sp)
+{
+  // Delete the shared pointer. This may or may not delete the actual decal that it's pointing to.
+  delete decal_sp;
 }
 
 RH_C_FUNCTION ON_UUID ON_Decal_TextureInstanceId(const ON_Decal* decal)
@@ -157,6 +168,14 @@ RH_C_FUNCTION double ON_Decal_Transparency(const ON_Decal* decal)
     return 0.0;
 
   return decal->Transparency();
+}
+
+RH_C_FUNCTION bool ON_Decal_IsVisible(const ON_Decal* decal)
+{
+  if (nullptr == decal)
+    return false;
+
+  return decal->IsVisible();
 }
 
 RH_C_FUNCTION void ON_Decal_SetTransparency(ON_Decal* decal, double d)

@@ -58,26 +58,30 @@ namespace Rhino.Render
   /// </summary>
   public class Decal : IDisposable
   {
-    private IntPtr m_decal;                       // Pointer to ON_Decal.
+    private IntPtr m_decal_sp = IntPtr.Zero;      // Pointer to shared_ptr to ON_Decal.
     private readonly uint m_rhino_doc_serial = 0; // Serial number of document (if applicable).
-    private readonly bool m_owned = false;        // True if m_decal is owned by this.
+    private IntPtr m_object_attr = IntPtr.Zero;   // Attributes for holding decal user data / XML.
 
     // Forces a reference to the decal enumerator to stick around until this object is GCd.
     private readonly DecalEnumerator m_decals;
 
-    internal Decal(IntPtr decal)
+    internal Decal(IntPtr decal_sp)
     {
-      m_decal = decal; // I own this.
-      m_owned = true;
+      m_decal_sp = decal_sp;
     }
 
-    [Obsolete("Do not use")]
-    internal Decal(IntPtr decal, DecalEnumerator decals, uint doc_sn)
+    internal Decal(IntPtr attr, uint decal_crc)
+    {
+      m_object_attr = attr;
+      m_decal_sp = UnsafeNativeMethods.Rdk_Decal_NewDecalSharedPtrFromObjectAttributes(attr, decal_crc);
+    }
+
+    internal Decal(IntPtr decal_sp, DecalEnumerator decals, uint doc_sn)
     {
       // The document is only needed for rendering, specifically for calling Decal.TextureRenderCRC.
       m_rhino_doc_serial = doc_sn;
 
-      m_decal  = decal; // Owned by attributes at the calling site.
+      m_decal_sp = UnsafeNativeMethods.SharedPtr_ON_Decal_Copy(decal_sp);
       m_decals = decals;
     }
 
@@ -92,37 +96,51 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public void Dispose(bool isDisposing)
     {
-      if (m_owned)
+      if (m_object_attr != IntPtr.Zero)
       {
-        UnsafeNativeMethods.ON_Decal_Delete(m_decal);
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Delete(m_object_attr);
+        m_object_attr = IntPtr.Zero;
       }
 
-      m_decal = IntPtr.Zero;
+      UnsafeNativeMethods.SharedPtr_ON_Decal_Delete(m_decal_sp);
+      GC.KeepAlive(this);
+
+      m_decal_sp = IntPtr.Zero;
     }
 
     /// <since>5.10</since>
     static public Decal Create(DecalCreateParams createParams)
     {
-      var create_params_ptr = UnsafeNativeMethods.CDecalCreateParams_New();
-      if (create_params_ptr == IntPtr.Zero)
+      var create_params = UnsafeNativeMethods.Rdk_DecalCreateParams_New();
+      if (create_params == IntPtr.Zero)
         return null;
 
-      var origin = createParams.Origin;
-      var up_vector = createParams.VectorUp;
-      var across_vector = createParams.VectorAcross;
-      UnsafeNativeMethods.CDecalCreateParams_SetFrame(create_params_ptr, ref origin, ref up_vector, ref across_vector);
-      UnsafeNativeMethods.CDecalCreateParams_SetMap(create_params_ptr, createParams.TextureInstanceId, (int)createParams.DecalMapping, (int)createParams.DecalProjection, createParams.MapToInside, createParams.Transparency);
-      UnsafeNativeMethods.CDecalCreateParams_SetCylindricalAndSpherical(create_params_ptr, createParams.Height, createParams.Radius, createParams.StartLatitude, createParams.EndLatitude, createParams.StartLongitude, createParams.EndLongitude);
-      UnsafeNativeMethods.CDecalCreateParams_SetUV(create_params_ptr, createParams.MinU, createParams.MinV, createParams.MaxU, createParams.MaxV);
+      var cp = createParams;
+      var origin = cp.Origin;
+      var up     = cp.VectorUp;
+      var across = cp.VectorAcross;
+      UnsafeNativeMethods.Rdk_DecalCreateParams_Set(create_params,
+                   cp.TextureInstanceId, (int)cp.DecalMapping, (int)cp.DecalProjection,
+                   cp.MapToInside, cp.Transparency, ref origin, ref up, ref across, cp.Height, cp.Radius,
+                   cp.StartLatitude, cp.EndLatitude, cp.StartLongitude, cp.EndLongitude,
+                   cp.MinU, cp.MinV, cp.MaxU, cp.MaxV);
 
-      var decal_ptr = UnsafeNativeMethods.ON_Decal_NewDecal(create_params_ptr);
+      var attr = UnsafeNativeMethods.ON_3dmObjectAttributes_New(IntPtr.Zero);
 
-      UnsafeNativeMethods.CDecalCreateParams_Delete(create_params_ptr);
+      // create_params is actually an ON_Decal.
+      var decal_crc = UnsafeNativeMethods.Rdk_Decal_AddDecal(create_params, attr);
 
-      if (decal_ptr == IntPtr.Zero)
+      UnsafeNativeMethods.Rdk_DecalCreateParams_Delete(create_params);
+
+      GC.KeepAlive(createParams);
+
+      if (0 == decal_crc)
+      {
+        UnsafeNativeMethods.ON_3dmObjectAttributes_Delete(attr);
         return null;
+      }
 
-      return new Decal(decal_ptr); // decal_ptr is owned by Render.Decal.
+      return new Decal(attr, decal_crc);
     }
 
     /// <summary>
@@ -133,13 +151,29 @@ namespace Rhino.Render
     /// You can detect when a decal changes by watching for the OnUserDataTransformed event.
     /// </summary>
     /// <since>6.0</since>
-    public int CRC { get => (int)UnsafeNativeMethods.ON_Decal_DecalCRC(ConstPointer()); }
+    public int CRC
+    {
+      get
+      {
+        var ret = (int)UnsafeNativeMethods.ON_Decal_DecalCRC(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// Gets the texture ID for this decal.
     /// </summary>
     /// <since>5.10</since>
-    public Guid TextureInstanceId { get => UnsafeNativeMethods.ON_Decal_TextureInstanceId(ConstPointer()); }
+    public Guid TextureInstanceId
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_TextureInstanceId(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
 #if RHINO_SDK
     /// <summary>
@@ -151,8 +185,10 @@ namespace Rhino.Render
     [Obsolete("Do not use")]
     public uint TextureRenderCRC(TextureRenderHashFlags rh)
     {
-      return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
+      var ret = UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
                                  m_rhino_doc_serial, ConstPointer(), (ulong)rh, IntPtr.Zero);
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -164,8 +200,11 @@ namespace Rhino.Render
     [Obsolete("Do not use")]
     public uint TextureRenderCRC(TextureRenderHashFlags rh, LinearWorkflow lw)
     {
-      return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
+      var ret = UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
                                  m_rhino_doc_serial, ConstPointer(), (ulong)rh, lw.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(lw);
+      return ret;
     }
 
     /// <summary>
@@ -180,8 +219,11 @@ namespace Rhino.Render
       if (0 == m_rhino_doc_serial)
         throw new DecalDocumentException();
 
-      return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
+      var ret = UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
                                  m_rhino_doc_serial, ConstPointer(), (ulong)flags, IntPtr.Zero);
+
+      GC.KeepAlive(this);
+      return ret;
     }
 
     /// <summary>
@@ -197,8 +239,11 @@ namespace Rhino.Render
       if (0 == m_rhino_doc_serial)
         throw new DecalDocumentException();
 
-      return UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
+      var ret = UnsafeNativeMethods.Rdk_ON_Decal_TextureRenderCRC(
                                  m_rhino_doc_serial, ConstPointer(), (ulong)flags, lw.CppPointer);
+
+      GC.KeepAlive(this);
+      return ret;
     }
 #endif
 
@@ -218,7 +263,10 @@ namespace Rhino.Render
     {
       get
       {
-        switch ((UnsafeNativeMethods.ON_DecalMapping)UnsafeNativeMethods.ON_Decal_Mapping(ConstPointer()))
+        var s = (UnsafeNativeMethods.ON_DecalMapping)UnsafeNativeMethods.ON_Decal_Mapping(ConstPointer());
+        GC.KeepAlive(this);
+
+        switch (s)
         {
           case UnsafeNativeMethods.ON_DecalMapping.Planar:      return DecalMapping.Planar;
           case UnsafeNativeMethods.ON_DecalMapping.Cylindrical: return DecalMapping.Cylindrical;
@@ -246,7 +294,10 @@ namespace Rhino.Render
     {
       get
       {
-        switch ((UnsafeNativeMethods.ON_DecalProjection)UnsafeNativeMethods.ON_Decal_Projection(ConstPointer()))
+        var s = (UnsafeNativeMethods.ON_DecalProjection)UnsafeNativeMethods.ON_Decal_Projection(ConstPointer());
+        GC.KeepAlive(this);
+
+        switch (s)
         {
           case UnsafeNativeMethods.ON_DecalProjection.Forward:  return DecalProjection.Forward;
           case UnsafeNativeMethods.ON_DecalProjection.Backward: return DecalProjection.Backward;
@@ -263,13 +314,43 @@ namespace Rhino.Render
     /// </summary>
     /// <value>true if texture is mapped to inside of sphere or cylinder, else \e false.</value>
     /// <since>5.10</since>
-    public bool MapToInside { get => UnsafeNativeMethods.ON_Decal_MapToInside(ConstPointer()); }
+    public bool MapToInside
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_MapToInside(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// Gets the decal's transparency in the range 0 to 1.
     /// </summary>
     /// <since>5.10</since>
-    public double Transparency { get => UnsafeNativeMethods.ON_Decal_Transparency(ConstPointer()); }
+    public double Transparency
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_Transparency(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
+
+    /// <summary>
+    /// Gets the decal's visibility.
+    /// </summary>
+    /// <since>8.18</since>
+    public bool IsVisible
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_IsVisible(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// Gets the origin of the decal in world space.
@@ -281,6 +362,7 @@ namespace Rhino.Render
       {
         var v = new Rhino.Geometry.Point3d();
         UnsafeNativeMethods.ON_Decal_Origin(ConstPointer(), ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -296,6 +378,7 @@ namespace Rhino.Render
       {
         var v = new Rhino.Geometry.Vector3d();
         UnsafeNativeMethods.ON_Decal_VectorUp(ConstPointer(), ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -311,6 +394,7 @@ namespace Rhino.Render
       {
         var v = new Rhino.Geometry.Vector3d();
         UnsafeNativeMethods.ON_Decal_VectorAcross(ConstPointer(), ref v);
+        GC.KeepAlive(this);
         return v;
       }
     }
@@ -319,13 +403,29 @@ namespace Rhino.Render
     /// Gets the height of the decal. Only used when mapping is cylindrical.
     /// </summary>
     /// <since>5.10</since>
-    public double Height { get => UnsafeNativeMethods.ON_Decal_Height(ConstPointer()); }
+    public double Height
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_Height(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// Gets the radius of the decal. Only used when mapping is cylindrical or spherical.
     /// </summary>
     /// <since>5.10</since>
-    public double Radius { get => UnsafeNativeMethods.ON_Decal_Radius(ConstPointer()); }
+    public double Radius
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.ON_Decal_Radius(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
+    }
 
     /// <summary>
     /// Gets the start angle of the decal's arc of latitude or 'horizontal sweep'. This is actually a LONGITUDINAL angle. Only used when mapping is cylindrical or spherical.
@@ -363,6 +463,7 @@ namespace Rhino.Render
     {
       double s = 0.0, e = 0.0;
       UnsafeNativeMethods.ON_Decal_GetHorzSweep(ConstPointer(), ref s, ref e);
+      GC.KeepAlive(this);
       sta = s; end = e;
     }
 
@@ -374,6 +475,7 @@ namespace Rhino.Render
     {
       double s = 0.0, e = 0.0;
       UnsafeNativeMethods.ON_Decal_GetVertSweep(ConstPointer(), ref s, ref e);
+      GC.KeepAlive(this);
       sta = s; end = e;
     }
 
@@ -381,9 +483,22 @@ namespace Rhino.Render
     /// The UV bounds of the decal. Only used when mapping is UV.
     /// </summary>
     /// <since>5.10</since>
+ //   [Obsolete("Use GetUVBounds instead")]
     public void UVBounds(ref double minUOut, ref double minVOut, ref double maxUOut, ref double maxVOut)
     {
       UnsafeNativeMethods.ON_Decal_UVBounds(ConstPointer(), ref minUOut, ref minVOut, ref maxUOut, ref maxVOut);
+    }
+
+    /// <summary>
+    /// The UV bounds of the decal. Only used when mapping is UV.
+    /// </summary>
+    /// <since>8.18</since>
+    public void GetUVBounds(out double min_u, out double min_v, out double max_u, out double max_v)
+    {
+      double a = 0.0, b = 0.0, c = 0.0, d = 0.0;
+      UnsafeNativeMethods.ON_Decal_UVBounds(ConstPointer(), ref a, ref b, ref c, ref d);
+      GC.KeepAlive(this);
+      min_u = a; min_v = b; max_u = c; max_v = d;
     }
 
     /// <summary>
@@ -394,10 +509,11 @@ namespace Rhino.Render
     {
       var tm = new TextureMapping();
       UnsafeNativeMethods.ON_Decal_TextureMapping(ConstPointer(), tm.NonConstPointer());
+      GC.KeepAlive(this);
       return tm;
     }
 
-    internal static List<NamedValue> ConvertToNamedValueList(IntPtr parms) // [MARKER]
+    internal static List<NamedValue> ConvertToNamedValueList(IntPtr parms)
     {
       var list = new List<NamedValue>();
 
@@ -434,6 +550,8 @@ namespace Rhino.Render
       var list = ConvertToNamedValueList(param_block);
       UnsafeNativeMethods.ON_XMLParameters_Delete(param_block);
 
+      GC.KeepAlive(this);
+
       return list;
     }
 
@@ -451,35 +569,59 @@ namespace Rhino.Render
       var list = ConvertToNamedValueList(param_block);
       UnsafeNativeMethods.ON_XMLParameters_Delete(param_block);
 
+      GC.KeepAlive(this);
+
       return list;
     }
 
     /// <summary>
-    /// Blend color with the decal color at a given point.
+    /// Blend a color with the decal color at a given point. Please note that this function is very slow
+    /// so you should only use it if you're not overly concerned about performance.
+    /// Also please note that this function is actually a 'blend' operation, not a true 'get' operation
+    /// and is sensitive to the value passed into the colInOut parameter. The alpha value of colInOut
+    /// is used as the blend amount where 0 means 'all decal RGB' and 1 means 'all colInOut RGB'.
+    /// If you want to simply GET the decal color, you must pass 0 for colInOut alpha.
     /// </summary>
     /// <param name="point">The point in space or, if the decal is uv-mapped, the uv-coordinate of that point.</param>
     /// <param name="normal">The face normal of the given point.</param>
-    /// <param name="colInOut">The color to blend the decal color to.</param>
-    /// <param name="uvOut">the UV on the texture that the color point was read from.</param>
+    /// <param name="colInOut">Accepts the color to blend the decal color to and returns the blended color.
+    ///                        See the notes above for details.</param>
+    /// <param name="uvOut">Returns the (u,v) on the texture that the color was read from.</param>
     /// <returns>true if the given point hits the decal, else false.</returns>
     /// <since>5.10</since>
-    /// <deprecated>8.5</deprecated>
-    [Obsolete("Incredibly slow call")]
-    public bool TryGetColor(Rhino.Geometry.Point3d point, Rhino.Geometry.Vector3d normal, ref Rhino.Display.Color4f colInOut, ref Rhino.Geometry.Point2d uvOut)
+    public bool TryGetColor(    Rhino.Geometry.Point3d point,       Rhino.Geometry.Vector3d normal,
+                            ref Rhino.Display.Color4f colInOut, ref Rhino.Geometry.Point2d uvOut)
     {
       if (0 == m_rhino_doc_serial)
         throw new DecalDocumentException();
 
-      return UnsafeNativeMethods.Rdk_ON_Decal_GetColor(m_rhino_doc_serial, ConstPointer(), ref point, ref normal, ref colInOut, ref uvOut);
+      var ret = UnsafeNativeMethods.Rdk_ON_Decal_GetColor(m_rhino_doc_serial, ConstPointer(), ref point, ref normal, ref colInOut, ref uvOut);
+      GC.KeepAlive(this);
+      return ret;
     }
 #else
 #endif
 
     #region internals
+
+    internal IntPtr DecalIntPtr
+    {
+      get
+      {
+        var decal_ptr = UnsafeNativeMethods.SharedPtr_ON_Decal_RawPtr(m_decal_sp);
+        GC.KeepAlive(this);
+        return decal_ptr;
+      }
+    }
+
     /// <since>5.10</since>
-    public IntPtr ConstPointer() { return m_decal; }
+    /// Returns the raw const ON_Decal pointer.
+    public IntPtr ConstPointer() { return DecalIntPtr; }
+
     /// <since>5.10</since>
-    public IntPtr NonConstPointer() { return m_decal; }
+    /// Returns the raw non-const ON_Decal pointer.
+    public IntPtr NonConstPointer() { return DecalIntPtr; }
+
     #endregion
   }
 
@@ -514,23 +656,31 @@ namespace Rhino.Render
       if (decal == null)
         throw new ArgumentNullException(nameof(decal));
 
-      var create_params_ptr = UnsafeNativeMethods.CDecalCreateParams_New();
+      // Adding a decal to the collection requires the decal data to be copied onto the collection's
+      // parent object attributes. We can't just add the decal to some list of decals because the
+      // decal actually has its own object attributes to hold the user data / XML blob as well as
+      // a cached decal object.
+
+      var create_params = UnsafeNativeMethods.Rdk_DecalCreateParams_New();
 
       var origin = decal.Origin;
-      var up_vector = decal.VectorUp;
-      var across_vector = decal.VectorAcross;
-      UnsafeNativeMethods.CDecalCreateParams_SetFrame(create_params_ptr, ref origin, ref up_vector, ref across_vector);
-      UnsafeNativeMethods.CDecalCreateParams_SetMap(create_params_ptr, decal.TextureInstanceId, (int)decal.Mapping, (int)decal.Projection, decal.MapToInside, decal.Transparency);
-      UnsafeNativeMethods.CDecalCreateParams_SetCylindricalAndSpherical(create_params_ptr, decal.Height, decal.Radius, decal.StartLatitude, decal.EndLatitude, decal.StartLongitude, decal.EndLongitude);
-      double min_u = 0.0, min_v = 0.0, max_u = 0.0, max_v = 0.0;
-      decal.UVBounds(ref min_u, ref min_v, ref max_u, ref max_v);
-      UnsafeNativeMethods.CDecalCreateParams_SetUV(create_params_ptr, min_u, min_v, max_u, max_v);
+      var up     = decal.VectorUp;
+      var across = decal.VectorAcross;
+      decal.HorzSweep(out var horz_sta, out var horz_end);
+      decal.VertSweep(out var vert_sta, out var vert_end);
+      decal.GetUVBounds(out var min_u, out var min_v, out var max_u, out var max_v);
+      UnsafeNativeMethods.Rdk_DecalCreateParams_Set(create_params,
+                    decal.TextureInstanceId, (int)decal.Mapping, (int)decal.Projection, decal.MapToInside,
+                    decal.Transparency, ref origin, ref up, ref across, decal.Height, decal.Radius,
+                    horz_sta, horz_end, vert_sta, vert_end, min_u, min_v, max_u, max_v);
 
-      var attr_pointer = m_parent_attributes.NonConstPointer();
-      var decal_ptr = UnsafeNativeMethods.ON_3dmObjectAttributes_AddDecalWithCreateParams(attr_pointer, create_params_ptr);
-      var decal_crc = UnsafeNativeMethods.ON_Decal_DecalCRC(decal_ptr);
+      // create_params is actually an ON_Decal.
+      var attr_ptr = m_parent_attributes.NonConstPointer();
+      var decal_crc = UnsafeNativeMethods.Rdk_Decal_AddDecal(create_params, attr_ptr);
 
-      UnsafeNativeMethods.CDecalCreateParams_Delete(create_params_ptr);
+      UnsafeNativeMethods.Rdk_DecalCreateParams_Delete(create_params);
+
+      GC.KeepAlive(decal);
 
       // TODO: Eventually this class will be derived from IList<Decal> which requires
       // a "int Add(T)" method so return the index of the new decal instead of the Id.
@@ -554,6 +704,8 @@ namespace Rhino.Render
 
       var non_const_pointer = m_parent_attributes.NonConstPointer();
       UnsafeNativeMethods.ON_3dmObjectAttributes_RemoveAllDecals(non_const_pointer);
+
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -569,7 +721,10 @@ namespace Rhino.Render
         return false;
 
       var non_const_pointer = m_parent_attributes.NonConstPointer();
-      return UnsafeNativeMethods.ON_3dmObjectAttributes_RemoveDecal(non_const_pointer, decal.NonConstPointer());
+      var ret = UnsafeNativeMethods.ON_3dmObjectAttributes_RemoveDecal(non_const_pointer, decal.NonConstPointer());
+      GC.KeepAlive(this);
+      GC.KeepAlive(decal);
+      return ret;
     }
 
     /// <since>5.10</since>
@@ -589,15 +744,22 @@ namespace Rhino.Render
   /// <summary>Represents all the decals of an object.</summary>
   internal class DecalEnumerator : IEnumerator<Decal>
   {
-    private int m_index = -1;
+    private int m_index = 0;
     private readonly uint m_rhino_doc_serial = 0;
     private readonly ObjectAttributes m_attr;
+    private readonly SimpleArrayIntPtr m_ptrs_to_shared_ptrs_to_decals;
 
     internal DecalEnumerator(ObjectAttributes attr, uint rhino_doc_sn)
     {
-      m_index = 0;
       m_attr = attr;
       m_rhino_doc_serial = rhino_doc_sn;
+      m_ptrs_to_shared_ptrs_to_decals = new SimpleArrayIntPtr();
+
+      var attr_ptr = m_attr.ConstPointer();
+      var array_ptr = m_ptrs_to_shared_ptrs_to_decals.NonConstPointer();
+      UnsafeNativeMethods.ON_3dmObjectAttributes_GetDecalArray(attr_ptr, array_ptr);
+
+      GC.KeepAlive(this);
     }
 
     ~DecalEnumerator() { Dispose(false); }
@@ -608,18 +770,23 @@ namespace Rhino.Render
 
     object IEnumerator.Current { get { return Current; } }
 
+    internal Decal NextDecal()
+    {
+      if (m_index >= m_ptrs_to_shared_ptrs_to_decals.Count)
+        return null;
+
+      var decal_sp_ptr = m_ptrs_to_shared_ptrs_to_decals.ToArray()[m_index++];
+
+      return new Decal(decal_sp_ptr, this, m_rhino_doc_serial);
+    }
+
     public bool MoveNext()
     {
-      Decal decal = null;
+      Decal decal = NextDecal();
 
-      var attr_ptr = m_attr.NonConstPointer();
-      var count = UnsafeNativeMethods.ON_3dmObjectAttributes_DecalCount(attr_ptr);
-      if (m_index < count)
+      while ((decal != null) && !decal.IsVisible)
       {
-        var decal_ptr = UnsafeNativeMethods.ON_3dmObjectAttributes_DecalAt(attr_ptr, m_index++);
-      #pragma warning disable CS0618
-        decal = new Decal(decal_ptr, this, m_rhino_doc_serial); // decal_ptr is owned by attributes.
-      #pragma warning restore CS0618
+        decal = NextDecal();
       }
 
       Current = decal;
@@ -641,8 +808,16 @@ namespace Rhino.Render
       Dispose(true);
     }
 
-    protected void Dispose(bool isDisposiing)
+    protected void Dispose(bool isDisposing)
     {
+      var decal_array = m_ptrs_to_shared_ptrs_to_decals.ToArray();
+
+      foreach (var psp in decal_array)
+      {
+        UnsafeNativeMethods.SharedPtr_ON_Decal_Delete(psp);
+      }
+
+      m_ptrs_to_shared_ptrs_to_decals.Dispose();
     }
 
     #endregion

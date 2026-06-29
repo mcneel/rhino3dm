@@ -770,52 +770,6 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_GetDecalArray(
   }
 }
 
-// rhino3dm-local (sync exception): the legacy raw-pointer decal API below was removed
-// upstream in favor of the shared_ptr API (GetDecalArray(vector)/AddDecalEx). rhino3dm
-// keeps it so the existing rdk_decals.cs binding compiles; it uses opennurbs' deprecated
-// (but still present) ON_Decal accessors. TODO(9.x): migrate decals to the shared_ptr API.
-RH_C_FUNCTION int ON_3dmObjectAttributes_DecalCount(const ON_3dmObjectAttributes* attr)
-{
-  if (nullptr == attr)
-    return 0;
-
-  return attr->GetDecalArray().Count();
-}
-
-RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_DecalAt(const ON_3dmObjectAttributes* attr, int index)
-{
-  if (nullptr == attr)
-    return nullptr;
-
-  const auto& decals = attr->GetDecalArray();
-  if ((index < 0) || (index >= decals.Count()))
-    return nullptr;
-
-  return decals[index];
-}
-
-RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_AddDecal(ON_3dmObjectAttributes* attr)
-{
-  if (nullptr == attr)
-    return nullptr;
-
-  return attr->AddDecal();
-}
-
-RH_C_FUNCTION ON_Decal* ON_3dmObjectAttributes_AddDecalWithCreateParams(ON_3dmObjectAttributes* attr, const ON_Decal* create_params)
-{
-  if (nullptr == create_params)
-    return 0;
-
-  auto* decal = ON_3dmObjectAttributes_AddDecal(attr);
-  if (nullptr == decal)
-    return 0;
-
-  *decal = *create_params;
-
-  return decal;
-}
-
 RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveDecal(ON_3dmObjectAttributes* attr, ON_Decal* decal)
 {
   if ((nullptr == attr) || (nullptr == decal))
