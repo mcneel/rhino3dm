@@ -1311,6 +1311,85 @@ declare module 'rhino3dm' {
 		 * @returns {boolean} true if the operation succeeded; otherwise false.
 		 */
 		setMesh(meshType:MeshType,mesh:Mesh): boolean;
+		/**
+		 * @description The loops of this face (outer boundary plus any inner holes).
+		 * @returns {BrepLoopList}
+		 */
+		loops: BrepLoopList;
+		/**
+		 * @description The outer boundary loop of this face.
+		 * @returns {BrepLoop} The outer loop, or null if none.
+		 */
+		outerLoop(): BrepLoop;
+	}
+
+	enum BrepLoopType {
+		Unknown,
+		Outer,
+		Inner,
+		Slit,
+		CurveOnSurface,
+		PointOnSurface
+	}
+
+	class BrepLoop {
+		/**
+		 * @description The type of this loop (outer, inner, etc.).
+		 */
+		loopType: BrepLoopType;
+		/**
+		 * @description Number of trims in this loop.
+		 */
+		trimCount: number;
+		/**
+		 * @description The trims that make up this loop.
+		 */
+		trims: BrepTrimList;
+	}
+
+	class BrepLoopList {
+		/**
+		 * @description Number of loops.
+		 */
+		count: number;
+		/**
+		 * @description Gets the loop at the given index.
+		 * @param {number} index
+		 * @returns {BrepLoop}
+		 */
+		get(index:number): BrepLoop;
+	}
+
+	class BrepTrim {
+		/**
+		 * @description Index of the edge this trim runs along, or -1 if the trim has no edge.
+		 */
+		edgeIndex: number;
+		/**
+		 * @description True if the trim runs opposite the natural direction of its edge.
+		 */
+		isReversed: boolean;
+		/**
+		 * @description Index of the trim's start vertex.
+		 */
+		startVertexIndex: number;
+		/**
+		 * @description Index of the trim's end vertex.
+		 */
+		endVertexIndex: number;
+	}
+
+	class BrepTrimList {
+		/**
+		 * @description Number of trims.
+		 */
+		count: number;
+		/**
+		 * @description Gets the trim at the given index.
+		 * @param {number} index
+		 * @returns {BrepTrim}
+		 */
+		get(index:number): BrepTrim;
 	}
 
 	class BrepFaceList {

@@ -14,6 +14,17 @@ public:
   BND_BrepEdge(ON_BrepEdge* edge, const ON_ModelComponentReference* compref);
 };
 
+// Mirrors RhinoCommon Rhino.Geometry.BrepLoopType (== ON_BrepLoop::TYPE values).
+enum class BrepLoopType : int
+{
+  Unknown = 0,
+  Outer = 1,
+  Inner = 2,
+  Slit = 3,
+  CurveOnSurface = 4,
+  PointOnSurface = 5
+};
+
 class BND_BrepTrim {
   ON_BrepTrim* m_trim;
   ON_ModelComponentReference m_component_reference;
@@ -39,9 +50,9 @@ class BND_BrepLoop {
   ON_ModelComponentReference m_component_reference;
 public:
   BND_BrepLoop(ON_BrepLoop* loop, const ON_ModelComponentReference& compref);
-  int Type() const;
+  BrepLoopType LoopType() const;
   int TrimCount() const;
-  BND_BrepTrimList GetTrims();
+  BND_BrepTrimList GetTrims() const;
 };
 
 class BND_BrepLoopList {
@@ -194,8 +205,8 @@ public:
   //bool IsSurface
   //int FaceIndex{ get; }
   //int SurfaceIndex
-  BND_BrepLoopList GetLoops();
-  //BrepLoop OuterLoop
+  BND_BrepLoopList GetLoops() const;
+  class BND_BrepLoop* OuterLoop();
   class BND_Brep* CreateExtrusion(const class BND_Curve* pathCurve, bool cap) const;
   //bool ShrinkFace(ShrinkDisableSide disableSide)
   //override bool SetDomain(int direction, Interval domain)

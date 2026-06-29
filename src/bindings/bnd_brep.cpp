@@ -353,11 +353,11 @@ BND_BrepLoop::BND_BrepLoop(ON_BrepLoop* loop, const ON_ModelComponentReference& 
   m_component_reference = compref;
 }
 
-int BND_BrepLoop::Type() const
+BrepLoopType BND_BrepLoop::LoopType() const
 {
   if (nullptr == m_loop)
-    return -1;
-  return (int)m_loop->m_type;
+    return BrepLoopType::Unknown;
+  return (BrepLoopType)m_loop->m_type;
 }
 
 int BND_BrepLoop::TrimCount() const
@@ -367,7 +367,7 @@ int BND_BrepLoop::TrimCount() const
   return m_loop->m_ti.Count();
 }
 
-BND_BrepTrimList BND_BrepLoop::GetTrims()
+BND_BrepTrimList BND_BrepLoop::GetTrims() const
 {
   return BND_BrepTrimList(m_loop, m_component_reference);
 }
@@ -407,9 +407,19 @@ BND_BrepLoop* BND_BrepLoopList::GetLoop(int i)
 
 //////////////////////////////////////////////////////////////////////////////
 
-BND_BrepLoopList BND_BrepFace::GetLoops()
+BND_BrepLoopList BND_BrepFace::GetLoops() const
 {
   return BND_BrepLoopList(m_brepface, m_component_ref);
+}
+
+BND_BrepLoop* BND_BrepFace::OuterLoop()
+{
+  if (nullptr == m_brepface)
+    return nullptr;
+  ON_BrepLoop* loop = m_brepface->OuterLoop();
+  if (nullptr == loop)
+    return nullptr;
+  return new BND_BrepLoop(loop, m_component_ref);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -545,6 +555,7 @@ void initBrepBindings(rh3dmpymodule& m)
     .def("SetMesh", &BND_BrepFace::SetMesh, py::arg("mesh"), py::arg("meshType"))
     .def_property("OrientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
     .def_property_readonly("Loops", &BND_BrepFace::GetLoops)
+    .def_property_readonly("OuterLoop", &BND_BrepFace::OuterLoop)
     ;
 
   py::class_<BND_BrepFaceList>(m, "BrepFaceList")
@@ -564,8 +575,17 @@ void initBrepBindings(rh3dmpymodule& m)
     .def("__getitem__", &BND_BrepTrimList::GetTrim)
     ;
 
+  py::enum_<BrepLoopType>(m, "BrepLoopType")
+    .value("Unknown", BrepLoopType::Unknown)
+    .value("Outer", BrepLoopType::Outer)
+    .value("Inner", BrepLoopType::Inner)
+    .value("Slit", BrepLoopType::Slit)
+    .value("CurveOnSurface", BrepLoopType::CurveOnSurface)
+    .value("PointOnSurface", BrepLoopType::PointOnSurface)
+    ;
+
   py::class_<BND_BrepLoop>(m, "BrepLoop")
-    .def_property_readonly("Type", &BND_BrepLoop::Type)
+    .def_property_readonly("LoopType", &BND_BrepLoop::LoopType)
     .def_property_readonly("TrimCount", &BND_BrepLoop::TrimCount)
     .def_property_readonly("Trims", &BND_BrepLoop::GetTrims)
     ;
@@ -639,6 +659,7 @@ void initBrepBindings(void*)
     .function("setMesh", &BND_BrepFace::SetMesh, allow_raw_pointers())
     .property("orientationIsReversed", &BND_BrepFace::GetOrientationIsReversed, &BND_BrepFace::SetOrientationIsReversed)
     .property("loops", &BND_BrepFace::GetLoops)
+    .function("outerLoop", &BND_BrepFace::OuterLoop, allow_raw_pointers())
     ;
 
   class_<BND_BrepFaceList>("BrepFaceList")
@@ -658,8 +679,17 @@ void initBrepBindings(void*)
     .function("get", &BND_BrepTrimList::GetTrim, allow_raw_pointers())
     ;
 
+  enum_<BrepLoopType>("BrepLoopType")
+    .value("Unknown", BrepLoopType::Unknown)
+    .value("Outer", BrepLoopType::Outer)
+    .value("Inner", BrepLoopType::Inner)
+    .value("Slit", BrepLoopType::Slit)
+    .value("CurveOnSurface", BrepLoopType::CurveOnSurface)
+    .value("PointOnSurface", BrepLoopType::PointOnSurface)
+    ;
+
   class_<BND_BrepLoop>("BrepLoop")
-    .property("type", &BND_BrepLoop::Type)
+    .property("loopType", &BND_BrepLoop::LoopType)
     .property("trimCount", &BND_BrepLoop::TrimCount)
     .property("trims", &BND_BrepLoop::GetTrims)
     ;
