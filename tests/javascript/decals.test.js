@@ -61,7 +61,6 @@ test('readDecalLifetime_RH3DM_159', async () => {
     const expected = [held[0].textureInstanceId, held[1].textureInstanceId]
 
     for (let n = 0; n < 50; n++) {
-        const c = decals.count
         decals.get(0); decals.get(1)
     }
 
