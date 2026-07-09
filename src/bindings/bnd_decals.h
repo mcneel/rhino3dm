@@ -28,14 +28,21 @@ void initDecalBindings(void* m);
 class BND_File3dmDecal
 {
 private:
-  ON_Decal* _decal = nullptr;
-  bool _owned = false;
+  // RH3DM-159: own the decal via shared_ptr instead of a raw ON_Decal* with an _owned flag. The old
+  // code wrapped a borrowed pointer from the deprecated GetDecalArray() with _owned=true, so
+  // destroying the wrapper deleted a decal owned by the attributes (dangling + double-free).
+  //
+  // Note shared ownership of the ON_Decal object is necessary but NOT sufficient: an ON_Decal read
+  // from the table holds a raw _model_node pointer into the collection's XML tree, which
+  // GetDecalArray() rebuilds (freeing the old nodes) on every call. So the table hands us a
+  // self-contained COPY (ON_Decal copy ctor -> owned _local_node) rather than the cached decal; see
+  // BND_File3dmDecalTable::FindIndex. This shared_ptr then owns that independent copy outright.
+  std::shared_ptr<ON_Decal> _decal;
 
 public:
-  BND_File3dmDecal();               //BND_File3dmDecal() { _decal = new ON_Decal; _owned = true; }
-  BND_File3dmDecal(ON_Decal* d);    //BND_File3dmDecal(ON_Decal* d) : _decal(d) { }
+  BND_File3dmDecal();
+  BND_File3dmDecal(std::shared_ptr<ON_Decal> d);
   BND_File3dmDecal(const BND_File3dmDecal& d);
-  ~BND_File3dmDecal() { if (_owned) delete _decal; }
 
   BND_UUID TextureInstanceId() const { return ON_UUID_to_Binding(_decal->TextureInstanceId()); }
   void SetTextureInstanceId(BND_UUID v) { _decal->SetTextureInstanceId(Binding_to_ON_UUID(v)); }

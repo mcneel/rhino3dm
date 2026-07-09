@@ -330,6 +330,31 @@ def setup_windows():
     #for line in fileinput.input("opennurbs_static.vcxproj", inplace=1):
     #   print(line.replace("WIN32;", "WIN64;"))
 
+    # ARM64 version (opt-in via --winarm64; cross-compiled from the x64 host).
+    # Requires the MSVC ARM64 build tools (VS 2022 "C++ ARM64/ARM64EC build tools" component).
+    if winarm64:
+        target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "winarm64"))
+        target_file_name = "librhino3dm_native.vcxproj"
+
+        item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
+        if not overwrite_check(item_to_check):
+            return False
+
+        os.chdir(target_path)
+
+        print("")
+        if xcode_logging:
+            print("Generating vcxproj files for Windows ARM64 native build...")
+        else:
+            print(bcolors.BOLD + "Generating vcxproj files for Windows ARM64 native build..." + bcolors.ENDC)
+        librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
+        command = ("cmake -G \"Visual Studio 17 2022\" -A ARM64 " + librhino3dm_native_folder)
+        run_command(command)
+
+        # Munge the project file to support 64 bit (ARM64 is 64-bit).
+        for line in fileinput.input("librhino3dm_native.vcxproj", inplace=1):
+            print(line.replace("WIN32;", "WIN64;"))
+
     # methogen
     if not lib:
         build_methodgen()
@@ -621,6 +646,8 @@ def main():
                         help="generate a ES6 module build (wasm only)")
     parser.add_argument('--wasm64', '-w', action='store_true',
                         help="generate a WASM64 (memory64) build that breaks the 4GB limit (wasm only, opt-in)")
+    parser.add_argument('--winarm64', action='store_true',
+                        help="also generate a Windows ARM64 native build (windows only, opt-in; requires MSVC ARM64 build tools)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
     
@@ -654,6 +681,9 @@ def main():
 
     global wasm64
     wasm64 = args.wasm64
+
+    global winarm64
+    winarm64 = args.winarm64
 
     global node
     node = False

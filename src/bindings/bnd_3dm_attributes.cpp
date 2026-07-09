@@ -1,8 +1,12 @@
 #include "bindings.h"
 
+// Delegate so m_decals / m_mesh_modifiers are wired to the SAME ON_3dmObjectAttributes this
+// wrapper owns. (Previously this ctor default-constructed those tables onto throwaway attributes,
+// so attributes.Decals on a freshly-created ObjectAttributes operated on a disconnected object.)
 BND_3dmObjectAttributes::BND_3dmObjectAttributes()
+  :
+  BND_3dmObjectAttributes(new ON_3dmObjectAttributes(), nullptr)
 {
-  SetTrackedPointer(new ON_3dmObjectAttributes(), nullptr);
 }
 
 BND_3dmObjectAttributes::BND_3dmObjectAttributes(ON_3dmObjectAttributes* attrs, const ON_ModelComponentReference* compref)

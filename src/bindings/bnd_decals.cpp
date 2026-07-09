@@ -3,20 +3,18 @@
 
 BND_File3dmDecal::BND_File3dmDecal()
 {
-  _decal = new ON_Decal();
-  _owned = true;
+  _decal = std::make_shared<ON_Decal>();
 }
 
-BND_File3dmDecal::BND_File3dmDecal(ON_Decal* d)
+BND_File3dmDecal::BND_File3dmDecal(std::shared_ptr<ON_Decal> d)
 {
   _decal = d;
-  _owned = true;
 }
 
 BND_File3dmDecal::BND_File3dmDecal(const BND_File3dmDecal& d)
-{ 
-  _decal = new ON_Decal(*d._decal); 
-  _owned = true; 
+{
+  // explicit copy => independent decal (value semantics for a standalone Decal)
+  _decal = std::make_shared<ON_Decal>(*d._decal);
 }
 
 ON_Decal::Mappings BND_File3dmDecal::GetMapping() const 
@@ -244,10 +242,13 @@ BND_File3dmDecalTable::BND_File3dmDecalTable(ON_3dmObjectAttributes* a)
   _attr = a;
 }
 
-BND_File3dmDecalTable::BND_File3dmDecalTable(const BND_File3dmDecalTable& d) 
-{ 
-  _attr = new ON_3dmObjectAttributes(*d._attr);
-  _owned = true; 
+BND_File3dmDecalTable::BND_File3dmDecalTable(const BND_File3dmDecalTable& d)
+{
+  // share the same (parent-owned) attributes, matching BND_File3dmMeshModifiers. embind/pybind
+  // return this table by value, so a deep-copying copy ctor made Add() mutate a throwaway and
+  // forced a full attributes copy on every read. Sharing keeps reads/writes on the live object.
+  _attr = d._attr;
+  _owned = false;
 }
 
 int BND_File3dmDecalTable::Count() const
@@ -255,7 +256,9 @@ int BND_File3dmDecalTable::Count() const
   if (nullptr == _attr)
     return 0;
 
-  return _attr->GetDecalArray().Count();
+  std::vector<std::shared_ptr<ON_Decal>> decals;
+  _attr->GetDecalArray(decals);
+  return (int)decals.size();
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
@@ -263,12 +266,20 @@ BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
   if (nullptr == _attr)
     return nullptr;
 
-  const auto& decals = _attr->GetDecalArray();
+  std::vector<std::shared_ptr<ON_Decal>> decals;
+  _attr->GetDecalArray(decals);
 
-  if ((index < 0) || (index >= decals.Count()))
+  if ((index < 0) || (index >= (int)decals.size()))
     return nullptr;
 
-  return new BND_File3dmDecal(decals[index]);
+  // RH3DM-159: return a self-contained COPY, not the collection's cached shared_ptr. Each ON_Decal
+  // holds a raw _model_node pointer into the collection's m_root_node XML tree, and GetDecalArray()
+  // rebuilds that tree on every call (clear + Populate -> GetEntireDecalXML), freeing the old nodes.
+  // A wrapper aliasing the cached decal would keep the ON_Decal object alive but its _model_node
+  // would dangle after the next Count()/FindIndex() -> use-after-free when a held wrapper is read
+  // later (segfault, order-dependent). ON_Decal's copy ctor copies the XML into a _local_node it
+  // owns, so the copy survives cache rebuilds.
+  return new BND_File3dmDecal(std::make_shared<ON_Decal>(*decals[index]));
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)

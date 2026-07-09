@@ -208,11 +208,32 @@ def build_windows():
         return False
 
     os.chdir(target_path)
-    
+
     run_command("cmake --build . --config Release --target librhino3dm_native", False)
 
-    if not build_did_succeed(item_to_check):             
+    if not build_did_succeed(item_to_check):
         return False
+
+    # ARM64 native library (opt-in via --winarm64; requires setup.py to have generated the
+    # winarm64 vcxproj and the MSVC ARM64 build tools to be installed).
+    if winarm64:
+        print(" Building Windows ARM64 native library...")
+        target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "winarm64")
+        vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
+
+        if not check_for_setup_files(vcxproj_path):
+            return False
+
+        item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))
+        if not overwrite_check(item_to_check):
+            return False
+
+        os.chdir(target_path)
+
+        run_command("cmake --build . --config Release --target librhino3dm_native", False)
+
+        if not build_did_succeed(item_to_check):
+            return False
 
     all_items_built = True
     if not lib:
@@ -543,6 +564,8 @@ def main():
                         help="generate Xcode-compatible log messages (no colors or other Terminal-friendly gimmicks)")
     parser.add_argument('--library', '-l', action='store_true',
                         help="skip building and running .net projects (methodgen). Useful for generating librhino3dm_native in release workflow")
+    parser.add_argument('--winarm64', action='store_true',
+                        help="also build the Windows ARM64 native library (windows only, opt-in; requires the setup to have been run with --winarm64)")
     args = parser.parse_args()
 
     # User has not entered any arguments...
@@ -567,6 +590,9 @@ def main():
 
     global lib
     lib = args.library
+
+    global winarm64
+    winarm64 = args.winarm64
 
     global node
     node = False
