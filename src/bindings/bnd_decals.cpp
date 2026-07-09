@@ -272,8 +272,14 @@ BND_File3dmDecal* BND_File3dmDecalTable::FindIndex(int index)
   if ((index < 0) || (index >= (int)decals.size()))
     return nullptr;
 
-  // shared ownership: the wrapper keeps the decal alive independently of the table's cache
-  return new BND_File3dmDecal(decals[index]);
+  // RH3DM-159: return a self-contained COPY, not the collection's cached shared_ptr. Each ON_Decal
+  // holds a raw _model_node pointer into the collection's m_root_node XML tree, and GetDecalArray()
+  // rebuilds that tree on every call (clear + Populate -> GetEntireDecalXML), freeing the old nodes.
+  // A wrapper aliasing the cached decal would keep the ON_Decal object alive but its _model_node
+  // would dangle after the next Count()/FindIndex() -> use-after-free when a held wrapper is read
+  // later (segfault, order-dependent). ON_Decal's copy ctor copies the XML into a _local_node it
+  // owns, so the copy survives cache rebuilds.
+  return new BND_File3dmDecal(std::make_shared<ON_Decal>(*decals[index]));
 }
 
 BND_File3dmDecal* BND_File3dmDecalTable::IterIndex(int index)

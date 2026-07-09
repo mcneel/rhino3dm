@@ -320,6 +320,8 @@ public:
   void SetTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf, bool lazy);
   void SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf);
   BND_CachedTextureCoordinates GetCachedTextureCoordinates( BND_UUID mappingId );
+  bool SetCachedTextureCoordinatesFromMaterial(const class BND_ONXModel& file, BND_UUID objectId, const class BND_Material& material);
+  BND_CachedTextureCoordinates* GetCachedTextureCoordinatesFromTexture(const class BND_ONXModel& file, BND_UUID objectId, const class BND_Texture& texture);
   bool Compact() { return m_mesh->Compact(); }
   //void Flip(bool vertexNormals, bool faceNormals, bool faceOrientation);
   //public int SolidOrientation()

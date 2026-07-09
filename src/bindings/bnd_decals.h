@@ -28,11 +28,15 @@ void initDecalBindings(void* m);
 class BND_File3dmDecal
 {
 private:
-  // RH3DM-159: hold a shared_ptr into the attributes' decal array (opennurbs' shared_ptr API)
-  // instead of a raw ON_Decal* with an _owned flag. The old code wrapped a borrowed pointer from
-  // the deprecated GetDecalArray() with _owned=true, so destroying the wrapper deleted a decal
-  // owned by the attributes (dangling + double-free, especially as GetDecalArray() repopulates
-  // its transient cache each call). Shared ownership makes the lifetime correct by construction.
+  // RH3DM-159: own the decal via shared_ptr instead of a raw ON_Decal* with an _owned flag. The old
+  // code wrapped a borrowed pointer from the deprecated GetDecalArray() with _owned=true, so
+  // destroying the wrapper deleted a decal owned by the attributes (dangling + double-free).
+  //
+  // Note shared ownership of the ON_Decal object is necessary but NOT sufficient: an ON_Decal read
+  // from the table holds a raw _model_node pointer into the collection's XML tree, which
+  // GetDecalArray() rebuilds (freeing the old nodes) on every call. So the table hands us a
+  // self-contained COPY (ON_Decal copy ctor -> owned _local_node) rather than the cached decal; see
+  // BND_File3dmDecalTable::FindIndex. This shared_ptr then owns that independent copy outright.
   std::shared_ptr<ON_Decal> _decal;
 
 public:

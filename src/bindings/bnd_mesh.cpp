@@ -1078,7 +1078,55 @@ bool BND_CachedTextureCoordinates::Contains(double x, double y, double z) const
 BND_CachedTextureCoordinates BND_Mesh::GetCachedTextureCoordinates( BND_UUID mappingId )
 {
   const ON_TextureCoordinates* tc = m_mesh->CachedTextureCoordinates( Binding_to_ON_UUID(mappingId) );
+  if (nullptr == tc)
+  {
+    ON_TextureCoordinates empty;
+    return BND_CachedTextureCoordinates(empty);
+  }
   return BND_CachedTextureCoordinates(*tc);
+}
+
+// Finds the object's texture mapping ref in the model. Mirrors the ONX_Model
+// helper in librhino3dm_native/on_mesh.cpp so the Py/JS bindings can resolve
+// mappings the same way the .NET layer does. (RH3DM-170)
+static const ON_MappingRef* GetMappingRefForObject(const ONX_Model& model, const ON_UUID& objectId, const ON_UUID& renderPluginId)
+{
+  ON_ModelComponentReference ref = model.ComponentFromId(ON_ModelComponent::Type::ModelGeometry, objectId);
+  if (ref.IsEmpty())
+    return nullptr;
+
+  const ON_ModelGeometryComponent* component_ptr = ON_ModelGeometryComponent::FromModelComponentRef(ref, &ON_ModelGeometryComponent::Unset);
+  if (nullptr == component_ptr)
+    return nullptr;
+
+  const ON_3dmObjectAttributes* attributes = component_ptr->Attributes(nullptr);
+  if (nullptr == attributes)
+    return nullptr;
+
+  return attributes->m_rendering_attributes.MappingRef(renderPluginId);
+}
+
+bool BND_Mesh::SetCachedTextureCoordinatesFromMaterial(const BND_ONXModel& file, BND_UUID objectId, const BND_Material& material)
+{
+  if (nullptr == m_mesh || !file.m_model || nullptr == material.m_material)
+    return false;
+
+  // MappingRef can be null; that is normal when the object has no texture mappings.
+  const ON_MappingRef* pMR = GetMappingRefForObject(*file.m_model, Binding_to_ON_UUID(objectId), ON_nil_uuid);
+  return m_mesh->SetCachedTextureCoordinatesFromMaterial(*file.m_model, *material.m_material, pMR);
+}
+
+BND_CachedTextureCoordinates* BND_Mesh::GetCachedTextureCoordinatesFromTexture(const BND_ONXModel& file, BND_UUID objectId, const BND_Texture& texture)
+{
+  if (nullptr == m_mesh || !file.m_model || nullptr == texture.m_texture)
+    return nullptr;
+
+  const ON_MappingRef* pMR = GetMappingRefForObject(*file.m_model, Binding_to_ON_UUID(objectId), ON_nil_uuid);
+  const ON_TextureCoordinates* tc = m_mesh->GetCachedTextureCoordinates(*file.m_model, *texture.m_texture, pMR);
+  if (nullptr == tc)
+    return nullptr;
+
+  return new BND_CachedTextureCoordinates(*tc);
 }
 
 void BND_Mesh::SetCachedTextureCoordinates(class BND_TextureMapping* tm, class BND_Transform* xf)
@@ -1230,6 +1278,8 @@ void initMeshBindings(rh3dmpymodule& m)
     .def("SetTextureCoordinates", &BND_Mesh::SetTextureCoordinates, py::arg("tm"), py::arg("xf"), py::arg("lazy"))
     .def("SetCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, py::arg("tm"), py::arg("xf"))
     .def("GetCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates, py::arg("id"))
+    .def("SetCachedTextureCoordinatesFromMaterial", &BND_Mesh::SetCachedTextureCoordinatesFromMaterial, py::arg("file"), py::arg("objectId"), py::arg("material"))
+    .def("GetCachedTextureCoordinatesFromTexture", &BND_Mesh::GetCachedTextureCoordinatesFromTexture, py::arg("file"), py::arg("objectId"), py::arg("texture"))
     .def("Compact", &BND_Mesh::Compact)
     .def("Append", &BND_Mesh::Append, py::arg("other"))
     .def("CreatePartitions", &BND_Mesh::CreatePartitions, py::arg("maximumVertexCount"), py::arg("maximumTriangleCount"))
@@ -1381,6 +1431,8 @@ void initMeshBindings(void*)
     .function("setTextureCoordinates", &BND_Mesh::SetTextureCoordinates, allow_raw_pointers())
     .function("setCachedTextureCoordinates", &BND_Mesh::SetCachedTextureCoordinates, allow_raw_pointers())
     .function("getCachedTextureCoordinates", &BND_Mesh::GetCachedTextureCoordinates)
+    .function("setCachedTextureCoordinatesFromMaterial", &BND_Mesh::SetCachedTextureCoordinatesFromMaterial, allow_raw_pointers())
+    .function("getCachedTextureCoordinatesFromTexture", &BND_Mesh::GetCachedTextureCoordinatesFromTexture, allow_raw_pointers())
     .function("compact", &BND_Mesh::Compact)
     .function("append", &BND_Mesh::Append)
     .function("createPartitions", &BND_Mesh::CreatePartitions)
