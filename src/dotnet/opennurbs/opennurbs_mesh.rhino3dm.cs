@@ -12,6 +12,11 @@ namespace Rhino.Geometry
   // rhino3dm has no document, so these variants resolve the object's texture mappings from a
   // File3dm (ONX_Model) instead. They call the same opennurbs methods via the *_ONX_Model
   // native exports. (RH3DM-170)
+  //
+  // TODO (post-8.32): push these File3dm/ONX_Model overloads UPSTREAM into RhinoCommon's
+  // opennurbs_mesh.cs on the rhino repo 8.x branch. Once they live upstream they will sync
+  // down like everything else and THIS whole file should be removed. Fine to ship as an
+  // extension for 8.32; the upstreaming is the follow-up.
   public partial class Mesh : GeometryBase
   {
     /// <summary>
