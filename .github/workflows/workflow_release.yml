@@ -189,21 +189,27 @@ jobs:
             image: mcneel/rhino3dm-dev-amazonlinux2023
             artifact-path: src/build/linux/librhino3dm_native.so
             architecture: ""
+            extra-args: ""
           - os: ubuntu-24.04-arm
             target: linux
             image: ""
             artifact-path: src/build/linux/librhino3dm_native.so
             architecture: arm64
+            extra-args: ""
           - os: windows-2022
             target: windows
             image: ""
+            # glob picks up win32, win64, AND winarm64 subdirs (preserved into the artifact)
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
             architecture: ""
+            # also cross-build the Windows ARM64 native lib (requires MSVC ARM64 build tools on the runner)
+            extra-args: "--winarm64"
           - os: macos-14
             target: macos
             image: ""
             artifact-path: src/build/macos/Release/librhino3dm_native.dylib
             architecture: ""
+            extra-args: ""
       fail-fast: false
     steps:
       #- name: setup dotnet
@@ -225,9 +231,9 @@ jobs:
       - name: bootstrap dotnet ${{ matrix.target }}
         run: python3 script/bootstrap.py -p ${{ matrix.target }}
       - name: setup dotnet ${{ matrix.target }}
-        run: python3 script/setup.py -p ${{ matrix.target }} -v -l
+        run: python3 script/setup.py -p ${{ matrix.target }} -v -l ${{ matrix.extra-args }}
       - name: build dotnet ${{ matrix.target }}
-        run: python3 script/build.py -p ${{ matrix.target }} -v -l
+        run: python3 script/build.py -p ${{ matrix.target }} -v -l ${{ matrix.extra-args }}
       - name: list
         run: "ls -R src/build/${{ matrix.target }}"
       - name: code-sign native libraries
