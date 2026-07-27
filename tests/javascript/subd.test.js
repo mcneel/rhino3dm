@@ -32,6 +32,11 @@ test('empty subd counts', async () => {
     expect(subd.faceCount).toBe(0)
 })
 
+test('tag enums', async () => {
+    expect(rhino.SubDVertexTag.Crease).not.toBe(rhino.SubDVertexTag.Smooth)
+    expect(rhino.SubDEdgeTag.Crease).not.toBe(rhino.SubDEdgeTag.Smooth)
+})
+
 test('read counts from fixture', async () => {
     const fixture = fixturePath()
     if (fixture === null) {

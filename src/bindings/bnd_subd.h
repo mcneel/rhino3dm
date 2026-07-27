@@ -151,6 +151,20 @@ public:
   int FaceCount() const { return m_subdvertex->FaceCount(); }
   BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
   BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
+
+  ON_SubDVertexTag Tag() const { return m_subdvertex->m_vertex_tag; }
+  bool IsCrease() const { return m_subdvertex->IsCrease(); }
+  bool IsDart() const { return m_subdvertex->IsDart(); }
+  bool IsSmooth() const { return m_subdvertex->IsSmooth(); }
+  bool IsSharp(bool endCheck) const { return m_subdvertex->IsSharp(endCheck); }
+  bool IsCorner() const { return m_subdvertex->IsCorner(); }
+  ON_3dPoint ControlNetPoint() const { return m_subdvertex->ControlNetPoint(); }
+  ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
+  double VertexSharpness() const { return m_subdvertex->VertexSharpness(); }
+  class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
+  class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
+  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
+
   const ON_SubDVertex* GetONSubDComponent() const { return m_subdvertex; }
 };
 

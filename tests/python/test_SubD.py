@@ -116,6 +116,24 @@ class TestSubD(unittest.TestCase):
                   edge.SubdivisionPoint, edge.ControlNetCenterPoint):
             self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
 
+    def test_vertex_properties(self):
+        v = self.subd.Vertices[1]
+        # Tag is a SubDVertexTag; exactly one of the tag predicates matches it
+        self.assertIn(v.Tag, (rhino3dm.SubDVertexTag.Unset, rhino3dm.SubDVertexTag.Smooth,
+                              rhino3dm.SubDVertexTag.Crease, rhino3dm.SubDVertexTag.Corner,
+                              rhino3dm.SubDVertexTag.Dart))
+        self.assertEqual(v.IsSmooth, v.Tag == rhino3dm.SubDVertexTag.Smooth)
+        self.assertEqual(v.IsCrease, v.Tag == rhino3dm.SubDVertexTag.Crease)
+        self.assertEqual(v.IsCorner, v.Tag == rhino3dm.SubDVertexTag.Corner)
+        self.assertEqual(v.IsDart, v.Tag == rhino3dm.SubDVertexTag.Dart)
+        self.assertIsInstance(v.IsSharp(True), bool)
+        self.assertIsInstance(v.VertexSharpness, float)
+        for p in (v.ControlNetPoint, v.SurfacePoint):
+            self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
+        # Edge(i) around the vertex agrees with the vertex's own edge sub-iterator
+        self.assertEqual(v.EdgeCount, v.Edges(self.subd).Count)
+        self.assertEqual(v.Edge(0).Index, v.Edges(self.subd).First().Index)
+
 
 if __name__ == '__main__':
     unittest.main()

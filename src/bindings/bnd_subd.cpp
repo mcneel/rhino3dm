@@ -204,6 +204,14 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
 
 void initSubDBindings(rh3dmpymodule& m)
 {
+  py::enum_<ON_SubDVertexTag>(m, "SubDVertexTag")
+    .value("Unset", ON_SubDVertexTag::Unset)
+    .value("Smooth", ON_SubDVertexTag::Smooth)
+    .value("Crease", ON_SubDVertexTag::Crease)
+    .value("Corner", ON_SubDVertexTag::Corner)
+    .value("Dart", ON_SubDVertexTag::Dart)
+    ;
+
   py::enum_<ON_SubDEdgeTag>(m, "SubDEdgeTag")
     .value("Unset", ON_SubDEdgeTag::Unset)
     .value("Smooth", ON_SubDEdgeTag::Smooth)
@@ -282,6 +290,18 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("FaceCount", &BND_SubDVertex::FaceCount)
     .def("Edges", &BND_SubDVertex::Edges)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
     .def("Faces", &BND_SubDVertex::Faces)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
+    .def_property_readonly("Tag", &BND_SubDVertex::Tag)
+    .def_property_readonly("ControlNetPoint", &BND_SubDVertex::ControlNetPoint)
+    .def_property_readonly("SurfacePoint", &BND_SubDVertex::SurfacePoint)
+    .def_property_readonly("IsSmooth", &BND_SubDVertex::IsSmooth)
+    .def("IsSharp", &BND_SubDVertex::IsSharp, py::arg("endCheck"))
+    .def_property_readonly("IsCrease", &BND_SubDVertex::IsCrease)
+    .def_property_readonly("IsDart", &BND_SubDVertex::IsDart)
+    .def_property_readonly("IsCorner", &BND_SubDVertex::IsCorner)
+    .def_property_readonly("VertexSharpness", &BND_SubDVertex::VertexSharpness)
+    .def("Next", &BND_SubDVertex::Next)
+    .def("Previous", &BND_SubDVertex::Previous)
+    .def("Edge", &BND_SubDVertex::Edge, py::arg("index"))
     ;
 
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
@@ -309,6 +329,14 @@ using namespace emscripten;
 // Python-first for now; exposing the iterators through embind is a follow-up.
 void initSubDBindings(void*)
 {
+  enum_<ON_SubDVertexTag>("SubDVertexTag")
+    .value("Unset", ON_SubDVertexTag::Unset)
+    .value("Smooth", ON_SubDVertexTag::Smooth)
+    .value("Crease", ON_SubDVertexTag::Crease)
+    .value("Corner", ON_SubDVertexTag::Corner)
+    .value("Dart", ON_SubDVertexTag::Dart)
+    ;
+
   enum_<ON_SubDEdgeTag>("SubDEdgeTag")
     .value("Unset", ON_SubDEdgeTag::Unset)
     .value("Smooth", ON_SubDEdgeTag::Smooth)
@@ -371,6 +399,18 @@ void initSubDBindings(void*)
     .property("id", &BND_SubDVertex::Id)
     .property("edgeCount", &BND_SubDVertex::EdgeCount)
     .property("faceCount", &BND_SubDVertex::FaceCount)
+    .property("tag", &BND_SubDVertex::Tag)
+    .property("controlNetPoint", &BND_SubDVertex::ControlNetPoint)
+    .property("surfacePoint", &BND_SubDVertex::SurfacePoint)
+    .property("isSmooth", &BND_SubDVertex::IsSmooth)
+    .function("isSharp", &BND_SubDVertex::IsSharp)
+    .property("isCrease", &BND_SubDVertex::IsCrease)
+    .property("isDart", &BND_SubDVertex::IsDart)
+    .property("isCorner", &BND_SubDVertex::IsCorner)
+    .property("vertexSharpness", &BND_SubDVertex::VertexSharpness)
+    .function("next", &BND_SubDVertex::Next, allow_raw_pointers())
+    .function("previous", &BND_SubDVertex::Previous, allow_raw_pointers())
+    .function("edge", &BND_SubDVertex::Edge, allow_raw_pointers())
     ;
 
   class_<BND_SubD, base<BND_GeometryBase>>("SubD")
