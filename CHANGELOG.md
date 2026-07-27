@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (py) Improved stubs. PR #708 @StudioWEngineers
 - (py) Improved stubs. PR #690 @StudioWEngineers
 
+### Changed
+
+- (all) FindId, FindIndex and FindName in File3dmLayerTable now return None if the layer is not found. PR #692 @StudioWEngineers
+
 ## [8.17.0] - 2025.03.12
 
 diff: https://github.com/mcneel/rhino3dm/compare/8.9.0...8.17.0
