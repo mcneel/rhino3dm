@@ -143,6 +143,19 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(v.EdgeCount, v.Edges.Count)
         self.assertEqual(v.Edge(0).Index, v.Edges.First().Index)
 
+    def test_component_equality(self):
+        # The same component reached two ways compares equal; different ones don't.
+        self.assertEqual(self.subd.Faces[1], self.subd.Faces[1])
+        self.assertNotEqual(self.subd.Faces[1], self.subd.Faces[2])
+        # Identity holds across traversal: an edge of a face is the same object as
+        # the one reached through SubD.Edges by id.
+        e = self.subd.Faces[1].Edges.First()
+        self.assertEqual(e, self.subd.Edges[e.Id])
+        # Components are hashable and de-duplicate correctly in a set.
+        self.assertEqual(len(set(self.subd.Vertices)), VERTEX_COUNT)
+        # Different component types are never equal.
+        self.assertNotEqual(self.subd.Faces[1], self.subd.Edges[1])
+
 
 if __name__ == '__main__':
     unittest.main()

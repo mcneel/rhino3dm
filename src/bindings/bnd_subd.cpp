@@ -263,6 +263,9 @@ void initSubDBindings(rh3dmpymodule& m)
     .def("Vertex", &BND_SubDFace::Vertex, py::arg("index"))
     .def("Edge", &BND_SubDFace::Edge, py::arg("index"))
     .def_property_readonly("SubdivisionPoint", &BND_SubDFace::SubdivisionPoint)
+    .def("__eq__", [](const BND_SubDFace& a, const BND_SubDFace& b){ return a.Equals(b); }, py::is_operator())
+    .def("__ne__", [](const BND_SubDFace& a, const BND_SubDFace& b){ return !a.Equals(b); }, py::is_operator())
+    .def("__hash__", [](const BND_SubDFace& f){ return (size_t)f.Id(); })
     ;
 
   py::class_<BND_SubDEdge>(m, "SubDEdge")
@@ -287,6 +290,9 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("SubdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
     .def_property_readonly("ControlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
     .def("ControlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal, py::arg("edge_face_index"))
+    .def("__eq__", [](const BND_SubDEdge& a, const BND_SubDEdge& b){ return a.Equals(b); }, py::is_operator())
+    .def("__ne__", [](const BND_SubDEdge& a, const BND_SubDEdge& b){ return !a.Equals(b); }, py::is_operator())
+    .def("__hash__", [](const BND_SubDEdge& e){ return (size_t)e.Id(); })
     ;
 
   py::class_<BND_SubDVertex>(m, "SubDVertex")
@@ -308,6 +314,9 @@ void initSubDBindings(rh3dmpymodule& m)
     .def("Next", &BND_SubDVertex::Next)
     .def("Previous", &BND_SubDVertex::Previous)
     .def("Edge", &BND_SubDVertex::Edge, py::arg("index"))
+    .def("__eq__", [](const BND_SubDVertex& a, const BND_SubDVertex& b){ return a.Equals(b); }, py::is_operator())
+    .def("__ne__", [](const BND_SubDVertex& a, const BND_SubDVertex& b){ return !a.Equals(b); }, py::is_operator())
+    .def("__hash__", [](const BND_SubDVertex& v){ return (size_t)v.Id(); })
     ;
 
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
@@ -376,6 +385,7 @@ void initSubDBindings(void*)
     .function("vertex", &BND_SubDFace::Vertex, allow_raw_pointers())
     .function("edge", &BND_SubDFace::Edge, allow_raw_pointers())
     .property("subdivisionPoint", &BND_SubDFace::SubdivisionPoint)
+    .function("equals", &BND_SubDFace::Equals)
     ;
 
   class_<BND_SubDEdge>("SubDEdge")
@@ -398,6 +408,7 @@ void initSubDBindings(void*)
     .property("subdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
     .property("controlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
     .function("controlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal)
+    .function("equals", &BND_SubDEdge::Equals)
     ;
 
   class_<BND_SubDVertex>("SubDVertex")
@@ -417,6 +428,7 @@ void initSubDBindings(void*)
     .function("next", &BND_SubDVertex::Next, allow_raw_pointers())
     .function("previous", &BND_SubDVertex::Previous, allow_raw_pointers())
     .function("edge", &BND_SubDVertex::Edge, allow_raw_pointers())
+    .function("equals", &BND_SubDVertex::Equals)
     ;
 
   class_<BND_SubD, base<BND_GeometryBase>>("SubD")

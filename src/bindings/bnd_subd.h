@@ -60,8 +60,7 @@ public:
 
 // Read-only wrappers over ON_SubD components. The pointers are non-owning; they
 // reference data owned by the parent ON_SubD and are only valid while it lives.
-// TODO: For BND_SubDFace, BND_SubDVertex, BND_SubDEdge, define robust == operators,
-// to be used in python == and is operators.
+// Each wrapper defines Equals (identity by ON component pointer) for == / is.
 class BND_SubDFace {
   const ON_SubDFace* m_subdface = nullptr;
   const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
@@ -100,6 +99,8 @@ public:
   class BND_SubDEdge* Edge(unsigned int index) const;
   ON_3dPoint SubdivisionPoint() const { return m_subdface->SubdivisionPoint(); }
 
+  // Identity: two wrappers are equal iff they reference the same ON_SubDFace.
+  bool Equals(const BND_SubDFace& other) const { return m_subdface == other.m_subdface; }
   const ON_SubDFace* GetONSubDComponent() const { return m_subdface; }
 };
 
@@ -135,6 +136,8 @@ public:
   ON_3dPoint ControlNetCenterPoint() const { return m_subdedge->ControlNetCenterPoint(); }
   ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return m_subdedge->ControlNetCenterNormal(edge_face_index); }
 
+  // Identity: two wrappers are equal iff they reference the same ON_SubDEdge.
+  bool Equals(const BND_SubDEdge& other) const { return m_subdedge == other.m_subdedge; }
   const ON_SubDEdge* GetONSubDComponent() const { return m_subdedge; }
 };
 
@@ -167,6 +170,8 @@ public:
   class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex, m_parent); }
   class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index), m_parent); }
 
+  // Identity: two wrappers are equal iff they reference the same ON_SubDVertex.
+  bool Equals(const BND_SubDVertex& other) const { return m_subdvertex == other.m_subdvertex; }
   const ON_SubDVertex* GetONSubDComponent() const { return m_subdvertex; }
 };
 
