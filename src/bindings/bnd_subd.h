@@ -56,6 +56,11 @@ public:
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   inline BND_SubDTTo* Item(unsigned int id) const
                                            { return AdapterT::ItemFromId(m_it, id); }
+
+  // Non-template shim for language bindings that cannot select between the two
+  // Item overloads (embind): resolves to index-by-position for a component-rooted
+  // iterator and index-by-Id for a SubD-rooted one, exactly like Item/__getitem__.
+  inline BND_SubDTTo* GetItem(unsigned int index_or_id) const { return Item(index_or_id); }
 };
 
 // Read-only wrappers over ON_SubD components. The pointers are non-owning; they

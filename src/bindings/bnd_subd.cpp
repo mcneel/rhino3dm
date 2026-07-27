@@ -339,9 +339,26 @@ void initSubDBindings(rh3dmpymodule& m)
 #if defined(ON_WASM_COMPILE)
 using namespace emscripten;
 
-// NOTE: The JS binding currently exposes SubD counts and the scalar data of a
-// SubDFace/Edge/Vertex. Traversal via the templated component iterators is
-// Python-first for now; exposing the iterators through embind is a follow-up.
+// Bind one BND_SubDComponentIterator<To, From> instantiation, mirroring the
+// pybind bind_SubDComponentIterator: the count, indexed/by-Id get(), and the
+// first/next/last/current cursor with currentIndex. embind cannot install a
+// Symbol.iterator from C++, so JS iterates either by index (count + get) or with
+// the cursor (first/next ... until current is null), matching the Python surface.
+template <typename BND_SubDTTo, typename BND_SubDTFrom>
+void bindSubDComponentIteratorJS(const char* name)
+{
+  using IteratorT = BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>;
+  class_<IteratorT>(name)
+    .property("count", &IteratorT::Count)
+    .property("currentIndex", &IteratorT::CurrentIndex)
+    .function("get", &IteratorT::GetItem, allow_raw_pointers())
+    .function("current", &IteratorT::Current, allow_raw_pointers())
+    .function("first", &IteratorT::First, allow_raw_pointers())
+    .function("next", &IteratorT::Next, allow_raw_pointers())
+    .function("last", &IteratorT::Last, allow_raw_pointers())
+    ;
+}
+
 void initSubDBindings(void*)
 {
   enum_<ON_SubDVertexTag>("SubDVertexTag")
@@ -358,6 +375,18 @@ void initSubDBindings(void*)
     .value("Crease", ON_SubDEdgeTag::Crease)
     .value("SmoothX", ON_SubDEdgeTag::SmoothX)
     ;
+
+  // All nine SubD-component iterator instantiations (must be registered before the
+  // SubD/component classes that return them).
+  bindSubDComponentIteratorJS<BND_SubDFace,   BND_SubD      >("SubDFaceIteratorFromSubD");
+  bindSubDComponentIteratorJS<BND_SubDEdge,   BND_SubD      >("SubDEdgeIteratorFromSubD");
+  bindSubDComponentIteratorJS<BND_SubDVertex, BND_SubD      >("SubDVertexIteratorFromSubD");
+  bindSubDComponentIteratorJS<BND_SubDEdge,   BND_SubDFace  >("SubDEdgeIteratorFromFace");
+  bindSubDComponentIteratorJS<BND_SubDVertex, BND_SubDFace  >("SubDVertexIteratorFromFace");
+  bindSubDComponentIteratorJS<BND_SubDFace,   BND_SubDEdge  >("SubDFaceIteratorFromEdge");
+  bindSubDComponentIteratorJS<BND_SubDVertex, BND_SubDEdge  >("SubDVertexIteratorFromEdge");
+  bindSubDComponentIteratorJS<BND_SubDFace,   BND_SubDVertex>("SubDFaceIteratorFromVertex");
+  bindSubDComponentIteratorJS<BND_SubDEdge,   BND_SubDVertex>("SubDEdgeIteratorFromVertex");
 
   class_<BND_SubDFace>("SubDFace")
     .property("index", &BND_SubDFace::Index)
@@ -385,6 +414,8 @@ void initSubDBindings(void*)
     .function("vertex", &BND_SubDFace::Vertex, allow_raw_pointers())
     .function("edge", &BND_SubDFace::Edge, allow_raw_pointers())
     .property("subdivisionPoint", &BND_SubDFace::SubdivisionPoint)
+    .function("edges", &BND_SubDFace::Edges)
+    .function("vertices", &BND_SubDFace::Vertices)
     .function("equals", &BND_SubDFace::Equals)
     ;
 
@@ -408,6 +439,8 @@ void initSubDBindings(void*)
     .property("subdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
     .property("controlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
     .function("controlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal)
+    .function("faces", &BND_SubDEdge::Faces)
+    .function("vertices", &BND_SubDEdge::Vertices)
     .function("equals", &BND_SubDEdge::Equals)
     ;
 
@@ -428,6 +461,8 @@ void initSubDBindings(void*)
     .function("next", &BND_SubDVertex::Next, allow_raw_pointers())
     .function("previous", &BND_SubDVertex::Previous, allow_raw_pointers())
     .function("edge", &BND_SubDVertex::Edge, allow_raw_pointers())
+    .function("faces", &BND_SubDVertex::Faces)
+    .function("edges", &BND_SubDVertex::Edges)
     .function("equals", &BND_SubDVertex::Equals)
     ;
 
@@ -440,6 +475,9 @@ void initSubDBindings(void*)
     .function("clearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .function("updateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .function("subdivide", &BND_SubD::Subdivide)
+    .function("faces", &BND_SubD::Faces)
+    .function("edges", &BND_SubD::Edges)
+    .function("vertices", &BND_SubD::Vertices)
     ;
 }
 #endif
