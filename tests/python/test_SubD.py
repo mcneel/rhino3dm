@@ -1,92 +1,78 @@
-import os
-import unittest
 import rhino3dm
-
-
-# RH3DM-178/177/176/175/169: read-only SubD component access (vertices, edges,
-# faces, connectivity, and crease tags for the Blender importer).
+import unittest
+import os
 
 
 def _fixture_path():
-    here = os.path.dirname(__file__)
-    for rel in ("../models/subdBox.3dm", "models/subdBox.3dm"):
-        candidate = os.path.normpath(os.path.join(here, rel))
-        if os.path.exists(candidate):
-            return candidate
+    """Locate tests/models/subd.3dm regardless of the working directory."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for rel in ("../models/subd.3dm", "models/subd.3dm",
+                os.path.join(here, "../models/subd.3dm")):
+        if os.path.exists(rel):
+            return rel
     return None
 
 
-def _first_subd(file3dm):
-    for obj in file3dm.Objects:
-        if isinstance(obj.Geometry, rhino3dm.SubD):
-            return obj.Geometry
-    return None
+def _read_subd():
+    path = _fixture_path()
+    if path is None:
+        return None
+    model = rhino3dm.File3dm.Read(path)
+    return model.Objects[0].Geometry
 
 
+# subd.3dm is a Rhino-authored SubD; these are its known component counts.
+FACE_COUNT = 235
+EDGE_COUNT = 434
+VERTEX_COUNT = 201
+
+
+@unittest.skipIf(_fixture_path() is None, "subd.3dm fixture not present")
 class TestSubD(unittest.TestCase):
 
-    def test_empty_subd_component_lists(self):
-        subd = rhino3dm.SubD()
-        self.assertEqual(subd.VertexCount, 0)
-        self.assertEqual(subd.EdgeCount, 0)
-        self.assertEqual(subd.FaceCount, 0)
-        self.assertEqual(len(subd.Vertices), 0)
-        self.assertIsNone(subd.Vertices[0])   # out of range -> None, not a crash
+    def setUp(self):
+        self.subd = _read_subd()
 
-    def test_tag_enums(self):
-        self.assertNotEqual(rhino3dm.SubDVertexTag.Crease, rhino3dm.SubDVertexTag.Smooth)
-        self.assertNotEqual(rhino3dm.SubDEdgeTag.Crease, rhino3dm.SubDEdgeTag.Smooth)
+    def test_counts(self):
+        self.assertEqual(self.subd.FaceCount, FACE_COUNT)
+        self.assertEqual(self.subd.EdgeCount, EDGE_COUNT)
+        self.assertEqual(self.subd.VertexCount, VERTEX_COUNT)
 
-    @unittest.skipIf(_fixture_path() is None, "subdBox.3dm fixture not present")
-    def test_read_components_from_fixture(self):
-        file3dm = rhino3dm.File3dm.Read(_fixture_path())
-        subd = _first_subd(file3dm)
-        self.assertIsNotNone(subd, "fixture has no SubD object")
+    def test_len_count_and_facecount_agree(self):
+        for lst, n in ((self.subd.Faces, FACE_COUNT),
+                       (self.subd.Edges, EDGE_COUNT),
+                       (self.subd.Vertices, VERTEX_COUNT)):
+            self.assertEqual(len(lst), n)
+            self.assertEqual(lst.Count, n)
+            self.assertEqual(len(lst), lst.Count)
 
-        # Counts agree between the SubD and its component lists.
-        self.assertGreater(subd.VertexCount, 0)
-        self.assertGreater(subd.EdgeCount, 0)
-        self.assertGreater(subd.FaceCount, 0)
-        self.assertEqual(len(subd.Vertices), subd.VertexCount)
-        self.assertEqual(len(subd.Edges), subd.EdgeCount)
-        self.assertEqual(len(subd.Faces), subd.FaceCount)
+    def test_iteration_yields_every_component(self):
+        self.assertEqual(sum(1 for _ in self.subd.Faces), FACE_COUNT)
+        self.assertEqual(sum(1 for _ in self.subd.Edges), EDGE_COUNT)
+        self.assertEqual(sum(1 for _ in self.subd.Vertices), VERTEX_COUNT)
 
-        # Vertices expose control-net points and a tag.
-        v0 = subd.Vertices[0]
-        self.assertIsNotNone(v0)
-        self.assertIsInstance(v0.ControlNetPoint, rhino3dm.Point3d)
-        self.assertIn(v0.Tag, (rhino3dm.SubDVertexTag.Smooth,
-                               rhino3dm.SubDVertexTag.Crease,
-                               rhino3dm.SubDVertexTag.Corner,
-                               rhino3dm.SubDVertexTag.Dart,
-                               rhino3dm.SubDVertexTag.Unset))
+    def test_find_by_id_round_trips(self):
+        # SubD-rooted iterators index by component Id; Id and Index alias the same value.
+        self.assertEqual(self.subd.Faces[1].Id, 1)
+        self.assertEqual(self.subd.Faces[1].Index, 1)
+        self.assertEqual(self.subd.Edges[1].Id, 1)
+        self.assertEqual(self.subd.Vertices[1].Id, 1)
 
-        # Faces expose their vertices; every referenced vertex resolves.
-        f0 = subd.Faces[0]
-        self.assertGreaterEqual(f0.VertexCount, 3)
-        fv0 = f0.VertexAt(0)
-        self.assertIsNotNone(fv0)
+    def test_face_sub_iterator_counts(self):
+        face = self.subd.Faces[1]
+        self.assertEqual(face.Edges(self.subd).Count, face.EdgeCount)
+        self.assertEqual(face.Vertices(self.subd).Count, face.VertexCount)
+        self.assertEqual(sum(1 for _ in face.Edges(self.subd)), face.EdgeCount)
+        self.assertEqual(sum(1 for _ in face.Vertices(self.subd)), face.VertexCount)
 
-        # Edges expose endpoints and a tag (crease is the Adidas driver).
-        e0 = subd.Edges[0]
-        self.assertIsNotNone(e0.VertexFrom)
-        self.assertIsNotNone(e0.VertexTo)
-        self.assertEqual(e0.IsCrease, e0.Tag == rhino3dm.SubDEdgeTag.Crease)
-
-        # Find-by-id round-trips.
-        found = subd.Vertices.Find(v0.Id)
-        self.assertIsNotNone(found)
-        self.assertEqual(found.Id, v0.Id)
-
-    @unittest.skipIf(_fixture_path() is None, "subdBox.3dm fixture not present")
-    def test_crease_present_if_authored(self):
-        # A creased box should report at least one crease edge. This is a soft
-        # check: if the fixture has no creases it simply reports zero.
-        file3dm = rhino3dm.File3dm.Read(_fixture_path())
-        subd = _first_subd(file3dm)
-        creases = sum(1 for i in range(subd.Edges.Count) if subd.Edges[i].IsCrease)
-        self.assertGreaterEqual(creases, 0)
+    def test_vertex_and_edge_sub_iterator_counts(self):
+        v = self.subd.Vertices[1]
+        self.assertEqual(v.Faces(self.subd).Count, v.FaceCount)
+        self.assertEqual(v.Edges(self.subd).Count, v.EdgeCount)
+        e = self.subd.Edges[1]
+        self.assertEqual(e.Faces(self.subd).Count, e.FaceCount)
+        self.assertEqual(e.Vertices(self.subd).Count, e.VertexCount)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
