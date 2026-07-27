@@ -77,6 +77,29 @@ public:
   int VertexCount() const { return m_subdface->EdgeCount(); }
   BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
   BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
+
+  int MaterialChannelIndex() const { return m_subdface->MaterialChannelIndex(); }
+  BND_Color PerFaceColor() const;
+  ON_3dPoint ControlNetCenterPoint() const { return m_subdface->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal() const { return m_subdface->ControlNetCenterNormal(); }
+  BND_Plane ControlNetCenterFrame() const { return BND_Plane::FromOnPlane(m_subdface->ControlNetCenterFrame()); }
+  bool IsConvex() const { return m_subdface->IsConvex(); }
+  bool IsNotConvex() const { return m_subdface->IsNotConvex(); }
+  bool IsPlanar(double planar_tolerance) const { return m_subdface->IsPlanar(planar_tolerance); }
+  bool IsNotPlanar(double planar_tolerance) const { return m_subdface->IsNotPlanar(planar_tolerance); }
+  unsigned int TexturePointsCapacity() const { return m_subdface->TexturePointsCapacity(); }
+  bool TexturePointsAreSet() const { return m_subdface->TexturePointsAreSet(); }
+  ON_3dPoint TexturePoint(unsigned int index) const { return m_subdface->TexturePoint(index); }
+  ON_3dPoint TextureCenterPoint() const { return m_subdface->TextureCenterPoint(); }
+  bool HasEdges() const { return m_subdface->HasEdges(); }
+  bool HasSharpEdges() const { return m_subdface->HasSharpEdges(); }
+  unsigned int SharpEdgeCount() const { return m_subdface->SharpEdgeCount(); }
+  double MaximumEdgeSharpness() const { return m_subdface->MaximumEdgeSharpness(); }
+  ON_3dPoint ControlNetPoint(unsigned int index) const { return m_subdface->ControlNetPoint(index); }
+  class BND_SubDVertex* Vertex(unsigned int index) const;
+  class BND_SubDEdge* Edge(unsigned int index) const;
+  ON_3dPoint SubdivisionPoint() const { return m_subdface->SubdivisionPoint(); }
+
   const ON_SubDFace* GetONSubDComponent() const { return m_subdface; }
 };
 

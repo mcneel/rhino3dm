@@ -73,6 +73,29 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(e.Faces(self.subd).Count, e.FaceCount)
         self.assertEqual(e.Vertices(self.subd).Count, e.VertexCount)
 
+    def test_face_properties(self):
+        face = self.subd.Faces[1]
+        self.assertGreaterEqual(face.EdgeCount, 3)
+        # scalar / boolean properties resolve and have sane types
+        self.assertIsInstance(face.MaterialChannelIndex, int)
+        self.assertIsInstance(face.IsConvex, bool)
+        self.assertIsInstance(face.IsNotConvex, bool)
+        self.assertIsInstance(face.IsPlanar(0.001), bool)
+        self.assertIsInstance(face.IsNotPlanar(0.001), bool)
+        self.assertTrue(face.HasEdges)
+        self.assertIsInstance(face.SharpEdgeCount, int)
+        self.assertIsInstance(face.TexturePointsCapacity, int)
+        self.assertIsInstance(face.TexturePointsAreSet, bool)
+        # geometry accessors return 3d points/vectors/planes
+        for p in (face.ControlNetCenterPoint, face.ControlNetCenterNormal,
+                  face.ControlNetPoint(0), face.SubdivisionPoint):
+            self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
+        self.assertTrue(hasattr(face.ControlNetCenterFrame, "Origin"))
+        self.assertIsNotNone(face.PerFaceColor)
+        # per-corner accessors line up with the face's own sub-iterators
+        self.assertEqual(face.Vertex(0).Index, face.Vertices(self.subd).First().Index)
+        self.assertEqual(face.Edge(0).Index, face.Edges(self.subd).First().Index)
+
 
 if __name__ == '__main__':
     unittest.main()
