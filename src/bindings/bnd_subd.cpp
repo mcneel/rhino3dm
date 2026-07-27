@@ -193,7 +193,10 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
                                            py::doc(("Initialize a new iterator for all " + type_to + " in this " + type_to + ", and return this iterator.").c_str()))
     .def("__next__",    [](IteratorT& it) -> BND_SubDTTo* {
                             BND_SubDTTo* current = it++;  // ON >= 8.18 postfix: the current component, then advance
-                            if (current->GetONSubDComponent() == nullptr) throw py::stop_iteration();
+                            if (current->GetONSubDComponent() == nullptr) {
+                              delete current;  // end of iteration: pybind never takes ownership, so free it here
+                              throw py::stop_iteration();
+                            }
                             return current; },
                                            py::doc(("Advance the iterator to the next "    + type_to + " and return the previously current " + type_to + ".").c_str()))
 #endif
