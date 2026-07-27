@@ -189,8 +189,8 @@ namespace docgen
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to rhino3dm's documentation!
-====================================
+Welcome to the rhino3dm.py documentation!
+=========================================
 
 .. toctree::
    :maxdepth: 2
