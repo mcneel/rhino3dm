@@ -101,6 +101,11 @@ class TestSubD(unittest.TestCase):
             self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
         self.assertTrue(hasattr(face.ControlNetCenterFrame, "Origin"))
         self.assertIsNotNone(face.PerFaceColor)
+        # sharp-edge and texture-point accessors
+        self.assertIsInstance(face.HasSharpEdges, bool)
+        self.assertIsInstance(face.MaximumEdgeSharpness, float)
+        self.assertTrue(hasattr(face.TextureCenterPoint, "X"))
+        self.assertTrue(hasattr(face.TexturePoint(0), "X"))  # safe even when texture points are unset
         # per-corner accessors line up with the face's own sub-iterators
         self.assertEqual(face.Vertex(0).Index, face.Vertices.First().Index)
         self.assertEqual(face.Edge(0).Index, face.Edges.First().Index)
@@ -124,6 +129,10 @@ class TestSubD(unittest.TestCase):
         for p in (edge.ControlNetPoint(0), edge.ControlNetDirection,
                   edge.SubdivisionPoint, edge.ControlNetCenterPoint):
             self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
+        # per-face center normal (indexed by edge-face); edge 1 has at least one face
+        if edge.FaceCount > 0:
+            n = edge.ControlNetCenterNormal(0)
+            self.assertTrue(hasattr(n, "X") and hasattr(n, "Y") and hasattr(n, "Z"))
 
     def test_vertex_properties(self):
         v = self.subd.Vertices[1]
@@ -142,6 +151,11 @@ class TestSubD(unittest.TestCase):
         # Edge(i) around the vertex agrees with the vertex's own edge sub-iterator
         self.assertEqual(v.EdgeCount, v.Edges.Count)
         self.assertEqual(v.Edge(0).Index, v.Edges.First().Index)
+        # Next/Previous walk the SubD vertex list; the head's next has the head as
+        # its previous (avoids dereferencing the null end of the list).
+        if self.subd.VertexCount >= 2:
+            head = self.subd.Vertices.First()
+            self.assertEqual(head.Next().Previous(), head)
 
     def test_component_equality(self):
         # The same component reached two ways compares equal; different ones don't.

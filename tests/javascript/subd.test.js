@@ -137,6 +137,11 @@ test('face properties', async () => {
         expect(typeof p[0]).toBe('number')
     }
     expect(face.perFaceColor).toBeDefined()
+    // sharp-edge and texture-point accessors
+    expect(typeof face.hasSharpEdges).toBe('boolean')
+    expect(typeof face.maximumEdgeSharpness).toBe('number')
+    expect(face.textureCenterPoint.length).toBe(3)
+    expect(face.texturePoint(0).length).toBe(3) // safe even when texture points are unset
     // per-corner accessors line up with the face's own sub-iterators
     expect(face.vertex(0).id).toBe(face.vertices().first().id)
     expect(face.edge(0).id).toBe(face.edges().first().id)
@@ -162,6 +167,8 @@ test('edge properties', async () => {
     for (const p of [edge.controlNetPoint(0), edge.controlNetDirection, edge.subdivisionPoint, edge.controlNetCenterPoint]) {
         expect(p.length).toBe(3)
     }
+    // per-face center normal (indexed by edge-face); the first edge has a face
+    if (edge.faceCount > 0) expect(edge.controlNetCenterNormal(0).length).toBe(3)
 })
 
 test('vertex properties', async () => {
@@ -184,6 +191,12 @@ test('vertex properties', async () => {
     }
     expect(v.edgeCount).toBe(v.edges().count)
     expect(v.edge(0).id).toBe(v.edges().first().id)
+    // next()/previous() walk the SubD vertex list; the head's next has the head
+    // as its previous (avoids dereferencing the null end of the list).
+    if (subd.vertexCount >= 2) {
+        const head = subd.vertices().first()
+        expect(head.next().previous().equals(head)).toBe(true)
+    }
 })
 
 test('component equality', async () => {
