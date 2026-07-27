@@ -31,7 +31,7 @@ class BND_SubDComponentIterator {
 
 public:
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  BND_SubDComponentIterator(const ON_SubD* parent_subd, const BND_SubDTFrom& base);
+  BND_SubDComponentIterator(const ON_SubDRef& parent_ref, const BND_SubDTFrom& base);
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   BND_SubDComponentIterator(const BND_SubD& base);
 
@@ -42,20 +42,23 @@ public:
   ThisT& operator=(const ThisT& rhs)          = default;
   ThisT& operator=(ThisT&& rhs)               = default;
 
+  // Every yielded component takes a copy of the iterator's ON_SubDRef (a refcounted
+  // handle that shares the SubD's dimple), so the wrapper keeps its geometry alive on
+  // its own and never dangles - even once this iterator, or the model, is destroyed.
   inline unsigned int Count()        const { return AdapterT::Count(m_it); }
   inline unsigned int CurrentIndex() const { return AdapterT::CurrentIndex(m_it); }
-  inline BND_SubDTTo* Current()      const { return AdapterT::Current(m_it); }
-  inline BND_SubDTTo* First()              { return AdapterT::First(m_it); }
-  inline BND_SubDTTo* Next()               { return AdapterT::Next(m_it); }
-  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(m_it++, &m_it.SubD()); }  // ON >= 8.18: operator++(int) is the correct postfix (returns current, then advances)
-  inline BND_SubDTTo* Last()               { return AdapterT::Last(m_it); }
+  inline BND_SubDTTo* Current()      const { return AdapterT::Current(m_it, m_it.SubDRef()); }
+  inline BND_SubDTTo* First()              { return AdapterT::First(m_it, m_it.SubDRef()); }
+  inline BND_SubDTTo* Next()               { return AdapterT::Next(m_it, m_it.SubDRef()); }
+  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(m_it++, m_it.SubDRef()); }  // ON >= 8.18: operator++(int) is the correct postfix (returns current, then advances)
+  inline BND_SubDTTo* Last()               { return AdapterT::Last(m_it, m_it.SubDRef()); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
   inline BND_SubDTTo* Item(unsigned int index) const
-                                           { return AdapterT::ItemAtIndex(m_it, index); }
+                                           { return AdapterT::ItemAtIndex(m_it, index, m_it.SubDRef()); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   inline BND_SubDTTo* Item(unsigned int id) const
-                                           { return AdapterT::ItemFromId(m_it, id); }
+                                           { return AdapterT::ItemFromId(m_it, id, m_it.SubDRef()); }
 
   // Non-template shim for language bindings that cannot select between the two
   // Item overloads (embind): resolves to index-by-position for a component-rooted
@@ -63,18 +66,20 @@ public:
   inline BND_SubDTTo* GetItem(unsigned int index_or_id) const { return Item(index_or_id); }
 };
 
-// Read-only wrappers over ON_SubD components. The pointers are non-owning; they
-// reference data owned by the parent ON_SubD and are only valid while it lives.
-// Each wrapper defines Equals (identity by ON component pointer) for == / is.
+// Read-only wrappers over ON_SubD components. The component pointer is non-owning
+// (it references data inside the parent SubD's dimple), but each wrapper also holds
+// an ON_SubDRef - a refcounted handle that keeps that dimple alive - so the wrapper
+// stays valid for its whole lifetime, even after the iterator or model that produced
+// it is gone. Each wrapper defines Equals (identity by ON component pointer) for == / is.
 class BND_SubDFace {
   const ON_SubDFace* m_subdface = nullptr;
-  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
+  ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
 
 public:
   using ON_SubDTFrom = ON_SubDFace;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDFace>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDFace>;
-  BND_SubDFace(const ON_SubDFace* face, const ON_SubD* parent = nullptr);
+  BND_SubDFace(const ON_SubDFace* face, ON_SubDRef parent = ON_SubDRef());
   unsigned int Index() const { return m_subdface->FaceId(); }
   unsigned int Id() const { return m_subdface->FaceId(); }
   int EdgeCount() const { return m_subdface->EdgeCount(); }
@@ -111,13 +116,13 @@ public:
 
 class BND_SubDEdge {
   const ON_SubDEdge* m_subdedge = nullptr;
-  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
+  ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
 
 public:
   using ON_SubDTFrom = ON_SubDEdge;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDEdge>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDEdge>;
-  BND_SubDEdge(const ON_SubDEdge* edge, const ON_SubD* parent = nullptr);
+  BND_SubDEdge(const ON_SubDEdge* edge, ON_SubDRef parent = ON_SubDRef());
   unsigned int Index() const { return m_subdedge->EdgeId(); }
   unsigned int Id() const { return m_subdedge->EdgeId(); }
   unsigned int VertexCount() const { return m_subdedge->VertexCount(); }
@@ -148,13 +153,13 @@ public:
 
 class BND_SubDVertex {
   const ON_SubDVertex* m_subdvertex = nullptr;
-  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
+  ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
 
 public:
   using ON_SubDTFrom = ON_SubDVertex;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDVertex>;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDVertex>;
-  BND_SubDVertex(const ON_SubDVertex* vertex, const ON_SubD* parent = nullptr);
+  BND_SubDVertex(const ON_SubDVertex* vertex, ON_SubDRef parent = ON_SubDRef());
   unsigned int Index() const { return m_subdvertex->VertexId(); }
   unsigned int Id() const { return m_subdvertex->VertexId(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }

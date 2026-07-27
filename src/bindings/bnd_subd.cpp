@@ -17,17 +17,17 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDFace, BND_SubDTFrom> {
 
   static inline unsigned int Count(const IteratorT& it)        { return it.FaceCount(); }
   static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentFaceIndex(); }
-  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentFace(), &it.SubD()); }
-  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstFace(), &it.SubD()); }
-  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextFace(), &it.SubD()); }
-  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastFace(), &it.SubD()); }
+  static inline IteratorTTo* Current(const IteratorT& it, const ON_SubDRef& parent) { return new IteratorTTo(it.CurrentFace(), parent); }
+  static inline IteratorTTo* First(IteratorT& it, const ON_SubDRef& parent)         { return new IteratorTTo(it.FirstFace(), parent); }
+  static inline IteratorTTo* Next(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.NextFace(), parent); }
+  static inline IteratorTTo* Last(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.LastFace(), parent); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Face(id), &it.SubD()); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Face(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(it.SubD().FaceFromId(id), &it.SubD()); }
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(it.SubD().FaceFromId(id), parent); }
 };
 
 template <typename BND_SubDTFrom>
@@ -38,17 +38,17 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDEdge, BND_SubDTFrom> {
 
   static inline unsigned int Count(const IteratorT& it)        { return it.EdgeCount(); }
   static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentEdgeIndex(); }
-  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentEdge(), &it.SubD()); }
-  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstEdge(), &it.SubD()); }
-  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextEdge(), &it.SubD()); }
-  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastEdge(), &it.SubD()); }
+  static inline IteratorTTo* Current(const IteratorT& it, const ON_SubDRef& parent) { return new IteratorTTo(it.CurrentEdge(), parent); }
+  static inline IteratorTTo* First(IteratorT& it, const ON_SubDRef& parent)         { return new IteratorTTo(it.FirstEdge(), parent); }
+  static inline IteratorTTo* Next(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.NextEdge(), parent); }
+  static inline IteratorTTo* Last(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.LastEdge(), parent); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Edge(id), &it.SubD()); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Edge(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(it.SubD().EdgeFromId(id), &it.SubD()); }
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(it.SubD().EdgeFromId(id), parent); }
 };
 
 template <typename BND_SubDTFrom>
@@ -59,32 +59,36 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDVertex, BND_SubDTFrom> {
 
   static inline unsigned int Count(const IteratorT& it)        { return it.VertexCount(); }
   static inline unsigned int CurrentIndex(const IteratorT& it) { return it.CurrentVertexIndex(); }
-  static inline IteratorTTo* Current(const IteratorT& it)      { return new IteratorTTo(it.CurrentVertex(), &it.SubD()); }
-  static inline IteratorTTo* First(IteratorT& it)              { return new IteratorTTo(it.FirstVertex(), &it.SubD()); }
-  static inline IteratorTTo* Next(IteratorT& it)               { return new IteratorTTo(it.NextVertex(), &it.SubD()); }
-  static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastVertex(), &it.SubD()); }
+  static inline IteratorTTo* Current(const IteratorT& it, const ON_SubDRef& parent) { return new IteratorTTo(it.CurrentVertex(), parent); }
+  static inline IteratorTTo* First(IteratorT& it, const ON_SubDRef& parent)         { return new IteratorTTo(it.FirstVertex(), parent); }
+  static inline IteratorTTo* Next(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.NextVertex(), parent); }
+  static inline IteratorTTo* Last(IteratorT& it, const ON_SubDRef& parent)          { return new IteratorTTo(it.LastVertex(), parent); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Vertex(id), &it.SubD()); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Vertex(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
-                                                               { return new IteratorTTo(it.SubD().VertexFromId(id), &it.SubD()); }
+  static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
+                                                               { return new IteratorTTo(it.SubD().VertexFromId(id), parent); }
 };
 
 template<typename BND_SubDTTo, typename BND_SubDTFrom>
 template<typename TFrom, EnableIfIsNotFromSubD<TFrom>*>
 BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator(
-  const ON_SubD* parent_subd, const BND_SubDTFrom& base) :
+  const ON_SubDRef& parent_ref, const BND_SubDTFrom& base) :
+  // The ON iterator stores parent_ref and hands it back via SubDRef(), so every
+  // component this iterator yields inherits the caller's refcounted SubD handle.
   m_it(
-    parent_subd != nullptr
-    ? ON_SubDTToIterator{ *parent_subd, *base.GetONSubDComponent() }
+    base.GetONSubDComponent() != nullptr
+    ? ON_SubDTToIterator{ parent_ref, *base.GetONSubDComponent() }
     : ON_SubDTToIterator{}) {}
 
 template<typename BND_SubDTTo, typename BND_SubDTFrom>
 template<typename TFrom, EnableIfIsFromSubD<TFrom>*>
 BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator(
   const BND_SubD& base) :
+  // Rooted on the whole SubD: the ON iterator builds its own ON_SubDRef (sharing the
+  // model's dimple), which SubDRef() then propagates to every yielded component.
   m_it(
     base.GetONSubDComponent() != nullptr
     ? ON_SubDTToIterator{ *base.GetONSubDComponent() }
@@ -108,9 +112,9 @@ BND_SubD::BND_SubD()
 }
 
 // SubD components
-BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face, const ON_SubD* parent)       { m_subdface = face; m_parent = parent; }
-BND_SubDEdge::BND_SubDEdge(const class ON_SubDEdge* edge, const ON_SubD* parent)       { m_subdedge = edge; m_parent = parent; }
-BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex, const ON_SubD* parent) { m_subdvertex = vertex; m_parent = parent; }
+BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face, ON_SubDRef parent)         { m_subdface = face; m_parent = std::move(parent); }
+BND_SubDEdge::BND_SubDEdge(const class ON_SubDEdge* edge, ON_SubDRef parent)         { m_subdedge = edge; m_parent = std::move(parent); }
+BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex, ON_SubDRef parent) { m_subdvertex = vertex; m_parent = std::move(parent); }
 
 BND_Color BND_SubDFace::PerFaceColor() const
 {
@@ -149,32 +153,32 @@ BND_SubD::BND_SubDVertexIterator BND_SubD::Vertices() const
 
 BND_SubDVertex::BND_SubDFaceIterator BND_SubDVertex::Faces() const
 {
-  return m_parent != nullptr ? BND_SubDFaceIterator(m_parent, *this) : BND_SubDFaceIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDFaceIterator(m_parent, *this) : BND_SubDFaceIterator{};
 }
 
 BND_SubDVertex::BND_SubDEdgeIterator BND_SubDVertex::Edges() const
 {
-  return m_parent != nullptr ? BND_SubDEdgeIterator(m_parent, *this) : BND_SubDEdgeIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDEdgeIterator(m_parent, *this) : BND_SubDEdgeIterator{};
 }
 
 BND_SubDEdge::BND_SubDVertexIterator BND_SubDEdge::Vertices() const
 {
-  return m_parent != nullptr ? BND_SubDVertexIterator(m_parent, *this) : BND_SubDVertexIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDVertexIterator(m_parent, *this) : BND_SubDVertexIterator{};
 }
 
 BND_SubDEdge::BND_SubDFaceIterator BND_SubDEdge::Faces() const
 {
-  return m_parent != nullptr ? BND_SubDFaceIterator(m_parent, *this) : BND_SubDFaceIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDFaceIterator(m_parent, *this) : BND_SubDFaceIterator{};
 }
 
 BND_SubDFace::BND_SubDEdgeIterator BND_SubDFace::Edges() const
 {
-  return m_parent != nullptr ? BND_SubDEdgeIterator(m_parent, *this) : BND_SubDEdgeIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDEdgeIterator(m_parent, *this) : BND_SubDEdgeIterator{};
 }
 
 BND_SubDFace::BND_SubDVertexIterator BND_SubDFace::Vertices() const
 {
-  return m_parent != nullptr ? BND_SubDVertexIterator(m_parent, *this) : BND_SubDVertexIterator{};
+  return !m_parent.SubD().IsEmpty() ? BND_SubDVertexIterator(m_parent, *this) : BND_SubDVertexIterator{};
 }
 
 #if defined(ON_PYTHON_COMPILE)
