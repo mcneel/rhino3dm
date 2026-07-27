@@ -37,14 +37,14 @@ if (${RHINO3DM_PY})
   endif()
 endif()
 
-message("NODE=${NODE}")
-if( NODE ) 
-    message("NODE evaluates to True")
+if (NODE)
+  message("NODE=${NODE}")
+  message("NODE evaluates to True")
 endif()
 
-message("MODULE=${MODULE}")
-if( MODULE ) 
-    message("MODULE evaluates to True")
+if (MODULE)
+  message("MODULE=${MODULE}")
+  message("MODULE evaluates to True")
 endif()
 
 # Add draco add_library
@@ -104,6 +104,15 @@ if (${RHINO3DM_PY})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
   endif()
+endif()
+
+if(MSVC)
+  # Faster MSVC builds: parallelize the solution over projects (/MP), and each
+  # project over files via the multi-tool task scheduler; use incremental linking.
+  add_compile_options("/MP")
+  set (CMAKE_VS_GLOBALS "${CMAKE_VS_GLOBALS};UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true")
+  add_compile_options("/openmp")     # OpenNURBS can use OpenMP; no need to force the single-threaded variant
+  add_link_options("/INCREMENTAL")
 endif()
 
 add_definitions(-D_GNU_SOURCE)
@@ -191,5 +200,16 @@ if (${RHINO3DM_PY})
     target_link_libraries(_rhino3dm PRIVATE optimized ${CMAKE_BINARY_DIR}/draco_static/Release/draco.lib)
   else()
     target_link_libraries(_rhino3dm PRIVATE draco_static)
+  endif()
+endif()
+
+if (MSVC)
+  # Build the rhino3dm code with warnings on. TODO: raise to /W4 (and eventually
+  # /WX) once OpenNURBS builds clean at that level.
+  if (TARGET _rhino3dm)
+    target_compile_options(_rhino3dm PRIVATE "/W3")
+  endif()
+  if (TARGET opennurbs_static)
+    target_compile_options(opennurbs_static PRIVATE "/W3")
   endif()
 endif()
