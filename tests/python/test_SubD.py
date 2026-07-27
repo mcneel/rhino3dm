@@ -69,18 +69,18 @@ class TestSubD(unittest.TestCase):
 
     def test_face_sub_iterator_counts(self):
         face = self.subd.Faces[1]
-        self.assertEqual(face.Edges(self.subd).Count, face.EdgeCount)
-        self.assertEqual(face.Vertices(self.subd).Count, face.VertexCount)
-        self.assertEqual(sum(1 for _ in face.Edges(self.subd)), face.EdgeCount)
-        self.assertEqual(sum(1 for _ in face.Vertices(self.subd)), face.VertexCount)
+        self.assertEqual(face.Edges.Count, face.EdgeCount)
+        self.assertEqual(face.Vertices.Count, face.VertexCount)
+        self.assertEqual(sum(1 for _ in face.Edges), face.EdgeCount)
+        self.assertEqual(sum(1 for _ in face.Vertices), face.VertexCount)
 
     def test_vertex_and_edge_sub_iterator_counts(self):
         v = self.subd.Vertices[1]
-        self.assertEqual(v.Faces(self.subd).Count, v.FaceCount)
-        self.assertEqual(v.Edges(self.subd).Count, v.EdgeCount)
+        self.assertEqual(v.Faces.Count, v.FaceCount)
+        self.assertEqual(v.Edges.Count, v.EdgeCount)
         e = self.subd.Edges[1]
-        self.assertEqual(e.Faces(self.subd).Count, e.FaceCount)
-        self.assertEqual(e.Vertices(self.subd).Count, e.VertexCount)
+        self.assertEqual(e.Faces.Count, e.FaceCount)
+        self.assertEqual(e.Vertices.Count, e.VertexCount)
 
     def test_face_properties(self):
         face = self.subd.Faces[1]
@@ -102,8 +102,8 @@ class TestSubD(unittest.TestCase):
         self.assertTrue(hasattr(face.ControlNetCenterFrame, "Origin"))
         self.assertIsNotNone(face.PerFaceColor)
         # per-corner accessors line up with the face's own sub-iterators
-        self.assertEqual(face.Vertex(0).Index, face.Vertices(self.subd).First().Index)
-        self.assertEqual(face.Edge(0).Index, face.Edges(self.subd).First().Index)
+        self.assertEqual(face.Vertex(0).Index, face.Vertices.First().Index)
+        self.assertEqual(face.Edge(0).Index, face.Edges.First().Index)
 
     def test_edge_properties(self):
         edge = self.subd.Edges[1]
@@ -140,8 +140,8 @@ class TestSubD(unittest.TestCase):
         for p in (v.ControlNetPoint, v.SurfacePoint):
             self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
         # Edge(i) around the vertex agrees with the vertex's own edge sub-iterator
-        self.assertEqual(v.EdgeCount, v.Edges(self.subd).Count)
-        self.assertEqual(v.Edge(0).Index, v.Edges(self.subd).First().Index)
+        self.assertEqual(v.EdgeCount, v.Edges.Count)
+        self.assertEqual(v.Edge(0).Index, v.Edges.First().Index)
 
 
 if __name__ == '__main__':

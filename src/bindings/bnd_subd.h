@@ -31,7 +31,7 @@ class BND_SubDComponentIterator {
 
 public:
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  BND_SubDComponentIterator(const BND_SubD& parent_subd, const BND_SubDTFrom& base);  // TODO: Remove parent_subd arg when BND_SubDFace etc hold a ref to their parent SubD
+  BND_SubDComponentIterator(const ON_SubD* parent_subd, const BND_SubDTFrom& base);
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   BND_SubDComponentIterator(const BND_SubD& base);
 
@@ -47,7 +47,7 @@ public:
   inline BND_SubDTTo* Current()      const { return AdapterT::Current(m_it); }
   inline BND_SubDTTo* First()              { return AdapterT::First(m_it); }
   inline BND_SubDTTo* Next()               { return AdapterT::Next(m_it); }
-  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(m_it++); }  // ON >= 8.18: operator++(int) is the correct postfix (returns current, then advances)
+  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(m_it++, &m_it.SubD()); }  // ON >= 8.18: operator++(int) is the correct postfix (returns current, then advances)
   inline BND_SubDTTo* Last()               { return AdapterT::Last(m_it); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
@@ -64,18 +64,19 @@ public:
 // to be used in python == and is operators.
 class BND_SubDFace {
   const ON_SubDFace* m_subdface = nullptr;
+  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
 
 public:
   using ON_SubDTFrom = ON_SubDFace;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDFace>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDFace>;
-  BND_SubDFace(const ON_SubDFace* face);
+  BND_SubDFace(const ON_SubDFace* face, const ON_SubD* parent = nullptr);
   unsigned int Index() const { return m_subdface->FaceId(); }
   unsigned int Id() const { return m_subdface->FaceId(); }
   int EdgeCount() const { return m_subdface->EdgeCount(); }
   int VertexCount() const { return m_subdface->EdgeCount(); }
-  BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
-  BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
+  BND_SubDEdgeIterator Edges() const;
+  BND_SubDVertexIterator Vertices() const;
 
   int MaterialChannelIndex() const { return m_subdface->MaterialChannelIndex(); }
   BND_Color PerFaceColor() const;
@@ -104,18 +105,19 @@ public:
 
 class BND_SubDEdge {
   const ON_SubDEdge* m_subdedge = nullptr;
+  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
 
 public:
   using ON_SubDTFrom = ON_SubDEdge;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDEdge>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDEdge>;
-  BND_SubDEdge(const ON_SubDEdge* edge);
+  BND_SubDEdge(const ON_SubDEdge* edge, const ON_SubD* parent = nullptr);
   unsigned int Index() const { return m_subdedge->EdgeId(); }
   unsigned int Id() const { return m_subdedge->EdgeId(); }
   unsigned int VertexCount() const { return m_subdedge->VertexCount(); }
   unsigned int FaceCount() const { return m_subdedge->FaceCount(); }
-  BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
-  BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
+  BND_SubDFaceIterator Faces() const;
+  BND_SubDVertexIterator Vertices() const;
 
   ON_SubDEdgeTag Tag() const { return m_subdedge->m_edge_tag; }
   unsigned int VertexId(unsigned index) const { return m_subdedge->Vertex(index)->VertexId(); }
@@ -138,18 +140,19 @@ public:
 
 class BND_SubDVertex {
   const ON_SubDVertex* m_subdvertex = nullptr;
+  const ON_SubD* m_parent = nullptr;  // owning SubD, so component traversal needs no explicit argument
 
 public:
   using ON_SubDTFrom = ON_SubDVertex;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDVertex>;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDVertex>;
-  BND_SubDVertex(const ON_SubDVertex* vertex);
+  BND_SubDVertex(const ON_SubDVertex* vertex, const ON_SubD* parent = nullptr);
   unsigned int Index() const { return m_subdvertex->VertexId(); }
   unsigned int Id() const { return m_subdvertex->VertexId(); }
   int EdgeCount() const { return m_subdvertex->EdgeCount(); }
   int FaceCount() const { return m_subdvertex->FaceCount(); }
-  BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
-  BND_SubDEdgeIterator Edges(class BND_SubD parent_subd) const;
+  BND_SubDFaceIterator Faces() const;
+  BND_SubDEdgeIterator Edges() const;
 
   ON_SubDVertexTag Tag() const { return m_subdvertex->m_vertex_tag; }
   bool IsCrease() const { return m_subdvertex->IsCrease(); }
@@ -160,9 +163,9 @@ public:
   ON_3dPoint ControlNetPoint() const { return m_subdvertex->ControlNetPoint(); }
   ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
   double VertexSharpness() const { return m_subdvertex->VertexSharpness(); }
-  class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex); }
-  class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex); }
-  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index)); }
+  class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex, m_parent); }
+  class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex, m_parent); }
+  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index), m_parent); }
 
   const ON_SubDVertex* GetONSubDComponent() const { return m_subdvertex; }
 };
