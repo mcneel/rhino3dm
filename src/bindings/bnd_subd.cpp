@@ -1,5 +1,12 @@
 #include "bindings.h"
 
+// The anchor component a component-rooted iterator walks around. ON exposes it via
+// ON_SubD*Iterator::BaseComponentPtr(); the overloaded dummy-pointer argument picks
+// the accessor matching the "From" component type.
+static inline const ON_SubDVertex* SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDVertex*) { return p.Vertex(); }
+static inline const ON_SubDEdge*   SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDEdge*)   { return p.Edge(); }
+static inline const ON_SubDFace*   SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDFace*)   { return p.Face(); }
+
 // SubDComponentIterator adapters: map the generic iterator onto the concrete
 // ON_SubD*Iterator for each yielded ("To") component type.
 template <typename BND_SubDTFrom>
@@ -16,8 +23,8 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDFace, BND_SubDTFrom> {
   static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastFace()); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
-                                                               { return new IteratorTTo(base->Face(id)); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Face(id)); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
                                                                { return new IteratorTTo(it.SubD().FaceFromId(id)); }
@@ -37,8 +44,8 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDEdge, BND_SubDTFrom> {
   static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastEdge()); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
-                                                               { return new IteratorTTo(base->Edge(id)); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Edge(id)); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
                                                                { return new IteratorTTo(it.SubD().EdgeFromId(id)); }
@@ -58,8 +65,8 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDVertex, BND_SubDTFrom> {
   static inline IteratorTTo* Last(IteratorT& it)               { return new IteratorTTo(it.LastVertex()); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
-  static inline IteratorTTo* ItemAtIndex(const ON_SubDTFrom* base, unsigned int id)
-                                                               { return new IteratorTTo(base->Vertex(id)); }
+  static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id)
+                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Vertex(id)); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id)
                                                                { return new IteratorTTo(it.SubD().VertexFromId(id)); }
@@ -72,8 +79,7 @@ BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator
   m_it(
     parent_subd.GetONSubDComponent() != nullptr
     ? ON_SubDTToIterator{ *parent_subd.GetONSubDComponent(), *base.GetONSubDComponent() }
-    : ON_SubDTToIterator{}),
-  m_base(base.GetONSubDComponent()) {}
+    : ON_SubDTToIterator{}) {}
 
 template<typename BND_SubDTTo, typename BND_SubDTFrom>
 template<typename TFrom, EnableIfIsFromSubD<TFrom>*>
@@ -82,8 +88,7 @@ BND_SubDComponentIterator<BND_SubDTTo, BND_SubDTFrom>::BND_SubDComponentIterator
   m_it(
     base.GetONSubDComponent() != nullptr
     ? ON_SubDTToIterator{ *base.GetONSubDComponent() }
-    : ON_SubDTToIterator{}),
-  m_base(base.GetONSubDComponent()) {}
+    : ON_SubDTToIterator{}) {}
 
 // SubD
 BND_SubD::BND_SubD(ON_SubD* subd, const ON_ModelComponentReference* compref)
@@ -183,8 +188,9 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
     .def("__iter__",    [](IteratorT& it) -> IteratorT&   { return it; },
                                            py::doc(("Initialize a new iterator for all " + type_to + " in this " + type_to + ", and return this iterator.").c_str()))
     .def("__next__",    [](IteratorT& it) -> BND_SubDTTo* {
-                            if (it.Current()->GetONSubDComponent() == nullptr) throw py::stop_iteration();
-                            return it++; },
+                            BND_SubDTTo* current = it++;  // ON >= 8.18 postfix: the current component, then advance
+                            if (current->GetONSubDComponent() == nullptr) throw py::stop_iteration();
+                            return current; },
                                            py::doc(("Advance the iterator to the next "    + type_to + " and return the previously current " + type_to + ".").c_str()))
 #endif
     .def("__getitem__", [](IteratorT& it, size_t ind) -> BND_SubDTTo* {

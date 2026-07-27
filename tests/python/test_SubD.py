@@ -47,9 +47,18 @@ class TestSubD(unittest.TestCase):
             self.assertEqual(len(lst), lst.Count)
 
     def test_iteration_yields_every_component(self):
-        self.assertEqual(sum(1 for _ in self.subd.Faces), FACE_COUNT)
-        self.assertEqual(sum(1 for _ in self.subd.Edges), EDGE_COUNT)
-        self.assertEqual(sum(1 for _ in self.subd.Vertices), VERTEX_COUNT)
+        for lst, n in ((self.subd.Faces, FACE_COUNT),
+                       (self.subd.Edges, EDGE_COUNT),
+                       (self.subd.Vertices, VERTEX_COUNT)):
+            items = list(lst)
+            self.assertEqual(len(items), n)
+            # Every yielded component must be valid: reading .Id would segfault on
+            # a null wrapper, and n distinct ids confirms nothing is skipped or a
+            # trailing null is appended (regression against the ++ off-by-one).
+            ids = [c.Id for c in items]
+            self.assertEqual(len(set(ids)), n)
+            # Iteration starts at the first component (it used to skip it).
+            self.assertEqual(items[0].Id, lst.First().Id)
 
     def test_find_by_id_round_trips(self):
         # SubD-rooted iterators index by component Id; Id and Index alias the same value.

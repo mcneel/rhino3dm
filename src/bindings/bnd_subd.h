@@ -28,7 +28,6 @@ class BND_SubDComponentIterator {
   using ON_SubDTToIterator = typename AdapterT::IteratorT;
   using ON_SubDTFrom = typename BND_SubDTFrom::ON_SubDTFrom;
   ON_SubDTToIterator m_it{};
-  const ON_SubDTFrom* m_base{};  // TODO: Make an accessor in ON for m_it.m_component_ptr and remove this, we only need it in ItemAtIndex()
 
 public:
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
@@ -48,12 +47,12 @@ public:
   inline BND_SubDTTo* Current()      const { return AdapterT::Current(m_it); }
   inline BND_SubDTTo* First()              { return AdapterT::First(m_it); }
   inline BND_SubDTTo* Next()               { return AdapterT::Next(m_it); }
-  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(++m_it); }  // TODO: Fix that in ON! operator++(int) should be the post-increment operator (m_it++)
+  inline BND_SubDTTo* operator++(int)      { return new BND_SubDTTo(m_it++); }  // ON >= 8.18: operator++(int) is the correct postfix (returns current, then advances)
   inline BND_SubDTTo* Last()               { return AdapterT::Last(m_it); }
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
   inline BND_SubDTTo* Item(unsigned int index) const
-                                           { return AdapterT::ItemAtIndex(m_base, index); }
+                                           { return AdapterT::ItemAtIndex(m_it, index); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   inline BND_SubDTTo* Item(unsigned int id) const
                                            { return AdapterT::ItemFromId(m_it, id); }
