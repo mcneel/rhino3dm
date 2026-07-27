@@ -117,6 +117,23 @@ public:
   unsigned int FaceCount() const { return m_subdedge->FaceCount(); }
   BND_SubDFaceIterator Faces(class BND_SubD parent_subd) const;
   BND_SubDVertexIterator Vertices(class BND_SubD parent_subd) const;
+
+  ON_SubDEdgeTag Tag() const { return m_subdedge->m_edge_tag; }
+  unsigned int VertexId(unsigned index) const { return m_subdedge->Vertex(index)->VertexId(); }
+  class BND_SubDVertex* Vertex(unsigned index);
+  ON_3dPoint ControlNetPoint(unsigned index) const { return m_subdedge->ControlNetPoint(index); }
+  ON_3dVector ControlNetDirection() const { return m_subdedge->ControlNetDirection(); }
+  bool IsSmooth() const { return m_subdedge->IsSmooth(); }
+  bool IsSharp() const { return m_subdedge->IsSharp(); }
+  double EndSharpness(unsigned endIndex) const { return m_subdedge->EndSharpness(endIndex); }
+  bool IsCrease() const { return m_subdedge->IsCrease(); }
+  bool IsHardCrease() const { return m_subdedge->IsHardCrease(); }
+  bool IsDartCrease() const { return m_subdedge->IsDartCrease(); }
+  unsigned int DartCount() const { return m_subdedge->DartCount(); }
+  ON_3dPoint SubdivisionPoint() const { return m_subdedge->SubdivisionPoint(); }
+  ON_3dPoint ControlNetCenterPoint() const { return m_subdedge->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return m_subdedge->ControlNetCenterNormal(edge_face_index); }
+
   const ON_SubDEdge* GetONSubDComponent() const { return m_subdedge; }
 };
 

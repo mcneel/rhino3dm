@@ -96,6 +96,26 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(face.Vertex(0).Index, face.Vertices(self.subd).First().Index)
         self.assertEqual(face.Edge(0).Index, face.Edges(self.subd).First().Index)
 
+    def test_edge_properties(self):
+        edge = self.subd.Edges[1]
+        self.assertEqual(edge.VertexCount, 2)
+        # Tag is a SubDEdgeTag; IsCrease agrees with the Crease tag
+        self.assertIn(edge.Tag, (rhino3dm.SubDEdgeTag.Unset, rhino3dm.SubDEdgeTag.Smooth,
+                                 rhino3dm.SubDEdgeTag.Crease, rhino3dm.SubDEdgeTag.SmoothX))
+        self.assertEqual(edge.IsCrease, edge.Tag == rhino3dm.SubDEdgeTag.Crease)
+        # endpoint accessors are consistent with each other
+        self.assertEqual(edge.VertexId(0), edge.Vertex(0).Id)
+        self.assertEqual(edge.VertexId(1), edge.Vertex(1).Id)
+        # booleans / counts resolve
+        for b in (edge.IsSmooth, edge.IsSharp, edge.IsCrease, edge.IsHardCrease, edge.IsDartCrease):
+            self.assertIsInstance(b, bool)
+        self.assertIsInstance(edge.DartCount, int)
+        self.assertIsInstance(edge.EndSharpness(0), float)
+        # geometry accessors return 3d points/vectors
+        for p in (edge.ControlNetPoint(0), edge.ControlNetDirection,
+                  edge.SubdivisionPoint, edge.ControlNetCenterPoint):
+            self.assertTrue(hasattr(p, "X") and hasattr(p, "Y") and hasattr(p, "Z"))
+
 
 if __name__ == '__main__':
     unittest.main()

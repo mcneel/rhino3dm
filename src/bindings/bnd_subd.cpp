@@ -122,6 +122,11 @@ BND_SubDEdge* BND_SubDFace::Edge(unsigned int i) const
   return new BND_SubDEdge(m_subdface->Edge(i));
 }
 
+class BND_SubDVertex* BND_SubDEdge::Vertex(unsigned index)
+{
+  return new class BND_SubDVertex(m_subdedge->Vertex(index));
+}
+
 BND_SubD::BND_SubDFaceIterator BND_SubD::Faces() const
 {
   return this != nullptr ? BND_SubDFaceIterator(*this) : BND_SubDFaceIterator{};
@@ -199,6 +204,13 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
 
 void initSubDBindings(rh3dmpymodule& m)
 {
+  py::enum_<ON_SubDEdgeTag>(m, "SubDEdgeTag")
+    .value("Unset", ON_SubDEdgeTag::Unset)
+    .value("Smooth", ON_SubDEdgeTag::Smooth)
+    .value("Crease", ON_SubDEdgeTag::Crease)
+    .value("SmoothX", ON_SubDEdgeTag::SmoothX)
+    ;
+
   bind_SubDComponentIterator<BND_SubDFace,   BND_SubD      >(m, "Face",   "SubD"  );
   bind_SubDComponentIterator<BND_SubDFace,   BND_SubDEdge  >(m, "Face",   "Edge"  );
   bind_SubDComponentIterator<BND_SubDFace,   BND_SubDVertex>(m, "Face",   "Vertex");
@@ -246,6 +258,21 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("FaceCount", &BND_SubDEdge::FaceCount)
     .def("Vertices", &BND_SubDEdge::Vertices)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
     .def("Faces", &BND_SubDEdge::Faces)  // TODO: Turn this into a readonly prop when we can get rid of the parent_subd arg
+    .def_property_readonly("Tag", &BND_SubDEdge::Tag)
+    .def("VertexId", &BND_SubDEdge::VertexId, py::arg("index"))
+    .def("Vertex", &BND_SubDEdge::Vertex, py::arg("index"))
+    .def("ControlNetPoint", &BND_SubDEdge::ControlNetPoint, py::arg("index"))
+    .def_property_readonly("ControlNetDirection", &BND_SubDEdge::ControlNetDirection)
+    .def_property_readonly("IsSmooth", &BND_SubDEdge::IsSmooth)
+    .def_property_readonly("IsSharp", &BND_SubDEdge::IsSharp)
+    .def("EndSharpness", &BND_SubDEdge::EndSharpness, py::arg("endIndex"))
+    .def_property_readonly("IsCrease", &BND_SubDEdge::IsCrease)
+    .def_property_readonly("IsHardCrease", &BND_SubDEdge::IsHardCrease)
+    .def_property_readonly("IsDartCrease", &BND_SubDEdge::IsDartCrease)
+    .def_property_readonly("DartCount", &BND_SubDEdge::DartCount)
+    .def_property_readonly("SubdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
+    .def_property_readonly("ControlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
+    .def("ControlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal, py::arg("edge_face_index"))
     ;
 
   py::class_<BND_SubDVertex>(m, "SubDVertex")
@@ -282,6 +309,13 @@ using namespace emscripten;
 // Python-first for now; exposing the iterators through embind is a follow-up.
 void initSubDBindings(void*)
 {
+  enum_<ON_SubDEdgeTag>("SubDEdgeTag")
+    .value("Unset", ON_SubDEdgeTag::Unset)
+    .value("Smooth", ON_SubDEdgeTag::Smooth)
+    .value("Crease", ON_SubDEdgeTag::Crease)
+    .value("SmoothX", ON_SubDEdgeTag::SmoothX)
+    ;
+
   class_<BND_SubDFace>("SubDFace")
     .property("index", &BND_SubDFace::Index)
     .property("id", &BND_SubDFace::Id)
@@ -315,6 +349,21 @@ void initSubDBindings(void*)
     .property("id", &BND_SubDEdge::Id)
     .property("vertexCount", &BND_SubDEdge::VertexCount)
     .property("faceCount", &BND_SubDEdge::FaceCount)
+    .property("tag", &BND_SubDEdge::Tag)
+    .function("vertexId", &BND_SubDEdge::VertexId)
+    .function("vertex", &BND_SubDEdge::Vertex, allow_raw_pointers())
+    .function("controlNetPoint", &BND_SubDEdge::ControlNetPoint)
+    .property("controlNetDirection", &BND_SubDEdge::ControlNetDirection)
+    .property("isSmooth", &BND_SubDEdge::IsSmooth)
+    .property("isSharp", &BND_SubDEdge::IsSharp)
+    .function("endSharpness", &BND_SubDEdge::EndSharpness)
+    .property("isCrease", &BND_SubDEdge::IsCrease)
+    .property("isHardCrease", &BND_SubDEdge::IsHardCrease)
+    .property("isDartCrease", &BND_SubDEdge::IsDartCrease)
+    .property("dartCount", &BND_SubDEdge::DartCount)
+    .property("subdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
+    .property("controlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
+    .function("controlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal)
     ;
 
   class_<BND_SubDVertex>("SubDVertex")
