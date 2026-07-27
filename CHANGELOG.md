@@ -4,16 +4,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [X.Y.Z] - T.B.A.
+## [8.32.0] - T.B.A.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.17.0...8.32.0
 
 ### Added
 
-- (py) Improved stubs. PR #708 @StudioWEngineers
-- (py) Improved stubs. PR #690 @StudioWEngineers
+- (py, js) SubD read API: `SubDVertex`, `SubDEdge`, and `SubDFace` classes exposing control-net points, surface points, vertex/edge tags (including crease), edge/face counts, and connectivity (`VertexFrom`/`VertexTo`, `VertexAt`/`EdgeAt`/`FaceAt`, `Next`/`Previous`); `SubD.Vertices`/`Edges`/`Faces` lists with counts and find-by-id; and `SubDVertexTag` / `SubDEdgeTag` enums. RH3DM-178, RH3DM-177, RH3DM-176, RH3DM-175, RH3DM-169 #725
+- (py) Brep topology wrapper classes and bindings (topology faces, edges, loops, trims, vertices), with tests. #713 @jchkoch, #723
+- (dotnet, py, js) Cached texture coordinates via ONX_Model (headless): `Mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, objectId, material)` and `Mesh.GetCachedTextureCoordinatesFromTexture(file3dm, objectId, texture)` — the rhino3dm counterparts to RhinoCommon's `RhinoObject`-based overloads. RH3DM-170
+- (py, js) Reading decals; decals now use the OpenNURBS `shared_ptr<ON_Decal>` API. RH3DM-192
+- (py, js) `GeometryBase.GetTightBoundingBox`. RH3DM-188
+- (js) Zero-copy typed-array mesh export path for faster large-model loading. RH3DM-191
+- (py, js) `Intersection.SphereSphere` and `Intersection.PlaneSphere`.
+- (py, js) New enums: `ObjectType`, `UnitSystem`, `MeshType`, `TextureType`, `CoordinateSystem`, `ComponentIndexType`, `ObjectMaterialSource`, `ObjectColorSource`, `ObjectMode`, `ObjectLinetypeSource`, `ObjectPlotColorSource`, `ObjectPlotWeightSource`, `ObjectDecoration`, `CurveOrientation`.
+- (py, js) Missing setters added to `Layer`; fixed `File3dmObjectTable.AddPolyline`.
+- (dotnet, py) Experimental RhinoCore / RhinoDoc bindings via nanobind (WIP). #696 #697 #698
+- (py, js) `Material.SetTexture(texture)` — a generic texture setter that respects the texture's own `TextureType`, so any PBR channel (roughness, metallic, emission, etc.) can be assigned, not just bitmap/bump/environment/transparency. #720 @aidannewsome
+- (js) `attributes` arguments added to the TypeScript definitions. #693
+- (py) Improved stubs, including `File3dmLayerTable`. #690 #708 @StudioWEngineers
 
 ### Changed
 
-- (all) FindId, FindIndex and FindName in File3dmLayerTable now return None if the layer is not found. PR #692 @StudioWEngineers
+- Updated OpenNURBS (synced from the Rhino 8.x branch).
+- (py, js) `__str__`/`__repr__` for point and vector types moved out of the `__init__.py` monkey-patch and into the bindings. RH3DM-180
+- Updated pybind11 to 3.0.4, nanobind to 2.7.0, and emscripten to 5.0.7. #699
+- (py) Added a Python 3.14 build target.
+- (dotnet) Windows CI agents updated to windows-2022. #715
+- (dotnet) Suppressed the SYSLIB0011 (BinaryFormatter) warning-as-error, mirroring RhinoCommon.
+
+### Fixed
+
+- (dotnet) `File3dm.Settings.PageAbsoluteTolerance` setter silently set `PageRelativeTolerance` instead — setting the page absolute tolerance was a no-op and corrupted the relative tolerance. RH-87934 / RH3DM-195
+- (js) `memory access out of bounds` crash when adding instance definitions whose objects carry meshes. RH3DM-193
+- (py) Blender/Linux segfault caused by a zlib symbol clash; zlib/OpenNURBS symbols are now hidden. RH-92684 #714 #717
+- (py, js, dotnet) zlib C4081 MSVC warning, via `ON_CMAKE_BUILD`. RH3DM-179
+- (py, js) `File3dmLayerTable.FindId`/`FindName` returned the default layer (never `None`) when no layer matched, and `FindIndex` returned it instead of raising — they used the OpenNURBS `LayerFrom*` helpers, which fall back to `m_default_layer` on a miss. They now use `ComponentFrom*` and check for an empty reference. #692 @StudioWEngineers
+
+### Removed
+
+- (py) Removed macOS-13 CI runners.
 
 ## [8.17.0] - 2025.03.12
 
