@@ -1,6 +1,7 @@
 import rhino3dm
 import unittest
 import os
+import gc
 
 
 def _fixture_path():
@@ -156,6 +157,27 @@ class TestSubD(unittest.TestCase):
         if self.subd.VertexCount >= 2:
             head = self.subd.Vertices.First()
             self.assertEqual(head.Next().Previous(), head)
+
+    def test_components_outlive_their_source(self):
+        # Each component holds a refcounted handle to its SubD, so parent-rooted
+        # traversal stays valid even after the iterators, the SubD, and the model
+        # that produced it are all gone. Regression: m_parent used to be a raw
+        # pointer to a transient SubD, so this dangled and segfaulted.
+        model = rhino3dm.File3dm.Read(_fixture_path())
+        subd = model.Objects[0].Geometry
+        vertex = subd.Vertices[1]           # from a temporary iterator
+        edge = subd.Faces[1].Edges.First()  # from a chain of temporaries
+        v_edge_count = vertex.EdgeCount
+        endpoints = (edge.Vertex(0).Id, edge.Vertex(1).Id)
+
+        del model, subd                     # drop everything that owns the geometry
+        gc.collect()
+
+        # Parent-rooted accessors must still resolve, to the same values.
+        self.assertEqual(vertex.Edges.Count, v_edge_count)
+        self.assertEqual(vertex.Edge(0).Id, vertex.Edges.First().Id)
+        self.assertEqual(edge.Vertices.Count, 2)
+        self.assertEqual((edge.Vertex(0).Id, edge.Vertex(1).Id), endpoints)
 
     def test_component_equality(self):
         # The same component reached two ways compares equal; different ones don't.
