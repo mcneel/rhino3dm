@@ -40,6 +40,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.17.0...8.32.0
 - (py) Blender/Linux segfault caused by a zlib symbol clash; zlib/OpenNURBS symbols are now hidden. RH-92684 #714 #717
 - (py, js, dotnet) zlib C4081 MSVC warning, via `ON_CMAKE_BUILD`. RH3DM-179
 - (py, js) `File3dmLayerTable.FindId`/`FindName` returned the default layer (never `None`) when no layer matched, and `FindIndex` returned it instead of raising — they used the OpenNURBS `LayerFrom*` helpers, which fall back to `m_default_layer` on a miss. They now use `ComponentFrom*` and check for an empty reference. #692 @StudioWEngineers
+- (py, js) `Material.SetBumpTexture`/`SetEnvironmentTexture`/`SetTransparencyTexture` (the `Texture` overloads) wrote the texture with the `bitmap` type instead of the intended channel type — the shared helper hard-coded `bitmap_texture`.
 
 ### Removed
 

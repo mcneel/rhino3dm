@@ -103,7 +103,7 @@ static bool SetTextureHelper(ON_Material* material, const ON_Texture* texture, O
 {
   material->DeleteTexture(nullptr, t);
   ON_Texture tx(*texture);
-  tx.m_type = ON_Texture::TYPE::bitmap_texture;
+  tx.m_type = t;
   return material->AddTexture(tx);
 }
 
@@ -276,6 +276,7 @@ void initMaterialBindings(void*)
     .function("getTransparencyTexture", &BND_Material::GetTransparencyTexture, allow_raw_pointers())
     .function("setTransparencyTextureFilename", &BND_Material::SetTransparencyTexture)
     .function("setTransparencyTexture", &BND_Material::SetTransparencyTexture2)
+    .function("setTexture", &BND_Material::SetTexture)
     .function("physicallyBased", &BND_Material::PhysicallyBased, allow_raw_pointers())
     .function("toPhysicallyBased", &BND_Material::ToPhysicallyBased)
     ;

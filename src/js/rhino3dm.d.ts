@@ -4473,6 +4473,12 @@ declare module 'rhino3dm' {
 		 * @returns {boolean}
 		 */
 		SetTransparencyTexture(texture: Texture): boolean;
+		/**
+		 * Sets a texture, respecting the texture's own TextureType so any channel
+		 * (e.g. a PBR roughness/metallic/emission map) can be assigned.
+		 * @returns {boolean}
+		 */
+		setTexture(texture: Texture): boolean;
 		/** ... */
 		physicallyBased(): PhysicallyBasedMaterial;
 		/**
