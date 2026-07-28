@@ -1,11 +1,13 @@
 #include "bindings.h"
 
 // The anchor component a component-rooted iterator walks around. ON exposes it via
-// ON_SubD*Iterator::BaseComponentPtr(); the overloaded dummy-pointer argument picks
-// the accessor matching the "From" component type.
-static inline const ON_SubDVertex* SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDVertex*) { return p.Vertex(); }
-static inline const ON_SubDEdge*   SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDEdge*)   { return p.Edge(); }
-static inline const ON_SubDFace*   SubDComponentBase(const ON_SubDComponentPtr& p, const ON_SubDFace*)   { return p.Face(); }
+// ON_SubD*Iterator::BaseComponentPtr(); the explicit template argument picks the
+// accessor matching the "From" component type. Only the three component types are
+// valid: the deleted primary template rejects anything else at compile time.
+template<typename ON_SubDT> const ON_SubDT* SubDComponentBase(const ON_SubDComponentPtr& p) = delete;
+template<> inline const ON_SubDVertex* SubDComponentBase(const ON_SubDComponentPtr& p) { return p.Vertex(); }
+template<> inline const ON_SubDEdge*   SubDComponentBase(const ON_SubDComponentPtr& p) { return p.Edge(); }
+template<> inline const ON_SubDFace*   SubDComponentBase(const ON_SubDComponentPtr& p) { return p.Face(); }
 
 // SubDComponentIterator adapters: map the generic iterator onto the concrete
 // ON_SubD*Iterator for each yielded ("To") component type.
@@ -24,7 +26,7 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDFace, BND_SubDTFrom> {
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Face(id), parent); }
+                                                               { return new IteratorTTo(SubDComponentBase<ON_SubDTFrom>(it.BaseComponentPtr())->Face(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
                                                                { return new IteratorTTo(it.SubD().FaceFromId(id), parent); }
@@ -45,7 +47,7 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDEdge, BND_SubDTFrom> {
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Edge(id), parent); }
+                                                               { return new IteratorTTo(SubDComponentBase<ON_SubDTFrom>(it.BaseComponentPtr())->Edge(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
                                                                { return new IteratorTTo(it.SubD().EdgeFromId(id), parent); }
@@ -66,7 +68,7 @@ struct BND_SubDComponentIteratorAdapter<BND_SubDVertex, BND_SubDTFrom> {
 
   template<typename TFrom = BND_SubDTFrom, EnableIfIsNotFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemAtIndex(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
-                                                               { return new IteratorTTo(SubDComponentBase(it.BaseComponentPtr(), (const ON_SubDTFrom*)nullptr)->Vertex(id), parent); }
+                                                               { return new IteratorTTo(SubDComponentBase<ON_SubDTFrom>(it.BaseComponentPtr())->Vertex(id), parent); }
   template<typename TFrom = BND_SubDTFrom, EnableIfIsFromSubD<TFrom>* = nullptr>
   static inline IteratorTTo* ItemFromId(const IteratorT& it, unsigned int id, const ON_SubDRef& parent)
                                                                { return new IteratorTTo(it.SubD().VertexFromId(id), parent); }
