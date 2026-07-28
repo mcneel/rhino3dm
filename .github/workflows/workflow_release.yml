@@ -205,9 +205,13 @@ jobs:
       - name: download all python artifacts
         uses: actions/download-artifact@v4
         with:
-          # merge-multiple flattens every build job's artifact into a single
-          # dist/ folder and extracts them (no nested zips) — the wheels have
-          # unique platform tags and there is a single sdist, so no collisions
+          # only the python artifacts: wheels + sdist are named "rhino3dm-<version>..."
+          # (hyphen). This excludes rhino3dm.js and rhino3dm.net* (dot) so the nupkg
+          # and js bundle don't land in dist/ and break twine.
+          pattern: 'rhino3dm-*'
+          # merge-multiple flattens every matched artifact into a single dist/ folder
+          # and extracts them (no nested zips) — the wheels have unique platform tags
+          # and there is a single sdist, so no collisions
           path: dist
           merge-multiple: true
       - name: list files
