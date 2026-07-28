@@ -28,6 +28,39 @@ EDGE_COUNT = 434
 VERTEX_COUNT = 201
 
 
+def _current_rss_bytes():
+    """Current resident set size of this process in bytes, or None when the
+    platform does not let us read it cheaply (used only for a leak bound, which
+    is skipped when this returns None)."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class _PMC(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD),
+                        ("PeakWorkingSetSize", ctypes.c_size_t), ("WorkingSetSize", ctypes.c_size_t),
+                        ("QuotaPeakPagedPoolUsage", ctypes.c_size_t), ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                        ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                        ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
+        psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+        c = _PMC(); c.cb = ctypes.sizeof(_PMC)
+        if psapi.GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(c), c.cb):
+            return c.WorkingSetSize
+    except Exception:
+        pass
+    try:
+        # Linux: field 2 of /proc/self/statm is resident pages.
+        with open("/proc/self/statm") as f:
+            return int(f.read().split()[1]) * os.sysconf("SC_PAGE_SIZE")
+    except Exception:
+        pass
+    return None  # e.g. macOS - caller skips the RSS bound
+
+
 @unittest.skipIf(_fixture_path() is None, "subd.3dm fixture not present")
 class TestSubD(unittest.TestCase):
 
@@ -265,6 +298,51 @@ class TestSubD(unittest.TestCase):
                                  "vertex with faces and edges")
         self._assert_full_traversal(lambda: vert.Faces, "Vertex.Faces", by_id=False)
         self._assert_full_traversal(lambda: vert.Edges, "Vertex.Edges", by_id=False)
+
+    def test_plain_iteration_reuses_and_does_not_leak(self):
+        # The everyday `for c in subd.Faces: ...` loop: it must yield every face,
+        # end cleanly (StopIteration), leave the SubD reusable, and not leak.
+        subd = self.subd
+
+        ids = [f.Id for f in subd.Faces]
+        self.assertEqual(len(ids), FACE_COUNT)
+        self.assertEqual(len(set(ids)), FACE_COUNT)
+
+        # subd.Faces is untouched by having been walked: the property hands out a
+        # fresh iterator, so a second `for` yields the same faces, and Count and
+        # indexed access still work.
+        self.assertEqual([f.Id for f in subd.Faces], ids)
+        self.assertEqual(subd.Faces.Count, FACE_COUNT)
+        self.assertEqual(subd.Faces[ids[0]].Id, ids[0])
+
+        # Past the end, the exhausted iterator keeps raising StopIteration rather
+        # than dereferencing the terminal null wrapper and crashing - repeatedly.
+        it = iter(subd.Faces)
+        self.assertEqual(sum(1 for _ in it), FACE_COUNT)
+        for _ in range(3):
+            with self.assertRaises(StopIteration):
+                next(it)
+
+        # No leak: each pass creates FACE_COUNT component wrappers; were they
+        # retained (a ref held, a cycle, or __next__ not releasing them), resident
+        # memory would climb over thousands of passes. Warm up so one-time caches
+        # settle, then bound the growth. The RSS bound is skipped where the
+        # platform RSS is not cheaply readable; the walk itself still runs.
+        def walk_many(n):
+            for _ in range(n):
+                for _f in subd.Faces:
+                    pass
+
+        walk_many(100)
+        gc.collect()
+        self.assertEqual(gc.garbage, [], "iteration created uncollectable cycles")
+        rss0 = _current_rss_bytes()
+        walk_many(2000)  # 2000 * FACE_COUNT wrapper create/destroy cycles
+        gc.collect()
+        if rss0 is not None:
+            growth = _current_rss_bytes() - rss0
+            self.assertLess(growth, 4 * 1024 * 1024,
+                            "iterating leaked ~%.2f MB of RSS" % (growth / 1024.0 / 1024.0))
 
     def test_component_equality(self):
         # The same component reached two ways compares equal; different ones don't.
