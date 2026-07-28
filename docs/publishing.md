@@ -50,31 +50,84 @@ There are several places where version numbers should be updated:
 
 ### Node.js
 
-1. Ensure the docs/javascript/RHINO3DM.JS.md is updated and committed to reflect the latest changes (version numbers, etc)
-2. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including the js version.
-3. Download and extract the `rhino3dm.js` artifact.
-4. cd into the directory you've just extracted
-5. From inside this directory, run `npm publish` (see note 2). You might need to run `npm login` prior to publishing.
+`rhino3dm.js` is published to npm automatically by the `workflow_release` workflow.
+
+1. Ensure `docs/javascript/RHINO3DM.JS.md` is updated and committed to reflect the latest changes (version numbers, etc).
+2. Go to the `workflow_release` workflow in the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml.
+3. Click **Run workflow** and check the **Publish rhino3dm.js to npm** box. For a pre-release (e.g. `8.x-beta`), also set the **npm dist-tag** field to `next` (see note 2); leave it as `latest` for a normal release. Run the workflow.
+4. The `publish_npm` job waits for the JS build and its tests to pass, then downloads the assembled `rhino3dm.js` artifact and runs `npm publish` for you. No manual download, extract, or `npm login` is required.
+
+Leaving the box unchecked builds the `rhino3dm.js` artifact without publishing — use that to test a release before pushing it to npm.
 
 See https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages for more info.
 
+#### Requirements
+
+Publishing uses [npm Trusted Publishing (OIDC)](https://docs.npmjs.com/trusted-publishers), so no npm token or stored secret is needed. This must be configured once on npm:
+
+1. Sign in as a member of the `mcneel` npm team with publish rights to the [rhino3dm package](https://www.npmjs.com/package/rhino3dm).
+2. On the package's **Settings → Trusted Publisher** page, add a GitHub Actions publisher:
+   - Organization/user: `mcneel`
+   - Repository: `rhino3dm`
+   - Workflow filename: `workflow_release.yml`
+
+Once registered, every run with the checkbox enabled publishes without further credentials.
+
 #### Notes:
 1. After creating a user on npm.org, ask Will to add you to the mcneel team!
-2. If publishing a pre-release, e.g. `0.4.0-beta`, use `npm publish --tag next` ([source](https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420))
+2. If publishing a pre-release, e.g. `0.4.0-beta`, set the **npm dist-tag** input to `next` so it does not become the default `latest` install ([source](https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420)).
+
+#### Manual fallback (npm publish)
+
+If trusted publishing is unavailable, you can still publish by hand:
+
+1. Ensure `docs/javascript/RHINO3DM.JS.md` is updated and committed to reflect the latest changes (version numbers, etc).
+2. Run a `workflow_release` workflow (the npm checkbox can be left unchecked). This builds the `rhino3dm.js` artifact.
+3. Download and extract the `rhino3dm.js` artifact.
+4. `cd` into the directory you've just extracted.
+5. From inside this directory, run `npm publish` (for a pre-release, `npm publish --tag next` — see note 2). You might need to run `npm login` prior to publishing.
 
 ## dotnet
 
-1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including a nupkg for rhino3m dotnet for linux, macos, and windows. 
-2. Download the `rhino3dm.net nupkg` artifact generated from running the `workflow_release` workflow. This will result in a `rhino3dm.net nupkg.zip` downloaded to your computer.
+The `Rhino3dm` .NET package is published to NuGet.org automatically by the `workflow_release` workflow.
+
+1. Go to the `workflow_release` workflow in the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml.
+2. Click **Run workflow**, check the **Publish Rhino3dm .NET package to NuGet.org** box, and run it.
+3. The `publish_nuget` job waits for the `pack_dotnet` build and the `test_dotnet` tests to pass, then downloads the `rhino3dm.net nupkg` artifact and pushes the `Rhino3dm.*.nupkg` to NuGet.org. No manual download, unzip, or `dotnet nuget push` is required.
+4. The newly created package will take a few minutes to validate on NuGet.org. You can check the status at the Rhino3dm page: https://www.nuget.org/packages/Rhino3dm/
+
+Leaving the box unchecked builds the nupkg artifact without publishing — use that to test a release before pushing it to NuGet.
+
+#### Requirements
+
+Publishing uses [NuGet Trusted Publishing (OIDC)](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing), so no long-lived API key is stored. The workflow exchanges a GitHub OIDC token for a short-lived (1-hour) key at run time via the `NuGet/login` action. Configure this once:
+
+1. Sign in to nuget.org as an owner of the [Rhino3dm package](https://www.nuget.org/packages/Rhino3dm/), then open your username menu → **Trusted Publishing** and add a policy:
+   - Repository Owner: `mcneel`
+   - Repository: `rhino3dm`
+   - Workflow File: `workflow_release.yml`
+   - Environment: leave blank
+2. Add a GitHub Actions repository **variable** (Settings → Secrets and variables → Actions → **Variables** tab) named **`NUGET_USER`** set to your nuget.org **profile name** (not your email). It's a plain variable rather than a secret because the profile name is public. The `NuGet/login` action uses it to request the temporary key.
+
+Once the policy is registered and the secret is set, every run with the checkbox enabled publishes without further credentials.
+
+See https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#publish-with-dotnet-nuget-push for more info.
+
+#### Manual fallback (dotnet nuget push)
+
+If trusted publishing is unavailable, you can still publish by hand with a long-lived API key:
+
+1. Run a `workflow_release` workflow (the nuget checkbox can be left unchecked). This builds the nupkg for linux, macos, and windows.
+2. Download the `rhino3dm.net nupkg` artifact. This will result in a `rhino3dm.net nupkg.zip` downloaded to your computer.
 3. Unzip the `rhino3dm.net nupkg.zip` file. This will result in a new folder named `rhino3dm.net nupkg` that will contain a `Rhino3dm.*.*.*.nupkg` numbered according to the current version.
 4. Open a terminal and direct it to the `rhino3dm.net nupkg` folder created from unzipping the file in step 3.
-5. Push the package to NuGet with `dotnet nuget push...`, replacing the wildcards with the version number, and entering your API Key from NuGet.org (see note 1). 
+5. Push the package to NuGet with `dotnet nuget push...`, replacing the wildcards with the version number, and entering your API Key from NuGet.org (see note 1).
 
 ```bash
 dotnet nuget push Rhino3dm.*.*.*.nupkg -k <APIKEY> -s https://api.nuget.org/v3/index.json
 ```
 
-6. If all went well you should see something similar in the terminal: 
+6. If all went well you should see something similar in the terminal:
 
 ```
 Pushing Rhino3dm.7.7.0.nupkg to 'https://www.nuget.org/api/v2/package'...
@@ -85,12 +138,9 @@ Your package was pushed.
 
 7. The newly created package will take a few minutes to validate on NuGet.org. You can check the status at the Rhino3dm page: https://www.nuget.org/packages/Rhino3dm/
 
-
-See https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#publish-with-dotnet-nuget-push for more info.
-
 #### Notes:
 
-1. To create an API Key for NuGet, see https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys 
+1. To create an API Key for NuGet (only needed for the manual fallback), see https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys 
 
 ## Python
 
