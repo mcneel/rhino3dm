@@ -2,7 +2,13 @@
 # https://github.com/actions/virtual-environments/tree/main/images
 
 name: workflow release
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      publish_to_pypi:
+        description: 'Upload Python packages (wheels + sdist) to PyPI'
+        type: boolean
+        default: false
 jobs:
 
   build_py_sdist:
@@ -174,7 +180,31 @@ jobs:
         with:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
-  
+
+  publish_pypi:
+    name: publish python to PyPI
+    needs: [build_py_sdist, build_py_manylinux, build_py_all_bdist]
+    if: ${{ inputs.publish_to_pypi }}
+    runs-on: ubuntu-latest
+    permissions:
+      # required for PyPI trusted publishing (OIDC); no API token needed
+      id-token: write
+    steps:
+      - name: download all python artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # merge-multiple flattens every build job's artifact into a single
+          # dist/ folder and extracts them (no nested zips) — the wheels have
+          # unique platform tags and there is a single sdist, so no collisions
+          path: dist
+          merge-multiple: true
+      - name: list files
+        run: ls -R dist
+      - name: publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }} ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}

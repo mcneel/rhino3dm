@@ -94,24 +94,47 @@ See https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#publish-w
 
 ## Python
 
-Python packages can be uploaded to the corresponding `pypi.org` project: https://pypi.org/project/rhino3dm.
+Python packages are published to the corresponding `pypi.org` project automatically by the `workflow_release` workflow: https://pypi.org/project/rhino3dm.
 
-1. Run a `workflow_release` workflow from the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml. This will build all of the rhino3dm versions, including all Python packages.
+1. Go to the `workflow_release` workflow in the rhino3dm repository Actions: https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml.
+2. Click **Run workflow**, check the **Upload Python packages (wheels + sdist) to PyPI** box, and run it.
+3. The `publish_pypi` job waits for all Python build jobs (sdist, manylinux, and per-OS bdist) to succeed, then collects every `.whl` and the `.tar.gz` sdist into a single `dist/` folder and uploads them to PyPI. No manual download, unzip, or `twine` step is required.
+
+Leaving the box unchecked builds all packages as artifacts without publishing — use that to test a release before pushing it to PyPI.
+
+#### Requirements
+
+Publishing uses [PyPI Trusted Publishing (OIDC)](https://docs.pypi.org/trusted-publishers/), so no API token or stored secret is needed. This must be configured once on PyPI:
+
+1. Sign in as a maintainer or owner of the [rhino3dm package](https://pypi.org/project/rhino3dm).
+2. Under the project's **Publishing** settings, add a GitHub Actions trusted publisher:
+   - Owner: `mcneel`
+   - Repository: `rhino3dm`
+   - Workflow name: `workflow_release.yml`
+   - Environment name: leave blank (or set to `pypi` if you also add a matching `environment: pypi` to the `publish_pypi` job for an extra approval gate).
+
+Once the trusted publisher is registered, every run with the checkbox enabled publishes without further credentials.
+
+#### Manual fallback (twine)
+
+If trusted publishing is unavailable (or you need to push a build that was made with the checkbox unchecked), you can still upload the artifacts by hand:
+
+1. Run the `workflow_release` workflow (the checkbox can be left unchecked). This builds all of the Python packages as artifacts.
 2. Download all of the `.whl` and `*.tar.gz` (source distribution) artifacts to a folder called `dist`.
 3. Extract all of the `.zip` files and delete them. For the tar.gz.zip, you can run `tar -xvzf rhino3dm-8.17.0.tar.gz.zip` to get a tar.gz file. You should be left with many `.whl` files and one `.tar.gz` file.
-4. From the `dist` parent folder, upload all Python packages with `twine`
+4. From the `dist` parent folder, upload all Python packages with `twine`:
 
 ```bash
 python3 -m twine upload dist/*
 ```
-5. when prompted for the username, enter in `__token__`
-6. When prompted for password, use API key obtained from pypi
+5. When prompted for the username, enter `__token__`.
+6. When prompted for the password, use an API token obtained from pypi.
 
-#### Requirements
+Requirements for the manual path:
 
 1. Have an account on pypi.org.
 2. Be a maintainer or owner for the [rhino3dm package](https://pypi.org/project/rhino3dm).
-3. Ensure `twine` is installed
+3. Ensure `twine` is installed:
 
 ```bash
 python3 -m pip install --upgrade twine
