@@ -66,7 +66,7 @@ jobs:
     container: ${{ matrix.image.container }}
     strategy:
       matrix:
-        python-version: [cp38-cp38, cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312, cp313-cp313, cp314-cp314]
+        python-version: [cp39-cp39, cp310-cp310, cp311-cp311, cp312-cp312, cp313-cp313, cp314-cp314]
         image: 
           - container: quay.io/pypa/manylinux_2_28_x86_64
             architecture: x86_64
@@ -116,7 +116,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022, macos-14, macos-15]
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
         include:
           - os: windows-2022
             target: windows

@@ -45,6 +45,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.17.0...8.32.0
 ### Removed
 
 - (py) Removed macOS-13 CI runners.
+- (py) Dropped the Python 3.8 build target (3.8 reached end-of-life in October 2024 and is no longer shipped by the `manylinux_2_28` images). `python_requires` is now `>=3.9`.
 
 ## [8.17.0] - 2025.03.12
 
