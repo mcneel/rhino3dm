@@ -344,6 +344,53 @@ class TestSubD(unittest.TestCase):
             self.assertLess(growth, 4 * 1024 * 1024,
                             "iterating leaked ~%.2f MB of RSS" % (growth / 1024.0 / 1024.0))
 
+    # ---- ON_SubDComponentPtr direction accessors ----
+    #
+    # Each component wrapper now stores an ON_SubDComponentPtr, which packs a
+    # direction bit alongside the pointer. ComponentDirection surfaces that bit;
+    # face/vertex -> edge traversal is wired through EdgePtr so a shared edge
+    # remembers whether it runs with or against the parent's orientation.
+
+    def test_component_direction_defaults_to_zero(self):
+        # Components taken straight from the SubD carry the natural orientation.
+        self.assertEqual(self.subd.Faces[1].ComponentDirection, 0)
+        self.assertEqual(self.subd.Edges[1].ComponentDirection, 0)
+        self.assertEqual(self.subd.Vertices[1].ComponentDirection, 0)
+        # A vertex never carries a direction, even reached through a face.
+        self.assertEqual(self.subd.Faces[1].Vertex(0).ComponentDirection, 0)
+
+    def test_face_edge_direction_is_wired_in(self):
+        # A face hands out its edges through ON_SubDFace::EdgePtr, so each edge
+        # remembers whether it agrees with the face's counter-clockwise orientation.
+        # ComponentDirection must agree with EdgeDirectionMatchesFaceOrientation
+        # (RhinoCommon parity), and the edge stays the same component - identity
+        # ignores direction, so it still equals the same edge taken from the SubD.
+        seen = set()
+        for face in self.subd.Faces:
+            for i in range(face.EdgeCount):
+                edge = face.Edge(i)
+                matches = face.EdgeDirectionMatchesFaceOrientation(i)
+                self.assertEqual(edge.ComponentDirection, 0 if matches else 1)
+                natural = self.subd.Edges[edge.Id]
+                self.assertEqual(natural.ComponentDirection, 0)
+                self.assertEqual(edge, natural)  # identity ignores direction
+                seen.add(edge.ComponentDirection)
+        # Shared edges are traversed in opposite directions by their two faces, so
+        # both orientations must appear - proof the bit is really carried, not 0.
+        self.assertEqual(seen, {0, 1})
+
+    def test_vertex_edge_direction_is_wired_in(self):
+        # A vertex hands out its edges through ON_SubDVertex::EdgePtr; the direction
+        # bit records which end of the edge this vertex is. Identity still ignores it.
+        seen = set()
+        for v in self.subd.Vertices:
+            for i in range(v.EdgeCount):
+                edge = v.Edge(i)
+                self.assertIn(edge.ComponentDirection, (0, 1))
+                self.assertEqual(edge, self.subd.Edges[edge.Id])  # identity ignores direction
+                seen.add(edge.ComponentDirection)
+        self.assertEqual(seen, {0, 1})
+
     def test_component_equality(self):
         # The same component reached two ways compares equal; different ones don't.
         self.assertEqual(self.subd.Faces[1], self.subd.Faces[1])

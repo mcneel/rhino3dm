@@ -72,117 +72,162 @@ public:
 // stays valid for its whole lifetime, even after the iterator or model that produced
 // it is gone. Each wrapper defines Equals (identity by ON component pointer) for == / is.
 class BND_SubDFace {
-  const ON_SubDFace* m_subdface = nullptr;
+  // The component is held as an ON_SubDComponentPtr (a packed pointer + type +
+  // direction bit) instead of a raw ON_SubDFace*, so a face reached in an oriented
+  // context can carry its ComponentDirection. ON_SubDComponentPtr has no default
+  // constructor, hence the explicit ::Null initializer. Every accessor unpacks
+  // through Face(), which is typed - this wrapper only ever holds a face - so the
+  // public surface stays as type safe as the old raw pointer.
+  ON_SubDComponentPtr m_component_ptr = ON_SubDComponentPtr::Null;
   ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
+
+  const ON_SubDFace* Face() const { return m_component_ptr.Face(); }
 
 public:
   using ON_SubDTFrom = ON_SubDFace;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDFace>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDFace>;
   BND_SubDFace(const ON_SubDFace* face, ON_SubDRef parent = ON_SubDRef());
-  unsigned int Index() const { return m_subdface->FaceId(); }
-  unsigned int Id() const { return m_subdface->FaceId(); }
-  int EdgeCount() const { return m_subdface->EdgeCount(); }
-  int VertexCount() const { return m_subdface->EdgeCount(); }
+  unsigned int Index() const { return Face()->FaceId(); }
+  unsigned int Id() const { return Face()->FaceId(); }
+  int EdgeCount() const { return Face()->EdgeCount(); }
+  int VertexCount() const { return Face()->EdgeCount(); }
   BND_SubDEdgeIterator Edges() const;
   BND_SubDVertexIterator Vertices() const;
 
-  int MaterialChannelIndex() const { return m_subdface->MaterialChannelIndex(); }
+  // 0 with natural orientation, 1 when reversed. Faces are always reached with
+  // their natural orientation in this API, so this is 0; it exists for parity with
+  // the edge and vertex wrappers, which share the ON_SubDComponentPtr storage.
+  unsigned int ComponentDirection() const { return (unsigned int)m_component_ptr.ComponentDirection(); }
+  // True when boundary edge [index] runs with this face's counter-clockwise
+  // orientation (ON_SubDFace::EdgeDirection(index) == 0). Mirrors RhinoCommon's
+  // SubDFace.EdgeDirectionMatchesFaceOrientation, and agrees with
+  // Edge(index).ComponentDirection == 0.
+  bool EdgeDirectionMatchesFaceOrientation(unsigned int index) const { return Face()->EdgeDirection(index) == 0; }
+
+  int MaterialChannelIndex() const { return Face()->MaterialChannelIndex(); }
   BND_Color PerFaceColor() const;
-  ON_3dPoint ControlNetCenterPoint() const { return m_subdface->ControlNetCenterPoint(); }
-  ON_3dVector ControlNetCenterNormal() const { return m_subdface->ControlNetCenterNormal(); }
-  BND_Plane ControlNetCenterFrame() const { return BND_Plane::FromOnPlane(m_subdface->ControlNetCenterFrame()); }
-  bool IsConvex() const { return m_subdface->IsConvex(); }
-  bool IsNotConvex() const { return m_subdface->IsNotConvex(); }
-  bool IsPlanar(double planar_tolerance) const { return m_subdface->IsPlanar(planar_tolerance); }
-  bool IsNotPlanar(double planar_tolerance) const { return m_subdface->IsNotPlanar(planar_tolerance); }
-  unsigned int TexturePointsCapacity() const { return m_subdface->TexturePointsCapacity(); }
-  bool TexturePointsAreSet() const { return m_subdface->TexturePointsAreSet(); }
-  ON_3dPoint TexturePoint(unsigned int index) const { return m_subdface->TexturePoint(index); }
-  ON_3dPoint TextureCenterPoint() const { return m_subdface->TextureCenterPoint(); }
-  bool HasEdges() const { return m_subdface->HasEdges(); }
-  bool HasSharpEdges() const { return m_subdface->HasSharpEdges(); }
-  unsigned int SharpEdgeCount() const { return m_subdface->SharpEdgeCount(); }
-  double MaximumEdgeSharpness() const { return m_subdface->MaximumEdgeSharpness(); }
-  ON_3dPoint ControlNetPoint(unsigned int index) const { return m_subdface->ControlNetPoint(index); }
+  ON_3dPoint ControlNetCenterPoint() const { return Face()->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal() const { return Face()->ControlNetCenterNormal(); }
+  BND_Plane ControlNetCenterFrame() const { return BND_Plane::FromOnPlane(Face()->ControlNetCenterFrame()); }
+  bool IsConvex() const { return Face()->IsConvex(); }
+  bool IsNotConvex() const { return Face()->IsNotConvex(); }
+  bool IsPlanar(double planar_tolerance) const { return Face()->IsPlanar(planar_tolerance); }
+  bool IsNotPlanar(double planar_tolerance) const { return Face()->IsNotPlanar(planar_tolerance); }
+  unsigned int TexturePointsCapacity() const { return Face()->TexturePointsCapacity(); }
+  bool TexturePointsAreSet() const { return Face()->TexturePointsAreSet(); }
+  ON_3dPoint TexturePoint(unsigned int index) const { return Face()->TexturePoint(index); }
+  ON_3dPoint TextureCenterPoint() const { return Face()->TextureCenterPoint(); }
+  bool HasEdges() const { return Face()->HasEdges(); }
+  bool HasSharpEdges() const { return Face()->HasSharpEdges(); }
+  unsigned int SharpEdgeCount() const { return Face()->SharpEdgeCount(); }
+  double MaximumEdgeSharpness() const { return Face()->MaximumEdgeSharpness(); }
+  ON_3dPoint ControlNetPoint(unsigned int index) const { return Face()->ControlNetPoint(index); }
   class BND_SubDVertex* Vertex(unsigned int index) const;
   class BND_SubDEdge* Edge(unsigned int index) const;
-  ON_3dPoint SubdivisionPoint() const { return m_subdface->SubdivisionPoint(); }
+  ON_3dPoint SubdivisionPoint() const { return Face()->SubdivisionPoint(); }
 
-  // Identity: two wrappers are equal iff they reference the same ON_SubDFace.
-  bool Equals(const BND_SubDFace& other) const { return m_subdface == other.m_subdface; }
-  const ON_SubDFace* GetONSubDComponent() const { return m_subdface; }
+  // Identity: two wrappers are equal iff they reference the same ON_SubDFace
+  // (ComponentDirection is ignored, so the same face reached two ways is equal).
+  bool Equals(const BND_SubDFace& other) const { return Face() == other.Face(); }
+  const ON_SubDFace* GetONSubDComponent() const { return Face(); }
 };
 
 class BND_SubDEdge {
-  const ON_SubDEdge* m_subdedge = nullptr;
+  // Held as an ON_SubDComponentPtr so an edge reached through a face or vertex keeps
+  // the ComponentDirection bit that says whether it runs with or against that
+  // parent's orientation. ON_SubDComponentPtr has no default constructor, hence the
+  // ::Null initializer. All accessors unpack through the typed Edge().
+  ON_SubDComponentPtr m_component_ptr = ON_SubDComponentPtr::Null;
   ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
+
+  const ON_SubDEdge* Edge() const { return m_component_ptr.Edge(); }
 
 public:
   using ON_SubDTFrom = ON_SubDEdge;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDEdge>;
   using BND_SubDVertexIterator = BND_SubDComponentIterator<class BND_SubDVertex, class BND_SubDEdge>;
   BND_SubDEdge(const ON_SubDEdge* edge, ON_SubDRef parent = ON_SubDRef());
-  unsigned int Index() const { return m_subdedge->EdgeId(); }
-  unsigned int Id() const { return m_subdedge->EdgeId(); }
-  unsigned int VertexCount() const { return m_subdedge->VertexCount(); }
-  unsigned int FaceCount() const { return m_subdedge->FaceCount(); }
+  // Direction-preserving: used when a face or vertex hands out one of its edges.
+  BND_SubDEdge(ON_SubDEdgePtr edgeptr, ON_SubDRef parent);
+  unsigned int Index() const { return Edge()->EdgeId(); }
+  unsigned int Id() const { return Edge()->EdgeId(); }
+  unsigned int VertexCount() const { return Edge()->VertexCount(); }
+  unsigned int FaceCount() const { return Edge()->FaceCount(); }
   BND_SubDFaceIterator Faces() const;
   BND_SubDVertexIterator Vertices() const;
 
-  ON_SubDEdgeTag Tag() const { return m_subdedge->m_edge_tag; }
-  unsigned int VertexId(unsigned index) const { return m_subdedge->Vertex(index)->VertexId(); }
-  class BND_SubDVertex* Vertex(unsigned index);
-  ON_3dPoint ControlNetPoint(unsigned index) const { return m_subdedge->ControlNetPoint(index); }
-  ON_3dVector ControlNetDirection() const { return m_subdedge->ControlNetDirection(); }
-  bool IsSmooth() const { return m_subdedge->IsSmooth(); }
-  bool IsSharp() const { return m_subdedge->IsSharp(); }
-  double EndSharpness(unsigned endIndex) const { return m_subdedge->EndSharpness(endIndex); }
-  bool IsCrease() const { return m_subdedge->IsCrease(); }
-  bool IsHardCrease() const { return m_subdedge->IsHardCrease(); }
-  bool IsDartCrease() const { return m_subdedge->IsDartCrease(); }
-  unsigned int DartCount() const { return m_subdedge->DartCount(); }
-  ON_3dPoint SubdivisionPoint() const { return m_subdedge->SubdivisionPoint(); }
-  ON_3dPoint ControlNetCenterPoint() const { return m_subdedge->ControlNetCenterPoint(); }
-  ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return m_subdedge->ControlNetCenterNormal(edge_face_index); }
+  // 0 when this edge runs with the natural orientation, 1 when reversed relative to
+  // the face or vertex it was reached through. 0 for an edge taken straight from the
+  // SubD. For a face's edge this is (EdgeDirectionMatchesFaceOrientation ? 0 : 1).
+  unsigned int ComponentDirection() const { return (unsigned int)m_component_ptr.ComponentDirection(); }
 
-  // Identity: two wrappers are equal iff they reference the same ON_SubDEdge.
-  bool Equals(const BND_SubDEdge& other) const { return m_subdedge == other.m_subdedge; }
-  const ON_SubDEdge* GetONSubDComponent() const { return m_subdedge; }
+  ON_SubDEdgeTag Tag() const { return Edge()->m_edge_tag; }
+  unsigned int VertexId(unsigned index) const { return Edge()->Vertex(index)->VertexId(); }
+  class BND_SubDVertex* Vertex(unsigned index);
+  ON_3dPoint ControlNetPoint(unsigned index) const { return Edge()->ControlNetPoint(index); }
+  ON_3dVector ControlNetDirection() const { return Edge()->ControlNetDirection(); }
+  bool IsSmooth() const { return Edge()->IsSmooth(); }
+  bool IsSharp() const { return Edge()->IsSharp(); }
+  double EndSharpness(unsigned endIndex) const { return Edge()->EndSharpness(endIndex); }
+  bool IsCrease() const { return Edge()->IsCrease(); }
+  bool IsHardCrease() const { return Edge()->IsHardCrease(); }
+  bool IsDartCrease() const { return Edge()->IsDartCrease(); }
+  unsigned int DartCount() const { return Edge()->DartCount(); }
+  ON_3dPoint SubdivisionPoint() const { return Edge()->SubdivisionPoint(); }
+  ON_3dPoint ControlNetCenterPoint() const { return Edge()->ControlNetCenterPoint(); }
+  ON_3dVector ControlNetCenterNormal(unsigned int edge_face_index) const { return Edge()->ControlNetCenterNormal(edge_face_index); }
+
+  // Identity: two wrappers are equal iff they reference the same ON_SubDEdge
+  // (ComponentDirection is ignored, so an edge and its reverse compare equal).
+  bool Equals(const BND_SubDEdge& other) const { return Edge() == other.Edge(); }
+  const ON_SubDEdge* GetONSubDComponent() const { return Edge(); }
 };
 
 class BND_SubDVertex {
-  const ON_SubDVertex* m_subdvertex = nullptr;
+  // Held as an ON_SubDComponentPtr for symmetry with the edge and face wrappers.
+  // A vertex has no meaningful direction, so ComponentDirection is always 0, but
+  // the uniform storage keeps the three wrappers consistent. No default constructor
+  // on ON_SubDComponentPtr, hence the ::Null initializer; accessors unpack through
+  // the typed Vertex().
+  ON_SubDComponentPtr m_component_ptr = ON_SubDComponentPtr::Null;
   ON_SubDRef m_parent;  // keeps the parent SubD alive; also lets traversal omit an explicit SubD argument
+
+  const ON_SubDVertex* Vertex() const { return m_component_ptr.Vertex(); }
 
 public:
   using ON_SubDTFrom = ON_SubDVertex;
   using BND_SubDFaceIterator   = BND_SubDComponentIterator<class BND_SubDFace,   class BND_SubDVertex>;
   using BND_SubDEdgeIterator   = BND_SubDComponentIterator<class BND_SubDEdge,   class BND_SubDVertex>;
   BND_SubDVertex(const ON_SubDVertex* vertex, ON_SubDRef parent = ON_SubDRef());
-  unsigned int Index() const { return m_subdvertex->VertexId(); }
-  unsigned int Id() const { return m_subdvertex->VertexId(); }
-  int EdgeCount() const { return m_subdvertex->EdgeCount(); }
-  int FaceCount() const { return m_subdvertex->FaceCount(); }
+  unsigned int Index() const { return Vertex()->VertexId(); }
+  unsigned int Id() const { return Vertex()->VertexId(); }
+  int EdgeCount() const { return Vertex()->EdgeCount(); }
+  int FaceCount() const { return Vertex()->FaceCount(); }
   BND_SubDFaceIterator Faces() const;
   BND_SubDEdgeIterator Edges() const;
 
-  ON_SubDVertexTag Tag() const { return m_subdvertex->m_vertex_tag; }
-  bool IsCrease() const { return m_subdvertex->IsCrease(); }
-  bool IsDart() const { return m_subdvertex->IsDart(); }
-  bool IsSmooth() const { return m_subdvertex->IsSmooth(); }
-  bool IsSharp(bool endCheck) const { return m_subdvertex->IsSharp(endCheck); }
-  bool IsCorner() const { return m_subdvertex->IsCorner(); }
-  ON_3dPoint ControlNetPoint() const { return m_subdvertex->ControlNetPoint(); }
-  ON_3dPoint SurfacePoint() const { return m_subdvertex->SurfacePoint(); }
-  double VertexSharpness() const { return m_subdvertex->VertexSharpness(); }
-  class BND_SubDVertex* Next() { return new BND_SubDVertex(m_subdvertex->m_next_vertex, m_parent); }
-  class BND_SubDVertex* Previous() { return new BND_SubDVertex(m_subdvertex->m_prev_vertex, m_parent); }
-  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(m_subdvertex->Edge(index), m_parent); }
+  // Always 0: a vertex carries no orientation. Present for parity with the edge and
+  // face wrappers that share the ON_SubDComponentPtr storage.
+  unsigned int ComponentDirection() const { return (unsigned int)m_component_ptr.ComponentDirection(); }
+
+  ON_SubDVertexTag Tag() const { return Vertex()->m_vertex_tag; }
+  bool IsCrease() const { return Vertex()->IsCrease(); }
+  bool IsDart() const { return Vertex()->IsDart(); }
+  bool IsSmooth() const { return Vertex()->IsSmooth(); }
+  bool IsSharp(bool endCheck) const { return Vertex()->IsSharp(endCheck); }
+  bool IsCorner() const { return Vertex()->IsCorner(); }
+  ON_3dPoint ControlNetPoint() const { return Vertex()->ControlNetPoint(); }
+  ON_3dPoint SurfacePoint() const { return Vertex()->SurfacePoint(); }
+  double VertexSharpness() const { return Vertex()->VertexSharpness(); }
+  class BND_SubDVertex* Next() { return new BND_SubDVertex(Vertex()->m_next_vertex, m_parent); }
+  class BND_SubDVertex* Previous() { return new BND_SubDVertex(Vertex()->m_prev_vertex, m_parent); }
+  // Direction-preserving: the returned edge carries its orientation about this vertex.
+  class BND_SubDEdge* Edge(unsigned index) { return new BND_SubDEdge(Vertex()->EdgePtr(index), m_parent); }
 
   // Identity: two wrappers are equal iff they reference the same ON_SubDVertex.
-  bool Equals(const BND_SubDVertex& other) const { return m_subdvertex == other.m_subdvertex; }
-  const ON_SubDVertex* GetONSubDComponent() const { return m_subdvertex; }
+  bool Equals(const BND_SubDVertex& other) const { return Vertex() == other.Vertex(); }
+  const ON_SubDVertex* GetONSubDComponent() const { return Vertex(); }
 };
 
 class BND_SubD : public BND_GeometryBase {

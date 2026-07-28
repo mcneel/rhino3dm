@@ -113,29 +113,33 @@ BND_SubD::BND_SubD()
   SetTrackedPointer(new ON_SubD(), nullptr);
 }
 
-// SubD components
-BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face, ON_SubDRef parent)         { m_subdface = face; m_parent = std::move(parent); }
-BND_SubDEdge::BND_SubDEdge(const class ON_SubDEdge* edge, ON_SubDRef parent)         { m_subdedge = edge; m_parent = std::move(parent); }
-BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex, ON_SubDRef parent) { m_subdvertex = vertex; m_parent = std::move(parent); }
+// SubD components. ON_SubDComponentPtr::Create packs the typed pointer (and maps a
+// null pointer to ON_SubDComponentPtr::Null); the ON_SubDEdgePtr overload also
+// carries the direction bit.
+BND_SubDFace::BND_SubDFace(const class ON_SubDFace* face, ON_SubDRef parent)         { m_component_ptr = ON_SubDComponentPtr::Create(face); m_parent = std::move(parent); }
+BND_SubDEdge::BND_SubDEdge(const class ON_SubDEdge* edge, ON_SubDRef parent)         { m_component_ptr = ON_SubDComponentPtr::Create(edge); m_parent = std::move(parent); }
+BND_SubDEdge::BND_SubDEdge(ON_SubDEdgePtr edgeptr, ON_SubDRef parent)                { m_component_ptr = ON_SubDComponentPtr::Create(edgeptr); m_parent = std::move(parent); }
+BND_SubDVertex::BND_SubDVertex(const class ON_SubDVertex* vertex, ON_SubDRef parent) { m_component_ptr = ON_SubDComponentPtr::Create(vertex); m_parent = std::move(parent); }
 
 BND_Color BND_SubDFace::PerFaceColor() const
 {
-  return ON_Color_to_Binding(m_subdface->PerFaceColor());
+  return ON_Color_to_Binding(Face()->PerFaceColor());
 }
 
 BND_SubDVertex* BND_SubDFace::Vertex(unsigned int i) const
 {
-  return new BND_SubDVertex(m_subdface->Vertex(i), m_parent);
+  return new BND_SubDVertex(Face()->Vertex(i), m_parent);
 }
 
 BND_SubDEdge* BND_SubDFace::Edge(unsigned int i) const
 {
-  return new BND_SubDEdge(m_subdface->Edge(i), m_parent);
+  // EdgePtr (not Edge) so the returned edge remembers its orientation in this face.
+  return new BND_SubDEdge(Face()->EdgePtr(i), m_parent);
 }
 
 class BND_SubDVertex* BND_SubDEdge::Vertex(unsigned index)
 {
-  return new class BND_SubDVertex(m_subdedge->Vertex(index), m_parent);
+  return new class BND_SubDVertex(Edge()->Vertex(index), m_parent);
 }
 
 BND_SubD::BND_SubDFaceIterator BND_SubD::Faces() const
@@ -251,6 +255,8 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("VertexCount", &BND_SubDFace::VertexCount)
     .def_property_readonly("Edges", &BND_SubDFace::Edges)
     .def_property_readonly("Vertices", &BND_SubDFace::Vertices)
+    .def_property_readonly("ComponentDirection", &BND_SubDFace::ComponentDirection)
+    .def("EdgeDirectionMatchesFaceOrientation", &BND_SubDFace::EdgeDirectionMatchesFaceOrientation, py::arg("index"))
     .def_property_readonly("MaterialChannelIndex", &BND_SubDFace::MaterialChannelIndex)
     .def_property_readonly("PerFaceColor", &BND_SubDFace::PerFaceColor)
     .def_property_readonly("ControlNetCenterPoint", &BND_SubDFace::ControlNetCenterPoint)
@@ -284,6 +290,7 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("FaceCount", &BND_SubDEdge::FaceCount)
     .def_property_readonly("Vertices", &BND_SubDEdge::Vertices)
     .def_property_readonly("Faces", &BND_SubDEdge::Faces)
+    .def_property_readonly("ComponentDirection", &BND_SubDEdge::ComponentDirection)
     .def_property_readonly("Tag", &BND_SubDEdge::Tag)
     .def("VertexId", &BND_SubDEdge::VertexId, py::arg("index"))
     .def("Vertex", &BND_SubDEdge::Vertex, py::arg("index"))
@@ -311,6 +318,7 @@ void initSubDBindings(rh3dmpymodule& m)
     .def_property_readonly("FaceCount", &BND_SubDVertex::FaceCount)
     .def_property_readonly("Edges", &BND_SubDVertex::Edges)
     .def_property_readonly("Faces", &BND_SubDVertex::Faces)
+    .def_property_readonly("ComponentDirection", &BND_SubDVertex::ComponentDirection)
     .def_property_readonly("Tag", &BND_SubDVertex::Tag)
     .def_property_readonly("ControlNetPoint", &BND_SubDVertex::ControlNetPoint)
     .def_property_readonly("SurfacePoint", &BND_SubDVertex::SurfacePoint)
@@ -423,6 +431,8 @@ void initSubDBindings(void*)
     .function("vertex", &BND_SubDFace::Vertex, allow_raw_pointers())
     .function("edge", &BND_SubDFace::Edge, allow_raw_pointers())
     .property("subdivisionPoint", &BND_SubDFace::SubdivisionPoint)
+    .property("componentDirection", &BND_SubDFace::ComponentDirection)
+    .function("edgeDirectionMatchesFaceOrientation", &BND_SubDFace::EdgeDirectionMatchesFaceOrientation)
     .function("edges", &BND_SubDFace::Edges)
     .function("vertices", &BND_SubDFace::Vertices)
     .function("equals", &BND_SubDFace::Equals)
@@ -448,6 +458,7 @@ void initSubDBindings(void*)
     .property("subdivisionPoint", &BND_SubDEdge::SubdivisionPoint)
     .property("controlNetCenterPoint", &BND_SubDEdge::ControlNetCenterPoint)
     .function("controlNetCenterNormal", &BND_SubDEdge::ControlNetCenterNormal)
+    .property("componentDirection", &BND_SubDEdge::ComponentDirection)
     .function("faces", &BND_SubDEdge::Faces)
     .function("vertices", &BND_SubDEdge::Vertices)
     .function("equals", &BND_SubDEdge::Equals)
@@ -470,6 +481,7 @@ void initSubDBindings(void*)
     .function("next", &BND_SubDVertex::Next, allow_raw_pointers())
     .function("previous", &BND_SubDVertex::Previous, allow_raw_pointers())
     .function("edge", &BND_SubDVertex::Edge, allow_raw_pointers())
+    .property("componentDirection", &BND_SubDVertex::ComponentDirection)
     .function("faces", &BND_SubDVertex::Faces)
     .function("edges", &BND_SubDVertex::Edges)
     .function("equals", &BND_SubDVertex::Equals)

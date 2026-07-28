@@ -269,6 +269,56 @@ test('component-rooted iterators traverse fully', async () => {
     assertFullTraversal(() => vert.edges(), 'Vertex.edges', false)
 })
 
+// ---- ON_SubDComponentPtr direction accessors ----
+//
+// Each component wrapper stores an ON_SubDComponentPtr (pointer + direction bit).
+// componentDirection surfaces the bit; face/vertex -> edge traversal is wired
+// through EdgePtr so a shared edge remembers its orientation. Mirrors the direction
+// tests in tests/python/test_SubD.py.
+
+test('component direction defaults to zero', async () => {
+    const subd = loadSubD()
+    if (!subd) return
+    expect(subd.faces().first().componentDirection).toBe(0)
+    expect(subd.edges().first().componentDirection).toBe(0)
+    expect(subd.vertices().first().componentDirection).toBe(0)
+    expect(subd.faces().first().vertex(0).componentDirection).toBe(0) // vertices never carry a direction
+})
+
+test('face edge direction is wired in', async () => {
+    const subd = loadSubD()
+    if (!subd) return
+    const seen = new Set()
+    for (const face of collect(subd.faces())) {
+        for (let i = 0; i < face.edgeCount; i++) {
+            const edge = face.edge(i)
+            const matches = face.edgeDirectionMatchesFaceOrientation(i)
+            expect(edge.componentDirection).toBe(matches ? 0 : 1)   // RhinoCommon parity
+            const natural = subd.edges().get(edge.id)               // SubD-rooted get() is by Id
+            expect(natural.componentDirection).toBe(0)
+            expect(edge.equals(natural)).toBe(true)                 // identity ignores direction
+            seen.add(edge.componentDirection)
+        }
+    }
+    // Shared edges are traversed both ways by their two faces: both must appear.
+    expect([...seen].sort()).toEqual([0, 1])
+})
+
+test('vertex edge direction is wired in', async () => {
+    const subd = loadSubD()
+    if (!subd) return
+    const seen = new Set()
+    for (const v of collect(subd.vertices())) {
+        for (let i = 0; i < v.edgeCount; i++) {
+            const edge = v.edge(i)
+            expect([0, 1]).toContain(edge.componentDirection)
+            expect(edge.equals(subd.edges().get(edge.id))).toBe(true) // identity ignores direction
+            seen.add(edge.componentDirection)
+        }
+    }
+    expect([...seen].sort()).toEqual([0, 1])
+})
+
 test('component equality', async () => {
     const subd = loadSubD()
     if (!subd) return
