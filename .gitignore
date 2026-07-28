@@ -28,6 +28,11 @@
 *.a
 *.lib
 
+# JS compiled artifacts
+tests/javascript/lib/rhino3dm.js
+tests/javascript/lib/rhino3dm.wasm
+tests/javascript/lib/package.json
+
 # Executables
 *.exe
 *.out
@@ -38,6 +43,15 @@ __pycache__/
 
 # temporary certificate files
 *.p12
+
+# Test artifacts
+tests/javascript/test_createFileWithLayers.3dm
+tests/javascript/test_createFileWithView.3dm
+tests/javascript/test_js_objectUserString.3dm
+tests/python/CreateFileWithView_py.3dm
+tests/python/decompressed.3dm
+tests/python/test_createFileWithLayers.3dm
+tests/python/test_Object_UserString.3dm
 
 .vscode
 
