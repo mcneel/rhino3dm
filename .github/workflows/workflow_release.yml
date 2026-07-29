@@ -5,34 +5,44 @@ name: workflow release
 on:
   workflow_dispatch:
     inputs:
+      # NOTE: workflow_dispatch inputs cannot be nested or conditionally
+      # enabled, so they are grouped by language instead. A publish_* toggle
+      # only takes effect if the matching build_* toggle is also on (the
+      # publish job needs the build job, so it is skipped otherwise).
+
+      # --- Python ---
       build_python:
-        description: 'Build the Python packages'
-        type: boolean
-        default: true
-      build_dotnet:
-        description: 'Build the .NET package'
-        type: boolean
-        default: true
-      build_javascript:
-        description: 'Build rhino3dm.js'
+        description: 'Python: build packages'
         type: boolean
         default: true
       publish_to_pypi:
-        description: 'Upload Python packages (wheels + sdist) to PyPI'
+        description: 'Python: upload to PyPI (requires build Python)'
         type: boolean
         default: false
+
+      # --- .NET ---
+      build_dotnet:
+        description: '.NET: build package'
+        type: boolean
+        default: true
+      publish_to_nuget:
+        description: '.NET: publish to NuGet.org (requires build .NET)'
+        type: boolean
+        default: false
+
+      # --- JavaScript ---
+      build_javascript:
+        description: 'JS: build rhino3dm.js'
+        type: boolean
+        default: true
       publish_to_npm:
-        description: 'Publish rhino3dm.js to npm'
+        description: 'JS: publish to npm (requires build JS)'
         type: boolean
         default: false
       npm_dist_tag:
-        description: 'npm dist-tag (use "next" for pre-releases, e.g. 8.x-beta)'
+        description: 'JS: npm dist-tag (use "next" for pre-releases, e.g. 8.x-beta)'
         type: string
         default: 'latest'
-      publish_to_nuget:
-        description: 'Publish Rhino3dm .NET package to NuGet.org'
-        type: boolean
-        default: false
 jobs:
 
   build_py_sdist:
