@@ -5,6 +5,18 @@ name: workflow release
 on:
   workflow_dispatch:
     inputs:
+      build_python:
+        description: 'Build the Python packages'
+        type: boolean
+        default: true
+      build_dotnet:
+        description: 'Build the .NET package'
+        type: boolean
+        default: true
+      build_javascript:
+        description: 'Build rhino3dm.js'
+        type: boolean
+        default: true
       publish_to_pypi:
         description: 'Upload Python packages (wheels + sdist) to PyPI'
         type: boolean
@@ -25,6 +37,7 @@ jobs:
 
   build_py_sdist:
     name: build python sdist
+    if: ${{ inputs.build_python }}
     runs-on: ubuntu-latest
     steps:
       - name: setup python
@@ -80,6 +93,7 @@ jobs:
 
   build_py_manylinux:
     name: build python ${{ matrix.python-version }} manylinux_2_28 ${{ matrix.image.architecture }}
+    if: ${{ inputs.build_python }}
     runs-on: ${{ matrix.image.os }}
     container: ${{ matrix.image.container }}
     strategy:
@@ -130,6 +144,7 @@ jobs:
 
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.os }} bdist
+    if: ${{ inputs.build_python }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -223,6 +238,7 @@ jobs:
 
   build_dotnet_os:
     name: build dotnet ${{ matrix.target }} ${{ matrix.architecture }}
+    if: ${{ inputs.build_dotnet }}
     runs-on: ${{ matrix.os }}
     container:
       image: ${{ matrix.image }}
@@ -406,6 +422,7 @@ jobs:
 
   build_js:
     name: build rhino3dm.js
+    if: ${{ inputs.build_javascript }}
     runs-on: ubuntu-latest
     container:
       image: emscripten/emsdk:5.0.7
