@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.32.0] - T.B.A.
+## [8.32.1] - T.B.A.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.32.0...8.32.1
+
+### Added
+
+- (js) `PointCloud.toThreejsBuffers()` — a zero-copy typed-array export (position, plus color/normal when present), mirroring `Mesh.toThreejsBuffers()` for faster large point-cloud loading in the three.js 3DMLoader.
+
+## [8.32.0] - 2026.07.28
 
 diff: https://github.com/mcneel/rhino3dm/compare/8.17.0...8.32.0
 
