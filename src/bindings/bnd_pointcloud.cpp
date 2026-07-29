@@ -854,9 +854,66 @@ BND_DICT BND_PointCloud::ToThreejsJSON() const
 
   emscripten::val rc(emscripten::val::object());
   rc.set("data", data);
-  
+
   return rc;
 
+}
+
+BND_DICT BND_PointCloud::ToThreejsBuffers(bool rotateToYUp) const
+{
+  ON_PointCloud* pc = m_pointcloud;
+  ON_PointCloud tempPc;
+  if (rotateToYUp)
+  {
+    tempPc = *m_pointcloud;
+    ON_Xform rotation(1);
+    rotation.RotationZYX(0.0, 0.0, -ON_PI / 2.0);
+    tempPc.Transform(rotation);
+    pc = &tempPc;
+  }
+
+  const int count = pc->m_P.Count();
+  std::vector<float> positions((size_t)count * 3);
+  for (int i = 0; i < count; i++)
+  {
+    positions[i * 3] = (float)pc->m_P[i].x;
+    positions[i * 3 + 1] = (float)pc->m_P[i].y;
+    positions[i * 3 + 2] = (float)pc->m_P[i].z;
+  }
+
+  emscripten::val Float32Array = emscripten::val::global("Float32Array");
+
+  emscripten::val rc(emscripten::val::object());
+  rc.set("position", Float32Array.new_(emscripten::typed_memory_view(positions.size(), positions.data())));
+  rc.set("pointCount", count);
+
+  if (pc->HasPointColors())
+  {
+    const int ccount = pc->m_C.Count();
+    std::vector<float> colors((size_t)ccount * 3);
+    for (int i = 0; i < ccount; i++)
+    {
+      colors[i * 3] = pc->m_C[i].Red() / 255.0f;
+      colors[i * 3 + 1] = pc->m_C[i].Green() / 255.0f;
+      colors[i * 3 + 2] = pc->m_C[i].Blue() / 255.0f;
+    }
+    rc.set("color", Float32Array.new_(emscripten::typed_memory_view(colors.size(), colors.data())));
+  }
+
+  if (pc->HasPointNormals())
+  {
+    const int ncount = pc->m_N.Count();
+    std::vector<float> normals((size_t)ncount * 3);
+    for (int i = 0; i < ncount; i++)
+    {
+      normals[i * 3] = (float)pc->m_N[i].x;
+      normals[i * 3 + 1] = (float)pc->m_N[i].y;
+      normals[i * 3 + 2] = (float)pc->m_N[i].z;
+    }
+    rc.set("normal", Float32Array.new_(emscripten::typed_memory_view(normals.size(), normals.data())));
+  }
+
+  return rc;
 }
 
 BND_PointCloud* BND_PointCloud::CreateFromThreejsJSON(BND_DICT json)
@@ -1060,6 +1117,7 @@ void initPointCloudBindings(void*)
     .function("getValues", &BND_PointCloud::GetValues)
     .function("closestPoint", &BND_PointCloud::ClosestPoint)
     .function("toThreejsJSON", &BND_PointCloud::ToThreejsJSON)
+    .function("toThreejsBuffers", &BND_PointCloud::ToThreejsBuffers)
     .class_function("createFromThreejsJSON", &BND_PointCloud::CreateFromThreejsJSON, allow_raw_pointers())
     ;
 }

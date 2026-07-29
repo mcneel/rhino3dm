@@ -130,6 +130,10 @@ public:
 
 #if defined(ON_WASM_COMPILE)
   BND_DICT ToThreejsJSON() const;
+  // Zero-copy alternative to ToThreejsJSON: one bulk-copied Float32Array per attribute
+  // (position, and color/normal when present) instead of N per-element val.set() boundary
+  // crossings. The three.js 3DMLoader can feed these straight into BufferAttributes.
+  BND_DICT ToThreejsBuffers(bool rotateToYUp) const;
   static BND_PointCloud* CreateFromThreejsJSON(BND_DICT json);
 #endif
 };
