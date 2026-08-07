@@ -147,6 +147,18 @@ RH_C_FUNCTION const ON_Viewport* ON_3dmView_ViewportPointer(const ON_3dmView* pV
   return rc;
 }
 
+RH_C_FUNCTION void ON_3dmView_GetConstructionPlane(const ON_3dmView* pConstView, ON_PLANE_STRUCT* plane)
+{
+  if( pConstView && plane )
+    CopyToPlaneStruct(*plane, pConstView->m_cplane.m_plane);
+}
+
+RH_C_FUNCTION void ON_3dmView_SetConstructionPlane(ON_3dmView* pView, const ON_PLANE_STRUCT* plane)
+{
+  if( pView && plane )
+    pView->m_cplane.m_plane = FromPlaneStruct(*plane);
+}
+
 RH_C_FUNCTION void ON_3dmView_FocalBlurDistance_Set(ON_3dmView* pView, double blur)
 {
 	if (pView)
