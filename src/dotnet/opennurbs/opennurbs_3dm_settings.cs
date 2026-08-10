@@ -796,6 +796,29 @@ namespace Rhino.DocObjects
         return m_viewport ?? (m_viewport = new ViewportInfo(this));
       }
     }
+
+    /// <summary>
+    /// Gets or sets the construction plane associated with this view. For the standard
+    /// parallel views the plane is the view's camera frame (Top is world XY, Front world ZX,
+    /// Right world YZ); Rhino uses the stored plane when a file or template is opened and does
+    /// not re-derive it, so a view authored with rhino3dm must set this explicitly.
+    /// </summary>
+    /// <since>8.33</since>
+    public Plane ConstructionPlane
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        Plane plane = Plane.WorldXY;
+        UnsafeNativeMethods.ON_3dmView_GetConstructionPlane(const_ptr_this, ref plane);
+        return plane;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetConstructionPlane(ptr_this, ref value);
+      }
+    }
     internal IntPtr ConstViewportPointer()
     {
       IntPtr ptr_const_this = ConstPointer();
