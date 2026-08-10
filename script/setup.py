@@ -524,6 +524,10 @@ def setup_js():
         # For a WASM64 build, draco's objects must also be memory64 or they
         # won't link against the wasm64 rhino3dm objects.
         draco_flags = ' -DCMAKE_C_FLAGS=-sMEMORY64=1 -DCMAKE_CXX_FLAGS=-sMEMORY64=1' if wasm64 else ''
+        # Match draco's optimization level to the rhino3dm build: a -d (debug)
+        # build skips draco's default Release full-opt so iteration compiles
+        # faster. Release/published builds leave it optimized.
+        draco_flags += ' -DCMAKE_BUILD_TYPE=Debug' if debug else ''
         command = "emcmake cmake " + os.path.join(src_folder, "lib/draco") + draco_flags
         environment = os.environ
         emcmake_path = shutil.which("emcmake")

@@ -475,9 +475,16 @@ def build_js():
     
 
     # build draco_wasm static lib
+    # Parallelize the make across all available cores; the compile phase is the
+    # bottleneck (hundreds of TUs) and make defaults to a single job.
+    # Build only the draco_static target (libdraco.a) rather than the default
+    # 'all': rhino3dm links libdraco.a alone, so the draco_decoder/draco_encoder
+    # command-line tools 'all' also builds are dead weight under Emscripten
+    # (two extra executable links per fresh build).
+    jobs = os.cpu_count() or 4
     draco_path = os.path.join(target_path, "draco_wasm")
     os.chdir(draco_path)
-    run_command("emmake make", True)
+    run_command("emmake make -j" + str(jobs) + " draco_static", True)
 
     os.chdir(target_path)
 
@@ -491,7 +498,7 @@ def build_js():
     # The javascript make build hangs after about 10 lines when outputting stderr the pipe so
     # we'll pass suppress_errors argument as True here...
 
-    run_command("emmake make", not verbose)
+    run_command("emmake make -j" + str(jobs), not verbose)
 
     # Check to see if the build succeeded and move into artifacts_js
     items_to_check = ['rhino3dm.wasm']
