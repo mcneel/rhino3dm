@@ -4972,6 +4972,30 @@ declare module 'rhino3dm' {
 		/** ... */
 		set(index:number, vertex:number[]): void;
 		/**
+		 * @description Gets the vertex location at the given index in double precision.
+		 * @param {number} index Index of the vertex.
+		 * @returns {number[]} The vertex location.
+		 */
+		point3dAt(index:number): number[];
+		/**
+		 * @description Sets the vertex location at the given index in double precision.
+		 The mesh keeps double precision vertices after this call.
+		 * @param {number} index Index of the vertex.
+		 * @param {number[]} point The new vertex location.
+		 * @returns {boolean} true if the index is valid.
+		 */
+		setPoint3dAt(index:number, point:number[]): boolean;
+		/**
+		 * @description Copies all vertex locations to a new array, in double precision.
+		 * @returns {number[][]} A new array.
+		 */
+		toPoint3dArray(): number[][];
+		/**
+		 * @description Copies all vertex locations to a new array, in single precision.
+		 * @returns {number[][]} A new array.
+		 */
+		toPoint3fArray(): number[][];
+		/**
 		 * @description Clears the Vertex list on the mesh.
 		 * @returns {void}
 		 */
@@ -4990,6 +5014,15 @@ declare module 'rhino3dm' {
 		 * @returns {number} The index of the newly added vertex.
 		 */
 		add(x:number,y:number,z:number): number;
+		/**
+		 * @description Adds a new vertex to the end of the Vertex list, in double precision.
+		 The mesh keeps double precision vertices after this call.
+		 * @param {number} x X component of new vertex coordinate.
+		 * @param {number} y Y component of new vertex coordinate.
+		 * @param {number} z Z component of new vertex coordinate.
+		 * @returns {number} The index of the newly added vertex.
+		 */
+		addPoint3d(x:number,y:number,z:number): number;
 		/**
 		 * @description Gets a value indicating whether or not a vertex is hidden.
 		 * @param {number} vertexIndex Index of vertex to query.
