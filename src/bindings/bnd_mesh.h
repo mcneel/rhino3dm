@@ -87,21 +87,23 @@ public:
   //    public int Capacity get;set;
   ON_3fPoint GetVertex(int i) const;
   void SetVertex(int i, ON_3fPoint pt);
+  ON_3dPoint Point3dAt(int i) const;
+  bool SetPoint3dAt(int i, ON_3dPoint pt);
+  BND_TUPLE ToPoint3dArray() const;
+  BND_TUPLE ToPoint3fArray() const;
   bool UseDoublePrecisionVertices() const { return m_mesh->HasDoublePrecisionVertices(); }
   void SetUseDoublePrecisionVertices(bool b);
   void Clear();
   void Destroy();
   int Add(float x, float y, float z);
-  //    public int Add(double x, double y, double z)
+  int AddPoint3d(double x, double y, double z);
   //    public int Add(Point3f vertex)
   //    public int Add(Point3d vertex)
   //    public void AddVertices(IEnumerable<Point3d> vertices)
   //    public void AddVertices(IEnumerable<Point3f> vertices)
   //bool SetVertex(int index, float x, float y, float z) { return m_mesh->SetVertex(index, ON_3fPoint(x, y, z)); }
   //    public bool SetVertex(int index, double x, double y, double z, bool updateNormals)
-  //    public bool SetVertex(int index, double x, double y, double z)
   //    public bool SetVertex(int index, Point3f vertex)
-  //    public bool SetVertex(int index, Point3d vertex)
   bool IsHidden(int vertexIndex) const;
   void Hide(int vertexIndex);
   void Show(int vertexIndex);
@@ -112,9 +114,6 @@ public:
   //    public int[] GetVertexFaces(int vertexIndex)
   //    public int[] GetTopologicalIndenticalVertices(int vertexIndex)
   //    public int[] GetConnectedVertices(int vertexIndex)
-  //    public Point3d Point3dAt(int index)
-  //    public Point3f[] ToPoint3fArray()
-  //    public Point3d[] ToPoint3dArray()
   //    public float[] ToFloatArray()
   //    public bool Remove(int index, bool shrinkFaces)
   //    public bool Remove(IEnumerable<int> indices, bool shrinkFaces)

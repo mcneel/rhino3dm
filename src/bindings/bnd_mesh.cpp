@@ -628,7 +628,51 @@ void BND_MeshVertexList::SetVertex(int i, ON_3fPoint pt)
   if (i < 0 || i >= m_mesh->m_V.Count())
     throw py::index_error();
 #endif
-  m_mesh->m_V[i] = pt;
+  // Do not write to m_V[] directly. ON_Mesh::SetVertex() also updates m_dV[],
+  // which keeps the single and the double precision vertices synchronized.
+  m_mesh->SetVertex(i, pt);
+}
+
+ON_3dPoint BND_MeshVertexList::Point3dAt(int i) const
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_V.Count())
+    throw py::index_error();
+#endif
+  return m_mesh->Vertex(i);
+}
+
+bool BND_MeshVertexList::SetPoint3dAt(int i, ON_3dPoint pt)
+{
+#if defined(ON_PYTHON_COMPILE)
+  if (i < 0 || i >= m_mesh->m_V.Count())
+    throw py::index_error();
+#endif
+  if (i >= 0 && i < m_mesh->m_V.Count() && !m_mesh->HasDoublePrecisionVertices())
+  {
+    // Make the double precision array. Without it, ON_Mesh::SetVertex() can
+    // keep the single precision location only.
+    m_mesh->DoublePrecisionVertices();
+  }
+  return m_mesh->SetVertex(i, pt);
+}
+
+BND_TUPLE BND_MeshVertexList::ToPoint3dArray() const
+{
+  const int count = m_mesh->VertexCount();
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+    SetTuple(rc, i, m_mesh->Vertex(i));
+  return rc;
+}
+
+BND_TUPLE BND_MeshVertexList::ToPoint3fArray() const
+{
+  const int count = m_mesh->VertexCount();
+  BND_TUPLE rc = CreateTuple(count);
+  for (int i = 0; i < count; i++)
+    SetTuple(rc, i, ON_3fPoint(m_mesh->Vertex(i)));
+  return rc;
 }
 
 void BND_MeshVertexList::SetUseDoublePrecisionVertices(bool use)
@@ -679,6 +723,9 @@ static void ON_Mesh_RepairHiddenArray(ON_Mesh* pMesh)
 void BND_MeshVertexList::Clear()
 {
   m_mesh->m_V.SetCount(0);
+  // Clear m_dV[] also. If m_dV[] keeps a different count than m_V[],
+  // the mesh is not valid and the double precision vertices are ignored.
+  m_mesh->m_dV.SetCount(0);
   ON_Mesh_RepairHiddenArray(m_mesh);
 }
 
@@ -693,6 +740,20 @@ void BND_MeshVertexList::Destroy()
 int BND_MeshVertexList::Add(float x, float y, float z)
 {
   m_mesh->SetVertex(m_mesh->VertexCount(), ON_3fPoint(x, y, z));
+  return m_mesh->VertexCount() - 1;
+}
+
+int BND_MeshVertexList::AddPoint3d(double x, double y, double z)
+{
+  const int count = m_mesh->VertexCount();
+  if (count > 0 && !m_mesh->HasDoublePrecisionVertices())
+  {
+    // Make the double precision array from the existing single precision
+    // vertices. Without it, ON_Mesh::SetVertex() keeps the single precision
+    // location only and the double precision input is lost.
+    m_mesh->DoublePrecisionVertices();
+  }
+  m_mesh->SetVertex(count, ON_3dPoint(x, y, z));
   return m_mesh->VertexCount() - 1;
 }
 
@@ -1178,10 +1239,15 @@ void initMeshBindings(rh3dmpymodule& m)
     .def("SetCount", &BND_MeshVertexList::SetCount)
     .def("__getitem__", &BND_MeshVertexList::GetVertex)
     .def("__setitem__", &BND_MeshVertexList::SetVertex)
+    .def("Point3dAt", &BND_MeshVertexList::Point3dAt, py::arg("index"))
+    .def("SetPoint3dAt", &BND_MeshVertexList::SetPoint3dAt, py::arg("index"), py::arg("point"))
+    .def("ToPoint3dArray", &BND_MeshVertexList::ToPoint3dArray)
+    .def("ToPoint3fArray", &BND_MeshVertexList::ToPoint3fArray)
     .def_property("UseDoublePrecisionVertices", &BND_MeshVertexList::UseDoublePrecisionVertices, &BND_MeshVertexList::SetUseDoublePrecisionVertices)
     .def("Clear", &BND_MeshVertexList::Clear)
     .def("Destroy", &BND_MeshVertexList::Destroy)
     .def("Add", &BND_MeshVertexList::Add, py::arg("x"), py::arg("y"), py::arg("z"))
+    .def("AddPoint3d", &BND_MeshVertexList::AddPoint3d, py::arg("x"), py::arg("y"), py::arg("z"))
     .def("IsHidden", &BND_MeshVertexList::IsHidden, py::arg("vertexIndex"))
     .def("Hide", &BND_MeshVertexList::Hide, py::arg("vertexIndex"))
     .def("Show", &BND_MeshVertexList::Show, py::arg("vertexIndex"))
@@ -1331,10 +1397,15 @@ void initMeshBindings(void*)
     .function("setCount", &BND_MeshVertexList::SetCount)
     .function("get", &BND_MeshVertexList::GetVertex)
     .function("set", &BND_MeshVertexList::SetVertex)
+    .function("point3dAt", &BND_MeshVertexList::Point3dAt)
+    .function("setPoint3dAt", &BND_MeshVertexList::SetPoint3dAt)
+    .function("toPoint3dArray", &BND_MeshVertexList::ToPoint3dArray)
+    .function("toPoint3fArray", &BND_MeshVertexList::ToPoint3fArray)
     .property("useDoublePrecisionVertices", &BND_MeshVertexList::UseDoublePrecisionVertices, &BND_MeshVertexList::SetUseDoublePrecisionVertices)
     .function("clear", &BND_MeshVertexList::Clear)
     .function("destroy", &BND_MeshVertexList::Destroy)
     .function("add", &BND_MeshVertexList::Add)
+    .function("addPoint3d", &BND_MeshVertexList::AddPoint3d)
     .function("isHidden", &BND_MeshVertexList::IsHidden)
     .function("hide", &BND_MeshVertexList::Hide)
     .function("show", &BND_MeshVertexList::Show)
