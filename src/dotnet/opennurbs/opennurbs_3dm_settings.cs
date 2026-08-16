@@ -819,6 +819,37 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_3dmView_SetConstructionPlane(ptr_this, ref value);
       }
     }
+
+    /// <summary>
+    /// Gets the view's full construction plane, including its grid settings (grid and snap
+    /// spacing, grid line count, thick-line frequency, depth buffering). The
+    /// <see cref="ConstructionPlane"/> property above exposes only the geometric plane.
+    /// </summary>
+    /// <returns>A copy of the view's construction plane.</returns>
+    /// <since>8.33</since>
+    public ConstructionPlane GetConstructionPlane()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_cplane = UnsafeNativeMethods.ON_3dmView_GetConstructionPlaneObject(const_ptr_this);
+      var rc = Rhino.DocObjects.ConstructionPlane.FromIntPtr(ptr_cplane);
+      UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the view's full construction plane, including its grid settings.
+    /// </summary>
+    /// <param name="constructionPlane">The construction plane to store on the view.</param>
+    /// <since>8.33</since>
+    public void SetConstructionPlane(ConstructionPlane constructionPlane)
+    {
+      if (constructionPlane == null)
+        return;
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_cplane = constructionPlane.CopyToNative();
+      UnsafeNativeMethods.ON_3dmView_SetConstructionPlaneObject(ptr_this, ptr_cplane);
+      UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+    }
     internal IntPtr ConstViewportPointer()
     {
       IntPtr ptr_const_this = ConstPointer();

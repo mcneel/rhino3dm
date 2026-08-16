@@ -159,6 +159,23 @@ RH_C_FUNCTION void ON_3dmView_SetConstructionPlane(ON_3dmView* pView, const ON_P
     pView->m_cplane.m_plane = FromPlaneStruct(*plane);
 }
 
+// RH3DM: the view's full construction plane, including the grid params (spacing, snap, line
+// count, thick-line frequency) that the plane-only accessor above cannot reach. The caller
+// wraps the returned pointer with the managed ConstructionPlane class and deletes it via
+// ON_3dmConstructionPlane_Delete.
+RH_C_FUNCTION ON_3dmConstructionPlane* ON_3dmView_GetConstructionPlaneObject(const ON_3dmView* pConstView)
+{
+  if( pConstView )
+    return new ON_3dmConstructionPlane(pConstView->m_cplane);
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_3dmView_SetConstructionPlaneObject(ON_3dmView* pView, const ON_3dmConstructionPlane* pConstCPlane)
+{
+  if( pView && pConstCPlane )
+    pView->m_cplane = *pConstCPlane;
+}
+
 RH_C_FUNCTION void ON_3dmView_FocalBlurDistance_Set(ON_3dmView* pView, double blur)
 {
 	if (pView)
