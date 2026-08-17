@@ -159,6 +159,53 @@ RH_C_FUNCTION void ON_3dmView_SetConstructionPlane(ON_3dmView* pView, const ON_P
     pView->m_cplane.m_plane = FromPlaneStruct(*plane);
 }
 
+// RH3DM: the view's full construction plane, including the grid params (spacing, snap, line
+// count, thick-line frequency) that the plane-only accessor above cannot reach. The caller
+// wraps the returned pointer with the managed ConstructionPlane class and deletes it via
+// ON_3dmConstructionPlane_Delete.
+RH_C_FUNCTION ON_3dmConstructionPlane* ON_3dmView_GetConstructionPlaneObject(const ON_3dmView* pConstView)
+{
+  if( pConstView )
+    return new ON_3dmConstructionPlane(pConstView->m_cplane);
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_3dmView_SetConstructionPlaneObject(ON_3dmView* pView, const ON_3dmConstructionPlane* pConstCPlane)
+{
+  if( pView && pConstCPlane )
+    pView->m_cplane = *pConstCPlane;
+}
+
+// RH3DM: the view's relative window position (ON_3dmView.m_position) -- the rectangle, in
+// 0..1 fractions of the parent frame, and the maximized flag. Without this a template author
+// can't lay views out through rhino3dm, so files open with all views stacked.
+RH_C_FUNCTION void ON_3dmView_GetWindowPosition(const ON_3dmView* pConstView, double* left, double* right,
+                                                double* top, double* bottom, bool* maximized)
+{
+  if( pConstView )
+  {
+    const ON_3dmViewPosition& p = pConstView->m_position;
+    if( left ) *left = p.m_wnd_left;
+    if( right ) *right = p.m_wnd_right;
+    if( top ) *top = p.m_wnd_top;
+    if( bottom ) *bottom = p.m_wnd_bottom;
+    if( maximized ) *maximized = p.m_bMaximized;
+  }
+}
+
+RH_C_FUNCTION void ON_3dmView_SetWindowPosition(ON_3dmView* pView, double left, double right,
+                                                double top, double bottom, bool maximized)
+{
+  if( pView )
+  {
+    pView->m_position.m_wnd_left = left;
+    pView->m_position.m_wnd_right = right;
+    pView->m_position.m_wnd_top = top;
+    pView->m_position.m_wnd_bottom = bottom;
+    pView->m_position.m_bMaximized = maximized;
+  }
+}
+
 RH_C_FUNCTION void ON_3dmView_FocalBlurDistance_Set(ON_3dmView* pView, double blur)
 {
 	if (pView)
@@ -643,6 +690,37 @@ RH_C_FUNCTION void ON_3dmSettings_SetDouble(ON_3dmSettings* pSettings, enum Unit
       break;
     }
   }
+}
+
+// RH3DM: model-space distance display mode + precision (ON_3dmUnitsAndTolerances). These live
+// in the units chunk, which rhino3dm otherwise exposes only for the unit system + tolerances;
+// without them a template author working through rhino3dm cannot set the display format
+// (decimal / fractional / feet & inches) or precision. Mode uses ON::OBSOLETE_DistanceDisplayMode
+// (0=Decimal, 1=Fractional, 2=FeetAndInches) -- still the field openNURBS stores.
+RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayMode(const ON_3dmSettings* pConstSettings)
+{
+  if( pConstSettings )
+    return (int)pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_mode;
+  return 0;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayMode(ON_3dmSettings* pSettings, int mode)
+{
+  if( pSettings )
+    pSettings->m_ModelUnitsAndTolerances.m_distance_display_mode = ON::DistanceDisplayModeFromUnsigned(mode);
+}
+
+RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayPrecision(const ON_3dmSettings* pConstSettings)
+{
+  if( pConstSettings )
+    return pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_precision;
+  return 3;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayPrecision(ON_3dmSettings* pSettings, int precision)
+{
+  if( pSettings )
+    pSettings->m_ModelUnitsAndTolerances.m_distance_display_precision = precision;
 }
 
 RH_C_FUNCTION int ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, int set_val)
