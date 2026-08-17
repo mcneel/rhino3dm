@@ -858,6 +858,70 @@ namespace Rhino.DocObjects
         UnsafeNativeMethods.ON_3dmView_SetConstructionPlane(ptr_this, ref value);
       }
     }
+
+    /// <summary>
+    /// Gets the view's full construction plane, including its grid settings (grid and snap
+    /// spacing, grid line count, thick-line frequency, depth buffering). The
+    /// <see cref="ConstructionPlane"/> property above exposes only the geometric plane.
+    /// </summary>
+    /// <returns>A copy of the view's construction plane.</returns>
+    /// <since>8.33</since>
+    public ConstructionPlane GetConstructionPlane()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_cplane = UnsafeNativeMethods.ON_3dmView_GetConstructionPlaneObject(const_ptr_this);
+      var rc = Rhino.DocObjects.ConstructionPlane.FromIntPtr(ptr_cplane);
+      UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the view's full construction plane, including its grid settings.
+    /// </summary>
+    /// <param name="constructionPlane">The construction plane to store on the view.</param>
+    /// <since>8.33</since>
+    public void SetConstructionPlane(ConstructionPlane constructionPlane)
+    {
+      if (constructionPlane == null)
+        return;
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_cplane = constructionPlane.CopyToNative();
+      UnsafeNativeMethods.ON_3dmView_SetConstructionPlaneObject(ptr_this, ptr_cplane);
+      UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+    }
+
+    /// <summary>
+    /// Gets the view's window position within its parent frame. The rectangle values are
+    /// fractions from 0 to 1.
+    /// </summary>
+    /// <param name="left">Left edge, 0 to 1.</param>
+    /// <param name="right">Right edge, 0 to 1.</param>
+    /// <param name="top">Top edge, 0 to 1.</param>
+    /// <param name="bottom">Bottom edge, 0 to 1.</param>
+    /// <param name="maximized">True if the view window is maximized.</param>
+    /// <since>8.33</since>
+    public void GetWindowRectangle(out double left, out double right, out double top, out double bottom, out bool maximized)
+    {
+      left = 0; right = 1; top = 0; bottom = 1; maximized = false;
+      UnsafeNativeMethods.ON_3dmView_GetWindowPosition(ConstPointer(), ref left, ref right, ref top, ref bottom, ref maximized);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Sets the view's window position within its parent frame. The rectangle values are
+    /// fractions from 0 to 1.
+    /// </summary>
+    /// <param name="left">Left edge, 0 to 1.</param>
+    /// <param name="right">Right edge, 0 to 1.</param>
+    /// <param name="top">Top edge, 0 to 1.</param>
+    /// <param name="bottom">Bottom edge, 0 to 1.</param>
+    /// <param name="maximized">True if the view window is maximized.</param>
+    /// <since>8.33</since>
+    public void SetWindowRectangle(double left, double right, double top, double bottom, bool maximized)
+    {
+      UnsafeNativeMethods.ON_3dmView_SetWindowPosition(NonConstPointer(), left, right, top, bottom, maximized);
+      GC.KeepAlive(this);
+    }
     internal IntPtr ConstViewportPointer()
     {
       IntPtr ptr_const_this = ConstPointer();
@@ -3237,6 +3301,21 @@ namespace Rhino.Display
 
 namespace Rhino.FileIO
 {
+  /// <summary>
+  /// How model-space distances are displayed. Mirrors the values openNURBS stores in the
+  /// units-and-tolerances settings (ON::OBSOLETE_DistanceDisplayMode).
+  /// </summary>
+  /// <since>8.33</since>
+  public enum ModelDistanceDisplayMode
+  {
+    /// <summary>Decimal, e.g. 12.5.</summary>
+    Decimal = 0,
+    /// <summary>Fractional, e.g. 12 1/2.</summary>
+    Fractional = 1,
+    /// <summary>Feet and inches, e.g. 1'-0 1/2".</summary>
+    FeetAndInches = 2,
+  }
+
   /// <summary> General settings in a 3dm file. </summary>
   public class File3dmSettings
   {
@@ -3355,6 +3434,42 @@ namespace Rhino.FileIO
     {
       get { return GetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelRelTol); }
       set { SetDouble(UnsafeNativeMethods.UnitsTolerancesSettingsDouble.ModelRelTol, value); }
+    }
+    /// <summary>Gets or sets how model-space distances are displayed (decimal / fractional /
+    /// feet &amp; inches). This is stored in the units settings and could previously only be
+    /// set by chunk-patching.</summary>
+    /// <since>8.33</since>
+    public ModelDistanceDisplayMode ModelDistanceDisplay
+    {
+      get
+      {
+        var rc = (ModelDistanceDisplayMode)UnsafeNativeMethods.ON_3dmSettings_GetModelDistanceDisplayMode(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmSettings_SetModelDistanceDisplayMode(NonConstPointer(), (int)value);
+        GC.KeepAlive(this);
+      }
+    }
+    /// <summary>Gets or sets the model-space distance display precision: the number of decimal
+    /// places in decimal mode, or the fraction denominator exponent (denominator = 2^precision)
+    /// in fractional / feet &amp; inches mode.</summary>
+    /// <since>8.33</since>
+    public int ModelDistanceDisplayPrecision
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.ON_3dmSettings_GetModelDistanceDisplayPrecision(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_3dmSettings_SetModelDistanceDisplayPrecision(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
     }
     /// <summary>Gets or sets the page space absolute tolerance.</summary>
     /// <since>5.0</since>
