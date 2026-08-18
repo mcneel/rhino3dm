@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.32.2] - 2026.08.18
 
 ### Added
 
 - (dotnet) `ViewInfo.ConstructionPlane` — get/set a view's construction plane. Views authored with rhino3dm can now set the per-view CPlane (e.g. world ZX for Front, world YZ for Right) instead of leaving the default World-XY; Rhino uses the stored plane on open and does not re-derive it. RH3DM-197.
+
+### Fixed
+
+- (js) bumped the max memory limit to 16gb for WASM64
 
 ## [8.32.1] - 2026.07.29
 
