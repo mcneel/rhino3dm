@@ -88,6 +88,12 @@ if(${RHINO3DM_JS})
     # wasm32/wasm64 and fail. (It also reaches the link line via CXX flags.)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMEMORY64=1")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sMEMORY64=1")
+    # -sMEMORY64 only lifts the address width; the heap cap still defaults to
+    # 2GB when ALLOW_MEMORY_GROWTH is on and MAXIMUM_MEMORY is unset. Without
+    # this the wasm64 binary is still capped at 2GB (memory.grow fails past it,
+    # malloc returns null), defeating the point of the build. Raise it past 4GB
+    # (link-only flag; only valid with MEMORY64, hence gated here).
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMAXIMUM_MEMORY=16GB")
   endif()
   # The remaining -s settings and -lembind are link-only; keep them out of the
   # compile flags so every object doesn't emit a "linker setting ignored during
