@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.32.2] - 2026.08.18
 
+diff: https://github.com/mcneel/rhino3dm/compare/8.32.1...8.32.2
+
 ### Added
 
 - (dotnet) `ViewInfo.ConstructionPlane` — get/set a view's construction plane. Views authored with rhino3dm can now set the per-view CPlane (e.g. world ZX for Front, world YZ for Right) instead of leaving the default World-XY; Rhino uses the stored plane on open and does not re-derive it. RH3DM-197.
