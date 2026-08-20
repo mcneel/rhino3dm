@@ -2770,8 +2770,8 @@ namespace Rhino.Display
     /// <since>8.11</since>
     public bool UseSectionStyles
     {
-      get { return (1 == GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage)); }
-      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage, value ? 1 : 0); }
+      get { return (0 == GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage)); }
+      set { SetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.ClipSectionUsage, value ? 0 : 1); }
     }
 
     /// <summary>

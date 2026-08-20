@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.35.0-beta1] - 2026.08.20
+
+Pre-release built against the openNURBS 8.35 RC. Synced the .NET/C layer from the Rhino 8.35 branch, primarily to pick up the canonical template-authoring APIs.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.32.2...8.35.0-beta1
+
+### Added
+
+- (dotnet) `ViewInfo.GetConstructionPlane()` / `SetConstructionPlane(ConstructionPlane)` — read/write a view's full construction plane, including grid settings (grid/snap spacing, line count, thick-line frequency, depth buffering).
+- (dotnet) `ViewInfo.Maximized`, `ViewInfo.GetWindowPosition(...)` / `SetWindowPosition(...)` — the view window's relative position (0..1 fractions) and maximized state, so authored views don't open stacked.
+- (dotnet) `File3dmSettings.ModelDistanceDisplayMode` / `PageDistanceDisplayMode` (`Rhino.UI.DistanceDisplayMode`) and `ModelDistanceDisplayPrecision` / `PageDistanceDisplayPrecision` — how model/page-space distances are displayed.
+
 ## [8.32.2] - 2026.08.18
 
 diff: https://github.com/mcneel/rhino3dm/compare/8.32.1...8.32.2

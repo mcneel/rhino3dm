@@ -1356,6 +1356,23 @@ namespace Rhino
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.PageRelTol, value); }
     }
 
+
+    /// <summary>Gets/Sets the distance display mode for model space.</summary>
+    /// <since>8.0</since>
+    public Rhino.UI.DistanceDisplayMode ModelDistanceDisplayMode
+    {
+      get => (Rhino.UI.DistanceDisplayMode)UnsafeNativeMethods.CRhinoDocProperties_GetDistanceDisplayMode(RuntimeSerialNumber, false);
+      set => UnsafeNativeMethods.CRhinoDocProperties_SetDistanceDisplayMode(RuntimeSerialNumber, (int)value, false);
+    }
+
+    /// <summary>Gets/Sets the distance display mode for page space.</summary>
+    /// <since>8.0</since>
+    public Rhino.UI.DistanceDisplayMode PageDistanceDisplayMode
+    {
+      get => (Rhino.UI.DistanceDisplayMode)UnsafeNativeMethods.CRhinoDocProperties_GetDistanceDisplayMode(RuntimeSerialNumber, true);
+      set => UnsafeNativeMethods.CRhinoDocProperties_SetDistanceDisplayMode(RuntimeSerialNumber, (int)value, true);
+    }
+
     /// <summary>
     /// The base point in the model that is used when inserting the model into another as a block definition.
     /// By default the base point in any model is 0,0,0.
@@ -6085,23 +6102,49 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Finds all of the clipping plane objects that actively clip a viewport.
+    /// Finds all of the visible clipping plane objects that actively clip a viewport.
     /// </summary>
     /// <param name="viewport">The viewport in which clipping planes are searched.</param>
     /// <returns>An array of clipping plane objects. The array can be empty but not null.</returns>
+    /// <remarks>
+    /// Hidden clipping planes, and clipping planes on hidden layers, are not included in
+    /// the results even though they continue to clip geometry in the viewport. Call
+    /// <see cref="FindClippingPlanesForViewport(RhinoViewport, bool)"/> with
+    /// <c>includeHidden</c> set to true to get every plane that clips the viewport.
+    /// </remarks>
     /// <since>5.0</since>
     public ClippingPlaneObject[] FindClippingPlanesForViewport(RhinoViewport viewport)
     {
+      return FindClippingPlanesForViewport(viewport, false);
+    }
+
+    /// <summary>
+    /// Finds all of the clipping plane objects that actively clip a viewport.
+    /// </summary>
+    /// <param name="viewport">The viewport in which clipping planes are searched.</param>
+    /// <param name="includeHidden">
+    /// When true, clipping planes that are hidden, or that are on hidden layers, are
+    /// included in the results. Such planes still clip geometry in the viewport, so pass
+    /// true when you need the complete set of planes affecting what is displayed.
+    /// </param>
+    /// <returns>An array of clipping plane objects. The array can be empty but not null.</returns>
+    /// <since>8.35</since>
+    public ClippingPlaneObject[] FindClippingPlanesForViewport(RhinoViewport viewport, bool includeHidden)
+    {
       Guid id = viewport.Id;
 
-      RhinoObject[] clipping_planes = FindByObjectType(ObjectType.ClipPlane);
-      if (clipping_planes.Length == 0)
-        return new ClippingPlaneObject[0];
+      // RH-97156: hidden clipping planes (and planes on hidden layers) still clip geometry,
+      // but the default enumerator settings skip them.
+      var settings = new ObjectEnumeratorSettings
+      {
+        ObjectTypeFilter = ObjectType.ClipPlane,
+        HiddenObjects = includeHidden
+      };
 
       var rc = new List<ClippingPlaneObject>();
-      for (int i = 0; i < clipping_planes.Length; i++)
+      foreach (var clipping_plane in GetObjectList(settings))
       {
-        var cp = clipping_planes[i] as ClippingPlaneObject;
+        var cp = clipping_plane as ClippingPlaneObject;
         if (cp != null)
         {
           Guid[] ids = cp.ClippingPlaneGeometry.ViewportIds();
@@ -8562,7 +8605,9 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Select(ObjRef objref, bool select, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
     {
-      if (objref == null) { throw new ArgumentNullException("objref"); }
+      if (objref == null)
+        return false;
+
       var obj = objref.Object();
       if (obj == null)
         return false;
@@ -8591,7 +8636,9 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public int Select(IEnumerable<ObjRef> objRefs, bool select)
     {
-      if (objRefs == null) { throw new ArgumentNullException("objRefs"); }
+      if (objRefs == null)
+        return 0;
+
       int count = 0;
       foreach (var objref in objRefs)
       {

@@ -73,7 +73,7 @@ namespace Rhino.DocObjects
     /// <summary>
     /// Layers from the linked instance definition are reference components in the model.
     /// This is the default layer style when the instance definition type is InstanceDefinitionUpdateType.Linked.
-    /// This layer style may be used when the instance definition type is is InstanceDefinitionUpdateType.Linked.
+    /// This layer style may be used when the instance definition type is InstanceDefinitionUpdateType.Linked.
     /// </summary>
     Reference = 2 
   }
@@ -217,8 +217,8 @@ namespace Rhino.DocObjects
     /// </param>
     /// <param name="viewportId">
     /// If skipHiddenPieces is false, then viewportId is ignored.
-    /// If bSkipHiddenPieces is true and and viewportId is not Guid.Empty, then layer and object per viewport visibility settings are used.
-    /// If bSkipHiddenPieces is true and and viewport_id is Guid.Empty, then layer and object global visibility settings are used.
+    /// If bSkipHiddenPieces is true and viewportId is not Guid.Empty, then layer and object per viewport visibility settings are used.
+    /// If bSkipHiddenPieces is true and viewport_id is Guid.Empty, then layer and object global visibility settings are used.
     /// </param>
     /// <param name="explodeNestedInstances">
     /// If true, then nested instance references are recursively exploded into pieces until actual geometry is found.

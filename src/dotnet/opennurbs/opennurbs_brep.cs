@@ -6784,7 +6784,7 @@ namespace Rhino.Geometry
     /// <param name="edge">The edge to fit.</param>
     /// <param name="knots">The custom knot vector to use, or an empty vector to use the existing knots of the surface.</param>
     /// <param name="tolerance">The 3d tolerance for projection, splitting, and fitting.</param>
-    /// <param name="bSections">If true, the surface is divided into seperate surface patches at all knots.</param>
+    /// <param name="bSections">If true, the surface is divided into separate surface patches at all knots.</param>
     /// <param name="fitQuality">A measure of the 3d fit to the trim curve.</param>
     /// <returns>The trimmed surfaces.</returns>
     /// <since>7.0</since>
@@ -7274,7 +7274,7 @@ namespace Rhino.Geometry
     /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
     /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
     /// <param name="split_type">The split type</param>
-    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the document's absolute tolerance.</param>
     /// <param name="out_fillets">The results of the fillet calculation.</param>
     /// <param name="out_breps0">The trim or split results of the Brep owned by faceWithCurve.</param>
     /// <param name="out_breps1">The trim or split results of the Brep owned by pFace1.</param>
@@ -7337,7 +7337,7 @@ namespace Rhino.Geometry
     /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
     /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
     /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
-    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the document's absolute tolerance.</param>
     /// <param name="out_fillets">he results of the fillet calculation.</param>
     /// <param name="fitResults">array of doubles indicating fitting results:
     /// [0] max 3d point deviation along curve

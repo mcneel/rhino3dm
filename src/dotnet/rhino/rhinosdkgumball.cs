@@ -717,7 +717,7 @@ namespace Rhino.UI.Gumball
       IntPtr pConstPickContext = pickContext.ConstPointer();
       IntPtr pGetPoint = IntPtr.Zero;
       if( getPoint!=null)
-        getPoint.NonConstPointer();
+        pGetPoint = getPoint.NonConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoGumballDisplayConduit_PickGumball(pThis, pConstPickContext, pGetPoint);
       GC.KeepAlive(pickContext);
       GC.KeepAlive(getPoint);

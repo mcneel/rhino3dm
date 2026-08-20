@@ -986,7 +986,7 @@ namespace Rhino.DocObjects.Tables
     /// <summary>Finds the linetype with a given name.</summary>
     /// <param name="name">he name of the linetype to find.</param>
     /// <returns>
-    /// The linetype. If the linetype was not found, then the default, or or "Continuous" linetype is returned.
+    /// The linetype. If the linetype was not found, then the default, or "Continuous" linetype is returned.
     /// </returns>
     /// <since>6.0</since>
     public Linetype FindName(string name)

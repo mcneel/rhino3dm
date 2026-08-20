@@ -4785,8 +4785,6 @@ namespace Rhino.Render
       {
         var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetDynamicIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer, (int)usage));
 
-        Debug.Assert(success);
-
         if (success)
         {
           bitmap = rhinodib.ToBitmap();

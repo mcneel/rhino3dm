@@ -611,11 +611,11 @@ namespace Rhino.Geometry.Intersect
       intersectionPoints = null;
       intersectionCurves = null;
 
-      //David sez: replace this logic with the dedicated Geometry/Plane intersector methods in Rhino5.
-      if (!plane.IsValid)
+      if (brep == null)
         return false;
 
-      bool rc = false;
+      if (!plane.IsValid)
+        return false;
 
       intersectionCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
@@ -628,7 +628,7 @@ namespace Rhino.Geometry.Intersect
 
       IntPtr brepPtr = brep.ConstPointer();
 
-      rc = UnsafeNativeMethods.ON_Intersect_BrepPlane(brepPtr, plane, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
+      bool rc = UnsafeNativeMethods.ON_Intersect_BrepPlane(brepPtr, plane, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
 
       if (rc)
       {
@@ -935,6 +935,9 @@ namespace Rhino.Geometry.Intersect
       overlapCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
 
+      if (curve == null || brep == null)
+        return false;
+
       Runtime.InteropWrappers.SimpleArrayPoint3d outputPoints = new Runtime.InteropWrappers.SimpleArrayPoint3d();
       IntPtr outputPointsPtr = outputPoints.NonConstPointer();
 
@@ -944,10 +947,7 @@ namespace Rhino.Geometry.Intersect
       IntPtr curvePtr = curve.ConstPointer();
       IntPtr brepPtr = brep.ConstPointer();
 
-      bool rc = false;
-
-      rc = UnsafeNativeMethods.ON_Intersect_CurveBrep(curvePtr, brepPtr, tolerance, outputCurvesPtr, outputPointsPtr);
-
+      bool rc = UnsafeNativeMethods.ON_Intersect_CurveBrep(curvePtr, brepPtr, tolerance, outputCurvesPtr, outputPointsPtr);
       if (rc)
       {
         overlapCurves = outputCurves.ToNonConstArray();
@@ -979,6 +979,9 @@ namespace Rhino.Geometry.Intersect
       intersectionPoints = new Point3d[0];
       curveParameters = new double[0];
 
+      if (curve == null || brep == null)
+        return false;
+
       SimpleArrayPoint3d outputPoints = new SimpleArrayPoint3d();
       IntPtr outputPointsPtr = outputPoints.NonConstPointer();
 
@@ -992,10 +995,7 @@ namespace Rhino.Geometry.Intersect
       IntPtr brepPtr = brep.ConstPointer();
 
 
-      bool rc = false;
-      rc = UnsafeNativeMethods.ON_Intersect_CurveBrep2(curvePtr, brepPtr, tolerance, outputCurvesPtr, outputPointsPtr, outputParametersPtr);
-
-
+      bool rc = UnsafeNativeMethods.ON_Intersect_CurveBrep2(curvePtr, brepPtr, tolerance, outputCurvesPtr, outputPointsPtr, outputParametersPtr);
       if (rc)
       {
         overlapCurves = outputCurves.ToNonConstArray();
@@ -1186,6 +1186,9 @@ namespace Rhino.Geometry.Intersect
       intersectionCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
 
+      if (brepA == null || brepB == null)
+        return false;
+
       Runtime.InteropWrappers.SimpleArrayPoint3d outputPoints = new Runtime.InteropWrappers.SimpleArrayPoint3d();
       IntPtr outputPointsPtr = outputPoints.NonConstPointer();
 
@@ -1247,6 +1250,9 @@ namespace Rhino.Geometry.Intersect
       intersectionCurves = new Curve[0];
       intersectionPoints = new Point3d[0];
 
+      if (brep == null || surface == null)
+        return false;
+
       Runtime.InteropWrappers.SimpleArrayPoint3d outputPoints = new Runtime.InteropWrappers.SimpleArrayPoint3d();
       IntPtr outputPointsPtr = outputPoints.NonConstPointer();
 
@@ -1256,9 +1262,7 @@ namespace Rhino.Geometry.Intersect
       IntPtr brepPtr = brep.ConstPointer();
       IntPtr surfacePtr = surface.ConstPointer();
 
-      bool rc = false;
-
-      rc = UnsafeNativeMethods.ON_Intersect_BrepSurface(brepPtr, surfacePtr, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
+      bool rc = UnsafeNativeMethods.ON_Intersect_BrepSurface(brepPtr, surfacePtr, tolerance, joinCurves, outputCurvesPtr, outputPointsPtr);
 
       if (rc)
       {
@@ -1282,6 +1286,9 @@ namespace Rhino.Geometry.Intersect
     /// <since>5.0</since>
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
+      if (meshA == null) return Array.Empty<Line>();
+      if (meshB == null) return Array.Empty<Line>();
+
       IntPtr ptrA = meshA.ConstPointer();
       IntPtr ptrB = meshB.ConstPointer();
       Line[] intersectionLines = new Line[0];

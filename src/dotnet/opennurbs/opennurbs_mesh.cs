@@ -2241,7 +2241,11 @@ namespace Rhino.Geometry
     /// <since>6.0</since>
     public int DesiredPolygonCount { get; set; }
 
-    /// <summary>If true mesh appearance is not changed even if the target polygon count is not reached</summary>
+    /// <summary>
+    /// If true, faces are removed until <see cref="DesiredPolygonCount"/> is reached, distorting
+    /// the shape as needed. If false, only flat (coplanar) regions are simplified, which leaves
+    /// the shape unchanged and ignores <see cref="DesiredPolygonCount"/>.
+    /// </summary>
     /// <since>6.0</since>
     public bool AllowDistortion { get; set; }
 
@@ -2826,7 +2830,7 @@ namespace Rhino.Geometry
     /// <param name="points">The input point array.</param>
     /// <param name="loopIndices">The indices of closed loops standing for the inner and outer boundaries of the region to be meshed.</param>
     /// <param name="permitVertexAdditions">Boolean to indicate if you are fine with new vertices</param>
-    /// <param name="permitEdgeSplitting">Boolean to indicate if you are with with your edges getting split</param>
+    /// <param name="permitEdgeSplitting">Boolean to indicate if you are with your edges getting split</param>
     /// <param name="tolerance">The tolerance to use for de-duplicating the points.</param>
     /// <param name="failure">[out] The reason for failure, if any.</param>
     /// <returns>
@@ -3024,6 +3028,8 @@ namespace Rhino.Geometry
     [Obsolete("Use version that takes MeshingParameters as input")]
     public static Mesh[] CreateFromBrep(Brep brep)
     {
+      if (brep == null) return Array.Empty<Mesh>();
+
       using (var meshes = new SimpleArrayMeshPointer())
       {
         IntPtr ptr_const_brep = brep.ConstPointer();
@@ -3048,6 +3054,8 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Mesh[] CreateFromBrep(Brep brep, MeshingParameters meshingParameters)
     {
+      if (brep == null || meshingParameters == null) return Array.Empty<Mesh>();
+
       IntPtr ptr_const_brep = brep.ConstPointer();
       IntPtr const_ptr_meshing_parameters = meshingParameters.ConstPointer();
       using (var meshes = new SimpleArrayMeshPointer())
@@ -3080,6 +3088,8 @@ namespace Rhino.Geometry
     /// <since>6.5</since>
     public static Mesh CreateFromSurface(Surface surface, MeshingParameters meshingParameters)
     {
+      if (surface == null) return null;
+
       IntPtr ptr_const_surface = surface.ConstPointer();
       IntPtr ptr_const_mp = meshingParameters == null ? IntPtr.Zero : meshingParameters.ConstPointer();
       IntPtr ptr_mesh = UnsafeNativeMethods.ON_Surface_CreateMesh(ptr_const_surface, ptr_const_mp);
@@ -3103,6 +3113,8 @@ namespace Rhino.Geometry
     /// <since>7.0</since>
     public static Mesh CreateFromSubD(SubD subd, int displayDensity)
     {
+      if (subd == null) return null;
+
       IntPtr constPtrSubD = subd.ConstPointer();
       IntPtr ptrMesh = UnsafeNativeMethods.ON_SubD_ToLimitSurfaceMesh(constPtrSubD, (uint)displayDensity);
       if (IntPtr.Zero != ptrMesh)
@@ -3120,6 +3132,8 @@ namespace Rhino.Geometry
     /// <since>8.3</since>
     public static Mesh CreateFromExtrusion(Extrusion extrusion, MeshingParameters meshingParameters)
     {
+      if (extrusion == null || meshingParameters == null) return null;
+
       IntPtr ptr_const_brep = extrusion.ConstPointer();
       IntPtr const_ptr_meshing_parameters = meshingParameters.ConstPointer();
       IntPtr ptrMesh = UnsafeNativeMethods.ON_Extrusion_CreateMesh(ptr_const_brep, const_ptr_meshing_parameters);
@@ -3150,6 +3164,8 @@ namespace Rhino.Geometry
     /// <since>8.25</since>
     public static Mesh[] SplitMesh(Mesh mesh, int maxCount, bool countSum, bool countTriangles)
     {
+      if (mesh == null) return Array.Empty<Mesh>();
+
       using (var meshes = new SimpleArrayMeshPointer())
       {
         IntPtr ptr_const_mesh = mesh.ConstPointer();
@@ -3176,6 +3192,8 @@ namespace Rhino.Geometry
     /// <since>8.25</since>
     public static Mesh[] PartitionMesh(Mesh mesh, int maxVertexCount, int maxFaceCount)
     {
+      if (mesh == null) return Array.Empty<Mesh>();
+
       using (var meshes = new SimpleArrayMeshPointer())
       {
         IntPtr ptr_const_mesh = mesh.ConstPointer();
@@ -4924,7 +4942,7 @@ namespace Rhino.Geometry
 
     /// <summary>
     /// Moves face edges of an open mesh to meet adjacent face edges.
-    /// The method will first try to match vertices, and then then it will try to split edges to make the edges match.
+    /// The method will first try to match vertices, and then it will try to split edges to make the edges match.
     /// </summary>
     /// <param name="distance">The distance tolerance. Use larger tolerances only if you select specific edges to close.</param>
     /// <param name="rachet">
@@ -6589,7 +6607,9 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="desiredPolygonCount">desired or target number of faces</param>
     /// <param name="allowDistortion">
-    /// If true mesh appearance is not changed even if the target polygon count is not reached
+    /// If true, faces are removed until desiredPolygonCount is reached, distorting the shape as needed.
+    /// If false, only flat (coplanar) regions are simplified, which leaves the shape unchanged and
+    /// ignores desiredPolygonCount.
     /// </param>
     /// <param name="accuracy">Integer from 1 to 10 telling how accurate reduction algorithm
     ///  to use. Greater number gives more accurate results
@@ -6607,7 +6627,9 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="desiredPolygonCount">desired or target number of faces</param>
     /// <param name="allowDistortion">
-    /// If true mesh appearance is not changed even if the target polygon count is not reached
+    /// If true, faces are removed until desiredPolygonCount is reached, distorting the shape as needed.
+    /// If false, only flat (coplanar) regions are simplified, which leaves the shape unchanged and
+    /// ignores desiredPolygonCount.
     /// </param>
     /// <param name="accuracy">Integer from 1 to 10 telling how accurate reduction algorithm
     ///  to use. Greater number gives more accurate results
@@ -6630,7 +6652,9 @@ namespace Rhino.Geometry
     /// <summary>Reduce polygon count</summary>
     /// <param name="desiredPolygonCount">desired or target number of faces</param>
     /// <param name="allowDistortion">
-    /// If true mesh appearance is not changed even if the target polygon count is not reached
+    /// If true, faces are removed until desiredPolygonCount is reached, distorting the shape as needed.
+    /// If false, only flat (coplanar) regions are simplified, which leaves the shape unchanged and
+    /// ignores desiredPolygonCount.
     /// </param>
     /// <param name="accuracy">Integer from 1 to 10 telling how accurate reduction algorithm
     ///  to use. Greater number gives more accurate results
@@ -6650,7 +6674,9 @@ namespace Rhino.Geometry
     /// <summary>Reduce polygon count</summary>
     /// <param name="desiredPolygonCount">desired or target number of faces</param>
     /// <param name="allowDistortion">
-    /// If true mesh appearance is not changed even if the target polygon count is not reached
+    /// If true, faces are removed until desiredPolygonCount is reached, distorting the shape as needed.
+    /// If false, only flat (coplanar) regions are simplified, which leaves the shape unchanged and
+    /// ignores desiredPolygonCount.
     /// </param>
     /// <param name="accuracy">Integer from 1 to 10 telling how accurate reduction algorithm
     ///  to use. Greater number gives more accurate results
@@ -6704,6 +6730,9 @@ namespace Rhino.Geometry
     /// <since>6.15</since>
     public bool Reduce(ReduceMeshParameters parameters, bool threaded)
     {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+
       IntPtr ptr_this = NonConstPointer();
 
       Interop.MarshalProgressAndCancelToken(parameters.CancelToken, parameters.ProgressReporter,
@@ -6713,10 +6742,15 @@ namespace Rhino.Geometry
       IntPtr ptr_face_tags = faceTags.Count == 0 ? IntPtr.Zero : faceTags.NonConstPointer();
 
       INTERNAL_ComponentIndexArray lockedComponents = new INTERNAL_ComponentIndexArray();
-      foreach (ComponentIndex ci in parameters.LockedComponents)
+      if (parameters.LockedComponents != null)
       {
-        lockedComponents.Add(ci);
+        foreach (ComponentIndex ci in parameters.LockedComponents)
+        {
+          lockedComponents.Add(ci);
+        }
       }
+
+      IntPtr ptr_locked_components = lockedComponents.Count == 0 ? IntPtr.Zero : lockedComponents.NonConstPointer();
 
       bool rc;
       using (var sw = new StringWrapper())
@@ -6731,7 +6765,7 @@ namespace Rhino.Geometry
                                                      progress_report_serial_number,
                                                      sw.NonConstPointer,
                                                      ptr_face_tags,
-                                                     lockedComponents.NonConstPointer(),
+                                                     ptr_locked_components,
                                                      threaded);
 
         if (rc)

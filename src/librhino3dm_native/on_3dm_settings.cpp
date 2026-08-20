@@ -147,63 +147,45 @@ RH_C_FUNCTION const ON_Viewport* ON_3dmView_ViewportPointer(const ON_3dmView* pV
   return rc;
 }
 
-RH_C_FUNCTION void ON_3dmView_GetConstructionPlane(const ON_3dmView* pConstView, ON_PLANE_STRUCT* plane)
+RH_C_FUNCTION void ON_3dmView_GetWindowPosition(const ON_3dmView* pConstView, int* maximized, double* wndLeft, double* wndRight, double* wndTop, double* wndBottom)
 {
-  if( pConstView && plane )
-    CopyToPlaneStruct(*plane, pConstView->m_cplane.m_plane);
+  if (pConstView && maximized && wndLeft && wndRight && wndTop && wndBottom)
+  {
+    *maximized = pConstView->m_position.m_bMaximized ? 1 : 0;
+    *wndLeft = pConstView->m_position.m_wnd_left;
+    *wndRight = pConstView->m_position.m_wnd_right;
+    *wndTop = pConstView->m_position.m_wnd_top;
+    *wndBottom = pConstView->m_position.m_wnd_bottom;
+  }
 }
 
-RH_C_FUNCTION void ON_3dmView_SetConstructionPlane(ON_3dmView* pView, const ON_PLANE_STRUCT* plane)
+RH_C_FUNCTION void ON_3dmView_SetWindowPosition(ON_3dmView* pView, int maximized, double wndLeft, double wndRight, double wndTop, double wndBottom)
 {
-  if( pView && plane )
-    pView->m_cplane.m_plane = FromPlaneStruct(*plane);
+  if (pView)
+  {
+    pView->m_position.m_bMaximized = maximized ? true : false;
+    pView->m_position.m_wnd_left = wndLeft;
+    pView->m_position.m_wnd_right = wndRight;
+    pView->m_position.m_wnd_top = wndTop;
+    pView->m_position.m_wnd_bottom = wndBottom;
+  }
 }
 
-// RH3DM: the view's full construction plane, including the grid params (spacing, snap, line
-// count, thick-line frequency) that the plane-only accessor above cannot reach. The caller
-// wraps the returned pointer with the managed ConstructionPlane class and deletes it via
-// ON_3dmConstructionPlane_Delete.
+// Returns a copy of the view's full construction plane, including its grid settings (grid and
+// snap spacing, grid line count, thick-line frequency, depth buffering). The plane-only
+// accessors above cannot reach the grid. The caller wraps the returned pointer with the managed
+// ConstructionPlane class and frees it with ON_3dmConstructionPlane_Delete.
 RH_C_FUNCTION ON_3dmConstructionPlane* ON_3dmView_GetConstructionPlaneObject(const ON_3dmView* pConstView)
 {
-  if( pConstView )
+  if (pConstView)
     return new ON_3dmConstructionPlane(pConstView->m_cplane);
   return nullptr;
 }
 
 RH_C_FUNCTION void ON_3dmView_SetConstructionPlaneObject(ON_3dmView* pView, const ON_3dmConstructionPlane* pConstCPlane)
 {
-  if( pView && pConstCPlane )
+  if (pView && pConstCPlane)
     pView->m_cplane = *pConstCPlane;
-}
-
-// RH3DM: the view's relative window position (ON_3dmView.m_position) -- the rectangle, in
-// 0..1 fractions of the parent frame, and the maximized flag. Without this a template author
-// can't lay views out through rhino3dm, so files open with all views stacked.
-RH_C_FUNCTION void ON_3dmView_GetWindowPosition(const ON_3dmView* pConstView, double* left, double* right,
-                                                double* top, double* bottom, bool* maximized)
-{
-  if( pConstView )
-  {
-    const ON_3dmViewPosition& p = pConstView->m_position;
-    if( left ) *left = p.m_wnd_left;
-    if( right ) *right = p.m_wnd_right;
-    if( top ) *top = p.m_wnd_top;
-    if( bottom ) *bottom = p.m_wnd_bottom;
-    if( maximized ) *maximized = p.m_bMaximized;
-  }
-}
-
-RH_C_FUNCTION void ON_3dmView_SetWindowPosition(ON_3dmView* pView, double left, double right,
-                                                double top, double bottom, bool maximized)
-{
-  if( pView )
-  {
-    pView->m_position.m_wnd_left = left;
-    pView->m_position.m_wnd_right = right;
-    pView->m_position.m_wnd_top = top;
-    pView->m_position.m_wnd_bottom = bottom;
-    pView->m_position.m_bMaximized = maximized;
-  }
 }
 
 RH_C_FUNCTION void ON_3dmView_FocalBlurDistance_Set(ON_3dmView* pView, double blur)
@@ -700,37 +682,6 @@ RH_C_FUNCTION void ON_3dmSettings_SetDouble(ON_3dmSettings* pSettings, enum Unit
       break;
     }
   }
-}
-
-// RH3DM: model-space distance display mode + precision (ON_3dmUnitsAndTolerances). These live
-// in the units chunk, which rhino3dm otherwise exposes only for the unit system + tolerances;
-// without them a template author working through rhino3dm cannot set the display format
-// (decimal / fractional / feet & inches) or precision. Mode uses ON::OBSOLETE_DistanceDisplayMode
-// (0=Decimal, 1=Fractional, 2=FeetAndInches) -- still the field openNURBS stores.
-RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayMode(const ON_3dmSettings* pConstSettings)
-{
-  if( pConstSettings )
-    return (int)pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_mode;
-  return 0;
-}
-
-RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayMode(ON_3dmSettings* pSettings, int mode)
-{
-  if( pSettings )
-    pSettings->m_ModelUnitsAndTolerances.m_distance_display_mode = ON::DistanceDisplayModeFromUnsigned(mode);
-}
-
-RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayPrecision(const ON_3dmSettings* pConstSettings)
-{
-  if( pConstSettings )
-    return pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_precision;
-  return 3;
-}
-
-RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayPrecision(ON_3dmSettings* pSettings, int precision)
-{
-  if( pSettings )
-    pSettings->m_ModelUnitsAndTolerances.m_distance_display_precision = precision;
 }
 
 RH_C_FUNCTION int ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, int set_val)
@@ -1922,4 +1873,66 @@ RH_C_FUNCTION void ON_3dmAnimationProperties_SetRenderPreview(ON_3dmAnimationPro
 	{
 		p->SetRenderPreview(b);
 	}
+}
+
+RH_C_FUNCTION int ON_3dmSettings_PlugInRefCount(const ON_3dmSettings* settings)
+{
+  if (settings)
+    return settings->m_plugin_list.Count();
+  return 0;
+}
+
+RH_C_FUNCTION ON_UUID ON_3dmSettings_PlugInRef(const ON_3dmSettings* settings, int index, ON_wString* name, ON_wString* filename)
+{
+  ON_UUID rc = ON_nil_uuid;
+  if (settings && index < settings->m_plugin_list.Count())
+  {
+    const ON_PlugInRef& pi = settings->m_plugin_list[index];
+    rc = pi.m_plugin_id;
+    if (name)
+      *name = pi.m_plugin_name;
+    if (filename)
+      *filename = pi.m_plugin_filename;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION int ON_3dmSettings_GetDistanceDisplayMode(const ON_3dmSettings* pConstSettings, bool model)
+{
+  ON::OBSOLETE_DistanceDisplayMode rc = ON::OBSOLETE_DistanceDisplayMode::Decimal;
+  if (pConstSettings)
+  {
+    rc = (model ? pConstSettings->m_ModelUnitsAndTolerances
+                : pConstSettings->m_PageUnitsAndTolerances).DistanceDisplayMode();
+  }
+  return (int)rc;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetDistanceDisplayMode(ON_3dmSettings* pSettings, bool model, int mode)
+{
+  if (pSettings)
+  {
+    (model ? pSettings->m_ModelUnitsAndTolerances
+           : pSettings->m_PageUnitsAndTolerances).SetDistanceDisplayMode(ON::DistanceDisplayModeFromUnsigned(mode));
+  }
+}
+
+RH_C_FUNCTION int ON_3dmSettings_GetDistanceDisplayPrecision(const ON_3dmSettings* pConstSettings, bool model)
+{
+  int rc = 0;
+  if (pConstSettings)
+  {
+    rc = (model ? pConstSettings->m_ModelUnitsAndTolerances
+                : pConstSettings->m_PageUnitsAndTolerances).DistanceDisplayPrecision();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetDistanceDisplayPrecision(ON_3dmSettings* pSettings, bool model, int precision)
+{
+  if (pSettings)
+  {
+    (model ? pSettings->m_ModelUnitsAndTolerances
+           : pSettings->m_PageUnitsAndTolerances).SetDistanceDisplayPrecision(precision);
+  }
 }

@@ -1825,7 +1825,11 @@ namespace Rhino
       if (m_idle_occured == null)
         return;
 
-      if (tracingEnabled!=0)
+      if (tracingEnabled == 0)
+      {
+        m_idle_occured.SafeInvoke();
+      }
+      else
       {
         foreach (var h in m_idle_occured.GetInvocationList())
         {
@@ -1840,18 +1844,6 @@ namespace Rhino
           {
             HostUtils.ExceptionReport(ex.InnerException ?? ex);
           }
-        }
-      }
-
-      foreach (var h in m_idle_occured.GetInvocationList())
-      {
-        try
-        {
-          h.DynamicInvoke(null, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-          HostUtils.ExceptionReport(ex.InnerException ?? ex);
         }
       }
     }

@@ -2326,7 +2326,7 @@ namespace Rhino.Geometry
     /// This vector and the curve tangent define a plane. In this plane, there is a vector V perpendicular to the tangent.
     /// </param>
     /// <param name="subDomain">
-    /// Subdomain of of curve to evaluate. This must not be empty.
+    /// Subdomain of curve to evaluate. This must not be empty.
     /// </param>
     /// <param name="seed">
     /// A seed parameter, which must be included in the subdomain.
@@ -5866,7 +5866,7 @@ namespace Rhino.Geometry
     /// Then it "connects the points" so that you have a polyline on the mesh.
     /// </summary>
     /// <param name="mesh">Mesh to project onto.</param>
-    /// <param name="tolerance">Input tolerance. When in doubt, the the document's model absolute tolerance.</param>
+    /// <param name="tolerance">Input tolerance. When in doubt, the document's model absolute tolerance.</param>
     /// <returns>A curve if success, or null on failure.</returns>
     /// <since>5.0</since>
     [ConstOperation]
@@ -5884,7 +5884,7 @@ namespace Rhino.Geometry
     /// Projects this curve onto a mesh.
     /// </summary>
     /// <param name="mesh">Mesh to project onto.</param>
-    /// <param name="tolerance">Input tolerance. When in doubt, the the document's model absolute tolerance.</param>
+    /// <param name="tolerance">Input tolerance. When in doubt, the document's model absolute tolerance.</param>
     /// <param name="loose">
     /// If true, the curve's edit points are pulled back to the mesh.
     /// If any edit point misses the mesh, the curve will not be created.
@@ -6305,7 +6305,7 @@ namespace Rhino.Geometry
     /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
     /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
     /// <param name="split_type">The split type</param>
-    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the document's absolute tolerance.</param>
     /// <param name="out_fillets">The results of the fillet calculation.</param>
     /// <param name="out_breps0">The trim or split results of the Brep owned by faceWithCurve.</param>
     /// <param name="out_breps1">The trim or split results of the Brep owned by pFace1.</param>
@@ -6386,7 +6386,7 @@ namespace Rhino.Geometry
     /// [0] (-1 to 1) slides tangent arms from base (-1) to theoretical(1)
     /// [1] (-1 to 1) slides inner CV(s) from base (-1) to theoretical(1)</param>
     /// <param name="numBezierSrfs">If >0, this indicates the number of equally-spaced fillet surfaces to be output in the rail direction, each surface Bézier in u.</param>
-    /// <param name="tolerance">The tolerance. In in doubt, the the document's absolute tolerance.</param>
+    /// <param name="tolerance">The tolerance. In in doubt, the document's absolute tolerance.</param>
     /// <param name="out_fillets">he results of the fillet calculation.</param>
     /// <param name="fitResults">array of doubles indicating fitting results:
     /// [0] max 3d point deviation along curve

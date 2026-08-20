@@ -633,57 +633,73 @@ namespace Rhino.DocObjects
       }
     }
 
-/*
-    /// <summary>
-    /// If "this" has attributes (color, plot weight, ...) with "by parent" sources,
-    /// then the values of those attributes on parentAttributes are copied.
-    /// </summary>
-    /// <param name="parentAttributes">-</param>
-    /// <param name="controlLimits">
-    /// The bits in controlLimits determine which attributes may be copied.
-    /// 1: visibility
-    /// 2: color
-    /// 4: render material
-    /// 8: plot color
-    /// 0x10: plot weight
-    /// 0x20: linetype
-    /// </param>
-    /// <returns>
-    /// The bits in the returned integer indicate which attributes were actually modified.
-    /// 1: visibility
-    /// 2: color
-    /// 4: render material
-    /// 8: plot color
-    /// 0x10: plot weight
-    /// 0x20: linetype.
-    /// </returns>
-    public int ApplyParentalControl(ObjectAttributes parentAttributes, int controlLimits)
+    /// <summary>En/disables the custom meshing parameters enabled state.</summary>
+    /// <since>9.0</since>
+    public bool EnableCustomMeshingParameters
     {
-      IntPtr ptr = NonConstPointer();
-      IntPtr parentPtr = parentAttributes.ConstPointer();
-      return (int)UnsafeNativeMethods.ON_3dmObjectAttributes_ApplyParentalControl(ptr, parentPtr, (uint)controlLimits);
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.ON_3dmObjectAttributes_GetEnableCustomRenderMeshParameters(ptr_const_this);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmObjectAttributes_SetEnableCustomRenderMeshParameters(ptr_this, value);
+      }
     }
-    /// <summary>
-    /// If "this" has attributes (color, plot weight, ...) with "by parent" sources,
-    /// then the values of those attributes on parentAttributes are copied.
-    /// </summary>
-    /// <param name="parentAttributes">-</param>
-    /// <returns>
-    /// The bits in the returned integer indicate which attributes were actually modified.
-    /// 1: visibility
-    /// 2: color
-    /// 4: render material
-    /// 8: plot color
-    /// 0x10: plot weight
-    /// 0x20: linetype.
-    /// </returns>
-    public int ApplyParentalControl(ObjectAttributes parentAttributes)
-    {
-      IntPtr ptr = NonConstPointer();
-      IntPtr parentPtr = parentAttributes.ConstPointer();
-      return (int)UnsafeNativeMethods.ON_3dmObjectAttributes_ApplyParentalControl(ptr, parentPtr, 0xFFFFFFFF);
-    }
-*/
+
+    /*
+        /// <summary>
+        /// If "this" has attributes (color, plot weight, ...) with "by parent" sources,
+        /// then the values of those attributes on parentAttributes are copied.
+        /// </summary>
+        /// <param name="parentAttributes">-</param>
+        /// <param name="controlLimits">
+        /// The bits in controlLimits determine which attributes may be copied.
+        /// 1: visibility
+        /// 2: color
+        /// 4: render material
+        /// 8: plot color
+        /// 0x10: plot weight
+        /// 0x20: linetype
+        /// </param>
+        /// <returns>
+        /// The bits in the returned integer indicate which attributes were actually modified.
+        /// 1: visibility
+        /// 2: color
+        /// 4: render material
+        /// 8: plot color
+        /// 0x10: plot weight
+        /// 0x20: linetype.
+        /// </returns>
+        public int ApplyParentalControl(ObjectAttributes parentAttributes, int controlLimits)
+        {
+          IntPtr ptr = NonConstPointer();
+          IntPtr parentPtr = parentAttributes.ConstPointer();
+          return (int)UnsafeNativeMethods.ON_3dmObjectAttributes_ApplyParentalControl(ptr, parentPtr, (uint)controlLimits);
+        }
+        /// <summary>
+        /// If "this" has attributes (color, plot weight, ...) with "by parent" sources,
+        /// then the values of those attributes on parentAttributes are copied.
+        /// </summary>
+        /// <param name="parentAttributes">-</param>
+        /// <returns>
+        /// The bits in the returned integer indicate which attributes were actually modified.
+        /// 1: visibility
+        /// 2: color
+        /// 4: render material
+        /// 8: plot color
+        /// 0x10: plot weight
+        /// 0x20: linetype.
+        /// </returns>
+        public int ApplyParentalControl(ObjectAttributes parentAttributes)
+        {
+          IntPtr ptr = NonConstPointer();
+          IntPtr parentPtr = parentAttributes.ConstPointer();
+          return (int)UnsafeNativeMethods.ON_3dmObjectAttributes_ApplyParentalControl(ptr, parentPtr, 0xFFFFFFFF);
+        }
+    */
     /// <summary>
     /// Every object has a Guid (globally unique identifier, also known as UUID, or universally
     /// unique identifier). The default value is Guid.Empty.

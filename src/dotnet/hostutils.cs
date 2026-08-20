@@ -3445,7 +3445,7 @@ namespace Rhino.Runtime
 
 
 
-      // I don't think is is possible to write bad things in a single line expression,
+      // I don't think is possible to write bad things in a single line expression,
       // but check for import, exec, and clr just to be safe.
       string[] badwords = { "import", "exec", "clr" };
       bool containsBadWord = false;

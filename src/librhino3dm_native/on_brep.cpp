@@ -555,16 +555,26 @@ RH_C_FUNCTION void ON_Brep_DuplicateEdgeCurves(const ON_Brep* pConstBrep, ON_Sim
     for (int i = 0; i < pConstBrep->m_E.Count(); i++)
     {
       const ON_BrepEdge& edge = pConstBrep->m_E[i];
+
+      const ON_BrepTrim* trim = nullptr;
+      if (edge.m_ti.Count() > 0)
+      {
+        const int trim_index = edge.m_ti[0];
+        if (trim_index >= 0 && trim_index < pConstBrep->m_T.Count())
+          trim = &pConstBrep->m_T[trim_index];
+      }
+
       if (nakedOnly)
       {
-        if (edge.TrimCount() != 1)
+        if (edge.TrimCount() != 1 || nullptr == trim)
           continue;
 
-        const ON_BrepTrim& trim = pConstBrep->m_T[edge.m_ti[0]];
-        const ON_BrepLoop& loop = pConstBrep->m_L[trim.m_li];
+        const ON_BrepLoop* loop = trim->Loop();
+        if (nullptr == loop)
+          continue;
 
-        bool acceptable = (nakedOuter && loop.m_type == ON_BrepLoop::outer) ||
-                          (nakedInner && loop.m_type == ON_BrepLoop::inner);
+        bool acceptable = (nakedOuter && loop->m_type == ON_BrepLoop::outer) ||
+                          (nakedInner && loop->m_type == ON_BrepLoop::inner);
         if (!acceptable)
           continue;
       }
@@ -577,11 +587,13 @@ RH_C_FUNCTION void ON_Brep_DuplicateEdgeCurves(const ON_Brep* pConstBrep, ON_Sim
         // so that the curve directions come out consistently
 
         // 16-Mar-2016 Dale Fugier, validate trim count
-        if (edge.TrimCount())
+        if (trim != nullptr)
         {
-          if (pConstBrep->m_T[edge.m_ti[0]].m_bRev3d)
+          if (trim->m_bRev3d)
             curve->Reverse();
-          if (pConstBrep->m_T[edge.m_ti[0]].Face()->m_bRev)
+          
+          const ON_BrepFace* face = trim->Face();
+          if (face && face->m_bRev)
             curve->Reverse();
         }
         pOutCurves->Append(curve);

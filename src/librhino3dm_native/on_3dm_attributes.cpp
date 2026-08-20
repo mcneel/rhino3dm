@@ -755,6 +755,20 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomRenderMeshParameters(ON_3dmOb
   }
 }
 
+RH_C_FUNCTION void ON_3dmObjectAttributes_SetEnableCustomRenderMeshParameters(ON_3dmObjectAttributes* pObjectAttributes, bool bEnable)
+{
+  if (pObjectAttributes)
+    pObjectAttributes->EnableCustomRenderMeshParameters(bEnable);
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_GetEnableCustomRenderMeshParameters(ON_3dmObjectAttributes* pObjectAttributes)
+{
+  if (nullptr == pObjectAttributes)
+    return false;
+
+  return pObjectAttributes->GetEnableCustomRenderMeshParameters();
+}
+
 RH_C_FUNCTION void ON_3dmObjectAttributes_GetDecalArray(
               const ON_3dmObjectAttributes* attr, ON_SimpleArray<std::shared_ptr<ON_Decal>*>* decal_array)
 {

@@ -349,6 +349,7 @@ RH_C_FUNCTION bool ON_Curve_FrameAt( const ON_Curve* pConstCurve, double t, ON_P
 #if defined(RHINO3DM_BUILD)
     rc = pConstCurve->FrameAt(t, temp)?true:false;
 #else // rhino.exe build
+    ON_FPU_ClearExceptionStatus();
     if( zero_twisting )
       rc = RhinoGetPerpendicularCurvePlane(pConstCurve, t, temp);
     else

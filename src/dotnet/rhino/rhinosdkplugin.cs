@@ -1302,7 +1302,7 @@ namespace Rhino.PlugIns
       bool rc = false;
       try
       {
-        // added in case the command tries to access it's plug-in in the constructor
+        // added in case the command tries to access it's plug-in the constructor
         m_active_plugin_at_command_creation = plugin;
         if( newCommand==null )
           newCommand = (Commands.Command)Activator.CreateInstance(commandType);

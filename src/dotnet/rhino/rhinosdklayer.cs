@@ -909,6 +909,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_UnsetModelPersistentVisibility(ptr_this);
       GC.KeepAlive(this);
+      InternalCommitChanges();
     }
 
     /// <summary>
@@ -920,6 +921,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_DeleteModelVisible(ptr_this);
       GC.KeepAlive(this);
+      InternalCommitChanges();
     }
 
     /// <summary>
@@ -1406,6 +1408,7 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, const_ptr_sectionstyle);
       GC.KeepAlive(sectionStyle);
       GC.KeepAlive(this);
+      InternalCommitChanges(); // RH-97334
     }
 
     /// <since>8.0</since>
@@ -1414,6 +1417,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.ON_Layer_SetCustomSectionStyle(ptr_this, IntPtr.Zero);
       GC.KeepAlive(this);
+      InternalCommitChanges(); // RH-97334
     }
     #endregion
 
