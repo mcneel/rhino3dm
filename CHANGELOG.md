@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.35.0-beta1] - 2026.08.20
+## [8.35.0-beta1] - 2026.08.24
 
-Pre-release built against the openNURBS 8.35 RC. Synced the .NET/C layer from the Rhino 8.35 branch, primarily to pick up the canonical template-authoring APIs.
+Pre-release built against the openNURBS 8.35 RC. Synced the .NET/C layer from the Rhino 8.35 branch, primarily to pick up the canonical template-authoring APIs, and brought the JavaScript/Python annotation bindings to parity with .NET.
 
 diff: https://github.com/mcneel/rhino3dm/compare/8.32.2...8.35.0-beta1
 
@@ -15,6 +15,19 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.32.2...8.35.0-beta1
 - (dotnet) `ViewInfo.GetConstructionPlane()` / `SetConstructionPlane(ConstructionPlane)` — read/write a view's full construction plane, including grid settings (grid/snap spacing, line count, thick-line frequency, depth buffering).
 - (dotnet) `ViewInfo.Maximized`, `ViewInfo.GetWindowPosition(...)` / `SetWindowPosition(...)` — the view window's relative position (0..1 fractions) and maximized state, so authored views don't open stacked.
 - (dotnet) `File3dmSettings.ModelDistanceDisplayMode` / `PageDistanceDisplayMode` (`Rhino.UI.DistanceDisplayMode`) and `ModelDistanceDisplayPrecision` / `PageDistanceDisplayPrecision` — how model/page-space distances are displayed.
+- (dotnet) `Font.FromRichTextProperties(richTextFontName, bold, italic, underlined, strikethrough)` — create a font by its rich-text family name, preserving the name even when the font isn't installed. Backed by `ON_Font::FontFromRichTextProperties`. RH-97829.
+- (dotnet) `ObjectAttributes.EnableCustomMeshingParameters` — get/set whether an object uses custom render-mesh parameters.
+- (js/py) Annotation support brought to parity with the .NET binding (RH3DM-204). `AnnotationBase` now exposes the effective dimension style and per-object overrides:
+  - `getDimensionStyle(parentDimStyle)` — the effective dimension style with per-object overrides folded in.
+  - `getTextHeight(parentDimStyle)` / `setTextHeight(...)` and `getDimensionScale(parentDimStyle)` / `setDimensionScale(...)` — the per-object text height and model space scale shown in Rhino's Properties panel.
+  - `getBoundingBox(parentDimStyle)` — a valid annotation bounding box (the inherited `GeometryBase.getBoundingBox()` returns an invalid box for annotations).
+  - `hasPropertyOverrides`, `isPropertyOverridden(field)`, `clearPropertyOverrides()`, `setOverrideDimStyle(overrideStyle)`.
+  - `getFont(parentDimStyle)` / `setFont(...)`, mask properties (`getMaskEnabled`/`getMaskColorSource`/`getMaskFrame`/`getMaskColor`/`getMaskOffset` and setters), `getDimensionLengthDisplay` / `getAlternateDimensionLengthDisplay` (and setters), `textRotationRadians`/`textRotationDegrees`.
+  - `setRichText(rtfText, dimstyle)`, `runReplace(...)`, `textHasRtfFormatting`, and static `plainTextToRtf(str)`.
+  - Each per-object accessor takes the parent dimension style explicitly; get it from `File3dm.DimStyles.FindId(annotation.DimensionStyleId)`.
+- (js/py) `DimensionStyle.dimensionScale` — the model space scale (RhinoCommon `DimensionStyle.DimensionScale`).
+- (js) `DimensionStyle.isFieldOverridden(field)` / `setFieldOverride(field)` / `clearFieldOverride(field)` and the `DimensionStyleField` enum (previously Python-only).
+- (js/py) New enums: `MaskType`, `MaskFrame`, `LengthDisplay`.
 
 ## [8.32.2] - 2026.08.18
 

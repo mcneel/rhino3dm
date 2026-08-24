@@ -76,7 +76,7 @@ public:
     DIMSTYLE_PROPERTY(double, ToleranceLowerValue)
     DIMSTYLE_PROPERTY(double, ToleranceHeightScale)
     DIMSTYLE_PROPERTY(double, BaselineSpacing)
-    //DIMSTYLE_PROPERTY(double, DimensionScale)
+    DIMSTYLE_PROPERTY(double, DimScale) // model space scale (RhinoCommon: DimensionStyle.DimensionScale)
     DIMSTYLE_PROPERTY(double, FixedExtensionLen)
     DIMSTYLE_PROPERTY(double, TextRotation)
     DIMSTYLE_PROPERTY(double, StackHeightScale)

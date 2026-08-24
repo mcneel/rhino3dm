@@ -17,65 +17,71 @@ protected:
 
 public:
   BND_AnnotationBase(ON_Annotation *annotation, const ON_ModelComponentReference *compref);
-  //public Guid DimensionStyleId {get;set;}
+
   ON::AnnotationType AnnotationType() const;
   BND_UUID DimensionStyleId() const;
-  // public bool HasPropertyOverrides {get;}
-  // public bool IsPropertyOverridden(DimensionStyle.Field field)
-  // public bool ClearPropertyOverrides()
-  // public DimensionStyle GetDimensionStyle(DimensionStyle parentDimStyle)
-  // public DimensionStyle DimensionStyle {get;}
-  //BND_DimensionStyle DimensionStyle();
-  // public bool SetOverrideDimStyle(DimensionStyle OverrideStyle)
-  // public DimensionStyle ParentDimensionStyle {get; set;}
-  // public double TextHeight {get; set;}
-  //  --- double TextHeight() const;
-  //  public bool MaskEnabled { get;set;}
-  //  public bool MaskUsesViewportColor{ get; set; }
-  //  public DimensionStyle.MaskType MaskColorSource{ get; set; }
-  //  public bool DrawTextFrame{ get; set; }
-  //  public DimensionStyle.MaskFrame MaskFrame{ get; set; }
-  //  public Color MaskColor{ get; set; }
-  //  public double MaskOffset{ get; set; }
-  //  public double DimensionScale{ get; set; }
-  //  public bool DrawForward{ get; set; }
-  //  public DocObjects.Font Font{ get; set; }
-  //  public DimensionStyle.LengthDisplay DimensionLengthDisplay{ get; set; }
-  //  public DimensionStyle.LengthDisplay AlternateDimensionLengthDisplay{ get; set; }
-  //  public char DecimalSeparator{ get; set; }
-  //  public Plane Plane{ get; set; }
   BND_Plane Plane() const;
-  // public string GetPlainTextWithRunMap(ref int[] map)
+
+  // --- Effective dimension style (parent style + per-object overrides) ---
+  // The parent dimension style comes from File3dm.DimStyles.FindId(annotation.DimensionStyleId).
+  BND_DimensionStyle* GetDimensionStyle(const BND_DimensionStyle& parentDimStyle) const;
+
+  // --- Per-object dimension style overrides ---
+  bool HasPropertyOverrides() const;
+  bool IsPropertyOverridden(ON_DimStyle::field field) const;
+  void ClearPropertyOverrides();
+  bool SetOverrideDimStyle(const BND_DimensionStyle& overrideStyle);
+
+  // --- Text ---
   std::wstring RichText() const;
-  //void SetRichText(const std::wstring& rtf);
   std::wstring PlainText() const;
-  //void SetPlainText(const std::wstring& text);
-  //public string RichText{ get; set; }
-  //public string PlainText{ get; set; }
   std::wstring PlainTextWithFields() const;
-  //public static string PlainTextToRtf(string str) = >
-  //public void SetRichText(string rtfText, DimensionStyle dimstyle)
-  //public bool TextHasRtfFormatting{ get; }
-  //static public string FormatRtfString(string rtf_in,
-  //static public bool FirstCharProperties(string rtf_str, ref bool bold, ref bool italic, ref bool underline, ref string facename)
-  //public Rhino.DocObjects.Font FirstCharFont
-  //public bool IsAllBold()
-  //public bool IsAllItalic()
-  //public bool IsAllUnderlined()
-  //public double TextModelWidth{ get; }
-  //public double FormatWidth{ get; set; }
-  //public bool TextIsWrapped{ get; set; }
+  void SetRichText(const std::wstring& rtfText, const BND_DimensionStyle& dimstyle);
+  static std::wstring PlainTextToRtf(const std::wstring& str);
+  bool TextHasRtfFormatting() const;
+  bool RunReplace(const BND_DimensionStyle& dimstyle, const std::wstring& str, int startRunIndex, int startRunPosition, int endRunIndex, int endRunPosition);
+
   bool TextIsWrapped() const;
   void SetTextIsWrapped(bool wrapped);
-  //public void WrapText()
   void WrapText(double wrapWidth);
-  // public double TextRotationRadians{ get; set; }
-  // public double TextRotationDegrees{ get; set; }
-  // public virtual bool SetBold(bool set_on)
-  // public virtual bool SetItalic(bool set_on)
-  // public virtual bool SetUnderline(bool set_on)
-  // public virtual bool SetFacename(bool set_on, string facename)
-  // public bool RunReplace(
+
+  double TextRotationRadians() const;
+  void SetTextRotationRadians(double rotation);
+  double TextRotationDegrees() const;
+  void SetTextRotationDegrees(double rotation);
+
+  // --- Properties that originate from the dimension style and can be overridden
+  //     per annotation object. Each takes the parent dimension style. ---
+  double TextHeight(const BND_DimensionStyle& parentDimStyle) const;
+  void SetTextHeight(const BND_DimensionStyle& parentDimStyle, double height);
+  double DimensionScale(const BND_DimensionStyle& parentDimStyle) const;
+  void SetDimensionScale(const BND_DimensionStyle& parentDimStyle, double scale);
+
+  bool MaskEnabled(const BND_DimensionStyle& parentDimStyle) const;
+  void SetMaskEnabled(const BND_DimensionStyle& parentDimStyle, bool on);
+  ON_TextMask::MaskType MaskColorSource(const BND_DimensionStyle& parentDimStyle) const;
+  void SetMaskColorSource(const BND_DimensionStyle& parentDimStyle, ON_TextMask::MaskType source);
+  ON_TextMask::MaskFrame MaskFrame(const BND_DimensionStyle& parentDimStyle) const;
+  void SetMaskFrame(const BND_DimensionStyle& parentDimStyle, ON_TextMask::MaskFrame frame);
+  BND_Color MaskColor(const BND_DimensionStyle& parentDimStyle) const;
+  void SetMaskColor(const BND_DimensionStyle& parentDimStyle, BND_Color color);
+  double MaskOffset(const BND_DimensionStyle& parentDimStyle) const;
+  void SetMaskOffset(const BND_DimensionStyle& parentDimStyle, double offset);
+
+  ON_DimStyle::LengthDisplay DimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle) const;
+  void SetDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle, ON_DimStyle::LengthDisplay display);
+  ON_DimStyle::LengthDisplay AlternateDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle) const;
+  void SetAlternateDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle, ON_DimStyle::LengthDisplay display);
+
+  class BND_Font* GetFont(const BND_DimensionStyle& parentDimStyle) const;
+  void SetFont(const BND_DimensionStyle& parentDimStyle, const class BND_Font* font);
+
+  // A valid bounding box for annotation geometry requires the parent dimension
+  // style (the generic GeometryBase.GetBoundingBox returns an invalid box).
+  BND_BoundingBox GetBoundingBox(const BND_DimensionStyle& parentDimStyle) const;
+
+  // Not exposed: GetPlainTextWithRunMap has no direct opennurbs public method
+  // (it is implemented only in the rhinocommon_c shim layer).
 };
 
 
