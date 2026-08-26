@@ -243,13 +243,17 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
           - os: windows-2022
             target: windows
+          - os: windows-11-arm
+            target: windows
+            # native ARM64 python (not emulated x64) — see setup-python step
+            architecture: arm64
           - os: macos-14
             target: macos
           - os: macos-15
@@ -260,6 +264,10 @@ jobs:
         uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
+          # empty for non-arm entries -> setup-python uses the runner's native arch.
+          # arm64 forces native ARM64 python on windows-11-arm. If extraction ever
+          # fails here, bump setup-python (see actions/setup-python#931).
+          architecture: ${{ matrix.architecture }}
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
@@ -401,13 +409,17 @@ jobs:
     needs: [build_py_all_bdist]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
             target: linux
           - os: windows-2022
             target: windows
+          - os: windows-11-arm
+            target: windows
+            # native ARM64 python (not emulated x64) — see setup-python step
+            architecture: arm64
           - os: macos-14
             target: macos
           - os: macos-15
@@ -418,6 +430,8 @@ jobs:
       uses: actions/setup-python@v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
+        # empty for non-arm entries -> runner-native arch; arm64 on windows-11-arm
+        architecture: ${{ matrix.architecture }}
     - name: info
       run: python --version && cmake --version
     - name: checkout
