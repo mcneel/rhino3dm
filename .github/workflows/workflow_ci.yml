@@ -2,7 +2,10 @@
 # https://github.com/actions/virtual-environments/tree/main/images
 
 name: workflow ci
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 
 env:
