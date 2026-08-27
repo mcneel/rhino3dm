@@ -1,6 +1,31 @@
 declare module 'rhino3dm' {
 
-	export default function rhino3dm() : Promise<RhinoModule>;
+	/**
+	 * Options accepted by the `rhino3dm()` module factory. This is the standard Emscripten
+	 * module-configuration object; the commonly used members are typed here and any other
+	 * Emscripten `Module` member may be passed as well.
+	 */
+	export interface RhinoModuleOptions {
+		/**
+		 * Override where `rhino3dm.wasm` is loaded from. Receives the file name (`'rhino3dm.wasm'`)
+		 * and the directory the script was loaded from, and must return the URL to fetch. Use this when
+		 * a bundler (Vite, webpack, Next.js, ...) does not serve the .wasm next to the .js.
+		 * @example
+		 * const rhino = await rhino3dm({ locateFile: (file) => `/wasm/${file}` });
+		 */
+		locateFile?: (path: string, scriptDirectory: string) => string;
+		/** Supply the wasm bytes directly instead of having the module fetch `rhino3dm.wasm`. */
+		wasmBinary?: ArrayBuffer | Uint8Array;
+		/** Called once the wasm runtime is initialized (before the returned promise resolves). */
+		onRuntimeInitialized?: () => void;
+		/** Redirect the module's stdout. */
+		print?: (text: string) => void;
+		/** Redirect the module's stderr. */
+		printErr?: (text: string) => void;
+		[key: string]: unknown;
+	}
+
+	export default function rhino3dm(moduleOptions?: RhinoModuleOptions) : Promise<RhinoModule>;
 
 	enum ActiveSpace {
 		None,
@@ -851,6 +876,11 @@ declare module 'rhino3dm' {
 		 * @returns {BoundingBox}
 		 */
 		getBoundingBox(parentDimStyle:DimensionStyle): BoundingBox;
+		/**
+		 * @deprecated Inherited GeometryBase overload; for annotations it returns an invalid box.
+		 * Pass the parent DimensionStyle instead (declared only so the override stays assignable to GeometryBase).
+		 */
+		getBoundingBox(accurate:boolean): BoundingBox;
 	}
 
 	class Arc {
@@ -2690,10 +2720,10 @@ declare module 'rhino3dm' {
 		static compress(mesh:Mesh): DracoCompression;
 		/** ... */
 		static compressOptions(mesh:Mesh, options: DracoCompressionOptions): DracoCompression;
-		/** ... */
-		static decompressByteArray(): GeometryBase;
-		/** ... */
-		static decompressBase64String(): GeometryBase;
+		/** Decompresses Draco-compressed mesh data from raw bytes (e.g. a fetched file or a Uint8Array). */
+		static decompressByteArray(buffer: Uint8Array | ArrayBuffer): GeometryBase;
+		/** Decompresses Draco-compressed mesh data from a base64 string (as produced by toBase64String()). */
+		static decompressBase64String(encoded: string): GeometryBase;
 		/** ... */
 		toBase64String(): string;
 	}

@@ -157,7 +157,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rhino3dm',
-    version='8.35.0b2',
+    version='8.35.0b3',
     python_requires='>=3.9',
     author='Robert McNeel & Associates',
     author_email='steve@mcneel.com',

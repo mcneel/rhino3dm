@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.35.0-beta3] - 2026.08.27
+
+Pre-release closing out several long-standing GitHub issues: TypeScript definitions for the module factory options and Draco, Python stub gaps, in-place `Point3d.Transform` in Python, and .NET assembly version attributes generated from the package version.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.35.0-beta2...8.35.0-beta3
+
+### Added
+
+- (py) `Vector3d.Transform(xform)` — transforms the vector in place (and returns it), mirroring RhinoCommon.
+- (py) Type stubs for `Polyline.CreateFromPoints` (both overloads), `DracoCompression` and `DracoCompressionOptions`. Fixes #707.
+- (js) `rhino3dm.d.ts`: the module factory now accepts the Emscripten module options (`rhino3dm(options?: RhinoModuleOptions)`), so passing `locateFile` to control where `rhino3dm.wasm` is loaded from type-checks. Documented in `docs/javascript/RHINO3DM.JS.md`. Fixes #706, #674.
+
+### Fixed
+
+- (py) `Point3d.Transform(xform)` now transforms the point in place as documented (RhinoCommon semantics). It still returns the point, so code that relied on the old copy-returning behavior keeps working. Fixes #695.
+- (js) `rhino3dm.d.ts`: `DracoCompression.decompressByteArray(buffer)` and `decompressBase64String(encoded)` now declare their parameters. Fixes #703.
+- (dotnet) `Rhino3dm.dll` assembly version attributes (`AssemblyVersion`, `AssemblyFileVersion`, `AssemblyInformationalVersion`) are now generated from the package `<Version>` instead of a hand-maintained literal that had gone stale (8.32.2.0). Fixes #589.
+
 ## [8.35.0-beta2] - 2026.08.27
 
 Pre-release adding native Windows ARM64 Python wheels. No library code changes since 8.35.0-beta1; the compiled .NET, JavaScript, and existing Python artifacts are equivalent.

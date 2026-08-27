@@ -8,7 +8,7 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>8.35.0-beta2</Version>
+    <Version>8.35.0-beta3</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>mcneel</Authors>
     <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
@@ -20,7 +20,17 @@
     <PackageIcon>icon.png</PackageIcon>
     <Title>Rhino3dm</Title>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- GitHub #589: Properties/AssemblyInfo.cs keeps the hand-written attributes (title, company,
+         copyright, InternalsVisibleTo, ...). Let the SDK generate only the *version* attributes so
+         AssemblyVersion / AssemblyFileVersion / AssemblyInformationalVersion always follow <Version>
+         above instead of a hand-maintained literal that goes stale between releases. -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <!-- MeshingParameters (opennurbs_mesh.cs) uses BinaryFormatter for its encoded-string
          (de)serialization, mirroring RhinoCommon. .NET 7+ escalates SYSLIB0011 to an error,
          so suppress it here exactly as RhinoCommon.csproj does. -->

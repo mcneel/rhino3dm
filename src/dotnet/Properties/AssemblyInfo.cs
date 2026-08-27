@@ -74,7 +74,13 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyVersion("6.0.0.1")]
 //#endif
 
-[assembly: AssemblyVersion("8.32.2.0")]
+// GitHub #589: for the SDK-style Rhino3dm.csproj the version attributes (AssemblyVersion,
+// AssemblyFileVersion, AssemblyInformationalVersion) are generated from <Version> in the csproj,
+// so they can no longer go stale here. The legacy Xamarin mobile projects (Rhino3dm.Android/iOS)
+// still compile this file without SDK generation, so they keep a literal.
+#if MOBILE_BUILD
+[assembly: AssemblyVersion("8.35.0.0")]
+#endif
 
 // 2013-12-19, Brian Gillespie
 // AssemblyFileVersion is set in /src4/version.h
