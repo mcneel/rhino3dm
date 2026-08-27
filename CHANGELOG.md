@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.35.0-beta2] - 2026.08.27
+
+Pre-release adding native Windows ARM64 Python wheels. No library code changes since 8.35.0-beta1; the compiled .NET, JavaScript, and existing Python artifacts are equivalent.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.35.0-beta1...8.35.0-beta2
+
+### Added
+
+- (py) Native Windows ARM64 wheels (`win_arm64`) for Python 3.11–3.14, built on GitHub's `windows-11-arm` runners. `setup.py` now selects the MSVC `ARM64` platform when running under a native ARM64 CPython instead of always targeting `x64`. RH3DM-205.
+
 ## [8.35.0-beta1] - 2026.08.24
 
 Pre-release built against the openNURBS 8.35 RC. Synced the .NET/C layer from the Rhino 8.35 branch, primarily to pick up the canonical template-authoring APIs, and brought the JavaScript/Python annotation bindings to parity with .NET.

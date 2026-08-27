@@ -5,8 +5,6 @@ name: workflow ci
 on:
   push:
   pull_request:
-  workflow_dispatch:
-
 
 env:
   RETENTION_DAYS: 15
