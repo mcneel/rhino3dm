@@ -78,7 +78,9 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                 cfg.upper(),
                 extdir)]
-            if sys.maxsize > 2**32:
+            if platform.machine().upper() == 'ARM64':
+                cmake_args += ['-A', 'ARM64']
+            elif sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
         else:
@@ -103,7 +105,13 @@ class CMakeBuild(build_ext):
 
         if os.name == 'nt':  # windows
             bitness = 8 * struct.calcsize("P")
-            osplatform = "win32" if bitness == 32 else "x64"
+            # RH3DM-205: pick the MSVC target platform from the interpreter's own architecture.
+            # A native ARM64 CPython (windows-11-arm) reports platform.machine() == 'ARM64'; an
+            # x64 CPython running emulated on ARM reports 'AMD64' and correctly gets x64.
+            if platform.machine().upper() == "ARM64":
+                osplatform = "ARM64"
+            else:
+                osplatform = "win32" if bitness == 32 else "x64"
 
 
             command = ['cmake', '-A', osplatform, f"{draco_src_dir}"]
