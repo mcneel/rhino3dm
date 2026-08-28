@@ -28,6 +28,39 @@ EDGE_COUNT = 434
 VERTEX_COUNT = 201
 
 
+def _current_rss_bytes():
+    """Current resident set size of this process in bytes, or None when the
+    platform does not let us read it cheaply (used only for a leak bound, which
+    is skipped when this returns None)."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class _PMC(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD),
+                        ("PeakWorkingSetSize", ctypes.c_size_t), ("WorkingSetSize", ctypes.c_size_t),
+                        ("QuotaPeakPagedPoolUsage", ctypes.c_size_t), ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                        ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                        ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
+        psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+        c = _PMC(); c.cb = ctypes.sizeof(_PMC)
+        if psapi.GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(c), c.cb):
+            return c.WorkingSetSize
+    except Exception:
+        pass
+    try:
+        # Linux: field 2 of /proc/self/statm is resident pages.
+        with open("/proc/self/statm") as f:
+            return int(f.read().split()[1]) * os.sysconf("SC_PAGE_SIZE")
+    except Exception:
+        pass
+    return None  # e.g. macOS - caller skips the RSS bound
+
+
 @unittest.skipIf(_fixture_path() is None, "subd.3dm fixture not present")
 class TestSubD(unittest.TestCase):
 
@@ -178,6 +211,138 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(vertex.Edge(0).Id, vertex.Edges.First().Id)
         self.assertEqual(edge.Vertices.Count, 2)
         self.assertEqual((edge.Vertex(0).Id, edge.Vertex(1).Id), endpoints)
+
+    # ---- full begin-to-end traversal of every iterator type ----
+    #
+    # There are nine BND_SubDComponentIterator<To, From> instantiations: three
+    # rooted on the whole SubD (Faces/Edges/Vertices) and six rooted on a single
+    # component (a face's Edges/Vertices, an edge's Faces/Vertices, a vertex's
+    # Faces/Edges). The tests below drive each one from its first component to its
+    # last through the public cursor and confirm the walk is complete and terminates.
+
+    def _first_with(self, iterator, predicate, what):
+        """First component of iterator satisfying predicate (fails if none)."""
+        for c in iterator:
+            if predicate(c):
+                return c
+        self.fail("fixture has no %s" % what)
+
+    def _walk_cursor(self, it):
+        """Walk it begin->end exactly as a caller would: start at First(), advance
+        with Next() while CurrentIndex < Count. Next() past the last yields a null
+        wrapper (CurrentIndex clamps to Count), so this never dereferences it. The
+        guard turns a broken, non-advancing cursor into a failure instead of a hang."""
+        n = it.Count
+        out = []
+        c = it.First()
+        while it.CurrentIndex < n:
+            out.append(c)
+            c = it.Next()
+            self.assertLessEqual(len(out), n, "cursor overran Count / did not advance")
+        return out
+
+    def _assert_full_traversal(self, make_iter, label, by_id):
+        """make_iter: zero-arg callable returning a FRESH iterator each call."""
+        it = make_iter()
+        n = it.Count
+        self.assertGreater(n, 0, "%s: empty iterator, nothing to traverse" % label)
+        self.assertEqual(len(it), n, "%s: __len__ disagrees with Count" % label)
+
+        # The cursor walk covers the whole range: n components, all valid (reading
+        # .Id segfaults on a null wrapper), all distinct (no skip, dupe, or overrun).
+        walked = self._walk_cursor(it)
+        ids = [c.Id for c in walked]
+        self.assertEqual(len(walked), n, "%s: cursor yielded %d of %d" % (label, len(walked), n))
+        self.assertEqual(len(set(ids)), n, "%s: cursor ids not distinct" % label)
+
+        # Cursor endpoints: First() is the head (index 0) and equals Current();
+        # Last() is the tail.
+        it = make_iter()
+        first = it.First()
+        self.assertEqual(it.CurrentIndex, 0, "%s: CurrentIndex after First()" % label)
+        self.assertEqual(first.Id, it.Current().Id, "%s: First() != Current()" % label)
+        self.assertEqual(first.Id, ids[0], "%s: First() != walk[0]" % label)
+        self.assertEqual(it.Last().Id, ids[-1], "%s: Last() != walk[-1]" % label)
+
+        # Native Python iteration yields the same begin->end sequence and stops.
+        self.assertEqual([c.Id for c in make_iter()], ids, "%s: __iter__ != cursor walk" % label)
+
+        # Indexing spans the whole range too: SubD-rooted __getitem__ is by Id,
+        # component-rooted by position. Either way it reproduces the walk.
+        it = make_iter()
+        if by_id:
+            for cid in ids:
+                self.assertEqual(it[cid].Id, cid, "%s: [Id] round-trip" % label)
+        else:
+            for i, cid in enumerate(ids):
+                self.assertEqual(it[i].Id, cid, "%s: [pos] round-trip" % label)
+
+    def test_subd_rooted_iterators_traverse_fully(self):
+        # From the whole SubD: Faces, Edges, Vertices (__getitem__ is by Id).
+        self._assert_full_traversal(lambda: self.subd.Faces,    "SubD.Faces",    by_id=True)
+        self._assert_full_traversal(lambda: self.subd.Edges,    "SubD.Edges",    by_id=True)
+        self._assert_full_traversal(lambda: self.subd.Vertices, "SubD.Vertices", by_id=True)
+
+    def test_component_rooted_iterators_traverse_fully(self):
+        # From a face: its Edges and Vertices (every face has at least three of each).
+        face = self.subd.Faces[1]
+        self._assert_full_traversal(lambda: face.Edges,    "Face.Edges",    by_id=False)
+        self._assert_full_traversal(lambda: face.Vertices, "Face.Vertices", by_id=False)
+        # From an edge: its Faces and Vertices (pick an edge that borders a face).
+        edge = self._first_with(self.subd.Edges, lambda e: e.FaceCount > 0, "edge with faces")
+        self._assert_full_traversal(lambda: edge.Faces,    "Edge.Faces",    by_id=False)
+        self._assert_full_traversal(lambda: edge.Vertices, "Edge.Vertices", by_id=False)
+        # From a vertex: its Faces and Edges (pick a vertex that has both).
+        vert = self._first_with(self.subd.Vertices,
+                                 lambda v: v.FaceCount > 0 and v.EdgeCount > 0,
+                                 "vertex with faces and edges")
+        self._assert_full_traversal(lambda: vert.Faces, "Vertex.Faces", by_id=False)
+        self._assert_full_traversal(lambda: vert.Edges, "Vertex.Edges", by_id=False)
+
+    def test_plain_iteration_reuses_and_does_not_leak(self):
+        # The everyday `for c in subd.Faces: ...` loop: it must yield every face,
+        # end cleanly (StopIteration), leave the SubD reusable, and not leak.
+        subd = self.subd
+
+        ids = [f.Id for f in subd.Faces]
+        self.assertEqual(len(ids), FACE_COUNT)
+        self.assertEqual(len(set(ids)), FACE_COUNT)
+
+        # subd.Faces is untouched by having been walked: the property hands out a
+        # fresh iterator, so a second `for` yields the same faces, and Count and
+        # indexed access still work.
+        self.assertEqual([f.Id for f in subd.Faces], ids)
+        self.assertEqual(subd.Faces.Count, FACE_COUNT)
+        self.assertEqual(subd.Faces[ids[0]].Id, ids[0])
+
+        # Past the end, the exhausted iterator keeps raising StopIteration rather
+        # than dereferencing the terminal null wrapper and crashing - repeatedly.
+        it = iter(subd.Faces)
+        self.assertEqual(sum(1 for _ in it), FACE_COUNT)
+        for _ in range(3):
+            with self.assertRaises(StopIteration):
+                next(it)
+
+        # No leak: each pass creates FACE_COUNT component wrappers; were they
+        # retained (a ref held, a cycle, or __next__ not releasing them), resident
+        # memory would climb over thousands of passes. Warm up so one-time caches
+        # settle, then bound the growth. The RSS bound is skipped where the
+        # platform RSS is not cheaply readable; the walk itself still runs.
+        def walk_many(n):
+            for _ in range(n):
+                for _f in subd.Faces:
+                    pass
+
+        walk_many(100)
+        gc.collect()
+        self.assertEqual(gc.garbage, [], "iteration created uncollectable cycles")
+        rss0 = _current_rss_bytes()
+        walk_many(2000)  # 2000 * FACE_COUNT wrapper create/destroy cycles
+        gc.collect()
+        if rss0 is not None:
+            growth = _current_rss_bytes() - rss0
+            self.assertLess(growth, 4 * 1024 * 1024,
+                            "iterating leaked ~%.2f MB of RSS" % (growth / 1024.0 / 1024.0))
 
     def test_component_equality(self):
         # The same component reached two ways compares equal; different ones don't.
