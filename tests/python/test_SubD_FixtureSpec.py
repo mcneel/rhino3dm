@@ -107,14 +107,15 @@ class TestEdgeTable(unittest.TestCase):
                     self.assertTrue(all(v == 0.0 for v in values))
 
     def test_sharp_edges_satisfy_the_is_sharp_rule(self):
-        # ON_SubDEdge::IsSharp wants a smooth tag, one end above zero, and one
-        # end below the maximum - so 4.0 at both ends would not be "sharp".
+        # ON_SubDEdgeSharpness::IsSharp wants a valid value - 0 to 4 inclusive -
+        # with at least one end above zero. Note the ON_SubDEdge::IsSharp header
+        # comment also claims one end must be *below* the maximum; the code does
+        # not, and test_SubD_SharpnessWrite pins the real behaviour.
         for key in SHARP:
             values = list(spec.EDGES_BY_KEY[key]["sharpness"].values())
             with self.subTest(edge=key):
                 self.assertTrue(all(0.0 <= v <= MAX_SHARPNESS for v in values))
                 self.assertTrue(any(v > 0.0 for v in values))
-                self.assertTrue(any(v < MAX_SHARPNESS for v in values))
 
     def test_hard_and_dart_creases_follow_the_end_vertex_tags(self):
         for key, edge in spec.EDGES_BY_KEY.items():
