@@ -25,7 +25,15 @@ public:
   //public void CopyFrom(Material other)
   BND_UUID GetRenderPlugInId() const { return ON_UUID_to_Binding(m_material->MaterialPlugInId()); }
   void SetRenderPlugInId(const BND_UUID& id) { m_material->SetMaterialPlugInId(Binding_to_ON_UUID(id)); }
+
+  // The id of the RDK render material this material stands for. This is the link that makes an
+  // object reference a render material: the object's attributes reference this material by index
+  // and this id resolves to an entry in the model's render content table. RenderMaterial.ToMaterial()
+  // does not set it -- the caller must, and should only do so for a render material that is (or
+  // will be) in the model's render content table.
   BND_UUID GetRdkMaterialInstanceId() const { return ON_UUID_to_Binding(m_material->RdkMaterialInstanceId()); }
+  void SetRdkMaterialInstanceId(const BND_UUID& id);
+
   int GetMaterialIndex() const { return m_material->Index(); }
   void SetMaterialIndex(int i) { m_material->SetIndex(i); }
   std::wstring GetName() const { return std::wstring(m_material->NameAsPointer()); }

@@ -27,6 +27,20 @@ int BND_Material::CompareAppearance(const BND_Material& mat1, const BND_Material
   return ON_Material::CompareAppearance(*(mat1.m_material), *(mat2.m_material));
 }
 
+void BND_Material::SetRdkMaterialInstanceId(const BND_UUID& id)
+{
+  const ON_UUID uuid = Binding_to_ON_UUID(id);
+
+  m_material->SetRdkMaterialInstanceId(uuid);
+
+  // When a material references an RDK render material, opennurbs requires the material's
+  // plug-in id to be the universal render engine id. See ON_Material::SetRdkMaterialInstanceId().
+  if (uuid != ON_nil_uuid)
+  {
+    m_material->SetMaterialPlugInId(ON_UniversalRenderEngineId);
+  }
+}
+
 
 BND_PhysicallyBasedMaterial* BND_Material::PhysicallyBased()
 {
@@ -171,7 +185,7 @@ void initMaterialBindings(rh3dmpymodule& m)
     .def(py::init<const BND_Material&>(), py::arg("other"))
     .def_static("CompareAppearance", &BND_Material::CompareAppearance, py::arg("material1"), py::arg("material2"))
     .def_property("RenderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
-    .def_property_readonly("RenderMaterialInstanceId", &BND_Material::GetRdkMaterialInstanceId)
+    .def_property("RenderMaterialInstanceId", &BND_Material::GetRdkMaterialInstanceId, &BND_Material::SetRdkMaterialInstanceId)
     .def_property("Name", &BND_Material::GetName, &BND_Material::SetName)
     .def_property("Shine", &BND_Material::GetShine, &BND_Material::SetShine)
     .def_property("Transparency", &BND_Material::GetTransparency, &BND_Material::SetTransparency)
@@ -244,7 +258,7 @@ void initMaterialBindings(void*)
     .constructor<const BND_Material&>()
     .class_function("compareAppearance", &BND_Material::CompareAppearance)
     .property("renderPlugInId", &BND_Material::GetRenderPlugInId, &BND_Material::SetRenderPlugInId)
-    .property("renderMaterialInstanceId", &BND_Material::GetRdkMaterialInstanceId)
+    .property("renderMaterialInstanceId", &BND_Material::GetRdkMaterialInstanceId, &BND_Material::SetRdkMaterialInstanceId)
     .property("name", &BND_Material::GetName, &BND_Material::SetName)
     .property("shine", &BND_Material::GetShine, &BND_Material::SetShine)
     .property("transparency", &BND_Material::GetTransparency, &BND_Material::SetTransparency)

@@ -322,6 +322,13 @@ BND_Material* BND_File3dmRenderMaterial::ToMaterial() const
   auto* m = new BND_Material;
   *m->m_material = mat->ToOnMaterial();
 
+  // Note that the returned material is only the display simulation of this render material; it
+  // is deliberately not linked back to it. Callers who want the material to reference this
+  // render material (e.g., to assign it to an object via its attributes) must set the link
+  // themselves with Material.RenderMaterialInstanceId = renderMaterial.Id. The link is left to
+  // the caller because this render material may not be in the model's render content table, in
+  // which case the reference would dangle.
+
   return m;
 }
 
