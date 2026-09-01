@@ -175,7 +175,4 @@ using (var file = File3dm.Read(tmpPath))
          Console.WriteLine("        child slot={0} kind={1}", child.ChildSlotName, child.Kind);
       }
    }
-
-   var o = new File3dmWriteOptions();
-   file3dm.Write("D:/Test.3dm", o);
 }
