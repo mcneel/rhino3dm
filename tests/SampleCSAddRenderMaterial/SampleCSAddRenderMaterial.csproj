@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\dotnet\Rhino3dm.csproj" />
+  </ItemGroup>
+
+  <!-- Copy the native library next to this sample's exe so P/Invoke can find it.
+       src/build_dotnet.py builds it into src/build/librhino3dm_native_64/Release,
+       which is not one of the locations Rhino3dm.csproj currently copies from. -->
+  <ItemGroup Condition="exists('..\..\src\build\librhino3dm_native_64\Release\librhino3dm_native.dll')">
+    <None Include="..\..\src\build\librhino3dm_native_64\Release\librhino3dm_native.dll">
+      <Link>librhino3dm_native.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="!exists('..\..\src\build\librhino3dm_native_64\Release\librhino3dm_native.dll') And exists('..\..\src\build\librhino3dm_native_64\Debug\librhino3dm_native.dll')">
+    <None Include="..\..\src\build\librhino3dm_native_64\Debug\librhino3dm_native.dll">
+      <Link>librhino3dm_native.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+<!---
+  <ItemGroup>
+    <PackageReference Include="Rhino3dm" Version="8.0.1" />
+  </ItemGroup>
+  -->
+
+</Project>
