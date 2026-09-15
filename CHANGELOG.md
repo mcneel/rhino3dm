@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Final 8.35.0 release, built against the released openNURBS 8.35 (v8.35.26251.13001). Final .NET/C sync from the released Rhino 8.35 branch, which completes the template-authoring accessor set — the values needed to author Rhino templates headlessly that previously had no managed accessor and were silently dropped from generated files.
 
-diff: https://github.com/mcneel/rhino3dm/compare/8.35.0-beta3...8.35.0
+diff: https://github.com/mcneel/rhino3dm/compare/8.32.1...8.35.0
 
 ### Added
 
