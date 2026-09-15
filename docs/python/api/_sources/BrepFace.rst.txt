@@ -9,6 +9,14 @@ BrepFace
 
       bool: True if face orientation is opposite of natural surface orientation.
 
+   .. py:attribute:: Loops
+
+      Collections.BrepLoopList: Loops in this face.
+
+   .. py:attribute:: OuterLoop
+
+      BrepLoop: Every face has a single outer loop.
+
    .. py:method:: UnderlyingSurface()
 
       Gets the untrimmed surface that is the base of this face.

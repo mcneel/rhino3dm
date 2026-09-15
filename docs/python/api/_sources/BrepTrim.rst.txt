@@ -1,0 +1,18 @@
+BrepTrim
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: BrepTrim
+
+   .. py:attribute:: EdgeIndex
+
+
+   .. py:attribute:: IsReversed
+
+
+   .. py:attribute:: StartVertexIndex
+
+
+   .. py:attribute:: EndVertexIndex
+

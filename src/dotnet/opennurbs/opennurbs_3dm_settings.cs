@@ -11,6 +11,65 @@ using System.Collections.Generic;
 namespace Rhino.DocObjects
 {
   /// <summary>
+  /// What a view in a document's view table is: a model view, a layout page, a detail
+  /// nested inside a layout, or one of Rhino's special editor views.
+  /// </summary>
+  /// <since>8.36</since>
+  public enum ViewType
+  {
+    /// <summary>A standard 3d model space view.</summary>
+    ModelView = 0,
+    /// <summary>A layout, a.k.a. "paper space". Must be an orthographic top view.</summary>
+    PageView = 1,
+    /// <summary>A model view nested inside another view - a layout detail.</summary>
+    NestedView = 2,
+    /// <summary>The UV editor's special view port.</summary>
+    UVEditorView = 3,
+    /// <summary>The block editor's special view port.</summary>
+    BlockEditorView = 4,
+  }
+
+  /// <summary>
+  /// The paper size and margins of a layout, in millimeters. Only meaningful for a view
+  /// whose <see cref="ViewInfo.ViewType"/> is <see cref="ViewType.PageView"/>.
+  /// </summary>
+  /// <since>8.36</since>
+  public class PageSettings
+  {
+    /// <summary>The page number of this layout.</summary>
+    /// <since>8.36</since>
+    public int PageNumber { get; set; }
+
+    /// <summary>Paper width in millimeters.</summary>
+    /// <since>8.36</since>
+    public double WidthMillimeters { get; set; }
+
+    /// <summary>Paper height in millimeters.</summary>
+    /// <since>8.36</since>
+    public double HeightMillimeters { get; set; }
+
+    /// <summary>Left margin in millimeters.</summary>
+    /// <since>8.36</since>
+    public double LeftMarginMillimeters { get; set; }
+
+    /// <summary>Right margin in millimeters.</summary>
+    /// <since>8.36</since>
+    public double RightMarginMillimeters { get; set; }
+
+    /// <summary>Top margin in millimeters.</summary>
+    /// <since>8.36</since>
+    public double TopMarginMillimeters { get; set; }
+
+    /// <summary>Bottom margin in millimeters.</summary>
+    /// <since>8.36</since>
+    public double BottomMarginMillimeters { get; set; }
+
+    /// <summary>Name of the printer this layout targets, if any.</summary>
+    /// <since>8.36</since>
+    public string PrinterName { get; set; } = string.Empty;
+  }
+
+  /// <summary>
   /// Default grid settings for a document
   /// </summary>
   public class ConstructionPlaneGridDefaults
@@ -621,6 +680,11 @@ namespace Rhino.DocObjects
       IntPtr ptr_cplane = UnsafeNativeMethods.ON_3dmView_GetConstructionPlaneObject(const_ptr_this);
       var rc = ConstructionPlane.FromIntPtr(ptr_cplane);
       UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
+      // ON_3dmConstructionPlane has no grid/axis visibility of its own - those flags live on
+      // the view - so carry them across, otherwise ConstructionPlane.ShowGrid and ShowAxes
+      // always read back as their managed defaults no matter what the file says.
+      rc.ShowGrid = ShowConstructionGrid;
+      rc.ShowAxes = ShowConstructionAxes;
       GC.KeepAlive(this);
       return rc;
     }
@@ -639,6 +703,10 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmView_SetConstructionPlaneObject(ptr_this, ptr_cplane);
       UnsafeNativeMethods.ON_3dmConstructionPlane_Delete(ptr_cplane);
       GC.KeepAlive(this);
+      // see GetConstructionPlane: these two live on the view, not on the construction plane,
+      // and were silently dropped before
+      ShowConstructionGrid = constructionPlane.ShowGrid;
+      ShowConstructionAxes = constructionPlane.ShowAxes;
     }
 
     /// <summary>
@@ -654,6 +722,181 @@ namespace Rhino.DocObjects
         GC.KeepAlive(this);
         return id;
       }
+      // <since>8.36</since>
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetNamedViewId(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The id of the display mode this view opens in - wireframe, shaded, rendered, or any
+    /// custom display mode. <see cref="Rhino.Display.DisplayModeDescription"/> holds the
+    /// standard ids. A nil id means the view has no display mode of its own and opens in
+    /// wireframe, which is what every template generated without this property did.
+    /// </summary>
+    /// <since>8.36</since>
+    public Guid DisplayModeId
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        Guid rc = UnsafeNativeMethods.ON_3dmView_GetDisplayModeId(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetDisplayModeId(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Whether this view is a model view, a layout page, a nested (detail) view, or one of
+    /// the special editor views. A page view must be an orthographic top view; see
+    /// <see cref="PageSettings"/> for its paper size.
+    /// </summary>
+    /// <since>8.36</since>
+    public Rhino.DocObjects.ViewType ViewType
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_3dmView_GetViewType(const_ptr_this);
+        GC.KeepAlive(this);
+        return (Rhino.DocObjects.ViewType)rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetViewType(ptr_this, (int)value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    bool GetViewBool(UnsafeNativeMethods.View3dmBool which)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_3dmView_GetBool(const_ptr_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    void SetViewBool(UnsafeNativeMethods.View3dmBool which, bool value)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmView_SetBool(ptr_this, which, value);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>Whether the construction plane grid is drawn in this view.</summary>
+    /// <since>8.36</since>
+    public bool ShowConstructionGrid
+    {
+      get => GetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionGrid);
+      set => SetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionGrid, value);
+    }
+
+    /// <summary>Whether the construction plane x and y axes are drawn in this view.</summary>
+    /// <since>8.36</since>
+    public bool ShowConstructionAxes
+    {
+      get => GetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionAxes);
+      set => SetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionAxes, value);
+    }
+
+    /// <summary>Whether the construction plane z axis is drawn in this view.</summary>
+    /// <since>8.36</since>
+    public bool ShowConstructionZAxis
+    {
+      get => GetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionZAxis);
+      set => SetViewBool(UnsafeNativeMethods.View3dmBool.ShowConstructionZAxis, value);
+    }
+
+    /// <summary>Whether the world axes icon is drawn in the corner of this view.</summary>
+    /// <since>8.36</since>
+    public bool ShowWorldAxes
+    {
+      get => GetViewBool(UnsafeNativeMethods.View3dmBool.ShowWorldAxes);
+      set => SetViewBool(UnsafeNativeMethods.View3dmBool.ShowWorldAxes, value);
+    }
+
+    /// <summary>Whether the view's projection is locked against changes.</summary>
+    /// <since>8.36</since>
+    public bool LockedProjection
+    {
+      get => GetViewBool(UnsafeNativeMethods.View3dmBool.LockedProjection);
+      set => SetViewBool(UnsafeNativeMethods.View3dmBool.LockedProjection, value);
+    }
+
+    /// <summary>The pixel size this view renders at.</summary>
+    /// <since>8.36</since>
+    public System.Drawing.Size RenderingSize
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int width = 0, height = 0;
+        UnsafeNativeMethods.ON_3dmView_GetRenderingSize(const_ptr_this, ref width, ref height);
+        GC.KeepAlive(this);
+        return new System.Drawing.Size(width, height);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmView_SetRenderingSize(ptr_this, value.Width, value.Height);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Gets the paper size and margins of this view. Only meaningful when
+    /// <see cref="ViewType"/> is <see cref="ViewType.PageView"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public PageSettings GetPageSettings()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      int page_number = 0;
+      double width = 0, height = 0, left = 0, right = 0, top = 0, bottom = 0;
+      var rc = new PageSettings();
+      using (var sh = new StringHolder())
+      {
+        UnsafeNativeMethods.ON_3dmView_GetPageSettings(const_ptr_this, ref page_number,
+          ref width, ref height, ref left, ref right, ref top, ref bottom, sh.NonConstPointer());
+        rc.PrinterName = sh.ToString();
+      }
+      GC.KeepAlive(this);
+      rc.PageNumber = page_number;
+      rc.WidthMillimeters = width;
+      rc.HeightMillimeters = height;
+      rc.LeftMarginMillimeters = left;
+      rc.RightMarginMillimeters = right;
+      rc.TopMarginMillimeters = top;
+      rc.BottomMarginMillimeters = bottom;
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the paper size and margins of this view. Set <see cref="ViewType"/> to
+    /// <see cref="ViewType.PageView"/> as well, or the page settings are ignored.
+    /// </summary>
+    /// <since>8.36</since>
+    public void SetPageSettings(PageSettings pageSettings)
+    {
+      if (pageSettings == null)
+        throw new ArgumentNullException(nameof(pageSettings));
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmView_SetPageSettings(ptr_this, pageSettings.PageNumber,
+        pageSettings.WidthMillimeters, pageSettings.HeightMillimeters,
+        pageSettings.LeftMarginMillimeters, pageSettings.RightMarginMillimeters,
+        pageSettings.TopMarginMillimeters, pageSettings.BottomMarginMillimeters,
+        pageSettings.PrinterName);
+      GC.KeepAlive(this);
     }
 
     /// <summary>
@@ -3611,6 +3854,288 @@ namespace Rhino.FileIO
         }
 
         return m_rs;
+      }
+    }
+
+    // ---- template authoring (RH-96388) -------------------------------------------------
+    // A byte-level comparison of the generated Rhino 9 templates against the hand-authored
+    // Rhino 8 ones showed these ON_3dmSettings members had no managed accessor, so a
+    // rebuilt template dropped every one of them to a default.
+
+    Guid GetUuid(UnsafeNativeMethods.Settings3dmUuid which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      Guid rc = UnsafeNativeMethods.ON_3dmSettings_GetUuid(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    void SetUuid(UnsafeNativeMethods.Settings3dmUuid which, Guid value)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmSettings_SetUuid(ptr_this, which, value);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// The viewport id of the view that is active when the model is opened. When this is nil
+    /// Rhino activates the first view in the view table.
+    /// </summary>
+    /// <since>8.36</since>
+    public Guid ActiveViewId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.ActiveViewId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.ActiveViewId, value);
+    }
+
+    /// <summary>The id of the layer new objects are created on.</summary>
+    /// <since>8.36</since>
+    public Guid CurrentLayerId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentLayerId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentLayerId, value);
+    }
+
+    /// <summary>The id of the current render material.</summary>
+    /// <since>8.36</since>
+    public Guid CurrentRenderMaterialId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentRenderMaterialId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentRenderMaterialId, value);
+    }
+
+    /// <summary>The id of the current line pattern (linetype).</summary>
+    /// <since>8.36</since>
+    public Guid CurrentLinePatternId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentLinePatternId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentLinePatternId, value);
+    }
+
+    /// <summary>The id of the current text style.</summary>
+    /// <since>8.36</since>
+    public Guid CurrentTextStyleId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentTextStyleId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentTextStyleId, value);
+    }
+
+    /// <summary>
+    /// The id of the dimension style new annotation uses. When this is nil Rhino falls back
+    /// to the obsolete V5 index, which selects the first style in the table - so a template
+    /// that leaves it nil can open with the wrong annotation style current.
+    /// </summary>
+    /// <since>8.36</since>
+    public Guid CurrentDimensionStyleId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentDimensionStyleId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentDimensionStyleId, value);
+    }
+
+    /// <summary>The id of the current hatch pattern.</summary>
+    /// <since>8.36</since>
+    public Guid CurrentHatchPatternId
+    {
+      get => GetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentHatchPatternId);
+      set => SetUuid(UnsafeNativeMethods.Settings3dmUuid.CurrentHatchPatternId, value);
+    }
+
+    /// <summary>The colour new objects are created with.</summary>
+    /// <since>8.36</since>
+    public System.Drawing.Color CurrentColor
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int argb = UnsafeNativeMethods.ON_3dmSettings_GetColor(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmColor.CurrentColor);
+        GC.KeepAlive(this);
+        return System.Drawing.Color.FromArgb(argb);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetColor(ptr_this,
+          UnsafeNativeMethods.Settings3dmColor.CurrentColor, value.ToArgb());
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>The plot colour new objects are created with.</summary>
+    /// <since>8.36</since>
+    public System.Drawing.Color CurrentPlotColor
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int argb = UnsafeNativeMethods.ON_3dmSettings_GetColor(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmColor.CurrentPlotColor);
+        GC.KeepAlive(this);
+        return System.Drawing.Color.FromArgb(argb);
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetColor(ptr_this,
+          UnsafeNativeMethods.Settings3dmColor.CurrentPlotColor, value.ToArgb());
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The surface isocurve density new objects are created with. -1 draws no isocurves,
+    /// 0 draws the surface edges only, and n &gt; 0 draws n isocurves per span.
+    /// </summary>
+    /// <since>8.36</since>
+    public int CurrentWireDensity
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_3dmSettings_GetInt(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmInt.CurrentWireDensity);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetInt(ptr_this,
+          UnsafeNativeMethods.Settings3dmInt.CurrentWireDensity, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>How instance definition links are updated when the model is opened.</summary>
+    /// <since>8.36</since>
+    public int InstanceDefinitionLinkUpdate
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_3dmSettings_GetInt(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmInt.IdefLinkUpdate);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetInt(ptr_this,
+          UnsafeNativeMethods.Settings3dmInt.IdefLinkUpdate, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>Whether texture bitmaps are embedded in the model when it is saved.</summary>
+    /// <since>8.36</since>
+    public bool SaveTextureBitmapsInFile
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_3dmSettings_GetBool(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmBool.SaveTextureBitmapsInFile);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetBool(ptr_this,
+          UnsafeNativeMethods.Settings3dmBool.SaveTextureBitmapsInFile, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>The document-wide linetype pattern display scale.</summary>
+    /// <since>8.36</since>
+    public double LinetypeDisplayScale
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_3dmSettings_GetLinetypeDisplayScale(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetLinetypeDisplayScale(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    Geometry.MeshingParameters GetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_mp = UnsafeNativeMethods.ON_3dmSettings_GetMeshParameters(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return IntPtr.Zero == ptr_mp ? null : new Geometry.MeshingParameters(ptr_mp);
+    }
+
+    void SetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters which, Geometry.MeshingParameters value)
+    {
+      if (value == null)
+        throw new ArgumentNullException(nameof(value));
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_3dmSettings_SetMeshParameters(ptr_this, which, value.ConstPointer());
+      GC.KeepAlive(this);
+      GC.KeepAlive(value);
+    }
+
+    /// <summary>
+    /// The meshing parameters Rhino uses to build render meshes for this model. Rhino derives
+    /// the "Jagged &amp; faster" / "Smooth &amp; slower" choice from these when the model is
+    /// opened, so a model that leaves them at the openNURBS default gets jagged render meshes.
+    /// </summary>
+    /// <since>8.36</since>
+    public Geometry.MeshingParameters MeshingParameters
+    {
+      get => GetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.RenderMeshSettings);
+      set => SetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.RenderMeshSettings, value);
+    }
+
+    /// <summary>The meshing parameters used for analysis meshes (curvature, draft angle, ...).</summary>
+    /// <since>8.36</since>
+    public Geometry.MeshingParameters AnalysisMeshingParameters
+    {
+      get => GetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.AnalysisMeshSettings);
+      set => SetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.AnalysisMeshSettings, value);
+    }
+
+    /// <summary>The meshing parameters stored as the model's custom render mesh settings.</summary>
+    /// <since>8.36</since>
+    public Geometry.MeshingParameters CustomRenderMeshingParameters
+    {
+      get => GetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.CustomRenderMeshSettings);
+      set => SetMeshParameters(UnsafeNativeMethods.Settings3dmMeshParameters.CustomRenderMeshSettings, value);
+    }
+
+    /// <summary>
+    /// The construction plane grid defaults new views inherit: grid and snap spacing, line
+    /// counts, and whether the grid, its axes and the world axes icon are drawn.
+    /// </summary>
+    /// <since>8.36</since>
+    public DocObjects.ConstructionPlaneGridDefaults GridDefaults
+    {
+      get
+      {
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr ptr_defaults = UnsafeNativeMethods.ON_3dmSettings_GridDefaultsPointer(ptr_this);
+        GC.KeepAlive(this);
+        return IntPtr.Zero == ptr_defaults ? null : DocObjects.ConstructionPlaneGridDefaults.FromConstPointer(ptr_defaults);
+      }
+      set
+      {
+        if (value == null)
+          throw new ArgumentNullException(nameof(value));
+        IntPtr ptr_this = NonConstPointer();
+        IntPtr ptr_defaults = UnsafeNativeMethods.ON_3dmSettings_GridDefaultsPointer(ptr_this);
+        if (IntPtr.Zero != ptr_defaults)
+          value.SetupNativePointer(ptr_defaults);
+        GC.KeepAlive(this);
       }
     }
   }

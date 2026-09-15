@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SubD &mdash; rhino3dm 8.32.0 documentation</title>
+  <title>SubD &mdash; rhino3dm 8.35.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,13 +15,13 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=65727893"></script>
+        <script src="_static/documentation_options.js?v=eb29895d"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Sun" href="Sun.html" />
+    <link rel="next" title="SubDEdge" href="SubDEdge.html" />
     <link rel="prev" title="Sphere" href="Sphere.html" /> 
 </head>
 
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.32.0
+                8.35.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BND_SubD.html">BND_SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
@@ -63,7 +64,11 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoop.html">BrepLoop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoopList.html">BrepLoopList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrim.html">BrepTrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrimList.html">BrepTrimList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
@@ -187,6 +192,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#rhino3dm.SubD"><code class="docutils literal notranslate"><span class="pre">SubD</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.SubD"><code class="docutils literal notranslate"><span class="pre">SubD.SubD()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.IsSolid"><code class="docutils literal notranslate"><span class="pre">SubD.IsSolid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.SharpEdgeCount"><code class="docutils literal notranslate"><span class="pre">SubD.SharpEdgeCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.FaceCount"><code class="docutils literal notranslate"><span class="pre">SubD.FaceCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.EdgeCount"><code class="docutils literal notranslate"><span class="pre">SubD.EdgeCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.VertexCount"><code class="docutils literal notranslate"><span class="pre">SubD.VertexCount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.Faces"><code class="docutils literal notranslate"><span class="pre">SubD.Faces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.Edges"><code class="docutils literal notranslate"><span class="pre">SubD.Edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.Vertices"><code class="docutils literal notranslate"><span class="pre">SubD.Vertices</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.ClearEvaluationCache"><code class="docutils literal notranslate"><span class="pre">SubD.ClearEvaluationCache()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.UpdateAllTagsAndSectorCoefficients"><code class="docutils literal notranslate"><span class="pre">SubD.UpdateAllTagsAndSectorCoefficients()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.SubD.Subdivide"><code class="docutils literal notranslate"><span class="pre">SubD.Subdivide()</span></code></a></li>
@@ -194,6 +206,9 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="SubDEdge.html">SubDEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDFace.html">SubDFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDVertex.html">SubDVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
@@ -252,6 +267,44 @@
 A “solid” is a closed oriented manifold, or a closed oriented manifold.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.SharpEdgeCount">
+<span class="sig-name descname"><span class="pre">SharpEdgeCount</span></span><a class="headerlink" href="#rhino3dm.SubD.SharpEdgeCount" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.FaceCount">
+<span class="sig-name descname"><span class="pre">FaceCount</span></span><a class="headerlink" href="#rhino3dm.SubD.FaceCount" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.EdgeCount">
+<span class="sig-name descname"><span class="pre">EdgeCount</span></span><a class="headerlink" href="#rhino3dm.SubD.EdgeCount" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.VertexCount">
+<span class="sig-name descname"><span class="pre">VertexCount</span></span><a class="headerlink" href="#rhino3dm.SubD.VertexCount" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.Faces">
+<span class="sig-name descname"><span class="pre">Faces</span></span><a class="headerlink" href="#rhino3dm.SubD.Faces" title="Link to this definition"></a></dt>
+<dd><p>Collections.SubDFaceList: All faces in this SubD</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.Edges">
+<span class="sig-name descname"><span class="pre">Edges</span></span><a class="headerlink" href="#rhino3dm.SubD.Edges" title="Link to this definition"></a></dt>
+<dd><p>Collections.SubDEdgeList: All edges in this SubD</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.SubD.Vertices">
+<span class="sig-name descname"><span class="pre">Vertices</span></span><a class="headerlink" href="#rhino3dm.SubD.Vertices" title="Link to this definition"></a></dt>
+<dd><p>Collections.SubDVertexList: All vertices in this SubD</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.SubD.ClearEvaluationCache">
 <span class="sig-name descname"><span class="pre">ClearEvaluationCache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.SubD.ClearEvaluationCache" title="Link to this definition"></a></dt>
@@ -305,7 +358,7 @@ in the edited areas need to be updated.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Sphere.html" class="btn btn-neutral float-left" title="Sphere" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Sun.html" class="btn btn-neutral float-right" title="Sun" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="SubDEdge.html" class="btn btn-neutral float-right" title="SubDEdge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

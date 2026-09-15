@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MeshVertexList &mdash; rhino3dm 8.32.0 documentation</title>
+  <title>MeshVertexList &mdash; rhino3dm 8.35.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=65727893"></script>
+        <script src="_static/documentation_options.js?v=eb29895d"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.32.0
+                8.35.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BND_SubD.html">BND_SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
@@ -63,7 +64,11 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoop.html">BrepLoop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoopList.html">BrepLoopList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrim.html">BrepTrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrimList.html">BrepTrimList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
@@ -149,9 +154,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.SetCount"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.SetCount()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.__getitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.__getitem__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.__setitem__"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.__setitem__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Point3dAt"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Point3dAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.SetPoint3dAt"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.SetPoint3dAt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.ToPoint3dArray"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.ToPoint3dArray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.ToPoint3fArray"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.ToPoint3fArray()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Clear"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Clear()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Destroy"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Destroy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Add"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.AddPoint3d"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.AddPoint3d()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.IsHidden"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.IsHidden()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Hide"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Hide()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.MeshVertexList.Show"><code class="docutils literal notranslate"><span class="pre">MeshVertexList.Show()</span></code></a></li>
@@ -204,6 +214,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDEdge.html">SubDEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDFace.html">SubDFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDVertex.html">SubDVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
@@ -280,6 +293,51 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Point3dAt">
+<span class="sig-name descname"><span class="pre">Point3dAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Point3dAt" title="Link to this definition"></a></dt>
+<dd><p>Get double precision location at a given index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.SetPoint3dAt">
+<span class="sig-name descname"><span class="pre">SetPoint3dAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.SetPoint3dAt" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.ToPoint3dArray">
+<span class="sig-name descname"><span class="pre">ToPoint3dArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.ToPoint3dArray" title="Link to this definition"></a></dt>
+<dd><p>Copies all vertices to a new array of .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Point3d.html#rhino3dm.Point3d" title="rhino3dm.Point3d">rhino3dm.Point3d</a>[]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.ToPoint3fArray">
+<span class="sig-name descname"><span class="pre">ToPoint3fArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.ToPoint3fArray" title="Link to this definition"></a></dt>
+<dd><p>Copies all vertices to a new array of .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="Point3f.html#rhino3dm.Point3f" title="rhino3dm.Point3f">Point3f</a>[]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.MeshVertexList.Clear">
 <span class="sig-name descname"><span class="pre">Clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.Clear" title="Link to this definition"></a></dt>
 <dd><p>Clears the Vertex list on the mesh.</p>
@@ -321,6 +379,12 @@ Subsequent calls can add new items.</p>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.MeshVertexList.AddPoint3d">
+<span class="sig-name descname"><span class="pre">AddPoint3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.MeshVertexList.AddPoint3d" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
 </dd></dl>
 
 <dl class="py method">

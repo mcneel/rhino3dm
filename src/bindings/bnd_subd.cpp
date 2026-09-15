@@ -209,10 +209,8 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
     .def("Next",     &IteratorT::Next,     py::doc(("Advance the iterator to the next "    + type_to + " and return this " + type_to + "."      ).c_str()))
     .def("Last",     &IteratorT::Last,     py::doc(("Advance the iterator to the last "    + type_to + " and return this " + type_to + "."      ).c_str()))
     .def("Current",  &IteratorT::Current,  py::doc(("Return the current "                  + type_to + " in this iterator."                     ).c_str()))
-    .def_property_readonly(
-         "Count",    &IteratorT::Count,    py::doc(("Number of " + type_to + "s in this iterator."                    ).c_str()))
-    .def_property_readonly(
-         "CurrentIndex", &IteratorT::CurrentIndex, py::doc(("Iterator index of the current "  + type_to + " in this iterator.").c_str()));
+    .def_property_readonly("Count",        &IteratorT::Count,        py::doc(("Number of " + type_to + "s in this iterator."                   ).c_str()))
+    .def_property_readonly("CurrentIndex", &IteratorT::CurrentIndex, py::doc(("Iterator index of the current " + type_to + " in this iterator.").c_str()));
 }
 
 void initSubDBindings(rh3dmpymodule& m)

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to rhino3dm’s documentation! &mdash; rhino3dm 8.32.0 documentation</title>
+  <title>Welcome to the rhino3dm.py documentation! &mdash; rhino3dm 8.35.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=65727893"></script>
+        <script src="_static/documentation_options.js?v=eb29895d"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -36,7 +36,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.32.0
+                8.35.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BND_SubD.html">BND_SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
@@ -62,7 +63,11 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoop.html">BrepLoop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoopList.html">BrepLoopList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrim.html">BrepTrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrimList.html">BrepTrimList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
@@ -183,6 +188,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDEdge.html">SubDEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDFace.html">SubDFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDVertex.html">SubDVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
@@ -213,7 +221,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to rhino3dm’s documentation!</li>
+      <li class="breadcrumb-item active">Welcome to the rhino3dm.py documentation!</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -223,8 +231,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-rhino3dm-s-documentation">
-<h1>Welcome to rhino3dm’s documentation!<a class="headerlink" href="#welcome-to-rhino3dm-s-documentation" title="Link to this heading"></a></h1>
+  <section id="welcome-to-the-rhino3dm-py-documentation">
+<h1>Welcome to the rhino3dm.py documentation!<a class="headerlink" href="#welcome-to-the-rhino3dm-py-documentation" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -256,6 +264,10 @@
 <li class="toctree-l2"><a class="reference internal" href="Bitmap.html#rhino3dm.Bitmap"><code class="docutils literal notranslate"><span class="pre">Bitmap</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="BND_SubD.html">BND_SubD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BND_SubD.html#rhino3dm.BND_SubD"><code class="docutils literal notranslate"><span class="pre">BND_SubD</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox"><code class="docutils literal notranslate"><span class="pre">BoundingBox</span></code></a></li>
 </ul>
@@ -284,8 +296,24 @@
 <li class="toctree-l2"><a class="reference internal" href="BrepFaceList.html#rhino3dm.BrepFaceList"><code class="docutils literal notranslate"><span class="pre">BrepFaceList</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoop.html">BrepLoop</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BrepLoop.html#rhino3dm.BrepLoop"><code class="docutils literal notranslate"><span class="pre">BrepLoop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoopList.html">BrepLoopList</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BrepLoopList.html#rhino3dm.BrepLoopList"><code class="docutils literal notranslate"><span class="pre">BrepLoopList</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="BrepSurfaceList.html#rhino3dm.BrepSurfaceList"><code class="docutils literal notranslate"><span class="pre">BrepSurfaceList</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrim.html">BrepTrim</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BrepTrim.html#rhino3dm.BrepTrim"><code class="docutils literal notranslate"><span class="pre">BrepTrim</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrimList.html">BrepTrimList</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BrepTrimList.html#rhino3dm.BrepTrimList"><code class="docutils literal notranslate"><span class="pre">BrepTrimList</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a><ul>
@@ -766,6 +794,18 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="SubD.html#rhino3dm.SubD"><code class="docutils literal notranslate"><span class="pre">SubD</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SubDEdge.html">SubDEdge</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="SubDEdge.html#rhino3dm.SubDEdge"><code class="docutils literal notranslate"><span class="pre">SubDEdge</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SubDFace.html">SubDFace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="SubDFace.html#rhino3dm.SubDFace"><code class="docutils literal notranslate"><span class="pre">SubDFace</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SubDVertex.html">SubDVertex</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="SubDVertex.html#rhino3dm.SubDVertex"><code class="docutils literal notranslate"><span class="pre">SubDVertex</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a><ul>

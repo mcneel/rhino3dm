@@ -132,6 +132,14 @@ Mesh
 
       :rtype: CachedTextureCoordinates
 
+   .. py:method:: SetCachedTextureCoordinatesFromMaterial(file, objectId, material)
+
+      [todo] add documentation
+
+   .. py:method:: GetCachedTextureCoordinatesFromTexture(file, objectId, texture)
+
+      [todo] add documentation
+
    .. py:method:: Compact()
 
       Removes any unreferenced objects from arrays, re-indexes as needed

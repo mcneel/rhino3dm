@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.35.0] - 2026.09.15
+
+Final 8.35.0 release, built against the released openNURBS 8.35 (v8.35.26251.13001). Final .NET/C sync from the released Rhino 8.35 branch, which completes the template-authoring accessor set — the values needed to author Rhino templates headlessly that previously had no managed accessor and were silently dropped from generated files.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.35.0-beta3...8.35.0
+
+### Added
+
+- (dotnet) Template-authoring accessors on `File3dmSettings`: current defaults `CurrentColor` / `CurrentPlotColor` / `CurrentWireDensity` / `CurrentLayerId` / `CurrentDimensionStyleId` / `CurrentTextStyleId` / `CurrentHatchPatternId` / `CurrentLinePatternId` / `CurrentRenderMaterialId`; render-mesh settings `MeshingParameters` / `CustomRenderMeshingParameters` / `AnalysisMeshingParameters`; plus `ActiveViewId`, `GridDefaults`, `LinetypeDisplayScale`, `SaveTextureBitmapsInFile`, and `InstanceDefinitionLinkUpdate`.
+- (dotnet) Template-authoring accessors on `ViewInfo`: `DisplayModeId`, `ViewType`, `RenderingSize`, `LockedProjection`, `ShowConstructionGrid` / `ShowConstructionAxes` / `ShowConstructionZAxis`, and `GetPageSettings()` / `SetPageSettings(...)` (with a new `PageSettings` type: page number, page size, margins, printer name).
+- (dotnet) `ViewportInfo.Id` now has a setter — needed to author a viewport with a specific id so a model's active-view reference resolves. The existing "no approved way to change the id once set" warning still applies to a viewport already in a document.
+- (dotnet) `DimensionStyle.UnitSystem` — get/set the dimension style's unit system.
+
 ## [8.35.0-beta3] - 2026.08.27
 
 Pre-release closing out several long-standing GitHub issues: TypeScript definitions for the module factory options and Draco, Python stub gaps, in-place `Point3d.Transform` in Python, and .NET assembly version attributes generated from the package version.
@@ -43,7 +56,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.32.2...8.35.0-beta1
 - (dotnet) `ViewInfo.GetConstructionPlane()` / `SetConstructionPlane(ConstructionPlane)` — read/write a view's full construction plane, including grid settings (grid/snap spacing, line count, thick-line frequency, depth buffering).
 - (dotnet) `ViewInfo.Maximized`, `ViewInfo.GetWindowPosition(...)` / `SetWindowPosition(...)` — the view window's relative position (0..1 fractions) and maximized state, so authored views don't open stacked.
 - (dotnet) `File3dmSettings.ModelDistanceDisplayMode` / `PageDistanceDisplayMode` (`Rhino.UI.DistanceDisplayMode`) and `ModelDistanceDisplayPrecision` / `PageDistanceDisplayPrecision` — how model/page-space distances are displayed.
-- (dotnet) `Font.FromRichTextProperties(richTextFontName, bold, italic, underlined, strikethrough)` — create a font by its rich-text family name, preserving the name even when the font isn't installed. Backed by `ON_Font::FontFromRichTextProperties`. RH-97829.
+- (dotnet) `Font.FromRichTextProperties(richTextFontName, bold, italic, underlined, strikethrough)` — create a font by its rich-text family name, preserving the name even when the font isn't installed. Backed by `ON_Font::FontFromRichTextProperties`.
 - (dotnet) `ObjectAttributes.EnableCustomMeshingParameters` — get/set whether an object uses custom render-mesh parameters.
 - (js/py) Annotation support brought to parity with the .NET binding (RH3DM-204). `AnnotationBase` now exposes the effective dimension style and per-object overrides:
   - `getDimensionStyle(parentDimStyle)` — the effective dimension style with per-object overrides folded in.
@@ -108,9 +121,9 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.17.0...8.32.0
 
 ### Fixed
 
-- (dotnet) `File3dm.Settings.PageAbsoluteTolerance` setter silently set `PageRelativeTolerance` instead — setting the page absolute tolerance was a no-op and corrupted the relative tolerance. RH-87934 / RH3DM-195
+- (dotnet) `File3dm.Settings.PageAbsoluteTolerance` setter silently set `PageRelativeTolerance` instead — setting the page absolute tolerance was a no-op and corrupted the relative tolerance. RH3DM-195
 - (js) `memory access out of bounds` crash when adding instance definitions whose objects carry meshes. RH3DM-193
-- (py) Blender/Linux segfault caused by a zlib symbol clash; zlib/OpenNURBS symbols are now hidden. RH-92684 #714 #717
+- (py) Blender/Linux segfault caused by a zlib symbol clash; zlib/OpenNURBS symbols are now hidden. #714 #717
 - (py, js, dotnet) zlib C4081 MSVC warning, via `ON_CMAKE_BUILD`. RH3DM-179
 - (py, js) `File3dmLayerTable.FindId`/`FindName` returned the default layer (never `None`) when no layer matched, and `FindIndex` returned it instead of raising — they used the OpenNURBS `LayerFrom*` helpers, which fall back to `m_default_layer` on a miss. They now use `ComponentFrom*` and check for an empty reference. #692 @StudioWEngineers
 - (py, js) `Material.SetBumpTexture`/`SetEnvironmentTexture`/`SetTransparencyTexture` (the `Texture` overloads) wrote the texture with the `bitmap` type instead of the intended channel type — the shared helper hard-coded `bitmap_texture`.

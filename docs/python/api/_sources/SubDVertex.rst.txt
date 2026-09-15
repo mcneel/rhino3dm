@@ -1,0 +1,81 @@
+SubDVertex
+==========
+
+.. py:module:: rhino3dm
+
+.. py:class:: SubDVertex
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: EdgeCount
+
+      int: Number of edges for this vertex
+
+   .. py:attribute:: FaceCount
+
+      int: Number of faces for this vertex
+
+   .. py:attribute:: Edges
+
+      IEnumerable<SubDEdge>: All edges that this vertex is part of
+
+   .. py:attribute:: Faces
+
+
+   .. py:attribute:: Tag
+
+      SubDVertexTag: identifies the type of subdivision vertex
+
+   .. py:attribute:: ControlNetPoint
+
+      rhino3dm.Point3d: Location of the "control net" point that this SubDVertex represents
+
+   .. py:attribute:: SurfacePoint
+
+
+   .. py:attribute:: IsSmooth
+
+
+   .. py:attribute:: IsCrease
+
+
+   .. py:attribute:: IsDart
+
+
+   .. py:attribute:: IsCorner
+
+
+   .. py:attribute:: VertexSharpness
+
+
+   .. py:method:: IsSharp(endCheck)
+
+      [todo] add documentation
+
+   .. py:method:: Next()
+
+      [todo] add documentation
+
+   .. py:method:: Previous()
+
+      [todo] add documentation
+
+   .. py:method:: Edge(index)
+
+      [todo] add documentation
+
+   .. py:method:: __eq__()
+
+      [todo] add documentation
+
+   .. py:method:: __ne__()
+
+      [todo] add documentation
+
+   .. py:method:: __hash__()
+
+      [todo] add documentation

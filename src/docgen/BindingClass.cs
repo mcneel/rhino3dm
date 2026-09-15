@@ -17,6 +17,20 @@ namespace docgen
         public static Dictionary<string, JavascriptEnum> AllJavascriptEnums { get; } = new Dictionary<string, JavascriptEnum>();
         public static Dictionary<string, PythonClass> AllPythonClasses { get; } = new Dictionary<string, PythonClass>();
 
+        // The first double-quoted token on `line`, or null when the line has none.
+        // Some pybind/embind statements name their member/class with a runtime
+        // variable instead of a string literal (e.g. the templated SubD iterators,
+        // "class_<IteratorT>(name)") - those have no quoted token, so callers skip
+        // them rather than crash on an out-of-range split.
+        static string QuotedName(string line)
+        {
+            int a = line.IndexOf('"');
+            if (a < 0)
+                return null;
+            int b = line.IndexOf('"', a + 1);
+            return b > a ? line.Substring(a + 1, b - a - 1) : null;
+        }
+
         public static void BuildDictionary(string sourcePath)
         {
             BindingClass activeClass = null;
@@ -28,7 +42,12 @@ namespace docgen
                     string line = lines[i].Trim();
                     if (line.StartsWith("class_"))
                     {
-                        string name = (line.Split(new char[] { '"' }))[1];
+                        string name = QuotedName(line);
+                        if (name == null)   // e.g. templated "class_<IteratorT>(name)"
+                        {
+                            activeClass = null;
+                            continue;
+                        }
                         if (name.StartsWith("__"))
                             continue;
                         var activeJavascriptClass = new JavascriptClass(name);
@@ -51,7 +70,12 @@ namespace docgen
 
                     if (line.StartsWith("py::class_"))
                     {
-                        string name = (line.Split(new char[] { '"' }))[1];
+                        string name = QuotedName(line);
+                        if (name == null)   // e.g. templated "py::class_<IteratorT>(m, name)"
+                        {
+                            activeClass = null;
+                            continue;
+                        }
                         if (name.StartsWith("__"))
                             continue;
                         var activePythonClass = new PythonClass(name);
@@ -80,7 +104,12 @@ namespace docgen
 
                     if (line.StartsWith("enum_"))
                     {
-                        string name = (line.Split(new char[] { '"' }))[1];
+                        string name = QuotedName(line);
+                        if (name == null)
+                        {
+                            activeClass = null;
+                            continue;
+                        }
                         if (name.StartsWith("__"))
                             continue;
                         var jsenum = new JavascriptEnum(name);
@@ -113,8 +142,9 @@ namespace docgen
                           || line.StartsWith(".def_readonly")
                           || line.StartsWith(".def_readwrite"))
                         {
-                            string propName = (line.Split(new char[] { '"' }))[1];
-                            activeClass.AddProperty(propName);
+                            string propName = QuotedName(line);
+                            if (propName != null)
+                                activeClass.AddProperty(propName);
                             continue;
                         }
 
@@ -123,16 +153,22 @@ namespace docgen
 
                         if (line.StartsWith(".function") || line.StartsWith(".def("))
                         {
-                            string funcName = (line.Split(new char[] { '"' }))[1];
-                            string cppFunction = GetCppFunctionName(line);
-                            activeClass.AddMethod(funcName, false, cppFunction, GetArgList(line));
+                            string funcName = QuotedName(line);
+                            if (funcName != null)
+                            {
+                                string cppFunction = GetCppFunctionName(line);
+                                activeClass.AddMethod(funcName, false, cppFunction, GetArgList(line));
+                            }
                         }
 
                         if (line.StartsWith(".class_function") || line.StartsWith(".def_static"))
                         {
-                            string funcName = (line.Split(new char[] { '"' }))[1];
-                            string cppFunction = GetCppFunctionName(line);
-                            activeClass.AddMethod(funcName, true, cppFunction, GetArgList(line));
+                            string funcName = QuotedName(line);
+                            if (funcName != null)
+                            {
+                                string cppFunction = GetCppFunctionName(line);
+                                activeClass.AddMethod(funcName, true, cppFunction, GetArgList(line));
+                            }
                         }
                         if (line.StartsWith(";"))
                         {

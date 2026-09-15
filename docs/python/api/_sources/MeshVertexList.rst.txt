@@ -25,6 +25,33 @@ MeshVertexList
 
       [todo] add documentation
 
+   .. py:method:: Point3dAt(index)
+
+      Get double precision location at a given index
+
+
+      :rtype: rhino3dm.Point3d
+
+   .. py:method:: SetPoint3dAt(index, point)
+
+      [todo] add documentation
+
+   .. py:method:: ToPoint3dArray()
+
+      Copies all vertices to a new array of .
+
+      :return: A new array.
+
+      :rtype: rhino3dm.Point3d[]
+
+   .. py:method:: ToPoint3fArray()
+
+      Copies all vertices to a new array of .
+
+      :return: A new array.
+
+      :rtype: Point3f[]
+
    .. py:method:: Clear()
 
       Clears the Vertex list on the mesh.
@@ -51,6 +78,10 @@ MeshVertexList
       :return: The index of the newly added vertex.
 
       :rtype: int
+
+   .. py:method:: AddPoint3d(x, y, z)
+
+      [todo] add documentation
 
    .. py:method:: IsHidden(vertexIndex)
 

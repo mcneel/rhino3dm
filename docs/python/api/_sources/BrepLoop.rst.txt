@@ -1,0 +1,17 @@
+BrepLoop
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: BrepLoop
+
+   .. py:attribute:: LoopType
+
+      BrepLoopType: type of loop.
+
+   .. py:attribute:: TrimCount
+
+
+   .. py:attribute:: Trims
+
+      Collections.BrepTrimList: List of trims for this loop

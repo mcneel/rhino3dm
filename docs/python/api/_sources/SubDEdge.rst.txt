@@ -1,0 +1,88 @@
+SubDEdge
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: SubDEdge
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: VertexCount
+
+
+   .. py:attribute:: FaceCount
+
+      int: Number of faces for this edge.
+
+   .. py:attribute:: Vertices
+
+
+   .. py:attribute:: Faces
+
+
+   .. py:attribute:: Tag
+
+      SubDEdgeTag: identifies the type of subdivision edge.
+
+   .. py:attribute:: ControlNetDirection
+
+
+   .. py:attribute:: IsSmooth
+
+
+   .. py:attribute:: IsSharp
+
+
+   .. py:attribute:: IsCrease
+
+
+   .. py:attribute:: IsHardCrease
+
+
+   .. py:attribute:: IsDartCrease
+
+
+   .. py:attribute:: DartCount
+
+
+   .. py:attribute:: SubdivisionPoint
+
+
+   .. py:attribute:: ControlNetCenterPoint
+
+
+   .. py:method:: VertexId(index)
+
+      [todo] add documentation
+
+   .. py:method:: Vertex(index)
+
+      [todo] add documentation
+
+   .. py:method:: ControlNetPoint(index)
+
+      [todo] add documentation
+
+   .. py:method:: EndSharpness(endIndex)
+
+      [todo] add documentation
+
+   .. py:method:: ControlNetCenterNormal(edge_face_index)
+
+      [todo] add documentation
+
+   .. py:method:: __eq__()
+
+      [todo] add documentation
+
+   .. py:method:: __ne__()
+
+      [todo] add documentation
+
+   .. py:method:: __hash__()
+
+      [todo] add documentation

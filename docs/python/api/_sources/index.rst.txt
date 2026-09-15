@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to rhino3dm's documentation!
-====================================
+Welcome to the rhino3dm.py documentation!
+=========================================
 
 .. toctree::
    :maxdepth: 2
@@ -17,6 +17,7 @@ Welcome to rhino3dm's documentation!
    Arrowhead
    BezierCurve
    Bitmap
+   BND_SubD
    BoundingBox
    Box
    Brep
@@ -24,7 +25,11 @@ Welcome to rhino3dm's documentation!
    BrepEdgeList
    BrepFace
    BrepFaceList
+   BrepLoop
+   BrepLoopList
    BrepSurfaceList
+   BrepTrim
+   BrepTrimList
    BrepVertex
    BrepVertexList
    CachedTextureCoordinates
@@ -145,6 +150,9 @@ Welcome to rhino3dm's documentation!
    Skylight
    Sphere
    SubD
+   SubDEdge
+   SubDFace
+   SubDVertex
    Sun
    Surface
    SurfaceProxy

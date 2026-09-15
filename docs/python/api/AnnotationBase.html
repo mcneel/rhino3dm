@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AnnotationBase &mdash; rhino3dm 8.32.0 documentation</title>
+  <title>AnnotationBase &mdash; rhino3dm 8.35.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=65727893"></script>
+        <script src="_static/documentation_options.js?v=eb29895d"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Arc" href="Arc.html" />
-    <link rel="prev" title="Welcome to rhino3dm’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Welcome to the rhino3dm.py documentation!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,7 +37,7 @@
             rhino3dm
           </a>
               <div class="version">
-                8.32.0
+                8.35.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -58,7 +58,39 @@
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.AnnotationType"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.AnnotationType</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextIsWrapped"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextIsWrapped</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.Plane"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.Plane</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.HasPropertyOverrides"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.HasPropertyOverrides</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextHasRtfFormatting"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextHasRtfFormatting</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextRotationRadians"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextRotationRadians</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.TextRotationDegrees"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.TextRotationDegrees</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.WrapText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.WrapText()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetDimensionStyle"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetDimensionStyle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.IsPropertyOverridden"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.IsPropertyOverridden()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.ClearPropertyOverrides"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.ClearPropertyOverrides()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetOverrideDimStyle"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetOverrideDimStyle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetRichText"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetRichText()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.PlainTextToRtf"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.PlainTextToRtf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.RunReplace"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.RunReplace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetTextHeight"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetTextHeight()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetTextHeight"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetTextHeight()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetDimensionScale"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetDimensionScale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetDimensionScale"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetDimensionScale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetMaskEnabled"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetMaskEnabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetMaskEnabled"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetMaskEnabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetMaskColorSource"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetMaskColorSource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetMaskColorSource"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetMaskColorSource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetMaskFrame"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetMaskFrame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetMaskFrame"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetMaskFrame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetMaskColor"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetMaskColor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetMaskColor"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetMaskColor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetMaskOffset"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetMaskOffset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetMaskOffset"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetMaskOffset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetDimensionLengthDisplay"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetDimensionLengthDisplay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetDimensionLengthDisplay"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetDimensionLengthDisplay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetAlternateDimensionLengthDisplay"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetAlternateDimensionLengthDisplay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetAlternateDimensionLengthDisplay"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetAlternateDimensionLengthDisplay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetFont"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetFont()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.SetFont"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.SetFont()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rhino3dm.AnnotationBase.GetBoundingBox"><code class="docutils literal notranslate"><span class="pre">AnnotationBase.GetBoundingBox()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -69,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Arrowhead.html">Arrowhead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BezierCurve.html">BezierCurve</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Bitmap.html">Bitmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BND_SubD.html">BND_SubD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BoundingBox.html">BoundingBox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Box.html">Box</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Brep.html">Brep</a></li>
@@ -76,7 +109,11 @@
 <li class="toctree-l1"><a class="reference internal" href="BrepEdgeList.html">BrepEdgeList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFace.html">BrepFace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepFaceList.html">BrepFaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoop.html">BrepLoop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepLoopList.html">BrepLoopList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepSurfaceList.html">BrepSurfaceList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrim.html">BrepTrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrepTrimList.html">BrepTrimList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertex.html">BrepVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrepVertexList.html">BrepVertexList</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CachedTextureCoordinates.html">CachedTextureCoordinates</a></li>
@@ -197,6 +234,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Skylight.html">Skylight</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sphere.html">Sphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SubD.html">SubD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDEdge.html">SubDEdge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDFace.html">SubDFace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SubDVertex.html">SubDVertex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sun.html">Sun</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Surface.html">Surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceProxy.html">SurfaceProxy</a></li>
@@ -287,6 +327,30 @@ returned by DimensionStyle(ParentStyle)</p>
 <dd><p>rhino3dm.Plane: Plane that this annotation lies on</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.HasPropertyOverrides">
+<span class="sig-name descname"><span class="pre">HasPropertyOverrides</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.HasPropertyOverrides" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.TextHasRtfFormatting">
+<span class="sig-name descname"><span class="pre">TextHasRtfFormatting</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.TextHasRtfFormatting" title="Link to this definition"></a></dt>
+<dd><p>bool: Gets a value indicating whether the annotation’s text is formatted as RTF (Rich Text Format).
+Returns True if the text begins with an RTF header; otherwise, false.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.TextRotationRadians">
+<span class="sig-name descname"><span class="pre">TextRotationRadians</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.TextRotationRadians" title="Link to this definition"></a></dt>
+<dd><p>float: Rotation of text in radians</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.TextRotationDegrees">
+<span class="sig-name descname"><span class="pre">TextRotationDegrees</span></span><a class="headerlink" href="#rhino3dm.AnnotationBase.TextRotationDegrees" title="Link to this definition"></a></dt>
+<dd><p>float: Rotation of text in degrees</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="rhino3dm.AnnotationBase.WrapText">
 <span class="sig-name descname"><span class="pre">WrapText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrapwidth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.WrapText" title="Link to this definition"></a></dt>
@@ -294,6 +358,235 @@ returned by DimensionStyle(ParentStyle)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetDimensionStyle">
+<span class="sig-name descname"><span class="pre">GetDimensionStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetDimensionStyle" title="Link to this definition"></a></dt>
+<dd><p>Return the proper dimension style from which to get properties
+for this annotation object
+If this object has style overrides, those will be included in the
+returned dimension style and the style will be updated to include
+the current state of the parent style for non-overridden fields</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="DimensionStyle.html#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle">DimensionStyle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.IsPropertyOverridden">
+<span class="sig-name descname"><span class="pre">IsPropertyOverridden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.IsPropertyOverridden" title="Link to this definition"></a></dt>
+<dd><p>Returns True if a property is overridden</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.ClearPropertyOverrides">
+<span class="sig-name descname"><span class="pre">ClearPropertyOverrides</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.ClearPropertyOverrides" title="Link to this definition"></a></dt>
+<dd><p>Clears all overridden properties for this annotation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetOverrideDimStyle">
+<span class="sig-name descname"><span class="pre">SetOverrideDimStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overrideStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetOverrideDimStyle" title="Link to this definition"></a></dt>
+<dd><p>Set a style including overrides for this annotation object.
+The DimensionStyle OverrideStyle must have the override fields marked
+as overridden and must have it’s Id set to nil.
+Use DimensionStyle.SetFieldOverride(Field field) and related functions
+to manage override settings. To override a field, the field value must be set
+and the field must be marked as an override.
+The DimensionStyle passed in here must not be in the dimstyle table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetRichText">
+<span class="sig-name descname"><span class="pre">SetRichText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rtfText</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetRichText" title="Link to this definition"></a></dt>
+<dd><p>Sets the annotation’s text as rich text (RTF), optionally using a specified dimension style for formatting overrides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rtfText</strong> (<em>str</em>) – The RTF (Rich Text Format) string to assign to the annotation.</p></li>
+<li><p><strong>dimstyle</strong> (<a class="reference internal" href="DimensionStyle.html#rhino3dm.DimensionStyle" title="rhino3dm.DimensionStyle"><em>DimensionStyle</em></a>) – The dimension style to use for formatting overrides, or None to use the current style.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.PlainTextToRtf">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlainTextToRtf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.PlainTextToRtf" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.RunReplace">
+<span class="sig-name descname"><span class="pre">RunReplace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimstyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startRunIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startRunPosition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endRunIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endRunPosition</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.RunReplace" title="Link to this definition"></a></dt>
+<dd><p>Replace text within a formatted string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetTextHeight">
+<span class="sig-name descname"><span class="pre">GetTextHeight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetTextHeight" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetTextHeight">
+<span class="sig-name descname"><span class="pre">SetTextHeight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetTextHeight" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetDimensionScale">
+<span class="sig-name descname"><span class="pre">GetDimensionScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetDimensionScale" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetDimensionScale">
+<span class="sig-name descname"><span class="pre">SetDimensionScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetDimensionScale" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetMaskEnabled">
+<span class="sig-name descname"><span class="pre">GetMaskEnabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetMaskEnabled" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetMaskEnabled">
+<span class="sig-name descname"><span class="pre">SetMaskEnabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetMaskEnabled" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetMaskColorSource">
+<span class="sig-name descname"><span class="pre">GetMaskColorSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetMaskColorSource" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetMaskColorSource">
+<span class="sig-name descname"><span class="pre">SetMaskColorSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetMaskColorSource" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetMaskFrame">
+<span class="sig-name descname"><span class="pre">GetMaskFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetMaskFrame" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetMaskFrame">
+<span class="sig-name descname"><span class="pre">SetMaskFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetMaskFrame" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetMaskColor">
+<span class="sig-name descname"><span class="pre">GetMaskColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetMaskColor" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetMaskColor">
+<span class="sig-name descname"><span class="pre">SetMaskColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetMaskColor" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetMaskOffset">
+<span class="sig-name descname"><span class="pre">GetMaskOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetMaskOffset" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetMaskOffset">
+<span class="sig-name descname"><span class="pre">SetMaskOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetMaskOffset" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetDimensionLengthDisplay">
+<span class="sig-name descname"><span class="pre">GetDimensionLengthDisplay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetDimensionLengthDisplay" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetDimensionLengthDisplay">
+<span class="sig-name descname"><span class="pre">SetDimensionLengthDisplay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetDimensionLengthDisplay" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetAlternateDimensionLengthDisplay">
+<span class="sig-name descname"><span class="pre">GetAlternateDimensionLengthDisplay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetAlternateDimensionLengthDisplay" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetAlternateDimensionLengthDisplay">
+<span class="sig-name descname"><span class="pre">SetAlternateDimensionLengthDisplay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetAlternateDimensionLengthDisplay" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetFont">
+<span class="sig-name descname"><span class="pre">GetFont</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetFont" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.SetFont">
+<span class="sig-name descname"><span class="pre">SetFont</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.SetFont" title="Link to this definition"></a></dt>
+<dd><p>[todo] add documentation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.AnnotationBase.GetBoundingBox">
+<span class="sig-name descname"><span class="pre">GetBoundingBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentDimStyle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rhino3dm.AnnotationBase.GetBoundingBox" title="Link to this definition"></a></dt>
+<dd><p>Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xform</strong> (<a class="reference internal" href="Transform.html#rhino3dm.Transform" title="rhino3dm.Transform"><em>Transform</em></a>) – Transformation to apply to bounding box after calculation. The geometry is not modified.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The bounding box of the transformed geometry in world coordinates or BoundingBox.Empty if not bounding box could be found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="BoundingBox.html#rhino3dm.BoundingBox" title="rhino3dm.BoundingBox">rhino3dm.BoundingBox</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -306,7 +599,7 @@ returned by DimensionStyle(ParentStyle)</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to rhino3dm’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to the rhino3dm.py documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Arc.html" class="btn btn-neutral float-right" title="Arc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

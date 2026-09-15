@@ -721,6 +721,32 @@ namespace Rhino.DocObjects
       set { SetInt(Field.AlternateDimensionLengthDisplay, (int)value); }
     }
 
+    /// <summary>
+    /// The dimension style's own unit system. This is what the style's lengths - text height,
+    /// arrow size and so on - are expressed in, and openNURBS uses it internally to get scales
+    /// right when annotation moves between model space, page space and instance definitions
+    /// whose unit systems differ. A style that reports
+    /// <see cref="Rhino.UnitSystem.None"/> has no unit system of its own, and unknown scales
+    /// resolve to 1.
+    /// </summary>
+    /// <since>8.36</since>
+    public UnitSystem UnitSystem
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        UnitSystem rc = UnsafeNativeMethods.ON_Dimstyle_GetUnitSystem(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Dimstyle_SetUnitSystem(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
     /// <since>6.0</since>
     [CLSCompliant(false)]
     public UnitSystem DimensionLengthDisplayUnit(uint model_serial_number )
