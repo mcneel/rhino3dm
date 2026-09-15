@@ -344,6 +344,19 @@ namespace Rhino.Commands
       get { return PlugIn.CommandSettings( EnglishName ); }
     }
 
+    /// <summary>
+    /// By default, object attribute changes do not trigger history replay.
+    /// Set this property to true, typically in the command's constructor, if you
+    /// want objects created with this command to trigger history replay when their
+    /// attributes change.
+    /// </summary>
+    /// <since>8.34</since>
+    public bool HistoryReplayOnObjectAttributeChange
+    {
+      get { return UnsafeNativeMethods.CRhinoCommand_GetHistoryReplayOnObjectAttributeChange(m_runtime_serial_number); }
+      set { UnsafeNativeMethods.CRhinoCommand_SetHistoryReplayOnObjectAttributeChange(m_runtime_serial_number, value); }
+    }
+
 #endregion
 
     /// <summary>

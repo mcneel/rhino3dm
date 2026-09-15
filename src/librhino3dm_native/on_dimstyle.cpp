@@ -1171,3 +1171,19 @@ RH_C_FUNCTION void ON_DimStyle_SetParentId(ON_DimStyle* dimstyle, ON_UUID parent
 
 #pragma endregion field overrides
 
+
+// The dimension style's own unit system (ON_DimStyle::UnitSystem). Template authoring
+// (RH-96388): the hand-authored Rhino 8 templates set this on every style, and a style
+// reconstructed without it reports ON::LengthUnitSystem::None, which openNURBS uses to
+// decide that unknown scales are 1 and which Rhino's dimension-style-on-open matching
+// falls back to. There was no managed accessor.
+RH_C_FUNCTION ON::LengthUnitSystem ON_Dimstyle_GetUnitSystem(const ON_DimStyle* pConstDimStyle)
+{
+  return pConstDimStyle ? pConstDimStyle->UnitSystem() : ON::LengthUnitSystem::None;
+}
+
+RH_C_FUNCTION void ON_Dimstyle_SetUnitSystem(ON_DimStyle* pDimStyle, ON::LengthUnitSystem unitSystem)
+{
+  if (pDimStyle)
+    pDimStyle->SetUnitSystem(unitSystem);
+}

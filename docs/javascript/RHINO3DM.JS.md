@@ -44,6 +44,19 @@ The easiest way to get started is to reference a specific version of the library
 
 You can also [download the files](https://www.jsdelivr.com/package/npm/rhino3dm) if you want to bake them into your site or application. You'll need the `.wasm` web assembly along with the `.js` (or `.min.js`) wrapper.
 
+### Bundlers: telling rhino3dm where `rhino3dm.wasm` lives
+
+`rhino3dm.js` loads `rhino3dm.wasm` from the same directory it was itself loaded from. Bundlers (Vite, webpack, Next.js, ...) often move or rename the `.js`, so the `.wasm` is no longer found. Rather than copying the `.wasm` around, pass a `locateFile` callback to the module factory and return the URL the `.wasm` is served from:
+
+```js
+import rhino3dm from 'rhino3dm'
+
+// e.g. the .wasm is copied to /public/wasm/ by your build
+const rhino = await rhino3dm({ locateFile: (file) => `/wasm/${file}` })
+```
+
+The argument is the standard [Emscripten module configuration object](https://emscripten.org/docs/api_reference/module.html), so other members such as `wasmBinary` (supply the bytes yourself) or `print`/`printErr` may be passed too. See `RhinoModuleOptions` in `rhino3dm.d.ts`.
+
 
 ### Node.js
 

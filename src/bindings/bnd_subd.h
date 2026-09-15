@@ -209,6 +209,11 @@ public:
   unsigned int UpdateAllTagsAndSectorCoefficients() { return m_subd->UpdateAllTagsAndSectorCoefficients(false); }
   bool Subdivide(int count) { return m_subd->GlobalSubdivide(count); }
 
+  // Number of sharp edges: smooth-tagged edges carrying nonzero sharpness, the
+  // soft creases a weighted-edge importer is looking for. Cheaper than walking
+  // Edges and testing IsSharp on each.
+  unsigned int SharpEdgeCount() const { return m_subd->SharpEdgeCount(); }
+
   const ON_SubD* GetONSubDComponent() const { return m_subd; }
 
 protected:

@@ -777,7 +777,7 @@ namespace Rhino.DocObjects
     /// <param name="rhinoObjects">An array, a list, or any enumerable set of Rhino objects.</param>
     /// <param name="okToCreate">true if the method is allowed to instantiate new meshes if they do not exist.</param>
     /// <param name="returnAllObjects">true if all objects should be returned.</param>
-    /// <param name="skipHiddenObjects">true if if hidden objects should be ignored.</param>
+    /// <param name="skipHiddenObjects">true if hidden objects should be ignored.</param>
     /// <param name="updateMeshTCs">true if the TCs should be updated with a texture mapping.</param>
     /// <returns>An array of object references.</returns>
     /// <since>7.3</since>

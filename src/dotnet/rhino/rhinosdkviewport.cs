@@ -266,7 +266,7 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// If true, the the camera location, camera direction, and lens angle should not be changed.
+    /// If true, the camera location, camera direction, and lens angle should not be changed.
     /// </summary>
     /// <since>8.0</since>
     public bool LockedProjection

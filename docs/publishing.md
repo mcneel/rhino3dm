@@ -15,6 +15,25 @@ There are several places where version numbers should be updated:
 
 ## Updating Documentation with docgen
 
+### automated (recommended)
+
+`src/docgen/make_docs.sh` runs the whole pipeline below (build + run docgen, sphinx for
+Python, typedoc for JavaScript) and copies the results into `docs/python/api` and
+`docs/javascript/api`. Run it from the repo root after bumping `src/version.txt` (the version
+shown in the docs is embedded from `version.txt` when docgen is built):
+
+```bash
+./src/docgen/make_docs.sh          # all: python + javascript
+./src/docgen/make_docs.sh python   # just the Python docs
+./src/docgen/make_docs.sh js       # just the JavaScript docs (typedoc)
+```
+
+It picks up `sphinx-build` from `.venv` if present (see requirements below), and runs
+`npm install` in `src/js/docs` on first use. Note: `src/js/rhino3dm.d.ts` is hand-maintained
+and is **not** regenerated — the JavaScript docs are produced by running typedoc against it.
+Then commit the changes and merge with `main`. The manual steps below are the reference the
+script automates.
+
 ### requirements:
 
 - python - 

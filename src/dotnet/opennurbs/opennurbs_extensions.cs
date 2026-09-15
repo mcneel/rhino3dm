@@ -889,7 +889,7 @@ namespace Rhino.FileIO
     {
       get
       {
-        // NOTE: This is how it works in Rhino.RhinoDoc, with get returning a copy and a seperate set function
+        // NOTE: This is how it works in Rhino.RhinoDoc, with get returning a copy and a separate set function
         return new EarthAnchorPoint(this);
       }
       set
@@ -1677,7 +1677,7 @@ namespace Rhino.FileIO
     /// </param>
     /// <param name="dataReader">
     /// The function that will read the data.
-    /// This function must be implemented identical to the the originating <see cref="DocObjects.Custom.UserData"/>-inherited class's Read method.
+    /// This function must be implemented identical to the originating <see cref="DocObjects.Custom.UserData"/>-inherited class's Read method.
     /// </param>
     /// <returns>The value returned by the data reading function if successful, false otherwise.</returns>
     public bool TryReadUserData(Guid userDataId, bool readFromAttributes, Func<File3dm, BinaryArchiveReader, bool> dataReader)
@@ -4016,7 +4016,7 @@ namespace Rhino.FileIO
     /// <param name="pluginData">The plug-in whose data you want to try to read.</param>
     /// <param name="dataReader">
     /// The function that will read the data.
-    /// This function must be implemented identical to the the originating plug-in's <see cref="PlugIns.PlugIn.ReadDocument(RhinoDoc, BinaryArchiveReader, FileReadOptions)"/> method.
+    /// This function must be implemented identical to the originating plug-in's <see cref="PlugIns.PlugIn.ReadDocument(RhinoDoc, BinaryArchiveReader, FileReadOptions)"/> method.
     /// </param>
     /// <returns>The value returned by the data reading function if successful, false otherwise.</returns>
     public bool TryRead(File3dmPlugInData pluginData, Func<File3dm, BinaryArchiveReader, bool> dataReader)
@@ -5307,7 +5307,7 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
-    /// Adds or sets a a document string in the 3dm file.
+    /// Adds or sets a document string in the 3dm file.
     /// </summary>
     /// <param name="key">The key.</param>
     /// <param name="value">The entry value.</param>

@@ -1,0 +1,14 @@
+BrepTrimList
+============
+
+.. py:module:: rhino3dm
+
+.. py:class:: BrepTrimList
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation

@@ -116,3 +116,13 @@ Vector3d
       :return: If the input is valid, the angle (in radians) between a and b; RhinoMath.UnsetValue otherwise.
 
       :rtype: float
+
+   .. py:method:: Transform(xform)
+
+      Transforms the vector in place.
+      The transformation matrix acts on the left of the vector; i.e.,result = transformation*vector
+
+      :param Transform transformation: Transformation matrix to apply.
+
+
+      :rtype: void

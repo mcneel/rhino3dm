@@ -1,6 +1,31 @@
 declare module 'rhino3dm' {
 
-	export default function rhino3dm() : Promise<RhinoModule>;
+	/**
+	 * Options accepted by the `rhino3dm()` module factory. This is the standard Emscripten
+	 * module-configuration object; the commonly used members are typed here and any other
+	 * Emscripten `Module` member may be passed as well.
+	 */
+	export interface RhinoModuleOptions {
+		/**
+		 * Override where `rhino3dm.wasm` is loaded from. Receives the file name (`'rhino3dm.wasm'`)
+		 * and the directory the script was loaded from, and must return the URL to fetch. Use this when
+		 * a bundler (Vite, webpack, Next.js, ...) does not serve the .wasm next to the .js.
+		 * @example
+		 * const rhino = await rhino3dm({ locateFile: (file) => `/wasm/${file}` });
+		 */
+		locateFile?: (path: string, scriptDirectory: string) => string;
+		/** Supply the wasm bytes directly instead of having the module fetch `rhino3dm.wasm`. */
+		wasmBinary?: ArrayBuffer | Uint8Array;
+		/** Called once the wasm runtime is initialized (before the returned promise resolves). */
+		onRuntimeInitialized?: () => void;
+		/** Redirect the module's stdout. */
+		print?: (text: string) => void;
+		/** Redirect the module's stderr. */
+		printErr?: (text: string) => void;
+		[key: string]: unknown;
+	}
+
+	export default function rhino3dm(moduleOptions?: RhinoModuleOptions) : Promise<RhinoModule>;
 
 	enum ActiveSpace {
 		None,
@@ -21,6 +46,48 @@ declare module 'rhino3dm' {
 		Text,
 		Leader,
 		Angular3pt
+	}
+
+	enum MaskType {
+		BackgroundColor,
+		MaskColor
+	}
+
+	enum MaskFrame {
+		NoFrame,
+		RectFrame,
+		CapsuleFrame
+	}
+
+	enum LengthDisplay {
+		ModelUnits,
+		Millmeters,
+		Centimeters,
+		Meters,
+		Kilometers,
+		InchesDecimal,
+		InchesFractional,
+		FeetDecimal,
+		FeetAndInches,
+		Miles
+	}
+
+	enum DimensionStyleField {
+		Unset,
+		Name,
+		Index,
+		ExtensionLineExtension,
+		ExtensionLineOffset,
+		ArrowSize,
+		LeaderArrowSize,
+		Centermark,
+		TextGap,
+		TextHeight,
+		DimensionScale,
+		DrawForward,
+		TextUnderlined,
+		DimensionLengthDisplay,
+		AlternateDimensionLengthDisplay
 	}
 
 	enum ArrowheadTypes {
@@ -643,10 +710,177 @@ declare module 'rhino3dm' {
 		 */
 		textIsWrapped: boolean;
 		/**
+		 * True if this annotation has any per-object dimension style overrides
+		 */
+		hasPropertyOverrides: boolean;
+		/**
+		 * True if the annotation's text begins with an RTF header
+		 */
+		textHasRtfFormatting: boolean;
+		/**
+		 * Angle in radians between the text plane and the object plane
+		 */
+		textRotationRadians: number;
+		/**
+		 * Angle in degrees between the text plane and the object plane
+		 */
+		textRotationDegrees: number;
+		/**
 		 * @description Wrap text
 		 * @returns {void}
 		 */
 		wrapText(): void;
+		/**
+		 * @description The effective dimension style for this annotation, combining the parent
+		 * dimension style with any per-object overrides. Get the parent from
+		 * File3dm.dimStyles.findId(annotation.dimensionStyleId).
+		 * @returns {DimensionStyle}
+		 */
+		getDimensionStyle(parentDimStyle:DimensionStyle): DimensionStyle;
+		/**
+		 * @description Tests whether a specific dimension style field is overridden on this annotation
+		 * @returns {boolean}
+		 */
+		isPropertyOverridden(field:DimensionStyleField): boolean;
+		/**
+		 * @description Clears all per-object dimension style overrides on this annotation
+		 * @returns {void}
+		 */
+		clearPropertyOverrides(): void;
+		/**
+		 * @description Applies a dimension style with overrides set to this annotation
+		 * @returns {boolean}
+		 */
+		setOverrideDimStyle(overrideStyle:DimensionStyle): boolean;
+		/**
+		 * @description Sets the annotation's text as rich text (RTF)
+		 * @returns {void}
+		 */
+		setRichText(rtfText:string, dimstyle:DimensionStyle): void;
+		/**
+		 * @description Converts a plain text string to an RTF string
+		 * @returns {string}
+		 */
+		static plainTextToRtf(str:string): string;
+		/**
+		 * @description Replaces text within a formatted string
+		 * @returns {boolean}
+		 */
+		runReplace(dimstyle:DimensionStyle, str:string, startRunIndex:number, startRunPosition:number, endRunIndex:number, endRunPosition:number): boolean;
+		/**
+		 * @description Effective text height for this annotation given its parent dimension style
+		 * @returns {number}
+		 */
+		getTextHeight(parentDimStyle:DimensionStyle): number;
+		/**
+		 * @description Sets the text height override for this annotation
+		 * @returns {void}
+		 */
+		setTextHeight(parentDimStyle:DimensionStyle, height:number): void;
+		/**
+		 * @description Effective model space scale (dimension scale) for this annotation
+		 * @returns {number}
+		 */
+		getDimensionScale(parentDimStyle:DimensionStyle): number;
+		/**
+		 * @description Sets the model space scale (dimension scale) override for this annotation
+		 * @returns {void}
+		 */
+		setDimensionScale(parentDimStyle:DimensionStyle, scale:number): void;
+		/**
+		 * @description Whether a text mask is drawn
+		 * @returns {boolean}
+		 */
+		getMaskEnabled(parentDimStyle:DimensionStyle): boolean;
+		/**
+		 * @description Sets whether a text mask is drawn
+		 * @returns {void}
+		 */
+		setMaskEnabled(parentDimStyle:DimensionStyle, on:boolean): void;
+		/**
+		 * @description Source of the text mask color
+		 * @returns {MaskType}
+		 */
+		getMaskColorSource(parentDimStyle:DimensionStyle): MaskType;
+		/**
+		 * @description Sets the source of the text mask color
+		 * @returns {void}
+		 */
+		setMaskColorSource(parentDimStyle:DimensionStyle, source:MaskType): void;
+		/**
+		 * @description Text mask frame type
+		 * @returns {MaskFrame}
+		 */
+		getMaskFrame(parentDimStyle:DimensionStyle): MaskFrame;
+		/**
+		 * @description Sets the text mask frame type
+		 * @returns {void}
+		 */
+		setMaskFrame(parentDimStyle:DimensionStyle, frame:MaskFrame): void;
+		/**
+		 * @description Text mask color
+		 * @returns {object}
+		 */
+		getMaskColor(parentDimStyle:DimensionStyle): object;
+		/**
+		 * @description Sets the text mask color
+		 * @returns {void}
+		 */
+		setMaskColor(parentDimStyle:DimensionStyle, color:object): void;
+		/**
+		 * @description Text mask border offset
+		 * @returns {number}
+		 */
+		getMaskOffset(parentDimStyle:DimensionStyle): number;
+		/**
+		 * @description Sets the text mask border offset
+		 * @returns {void}
+		 */
+		setMaskOffset(parentDimStyle:DimensionStyle, offset:number): void;
+		/**
+		 * @description Dimension length display units and format
+		 * @returns {LengthDisplay}
+		 */
+		getDimensionLengthDisplay(parentDimStyle:DimensionStyle): LengthDisplay;
+		/**
+		 * @description Sets the dimension length display units and format
+		 * @returns {void}
+		 */
+		setDimensionLengthDisplay(parentDimStyle:DimensionStyle, display:LengthDisplay): void;
+		/**
+		 * @description Alternate dimension length display units and format
+		 * @returns {LengthDisplay}
+		 */
+		getAlternateDimensionLengthDisplay(parentDimStyle:DimensionStyle): LengthDisplay;
+		/**
+		 * @description Sets the alternate dimension length display units and format
+		 * @returns {void}
+		 */
+		setAlternateDimensionLengthDisplay(parentDimStyle:DimensionStyle, display:LengthDisplay): void;
+		/**
+		 * @description Effective font for this annotation given its parent dimension style
+		 * @returns {Font}
+		 */
+		getFont(parentDimStyle:DimensionStyle): Font;
+		/**
+		 * @description Sets the font override for this annotation
+		 * @returns {void}
+		 */
+		setFont(parentDimStyle:DimensionStyle, font:Font): void;
+		/**
+		 * @description A bounding box for the annotation, computed using the parent
+		 * dimension style (the inherited GeometryBase.getBoundingBox() is not valid for
+		 * annotations). Note: text glyph widths cannot be measured in a headless context,
+		 * so for plain Text the box carries valid position/height/orientation but may have
+		 * zero width. Dimensions (which have line geometry) return a full box.
+		 * @returns {BoundingBox}
+		 */
+		getBoundingBox(parentDimStyle:DimensionStyle): BoundingBox;
+		/**
+		 * @deprecated Inherited GeometryBase overload; for annotations it returns an invalid box.
+		 * Pass the parent DimensionStyle instead (declared only so the override stays assignable to GeometryBase).
+		 */
+		getBoundingBox(accurate:boolean): BoundingBox;
 	}
 
 	class Arc {
@@ -2328,6 +2562,10 @@ declare module 'rhino3dm' {
 		 */
 		fixedExtensionLengthOn: any;
 		/**
+		 * Model space scale factor (RhinoCommon: DimensionStyle.DimensionScale)
+		 */
+		dimensionScale: number;
+		/**
 		 * Checks if any fields in this DimensionStyle are overrides
 		 */
 		hasFieldOverrides: boolean;
@@ -2358,6 +2596,21 @@ declare module 'rhino3dm' {
 		 * @returns {void}
 		 */
 		clearAllFieldOverrides(): void;
+		/**
+		 * @description Tests if a specific field is overridden in this DimensionStyle
+		 * @returns {boolean}
+		 */
+		isFieldOverridden(field:DimensionStyleField): boolean;
+		/**
+		 * @description Marks a specific field as overridden in this DimensionStyle
+		 * @returns {void}
+		 */
+		setFieldOverride(field:DimensionStyleField): void;
+		/**
+		 * @description Clears the override on a specific field in this DimensionStyle
+		 * @returns {void}
+		 */
+		clearFieldOverride(field:DimensionStyleField): void;
 		/**
 		 * @description Tests if this DimensionStyle is a child of a specific DimensionStyle
 		 * @returns {boolean} True if this is a child of the DimensionStyle with Parent
@@ -2467,10 +2720,10 @@ declare module 'rhino3dm' {
 		static compress(mesh:Mesh): DracoCompression;
 		/** ... */
 		static compressOptions(mesh:Mesh, options: DracoCompressionOptions): DracoCompression;
-		/** ... */
-		static decompressByteArray(): GeometryBase;
-		/** ... */
-		static decompressBase64String(): GeometryBase;
+		/** Decompresses Draco-compressed mesh data from raw bytes (e.g. a fetched file or a Uint8Array). */
+		static decompressByteArray(buffer: Uint8Array | ArrayBuffer): GeometryBase;
+		/** Decompresses Draco-compressed mesh data from a base64 string (as produced by toBase64String()). */
+		static decompressBase64String(encoded: string): GeometryBase;
 		/** ... */
 		toBase64String(): string;
 	}

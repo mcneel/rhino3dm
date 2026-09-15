@@ -110,6 +110,144 @@ BND_UUID BND_AnnotationBase::DimensionStyleId() const
   return ON_UUID_to_Binding(dimstyleid);
 }
 
+BND_DimensionStyle* BND_AnnotationBase::GetDimensionStyle(const BND_DimensionStyle& parentDimStyle) const
+{
+  // DimensionStyle() returns a reference to either the parent style or the internal
+  // override style, so copy it into a new heap object owned by the returned wrapper.
+  const ON_DimStyle& effective = m_annotation->DimensionStyle(*parentDimStyle.m_dimstyle);
+  return new BND_DimensionStyle(new ON_DimStyle(effective), nullptr);
+}
+
+bool BND_AnnotationBase::HasPropertyOverrides() const
+{
+  return m_annotation->HasDimensionStyleOverrides();
+}
+
+bool BND_AnnotationBase::IsPropertyOverridden(ON_DimStyle::field field) const
+{
+  return m_annotation->FieldIsOverridden(field);
+}
+
+void BND_AnnotationBase::ClearPropertyOverrides()
+{
+  m_annotation->ClearOverrideDimensionStyle();
+}
+
+bool BND_AnnotationBase::SetOverrideDimStyle(const BND_DimensionStyle& overrideStyle)
+{
+  return m_annotation->SetOverrideDimensionStyle(overrideStyle.m_dimstyle, false);
+}
+
+void BND_AnnotationBase::SetRichText(const std::wstring& rtfText, const BND_DimensionStyle& dimstyle)
+{
+  m_annotation->ReplaceTextString(rtfText.c_str(), dimstyle.m_dimstyle);
+}
+
+std::wstring BND_AnnotationBase::PlainTextToRtf(const std::wstring& str)
+{
+  std::wstring rc = L"{\\rtf1{\\ltrch ";
+  for (wchar_t c : str)
+  {
+    switch (c)
+    {
+    case L'\\': rc += L"\\\\"; break;
+    case L'{':  rc += L"\\{";  break;
+    case L'}':  rc += L"\\}";  break;
+    case L'\n': rc += L"}\\par {"; break;
+    case L'\r': break;
+    default:    rc += c; break;
+    }
+  }
+  rc += L"}}";
+  return rc;
+}
+
+bool BND_AnnotationBase::TextHasRtfFormatting() const
+{
+  std::wstring rt = RichText();
+  return rt.rfind(L"{\\rtf", 0) == 0 || rt.rfind(L"{\\\\rtf", 0) == 0;
+}
+
+bool BND_AnnotationBase::RunReplace(const BND_DimensionStyle& dimstyle, const std::wstring& str, int startRunIndex, int startRunPosition, int endRunIndex, int endRunPosition)
+{
+  return m_annotation->RunReplaceString(dimstyle.m_dimstyle, str.c_str(), startRunIndex, startRunPosition, endRunIndex, endRunPosition);
+}
+
+double BND_AnnotationBase::TextRotationRadians() const { return m_annotation->TextRotationRadians(); }
+void BND_AnnotationBase::SetTextRotationRadians(double rotation) { m_annotation->SetTextRotationRadians(rotation); }
+double BND_AnnotationBase::TextRotationDegrees() const { return m_annotation->TextRotationDegrees(); }
+void BND_AnnotationBase::SetTextRotationDegrees(double rotation) { m_annotation->SetTextRotationDegrees(rotation); }
+
+double BND_AnnotationBase::TextHeight(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->TextHeight(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetTextHeight(const BND_DimensionStyle& parentDimStyle, double height) { m_annotation->SetTextHeight(parentDimStyle.m_dimstyle, height); }
+double BND_AnnotationBase::DimensionScale(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->DimScale(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetDimensionScale(const BND_DimensionStyle& parentDimStyle, double scale) { m_annotation->SetDimScale(parentDimStyle.m_dimstyle, scale); }
+
+bool BND_AnnotationBase::MaskEnabled(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->DrawTextMask(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetMaskEnabled(const BND_DimensionStyle& parentDimStyle, bool on) { m_annotation->SetDrawTextMask(parentDimStyle.m_dimstyle, on); }
+ON_TextMask::MaskType BND_AnnotationBase::MaskColorSource(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->MaskFillType(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetMaskColorSource(const BND_DimensionStyle& parentDimStyle, ON_TextMask::MaskType source) { m_annotation->SetMaskFillType(parentDimStyle.m_dimstyle, source); }
+ON_TextMask::MaskFrame BND_AnnotationBase::MaskFrame(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->MaskFrameType(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetMaskFrame(const BND_DimensionStyle& parentDimStyle, ON_TextMask::MaskFrame frame) { m_annotation->SetMaskFrameType(parentDimStyle.m_dimstyle, frame); }
+BND_Color BND_AnnotationBase::MaskColor(const BND_DimensionStyle& parentDimStyle) const { return ON_Color_to_Binding(m_annotation->MaskColor(parentDimStyle.m_dimstyle)); }
+void BND_AnnotationBase::SetMaskColor(const BND_DimensionStyle& parentDimStyle, BND_Color color) { m_annotation->SetMaskColor(parentDimStyle.m_dimstyle, Binding_to_ON_Color(color)); }
+double BND_AnnotationBase::MaskOffset(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->MaskBorder(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetMaskOffset(const BND_DimensionStyle& parentDimStyle, double offset) { m_annotation->SetMaskBorder(parentDimStyle.m_dimstyle, offset); }
+
+ON_DimStyle::LengthDisplay BND_AnnotationBase::DimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->DimensionLengthDisplay(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle, ON_DimStyle::LengthDisplay display) { m_annotation->SetDimensionLengthDisplay(parentDimStyle.m_dimstyle, display); }
+ON_DimStyle::LengthDisplay BND_AnnotationBase::AlternateDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle) const { return m_annotation->AlternateDimensionLengthDisplay(parentDimStyle.m_dimstyle); }
+void BND_AnnotationBase::SetAlternateDimensionLengthDisplay(const BND_DimensionStyle& parentDimStyle, ON_DimStyle::LengthDisplay display) { m_annotation->SetAlternateDimensionLengthDisplay(parentDimStyle.m_dimstyle, display); }
+
+BND_Font* BND_AnnotationBase::GetFont(const BND_DimensionStyle& parentDimStyle) const
+{
+  return new BND_Font(m_annotation->Font(parentDimStyle.m_dimstyle));
+}
+
+void BND_AnnotationBase::SetFont(const BND_DimensionStyle& parentDimStyle, const BND_Font* font)
+{
+  if (font)
+    m_annotation->SetFont(parentDimStyle.m_dimstyle, *font->m_managed_font);
+}
+
+BND_BoundingBox BND_AnnotationBase::GetBoundingBox(const BND_DimensionStyle& parentDimStyle) const
+{
+  const ON_DimStyle& effective = m_annotation->DimensionStyle(*parentDimStyle.m_dimstyle);
+  double dimscale = effective.DimScale();
+  double boxmin[3] = { 0.0, 0.0, 0.0 };
+  double boxmax[3] = { 0.0, 0.0, 0.0 };
+  if (m_annotation->GetAnnotationBoundingBox(nullptr, &effective, dimscale, boxmin, boxmax, false))
+  {
+    ON_BoundingBox bbox(ON_3dPoint(boxmin[0], boxmin[1], boxmin[2]), ON_3dPoint(boxmax[0], boxmax[1], boxmax[2]));
+    if (bbox.IsNotEmpty())
+      return BND_BoundingBox(bbox);
+  }
+
+  // Glyph metrics may be unavailable in a headless context, so GetAnnotationBoundingBox
+  // can fail to measure the text. Fall back to the stored text-run rectangle transformed
+  // into world coordinates using the same transform the glyph path would use.
+  const ON_TextContent* tc = m_annotation->Text();
+  if (nullptr != tc)
+  {
+    ON_2dPoint corners2d[4];
+    ON_Xform txf;
+    if (tc->Get2dCorners(corners2d) && m_annotation->GetTextXform(nullptr, &effective, dimscale, txf))
+    {
+      ON_BoundingBox bbox = ON_BoundingBox::EmptyBoundingBox;
+      for (int i = 0; i < 4; i++)
+      {
+        ON_3dPoint p(corners2d[i].x, corners2d[i].y, 0.0);
+        p.Transform(txf);
+        bbox.Set(p, true);
+      }
+      if (bbox.IsNotEmpty())
+        return BND_BoundingBox(bbox);
+    }
+  }
+
+  return BND_BoundingBox(ON_BoundingBox::EmptyBoundingBox);
+}
+
 /*********/
 
 BND_TextDot::BND_TextDot(ON_TextDot* dot, const ON_ModelComponentReference* compref)
@@ -635,6 +773,38 @@ void initAnnotationBaseBindings(rh3dmpymodule& m)
     .def("WrapText", &BND_AnnotationBase::WrapText, py::arg("wrapwidth"))
     .def_property("TextIsWrapped", &BND_AnnotationBase::TextIsWrapped, &BND_AnnotationBase::SetTextIsWrapped)
     .def_property_readonly("Plane", &BND_AnnotationBase::Plane)
+    .def("GetDimensionStyle", &BND_AnnotationBase::GetDimensionStyle, py::arg("parentDimStyle"))
+    .def_property_readonly("HasPropertyOverrides", &BND_AnnotationBase::HasPropertyOverrides)
+    .def("IsPropertyOverridden", &BND_AnnotationBase::IsPropertyOverridden, py::arg("field"))
+    .def("ClearPropertyOverrides", &BND_AnnotationBase::ClearPropertyOverrides)
+    .def("SetOverrideDimStyle", &BND_AnnotationBase::SetOverrideDimStyle, py::arg("overrideStyle"))
+    .def("SetRichText", &BND_AnnotationBase::SetRichText, py::arg("rtfText"), py::arg("dimstyle"))
+    .def_static("PlainTextToRtf", &BND_AnnotationBase::PlainTextToRtf, py::arg("str"))
+    .def_property_readonly("TextHasRtfFormatting", &BND_AnnotationBase::TextHasRtfFormatting)
+    .def("RunReplace", &BND_AnnotationBase::RunReplace, py::arg("dimstyle"), py::arg("str"), py::arg("startRunIndex"), py::arg("startRunPosition"), py::arg("endRunIndex"), py::arg("endRunPosition"))
+    .def_property("TextRotationRadians", &BND_AnnotationBase::TextRotationRadians, &BND_AnnotationBase::SetTextRotationRadians)
+    .def_property("TextRotationDegrees", &BND_AnnotationBase::TextRotationDegrees, &BND_AnnotationBase::SetTextRotationDegrees)
+    .def("GetTextHeight", &BND_AnnotationBase::TextHeight, py::arg("parentDimStyle"))
+    .def("SetTextHeight", &BND_AnnotationBase::SetTextHeight, py::arg("parentDimStyle"), py::arg("height"))
+    .def("GetDimensionScale", &BND_AnnotationBase::DimensionScale, py::arg("parentDimStyle"))
+    .def("SetDimensionScale", &BND_AnnotationBase::SetDimensionScale, py::arg("parentDimStyle"), py::arg("scale"))
+    .def("GetMaskEnabled", &BND_AnnotationBase::MaskEnabled, py::arg("parentDimStyle"))
+    .def("SetMaskEnabled", &BND_AnnotationBase::SetMaskEnabled, py::arg("parentDimStyle"), py::arg("on"))
+    .def("GetMaskColorSource", &BND_AnnotationBase::MaskColorSource, py::arg("parentDimStyle"))
+    .def("SetMaskColorSource", &BND_AnnotationBase::SetMaskColorSource, py::arg("parentDimStyle"), py::arg("source"))
+    .def("GetMaskFrame", &BND_AnnotationBase::MaskFrame, py::arg("parentDimStyle"))
+    .def("SetMaskFrame", &BND_AnnotationBase::SetMaskFrame, py::arg("parentDimStyle"), py::arg("frame"))
+    .def("GetMaskColor", &BND_AnnotationBase::MaskColor, py::arg("parentDimStyle"))
+    .def("SetMaskColor", &BND_AnnotationBase::SetMaskColor, py::arg("parentDimStyle"), py::arg("color"))
+    .def("GetMaskOffset", &BND_AnnotationBase::MaskOffset, py::arg("parentDimStyle"))
+    .def("SetMaskOffset", &BND_AnnotationBase::SetMaskOffset, py::arg("parentDimStyle"), py::arg("offset"))
+    .def("GetDimensionLengthDisplay", &BND_AnnotationBase::DimensionLengthDisplay, py::arg("parentDimStyle"))
+    .def("SetDimensionLengthDisplay", &BND_AnnotationBase::SetDimensionLengthDisplay, py::arg("parentDimStyle"), py::arg("display"))
+    .def("GetAlternateDimensionLengthDisplay", &BND_AnnotationBase::AlternateDimensionLengthDisplay, py::arg("parentDimStyle"))
+    .def("SetAlternateDimensionLengthDisplay", &BND_AnnotationBase::SetAlternateDimensionLengthDisplay, py::arg("parentDimStyle"), py::arg("display"))
+    .def("GetFont", &BND_AnnotationBase::GetFont, py::arg("parentDimStyle"))
+    .def("SetFont", &BND_AnnotationBase::SetFont, py::arg("parentDimStyle"), py::arg("font"))
+    .def("GetBoundingBox", &BND_AnnotationBase::GetBoundingBox, py::arg("parentDimStyle"))
     ;
 
   py::class_<BND_Text, BND_AnnotationBase>(m, "Text")
@@ -696,7 +866,39 @@ void initAnnotationBaseBindings(void*)
     .property("plainTextWithFields", &BND_AnnotationBase::PlainTextWithFields)
     .property("plane", &BND_AnnotationBase::Plane)
     .property("textIsWrapped", &BND_AnnotationBase::TextIsWrapped, &BND_AnnotationBase::SetTextIsWrapped)
+    .property("hasPropertyOverrides", &BND_AnnotationBase::HasPropertyOverrides)
+    .property("textHasRtfFormatting", &BND_AnnotationBase::TextHasRtfFormatting)
+    .property("textRotationRadians", &BND_AnnotationBase::TextRotationRadians, &BND_AnnotationBase::SetTextRotationRadians)
+    .property("textRotationDegrees", &BND_AnnotationBase::TextRotationDegrees, &BND_AnnotationBase::SetTextRotationDegrees)
     .function("wrapText", &BND_AnnotationBase::WrapText)
+    .function("getDimensionStyle", &BND_AnnotationBase::GetDimensionStyle, allow_raw_pointers())
+    .function("isPropertyOverridden", &BND_AnnotationBase::IsPropertyOverridden)
+    .function("clearPropertyOverrides", &BND_AnnotationBase::ClearPropertyOverrides)
+    .function("setOverrideDimStyle", &BND_AnnotationBase::SetOverrideDimStyle)
+    .function("setRichText", &BND_AnnotationBase::SetRichText)
+    .class_function("plainTextToRtf", &BND_AnnotationBase::PlainTextToRtf)
+    .function("runReplace", &BND_AnnotationBase::RunReplace)
+    .function("getTextHeight", &BND_AnnotationBase::TextHeight)
+    .function("setTextHeight", &BND_AnnotationBase::SetTextHeight)
+    .function("getDimensionScale", &BND_AnnotationBase::DimensionScale)
+    .function("setDimensionScale", &BND_AnnotationBase::SetDimensionScale)
+    .function("getMaskEnabled", &BND_AnnotationBase::MaskEnabled)
+    .function("setMaskEnabled", &BND_AnnotationBase::SetMaskEnabled)
+    .function("getMaskColorSource", &BND_AnnotationBase::MaskColorSource)
+    .function("setMaskColorSource", &BND_AnnotationBase::SetMaskColorSource)
+    .function("getMaskFrame", &BND_AnnotationBase::MaskFrame)
+    .function("setMaskFrame", &BND_AnnotationBase::SetMaskFrame)
+    .function("getMaskColor", &BND_AnnotationBase::MaskColor)
+    .function("setMaskColor", &BND_AnnotationBase::SetMaskColor)
+    .function("getMaskOffset", &BND_AnnotationBase::MaskOffset)
+    .function("setMaskOffset", &BND_AnnotationBase::SetMaskOffset)
+    .function("getDimensionLengthDisplay", &BND_AnnotationBase::DimensionLengthDisplay)
+    .function("setDimensionLengthDisplay", &BND_AnnotationBase::SetDimensionLengthDisplay)
+    .function("getAlternateDimensionLengthDisplay", &BND_AnnotationBase::AlternateDimensionLengthDisplay)
+    .function("setAlternateDimensionLengthDisplay", &BND_AnnotationBase::SetAlternateDimensionLengthDisplay)
+    .function("getFont", &BND_AnnotationBase::GetFont, allow_raw_pointers())
+    .function("setFont", &BND_AnnotationBase::SetFont, allow_raw_pointers())
+    .function("getBoundingBox", &BND_AnnotationBase::GetBoundingBox)
     ;
 
   class_<BND_TextDot, base<BND_GeometryBase>>("TextDot")

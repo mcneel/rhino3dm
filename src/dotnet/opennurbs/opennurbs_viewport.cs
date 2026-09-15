@@ -1797,11 +1797,17 @@ namespace Rhino.DocObjects
         GC.KeepAlive(this);
         return rc;
       }
-      //set
-      //{
-      //  IntPtr pThis = NonConstPointer();
-      //  UnsafeNativeMethods.ON_Viewport_SetViewportId(pThis, value);
-      //}
+      // Template authoring (RH-96388): a viewport written with a nil id makes the model's
+      // active-view reference meaningless, since it can only point at a viewport by id. The
+      // warning above still stands for a viewport that is already in a document - Rhino
+      // matches views by this id - so treat this as an authoring-time setter.
+      // The setter was added in 8.36.
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_Viewport_SetViewportId(ptr_this, value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>

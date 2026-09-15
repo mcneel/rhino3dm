@@ -1,0 +1,44 @@
+BND_SubD
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: BND_SubD
+
+   .. py:attribute:: Count
+
+
+   .. py:attribute:: CurrentIndex
+
+
+   .. py:method:: __len__()
+
+      [todo] add documentation
+
+   .. py:method:: __iter__()
+
+      [todo] add documentation
+
+   .. py:method:: __next__()
+
+      [todo] add documentation
+
+   .. py:method:: __getitem__()
+
+      [todo] add documentation
+
+   .. py:method:: First()
+
+      [todo] add documentation
+
+   .. py:method:: Next()
+
+      [todo] add documentation
+
+   .. py:method:: Last()
+
+      [todo] add documentation
+
+   .. py:method:: Current()
+
+      [todo] add documentation

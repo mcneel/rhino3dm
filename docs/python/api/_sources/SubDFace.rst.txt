@@ -1,0 +1,110 @@
+SubDFace
+========
+
+.. py:module:: rhino3dm
+
+.. py:class:: SubDFace
+
+   .. py:attribute:: Index
+
+
+   .. py:attribute:: Id
+
+
+   .. py:attribute:: EdgeCount
+
+      int: Number of edges for this face. Note that EdgeCount is always the same
+      as VertexCount. Two properties are provided simply for clarity.
+
+   .. py:attribute:: VertexCount
+
+      int: Number of vertices for this face. Note that EdgeCount is always the same
+      as VertexCount. Two properties are provided simply for clarity.
+
+   .. py:attribute:: Edges
+
+
+   .. py:attribute:: Vertices
+
+
+   .. py:attribute:: MaterialChannelIndex
+
+
+   .. py:attribute:: PerFaceColor
+
+      System.Drawing.Color: If per-face color is "Empty", then this face does not have a custom color
+
+   .. py:attribute:: ControlNetCenterPoint
+
+
+   .. py:attribute:: ControlNetCenterNormal
+
+
+   .. py:attribute:: ControlNetCenterFrame
+
+
+   .. py:attribute:: IsConvex
+
+
+   .. py:attribute:: IsNotConvex
+
+
+   .. py:attribute:: TexturePointsCapacity
+
+
+   .. py:attribute:: TexturePointsAreSet
+
+
+   .. py:attribute:: TextureCenterPoint
+
+
+   .. py:attribute:: HasEdges
+
+
+   .. py:attribute:: HasSharpEdges
+
+
+   .. py:attribute:: SharpEdgeCount
+
+
+   .. py:attribute:: MaximumEdgeSharpness
+
+
+   .. py:attribute:: SubdivisionPoint
+
+
+   .. py:method:: IsPlanar(planar_tolerance)
+
+      [todo] add documentation
+
+   .. py:method:: IsNotPlanar(planar_tolerance)
+
+      [todo] add documentation
+
+   .. py:method:: TexturePoint(index)
+
+      [todo] add documentation
+
+   .. py:method:: ControlNetPoint(index)
+
+      [todo] add documentation
+
+   .. py:method:: Vertex(index)
+
+      [todo] add documentation
+
+   .. py:method:: Edge(index)
+
+      [todo] add documentation
+
+   .. py:method:: __eq__()
+
+      [todo] add documentation
+
+   .. py:method:: __ne__()
+
+      [todo] add documentation
+
+   .. py:method:: __hash__()
+
+      [todo] add documentation

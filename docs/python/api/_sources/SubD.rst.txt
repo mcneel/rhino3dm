@@ -15,6 +15,30 @@ SubD
       bool: Test SubD to see if the active level is a solid.
       A "solid" is a closed oriented manifold, or a closed oriented manifold.
 
+   .. py:attribute:: SharpEdgeCount
+
+
+   .. py:attribute:: FaceCount
+
+
+   .. py:attribute:: EdgeCount
+
+
+   .. py:attribute:: VertexCount
+
+
+   .. py:attribute:: Faces
+
+      Collections.SubDFaceList: All faces in this SubD
+
+   .. py:attribute:: Edges
+
+      Collections.SubDEdgeList: All edges in this SubD
+
+   .. py:attribute:: Vertices
+
+      Collections.SubDVertexList: All vertices in this SubD
+
    .. py:method:: ClearEvaluationCache()
 
       Clear all cached evaluation information (meshes, surface points, bounding boxes, ...)

@@ -158,21 +158,35 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022, macos-14, macos-15]
+        os: [windows-2022, windows-11-arm, macos-14, macos-15]
         python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
         include:
           - os: windows-2022
             target: windows
+          - os: windows-11-arm
+            target: windows
+            # native ARM64 python (not emulated x64) — see setup-python step
+            architecture: arm64
           - os: macos-14
             target: macos
           - os: macos-15
             target: macos
+        exclude:
+          # native Windows-on-ARM CPython installers only exist for 3.11+
+          - os: windows-11-arm
+            python-version: 3.9
+          - os: windows-11-arm
+            python-version: '3.10'
       fail-fast: false
     steps:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
+          # empty for non-arm entries -> setup-python uses the runner's native arch.
+          # arm64 forces native ARM64 python on windows-11-arm. If extraction ever
+          # fails here, bump setup-python (see actions/setup-python#931).
+          architecture: ${{ matrix.architecture }}
       - name: info
         run: python --version && cmake --version
       - name: install dependencies

@@ -2178,7 +2178,7 @@ namespace Rhino.Geometry.HiddenLineDrawingProposal
     #region constructor
     /// <summary>
     /// Internal constructor. The idea here is that all fields are assigned immediately and we stay within pure .NET from here on out.
-    /// The amount of of time it takes for a HiddenLineDrawing to compute is so large that the slight overhead of copying all curves in one go
+    /// The amount of time it takes for a HiddenLineDrawing to compute is so large that the slight overhead of copying all curves in one go
     /// does not matter. Also, it is exceptionally likely that the caller will iterate over *all* curves anyway, so all this data needs to cross
     /// from C++ to .NET at one time or another.
     /// </summary>
@@ -2313,7 +2313,7 @@ namespace Rhino.Geometry.HiddenLineDrawingProposal
     #region constructor
     /// <summary>
     /// Internal constructor. The idea here is that all fields are assigned immediately and we stay within pure .NET from here on out.
-    /// The amount of of time it takes for a HiddenLineDrawing to compute is so large that the slight overhead of copying all curves in one go
+    /// The amount of time it takes for a HiddenLineDrawing to compute is so large that the slight overhead of copying all curves in one go
     /// does not matter. Also, it is exceptionally likely that the caller will iterate over *all* curves anyway, so all this data needs to cross
     /// from C++ to .NET at one time or another.
     /// </summary>

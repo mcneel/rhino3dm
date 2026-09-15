@@ -18,7 +18,9 @@ namespace Rhino.Display
     Metal = 2,
     DirectX = 3,
     Software = 4,
-    Vulkan = 5
+    Vulkan = 5,
+    Direct3d11 = 3,
+    Direct3d12 = 6
   };
 
   /// <summary>
@@ -472,7 +474,16 @@ namespace Rhino.Display
 
     internal RhDisplayPoint ToDisplayPoint(DisplayPointAttributes fallbackAttributes)
     {
-      RhDisplayPoint rc = new RhDisplayPoint(_location);
+      return ToDisplayPoint(fallbackAttributes, Rhino.Geometry.Transform.Identity);
+    }
+
+    // vertexTransform is the far-from-origin shift applied to the location while it
+    // is still in double precision, before it is cast to single precision in the
+    // RhDisplayPoint constructor. Pass Transform.Identity when no shift is needed.
+    internal RhDisplayPoint ToDisplayPoint(DisplayPointAttributes fallbackAttributes, Rhino.Geometry.Transform vertexTransform)
+    {
+      Rhino.Geometry.Point3d location = vertexTransform.IsIdentity ? _location : vertexTransform * _location;
+      RhDisplayPoint rc = new RhDisplayPoint(location);
 
       if (_attributes != null && _attributes.PointStyle.HasValue)
         rc.m_style = UnsafeNativeMethods.RHC_RhinoPointStyleFromPointStyle(_attributes.PointStyle.Value);
@@ -523,6 +534,19 @@ namespace Rhino.Display
     DisplayPointAttributes _cachedFallbackAttributes;
     IntPtr _cacheHandle = IntPtr.Zero;
 
+    // Far-from-origin support. The native CRhPointData vertices are single
+    // precision, so points that are very far from the world origin lose precision
+    // and draw in the wrong location. When that happens we shift the points toward
+    // the origin in double precision (before the cast to float) and hand the
+    // inverse shift to the display engine, which re-applies it on the GPU via
+    // worldToClip * _ffoTransform. _ffoTransform is Identity when no shift is
+    // needed (the common, near-origin case), which preserves the original path.
+    Rhino.Geometry.Transform _ffoTransform = Rhino.Geometry.Transform.Identity;
+
+    // Inverse of the shift applied to the cached vertices. Only valid after
+    // RhDisplayPoints() has been called. Identity means no shift was applied.
+    internal Rhino.Geometry.Transform FarFromOriginTransform => _ffoTransform;
+
     /// <since>8.0</since>
     public static DisplayPointSet Create(IEnumerable<DisplayPoint> points)
     {
@@ -551,11 +575,63 @@ namespace Rhino.Display
       if (fallbackAttributes != null)
         _cachedFallbackAttributes = new DisplayPointAttributes(fallbackAttributes);
 
+      // Compute a far-from-origin shift in double precision. "forward" is applied
+      // to each vertex before it is cast to single precision; "_ffoTransform" (its
+      // inverse) is handed to the display engine so the shift is undone on the GPU.
+      Rhino.Geometry.Transform forward = ComputeFarFromOriginShift(out _ffoTransform);
+
       for( int i=0; i<_points.Length; i++)
       {
-        _cachedNativePoints[i] = _points[i].ToDisplayPoint(fallbackAttributes);
+        _cachedNativePoints[i] = _points[i].ToDisplayPoint(fallbackAttributes, forward);
       }
       return _cachedNativePoints;
+    }
+
+    // Returns the transform applied to vertices (in double precision) to move them
+    // near the origin, and outputs its inverse, which the engine re-applies on the
+    // GPU. Both are Identity when the point set is close enough to the origin that
+    // single precision is sufficient.
+    Rhino.Geometry.Transform ComputeFarFromOriginShift(out Rhino.Geometry.Transform inverse)
+    {
+      inverse = Rhino.Geometry.Transform.Identity;
+      int pointCount = _points.Length;
+      if (pointCount == 0)
+        return Rhino.Geometry.Transform.Identity;
+
+      // We only need an approximate center to remove the large-magnitude
+      // offset, so sample up to 3 points rather than walking the whole set.
+      var bbox = Rhino.Geometry.BoundingBox.Empty;
+      bbox.Union(_points[0].Location);
+      if (pointCount > 1)
+        bbox.Union(_points[pointCount - 1].Location);
+      if (pointCount > 2)
+        bbox.Union(_points[pointCount/2].Location);
+      if (!bbox.IsValid)
+        return Rhino.Geometry.Transform.Identity;
+
+      // Threshold matches OutsideSinglePrecisionTest / ON_BeyondSinglePrecision in the
+      // core display pipeline (RhVbo.cpp). A power of 2 to preserve float precision.
+      const double _farFromOriginThreshold = 32768.0;
+
+      Rhino.Geometry.Point3d min = bbox.Min;
+      Rhino.Geometry.Point3d max = bbox.Max;
+      double maxCoord = Math.Max(
+        Math.Max(Math.Max(Math.Abs(min.X), Math.Abs(min.Y)), Math.Abs(min.Z)),
+        Math.Max(Math.Max(Math.Abs(max.X), Math.Abs(max.Y)), Math.Abs(max.Z)));
+
+      if (maxCoord < _farFromOriginThreshold)
+        return Rhino.Geometry.Transform.Identity;
+
+      // Translate the bbox center to the origin. Drop small components: shifting a
+      // coordinate that is already near the origin only adds fuzz to the math
+      Rhino.Geometry.Point3d c = bbox.Center;
+      if (Math.Abs(c.X) <= 100.0) c.X = 0.0;
+      if (Math.Abs(c.Y) <= 100.0) c.Y = 0.0;
+      if (Math.Abs(c.Z) <= 100.0) c.Z = 0.0;
+
+      var forward = Rhino.Geometry.Transform.Translation(-c.X, -c.Y, -c.Z);
+      inverse = Rhino.Geometry.Transform.Translation(c.X, c.Y, c.Z);
+      return forward;
     }
 
     private DisplayPointSet(List<DisplayPoint> points)

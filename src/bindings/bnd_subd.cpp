@@ -209,10 +209,8 @@ void bind_SubDComponentIterator(py::module& m, const std::string& type_to, const
     .def("Next",     &IteratorT::Next,     py::doc(("Advance the iterator to the next "    + type_to + " and return this " + type_to + "."      ).c_str()))
     .def("Last",     &IteratorT::Last,     py::doc(("Advance the iterator to the last "    + type_to + " and return this " + type_to + "."      ).c_str()))
     .def("Current",  &IteratorT::Current,  py::doc(("Return the current "                  + type_to + " in this iterator."                     ).c_str()))
-    .def_property_readonly(
-         "Count",    &IteratorT::Count,    py::doc(("Number of " + type_to + "s in this iterator."                    ).c_str()))
-    .def_property_readonly(
-         "CurrentIndex", &IteratorT::CurrentIndex, py::doc(("Iterator index of the current "  + type_to + " in this iterator.").c_str()));
+    .def_property_readonly("Count",        &IteratorT::Count,        py::doc(("Number of " + type_to + "s in this iterator."                   ).c_str()))
+    .def_property_readonly("CurrentIndex", &IteratorT::CurrentIndex, py::doc(("Iterator index of the current " + type_to + " in this iterator.").c_str()));
 }
 
 void initSubDBindings(rh3dmpymodule& m)
@@ -332,6 +330,8 @@ void initSubDBindings(rh3dmpymodule& m)
     .def("ClearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .def("UpdateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .def("Subdivide", &BND_SubD::Subdivide, py::arg("count"))
+    .def_property_readonly("SharpEdgeCount", &BND_SubD::SharpEdgeCount,
+         py::doc("Number of soft-crease (sharp) edges in this SubD."))
     .def_property_readonly("FaceCount", &BND_SubD::FaceCount)
     .def_property_readonly("EdgeCount", &BND_SubD::EdgeCount)
     .def_property_readonly("VertexCount", &BND_SubD::VertexCount)
@@ -479,6 +479,7 @@ void initSubDBindings(void*)
     .property("faceCount", &BND_SubD::FaceCount)
     .property("edgeCount", &BND_SubD::EdgeCount)
     .property("vertexCount", &BND_SubD::VertexCount)
+    .property("sharpEdgeCount", &BND_SubD::SharpEdgeCount)
     .function("clearEvaluationCache", &BND_SubD::ClearEvaluationCache)
     .function("updateAllTagsAndSectorCoefficients", &BND_SubD::UpdateAllTagsAndSectorCoefficients)
     .function("subdivide", &BND_SubD::Subdivide)

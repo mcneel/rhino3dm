@@ -938,7 +938,7 @@ namespace Rhino.Geometry
     {
       if (IsNonConst)
       {
-        // TODO: This could keep the display cache when the copy is succesful as it meant SubDs were identical
+        // TODO: This could keep the display cache when the copy is successful as it meant SubDs were identical
         var ptr_this = NonConstPointer();
         bool rc = UnsafeNativeMethods.ON_SubD_CopyEvaluationCache(ptr_this, src.ConstPointer());
         GC.KeepAlive(src);

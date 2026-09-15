@@ -67,16 +67,17 @@ namespace Rhino.Display
 
     internal static Bitmap CaptureToBitmap(ViewCaptureSettings settings, bool forPrinting, bool preview)
     {
+      if (settings == null)
+        return null;
+
       using (var dib = new Runtime.InteropWrappers.RhinoDib())
       {
         IntPtr dib_pointer = dib.NonConstPointer;
         IntPtr ptrConstPrintInfo = settings.ConstPointer();
-        if (UnsafeNativeMethods.CRhinoPrintInfo_Capture(dib_pointer, ptrConstPrintInfo, forPrinting, preview))
-        {
-          var bitmap = dib.ToBitmap();
-          return bitmap;
-        }
+        bool success = UnsafeNativeMethods.CRhinoPrintInfo_Capture(dib_pointer, ptrConstPrintInfo, forPrinting, preview);
         GC.KeepAlive(settings);
+        if (success)
+          return dib.ToBitmap();
       }
       return null;
     }
@@ -762,10 +763,18 @@ namespace Rhino.Display
     {
       IntPtr constPtrThis = ConstPointer();
       IntPtr ptrNewSettings = UnsafeNativeMethods.CRhinoPrintInfo_GetPreviewLayout(constPtrThis, size.Width, size.Height);
-      if (ptrNewSettings != IntPtr.Zero)
-        return new ViewCaptureSettings(ptrNewSettings);
       GC.KeepAlive(this);
+      if (ptrNewSettings == IntPtr.Zero)
       return null;
+
+      // 27 July 2026 S. Baer (RH-97221)
+      // CRhinoPrintInfo_GetPreviewLayout hands back a CRhinoPrintInfo that it
+      // allocated, and the ViewCaptureSettings constructor makes its own copy.
+      // Delete the intermediate or we leak one CRhinoPrintInfo per call - which
+      // is once per print preview timer tick plus twice per preview repaint.
+      ViewCaptureSettings rc = new ViewCaptureSettings(ptrNewSettings);
+      UnsafeNativeMethods.CRhinoPrintInfo_Delete(ptrNewSettings);
+      return rc;
     }
 
     /// <summary>

@@ -388,7 +388,7 @@ namespace Rhino
       /// unique Id.  n Windows there is only one panel created which gets
       /// recycled for each new document.  On the Mac a panel will be created
       /// for each open document and destroyed when the document closes.  In
-      /// certain situations in Mac Rhino a a panel may get created and
+      /// certain situations in Mac Rhino a panel may get created and
       /// destroyed multiple times when opening/closing a panel while editing a
       /// document.
       /// </param>
@@ -429,7 +429,7 @@ namespace Rhino
       /// unique Id.  n Windows there is only one panel created which gets
       /// recycled for each new document.  On the Mac a panel will be created
       /// for each open document and destroyed when the document closes.  In
-      /// certain situations in Mac Rhino a a panel may get created and
+      /// certain situations in Mac Rhino a panel may get created and
       /// destroyed multiple times when opening/closing a panel while editing a
       /// document.
       /// </param>

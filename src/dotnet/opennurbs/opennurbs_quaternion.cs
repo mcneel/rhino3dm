@@ -818,7 +818,7 @@ namespace Rhino.Geometry
     /// <remarks>
     /// When true, this = RotationZYZ(alpha, beta, gamma) = R_z(alpha) * R_y(beta) * R_z(gamma),
     /// where R_*(angle) is rotation of angle radians about the corresponding *-world coordinate axis.
-    /// alpha and gamma are in the range (-pi, pi], while beta in in the range [0, pi].
+    /// alpha and gamma are in the range (-pi, pi], while beta in the range [0, pi].
     /// </remarks>
     /// <since>8.0</since>
     [ConstOperation]

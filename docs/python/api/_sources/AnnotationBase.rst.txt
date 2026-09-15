@@ -36,9 +36,178 @@ AnnotationBase
 
       rhino3dm.Plane: Plane that this annotation lies on
 
+   .. py:attribute:: HasPropertyOverrides
+
+
+   .. py:attribute:: TextHasRtfFormatting
+
+      bool: Gets a value indicating whether the annotation's text is formatted as RTF (Rich Text Format).
+      Returns True if the text begins with an RTF header; otherwise, false.
+
+   .. py:attribute:: TextRotationRadians
+
+      float: Rotation of text in radians
+
+   .. py:attribute:: TextRotationDegrees
+
+      float: Rotation of text in degrees
+
    .. py:method:: WrapText(wrapwidth)
 
       Wrap text
 
 
       :rtype: void
+
+   .. py:method:: GetDimensionStyle(parentDimStyle)
+
+      Return the proper dimension style from which to get properties
+      for this annotation object
+      If this object has style overrides, those will be included in the
+      returned dimension style and the style will be updated to include
+      the current state of the parent style for non-overridden fields
+
+
+      :rtype: DimensionStyle
+
+   .. py:method:: IsPropertyOverridden(field)
+
+      Returns True if a property is overridden
+
+
+      :rtype: bool
+
+   .. py:method:: ClearPropertyOverrides()
+
+      Clears all overridden properties for this annotation
+
+
+      :rtype: bool
+
+   .. py:method:: SetOverrideDimStyle(overrideStyle)
+
+      Set a style including overrides for this annotation object.
+      The DimensionStyle OverrideStyle must have the override fields marked
+      as overridden and must have it's Id set to nil.
+      Use DimensionStyle.SetFieldOverride(Field field) and related functions
+      to manage override settings. To override a field, the field value must be set
+      and the field must be marked as an override.
+      The DimensionStyle passed in here must not be in the dimstyle table
+
+
+      :rtype: bool
+
+   .. py:method:: SetRichText(rtfText, dimstyle)
+
+      Sets the annotation's text as rich text (RTF), optionally using a specified dimension style for formatting overrides.
+
+      :param str rtfText: The RTF (Rich Text Format) string to assign to the annotation.
+      :param DimensionStyle dimstyle: The dimension style to use for formatting overrides, or None to use the current style.
+
+
+      :rtype: void
+
+   .. py:staticmethod:: PlainTextToRtf(str)
+
+
+
+      :rtype: str
+
+   .. py:method:: RunReplace(dimstyle, str, startRunIndex, startRunPosition, endRunIndex, endRunPosition)
+
+      Replace text within a formatted string
+
+
+      :rtype: bool
+
+   .. py:method:: GetTextHeight(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetTextHeight(parentDimStyle, height)
+
+      [todo] add documentation
+
+   .. py:method:: GetDimensionScale(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetDimensionScale(parentDimStyle, scale)
+
+      [todo] add documentation
+
+   .. py:method:: GetMaskEnabled(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetMaskEnabled(parentDimStyle, on)
+
+      [todo] add documentation
+
+   .. py:method:: GetMaskColorSource(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetMaskColorSource(parentDimStyle, source)
+
+      [todo] add documentation
+
+   .. py:method:: GetMaskFrame(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetMaskFrame(parentDimStyle, frame)
+
+      [todo] add documentation
+
+   .. py:method:: GetMaskColor(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetMaskColor(parentDimStyle, color)
+
+      [todo] add documentation
+
+   .. py:method:: GetMaskOffset(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetMaskOffset(parentDimStyle, offset)
+
+      [todo] add documentation
+
+   .. py:method:: GetDimensionLengthDisplay(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetDimensionLengthDisplay(parentDimStyle, display)
+
+      [todo] add documentation
+
+   .. py:method:: GetAlternateDimensionLengthDisplay(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetAlternateDimensionLengthDisplay(parentDimStyle, display)
+
+      [todo] add documentation
+
+   .. py:method:: GetFont(parentDimStyle)
+
+      [todo] add documentation
+
+   .. py:method:: SetFont(parentDimStyle, font)
+
+      [todo] add documentation
+
+   .. py:method:: GetBoundingBox(parentDimStyle)
+
+      Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed geometry.
+
+      :param Transform xform: Transformation to apply to bounding box after calculation. \
+         The geometry is not modified.
+
+      :return: The bounding box of the transformed geometry in world coordinates \
+         or BoundingBox.Empty if not bounding box could be found.
+
+      :rtype: rhino3dm.BoundingBox

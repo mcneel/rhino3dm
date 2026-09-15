@@ -126,6 +126,30 @@ namespace Rhino.DocObjects
       return null;
     }
 
+    /// <summary>
+    /// Returns a font with the requested rich-text (family) name, preserving that name even
+    /// when the font is not installed on the current machine. If an installed font matches it
+    /// is returned; otherwise a "not on device" managed font that keeps the requested name is
+    /// returned (rendered with a fallback quartet). Use this to author a font by name on a
+    /// machine that does not have it installed: the Font constructor and
+    /// <see cref="FromQuartetProperties"/> both substitute the family in that case, losing the
+    /// requested name when the file is written.
+    /// </summary>
+    /// <param name="richTextFontName">The rich-text font (family) name to store.</param>
+    /// <param name="bold">True to select the heavier member of the rich-text quartet.</param>
+    /// <param name="italic">True to select the more slanted member of the rich-text quartet.</param>
+    /// <param name="underlined">True for underlined text.</param>
+    /// <param name="strikethrough">True for strikethrough text.</param>
+    /// <returns>A font that preserves the requested name, or null if none could be created.</returns>
+    /// <since>8.35</since>
+    public static Font FromRichTextProperties(string richTextFontName, bool bold, bool italic, bool underlined, bool strikethrough)
+    {
+      IntPtr managed_font = UnsafeNativeMethods.ON_Font_FromRichTextProperties(richTextFontName, bold, italic, underlined, strikethrough);
+      if (managed_font != IntPtr.Zero)
+        return new Font(managed_font);
+      return null;
+    }
+
     internal Font(IntPtr managedFont)
     {
       m_managed_font = managedFont;

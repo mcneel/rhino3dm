@@ -147,63 +147,45 @@ RH_C_FUNCTION const ON_Viewport* ON_3dmView_ViewportPointer(const ON_3dmView* pV
   return rc;
 }
 
-RH_C_FUNCTION void ON_3dmView_GetConstructionPlane(const ON_3dmView* pConstView, ON_PLANE_STRUCT* plane)
+RH_C_FUNCTION void ON_3dmView_GetWindowPosition(const ON_3dmView* pConstView, int* maximized, double* wndLeft, double* wndRight, double* wndTop, double* wndBottom)
 {
-  if( pConstView && plane )
-    CopyToPlaneStruct(*plane, pConstView->m_cplane.m_plane);
+  if (pConstView && maximized && wndLeft && wndRight && wndTop && wndBottom)
+  {
+    *maximized = pConstView->m_position.m_bMaximized ? 1 : 0;
+    *wndLeft = pConstView->m_position.m_wnd_left;
+    *wndRight = pConstView->m_position.m_wnd_right;
+    *wndTop = pConstView->m_position.m_wnd_top;
+    *wndBottom = pConstView->m_position.m_wnd_bottom;
+  }
 }
 
-RH_C_FUNCTION void ON_3dmView_SetConstructionPlane(ON_3dmView* pView, const ON_PLANE_STRUCT* plane)
+RH_C_FUNCTION void ON_3dmView_SetWindowPosition(ON_3dmView* pView, int maximized, double wndLeft, double wndRight, double wndTop, double wndBottom)
 {
-  if( pView && plane )
-    pView->m_cplane.m_plane = FromPlaneStruct(*plane);
+  if (pView)
+  {
+    pView->m_position.m_bMaximized = maximized ? true : false;
+    pView->m_position.m_wnd_left = wndLeft;
+    pView->m_position.m_wnd_right = wndRight;
+    pView->m_position.m_wnd_top = wndTop;
+    pView->m_position.m_wnd_bottom = wndBottom;
+  }
 }
 
-// RH3DM: the view's full construction plane, including the grid params (spacing, snap, line
-// count, thick-line frequency) that the plane-only accessor above cannot reach. The caller
-// wraps the returned pointer with the managed ConstructionPlane class and deletes it via
-// ON_3dmConstructionPlane_Delete.
+// Returns a copy of the view's full construction plane, including its grid settings (grid and
+// snap spacing, grid line count, thick-line frequency, depth buffering). The plane-only
+// accessors above cannot reach the grid. The caller wraps the returned pointer with the managed
+// ConstructionPlane class and frees it with ON_3dmConstructionPlane_Delete.
 RH_C_FUNCTION ON_3dmConstructionPlane* ON_3dmView_GetConstructionPlaneObject(const ON_3dmView* pConstView)
 {
-  if( pConstView )
+  if (pConstView)
     return new ON_3dmConstructionPlane(pConstView->m_cplane);
   return nullptr;
 }
 
 RH_C_FUNCTION void ON_3dmView_SetConstructionPlaneObject(ON_3dmView* pView, const ON_3dmConstructionPlane* pConstCPlane)
 {
-  if( pView && pConstCPlane )
+  if (pView && pConstCPlane)
     pView->m_cplane = *pConstCPlane;
-}
-
-// RH3DM: the view's relative window position (ON_3dmView.m_position) -- the rectangle, in
-// 0..1 fractions of the parent frame, and the maximized flag. Without this a template author
-// can't lay views out through rhino3dm, so files open with all views stacked.
-RH_C_FUNCTION void ON_3dmView_GetWindowPosition(const ON_3dmView* pConstView, double* left, double* right,
-                                                double* top, double* bottom, bool* maximized)
-{
-  if( pConstView )
-  {
-    const ON_3dmViewPosition& p = pConstView->m_position;
-    if( left ) *left = p.m_wnd_left;
-    if( right ) *right = p.m_wnd_right;
-    if( top ) *top = p.m_wnd_top;
-    if( bottom ) *bottom = p.m_wnd_bottom;
-    if( maximized ) *maximized = p.m_bMaximized;
-  }
-}
-
-RH_C_FUNCTION void ON_3dmView_SetWindowPosition(ON_3dmView* pView, double left, double right,
-                                                double top, double bottom, bool maximized)
-{
-  if( pView )
-  {
-    pView->m_position.m_wnd_left = left;
-    pView->m_position.m_wnd_right = right;
-    pView->m_position.m_wnd_top = top;
-    pView->m_position.m_wnd_bottom = bottom;
-    pView->m_position.m_bMaximized = maximized;
-  }
 }
 
 RH_C_FUNCTION void ON_3dmView_FocalBlurDistance_Set(ON_3dmView* pView, double blur)
@@ -700,37 +682,6 @@ RH_C_FUNCTION void ON_3dmSettings_SetDouble(ON_3dmSettings* pSettings, enum Unit
       break;
     }
   }
-}
-
-// RH3DM: model-space distance display mode + precision (ON_3dmUnitsAndTolerances). These live
-// in the units chunk, which rhino3dm otherwise exposes only for the unit system + tolerances;
-// without them a template author working through rhino3dm cannot set the display format
-// (decimal / fractional / feet & inches) or precision. Mode uses ON::OBSOLETE_DistanceDisplayMode
-// (0=Decimal, 1=Fractional, 2=FeetAndInches) -- still the field openNURBS stores.
-RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayMode(const ON_3dmSettings* pConstSettings)
-{
-  if( pConstSettings )
-    return (int)pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_mode;
-  return 0;
-}
-
-RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayMode(ON_3dmSettings* pSettings, int mode)
-{
-  if( pSettings )
-    pSettings->m_ModelUnitsAndTolerances.m_distance_display_mode = ON::DistanceDisplayModeFromUnsigned(mode);
-}
-
-RH_C_FUNCTION int ON_3dmSettings_GetModelDistanceDisplayPrecision(const ON_3dmSettings* pConstSettings)
-{
-  if( pConstSettings )
-    return pConstSettings->m_ModelUnitsAndTolerances.m_distance_display_precision;
-  return 3;
-}
-
-RH_C_FUNCTION void ON_3dmSettings_SetModelDistanceDisplayPrecision(ON_3dmSettings* pSettings, int precision)
-{
-  if( pSettings )
-    pSettings->m_ModelUnitsAndTolerances.m_distance_display_precision = precision;
 }
 
 RH_C_FUNCTION int ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, int set_val)
@@ -1922,4 +1873,399 @@ RH_C_FUNCTION void ON_3dmAnimationProperties_SetRenderPreview(ON_3dmAnimationPro
 	{
 		p->SetRenderPreview(b);
 	}
+}
+
+RH_C_FUNCTION int ON_3dmSettings_PlugInRefCount(const ON_3dmSettings* settings)
+{
+  if (settings)
+    return settings->m_plugin_list.Count();
+  return 0;
+}
+
+RH_C_FUNCTION ON_UUID ON_3dmSettings_PlugInRef(const ON_3dmSettings* settings, int index, ON_wString* name, ON_wString* filename)
+{
+  ON_UUID rc = ON_nil_uuid;
+  if (settings && index < settings->m_plugin_list.Count())
+  {
+    const ON_PlugInRef& pi = settings->m_plugin_list[index];
+    rc = pi.m_plugin_id;
+    if (name)
+      *name = pi.m_plugin_name;
+    if (filename)
+      *filename = pi.m_plugin_filename;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION int ON_3dmSettings_GetDistanceDisplayMode(const ON_3dmSettings* pConstSettings, bool model)
+{
+  ON::OBSOLETE_DistanceDisplayMode rc = ON::OBSOLETE_DistanceDisplayMode::Decimal;
+  if (pConstSettings)
+  {
+    rc = (model ? pConstSettings->m_ModelUnitsAndTolerances
+                : pConstSettings->m_PageUnitsAndTolerances).DistanceDisplayMode();
+  }
+  return (int)rc;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetDistanceDisplayMode(ON_3dmSettings* pSettings, bool model, int mode)
+{
+  if (pSettings)
+  {
+    (model ? pSettings->m_ModelUnitsAndTolerances
+           : pSettings->m_PageUnitsAndTolerances).SetDistanceDisplayMode(ON::DistanceDisplayModeFromUnsigned(mode));
+  }
+}
+
+RH_C_FUNCTION int ON_3dmSettings_GetDistanceDisplayPrecision(const ON_3dmSettings* pConstSettings, bool model)
+{
+  int rc = 0;
+  if (pConstSettings)
+  {
+    rc = (model ? pConstSettings->m_ModelUnitsAndTolerances
+                : pConstSettings->m_PageUnitsAndTolerances).DistanceDisplayPrecision();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetDistanceDisplayPrecision(ON_3dmSettings* pSettings, bool model, int precision)
+{
+  if (pSettings)
+  {
+    (model ? pSettings->m_ModelUnitsAndTolerances
+           : pSettings->m_PageUnitsAndTolerances).SetDistanceDisplayPrecision(precision);
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+//
+// Template authoring (RH-96388)
+//
+// A .3dm written by the OpenNURBS flavor of RhinoCommon (rhino3dm) is how the shipped
+// Rhino templates are generated, and a byte-level comparison against the hand-authored
+// Rhino 8 templates showed a set of authored values with no managed accessor at all - so
+// the generated templates silently dropped them. The accessors below close that set.
+// Several use an enum selector rather than a function per field, matching
+// ON_3dmSettings_GetDouble above, to keep the export count down.
+//
+
+// ---- ON_3dmView ---------------------------------------------------------------------
+
+// The view's display mode (wireframe, shaded, rendered, ...). Every generated template
+// left this nil, so all four views opened in wireframe no matter what the donor said.
+RH_C_FUNCTION ON_UUID ON_3dmView_GetDisplayModeId(const ON_3dmView* pConstView)
+{
+  return pConstView ? pConstView->m_display_mode_id : ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_3dmView_SetDisplayModeId(ON_3dmView* pView, ON_UUID displayModeId)
+{
+  if (pView)
+    pView->m_display_mode_id = displayModeId;
+}
+
+// ON::view_type - model, page ("paper space"), nested, uveditor or blockeditor. Needed to
+// author a layout in a template; without it every view can only ever be a model view.
+RH_C_FUNCTION int ON_3dmView_GetViewType(const ON_3dmView* pConstView)
+{
+  return pConstView ? (int)pConstView->m_view_type : (int)ON::model_view_type;
+}
+
+RH_C_FUNCTION void ON_3dmView_SetViewType(ON_3dmView* pView, int viewType)
+{
+  if (pView)
+    pView->m_view_type = ON::ViewType(viewType);
+}
+
+enum View3dmBool : int
+{
+  ShowConstructionGrid = 0,
+  ShowConstructionAxes = 1,
+  ShowConstructionZAxis = 2,
+  ShowWorldAxes = 3,
+  LockedProjection = 4,
+};
+
+RH_C_FUNCTION bool ON_3dmView_GetBool(const ON_3dmView* pConstView, enum View3dmBool which)
+{
+  if (nullptr == pConstView)
+    return false;
+  switch (which)
+  {
+  case View3dmBool::ShowConstructionGrid:  return pConstView->m_bShowConstructionGrid;
+  case View3dmBool::ShowConstructionAxes:  return pConstView->m_bShowConstructionAxes;
+  case View3dmBool::ShowConstructionZAxis: return pConstView->m_bShowConstructionZAxis;
+  case View3dmBool::ShowWorldAxes:         return pConstView->m_bShowWorldAxes;
+  case View3dmBool::LockedProjection:      return pConstView->m_bLockedProjection;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_3dmView_SetBool(ON_3dmView* pView, enum View3dmBool which, bool value)
+{
+  if (nullptr == pView)
+    return;
+  switch (which)
+  {
+  case View3dmBool::ShowConstructionGrid:  pView->m_bShowConstructionGrid = value;  break;
+  case View3dmBool::ShowConstructionAxes:  pView->m_bShowConstructionAxes = value;  break;
+  case View3dmBool::ShowConstructionZAxis: pView->m_bShowConstructionZAxis = value; break;
+  case View3dmBool::ShowWorldAxes:         pView->m_bShowWorldAxes = value;         break;
+  case View3dmBool::LockedProjection:      pView->m_bLockedProjection = value;      break;
+  }
+}
+
+// ON_3dmView_NamedViewId above is read-only; a template that wants a view bound to one of
+// its named views needs to be able to set it.
+RH_C_FUNCTION void ON_3dmView_SetNamedViewId(ON_3dmView* pView, ON_UUID namedViewId)
+{
+  if (pView)
+    pView->m_named_view_id = namedViewId;
+}
+
+RH_C_FUNCTION void ON_3dmView_GetRenderingSize(const ON_3dmView* pConstView, int* width, int* height)
+{
+  if (pConstView && width && height)
+  {
+    const ON_2iSize size = pConstView->RenderingSize();
+    *width = size.cx;
+    *height = size.cy;
+  }
+}
+
+RH_C_FUNCTION void ON_3dmView_SetRenderingSize(ON_3dmView* pView, int width, int height)
+{
+  if (pView)
+    pView->SetRenderingSize(ON_2iSize(width, height));
+}
+
+// The page size and margins of a layout. Only meaningful when the view type is page_view.
+RH_C_FUNCTION void ON_3dmView_GetPageSettings(const ON_3dmView* pConstView, int* pageNumber,
+  double* widthMillimeters, double* heightMillimeters,
+  double* leftMarginMillimeters, double* rightMarginMillimeters,
+  double* topMarginMillimeters, double* bottomMarginMillimeters,
+  CRhCmnStringHolder* pStringHolderPrinterName)
+{
+  if (nullptr == pConstView)
+    return;
+  const ON_3dmPageSettings& ps = pConstView->m_page_settings;
+  if (pageNumber) *pageNumber = ps.m_page_number;
+  if (widthMillimeters) *widthMillimeters = ps.m_width_mm;
+  if (heightMillimeters) *heightMillimeters = ps.m_height_mm;
+  if (leftMarginMillimeters) *leftMarginMillimeters = ps.m_left_margin_mm;
+  if (rightMarginMillimeters) *rightMarginMillimeters = ps.m_right_margin_mm;
+  if (topMarginMillimeters) *topMarginMillimeters = ps.m_top_margin_mm;
+  if (bottomMarginMillimeters) *bottomMarginMillimeters = ps.m_bottom_margin_mm;
+  if (pStringHolderPrinterName) pStringHolderPrinterName->Set(ps.m_printer_name);
+}
+
+RH_C_FUNCTION void ON_3dmView_SetPageSettings(ON_3dmView* pView, int pageNumber,
+  double widthMillimeters, double heightMillimeters,
+  double leftMarginMillimeters, double rightMarginMillimeters,
+  double topMarginMillimeters, double bottomMarginMillimeters,
+  const RHMONO_STRING* printerName)
+{
+  if (nullptr == pView)
+    return;
+  ON_3dmPageSettings& ps = pView->m_page_settings;
+  ps.m_page_number = pageNumber;
+  ps.m_width_mm = widthMillimeters;
+  ps.m_height_mm = heightMillimeters;
+  ps.m_left_margin_mm = leftMarginMillimeters;
+  ps.m_right_margin_mm = rightMarginMillimeters;
+  ps.m_top_margin_mm = topMarginMillimeters;
+  ps.m_bottom_margin_mm = bottomMarginMillimeters;
+  INPUTSTRINGCOERCE(_printerName, printerName);
+  ps.m_printer_name = _printerName;
+}
+
+// ---- ON_3dmSettings -----------------------------------------------------------------
+
+enum Settings3dmUuid : int
+{
+  ActiveViewId = 0,
+  CurrentLayerId = 1,
+  CurrentRenderMaterialId = 2,
+  CurrentLinePatternId = 3,
+  CurrentTextStyleId = 4,
+  CurrentDimensionStyleId = 5,
+  CurrentHatchPatternId = 6,
+};
+
+RH_C_FUNCTION ON_UUID ON_3dmSettings_GetUuid(const ON_3dmSettings* pConstSettings, enum Settings3dmUuid which)
+{
+  if (nullptr == pConstSettings)
+    return ON_nil_uuid;
+  switch (which)
+  {
+  case Settings3dmUuid::ActiveViewId:             return pConstSettings->m_active_view_id;
+  case Settings3dmUuid::CurrentLayerId:           return pConstSettings->CurrentLayerId();
+  case Settings3dmUuid::CurrentRenderMaterialId:  return pConstSettings->CurrentMaterialId();
+  case Settings3dmUuid::CurrentLinePatternId:     return pConstSettings->CurrentLinePatternId();
+  case Settings3dmUuid::CurrentTextStyleId:       return pConstSettings->CurrentTextStyleId();
+  case Settings3dmUuid::CurrentDimensionStyleId:  return pConstSettings->CurrentDimensionStyleId();
+  case Settings3dmUuid::CurrentHatchPatternId:    return pConstSettings->CurrentHatchPatternId();
+  }
+  return ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetUuid(ON_3dmSettings* pSettings, enum Settings3dmUuid which, ON_UUID value)
+{
+  if (nullptr == pSettings)
+    return;
+  switch (which)
+  {
+  case Settings3dmUuid::ActiveViewId:            pSettings->m_active_view_id = value; break;
+  case Settings3dmUuid::CurrentLayerId:          pSettings->SetCurrentLayerId(value); break;
+  case Settings3dmUuid::CurrentRenderMaterialId: pSettings->SetCurrentMaterialId(value); break;
+  case Settings3dmUuid::CurrentLinePatternId:    pSettings->SetCurrentLinePatternId(value); break;
+  case Settings3dmUuid::CurrentTextStyleId:      pSettings->SetCurrentTextStyleId(value); break;
+  case Settings3dmUuid::CurrentDimensionStyleId: pSettings->SetCurrentDimensionStyleId(value); break;
+  case Settings3dmUuid::CurrentHatchPatternId:   pSettings->SetCurrentHatchPatternId(value); break;
+  }
+}
+
+enum Settings3dmInt : int
+{
+  CurrentWireDensity = 0,
+  IdefLinkUpdate = 1,
+};
+
+RH_C_FUNCTION int ON_3dmSettings_GetInt(const ON_3dmSettings* pConstSettings, enum Settings3dmInt which)
+{
+  if (nullptr == pConstSettings)
+    return 0;
+  switch (which)
+  {
+  case Settings3dmInt::CurrentWireDensity: return pConstSettings->m_current_wire_density;
+  case Settings3dmInt::IdefLinkUpdate:     return (int)pConstSettings->m_IO_settings.m_idef_link_update;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetInt(ON_3dmSettings* pSettings, enum Settings3dmInt which, int value)
+{
+  if (nullptr == pSettings)
+    return;
+  switch (which)
+  {
+  case Settings3dmInt::CurrentWireDensity:
+    pSettings->m_current_wire_density = value;
+    break;
+  case Settings3dmInt::IdefLinkUpdate:
+    // a plain int on this branch, not an enum
+    pSettings->m_IO_settings.m_idef_link_update = value;
+    break;
+  }
+}
+
+enum Settings3dmColor : int
+{
+  CurrentColor = 0,
+  CurrentPlotColor = 1,
+};
+
+RH_C_FUNCTION int ON_3dmSettings_GetColor(const ON_3dmSettings* pConstSettings, enum Settings3dmColor which)
+{
+  if (nullptr == pConstSettings)
+    return 0;
+  switch (which)
+  {
+  case Settings3dmColor::CurrentColor:     return (int)(unsigned int)pConstSettings->m_current_color;
+  case Settings3dmColor::CurrentPlotColor: return (int)(unsigned int)pConstSettings->m_current_plot_color;
+  }
+  return 0;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetColor(ON_3dmSettings* pSettings, enum Settings3dmColor which, int argb)
+{
+  if (nullptr == pSettings)
+    return;
+  ON_Color color = ARGB_to_ABGR(argb);
+  switch (which)
+  {
+  case Settings3dmColor::CurrentColor:     pSettings->m_current_color = color; break;
+  case Settings3dmColor::CurrentPlotColor: pSettings->m_current_plot_color = color; break;
+  }
+}
+
+enum Settings3dmBool : int
+{
+  SaveTextureBitmapsInFile = 0,
+};
+
+RH_C_FUNCTION bool ON_3dmSettings_GetBool(const ON_3dmSettings* pConstSettings, enum Settings3dmBool which)
+{
+  if (nullptr == pConstSettings)
+    return false;
+  switch (which)
+  {
+  case Settings3dmBool::SaveTextureBitmapsInFile: return pConstSettings->m_IO_settings.m_bSaveTextureBitmapsInFile;
+  }
+  return false;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetBool(ON_3dmSettings* pSettings, enum Settings3dmBool which, bool value)
+{
+  if (nullptr == pSettings)
+    return;
+  switch (which)
+  {
+  case Settings3dmBool::SaveTextureBitmapsInFile: pSettings->m_IO_settings.m_bSaveTextureBitmapsInFile = value; break;
+  }
+}
+
+RH_C_FUNCTION double ON_3dmSettings_GetLinetypeDisplayScale(const ON_3dmSettings* pConstSettings)
+{
+  return pConstSettings ? pConstSettings->m_linetype_display_scale : 1.0;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetLinetypeDisplayScale(ON_3dmSettings* pSettings, double scale)
+{
+  if (pSettings)
+    pSettings->m_linetype_display_scale = scale;
+}
+
+// The document render mesh, analysis mesh and custom render mesh settings. Rhino derives
+// the "Jagged & faster" / "Smooth & slower" choice from these on open, so a template that
+// leaves them at the openNURBS default silently ships jagged render meshes.
+enum Settings3dmMeshParameters : int
+{
+  RenderMeshSettings = 0,
+  AnalysisMeshSettings = 1,
+  CustomRenderMeshSettings = 2,
+};
+
+RH_C_FUNCTION ON_MeshParameters* ON_3dmSettings_GetMeshParameters(const ON_3dmSettings* pConstSettings, enum Settings3dmMeshParameters which)
+{
+  if (nullptr == pConstSettings)
+    return nullptr;
+  switch (which)
+  {
+  case Settings3dmMeshParameters::RenderMeshSettings:       return new ON_MeshParameters(pConstSettings->m_RenderMeshSettings);
+  case Settings3dmMeshParameters::AnalysisMeshSettings:     return new ON_MeshParameters(pConstSettings->m_AnalysisMeshSettings);
+  case Settings3dmMeshParameters::CustomRenderMeshSettings: return new ON_MeshParameters(pConstSettings->m_CustomRenderMeshSettings);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION void ON_3dmSettings_SetMeshParameters(ON_3dmSettings* pSettings, enum Settings3dmMeshParameters which, const ON_MeshParameters* pConstMeshParameters)
+{
+  if (nullptr == pSettings || nullptr == pConstMeshParameters)
+    return;
+  switch (which)
+  {
+  case Settings3dmMeshParameters::RenderMeshSettings:       pSettings->m_RenderMeshSettings = *pConstMeshParameters; break;
+  case Settings3dmMeshParameters::AnalysisMeshSettings:     pSettings->m_AnalysisMeshSettings = *pConstMeshParameters; break;
+  case Settings3dmMeshParameters::CustomRenderMeshSettings: pSettings->m_CustomRenderMeshSettings = *pConstMeshParameters; break;
+  }
+}
+
+// The document construction plane grid defaults that new views inherit. The managed
+// ConstructionPlaneGridDefaults class and its ON_3dmConstructionPlaneGridDefaults_Get/Set
+// exports already exist; only a way to reach the one on ON_3dmSettings was missing.
+RH_C_FUNCTION ON_3dmConstructionPlaneGridDefaults* ON_3dmSettings_GridDefaultsPointer(ON_3dmSettings* pSettings)
+{
+  return pSettings ? &pSettings->m_GridDefaults : nullptr;
 }

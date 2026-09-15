@@ -199,6 +199,76 @@ test('vertex properties', async () => {
     }
 })
 
+// ---- full begin-to-end traversal of every iterator type ----
+//
+// Nine BND_SubDComponentIterator<To, From> instantiations exist: three rooted on
+// the whole SubD (faces/edges/vertices) and six rooted on a single component (a
+// face's edges/vertices, an edge's faces/vertices, a vertex's faces/edges). Each
+// is driven from its first component to its last through the first()/next() cursor
+// (currentIndex < count), matching tests/python/test_SubD.py. embind has no
+// Symbol.iterator, so there is no native-iteration leg here.
+
+// First component of iter satisfying predicate, or null.
+function firstWith(iter, predicate) {
+    for (let c = iter.first(); iter.currentIndex < iter.count; c = iter.next()) if (predicate(c)) return c
+    return null
+}
+
+function assertFullTraversal(makeIter, label, byId) {
+    let it = makeIter()
+    const n = it.count
+    expect(n).toBeGreaterThan(0)          // label: empty iterator, nothing to traverse
+    // Cursor walk covers the whole range: n components, all valid (id > 0 on a null
+    // wrapper is false), all distinct (no skip, dupe, or overrun past the end).
+    const walked = collect(it)
+    const ids = walked.map(c => c.id)
+    expect(walked.length).toBe(n)
+    ids.forEach(id => expect(id).toBeGreaterThan(0))
+    expect(new Set(ids).size).toBe(n)
+
+    // Cursor endpoints: first() is the head (index 0) and equals current(); last()
+    // is the tail.
+    it = makeIter()
+    const first = it.first()
+    expect(it.currentIndex).toBe(0)
+    expect(it.current().id).toBe(first.id)
+    expect(first.id).toBe(ids[0])
+    expect(it.last().id).toBe(ids[n - 1])
+
+    // Indexing spans the whole range too: SubD-rooted get() is by Id, component-
+    // rooted by position. Either way it reproduces the walk.
+    it = makeIter()
+    if (byId) ids.forEach(id => expect(it.get(id).id).toBe(id))
+    else ids.forEach((id, i) => expect(it.get(i).id).toBe(id))
+}
+
+test('subd-rooted iterators traverse fully', async () => {
+    const subd = loadSubD()
+    if (!subd) return
+    assertFullTraversal(() => subd.faces(),    'SubD.faces',    true)
+    assertFullTraversal(() => subd.edges(),    'SubD.edges',    true)
+    assertFullTraversal(() => subd.vertices(), 'SubD.vertices', true)
+})
+
+test('component-rooted iterators traverse fully', async () => {
+    const subd = loadSubD()
+    if (!subd) return
+    // From a face: its edges and vertices (every face has at least three of each).
+    const face = subd.faces().first()
+    assertFullTraversal(() => face.edges(),    'Face.edges',    false)
+    assertFullTraversal(() => face.vertices(), 'Face.vertices', false)
+    // From an edge: its faces and vertices (pick an edge that borders a face).
+    const edge = firstWith(subd.edges(), e => e.faceCount > 0)
+    expect(edge).not.toBeNull()
+    assertFullTraversal(() => edge.faces(),    'Edge.faces',    false)
+    assertFullTraversal(() => edge.vertices(), 'Edge.vertices', false)
+    // From a vertex: its faces and edges (pick a vertex that has both).
+    const vert = firstWith(subd.vertices(), v => v.faceCount > 0 && v.edgeCount > 0)
+    expect(vert).not.toBeNull()
+    assertFullTraversal(() => vert.faces(), 'Vertex.faces', false)
+    assertFullTraversal(() => vert.edges(), 'Vertex.edges', false)
+})
+
 test('component equality', async () => {
     const subd = loadSubD()
     if (!subd) return

@@ -185,3 +185,13 @@ Material
 
 
       :rtype: void
+
+   .. py:method:: SetTexture(texture)
+
+      Set the texture that corresponds with the specified texture type for this material.
+
+      :param Texture texture: An instance of Rhino.DocObjects.Texture
+      :param TextureType which: Use Rhino.DocObjects.TextureType
+
+
+      :rtype: bool

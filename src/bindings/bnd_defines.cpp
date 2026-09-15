@@ -289,6 +289,30 @@ void initDefines(rh3dmpymodule& m)
       .value("Angular3pt", ON::AnnotationType::Angular3pt)
     ;
 
+  py::enum_<ON_TextMask::MaskType>(m, "MaskType")
+      .value("BackgroundColor", ON_TextMask::MaskType::BackgroundColor)
+      .value("MaskColor", ON_TextMask::MaskType::MaskColor)
+    ;
+
+  py::enum_<ON_TextMask::MaskFrame>(m, "MaskFrame")
+      .value("NoFrame", ON_TextMask::MaskFrame::NoFrame)
+      .value("RectFrame", ON_TextMask::MaskFrame::RectFrame)
+      .value("CapsuleFrame", ON_TextMask::MaskFrame::CapsuleFrame)
+    ;
+
+  py::enum_<ON_DimStyle::LengthDisplay>(m, "LengthDisplay")
+      .value("ModelUnits", ON_DimStyle::LengthDisplay::ModelUnits)
+      .value("Millmeters", ON_DimStyle::LengthDisplay::Millmeters)
+      .value("Centimeters", ON_DimStyle::LengthDisplay::Centimeters)
+      .value("Meters", ON_DimStyle::LengthDisplay::Meters)
+      .value("Kilometers", ON_DimStyle::LengthDisplay::Kilometers)
+      .value("InchesDecimal", ON_DimStyle::LengthDisplay::InchesDecimal)
+      .value("InchesFractional", ON_DimStyle::LengthDisplay::InchesFractional)
+      .value("FeetDecimal", ON_DimStyle::LengthDisplay::FeetDecimal)
+      .value("FeetAndInches", ON_DimStyle::LengthDisplay::FeetAndInches)
+      .value("Miles", ON_DimStyle::LengthDisplay::Miles)
+    ;
+
   py::enum_<ON_Arrowhead::arrow_type>(m, "ArrowheadTypes")
       .value("None", ON_Arrowhead::arrow_type::None)
       .value("UserBlock", ON_Arrowhead::arrow_type::UserBlock)
@@ -610,6 +634,30 @@ void initDefines(void*)
       .value("Text", ON::AnnotationType::Text)
       .value("Leader", ON::AnnotationType::Leader)
       .value("Angular3pt", ON::AnnotationType::Angular3pt)
+    ;
+
+  enum_<ON_TextMask::MaskType>("MaskType")
+      .value("BackgroundColor", ON_TextMask::MaskType::BackgroundColor)
+      .value("MaskColor", ON_TextMask::MaskType::MaskColor)
+    ;
+
+  enum_<ON_TextMask::MaskFrame>("MaskFrame")
+      .value("NoFrame", ON_TextMask::MaskFrame::NoFrame)
+      .value("RectFrame", ON_TextMask::MaskFrame::RectFrame)
+      .value("CapsuleFrame", ON_TextMask::MaskFrame::CapsuleFrame)
+    ;
+
+  enum_<ON_DimStyle::LengthDisplay>("LengthDisplay")
+      .value("ModelUnits", ON_DimStyle::LengthDisplay::ModelUnits)
+      .value("Millmeters", ON_DimStyle::LengthDisplay::Millmeters)
+      .value("Centimeters", ON_DimStyle::LengthDisplay::Centimeters)
+      .value("Meters", ON_DimStyle::LengthDisplay::Meters)
+      .value("Kilometers", ON_DimStyle::LengthDisplay::Kilometers)
+      .value("InchesDecimal", ON_DimStyle::LengthDisplay::InchesDecimal)
+      .value("InchesFractional", ON_DimStyle::LengthDisplay::InchesFractional)
+      .value("FeetDecimal", ON_DimStyle::LengthDisplay::FeetDecimal)
+      .value("FeetAndInches", ON_DimStyle::LengthDisplay::FeetAndInches)
+      .value("Miles", ON_DimStyle::LengthDisplay::Miles)
     ;
 
   enum_<ON_Arrowhead::arrow_type>("ArrowheadTypes")

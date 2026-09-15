@@ -351,7 +351,9 @@ void initPointBindings(rh3dmpymodule& m)
     .def(py::self == py::self)
     .def(py::self != py::self)
     .def("DistanceTo", &ON_3dPoint::DistanceTo, py::arg("other"))
-    .def("Transform", &BND_Point3d::Transform, py::arg("xform"));
+    // GitHub #695: RhinoCommon's Point3d.Transform mutates the point in place. Do the same here,
+    // and also return the point so code written against the old copy-returning behavior keeps working.
+    .def("Transform", [](ON_3dPoint& self, const BND_Transform& xform) { self = xform.m_xform * self; return self; }, py::arg("xform"));
 
   py::class_<ON_4dPoint>(m, "Point4d")
     .def(py::init<double, double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("w"))
@@ -391,6 +393,7 @@ void initPointBindings(rh3dmpymodule& m)
     .def_readwrite("X", &ON_3dVector::x)
     .def_readwrite("Y", &ON_3dVector::y)
     .def_readwrite("Z", &ON_3dVector::z)
+    .def("Transform", [](ON_3dVector& self, const BND_Transform& xform) { self = xform.m_xform * self; return self; }, py::arg("xform"))
     .def(py::self == py::self)
     .def(py::self != py::self);
 

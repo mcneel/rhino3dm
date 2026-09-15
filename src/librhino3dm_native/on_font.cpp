@@ -298,6 +298,19 @@ RH_C_FUNCTION const ON_Font* ON_Font_FromQuartetProperties(const RHMONO_STRING* 
   return nullptr;
 }
 
+// Unlike ON_Font_GetManagedFont / ON_Font_FromQuartetProperties, this preserves the requested
+// rich-text (family) name even when the font is not installed: if installed it is returned,
+// otherwise a "not on device" managed font that keeps the name is returned (rendered with a
+// fallback quartet). This is how a file can be authored to reference a font the writing
+// machine does not have (RH-97829).
+RH_C_FUNCTION const ON_Font* ON_Font_FromRichTextProperties(const RHMONO_STRING* richTextFontName, bool bold, bool italic, bool underlined, bool strikethrough)
+{
+  if (nullptr == richTextFontName)
+    return nullptr;
+  INPUTSTRINGCOERCE(_richTextFontName, richTextFontName);
+  return ON_Font::FontFromRichTextProperties(_richTextFontName, bold, italic, underlined, strikethrough);
+}
+
 RH_C_FUNCTION const ON_Font* ON_Font_FromBuffer(int archive_3dm_version, unsigned int archive_on_version, int length, /*ARRAY*/const unsigned char* buffer)
 {
   // Eliminate potential bogus file versions written

@@ -940,6 +940,20 @@ namespace Rhino.Display
     #endregion
 
     #region properties
+
+    /// <summary>
+    /// Get the GPU technology that this pipeline is actively using
+    /// </summary>
+    /// <since>8.35</since>
+    public DisplayTechnology Technology
+    {
+      get
+      {
+        int tech = UnsafeNativeMethods.CRhinoDisplayPipeline_Technology(m_ptr);
+        return (DisplayTechnology)tech;
+      }
+    }
+
     /// <summary>
     /// Gets the size of the frame buffer that this pipeline is drawing to.
     /// </summary>
@@ -2343,13 +2357,16 @@ namespace Rhino.Display
         return;
 
       var nativePoints = points.RhDisplayPoints(fallbackAttributes);
+      // Must be read after RhDisplayPoints(): that call computes the far-from-origin
+      // shift, and the vertices in nativePoints are stored relative to it.
+      var ffoTransform = points.FarFromOriginTransform;
       var overridePoint = new DisplayPoint(Point3d.Origin).WithAttributes(overrideAttributes).ToDisplayPoint(null);
       if (overrideAttributes == null || !overrideAttributes.PointStyle.HasValue)
         overridePoint.m_style = 0;
       if (overrideAttributes == null || !overrideAttributes.RotationRadians.HasValue)
         overridePoint.m_rotationRadians = RhinoMath.UnsetSingle;
       IntPtr cacheHandle = points.CacheHandle();
-      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDisplayPoints(m_ptr, nativePoints.Length, nativePoints, ref overridePoint, cacheHandle);
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDisplayPoints(m_ptr, nativePoints.Length, nativePoints, ref overridePoint, cacheHandle, ref ffoTransform);
     }
 
     /// <summary>Draws a point with a given radius, style and color.</summary>

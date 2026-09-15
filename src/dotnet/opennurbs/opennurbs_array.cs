@@ -2391,6 +2391,7 @@ namespace Rhino.Runtime.InteropWrappers
   public class SimpleArrayCurvePointer : IDisposable
   {
     IntPtr m_ptr; //ON_SimpleArray<ON_Curve*>*
+    readonly List<Curve> m_keep_alive = new List<Curve>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -2422,21 +2423,17 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public SimpleArrayCurvePointer(System.Collections.Generic.IEnumerable<Curve> curves)
     {
-      int initial_capacity = 0;
       foreach (Curve c in curves)
       {
         if (null != c)
-          initial_capacity++;
+          m_keep_alive.Add(c);
       }
 
-      m_ptr = UnsafeNativeMethods.ON_CurveArray_New(initial_capacity);
-      foreach (Curve c in curves)
+      m_ptr = UnsafeNativeMethods.ON_CurveArray_New(m_keep_alive.Count);
+      foreach (Curve c in m_keep_alive)
       {
-        if (null != c)
-        {
-          IntPtr curvePtr = c.ConstPointer();
-          UnsafeNativeMethods.ON_CurveArray_Append(m_ptr, curvePtr);
-        }
+        IntPtr curvePtr = c.ConstPointer();
+        UnsafeNativeMethods.ON_CurveArray_Append(m_ptr, curvePtr);
       }
       GC.KeepAlive(curves);
       GC.KeepAlive(this);
@@ -2497,6 +2494,8 @@ namespace Rhino.Runtime.InteropWrappers
         UnsafeNativeMethods.ON_CurveArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
   }
 
@@ -2507,6 +2506,7 @@ namespace Rhino.Runtime.InteropWrappers
   public class SimpleArrayGeometryPointer : IDisposable
   {
     IntPtr m_ptr; //ON_SimpleArray<ON_Geometry*>*
+    readonly List<GeometryBase> m_keep_alive = new List<GeometryBase>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -2544,6 +2544,7 @@ namespace Rhino.Runtime.InteropWrappers
       {
         IntPtr geomPtr = gb.ConstPointer();
         UnsafeNativeMethods.ON_GeometryArray_Append(m_ptr, geomPtr);
+        m_keep_alive.Add(gb);
       }
       GC.KeepAlive(geometry);
       GC.KeepAlive(this);
@@ -2565,6 +2566,7 @@ namespace Rhino.Runtime.InteropWrappers
         {
           IntPtr geomPtr = gb.ConstPointer();
           UnsafeNativeMethods.ON_GeometryArray_Append(m_ptr, geomPtr);
+          m_keep_alive.Add(gb);
         }
       }
       GC.KeepAlive(geometry);
@@ -2622,6 +2624,8 @@ namespace Rhino.Runtime.InteropWrappers
         UnsafeNativeMethods.ON_GeometryArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
   }
 
@@ -2634,6 +2638,7 @@ namespace Rhino.Runtime.InteropWrappers
   {
     internal bool DontDelete { get; set; }
     IntPtr m_ptr; // ON_SimpleArray<ON_Mesh*>*
+    readonly List<Mesh> m_keep_alive = new List<Mesh>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -2694,6 +2699,7 @@ namespace Rhino.Runtime.InteropWrappers
           pMesh = mesh.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_MeshArray_Append(ptr, pMesh);
+        m_keep_alive.Add(mesh);
         GC.KeepAlive(mesh);
         GC.KeepAlive(this);
       }
@@ -2728,6 +2734,8 @@ namespace Rhino.Runtime.InteropWrappers
         if(!DontDelete) UnsafeNativeMethods.ON_MeshArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
 
     /// <summary>
@@ -3173,6 +3181,7 @@ namespace Rhino.Runtime.InteropWrappers
   public class SimpleArraySubDPointer : IDisposable
   {
     IntPtr m_ptr; // ON_SimpleArray<ON_SubD*>*
+    readonly List<SubD> m_keep_alive = new List<SubD>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -3227,6 +3236,7 @@ namespace Rhino.Runtime.InteropWrappers
           pSubD = subd.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_SubDArray_Append(ptr, pSubD);
+        m_keep_alive.Add(subd);
         GC.KeepAlive(subd);
         GC.KeepAlive(this);
       }
@@ -3261,6 +3271,8 @@ namespace Rhino.Runtime.InteropWrappers
         UnsafeNativeMethods.ON_SubDArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
 
     /// <summary>
@@ -3293,6 +3305,7 @@ namespace Rhino.Runtime.InteropWrappers
   public class SimpleArrayBrepPointer : IDisposable
   {
     IntPtr m_ptr; // ON_SimpleArray<ON_Brep*>*
+    readonly List<Brep> m_keep_alive = new List<Brep>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -3347,6 +3360,7 @@ namespace Rhino.Runtime.InteropWrappers
           pBrep = brep.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_BrepArray_Append(ptr, pBrep);
+        m_keep_alive.Add(brep);
         GC.KeepAlive(brep);
         GC.KeepAlive(this);
       }
@@ -3381,6 +3395,8 @@ namespace Rhino.Runtime.InteropWrappers
         UnsafeNativeMethods.ON_BrepArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
 
     /// <summary>
@@ -3515,6 +3531,7 @@ namespace Rhino.Runtime.InteropWrappers
   public class SimpleArrayExtrusionPointer : IDisposable
   {
     IntPtr m_ptr; // ON_SimpleArray<ON_Extrusion*>*
+    readonly List<Extrusion> m_keep_alive = new List<Extrusion>(); //RH-97586: hold onto a managed ptr so we keep alive
 
     /// <summary>
     /// Gets the constant (immutable) pointer of this array.
@@ -3569,6 +3586,7 @@ namespace Rhino.Runtime.InteropWrappers
           pExtrusion = extrusion.NonConstPointer();
         IntPtr ptr = NonConstPointer();
         UnsafeNativeMethods.ON_ExtrusionArray_Append(ptr, pExtrusion);
+        m_keep_alive.Add(extrusion);
         GC.KeepAlive(extrusion);
         GC.KeepAlive(this);
       }
@@ -3603,6 +3621,8 @@ namespace Rhino.Runtime.InteropWrappers
         UnsafeNativeMethods.ON_ExtrusionArray_Delete(m_ptr);
         m_ptr = IntPtr.Zero;
       }
+      if (disposing)
+        m_keep_alive.Clear();
     }
 
     /// <summary>

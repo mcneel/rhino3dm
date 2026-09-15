@@ -1297,6 +1297,7 @@ namespace Rhino
     /// Defines enumerated values for the display of distances in US customary and Imperial units.
     /// </summary>
     /// <since>5.0</since>
+    [Obsolete("Use Rhino.UI.DistanceDisplayMode")]
     public enum DistanceDisplayMode
     {
       /// <summary>
