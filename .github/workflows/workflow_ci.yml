@@ -161,6 +161,31 @@ jobs:
             echo "$file was changed"
           done
 
+  #checks if the native C sources have changed. Without this, a sync that
+  #touches only src/librhino3dm_native/ triggers no build at all.
+  check_native:
+    name: check src/librhino3dm_native
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
+      - name: check changed files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        id: changed-files
+        with:
+          files: src/librhino3dm_native/**
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
   #checks if src/bindings have changed
   check_bindings:
     name: check src/bindings
@@ -347,8 +372,8 @@ jobs:
     runs-on: ubuntu-latest
     #container:
       #image: mcneel/rhino3dm-dev-amzn2
-    needs: [check_dotnet, check_workflow, check_build_scripts, check_tests_dotnet]
-    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' ||  needs.check_tests_dotnet.outputs.any_changed == 'true'}}
+    needs: [check_dotnet, check_native, check_workflow, check_build_scripts, check_tests_dotnet]
+    if: ${{ needs.check_dotnet.outputs.any_changed == 'true' || needs.check_native.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' ||  needs.check_tests_dotnet.outputs.any_changed == 'true'}}
     steps:
       - name: info
         run: python3 --version && cmake --version && dotnet --version && git --version
@@ -364,6 +389,11 @@ jobs:
         run: python3 script/setup.py -p linux -v
       - name: build dotnet
         run: python3 script/build.py -p linux -v
+      # Fails if any P/Invoke declared in AutoNativeMethods.cs is absent from the
+      # built library AND reachable from C# that rhino3dm actually compiles.
+      # Catches a C# member being synced without its backing C export.
+      - name: validate native surface
+        run: python3 tools/extract/validate.py src/build/linux/librhino3dm_native.so
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj -c Debug
       - name: artifacts
