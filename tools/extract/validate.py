@@ -44,10 +44,11 @@ def library_exports(lib):
 
 def declared_pinvokes(autonative):
     names = set()
-    for line in open(autonative, encoding='utf-8', errors='replace'):
-        m = re.search(r'internal static extern .*?([A-Za-z0-9_]+)\s*\(', line)
-        if m:
-            names.add(m.group(1))
+    with open(autonative, encoding='utf-8', errors='replace') as handle:
+        for line in handle:
+            m = re.search(r'internal static extern .*?([A-Za-z0-9_]+)\s*\(', line)
+            if m:
+                names.add(m.group(1))
     return names
 
 
@@ -57,7 +58,8 @@ def live_callers(dotnet_dir, wanted):
     for path in glob.glob(os.path.join(dotnet_dir, '**', '*.cs'), recursive=True):
         if os.path.basename(path).startswith('AutoNative'):
             continue
-        raw = open(path, encoding='utf-8', errors='replace').read()
+        with open(path, encoding='utf-8', errors='replace') as handle:
+            raw = handle.read()
         if 'UnsafeNativeMethods.' not in raw:
             continue
         keep = evaluate(raw, CSHARP_DEFINES, bare_is_defined=True)
