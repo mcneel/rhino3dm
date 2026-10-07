@@ -36,7 +36,14 @@ set (CMAKE_CXX_STANDARD 14)
 
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DON_COMPILING_OPENNURBS)
-add_definitions(-DOPENNURBS_FREETYPE_INC_)
+# NOTE: OPENNURBS_FREETYPE_INC_ is opennurbs_freetype.h's OWN include guard.
+# Pre-defining it here makes that header a no-op, suppressing every
+# ON_FreeType* declaration. That was harmless while nothing referenced them,
+# but opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT for ON_RUNTIME_LINUX,
+# so the .cpp files now call functions this would hide. Skip it on Linux.
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOPENNURBS_FREETYPE_INC_)
+endif()
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 add_definitions(-DUNICODE)
@@ -50,6 +57,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DON_CLANG_CONSTRUCTOR_BUG)
   add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
   #target_link_libraries(librhino3dm_native -luuid)
+  # opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT whenever ON_RUNTIME_LINUX is
+  # set (opennurbs_system.h); in 8.x that was ON_RUNTIME_ANDROID only. The vendored
+  # FreeType is therefore now required to build opennurbs on Linux. This mirrors
+  # opennurbs' own CMakeLists: build freetype263, add its include dir, link it.
+  # CMAKE_DL_LIBS is for dladdr(), used by Internal_GetLinuxInstalledFonts.
+  add_subdirectory(../lib/opennurbs/freetype263 freetype263)
+  target_include_directories(librhino3dm_native PRIVATE ../lib/opennurbs/freetype263/include)
+  target_link_libraries(librhino3dm_native opennurbs_public_freetype ${CMAKE_DL_LIBS})
 endif()
 
 if(MACOS_BUILD)

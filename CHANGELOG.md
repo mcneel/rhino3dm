@@ -20,6 +20,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/8.35.0...9.0.0-beta
 ### Added
 
 - (dotnet) `LengthUnit` — a readonly struct representing a length unit, with conversion between unit systems (RhinoCommon `<since>9.0</since>`).
+- (js) WASM64 (memory64) is now the default build, replacing wasm32. This is not a preference: opennurbs 9.x packs a type tag into the low bits of SubD component pointers and requires 64-bit pointers, so a wasm32 build no longer compiles. Awaiting RH3DM-215; `script/setup.py -p js --wasm32` is kept so the 32-bit build can be re-enabled once that is resolved. Note memory64 requires Chrome 133+, Firefox 134+, or Node 24+; Safari supports it only in Technology Preview. The default should be revisited once RH3DM-215 is resolved.
 - `script/bump_version.py` — propagates `src/version.txt` to `package.json`, `Rhino3dm.csproj`, `AssemblyInfo.cs`, `setup.py` and `src/rhino3dm/__init__.py`, converting to each ecosystem's required spelling (semver, PEP 440, and the four-part numeric `AssemblyVersion`). `--check` verifies without writing.
 - CI: a `validate_version` job fails the build if any version file disagrees with `src/version.txt`.
 - CI: a `check_native` job watching `src/librhino3dm_native/**`. Previously no job watched the native C sources, so a C-only sync built nothing.

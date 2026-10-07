@@ -77,9 +77,15 @@ if(${RHINO3DM_JS})
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
   # WASM64 (wasm memory64) is its own build dimension, independent of NODE.
-  # It produces a 64-bit-memory binary that breaks the 4GB limit. Chrome ships
-  # memory64 unflagged and Node supports it; Firefox/Safari are still gated, so
-  # the default build stays wasm32 and WASM64 is opt-in.
+  # It produces a 64-bit-memory binary that breaks the 4GB limit. Support
+  # (MDN browser-compat-data, checked 2026-10-07): Chrome 133, Firefox 134,
+  # Node 24; Safari still Technology Preview only.
+  #
+  # WASM64 is the DEFAULT as of 9.0 (script/setup.py passes -D WASM64=TRUE unless
+  # --wasm32 is given). This is not a preference: opennurbs 9.x packs a type tag
+  # into the low bits of SubD component pointers and requires 64-bit pointers, so
+  # a wasm32 build does not compile. Awaiting RH3DM-215; once that is resolved the
+  # default should be revisited, since Safari and Node < 24 cannot run memory64.
   if(WASM64)
     message("WASM64 (memory64) build")
     # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied

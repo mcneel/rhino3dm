@@ -1,5 +1,11 @@
 #include "stdafx.h"
+#if defined(RHINO3DM_BUILD)
+// rhino3dm builds this file from src/librhino3dm_native/, where opennurbs lives at
+// ../lib/opennurbs. The Rhino-relative path below resolves outside that repo.
+#include "../lib/opennurbs/opennurbs_textiterator.h"
+#else
 #include "../../../opennurbs/opennurbs_textiterator.h"
+#endif
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_text.h")
 //--------------------------------------------------------

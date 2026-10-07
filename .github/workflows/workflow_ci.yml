@@ -508,6 +508,14 @@ jobs:
         with:
           name: rhino3dm.js
           path: tests/javascript/lib
+      # The default build is WASM64 (memory64) as of 9.0, which needs node >= 24
+      # (BCD: chrome 133, firefox 134, node 24, safari preview). ubuntu-latest's
+      # bundled node is unpinned and too old; without this the module fails to
+      # instantiate with "CompileError: invalid table elements limits flags".
+      - name: setup node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - name: test javascript
         run: |
           ls tests/javascript/lib
