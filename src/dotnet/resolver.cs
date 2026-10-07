@@ -7,7 +7,11 @@ using System.Linq;
 using System.Collections;
 using System.Runtime.InteropServices;
 #if RHINO_SDK
-using System.Collections.Immutable;   // rhino3dm-local: ImmutableHashSet is only used in RHINO_SDK code; keep guarded so rhino3dm needs no System.Collections.Immutable package
+using System.Collections.Immutable;   // not referenced outside RHINO_SDK; the
+                                      // package is unavailable to opennurbs-only builds
+#endif
+#if RHINO_SDK
+using Rhino.PlugIns;   // PlugIn is only referenced from RHINO_SDK code
 #endif
 
 namespace Rhino.Runtime
@@ -17,10 +21,10 @@ namespace Rhino.Runtime
   public static class AssemblyResolver
   {
     // List of assemblies we resolve by version first, otherwise we find based on name only
-    private static readonly ImmutableHashSet<string> ResolveByVersionWhitelist = ImmutableHashSet.Create(StringComparer.Ordinal, new [] {
+    private static readonly HashSet<string> ResolveByVersionWhitelist = new HashSet<string>(StringComparer.Ordinal) {
       "Newtonsoft.Json"
-    });
-    
+    };
+
 
     static bool Initialized = false;
     private static readonly ResolverContext ExecutionContext = new ResolverContext(false);
@@ -312,6 +316,9 @@ namespace Rhino.Runtime
         if (context.LoadFailures.Contains(filename))
           return null;
       }
+      
+      if (!PlugIn.GetReplacedAssembly(ref filename, LogEnabled))
+        return null;
 
       // David: restrict loading to known file-types. Steve, you'll need to handle rhp loading as I have no idea how.
       if (filename.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) //TODO: implement .rhp loading

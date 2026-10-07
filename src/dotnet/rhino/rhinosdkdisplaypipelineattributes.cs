@@ -43,6 +43,11 @@ namespace Rhino.Display
       m_dontdelete = dontdelete;
     }
 
+    internal DisplayPipelineAttributes(DisplayPipelineAttributes other)
+    {
+      m_ptr_attributes = UnsafeNativeMethods.CDisplayPipelineAttributes_New2(other.ConstPointer());
+    }
+
     internal DisplayPipelineAttributes(DisplayModeDescription parent)
     {
       m_parent = parent;
@@ -158,6 +163,19 @@ namespace Rhino.Display
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IgnoreHighlights); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.IgnoreHighlights, value); }
+    }
+
+    /// <summary>
+    /// Draw order support for this display mode. When true (the default), objects with a
+    /// non-zero draw order are drawn in front of or behind other objects based on that
+    /// draw order. When false, this display mode ignores per object draw order and draws
+    /// everything in the standard order.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool HonorDrawOrder
+    {
+      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HonorDrawOrder); }
+      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.HonorDrawOrder, value); }
     }
 
     /// <since>5.0</since>
@@ -404,6 +422,36 @@ namespace Rhino.Display
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.DrawTransGridPlane, value); }
       }
 
+      /// <summary>
+      /// The amount the grid fades out towards its edges, from 0.0 (no fade) to 1.0 (full fade).
+      /// </summary>
+      /// <since>9.0</since>
+      public float GridFade
+      {
+        get { return m_parent.GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridFade); }
+        set { m_parent.SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridFade, value); }
+      }
+
+      /// <summary>
+      /// The radius used to round the corners of the grid.
+      /// </summary>
+      /// <since>9.0</since>
+      public float GridCornerRadius
+      {
+        get { return m_parent.GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridCornerRadius); }
+        set { m_parent.SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridCornerRadius, value); }
+      }
+
+      /// <summary>
+      /// The thickness of the grid boundary.
+      /// </summary>
+      /// <since>9.0</since>
+      public float GridBoundaryThickness
+      {
+        get { return m_parent.GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridBoundaryThickness); }
+        set { m_parent.SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.GridBoundaryThickness, value); }
+      }
+
       //int                   m_nGridPlaneTrans;
       //int                   m_nAxesPercentage;
       //bool                  m_bPlaneUsesGridColor;
@@ -487,6 +535,58 @@ namespace Rhino.Display
       IntPtr ptr_this = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetBool(ptr_this, which, b);
       GC.KeepAlive(this);
+    }
+
+    internal bool GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialBool which)
+    {
+      IntPtr ptr = NonConstPointer();
+      bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, mat, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    internal void SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialBool which, bool value)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, mat, which, value);
+      GC.KeepAlive(this);
+    }
+
+    internal int GetMaterialInt(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialInt which)
+    {
+      IntPtr ptr = ConstPointer();
+      int rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetInt(ptr, mat, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    internal void SetMaterialInt(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialInt which, int value)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetInt(ptr, mat, which, value);
+      GC.KeepAlive(this);
+    }
+
+    bool GetTechnicalBool(uint tech)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetTechnical(const_ptr_this, tech);
+    }
+
+    void SetTechnicalBool(uint which, bool b)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetTechnical(ptr_this, which, b);
+    }
+
+    internal bool GetTechnicalUsageBool(uint tech)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.CDisplayPipelineAttributes_GetTechnicalUsage(const_ptr_this, tech);
+    }
+
+    internal void SetTechnicalUsageBool(uint which, bool b)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_SetTechnicalUsage(ptr_this, which, b);
     }
 
     /// <summary>
@@ -699,6 +799,20 @@ namespace Rhino.Display
     {
       IntPtr pThis = NonConstPointer();
       UnsafeNativeMethods.CDisplayPipelineAttributes_SetDouble(pThis, which, d);
+      GC.KeepAlive(this);
+    }
+
+    internal double GetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialDouble which)
+    {
+      IntPtr ptr = NonConstPointer();
+      double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, mat, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    internal void SetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx mat, UnsafeNativeMethods.DisplayAttributesMaterialDouble which, double value)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, mat, which, value);
       GC.KeepAlive(this);
     }
     #endregion
@@ -1032,7 +1146,7 @@ namespace Rhino.Display
     /// <since>8.6</since>
     public void SetSurfaceIsoThicknessUsage(SurfaceIsoThicknessUse value)
     {
-      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage) & (int)SurfaceEdgeThicknessFlags.IsoFixedWidth);
+      SurfaceEdgeThicknessFlags currentUsage = (SurfaceEdgeThicknessFlags)(GetByte(UnsafeNativeMethods.DisplayPipelineAttributesByte.SurfaceThicknessUsage));// & (int)SurfaceEdgeThicknessFlags.IsoFixedWidth);
 
       if (SurfaceIsoThicknessUse.ObjectWidth == value)
         currentUsage &= ~SurfaceEdgeThicknessFlags.IsoFixedWidth;
@@ -1336,6 +1450,7 @@ namespace Rhino.Display
     }
 
 
+
     //UINT m_nEdgePattern;
     //UINT m_nNakedEdgePattern;
     //UINT m_nNonmanifoldEdgePattern;
@@ -1590,6 +1705,29 @@ namespace Rhino.Display
       }
     }
 
+    /// <summary>
+    /// Style used to draw control points whose weight is not 1. Defaults to
+    /// RoundControlPoint, matching the default control point style, so weighted
+    /// control points are not called out until this is changed.
+    /// </summary>
+    /// <since>9.0</since>
+    public PointStyle WeightedPointStyle
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        PointStyle rc = UnsafeNativeMethods.CDisplayPipelineAttributes_GetWeightedPointStyle(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CDisplayPipelineAttributes_SetWeightedPointStyle(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
     /// <since>6.0</since>
     public float PointRadius
     {
@@ -1624,6 +1762,166 @@ namespace Rhino.Display
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPointClouds); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowPointClouds, value); }
+    }
+
+    internal enum TechnicalModeParameter
+    {
+        TECH_HIDDENLINES     =      0x0001,
+        TECH_EDGES           =      0x0002,
+        TECH_SILHOUETTES     =      0x0004,
+        TECH_CREASES         =      0x0008,
+        TECH_SEAMS           =      0x0010,
+        TECH_INTERSECTIONS   =      0x0020,
+        TECH_LIGHTING        =      0x0040,
+    }
+
+    /// <since>9.0</since>
+    public bool ShowHiddenLines
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_HIDDENLINES); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_HIDDENLINES, value); }
+    }
+
+    internal Color HiddenLineColor
+    {
+      get
+      {
+        return GetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalLine);
+      }
+      set
+      {
+        SetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalLine, value);
+      }
+    }
+
+    // When true, hidden lines use HiddenLineColor; when false, they use the object color.
+    internal bool HiddenLineUseSingleColor
+    {
+      get { return GetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_HIDDENLINES); }
+      set { SetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_HIDDENLINES, value); }
+    }
+
+    internal Color EdgeLineColor
+    {
+      get
+      {
+        return GetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalEdge);
+      }
+      set
+      {
+        SetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalEdge, value);
+      }
+    }
+
+    // When true, edge lines use EdgeLineColor; when false, they use the object color.
+    internal bool EdgeLineUseSingleColor
+    {
+      get { return GetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_EDGES); }
+      set { SetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_EDGES, value); }
+    }
+
+    internal Color SilhouetteLineColor
+    {
+      get
+      {
+        return GetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalSilhouette);
+      }
+      set
+      {
+        SetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalSilhouette, value);
+      }
+    }
+
+    // When true, silhouette lines use SilhouetteLineColor; when false, they use the object color.
+    internal bool SilhouetteLineUseSingleColor
+    {
+      get { return GetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_SILHOUETTES); }
+      set { SetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_SILHOUETTES, value); }
+    }
+
+    internal Color IntersectionLineColor
+    {
+      get
+      {
+        return GetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalIntersection);
+      }
+      set
+      {
+        SetColor(UnsafeNativeMethods.DisplayAttrsColor.TechnicalIntersection, value);
+      }
+    }
+
+    // When true, intersection lines use IntersectionLineColor; when false, they use the object color.
+    internal bool IntersectionLineUseSingleColor
+    {
+      get { return GetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_INTERSECTIONS); }
+      set { SetTechnicalUsageBool((uint)TechnicalModeParameter.TECH_INTERSECTIONS, value); }
+    }
+
+    internal int HiddenLineThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalLineThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalLineThickness, value); }
+    }
+
+    internal int EdgeThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalEdgeThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalEdgeThickness, value); }
+    }
+
+    internal int SilhoutteThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalSilhoutteThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalSilhoutteThickness, value); }
+    }
+
+    internal int IntersectionThickness
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalIntersectionThickness); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.TechnicalIntersectionThickness, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowEdges
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_EDGES); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_EDGES, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowSilhouttes
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_SILHOUETTES); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_SILHOUETTES, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowCreases
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_CREASES); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_CREASES, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowSeams
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_SEAMS); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_SEAMS, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowIntersections
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_INTERSECTIONS); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_INTERSECTIONS, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool ShowLighting
+    {
+      get { return GetTechnicalBool((uint)TechnicalModeParameter.TECH_LIGHTING); }
+      set { SetTechnicalBool((uint)TechnicalModeParameter.TECH_LIGHTING, value); }
     }
 
     /// <since>8.4</since>
@@ -1954,84 +2252,40 @@ namespace Rhino.Display
       }
     }
     /// <summary>
-    /// Get or set the front material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// Get or set the front material shine (0 to Rhino.DocObjects.Material.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
     /// <since>8.4</since>
     public double FrontMaterialShine
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+      set => SetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
     }
     /// <summary>
-    /// Get or set the back material shine (0 to Rhino.DocObjects.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// Get or set the back material shine (0 to Rhino.DocObjects.Material.MaxShine). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
     /// <since>8.4</since>
     public double BackMaterialShine
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+      set => SetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
     }
     /// <summary>
-    /// Get or set the front material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// Get or set the front material transparency (0.0 opaque to 1.0 transparent). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
     /// <since>8.4</since>
     public double FrontMaterialTransparency
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+      set => SetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
     }
     /// <summary>
-    /// Get or set the back material transparency (0 to 100). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
+    /// Get or set the back material transparency (0.0 opaque to 1.0 transparent). You must call DisplayModeDescription.UpdateDisplayMode() to commit this change.
     /// </summary>
     /// <since>8.4</since>
     public double BackMaterialTransparency
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        double rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetDouble(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+      set => SetMaterialDouble(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
     }
 
     /// <since>8.8</since>
@@ -2110,7 +2364,7 @@ namespace Rhino.Display
     /// <since>8.9</since>
     public SubDEdgeColorUse SubDSmoothInteriorEdgeColorUsage
     {
-      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage); }
+      get { return (SubDEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDSmoothInteriorEdgeColorUsage, (int)value); }
     }
     /// <summary>
@@ -2119,7 +2373,7 @@ namespace Rhino.Display
     /// <since>8.9</since>
     public SubDEdgeColorUse SubDCreaseInteriorEdgeColorUsage
     {
-      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage); }
+      get { return (SubDEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDCreaseInteriorEdgeColorUsage, (int)value); }
     }
     /// <summary>
@@ -2128,7 +2382,7 @@ namespace Rhino.Display
     /// <since>8.9</since>
     public SubDEdgeColorUse SubDNonManifoldEdgeColorUsage
     {
-      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage); }
+      get { return (SubDEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDNonManifoldEdgeColorUsage, (int)value); }
     }
     /// <summary>
@@ -2137,7 +2391,7 @@ namespace Rhino.Display
     /// <since>8.9</since>
     public SubDEdgeColorUse SubDBoundaryEdgeColorUsage
     {
-      get { return (SubDEdgeColorUse)(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage); }
+      get { return (SubDEdgeColorUse)GetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage); }
       set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.SubDBoundaryEdgeColorUsage, (int)value); }
     }
     /// <summary>
@@ -2553,6 +2807,13 @@ namespace Rhino.Display
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectedPreview); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.SubDReflectedPreview, value); }
+    }
+
+    /// <since>9.0</since>
+    public float SubDReflectionAxisLineThickness
+    {
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDReflectionAxisLineThickness); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.SubDReflectionAxisLineThickness, value); }
     }
     /// <summary>
     /// Display mesh edges on/off
@@ -3103,7 +3364,8 @@ namespace Rhino.Display
       {
         if (value < 0.0) value = 0.0;
         if (value > 50.0) value = 50.0;
-        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX, value); }
+        SetDouble(UnsafeNativeMethods.DisplayAttributesDouble.ShadowBiasX, value);
+      }
     }
     /// <summary>
     /// Transparency tolerance from 0 (never cast shadows) to 100 (always case shadows)
@@ -3280,7 +3542,7 @@ namespace Rhino.Display
     public GroundPlaneUsages GroundPlaneUsage
     {
       get { return (GroundPlaneUsages)GetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage); }
-      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage, (int) value); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.GroundPlaneUsage, (int)value); }
     }
 
     /// <summary>
@@ -3289,8 +3551,8 @@ namespace Rhino.Display
     /// <since>8.14</since>
     public enum LinearWorkflowUsages
     {
-      ByDocument=0,
-      Custom=1,
+      ByDocument = 0,
+      Custom = 1,
     }
 
     /// <summary>
@@ -3347,10 +3609,10 @@ namespace Rhino.Display
     /// Linear workflow Output image gamma
     /// </summary>
     /// <since>8.14</since>
-    public bool PostProcessGamma
+    public float PostProcessGamma
     {
-      get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessGamma); }
-      set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.PostProcessGamma, value); }
+      get { return GetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.PostProcessGamma); }
+      set { SetFloat(UnsafeNativeMethods.DisplayPipelineAttributesFloat.PostProcessGamma, value); }
     }
 
     /// <summary>
@@ -3359,19 +3621,8 @@ namespace Rhino.Display
     /// <since>8.14</since>
     public bool FrontFlatShaded
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded, value);
     }
 
     /// <summary>
@@ -3380,19 +3631,8 @@ namespace Rhino.Display
     /// <since>8.14</since>
     public bool FrontOverrideObjectColor
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor, value);
     }
 
     /// <summary>
@@ -3401,19 +3641,8 @@ namespace Rhino.Display
     /// <since>8.21</since>
     public bool FrontOverrideObjectTransparency
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
     }
 
     /// <summary>
@@ -3422,19 +3651,8 @@ namespace Rhino.Display
     /// <since>8.21</since>
     public bool FrontOverrideObjectReflectivity
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
     }
 
     /// <summary>
@@ -3443,19 +3661,8 @@ namespace Rhino.Display
     /// <since>8.21</since>
     public bool BackOverrideObjectTransparency
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
     }
 
     /// <summary>
@@ -3464,19 +3671,8 @@ namespace Rhino.Display
     /// <since>8.21</since>
     public bool BackOverrideObjectReflectivity
     {
-      get
-      {
-        IntPtr ptr = NonConstPointer();
-        bool rc = UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_GetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        IntPtr ptr = NonConstPointer();
-        UnsafeNativeMethods.CDisplayPipelineAttributes_DisplayAttributeMaterial_SetBool(ptr, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
-        GC.KeepAlive(this);
-      }
+      get => GetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
+      set => SetMaterialBool(UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
     }
     /// <summary>
     /// Shades the current viewport with no smoothing so the individual render mesh faces are visible.
@@ -3499,6 +3695,28 @@ namespace Rhino.Display
       }
     }
 
+    DisplayAttributeMaterial m_front_material;
+    DisplayAttributeMaterial m_back_material;
+
+    /// <summary>
+    /// The material used to shade the front faces of an object. The Front* properties on this
+    /// class are shortcuts into it.
+    /// </summary>
+    /// <since>9.0</since>
+    public DisplayAttributeMaterial FrontMaterial
+    {
+      get { return m_front_material ?? (m_front_material = new DisplayAttributeMaterial(this, UnsafeNativeMethods.DisplayAttributesMaterialIdx.FrontMaterial)); }
+    }
+
+    /// <summary>
+    /// The material used to shade the back faces of an object.
+    /// </summary>
+    /// <since>9.0</since>
+    public DisplayAttributeMaterial BackMaterial
+    {
+      get { return m_back_material ?? (m_back_material = new DisplayAttributeMaterial(this, UnsafeNativeMethods.DisplayAttributesMaterialIdx.BackMaterial)); }
+    }
+
     /// <summary>
     /// Adds the ability to display procedural textures in viewports. When it is turned off, procedural textures in viewports look different from the rendering.
     /// </summary>
@@ -3507,6 +3725,30 @@ namespace Rhino.Display
     {
       get { return GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BakeTextures); }
       set { SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.BakeTextures, value); }
+    }
+
+    internal int ShadingEffects
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffects); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffects, value); }
+    }
+
+    internal int ShadingEffectsWidth
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsWidth); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsWidth, value); }
+    }
+
+    internal int ShadingEffectsSeparation
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsSeparation); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsSeparation, value); }
+    }
+
+    internal int ShadingEffectsRotation
+    {
+      get { return GetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsRotation); }
+      set { SetInt(UnsafeNativeMethods.DisplayAttributesInt.ShadingEffectsRotation, value); }
     }
 
 

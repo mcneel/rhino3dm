@@ -93,6 +93,8 @@ internal partial class UnsafeNativeMethods
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RHC_RhRegisterNamedCallbackProc([MarshalAs(UnmanagedType.LPWStr)]string name, IntPtr callback);
 
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhCommandPromptWatcher_SetCallback(Rhino.RhinoApp.CommandPromptCallback callback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoCommonPlugInLoader_SetCallbacks(Rhino.Runtime.HostUtils.LoadPluginCallback loadplugin,
@@ -131,7 +133,8 @@ internal partial class UnsafeNativeMethods
                                                              Rhino.Runtime.LicenseManager.AskUserForLicenseCallback askUserForLicense,
                                                              Rhino.Runtime.LicenseManager.GetRegisteredOwnerInfoCallback getRegisteredOwnerInfo,
                                                              Rhino.Runtime.LicenseManager.ShowExpiredMessageCallback showExpiredMessage,
-                                                             Rhino.Runtime.LicenseManager.GetInternetTimeCallback getInternetTime
+                                                             Rhino.Runtime.LicenseManager.GetInternetTimeCallback getInternetTime,
+                                                             Rhino.Runtime.LicenseManager.ValidateLicenseNoPromptCallback validateLicenseNoPrompt
                                                             );
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -208,7 +211,7 @@ internal partial class UnsafeNativeMethods
     Rhino.PlugIns.RenderPlugIn.RegisterCustomPlugInsCallback registerCustomPlugInsCallback,
     Rhino.PlugIns.RenderPlugIn.GetCustomRenderSaveFileTypesCallback getCustomRenderSaveFileTypesCallback,
     Rhino.PlugIns.RenderPlugIn.UiContentTypesCallback uiContentTypesCallback,
-    Rhino.PlugIns.RenderPlugIn.SaveCusomtomRenderFileCallback saveCustomRenderFile,
+    Rhino.PlugIns.RenderPlugIn.SaveCustomRenderFileCallback saveCustomRenderFile,
     Rhino.PlugIns.RenderPlugIn.RenderSettingsSectionsCallback renderSettingsSections,
     Rhino.PlugIns.RenderPlugIn.PlugInIconCallback pluginiconcallback,
     Rhino.PlugIns.RenderPlugIn.InitialChannelToDisplayCallback initialChannelToDisplay,
@@ -311,6 +314,9 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetEndSaveDocumentCallback(Rhino.RhinoDoc.DocumentIoCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern IntPtr CRhCmnEventWatcher_New(bool headlessDocAware, bool headlessAppAware, IntPtr context, Rhino.EventWatcher.InstanceEventCallback proc);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetAddObjectCallback(Rhino.RhinoDoc.RhinoObjectCallback cb, Rhino.Runtime.HostUtils.ReportCallback reportCallback);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -386,6 +392,22 @@ internal partial class UnsafeNativeMethods
   internal static extern void CRhinoEventWatcher_SetViewEnableDrawingCallback(Rhino.Display.RhinoView.ViewEnableDrawingCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetObjectAnalysisModeChangedCallback(Rhino.DocObjects.RhinoObject.RhinoObjectAnalysisModeChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetSectionStyleTableChangedCallback(Rhino.RhinoDoc.RhinoDocSectionStyleTableChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetMarkupTableChangedCallback(Rhino.RhinoDoc.RhinoDocMarkupTableChangedCallback cb);
+
+  // https://mcneel.myjetbrains.com/youtrack/issue/RH-92369
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetMarkupViewChangedCallback(Rhino.RhinoDoc.RhinoDocMarkupViewChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetPageViewGroupTableChangedCallback(Rhino.RhinoDoc.RhinoDocPageViewGroupTableChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetPageViewPropertiesCallback(Rhino.Display.RhinoPageView.PageViewPropertiesCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
@@ -393,6 +415,9 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnIDocUserStringChangedCallback(Rhino.RhinoDoc.UserStringChangedCallback cb);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoEventWatcher_SetOnWorksessionFileChangedCallback(Rhino.RhinoDoc.WorksessionFileChangedCallback cb);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhinoEventWatcher_SetOnIdleCallback(Rhino.RhinoApp.RhCmnIntActionCallback cb);
@@ -458,12 +483,22 @@ internal partial class UnsafeNativeMethods
     Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsDrawCallback drawFunc,
     Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNeighborGripCallback neighborgripFunc,
     Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNurbsSurfaceGripCallback nurbssurfacegripFunc,
-    Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNurbsSurfaceCallback nurbssurfaceFunc);
+    Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNurbsSurfaceCallback nurbssurfaceFunc,
+    Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNurbsCurveGripCallback nurbscurvegripFunc,
+    Rhino.DocObjects.Custom.CustomObjectGrips.CRhinoObjectGripsNurbsCurveCallback nurbscurveFunc);
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void CRhCmnGripObject_SetCallbacks(Rhino.DocObjects.Custom.CustomGripObject.CRhinoObjectDestructorCallback destructorFunc,
     Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectWeightCallback getweightFunc,
     Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectSetWeightCallback setweightFunc);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhCmnGripObject_SetCallbacks2(Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectGripDirectionsCallback gripdirectionsFunc,
+    Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectCurveParamCallback curveparamFunc,
+    Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectSurfaceParamCallback surfaceparamFunc,
+    Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectCurveCVIndicesCallback curvecvindicesFunc,
+    Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectSurfaceCVIndicesCallback surfacecvindicesFunc,
+    Rhino.DocObjects.Custom.CustomGripObject.CRhinoGripObjectUndoMoveCallback undomoveFunc);
 
   #region RDK Functions
   //int Rdk_Globals_ShowColorPicker(HWND hWnd, ON_4FVECTOR_STRUCT v, bool bUseAlpha, ON_4fPoint* pColor)
@@ -761,7 +796,7 @@ internal partial class UnsafeNativeMethods
   internal static extern void Rdk_UiDynamicAccess_SetCallbacks(
     Rhino.RDK.Delegates.ADD_SECTIONS_PRE_PROC addsectionspre,
     Rhino.RDK.Delegates.SET_INTPTR_PROC addsectionspost,
-    Rhino.RDK.Delegates.NEW_CONTENT_CREATOR_USING_TYPE_BROWSER_PROC newcontentcreatorusingtypebrowser,
+    Rhino.RDK.Delegates.SHOW_CONTENT_NEW_EXISTING_BROWSER_PROC show_content_new_existing_browser_proc,
     Rhino.RDK.Delegates.CONTENT_EDITOR_TAB_ID_PROC contenteditortabid,
     Rhino.RDK.Delegates.SET_INTPTR_PROC addtextureadjustmentsection,
     Rhino.RDK.Delegates.SET_INTPTR_PROC addtwocolorsection,
@@ -779,12 +814,11 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.UPDATE_TT_MAPPING_MESH_EDITOR_DOCKBAR updatettmappingmesheditordockbar,
     Rhino.RDK.Delegates.SHOW_RENDER_OPEN_FILE_DLG_PROC ShowRenderOpenFileDlg,
     Rhino.RDK.Delegates.SHOW_RENDER_SAVE_FILE_DLG_PROC ShowRenderSaveFileDlg,
-    Rhino.RDK.Delegates.SHOW_CONTENT_TYPE_BROWSER_PROC ShowContentTypeBrowser,
     Rhino.RDK.Delegates.PROMPT_FOR_IMAGE_FILE_PARAMS_PROC PromptForImageFileParams,
     Rhino.RDK.Delegates.SHOW_NAMED_ITEM_EDIT_DLG_PROC ShowNamedItemEditDlg,
     Rhino.RDK.Delegates.SHOW_SMART_MERGE_NAME_COLLISION_DLG_PROC ShowSmartMergeNameCollisionDlg,
     Rhino.RDK.Delegates.SHOW_PREVIEW_PROPERTIES_DLG_PROC ShowPreviewPropertiesDlg,
-    Rhino.RDK.Delegates.CHOOSE_CONTENT_PROC ChooseContent,
+    Rhino.RDK.Delegates.SHOW_CONTENT_INSTANCE_BROWSER_PROC ShowContentInstanceBrowser,
     Rhino.RDK.Delegates.PEP_PICK_POINT_ON_IMAGE_PROC PepPickPointOnImage,
     Rhino.RDK.Delegates.SHOW_LAYER_MATERIAL_DIALOG_PROC ShowLayerMaterialDialog,
     Rhino.RDK.Delegates.PROMPT_FOR_IMAGE_DRAG_OPTIONS_DLG_PROC PromptForImageDragOptionsDlg,
@@ -799,7 +833,6 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.ON_PLUGIN_LOADED_PROC OnPlugInLoaded,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsFog,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionGlow,
-    Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsGlare,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsBloom,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsDOF,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsGamma,
@@ -816,6 +849,7 @@ internal partial class UnsafeNativeMethods
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsHueSatLum,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsBriCon,
     Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsMultiplier,
+    Rhino.RDK.Delegates.PEP_UI_ADD_SECTIONS_PROC AddPostEffectUISectionsDespeckle,
     Rhino.RDK.Delegates.PEP_RENDER_SETTINGS_PAGE_PROC AttachRenderPostEffectsPage,
     Rhino.RDK.Delegates.NEW_RENDER_CHANNELS_SECTION_PROC NewRenderChannelsSection,
     Rhino.RDK.Delegates.CREATE_PBR_FROM_FILES_PROC CreatePBRFromFiles,
@@ -1263,6 +1297,10 @@ internal partial class UnsafeNativeMethods
 
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   [return: MarshalAs(UnmanagedType.U1)]
+  internal static extern bool ON_RTree_SearchOverlaps(IntPtr pConstRtree, double tolerance, int serialNumber, RTree.SearchCallback searchCallback);
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  [return: MarshalAs(UnmanagedType.U1)]
   internal static extern bool ON_RTree_Search2(IntPtr pConstRtreeA, IntPtr pConstRtreeB, double tolerance, int serialNumber, RTree.SearchCallback searchCallback);
 
   //bool ON_Arc_Copy(ON_Arc* pRdnArc, ON_Arc* pRhCmnArc, bool rdnToRhc)
@@ -1397,8 +1435,7 @@ internal partial class UnsafeNativeMethods
   [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void SetRhCsInternetFunctionalityCallback(
     Rhino.Render.InternalUtilities.RhCsDownloadFileProc downloadFileCallback,
-    Rhino.Render.InternalUtilities.RhCsUrlResponseProc urlResponseCallback,
-    Rhino.Render.InternalUtilities.RhCsBitmapFromSvgProc bitmapFromSvgCallback);
+    Rhino.Render.InternalUtilities.RhCsUrlResponseProc urlResponseCallback);
 
   [DllImport (Import.lib, CallingConvention = CallingConvention.Cdecl)]
   internal static extern void RhCmn_PropertiesEditor_SetDisplayPageHook(Guid id, [MarshalAs(UnmanagedType.U1)] bool isStaticProc, IntPtr proc);
@@ -1445,6 +1482,7 @@ internal partial class UnsafeNativeMethods
     Rhino.ObjectManager.ObjectManagerNode.NodePropertiesDelegate delegateProperties,
     Rhino.ObjectManager.ObjectManagerNode.NodeBeginChangeDelegate delegateBeginChange,
     Rhino.ObjectManager.ObjectManagerNode.NodeEndChangeDelegate delegateEndChange,
+    Rhino.ObjectManager.ObjectManagerNode.NodeLookupPropertyDelegate delegateLookupProperty,
     Rhino.ObjectManager.ObjectManagerNode.NodeCommandsDelegate delegateCommands,
     Rhino.ObjectManager.ObjectManagerNode.NodeCommandsForNodesDelegate delegateCommandsForNodes,
     Rhino.ObjectManager.ObjectManagerNode.NodePreviewDelegate delegatePreview,
@@ -1511,5 +1549,79 @@ internal partial class UnsafeNativeMethods
     ConstraintWidgetAddRemProc ConstraintWidgetRemoved
     );
 
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern double ON_Integrate_1D(
+    Rhino.RhinoMath.OnIntegrate1DCallback func,
+    uint serialNumber,
+    Interval limits,
+    double relTol,
+    double absTol,
+    ref double errorBound
+    );
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern double ON_Integrate_1D_Curve(
+    Rhino.RhinoMath.OnIntegrate1DCallback func,
+    uint serialNumber,
+    IntPtr ptrCurve,
+    double relTol,
+    double absTol,
+    ref double errorBound
+    );
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern double ON_Integrate_2D(
+    Rhino.RhinoMath.OnIntegrate2DCallback func,
+    uint serialNumber,
+    Interval limits1,
+    Interval limits2,
+    double relTol,
+    double absTol,
+    ref double errorBound
+    );
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern double ON_Integrate_2D_Surface(
+    Rhino.RhinoMath.OnIntegrate2DCallback func,
+    uint serialNumber,
+    IntPtr ptrSurface,
+    double relTol,
+    double absTol,
+    ref double errorBound
+    );
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern uint CRhinoUserInterfaceObject_Create(
+    UserInterfaceClassType classType,
+    uint existingSerialNumber,
+    IntPtr drawCallback,
+    IntPtr mouseCallback,
+    IntPtr dragCallback,
+    IntPtr valueChangedCallback,
+    IntPtr runCommandCallback,
+    uint documentSerialNumber,
+    Guid userInterfaceGroupId);
+
+  // Text boxes have more than one thing to report, so they do not go through the value
+  // changed callback the slider and the check box use. This one callback serves every text
+  // box; which event it is comes across in the second argument.
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern void CRhinoUserInterfaceTextBox_SetEventCallback(IntPtr textBoxCallback);
+
+
+  [DllImport(Import.lib, CallingConvention = CallingConvention.Cdecl)]
+  internal static extern double ON_Math_Minimize(
+    Rhino.RhinoMath.ObjectiveFunctionCallback func,
+      uint index,
+      int n,
+      IntPtr search_domain,
+      double[] t0,
+      double terminate_value,
+      double terminate_gradient,
+      double relative_tolerance,
+      double zero_tolerance,
+      int maximum_iterations,
+      double[] t,
+      ref bool converged);
 #endif
 }

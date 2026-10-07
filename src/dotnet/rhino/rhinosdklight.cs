@@ -161,6 +161,27 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <summary>
+    /// Gets the default light that Rhino uses when no other lights illuminate the scene.
+    /// </summary>
+    /// <since>9.0</since>
+    public LightObject DefaultLight
+    {
+      get
+      {
+        IntPtr pConstLight = UnsafeNativeMethods.CRhinoLightTable_DefaultLight(m_doc.RuntimeSerialNumber);
+        if (IntPtr.Zero == pConstLight)
+          return null;
+        uint sn = UnsafeNativeMethods.CRhinoObject_RuntimeSN(pConstLight);
+        // The default light is a member of the light table, not an entry in the
+        // document's object lists, so a runtime serial number lookup cannot find
+        // it. Pin the wrapper to the native pointer instead.
+        var rc = new LightObject(sn);
+        rc.m_pRhinoObject = pConstLight;
+        return rc;
+      }
+    }
+
     /// <since>6.0</since>
     public Render.Skylight Skylight
     {

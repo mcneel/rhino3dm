@@ -49,11 +49,28 @@ namespace Rhino.Geometry
     /// <param name="style">The dimension style.</param>
     /// <param name="units">The unit system.</param>
     /// <since>7.34</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Since 9.0")]
     public void UpdateDimensionText(DimensionStyle style, UnitSystem units)
     {
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_const_dimstyle = style.ConstPointer();
-      UnsafeNativeMethods.ON_V6_Dimension_UpdateDimensionText(ptr_this, ptr_const_dimstyle, units);
+      UnsafeNativeMethods.ON_V6_Dimension_UpdateDimensionText(ptr_this, ptr_const_dimstyle, units, 1.0);
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Remakes dimension text geometry object and sets it on the dimension.
+    /// </summary>
+    /// <param name="style">The dimension style.</param>
+    /// <param name="units">The length units.</param>
+    /// <since>9.0</since>
+    public void UpdateDimensionText(DimensionStyle style, LengthUnit units)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_const_dimstyle = style.ConstPointer();
+      UnsafeNativeMethods.ON_V6_Dimension_UpdateDimensionText(ptr_this, ptr_const_dimstyle, units.ToUnitSystem(out var metersPerUnit), metersPerUnit);
       GC.KeepAlive(style);
       GC.KeepAlive(this);
     }
@@ -569,6 +586,54 @@ namespace Rhino.Geometry
         IntPtr styleptr = ConstParentDimStylePointer();
         UnsafeNativeMethods.ON_V6_Annotation_SetSuppressExtension2(dimptr, styleptr, value);
         GC.KeepAlive(this);   // GC_KeepAlive: Nov. 1, 2018
+      }
+    }
+
+    /// <summary>
+    /// Suppresses the dimension line and arrowhead between the first extension
+    /// line and the dimension text.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SuppressDimensionLine1
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        bool rc = UnsafeNativeMethods.ON_V6_Annotation_SuppressDimLine1(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Annotation_SetSuppressDimLine1(dimptr, styleptr, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Suppresses the dimension line and arrowhead between the second extension
+    /// line and the dimension text.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SuppressDimensionLine2
+    {
+      get
+      {
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        bool rc = UnsafeNativeMethods.ON_V6_Annotation_SuppressDimLine2(dimptr, styleptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr dimptr = NonConstPointer();
+        IntPtr styleptr = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_V6_Annotation_SetSuppressDimLine2(dimptr, styleptr, value);
+        GC.KeepAlive(this);
       }
     }
 
@@ -1492,7 +1557,9 @@ namespace Rhino.Geometry
     }
 
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
     [ConstOperation]
+    [Obsolete("Since 9.0")]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
       using (var sw = new StringWrapper())
@@ -1500,14 +1567,30 @@ namespace Rhino.Geometry
         var strptr = sw.NonConstPointer;
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
-        UnsafeNativeMethods.ON_V6_DimLinear_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
+        UnsafeNativeMethods.ON_V6_DimLinear_GetDisplayText(dimptr, unitsystem, 1.0, styleptr, strptr);
         GC.KeepAlive(style);
         GC.KeepAlive(this);
         return sw.ToString();
       }
     }
-  }
 
+    /// <since>9.0</since>
+    [ConstOperation]
+    public string GetDistanceDisplayText(LengthUnit units, DimensionStyle style)
+    {
+      using (var sw = new StringWrapper())
+      {
+        var strptr = sw.NonConstPointer;
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = style.ConstPointer();
+        UnsafeNativeMethods.ON_V6_DimLinear_GetDisplayText(dimptr, units.ToUnitSystem(out var metersPerUnit), metersPerUnit, styleptr, strptr);
+        GC.KeepAlive(style);
+        GC.KeepAlive(this);
+        return sw.ToString();
+      }
+    }
+
+  }
 }
 
 namespace Rhino.Geometry
@@ -2430,7 +2513,9 @@ namespace Rhino.Geometry
     }
 
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
     [ConstOperation]
+    [Obsolete("Since 9.0")]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
       using (var sw = new StringWrapper())
@@ -2438,8 +2523,24 @@ namespace Rhino.Geometry
         var strptr = sw.NonConstPointer;
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
-        UnsafeNativeMethods.ON_V6_DimRadial_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
+        UnsafeNativeMethods.ON_V6_DimRadial_GetDisplayText(dimptr, unitsystem, 1.0, styleptr, strptr);
         GC.KeepAlive(style);   // GC_KeepAlive: Nov. 1, 2018
+        GC.KeepAlive(this);
+        return sw.ToString();
+      }
+    }
+
+    /// <since>9.0</since>
+    [ConstOperation]
+    public string GetDistanceDisplayText(LengthUnit units, DimensionStyle style)
+    {
+      using (var sw = new StringWrapper())
+      {
+        var strptr = sw.NonConstPointer;
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = style.ConstPointer();
+        UnsafeNativeMethods.ON_V6_DimRadial_GetDisplayText(dimptr, units.ToUnitSystem(out var metersPerUnit), metersPerUnit, styleptr, strptr);
+        GC.KeepAlive(style);
         GC.KeepAlive(this);
         return sw.ToString();
       }
@@ -2898,7 +2999,9 @@ namespace Rhino.Geometry
     }
 
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
     [ConstOperation]
+    [Obsolete("Since 9.0")]
     public string GetDistanceDisplayText(UnitSystem unitsystem, DimensionStyle style)
     {
       using (var sw = new StringWrapper())
@@ -2906,7 +3009,23 @@ namespace Rhino.Geometry
         var strptr = sw.NonConstPointer;
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
-        UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayText(dimptr, unitsystem, styleptr, strptr);
+        UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayText(dimptr, unitsystem, 1.0, styleptr, strptr);
+        GC.KeepAlive(this);
+        return sw.ToString();
+      }
+    }
+
+    /// <since>9.0</since>
+    [ConstOperation]
+    public string GetDistanceDisplayText(LengthUnit units, DimensionStyle style)
+    {
+      using (var sw = new StringWrapper())
+      {
+        var strptr = sw.NonConstPointer;
+        IntPtr dimptr = ConstPointer();
+        IntPtr styleptr = style.ConstPointer();
+        UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayText(dimptr, units.ToUnitSystem(out var metersPerUnit), metersPerUnit, styleptr, strptr);
+        GC.KeepAlive(style);
         GC.KeepAlive(this);
         return sw.ToString();
       }

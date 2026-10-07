@@ -1,6 +1,7 @@
 #if RHINO_SDK
 
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -887,7 +888,7 @@ namespace Rhino.Render
   /// <summary>
   /// A collection of Render content
   /// </summary>
-  public sealed class RenderContentCollection : IDisposable, IEnumerable
+  public sealed class RenderContentCollection : IDisposable, IEnumerable<RenderContent>
   {
     private IntPtr m_cpp;
     private readonly bool m_delete_cpp_pointer;
@@ -1005,11 +1006,13 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public void SetSearchPattern(string pattern)
     {
-      var sh = new StringWrapper(pattern);
-      var p_string = sh.ConstPointer;
+      using (var sh = new StringWrapper(pattern))
+      {
+        var p_string = sh.ConstPointer;
 
-      UnsafeNativeMethods.IRhRdkContentCollection_SetSearchPattern(m_cpp, p_string);
-      GC.KeepAlive(this);
+        UnsafeNativeMethods.IRhRdkContentCollection_SetSearchPattern(m_cpp, p_string);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary>
@@ -1203,22 +1206,22 @@ namespace Rhino.Render
     {
       RenderContent found = null;
 
-      var iterator = Iterator();
-      if (iterator != null)
+      using (var iterator = Iterator())
       {
-        var content = iterator.First();
-        while (content != null)
+        if (iterator != null)
         {
-          if (content.Id.ToString().CompareTo(uuid.ToString()) == 0)
+          var content = iterator.First();
+          while (content != null)
           {
-            found = content;
-            break;
+            if (content.Id.ToString().CompareTo(uuid.ToString()) == 0)
+            {
+              found = content;
+              break;
+            }
+
+            content = iterator.Next();
           }
-
-          content = iterator.Next();
         }
-
-        iterator.DeleteThis();
       }
 
       return found;
@@ -1245,26 +1248,42 @@ namespace Rhino.Render
       return null;
     }
 
+    /// <summary>
+    /// Enumerates the contents in the collection. This makes it possible to use the collection
+    /// directly in a foreach loop instead of manually driving a
+    /// <see cref="ContentCollectionIterator"/>:
+    ///
+    /// <code>
+    /// foreach (RenderContent content in collection) { ... }
+    /// </code>
+    ///
+    /// The collection also implements IEnumerable&lt;RenderContent&gt;, so LINQ can be used on
+    /// it directly. Note that this method returns the non-generic enumerator for backwards
+    /// compatibility, which is why the loop variable above is declared as RenderContent rather
+    /// than var.
+    /// </summary>
     /// <since>6.0</since>
     public IEnumerator GetEnumerator()
     {
-      var iterator = Iterator();
-      if (iterator != null)
+      return Enumerate();
+    }
+
+    /// <since>9.0</since>
+    IEnumerator<RenderContent> IEnumerable<RenderContent>.GetEnumerator()
+    {
+      return Enumerate();
+    }
+
+    private IEnumerator<RenderContent> Enumerate()
+    {
+      using (var iterator = Iterator())
       {
-        // 4th June 2024 John Croudy, https://mcneel.myjetbrains.com/youtrack/issue/RH-82358
-        // Use try..finally to make sure the iterator gets deleted even if the caller breaks out of the loop.
-        try
+        if (iterator != null)
         {
-          var content = iterator.First();
-          while (content != null)
+          foreach (var content in iterator)
           {
             yield return content;
-            content = iterator.Next();
           }
-        }
-        finally
-        {
-          iterator.DeleteThis();
         }
       }
     }
@@ -1273,7 +1292,7 @@ namespace Rhino.Render
   /// <summary>
   /// An iterator for the RenderContentCollection
   /// </summary>
-  public sealed class ContentCollectionIterator : IDisposable
+  public sealed class ContentCollectionIterator : IDisposable, IEnumerable<RenderContent>
   {
     private IntPtr m_cpp;
 
@@ -1308,18 +1327,17 @@ namespace Rhino.Render
     {
       if (m_cpp != IntPtr.Zero)
       {
-        m_cpp = IntPtr.Zero;
         UnsafeNativeMethods.IIterator_DeleteThis(m_cpp);
+        m_cpp = IntPtr.Zero;
       }
     }
 
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete ("Use Dispose")]
     public void DeleteThis()
     {
-      if (m_cpp != IntPtr.Zero)
-      {
-        UnsafeNativeMethods.IIterator_DeleteThis(m_cpp);
-      }
+      Dispose();
     }
 
     /// <since>6.0</since>
@@ -1348,6 +1366,31 @@ namespace Rhino.Render
       }
 
       return content;
+    }
+
+    /// <summary>
+    /// Enumerates the contents, rewinding the iterator to the beginning first. This makes it
+    /// possible to use the iterator in a foreach loop or with LINQ instead of manually calling
+    /// First() and Next(). The iterator itself is not disposed by enumerating it, so it should
+    /// still be wrapped in a 'using' statement, or the whole
+    /// <see cref="RenderContentCollection"/> can be enumerated directly instead.
+    /// </summary>
+    /// <since>9.0</since>
+    public IEnumerator<RenderContent> GetEnumerator()
+    {
+      var content = First();
+
+      while (content != null)
+      {
+        yield return content;
+        content = Next();
+      }
+    }
+
+    /// <since>9.0</since>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
     }
   }
 
@@ -1462,25 +1505,27 @@ namespace Rhino.Render
     #endregion
 
     #region statics
+    /// <summary>
+    /// Checks if a method is overridden.
+    /// </summary>
+    /// <param name="method"></param>
+    /// <returns></returns>
+    protected internal static bool IsOverridden(System.Reflection.MethodInfo method)
+    {
+      return method.GetBaseDefinition().DeclaringType != method.DeclaringType;
+    }
+
     /// <since>5.1</since>
     /// <deprecated>7.9</deprecated>
     public enum ShowContentChooserFlags : int
     {
-      /// <summary>
-      /// Deprecated
-      /// </summary>
-      None              = 0x0000,
-      /// <summary>
-      /// Deprecated
-      /// </summary>
+      /// <summary></summary>
+      None = 0x0000,
+      /// <summary></summary>
       HideNewTab = 0x0001,
-      /// <summary>
-      /// Deprecated
-      /// </summary>
+      /// <summary></summary>
       HideExistingTab = 0x0002,
-      /// <summary>
-      /// Deprecated
-      /// </summary>
+      /// <summary></summary>
       MultipleSelection = 0x0004,
     };
 
@@ -2061,7 +2106,7 @@ namespace Rhino.Render
       IntPtr lwp = (lw != null) ? lw.CppPointer : IntPtr.Zero;
 
       IntPtr pDib = UnsafeNativeMethods.Rdk_Globals_GenerateQuickContentPreview(
-             lwp, c.CppPointer, width, height, pPreviewSceneServer, bSuppressLocalMapping, reason, ref rValue);
+             lwp, c.CppPointer, width, height, pPreviewSceneServer, bSuppressLocalMapping, reason, ref rValue, false);
 
       GC.KeepAlive(lw);
       GC.KeepAlive(c);
@@ -2462,6 +2507,29 @@ namespace Rhino.Render
     }
 
     /// <summary>
+    /// Units used by this instance on length fields.
+    /// </summary>
+    /// <since>9.0</since>
+    public LengthUnit ModelUnits
+    {
+      get 
+      {
+        var p_const_this = ConstPointer();
+        using (var sh = new StringHolder())
+        {
+          var unit_name = sh.NonConstPointer();
+          var meters_per_unit = double.NaN;
+          var unit_system = (UnitSystem) UnsafeNativeMethods.Rdk_RenderContent_GetModelUnits(p_const_this, unit_name, ref meters_per_unit);
+          GC.KeepAlive(this);
+
+          return unit_system == UnitSystem.CustomUnits ?
+            LengthUnit.FromCustomUnitSystem(sh.ToString(), meters_per_unit) :
+            LengthUnit.FromKnownUnitSystem(unit_system);
+        }
+      }
+    }
+
+    /// <summary>
     /// Instance identifier for this content.
     /// </summary>
     /// <since>5.1</since>
@@ -2858,6 +2926,20 @@ namespace Rhino.Render
       {
         UnsafeNativeMethods.Rdk_RenderContent_SetIsHidden(NonConstPointer(), value);
         GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The Content type should not be shown in the UI if Private is true
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Private
+    {
+      get
+      {
+        var ret = UnsafeNativeMethods.RdkContentIsPrivate(ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
       }
     }
 
@@ -3358,7 +3440,7 @@ namespace Rhino.Render
       if (HostUtils.RunningOnWindows)
       {
         var service = HostUtils.GetPlatformService<Rhino.UI.IEtoStylePageService>();
-        service?.StyleEtoControls(section);
+        service?.ApplyRhinoStyle(section);
       }
 
       bool rc = UnsafeNativeMethods.Rdk_CoreContent_AddUISection(NonConstPointer(), OnAddUiSectionsUIId, section.CppPointer);
@@ -3396,7 +3478,7 @@ namespace Rhino.Render
 
     /// <since>7.0</since>
     /// DO NOT CALL THIS FUNCTION IN NEW CODE. IT WILL BE DEPRECATED ASAP.
-    public bool GetUnderlyingInstances(ref RenderContentCollection collection) // TODO: JOHNC GetUnderlyingInstances
+    public bool GetUnderlyingInstances(RenderContentCollection collection) // TODO: JOHNC GetUnderlyingInstances
     {
       bool rc = UnsafeNativeMethods.Rdk_RenderContent_GetUnderlyingInstances(ConstPointer(), collection.CppPointer);
       GC.KeepAlive(collection);
@@ -3438,8 +3520,38 @@ namespace Rhino.Render
     /// No need to call the base class when you override this, and no need to recurse into children.
     /// </summary>
     /// <since>7.0</since>
+    /// <deprecated>9.0</deprecated>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("Since 9.0. Use ConvertUnits with LengthUnit instead, and don't override this virtual function")]
     public virtual void ConvertUnits(UnitSystem from, UnitSystem to)
     {
+      var oldConvertUnits = GetType().GetMethod(nameof(ConvertUnits), BindingFlags.Instance | BindingFlags.Public, null, new Type[] { typeof(UnitSystem), typeof(UnitSystem) }, null);
+      var newConvertUnits = GetType().GetMethod(nameof(ConvertUnits), BindingFlags.Instance | BindingFlags.Public, null, new Type[] { typeof(LengthUnit), typeof(LengthUnit) }, null);
+
+      if (IsOverridden(newConvertUnits) && !IsOverridden(oldConvertUnits))
+      {
+        if (LengthUnit.IsKnownLengthUnit(from, out var f) && LengthUnit.IsKnownLengthUnit(to, out var t))
+          ConvertUnits(f, t);
+      }
+    }
+
+    /// <summary>
+    /// Modify your content so that it is converted from meters into the units of the unit system.
+    /// No need to call the base class when you override this, and no need to recurse into children.
+    /// </summary>
+    /// <since>9.0</since>
+    public virtual void ConvertUnits(LengthUnit from, LengthUnit to)
+    {
+      var oldConvertUnits = GetType().GetMethod(nameof(ConvertUnits), BindingFlags.Instance | BindingFlags.Public, null, new Type[] { typeof(UnitSystem), typeof(UnitSystem) }, null);
+      var newConvertUnits = GetType().GetMethod(nameof(ConvertUnits), BindingFlags.Instance | BindingFlags.Public, null, new Type[] { typeof(LengthUnit), typeof(LengthUnit) }, null);
+
+      if (IsOverridden(oldConvertUnits) && !IsOverridden(newConvertUnits))
+      {
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (from.IsKnownUnitSystem(out var f) && to.IsKnownUnitSystem(out var t ))
+          ConvertUnits(f, t);
+#pragma warning restore CS0618 // Type or member is obsolete
+      }
     }
 
     /// <summary>
@@ -3509,30 +3621,34 @@ namespace Rhino.Render
     public virtual bool SetParameter(String parameterName, object value)
     {
       bool ret = false;
-      var v = new Variant(value);
-      if (v != null)
+
+      using (var v = new Variant(value))
       {
-        if (IsNativeWrapper())
+        if (v != null)
         {
-          ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_SetVariantParameter(ConstPointer(), parameterName, v.ConstPointer()));
-        }
-        else
-        {
-          var key = BindingKey(parameterName, null);
-          if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+          if (IsNativeWrapper())
           {
-            bound_field.Field.Set(v);
-            ret = true;
+            ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_SetVariantParameter(ConstPointer(), parameterName, v.ConstPointer()));
           }
           else
           {
-            ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetVariantParameterBase(ConstPointer(), parameterName, v.ConstPointer()));
+            var key = BindingKey(parameterName, null);
+
+            if (m_bound_parameters.TryGetValue(key, out BoundField bound_field))
+            {
+              bound_field.Field.Set(v);
+              ret = true;
+            }
+            else
+            {
+              ret = (1 == UnsafeNativeMethods.Rdk_RenderContent_CallSetVariantParameterBase(ConstPointer(), parameterName, v.ConstPointer()));
+            }
           }
         }
       }
 
       GC.KeepAlive(this);
-      GC.KeepAlive(v);
+      GC.KeepAlive(value);
       GC.KeepAlive(parameterName);
 
       return ret;
@@ -4079,20 +4195,17 @@ namespace Rhino.Render
     /// <since>7.1</since>
     public bool CreateDynamicField(string internalName, string localName, string englishName, object value, object minValue, object maxValue, int sectionId)
     {
-      var varValue = new Variant(value);
-      var varMin   = new Variant(minValue);
-      var varMax   = new Variant(maxValue);
+      using (var varValue = new Variant(value))
+      using (var varMin = new Variant(minValue))
+      using (var varMax = new Variant(maxValue))
+      {
+        var ret = UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(),
+               internalName, localName, englishName,
+               varValue.ConstPointer(), varMin.ConstPointer(), varMax.ConstPointer(), sectionId);
 
-      var ret = UnsafeNativeMethods.Rdk_RenderContent_CreateDynamicField(ConstPointer(),
-             internalName, localName, englishName,
-             varValue.ConstPointer(), varMin.ConstPointer(), varMax.ConstPointer(), sectionId);
-
-      GC.KeepAlive(this);
-      GC.KeepAlive(varValue);
-      GC.KeepAlive(varMin);
-      GC.KeepAlive(varMax);
-
-      return ret;
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>
@@ -4560,7 +4673,7 @@ namespace Rhino.Render
 
       if (null != content.DocumentAssoc)
       {
-        content.ConvertUnits(UnitSystem.Meters, content.DocumentAssoc.ModelUnitSystem);
+        content.ConvertUnits(LengthUnit.Meters, content.DocumentAssoc.ModelUnits);
       }
     }
 
@@ -4575,7 +4688,7 @@ namespace Rhino.Render
 
       if (null != content.DocumentAssoc)
       {
-        content.ConvertUnits(content.DocumentAssoc.ModelUnitSystem, UnitSystem.Meters);
+        content.ConvertUnits(content.DocumentAssoc.ModelUnits, LengthUnit.Meters);
       }
     }
 
@@ -4636,8 +4749,10 @@ namespace Rhino.Render
         var content = FromSerialNumber(serialNumber);
         if (content != null && pString_name != IntPtr.Zero && value != IntPtr.Zero)
         {
-          var v = Variant.CopyFromPointer(value);
-          return (content.SetParameter(StringWrapper.GetStringFromPointer(pString_name), v) ? 1 : 0);
+          using (var v = Variant.CopyFromPointer(value))
+          {
+            return (content.SetParameter(StringWrapper.GetStringFromPointer(pString_name), v) ? 1 : 0);
+          }
         }
       }
       catch (Exception ex)
@@ -4739,9 +4854,9 @@ namespace Rhino.Render
       using (var rhinodib = new RhinoDib())
       {
         var ptr_rhino_dib = rhinodib.NonConstPointer;
+        // No assert on failure: an icon that cannot be loaded is a tolerated runtime condition, and
+        // a failed Debug.Assert terminates a .NET process that has no debugger attached.
         var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetVirtualIcon(const_ptr_this, size.Width, size.Height, ptr_rhino_dib, 1));
-
-        Debug.Assert(success);
 
         if (success)
         {
@@ -4763,7 +4878,9 @@ namespace Rhino.Render
       {
         var success = (0 != UnsafeNativeMethods.Rdk_RenderContent_GetIcon(ConstPointer(), size.Width, size.Height, rhinodib.NonConstPointer));
 
-        Debug.Assert(success);
+        // This assert fires during texture deletion when a texture proxy has no members. This is because the
+        // last member was deleted but the texture proxy is still there until they update on the lazy timer.
+        //Debug.Assert(success); // So I'm removing it because this is typical texture proxy malarky.
 
         if (success)
         {
@@ -4806,10 +4923,12 @@ namespace Rhino.Render
         var content = FromSerialNumber(serialNumber);
         if (content != null && pString_paramName != IntPtr.Zero && value != IntPtr.Zero && pString_extraRequirementName != IntPtr.Zero)
         {
-          var v = Variant.CopyFromPointer(value);
-          return content.SetExtraRequirementParameter(StringWrapper.GetStringFromPointer(pString_paramName),
-                                      StringWrapper.GetStringFromPointer(pString_extraRequirementName), v,
-                                     (ExtraRequirementsSetContexts)sc) ? 1 : 0;
+          using (var v = Variant.CopyFromPointer(value))
+          {
+            return content.SetExtraRequirementParameter(StringWrapper.GetStringFromPointer(pString_paramName),
+                                        StringWrapper.GetStringFromPointer(pString_extraRequirementName), v,
+                                       (ExtraRequirementsSetContexts)sc) ? 1 : 0;
+          }
         }
       }
       catch (Exception ex)
@@ -5578,11 +5697,15 @@ namespace Rhino.Render
         // the Mac. This needs to be thought through carefully. The current
         // problem is that we cannot yet create a CRhinoDib from a C# Bitmap.
 
-        foreach (var item in m_bitmap_to_icon_dictionary)
+        if (m_bitmap_to_icon_dictionary != null)
         {
-          UnsafeNativeMethods.DeleteObject(item.Value);
+          foreach (var item in m_bitmap_to_icon_dictionary)
+          {
+            UnsafeNativeMethods.DeleteObject(item.Value);
+          }
+
+          m_bitmap_to_icon_dictionary.Clear();
         }
-        m_bitmap_to_icon_dictionary.Clear();
       }
       
     }

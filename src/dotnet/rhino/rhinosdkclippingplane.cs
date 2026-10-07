@@ -31,6 +31,22 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Determines whether an object is clipped by this clipping plane, taking the
+    /// clip participation (inclusion/exclusion) lists into account. This is the
+    /// same test the display uses.
+    /// </summary>
+    /// <param name="objectId">Id of the object to test.</param>
+    /// <returns>true if the object is clipped by this clipping plane.</returns>
+    /// <since>9.0</since>
+    public bool ObjectParticipates(System.Guid objectId)
+    {
+      System.IntPtr ptr_const_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.CRhinoClippingPlaneObject_ObjectParticipates(ptr_const_this, objectId);
+      System.GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
     /// Adds a viewport to the list of viewports that this clipping plane clips.
     /// </summary>
     /// <param name="viewport">The viewport to add.</param>

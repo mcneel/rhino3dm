@@ -132,6 +132,16 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <summary>
+    /// Determines if we're supposed to do both sides
+    /// </summary>
+    /// <since>9.0</since>
+    public bool BothSides
+    {
+      get { return GetBool(UnsafeNativeMethods.GetConeBoolConsts.BothSides); }
+      set { SetBool(UnsafeNativeMethods.GetConeBoolConsts.BothSides, value); }
+    }
+
     /// <since>6.0</since>
     public double ApexAngleDegrees
     {
@@ -226,6 +236,48 @@ namespace Rhino.Input.Custom
     {
       get { return GetBool(UnsafeNativeMethods.GetConeBoolConsts.AllowAngleInput); }
       set { SetBool(UnsafeNativeMethods.GetConeBoolConsts.AllowAngleInput, value); }
+    }
+
+    /// <summary>
+    /// The minimum number of faces in the vertical direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int VerticalDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_VerticalDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetVerticalDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The minimum number of faces in the around direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int AroundDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_AroundDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetAroundDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
     }
 
     /// <summary> 

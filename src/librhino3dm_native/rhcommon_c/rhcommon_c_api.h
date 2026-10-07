@@ -5,7 +5,7 @@
  to search a native C++ files for enums that need to be automatically
  created in RhinoCommon as .NET enums.  The native C++ enums look like
  
- #pragma region RH_C_SHARED_ENUM [<<full C++ enum name>> [<<full RhinoCommon .NET enum name]
+ #pragma region RH_C_SHARED_ENUM [<<full C++ enum name>>] [<<full RhinoCommon .NET enum name]
  /// <summary>
  /// ...
  /// </summary>
@@ -27,7 +27,7 @@
  
  Hard coded values must be specified for each enum value so that we are certain the
  native C++ and the RhinoCommon .NET enum values are identical and can be safely
- cast and passes as int types.
+ cast and passed as int types.
  
  The RhinoCommon .NET enums are created in AutoNativeEnums.cs
  
@@ -191,6 +191,9 @@ struct ON_LINE_STRUCT { ON_3DPOINT_STRUCT from; ON_3DPOINT_STRUCT to; };
 //struct ON_PLANEEQ_STRUCT{ double val[4]; };
 struct ON_2INTS { int val[2]; };
 
+// Blittable stand-in for ON_SubDEdgeSharpness (two floats: start and end sharpness).
+struct ON_SUBD_EDGE_SHARPNESS_STRUCT { float val[2]; };
+
 
 struct ON_PLANE_STRUCT
 {
@@ -205,6 +208,30 @@ struct ON_CIRCLE_STRUCT
 {
   ON_PLANE_STRUCT plane;
   double radius;
+};
+
+// Flat form of ON_SubDComponentParameter.
+//
+// component_type is an ON_SubDComponentPtr::Type value
+// (0 = unset, 2 = vertex, 4 = edge, 6 = face).
+// component_id and component_dir identify the referenced SubD component.
+//
+// The remaining fields depend on component_type:
+//   vertex: value_a = active edge id, value_b = active face id.
+//   edge:   value_a = active face id, p[0] = edge parameter in [0,1].
+//   face:   value_a = face corner index, value_b = face edge count,
+//           p[0] = corner s, p[1] = corner t, both in [0,1/2].
+//
+// The uint count is even so that p[] is 8 byte aligned with no implicit padding.
+struct ON_SUBD_COMPONENT_PARAMETER_STRUCT
+{
+  unsigned int component_type;
+  unsigned int component_id;
+  unsigned int component_dir;
+  unsigned int value_a;
+  unsigned int value_b;
+  unsigned int reserved;
+  double p[2];
 };
 
 void CopyToPlaneStruct(ON_PLANE_STRUCT& ps, const ON_Plane& plane);

@@ -1,5 +1,8 @@
+using Rhino.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 #if RHINO_SDK
 
@@ -270,12 +273,13 @@ namespace Rhino.Geometry
       const double relative_tolerance = 1.0e-6;
       const double absolute_tolerance = 1.0e-6;
 
-      Rhino.Runtime.InteropWrappers.SimpleArrayGeometryPointer array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry);
-      IntPtr pConstGeometryArray = array.ConstPointer();
-      IntPtr rc = UnsafeNativeMethods.ON_Geometry_AreaMassProperties(pConstGeometryArray, area, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
-      GC.KeepAlive(array);
-      GC.KeepAlive(geometry);
-      return IntPtr.Zero == rc ? null : new AreaMassProperties(rc, false);
+      using (var array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry))
+      {
+        IntPtr pConstGeometryArray = array.ConstPointer();
+        IntPtr rc = UnsafeNativeMethods.ON_Geometry_AreaMassProperties(pConstGeometryArray, area, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+        GC.KeepAlive(geometry);
+        return IntPtr.Zero == rc ? null : new AreaMassProperties(rc, false);
+      }
     }
 
     #region properties
@@ -726,18 +730,96 @@ namespace Rhino.Geometry
 
     #endregion
 
+
     #region methods
-    ///// <summary>
-    ///// Sum mass properties together to get an aggregate mass.
-    ///// </summary>
-    ///// <param name="summand">mass properties to add.</param>
-    ///// <returns>true if successful.</returns>
-    //public bool Sum(AreaMassProperties summand)
-    //{
-    //  IntPtr pSum = summand.ConstPointer();
-    //  return UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
-    //}
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summand">mass properties to add.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>9.0</since>
+    public bool Sum(AreaMassProperties summand)
+    {
+      IntPtr pSum = summand.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
+      GC.KeepAlive(summand);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="bAddTo">If true, then the summands are added to the existing mass.</param>
+    /// <returns>True if successful.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public bool Sum(IEnumerable<AreaMassProperties> summands, bool bAddTo)
+    {
+      bool rc = false;
+
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+      int count = summands_const_ptrs.Count;
+      if (count <= 0) return false;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        rc = UnsafeNativeMethods.ON_MassProperties_Sum2(this.ConstPointer(), count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), bAddTo);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Sum a list of mass properties together to get
+    /// an aggregate mass, weighting each by a density factor.Ignores existing
+    /// mass properties in this object.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="weights">An array of non-negative densities, of the same length as summands.</param>
+    /// <returns>An AreaMassProperties containing the result if successful, null if a failure occurs.</returns>
+    /// <exception cref="ArgumentNullException">When summands or weights is null.</exception>
+    /// <since>9.0</since>
+    public static AreaMassProperties WeightedSum(IEnumerable<AreaMassProperties> summands, IEnumerable<double> weights)
+    {
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      if (null == weights) throw new ArgumentNullException(nameof(weights));
+
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+
+      var arrayWeights = weights.ToArray();
+      int count = arrayWeights.Length;
+      if (count != summands_const_ptrs.Count) return null;
+
+      IntPtr result = IntPtr.Zero;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        result = UnsafeNativeMethods.ON_MassProperties_WeightedSum(count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), arrayWeights);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      if (IntPtr.Zero == result) return null;
+
+      return new AreaMassProperties(result, false);
+    }
+
     #endregion
+
   }
 
 
@@ -952,14 +1034,99 @@ namespace Rhino.Geometry
       const double relative_tolerance = 1.0e-6;
       const double absolute_tolerance = 1.0e-6;
 
-      Rhino.Runtime.InteropWrappers.SimpleArrayGeometryPointer array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry);
-      IntPtr pConstGeometryArray = array.ConstPointer();
-      IntPtr rc = UnsafeNativeMethods.ON_Geometry_VolumeMassProperties(pConstGeometryArray, volume, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
-      GC.KeepAlive(array);
-      GC.KeepAlive(geometry);
-      return IntPtr.Zero == rc ? null : new VolumeMassProperties(rc, false);
+      using (var array = new Runtime.InteropWrappers.SimpleArrayGeometryPointer(geometry))
+      {
+        IntPtr pConstGeometryArray = array.ConstPointer();
+        IntPtr rc = UnsafeNativeMethods.ON_Geometry_VolumeMassProperties(pConstGeometryArray, volume, firstMoments, secondMoments, productMoments, relative_tolerance, absolute_tolerance);
+        GC.KeepAlive(geometry);
+        return IntPtr.Zero == rc ? null : new VolumeMassProperties(rc, false);
+      }
     }
-    
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summand">mass properties to add.</param>
+    /// <returns>true if successful.</returns>
+    public bool Sum(VolumeMassProperties summand)
+    {
+      IntPtr pSum = summand.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
+      GC.KeepAlive(summand);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="bAddTo">If true, then the summands are added to the existing mass.</param>
+    /// <returns>True if successful.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public bool Sum(IEnumerable<VolumeMassProperties> summands, bool bAddTo)
+    {
+      bool rc = false;
+
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+      int count = summands_const_ptrs.Count;
+      if (count <= 0) return false;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        rc = UnsafeNativeMethods.ON_MassProperties_Sum2(this.ConstPointer(), count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), bAddTo);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Sum a list of mass properties together to get
+    /// an aggregate mass, weighting each by a density factor.Ignores existing
+    /// mass properties in this object.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="weights">An array of non-negative densities, of the same length as summands.</param>
+    /// <returns>An VolumeMassProperties containing the result if successful, null if a failure occurs.</returns>
+    /// <exception cref="ArgumentNullException">When summands or weights is null.</exception>
+    /// <since>9.0</since>
+    public static VolumeMassProperties WeightedSum(IEnumerable<VolumeMassProperties> summands, IEnumerable<double> weights)
+    {
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      if (null == weights) throw new ArgumentNullException(nameof(weights));
+
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+
+      var arrayWeights = weights.ToArray();
+      int count = arrayWeights.Length;
+      if (count != summands_const_ptrs.Count) return null;
+
+      IntPtr result = IntPtr.Zero;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        result = UnsafeNativeMethods.ON_MassProperties_WeightedSum(count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), arrayWeights);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      if (IntPtr.Zero == result) return null;
+
+      return new VolumeMassProperties(result, false);
+    }
+
     #region properties
 
     internal IntPtr ConstPointer()
@@ -1422,20 +1589,6 @@ namespace Rhino.Geometry
 
     #region methods
     /// <summary>
-    /// Sum mass properties together to get an aggregate mass.
-    /// </summary>
-    /// <param name="summand">mass properties to add.</param>
-    /// <returns>true if successful.</returns>
-    /// <since>5.0</since>
-    public bool Sum(VolumeMassProperties summand)
-    {
-      IntPtr pSum = summand.ConstPointer();
-      bool rc = UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
-      GC.KeepAlive(summand);
-      return rc;
-    }
-
-    /// <summary>
     /// On input, this contains the mass properties for some geometry G.
 		/// On exit, this contains the mass properties for the transformed geometry xform(G).
     /// </summary>
@@ -1575,19 +1728,107 @@ namespace Rhino.Geometry
     {
       const double rel_tol = 1.0e-6;
       const double abs_tol = 1.0e-6;
-      Rhino.Runtime.InteropWrappers.SimpleArrayCurvePointer array = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves);
-      IntPtr ptr_const_curves = array.ConstPointer();
-      IntPtr ptr_mp = UnsafeNativeMethods.ON_Curve_LengthMassProperties2(ptr_const_curves, length, firstMoments, secondMoments, productMoments, rel_tol, abs_tol);
-      GC.KeepAlive(array);
-      GC.KeepAlive(curves);
-      return ptr_mp == IntPtr.Zero
-        ? null
-        : new LengthMassProperties(ptr_mp, false);
+
+      using (var array = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves))
+      {
+        IntPtr ptr_const_curves = array.ConstPointer();
+        IntPtr ptr_mp = UnsafeNativeMethods.ON_Curve_LengthMassProperties2(ptr_const_curves, length, firstMoments, secondMoments, productMoments, rel_tol, abs_tol);
+        GC.KeepAlive(curves);
+        return ptr_mp == IntPtr.Zero
+          ? null
+          : new LengthMassProperties(ptr_mp, false);
+      }
     }
 
-    #region properties
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summand">mass properties to add.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>9.0</since>
+    public bool Sum(LengthMassProperties summand)
+    {
+      IntPtr pSum = summand.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_MassProperties_Sum(m_ptr, pSum);
+      GC.KeepAlive(summand);
+      return rc;
+    }
 
-    internal IntPtr ConstPointer()
+    /// <summary>
+    /// Sum mass properties together to get an aggregate mass.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="bAddTo">If true, then the summands are added to the existing mass.</param>
+    /// <returns>True if successful.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public bool Sum(IEnumerable<LengthMassProperties> summands, bool bAddTo)
+    {
+      bool rc = false;
+
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+      int count = summands_const_ptrs.Count;
+      if (count <= 0) return false;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        rc = UnsafeNativeMethods.ON_MassProperties_Sum2(this.ConstPointer(), count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), bAddTo);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Sum a list of mass properties together to get
+    /// an aggregate mass, weighting each by a density factor.Ignores existing
+    /// mass properties in this object.
+    /// </summary>
+    /// <param name="summands">An array of mass properties to add.</param>
+    /// <param name="weights">An array of non-negative densities, of the same length as summands.</param>
+    /// <returns>An LengthMassProperties containing the result if successful, null if a failure occurs.</returns>
+    /// <exception cref="ArgumentNullException">When summands or weights is null.</exception>
+    /// <since>9.0</since>
+    public static LengthMassProperties WeightedSum(IEnumerable<LengthMassProperties> summands, IEnumerable<double> weights)
+    {
+      if (null == summands) throw new ArgumentNullException(nameof(summands));
+      if (null == weights) throw new ArgumentNullException(nameof(weights));
+
+      RhinoList<IntPtr> summands_const_ptrs = new RhinoList<IntPtr>();
+      foreach (var summand in summands)
+      {
+        summands_const_ptrs.Add(summand.ConstPointer());
+      }
+
+      var arrayWeights = weights.ToArray();
+      int count = arrayWeights.Length;
+      if (count != summands_const_ptrs.Count) return null;
+
+      IntPtr result = IntPtr.Zero;
+      try
+      {
+        GCHandle handle = GCHandle.Alloc(summands_const_ptrs.m_items, GCHandleType.Pinned);
+        result = UnsafeNativeMethods.ON_MassProperties_WeightedSum(count, Marshal.UnsafeAddrOfPinnedArrayElement(summands_const_ptrs.m_items, 0), arrayWeights);
+        handle.Free();
+        GC.KeepAlive(summands);
+      }
+      catch { }
+
+      if (IntPtr.Zero == result) return null;
+
+      return new LengthMassProperties(result, false);
+    }
+
+  #region properties
+
+  internal IntPtr ConstPointer()
     {
       return m_ptr;
     }

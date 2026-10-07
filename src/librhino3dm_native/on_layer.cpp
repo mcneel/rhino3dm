@@ -69,6 +69,7 @@ enum LayerInt : int
   idxLinetypeIndex = 0,
   idxRenderMaterialIndex = 1,
   idxIgesLevel = 3,
+  idxSectionStyleIndex = 4,
 };
 
 RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
@@ -86,6 +87,9 @@ RH_C_FUNCTION int ON_Layer_GetInt(const ON_Layer* pLayer, enum LayerInt which)
       break;
     case idxIgesLevel:
       rc = pLayer->IgesLevel();
+      break;
+    case idxSectionStyleIndex:
+      rc = pLayer->SectionStyleIndex();
       break;
     }
   }
@@ -106,6 +110,9 @@ RH_C_FUNCTION void ON_Layer_SetInt(ON_Layer* pLayer, enum LayerInt which, int va
       break;
     case idxIgesLevel:
       pLayer->SetIgesLevel(val);
+      break;
+    case idxSectionStyleIndex:
+      pLayer->SetSectionStyleIndex(val);
       break;
     }
   }
@@ -363,5 +370,20 @@ RH_C_FUNCTION void ON_Layer_SetCustomSectionStyle(ON_Layer* layer, const ON_Sect
       layer->SetCustomSectionStyle(*sectionstyle);
     else
       layer->RemoveCustomSectionStyle();
+  }
+}
+
+RH_C_FUNCTION void ON_Layer_GetDescription(const ON_Layer* pLayer, CRhCmnStringHolder* pString)
+{
+  if (pLayer && pString)
+    pString->Set(pLayer->Description());
+}
+
+RH_C_FUNCTION void ON_Layer_SetDescription(ON_Layer* pLayer, const RHMONO_STRING* pString)
+{
+  if (pLayer)
+  {
+    INPUTSTRINGCOERCE(str, pString);
+    pLayer->SetDescription(str);
   }
 }

@@ -388,6 +388,8 @@ namespace Rhino.ObjectManager
       if (null == ext)
         return;
 
+#pragma warning disable CA2000
+
       ObjectManagerNodeNative node = null;
 
       if (IntPtr.Zero != pNode)
@@ -403,7 +405,11 @@ namespace Rhino.ObjectManager
       {
         UnsafeNativeMethods.RhinoObjectManager_NodeVector_Add(pNodes, child.CppPointer);
       }
+
+#pragma warning restore CA2000
     }
+
+
 
     internal static void SetCppHooks(bool bInitialize)
     {
@@ -442,12 +448,14 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Extension_EnglishName(CppPointer, p_string);
+          UnsafeNativeMethods.RhinoObjectManager_Extension_EnglishName(CppPointer, p_string);
 
-        return sh.ToString();
+          return sh.ToString();
+        }
       }
     }
 
@@ -456,12 +464,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Extension_LocalizedName(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Extension_LocalizedName(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -708,9 +719,10 @@ namespace Rhino.ObjectManager
       ObjectManagerNodesList.nodes.Add(this);
     }
 
-    internal ObjectManagerNode(IntPtr p)
+    internal ObjectManagerNode(IntPtr p, bool delete_cpp_pointer)
     {
       m_cpp_shared_ptr_to_node = p;
+      Delete = delete_cpp_pointer;
     }
 
     ~ObjectManagerNode()
@@ -757,12 +769,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_FullyQualifiedId(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_FullyQualifiedId(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -1124,9 +1139,10 @@ namespace Rhino.ObjectManager
       if (null == node)
         return 0;
 
-      var dt = new ObjectManagerNodeDropTarget(pDropTarget);
-
-      return node.SupportsDropTarget(dt) ? 1 : 0;
+      using (var dt = new ObjectManagerNodeDropTarget(pDropTarget))
+      {
+        return node.SupportsDropTarget(dt) ? 1 : 0;
+      }
     }
 
     public delegate int NodeDropDelegate(int serial, IntPtr pDropTarget);
@@ -1139,9 +1155,10 @@ namespace Rhino.ObjectManager
       if (null == node)
         return 0;
 
-      var dt = new ObjectManagerNodeDropTarget(pDropTarget);
-
-      return node.Drop(dt) ? 1 : 0;
+      using (var dt = new ObjectManagerNodeDropTarget(pDropTarget))
+      {
+        return node.Drop(dt) ? 1 : 0;
+      }
     }
 
     public delegate void NodeAddUiSectionsDelegate(int serial, IntPtr pSectionHolder);
@@ -1158,26 +1175,30 @@ namespace Rhino.ObjectManager
       node.AddUiSections(holder);
     }
 
-    public delegate IntPtr NodeGetParameterDelegate(int serial, IntPtr pName);
+    public delegate int NodeGetParameterDelegate(int serial, IntPtr pName, IntPtr pValue);
 
     private static NodeGetParameterDelegate DelegateNodeGetParameter = OnNodeGetParameter;
     [MonoPInvokeCallback(typeof(NodeGetParameterDelegate))]
-    private static IntPtr OnNodeGetParameter(int sn, IntPtr pName)
+    private static int OnNodeGetParameter(int sn, IntPtr pName, IntPtr pValue)
     {
+      if ((IntPtr.Zero == pName) || (IntPtr.Zero == pValue))
+        return 0;
+
       var node = ObjectManagerNode.FromSerialNumber(sn);
       if (null == node)
-        return IntPtr.Zero;
-
-      if (IntPtr.Zero == pName)
-        return IntPtr.Zero;
+        return 0;
 
       var parameter_name = Rhino.Runtime.InteropWrappers.StringWrapper.GetStringFromPointer(pName);
       var param = node.GetParameter(parameter_name);
       if (null == param)
-        return IntPtr.Zero;
+        return 0;
 
-      var value = new Rhino.Render.Variant(param);
-      return value.ConstPointer();
+      using (var value = new Rhino.Render.Variant(param))
+      {
+        value.CopyToPointer(pValue);
+      }
+
+      return 1;
     }
 
     public delegate int NodeSetParameterDelegate(int serial, IntPtr pName, IntPtr pValue);
@@ -1194,9 +1215,11 @@ namespace Rhino.ObjectManager
         return 0;
 
       var parameter_name = Rhino.Runtime.InteropWrappers.StringWrapper.GetStringFromPointer(pName);
-      var value = Rhino.Render.Variant.CopyFromPointer(pValue);
 
-      return node.SetParameter(parameter_name, value) ? 1 : 0;
+      using (var value = Rhino.Render.Variant.CopyFromPointer(pValue))
+      {
+        return node.SetParameter(parameter_name, value) ? 1 : 0;
+      }
     }
 
     public delegate int NodeIsEqualDelegate(int serial, IntPtr pNode);
@@ -1212,9 +1235,10 @@ namespace Rhino.ObjectManager
       if (IntPtr.Zero == pNode)
         return 0;
 
-      var node2 = new ObjectManagerNodeNative(pNode, false);
-
-      return node.IsEqual(node2) ? 1 : 0;
+      using (var node2 = new ObjectManagerNodeNative(pNode, false))
+      {
+        return node.IsEqual(node2) ? 1 : 0;
+      }
     }
 
     public delegate void NodeHighlightInViewDelegate(int serial, IntPtr pDisplayPipeline, uint channel, IntPtr pDisplayPen);
@@ -1277,26 +1301,26 @@ namespace Rhino.ObjectManager
       {
         UnsafeNativeMethods.RhCmnObjectManagerNode_SetCallbacks(DelegateNodeTypeId, DelegateNodeEnglishName,
           DelegateNodeLocalizedName, DelegateNodeId, DelegateParentNode, DelegateChildrenNode, DelegateNodeImage, DelegateNodeProperties,
-          DelegateNodeBeginChange, DelegateNodeEndChange, DelegateNodeCommands, DelegateNodeCommandsForNodes, DelegateNodePreview,
-          DelegateNodeWriteToBuffer, DelegateNodeIsDragable, DelegateNodeSupportsDropTarget, DelegateNodeDrop, DelegateNodeAddUiSections,
-          DelegateNodeGetParameter, DelegateNodeSetParameter, DelegateNodeIsEqual, DelegateNodeHighlightInView, DelegateNodeIsSelected,
-          DelegateNodeToolTip);
+          DelegateNodeBeginChange, DelegateNodeEndChange, DelegateNodeLookupProperty, DelegateNodeCommands, DelegateNodeCommandsForNodes,
+          DelegateNodePreview, DelegateNodeWriteToBuffer, DelegateNodeIsDragable, DelegateNodeSupportsDropTarget, DelegateNodeDrop,
+          DelegateNodeAddUiSections, DelegateNodeGetParameter, DelegateNodeSetParameter, DelegateNodeIsEqual, DelegateNodeHighlightInView,
+          DelegateNodeIsSelected, DelegateNodeToolTip);
       }
       else
       {
         UnsafeNativeMethods.RhCmnObjectManagerNode_SetCallbacks(null, null, null, null, null, null, null, null, null, null, null, null,
-          null, null, null, null, null, null, null, null, null, null, null, null);
+          null, null, null, null, null, null, null, null, null, null, null, null, null);
       }
     }
   }
 
 
+  // DO NOT make public
   internal class ObjectManagerNodeNative : ObjectManagerNode
   {
-    public ObjectManagerNodeNative(IntPtr p, bool delete_cpp_pointer)
-    : base(p)
+    internal ObjectManagerNodeNative(IntPtr p, bool delete_cpp_pointer)
+    : base(p, delete_cpp_pointer)
     {
-      Delete = delete_cpp_pointer;
     }
 
     public override Guid TypeId
@@ -1309,12 +1333,14 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_EnglishName(CppPointer, p_string);
+          UnsafeNativeMethods.RhinoObjectManager_Node_EnglishName(CppPointer, p_string);
 
-        return sh.ToString();
+          return sh.ToString();
+        }
       }
     }
 
@@ -1323,12 +1349,14 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_LocalizedName(CppPointer, p_string);
+          UnsafeNativeMethods.RhinoObjectManager_Node_LocalizedName(CppPointer, p_string);
 
-        return sh.ToString();
+          return sh.ToString();
+        }
       }
     }
 
@@ -1337,12 +1365,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Id(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_Id(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -1376,13 +1407,18 @@ namespace Rhino.ObjectManager
 
     public override object GetParameter(String parameterName)
     {
+#pragma warning disable CA2000
       var var = new Rhino.Render.Variant();
+#pragma warning restore CA2000
 
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(parameterName);
-      if (!UnsafeNativeMethods.RhinoObjectManager_Node_GetParameter(CppPointer, sh.ConstPointer, var.NonConstPointer()))
-        return null;
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(parameterName))
+      {
 
-      return var.IsNull ? null : var;
+        if (!UnsafeNativeMethods.RhinoObjectManager_Node_GetParameter(CppPointer, sh.ConstPointer, var.NonConstPointer()))
+          return null;
+
+        return var.IsNull ? null : var;
+      }
     }
 
     public override string ToolTip
@@ -1390,25 +1426,32 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_ToolTip(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_ToolTip(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
     public override bool SetParameter(String parameterName, object value)
     {
-      var var = new Rhino.Render.Variant(value);
-      if ((null == var) || (var.IsNull))
+      using (var var = new Rhino.Render.Variant(value))
       {
-        return false;
-      }
+        if ((null == var) || (var.IsNull))
+        {
+          return false;
+        }
 
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(parameterName);
-      return UnsafeNativeMethods.RhinoObjectManager_Node_SetParameter(CppPointer, sh.ConstPointer, var.ConstPointer());
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(parameterName))
+        {
+          return UnsafeNativeMethods.RhinoObjectManager_Node_SetParameter(CppPointer, sh.ConstPointer, var.ConstPointer());
+        }
+      }
     }
 
     public override ObjectManagerNode Parent
@@ -1840,12 +1883,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Property_DisplayName(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_Property_DisplayName(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -1854,12 +1900,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Property_ParameterName(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_Property_ParameterName(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -2230,12 +2279,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Command_EnglishName(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_Command_EnglishName(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 
@@ -2244,12 +2296,15 @@ namespace Rhino.ObjectManager
       get
       {
         string name = "";
-        var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name);
-        var p_string = sh.ConstPointer;
 
-        UnsafeNativeMethods.RhinoObjectManager_Node_Command_LocalizedName(CppPointer, p_string);
+        using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(name))
+        {
+          var p_string = sh.ConstPointer;
 
-        return sh.ToString();
+          UnsafeNativeMethods.RhinoObjectManager_Node_Command_LocalizedName(CppPointer, p_string);
+
+          return sh.ToString();
+        }
       }
     }
 

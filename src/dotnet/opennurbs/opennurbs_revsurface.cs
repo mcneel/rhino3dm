@@ -97,6 +97,19 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Detemines if the axis of revolution and the curve are co-planar.
+    /// </summary>
+    /// <returns>
+    /// true if the axis of revolution and the curve are co-planar, false otherwise.
+    /// </returns>
+    /// <since>9.0</since>
+    public bool AxisAndCurveCoplanar()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.ON_RevSurface_AxisAndCurveCoplanar(const_ptr_this);
+    }
+
     #endregion
 
     #region static create functions

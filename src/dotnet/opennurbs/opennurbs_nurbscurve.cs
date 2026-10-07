@@ -69,8 +69,10 @@ namespace Rhino.Geometry
       //crv.Knots.CreateUniformKnots(1.0);
       //return crv;
 
-      LineCurve line_crv = new LineCurve(line);
-      return line_crv.ToNurbsCurve();
+      using (LineCurve line_crv = new LineCurve(line))
+      {
+        return line_crv.ToNurbsCurve();
+      }
     }
 
     /// <summary>

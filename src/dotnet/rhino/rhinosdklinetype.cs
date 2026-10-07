@@ -526,6 +526,134 @@ namespace Rhino.DocObjects
     }
     #endregion
 
+    /// <summary>
+    /// Does this linetype have shapes
+    /// </summary>
+    /// <since>9.0</since>
+    public bool HasShapes
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_ShapeCount(constPtrThis) > 0;
+      }
+    }
+
+    /// <summary>
+    /// Remove all shapes from this linetype
+    /// </summary>
+    /// <since>9.0</since>
+    public void RemoveAllShapes()
+    {
+      if (HasShapes)
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_RemoveAllShapes(ptrThis);
+      }
+    }
+
+    /// <summary>
+    /// If shapes are present in this linetype, this is the distance between
+    /// shapes
+    /// </summary>
+    /// <since>9.0</since>
+    public double ShapeSpacing
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_GetShapeSpacing(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetShapeSpacing(ptrThis, value);
+      }
+    }
+
+    /// <summary>
+    /// If shapes are present in this linetype, this is the gap around the
+    /// shape.
+    /// </summary>
+    /// <since>9.0</since>
+    public double ShapeGap
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_Linetype_GetShapeGap(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetShapeGap(ptrThis, value);
+      }
+    }
+
+    /// <summary>
+    /// Local offset applied to shapes
+    /// </summary>
+    /// <since>9.0</since>
+    public Vector2d ShapeLocalOffset
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        Vector2d rc = new Vector2d();
+        UnsafeNativeMethods.ON_Linetype_GetLocalShapeOffset(constPtrThis, ref rc);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Linetype_SetLocalShapeOffset(ptrThis, value);
+      }
+    }
+
+    /// <summary>
+    /// Add a curve shape to this linetype definition
+    /// </summary>
+    /// <param name="shapeCurve"></param>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool AddShape(Curve shapeCurve, double offset)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      IntPtr constPtrCurve = shapeCurve.ConstPointer();
+      return UnsafeNativeMethods.ON_Linetype_AddShape1(ptrThis, constPtrCurve, offset);
+    }
+
+    /// <summary>
+    /// Add text as a shape to this linetype definition
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool AddShape(TextEntity text, double offset)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      IntPtr constPtrText = text.ConstPointer();
+      return UnsafeNativeMethods.ON_Linetype_AddShape2(ptrThis, constPtrText, offset);
+    }
+
+    /// <summary>
+    /// The bounding box of the shapes in this linetype definition.
+    /// </summary>
+    /// <since>9.0</since>
+    public BoundingBox ShapeBounds
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        BoundingBox rc = BoundingBox.Empty;
+        UnsafeNativeMethods.ON_Linetype_GetShapeBounds(constPtrThis, ref rc);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Reads linetypes from either a Rhino .3dm file or an AutoCAD .lin file.
@@ -829,6 +957,19 @@ namespace Rhino.DocObjects.Tables
     /// linetype is returned. Note that this reference may become invalid after
     /// AddLinetype() is called.
     /// </returns>
+    /// <remarks>
+    /// Detaching a worksession reference model, or purging a linked instance
+    /// definition, removes its linetypes but leaves the table slots they occupied
+    /// empty; the slots cannot be closed up, because table indices are persistent
+    /// references that objects store. Count spans the empty slots and they
+    /// accumulate for the life of the document. An index that lands on one
+    /// returns the continuous line pattern rather than throwing, and nothing
+    /// about it says it is a stand-in except its index, which is -1 and never the
+    /// index you asked for - so test index == Linetypes[index].Index before
+    /// treating an entry as real. Enumerating the table with foreach goes through
+    /// the document manifest rather than the raw table array, so it does not
+    /// visit empty slots at all. See RH-97389.
+    /// </remarks>
     public DocObjects.Linetype this[int index]
     {
       get
@@ -1152,6 +1293,16 @@ namespace Rhino.DocObjects.Tables
     public bool Undelete(int index)
     {
       return UnsafeNativeMethods.CRhinoLinetypeTable_Un(m_doc.RuntimeSerialNumber, index, false);
+    }
+
+    /// <summary>
+    /// Purges any unused linetypes.
+    /// </summary>
+    /// <returns>The number of unused linetypes that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeUnused()
+    {
+      return UnsafeNativeMethods.RHC_RhPurgeLinetypes(Document.RuntimeSerialNumber);
     }
 
     /// <summary>

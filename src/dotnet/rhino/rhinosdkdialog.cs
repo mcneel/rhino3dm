@@ -1,5 +1,10 @@
 #pragma warning disable 1591
 using System;
+using System.Threading.Tasks;
+#if RHINO_SDK
+using System.Windows.Forms;
+#endif
+using Rhino.Runtime;
 
 // none of the UI namespace needs to be in the stand-alone opennurbs library
 #if RHINO_SDK
@@ -95,7 +100,7 @@ namespace Rhino
       {
         throw new NotImplementedException();
       }
-      
+
       public bool DockBarIsVisible(Guid barId)
       {
         throw new NotImplementedException();
@@ -105,7 +110,7 @@ namespace Rhino
       {
         throw new NotImplementedException();
       }
-      
+
       public bool UnhookDeleteAndDestroyDockBar(Guid id)
       {
         throw new NotImplementedException();
@@ -204,11 +209,147 @@ namespace Rhino
       /// the dock site restoration code in Rhino.UI to ensure the command prompt
       /// is visible when Rhino starts.
       /// </summary>
-      internal static Guid Command { get; } = new Guid("1d3d1785-2332-428b-a838-b2fe39ec50f4");
+      internal static Guid CommandHistory { get; } = new Guid("1d3d1785-2332-428b-a838-b2fe39ec50f4");
+
+      /// <summary>
+      /// This is the old sidebar-based command prompt panel that was used on Mac.
+      /// It is replaced by <see cref="Sidebar"/> when Eto-based command UI is active.
+      /// </summary>
       internal static Guid MacCommandPrompt { get; } = new Guid("303293C9-AAD0-4419-994D-6765718A58ED");
-      internal static Guid CommandPrompt => Rhino.Runtime.HostUtils.RunningOnOSX ? MacCommandPrompt : Command;
+
+      /// <summary>
+      /// This is the bottom dockbar ID that usually contained just the command history on Mac.
+      /// </summary>
+      internal static Guid MacHistoryPanel { get; } = new Guid("a6e1bdd1-20c0-4768-8fbf-49f8ca435efd");
+
+      /// <summary>
+      /// Gets the Id of the command prompt panel currently in use depending on the mode.
+      /// </summary>
+      internal static Guid CommandPrompt
+      {
+        get
+        {
+          if (!CommandPanels.UseEtoCommandUI)
+            return Rhino.Runtime.HostUtils.RunningOnOSX ? MacCommandPrompt : CommandHistory;
+
+          return CommandPanels.PromptLocation switch
+          {
+            CommandPromptLocation.CommandHistory => CommandHistory,
+            CommandPromptLocation.SideBar => Sidebar,
+            CommandPromptLocation.SeparatePanel => CommandPanel,
+            _ => CommandHistory
+          };
+        }
+      }
+
+      /// <summary>
+      /// Gets the ID of the sidebar in use, Mac in legacy mode used a different ID.
+      /// </summary>
+      internal static Guid MacSidebar => !HostUtils.RunningOnOSX || CommandPanels.UseEtoCommandUI ? Sidebar : MacCommandPrompt;
+
+      internal static Guid CommandPanel { get; } = new Guid("60488dd9-fbc1-4941-aa07-baab0d3b19cc");
+      internal static Guid Sidebar { get; } = new Guid("{7491FFAC-EBF2-4214-BF42-D3D1E4E0F0E1}");
       internal static Guid ObjectSnap { get; } = new Guid("d3c4a392-88de-4c4f-88a4-ba5636ef7f38");
       internal static Guid SelectionFilter { get; } = new Guid("918191ca-1105-43f9-a34a-dda4276883c1");
+    }
+
+    internal enum CommandPromptLocation
+    {
+      SeparatePanel = 0,
+      SideBar = 1,
+      CommandHistory = 2,
+    }
+
+    internal enum CommandPromptStyle
+    {
+      /// <summary>
+      /// Windows style (links)
+      /// </summary>
+      Links = 0,
+      /// <summary>
+      /// Mac style (graphical UI elements)
+      /// </summary>
+      Graphical = 1,
+      /// <summary>
+      /// New style with buttons
+      /// </summary>
+      Buttons = 2
+    }
+
+    internal static class CommandPanels
+    {
+      // use this so it doesn't change until Rhino is restarted
+      static bool? _useEtoCommandUI;
+      internal static bool UseEtoCommandUI
+      {
+        get => _useEtoCommandUI ??= Runtime.AdvancedSettings.Settings.GetBool("UseEtoCommandUI", true);  //RhinoApp.IsLoggedInAsMcNeelUser);
+        set => Runtime.AdvancedSettings.Settings.SetBool("UseEtoCommandUI", value);
+      }
+
+      private static PersistentSettings ThemePersistentSettings => PersistentSettings.RhinoAppSettings.GetChild("Options");
+
+      internal static EventHandler PromptLocationChanged;
+
+      internal static CommandPromptLocation PromptLocation
+      {
+        get
+        {
+          if (ThemePersistentSettings.TryGetEnumValue<CommandPromptLocation>("CommandPromptLocation", out var location))
+          {
+            return location;
+          }
+
+          // TODO: Remove this eventually, it was only used in early v9 WIPs
+          if (ThemePersistentSettings.TryGetInteger("CommandOptionsPresentationStyle", out var style))
+          {
+            return style switch
+            {
+              0 => CommandPromptLocation.SeparatePanel,
+              1 => CommandPromptLocation.SideBar,
+              2 => CommandPromptLocation.CommandHistory,
+              _ => Runtime.HostUtils.RunningOnOSX ? CommandPromptLocation.SideBar : CommandPromptLocation.CommandHistory
+            };
+          }
+
+          // On Mac, use the old setting from the Themes
+          if (!(HostUtils.RunningOnOSX && ThemePersistentSettings.GetChild("Themes").TryGetInteger("CommandOptionsPresentationStyle", out style)))
+            style = -1;
+
+          return HostUtils.RunningOnOSX ? CommandPromptLocation.SideBar : CommandPromptLocation.CommandHistory;
+        }
+        set
+        {
+          ThemePersistentSettings.SetEnumValue("CommandOptionsPresentationStyle", value);
+          PromptLocationChanged?.Invoke(null, EventArgs.Empty);
+        }
+      }
+
+      internal static EventHandler PromptStyleChanged;
+
+      internal static CommandPromptStyle PromptStyle
+      {
+        get
+        {
+          if (ThemePersistentSettings.TryGetEnumValue<CommandPromptStyle>("CommandPromptStyle", out var style))
+          {
+            return style;
+          }
+
+          return PromptLocation switch
+          {
+            CommandPromptLocation.SeparatePanel => CommandPromptStyle.Graphical,
+            CommandPromptLocation.SideBar => CommandPromptStyle.Graphical,
+            CommandPromptLocation.CommandHistory => CommandPromptStyle.Links,
+            _ => HostUtils.RunningOnOSX ? CommandPromptStyle.Graphical : CommandPromptStyle.Links
+          };
+        }
+        set
+        {
+          ThemePersistentSettings.SetEnumValue("CommandPromptStyle", value);
+          PromptStyleChanged?.Invoke(null, EventArgs.Empty);
+        }
+      }
+
     }
 
     /// <summary>
@@ -220,7 +361,7 @@ namespace Rhino
     internal enum PanelStyles : int
     {
       /// <summary>
-      /// 
+      ///
       /// </summary>
       UseDefaults = 0,
       /// <summary>
@@ -240,6 +381,13 @@ namespace Rhino
       /// bottom.
       /// </summary>
       HideGripperTextWhenDockedOnTopOrBottom = 4,
+      /// <summary>
+      /// When a container has to be created for this panel on the fly the first
+      /// time it is opened it gets a container of its own, which has never been
+      /// through the layout file and so has no saved float size. In this case
+      /// size that container to the panel's content
+      /// </summary>
+      AutoSizeWhenFloating = 8,
       /// <summary>
       /// Apply all of the style flags
       /// </summary>
@@ -318,7 +466,7 @@ namespace Rhino
       public static bool DockBarIdInUse(Guid dockBarId) => Service.DockBarIdInUse(dockBarId);
 
       /// <summary>
-      /// Check to see if reason is equal to any of the hide events 
+      /// Check to see if reason is equal to any of the hide events
       /// </summary>
       /// <param name="reason"></param>
       /// <returns></returns>
@@ -329,7 +477,7 @@ namespace Rhino
       }
 
       /// <summary>
-      /// Check to see if reason is equal to any of the show events 
+      /// Check to see if reason is equal to any of the show events
       /// </summary>
       /// <param name="reason"></param>
       /// <returns></returns>
@@ -383,7 +531,7 @@ namespace Rhino
       /// derived from System.Windows.FrameworkElement.  Mac Rhino will also
       /// support classes that are derived from NsView.  In addition to the
       /// type requirements the class must have a public constructor with no
-      /// parameters or a constructor with a single uint that represents the 
+      /// parameters or a constructor with a single uint that represents the
       /// document serial number and have a GuidAttribute applied with a
       /// unique Id.  n Windows there is only one panel created which gets
       /// recycled for each new document.  On the Mac a panel will be created
@@ -424,7 +572,7 @@ namespace Rhino
       /// derived from System.Windows.FrameworkElement.  Mac Rhino will also
       /// support classes that are derived from NsView.  In addition to the
       /// type requirements the class must have a public constructor with no
-      /// parameters or a constructor with a single uint that represents the 
+      /// parameters or a constructor with a single uint that represents the
       /// document serial number and have a GuidAttribute applied with a
       /// unique Id.  n Windows there is only one panel created which gets
       /// recycled for each new document.  On the Mac a panel will be created
@@ -441,7 +589,7 @@ namespace Rhino
       /// Assembly conataining the iconResourceId, if null it is assumed the
       /// iconResourceId is a starndard Rhino resource and the Rhino.UI assembly
       /// will be used.
-      /// assembly will be used 
+      /// assembly will be used
       /// </param>
       /// <param name="iconResourceId">
       /// The resource Id string used to load the panel icon from the iconAssembly.
@@ -694,7 +842,7 @@ namespace Rhino
       public static T [] GetPanels<T> (uint documentRuntimeSerialNumber) where T : class => GetPanels<T> (RhinoDoc.FromRuntimeSerialNumber (documentRuntimeSerialNumber));
 
       /// <summary>
-      /// 
+      ///
       /// </summary>
       /// <returns></returns>
       /// <param name="doc"></param>
@@ -719,7 +867,7 @@ namespace Rhino
       /// </param>
       /// <param name="isSelectedTab">
       /// This parameter is ignored on Mac.
-      /// 
+      ///
       /// If Windows and true the panel must be visible in a container and
       /// if it is a tabbed container it must be the active tab to be true.
       /// </param>
@@ -728,7 +876,7 @@ namespace Rhino
       ///   The return value is dependent on the isSelectedTab value.  If
       ///   isSelectedTab is true then the panel must be included in a
       ///   visible tabbed container and must also be the active tab to be
-      ///   true.  If isSelectedTab is false then the panel only has to be 
+      ///   true.  If isSelectedTab is false then the panel only has to be
       ///   included in a visible tabbed container to be true.
       /// On Mac:
       ///   isSelected is ignored and true is returned if the panel appears
@@ -751,7 +899,7 @@ namespace Rhino
       /// </param>
       /// <param name="isSelectedTab">
       /// This parameter is ignored on Mac.
-      /// 
+      ///
       /// If Windows and true the panel must be visible in a container and
       /// if it is a tabbed container it must be the active tab to be true.
       /// </param>
@@ -760,7 +908,7 @@ namespace Rhino
       ///   The return value is dependent on the isSelectedTab value.  If
       ///   isSelectedTab is true then the panel must be included in a
       ///   visible tabbed container and must also be the active tab to be
-      ///   true.  If isSelectedTab is false then the panel only has to be 
+      ///   true.  If isSelectedTab is false then the panel only has to be
       ///   included in a visible tabbed container to be true.
       /// On Mac:
       ///   isSelected is ignored and true is returned if the panel appears
@@ -925,7 +1073,7 @@ namespace Rhino
       /// Class type Id for the panel to open.
       /// </param>
       /// <returns>
-      /// Returns true if the 
+      /// Returns true if the
       /// </returns>
       /// <since>5.12</since>
       public static Guid OpenPanel(Guid dockBarId, Guid panelId)
@@ -949,21 +1097,23 @@ namespace Rhino
       /// otherwise; the panel is opened but not set as the active tab.
       /// </param>
       /// <returns>
-      /// Returns true if the 
+      /// Returns true if the
       /// </returns>
       /// <since>6.0</since>
       public static Guid OpenPanel(Guid dockBarId, Guid panelId, bool makeSelectedPanel)
       {
-        var args = new Runtime.NamedParametersEventArgs();
-        args.Set("dockBarId", dockBarId);
-        args.Set("factoryId", panelId);
-        args.Set("makeSelectedTab", makeSelectedPanel);
-        Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.OpenTabOnDockBar", args);
-        if (args.TryGetBool("handled", out bool handled) && handled)
-          return args.TryGetGuid("dockBarId", out Guid barId) ? barId : Guid.Empty;
-        // This won't be necessary Mac Rhino is ported to use the generic panel
-        // interfaces
-        return UnsafeNativeMethods.CRhinoTabbedDockBarDialog_OpenTabOnDockBar(RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0, dockBarId, panelId, makeSelectedPanel);
+        using (var args = new Runtime.NamedParametersEventArgs())
+        {
+          args.Set("dockBarId", dockBarId);
+          args.Set("factoryId", panelId);
+          args.Set("makeSelectedTab", makeSelectedPanel);
+          Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.OpenTabOnDockBar", args);
+          if (args.TryGetBool("handled", out bool handled) && handled)
+            return args.TryGetGuid("dockBarId", out Guid barId) ? barId : Guid.Empty;
+          // This won't be necessary Mac Rhino is ported to use the generic panel
+          // interfaces
+          return UnsafeNativeMethods.CRhinoTabbedDockBarDialog_OpenTabOnDockBar(RhinoDoc.ActiveDoc?.RuntimeSerialNumber ?? 0, dockBarId, panelId, makeSelectedPanel);
+        }
       }
       /// <summary>
       /// In Mac Rhino this will just call the version of OpenPanel that takes
@@ -978,7 +1128,7 @@ namespace Rhino
       /// Class type for the panel to open.
       /// </param>
       /// <returns>
-      /// Returns true if the 
+      /// Returns true if the
       /// </returns>
       /// <since>5.12</since>
       public static Guid OpenPanel(Guid dockBarId, Type panelType)
@@ -1002,7 +1152,7 @@ namespace Rhino
       /// otherwise; the panel is opened but not set as the active tab.
       /// </param>
       /// <returns>
-      /// Returns true if the 
+      /// Returns true if the
       /// </returns>
       /// <since>6.0</since>
       public static Guid OpenPanel(Guid dockBarId, Type panelType, bool makeSelectedPanel)
@@ -1033,7 +1183,7 @@ namespace Rhino
       /// Mac support:
       ///   Display the specified panel in a floating window on Mac, the floating
       ///   window will only contain the specified panel.
-      /// 
+      ///
       /// Windows support:
       ///   On Windows this will show or hide the floating container containing the
       ///   specified panel.  If the tab is docked with other tabs it will be
@@ -1054,7 +1204,7 @@ namespace Rhino
       /// Mac support:
       ///   Display the specified panel in a floating window on Mac, the floating
       ///   window will only contain the specified panel.
-      /// 
+      ///
       /// Windows support:
       ///   On Windows this will show or hide the floating container containing the
       ///   specified panel.  If the tab is docked with other tabs it will be
@@ -1093,7 +1243,7 @@ namespace Rhino
       /// </param>
       /// <returns>
       /// Always returns Guid.Empty on Mac Rhino.  On Windows Rhino it will
-      /// return the Id for the dock bar which host the specified panel or 
+      /// return the Id for the dock bar which host the specified panel or
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
       /// <since>6.1</since>
@@ -1118,7 +1268,7 @@ namespace Rhino
       /// </param>
       /// <returns>
       /// Always returns Guid.Empty on Mac Rhino.  On Windows Rhino it will
-      /// return the Id for the dock bar which host the specified panel or 
+      /// return the Id for the dock bar which host the specified panel or
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
       /// <since>5.12</since>
@@ -1137,7 +1287,7 @@ namespace Rhino
       /// </param>
       /// <returns>
       /// Always returns Guid.Empty on Mac Rhino.  On Windows Rhino it will
-      /// return the Id for the dock bar which host the specified panel or 
+      /// return the Id for the dock bar which host the specified panel or
       /// Guid.Empty if the panel is not currently visible.
       /// </returns>
       /// <since>5.12</since>
@@ -1148,15 +1298,17 @@ namespace Rhino
 
       private static void RHC_RhinoUiOpenCloseDockbarTab(RhinoDoc doc, Guid tabId, bool open, bool makeSelectedTab)
       {
-        var args = new Runtime.NamedParametersEventArgs();
-        args.Set("documentSerialNumber", (doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0u);
-        args.Set("factoryId", tabId);
-        args.Set("open", open);
-        args.Set("makeSelectedTab", makeSelectedTab);
-        Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.RhinoUiOpenCloseDockbarTab", args);
-        if (args.TryGetBool("handled", out bool handled) && handled)
-          return;
-        UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab((doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0, tabId, open, makeSelectedTab);
+        using (var args = new Runtime.NamedParametersEventArgs())
+        {
+          args.Set("documentSerialNumber", (doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0u);
+          args.Set("factoryId", tabId);
+          args.Set("open", open);
+          args.Set("makeSelectedTab", makeSelectedTab);
+          Runtime.HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.NamedCallbacks.RhinoUiOpenCloseDockbarTab", args);
+          if (args.TryGetBool("handled", out bool handled) && handled)
+            return;
+          UnsafeNativeMethods.RHC_RhinoUiOpenCloseDockbarTab((doc ?? RhinoDoc.ActiveDoc)?.RuntimeSerialNumber ?? 0, tabId, open, makeSelectedTab);
+        }
       }
       /// <summary>
       /// Will close or hide the specified panel type, in Windows Rhino, if it
@@ -1258,11 +1410,11 @@ namespace Rhino
         Show.Invoke(null, args);
       }
       /// <summary>
-      /// This event is called when a panel is shown or hidden.  This event will get raised 
+      /// This event is called when a panel is shown or hidden.  This event will get raised
       /// multipThis times when the active document changes in Mac Rhino.  It will called
-      /// with show equal to false for the previous active document and with show equal to 
+      /// with show equal to false for the previous active document and with show equal to
       /// true for the current document.  When the event is raised with show equal to false
-      /// it only means the document instance of the panel is not visible it does not mean 
+      /// it only means the document instance of the panel is not visible it does not mean
       /// the panel host has been closed.  If you need to know when the panel host closes
       /// then subscribe to the Closed event.
       /// </summary>

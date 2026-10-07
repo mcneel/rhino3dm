@@ -40,7 +40,11 @@ namespace Rhino.Geometry
       bool rational = info.GetBoolean("IsRational");
       int order = info.GetInt32("Order");
       double[] cvs = info.GetValue("CVs", typeof(double[])) as double[];
-      m_ptr = UnsafeNativeMethods.ON_BezierCurve_New2(dimension, rational, order, cvs.Length, cvs);
+      if (null == cvs)
+        throw new SerializationException("BezierCurve control vertex data is missing.");
+      m_ptr = UnsafeNativeMethods.ON_BezierCurve_NewFromCvs(dimension, rational, order, cvs.Length, cvs);
+      if (IntPtr.Zero == m_ptr)
+        throw new SerializationException("BezierCurve control vertex data does not match the serialized dimension, rationality and order.");
     }
 
     /// <summary>
@@ -52,14 +56,21 @@ namespace Rhino.Geometry
     [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
+      IntPtr const_ptr_this = ConstPointer();
+      int order = UnsafeNativeMethods.ON_BezierCurve_Order(const_ptr_this);
+      int cv_size = UnsafeNativeMethods.ON_BezierCurve_CVSize(const_ptr_this);
+
+      // Write the logical control vertices in packed form. The unmanaged CV buffer
+      // is allocated, not filled, to m_cv_capacity doubles and is laid out with a
+      // stride that is not part of this stream, so neither value can be used here.
+      int length = (order > 0 && cv_size > 0) ? order * cv_size : 0;
+      double[] cvs = new double[length];
+      if (!UnsafeNativeMethods.ON_BezierCurve_GetCvs(const_ptr_this, length, cvs))
+        throw new SerializationException("Unable to retrieve BezierCurve control vertices.");
+
       info.AddValue("Dimension", Dimension);
       info.AddValue("IsRational", IsRational);
-      IntPtr const_ptr_this = ConstPointer();
-      info.AddValue("Order", UnsafeNativeMethods.ON_BezierCurve_Order(const_ptr_this));
-      int capacity = UnsafeNativeMethods.ON_BezierCurve_CvCapacity(const_ptr_this);
-
-      double[] cvs = new double[capacity];
-      UnsafeNativeMethods.ON_BezierCurve_SetCvs(const_ptr_this, cvs.Length, cvs);
+      info.AddValue("Order", order);
       info.AddValue("CVs", cvs);
       GC.KeepAlive(this);
     }
@@ -437,7 +448,34 @@ namespace Rhino.Geometry
       return rc;
     }
 
-#region Rhino SDK functions
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public BezierCurve Derivative()
+    {
+      IntPtr ptr_derivative = UnsafeNativeMethods.ON_BezierCurve_New();
+      IntPtr const_ptr_this = ConstPointer();
+
+      bool rc = UnsafeNativeMethods.ON_BezierCurve_Derivative(const_ptr_this, ptr_derivative);
+      if (rc)
+      {
+        return new BezierCurve(ptr_derivative);
+      }
+      else
+      {
+        UnsafeNativeMethods.ON_BezierCurve_Delete(ptr_derivative);
+        return null;
+      }
+    }
+#endif
+
+    #region Rhino SDK functions
 #if RHINO_SDK
     /// <summary>
     /// Constructs an array of cubic, non-rational Beziers that fit a curve to a tolerance.

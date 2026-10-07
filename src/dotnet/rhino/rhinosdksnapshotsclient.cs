@@ -92,12 +92,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string ApplicationCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_ApplicationCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_ApplicationCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -108,12 +111,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string DocumentCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_DocumentCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_DocumentCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -124,12 +130,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string RenderingCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_RenderingCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_RenderingCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -140,12 +149,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string ViewsCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_ViewsCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_ViewsCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -156,12 +168,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string ObjectsCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_ObjectsCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_ObjectsCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -172,12 +187,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string LayersCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_LayersCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_LayersCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -188,12 +206,15 @@ namespace Rhino.DocObjects.SnapShots
     public static string LightsCategory()
     {
       string category = "";
-      var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category);
-      var p_string = sh.NonConstPointer;
 
-      UnsafeNativeMethods.CRdkCmnSnapShotClient_LightsCategory(p_string);
+      using (var sh = new Rhino.Runtime.InteropWrappers.StringWrapper(category))
+      {
+        var p_string = sh.NonConstPointer;
 
-      return sh.ToString();
+        UnsafeNativeMethods.CRdkCmnSnapShotClient_LightsCategory(p_string);
+
+        return sh.ToString();
+      }
     }
 
     /// <summary>
@@ -482,12 +503,15 @@ namespace Rhino.DocObjects.SnapShots
       if (client != null)
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
-        BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
-        BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
 
-        bool animate_doc = client.AnimateObject(doc, obj, ref transform, dPos, archive_start, archive_stop);
-        return animate_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
+          BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
+
+          bool animate_doc = client.AnimateObject(doc, obj, ref transform, dPos, archive_start, archive_stop);
+          return animate_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -501,11 +525,14 @@ namespace Rhino.DocObjects.SnapShots
       if (client != null)
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
-        BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
-        BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
 
-        client.ExtendBoundingBoxForObjectAnimation(doc, obj, ref transform, archive_start, archive_stop, ref bbox);
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
+          BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
+
+          client.ExtendBoundingBoxForObjectAnimation(doc, obj, ref transform, archive_start, archive_stop, ref bbox);
+        }
       }
     }
 
@@ -518,12 +545,15 @@ namespace Rhino.DocObjects.SnapShots
       if (client != null)
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
-        BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
-        BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
 
-        bool animate_doc = client.PrepareForObjectAnimation(doc, obj, ref transform, archive_start, archive_stop);
-        return animate_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          BinaryArchiveReader archive_start = new BinaryArchiveReader(pArchive_start);
+          BinaryArchiveReader archive_stop = new BinaryArchiveReader(pArchive_stop);
+
+          bool animate_doc = client.PrepareForObjectAnimation(doc, obj, ref transform, archive_start, archive_stop);
+          return animate_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -603,10 +633,12 @@ namespace Rhino.DocObjects.SnapShots
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
         BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
 
-        bool save_doc = client.ObjectTransformNotification(doc, obj, ref transform, archive);
-        return save_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          bool save_doc = client.ObjectTransformNotification(doc, obj, ref transform, archive);
+          return save_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -621,10 +653,12 @@ namespace Rhino.DocObjects.SnapShots
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
         BinaryArchiveWriter archive = new BinaryArchiveWriter(pArchive);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
 
-        bool save_doc = client.SaveObject(doc, obj, ref transform, archive);
-        return save_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          bool save_doc = client.SaveObject(doc, obj, ref transform, archive);
+          return save_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -639,10 +673,12 @@ namespace Rhino.DocObjects.SnapShots
       {
         RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(doc_serial);
         BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
 
-        bool save_doc = client.RestoreObject(doc, obj, ref transform, archive);
-        return save_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          bool save_doc = client.RestoreObject(doc, obj, ref transform, archive);
+          return save_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -669,10 +705,11 @@ namespace Rhino.DocObjects.SnapShots
 
       if (client != null)
       {
-
-        Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
-        bool save_doc = client.SupportsObject(obj);
-        return save_doc ? 1 : 0;
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        {
+          bool save_doc = client.SupportsObject(obj);
+          return save_doc ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -781,46 +818,44 @@ namespace Rhino.DocObjects.SnapShots
     [MonoPInvokeCallback(typeof(GETBOOLDOCBUFFERBUFFERARRAYTEXTLOGPROC))]
     private static int IsCurrentModelStateInAnySnapshot(int serial, uint pDoc_serial, IntPtr pArchive, IntPtr pArchives, IntPtr pTextLog)
     {
-        var client = FromSerialNumber(serial);
+      var client = FromSerialNumber(serial);
 
-        if (client != null)
+      if (client != null)
+      {
+        BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
+
+        using (RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial))
+        using (SimpleArrayBinaryArchiveReader archives = new SimpleArrayBinaryArchiveReader(pArchives))
+        using (var log = (IntPtr.Zero != pTextLog) ? new TextLog(pTextLog) : null)
         {
-            RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial);
-            BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
-            SimpleArrayBinaryArchiveReader archives = new SimpleArrayBinaryArchiveReader(pArchives);
-
-            TextLog log = null;
-            if (IntPtr.Zero != pTextLog)
-              new TextLog(pTextLog);
-
-            bool equal_doc = client.IsCurrentModelStateInAnySnapshot(doc, archive, archives, log);
-            return equal_doc ? 1 : 0;
+          bool equal_doc = client.IsCurrentModelStateInAnySnapshot(doc, archive, archives, log);
+          return equal_doc ? 1 : 0;
         }
-        return 0;
+      }
+      return 0;
     }
 
     internal static GETBOOLDOCOBJBUFFERBUFFERARRAYTEXTLOGPROC iscurrentobjmodelstateinanysnapshot_proc = IsCurrentObjModelStateInAnySnapshot;
     [MonoPInvokeCallback(typeof(GETBOOLDOCOBJBUFFERBUFFERARRAYTEXTLOGPROC))]
     private static int IsCurrentObjModelStateInAnySnapshot(int serial, uint pDoc_serial, uint obj_serial, IntPtr pArchive, IntPtr pArchives, IntPtr pTextLog)
     {
-        var client = FromSerialNumber(serial);
+      var client = FromSerialNumber(serial);
 
-        if (client != null)
+      if (client != null)
+      {
+        BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
+
+        using (RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial))
+        using (SimpleArrayBinaryArchiveReader archives = new SimpleArrayBinaryArchiveReader(pArchives))
+        using (Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial))
+        using (TextLog log = (IntPtr.Zero != pTextLog) ? new TextLog(pTextLog) : null)
         {
-            RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(pDoc_serial);
-            BinaryArchiveReader archive = new BinaryArchiveReader(pArchive);
-            SimpleArrayBinaryArchiveReader archives = new SimpleArrayBinaryArchiveReader(pArchives);
-            Rhino.DocObjects.RhinoObject obj = new DocObjects.RhinoObject(obj_serial);
-
-            TextLog log = null;
-            if (IntPtr.Zero != pTextLog)
-                new TextLog(pTextLog);
-
-            bool equal_doc = client.IsCurrentModelStateInAnySnapshot(doc, obj, archive, archives, log);
-            return equal_doc ? 1 : 0;
+          bool equal_doc = client.IsCurrentModelStateInAnySnapshot(doc, obj, archive, archives, log);
+          return equal_doc ? 1 : 0;
         }
-        return 0;
-     }
+      }
+      return 0;
+    }
 
    static internal void SetCppHooks(bool bInitialize)
     {

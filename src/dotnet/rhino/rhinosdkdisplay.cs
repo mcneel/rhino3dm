@@ -1,12 +1,37 @@
 #pragma warning disable 1591
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.InteropServices;
+using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 
 #if RHINO_SDK
 namespace Rhino.Display
 {
+  /// <summary>
+  /// Defines how drawing should be performed when drawing with iso intervals
+  /// aka zebra or banded drawing
+  /// </summary>
+  /// <since>9.0</since>
+  public enum IsoDrawMode : byte
+  {
+    None = 0,
+    DirectionalLight = 1,
+    DirectionalLightXY = 2,
+    DirectionalLightXYDots = 3,
+    DirectionalLightCameraX = 4,
+    DirectionalLightCameraY = 5,
+    DirectionalLightCameraXY = 6,
+    DirectionalLightCameraXYDots = 7,
+    DirectionalLightCameraZ = 8,
+    PointLight = 9,
+    PointLightCamera = 10,
+    CylindricalStatic = 11,
+    DirectionalDistance = 12,
+    DirectionalDistanceCamera = 13
+  }
+
   /// <summary>
   /// Graphics display techologies.
   /// </summary>
@@ -164,8 +189,11 @@ namespace Rhino.Display
           using (var client = new System.Net.WebClient())
           {
             var stream = client.OpenRead(path);
-            var bmp = new System.Drawing.Bitmap(stream);
-            return new DisplayBitmap(bmp);
+
+            using (var bmp = new System.Drawing.Bitmap(stream))
+            {
+              return new DisplayBitmap(bmp);
+            }
           }
         }
         catch(Exception)
@@ -676,6 +704,101 @@ namespace Rhino.Display
       }
     }
   }
+
+  public class IsoDrawEffect
+  {
+    private Color[] _colors = new Color[10];
+
+    /// <since>9.0</since>
+    public IsoDrawEffect()
+    {
+      for (int i = 0; i < 10; i++)
+        _colors[i] = Color.Black;
+    }
+
+    internal IsoDrawEffect(IntPtr ptrIsoDrawEffect)
+    {
+      DrawMode = (IsoDrawMode)UnsafeNativeMethods.CRhinoIsoDrawEffect_GetInt(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsInt.DrawMode);
+      UsedBandColorCount = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetInt(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsInt.ColorCount);
+      Frequency = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetInt(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsInt.Frequency);
+      GapSize = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetDouble(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsDouble.GapSize);
+      Falloff = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetDouble(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsDouble.Falloff);
+      RotationRadians = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetDouble(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsDouble.Rotation);
+      DiscardGap = UnsafeNativeMethods.CRhinoIsoDrawEffect_GetBool(ptrIsoDrawEffect, UnsafeNativeMethods.IsoDrawSettingsBool.DiscardGap);
+      Point3d pt = new Point3d();
+      UnsafeNativeMethods.CRhinoIsoDrawEffect_GetPoint(ptrIsoDrawEffect, ref pt);
+      Point = pt;
+      Vector3d dir = new Vector3d();
+      UnsafeNativeMethods.CRhinoIsoDrawEffect_GetDirection(ptrIsoDrawEffect, ref dir);
+
+      GapColor = Color.FromArgb(UnsafeNativeMethods.CRhinoIsoDrawEffect_GetColor(ptrIsoDrawEffect, -1));
+      for(int i=0; i<_colors.Length; i++)
+        _colors[i] = Color.FromArgb(UnsafeNativeMethods.CRhinoIsoDrawEffect_GetColor(ptrIsoDrawEffect, i));
+    }
+
+    internal IntPtr CreateNativeVersion()
+    {
+      int[] argb = new int[UsedBandColorCount];
+      for (int i=0; i<UsedBandColorCount; i++)
+      {
+        argb[i] = _colors[i].ToArgb();
+      }
+      IntPtr ptrZebra = UnsafeNativeMethods.CRhinoIsoDrawEffect_Create((int)DrawMode, Frequency, GapSize, Falloff,
+        RotationRadians, argb, GapColor.ToArgb(), UsedBandColorCount, DiscardGap, Point, Direction);
+      return ptrZebra;
+    }
+
+    /// <since>9.0</since>
+    public IsoDrawMode DrawMode { get; set; } = IsoDrawMode.None;
+
+    /// <since>9.0</since>
+    public int UsedBandColorCount { get; set; } = 1;
+
+    /// <since>9.0</since>
+    public Color GetBandColor(int index)
+    {
+      if (index>=0 && index<_colors.Length)
+      {
+        return _colors[index];
+      }
+      return Color.Empty;
+    }
+
+    /// <since>9.0</since>
+    public bool SetBandColor(int index, Color color)
+    {
+      if (index >= 0 && index < _colors.Length)
+      {
+        _colors[index] = color;
+        return true;
+      }
+      return false;
+    }
+
+    /// <since>9.0</since>
+    public int Frequency { get; set; } = 10;
+
+    /// <since>9.0</since>
+    public Color GapColor { get; set; } = Color.White;
+
+    /// <since>9.0</since>
+    public double GapSize { get; set; } = 0.5;
+
+    /// <since>9.0</since>
+    public double Falloff { get; set; } = 0.01;
+
+    /// <since>9.0</since>
+    public double RotationRadians { get; set; } = 0.0;
+
+    /// <since>9.0</since>
+    public bool DiscardGap { get; set; } = false;
+
+    /// <since>9.0</since>
+    public Point3d Point { get; set; } = new Point3d(0, 0, 0);
+
+    /// <since>9.0</since>
+    public Vector3d Direction { get; set; } = new Vector3d(1, 0, 0);
+  }
 }
 
 namespace Rhino.Runtime.InteropWrappers
@@ -1000,6 +1123,127 @@ namespace Rhino.Geometry
       return GetEnumerator();
     }
     #endregion
+  }
+
+  /// <summary>
+  /// Surface direction indicators can be drawn by a display pipeline.
+  /// </summary>
+  public class SurfaceDirectionIndicators : IDisposable
+  {
+    private IntPtr m_ptr;
+    private GeometryBase m_geo = null;
+
+    /// <summary>
+    /// Returns true if this instance is valid. The geometry that was
+    /// used to create may not have been garbage collected.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        if (m_ptr != IntPtr.Zero)
+        {
+          return m_geo != null;
+        }
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Construct for a surface.
+    /// </summary>
+    /// <param name="surface"></param>
+    /// <since>9.0</since>
+    public SurfaceDirectionIndicators(Surface surface)
+    {
+      IntPtr pSrf = surface.ConstPointer();
+      m_ptr = UnsafeNativeMethods.RHC_CreateSurfaceDirectionIndicators_Surface(pSrf);
+      m_geo = surface;
+      GC.KeepAlive(surface);
+    }
+
+    ~SurfaceDirectionIndicators()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+    
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (m_ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.RHC_DeleteSurfaceDirectionIndicators(m_ptr);
+      }
+
+      m_geo = null;
+      m_ptr = IntPtr.Zero;
+    }
+
+    /// <summary>
+    /// Construct for a Nurbs surface.
+    /// </summary>
+    /// <param name="surface"></param>
+    /// <param name="origin">Use <see cref="Point2d.Unset"/> to place the arrows at the default location.</param>
+    /// <since>9.0</since>
+    public SurfaceDirectionIndicators(NurbsSurface surface, Point2d origin)
+    {
+      IntPtr pSrf = surface.ConstPointer();
+      m_ptr = UnsafeNativeMethods.RHC_CreateSurfaceDirectionIndicators_NurbsSurface(pSrf, origin);
+      m_geo = surface;
+      GC.KeepAlive(surface);
+    }
+
+    /// <summary>
+    /// Construct for a Brep face.
+    /// </summary>
+    /// <param name="face"></param>
+    /// <since>9.0</since>
+    public SurfaceDirectionIndicators(BrepFace face)
+    {
+      IntPtr pFace = face.ConstPointer();
+      m_ptr = UnsafeNativeMethods.RHC_CreateSurfaceDirectionIndicators_BrepFace(pFace);
+      m_geo = face.Brep; // keep a reference to the whole Brep, not just the face
+      GC.KeepAlive(face);
+    }
+
+    /// <summary>
+    /// Draw the surface directions.
+    /// </summary>
+    /// <param name="dp"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool Draw(Rhino.Display.DisplayPipeline dp)
+    {
+      if(m_geo != null)
+      {
+        IntPtr pPipeline = dp.NonConstPointer();
+        UnsafeNativeMethods.RHC_DrawSurfaceDirectionIndicators(m_ptr, pPipeline);
+        GC.KeepAlive(dp);
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
   }
 }
 #endif

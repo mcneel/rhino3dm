@@ -169,7 +169,7 @@ namespace Rhino.Geometry
       a = -1;
       b = -1;
       c = -1;
-      bool rc = UnsafeNativeMethods.ON_MESHPOINT_GetTriangle(pConstMesh, ref m_data, ref a, ref b, ref b);
+      bool rc = UnsafeNativeMethods.ON_MESHPOINT_GetTriangle(pConstMesh, ref m_data, ref a, ref b, ref c);
       GC.KeepAlive(m_parent);
       return rc;
     }

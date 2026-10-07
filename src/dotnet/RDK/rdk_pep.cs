@@ -181,6 +181,7 @@ namespace Rhino.Render.PostEffects
   public static class PostEffectUuids
   {
     /// <since>8.13</since>
+    /// <remarks>Obsolete; the Glare post effect was removed in Rhino 7.</remarks>
     public static Guid Glare           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Glare);
     /// <since>8.13</since>
     public static Guid Bloom           => UnsafeNativeMethods.RhRdkUuids_GetUuid(UnsafeNativeMethods.Rdk_UuidIds.PostEffect_Bloom);
@@ -461,8 +462,10 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var pipeline = new PostEffectPipeline(pIRhRdkPostEffectPipeLine);
-        return client.CanExecute(pipeline) ? 1 : 0;
+        using (var pipeline = new PostEffectPipeline(pIRhRdkPostEffectPipeLine))
+        {
+          return client.CanExecute(pipeline) ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -474,11 +477,13 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var channels = new SimpleArrayGuid(pOnSimpleArrayUuid);
-        var ids = client.RequiredChannels;
-        foreach (var id in ids)
+        using (var channels = new SimpleArrayGuid(pOnSimpleArrayUuid))
         {
-          channels.Append(id);
+          var ids = client.RequiredChannels;
+          foreach (var id in ids)
+          {
+            channels.Append(id);
+          }
         }
       }
     }
@@ -540,9 +545,11 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var pipeline = new PostEffectPipeline(pIRhRdkPostEffectPipeline);
-        var rect = new Rectangle(left, top, width, height);
-        return client.Execute(pipeline, rect) ? 1 : 0;
+        using (var pipeline = new PostEffectPipeline(pIRhRdkPostEffectPipeline))
+        {
+          var rect = new Rectangle(left, top, width, height);
+          return client.Execute(pipeline, rect) ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -554,16 +561,20 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var input_var = new Variant(pVariant);
-        var sParam = StringWrapper.GetStringFromPointer(pString);
+        using (var input_var = new Variant(pVariant))
+        {
+          var sParam = StringWrapper.GetStringFromPointer(pString);
 
-        object input_var_obj = input_var.AsObject();
-        bool ret = client.GetParam(sParam, ref input_var_obj);
+          object input_var_obj = input_var.AsObject();
+          bool ret = client.GetParam(sParam, ref input_var_obj);
 
-        Variant output_variant = new Variant(input_var_obj);
-        output_variant.CopyToPointer(pVariant);
+          using (Variant output_variant = new Variant(input_var_obj))
+          {
+            output_variant.CopyToPointer(pVariant);
 
-        return ret ? 1 : 0;
+            return ret ? 1 : 0;
+          }
+        }
       }
       return 0;
     }
@@ -575,9 +586,11 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var var = new Variant(pVariant);
-        var sParam = StringWrapper.GetStringFromPointer(pString);
-        return client.SetParam(sParam, var.AsObject()) ? 1 : 0;
+        using (var var = new Variant(pVariant))
+        {
+          var sParam = StringWrapper.GetStringFromPointer(pString);
+          return client.SetParam(sParam, var.AsObject()) ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -589,8 +602,10 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
-        var state = new PostEffectState(pState);
-        return client.ReadState(state) ? 1 : 0;
+        using (var state = new PostEffectState(pState))
+        {
+          return client.ReadState(state) ? 1 : 0;
+        }
       }
       return 0;
     }
@@ -623,7 +638,9 @@ namespace Rhino.Render.PostEffects
       var client = FromSerialNumber(serial);
       if (client != null)
       {
+#pragma warning disable CA2000
         var ui = new PostEffectUI(pIRhRdkPostEffecsUI);
+#pragma warning restore CA2000
         client.AddUISections(ui);
       }
     }
@@ -829,12 +846,13 @@ namespace Rhino.Render.PostEffects
     {
       get
       {
-        var aChannels = new SimpleArrayGuid();
+        using (var aChannels = new SimpleArrayGuid())
+        {
+          UnsafeNativeMethods.CRdkCmnPostEffect_Base_RequiredChannels(CppPointer, aChannels.NonConstPointer());
+          GC.KeepAlive(this);
 
-        UnsafeNativeMethods.CRdkCmnPostEffect_Base_RequiredChannels(CppPointer, aChannels.NonConstPointer());
-        GC.KeepAlive(this);
-
-        return aChannels.ToArray();
+          return aChannels.ToArray();
+        }
       }
     }
 
@@ -938,19 +956,21 @@ namespace Rhino.Render.PostEffects
       using (var sf = new StringWrapper(name))
       {
         // https://mcneel.myjetbrains.com/youtrack/issue/RH-60356
-        var v = new Variant();
-        object obj = v.ToType(typeof(T), System.Globalization.CultureInfo.InvariantCulture);
-        v = new Variant(obj);
+        using (var v_test_only = new Variant())
+        {
+          object obj = v_test_only.ToType(typeof(T), System.Globalization.CultureInfo.InvariantCulture);
 
-        // do the call
-        bool ret = UnsafeNativeMethods.IRhRdkPostEffect_IState_GetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
+          using (var v = new Variant(obj))
+          {
+            // do the call
+            bool ret = UnsafeNativeMethods.IRhRdkPostEffect_IState_GetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
+            GC.KeepAlive(this);
 
-        GC.KeepAlive(this);
-        GC.KeepAlive(v);
+            vValue = (T)v.AsObject();
 
-        vValue = (T)v.AsObject();
-
-        return ret;
+            return ret;
+          }
+        }
       }
     }
 
@@ -958,11 +978,10 @@ namespace Rhino.Render.PostEffects
     public bool SetValue<T>(string name, T vValue)
     {
       using (var sf = new StringWrapper(name))
+      using (var v = new Variant(vValue))
       {
-        var v = new Variant(vValue);
         var ret = UnsafeNativeMethods.IRhRdkPostEffect_IState_SetParam(m_cpp, sf.ConstPointer, v.NonConstPointer());
         GC.KeepAlive(this);
-        GC.KeepAlive(v);
         return ret;
       }
     }
@@ -1315,10 +1334,12 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public Guid[] ExecutionOrder()
     {
-      SimpleArrayGuid array = new SimpleArrayGuid();
-      UnsafeNativeMethods.IRhRdkPostEffectPipeline_PostEffects(m_cpp, array.NonConstPointer());
-      GC.KeepAlive(this);
-      return array.ToArray();
+      using (SimpleArrayGuid array = new SimpleArrayGuid())
+      {
+        UnsafeNativeMethods.IRhRdkPostEffectPipeline_PostEffects(m_cpp, array.NonConstPointer());
+        GC.KeepAlive(this);
+        return array.ToArray();
+      }
     }
 
     /// <summary>
@@ -1729,8 +1750,10 @@ namespace Rhino.Render.PostEffects
         return 0;
 
       var rect = new Rectangle(left, top, width, height);
-      var access = new PostEffectJobChannels(pAccess);
-      return client.Execute(rect, access) ? 1 : 0;
+      using (var access = new PostEffectJobChannels(pAccess))
+      {
+        return client.Execute(rect, access) ? 1 : 0;
+      }
     }
 
     static internal void SetCppHooks(bool bInitialize)
@@ -1817,19 +1840,20 @@ namespace Rhino.Render.PostEffects
       int w = rect.Width;
       int h = rect.Height;
 
-      var guidArray = new SimpleArrayGuid(channels);
+      using (var guidArray = new SimpleArrayGuid(channels))
+      {
+        bool rc = UnsafeNativeMethods.IRhRdkPostEffectThreadEngine_RunPostEffect(CppPointer, job.CppPointer, pipeline.CppPointer, plugin.CppPointer, x, y, w, h, guidArray.ConstPointer());
 
-      bool rc = UnsafeNativeMethods.IRhRdkPostEffectThreadEngine_RunPostEffect(CppPointer, job.CppPointer, pipeline.CppPointer, plugin.CppPointer, x, y, w, h, guidArray.ConstPointer());
+        // 2021-08-23 David E.
+        // "job" needs to not be garbage collected until IRhRdkPostEffectThreadEngine_RunPostEffect has executed.
+        // Fixes RH-65311.
+        GC.KeepAlive(job);
+        GC.KeepAlive(pipeline);
+        GC.KeepAlive(plugin);
+        GC.KeepAlive(this);
 
-      // 2021-08-23 David E.
-      // "job" needs to not be garbage collected until IRhRdkPostEffectThreadEngine_RunPostEffect has executed.
-      // Fixes RH-65311.
-      GC.KeepAlive(job);
-      GC.KeepAlive(this);
-      GC.KeepAlive(pipeline);
-      GC.KeepAlive(plugin);
-
-      return rc;
+        return rc;
+      }
     }
   }
 
@@ -1884,10 +1908,12 @@ namespace Rhino.Render.PostEffects
     /// <since>7.0</since>
     public PostEffect[] GetPostEffects(PostEffectType type)
     {
-      var array = new PostEffectArray();
-      UnsafeNativeMethods.IRhRdkPostEffects_GetPostEffects(CppPointer, (uint)type, array.CppPointer);
-      GC.KeepAlive(this);
-      return array.ToArray();
+      using (var array = new PostEffectArray())
+      {
+        UnsafeNativeMethods.IRhRdkPostEffects_GetPostEffects(CppPointer, (uint)type, array.CppPointer);
+        GC.KeepAlive(this);
+        return array.ToArray();
+      }
     }
   }
 
@@ -2008,8 +2034,8 @@ namespace Rhino.Render.PostEffects
     public override bool GetParam(string param, ref object vValue)
     {
       using (var sf = new StringWrapper(param))
+      using (var v = new Variant(vValue))
       {
-        var v = new Variant(vValue);
         bool ret = UnsafeNativeMethods.IRhRdkPostEffect_GetParameter(CppPointer, sf.ConstPointer, v.NonConstPointer());
         GC.KeepAlive(this);
         vValue = v.AsObject();
@@ -2020,11 +2046,10 @@ namespace Rhino.Render.PostEffects
     public override bool SetParam(string param, object vValue)
     {
       using (var sf = new StringWrapper(param))
+      using (var v = new Variant(vValue))
       {
-        var v = new Variant(vValue);
         var ret = UnsafeNativeMethods.IRhRdkPostEffect_SetParameter(CppPointer, sf.ConstPointer, v.NonConstPointer());
         GC.KeepAlive(this);
-        GC.KeepAlive(v);
         return ret;
       }
     }
@@ -2249,7 +2274,9 @@ namespace Rhino.Render.PostEffects
     [CLSCompliant(false)]
     public IConvertible GetParameter(string param_name)
     {
+#pragma warning disable CA2000
       var v = new Variant();
+#pragma warning restore CA2000
 
       var b = UnsafeNativeMethods.ON_PostEffect_GetParameter(CppPointer, param_name, v.NonConstPointer());
 
@@ -2269,11 +2296,12 @@ namespace Rhino.Render.PostEffects
     /// <since>8.0</since>
     public bool SetParameter(string param_name, object param_value)
     {
-      var v = new Variant(param_value);
-      var ret = UnsafeNativeMethods.ON_PostEffect_SetParameter(CppPointer, param_name, v.ConstPointer());
-      GC.KeepAlive(this);
-      GC.KeepAlive(v);
-      return ret;
+      using (var v = new Variant(param_value))
+      {
+        var ret = UnsafeNativeMethods.ON_PostEffect_SetParameter(CppPointer, param_name, v.ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     /// <summary>

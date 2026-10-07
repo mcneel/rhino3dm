@@ -24,3 +24,11 @@ RH_C_FUNCTION bool ON_EmbeddedFile_SaveToFile(ON_EmbeddedFile* ef, const RHMONO_
 
   return false;
 }
+
+RH_C_FUNCTION ON__UINT64 ON_EmbeddedFile_CompressedLength(const ON_EmbeddedFile* ef)
+{
+  if (nullptr == ef)
+    return 0;
+
+  return static_cast<ON__UINT64>(ef->CompressedLength());
+}

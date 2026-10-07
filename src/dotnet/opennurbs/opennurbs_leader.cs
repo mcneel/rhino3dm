@@ -6,7 +6,6 @@ using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
-
   /// <summary> Arrowhead used by annotation </summary>
   public class Arrowhead
   {

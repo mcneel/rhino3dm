@@ -1,3 +1,6 @@
+#if RHINO_SDK
+using Rhino.PrivateMeshCommands.Operations.Utils;
+#endif
 using System;
 
 #if RHINO_SDK
@@ -11,7 +14,7 @@ namespace Rhino.UI
   /// </summary>
   interface IEtoStylePageService
   {
-    object StyleEtoControls(object eto_control);
+    void ApplyRhinoStyle(object eto_control);
 
   }
 
@@ -181,15 +184,25 @@ namespace Rhino.UI
     /// <since>6.0</since>
     public void AddChildPage(StackedDialogPage pageToAdd)
     {
+      bool needToAddAnnotationPage = InternalAddChildPage(pageToAdd);
+
+      if (needToAddAnnotationPage)
+      {
+        Children.Add(pageToAdd);
+      }
+    }
+
+    internal bool InternalAddChildPage(StackedDialogPage pageToAdd)
+    {
       if (!Runtime.HostUtils.RunningOnWindows)
-        return;
+        return false;
       var unmanaged_pointer = RhinoPageHooks.UnmanagedIRhinoPagePointerFromPage(this);
       if (unmanaged_pointer == IntPtr.Zero)
       {
         // The page array has not been processed yet so just append the page
         // to the end of the children list
         Children.Add(pageToAdd);
-        return;
+        return false;
       }
       //
       // Unmanaged page has been created so create and add the new child page
@@ -201,15 +214,14 @@ namespace Rhino.UI
         : IntPtr.Zero;
       // Not a OptionsDialogPage or was unable to allocate a unmanaged pointer
       if (pointer == IntPtr.Zero)
-        return;
+        return false;
       // Add the child page to this objects IRhinoOptionsPageHost
       if (!RhinoPageHooks.AddChildPage(unmanaged_pointer, pointer))
       {
         UnsafeNativeMethods.IRhinoOptionsPage_Delete(pointer);
-        return;
+        return false;
       }
-      // Put the new child page in the child array
-      Children.Add(pageToAdd);
+      return true;
     }
 
     /// <summary>

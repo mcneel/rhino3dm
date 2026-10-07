@@ -34,6 +34,36 @@ namespace Rhino.UI
   {
     internal static bool UsingNewTabPanelSystem => true;
 
+    static PanelSystem()
+    {
+      RhinoApp.AppSettingsChanged += OnAppSettingsChanged;
+    }
+
+    private static void OnAppSettingsChanged(object sender, EventArgs e)
+    {
+      // using the logic from ChangePanelIcon
+      foreach (var definition in Definitions.Values)
+      {
+        if (!string.IsNullOrWhiteSpace(definition.IconResourceId))
+        {
+          definition.ClearCachedIcon();
+          PanelIconChanged?.Invoke(definition, EventArgs.Empty);
+          if (UsingNewTabPanelSystem)
+          {
+            using (var args = new NamedParametersEventArgs())
+            {
+              args.Set("panelTypeId", definition.Id);
+              HostUtils.ExecuteNamedCallback("Rhino.UI.Internal.TabPanels.NamedCallbacks.ChangePanelIcon", args);
+            }
+          }
+          else
+          {
+            UnsafeNativeMethods.RHC_ChangePanelIcon(definition.Id, StackedDialogPage.Service.GetImageHandle(definition.Icon, false));
+          }
+        }
+      }
+    }
+
     private static void RegisterPanel(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
     {
       // Plug-in that owns the panel, currently required.  Investigate changing to
@@ -441,7 +471,13 @@ namespace Rhino.UI
     /// <returns></returns>
     private static void Add(Guid plugInId, Type type, string caption, Icon icon, Assembly iconAssembly, string iconResourceId, PanelType panelType)
     {
-      if (HostUtils.RunningOniOS)
+      // No panel UI on iOS, and none on the RhinoCore build flavor either:
+      // its rhcommon_c does not compile rh_panels.cpp, so the P/Invoke below
+      // throws EntryPointNotFoundException there - which is how Grasshopper,
+      // which registers its panel on load, failed to load on Windows
+      // RhinoCore. Fence on the BUILD, not on headless MODE: Rhino.Inside on
+      // a full build runs headless and has the exports (see RunningOnRhinoCore).
+      if (HostUtils.RunningOniOS || HostUtils.RunningOnRhinoCore)
         return;
 
       if (type == null)
@@ -613,6 +649,15 @@ namespace Rhino.UI
     private string _iconResourceId;
 
     public PanelType PanelType { get; }
+
+    /// <summary>
+    /// Clear the cached icon so it will be reloaded from the resource
+    /// </summary>
+    internal void ClearCachedIcon()
+    {
+      if (!string.IsNullOrWhiteSpace(IconResourceId))
+        m_icon = null;
+    }
 
     #endregion Public properties
 

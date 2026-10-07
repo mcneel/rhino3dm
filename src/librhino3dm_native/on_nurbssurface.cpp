@@ -2,7 +2,7 @@
 
 RH_C_FUNCTION ON_NurbsSurface* ON_NurbsSurface_New(int dimension, bool isRational, int order0, int order1, int cvCount0, int cvCount1)
 {
-  return ON_NurbsSurface::New(dimension, isRational ? TRUE : FALSE, order0, order1, cvCount0, cvCount1);
+  return ON_NurbsSurface::New(dimension, isRational, order0, order1, cvCount0, cvCount1);
 }
 
 RH_C_FUNCTION ON_NurbsSurface* ON_NurbsSurface_New2(const ON_NurbsSurface* pConstNurbsSurface)

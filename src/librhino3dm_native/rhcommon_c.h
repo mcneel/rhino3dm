@@ -27,6 +27,9 @@ struct ON_LINE_STRUCT { ON_3DPOINT_STRUCT from; ON_3DPOINT_STRUCT to; };
 //struct ON_PLANEEQ_STRUCT{ double val[4]; };
 struct ON_2INTS { int val[2]; };
 
+// Blittable stand-in for ON_SubDEdgeSharpness (two floats: start and end sharpness).
+struct ON_SUBD_EDGE_SHARPNESS_STRUCT { float val[2]; };
+
 struct ON_PLANE_STRUCT
 {
   double origin[3];
@@ -40,6 +43,30 @@ struct ON_CIRCLE_STRUCT
 {
   ON_PLANE_STRUCT plane;
   double radius;
+};
+
+// Flat form of ON_SubDComponentParameter.
+//
+// component_type is an ON_SubDComponentPtr::Type value
+// (0 = unset, 2 = vertex, 4 = edge, 6 = face).
+// component_id and component_dir identify the referenced SubD component.
+//
+// The remaining fields depend on component_type:
+//   vertex: value_a = active edge id, value_b = active face id.
+//   edge:   value_a = active face id, p[0] = edge parameter in [0,1].
+//   face:   value_a = face corner index, value_b = face edge count,
+//           p[0] = corner s, p[1] = corner t, both in [0,1/2].
+//
+// The uint count is even so that p[] is 8 byte aligned with no implicit padding.
+struct ON_SUBD_COMPONENT_PARAMETER_STRUCT
+{
+  unsigned int component_type;
+  unsigned int component_id;
+  unsigned int component_dir;
+  unsigned int value_a;
+  unsigned int value_b;
+  unsigned int reserved;
+  double p[2];
 };
 
 #ifdef USING_RH_C_SDK
@@ -80,6 +107,7 @@ typedef ON_Geometry ON_GeometryImpl;
 typedef ON_LineCurve ON_LineCurveImpl;
 typedef ON_Object ON_ObjectImpl;
 typedef ON_wString ON_wStringImpl;
+
 #if !defined(RHINO3DM_BUILD)
 typedef ON_SimpleArray<CRhinoObjectPair> ON_SimpleArray_CRhinoObjectPairImpl;
 typedef CArgsRhinoGetCircle CArgsRhinoGetCircleImpl;
@@ -97,6 +125,96 @@ typedef int (CALLBACK* CRHINOPLUGIN_WRITEDOCPROC)(int pluginSerialNumber, unsign
 typedef int (CALLBACK* CRHINOPLUGIN_READDOCPROC)(int pluginSerialNumber, unsigned int docSerialNumber, class ON_BinaryArchive*, const class CRhinoFileReadOptions*);
 typedef bool (CALLBACK* CRHINOPLUGIN_DISPLAYHELP)(int pluginSerialNumber, HWND hwndParent);
 #endif
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Marshalling invariants
+//
+// The *_STRUCT types above are blittable stand-ins for opennurbs classes. RhinoCommon
+// declares a matching C# struct for each one and passes it across the interop boundary by
+// value, so a size change on either side silently corrupts arguments instead of failing to
+// build. Assert the sizes here, where both the stand-in and the real class are visible.
+//
+// Small classes are also asserted to be trivially copyable. Both the Microsoft x64 and the
+// Itanium C++ ABIs pass a trivially copyable class of 1, 2, 4 or 8 bytes in a register;
+// giving such a class a copy constructor or a destructor switches it to pass-by-address and
+// breaks every by-value RH_C_FUNCTION taking it. Note that std::is_trivially_copyable
+// already requires a trivial destructor, so there is no separate destructible assert.
+//
+#include <type_traits>
+
+static_assert(sizeof(ON_2DPOINT_STRUCT) == sizeof(ON_2dPoint), "ON_2DPOINT_STRUCT no longer matches ON_2dPoint.");
+static_assert(16 == sizeof(ON_2DPOINT_STRUCT), "ComponentIndex marshalling assumes ON_2DPOINT_STRUCT is 16 bytes.");
+static_assert(std::is_trivially_copyable<ON_2DPOINT_STRUCT>::value, "ON_2DPOINT_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_3DPOINT_STRUCT) == sizeof(ON_3dPoint), "ON_3DPOINT_STRUCT no longer matches ON_3dPoint.");
+static_assert(24 == sizeof(ON_3DPOINT_STRUCT), "ComponentIndex marshalling assumes ON_3DPOINT_STRUCT is 24 bytes.");
+static_assert(std::is_trivially_copyable<ON_3DPOINT_STRUCT>::value, "ON_3DPOINT_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_2DVECTOR_STRUCT) == sizeof(ON_2dVector), "ON_2DVECTOR_STRUCT no longer matches ON_2dVector.");
+static_assert(16 == sizeof(ON_2DVECTOR_STRUCT), "ComponentIndex marshalling assumes ON_2DVECTOR_STRUCT is 16 bytes.");
+static_assert(std::is_trivially_copyable<ON_2DVECTOR_STRUCT>::value, "ON_2DVECTOR_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_3DVECTOR_STRUCT) == sizeof(ON_3dVector), "ON_3DVECTOR_STRUCT no longer matches ON_3dVector.");
+static_assert(24 == sizeof(ON_3DVECTOR_STRUCT), "ComponentIndex marshalling assumes ON_3DVECTOR_STRUCT is 24 bytes.");
+static_assert(std::is_trivially_copyable<ON_3DVECTOR_STRUCT>::value, "ON_3DVECTOR_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_4DPOINT_STRUCT) == sizeof(ON_4dPoint), "ON_4DPOINT_STRUCT no longer matches ON_4dPoint.");
+static_assert(32 == sizeof(ON_4DPOINT_STRUCT), "ComponentIndex marshalling assumes ON_4DPOINT_STRUCT is 32 bytes.");
+static_assert(std::is_trivially_copyable<ON_4DPOINT_STRUCT>::value, "ON_4DPOINT_STRUCT must stay trivially copyable to be passed by value.");
+
+// ON_4DVECTOR_STRUCT has no opennurbs counterpart to compare against; opennurbs has no
+// ON_4dVector, and the struct is only used through the C# Vector4d type.
+
+static_assert(sizeof(ON_4FVECTOR_STRUCT) == sizeof(ON_4fColor), "ON_4FVECTOR_STRUCT no longer matches ON_4fColor.");
+static_assert(16 == sizeof(ON_4FVECTOR_STRUCT), "ComponentIndex marshalling assumes ON_4FVECTOR_STRUCT is 16 bytes.");
+static_assert(std::is_trivially_copyable<ON_4FVECTOR_STRUCT>::value, "ON_4FVECTOR_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_2FVECTOR_STRUCT) == sizeof(ON_2fVector), "ON_2FVECTOR_STRUCT no longer matches ON_2fVector.");
+static_assert(8 == sizeof(ON_2FVECTOR_STRUCT), "ComponentIndex marshalling assumes ON_2FVECTOR_STRUCT is 8 bytes.");
+static_assert(std::is_trivially_copyable<ON_2FVECTOR_STRUCT>::value, "ON_2FVECTOR_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_3FPOINT_STRUCT) == sizeof(ON_3fPoint), "ON_3FPOINT_STRUCT no longer matches ON_3fPoint.");
+static_assert(12 == sizeof(ON_3FPOINT_STRUCT), "ComponentIndex marshalling assumes ON_3FPOINT_STRUCT is 12 bytes.");
+static_assert(std::is_trivially_copyable<ON_3FPOINT_STRUCT>::value, "ON_3FPOINT_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_3FVECTOR_STRUCT) == sizeof(ON_3fVector), "ON_3FVECTOR_STRUCT no longer matches ON_3fVector.");
+static_assert(12 == sizeof(ON_3FVECTOR_STRUCT), "ComponentIndex marshalling assumes ON_3FVECTOR_STRUCT is 12 bytes.");
+static_assert(std::is_trivially_copyable<ON_3FVECTOR_STRUCT>::value, "ON_3FVECTOR_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_4FPOINT_STRUCT) == sizeof(ON_4fPoint), "ON_4FPOINT_STRUCT no longer matches ON_4fPoint.");
+static_assert(16 == sizeof(ON_4FPOINT_STRUCT), "ComponentIndex marshalling assumes ON_4FPOINT_STRUCT is 16 bytes.");
+static_assert(std::is_trivially_copyable<ON_4FPOINT_STRUCT>::value, "ON_4FPOINT_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_XFORM_STRUCT) == sizeof(ON_Xform), "ON_XFORM_STRUCT no longer matches ON_Xform.");
+static_assert(128 == sizeof(ON_XFORM_STRUCT), "ComponentIndex marshalling assumes ON_XFORM_STRUCT is 128 bytes.");
+static_assert(std::is_trivially_copyable<ON_XFORM_STRUCT>::value, "ON_XFORM_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_INTERVAL_STRUCT) == sizeof(ON_Interval), "ON_INTERVAL_STRUCT no longer matches ON_Interval.");
+static_assert(16 == sizeof(ON_INTERVAL_STRUCT), "ComponentIndex marshalling assumes ON_INTERVAL_STRUCT is 16 bytes.");
+static_assert(std::is_trivially_copyable<ON_INTERVAL_STRUCT>::value, "ON_INTERVAL_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_LINE_STRUCT) == sizeof(ON_Line), "ON_LINE_STRUCT no longer matches ON_Line.");
+static_assert(48 == sizeof(ON_LINE_STRUCT), "ComponentIndex marshalling assumes ON_LINE_STRUCT is 48 bytes.");
+static_assert(std::is_trivially_copyable<ON_LINE_STRUCT>::value, "ON_LINE_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_PLANE_STRUCT) == sizeof(ON_Plane), "ON_PLANE_STRUCT no longer matches ON_Plane.");
+static_assert(128 == sizeof(ON_PLANE_STRUCT), "ComponentIndex marshalling assumes ON_PLANE_STRUCT is 128 bytes.");
+static_assert(std::is_trivially_copyable<ON_PLANE_STRUCT>::value, "ON_PLANE_STRUCT must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_CIRCLE_STRUCT) == sizeof(ON_Circle), "ON_CIRCLE_STRUCT no longer matches ON_Circle.");
+static_assert(136 == sizeof(ON_CIRCLE_STRUCT), "ComponentIndex marshalling assumes ON_CIRCLE_STRUCT is 136 bytes.");
+static_assert(std::is_trivially_copyable<ON_CIRCLE_STRUCT>::value, "ON_CIRCLE_STRUCT must stay trivially copyable to be passed by value.");
+
+// ON_2INTS is the legacy stand-in for ON_COMPONENT_INDEX, and both are marshalled as the
+// C# ComponentIndex struct.
+static_assert(sizeof(ON_2INTS) == sizeof(ON_COMPONENT_INDEX), "ON_2INTS no longer matches ON_COMPONENT_INDEX.");
+static_assert(8 == sizeof(ON_COMPONENT_INDEX), "ComponentIndex marshalling assumes ON_COMPONENT_INDEX is 8 bytes.");
+static_assert(std::is_trivially_copyable<ON_COMPONENT_INDEX>::value, "ON_COMPONENT_INDEX must stay trivially copyable to be passed by value.");
+
+static_assert(sizeof(ON_SUBD_EDGE_SHARPNESS_STRUCT) == sizeof(ON_SubDEdgeSharpness), "ON_SUBD_EDGE_SHARPNESS_STRUCT no longer matches ON_SubDEdgeSharpness.");
+static_assert(8 == sizeof(ON_SubDEdgeSharpness), "SubDEdgeSharpness marshalling assumes ON_SubDEdgeSharpness is 8 bytes.");
+static_assert(std::is_trivially_copyable<ON_SubDEdgeSharpness>::value, "ON_SubDEdgeSharpness must stay trivially copyable to be passed by value.");
 
 #endif
 
@@ -176,7 +294,7 @@ RH_C_FUNCTION void CRhinoPlugIn_SetCallbacks(
 RH_C_FUNCTION CRhinoPlugInImpl* CRhinoPlugIn_Pointer(int serialNumber);
 
 RH_C_FUNCTION int CRhinoCommand_New(CRhinoPlugInImpl* pPlugIn, GUID id,
-  const RHMONO_STRING* englishName, const RHMONO_STRING* localName, int commandStyle, int commandtype);
+  const RHMONO_STRING* englishName, const RHMONO_STRING* localName, int commandStyle, int commandtype, bool callRegister);
 
 typedef int (CALLBACK* CRHINOCOMMAND_RUNPROC)(int commandSerialNumber, unsigned int docSerialNumber, int mode);
 typedef int (CALLBACK* CRHINOCOMMAND_SELPROC)(int commandSerialNumber, const CRhinoObjectImpl* pConstRhinoObject);
@@ -201,7 +319,7 @@ RH_C_FUNCTION void CRhinoApp_SetCommandPrompt(const RHMONO_STRING* prompt, const
 
 
 RH_C_FUNCTION CRhinoDocImpl* CRhinoDoc_GetFromId(unsigned int docSerialNumber);
-RH_C_FUNCTION void CRhinoDoc_Redraw(unsigned int docSerialNumber);
+RH_C_FUNCTION void CRhinoDoc_Redraw(unsigned int docSerialNumber, bool deferred);
 RH_C_FUNCTION GUID CRhinoDoc_AddPoint(unsigned int docSerialNumber, ON_3DPOINT_STRUCT point, const ON_3dmObjectAttributesImpl* attrs, CRhinoHistoryImpl* pHistory, bool reference);
 RH_C_FUNCTION GUID CRhinoDoc_AddCircle(unsigned int docSerialNumber, const ON_CIRCLE_STRUCT* pCircle, const ON_3dmObjectAttributesImpl* attr, CRhinoHistoryImpl* pHistory, bool reference);
 RH_C_FUNCTION GUID CRhinoDoc_AddCurve(unsigned int docSerialNumber, const ON_CurveImpl* pCurve, const ON_3dmObjectAttributesImpl* attr, CRhinoHistoryImpl* pHistory, bool reference);

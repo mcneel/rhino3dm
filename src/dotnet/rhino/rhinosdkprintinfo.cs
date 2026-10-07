@@ -2634,21 +2634,26 @@ namespace Rhino.Runtime
       float[] gradientStops = new float[gradientCount];
       int* argbs = (int*)colors.ToPointer();
       float* pStops = (float*)stops.ToPointer();
+
       for( int i=0; i<gradientCount; i++ )
       {
         gradientColors[i] = Color.FromArgb(argbs[i]);
         gradientStops[i] = pStops[i];
       }
+
       Point3d* pts = (Point3d*)points.ToPointer();
       Point3d gradientPoint1 = new Point3d(pts[0]);
       Point3d gradientPoint2 = new Point3d(pts[1]);
       Color boundaryColor = Color.FromArgb(bc);
       double pointScale = ToPoints(1);
+
       DrawGradientHatch(dp, hatch, pattern, gradientColors, gradientStops, gradientPoint1, gradientPoint2, linearGradient != 0, boundaryColor, pointScale, effectiveHatchScale);
 
-      hatch.ReleaseNonConstPointer();
-      if (pattern != null)
-        pattern.ReleaseNonConstPointer();
+      pattern?.ReleaseNonConstPointer();
+      hatch?.ReleaseNonConstPointer();
+
+      pattern?.Dispose();
+      hatch?.Dispose();
     }
 
 

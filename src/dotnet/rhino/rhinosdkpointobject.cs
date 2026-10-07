@@ -75,6 +75,41 @@ namespace Rhino.DocObjects
     {
     }
 
+    /// <summary>
+    /// The object these grips belong to.
+    /// </summary>
+    /// <remarks>
+    /// Reaches the owner without the document lookup <see cref="OwnerId"/> would need, so
+    /// <see cref="RhinoObject.EnabledGripsId"/> and <see cref="RhinoObject.EditPointGripsOn"/>
+    /// are one hop from a grip.
+    /// </remarks>
+    public RhinoObject Owner
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        return RhinoObject.CreateRhinoObjectHelper(
+          UnsafeNativeMethods.CRhinoGripObject_Owner(const_ptr_this));
+      }
+    }
+
+    /// <summary>
+    /// Id of the SubD component this grip is on, or 0 when the grip names no SubD component.
+    /// </summary>
+    /// <remarks>
+    /// Unlike <see cref="Index"/>, which is a position in the owner's grip list, this still
+    /// names the same component after the SubD has been edited. Recording it is what lets a
+    /// selection of SubD grips be restored against a changed object.
+    /// </remarks>
+    [CLSCompliant(false)]
+    public uint SubDComponentId
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        return UnsafeNativeMethods.CRhinoGripObject_SubDComponentId(const_ptr_this);
+      }
+    }
 
     /// <since>5.0</since>
     public Point3d CurrentLocation
@@ -415,22 +450,15 @@ namespace Rhino.DocObjects.Custom
   {
     #region statics
     // this will probably end up in RhinoObject
-    static readonly System.Collections.Generic.List<CustomGripObject> g_all_custom_grips = new System.Collections.Generic.List<CustomGripObject>();
-    static CustomGripObject g_prev_found;
-    static RhinoObject GetCustomObject(uint serialNumber)
-    {
-      if (g_prev_found != null && g_prev_found.m_rhinoobject_serial_number == serialNumber)
-        return g_prev_found;
+    // Keyed, not scanned. Every callback below looks a grip up by serial number, and a linear
+    // scan here is a scan of every grip the session has ever created.
+    static readonly System.Collections.Generic.Dictionary<uint, CustomGripObject> g_all_custom_grips =
+      new System.Collections.Generic.Dictionary<uint, CustomGripObject>();
 
-      foreach (CustomGripObject grip in g_all_custom_grips)
-      {
-        if (grip.m_rhinoobject_serial_number == serialNumber)
-        {
-          g_prev_found = grip;
-          return g_prev_found;
-        }
-      }
-      return null;
+    static CustomGripObject GetCustomObject(uint serialNumber)
+    {
+      CustomGripObject grip;
+      return g_all_custom_grips.TryGetValue(serialNumber, out grip) ? grip : null;
     }
     #endregion
 
@@ -439,10 +467,20 @@ namespace Rhino.DocObjects.Custom
     {
       m_pRhinoObject = UnsafeNativeMethods.CRhCmnGripObject_New();
       m_rhinoobject_serial_number = UnsafeNativeMethods.CRhinoObject_RuntimeSN(m_pRhinoObject);
-      g_all_custom_grips.Add(this);
+      g_all_custom_grips[m_rhinoobject_serial_number] = this;
 
-      UnsafeNativeMethods.CRhCmnGripObject_SetCallbacks(g_destructor, g_get_weight, g_set_weight);
+      // The native side holds these as statics, so once is enough. A surface puts one grip on
+      // every control point, so setting them per grip is thousands of redundant stores.
+      if (!g_callbacks_set)
+      {
+        g_callbacks_set = true;
+        UnsafeNativeMethods.CRhCmnGripObject_SetCallbacks(g_destructor, g_get_weight, g_set_weight);
+        UnsafeNativeMethods.CRhCmnGripObject_SetCallbacks2(g_grip_directions, g_curve_param, g_surface_param,
+          g_curve_cv_indices, g_surface_cv_indices, g_undo_move);
+      }
     }
+
+    static bool g_callbacks_set;
 
     ~CustomGripObject(){ Dispose(false); }
     /// <since>5.0</since>
@@ -453,7 +491,7 @@ namespace Rhino.DocObjects.Custom
 
     protected override void Dispose(bool disposing)
     {
-      g_all_custom_grips.Remove(this);
+      g_all_custom_grips.Remove(m_rhinoobject_serial_number);
       if ( IntPtr.Zero != m_pRhinoObject )
       {
         // This delete is safe in that it makes sure the object is NOT
@@ -463,6 +501,12 @@ namespace Rhino.DocObjects.Custom
       m_pRhinoObject = IntPtr.Zero;
     }
 
+    /// <summary>
+    /// The grip's index. CustomObjectGrips.AddGrip already assigns this the grip's position in
+    /// the grips list, and Rhino passes it back as the gripIndex argument of NeighborGrip and
+    /// as the key of the grip direction cache. Setting it to anything else makes those
+    /// arguments disagree with CustomObjectGrips.Grip(int), which is indexed by list position.
+    /// </summary>
     /// <since>5.0</since>
     public new int Index
     {
@@ -501,28 +545,144 @@ namespace Rhino.DocObjects.Custom
       UnsafeNativeMethods.CRhCmnGripObject_NewLocationBase(ptr_this);
     }
 
+    /// <summary>
+    /// Evaluates this grip's directions. For a surface control point these are the two surface
+    /// tangents and the normal; for a curve control point, the tangent and a frame around it.
+    /// Rhino caches the result per grip and does not ask again, so the directions must not
+    /// change once reported.
+    /// </summary>
+    /// <param name="x">First direction.</param>
+    /// <param name="y">Second direction.</param>
+    /// <param name="z">Third direction.</param>
+    /// <returns>true if the directions were set. The default implementation returns false.</returns>
+    protected virtual bool EvaluateGripDirections(out Vector3d x, out Vector3d y, out Vector3d z)
+    {
+      x = y = z = Vector3d.Zero;
+      return false;
+    }
+
+    /// <summary>
+    /// The curve parameter of the control point this grip drives.
+    /// </summary>
+    /// <param name="t">The curve parameter.</param>
+    /// <returns>true on success. The default implementation returns false.</returns>
+    protected virtual bool EvaluateCurveParameter(out double t)
+    {
+      t = RhinoMath.UnsetValue;
+      return false;
+    }
+
+    /// <summary>
+    /// The surface parameters of the control point this grip drives.
+    /// </summary>
+    /// <param name="u">The first surface parameter.</param>
+    /// <param name="v">The second surface parameter.</param>
+    /// <returns>true on success. The default implementation returns false.</returns>
+    protected virtual bool EvaluateSurfaceParameters(out double u, out double v)
+    {
+      u = v = RhinoMath.UnsetValue;
+      return false;
+    }
+
+    /// <summary>
+    /// The indices of the NURBS curve control points this grip drives. A grip may drive more
+    /// than one, as at a closed or periodic seam.
+    /// </summary>
+    /// <returns>The control point indices, or null if this grip drives none.</returns>
+    protected virtual int[] EvaluateCurveCVIndices()
+    {
+      return null;
+    }
+
+    /// <summary>
+    /// The indices of the NURBS surface control points this grip drives. A grip may drive more
+    /// than one, as at a closed or periodic seam or a singular edge.
+    /// Every index must lie inside the surface returned by the owning CustomObjectGrips'
+    /// NurbsSurface(). Rhino writes through these indices without checking them, so a grip
+    /// reporting one outside the control point grid is refused whole.
+    /// </summary>
+    /// <returns>The control point indices, or null if this grip drives none.</returns>
+    /// <remarks>
+    /// IndexPair rather than the Tuple used by GripObject.GetSurfaceCVIndices: this is called
+    /// once per grip while Rhino maps a whole surface, and IndexPair is a struct.
+    /// </remarks>
+    protected virtual IndexPair[] EvaluateSurfaceCVIndices()
+    {
+      return null;
+    }
+
+    /// <summary>
+    /// Set this when the grip changes something other than its location, such as a weight, so
+    /// that Rhino counts the grip as moved. Rhino already counts a grip whose location moved,
+    /// so this only adds to that. Cleared when Rhino undoes the grip move.
+    /// </summary>
+    /// <remarks>
+    /// A stored flag rather than something Rhino asks for: it is read once per grip per draw,
+    /// so answering it across the managed boundary would cost a transition per grip per frame.
+    /// Real time work driven by grip movement belongs in CustomObjectGrips.OnDraw, which runs
+    /// on the display thread, together with the NewLocation latch.
+    /// </remarks>
+    /// <since>8.36</since>
+    public bool MovedOtherThanLocation
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        var rc = UnsafeNativeMethods.CRhCmnGripObject_GetMovedOtherThanLocation(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CRhCmnGripObject_SetMovedOtherThanLocation(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Called when Rhino undoes a grip move. Restore anything the grip changed alongside its
+    /// location, such as a weight. The location itself is restored by Rhino.
+    /// </summary>
+    protected virtual void OnUndoMove()
+    {
+    }
+
 
     internal delegate void CRhinoObjectDestructorCallback(uint serialNumber);
     internal delegate double CRhinoGripObjectWeightCallback(uint serialNumber);
     internal delegate void CRhinoGripObjectSetWeightCallback(uint serialNumber, double weight);
+    internal delegate int CRhinoGripObjectGripDirectionsCallback(uint serialNumber, ref Vector3d x, ref Vector3d y, ref Vector3d z);
+    internal delegate int CRhinoGripObjectCurveParamCallback(uint serialNumber, ref double t);
+    internal delegate int CRhinoGripObjectSurfaceParamCallback(uint serialNumber, ref double u, ref double v);
+    internal delegate int CRhinoGripObjectCurveCVIndicesCallback(uint serialNumber, IntPtr pIndices);
+    internal delegate int CRhinoGripObjectSurfaceCVIndicesCallback(uint serialNumber, IntPtr pIndices);
+    internal delegate void CRhinoGripObjectUndoMoveCallback(uint serialNumber);
 
     private static readonly CRhinoObjectDestructorCallback g_destructor = CRhinoObject_Destructor;
     private static readonly CRhinoGripObjectWeightCallback g_get_weight = CRhinoGripObject_GetWeight;
     private static readonly CRhinoGripObjectSetWeightCallback g_set_weight = CRhinoGripObject_SetWeight;
+    private static readonly CRhinoGripObjectGripDirectionsCallback g_grip_directions = CRhinoGripObject_GripDirections;
+    private static readonly CRhinoGripObjectCurveParamCallback g_curve_param = CRhinoGripObject_CurveParameter;
+    private static readonly CRhinoGripObjectSurfaceParamCallback g_surface_param = CRhinoGripObject_SurfaceParameters;
+    private static readonly CRhinoGripObjectCurveCVIndicesCallback g_curve_cv_indices = CRhinoGripObject_CurveCVIndices;
+    private static readonly CRhinoGripObjectSurfaceCVIndicesCallback g_surface_cv_indices = CRhinoGripObject_SurfaceCVIndices;
+    private static readonly CRhinoGripObjectUndoMoveCallback g_undo_move = CRhinoGripObject_UndoMove;
 
     private static void CRhinoObject_Destructor(uint serialNumber)
     {
-      var grip = GetCustomObject(serialNumber) as CustomGripObject;
+      var grip = GetCustomObject(serialNumber);
       if (grip != null)
       {
         grip.m_pRhinoObject = IntPtr.Zero;
+        g_all_custom_grips.Remove(serialNumber);
         GC.SuppressFinalize(grip);
       }
     }
 
     private static double CRhinoGripObject_GetWeight(uint serialNumber)
     {
-      var grip = GetCustomObject(serialNumber) as CustomGripObject;
+      var grip = GetCustomObject(serialNumber);
       if (grip != null)
       {
         return grip.Weight;
@@ -531,9 +691,191 @@ namespace Rhino.DocObjects.Custom
     }
     private static void CRhinoGripObject_SetWeight(uint serialNumber, double weight)
     {
-      var grip = GetCustomObject(serialNumber) as CustomGripObject;
+      var grip = GetCustomObject(serialNumber);
       if (grip != null)
         grip.Weight = weight;
+    }
+
+    // GripObject's public getters - Moved, GetGripDirections, GetSurfaceParameters and the rest -
+    // call the very native virtuals these callbacks implement. An override that reads its own
+    // getter would recurse until the stack is gone, so each (grip, callback) pair is entered once.
+    [ThreadStatic] private static System.Collections.Generic.HashSet<long> g_in_callback;
+
+    private const int idxGripDirections = 0;
+    private const int idxCurveParameter = 1;
+    private const int idxSurfaceParameters = 2;
+    private const int idxCurveCVIndices = 3;
+    private const int idxSurfaceCVIndices = 4;
+    private const int idxUndoMove = 6;
+
+    private static bool EnterCallback(uint serialNumber, int which)
+    {
+      var set = g_in_callback;
+      if (set == null)
+        set = g_in_callback = new System.Collections.Generic.HashSet<long>();
+      return set.Add(((long)serialNumber << 3) | (uint)which);
+    }
+
+    private static void ExitCallback(uint serialNumber, int which)
+    {
+      var set = g_in_callback;
+      if (set != null)
+        set.Remove(((long)serialNumber << 3) | (uint)which);
+    }
+
+    private static int CRhinoGripObject_GripDirections(uint serialNumber, ref Vector3d x, ref Vector3d y, ref Vector3d z)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && EnterCallback(serialNumber, idxGripDirections))
+      {
+        try
+        {
+          Vector3d vx, vy, vz;
+          if (grip.EvaluateGripDirections(out vx, out vy, out vz))
+          {
+            x = vx;
+            y = vy;
+            z = vz;
+            return 1;
+          }
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxGripDirections);
+        }
+      }
+      return 0;
+    }
+
+    private static int CRhinoGripObject_CurveParameter(uint serialNumber, ref double t)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && EnterCallback(serialNumber, idxCurveParameter))
+      {
+        try
+        {
+          double s;
+          if (grip.EvaluateCurveParameter(out s))
+          {
+            t = s;
+            return 1;
+          }
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxCurveParameter);
+        }
+      }
+      return 0;
+    }
+
+    private static int CRhinoGripObject_SurfaceParameters(uint serialNumber, ref double u, ref double v)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && EnterCallback(serialNumber, idxSurfaceParameters))
+      {
+        try
+        {
+          double s, t;
+          if (grip.EvaluateSurfaceParameters(out s, out t))
+          {
+            u = s;
+            v = t;
+            return 1;
+          }
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxSurfaceParameters);
+        }
+      }
+      return 0;
+    }
+
+    private static int CRhinoGripObject_CurveCVIndices(uint serialNumber, IntPtr pIndices)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && IntPtr.Zero != pIndices && EnterCallback(serialNumber, idxCurveCVIndices))
+      {
+        try
+        {
+          int[] indices = grip.EvaluateCurveCVIndices();
+          if (indices != null)
+          {
+            foreach (int i in indices)
+              UnsafeNativeMethods.ON_IntArray_Append(pIndices, i);
+            return indices.Length;
+          }
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxCurveCVIndices);
+        }
+      }
+      return 0;
+    }
+
+    private static int CRhinoGripObject_SurfaceCVIndices(uint serialNumber, IntPtr pIndices)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && IntPtr.Zero != pIndices && EnterCallback(serialNumber, idxSurfaceCVIndices))
+      {
+        try
+        {
+          IndexPair[] indices = grip.EvaluateSurfaceCVIndices();
+          if (indices != null)
+          {
+            foreach (IndexPair ij in indices)
+              UnsafeNativeMethods.ON_2dexArray_Append(pIndices, ij.I, ij.J);
+            return indices.Length;
+          }
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxSurfaceCVIndices);
+        }
+      }
+      return 0;
+    }
+
+    private static void CRhinoGripObject_UndoMove(uint serialNumber)
+    {
+      var grip = GetCustomObject(serialNumber);
+      if (grip != null && EnterCallback(serialNumber, idxUndoMove))
+      {
+        try
+        {
+          grip.OnUndoMove();
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+        finally
+        {
+          ExitCallback(serialNumber, idxUndoMove);
+        }
+      }
     }
   }
 }

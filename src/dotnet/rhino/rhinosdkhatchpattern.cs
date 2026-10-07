@@ -365,6 +365,34 @@ namespace Rhino.DocObjects
     #endregion
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// Gets Rhino default hatch patterns. These patterns are not in the document hatch pattern table.
+    /// </summary>
+    /// <returns>An array of hatch patterns.</returns>
+    /// <since>9.0</since>
+    public static HatchPattern[] GetDefaultHatchPatterns()
+    {
+      using (SimpleArrayIntPtr ptr_array = new SimpleArrayIntPtr())
+      {
+        int count = UnsafeNativeMethods.RHC_GetDefaultHatchPatterns(ptr_array.NonConstPointer());
+        if (count <= 0)
+          return Array.Empty<HatchPattern>();
+
+        List<HatchPattern> out_patterns = new List<HatchPattern>(count);
+        foreach (var ptr in ptr_array.ToArray())
+        {
+          if (ptr != IntPtr.Zero)
+          {
+            HatchPattern hatchPattern = new HatchPattern(ptr);
+            out_patterns.Add(hatchPattern);
+          }
+        }
+
+        return out_patterns.ToArray();
+      }
+    }
+
     /// <summary>
     /// Reads hatch pattern definitions from a file.
     /// </summary>
@@ -554,8 +582,6 @@ namespace Rhino.DocObjects
     {
       get
       {
-        if (!IsDocumentControlled) // this might not be necessary any longer.
-          return -1;
         return base.Index;
       }
       set
@@ -718,6 +744,48 @@ namespace Rhino.DocObjects
         int rc = UnsafeNativeMethods.ON_HatchPattern_SetHatchLines(pThis, pHatchLines);
         GC.KeepAlive(this);
         return rc;
+      }
+    }
+
+    /// <summary>
+    /// Hatchpattern patterns are typically defined as distances on
+    /// the printed output when printing. In this case PatternUnitSystem is
+    /// UnitSystem.None (default). When set to any other unit system, 
+    /// the hatch pattern will be scaled acordingly.
+    /// </summary>
+    /// <since>9.0</since>
+    public UnitSystem PatternUnitSystem
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchPattern_PatternUnitSystem(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchPattern_SetPatternUnitSystem(ptrThis, value);
+      }
+    }
+    
+    /// <summary>
+    /// Hatchpattern patterns are typically interpreted as distances on
+    /// the printed output when printing. In this case AlwaysModelDistances is
+    /// false (default). When set to true, the hatch pattern will
+    /// be interpreted as being in world distances.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool AlwaysModelDistances
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_HatchPattern_AlwaysModelDistances(constPtrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_HatchPattern_SetAlwaysModelDistances(ptrThis, value);
       }
     }
 
@@ -995,6 +1063,19 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// If index is out of range, the current hatch pattern is returned.
     /// </returns>
+    /// <remarks>
+    /// Detaching a worksession reference model, or purging a linked instance
+    /// definition, removes its hatch patterns but leaves the table slots they
+    /// occupied empty; the slots cannot be closed up, because table indices are
+    /// persistent references that objects store. Count spans the empty slots and
+    /// they accumulate for the life of the document. An index that lands on one
+    /// returns the default hatch pattern rather than throwing, and nothing about
+    /// it says it is a stand-in except its index, which is -1 and never the index
+    /// you asked for - so test index == HatchPatterns[index].Index before
+    /// treating an entry as real. Enumerating the table with foreach goes through
+    /// the document manifest rather than the raw table array, so it does not
+    /// visit empty slots at all. See RH-97389.
+    /// </remarks>
     public DocObjects.HatchPattern this[int index]
     {
       get
@@ -1197,6 +1278,32 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Delete multiple hatch patterns.
+    /// </summary>
+    /// <param name="hatchPatternIndices">An enumeration of hatch pattern indices.</param>
+    /// <param name="quiet">If true, no warning message box appears if a hatch pattern is in use.</param>
+    /// <returns>The number of hatch patterns that were deleted.</returns>
+    /// <since>9.0</since>
+    public int Delete(IEnumerable<int> hatchPatternIndices, bool quiet)
+    {
+      using (var indices = new SimpleArrayInt(hatchPatternIndices))
+      {
+        IntPtr ptr_const_indices = indices.ConstPointer();
+        return UnsafeNativeMethods.CRhinoHatchPatternTable_DeleteHatchPattern3(m_doc.RuntimeSerialNumber, ptr_const_indices, quiet);
+      }
+    }
+
+    /// <summary>
+    /// Purges any unused hatch patterns.
+    /// </summary>
+    /// <returns>The number of unused hatch patterns that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeUnused()
+    {
+      return UnsafeNativeMethods.RHC_RhPurgeHatchPatterns(Document.RuntimeSerialNumber);
+    }
+
+    /// <summary>
     /// Renames a hatch pattern in the table.
     /// </summary>
     /// <param name="item">The hatch pattern to rename</param>
@@ -1224,6 +1331,21 @@ namespace Rhino.DocObjects.Tables
     {
       if (string.IsNullOrEmpty(hatchPatternName)) return false;
       return UnsafeNativeMethods.CRhinoHatchPatternTable_RenameHatchPattern(m_doc.RuntimeSerialNumber, hatchPatternIndex, hatchPatternName);
+    }
+
+    /// <summary>
+    /// Gets unused hatchpattern name used as default when creating new hatchpatterns.
+    /// </summary>
+    /// <returns>The unused hatchpattern name.</returns>
+    /// <since>9.0</since>
+    public string GetUnusedHatchPatternName()
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.CRhinoHatchPatternTable_GetUnusedHatchPatternName(m_doc.RuntimeSerialNumber, pString);
+        return sh.ToString();
+      }
     }
 
     #endregion

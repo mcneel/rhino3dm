@@ -218,9 +218,11 @@ namespace Rhino.Geometry
       {
         if (m_curves.Count > 0)
         {
-          var crvs = new Runtime.InteropWrappers.SimpleArrayCurvePointer(m_curves);
-          IntPtr const_ptr_curves = crvs.ConstPointer();
-          UnsafeNativeMethods.CRhinoUnroll_PrepareCurves(ptr_unroller, const_ptr_curves);
+          using (var crvs = new Runtime.InteropWrappers.SimpleArrayCurvePointer(m_curves))
+          {
+            IntPtr const_ptr_curves = crvs.ConstPointer();
+            UnsafeNativeMethods.CRhinoUnroll_PrepareCurves(ptr_unroller, const_ptr_curves);
+          }
         }
         if (m_points.Count > 0)
         {

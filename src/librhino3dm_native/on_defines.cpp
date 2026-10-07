@@ -27,15 +27,23 @@ RH_C_FUNCTION double ONC_UnitScale2(ON::LengthUnitSystem usFrom, double mpuFrom,
   return ON::UnitScale(us_from, us_to);
 }
 
-RH_C_FUNCTION double ONC_MetersPerUnit(ON::LengthUnitSystem us)
+RH_C_FUNCTION double ONC_MetersPerLengthUnit(ON::LengthUnitSystem us)
 {
-  ON_UnitSystem unitSystem(us);
-  return unitSystem.MetersPerUnit(ON_DBL_QNAN);
+  return ON::MetersPerLengthUnit(us);
 }
 
 RH_C_FUNCTION bool ONC_IsMetricLengthUnit(ON::LengthUnitSystem us)
 {
   return ON::IsMetricLengthUnit(us);
+}
+
+RH_C_FUNCTION void ON_LengthUnitSystem_Name(ON::LengthUnitSystem us, CRhCmnStringHolder* pString)
+{
+  if (pString)
+  {
+    ON_UnitSystem unitSystem(us);
+    pString->Set(unitSystem.UnitSystemName());
+  }
 }
 
 RH_C_FUNCTION void ON_Revision(CRhCmnStringHolder* pStringHolder)
@@ -88,6 +96,12 @@ RH_C_FUNCTION void ON_wString_Set(ON_wString* pString, const RHMONO_STRING* _tex
     INPUTSTRINGCOERCE(text, _text);
     (*pString) = text;
   }
+}
+
+RH_C_FUNCTION void ON_wString_SetLengthZero(ON_wString* pString)
+{
+  if (pString)
+    pString->SetLength(0);
 }
 
 

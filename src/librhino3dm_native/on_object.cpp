@@ -234,7 +234,15 @@ RH_C_FUNCTION void ON_Object_DeleteUserStrings(const ON_Object* pConstObject)
 {
   ON_UserStringList* list = ON_UserStringList::FromObject(pConstObject);
   if (list)
-    list->m_e.Empty();
+  {
+    // 20-Jul-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-78333
+    // Detach and delete the container rather than just emptying it - an empty
+    // ON_UserStringList still serializes (~286 bytes/object) and needlessly
+    // inflates the file.
+    ON_Object* pObject = const_cast<ON_Object*>(pConstObject);
+    pObject->DetachUserData(list);
+    delete list;
+  }
 }
 
 RH_C_FUNCTION ON_UserData* ON_Object_FirstUserData(const ON_Object* pObject)

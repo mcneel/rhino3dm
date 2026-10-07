@@ -26,6 +26,9 @@ namespace Rhino.UI
     /// <since>5.0</since>
     public static string STR(string english)
     {
+#if DEBUG
+      if (string.IsNullOrEmpty(english)) throw new NotSupportedException("LOC.STR cannot accept an empty string");
+#endif
       return english;
     }
 
@@ -38,6 +41,9 @@ namespace Rhino.UI
     /// <since>5.0</since>
     public static string STR(string english, object assemblyOrObject)
     {
+#if DEBUG
+      if (string.IsNullOrEmpty(english)) throw new NotSupportedException("LOC.STR cannot accept an empty string");
+#endif
       return english;
     }
 
@@ -181,7 +187,7 @@ namespace Rhino.UI
       {
         if (g_service_implementation == null)
         {
-          // This line doesn't work in the InstallLicense project when the file is used 
+          // This line doesn't work in the InstallLicense project when the file is used
           // via an SVN external. Localization.cs is used outside RhinoCommon in InstallLicense.
           g_service_implementation = Runtime.HostUtils.GetPlatformService<ILocalizationService>();
           if (g_service_implementation == null)
@@ -228,7 +234,7 @@ namespace Rhino.UI
       using (var sh = new StringHolder())
       {
         IntPtr pString = sh.NonConstPointer();
-        UnsafeNativeMethods.CRhinoApp_UnitSystemName((int)units, capitalize, singular, abbreviate, pString);
+        UnsafeNativeMethods.CRhinoApp_UnitSystemName(units, capitalize, singular, abbreviate, pString);
         return sh.ToString();
       }
     }
@@ -248,10 +254,31 @@ namespace Rhino.UI
       using (var sh = new StringHolder())
       {
         IntPtr pString = sh.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoFormatNumber(x, (int)units, (int)mode, precision, appendUnitSystemName, pString);
+        UnsafeNativeMethods.RHC_RhinoFormatNumber(x, units, 1.0, (int)mode, precision, appendUnitSystemName, pString);
         return sh.ToString();
       }
     }
+
+    /// <summary>
+    /// Get a string version of a number in a given unit system / display mode.
+    /// </summary>
+    /// <param name="x">The number to format into a string.</param>
+    /// <param name="units">The length unit for the number.</param>
+    /// <param name="mode">How the number should be formatted.</param>
+    /// <param name="precision">The precision of the number.</param>
+    /// <param name="appendUnitSystemName">Adds unit system name to the end of the number.</param>
+    /// <returns>The formatted number.</returns>
+    /// <since>9.0</since>
+    public static string FormatNumber(double x, LengthUnit units, DistanceDisplayMode mode, int precision, bool appendUnitSystemName)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoFormatNumber(x, units.ToUnitSystem(out var metersPerUnit), metersPerUnit, (int)mode, precision, appendUnitSystemName, pString);
+        return sh.ToString();
+      }
+    }
+
 
     /// <summary>
     /// Get a string version of a number.
@@ -270,7 +297,7 @@ namespace Rhino.UI
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="distance"></param>
     /// <param name="units"></param>
@@ -521,7 +548,7 @@ namespace Rhino.UI
       {
         // we don't want the language id to change since Rhino in general does not
         // support swapping localizations on the fly. Use a cached language id after the
-        // initial language id has been read 
+        // initial language id has been read
         if (g_language_id == -1)
         {
 #if RHINO_SDK
@@ -543,10 +570,10 @@ namespace Rhino.UI
             // 11 Feb 2021 John Morse
             // https://mcneel.myjetbrains.com/youtrack/issue/RH-62744
             // There is core Rhino UI that is registered when the Rhino.UI is initialized
-            // which happens prior to CRhinoAppearanceSettings::LoadProfile.  Calling 
+            // which happens prior to CRhinoAppearanceSettings::LoadProfile.  Calling
             // AppearanceSettings.LanguageIdentifier before LoadProfile is called will always
             // return the default language of the OS causing strings to get localized in that
-            // language until LoadProfile gets called.  This will check to see if the user 
+            // language until LoadProfile gets called.  This will check to see if the user
             // changed the language and use the user provided value.
             PersistentSettings.RhinoAppSettings.TryGetChild("Options", out PersistentSettings options);
             if (options != null)

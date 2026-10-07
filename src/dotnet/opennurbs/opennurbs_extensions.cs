@@ -26,6 +26,8 @@ namespace Rhino.FileIO
     {
       /// <summary></summary>
       None = UnsafeNativeMethods.ReadFileTableTypeFilter.None,
+      /// <summary>The 3dm start section.</summary>
+      StartSection = UnsafeNativeMethods.ReadFileTableTypeFilter.StartSection,
       /// <summary></summary>
       Properties = UnsafeNativeMethods.ReadFileTableTypeFilter.PropertiesTable,
       /// <summary></summary>
@@ -52,12 +54,18 @@ namespace Rhino.FileIO
       Light = UnsafeNativeMethods.ReadFileTableTypeFilter.LightTable,
       /// <summary></summary>
       Hatchpattern = UnsafeNativeMethods.ReadFileTableTypeFilter.HatchpatternTable,
+      /// <summary>The section style table (Rhino 9 and later).</summary>
+      SectionStyle = UnsafeNativeMethods.ReadFileTableTypeFilter.SectionStyleTable,
+      /// <summary>The markup table (Rhino 9 and later).</summary>
+      Markup = UnsafeNativeMethods.ReadFileTableTypeFilter.MarkupTable,
+      /// <summary>The page view group table (Rhino 9 and later).</summary>
+      PageViewGroup = UnsafeNativeMethods.ReadFileTableTypeFilter.PageviewGroupTable,
       /// <summary></summary>
       InstanceDefinition = UnsafeNativeMethods.ReadFileTableTypeFilter.InstanceDefinitionTable,
       /// <summary></summary>
       ObjectTable = UnsafeNativeMethods.ReadFileTableTypeFilter.ObjectTable,
       /// <summary></summary>
-      Historyrecord = UnsafeNativeMethods.ReadFileTableTypeFilter.HistoryrecordTable,
+      Historyrecord = UnsafeNativeMethods.ReadFileTableTypeFilter.HistoryRecordTable,
       /// <summary></summary>
       UserTable = UnsafeNativeMethods.ReadFileTableTypeFilter.UserTable
     }
@@ -144,6 +152,23 @@ namespace Rhino.FileIO
       if (!File.Exists(path))
         throw new FileNotFoundException("The provided path is null, does not exist or cannot be accessed.", path);
       IntPtr ptr_onx_model = UnsafeNativeMethods.ONX_Model_ReadFile(path, IntPtr.Zero);
+      return ptr_onx_model == IntPtr.Zero ? null : new File3dm(ptr_onx_model);
+    }
+
+    /// <summary>
+    /// Reads only the start section, properties, and settings from a 3dm
+    /// file at a specified location. The rest of the model (objects, layers,
+    /// and other tables) is not read.
+    /// </summary>
+    /// <param name="path">The file to read.</param>
+    /// <returns>new File3dm on success, null on error.</returns>
+    /// <exception cref="FileNotFoundException">If path does not exist.</exception>
+    /// <since>9.0</since>
+    public static File3dm ReadSettings(string path)
+    {
+      if (!File.Exists(path))
+        throw new FileNotFoundException("The provided path is null, does not exist or cannot be accessed.", path);
+      IntPtr ptr_onx_model = UnsafeNativeMethods.ONX_Model_ReadFileSettings(path);
       return ptr_onx_model == IntPtr.Zero ? null : new File3dm(ptr_onx_model);
     }
 
@@ -356,6 +381,34 @@ namespace Rhino.FileIO
         applicationDetails = details.ToString();
       }
     }
+
+#if RHINO_SDK
+#if !MOBILE_BUILD
+    /// <summary>
+    /// Reads page view, or layout, information from an existing 3dm file.
+    /// </summary>
+    /// <param name="path">A location on disk or network.</param>
+    /// <returns>An array of view information if successful, otherwise an empty array.</returns>
+    /// <since>9.0</since>
+    public static ViewInfo[] ReadPageViews(string path)
+    {
+      if (!File.Exists(path))
+        return Array.Empty<ViewInfo>();
+
+      using SimpleArrayIntPtr views = new SimpleArrayIntPtr();
+      IntPtr ptr_views = views.NonConstPointer();
+      bool rc = UnsafeNativeMethods.ONX_Model_ReadPageViews(path, ptr_views);
+      if (rc)
+      {
+        List<ViewInfo> page_views = new List<ViewInfo>(views.Count);
+        foreach (IntPtr ptr in views.ToArray())
+          page_views.Add(new ViewInfo(ptr, false));
+        return page_views.ToArray();
+      }
+      return Array.Empty<ViewInfo>(); 
+    }
+#endif // MOBILE_BUILD
+#endif // RHINO_SDK
 
     /// <summary>
     /// Creates a simple 3dm file that contains a single geometric object.
@@ -834,7 +887,7 @@ namespace Rhino.FileIO
         IntPtr ptr_revhist = UnsafeNativeMethods.ONX_Model_RevisionHistory(ptr_const_this);
         int second = 0, minute = 0, hour = 0, month = 0, day = 0, year = 0;
         if (UnsafeNativeMethods.ON_3dmRevisionHistory_GetDate(ptr_revhist, true, ref second, ref minute, ref hour, ref day, ref month, ref year))
-          return new DateTime(year, month, day, hour, minute, second);
+          return new DateTime(year, month+1, day, hour, minute, second); // RH-96836: native month is tm_mon (0-11)
         GC.KeepAlive(this);
         return DateTime.MinValue;
       }
@@ -853,7 +906,7 @@ namespace Rhino.FileIO
         IntPtr ptr_revhist = UnsafeNativeMethods.ONX_Model_RevisionHistory(ptr_const_this);
         int second = 0, minute = 0, hour = 0, month = 0, day = 0, year = 0;
         if (UnsafeNativeMethods.ON_3dmRevisionHistory_GetDate(ptr_revhist, false, ref second, ref minute, ref hour, ref day, ref month, ref year))
-          return new DateTime(year, month, day, hour, minute, second);
+          return new DateTime(year, month+1, day, hour, minute, second); // RH-96836: native month is tm_mon (0-11)
         GC.KeepAlive(this);
         return DateTime.MinValue;
       }
@@ -1115,7 +1168,7 @@ namespace Rhino.FileIO
     /// <since>6.0</since>
     public File3dmViewTable AllViews
     {
-      get { return m_named_view_table ?? (m_named_view_table = new File3dmViewTable(this, false)); }
+      get { return m_view_table ?? (m_view_table = new File3dmViewTable(this, false)); }
     }
 
     /// <summary>
@@ -2307,7 +2360,14 @@ namespace Rhino.FileIO
       if (typeof(T) == typeof(Font))
         return ModelComponentType.TextStyle;
 
+      if (typeof(T) == typeof(SectionStyle))
+        return ModelComponentType.SectionStyle;
+
 #if RHINO_SDK
+      // PageViewGroup is backed by ON_PageViewGroup, which is not part of public opennurbs.
+      if (typeof(T) == typeof(PageViewGroup))
+        return ModelComponentType.PageViewGroup;
+
       if (typeof(T) == typeof(LightObject))
         return ModelComponentType.RenderLight;
 #endif

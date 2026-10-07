@@ -20,6 +20,7 @@ using System.Reflection.Metadata;
 using System.Reflection;
 using Rhino.FileIO;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 #endif
 
 
@@ -650,7 +651,14 @@ namespace Rhino.Runtime
     public bool TryGetUnmangedPointer(string name, out IntPtr value)
     {
       value = UnsafeNativeMethods.CRhParameterDictionary_GetUnmangedPointer(m_pNamedParams, name);
-      return value != IntPtr.Zero;
+
+      if (value == (IntPtr)(-1))
+      {
+        value = IntPtr.Zero;
+        return false;
+      }
+
+      return true;
     }
 
     /// <summary>
@@ -832,10 +840,12 @@ namespace Rhino.Runtime
     /// <since>8.0</since>
     public bool TryGetPoints(string name, out Rhino.Geometry.Point3d[] pts)
     {
-      SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d();
-      bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
-      pts = simplePoint3dArray.ToArray();
-      return rc;
+      using (SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d())
+      {
+        bool rc = UnsafeNativeMethods.CRhParameterDictionary_GetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
+        pts = simplePoint3dArray.ToArray();
+        return rc;
+      }
     }
 
     /// <summary>
@@ -846,8 +856,10 @@ namespace Rhino.Runtime
     /// <since>8.0</since>
     public void Set(string name, Rhino.Geometry.Point3d[] pts)
     {
-      SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d(pts);
-      UnsafeNativeMethods.CRhParameterDictionary_SetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
+      using (SimpleArrayPoint3d simplePoint3dArray = new SimpleArrayPoint3d(pts))
+      {
+        UnsafeNativeMethods.CRhParameterDictionary_SetPointsList(m_pNamedParams, name, simplePoint3dArray.NonConstPointer());
+      }
     }
 
     /// <summary>
@@ -922,55 +934,73 @@ namespace Rhino.Runtime
       }
     }
 
+    internal enum EventCode
+    {
+      // controlling skin interface
+      HIDESPLASH = 0,
+      SHOWSPLASH = 1,
+      SHOWHELP = 2,
+      SHOWCHOOSETEMPLATE = 3,
+      SHOWCHOOSERECENT = 4,
+  
+      // similar to rhSkin.h::initinstance_event
+      MAINFRAMECREATED = 1000,                  // initinstance_event.mainframe_created
+      LICENSECHECKED = 2000,                    // initinstance_event.license_checked
+      BUILTIN_COMMANDS_REGISTERED = 3000,       // initinstance_event.builtin_commands_registered
+      BEGIN_LOAD_PLUGIN = 4000,                 // initinstance_event.begin_load_plugin
+      END_LOAD_PLUGIN = 5000,                   // initinstance_event.end_load_plugin
+      END_LOAD_AT_START_PLUGINS = 6000,         // initinstance_event.end_load_at_start_plugins
+  
+      // NOT USED - reserved for backward compatibility
+      BEGIN_LOAD_PLUGINS_BASE = 100000,
+    }
+
     internal void OnShowSplash(int mode, string description)
     {
-      const int HIDESPLASH = 0;
-      const int SHOWSPLASH = 1;
-      const int SHOWHELP = 2;
-      const int MAINFRAMECREATED = 1000;
-      const int LICENSECHECKED = 2000;
-      const int BUILTIN_COMMANDS_REGISTERED = 3000;
-      const int BEGIN_LOAD_PLUGIN = 4000;
-      const int END_LOAD_PLUGIN = 5000;
-      const int END_LOAD_AT_START_PLUGINS = 6000;
-      const int BEGIN_LOAD_PLUGINS_BASE = 100000;
       try
       {
+        EventCode e = (EventCode)mode;
         if (m_theSingleSkin != null)
         {
-          switch (mode)
+          switch (e)
           {
-            case HIDESPLASH:
+            case EventCode.HIDESPLASH:
               m_theSingleSkin.HideSplash();
               break;
-            case SHOWSPLASH:
+            case EventCode.SHOWSPLASH:
               m_theSingleSkin.ShowSplash();
               break;
-            case SHOWHELP:
+            case EventCode.SHOWHELP:
               m_theSingleSkin.ShowHelp();
               break;
-            case MAINFRAMECREATED:
+            case EventCode.SHOWCHOOSETEMPLATE:
+              m_theSingleSkin.ShowChooseTemplate();
+              break;
+            case EventCode.SHOWCHOOSERECENT:
+              m_theSingleSkin.ShowChooseRecent();
+              break;
+            case EventCode.MAINFRAMECREATED:
               m_theSingleSkin.OnMainFrameWindowCreated();
               break;
-            case LICENSECHECKED:
+            case EventCode.LICENSECHECKED:
               m_theSingleSkin.OnLicenseCheckCompleted();
               break;
-            case BUILTIN_COMMANDS_REGISTERED:
+            case EventCode.BUILTIN_COMMANDS_REGISTERED:
               m_theSingleSkin.OnBuiltInCommandsRegistered();
               break;
-            case BEGIN_LOAD_PLUGIN:
+            case EventCode.BEGIN_LOAD_PLUGIN:
               m_theSingleSkin.OnBeginLoadPlugIn(description);
               break;
-            case END_LOAD_PLUGIN:
+            case EventCode.END_LOAD_PLUGIN:
               m_theSingleSkin.OnEndLoadPlugIn();
               break;
-            case END_LOAD_AT_START_PLUGINS:
+            case EventCode.END_LOAD_AT_START_PLUGINS:
               m_theSingleSkin.OnEndLoadAtStartPlugIns();
               break;
           }
-          if (mode >= BEGIN_LOAD_PLUGINS_BASE)
+          if (e >= EventCode.BEGIN_LOAD_PLUGINS_BASE)
           {
-            int count = (mode - BEGIN_LOAD_PLUGINS_BASE);
+            int count = mode - (int)EventCode.BEGIN_LOAD_PLUGINS_BASE;
             m_theSingleSkin.OnBeginLoadAtStartPlugIns(count);
           }
         }
@@ -1006,6 +1036,7 @@ namespace Rhino.Runtime
       m_pSkin = UnsafeNativeMethods.CRhinoSkin_New(m_ShowSplash, name, hicon);
       m_theSingleSkin = this;
     }
+
     /// <summary>Is called when the splash screen should be shown.</summary>
     protected virtual void ShowSplash() { }
 
@@ -1017,6 +1048,65 @@ namespace Rhino.Runtime
 
     /// <summary>Is called when the splash screen should be hidden.</summary>
     protected virtual void HideSplash() { }
+
+    /// <summary>
+    /// True when the platform's native boot splash is compiled in and shown at startup.
+    /// </summary>
+    /// <since>9.0</since>
+    protected static bool HasBootSplash => UnsafeNativeMethods.CRhinoSkin_HasBootSplash();
+
+    /// <summary>
+    /// Tells the platform's boot splash to dismiss, if one is up.
+    /// Call this from a Skin subclass once its own window is on screen.
+    /// No-op on platforms that have no boot splash.
+    /// </summary>
+    /// <since>9.0</since>
+    protected static void DismissBootSplash()
+    {
+      UnsafeNativeMethods.CRhinoSkin_DismissBootSplash();
+    }
+
+    /// <summary>
+    /// Pushes a progress value to the platform's boot splash so it can
+    /// paint a progress bar. The value is treated as a percentage and
+    /// clamped to 0..100 on the native side. No-op on platforms that
+    /// have no boot splash, and harmless if the splash is already gone.
+    /// </summary>
+    /// <param name="value">Progress percentage in the range 0..100.</param>
+    /// <since>9.0</since>
+    protected static void SetBootSplashProgress(int value)
+    {
+      UnsafeNativeMethods.CRhinoSkin_SetBootSplashProgress(value);
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RhinoDoc"/> from the given template (or a
+    /// blank document when the path is null/empty/missing) and brings up
+    /// its document window. Must be called on the main UI thread.
+    /// </summary>
+    /// <param name="templatePath">Path to a template file, or null/empty for a blank document.</param>
+    /// <returns>The new <see cref="RhinoDoc"/>, or null on failure.</returns>
+    /// <since>9.0</since>
+    protected static RhinoDoc OpenNewDocument(string templatePath)
+    {
+      uint sn = UnsafeNativeMethods.CRhinoDoc_CreateAndDisplay(templatePath ?? string.Empty);
+      return sn == 0 ? null : RhinoDoc.FromRuntimeSerialNumber(sn);
+    }
+
+    /// <summary>
+    /// Called when the host requests the Skin's "choose template" UI
+    /// (e.g. from the File &gt; New Using Template menu item).
+    /// Default implementation is empty.
+    /// </summary>
+    /// <since>9.0</since>
+    protected virtual void ShowChooseTemplate() { }
+
+    /// <summary>
+    /// Called when the host requests the Skin's "choose recent" UI.
+    /// Default implementation is empty.
+    /// </summary>
+    /// <since>9.0</since>
+    protected virtual void ShowChooseRecent() { }
 
     /// <summary>Is called when the main frame window is created.</summary>
     protected virtual void OnMainFrameWindowCreated() { }
@@ -1066,6 +1156,28 @@ namespace Rhino.Runtime
         if (m_SettingsManager == null)
           m_SettingsManager = PersistentSettingsManager.Create(this);
         return m_SettingsManager.PluginSettings;
+      }
+    }
+
+    string m_settings_dir;
+
+    /// <summary>
+    /// Get the skin's settings directory. This is the directory where the
+    /// skin's persistent settings files are saved, matching the location used
+    /// by <see cref="Settings"/>. Note, this does not verify the directory exists.
+    /// </summary>
+    /// <since>9.0</since>
+    public string SettingsDirectory
+    {
+      get
+      {
+        // A skin's PersistentSettingsManager is created with Guid.Empty and the
+        // skin's own assembly; SettingsDirectoryHelper then derives the id from
+        // that assembly's GuidAttribute. Mirror that here so the returned path
+        // matches where Settings is actually written.
+        if (string.IsNullOrEmpty(m_settings_dir))
+          m_settings_dir = PlugIn.SettingsDirectoryHelper(true, GetType().Assembly, Guid.Empty);
+        return m_settings_dir;
       }
     }
 
@@ -1446,13 +1558,12 @@ namespace Rhino.Runtime
       string fullPath = Path.GetFullPath(path);
 
       var loadContext = RhinoLoadContext;
-      if (RunningOnWindows && RhinoLoadContext != AssemblyLoadContext.Default)
+      if (RhinoLoadContext != AssemblyLoadContext.Default)
       {
         // 2025-08-11 - kike@mcneel.com:
         // VisualARQ has MixedMode .dll files that should load into AssemblyLoadContext.Default.
         // See https://github.com/dotnet/runtime/issues/62754
-        const int COMIMAGE_FLAGS_ILONLY = 0x00000001;
-        if (IsManagedDll(fullPath, out var clrFlags) && (clrFlags & COMIMAGE_FLAGS_ILONLY) == 0)
+        if (IsManagedDll(fullPath, out var corFlags) && !corFlags.HasFlag(System.Reflection.PortableExecutable.CorFlags.ILOnly))
           loadContext = AssemblyLoadContext.Default;
       }
 
@@ -1592,7 +1703,7 @@ namespace Rhino.Runtime
       lock (s_loadFromAssemblyList)
       {
         // If the requestor assembly was not loaded using LoadFrom, exit.
-        if (!s_loadFromAssemblyList.TryGetValue(requestorPath, out var loadContext) || 
+        if (!s_loadFromAssemblyList.TryGetValue(requestorPath, out var loadContext) ||
             loadContext != AssemblyLoadContext.GetLoadContext(requestingAssembly))
         {
           return null;
@@ -1863,6 +1974,22 @@ namespace Rhino.Runtime
       {
 #if ON_RUNTIME_APPLE_IOS
         assemblyPath = "RhinoiOS.dll";
+#elif ON_RUNTIME_LINUX
+        // ON_RUNTIME_LINUX covers two distinct runtimes today:
+        // RhinoLinux (Compute / server) and RhinoCross (the cross-
+        // platform C#/Eto Rhino app). Probe what's actually deployed
+        {
+          var linuxPath = System.IO.Path.Combine(RhinoAssemblyDirectory, "RhinoLinux.dll");
+          var crossPath = System.IO.Path.Combine(RhinoAssemblyDirectory, "RhinoCross.dll");
+          var hasLinux = System.IO.File.Exists(linuxPath);
+          var hasCross = System.IO.File.Exists(crossPath);
+          if (hasLinux && hasCross)
+            throw new System.InvalidOperationException(
+              "Both RhinoLinux.dll and RhinoCross.dll are present in " +
+              RhinoAssemblyDirectory + "; only one Linux runtime " +
+              "should be deployed.");
+          assemblyPath = hasCross ? "RhinoCross.dll" : "RhinoLinux.dll";
+        }
 #else
         assemblyPath = RunningOnWindows ? "RhinoWindows.dll" : "RhinoMac.dll";
 #endif
@@ -1920,10 +2047,20 @@ namespace Rhino.Runtime
       return UnsafeNativeMethods.RHC_IsManagedDll(path);
     }
 
-    private static bool IsManagedDll(string path, out int clrFlags)
+    internal static bool IsManagedDll(string path, out System.Reflection.PortableExecutable.CorFlags corFlags)
     {
-      clrFlags = default;
-      return UnsafeNativeMethods.RHC_IsManagedDll2(path, ref clrFlags);
+      corFlags = default;
+      using (var fs = File.OpenRead(path))
+      {
+        using (var fileReader = new System.Reflection.PortableExecutable.PEReader(fs))
+        {
+          if (fileReader.PEHeaders.CorHeader is null)
+            return false;
+
+          corFlags = fileReader.PEHeaders.CorHeader.Flags;
+        }
+      }
+      return true;
     }
 
     /// <summary>
@@ -2151,6 +2288,43 @@ namespace Rhino.Runtime
 
     private static bool? _runningOnWindows = null;
     private static bool? _runningOnOSX = null;
+     private static bool? _runningOnLinux = null;
+
+    private static bool? _runningOnRhinoCore = null;
+
+    [DllImport("RhinoCore")]
+    [return: MarshalAs(UnmanagedType.U1)]
+    private static extern bool RhStartedAsRhinoCore();
+
+    /// <summary>
+    /// True when this process runs on the RhinoCore build flavor - the
+    /// CMake-built RhinoCore that Rhino.Inside / Rhino.Compute can host
+    /// directly (already the only flavor on Linux) and that rhinocore_tests
+    /// runs - rather than full Rhino. Every Rhino loads RhinoCore.dll; this
+    /// identifies the flavor whose rhcommon_c does not carry the
+    /// UI/RDK/ObjectManager native exports, so hook registration keeps its
+    /// fences on it. A property of the BUILD, not of headless MODE:
+    /// Rhino.Inside on a full build runs headless and must register every
+    /// hook (fencing on mode alone broke it - see the bisect on d83908b779c;
+    /// RH-98153).
+    /// </summary>
+    internal static bool RunningOnRhinoCore
+    {
+      get
+      {
+        if (!_runningOnRhinoCore.HasValue)
+        {
+          try { _runningOnRhinoCore = RhStartedAsRhinoCore(); }
+          // A RhinoCore without the export is a full build from before this
+          // flag existed: not the RhinoCore flavor, register everything. A
+          // host where the "RhinoCore" import cannot resolve at all gets the
+          // same conservative answer.
+          catch (EntryPointNotFoundException) { _runningOnRhinoCore = false; }
+          catch (DllNotFoundException) { _runningOnRhinoCore = false; }
+        }
+        return _runningOnRhinoCore.Value;
+      }
+    }
 
     /// <summary>
     /// Tests if this process is currently executing on the Windows platform.
@@ -2203,6 +2377,22 @@ namespace Rhino.Runtime
       }
     }
 
+    /// <summary>
+    /// Tests if this process is currently executing on the Linux platform.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool RunningOnLinux
+    {
+      get
+      {
+        if (!_runningOnLinux.HasValue)
+        {
+          _runningOnLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        }
+        return _runningOnLinux.Value;
+      }
+    }
+
 
 #if RHINO_SDK
     /// <summary>
@@ -2218,10 +2408,16 @@ namespace Rhino.Runtime
     }
 
     /// <summary>
-    /// Tests if this process is currently executing in a server environment.
+    /// Tests if this process is currently executing in a server-like installation
+    /// environment: Windows Server, or an AWS Marketplace instance
+    /// (<see cref="OperatingSystemInstallationType"/> = "MarketplaceAWS"). Both
+    /// share the headless-server behavior model — RHINO_TOKEN-based auth,
+    /// non-interactive licensing UI, no local license discovery.
     /// </summary>
     /// <since>7.8</since>
-    public static bool RunningOnServer => string.Equals(OperatingSystemInstallationType, "server", StringComparison.InvariantCultureIgnoreCase);
+    public static bool RunningOnServer =>
+      string.Equals(OperatingSystemInstallationType, "server", StringComparison.InvariantCultureIgnoreCase) ||
+      string.Equals(OperatingSystemInstallationType, "MarketplaceAWS", StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// Tests if this process is currently executing inside a Windows Container.
@@ -2343,7 +2539,13 @@ namespace Rhino.Runtime
           // exists. Otherwise, base it on the first Ethernet MacAddress.
           // The goal here is to generate a reasonably uniqe and stable
           // ID, so very little hardware information is used.
-          string data = HardwareSerialNumber;
+          string data = null;
+
+          // luis@mcneel.com (2025.05.06) Use Mac address on Linux.
+          // TBD, what to use for Hardware serial number on linux?
+//#if !ON_RUNTIME_LINUX
+          data = HardwareSerialNumber;
+//#endif
           if (string.IsNullOrWhiteSpace(data))
           {
             SerialNumberIsHardwareBased = false;
@@ -2372,14 +2574,6 @@ namespace Rhino.Runtime
         }
         return m_device_id;
       }
-      set
-      {
-        if (RunningInRhino)
-        {
-          throw new Exception("Nope. Can't do this.");
-        }
-        m_device_id = value;
-      }
     }
 
     private static string m_serial_number = "";
@@ -2390,7 +2584,7 @@ namespace Rhino.Runtime
         if (!string.IsNullOrWhiteSpace(m_serial_number))
           return m_serial_number;
 
-        if (RunningOnOSX)
+        if (RunningOnOSX || RunningOnLinux)
         {
           m_serial_number = ComputerSerialNumber;
         }
@@ -2411,17 +2605,19 @@ namespace Rhino.Runtime
       {
         try
         {
-          var mc = new ManagementClass("Win32_ComputerSystemProduct");
-          var coll = mc.GetInstances();
-          foreach (var obj in coll)
+          using (var mc = new ManagementClass("Win32_ComputerSystemProduct"))
           {
-            var uuid = obj.Properties["UUID"].Value.ToString().ToLowerInvariant();
-            var fullUuid = new Guid("ffffffffffffffffffffffffffffffff");
-            if (uuid == fullUuid.ToString() || uuid == Guid.Empty.ToString())
+            var coll = mc.GetInstances();
+            foreach (var obj in coll)
             {
-              continue;
+              var uuid = obj.Properties["UUID"].Value.ToString().ToLowerInvariant();
+              var fullUuid = new Guid("ffffffffffffffffffffffffffffffff");
+              if (uuid == fullUuid.ToString() || uuid == Guid.Empty.ToString())
+              {
+                continue;
+              }
+              return uuid;
             }
-            return uuid;
           }
         }
         catch
@@ -2482,6 +2678,53 @@ namespace Rhino.Runtime
       }
     }
 
+    internal static string McNeelUpdateRegistryKey
+    {
+      get
+      {
+        return string.Format(@"Software\McNeel\McNeelUpdate\{0}", Rhino.RhinoApp.Version.Major);
+      }
+    }
+
+    internal static bool DailyBuildDownloadsEnabled
+    {
+      get
+      {
+        if (RunningOnWindows)
+        {
+          using (RegistryKey key = Registry.CurrentUser.OpenSubKey(McNeelUpdateRegistryKey, false))
+          {
+            if (key == null)
+              return false;
+
+            string value = (string)key.GetValue("EnableDailyBuilds");
+            if (string.IsNullOrEmpty(value))
+              return false;
+
+            char c = value.ToLowerInvariant()[0];
+            if ('y' == c || 't' == c || '1' == c)
+              return true;
+          }
+        }
+          return false;
+      }
+      set
+      {
+        if (RunningOnWindows)
+        {
+          using (RegistryKey key = Registry.CurrentUser.CreateSubKey(McNeelUpdateRegistryKey))
+          {
+            if (key == null)
+              return;
+
+            if (value == false)
+              key.DeleteValue("EnableDailyBuilds");
+            else
+              key.SetValue("EnableDailyBuilds", value.ToString());
+          }
+        }
+      }
+    }
 
 #endif
     /// <summary>
@@ -2587,7 +2830,7 @@ namespace Rhino.Runtime
         yield return typeof(System.Xml.Linq.XText).Assembly.Location; // System.Xml.Linq.dll
         yield return typeof(System.Linq.IQueryable).Assembly.Location; // System.Core.dll
         yield return typeof(System.Data.ConflictOption).Assembly.Location; // System.Data.dll
-        yield return typeof(System.Net.AuthenticationManager).Assembly.Location; // System.Net.dll (System.dll) ??????
+        yield return typeof(System.Net.Authorization).Assembly.Location; // System.Net.dll (System.dll) ??????
         yield return typeof(System.Net.Http.HttpClient).Assembly.Location; // System.Net.Http.dll
         yield return typeof(System.ServiceModel.BasicHttpBinding).Assembly.Location; // System.ServiceModel.dll
 
@@ -3101,11 +3344,11 @@ namespace Rhino.Runtime
       if (geometry == null) return null;
 
       IntPtr ptr = geometry.ConstPointer();
-      var log = new TextLog();
-
-      UnsafeNativeMethods.RH_RhinoDescribeGeometry(ptr, 0, log.NonConstPointer());
-
-      return log.ToString();
+      using (var log = new TextLog())
+      {
+        UnsafeNativeMethods.RH_RhinoDescribeGeometry(ptr, 0, log.NonConstPointer());
+        return log.ToString();
+      }
     }
 #endif
 
@@ -3158,7 +3401,7 @@ namespace Rhino.Runtime
           continue;
         if (command_type.IsAssignableFrom(exported_types[i]))
         {
-          if( PlugIn.CreateCommandsHelper(null, pPlugIn, exported_types[i], null))
+          if( PlugIn.CreateCommandsHelper(null, pPlugIn, exported_types[i], null, false))
             rc++;
         }
       }
@@ -3196,7 +3439,7 @@ namespace Rhino.Runtime
             command_style = (int)cmd.m_style_flags;
           }
           Guid id = cmd.Id;
-          int sn = UnsafeNativeMethods.CRhinoCommand_New(ptr_plugin, id, english_name, local_name, command_style, 0);
+          int sn = UnsafeNativeMethods.CRhinoCommand_New(ptr_plugin, id, english_name, local_name, command_style, 0, false);
           cmd.m_runtime_serial_number = sn;
           rc = sn!=0;
         }
@@ -3281,7 +3524,7 @@ namespace Rhino.Runtime
           {
             if (doc != null)
             {
-              int display_precision = doc.DistanceDisplayPrecision;
+              int display_precision = doc.ModelDistanceDisplayPrecision;
               string format = "{0:0.";
               format = format.PadRight(display_precision + format.Length, '0') + "}";
               s = string.Format(format, eval_result);
@@ -3299,7 +3542,7 @@ namespace Rhino.Runtime
             string format = null;
             if (doc != null)
             {
-              int display_precision = doc.DistanceDisplayPrecision;
+              int display_precision = doc.ModelDistanceDisplayPrecision;
               format = "{0:0.";
               format = format.PadRight(display_precision + format.Length, '0') + "}";
             }
@@ -3360,6 +3603,7 @@ namespace Rhino.Runtime
         "BlockAttributeText",
         "BlockInstanceCount",
         "BlockInstanceName",
+        "BlockInsertionCoordinate",
         "CurveLength",
         "Date",
         "DateModified",
@@ -3531,15 +3775,26 @@ namespace Rhino.Runtime
                 }
               }
 
-         
-              
+
+
               // CurveLength
               if (annotation != null && formula.StartsWith("CurveLength", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
               {
                 var function_unit = ExtractUnitFromFunctionString(formula, units);
-                var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
+                var dim_style = annotation.AnnotationGeometry.DimensionStyle;
+                var stringResult = Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, function_unit, dim_style, false);
                 if (!string.IsNullOrWhiteSpace(stringResult))
+                {
+                  if (dim_style.AlternateUnitsDisplay)
+                  {
+                    if (dim_style.AlternateBelowLine)
+                      stringResult += "\r\n";
+                    stringResult += dim_style.AlternatePrefix;
+                    stringResult += Rhino.UI.Localization.FormatDistanceAndTolerance(double_result, function_unit, dim_style, true);
+                    stringResult += dim_style.AlternateSuffix;
+                  }
                   return stringResult;
+                }
               }
 
               //Area
@@ -3552,15 +3807,16 @@ namespace Rhino.Runtime
                   return stringResult;
               }
 
+              //Fixes https://mcneel.myjetbrains.com/youtrack/issue/RH-67437
               //Volume
-              if (annotation != null && formula.StartsWith("Volume", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
-              {
-                var function_unit = ExtractUnitFromFunctionString(formula, units); 
-                string stringResult = Rhino.UI.Localization.FormatVolume(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
+              //if (annotation != null && formula.StartsWith("Volume", StringComparison.Ordinal) && formula.IndexOf(')') == (formula.Length - 1))
+              //{
+              //  var function_unit = ExtractUnitFromFunctionString(formula, units);
+              //  // string stringResult = Rhino.UI.Localization.FormatVolume(double_result, function_unit, annotation.AnnotationGeometry.DimensionStyle, false);
 
-                if (!string.IsNullOrWhiteSpace(stringResult))
-                  return stringResult;
-              }
+              //  //if (!string.IsNullOrWhiteSpace(stringResult))
+              //    //return stringResult;
+              //}
 
               if (annotation != null)
               {
@@ -3703,6 +3959,7 @@ namespace Rhino.Runtime
       // use MAJOR.0 for package folder regardless of whether this is an official build or not
       string name = $"{RhinoBuildConstants.MAJOR_VERSION_STRING}.0";
 
+#if !ON_RUNTIME_LINUX
       // use e.g. "7.0-WIP-Developer-Debug-trunk" if Rhino.Options.PackageManager.UseDebugFolder
       if (RhinoBuildConstants.VERSION_STRING.EndsWith("0")) // developer build only
       {
@@ -3721,6 +3978,7 @@ namespace Rhino.Runtime
           // only happens if UseDebugFolder is *not* set, so let's ignore it
         }
       }
+#endif
 
       string path = System.IO.Path.Combine(dir.Parent.FullName, "packages", name);
       return path;
@@ -3733,8 +3991,7 @@ namespace Rhino.Runtime
       {
         foreach (var active_version_directory in GetActivePlugInVersionFolders())
         {
-          var rhps = active_version_directory.GetFiles("*.rhp", System.IO.SearchOption.TopDirectoryOnly);
-          foreach (var rhp in rhps)
+          foreach (var rhp in GetPlugInsInFolder(active_version_directory, "*.rhp"))
           {
             UnsafeNativeMethods.CRhinoPlugInManager_InstallPlugIn(rhp.FullName, true);
           }
@@ -3744,6 +4001,15 @@ namespace Rhino.Runtime
       {
         ExceptionReport(ex);
       }
+    }
+
+    // ALB 2026.10.06 RH-99314 Adds Mac C++ plug-ins, which are bundle folders, not files.
+    static IEnumerable<System.IO.FileSystemInfo> GetPlugInsInFolder(System.IO.DirectoryInfo folder, string searchPattern)
+    {
+      IEnumerable<System.IO.FileSystemInfo> plugins = folder.GetFiles(searchPattern, System.IO.SearchOption.TopDirectoryOnly);
+      if (RunningOnOSX)
+        plugins = plugins.Concat(folder.GetDirectories(searchPattern, System.IO.SearchOption.TopDirectoryOnly));
+      return plugins;
     }
 
     /// <summary>
@@ -3808,11 +4074,16 @@ namespace Rhino.Runtime
         yield return GetRuntimeSpecificFolder(machineDir);
     }
 
-    internal static DirectoryInfo GetRuntimeSpecificFolder(DirectoryInfo root, bool useRootFiles = true)
+    internal static DirectoryInfo GetRuntimeSpecificFolder(DirectoryInfo root, bool useRootFiles = true, string pluginFileName = null)
     {
+      // root may be a stale path (e.g. an uninstalled package version) - RH-95342.
+      // Enumerating a non-existent directory throws DirectoryNotFoundException, so bail out early.
+      if (!root.Exists)
+        return root;
+
       // if there are .rhp or .gha's in the top folder, use default behaviour
       if (useRootFiles &&
-        (root.GetFiles("*.rhp").Length > 0
+        (GetPlugInsInFolder(root, "*.rhp").Any()
         || root.GetFiles("*.gha").Length > 0)
         )
         return root;
@@ -3852,6 +4123,9 @@ namespace Rhino.Runtime
           {
             var osVersion = GetOSVersion(platformDir.Name);
 
+            if (pluginFileName != null && !File.Exists(Path.Combine(platformDir.FullName, pluginFileName)))
+              continue;
+
             // no os version, just use it
             if (osVersion == null)
               return platformDir;
@@ -3864,7 +4138,11 @@ namespace Rhino.Runtime
           // search for platform-agnostic target
           var targetDir = root.GetDirectories($"net{i}.0")?.FirstOrDefault();
           if (targetDir != null)
+          {
+            if (pluginFileName != null && !File.Exists(Path.Combine(targetDir.FullName, pluginFileName)))
+              continue;
             return targetDir;
+          }
         }
       }
 
@@ -3873,6 +4151,9 @@ namespace Rhino.Runtime
       {
         var match = Regex.Match(net4xdir.Name, @"net(?<ver>4\d+)");
         if (!match.Success)
+          continue;
+
+        if (pluginFileName != null && !File.Exists(Path.Combine(net4xdir.FullName, pluginFileName)))
           continue;
 
         // just return it.
@@ -3887,8 +4168,12 @@ namespace Rhino.Runtime
     /// <summary>
     /// list of package names that should never be passed to rhino
     /// i.e. removed from package server to be shipped with rhino
+    /// RH-87320, RH-92086
     /// </summary>
-    private static string[] _package_folder_blocklist = new string[] { "sectiontools" };
+    /// <remarks>See also Commands.ViewModels.PackageManagerViewModel._ignored_packages</remarks>
+    private static string[] _package_folder_blocklist = new string[] {
+      "sectiontools", "grasshopper2", "shapemap", "Rhino-MCP-Platform"
+    };
 
     /// <summary>
     /// Recurses through the auto install plug-in folders and returns the directories containing "active" versions of plug-ins.
@@ -4097,6 +4382,7 @@ namespace Rhino.Runtime
       UnsafeNativeMethods.RHC_SetPythonEvaluateCallback(m_evaluate_callback);
       UnsafeNativeMethods.RHC_SetTextFieldEvalCallback(m_eval_textfield_callback);
       UnsafeNativeMethods.CRhinoCommonPlugInLoader_SetCallbacks(m_loadplugin_callback, m_loadskin_callback, m_buildplugin_list, m_getassembly_id);
+
       // 3 March 2023 John Morse
       // Initialize the settings system hooks early in the process to allow the
       // unmanaged settings system to work.
@@ -4132,24 +4418,55 @@ namespace Rhino.Runtime
       if (m_rhinocommonrdkinitialized)
         return;
       m_rhinocommonrdkinitialized = true;
+#if !ON_RUNTIME_LINUX
+      // RH-98153: render-pipeline hooks. Post effects execute during
+      // production/realtime rendering and snapshots restore document state -
+      // rdk.rhp calls these C# callbacks whenever it runs, headless included
+      // (Compute renders headless; skipping them is the rdk_pep.h:161
+      // ASSERT(___csharp_callbacks.IsSet()) failure). Register them wherever
+      // rhcommonrdk_c exists: every full build, and the mac RhinoCore flavor
+      // with INCLUDE_RDK. A RhinoCore build without the RDK (MSVC CMake
+      // today) has no rhcommonrdk_c, so degrade quietly there. Linux builds
+      // rhcommonrdk_c too, but the enclosing !ON_RUNTIME_LINUX (a pre-RH-98153
+      // fence) keeps this whole block out of the Linux RhinoCommon, so these
+      // hooks are NOT registered on Linux and the ASSERT above is still
+      // reachable there - lifting that gate belongs to the planned
+      // ON_RUNTIME_LINUX gate revision.
+      try
+      {
+        Rhino.Render.PostEffects.PostEffect.SetCppHooks(true);
+        Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(true);
+        Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
+        Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(true);
+        Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
+      }
+      catch (DllNotFoundException) { }
+      catch (EntryPointNotFoundException) { }
 
-      Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(true);
-      Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(true);
-      Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(true);
-      Rhino.Render.UICommands.UICommand.SetCppHooks(true);
-      Rhino.Render.PostEffects.PostEffect.SetCppHooks(true);
-      Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(true);
-      Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(true);
-      Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(true);
-      Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(true);
-      Rhino.UI.Controls.FactoryBase.Register();
+      // RDK UI hooks (collapsible sections, view models, UI commands, content
+      // UI factories): the RhinoCore flavor's rhcommon_c does not carry these
+      // exports. Full builds register them in every mode, headless included,
+      // as they did before d83908b779c (a headless-mode fence here is possible
+      // future work, deliberately not done yet).
+      if (!HostUtils.RunningOnRhinoCore)
+      {
+        Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(true);
+        Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(true);
+        Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(true);
+        Rhino.Render.UICommands.UICommand.SetCppHooks(true);
+        Rhino.UI.Controls.FactoryBase.Register();
+      }
+#endif
+      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(Rhino.Render.InternalUtilities.OnDownloadFileProc, Rhino.Render.InternalUtilities.OnUrlResponseProc);
 
-      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(Rhino.Render.InternalUtilities.OnDownloadFileProc, Rhino.Render.InternalUtilities.OnUrlResponseProc,
-        Rhino.Render.InternalUtilities.OnBitmapFromSvgProc);
-
-#if !ON_RUNTIME_APPLE_IOS
-      Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(true);
-      Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(true);
+#if !ON_RUNTIME_APPLE_IOS && !ON_RUNTIME_LINUX
+      // Same fence as above (the RhinoCore flavor's rhcommon_c excludes the
+      // rh_objectmanager sources; full builds carry them).
+      if (!HostUtils.RunningOnRhinoCore)
+      {
+        Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(true);
+        Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(true);
+      }
 #endif
     }
 
@@ -4161,17 +4478,32 @@ namespace Rhino.Runtime
     [MonoPInvokeCallback(typeof(ShutdownRDKCallback))]
     public static void ShutDownRhinoCommon_RDK()
     {
-      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null, null);
+      UnsafeNativeMethods.SetRhCsInternetFunctionalityCallback(null, null);
+
+      // RH-98153: mirror of InitializeRhinoCommon_RDK - unhook each group under
+      // the same condition it was hooked, and never touch exports the build
+      // does not carry.
+
+      // Render-pipeline hooks: registered wherever rhcommonrdk_c exists.
+      try
+      {
+        Rhino.Render.PostEffects.PostEffect.SetCppHooks(false);
+        Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
+        Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
+        Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(false);
+        Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
+      }
+      catch (DllNotFoundException) { }
+      catch (EntryPointNotFoundException) { }
+
+      // UI + object manager hooks: registered only on full builds.
+      if (HostUtils.RunningOnRhinoCore)
+        return;
 
       Rhino.UI.Controls.CollapsibleSectionImpl.SetCppHooks(false);
       Rhino.UI.Controls.CollapsibleSectionHolderImpl.SetCppHooks(false);
       Rhino.UI.Controls.InternalRdkViewModel.SetCppHooks(false);
       Rhino.Render.UICommands.UICommand.SetCppHooks(false);
-      Rhino.Render.PostEffects.PostEffect.SetCppHooks(false);
-      Rhino.Render.PostEffects.PostEffectFactoryBase.SetCppHooks(false);
-      Rhino.Render.PostEffects.PostEffectJob.SetCppHooks(false);
-      Rhino.Render.PostEffects.PostEffectExecutionControl.SetCppHooks(false);
-      Rhino.DocObjects.SnapShots.SnapShotsClient.SetCppHooks(false);
 
       Rhino.ObjectManager.ObjectManagerExtension.SetCppHooks(false);
       Rhino.ObjectManager.ObjectManagerNode.SetCppHooks(false);
@@ -4220,7 +4552,11 @@ namespace Rhino.Runtime
 #if DEBUG
       // only show dialog for the UI thread. Background threads dump to the console.
       if (m_uiThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+      {
+#if !ON_RUNTIME_LINUX
         Rhino.UI.Dialogs.ShowMessage(msg, "Unhandled CurrentDomain Exception in .NET");
+#endif
+      }
       else
         DebugString (msg);
 #endif
@@ -4388,8 +4724,23 @@ namespace Rhino.Runtime
         for (int i = 0; i < list.Length; i++)
         {
           Delegate subD = list[i];
-          Type t = subD.Target.GetType();
-          string msg = string.Format(fp, "- Plug-In = {0}\n", t.Assembly.GetName().Name);
+          var method = subD.Method;
+          string msg = null;
+          if (method != null)
+          {
+            Type declaringType = method.DeclaringType;
+            string fullname = declaringType.FullName;
+            msg = string.Format(fp, "- {0} : {1}; Plug-In = {2}\n", fullname, method.ToString(), declaringType.Assembly.GetName().Name);
+          }
+          else
+          {
+            var target = subD.Target;
+            if (target != null)
+            {
+              Type t = subD.Target.GetType();
+              msg = string.Format(fp, "- Plug-In = {0}\n", t.Assembly.GetName().Name);
+            }
+          }
           UnsafeNativeMethods.CRhinoEventWatcher_LogState(msg);
         }
       }
@@ -4501,12 +4852,31 @@ namespace Rhino.Runtime
     }
     static System.Reflection.Assembly m_rhdn_assembly;
 
+    static List<IDisposable> _staticDisposables = new List<IDisposable>();
+    /// <summary>
+    /// Statics do not get disposed of in .NET. If you have a static IDisposable
+    /// that you want to be disposed during shutdown, add your disposable to this
+    /// list.
+    /// </summary>
+    /// <param name="disposable"></param>
+    /// <since>9.0</since>
+    public static void RegisterStaticIDisposable(IDisposable disposable)
+    {
+      _staticDisposables.Add(disposable);
+    }
+
     /// <summary>
     /// Informs the runtime that the application is shutting down.
     /// </summary>
     /// <since>5.0</since>
     public static void SetInShutDown()
     {
+      foreach(var disposable in _staticDisposables)
+      {
+        disposable.Dispose();
+      }
+      _staticDisposables.Clear();
+
       //Added by Andy - to make sure that the GC doesn't start deleting stuff that
       //is actually owned by plug-ins or other DLLs that will soon not be around.
       GC.Collect();

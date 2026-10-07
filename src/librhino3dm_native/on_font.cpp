@@ -86,6 +86,13 @@ RH_C_FUNCTION bool ON_Font_IsSingleStrokeFont(const ON_Font* constFont)
   return false;
 }
 
+RH_C_FUNCTION bool ON_Font_IsGeometricToleranceFont(const ON_Font* constFont)
+{
+  if (constFont)
+    return constFont->IsGeometricToleranceFont();
+  return false;
+}
+
 RH_C_FUNCTION bool ON_Font_IsSimulated(const ON_Font* constFont)
 {
   if (constFont)
@@ -148,6 +155,22 @@ RH_C_FUNCTION double ON_Font_PointSize(const ON_Font* constFont)
     return constFont->PointSize();
 
   return 10.0;
+}
+
+RH_C_FUNCTION int ON_Font_UnitsPerEm(const ON_Font* constFont)
+{
+  if (constFont)
+    return constFont->FontMetrics().UPM();
+
+  return 0;
+}
+
+RH_C_FUNCTION int ON_Font_AscentOfCapital(const ON_Font* constFont)
+{
+  if (constFont)
+    return constFont->FontMetrics().AscentOfCapital();
+
+  return 0;
 }
 
 RH_C_FUNCTION int ON_Font_GetFontNames(ON_ClassArray<ON_wString>* pStrings)
@@ -376,3 +399,4 @@ RH_C_FUNCTION const ON_Font* ON_Font_GetSubstituteFont(const ON_Font* font)
     return font->SubstituteFont();
   return nullptr;
 }
+

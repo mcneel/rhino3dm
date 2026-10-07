@@ -436,6 +436,8 @@ namespace Rhino.Geometry.Intersect
 
     /// <summary>
     /// Intersects a mesh with an infinite plane.
+    /// <see cref="RhinoMath.ZeroTolerance"/> is used as fixed tolerance.
+    /// We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/> instaed.
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="plane">Plane to intersect with.</param>
@@ -451,6 +453,8 @@ namespace Rhino.Geometry.Intersect
 
     /// <summary>
     /// Intersects a mesh with an infinite plane.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="cache">Intersection cache for mesh.</param>
@@ -468,7 +472,30 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Intersects a mesh with an infinite plane.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="cache">Intersection cache for mesh.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <param name="tolerance">Intersection tolerance.</param>
+    /// <param name="overlaps">If true, overlaps are computed and will be part of the output.</param>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
+    /// <since>8.0</since>
+    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, Plane plane, double tolerance, bool overlaps)
+    {
+      Rhino.Collections.RhinoList<Plane> planes = new Rhino.Collections.RhinoList<Plane>(1, plane);
+      return MeshPlane(mesh, cache, planes, tolerance, overlaps);
+    }
+
+    /// <summary>
     /// Intersects a mesh with a collection of infinite planes.
+    /// <para><see cref="RhinoMath.ZeroTolerance"/> is used as fixed tolerance.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/> instaed.</para>
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="planes">Planes to intersect with.</param>
@@ -483,7 +510,9 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// Intersects a mesh with a collection of infinite planes.
+    /// Intersects a mesh with a collection of infinite planes, providing both overlaps and perforations.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
     /// </summary>
     /// <param name="mesh">Mesh to intersect.</param>
     /// <param name="cache">Intersection cache for the mesh.</param>
@@ -494,48 +523,66 @@ namespace Rhino.Geometry.Intersect
     /// or null if no intersections could be found.
     /// </returns>
     /// <since>8.0</since>
-    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, IEnumerable<Plane> planes,  double tolerance)
+    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, IEnumerable<Plane> planes, double tolerance)
+    {
+      return MeshPlane(mesh, cache, planes, tolerance, true);
+    }
+
+    /// <summary>
+    /// Intersects a mesh with a collection of infinite planes.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="cache">Intersection cache for the mesh.</param>
+    /// <param name="planes">Planes to intersect with.</param>
+    /// <param name="tolerance">Intersection tolerance.</param>
+    /// <param name="overlaps">If true, overlaps are computed and will be part of the output.</param>
+    /// <returns>
+    /// An array of polylines describing the intersection loops, 
+    /// or null if no intersections could be found.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Polyline[] MeshPlane(Mesh mesh, MeshIntersectionCache cache, IEnumerable<Plane> planes, double tolerance, bool overlaps)
     {
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-67504
 
       if (null == mesh || null == planes)
         return null;
-
       Rhino.Collections.RhinoList<Plane> list = planes as Rhino.Collections.RhinoList<Plane> ?? new Rhino.Collections.RhinoList<Plane>(planes);
       if (list.Count < 1)
         return null;
 
-      bool reclaim_cache = false;
-      if (list.Count > 2 && cache == null)
+      bool use_local_cache = (cache == null && list.Count > 2);
+
+      using (MeshIntersectionCache local_cache = use_local_cache ? new MeshIntersectionCache() : null)
       {
-        cache = new MeshIntersectionCache();
-        reclaim_cache = true;
-      }
+        IntPtr pMesh = mesh.ConstPointer();
 
-      IntPtr pMesh = mesh.ConstPointer();
-      IntPtr pCache = (null != cache) ? cache.NonConstPointer() : IntPtr.Zero;
+        MeshIntersectionCache cache_in_use = use_local_cache ? local_cache : cache;
 
-      var out_points = new SimpleArrayArrayPoint3d();
-      IntPtr pOutPoints = out_points.NonConstPointer();
+        IntPtr pCache = (null != cache_in_use) ? cache_in_use.NonConstPointer() : IntPtr.Zero;
 
-      int count = UnsafeNativeMethods.ON_Mesh_GetIntersections(pMesh, pCache, list.Count, list.m_items, tolerance, pOutPoints);
-      GC.KeepAlive(mesh); GC.KeepAlive(cache);
-
-      if (reclaim_cache)
-      {
-        cache.Dispose();
-      }
-
-      if (count > 0)
-      {
-        List<Polyline> out_polylines = new List<Polyline>(out_points.Count);
-        for (int i = 0; i < out_points.Count; i++)
+        using (var out_points = new SimpleArrayArrayPoint3d())
         {
-          Polyline pline = out_points.PolylineAt(i);
-          if (null != pline)
-            out_polylines.Add(pline);
+          IntPtr pOutPoints = out_points.NonConstPointer();
+
+          int count = UnsafeNativeMethods.ON_Mesh_GetIntersections(pMesh, pCache, list.Count, list.m_items, tolerance, overlaps, pOutPoints);
+
+          GC.KeepAlive(mesh); GC.KeepAlive(cache_in_use);
+
+          if (count > 0)
+          {
+            List<Polyline> out_polylines = new List<Polyline>(out_points.Count);
+            for (int i = 0; i < out_points.Count; i++)
+            {
+              Polyline pline = out_points.PolylineAt(i);
+              if (null != pline)
+                out_polylines.Add(pline);
+            }
+            return out_polylines.ToArray();
+          }
         }
-        return out_polylines.ToArray();
       }
 
       return null;
@@ -606,6 +653,7 @@ namespace Rhino.Geometry.Intersect
     /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
     /// <param name="intersectionPoints">The intersection points will be returned here.</param>
     /// <returns>true on success, false on failure.</returns>
+    /// <since>8.27</since>
     public static bool BrepPlane(Brep brep, Plane plane, double tolerance, bool joinCurves, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
     {
       intersectionPoints = null;
@@ -657,7 +705,154 @@ namespace Rhino.Geometry.Intersect
     {
       return BrepPlane(brep, plane, tolerance, true, out intersectionCurves, out intersectionPoints);
     }
-#endif
+
+    /// <summary>
+    /// Intersects geometry with an (infinite) plane.
+    /// </summary>
+    /// <param name="geometry">GeometryBase object to intersect.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <param name="tolerance">Tolerance to use for intersections.</param>
+    /// <param name="joinCurves">If true, join the resulting curves of each object where possible, for every geometry type. Curves of different objects, such as the objects of an instance definition, are never joined.</param>
+    /// <param name="doc">The document that has the instance definition when geometry is an InstanceReferenceGeometry. Can be null for other geometry.</param>
+    /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
+    /// <param name="intersectionPoints">The intersection points will be returned here.</param>
+    /// <returns>
+    /// true if the intersection was computed, including when the plane misses the geometry.
+    /// For an InstanceReferenceGeometry, true if it was computed for any object in the instance definition.
+    /// false if the plane is not valid, tolerance is negative or not a number, the geometry type is not
+    /// supported or the intersection failed. Curves and points found before a failure are still returned.
+    /// </returns>
+    /// <remarks>
+    /// The curves and points are projected onto the plane. Curves that are not valid after the
+    /// projection are not returned.
+    /// For an InstanceReferenceGeometry, curves are fitted inside the instance definition with tolerance
+    /// divided by the largest scale factor of the transform, so they are within tolerance in world
+    /// coordinates, also for non-uniform scale. Points are tested with their distance to the plane in
+    /// world coordinates. With non-uniform scale, overlaps of curves with the plane are detected with the
+    /// stricter curve tolerance, so a curve closer than tolerance to the plane can be missed as an overlap.
+    /// When joinCurves is true, the open curves of each object are joined: they can be reversed, very short curves
+    /// can be dropped, and joined curves are PolyCurve.
+    /// For point clouds, the points within tolerance of the plane are returned as one polyline in
+    /// intersectionCurves, or in intersectionPoints when there is only one. Points closer together
+    /// than tolerance are merged.
+    /// The objects of an instance definition that are not visible are skipped, as the Contour command does.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static bool GeometryPlane(GeometryBase geometry, Plane plane, double tolerance, bool joinCurves, RhinoDoc doc, out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    {
+      return GeometryPlane(geometry, plane, tolerance, joinCurves, false, false, doc, Transform.Identity, null,
+        System.Threading.CancellationToken.None, out intersectionCurves, out intersectionPoints);
+    }
+
+    /// <summary>
+    /// Intersects geometry with an (infinite) plane.
+    /// </summary>
+    /// <param name="geometry">GeometryBase object to intersect.</param>
+    /// <param name="plane">Plane to intersect with.</param>
+    /// <param name="tolerance">Tolerance to use for intersections.</param>
+    /// <param name="joinCurves">If true, join the resulting curves of each object where possible, for every geometry type. Curves of different objects, such as the objects of an instance definition, are never joined.</param>
+    /// <param name="pointCloudAsPoints">
+    /// If true, every point of a PointCloud within tolerance of the plane is returned in intersectionPoints.
+    /// If false, they are returned as one polyline in intersectionCurves, as the Contour command does.
+    /// </param>
+    /// <param name="includeHiddenObjects">
+    /// If false, the objects of an instance definition that are hidden or on a layer that is off are skipped,
+    /// as the Contour command does. Nested instance references are entered whether they are visible or not,
+    /// and their objects are tested one by one.
+    /// </param>
+    /// <param name="doc">The document that has the instance definition when geometry is, or contains, an InstanceReferenceGeometry. Can be null for other geometry.</param>
+    /// <param name="xform">
+    /// Maps geometry to the space of the plane and the results, as InstanceReferenceGeometry.Xform does.
+    /// Avoids transforming a copy of the geometry. Must not be singular.
+    /// </param>
+    /// <param name="cache">
+    /// Data computed from the geometry alone, kept between calls, or null. Reuse one cache for many planes through the same geometry.
+    /// </param>
+    /// <param name="cancel">
+    /// Checked between the objects of an instance definition, in point clouds and in mesh intersections.
+    /// A single Brep intersection cannot be cancelled once it has started.
+    /// </param>
+    /// <param name="intersectionCurves">The intersection curves will be returned here.</param>
+    /// <param name="intersectionPoints">The intersection points will be returned here.</param>
+    /// <returns>
+    /// true if the intersection was computed, including when the plane misses the geometry.
+    /// For an InstanceReferenceGeometry, true if it was computed for any object in the instance definition.
+    /// false if the plane is not valid, tolerance is negative or not a number, the geometry type is not
+    /// supported, the intersection failed or was cancelled, or xform or the transform of an
+    /// InstanceReferenceGeometry is singular. Curves and points found before a failure or cancellation are
+    /// still returned.
+    /// </returns>
+    /// <remarks>
+    /// The curves and points are projected onto the plane. Curves that are not valid after the
+    /// projection are not returned.
+    /// For xform and for an InstanceReferenceGeometry, curves are fitted in the space of the geometry with
+    /// tolerance divided by the largest scale factor of the transform, so they are within tolerance in world
+    /// coordinates, also for non-uniform scale. Points are tested with their distance to the plane in
+    /// world coordinates. With non-uniform scale, overlaps of curves with the plane are detected with the
+    /// stricter curve tolerance, so a curve closer than tolerance to the plane can be missed as an overlap.
+    /// When joinCurves is true, the open curves of each object are joined: they can be reversed, very short curves
+    /// can be dropped, and joined curves are PolyCurve. Objects after a cancellation are not joined.
+    /// For point clouds, the points within tolerance of the plane are returned in intersectionPoints when
+    /// pointCloudAsPoints is true, all of them. Otherwise they are returned as one polyline in intersectionCurves,
+    /// or in intersectionPoints when there is only one, and points closer together than tolerance are merged.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static bool GeometryPlane(GeometryBase geometry, Plane plane, double tolerance, bool joinCurves, bool pointCloudAsPoints,
+      bool includeHiddenObjects, RhinoDoc doc, Transform xform, PlaneIntersectionCache cache, System.Threading.CancellationToken cancel,
+      out Curve[] intersectionCurves, out Point3d[] intersectionPoints)
+    {
+      intersectionPoints = null;
+      intersectionCurves = null;
+
+      if (geometry == null)
+        return false;
+
+      if (!plane.IsValid)
+        return false;
+
+      // Not Runtime.Interop.MarshalProgressAndCancelToken: its registration on the token is never
+      // removed, and callers such as Grasshopper keep one token for many calls.
+      ThreadTerminator terminator = null;
+      var registration = default(System.Threading.CancellationTokenRegistration);
+      if (cancel.CanBeCanceled)
+      {
+        terminator = new ThreadTerminator();
+        registration = cancel.Register(terminator.RequestCancel);
+      }
+      try
+      {
+        using (var outputPoints = new SimpleArrayPoint3d())
+        using (var outputCurves = new SimpleArrayCurvePointer())
+        {
+          uint docSN = doc != null ? doc.RuntimeSerialNumber : 0;
+          IntPtr cachePtr = IntPtr.Zero;
+          if (cache != null)
+          {
+            cachePtr = cache.NonConstPointer();
+            cache.KeepAlive(geometry);
+          }
+          IntPtr terminatorPtr = terminator != null ? terminator.NonConstPointer() : IntPtr.Zero;
+
+          bool rc = UnsafeNativeMethods.ON_Intersect_GeometryPlane(geometry.ConstPointer(), plane, tolerance, joinCurves, pointCloudAsPoints, includeHiddenObjects, docSN,
+            ref xform, cachePtr, terminatorPtr, outputCurves.NonConstPointer(), outputPoints.NonConstPointer());
+
+          // Copied also when rc is false: outputCurves.Dispose() does not delete the curves.
+          intersectionCurves = outputCurves.ToNonConstArray();
+          intersectionPoints = outputPoints.ToArray();
+
+          Runtime.CommonObject.GcProtect(geometry);
+          GC.KeepAlive(cache);
+          return rc;
+        }
+      }
+      finally
+      {
+        // Dispose waits for a callback that is running, so none runs after the terminator is deleted.
+        registration.Dispose();
+        if (terminator != null) terminator.Dispose();
+      }
+    }
+    #endif
 
     /// <summary>
     /// Utility function for creating a PlaneSurface through a Box.
@@ -1278,11 +1473,15 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
-    /// This is an old overload kept for compatibility. Overlaps and near misses are ignored.
+    /// Fast intersection of two meshes, returned as loose line segments rather than assembled polylines.
+    /// <para>Vertices are read in double precision when the mesh has them. Faces that cross or touch within
+    /// tolerance produce segments; coplanar overlaps are ignored. Use <see cref="MeshMesh(IEnumerable{Mesh}, double, out Polyline[], bool, out Polyline[], bool, out Mesh, FileIO.TextLog, System.Threading.CancellationToken, IProgress{double})"/>
+    /// when overlaps or joined curves are needed, and <see cref="MeshMeshPredicate(IEnumerable{Mesh}, IEnumerable{Mesh}, double, bool, FileIO.TextLog, System.Threading.CancellationToken)"/>
+    /// when only the yes/no answer is needed.</para>
     /// </summary>
     /// <param name="meshA">First mesh for intersection.</param>
     /// <param name="meshB">Second mesh for intersection.</param>
-    /// <returns>An array of intersection line segments, or null if no intersections were found.</returns>
+    /// <returns>An array of intersection line segments, empty if no intersections were found.</returns>
     /// <since>5.0</since>
     public static Line[] MeshMeshFast(Mesh meshA, Mesh meshB)
     {
@@ -1332,6 +1531,19 @@ namespace Rhino.Geometry.Intersect
       set
       {
         GetSet_MX_DebugOptions(6, false, value);
+      }
+    }
+
+    //only internal hint for debugging. Not used in UI
+    internal static bool SearchOverlaps
+    {
+      get
+      {
+        return GetSet_MX_DebugOptions(15, true, default);
+      }
+      set
+      {
+        GetSet_MX_DebugOptions(15, false, value);
       }
     }
 
@@ -1393,12 +1605,14 @@ namespace Rhino.Geometry.Intersect
       }
     }
 
-    internal static bool MeshMesh_Helper(IEnumerable<Mesh> meshes, double tolerance,
-      bool computeSelfIntersections, bool overlaps_with_intersections, out Polyline[] intersections, 
+    internal static bool MeshMesh_Helper(IEnumerable<Mesh> meshes, IEnumerable<Mesh> meshesBOrNull, double tolerance,
+      bool computeSelfIntersections, bool overlaps_with_intersections, out Polyline[] intersections,
       bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
       bool meshpairs, out int[] meshpairsResult, FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
     {
       if (meshes == null) throw new ArgumentNullException(nameof(meshes));
+      if (meshesBOrNull != null && (computeSelfIntersections || meshpairs))
+        throw new ArgumentException("A second mesh set cannot be combined with self-intersections or mesh pairs.");
       tolerance = Math.Abs(tolerance);
 
       intersections = null;
@@ -1412,11 +1626,21 @@ namespace Rhino.Geometry.Intersect
       try
       {
         using (var input = new SimpleArrayMeshPointer())
+        using (var inputB = meshesBOrNull == null ? null : new SimpleArrayMeshPointer())
         {
           foreach (var mesh in meshes)
           {
             if (mesh == null) continue;
             input.Add(mesh, true);
+          }
+
+          if (inputB != null)
+          {
+            foreach (var mesh in meshesBOrNull)
+            {
+              if (mesh == null) continue;
+              inputB.Add(mesh, true);
+            }
           }
 
           using (var pairs = meshpairs ? new SimpleArray2dex() : null)
@@ -1442,14 +1666,21 @@ namespace Rhino.Geometry.Intersect
             }
 
             bool rc = UnsafeNativeMethods.RH_MX_MeshMeshIntersect(computeSelfIntersections,
-              input.ConstPointer(), tolerance, intersections_native.NonConstPointer(), overlaps_native_ptr, 
+              input.ConstPointer(), inputB != null ? inputB.ConstPointer() : IntPtr.Zero,
+              tolerance, intersections_native.NonConstPointer(), overlaps_native_ptr,
               mesh_overlaps_ptr, meshpairs, pairs_native_ptr,
               textLog != null ? textLog.NonConstPointer() : IntPtr.Zero, ptr_terminator, progress_report_serial_number);
 
             GC.KeepAlive(meshes);
+            GC.KeepAlive(meshesBOrNull);
 
             if (!rc)
             {
+              if (overlapsMeshResult != null)
+              {
+                overlapsMeshResult.Dispose();
+                overlapsMeshResult = null;
+              }
               return false;
             }
 
@@ -1490,6 +1721,20 @@ namespace Rhino.Geometry.Intersect
 
               intersections = output_pls;
             }
+
+            // Flatten the intersecting mesh couples (native ON_2dex of input indices) into the
+            // [i0,j0,i1,j1,...] result. Without this the predicate's pairs out-parameter is always null.
+            if (pairs != null && pairs.Count > 0)
+            {
+              var couples = pairs.ToArray();
+              int[] flat = new int[couples.Length * 2];
+              for (int i = 0; i < couples.Length; i++)
+              {
+                flat[2 * i] = couples[i].I;
+                flat[2 * i + 1] = couples[i].J;
+              }
+              meshpairsResult = flat;
+            }
           }
         }
       }
@@ -1505,6 +1750,8 @@ namespace Rhino.Geometry.Intersect
 
     /// <summary>
     /// Intersects meshes. Overlaps and perforations are provided in the output list.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
     /// </summary>
     /// <param name="meshes">The mesh input list. This cannot be null. Null entries are tolerated.</param>
     /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
@@ -1523,26 +1770,63 @@ namespace Rhino.Geometry.Intersect
       out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
       FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
     {
-      return MeshMesh_Helper(meshes, tolerance, false, false, out intersections,
+      return MeshMesh_Helper(meshes, null, tolerance, false, false, out intersections,
         overlapsPolylines, out overlapsPolylinesResult,
         overlapsMesh, out overlapsMeshResult, false, out _,
         textLog, cancel, progress);
     }
 
     /// <summary>
-    /// Determines if meshes intersect or overlap.
+    /// Intersects two sets of meshes with each other. Overlaps and perforations are provided in the output list.
+    /// <para>Only events between a mesh of the first set and a mesh of the second set are computed. Intersections
+    /// among meshes of the same set, and self-intersections within a single mesh, are ignored.</para>
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
+    /// </summary>
+    /// <param name="setA">The first mesh input list. This cannot be null. Null entries are tolerated.</param>
+    /// <param name="setB">The second mesh input list. This cannot be null. Null entries are tolerated.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <param name="intersections">Returns the intersections.</param>
+    /// <param name="overlapsPolylines">If true, overlaps are computed and returned.</param>
+    /// <param name="overlapsPolylinesResult">If requested, overlaps are returned here.</param>
+    /// <param name="overlapsMesh">If true, an overlaps mesh is computed and returned.</param>
+    /// <param name="overlapsMeshResult">If requested, overlaps are returned here.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
+    /// <param name="progress">A progress reporter to inform the user about progress, or null. The reported value is indicative.</param>
+    /// <returns>True, if the operation succeeded, otherwise false.</returns>
+    /// <since>9.0</since>
+    public static bool MeshMeshTwoSets(IEnumerable<Mesh> setA, IEnumerable<Mesh> setB, double tolerance,
+      out Polyline[] intersections, bool overlapsPolylines, out Polyline[] overlapsPolylinesResult, bool overlapsMesh, out Mesh overlapsMeshResult,
+      FileIO.TextLog textLog, System.Threading.CancellationToken cancel, IProgress<double> progress)
+    {
+      if (setA == null) throw new ArgumentNullException(nameof(setA));
+      if (setB == null) throw new ArgumentNullException(nameof(setB));
+
+      return MeshMesh_Helper(setA, setB, tolerance, false, false, out intersections,
+        overlapsPolylines, out overlapsPolylinesResult,
+        overlapsMesh, out overlapsMeshResult, false, out _,
+        textLog, cancel, progress);
+    }
+
+    /// <summary>
+    /// Determines which meshes intersect. No geometry is computed: each pair of meshes is tested only until
+    /// its first crossing is found, with the fast intersector behind <see cref="MeshMeshFast"/>. Faces that
+    /// cross or touch within tolerance count; coplanar overlap without a crossing does not.
+    /// <para>The same as <see cref="MeshMeshPredicate(IEnumerable{Mesh}, IEnumerable{Mesh}, double, bool, out IntersectingMeshPair[], FileIO.TextLog, System.Threading.CancellationToken)"/> with fast = true.</para>
     /// </summary>
     /// <param name="meshes">The mesh input list. This cannot be null. Null entries are tolerated.</param>
     /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
     /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
     /// <param name="pairs">An array containing pairs of meshes that intersect.</param>
     /// <param name="textLog">A text log, or null.</param>
-    /// <returns>True, if meshes intersect or overlap, otherwise false. False is also returned on error, but textLog will start with Error: and contain the error.</returns>
+    /// <returns>True, if meshes intersect, otherwise false. False is also returned on error, but textLog will start with Error: and contain the error.</returns>
     /// <since>8.0</since>
     public static bool MeshMeshPredicate(IEnumerable<Mesh> meshes, double tolerance, out int[] pairs,
       FileIO.TextLog textLog)
     {
-      return MeshMesh_Helper(meshes, tolerance, false, false, out _,
+      return MeshMesh_Helper(meshes, null, tolerance, false, false, out _,
         false, out _,
         false, out _,
         true, out pairs,
@@ -1550,7 +1834,112 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Determines which meshes intersect, and reports one intersecting face couple for each pair found.
+    /// No geometry is computed: each pair of meshes is tested only until its first hit.
+    /// </summary>
+    /// <param name="meshesA">The first mesh list. This cannot be null. Null entries are skipped but keep their index.</param>
+    /// <param name="meshesB">A second mesh list, or null. When null, every pair within meshesA is tested once;
+    /// otherwise every mesh of meshesA is tested against every mesh of meshesB. Null entries are skipped but keep their index.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <param name="fast">True uses the fast intersector behind <see cref="MeshMeshFast"/>: faces that cross or touch
+    /// within tolerance count, coplanar overlap without a crossing does not. False uses the accurate intersector,
+    /// which also reports coplanar overlap and costs about as much as <see cref="MeshMeshFast"/>.</param>
+    /// <param name="intersectingPairs">The pairs of meshes that intersect, each with the first intersecting faces found.
+    /// <see cref="IntersectingMeshPair.MeshIndexA"/> indexes meshesA and <see cref="IntersectingMeshPair.MeshIndexB"/> indexes meshesB,
+    /// or both index meshesA with MeshIndexA less than MeshIndexB. Empty when nothing intersects.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
+    /// <returns>True if any pair intersects, otherwise false. False is also returned on error or cancellation.</returns>
+    /// <since>9.0</since>
+    public static bool MeshMeshPredicate(IEnumerable<Mesh> meshesA, IEnumerable<Mesh> meshesB, double tolerance, bool fast,
+      out IntersectingMeshPair[] intersectingPairs, FileIO.TextLog textLog, System.Threading.CancellationToken cancel)
+    {
+      return MeshMeshPredicate_Helper(meshesA, meshesB, tolerance, fast, true, out intersectingPairs, textLog, cancel);
+    }
+
+    /// <summary>
+    /// Determines whether any of the meshes intersect. No geometry is computed, and the search stops at the first
+    /// pair of meshes that intersect: this is the quickest answer when the intersecting pairs are not needed.
+    /// </summary>
+    /// <param name="meshesA">The first mesh list. This cannot be null. Null entries are skipped.</param>
+    /// <param name="meshesB">A second mesh list, or null. When null, every pair within meshesA is tested once;
+    /// otherwise every mesh of meshesA is tested against every mesh of meshesB. Null entries are skipped.</param>
+    /// <param name="tolerance">A tolerance value. If negative, the positive value will be used.
+    /// WARNING! Good tolerance values are in the magnitude of 10^-7, or RhinoMath.SqrtEpsilon*10.</param>
+    /// <param name="fast">True uses the fast intersector behind <see cref="MeshMeshFast"/>: faces that cross or touch
+    /// within tolerance count, coplanar overlap without a crossing does not. False uses the accurate intersector,
+    /// which also reports coplanar overlap and costs about as much as <see cref="MeshMeshFast"/>.</param>
+    /// <param name="textLog">A text log, or null.</param>
+    /// <param name="cancel">A cancellation token to stop the computation at a given point.</param>
+    /// <returns>True if any pair intersects, otherwise false. False is also returned on error or cancellation.</returns>
+    /// <since>9.0</since>
+    public static bool MeshMeshPredicate(IEnumerable<Mesh> meshesA, IEnumerable<Mesh> meshesB, double tolerance, bool fast,
+      FileIO.TextLog textLog, System.Threading.CancellationToken cancel)
+    {
+      return MeshMeshPredicate_Helper(meshesA, meshesB, tolerance, fast, false, out _, textLog, cancel);
+    }
+
+    static bool MeshMeshPredicate_Helper(IEnumerable<Mesh> meshesA, IEnumerable<Mesh> meshesB, double tolerance, bool fast,
+      bool reportIntersectingPairs, out IntersectingMeshPair[] intersectingPairs, FileIO.TextLog textLog, System.Threading.CancellationToken cancel)
+    {
+      if (meshesA == null) throw new ArgumentNullException(nameof(meshesA));
+      tolerance = Math.Abs(tolerance);
+      intersectingPairs = Array.Empty<IntersectingMeshPair>();
+
+      Runtime.Interop.MarshalProgressAndCancelToken(cancel, null,
+        out IntPtr ptr_terminator, out int _, out var reporter, out var terminator);
+      try
+      {
+        using (var input = new SimpleArrayMeshPointer())
+        using (var inputB = meshesB == null ? null : new SimpleArrayMeshPointer())
+        using (var pairs_native = reportIntersectingPairs ? new SimpleArray2dex() : null)
+        using (var faces_native = reportIntersectingPairs ? new SimpleArray2dex() : null)
+        {
+          foreach (var mesh in meshesA)
+            input.AddConstKeepingNullSlot(mesh);
+          if (inputB != null)
+          {
+            foreach (var mesh in meshesB)
+              inputB.AddConstKeepingNullSlot(mesh);
+          }
+
+          bool rc = UnsafeNativeMethods.RH_MX_MeshMeshPredicate(input.ConstPointer(), inputB != null ? inputB.ConstPointer() : IntPtr.Zero,
+            tolerance, fast,
+            pairs_native != null ? pairs_native.NonConstPointer() : IntPtr.Zero,
+            faces_native != null ? faces_native.NonConstPointer() : IntPtr.Zero,
+            textLog != null ? textLog.NonConstPointer() : IntPtr.Zero, ptr_terminator);
+
+          GC.KeepAlive(meshesA);
+          GC.KeepAlive(meshesB);
+
+          if (reportIntersectingPairs)
+            intersectingPairs = IntersectingMeshPairsFromMeshCouplesAndTheirFaceCouples(pairs_native, faces_native);
+          return rc;
+        }
+      }
+      finally
+      {
+        if (reporter != null) reporter.Disable();
+        if (terminator != null) terminator.Dispose();
+      }
+    }
+
+    static IntersectingMeshPair[] IntersectingMeshPairsFromMeshCouplesAndTheirFaceCouples(SimpleArray2dex meshCouples, SimpleArray2dex faceCouples)
+    {
+      IndexPair[] mesh_couples = meshCouples.ToArray();
+      if (mesh_couples.Length == 0) return Array.Empty<IntersectingMeshPair>();
+      IndexPair[] face_couples = faceCouples.ToArray();
+      var intersecting_pairs = new IntersectingMeshPair[mesh_couples.Length];
+      for (int i = 0; i < mesh_couples.Length; i++)
+        intersecting_pairs[i] = new IntersectingMeshPair(mesh_couples[i].I, mesh_couples[i].J, face_couples[i].I, face_couples[i].J);
+      return intersecting_pairs;
+    }
+
+    /// <summary>
     /// Intersects two meshes. Overlaps and near misses are handled. This is an old method kept for compatibility.
+    /// <para>Tolerance can be specified.</para>
+    /// <para>We suggest to use the document tolerance multiplied by <see cref="MeshIntersectionsTolerancesCoefficient"/>.</para>
     /// </summary>
     /// <param name="meshA">First mesh for intersection.</param>
     /// <param name="meshB">Second mesh for intersection.</param>
@@ -1563,7 +1952,7 @@ namespace Rhino.Geometry.Intersect
       if (UseNewMeshIntersections)
       {
         var arr = new[] { meshA, meshB };
-        var rc = MeshMesh_Helper(arr, tolerance, false, true,
+        var rc = MeshMesh_Helper(arr, null, tolerance, false, true,
           out Polyline[] result, true, out Polyline[] _, false, out Mesh _,
           false, out int[] _,
           null, System.Threading.CancellationToken.None, null);
@@ -1615,6 +2004,83 @@ namespace Rhino.Geometry.Intersect
       double rc = UnsafeNativeMethods.ON_Intersect_MeshRay2(pConstMesh, ref ray, true, 0.0, ref count, ref zero, ref zero);
       GC.KeepAlive(mesh);
 
+      return rc;
+    }
+
+    /// <summary>
+    /// Finds the first intersection of each one of a set of rays with a mesh.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect.</param>
+    /// <param name="rays">The rays to cast.</param>
+    /// <returns>
+    /// One value for each ray, in the order of the rays: the parameter along that ray of its
+    /// first intersection with the mesh, or a value smaller than 0.0 where that ray does not
+    /// meet the mesh. Null when the mesh or the set of rays is null.
+    /// </returns>
+    /// <remarks>
+    /// The rays are cast on several threads, so this is much faster than one call of
+    /// <see cref="MeshRay(Mesh, Ray3d)"/> per ray.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static double[] MeshRays(Mesh mesh, IEnumerable<Ray3d> rays)
+    {
+      return MeshRays(mesh, rays, true);
+    }
+
+    /// <summary>
+    /// Finds the first intersection of each one of a set of rays with a mesh.
+    /// </summary>
+    /// <param name="mesh">A mesh to intersect.</param>
+    /// <param name="rays">The rays to cast.</param>
+    /// <param name="multithreaded">True to cast the rays on several threads.</param>
+    /// <returns>
+    /// One value for each ray, in the order of the rays: the parameter along that ray of its
+    /// first intersection with the mesh, or a value smaller than 0.0 where that ray does not
+    /// meet the mesh. Null when the mesh or the set of rays is null.
+    /// </returns>
+    /// <since>9.0</since>
+    public static double[] MeshRays(Mesh mesh, IEnumerable<Ray3d> rays, bool multithreaded)
+    {
+      if (null == mesh || null == rays)
+        return null;
+
+      Ray3d[] ray_array = rays as Ray3d[] ?? new List<Ray3d>(rays).ToArray();
+      if (ray_array.Length < 1)
+        return new double[0];
+
+      double[] rc = new double[ray_array.Length];
+
+      IntPtr ptr_const_mesh = mesh.ConstPointer();
+
+      // one ray is a search of a tree, so a chunk holds enough of them to be worth a thread
+      const int minimum_chunk = 512;
+
+      if (!multithreaded || ray_array.Length <= minimum_chunk)
+      {
+        UnsafeNativeMethods.ON_Intersect_MeshRays(ptr_const_mesh, ray_array.Length, ray_array, 0, ray_array.Length, rc);
+      }
+      else
+      {
+        int chunk_count = System.Environment.ProcessorCount * 4;
+        int chunk_size = (ray_array.Length + chunk_count - 1) / chunk_count;
+        if (chunk_size < minimum_chunk)
+        {
+          chunk_size = minimum_chunk;
+          chunk_count = (ray_array.Length + chunk_size - 1) / chunk_size;
+        }
+
+        System.Threading.Tasks.Parallel.For(0, chunk_count, chunk =>
+        {
+          int start = chunk * chunk_size;
+          int end = start + chunk_size;
+          if (end > ray_array.Length)
+            end = ray_array.Length;
+          if (start < end)
+            UnsafeNativeMethods.ON_Intersect_MeshRays(ptr_const_mesh, ray_array.Length, ray_array, start, end, rc);
+        });
+      }
+
+      GC.KeepAlive(mesh);
       return rc;
     }
 
@@ -1792,6 +2258,187 @@ namespace Rhino.Geometry.Intersect
     }
 
     /// <summary>
+    /// Intersects a curve and a mesh, returning certified hits sorted by curve parameter.
+    /// </summary>
+    /// <remarks>Every overlap is reported as two Point events at the overlap's endpoints plus one
+    /// Overlap event for the in-plane span. This overload always includes the Overlap events; use
+    /// the <see cref="MeshCurve(Mesh, Curve, double, bool)"/> overload to drop them while still
+    /// reporting the endpoint Points.</remarks>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="curve">Curve to intersect.</param>
+    /// <param name="tolerance">Post-process merge tolerance in 3D model space. Consecutive
+    /// intersection events whose 3D endpoints are within this distance are fused into a single
+    /// event. Must be a positive finite value (use the document absolute tolerance as a starting
+    /// point). The internal calculation tolerance is a fixed value independent of this
+    /// parameter.</param>
+    /// <returns>Array of intersection events sorted by curve parameter. Empty on failure or no intersection.</returns>
+    /// <since>9.0</since>
+    // RH-97386: internal until automated geometry error reporting covers every cgk path.
+    internal static MeshCurveIntersection[] MeshCurve(Mesh mesh, Curve curve, double tolerance)
+    {
+      return MeshCurve(mesh, curve, tolerance, includeOverlaps: true);
+    }
+
+    /// <summary>
+    /// Same as <see cref="MeshCurve(Mesh, Curve, double)"/> with a flag controlling the Overlap
+    /// span events.
+    /// </summary>
+    /// <remarks>
+    /// Every overlap is reported as two Point events at the overlap's endpoints plus one Overlap
+    /// event for the in-plane span. The two endpoint Points are emitted in both modes;
+    /// <paramref name="includeOverlaps"/> controls only the span event. Pass <c>false</c> to drop
+    /// the Overlap span events while still reporting the endpoint crossings as Point events — it
+    /// does not reduce the result to transversal crossings only.
+    /// </remarks>
+    /// <since>9.0</since>
+    internal static MeshCurveIntersection[] MeshCurve(Mesh mesh, Curve curve, double tolerance, bool includeOverlaps)
+    {
+      // tolerance must be a finite positive double: it is used as the 3D post-process merge
+      // tolerance and the guard prevents a no-op call. The `!(tolerance > 0)` form also
+      // rejects NaN. Caller-side validation here saves a P/Invoke round-trip.
+      if (mesh == null || curve == null || !(tolerance > 0)) return new MeshCurveIntersection[0];
+      IntPtr ptr_mesh = mesh.ConstPointer();
+      IntPtr ptr_curve = curve.ConstPointer();
+      IntPtr ptr_array = UnsafeNativeMethods.RHC_Intersect_CurveMesh(ptr_curve, ptr_mesh, tolerance, includeOverlaps);
+      Runtime.CommonObject.GcProtect(mesh, curve);
+      if (ptr_array == IntPtr.Zero) return new MeshCurveIntersection[0];
+      try
+      {
+        int count = UnsafeNativeMethods.RHC_Intersect_CurveMeshCount(ptr_array);
+        var result = new MeshCurveIntersection[count];
+        // Fetch the flat face-incidence pool once and slice per-event below.
+        int poolCount = UnsafeNativeMethods.RHC_Intersect_CurveMeshFacePoolCount(ptr_array);
+        int[] pool = poolCount > 0 ? new int[poolCount] : null;
+        if (poolCount > 0)
+          UnsafeNativeMethods.RHC_Intersect_CurveMeshFacePoolCopy(ptr_array, pool);
+
+        for (int i = 0; i < count; i++)
+        {
+          var evt = new MeshCurveIntersection();
+          int on_boundary = 0;
+          int incidence = 0;
+          int face_indices_offset = -1;
+          int face_indices_count = 0;
+          UnsafeNativeMethods.RHC_Intersect_CurveMeshData(ptr_array, i,
+            ref evt.m_type,
+            ref evt.m_face_index, ref evt.m_face_triangle_index,
+            ref face_indices_offset, ref face_indices_count,
+            ref evt.m_t0, ref evt.m_t1,
+            ref evt.m_point0, ref evt.m_point1,
+            ref evt.m_barycentric0, ref evt.m_barycentric1,
+            ref evt.m_t_tolerance, ref evt.m_point_tolerance, ref evt.m_barycentric_tolerance,
+            ref on_boundary,
+            ref incidence);
+          evt.m_on_boundary = on_boundary != 0;
+          evt.m_incidence = incidence;
+          if (pool != null && face_indices_offset >= 0 && face_indices_count > 0)
+          {
+            evt.m_face_indices = new int[face_indices_count];
+            Array.Copy(pool, face_indices_offset, evt.m_face_indices, 0, face_indices_count);
+          }
+          else
+          {
+            // Single-face hit (face interior, or mesh boundary edge): the participating-face
+            // list is just the canonical face.
+            evt.m_face_indices = new int[] { evt.m_face_index };
+          }
+          result[i] = evt;
+        }
+        return result;
+      }
+      finally
+      {
+        UnsafeNativeMethods.RHC_Intersect_CurveMeshDelete(ptr_array);
+      }
+    }
+
+    /// <summary>
+    /// Simpler overload of <see cref="MeshCurve(Mesh, Curve, double)"/>: returns the Point-event
+    /// hits (isolated crossings and the endpoints of every overlap span) as a flat
+    /// <see cref="Point3d"/> array, and the overlap spans as sub-curves of <paramref name="curve"/>
+    /// via <paramref name="overlapCurves"/>. Both arrays are ordered by curve parameter.
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="curve">Curve to intersect.</param>
+    /// <param name="tolerance">Numerical tolerance; see the rich overload.</param>
+    /// <param name="overlapCurves">Receives one trimmed sub-curve of the input per overlap event
+    /// (the portion of <paramref name="curve"/> that lies in a face's plane).</param>
+    /// <returns>One point per Point event — isolated crossings and the endpoints of every overlap span — ordered by curve parameter. Empty on failure or no intersection.</returns>
+    /// <since>9.0</since>
+    internal static Point3d[] MeshCurve(Mesh mesh, Curve curve, double tolerance, out Curve[] overlapCurves)
+    {
+      var events = MeshCurve(mesh, curve, tolerance);
+      var points = new List<Point3d>();
+      var overlaps = new List<Curve>();
+      for (int i = 0; i < events.Length; i++)
+      {
+        var e = events[i];
+        if (e.IsPoint)
+        {
+          points.Add(e.PointA);
+        }
+        else if (e.IsOverlap)
+        {
+          var sub = curve.Trim(e.CurveParameter);
+          if (sub != null)
+            overlaps.Add(sub);
+          /* If Trim returns null the overlap range was outside the curve's domain or otherwise
+           * un-trimmable; the event is dropped from the simpler overload's output. The rich
+           * overload still exposes the full event for callers that need it. */
+        }
+        /* else: NoEvent / unknown — skip. */
+      }
+      overlapCurves = overlaps.ToArray();
+      return points.ToArray();
+    }
+
+    /// <summary>
+    /// Simpler overload of <see cref="MeshCurve(Mesh, Curve, double)"/> with mesh face indices.
+    /// Mirrors <see cref="MeshLine(Mesh, Line, out int[])"/> and adds overlap output as sub-curves.
+    /// </summary>
+    /// <param name="mesh">Mesh to intersect.</param>
+    /// <param name="curve">Curve to intersect.</param>
+    /// <param name="tolerance">Numerical tolerance; see the rich overload.</param>
+    /// <param name="faceIds">Receives one face index per returned point (parallel to the return array).</param>
+    /// <param name="overlapCurves">Receives one trimmed sub-curve of the input per overlap event.</param>
+    /// <param name="overlapFaceIds">Receives one face index per overlap sub-curve (parallel to <paramref name="overlapCurves"/>).</param>
+    /// <returns>One point per Point event — isolated crossings and the endpoints of every overlap span — ordered by curve parameter. Empty on failure or no intersection.</returns>
+    /// <since>9.0</since>
+    internal static Point3d[] MeshCurve(Mesh mesh, Curve curve, double tolerance, out int[] faceIds, out Curve[] overlapCurves, out int[] overlapFaceIds)
+    {
+      var events = MeshCurve(mesh, curve, tolerance);
+      var points = new List<Point3d>();
+      var pointFaceIds = new List<int>();
+      var overlaps = new List<Curve>();
+      var overlapFaces = new List<int>();
+      for (int i = 0; i < events.Length; i++)
+      {
+        var e = events[i];
+        if (e.IsPoint)
+        {
+          points.Add(e.PointA);
+          pointFaceIds.Add(e.FaceIndex);
+        }
+        else if (e.IsOverlap)
+        {
+          var sub = curve.Trim(e.CurveParameter);
+          if (sub != null)
+          {
+            overlaps.Add(sub);
+            overlapFaces.Add(e.FaceIndex);
+          }
+          /* If Trim returns null the event is dropped from the simpler output. The parallel
+           * face-id array stays in sync because we add to both lists only on success. */
+        }
+        /* else: NoEvent / unknown — skip. */
+      }
+      faceIds = pointFaceIds.ToArray();
+      overlapCurves = overlaps.ToArray();
+      overlapFaceIds = overlapFaces.ToArray();
+      return points.ToArray();
+    }
+
+    /// <summary>
     /// Computes point intersections that occur when shooting a ray to a collection of surfaces and Breps.
     /// </summary>
     /// <param name="ray">A ray used in intersection.</param>
@@ -1812,7 +2459,7 @@ namespace Rhino.Geometry.Intersect
       {
         var ptr_const_geom = in_geom.ConstPointer();
         var ptr_out_points = out_points.NonConstPointer();
-        int count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, IntPtr.Zero, IntPtr.Zero);
+        int count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, IntPtr.Zero, IntPtr.Zero, false);
         if (count > 0) 
           return out_points.ToArray();
       }
@@ -1831,6 +2478,25 @@ namespace Rhino.Geometry.Intersect
     /// <since>7.0</since>
     public static RayShootEvent[] RayShoot(IEnumerable<GeometryBase> geometry, Ray3d ray, int maxReflections)
     {
+      return RayShoot(geometry, ray, maxReflections, false);
+    }
+
+    /// <summary>
+    /// Computes point intersections that occur when shooting a ray to a collection of surfaces and Breps.
+    /// </summary>
+    /// <param name="geometry">The collection of surfaces and Breps to intersect.</param>
+    /// <param name="ray">A ray used in intersection.</param>
+    /// <param name="maxReflections">The maximum number of reflections. This value should be any value between 1 and 1000, inclusive.</param>
+    /// <param name="honorTrims">
+    /// When true, hits that land outside a Brep face's trimming loops are skipped and the ray continues.
+    /// When false, Breps are treated as their untrimmed surfaces, which is what Rhino 8 and earlier did.
+    /// </param>
+    /// <returns>An array of RayShootEvent structs if successful, or an empty array on failure.</returns>
+    /// <exception cref="ArgumentNullException">geometry is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">maxReflections is strictly outside the [1-1000] range.</exception>
+    /// <since>9.0</since>
+    public static RayShootEvent[] RayShoot(IEnumerable<GeometryBase> geometry, Ray3d ray, int maxReflections, bool honorTrims)
+    {
       if (null == geometry) throw new ArgumentNullException(nameof(geometry));
       if (maxReflections < 1 || maxReflections > 1000)
         throw new ArgumentOutOfRangeException("maxReflections", "maxReflections must be between 1-1000");
@@ -1844,7 +2510,7 @@ namespace Rhino.Geometry.Intersect
         var ptr_out_geom_idx = out_geom_idx.NonConstPointer();
         var ptr_out_face_idx = out_face_idx.NonConstPointer();
         var ptr_out_points = out_points.NonConstPointer();
-        var count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, ptr_out_geom_idx, ptr_out_face_idx);
+        var count = UnsafeNativeMethods.ON_RayShooter_ShootRay(ptr_const_geom, ray.Position, ray.Direction, maxReflections, ptr_out_points, ptr_out_geom_idx, ptr_out_face_idx, honorTrims);
         if (count > 0)
         {
           var points = out_points.ToArray();
@@ -1874,41 +2540,43 @@ namespace Rhino.Geometry.Intersect
 
 #endif
 
-#endregion
+    #endregion
 
 #if RHINO_SDK
-        /// <summary>
-        /// Projects points onto meshes.
-        /// </summary>
-        /// <param name="meshes">the meshes to project on to.</param>
-        /// <param name="points">the points to project.</param>
-        /// <param name="direction">the direction to project.</param>
-        /// <param name="tolerance">
-        /// Projection tolerances used for culling close points and for line-mesh intersection.
-        /// </param>
-        /// <returns>
-        /// Array of projected points, or null in case of any error or invalid input.
-        /// </returns>
-        /// <since>5.0</since>
-        public static Point3d[] ProjectPointsToMeshes(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
+    /// <summary>
+    /// Projects points onto meshes.
+    /// </summary>
+    /// <param name="meshes">the meshes to project on to.</param>
+    /// <param name="points">the points to project.</param>
+    /// <param name="direction">the direction to project.</param>
+    /// <param name="tolerance">
+    /// Projection tolerances used for culling close points and for line-mesh intersection.
+    /// </param>
+    /// <returns>
+    /// Array of projected points, or null in case of any error or invalid input.
+    /// </returns>
+    /// <since>5.0</since>
+    public static Point3d[] ProjectPointsToMeshes(IEnumerable<Mesh> meshes, IEnumerable<Point3d> points, Vector3d direction, double tolerance)
     {
       Point3d[] rc = null;
       if (meshes != null && points != null)
       {
-        Runtime.InteropWrappers.SimpleArrayMeshPointer mesh_array = new Runtime.InteropWrappers.SimpleArrayMeshPointer();
-        foreach (Mesh mesh in meshes)
-          mesh_array.Add(mesh, true);
-
-        Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
-        if (inputpoints.Count > 0)
+        using (var mesh_array = new Runtime.InteropWrappers.SimpleArrayMeshPointer())
         {
-          IntPtr const_ptr_mesh_array = mesh_array.ConstPointer();
+          foreach (Mesh mesh in meshes)
+            mesh_array.Add(mesh, true);
 
-          using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+          Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
+          if (inputpoints.Count > 0)
           {
-            IntPtr ptr_output = output.NonConstPointer();
-            if (UnsafeNativeMethods.RHC_RhinoProjectPointsToMeshes(const_ptr_mesh_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output, IntPtr.Zero))
-              rc = output.ToArray();
+            IntPtr const_ptr_mesh_array = mesh_array.ConstPointer();
+
+            using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+            {
+              IntPtr ptr_output = output.NonConstPointer();
+              if (UnsafeNativeMethods.RHC_RhinoProjectPointsToMeshes(const_ptr_mesh_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output, IntPtr.Zero))
+                rc = output.ToArray();
+            }
           }
         }
       }
@@ -1942,24 +2610,26 @@ namespace Rhino.Geometry.Intersect
       indices = new int[0];
       if (meshes != null && points != null)
       {
-        Runtime.InteropWrappers.SimpleArrayMeshPointer mesh_array = new Runtime.InteropWrappers.SimpleArrayMeshPointer();
-        foreach (Mesh mesh in meshes)
-          mesh_array.Add(mesh, true);
-
-        Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
-        if (inputpoints.Count > 0)
+        using (var mesh_array = new Runtime.InteropWrappers.SimpleArrayMeshPointer())
         {
-          IntPtr const_ptr_mesh_array = mesh_array.ConstPointer();
+          foreach (Mesh mesh in meshes)
+            mesh_array.Add(mesh, true);
 
-          using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
-          using (Runtime.InteropWrappers.SimpleArrayInt output_indices = new Runtime.InteropWrappers.SimpleArrayInt())
+          Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
+          if (inputpoints.Count > 0)
           {
-            IntPtr ptr_output = output.NonConstPointer();
-            IntPtr ptr_indices = output_indices.NonConstPointer();
-            if (UnsafeNativeMethods.RHC_RhinoProjectPointsToMeshes(const_ptr_mesh_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output, ptr_indices))
+            IntPtr const_ptr_mesh_array = mesh_array.ConstPointer();
+
+            using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+            using (Runtime.InteropWrappers.SimpleArrayInt output_indices = new Runtime.InteropWrappers.SimpleArrayInt())
             {
-              rc = output.ToArray();
-              indices = output_indices.ToArray();
+              IntPtr ptr_output = output.NonConstPointer();
+              IntPtr ptr_indices = output_indices.NonConstPointer();
+              if (UnsafeNativeMethods.RHC_RhinoProjectPointsToMeshes(const_ptr_mesh_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output, ptr_indices))
+              {
+                rc = output.ToArray();
+                indices = output_indices.ToArray();
+              }
             }
           }
         }
@@ -1990,20 +2660,22 @@ namespace Rhino.Geometry.Intersect
       Point3d[] rc = null;
       if (breps != null && points != null)
       {
-        Runtime.InteropWrappers.SimpleArrayBrepPointer brep_array = new Runtime.InteropWrappers.SimpleArrayBrepPointer();
-        foreach (Brep brep in breps)
-          brep_array.Add(brep, true);
-
-        Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
-        if (inputpoints.Count > 0)
+        using (var brep_array = new Runtime.InteropWrappers.SimpleArrayBrepPointer())
         {
-          IntPtr const_ptr_brep_array = brep_array.ConstPointer();
+          foreach (Brep brep in breps)
+            brep_array.Add(brep, true);
 
-          using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+          Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
+          if (inputpoints.Count > 0)
           {
-            IntPtr ptr_output_points = output.NonConstPointer();
-            if (UnsafeNativeMethods.RHC_RhinoProjectPointsToBreps(const_ptr_brep_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output_points, IntPtr.Zero))
-              rc = output.ToArray();
+            IntPtr const_ptr_brep_array = brep_array.ConstPointer();
+
+            using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+            {
+              IntPtr ptr_output_points = output.NonConstPointer();
+              if (UnsafeNativeMethods.RHC_RhinoProjectPointsToBreps(const_ptr_brep_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output_points, IntPtr.Zero))
+                rc = output.ToArray();
+            }
           }
         }
       }
@@ -2029,24 +2701,26 @@ namespace Rhino.Geometry.Intersect
       indices = new int[0];
       if (breps != null && points != null)
       {
-        Runtime.InteropWrappers.SimpleArrayBrepPointer brep_array = new Runtime.InteropWrappers.SimpleArrayBrepPointer();
-        foreach (Brep brep in breps)
-          brep_array.Add(brep, true);
-
-        Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
-        if (inputpoints.Count > 0)
+        using (var brep_array = new Runtime.InteropWrappers.SimpleArrayBrepPointer())
         {
-          IntPtr const_ptr_brep_array = brep_array.ConstPointer();
+          foreach (Brep brep in breps)
+            brep_array.Add(brep, true);
 
-          using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
-          using (Runtime.InteropWrappers.SimpleArrayInt output_indices = new Runtime.InteropWrappers.SimpleArrayInt())
+          Rhino.Collections.Point3dList inputpoints = new Rhino.Collections.Point3dList(points);
+          if (inputpoints.Count > 0)
           {
-            IntPtr ptr_output_points = output.NonConstPointer();
-            IntPtr ptr_indices = output_indices.NonConstPointer();
-            if (UnsafeNativeMethods.RHC_RhinoProjectPointsToBreps(const_ptr_brep_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output_points, ptr_indices))
+            IntPtr const_ptr_brep_array = brep_array.ConstPointer();
+
+            using (Runtime.InteropWrappers.SimpleArrayPoint3d output = new Runtime.InteropWrappers.SimpleArrayPoint3d())
+            using (Runtime.InteropWrappers.SimpleArrayInt output_indices = new Runtime.InteropWrappers.SimpleArrayInt())
             {
-              rc = output.ToArray();
-              indices = output_indices.ToArray();
+              IntPtr ptr_output_points = output.NonConstPointer();
+              IntPtr ptr_indices = output_indices.NonConstPointer();
+              if (UnsafeNativeMethods.RHC_RhinoProjectPointsToBreps(const_ptr_brep_array, direction, tolerance, inputpoints.Count, inputpoints.m_items, ptr_output_points, ptr_indices))
+              {
+                rc = output.ToArray();
+                indices = output_indices.ToArray();
+              }
             }
           }
         }
@@ -2057,6 +2731,73 @@ namespace Rhino.Geometry.Intersect
 
 #endif
   }
+
+#if RHINO_SDK
+  /// <summary>
+  /// Two meshes that intersect, as reported by
+  /// <see cref="Intersection.MeshMeshPredicate(IEnumerable{Mesh}, IEnumerable{Mesh}, double, bool, out IntersectingMeshPair[], FileIO.TextLog, System.Threading.CancellationToken)"/>,
+  /// with one face of each that intersect.
+  /// </summary>
+  /// <since>9.0</since>
+  public readonly struct IntersectingMeshPair
+  {
+    /// <summary>
+    /// Initializes a new instance of <see cref="IntersectingMeshPair"/>.
+    /// </summary>
+    /// <param name="meshIndexA">The index of the first mesh.</param>
+    /// <param name="meshIndexB">The index of the second mesh.</param>
+    /// <param name="faceIndexA">The index of a face of the first mesh.</param>
+    /// <param name="faceIndexB">The index of a face of the second mesh.</param>
+    /// <since>9.0</since>
+    public IntersectingMeshPair(int meshIndexA, int meshIndexB, int faceIndexA, int faceIndexB)
+    {
+      MeshIndexA = meshIndexA;
+      MeshIndexB = meshIndexB;
+      FaceIndexA = faceIndexA;
+      FaceIndexB = faceIndexB;
+    }
+
+    /// <summary>
+    /// The index of the first mesh, in meshesA.
+    /// </summary>
+    /// <since>9.0</since>
+    public int MeshIndexA { get; }
+
+    /// <summary>
+    /// The index of the second mesh, in meshesB, or in meshesA when meshesB is null.
+    /// </summary>
+    /// <since>9.0</since>
+    public int MeshIndexB { get; }
+
+    /// <summary>
+    /// The index of a face of the first mesh that intersects <see cref="FaceIndexB"/>, or -1 if it could not be determined.
+    /// </summary>
+    /// <since>9.0</since>
+    public int FaceIndexA { get; }
+
+    /// <summary>
+    /// The index of a face of the second mesh that intersects <see cref="FaceIndexA"/>, or -1 if it could not be determined.
+    /// </summary>
+    /// <since>9.0</since>
+    public int FaceIndexB { get; }
+
+    /// <summary>
+    /// Deconstructs this pair, so that it can be written as <c>var (meshIndexA, meshIndexB, _, _) = pair;</c>.
+    /// </summary>
+    /// <param name="meshIndexA">Receives <see cref="MeshIndexA"/>.</param>
+    /// <param name="meshIndexB">Receives <see cref="MeshIndexB"/>.</param>
+    /// <param name="faceIndexA">Receives <see cref="FaceIndexA"/>.</param>
+    /// <param name="faceIndexB">Receives <see cref="FaceIndexB"/>.</param>
+    /// <since>9.0</since>
+    public void Deconstruct(out int meshIndexA, out int meshIndexB, out int faceIndexA, out int faceIndexB)
+    {
+      meshIndexA = MeshIndexA;
+      meshIndexB = MeshIndexB;
+      faceIndexA = FaceIndexA;
+      faceIndexB = FaceIndexB;
+    }
+  }
+#endif
 
   /// <summary>
   /// Represents all possible cases of a Plane|Circle intersection event.
@@ -2265,4 +3006,96 @@ namespace Rhino.Geometry.Intersect
     Overlap = 3
   }
 
+#if RHINO_SDK
+  /// <summary>
+  /// Data that <see cref="Intersection.GeometryPlane(GeometryBase, Plane, double, bool, bool, bool, RhinoDoc, Transform, PlaneIntersectionCache, System.Threading.CancellationToken, out Curve[], out Point3d[])"/>
+  /// computes from the geometry alone, kept between calls: the mesh intersection data of a mesh, and the Brep
+  /// a SubD, Extrusion, Surface or BrepFace converts to. Reuse one cache for many planes through the same geometry,
+  /// such as a contour stack.
+  /// </summary>
+  /// <remarks>
+  /// Entries are keyed by the native geometry. The cache keeps each geometry it is used with alive until
+  /// <see cref="Clear"/> or <see cref="Dispose()"/>, so a new object cannot take over the entry of a collected one.
+  /// Call <see cref="Clear"/> when a geometry used with the cache, or an instance definition it references,
+  /// is changed in place; not while the cache is in use.
+  /// One cache can be used from several threads at the same time.
+  /// </remarks>
+  public sealed class PlaneIntersectionCache : IDisposable
+  {
+    IntPtr m_ptr; // CRhinoPlaneIntersectionCache*
+
+    // Keeps the geometry the native entries are keyed by alive. By reference, not by Equals.
+    readonly HashSet<GeometryBase> m_geometry = new HashSet<GeometryBase>(new ReferenceComparer());
+
+    sealed class ReferenceComparer : IEqualityComparer<GeometryBase>
+    {
+      public bool Equals(GeometryBase a, GeometryBase b) => ReferenceEquals(a, b);
+      public int GetHashCode(GeometryBase g) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(g);
+    }
+
+    /// <summary>
+    /// Creates an empty cache.
+    /// </summary>
+    /// <since>9.0</since>
+    public PlaneIntersectionCache()
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoPlaneIntersectionCache_New();
+    }
+
+    /// <summary>
+    /// Releases the native cache.
+    /// </summary>
+    ~PlaneIntersectionCache()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Releases the native cache.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+        UnsafeNativeMethods.CRhinoPlaneIntersectionCache_Delete(m_ptr);
+      m_ptr = IntPtr.Zero;
+      if (disposing)
+      {
+        lock (m_geometry)
+          m_geometry.Clear();
+      }
+    }
+
+    /// <summary>
+    /// Removes all entries, and releases the geometry the cache kept alive.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Clear()
+    {
+      UnsafeNativeMethods.CRhinoPlaneIntersectionCache_Clear(m_ptr);
+      lock (m_geometry)
+        m_geometry.Clear();
+      GC.KeepAlive(this);
+    }
+
+    internal IntPtr NonConstPointer()
+    {
+      if (IntPtr.Zero == m_ptr)
+        throw new ObjectDisposedException(nameof(PlaneIntersectionCache));
+      return m_ptr;
+    }
+
+    internal void KeepAlive(GeometryBase geometry)
+    {
+      lock (m_geometry)
+        m_geometry.Add(geometry);
+    }
+  }
+#endif
 }

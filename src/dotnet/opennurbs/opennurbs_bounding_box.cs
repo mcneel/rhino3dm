@@ -336,6 +336,52 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Finds the shortest distance between this bounding box and a test point.
+    /// </summary>
+    /// <param name="testPoint">A point to test.</param>
+    /// <returns>The minimum distance.</returns>
+    /// <since>9.0</since>
+    public double MinimumDistanceTo(Point3d testPoint)
+    {
+      Vector3d diagonal = Vector3d.Zero;
+
+      if (testPoint.X < Min.X)
+        diagonal.X = Min.X - testPoint.X;
+      else if (testPoint.X > Max.X)
+        diagonal.X = testPoint.X - Max.X;
+    
+      if(testPoint.Y < Min.Y)
+        diagonal.Y = Min.Y - testPoint.Y;
+      else if(testPoint.Y > Max.Y)
+        diagonal.Y = testPoint.Y - Max.Y;
+
+      if(testPoint.Z < Min.Z)
+        diagonal.Z = Min.Z - testPoint.Z;
+      else if(testPoint.Z > Max.Z)
+        diagonal.Z = testPoint.Z - Max.Z;
+
+      return diagonal.Length;
+    }
+
+    /// <summary>
+    /// Finds the largest distance between this bounding box and a test point.
+    /// </summary>
+    /// <param name="testPoint">A point to test.</param>
+    /// <returns>The maximum distance.</returns>
+    /// <since>9.0</since>
+    public double MaximumDistanceTo(Point3d testPoint)
+    {
+      Vector3d diagonal = new Vector3d
+      (
+        ((testPoint.X < 0.5 * (Min.X + Max.X)) ? Max.X : Min.X) - testPoint.X,
+        ((testPoint.Y < 0.5 * (Min.Y + Max.Y)) ? Max.Y : Min.Y) - testPoint.Y,
+        ((testPoint.Z < 0.5 * (Min.Z + Max.Z)) ? Max.Z : Min.Z) - testPoint.Z
+      );
+
+      return diagonal.Length;
+    }
+
+    /// <summary>
     /// Finds the furthest point on the Box.
     /// </summary>
     /// <param name="point">Sample point.</param>
@@ -504,6 +550,67 @@ namespace Rhino.Geometry
       }
 
       return true;
+    }
+
+    /// <summary>
+    /// Determines whether this bounding box and another bounding box are disjoint,
+    /// that is, whether they do not intersect.
+    /// <para>This is the same as calling IsDisjoint(box, 0.0).</para>
+    /// </summary>
+    /// <param name="box">Box to test.</param>
+    /// <returns>true if this bounding box and box are disjoint.</returns>
+    /// <remarks>
+    /// If either box is invalid, then true is returned. Boxes that merely touch are not
+    /// disjoint.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsDisjoint(BoundingBox box)
+    {
+      return IsDisjoint(box, 0.0);
+    }
+
+    /// <summary>
+    /// Determines whether this bounding box and another bounding box are disjoint,
+    /// that is, whether they do not intersect, allowing a tolerance for the comparison.
+    /// </summary>
+    /// <param name="box">Box to test.</param>
+    /// <param name="tolerance">Distance tolerance for the comparison.
+    /// <para>When tolerance is positive, the boxes are considered to intersect (not disjoint)
+    /// if the gap between them is less than or equal to tolerance. This is useful as a coarse
+    /// pre-check when the boxes may be separated by numerical noise but the underlying
+    /// geometry actually intersects within a working tolerance.</para>
+    /// <para>When tolerance is 0.0, the result is the same as IsDisjoint(box).</para>
+    /// <para>When tolerance is negative, the boxes must overlap by more than the absolute
+    /// value of tolerance to be considered not disjoint.</para>
+    /// </param>
+    /// <returns>true if this bounding box and box are disjoint.</returns>
+    /// <remarks>
+    /// If either box is invalid, then true is returned.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsDisjoint(BoundingBox box, double tolerance)
+    {
+      if (!m_min.IsValid || !m_max.IsValid || !box.m_min.IsValid || !box.m_max.IsValid)
+        return true;
+
+      if (m_min.m_x > m_max.m_x || box.m_min.m_x > box.m_max.m_x
+          || m_min.m_x > box.m_max.m_x + tolerance
+          || m_max.m_x + tolerance < box.m_min.m_x)
+        return true;
+
+      if (m_min.m_y > m_max.m_y || box.m_min.m_y > box.m_max.m_y
+          || m_min.m_y > box.m_max.m_y + tolerance
+          || m_max.m_y + tolerance < box.m_min.m_y)
+        return true;
+
+      if (m_min.m_z > m_max.m_z || box.m_min.m_z > box.m_max.m_z
+          || m_min.m_z > box.m_max.m_z + tolerance
+          || m_max.m_z + tolerance < box.m_min.m_z)
+        return true;
+
+      return false;
     }
 
     /// <summary>
@@ -768,7 +875,16 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="a">A first bounding box.</param>
     /// <param name="b">A second bounding box.</param>
-    /// <returns>The intersection bounding box.</returns>
+    /// <returns>
+    /// The intersection bounding box, or <see cref="Unset"/> if the intersection is empty.
+    /// </returns>
+    /// <remarks>
+    /// The intersection is empty when a and b do not overlap, and when either box is invalid.
+    /// Invalid boxes are treated as the empty set. Boxes that merely touch do overlap, and
+    /// produce a valid, degenerate (zero thickness) intersection box.
+    /// <para>To test two boxes for overlap without constructing an intersection box, use
+    /// <see cref="IsDisjoint(BoundingBox)"/>.</para>
+    /// </remarks>
     /// <since>5.0</since>
     public static BoundingBox Intersection(BoundingBox a, BoundingBox b)
     {
@@ -783,7 +899,13 @@ namespace Rhino.Geometry
         max.X = (a.Max.X <= b.Max.X) ? a.Max.X : b.Max.X;
         max.Y = (a.Max.Y <= b.Max.Y) ? a.Max.Y : b.Max.Y;
         max.Z = (a.Max.Z <= b.Max.Z) ? a.Max.Z : b.Max.Z;
-        rc = new BoundingBox(min, max);
+
+        // The clamped corners describe a box only when they are still ordered on every
+        // axis. When they are not, a and b are disjoint and the intersection is empty:
+        // returning the clamped corners would mix a corner of a with a corner of b, and
+        // Min, Max, Center and Diagonal would all report meaningless values. RH-98176.
+        if (min.X <= max.X && min.Y <= max.Y && min.Z <= max.Z)
+          rc = new BoundingBox(min, max);
       }
       return rc;
     }

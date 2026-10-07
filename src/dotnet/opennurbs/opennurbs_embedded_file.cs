@@ -125,6 +125,23 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// The number of bytes this file occupies in the archive. Returns zero when
+    /// the embedded file was not loaded from an archive (e.g. when it was loaded
+    /// from a local file or buffer).
+    /// </summary>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public ulong CompressedLength
+    {
+      get
+      {
+        ulong rc = UnsafeNativeMethods.ON_EmbeddedFile_CompressedLength(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
     /// Returns <see cref="ModelComponentType.EmbeddedFile"/>.
     /// </summary>
     /// <since>8.0</since>

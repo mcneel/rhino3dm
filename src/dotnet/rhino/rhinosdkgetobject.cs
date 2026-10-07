@@ -423,6 +423,17 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// By default, locked objects cannot be selected. If you do want to be
+    /// able to select locked objects, then call LockedObjectSelect=true.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool LockedObjectSelect
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.LockedObjectSelect); }
+      set { SetBool(UnsafeNativeMethods.RhinoGetObjectBoolConsts.LockedObjectSelect, value); }
+    }
+
+    /// <summary>
     /// By default, post selection will select objects with grips on. If you do
     /// not want to be able to post select objects with grips on, then call
     /// EnableIgnoreGrips = false. The ability to preselect an object with grips
@@ -492,8 +503,10 @@ namespace Rhino.Input.Custom
           RhinoObject rh_object = RhinoObject.CreateRhinoObjectHelper(rhObject);
           using (var or = new ObjRef(rh_object, ptrGeometry))
           {
+#pragma warning disable CA2000 //It is very unclear here who owns geom
             GeometryBase geom = or.Geometry();
             rc = g_active_go.CustomGeometryFilter(rh_object, geom, componentIndex);
+#pragma warning restore CA2000
           }
         }
         catch (Exception ex)

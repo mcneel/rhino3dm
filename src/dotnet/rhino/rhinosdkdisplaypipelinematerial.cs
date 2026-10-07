@@ -369,6 +369,29 @@ namespace Rhino.Display
     {
       return SetTexture(texture, Rhino.DocObjects.TextureType.Bitmap, front);
     }
+    /// <summary>
+    /// Uses the pixels of an in-memory bitmap as this material's bitmap texture, without
+    /// writing an image file.
+    /// <para>
+    /// The pixels are copied into <see cref="TextureCache"/> under <paramref name="name"/>.
+    /// Calling this again with the same name replaces them in place, and the change shows up
+    /// on the next redraw.
+    /// </para>
+    /// </summary>
+    /// <param name="name">
+    /// The name to cache the pixels under. See <see cref="TextureCache.Set"/>.
+    /// </param>
+    /// <param name="bitmap">The pixels to use.</param>
+    /// <param name="front">true for the front material, false for the back material.</param>
+    /// <returns>true on success.</returns>
+    /// <since>9.0</since>
+    /// <seealso cref="TextureCache"/>
+    public bool SetBitmapTexture(string name, System.Drawing.Bitmap bitmap, bool front)
+    {
+      if (!TextureCache.Set(name, bitmap))
+        return false;
+      return AddTexture(name, Rhino.DocObjects.TextureType.Bitmap, front);
+    }
     #endregion
 
     #region Bump
@@ -428,6 +451,388 @@ namespace Rhino.Display
       return SetTexture(texture, Rhino.DocObjects.TextureType.Transparency, front);
     }
     #endregion
+  }
+
+  /// <summary>
+  /// One side of the material the display pipeline shades an object with. A texture-style
+  /// <see cref="Rhino.Display.VisualAnalysisMode"/> sets its texture up here from
+  /// SetUpDisplayAttributes.
+  /// </summary>
+  /// <remarks>
+  /// Valid for as long as the <see cref="DisplayPipelineAttributes"/> it came from, the same as
+  /// <see cref="DisplayPipelineAttributes.MeshSpecificAttributes"/>. The attributes passed to SetUpDisplayAttributes belong
+  /// to the display pipeline and are disposed when that call returns; using this afterwards does
+  /// nothing rather than reaching freed memory.
+  /// </remarks>
+  public sealed class DisplayAttributeMaterial
+  {
+    readonly DisplayPipelineAttributes m_parent;
+    readonly UnsafeNativeMethods.DisplayAttributesMaterialIdx m_which;
+
+    internal DisplayAttributeMaterial(DisplayPipelineAttributes parent, UnsafeNativeMethods.DisplayAttributesMaterialIdx which)
+    {
+      m_parent = parent;
+      m_which = which;
+    }
+
+    // Resolved on every call rather than cached: the pipeline replaces the attributes'
+    // material as it moves from object to object.
+    internal IntPtr MaterialPointer()
+    {
+      IntPtr ptr_attributes = m_parent.NonConstPointer();
+      IntPtr rc = UnsafeNativeMethods.GetDisplayAttributeMaterialNonConst(ptr_attributes, m_which);
+      GC.KeepAlive(m_parent);
+      return rc;
+    }
+
+    /// <summary>
+    /// Shine, 0 to <see cref="Rhino.DocObjects.Material.MaxShine"/>.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Shine
+    {
+      get => m_parent.GetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine);
+      set => m_parent.SetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Shine, value);
+    }
+
+    /// <summary>
+    /// Transparency, 0.0 opaque to 1.0 transparent.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Transparency
+    {
+      get => m_parent.GetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency);
+      set => m_parent.SetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Transparency, value);
+    }
+
+    /// <summary>
+    /// Index of refraction.
+    /// </summary>
+    /// <since>9.0</since>
+    public double IndexOfRefraction
+    {
+      get => m_parent.GetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.IndexOfRefraction);
+      set => m_parent.SetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.IndexOfRefraction, value);
+    }
+
+    /// <summary>
+    /// Reflectivity, 0.0 to 1.0.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Reflectivity
+    {
+      get => m_parent.GetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Reflectivity);
+      set => m_parent.SetMaterialDouble(m_which, UnsafeNativeMethods.DisplayAttributesMaterialDouble.Reflectivity, value);
+    }
+
+    /// <summary>
+    /// Shades with no smoothing, so the individual render mesh faces are visible.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool FlatShaded
+    {
+      get => m_parent.GetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded);
+      set => m_parent.SetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.FlatShaded, value);
+    }
+
+    /// <summary>
+    /// Objects acquire color from render materials.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool OverrideObjectColor
+    {
+      get => m_parent.GetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor);
+      set => m_parent.SetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectColor, value);
+    }
+
+    /// <summary>
+    /// Objects acquire transparency from render materials.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool OverrideObjectTransparency
+    {
+      get => m_parent.GetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency);
+      set => m_parent.SetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectTransparency, value);
+    }
+
+    /// <summary>
+    /// Objects acquire reflectivity from render materials.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool OverrideObjectReflectivity
+    {
+      get => m_parent.GetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity);
+      set => m_parent.SetMaterialBool(m_which, UnsafeNativeMethods.DisplayAttributesMaterialBool.MatOverrideObjectReflectivity, value);
+    }
+
+    /// <summary>
+    /// Diffuse color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color Diffuse
+    {
+      get
+      {
+        IntPtr ptr_attributes = m_parent.NonConstPointer();
+        Color rc = Color.FromArgb(UnsafeNativeMethods.CDisplayAttributeMaterial_GetColor(ptr_attributes, m_which, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse));
+        GC.KeepAlive(m_parent);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_attributes = m_parent.NonConstPointer();
+        UnsafeNativeMethods.CDisplayAttributeMaterial_SetColor(ptr_attributes, m_which, UnsafeNativeMethods.DisplayAttrsMaterialColor.Diffuse, value.ToArgb());
+        GC.KeepAlive(m_parent);
+      }
+    }
+
+    /// <summary>
+    /// Emission color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color Emission
+    {
+      get
+      {
+        IntPtr ptr_attributes = m_parent.NonConstPointer();
+        Color rc = Color.FromArgb(UnsafeNativeMethods.CDisplayAttributeMaterial_GetColor(ptr_attributes, m_which, UnsafeNativeMethods.DisplayAttrsMaterialColor.Emission));
+        GC.KeepAlive(m_parent);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_attributes = m_parent.NonConstPointer();
+        UnsafeNativeMethods.CDisplayAttributeMaterial_SetColor(ptr_attributes, m_which, UnsafeNativeMethods.DisplayAttrsMaterialColor.Emission, value.ToArgb());
+        GC.KeepAlive(m_parent);
+      }
+    }
+
+    /// <summary>
+    /// When true the material is drawn at full diffuse color, ignoring the scene lights.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool DisableLighting
+    {
+      get => UnsafeNativeMethods.ON_Material_GetBool(MaterialPointer(), UnsafeNativeMethods.MaterialBool.DisableLighting);
+      set => UnsafeNativeMethods.ON_Material_SetBool(MaterialPointer(), UnsafeNativeMethods.MaterialBool.DisableLighting, value);
+    }
+
+    /// <summary>
+    /// Luminosity.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Luminosity
+    {
+      get => m_parent.GetMaterialInt(m_which, UnsafeNativeMethods.DisplayAttributesMaterialInt.Luminosity);
+      set => m_parent.SetMaterialInt(m_which, UnsafeNativeMethods.DisplayAttributesMaterialInt.Luminosity, value);
+    }
+
+    /// <summary>
+    /// Shine intensity.
+    /// </summary>
+    /// <since>9.0</since>
+    public int ShineIntensity
+    {
+      get => m_parent.GetMaterialInt(m_which, UnsafeNativeMethods.DisplayAttributesMaterialInt.ShineIntensity);
+      set => m_parent.SetMaterialInt(m_which, UnsafeNativeMethods.DisplayAttributesMaterialInt.ShineIntensity, value);
+    }
+
+    /// <summary>
+    /// Assigns a texture, replacing any texture this material already has of the same type.
+    /// </summary>
+    /// <param name="texture">The texture to assign.</param>
+    /// <param name="which">The texture type.</param>
+    /// <returns>true on success.</returns>
+    /// <since>9.0</since>
+    public bool SetTexture(Rhino.DocObjects.Texture texture, Rhino.DocObjects.TextureType which)
+    {
+      if (texture == null)
+        throw new ArgumentNullException(nameof(texture));
+      IntPtr ptr_material = MaterialPointer();
+
+      // RH-86871: the physically based shaders do not show an environment map, so an emap on a PBR
+      // material draws as if it were not there. The built-in EMap and Zebra modes drop the PBR data
+      // first (CRhEMapVAM::SetAnalysisModeDisplayAttributes); this does it for the caller, since the
+      // display material is per-draw scratch state and nothing downstream wants the PBR half of it.
+      if (Rhino.DocObjects.TextureType.Emap == which &&
+          UnsafeNativeMethods.ON_Material_IsPhysicallyBased(ptr_material))
+      {
+        UnsafeNativeMethods.ON_Material_PBR_ToLegacy(ptr_material);
+      }
+
+      IntPtr ptr_const_texture = texture.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Material_SetTexture(ptr_material, ptr_const_texture, (int)which);
+      GC.KeepAlive(texture);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the texture of the given type, or null when this material has none.
+    /// </summary>
+    /// <param name="which">
+    /// The texture type. <see cref="Rhino.DocObjects.TextureType.None"/> matches nothing.
+    /// </param>
+    /// <since>9.0</since>
+    public Rhino.DocObjects.Texture GetTexture(Rhino.DocObjects.TextureType which)
+    {
+      // ON_Material::FindTexture skips the type comparison for no_texture_type and so returns
+      // the first texture of any type, which is not what this asks for.
+      if (Rhino.DocObjects.TextureType.None == which)
+        return null;
+      int index = UnsafeNativeMethods.ON_Material_GetTexture(MaterialPointer(), (int)which);
+      if (index >= 0)
+        return new Rhino.DocObjects.Texture(index, this);
+      return null;
+    }
+
+    /// <summary>
+    /// Gets every texture this material uses.
+    /// </summary>
+    /// <since>9.0</since>
+    public Rhino.DocObjects.Texture[] GetTextures()
+    {
+      int count = UnsafeNativeMethods.ON_Material_GetTextureCount(MaterialPointer());
+      var rc = new Rhino.DocObjects.Texture[count];
+      for (int i = 0; i < count; i++)
+        rc[i] = new Rhino.DocObjects.Texture(i, this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Removes every texture of the given type.
+    /// </summary>
+    /// <param name="which">
+    /// The texture type. <see cref="Rhino.DocObjects.TextureType.None"/> removes nothing.
+    /// </param>
+    /// <returns>true when a texture was removed.</returns>
+    /// <since>9.0</since>
+    public bool RemoveTexture(Rhino.DocObjects.TextureType which)
+    {
+      // ON_Material::DeleteTexture reads a null filename together with no_texture_type as
+      // "delete them all", which is not what this asks for.
+      if (Rhino.DocObjects.TextureType.None == which)
+        return false;
+      return UnsafeNativeMethods.ON_Material_DeleteTexture(MaterialPointer(), null, (int)which);
+    }
+  }
+
+  /// <summary>
+  /// Settings for drawing shaded meshes with the Grasshopper 2 ("G2") shader, used by
+  /// <see cref="DisplayPipeline.DrawMeshShaded(Geometry.Mesh, GrasshopperDisplayMaterial)"/>
+  /// and <see cref="DisplayPipeline.DrawMeshesShaded"/>.
+  /// </summary>
+  /// <remarks>
+  /// The G2 shader produces a gradient-shaded look from a compact set of inputs rather
+  /// than from the full lighting model of a <see cref="DisplayMaterial"/>: a diffuse
+  /// colour, plus optional striping, stippling and dark-area desaturation. Unlike
+  /// <see cref="DisplayMaterial"/> this is a plain settings object with no unmanaged
+  /// resources, so it does not need to be disposed.
+  /// </remarks>
+  /// <since>9.0</since>
+  public class GrasshopperDisplayMaterial
+  {
+    /// <summary>
+    /// Constructs a default material with an opaque white diffuse colour.
+    /// </summary>
+    /// <since>9.0</since>
+    public GrasshopperDisplayMaterial()
+    {
+    }
+
+    /// <summary>
+    /// Constructs a material with a specific diffuse colour.
+    /// </summary>
+    /// <param name="diffuse">The diffuse colour. Unlike
+    /// <see cref="DisplayMaterial"/>, the alpha channel is <b>not</b> ignored — it is
+    /// the opacity. See <see cref="Diffuse"/>.</param>
+    /// <since>9.0</since>
+    public GrasshopperDisplayMaterial(Color diffuse)
+    {
+      Diffuse = diffuse;
+    }
+
+    /// <summary>
+    /// Gets or sets the diffuse colour — the colour reached in the brightest areas of
+    /// the shading. The alpha channel is <b>opacity</b>, following the usual
+    /// <see cref="System.Drawing.Color"/> convention: A=255 is fully opaque and A=0
+    /// fully transparent. Note this differs from <see cref="DisplayMaterial.Diffuse"/>,
+    /// which ignores alpha. Default: opaque white.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color Diffuse { get; set; } = Color.White;
+
+    /// <summary>
+    /// Gets or sets whether the G2 striping overlay is applied. Default: false.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Striping { get; set; }
+
+    /// <summary>
+    /// Gets or sets the width of one stripe band in <b>screen-space pixels</b> (used
+    /// only when <see cref="Striping"/> is true). Stripes run along the screen diagonal
+    /// and the light/dark pattern repeats every <c>2 × StripeWidth</c> pixels; values
+    /// below 1 are treated as 1. This is a pixel-space overlay — it does not scale with
+    /// zoom or model units. Default: 0.
+    /// </summary>
+    /// <since>9.0</since>
+    public double StripeWidth { get; set; }
+
+    /// <summary>
+    /// Gets or sets the stripe contrast (used only when <see cref="Striping"/> is
+    /// true). The effective range is 0..0.9; higher values are clamped, and 0 means no
+    /// visible striping. Default: 1.0.
+    /// </summary>
+    /// <since>9.0</since>
+    public double StripeContrast { get; set; } = 1.0;
+
+    /// <summary>
+    /// Gets or sets whether an 8x8 Bayer stipple (dither) mask is applied.
+    /// Default: false.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Stippling { get; set; }
+
+    /// <summary>
+    /// Gets or sets how much of the stipple pattern is turned off, as a fraction from
+    /// 0 to 1 (used only when <see cref="Stippling"/> is true). Default: 0.
+    /// </summary>
+    /// <remarks>
+    /// The pattern is an 8x8 Bayer mask — 64 cells — and this is the fraction of those
+    /// cells that stop drawing: 0 turns none off (nothing is stippled away), 0.5 turns
+    /// off about half of them (32 of 64), and 1 is clamped to 63 of 64, so a trace of
+    /// the mesh always remains rather than disappearing entirely. Values outside 0 to 1
+    /// are clamped.
+    /// </remarks>
+    /// <since>9.0</since>
+    public double StipplingAmount { get; set; }
+
+    /// <summary>
+    /// Gets or sets how far the shaded colour is blended towards greyscale, as a
+    /// fraction from 0 to 1: 0 leaves the colour untouched, 1 is fully greyscale, and
+    /// values in between blend linearly. Default: 0.
+    /// </summary>
+    /// <remarks>
+    /// The blend is applied uniformly to the final colour of the whole surface,
+    /// including flat (unshaded) vertex colours — see <see cref="ShadeFalseColor"/>. It
+    /// holds luminosity constant, so the colour drains towards grey without the surface
+    /// appearing to get lighter or darker.
+    /// </remarks>
+    /// <since>9.0</since>
+    public double Desaturation { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether a mesh's vertex colours are shaded. Has no effect on a mesh
+    /// that has no vertex colours. Default: false.
+    /// </summary>
+    /// <remarks>
+    /// When a mesh carries vertex colours, those colours — its "false colours" — are
+    /// always what gets drawn, in place of <see cref="Diffuse"/>. This property decides
+    /// only how they are drawn: true lights and shades them like any other surface
+    /// colour, while false draws them flat, with no lighting or shading applied at all.
+    /// Striping, stippling and <see cref="Desaturation"/> still apply either way.
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool ShadeFalseColor { get; set; }
   }
 }
 #endif

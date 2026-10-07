@@ -410,6 +410,20 @@ namespace Rhino.Collections
     }
 
     /// <summary>
+    /// Converts any object that is deemed suitable to SurfaceCurvature.
+    /// </summary>
+    internal static bool HelperTryCoerce(object item, out SurfaceCurvature result)
+    {
+      if (item is SurfaceCurvature curvature)
+      {
+        result = curvature;
+        return true;
+      }
+      result = default(SurfaceCurvature);
+      return false;
+    }
+
+    /// <summary>
     /// Converts any object that is deemed suitable to Point3f, or raises an exception.
     /// </summary>
     internal static Point3f HelperCoercePoint(object item)
@@ -429,6 +443,17 @@ namespace Rhino.Collections
       if (HelperTryCoerce(item, out result))
         return result;
       throw new ArgumentException("The object needs to be of type Point2f or Point2d.", "item");
+    }
+
+    /// <summary>
+    /// Converts any object that is deemed suitable to SurfaceCurvature, or raises an exception.
+    /// </summary>
+    internal static SurfaceCurvature HelpCoerceSurfaceCurvature(object item)
+    {
+      SurfaceCurvature result;
+      if (HelperTryCoerce(item, out result))
+        return result;
+      throw new ArgumentException("The object needs to be of type SurfaceCurvature.", "item");
     }
 
     /// <summary>
@@ -2633,6 +2658,7 @@ namespace Rhino.Collections
     #endregion
   }
 
+#pragma warning disable CA2000
   /// <summary>
   /// Represents a list of curves.
   /// </summary>
@@ -2803,4 +2829,6 @@ namespace Rhino.Collections
     }
     #endregion
   }
+
+#pragma warning restore CA2000
 }

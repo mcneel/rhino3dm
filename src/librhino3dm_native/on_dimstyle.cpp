@@ -74,13 +74,13 @@ RH_C_FUNCTION void ON_Dimstyle_SetTextStyle(ON_DimStyle* pointerToDimStyle, cons
 }
 
 #if !defined(RHINO3DM_BUILD) //in rhino.exe
-RH_C_FUNCTION CRhinoDib* ON_Dimstyle_GetPreview_Bitmap(const ON_DimStyle* constDimStyle, int width, int height)
+RH_C_FUNCTION CRhinoDib* ON_Dimstyle_GetPreview_Bitmap(const ON_DimStyle* constDimStyle, int width, int height, bool transparent)
 {
   ON_FPU_ClearExceptionStatus();
   CRhinoDoc* doc = RhinoApp().ActiveDoc();
   unsigned int doc_sn = CRhinoDoc::RuntimeSerialNumber(doc);
   CRhinoDib* dib = new CRhinoDib();
-  if (GetDimensionPreviewBitmap(doc_sn, constDimStyle, width, height, *dib))
+  if (GetDimensionPreviewBitmap(doc_sn, constDimStyle, width, height, transparent, *dib))
     return dib;
   delete dib;
   return nullptr;
@@ -213,6 +213,12 @@ RH_C_FUNCTION bool ON_DimStyle_GetBool(const ON_DimStyle* constDimStyle, ON_DimS
       return constDimStyle->TextUnderlined();
     case ON_DimStyle::field::ForceDimLine:
       return constDimStyle->ForceDimLine();
+    case ON_DimStyle::field::Kerning:
+      return constDimStyle->UseKerning();
+    case ON_DimStyle::field::SuppressDimLine1:
+      return constDimStyle->SuppressDimLine1();
+    case ON_DimStyle::field::SuppressDimLine2:
+      return constDimStyle->SuppressDimLine2();
 
     default:
       break;
@@ -263,6 +269,15 @@ RH_C_FUNCTION void ON_DimStyle_SetBool(ON_DimStyle* dimstyle, ON_DimStyle::field
     case ON_DimStyle::field::ForceDimLine:
       dimstyle->SetForceDimLine(val);
       break;
+    case ON_DimStyle::field::Kerning:
+      dimstyle->SetUseKerning(val);
+      break;
+    case ON_DimStyle::field::SuppressDimLine1:
+      dimstyle->SetSuppressDimLine1(val);
+      break;
+    case ON_DimStyle::field::SuppressDimLine2:
+      dimstyle->SetSuppressDimLine2(val);
+      break;
     default:
       return;
     }
@@ -289,6 +304,8 @@ RH_C_FUNCTION double ON_DimStyle_GetDouble(const ON_DimStyle* constDimStyle, ON_
       return constDimStyle->ArrowSize();
     case ON_DimStyle::field::LeaderArrowsize:
       return constDimStyle->LeaderArrowSize();
+    case ON_DimStyle::field::ClippingArrowSize:
+      return constDimStyle->ClippingArrowSize();
     case ON_DimStyle::field::Centermark:
       return constDimStyle->CenterMark();
     case ON_DimStyle::field::TextGap:
@@ -333,6 +350,8 @@ RH_C_FUNCTION double ON_DimStyle_GetDouble(const ON_DimStyle* constDimStyle, ON_
       return constDimStyle->LeaderLandingLength();
     case ON_DimStyle::field::LeaderContentAngle:
       return constDimStyle->LeaderContentAngleRadians();
+    case ON_DimStyle::field::LineSpaceScale:
+      return constDimStyle->LineSpaceScale();
     default:
       break;
     }
@@ -357,6 +376,9 @@ RH_C_FUNCTION void ON_DimStyle_SetDouble(ON_DimStyle* dimstyle, ON_DimStyle::fie
       break;
     case ON_DimStyle::field::LeaderArrowsize:
       dimstyle->SetLeaderArrowSize(val);
+      break;
+    case ON_DimStyle::field::ClippingArrowSize:
+      dimstyle->SetClippingArrowSize(val);
       break;
     case ON_DimStyle::field::Centermark:
       dimstyle->SetCenterMark(val);
@@ -423,6 +445,9 @@ RH_C_FUNCTION void ON_DimStyle_SetDouble(ON_DimStyle* dimstyle, ON_DimStyle::fie
       break;
     case ON_DimStyle::field::LeaderContentAngle:
       dimstyle->SetLeaderContentAngleRadians(val);
+      break;
+    case ON_DimStyle::field::LineSpaceScale:
+      dimstyle->SetLineSpaceScale(val);
       break;
     default:
       return;
@@ -604,6 +629,10 @@ RH_C_FUNCTION int ON_DimStyle_GetInt(const ON_DimStyle* constDimStyle, ON_DimSty
       return (int)constDimStyle->ArrowType2();
     case ON_DimStyle::field::LeaderArrowType:
       return (int)constDimStyle->LeaderArrowType();
+    case ON_DimStyle::field::ClippingArrowType1:
+      return (int)constDimStyle->ClippingArrowType1();
+    case ON_DimStyle::field::ClippingArrowType2:
+      return (int)constDimStyle->ClippingArrowType2();
     case ON_DimStyle::field::TextVerticalAlignment:
       return (int)constDimStyle->TextVerticalAlignment();
     case ON_DimStyle::field::LeaderTextVerticalAlignment:
@@ -798,6 +827,20 @@ RH_C_FUNCTION void ON_DimStyle_SetInt(ON_DimStyle* dimstyle, ON_DimStyle::field 
       const ON_Arrowhead::arrow_type arrow_type = ON_Arrowhead::ArrowTypeFromUnsigned((unsigned int)i);
       if (static_cast<const unsigned int>(arrow_type) == (unsigned int)i)
         dimstyle->SetLeaderArrowType(arrow_type);
+    }
+    break;
+    case ON_DimStyle::field::ClippingArrowType1:
+    {
+      const ON_ClippingArrowhead::arrow_type arrow_type = ON_ClippingArrowhead::ArrowTypeFromUnsigned((unsigned int)i);
+      if (static_cast<const unsigned int>(arrow_type) == (unsigned int)i)
+        dimstyle->SetClippingArrowType1(arrow_type);
+    }
+    break;
+    case ON_DimStyle::field::ClippingArrowType2:
+    {
+      const ON_ClippingArrowhead::arrow_type arrow_type = ON_ClippingArrowhead::ArrowTypeFromUnsigned((unsigned int)i);
+      if (static_cast<const unsigned int>(arrow_type) == (unsigned int)i)
+        dimstyle->SetClippingArrowType2(arrow_type);
     }
     break;
     case ON_DimStyle::field::DimRadialTextLocation:

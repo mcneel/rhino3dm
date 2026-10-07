@@ -116,6 +116,8 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox(ON_Line* pL
     ON_Plane plane(pLine->from, _normal, pLine->Direction());
 
     rc = new ON_PlaneSurface();
+    // Return value deliberately ignored; on failure the surface is still filled
+    // with the pseudo-infinite plane through the box, and this must not return null.
     rc->CreatePlaneThroughBox(plane, *pBox); // use default padding
   }
   return rc;
@@ -129,6 +131,7 @@ RH_C_FUNCTION ON_PlaneSurface* ON_PlaneSurface_CreatePlaneThroughBox2(const ON_P
     ON_Plane _plane = FromPlaneStruct(*pPlane);
     _plane.UpdateEquation();
     rc = new ON_PlaneSurface();
+    // Return value deliberately ignored; see ON_PlaneSurface_CreatePlaneThroughBox.
     rc->CreatePlaneThroughBox(_plane, *pBox); // use default padding
   }
   return rc;
@@ -282,4 +285,17 @@ RH_C_FUNCTION ON_ClippingPlaneSurface* ON_ClippingPlaneSurface_New_FromPlane(con
 RH_C_FUNCTION ON_ClippingPlaneSurface* ON_ClippingPlaneSurface_New_FromPLaneSurface(const ON_PlaneSurface* planeSurface)
 {
   return new ON_ClippingPlaneSurface(*planeSurface);
+}
+
+RH_C_FUNCTION ON_UUID ON_ClippingPlaneSurface_DimensionStyleId(const ON_ClippingPlaneSurface* pClippingPlaneSurface)
+{
+  if (nullptr != pClippingPlaneSurface)
+    return pClippingPlaneSurface->DimensionStyleId();
+  return ::ON_nil_uuid;
+}
+
+RH_C_FUNCTION void ON_ClippingPlaneSurface_SetDimensionStyleId(ON_ClippingPlaneSurface* pClippingPlaneSurface, ON_UUID styleId)
+{
+  if (nullptr != pClippingPlaneSurface)
+    pClippingPlaneSurface->SetDimensionStyleId(styleId);
 }

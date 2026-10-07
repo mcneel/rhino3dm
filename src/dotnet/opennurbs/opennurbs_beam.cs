@@ -107,10 +107,13 @@ namespace Rhino.Geometry
         box.PointAt(1,1,0),
         box.PointAt(0,1,0),
         box.PointAt(0,0,0),
-      }.ToPolylineCurve();
+      };
 
-      double height = box.m_dz.Length;
-      return Create(pl, height, cap);
+      using (var pc = pl.ToPolylineCurve())
+      {
+        double height = box.m_dz.Length;
+        return Create(pc, height, cap);
+      }
     }
 
     /// <summary>

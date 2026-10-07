@@ -4,4 +4,4 @@ if sys.version_info.major==2:
 else:
     from ._rhino3dm import *
 
-__version__ = '8.35.0'
+__version__ = '9.0.0b0'

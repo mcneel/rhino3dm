@@ -1,6 +1,8 @@
 using Rhino.Geometry;
 #pragma warning disable 1591
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.FileIO;
@@ -313,6 +315,20 @@ namespace Rhino.DocObjects
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.PlotWeightSource, (int)value); }
     }
 
+// Uses RHINO_SDK-only types; excluded from the stand-alone opennurbs (Rhino3dm) build.
+#if RHINO_SDK
+    /// <since>9.0</since>
+    public SectionStyle ComputedSectionStyle(RhinoDoc doc, ObjectAttributes sectionerAttributes, bool computeColors, Guid viewport_id)
+    {
+      if (null == doc || null == sectionerAttributes) return null;
+      IntPtr const_ptr_this = ConstPointer();
+      uint docID = doc.RuntimeSerialNumber;
+      IntPtr const_ptr_sectionerAttributes = sectionerAttributes.ConstPointer();
+      IntPtr ptr_sectionStyle = UnsafeNativeMethods.ON_3dmObjectAtributes_ComputedSectionStyle(const_ptr_this, docID, const_ptr_sectionerAttributes, computeColors, viewport_id);
+      if (ptr_sectionStyle == IntPtr.Zero) return null;
+      return new SectionStyle(ptr_sectionStyle);
+    }
+#endif
     ///<summary>
     /// Get an optional custom section style associated with these attributes.
     ///</summary>
@@ -381,8 +397,18 @@ namespace Rhino.DocObjects
     /// <since>8.0</since>
     public System.Drawing.Color HatchBackgroundFillColor
     {
-      get { return GetColor(IDX_HATCH_BACKGROUND_FILL_COLOR); }
-      set { SetColor(IDX_HATCH_BACKGROUND_FILL_COLOR, value); }
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBackgroundFillColor); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBackgroundFillColor, value); }
+    }
+
+    /// <summary>
+    /// Fill color for hatches when printing (default is Color.Empty)
+    /// </summary>
+    /// <since>9.0</since>
+    public System.Drawing.Color HatchBackgroundFillPrintColor
+    {
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBackgroundFillColorPrint); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBackgroundFillColorPrint, value); }
     }
 
     /// <summary>
@@ -396,6 +422,79 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Hatch boundary color override. Default is unset color which means use
+    /// the standard attributes and layer colors to determine the boundary color
+    /// </summary>
+    /// <since>9.0</since>
+    public System.Drawing.Color HatchBoundaryColor
+    {
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBoundaryColor); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBoundaryColor, value); }
+    }
+
+    /// <summary>
+    /// Hatch boundary plot color override. Default is unset color which means use
+    /// the standard attributes and layer colors to determine the boundary color
+    /// </summary>
+    /// <since>9.0</since>
+    public System.Drawing.Color HatchBoundaryPlotColor
+    {
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBoundaryPrintColor); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.HatchBoundaryPrintColor, value); }
+    }
+
+    /// <summary>
+    /// Source for the hatch boundary display color. Determines whether the
+    /// boundary color is read from the layer, from the object's main
+    /// attribute color, inherited from the parent, or read from the custom
+    /// override color set by HatchBoundaryColor (ColorCustom).
+    /// </summary>
+    /// <since>9.0</since>
+    public ItemColorSource HatchBoundaryColorSource
+    {
+      get { return (ItemColorSource)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.HatchBoundaryColorSource); }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.HatchBoundaryColorSource, (int)value); }
+    }
+
+    /// <summary>
+    /// Source for the hatch boundary plot/print color. Determines whether
+    /// the boundary plot color is read from the layer, from the object's
+    /// main attribute color, inherited from the parent, or read from the
+    /// custom override color set by HatchBoundaryPlotColor (ColorCustom).
+    /// </summary>
+    /// <since>9.0</since>
+    public ItemColorSource HatchBoundaryPlotColorSource
+    {
+      get { return (ItemColorSource)GetInt(UnsafeNativeMethods.ObjectAttrsInteger.HatchBoundaryPrintColorSource); }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.HatchBoundaryPrintColorSource, (int)value); }
+    }
+
+    /// <summary>
+    /// Plot width of hatch boundary curves.
+    ///  values less than -1 (-10 is default): plot weight is determined by the
+    ///                                        m_plot_weight
+    ///  -1: do not plot
+    ///   0: use default weight defined by the print dialog
+    ///   positive values are thicknesses in millimeters to print to
+    /// </summary>
+    /// <since>9.0</since>
+    public double HatchBoundaryPlotWeightMillimeters
+    {
+      get { return GetDouble(UnsafeNativeMethods.ObjectAttrsDouble.HatchBoundaryPlotWeightMM); }
+      set { SetDouble(UnsafeNativeMethods.ObjectAttrsDouble.HatchBoundaryPlotWeightMM, value); }
+    }
+
+    /// <summary>
+    /// Should the background color show for a detail
+    /// </summary>
+    /// <since>9.0</since>
+    public bool DetailBackgroundVisible
+    {
+      get { return GetBool(UnsafeNativeMethods.ObjectAttrsBool.DetailBackgroundVisible); }
+      set { SetBool(UnsafeNativeMethods.ObjectAttrsBool.DetailBackgroundVisible, value); }
+    }
+
+    /// <summary>
     /// Defines how a label for a clipping plane object should be shown
     /// </summary>
     /// <since>8.0</since>
@@ -405,6 +504,7 @@ namespace Rhino.DocObjects
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.ClippingPlaneLabelStyle, (int)value); }
     }
 
+    #region CustomLinetype
     ///<summary>
     /// Get an optional custom linetype associated with these attributes. If null,
     /// then the attributes use the linetype index to determine it's linetype
@@ -443,7 +543,9 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmObjectAttributes_SetCustomLinetype(ptr_this, IntPtr.Zero);
       GC.KeepAlive(this);
     }
+    #endregion
 
+    #region DisplayModeOverride
     /// <summary>
     /// Determines if an object has a display mode override for a given viewport.
     /// </summary>
@@ -548,7 +650,9 @@ namespace Rhino.DocObjects
       UnsafeNativeMethods.ON_3dmObjectAttributes_ClearDisplayMode(ptr_this, rhinoViewportId);
       GC.KeepAlive(this);
     }
+    #endregion
 
+    #region HideInDetail
     /// <summary> Make this object hidden in a given detail </summary>
     /// <param name="detailId"></param>
     /// <returns></returns>
@@ -598,11 +702,87 @@ namespace Rhino.DocObjects
       using (var guids = new SimpleArrayGuid())
       {
         IntPtr constPtrThis = ConstPointer();
-        UnsafeNativeMethods.ON_3dmObjectAttributes_HideInDetailIds(constPtrThis, guids.NonConstPointer());
+        UnsafeNativeMethods.ON_3dmObjectAttributes_GetHideInDetailIds(constPtrThis, guids.NonConstPointer());
         GC.KeepAlive(this);
         return guids.ToArray();
       }
     }
+    #endregion
+
+    #region ActiveInViewport
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool GetActiveInViewportOverrides(out Guid[] viewportIds, out bool active)
+    {
+      using (var guids = new SimpleArrayGuid())
+      {
+        IntPtr constPtrThis = ConstPointer();
+        active = false;
+        var rc = UnsafeNativeMethods.ON_3dmObjectAttributes_GetActiveInViewportOverrides(constPtrThis, guids.NonConstPointer(), ref active);
+        GC.KeepAlive(this);
+        viewportIds = guids.ToArray();
+        return rc;
+      }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool SetActiveInViewportOverrides(Guid[] viewportIds, bool active)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      var rc = UnsafeNativeMethods.ON_3dmObjectAttributes_SetActiveInViewportOverrides(constPtrThis, viewportIds, viewportIds.Length, active);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool HasActiveInViewportOverride(Guid viewportId, out bool active)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      active = false;
+      var rc = UnsafeNativeMethods.ON_3dmObjectAttributes_HasActiveInViewportOverride(constPtrThis, viewportId, ref active);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool AddActiveInViewportOverride(Guid viewportId, bool active)
+    {
+      IntPtr constPtrThis = ConstPointer();
+      var rc = UnsafeNativeMethods.ON_3dmObjectAttributes_AddActiveInViewportOverride(constPtrThis, viewportId, active);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="viewportId"></param>
+    /// <param name="active"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool RemoveActiveInViewportOverride(Guid viewportId, bool active)
+    {
+      IntPtr ptrThis = NonConstPointer();
+      bool rc = UnsafeNativeMethods.ON_3dmObjectAttributes_RemoveActiveInViewportOverride(ptrThis, viewportId, active);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    #endregion
 
     /// <summary>
     /// Returns or sets the per-object render meshing parameters, which controls the object's render mesh density.
@@ -835,6 +1015,17 @@ namespace Rhino.DocObjects
       set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.MaterialSource, (int)value); }
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Gets or sets the section style index.
+    /// </summary>
+    /// <since>9.0</since>
+    public int SectionStyleIndex
+    {
+      get { return GetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionStyleIndex); }
+      set { SetInt(UnsafeNativeMethods.ObjectAttrsInteger.SectionStyleIndex, value); }
+    }
+#endif
 
 #if RHINO_SDK
     /// <summary>
@@ -851,17 +1042,18 @@ namespace Rhino.DocObjects
           throw new ArgumentException("The material is not attached to a document.");
         }
 
-        var material = value.ToMaterial(Render.RenderTexture.TextureGeneration.Allow);
-
-        material.RenderMaterialInstanceId = value.Id;
-
-        if (MaterialIndex == -1)
+        using (var material = value.ToMaterial(Render.RenderTexture.TextureGeneration.Allow))
         {
-          MaterialIndex = doc.Materials.Add(material);
-        }
-        else
-        {
-          doc.Materials.Modify(material, MaterialIndex, true);
+          material.RenderMaterialInstanceId = value.Id;
+
+          if (MaterialIndex == -1)
+          {
+            MaterialIndex = doc.Materials.Add(material);
+          }
+          else
+          {
+            doc.Materials.Modify(material, MaterialIndex, true);
+          }
         }
 
         MaterialSource = ObjectMaterialSource.MaterialFromObject;
@@ -869,17 +1061,14 @@ namespace Rhino.DocObjects
     }
 #endif
 
-    const int IDX_COLOR = 0;
-    const int IDX_PLOT_COLOR = 1;
-    const int IDX_HATCH_BACKGROUND_FILL_COLOR = 2;
-    System.Drawing.Color GetColor(int which)
+    System.Drawing.Color GetColor(UnsafeNativeMethods.ObjectAttrsColor which)
     {
       IntPtr ptr = ConstPointer();
       int argb = UnsafeNativeMethods.ON_3dmObjectAttributes_GetSetColor(ptr, which, false, 0);
       GC.KeepAlive(this);
       return System.Drawing.Color.FromArgb(argb);
     }
-    void SetColor(int which, System.Drawing.Color c)
+    void SetColor(UnsafeNativeMethods.ObjectAttrsColor which, System.Drawing.Color c)
     {
       IntPtr ptr = NonConstPointer();
       int argb = c.ToArgb();
@@ -925,7 +1114,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <since>8.0</since>
     [Flags]
@@ -998,7 +1187,7 @@ namespace Rhino.DocObjects
     /// If you are developing a high quality plug-in renderer, and a user is
     /// assigning a custom render material to this object, then add rendering
     /// material information to the MaterialRefs dictionary.
-    /// 
+    ///
     /// Note to developers:
     ///  As soon as the MaterialRefs dictionary contains items rendering
     ///  material queries slow down.  Do not populate the MaterialRefs
@@ -1021,8 +1210,8 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public System.Drawing.Color ObjectColor
     {
-      get { return GetColor(IDX_COLOR); }
-      set { SetColor(IDX_COLOR, value); }
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.Color); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.Color, value); }
     }
     /// <summary>
     /// If plot_color_from_object == PlotColorSource, then PlotColor is the object's plotting color.
@@ -1030,8 +1219,8 @@ namespace Rhino.DocObjects
     /// <since>5.0</since>
     public System.Drawing.Color PlotColor
     {
-      get { return GetColor(IDX_PLOT_COLOR); }
-      set { SetColor(IDX_PLOT_COLOR, value); }
+      get { return GetColor(UnsafeNativeMethods.ObjectAttrsColor.PlotColor); }
+      set { SetColor(UnsafeNativeMethods.ObjectAttrsColor.PlotColor, value); }
     }
 
     /// <summary>
@@ -1164,7 +1353,7 @@ namespace Rhino.DocObjects
     /// how many isoparametric wires are used.
     /// value    number of isoparametric wires
     /// -1       boundary wires (off)
-    /// 0        boundary and knot wires 
+    /// 0        boundary and knot wires
     /// 1        boundary and knot wires and, if there are no interior knots, a single interior wire.
     /// N>=2     boundary and knot wires and (N+1) interior wires.
     /// </summary>
@@ -1182,7 +1371,7 @@ namespace Rhino.DocObjects
 
 
     /// <summary>
-    /// If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then 
+    /// If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then
     /// this object is only active in a specific view. This field is primarily used to assign page
     /// space objects to a specific page, but it can also be used to restrict model space to a
     /// specific view.
@@ -1306,7 +1495,7 @@ namespace Rhino.DocObjects
 
     // [skipping]
     //  bool FindDisplayMaterialRef(
-    //  bool FindDisplayMaterialId( 
+    //  bool FindDisplayMaterialId(
     //  bool AddDisplayMaterialRef(
     //  bool RemoveDisplayMaterialRef(
     //  void RemoveAllDisplayMaterialRefs();

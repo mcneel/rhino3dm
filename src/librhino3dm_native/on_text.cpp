@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "../../../opennurbs/opennurbs_textiterator.h"
 
 RH_C_SHARED_ENUM_PARSE_FILE("../../../opennurbs/opennurbs_text.h")
 //--------------------------------------------------------
@@ -136,6 +137,147 @@ RH_C_FUNCTION void ON_V6_Annotation_GetPlainTextWithRunMap(const ON_Annotation* 
     for(int i = 0; i < count; i++)
       intrunmap->Append(3, &runmap[i].i);
   }
+}
+
+RH_C_FUNCTION ON_TextRunArray* ON_TextRunArray_New(/*int initial_capacity*/)
+{
+  return new ON_TextRunArray(/*initial_capacity*/);
+}
+
+RH_C_FUNCTION void ON_TextRunArray_Delete( ON_TextRunArray* pArray )
+{
+  if( pArray )
+    delete pArray;
+}
+
+RH_C_FUNCTION int ON_TextRunArray_Count( const ON_TextRunArray* pArray )
+{
+  int rc = pArray ? pArray->Count() : 0;
+  return rc;
+}
+
+RH_C_FUNCTION void ON_TextRunArray_Append(ON_TextRunArray* pTextRunArray, const ON_TextRun* constTextRun)
+{
+  if (pTextRunArray && constTextRun)
+  {
+    ON_TextRun* run = constTextRun->GetManagedTextRun(*constTextRun);
+    if (run)
+      pTextRunArray->AppendRun(run);
+  }
+}
+
+RH_C_FUNCTION void ON_TextRunArray_SetTextHeight(ON_TextRunArray* pTextRunArray, double height)
+{
+  if (pTextRunArray)
+    pTextRunArray->SetTextHeight(height);
+}
+
+RH_C_FUNCTION void ON_TextRunArray_SetLineSpaceScale(ON_TextRunArray* pTextRunArray, double scale)
+{
+  if (pTextRunArray)
+    pTextRunArray->SetLineSpaceScale(scale);
+}
+
+RH_C_FUNCTION void ON_TextRunArray_SetApplyKerning(ON_TextRunArray* pTextRunArray, bool applyKerning)
+{
+  if (pTextRunArray)
+    pTextRunArray->SetApplyKerning(applyKerning);
+}
+
+// True if any text run still carries the literal "<>" measurement placeholder.
+static bool Internal_TextRunsContainDimMarker(const ON_TextRunArray* runs)
+{
+  if (nullptr == runs)
+    return false;
+  for (int i = 0; i < runs->Count(); i++)
+  {
+    const ON_TextRun* run = (*runs)[i];
+    if (nullptr != run && ON_TextRun::RunType::kText == run->Type())
+    {
+      if (ON_wString(run->TextString()).Find(L"<>") >= 0)
+        return true;
+    }
+  }
+  return false;
+}
+
+RH_C_FUNCTION const ON_TextRunArray* ON_V9_Annotation_GetTextRuns(const ON_Annotation* constAnnotation)
+{
+  const ON_TextRunArray* tra = nullptr;
+  if (nullptr != constAnnotation)
+  {
+    const ON_TextContent* tc = constAnnotation->Text();
+    if (nullptr != tc)
+    {
+      const ON_TextRunArray* runs = tc->TextRuns(true);
+      // For dimensions the editor must round-trip the AUTHORED text (the "<>"
+      // formula with its run formatting such as super/subscript), not the
+      // resolved display runs (which have the measurement substituted and the
+      // "<>" consumed). If the current runs still carry the "<>" marker they
+      // are freshly-set authored runs; otherwise return the cached authored
+      // template when present. Text entities have no dimension template, so
+      // this returns their runs unchanged.
+      if (tc->HasDimensionTemplate() && !Internal_TextRunsContainDimMarker(runs))
+        tra = tc->DimensionTemplate();
+      else
+        tra = runs;
+    }
+  }
+  return tra;
+}
+
+RH_C_FUNCTION void ON_V9_Annotation_SetTextRuns(ON_Annotation* annotation, const ON_TextRunArray* textRunArray)
+{
+  if (annotation && textRunArray)
+  {
+    annotation->SetText(*textRunArray);
+  }
+}
+
+RH_C_FUNCTION ON_TextRun* ON_TextRunArray_ON_TextRun_At(const ON_TextRunArray* textRunArray, int index)
+{
+  ON_TextRun* rc = nullptr;
+  if (textRunArray && index >= 0 && index < textRunArray->Count())
+  {
+    const ON_TextRun* runOnArray = (*textRunArray)[index];
+    if (runOnArray)
+      rc = ON_TextRun::GetManagedTextRun(*runOnArray);
+  }
+  return rc;
+}
+
+// Pure helper: parse an RTF string to a freshly allocated ON_TextRunArray.
+// Caller owns the returned pointer and must release it with
+// ON_TextRunArray_Delete. Returns nullptr if the parse fails (including
+// on empty input).
+RH_C_FUNCTION ON_TextRunArray* ON_RtfParser_ParseToRuns(
+  const RHMONO_STRING* rtf_string,
+  const ON_DimStyle* dim_style)
+{
+  INPUTSTRINGCOERCE(_rtf, rtf_string);
+  ON_TextRunArray* runs = new ON_TextRunArray();
+  ON_SHA1_Hash hash;
+  const ON_Font* default_font = nullptr;
+  if (!ON_RtfParser::ParseToRuns(_rtf, dim_style, *runs, hash, default_font))
+  {
+    delete runs;
+    return nullptr;
+  }
+  return runs;
+}
+
+// Pure helper: compose an RTF string from an existing ON_TextRunArray and
+// an explicit default (style) font. Writes to *out_string on success.
+// Does NOT consult the RtfComposer::RecomposeRTF() flag -- this is the
+// straight runs-in-rtf-out path.
+RH_C_FUNCTION bool ON_RtfComposer_ComposeFromRuns(
+  ON_TextRunArray* runs,
+  const ON_Font* default_font,
+  ON_wString* out_string)
+{
+  if (nullptr == runs || nullptr == default_font || nullptr == out_string)
+    return false;
+  return RtfComposer::ComposeFromRuns(*runs, *default_font, *out_string, true);
 }
 
 RH_C_FUNCTION double ON_V6_Annotation_GetFormatWidth(const ON_Annotation* constAnnotation)
@@ -546,6 +688,35 @@ RH_C_FUNCTION void ON_V6_Annotation_SetAlternateSuffix(ON_Annotation* annotation
     INPUTSTRINGCOERCE(suffix, str);
     annotation->SetAlternateSuffix(parent_style, suffix);
   }
+}
+
+// 31-Aug-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-66603
+RH_C_FUNCTION bool ON_V6_Annotation_SuppressDimLine1(const ON_Annotation* annotation, const ON_DimStyle* parent_style)
+{
+  if (nullptr != annotation)
+    return annotation->SuppressDimLine1(parent_style);
+  else
+    return ON_DimStyle::Default.SuppressDimLine1();
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_SetSuppressDimLine1(ON_Annotation* annotation, const ON_DimStyle* parent_style, bool b)
+{
+  if (nullptr != annotation)
+    annotation->SetSuppressDimLine1(parent_style, b);
+}
+
+RH_C_FUNCTION bool ON_V6_Annotation_SuppressDimLine2(const ON_Annotation* annotation, const ON_DimStyle* parent_style)
+{
+  if (nullptr != annotation)
+    return annotation->SuppressDimLine2(parent_style);
+  else
+    return ON_DimStyle::Default.SuppressDimLine2();
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_SetSuppressDimLine2(ON_Annotation* annotation, const ON_DimStyle* parent_style, bool b)
+{
+  if (nullptr != annotation)
+    annotation->SetSuppressDimLine2(parent_style, b);
 }
 
 RH_C_FUNCTION bool ON_V6_Annotation_SuppressExtension1(const ON_Annotation* annotation, const ON_DimStyle* parent_style)
@@ -1587,29 +1758,32 @@ RH_C_FUNCTION void ON_Dim_SetTextUnderlined(ON_Annotation* anno, const ON_DimSty
   }
 }
 
-RH_C_FUNCTION void ON_V6_DimLinear_GetDisplayText(const ON_DimLinear* dimptr, ON::LengthUnitSystem units, const ON_DimStyle* dimstyle, ON_wString* wstring)
+RH_C_FUNCTION void ON_V6_DimLinear_GetDisplayText(const ON_DimLinear* dimptr, ON::LengthUnitSystem units, double meters_per_unit, const ON_DimStyle* dimstyle, ON_wString* wstring)
 {
   if (dimptr && wstring)
   {
-    if (!dimptr->GetDistanceDisplayText(units, dimstyle, *wstring))
+    ON_UnitSystem us = units != ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem(units) : ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+    if (!dimptr->GetDistanceDisplayText(us, dimstyle, *wstring))
       *wstring = ON_wString::EmptyString;
   }
 }
 
-RH_C_FUNCTION void ON_V6_DimRadial_GetDisplayText(const ON_DimRadial* dimptr, ON::LengthUnitSystem units, const ON_DimStyle* dimstyle, ON_wString* wstring)
+RH_C_FUNCTION void ON_V6_DimRadial_GetDisplayText(const ON_DimRadial* dimptr, ON::LengthUnitSystem units, double meters_per_unit, const ON_DimStyle* dimstyle, ON_wString* wstring)
 {
   if (dimptr && wstring)
   {
-    if (!dimptr->GetDistanceDisplayText(units, dimstyle, *wstring))
+    ON_UnitSystem us = units != ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem(units) : ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+    if (!dimptr->GetDistanceDisplayText(us, dimstyle, *wstring))
       *wstring = ON_wString::EmptyString;
   }
 }
 
-RH_C_FUNCTION void ON_V6_DimOrdinate_GetDisplayText(const ON_DimOrdinate* dimptr, ON::LengthUnitSystem units, const ON_DimStyle* dimstyle, ON_wString* wstring)
+RH_C_FUNCTION void ON_V6_DimOrdinate_GetDisplayText(const ON_DimOrdinate* dimptr, ON::LengthUnitSystem units, double meters_per_unit, const ON_DimStyle* dimstyle, ON_wString* wstring)
 {
   if (dimptr && wstring)
   {
-    if (!dimptr->GetDistanceDisplayText(units, dimstyle, *wstring))
+    ON_UnitSystem us = units != ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem(units) : ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+    if (!dimptr->GetDistanceDisplayText(us, dimstyle, *wstring))
       *wstring = ON_wString::EmptyString;
   }
 }
@@ -1654,6 +1828,17 @@ RH_C_FUNCTION bool ON_V6_TextObject_GetTextXform(const ON_Text* constPtrTextObje
   if (constPtrTextObject && xform_out)
   {
     rc = constPtrTextObject->GetTextXform(nullptr, dimstyle, scale, *xform_out);
+  }
+  return rc;
+}
+
+// 24-Jul-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-88529
+RH_C_FUNCTION bool ON_V6_TextObject_GetTextXform2(const ON_Text* constPtrTextObject, const ON_Viewport* constViewport, const ON_DimStyle* dimstyle, double scale, ON_Xform* xform_out)
+{
+  bool rc = false;
+  if (constPtrTextObject && xform_out)
+  {
+    rc = constPtrTextObject->GetTextXform(constViewport, dimstyle, scale, *xform_out);
   }
   return rc;
 }
@@ -1708,6 +1893,96 @@ RH_C_FUNCTION void ON_Annotation_SetFont(ON_Annotation* annotation, const ON_Dim
   if (nullptr != annotation && nullptr != font)
   {
     annotation->SetAnnotationFont(font, parent_style);
+  }
+}
+
+RH_C_FUNCTION void ON_Annotation_SetFont2(ON_Annotation* annotation, const ON_DimStyle* parent_style, const class ON_Font* font, bool keep_overrides)
+{
+  if (nullptr != annotation && nullptr != font)
+  {
+    annotation->SetAnnotationFont(font, parent_style, keep_overrides);
+  }
+}
+
+RH_C_FUNCTION void ON_Annotation_SetFont3(
+    ON_Annotation* annotation,
+    const ON_DimStyle* parent_style,
+    const ON_Font* font,
+    bool keep_overrides,
+    bool underline)
+{
+  if (nullptr == annotation || nullptr == font)
+    return;
+  ON_Font modified(*font);
+  modified.SetUnderlined(underline);
+  const ON_Font* managed = modified.ManagedFont();
+  if (nullptr != managed)
+    annotation->SetAnnotationFont(managed, parent_style, keep_overrides);
+}
+
+//which: 0 = bold, 1 = italic, 2 = underline.
+RH_C_FUNCTION void ON_Annotation_SetRunsFontAttribute(
+    ON_Annotation* annotation,
+    const ON_DimStyle* parent_style,
+    int which,
+    bool value)
+{
+  if (nullptr == annotation)
+    return;
+  const ON_TextContent* text = annotation->Text();
+  if (nullptr == text)
+    return;
+  const ON_TextRunArray* runs = text->TextRuns(true);
+  if (nullptr == runs)
+    return;
+
+  ON_SimpleArray<const ON_Font*> unique_fonts(8);
+  for (int i = 0; i < runs->Count(); i++)
+  {
+    const ON_TextRun* run = (*runs)[i];
+    if (nullptr == run)
+      continue;
+    ON_TextRun::RunType type = run->Type();
+    if (type == ON_TextRun::RunType::kListBegin ||
+        type == ON_TextRun::RunType::kListEnd ||
+        type == ON_TextRun::RunType::kListItemEnd)
+      continue;
+    const ON_Font* f = run->Font();
+    if (nullptr == f)
+      continue;
+
+    bool found = false;
+    for (int j = 0; j < unique_fonts.Count(); j++)
+    {
+      if (unique_fonts[j] == f) { found = true; break; }
+    }
+    if (!found)
+      unique_fonts.Append(f);
+  }
+
+  for (int i = 0; i < unique_fonts.Count(); i++)
+  {
+    const ON_Font* old_font = unique_fonts[i];
+    bool bold = old_font->IsBoldInQuartet();
+    bool italic = old_font->IsItalicInQuartet();
+    bool underline = old_font->IsUnderlined();
+    bool strikethrough = old_font->IsStrikethrough();
+
+    switch (which)
+    {
+    case 0: bold = value; break;
+    case 1: italic = value; break;
+    case 2: underline = value; break;
+    default: return;
+    }
+
+    const ON_Font* new_font = ON_Font::FontFromRichTextProperties(
+      ON_Font::RichTextFontName(old_font, true),
+      bold, italic, underline, strikethrough);
+    if (nullptr == new_font || new_font == old_font)
+      continue;
+
+    annotation->SetAnnotationFont(new_font, parent_style, true, old_font);
   }
 }
 
@@ -1776,6 +2051,33 @@ RH_C_FUNCTION bool ON_Annotation_IsAllUnderlined(const ON_Annotation* ptr)
   return false;
 }
 
+RH_C_FUNCTION bool ON_Annotation_UseKerning(const ON_Annotation* constPtrAnnotation, const ON_DimStyle* constParentDimstyle)
+{
+  if (constPtrAnnotation)
+    return constPtrAnnotation->UseKerning(constParentDimstyle);
+  return false;
+}
+
+RH_C_FUNCTION void ON_Annotation_SetUseKerning(ON_Annotation* ptrAnnotation, const ON_DimStyle* constParentDimStyle, bool enabled)
+{
+  if (ptrAnnotation)
+    ptrAnnotation->SetUseKerning(constParentDimStyle, enabled);
+}
+
+RH_C_FUNCTION double ON_Annotation_LineSpaceScale(const ON_Annotation* constPtrAnnotation, const ON_DimStyle* constParentDimstyle)
+{
+  if (constPtrAnnotation)
+    return constPtrAnnotation->LineSpaceScale(constParentDimstyle);
+  return 1.0;
+}
+
+RH_C_FUNCTION void ON_Annotation_SetLineSpaceScale(ON_Annotation* ptrAnnotation, const ON_DimStyle* constParentDimStyle, double scale)
+{
+  if (ptrAnnotation)
+    ptrAnnotation->SetLineSpaceScale(constParentDimStyle, scale);
+}
+
+
 // ON_TextRun
 //---------------------------------------------------------------------
 
@@ -1784,11 +2086,20 @@ enum TextRunTypeConsts : int
   rtNone = 0,
   rtText = 1,
   rtNewline = 2,
-  rtParagraph = 3,
-  rtColumn = 4,
-  rtField = 5,
-  rtFontdef = 6,
-  rtHeader = 7
+  rtSoftreturn = 3,
+  rtParagraph = 4,
+  rtColumn = 5,
+  rtField = 6,
+  rtFieldValue = 7,
+  rtFontdef = 8,
+  rtHeader = 9,
+  rtFonttbl = 10,
+  rtColortbl = 11,
+  rtTab = 12,
+  rtListBegin = 13,
+  rtListEnd = 14,
+  rtListItemBegin = 15,
+  rtListItemEnd = 16
 };
 
 //TextRunTypeConsts TextRunType(int rti)
@@ -1813,6 +2124,9 @@ int TextRunType(TextRunTypeConsts rt)
   int type = (int)ON_TextRun::RunType::kNone;
   switch (rt)
   {
+  case rtNone:
+    type = (int)ON_TextRun::RunType::kNone;
+    break;
   case rtText:       type = (int)ON_TextRun::RunType::kText;      break;
   case rtNewline:    type = (int)ON_TextRun::RunType::kNewline;   break;
   case rtParagraph:  type = (int)ON_TextRun::RunType::kParagraph; break;
@@ -1822,8 +2136,32 @@ int TextRunType(TextRunTypeConsts rt)
   case rtHeader:
     type = (int)ON_TextRun::RunType::kHeader;
     break;
-  case rtNone:
-    type =(int)ON_TextRun::RunType::kNone;
+  case rtSoftreturn:
+    type = (int)ON_TextRun::RunType::kSoftreturn;
+    break;
+  case rtFieldValue:
+    type = (int)ON_TextRun::RunType::kFieldValue;
+    break;
+  case rtFonttbl:
+    type = (int)ON_TextRun::RunType::kFonttbl;
+    break;
+  case rtColortbl:
+    type = (int)ON_TextRun::RunType::kFonttbl;
+    break;
+  case rtTab:
+    type = (int)ON_TextRun::RunType::kTab;
+    break;
+  case rtListBegin:
+    type = (int)ON_TextRun::RunType::kListBegin;
+    break;
+  case rtListEnd:
+    type = (int)ON_TextRun::RunType::kListEnd;
+    break;
+  case rtListItemBegin:
+    type = (int)ON_TextRun::RunType::kListItemBegin;
+    break;
+  case rtListItemEnd:
+    type = (int)ON_TextRun::RunType::kListItemEnd;
     break;
   }
   return type;
@@ -1854,6 +2192,14 @@ RH_C_FUNCTION void ON_TextRun_SetType(ON_TextRun* ptrTextRun, TextRunTypeConsts 
 {
   if (ptrTextRun)
     ptrTextRun->SetType(static_cast< ON_TextRun::RunType >(TextRunType(rt)));
+}
+
+RH_C_FUNCTION const ON_Font* ON_V9_TextRun_Font(const ON_TextRun* text_run)
+{
+  if (nullptr != text_run)
+    return text_run->Font();
+  else
+    return &ON_DimStyle::Default.Font();
 }
 
 //RH_C_FUNCTION double ON_TextRun_Height(const ON_TextRun* constPtrTextRun)
@@ -1955,6 +2301,146 @@ RH_C_FUNCTION void ON_TextRun_SetType(ON_TextRun* ptrTextRun, TextRunTypeConsts 
 //    return 1.0;
 //}
 //
+
+RH_C_FUNCTION void ON_TextRun_GetTextString(const ON_TextRun* constPtrTextRun, ON_wString* wstring)
+{
+  if (nullptr != wstring)
+  {
+    if (constPtrTextRun)
+    {
+      const wchar_t* runText = constPtrTextRun->TextString();
+      if (nullptr != runText)
+      {
+        // C4267: argument: conversion from 'size_t' to 'int', possible loss of data
+        #pragma warning( disable : 4267)
+        wstring->Append(runText, wcslen(runText));
+      }
+    }
+    else
+      *wstring = ON_wString::EmptyString;
+  }
+}
+
+RH_C_FUNCTION bool ON_TextRun_IsStacked(const ON_TextRun* constPtrTextRun)
+{
+  bool b = false;
+  if (constPtrTextRun)
+  {
+    b = constPtrTextRun->IsStacked() == ON_TextRun::Stacked::kStacked; 
+  }
+  return b;
+}
+
+RH_C_FUNCTION bool ON_TextRun_IsSuperscript(const ON_TextRun* constPtrTextRun)
+{
+  bool b = false;
+  if (constPtrTextRun)
+  {
+    b = constPtrTextRun->IsSuperscript();
+  }
+  return b;
+}
+
+RH_C_FUNCTION bool ON_TextRun_IsSubscript(const ON_TextRun* constPtrTextRun)
+{
+  bool b = false;
+  if (constPtrTextRun)
+  {
+    b = constPtrTextRun->IsSubscript();
+  }
+  return b;
+}
+
+RH_C_FUNCTION void ON_TextRun_SetSuperscript(ON_TextRun* ptrTextRun)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetSuperscript();
+  }
+}
+
+RH_C_FUNCTION void ON_TextRun_SetSubscript(ON_TextRun* ptrTextRun)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetSubscript();
+  }
+}
+
+RH_C_FUNCTION void ON_TextRun_SetSuperOrSubscriptOff(ON_TextRun* ptrTextRun)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetStackedOff();
+  }
+}
+
+RH_C_FUNCTION void ON_TextRun_SetStacked(ON_TextRun* ptrTextRun, int separator)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetType(ON_TextRun::RunType::kText);
+    ptrTextRun->SetStacked(ON_TextRun::Stacked::kStacked);
+    if (nullptr == ptrTextRun->m_stacked_text)
+      ptrTextRun->m_stacked_text = new ON_StackedText;
+    ptrTextRun->m_stacked_text->m_separator = (wchar_t)separator;
+  }
+}
+
+RH_C_FUNCTION int ON_TextRun_ListDepth(const ON_TextRun* constPtrTextRun)
+{
+  int depth = 1;
+  if (constPtrTextRun)
+  {
+    depth = constPtrTextRun->ListDepth();
+  }
+  return depth;
+}
+
+RH_C_FUNCTION void ON_TextRun_SetListDepth(ON_TextRun* ptrTextRun, int depth)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetListDepth(depth);
+  }
+}
+
+RH_C_FUNCTION int ON_TextRun_ListItemNumber(const ON_TextRun* constPtrTextRun)
+{
+  int item_number = 0;
+  if (constPtrTextRun)
+  {
+    item_number = constPtrTextRun->ListItemNumber();
+  }
+  return item_number;
+}
+
+RH_C_FUNCTION void ON_TextRun_SetListItemNumber(ON_TextRun* ptrTextRun, int itemNumber)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetListItemNumber(itemNumber);
+  }
+}
+
+RH_C_FUNCTION bool ON_TextRun_IsListOrdered(const ON_TextRun* constPtrTextRun)
+{
+  bool ordered = false;
+  if (constPtrTextRun)
+  {
+    ordered = constPtrTextRun->IsListOrdered();
+  }
+  return ordered;
+}
+
+RH_C_FUNCTION void ON_TextRun_SetIsListOrdered(ON_TextRun* ptrTextRun, bool ordered)
+{
+  if (ptrTextRun)
+  {
+    ptrTextRun->SetIsListOrdered(ordered);
+  }
+}
+
 //RH_C_FUNCTION void ON_TextRun_GetCodepoints(const ON_TextRun* constPtrTextRun, int count, /*ARRAY*/unsigned int* cpOut)
 //{
 //  if (constPtrTextRun && count >= ON_TextRun::CodepointCount(constPtrTextRun->UnicodeString()) && cpOut)

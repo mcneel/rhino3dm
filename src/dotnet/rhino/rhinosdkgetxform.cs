@@ -300,9 +300,11 @@ namespace Rhino.Input.Custom
         return 0;
       try
       {
-        Display.RhinoViewport viewport = new Display.RhinoViewport(null, pRhinoViewport);
-        xform = active_gxform.CalculateTransform(viewport, point);
-        return 1;
+        using (Display.RhinoViewport viewport = new Display.RhinoViewport(null, pRhinoViewport))
+        {
+          xform = active_gxform.CalculateTransform(viewport, point);
+          return 1;
+        }
       }
       catch (Exception ex)
       {

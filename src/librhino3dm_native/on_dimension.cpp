@@ -40,10 +40,13 @@ RH_C_FUNCTION bool ON_V6_Dimension_GetTextXform( const ON_Dimension* constDimens
   return rc;
 }
 
-RH_C_FUNCTION void ON_V6_Dimension_UpdateDimensionText(ON_Dimension* pDim, const ON_DimStyle* pStyle, ON::LengthUnitSystem units)
+RH_C_FUNCTION void ON_V6_Dimension_UpdateDimensionText(ON_Dimension* pDim, const ON_DimStyle* pStyle, ON::LengthUnitSystem units, double meters_per_unit)
 {
   if (pDim && pStyle)
-    pDim->UpdateDimensionText(units, pStyle);
+  {
+    ON_UnitSystem us = units != ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem(units) : ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+    pDim->UpdateDimensionText(us, pStyle);
+  }
 }
 
 RH_C_FUNCTION void ON_V6_Dimension_GetUserText(const ON_Dimension* constDimension, ON_wString* wstring)

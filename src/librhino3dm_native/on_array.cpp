@@ -3,9 +3,10 @@
 #include <vector>
 
 ///////////////////////////////////////////////////////////////////////////////////////
-RH_C_FUNCTION ON_SimpleArray<ON_Line>* ON_LineArray_New()
+
+RH_C_FUNCTION ON_SimpleArray<ON_Line>* ON_LineArray_New(int initial_capacity)
 {
-  return new ON_SimpleArray<ON_Line>();
+  return new ON_SimpleArray<ON_Line>(initial_capacity);
 }
 
 RH_C_FUNCTION void ON_LineArray_Delete( ON_SimpleArray<ON_Line>* pArray )
@@ -20,6 +21,14 @@ RH_C_FUNCTION int ON_LineArray_Count( const ON_SimpleArray<ON_Line>* pArray )
   if( pArray )
     rc = pArray->Count();
   return rc;
+}
+
+RH_C_FUNCTION void ON_LineArray_Append(ON_SimpleArray<ON_Line>* pArray, ON_Line* line)
+{
+  if (pArray && line)
+  {
+    pArray->Append(*line);
+  }
 }
 
 RH_C_FUNCTION void ON_LineArray_CopyValues( const ON_SimpleArray<ON_Line>* pArray, /*ARRAY*/ON_Line* lines )
@@ -183,6 +192,51 @@ RH_C_FUNCTION void ON_2dPointArray_CopyValues( const ON_2dPointArray* pArray, /*
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+RH_C_FUNCTION ON_3dVectorArray* ON_3dVectorArray_New(int capacity)
+{
+  if (capacity < 1)
+    return new ON_3dVectorArray();
+  return new ON_3dVectorArray(capacity);
+}
+
+RH_C_FUNCTION void ON_3dVectorArray_Delete(ON_3dVectorArray* pArray)
+{
+  if (pArray)
+    delete pArray;
+}
+
+
+RH_C_FUNCTION int ON_3dVectorArray_Count(const ON_3dVectorArray* pArray)
+{
+  int rc = 0;
+  if (pArray)
+    rc = pArray->Count();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_3dVectorArray_CopyValues(const ON_3dVectorArray* pArray, /*ARRAY*/ON_3dVector* pts)
+{
+  if (pArray && pts)
+  {
+    int count = pArray->Count();
+    if (count > 0)
+    {
+      const ON_3dVector* source = pArray->Array();
+      ::memcpy(pts, source, count * sizeof(ON_3dVector));
+    }
+  }
+}
+
+RH_C_FUNCTION void ON_3dVectorArray_Append(ON_3dVectorArray* pArray, ON_3dVector* pt)
+{
+  if (pArray && pt)
+  {
+    pArray->Append(*pt);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 RH_C_FUNCTION ON_3dPointArray* ON_3dPointArray_New(int capacity)
 {
   if( capacity < 1 )
@@ -321,6 +375,12 @@ RH_C_FUNCTION ON_SimpleArray<int>* ON_IntArray_New(/*ARRAY*/const int* vals, int
   return rc;
 }
 
+
+RH_C_FUNCTION void ON_IntArray_Append(ON_SimpleArray<int>* ptr, int val)
+{
+  if( ptr )
+    ptr->Append(val);
+}
 
 RH_C_FUNCTION void ON_IntArray_CopyValues(const ON_SimpleArray<int>* ptr, /*ARRAY*/int* vals)
 {
@@ -996,6 +1056,12 @@ RH_C_FUNCTION ON_SimpleArray<ON_2dex>* ON_2dexArray_New(/*ARRAY*/const ON_2dex* 
 }
 
 
+RH_C_FUNCTION void ON_2dexArray_Append(ON_SimpleArray<ON_2dex>* ptr, int i, int j)
+{
+  if (ptr)
+    ptr->Append(ON_2dex(i, j));
+}
+
 RH_C_FUNCTION void ON_2dexArray_CopyValues(const ON_SimpleArray<ON_2dex>* ptr, /*ARRAY*/ON_2dex* vals)
 {
   if (ptr && vals)
@@ -1171,6 +1237,12 @@ RH_C_FUNCTION void ON_MeshArray_Append(ON_SimpleArray<ON_Mesh*>* pMeshArray, ON_
   }
 }
 
+RH_C_FUNCTION void ON_MeshArray_AppendKeepingNullSlot(ON_SimpleArray<ON_Mesh*>* pMeshArray, ON_Mesh* pMeshOrNull)
+{
+  if (pMeshArray)
+    pMeshArray->Append(pMeshOrNull);
+}
+
 RH_C_FUNCTION ON_Mesh* ON_MeshArray_Get(ON_SimpleArray<ON_Mesh*>* pMeshArray, int index)
 {
   ON_Mesh* rc = nullptr;
@@ -1330,9 +1402,9 @@ RH_C_FUNCTION ON_Surface* ON_SurfaceArray_Get(ON_SimpleArray<ON_Surface*>* pSurf
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-RH_C_FUNCTION ON_SimpleArray<ON_Interval>* ON_IntervalArray_New()
+RH_C_FUNCTION ON_SimpleArray<ON_Interval>* ON_IntervalArray_New(int initial_capacity)
 {
-  return new ON_SimpleArray<ON_Interval>();
+  return new ON_SimpleArray<ON_Interval>(initial_capacity);
 }
 
 RH_C_FUNCTION void ON_IntervalArray_Delete(ON_SimpleArray<ON_Interval>* pIntervalArray)

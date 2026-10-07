@@ -262,11 +262,21 @@ namespace Rhino.Runtime
     /// </summary>
     private static FileSettingsService g_file_service;
 
-#endregion Construction and access to service providers
+    #endregion Construction and access to service providers
 
-#region ISettingsService implementation
+    #region PreventWritingFlag
 
-    public void TestHarness(){}
+    /// <summary>
+    /// Setting this to true should prevent Rhino from writing out any settings.
+    /// If you disagree with this design, talk to CS, he is more than happy to change it.
+    /// </summary>
+    public static bool PreventSettingsWriteOut { get; set; } = false;
+
+    #endregion
+
+    #region ISettingsService implementation
+
+    public void TestHarness() { }
 
 #region ISettingsService properties
     /// <summary>
@@ -379,6 +389,8 @@ namespace Rhino.Runtime
     /// </returns>
     public bool WriteSettings(bool isShuttingDown, Stream stream, string fileName, Action<bool, bool> writing)
     {
+      if (PreventSettingsWriteOut) return false;
+
       // Write settings to a temporary file in the output folder
       var temp_file_name = WriteTempFile(isShuttingDown, Path.GetDirectoryName(fileName), fileName, stream);
       // If the temporary file was successfully created then tempFileName will be the full path to
@@ -4747,6 +4759,7 @@ namespace Rhino
       }
     }
 
+#pragma warning disable CA2000
     protected void AttachFileWatcher(string fileName)
     {
       if (PersistentSettings.Service.UseFileWatchers == false)
@@ -4762,6 +4775,7 @@ namespace Rhino
         // so we can tell when the settings directory gets created
         var parent = Path.GetDirectoryName(folder);
         if (parent == null || m_watchers.ContainsKey(parent) || !Directory.Exists(parent)) return;
+
         var watcher = new FileSystemWatcher()
         {
           Path = parent,
@@ -4775,6 +4789,7 @@ namespace Rhino
         watcher.EnableRaisingEvents = true;
         m_watchers.Add(parent, new KeyValuePair<string, FileSystemWatcher>(fileName, watcher));
         return;
+
       }
       try
       {
@@ -4799,6 +4814,7 @@ namespace Rhino
         Runtime.HostUtils.ExceptionReport(exception);
       }
     }
+#pragma warning restore CA2000
 
     private void WatcherSettingsFolderCreated(object sender, FileSystemEventArgs e)
     {
@@ -5031,11 +5047,46 @@ namespace Rhino
           return true;
         }
       }
-      var success =  PersistentSettings.Service.SupportsPlist
+
+      if (PersistentSettings.Service.SupportsPlist)
+      {
         // If the service supports direct writing (Mac PLIST)
-        ? !windowPositions && PersistentSettings.Service.WriteToPlist(shuttingDown, m_plugin_settings, m_command_settings_dict, WriteSettingsCallback)
-        // Otherwise write XML to a stream and send the stream to the settings service for serialzation
-        : PersistentSettings.Service.WriteSettings(shuttingDown, WriteToStream(windowPositions), SettingsFileName(localSettings, windowPositions), WriteSettingsCallback);
+        bool rc = !windowPositions && PersistentSettings.Service.WriteToPlist(shuttingDown, m_plugin_settings, m_command_settings_dict, WriteSettingsCallback);
+        return rc;
+      }
+
+      // 8 Dec 2025 S. Baer
+      // I don't understand the logic of write the settings file and then
+      // immediately turn around and read it back in. I'm disabling the file
+      // watcher during a write. Settings files written by other processes will
+      // still be watched. If this causes bugs, we can back this change out. In
+      // that case please provide comments and a YT issue number to help
+      // explain why this watcher needs to stay on.
+      // 17 Jan 2025 S. Baer
+      // Turns out we do need this feature. If I change something in AdvancedSettings,
+      // the changes don't end up making it down into the C++ Settings classes.
+      
+      // Otherwise write XML to a stream and send the stream to the settings
+      // service for serialzation
+      string settingsFileName = SettingsFileName(localSettings, windowPositions);
+
+      //KeyValuePair<string, FileSystemWatcher> watcher;
+      //bool reenableWatcher = false;
+      //if (m_watchers.TryGetValue(settingsFileName, out watcher) && watcher.Value != null)
+      //{
+      //  if (watcher.Value.EnableRaisingEvents)
+      //  {
+      //    watcher.Value.EnableRaisingEvents = false;
+      //    reenableWatcher = true;
+      //  }
+      //}
+      // disable our file watcher while writing settings so we don't have to
+      // turn around and just read the same data back
+      bool success = PersistentSettings.Service.WriteSettings(shuttingDown, WriteToStream(windowPositions), settingsFileName, WriteSettingsCallback);
+      //if (reenableWatcher)
+      //{
+      //  watcher.Value.EnableRaisingEvents = true;
+      //}
       return success;
     }
     private void WriteSettingsCallback(bool isShuttingDown, bool done)
@@ -5106,7 +5157,7 @@ namespace Rhino
       MemoryStream stream = null;
       try
       {
-        var xml_writer = XmlWriter.Create(
+        using (var xml_writer = XmlWriter.Create(
           stream = new MemoryStream(),
           new XmlWriterSettings
           {
@@ -5116,32 +5167,34 @@ namespace Rhino
             OmitXmlDeclaration = false,
             NewLineOnAttributes = false,
             CloseOutput = false
-          });
-        
-        xml_writer.WriteStartDocument();
+          }))
         {
-          xml_writer.WriteStartElement("settings");
+
+          xml_writer.WriteStartDocument();
           {
-            xml_writer.WriteAttributeString("id", CURRENT_XML_FORMAT_VERSION);
+            xml_writer.WriteStartElement("settings");
+            {
+              xml_writer.WriteAttributeString("id", CURRENT_XML_FORMAT_VERSION);
 
-            // Write settings section for plug-in or window position settings,
-            // settings will be null if all values are default so the "settings"
-            // section will be empty
-            settings?.WriteXmlElement(xml_writer, "settings", "", "", AllUserPlugInSettings);
+              // Write settings section for plug-in or window position settings,
+              // settings will be null if all values are default so the "settings"
+              // section will be empty
+              settings?.WriteXmlElement(xml_writer, "settings", "", "", AllUserPlugInSettings);
 
-            // Write command section if provided (will be null for window position settings)
-            if (commandSettings != null)
-              foreach (var item in commandSettings)
-                item.Value.WriteXmlElement(xml_writer, "command", "name", item.Key, AllUserCommandSettings (item.Key));
+              // Write command section if provided (will be null for window position settings)
+              if (commandSettings != null)
+                foreach (var item in commandSettings)
+                  item.Value.WriteXmlElement(xml_writer, "command", "name", item.Key, AllUserCommandSettings(item.Key));
+            }
+            xml_writer.WriteEndElement();
           }
-          xml_writer.WriteEndElement();
+          xml_writer.WriteEndDocument();
+
+          xml_writer.Flush();
+          xml_writer.Close();
+
+          return stream;
         }
-        xml_writer.WriteEndDocument();
-
-        xml_writer.Flush();
-        xml_writer.Close();
-
-        return stream;
       }
       catch (Exception ex) 
       {
@@ -5155,6 +5208,7 @@ namespace Rhino
   class PersistentSettingsManager
   {
     static readonly List<PersistentSettingsManager> g_all_managers = new List<PersistentSettingsManager>();
+    static readonly object g_all_managers_lock = new object();
     System.Reflection.Assembly m_assembly;
     /// <summary>
     /// If this settings PersistentSettingsManager is created by plug-in provided DLL then save the plug-in ID
@@ -5198,40 +5252,49 @@ namespace Rhino
     {
       if (pluginId == Guid.Empty)
         throw new System.ComponentModel.InvalidEnumArgumentException($"pluginId Can not be Guid.Empty");
-      for (int i = 0; i < g_all_managers.Count; i++)
-        if (g_all_managers[i].m_plugin_id == pluginId)
-          return g_all_managers[i];
-      var ps = new PersistentSettingsManager(pluginId);
-      g_all_managers.Add(ps);
-      return ps;
+      lock (g_all_managers_lock)
+      {
+        for (int i = 0; i < g_all_managers.Count; i++)
+          if (g_all_managers[i].m_plugin_id == pluginId)
+            return g_all_managers[i];
+        var ps = new PersistentSettingsManager(pluginId);
+        g_all_managers.Add(ps);
+        return ps;
+      }
     }
 
     public static PersistentSettingsManager Create(PlugIns.PlugIn plugin)
     {
       Guid plugin_id = plugin.Id;
       System.Reflection.Assembly assembly = plugin.GetType().Assembly;
-      for (int i = 0; i < g_all_managers.Count; i++)
+      lock (g_all_managers_lock)
       {
-        if (g_all_managers[i].m_assembly == assembly || g_all_managers[i].m_plugin_id == plugin_id)
+        for (int i = 0; i < g_all_managers.Count; i++)
         {
-          g_all_managers[i].m_assembly = assembly;
-          return g_all_managers[i];
+          if (g_all_managers[i].m_assembly == assembly || g_all_managers[i].m_plugin_id == plugin_id)
+          {
+            g_all_managers[i].m_assembly = assembly;
+            return g_all_managers[i];
+          }
         }
+        var ps = new PersistentSettingsManager(assembly, plugin_id);
+        g_all_managers.Add(ps);
+        return ps;
       }
-      var ps = new PersistentSettingsManager(assembly, plugin_id);
-      g_all_managers.Add(ps);
-      return ps;
     }
 
     public static PersistentSettingsManager Create(Runtime.Skin skin)
     {
       System.Reflection.Assembly assembly = skin.GetType().Assembly;
-      for (int i = 0; i < g_all_managers.Count; i++)
-        if (g_all_managers[i].m_assembly == assembly)
-          return g_all_managers[i];
-      var ps = new PersistentSettingsManager(assembly, Guid.Empty);
-      g_all_managers.Add(ps);
-      return ps;
+      lock (g_all_managers_lock)
+      {
+        for (int i = 0; i < g_all_managers.Count; i++)
+          if (g_all_managers[i].m_assembly == assembly)
+            return g_all_managers[i];
+        var ps = new PersistentSettingsManager(assembly, Guid.Empty);
+        g_all_managers.Add(ps);
+        return ps;
+      }
     }
 
     internal PlugInSettings InternalPlugInSettings { get { return m_settings_local; } }

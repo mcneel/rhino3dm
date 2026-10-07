@@ -1,58 +1,98 @@
 
 #include "stdafx.h"
 
-static ON_MeshModifiers* GetMeshModifiers(const ON_3dmObjectAttributes* attr)
+static const ON_Displacement* Displacement(const ON_3dmObjectAttributes* attr)
 {
-  if (nullptr == attr)
-    return nullptr;
-
-  return &attr->MeshModifiers();
+  return attr ? attr->MeshModifiers().Displacement() : nullptr;
 }
 
-static ON_Displacement* Displacement(const ON_3dmObjectAttributes* attr)
+static ON_Displacement* Displacement(ON_3dmObjectAttributes* attr)
 {
-  auto* mm = GetMeshModifiers(attr);
-  if (nullptr == mm)
-    return nullptr;
+  ASSERT(attr);
+  if (attr)
+  {
+    return &attr->MeshModifiers().Displacement();
+  }
 
-  return mm->Displacement();
+  //Shouldn't happen.
+  return nullptr;
 }
 
-static ON_EdgeSoftening* EdgeSoftening(const ON_3dmObjectAttributes* attr)
+static const ON_EdgeSoftening* EdgeSoftening(const ON_3dmObjectAttributes* attr)
 {
-  auto* mm = GetMeshModifiers(attr);
-  if (nullptr == mm)
-    return nullptr;
-
-  return mm->EdgeSoftening();
+  return attr ? attr->MeshModifiers().EdgeSoftening() : nullptr;
 }
 
-static ON_Thickening* Thickening(const ON_3dmObjectAttributes* attr)
+static ON_EdgeSoftening* EdgeSoftening(ON_3dmObjectAttributes* attr)
 {
-  auto* mm = GetMeshModifiers(attr);
-  if (nullptr == mm)
-    return nullptr;
+  ASSERT(attr);
+  if (attr)
+  {
+    return &attr->MeshModifiers().EdgeSoftening();
+  }
 
-  return mm->Thickening();
+  //Shouldn't happen.
+  return nullptr;
 }
 
-static ON_CurvePiping* CurvePiping(const ON_3dmObjectAttributes* attr)
+static const ON_Thickening* Thickening(const ON_3dmObjectAttributes* attr)
 {
-  auto* mm = GetMeshModifiers(attr);
-  if (nullptr == mm)
-    return nullptr;
-
-  return mm->CurvePiping();
+  return attr ? attr->MeshModifiers().Thickening() : nullptr;
 }
 
-static ON_ShutLining* Shutlining(const ON_3dmObjectAttributes* attr)
+static ON_Thickening* Thickening(ON_3dmObjectAttributes* attr)
 {
-  auto* mm = GetMeshModifiers(attr);
-  if (nullptr == mm)
-    return nullptr;
+  ASSERT(attr);
+  if (attr)
+  {
+    return &attr->MeshModifiers().Thickening();
+  }
 
-  return mm->ShutLining();
+  //Shouldn't happen.
+  return nullptr;
 }
+
+static const ON_CurvePiping* CurvePiping(const ON_3dmObjectAttributes* attr)
+{
+  return attr ? attr->MeshModifiers().CurvePiping() : nullptr;
+}
+
+static ON_CurvePiping* CurvePiping(ON_3dmObjectAttributes* attr)
+{
+  ASSERT(attr);
+  if (attr)
+  {
+    return &attr->MeshModifiers().CurvePiping();
+  }
+
+  //Shouldn't happen.
+  return nullptr;
+}
+
+static const ON_ShutLining* ShutLining(const ON_3dmObjectAttributes* attr)
+{
+  return attr ? attr->MeshModifiers().ShutLining() : nullptr;
+}
+
+static ON_ShutLining* ShutLining(ON_3dmObjectAttributes* attr)
+{
+  ASSERT(attr);
+  if (attr)
+  {
+    return &attr->MeshModifiers().ShutLining();
+  }
+
+  //Shouldn't happen.
+  return nullptr;
+}
+
+
+
+
+
+
+
+
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_HasDisplacement(const ON_3dmObjectAttributes* attr)
 {
@@ -70,7 +110,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetOn(const ON_3dmObjectA
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetOn(b);
@@ -79,7 +119,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetOn(ON_3dmObjectAttribu
 
 RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_Displacement_GetTextureId(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return ON_nil_uuid;
 
@@ -88,7 +128,7 @@ RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_Displacement_GetTextureId(const ON_
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetTextureId(ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetTexture(id);
@@ -97,7 +137,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetTextureId(ON_3dmObject
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetMappingChannel(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -106,7 +146,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetMappingChannel(const ON
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetMappingChannel(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetMappingChannel(i);
@@ -115,7 +155,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetMappingChannel(ON_3dmO
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetBlackPoint(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0.0;
 
@@ -124,7 +164,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetBlackPoint(const ON_
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetBlackPoint(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetBlackPoint(d);
@@ -133,7 +173,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetBlackPoint(ON_3dmObjec
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetWhitePoint(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0.0;
 
@@ -142,7 +182,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetWhitePoint(const ON_
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetWhitePoint(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetWhitePoint(d);
@@ -151,7 +191,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetWhitePoint(ON_3dmObjec
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetInitialQuality(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -160,7 +200,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetInitialQuality(const ON
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetInitialQuality(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetInitialQuality(i);
@@ -169,7 +209,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetInitialQuality(ON_3dmO
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return false;
 
@@ -178,7 +218,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(const 
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFinalMaxFacesOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetFinalMaxFacesOn(b);
@@ -187,7 +227,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFinalMaxFacesOn(ON_3dm
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetFinalMaxFaces(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -196,7 +236,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetFinalMaxFaces(const ON_
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFinalMaxFaces(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetFinalMaxFaces(i);
@@ -205,7 +245,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFinalMaxFaces(ON_3dmOb
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetFairingOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return false;
 
@@ -214,7 +254,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetFairingOn(const ON_3dm
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFairingOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetFairingOn(b);
@@ -223,7 +263,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFairingOn(ON_3dmObject
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetFairing(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -232,7 +272,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetFairing(const ON_3dmObj
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFairing(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetFairing(i);
@@ -241,7 +281,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetFairing(ON_3dmObjectAt
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetPostWeldAngle(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0.0;
 
@@ -250,7 +290,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetPostWeldAngle(const 
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetPostWeldAngle(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetPostWeldAngle(d);
@@ -259,7 +299,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetPostWeldAngle(ON_3dmOb
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetMeshMemoryLimit(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -268,7 +308,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetMeshMemoryLimit(const O
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetMeshMemoryLimit(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetMeshMemoryLimit(i);
@@ -277,7 +317,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetMeshMemoryLimit(ON_3dm
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetRefineSteps(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0;
 
@@ -286,7 +326,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetRefineSteps(const ON_3d
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetRefineSteps(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetRefineSteps(i);
@@ -295,7 +335,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetRefineSteps(ON_3dmObje
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetRefineSensitivity(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return 0.0;
 
@@ -304,7 +344,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetRefineSensitivity(co
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetRefineSensitivity(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetRefineSensitivity(d);
@@ -313,7 +353,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetRefineSensitivity(ON_3
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetSweepResolutionFormula(const ON_3dmObjectAttributes* attr)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return int(ON_Displacement::SweepResolutionFormulas::Default);
 
@@ -322,7 +362,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetSweepResolutionFormula(
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSweepResolutionFormula(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->SetSweepResolutionFormula(ON_Displacement::SweepResolutionFormulas(i));
@@ -331,7 +371,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSweepResolutionFormula
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_GetSubItems(const ON_3dmObjectAttributes* attr, ON_SimpleArray<int>* a)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if ((nullptr != dsp) && (nullptr != a))
   {
     auto it = dsp->GetSubItemIterator();
@@ -346,7 +386,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_GetSubItems(const ON_3dmO
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_AddSubItem(ON_3dmObjectAttributes* attr, int face_index,
                    bool on, ON_UUID texture, int mapping_channel, double black_point, double white_point)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return false;
 
@@ -363,7 +403,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_AddSubItem(ON_3dmObjectAt
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_DeleteSubItem(ON_3dmObjectAttributes* attr, int face_index)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->DeleteSubItem(face_index);
@@ -372,7 +412,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_DeleteSubItem(ON_3dmObjec
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_DeleteAllSubItems(ON_3dmObjectAttributes* attr)
 {
-  auto* dsp = Displacement(attr);
+  auto dsp = Displacement(attr);
   if (nullptr != dsp)
   {
     dsp->DeleteAllSubItems();
@@ -381,7 +421,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_DeleteAllSubItems(ON_3dmO
 
 static ON_Displacement::SubItem* FindDisplacementSubItem(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* dsp = Displacement(attr);
+  const auto dsp = Displacement(attr);
   if (nullptr == dsp)
     return nullptr;
 
@@ -390,7 +430,7 @@ static ON_Displacement::SubItem* FindDisplacementSubItem(const ON_3dmObjectAttri
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetSubItemOn(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  const auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr == sub_item)
     return false;
 
@@ -399,7 +439,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetSubItemOn(const ON_3dm
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemOn(ON_3dmObjectAttributes* attr, int face_index, bool b)
 {
-  auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr != sub_item)
   {
     sub_item->SetOn(b);
@@ -408,7 +448,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemOn(ON_3dmObject
 
 RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_Displacement_GetSubItemTexture(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  const auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr == sub_item)
     return ON_nil_uuid;
 
@@ -417,7 +457,7 @@ RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_Displacement_GetSubItemTexture(cons
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemTexture(ON_3dmObjectAttributes* attr, int face_index, ON_UUID id)
 {
-  auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr != sub_item)
   {
     sub_item->SetTexture(id);
@@ -426,7 +466,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemTexture(ON_3dmO
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetSubItemMappingChannel(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  const auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr == sub_item)
     return -1;
 
@@ -435,7 +475,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_Displacement_GetSubItemMappingChannel(c
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemMappingChannel(ON_3dmObjectAttributes* attr, int face_index, int i)
 {
-  auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr != sub_item)
   {
     sub_item->SetMappingChannel(i);
@@ -444,7 +484,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemMappingChannel(
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetSubItemBlackPoint(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  const auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr == sub_item)
     return 0.0;
 
@@ -453,7 +493,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetSubItemBlackPoint(co
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemBlackPoint(ON_3dmObjectAttributes* attr, int face_index, double d)
 {
-  auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr != sub_item)
   {
     sub_item->SetBlackPoint(d);
@@ -462,7 +502,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemBlackPoint(ON_3
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetSubItemWhitePoint(const ON_3dmObjectAttributes* attr, int face_index)
 {
-  const auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  const auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr == sub_item)
     return 0.0;
 
@@ -471,7 +511,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Displacement_GetSubItemWhitePoint(co
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Displacement_SetSubItemWhitePoint(ON_3dmObjectAttributes* attr, int face_index, double d)
 {
-  auto* sub_item = FindDisplacementSubItem(attr, face_index);
+  auto sub_item = FindDisplacementSubItem(attr, face_index);
   if (nullptr != sub_item)
   {
     sub_item->SetWhitePoint(d);
@@ -485,7 +525,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasEdgeSoftening(const ON_3dmObjectAtt
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return false;
 
@@ -494,7 +534,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetOn(const ON_3dmObject
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetOn(b);
@@ -503,7 +543,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetOn(ON_3dmObjectAttrib
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_EdgeSoftening_GetSoftening(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return 0.0;
 
@@ -512,7 +552,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_EdgeSoftening_GetSoftening(const ON_
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetSoftening(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetSoftening(d);
@@ -521,7 +561,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetSoftening(ON_3dmObjec
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetChamfer(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return false;
 
@@ -530,7 +570,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetChamfer(const ON_3dmO
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetChamfer(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetChamfer(b);
@@ -539,7 +579,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetChamfer(ON_3dmObjectA
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetFaceted(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return false;
 
@@ -548,7 +588,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetFaceted(const ON_3dmO
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetFaceted(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetFaceted(b);
@@ -557,7 +597,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetFaceted(ON_3dmObjectA
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_EdgeSoftening_GetEdgeAngleThreshold(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return 0.0;
 
@@ -566,7 +606,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_EdgeSoftening_GetEdgeAngleThreshold(
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetEdgeAngleThreshold(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetEdgeAngleThreshold(d);
@@ -575,7 +615,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetEdgeAngleThreshold(ON
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetForceSoftening(const ON_3dmObjectAttributes* attr)
 {
-  const auto* es = EdgeSoftening(attr);
+  const auto es = EdgeSoftening(attr);
   if (nullptr == es)
     return false;
 
@@ -584,7 +624,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetForceSoftening(const 
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetForceSoftening(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* es = EdgeSoftening(attr);
+  auto es = EdgeSoftening(attr);
   if (nullptr != es)
   {
     es->SetForceSoftening(b);
@@ -593,7 +633,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_EdgeSoftening_SetForceSoftening(ON_3dm
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* th = Thickening(attr);
+  const auto th = Thickening(attr);
   if (nullptr == th)
     return false;
 
@@ -607,7 +647,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasThickening(const ON_3dmObjectAttrib
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* th = Thickening(attr);
+  auto th = Thickening(attr);
   if (nullptr != th)
   {
     th->SetOn(b);
@@ -616,7 +656,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetOn(ON_3dmObjectAttribute
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_Thickening_GetDistance(const ON_3dmObjectAttributes* attr)
 {
-  const auto* th = Thickening(attr);
+  const auto th = Thickening(attr);
   if (nullptr == th)
     return 0.0;
 
@@ -625,7 +665,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_Thickening_GetDistance(const ON_3dmO
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetDistance(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* th = Thickening(attr);
+  auto th = Thickening(attr);
   if (nullptr != th)
   {
     th->SetDistance(d);
@@ -634,7 +674,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetDistance(ON_3dmObjectAtt
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetSolid(const ON_3dmObjectAttributes* attr)
 {
-  const auto* th = Thickening(attr);
+  const auto th = Thickening(attr);
   if (nullptr == th)
     return false;
 
@@ -643,7 +683,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetSolid(const ON_3dmObject
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetSolid(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* th = Thickening(attr);
+  auto th = Thickening(attr);
   if (nullptr != th)
   {
     th->SetSolid(b);
@@ -652,7 +692,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetSolid(ON_3dmObjectAttrib
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetOffsetOnly(const ON_3dmObjectAttributes* attr)
 {
-  const auto* th = Thickening(attr);
+  const auto th = Thickening(attr);
   if (nullptr == th)
     return false;
 
@@ -661,7 +701,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetOffsetOnly(const ON_3dmO
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetOffsetOnly(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* th = Thickening(attr);
+  auto th = Thickening(attr);
   if (nullptr != th)
   {
     th->SetOffsetOnly(b);
@@ -670,7 +710,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetOffsetOnly(ON_3dmObjectA
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetBothSides(const ON_3dmObjectAttributes* attr)
 {
-  const auto* th = Thickening(attr);
+  const auto th = Thickening(attr);
   if (nullptr == th)
     return false;
 
@@ -679,7 +719,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_Thickening_GetBothSides(const ON_3dmOb
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetBothSides(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* th = Thickening(attr);
+  auto th = Thickening(attr);
   if (nullptr != th)
   {
     th->SetBothSides(b);
@@ -693,7 +733,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasCurvePiping(const ON_3dmObjectAttri
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_CurvePiping_GetOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return false;
 
@@ -702,7 +742,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_CurvePiping_GetOn(const ON_3dmObjectAt
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetOn(b);
@@ -711,7 +751,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetOn(ON_3dmObjectAttribut
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_CurvePiping_GetRadius(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return 0.0;
 
@@ -720,7 +760,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_CurvePiping_GetRadius(const ON_3dmOb
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetRadius(ON_3dmObjectAttributes* attr, double d)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetRadius(d);
@@ -729,7 +769,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetRadius(ON_3dmObjectAttr
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetSegments(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return 0;
 
@@ -738,7 +778,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetSegments(const ON_3dmObj
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetSegments(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetSegments(i);
@@ -747,7 +787,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetSegments(ON_3dmObjectAt
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_CurvePiping_GetFaceted(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return false;
 
@@ -756,7 +796,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_CurvePiping_GetFaceted(const ON_3dmObj
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetFaceted(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetFaceted(b);
@@ -765,7 +805,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetFaceted(ON_3dmObjectAtt
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetAccuracy(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return 0;
 
@@ -774,7 +814,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetAccuracy(const ON_3dmObj
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetAccuracy(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetAccuracy(i);
@@ -783,7 +823,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetAccuracy(ON_3dmObjectAt
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetCapType(const ON_3dmObjectAttributes* attr)
 {
-  const auto* cp = CurvePiping(attr);
+  const auto cp = CurvePiping(attr);
   if (nullptr == cp)
     return int(ON_CurvePiping::CapTypes::None);
 
@@ -792,7 +832,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_CurvePiping_GetCapType(const ON_3dmObje
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_CurvePiping_SetCapType(ON_3dmObjectAttributes* attr, int i)
 {
-  auto* cp = CurvePiping(attr);
+  auto cp = CurvePiping(attr);
   if (nullptr != cp)
   {
     cp->SetCapType(ON_CurvePiping::CapTypes(i));
@@ -806,7 +846,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasShutLining(const ON_3dmObjectAttrib
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetOn(const ON_3dmObjectAttributes* attr)
 {
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return false;
 
@@ -815,7 +855,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetOn(const ON_3dmObjectAtt
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* sl = Shutlining(attr);
+  auto sl = ShutLining(attr);
   if (nullptr != sl)
   {
     sl->SetOn(b);
@@ -824,7 +864,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetOn(ON_3dmObjectAttribute
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetFaceted(const ON_3dmObjectAttributes* attr)
 {
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return false;
 
@@ -833,7 +873,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetFaceted(const ON_3dmObje
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetFaceted(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* sl = Shutlining(attr);
+  auto* sl = ShutLining(attr);
   if (nullptr != sl)
   {
     sl->SetFaceted(b);
@@ -842,7 +882,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetFaceted(ON_3dmObjectAttr
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetAutoUpdate(const ON_3dmObjectAttributes* attr)
 {
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return false;
 
@@ -851,7 +891,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetAutoUpdate(const ON_3dmO
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetAutoUpdate(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* sl = Shutlining(attr);
+  auto sl = ShutLining(attr);
   if (nullptr != sl)
   {
     sl->SetAutoUpdate(b);
@@ -860,7 +900,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetAutoUpdate(ON_3dmObjectA
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetForceUpdate(const ON_3dmObjectAttributes* attr)
 {
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return false;
 
@@ -869,7 +909,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetForceUpdate(const ON_3dm
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetForceUpdate(ON_3dmObjectAttributes* attr, bool b)
 {
-  auto* sl = Shutlining(attr);
+  auto sl = ShutLining(attr);
   if (nullptr != sl)
   {
     sl->SetForceUpdate(b);
@@ -881,7 +921,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_GetCurves(const ON_3dmObjec
   if (nullptr == a)
     return;
 
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return;
 
@@ -895,7 +935,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_GetCurves(const ON_3dmObjec
 
 RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_ShutLining_AddCurve(ON_3dmObjectAttributes* attr)
 {
-  auto* sl = Shutlining(attr);
+  auto sl = ShutLining(attr);
   if (nullptr == sl)
     return ON_nil_uuid;
 
@@ -904,16 +944,16 @@ RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_ShutLining_AddCurve(ON_3dmObjectAtt
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_DeleteAllCurves(ON_3dmObjectAttributes* attr)
 {
-  auto* sl = Shutlining(attr);
+  auto sl = ShutLining(attr);
   if (nullptr != sl)
   {
     return sl->DeleteAllCurves();
   }
 }
 
-static ON_ShutLining::Curve* FindShutliningCurve(const ON_3dmObjectAttributes* attr, ON_UUID id)
+static ON_ShutLining::Curve* FindShutLiningCurve(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* sl = Shutlining(attr);
+  const auto sl = ShutLining(attr);
   if (nullptr == sl)
     return nullptr;
 
@@ -922,7 +962,7 @@ static ON_ShutLining::Curve* FindShutliningCurve(const ON_3dmObjectAttributes* a
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurveEnabled(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* curve = FindShutliningCurve(attr, id);
+  const auto curve = FindShutLiningCurve(attr, id);
   if (nullptr == curve)
     return false;
 
@@ -931,7 +971,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurveEnabled(const ON_3d
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveEnabled(const ON_3dmObjectAttributes* attr, ON_UUID id, bool b)
 {
-  auto* curve = FindShutliningCurve(attr, id);
+  auto curve = FindShutLiningCurve(attr, id);
   if (nullptr != curve)
   {
     curve->SetEnabled(b);
@@ -940,7 +980,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveEnabled(const ON_3d
 
 RH_C_FUNCTION double ON_3dmObjectAttributes_ShutLining_GetCurveRadius(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* curve = FindShutliningCurve(attr, id);
+  const auto curve = FindShutLiningCurve(attr, id);
   if (nullptr == curve)
     return 0.0;
 
@@ -949,7 +989,7 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_ShutLining_GetCurveRadius(const ON_3
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveRadius(const ON_3dmObjectAttributes* attr, ON_UUID id, double d)
 {
-  auto* curve = FindShutliningCurve(attr, id);
+  auto curve = FindShutLiningCurve(attr, id);
   if (nullptr != curve)
   {
     curve->SetRadius(d);
@@ -958,7 +998,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveRadius(const ON_3dm
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_ShutLining_GetCurveProfile(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* curve = FindShutliningCurve(attr, id);
+  const auto curve = FindShutLiningCurve(attr, id);
   if (nullptr == curve)
     return 0;
 
@@ -967,7 +1007,7 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_ShutLining_GetCurveProfile(const ON_3dm
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveProfile(ON_3dmObjectAttributes* attr, ON_UUID id, int i)
 {
-  auto* curve = FindShutliningCurve(attr, id);
+  auto curve = FindShutLiningCurve(attr, id);
   if (nullptr != curve)
   {
     curve->SetProfile(i);
@@ -976,7 +1016,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveProfile(ON_3dmObjec
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurvePull(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* curve = FindShutliningCurve(attr, id);
+  const auto curve = FindShutLiningCurve(attr, id);
   if (nullptr == curve)
     return false;
 
@@ -985,7 +1025,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurvePull(const ON_3dmOb
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurvePull(const ON_3dmObjectAttributes* attr, ON_UUID id, bool b)
 {
-  auto* curve = FindShutliningCurve(attr, id);
+  auto curve = FindShutLiningCurve(attr, id);
   if (nullptr != curve)
   {
     curve->SetPull(b);
@@ -994,7 +1034,7 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurvePull(const ON_3dmOb
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurveIsBump(const ON_3dmObjectAttributes* attr, ON_UUID id)
 {
-  const auto* curve = FindShutliningCurve(attr, id);
+  const auto curve = FindShutLiningCurve(attr, id);
   if (nullptr == curve)
     return false;
 
@@ -1003,7 +1043,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetCurveIsBump(const ON_3dm
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_SetCurveIsBump(ON_3dmObjectAttributes* attr, ON_UUID id, bool b)
 {
-  auto* curve = FindShutliningCurve(attr, id);
+  auto curve = FindShutLiningCurve(attr, id);
   if (nullptr != curve)
   {
     curve->SetIsBump(b);

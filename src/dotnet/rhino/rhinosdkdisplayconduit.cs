@@ -74,6 +74,8 @@ namespace Rhino.Display
     ObjectType _geometryFilter = ObjectType.AnyObject;
     bool _selectedObjectFilter = false;
     bool _subObjectSelectedFilter = false;
+    bool _exclusiveBindings = false;
+    List<RhinoViewport> _bindings;
     Guid[] _objectIdFilter = new Guid[0];
 
     protected DisplayConduit()
@@ -140,6 +142,10 @@ namespace Rhino.Display
           if (mi.DeclaringType != base_type)
             supportChannels |= CSupportChannels.SC_OBJECTCULLING;
 
+          mi = t.GetMethod("PostProcessFrameBuffer", flags);
+          if (mi.DeclaringType != base_type)
+            supportChannels |= CSupportChannels.SC_POSTPROCESSFRAMEBUFFER;
+
           _nativeRuntimeSerialNumber = UnsafeNativeMethods.CRhinoDisplayConduit_New((uint)supportChannels);
           _enabledConduits[_nativeRuntimeSerialNumber] = this;
           _callback = ExecConduit;
@@ -185,6 +191,44 @@ namespace Rhino.Display
         _geometryFilter = value;
         UpdateNativeInstance();
       }
+    }
+
+    /// <summary>
+    /// Bind this conduit to a specific viewport
+    /// </summary>
+    /// <param name="viewport"></param>
+    /// <since>9.0</since>
+    public void Bind(RhinoViewport viewport)
+    {
+      if (_bindings==null)
+        _bindings = new List<RhinoViewport>();
+      _bindings.Add(viewport);
+      UpdateNativeInstance();
+    }
+
+    /// <summary>
+    /// Exclusively bind this conduit to a specific viewport
+    /// </summary>
+    /// <param name="viewport"></param>
+    /// <since>9.0</since>
+    public void ExclusiveBind(RhinoViewport viewport)
+    {
+      if (_bindings == null)
+        _bindings = new List<RhinoViewport>();
+      _bindings.Add(viewport);
+      _exclusiveBindings = true;
+      UpdateNativeInstance();
+    }
+
+    /// <summary>
+    /// Remove viewport bindings
+    /// </summary>
+    /// <since>9.0</since>
+    public void UnbindAll()
+    {
+      _bindings = null;
+      _exclusiveBindings = false;
+      UpdateNativeInstance();
     }
 
     /// <summary>
@@ -241,6 +285,18 @@ namespace Rhino.Display
     {
       UnsafeNativeMethods.CRhinoDisplayConduit_SetFilters(_nativeRuntimeSerialNumber, (uint)_geometryFilter, _selectedObjectFilter, _subObjectSelectedFilter);
       UnsafeNativeMethods.CRhinoDisplayConduit_SetObjectFilter(_nativeRuntimeSerialNumber, _objectIdFilter.Length, _objectIdFilter);
+      if (_bindings==null || _bindings.Count < 1)
+      {
+        UnsafeNativeMethods.CRhinoDisplayConduit_UnbindAll(_nativeRuntimeSerialNumber);
+      }
+      else
+      {
+        foreach(var viewport in _bindings)
+        {
+          IntPtr ptrViewport = viewport.ConstPointer();
+          UnsafeNativeMethods.CRhinoDisplayConduit_Bind(_nativeRuntimeSerialNumber, ptrViewport, _exclusiveBindings);
+        }
+      }
     }
 
     /// <summary>
@@ -307,6 +363,11 @@ namespace Rhino.Display
     {
       if (PassesFilter(e))
         PreDrawObject(e);
+    }
+    private void _PostProcessFrameBuffer(object sender, PostProcessFrameBufferEventArgs e)
+    {
+      if (PassesFilter(e))
+        PostProcessFrameBuffer(e);
     }
 
     /// <summary>
@@ -382,6 +443,19 @@ namespace Rhino.Display
     /// <param name="e">The event argument contains the current viewport and display state.</param>
     protected virtual void DrawOverlay(DrawEventArgs e) {}
 
+    /// <summary>
+    /// Called after the frame has been drawn, with the finished frame available to be read. Use
+    /// this to record or stream a viewport: reading the frame here copies the one that was just
+    /// drawn, and never redraws the scene.
+    /// <para>Overriding this makes every frame cost an extra frame buffer read back for as long
+    /// as the conduit is enabled, whether or not the override reads anything.</para>
+    /// <para>The override runs on the thread that drew the frame and holds up the next one. Copy
+    /// the pixels here and do the rest of the work somewhere else.</para>
+    /// <para>The default implementation does nothing.</para>
+    /// </summary>
+    /// <param name="e">The event argument gives access to the frame that was drawn.</param>
+    protected virtual void PostProcessFrameBuffer(PostProcessFrameBufferEventArgs e) {}
+
 
     private static void ExecConduit(IntPtr pPipeline, uint conduitSerialNumber, uint channel)
     {
@@ -422,6 +496,7 @@ namespace Rhino.Display
             case (uint)CSupportChannels.SC_POSTOBJECTDRAW:
               break;
             case (uint)CSupportChannels.SC_POSTPROCESSFRAMEBUFFER:
+              conduit._PostProcessFrameBuffer(null, new PostProcessFrameBufferEventArgs(pPipeline, conduitSerialNumber));
               break;
             case (uint)CSupportChannels.SC_PREDRAWMIDDLEGROUND:
               break;

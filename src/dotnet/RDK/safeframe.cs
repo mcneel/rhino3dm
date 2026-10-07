@@ -125,7 +125,10 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.SafeFrameSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      using (var v_which = GetValue(which))
+      {
+        return UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.SafeFrameSetting which)
@@ -161,8 +164,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.Enabled, v);
+        }
+      }
     }
 
     ///<summary>
@@ -171,8 +185,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool PerspectiveOnly
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.PerspectiveOnly, v);
+        }
+      }
     }
 
     ///<summary>
@@ -181,8 +206,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool FieldsOn
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.FieldGridOn, v);
+        }
+      }
     }
 
     ///<summary>
@@ -192,8 +228,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool LiveFrameOn
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.LiveFrameOn, v);
+        }
+      }
     }
 
     ///<summary>
@@ -202,8 +249,20 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool ActionFrameOn
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn))
+          return v.ToBool();
+
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameOn, v);
+        }
+      }
     }
 
     ///<summary>
@@ -213,8 +272,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool ActionFrameLinked
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameLinked, v);
+        }
+      }
     }
 
     ///<summary>
@@ -225,8 +295,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double ActionFrameXScale
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameXScale, v);
+        }
+      }
     }
 
     ///<summary>
@@ -237,8 +318,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double ActionFrameYScale
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.ActionFrameYScale, v);
+        }
+      }
     }
 
     ///<summary>
@@ -247,8 +339,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool TitleFrameOn
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameOn, v);
+        }
+      }
     }
 
     ///<summary>
@@ -258,8 +361,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public bool TitleFrameLinked
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked).ToBool();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameLinked, v);
+        }
+      }
     }
 
     ///<summary>
@@ -270,8 +384,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double TitleFrameXScale
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameXScale, v);
+        }
+      }
     }
 
     ///<summary>
@@ -282,8 +407,19 @@ namespace Rhino.Render
     /// <since>7.12</since>
     public double TitleFrameYScale
     {
-      get => GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SafeFrameSetting.TitleFrameYScale, v);
+        }
+      }
     }
   }
 }

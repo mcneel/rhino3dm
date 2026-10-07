@@ -161,6 +161,48 @@ namespace Rhino.Input.Custom
       }
     }
 
+    /// <summary>
+    /// The minimum number of faces in the vertical direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int VerticalDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_VerticalDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetVerticalDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The minimum number of faces in the around direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int AroundDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_AroundDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetAroundDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
     bool GetBool(UnsafeNativeMethods.ArgsGetCircleBoolConsts which)
     {
       IntPtr const_ptr_this = ConstPointer();
@@ -197,6 +239,21 @@ namespace Rhino.Input.Custom
       cylinder = Geometry.Cylinder.Unset;
       uint rc = UnsafeNativeMethods.RHC_RhinoGetCylinder(ref cylinder, ptr_this);
       GC.KeepAlive(this);
+      return (Commands.Result)rc;
+    }
+
+    /// <summary>
+    /// Prompt for the getting of a cylinder.
+    /// </summary>
+    /// <param name="cylinder">The cylinder geometry defined by the user.</param>
+    /// <returns>The result of the getting operation.</returns>
+    /// <since>6.0</since>
+    public Commands.Result Get(out Geometry.Extrusion cylinder)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      cylinder = new Geometry.Extrusion();
+      IntPtr ptr_outextrusion = cylinder.NonConstPointer();
+      uint rc = UnsafeNativeMethods.RHC_RhinoGetCylinderExtrusion(ptr_outextrusion, ptr_this);
       return (Commands.Result)rc;
     }
 

@@ -16,10 +16,9 @@ using Rhino.Geometry;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Render;
 using Rhino.Runtime;
-using System.Security.Cryptography;
+
 
 #if RHINO_SDK
-using System.Security.Policy;
 using Rhino.Commands;
 #endif
 
@@ -401,6 +400,35 @@ namespace Rhino.Render
     /// </summary>
     /// <since>5.0</since>
     public Transform MeshTransform { get; set; }
+
+    /// <summary>
+    /// Compares this mapping tag with another mapping tag.
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns>-1 if this &lt; other; 0 if both are equal; 1 otherwise.</returns>
+    /// <since>9.0</since>
+    public int CompareTo(MappingTag other)
+    {
+      // See ON_MappingTag::CompareAll
+      if (null == other)
+        return -1;
+
+      if (MappingType < other.MappingType)
+        return -1;
+      if (MappingType > other.MappingType)
+        return 1;
+
+      int rc = Id.CompareTo(other.Id);
+      if (0 != rc)
+        return rc;
+
+      if (MappingCRC < other.MappingCRC)
+        return -1;
+      if (MappingCRC > other.MappingCRC)
+        return 1;
+
+      return MeshTransform.CompareTo(other.MeshTransform);
+    }
   }
 }
 
@@ -1045,10 +1073,13 @@ namespace Rhino.Geometry
     /// The absolute SubD display density is &lt;= adaptiveSubDDisplayDensity and &lt;= SubDDisplayParameters.Density.MaximumDensity.
     /// </returns>
     /// <since>7.18</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use AbsoluteDisplayDensityFromSubD")]
     [CLSCompliant(false)]
     public static uint AbsoluteDisplayDensityFromSubDFaceCount(uint adaptiveSubDDisplayDensity, uint subDFaceCount)
     {
-      return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(adaptiveSubDDisplayDensity, subDFaceCount);
+      //return UnsafeNativeMethods.ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(adaptiveSubDDisplayDensity, subDFaceCount);
+      return 0;
     }
 
     /// <summary>
@@ -1332,8 +1363,7 @@ namespace Rhino.Geometry
         using (var stream = new System.IO.MemoryStream(Convert.FromBase64String(value)))
         {
           var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-          var result = formatter.Deserialize(stream) as MeshingParameters;
-          return result as T;
+          return formatter.Deserialize(stream) as T;
         }
       }
       catch
@@ -1417,7 +1447,7 @@ namespace Rhino.Geometry
     {
       Dispose(false);
     }
-    
+
     #endregion
 
     #region ISerializable code
@@ -1560,7 +1590,7 @@ namespace Rhino.Geometry
     /// <returns>true if MeshingParameters has the same values as this; otherwise false.</returns>
     /// <since>8.0</since>
     public override bool Equals(object obj) => Equals(obj as MeshingParameters);
-    
+
     /// <summary>
     /// Determines whether the specified MeshingParameters has the same values as the present MeshingParameters.
     /// </summary>
@@ -2405,6 +2435,12 @@ namespace Rhino.Geometry
     /// </summary>
     /// <since>8.3</since>
     public bool InflateVerticesAndPoints { get; set; }
+
+    /// <summary>
+    /// Transfers mesh vertex and or point cloud colors to the shrinkwrapped results. 
+    /// </summary>
+    /// <since>9.0</since>
+    public bool PreserveColors { get; set; }
   }
 
   /// <summary>
@@ -2812,10 +2848,16 @@ namespace Rhino.Geometry
     {
       if (!polyline.IsClosed)
         return null;
-      var rc = new Mesh();
-      var ptr_mesh = rc.NonConstPointer();
+
+      var mesh = new Mesh();
+
+      var ptr_mesh = mesh.NonConstPointer();
+
       if (UnsafeNativeMethods.TLC_MeshPolyline(polyline.Count, polyline.ToArray(), ptr_mesh))
-        return rc;
+        return mesh;
+
+      mesh?.Dispose();
+
       return null;
     }
 
@@ -2842,7 +2884,8 @@ namespace Rhino.Geometry
       bool permitVertexAdditions,
       bool permitEdgeSplitting,
       double tolerance,
-      out TesselationFailure failure) {
+      out TesselationFailure failure)
+    {
 
       failure = new TesselationFailure();
       if (points.Length < 3 || loopIndices.Length == 0 || loopIndices[0].Length == 0)
@@ -2859,40 +2902,53 @@ namespace Rhino.Geometry
         ).ToArray();
 
 
-      for (int i = 0; i < nloops; i++) {
+      for (int i = 0; i < nloops; i++)
+      {
         if (!loopCurvesArray[i].IsValid) continue;
-        if (!loopCurvesArray[i].IsClosed) {
+        if (!loopCurvesArray[i].IsClosed)
+        {
           failure.What += "Open polyline." + System.Environment.NewLine;
           failure.OpenPolylines.Add(i);
         }
-        if (Intersect.Intersection.CurveSelf(loopCurvesArray[i], tolerance).Any()) {
-          failure.What += "Self intersecting polylines." + System.Environment.NewLine;
-          failure.SelfIntersectingPolylines.Add(i);
+
+        using (var cs = Intersect.Intersection.CurveSelf(loopCurvesArray[i], tolerance))
+        {
+          if (cs.Any())
+          {
+            failure.What += "Self intersecting polylines." + System.Environment.NewLine;
+            failure.SelfIntersectingPolylines.Add(i);
+          }
         }
-
       }
-
 
       if (nloops >= 2)
         for (int i = 0; i < nloops; i++)
-          for (int j = i + 1; j < nloops; j++) {
+          for (int j = i + 1; j < nloops; j++)
+          {
             if (!loopCurvesArray[i].IsValid || !loopCurvesArray[j].IsValid) continue;
 
-            if (Intersect.Intersection.CurveCurve(
-                    loopCurvesArray[i], loopCurvesArray[j], tolerance, tolerance).Any()) {
-              failure.What += "Mutually intersecting polylines." + System.Environment.NewLine;
-              failure.MutuallyIntersectingPolylines.Add(new IndexPair(i, j));
+            using (var cc = Intersect.Intersection.CurveCurve(loopCurvesArray[i], loopCurvesArray[j], tolerance, tolerance))
+            {
+              if (cc.Any())
+              {
+                failure.What += "Mutually intersecting polylines." + System.Environment.NewLine;
+                failure.MutuallyIntersectingPolylines.Add(new IndexPair(i, j));
+              }
             }
           }
 
       CurveOrientation[] os = loopCurvesArray.Select(o => o.ClosedCurveOrientation()).ToArray();
 
       int indexOfOutermostCurve = 0;
-      if (nloops >= 2) {
+      if (nloops >= 2)
+      {
         double[] areas;
-        try {
+        try
+        {
           areas = loopCurvesArray.Select(o => AreaMassProperties.Compute(o).Area).ToArray();
-        } catch {
+        }
+        catch
+        {
           // Since we have checked the curves are simple closed curves, we should not land here
           // In this case, the loops were not all simple closed curves. This throws, and we have already registered the failure, so we can just return;
           failure.What += "Could not calculate the area content of the curves.";
@@ -2906,11 +2962,13 @@ namespace Rhino.Geometry
 
         var holeIndices = Enumerable.Range(0, nloops).Where(i => i != indexOfOutermostCurve);
 
-        foreach (var hi in holeIndices) {
+        foreach (var hi in holeIndices)
+        {
           if (!loopCurvesArray[hi].IsValid) continue;
           var rc = Curve.PlanarClosedCurveRelationship(
             loopCurvesArray[indexOfOutermostCurve], loopCurvesArray[hi], Plane.WorldXY, tolerance);
-          switch (rc) {
+          switch (rc)
+          {
             case RegionContainment.AInsideB:
               failure.PolylinesNotContainedInOne = true;
               failure.What += "Failure ... can't determine which curve is within the other." +
@@ -2941,7 +2999,8 @@ namespace Rhino.Geometry
 
       List<IndexPair> ip = new List<IndexPair>();
 
-      for (int i = 0; i < nloops; i++) {
+      for (int i = 0; i < nloops; i++)
+      {
         if (!loopCurvesArray[i].IsValid) continue;
         var l = loopIndices[i];
         int ll = l.Length - 1;
@@ -2967,7 +3026,8 @@ namespace Rhino.Geometry
         tolerance
         );
 
-      if (res == IntPtr.Zero) {
+      if (res == IntPtr.Zero)
+      {
         return null;
       }
       return CreateGeometryHelper(res, null) as Mesh;
@@ -3098,6 +3158,35 @@ namespace Rhino.Geometry
       GC.KeepAlive(surface);
       GC.KeepAlive(meshingParameters);
       return new Mesh(ptr_mesh, null);
+    }
+
+    /// <summary>
+    /// Create a mesh from a SubD limit surface, using the default meshing density for SubDs.
+    /// </summary>
+    /// <param name="subd">SubD to mesh</param>
+    /// <returns>New mesh representing the SubD</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
+    /// <since>9.0</since>
+    public static Mesh CreateFromSubD(SubD subd)
+    {
+      return CreateFromSubD(subd, SubDDisplayParameters.Density.DefaultDensity);
+    }
+
+    /// <summary>
+    /// Create a mesh from a SubD limit surface
+    /// </summary>
+    /// <param name="subd">SubD to mesh</param>
+    /// <param name="displayDensity">
+    /// Adaptive display density value to use. If in doubt, pass 
+    /// <see cref="SubDDisplayParameters.Density.DefaultDensity"/>: this is what the cache uses.
+    /// </param>
+    /// <returns>New mesh representing the SubD</returns>
+    /// <seealso cref="SubD.UpdateSurfaceMeshCache(bool)"/>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static Mesh CreateFromSubD(SubD subd, SubDDisplayParameters.Density displayDensity)
+    {
+      return CreateFromSubD(subd, (int)displayDensity);
     }
 
     /// <summary>
@@ -3250,6 +3339,135 @@ namespace Rhino.Geometry
         return new Mesh(ptr_mesh, null);
       GC.KeepAlive(surface);
       return null;
+    }
+
+    /// <summary>
+    /// Attempts to create a 3d convex hull mesh from input points using the QuickHull algorithm.
+    /// Hull faces whose shared edges are not clearly convex are merged, so faces of the resulting
+    /// mesh may be triangles, quads, or larger convex polygons (returned as mesh ngons).
+    /// </summary>
+    /// <param name="points">The 3D input points to be covered with the convex hull. At least four
+    /// points are required, and they must not be coincident, colinear, or coplanar.
+    /// </param>
+    /// <returns>A valid mesh if successful. If there were too few input points, or the input was
+    /// degenerate (coincident, colinear, or coplanar), the result is null.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Mesh CreateQuickHull3D(IEnumerable<Point3d> points)
+    {
+      Point3d[] array = points.ToArray();
+      IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_CreateQuickHull3D(array, array.Length);
+      return CreateGeometryHelper(ptr_mesh, null) as Mesh;
+    }
+
+    /// <summary>
+    /// Attempts to create a 3d convex hull mesh from input points using the QuickHull algorithm.
+    /// Hull faces whose shared edges are not clearly convex are merged, so faces of the resulting
+    /// mesh may be triangles, quads, or larger convex polygons (returned as mesh ngons).
+    /// </summary>
+    /// <param name="points">The 3D input points to be covered with the convex hull. At least four
+    /// points are required, and they must not be coincident, colinear, or coplanar.
+    /// </param>
+    /// <param name="indexMap">
+    /// List of integer arrays, one for each hull face, containing the indices into the input
+    /// points enumerable that make up that face. Note, this can be null.
+    /// </param>
+    /// <returns>A valid mesh if successful. If there were too few input points, or the input was
+    /// degenerate (coincident, colinear, or coplanar), the result is null.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Mesh CreateQuickHull3D(IEnumerable<Point3d> points, out List<int[]> indexMap)
+    {
+      Point3d[] array = points.ToArray();
+      using (Rhino.Runtime.InteropWrappers.SimpleArrayInt facetIndexMap = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
+      {
+        IntPtr ptr_facet_index_map = facetIndexMap.NonConstPointer();
+        IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_CreateQuickHull3DWithFacets(array, array.Length, ptr_facet_index_map);
+        Mesh mesh = CreateGeometryHelper(ptr_mesh, null) as Mesh;
+        indexMap = mesh is null ? null : DecodeQuickHull3DFacetIndexMap(facetIndexMap.ToArray());
+        return mesh;
+      }
+    }
+
+    /// <summary>
+    /// Converts the flat, -1-delimited facet index array produced by the native QuickHull3D
+    /// interop functions back into a jagged array, or null if the flat array is empty.
+    /// </summary>
+    private static List<int[]> DecodeQuickHull3DFacetIndexMap(int[] flatFacetIndexMap)
+    {
+      if (flatFacetIndexMap.Length == 0)
+        return null;
+
+      List<int[]> indexMap = new List<int[]>();
+      List<int> map = null;
+      foreach (int k in flatFacetIndexMap)
+      {
+        if (k >= 0)
+        {
+          if (null == map)
+            map = new List<int>();
+          map.Add(k);
+        }
+        else
+        {
+          if (null != map)
+            indexMap.Add(map.ToArray());
+          map = null;
+        }
+      }
+      if (null != map)
+        indexMap.Add(map.ToArray());
+      return indexMap;
+    }
+
+    /// <summary>
+    /// Attempts to create a 3d convex hull mesh from an input point cloud using the QuickHull algorithm.
+    /// Hull faces whose shared edges are not clearly convex are merged, so faces of the resulting
+    /// mesh may be triangles, quads, or larger convex polygons (returned as mesh ngons).
+    /// </summary>
+    /// <param name="pointCloud">The point cloud to be covered with the convex hull. At least four
+    /// points are required, and they must not be coincident, colinear, or coplanar.
+    /// </param>
+    /// <returns>A valid mesh if successful. If there were too few input points, or the input was
+    /// degenerate (coincident, colinear, or coplanar), the result is null.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Mesh CreateQuickHull3D(PointCloud pointCloud)
+    {
+      IntPtr const_ptr_point_cloud = pointCloud.ConstPointer();
+      IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_CreateQuickHull3DFromPointCloud(const_ptr_point_cloud);
+      Mesh mesh = CreateGeometryHelper(ptr_mesh, null) as Mesh;
+      GC.KeepAlive(pointCloud);
+      return mesh;
+    }
+
+    /// <summary>
+    /// Attempts to create a 3d convex hull mesh from an input point cloud using the QuickHull
+    /// algorithm, also returning the input points that make up each hull face.
+    /// </summary>
+    /// <param name="pointCloud">The point cloud to be covered with the convex hull. At least four
+    /// points are required, and they must not be coincident, colinear, or coplanar.
+    /// </param>
+    /// <param name="indexMap">
+    /// List of integer arrays, one for each hull face, containing the indices into the point
+    /// cloud that make up that face. Note, this can be null.
+    /// </param>
+    /// <returns>A valid mesh if successful. If there were too few input points, or the input was
+    /// degenerate (coincident, colinear, or coplanar), the result is null.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Mesh CreateQuickHull3D(PointCloud pointCloud, out List<int[]> indexMap)
+    {
+      IntPtr const_ptr_point_cloud = pointCloud.ConstPointer();
+      using (Rhino.Runtime.InteropWrappers.SimpleArrayInt facetIndexMap = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
+      {
+        IntPtr ptr_facet_index_map = facetIndexMap.NonConstPointer();
+        IntPtr ptr_mesh = UnsafeNativeMethods.ON_Mesh_CreateQuickHull3DFromPointCloudWithFacets(const_ptr_point_cloud, ptr_facet_index_map);
+        Mesh mesh = CreateGeometryHelper(ptr_mesh, null) as Mesh;
+        indexMap = mesh is null ? null : DecodeQuickHull3DFacetIndexMap(facetIndexMap.ToArray());
+        GC.KeepAlive(pointCloud);
+        return mesh;
+      }
     }
 
 #if RHINO_SDK
@@ -3426,18 +3644,43 @@ namespace Rhino.Geometry
       return MeshBooleanHelper(meshes, null, UnsafeNativeMethods.MeshBooleanIntDiffConst.Union, out commandResult, options);
     }
 
-    private static Mesh[] MeshBooleanHelper(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst which, out Commands.Result result, MeshBooleanOptions options=null)
+    /// <summary>
+    /// Computes the solid union of a set of meshes and reports which inputs contributed to each output.
+    /// </summary>
+    /// <param name="meshes">Meshes to union.</param>
+    /// <param name="options">An option instance. Can be null, but generally it should be instantiated and have a tolerance set.</param>
+    /// <param name="commandResult">A value indicating if the function was successful, or if it was cancelled, or if it did nothing, or failed.</param>
+    /// <param name="inputMap">
+    /// On success, one array per output mesh (parallel to the returned array), listing the indices of the
+    /// input meshes that contributed faces to that output. Indices refer to <paramref name="meshes"/> in
+    /// enumeration order; null inputs are skipped and not assigned an index. Null when the function fails.
+    /// </param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>9.0</since>
+    public static Mesh[] CreateBooleanUnion(IEnumerable<Mesh> meshes, MeshBooleanOptions options, out Commands.Result commandResult, out int[][] inputMap)
+    {
+      return MeshBooleanHelper(meshes, null, UnsafeNativeMethods.MeshBooleanIntDiffConst.Union, out commandResult, options, true, out inputMap);
+    }
+
+    private static Mesh[] MeshBooleanHelper(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst which, out Commands.Result result, MeshBooleanOptions options = null)
+    {
+      return MeshBooleanHelper(firstSet, secondSet, which, out result, options, false, out _);
+    }
+
+    private static Mesh[] MeshBooleanHelper(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst which, out Commands.Result result, MeshBooleanOptions options, bool wantInputMap, out int[][] inputMap)
     {
       result = Commands.Result.Failure;
+      inputMap = null;
 
       if (null == firstSet || (null == secondSet && UnsafeNativeMethods.MeshBooleanIntDiffConst.Union != which))
         return null;
 
       if (options == null) options = new MeshBooleanOptions();
-      
+
       using (var input1 = new SimpleArrayMeshPointer())
       using (var input2 = (which != UnsafeNativeMethods.MeshBooleanIntDiffConst.Union) ? new SimpleArrayMeshPointer() : null)
       using (var output = new SimpleArrayMeshPointer())
+      using (var map = wantInputMap ? new SimpleArrayInt() : null)
       {
         foreach (Mesh mesh in firstSet)
         {
@@ -3459,6 +3702,7 @@ namespace Rhino.Geometry
         IntPtr const_ptr_input1 = input1.ConstPointer();
         IntPtr const_ptr_input2 = input2?.ConstPointer() ?? IntPtr.Zero;
         IntPtr ptr_output = output.NonConstPointer();
+        IntPtr ptr_map = map?.NonConstPointer() ?? IntPtr.Zero;
 
         IntPtr text_log_ptr = options.TextLog?.NonConstPointer() ?? IntPtr.Zero;
 
@@ -3467,18 +3711,44 @@ namespace Rhino.Geometry
 
         int commandResult = 0;
         Mesh[] rc = null;
-        if (UnsafeNativeMethods.RHC_RhinoMeshBooleanIntDiffUni(const_ptr_input1, const_ptr_input2, 
-          options.Tolerance, options.Tolerance, ptr_output, which, text_log_ptr, ptrTerminator, progressInt, ref commandResult))
+        try
         {
-          rc = output.ToNonConstArray();
-          result = (Commands.Result)commandResult;
+          if (UnsafeNativeMethods.RHC_RhinoMeshBooleanIntDiffUni(const_ptr_input1, const_ptr_input2,
+            options.Tolerance, options.Tolerance, ptr_output, which, text_log_ptr, ptrTerminator, progressInt, ref commandResult, ptr_map))
+          {
+            rc = output.ToNonConstArray();
+            result = (Commands.Result)commandResult;
+
+            if (wantInputMap && rc != null)
+            {
+              // Rebuild the jagged map from the flat, -1-delimited array (one row per output mesh,
+              // parallel to rc). A new row is started at every -1 so empty rows are preserved and
+              // inputMap.Length stays equal to rc.Length.
+              int[] keys = map.ToArray();
+              var rows = new List<int[]>();
+              var current = new List<int>();
+              foreach (int k in keys)
+              {
+                if (k < 0)
+                {
+                  rows.Add(current.ToArray());
+                  current = new List<int>();
+                }
+                else
+                  current.Add(k);
+              }
+              inputMap = rows.ToArray();
+            }
+          }
+        }
+        finally
+        {
+          if (terminator != null) terminator.Dispose();
+          if (reporter != null) reporter.Disable();
         }
         GC.KeepAlive(firstSet);
         GC.KeepAlive(secondSet);
         GC.KeepAlive(options);
-
-        if (terminator != null) terminator.Dispose();
-        if (reporter != null) reporter.Disable();
 
         return rc;
       }
@@ -3510,6 +3780,26 @@ namespace Rhino.Geometry
       return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference, out result, options);
     }
 
+    /// <summary>
+    /// Computes the solid difference of two sets of meshes and reports which inputs contributed to each output.
+    /// </summary>
+    /// <param name="firstSet">First set of Meshes (the set to subtract from).</param>
+    /// <param name="secondSet">Second set of Meshes (the set to subtract).</param>
+    /// <param name="options">An option instance. Should have a valid Tolerance set.</param>
+    /// <param name="result">Indicates if the function succeeded, was cancelled, did nothing, or failed.</param>
+    /// <param name="inputMap">
+    /// On success, one array per output mesh (parallel to the returned array), listing the indices of the
+    /// input meshes that contributed faces to that output. The index space is flat-concatenated:
+    /// <paramref name="firstSet"/> occupies 0..n0-1 and <paramref name="secondSet"/> occupies n0..n0+n1-1,
+    /// in enumeration order; null inputs are skipped and not assigned an index. Null when the function fails.
+    /// </param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>9.0</since>
+    public static Mesh[] CreateBooleanDifference(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, MeshBooleanOptions options, out Commands.Result result, out int[][] inputMap)
+    {
+      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Difference, out result, options, true, out inputMap);
+    }
+
 
     /// <summary>
     /// Computes the solid intersection of two sets of meshes.
@@ -3537,6 +3827,26 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Computes the solid intersection of two sets of meshes and reports which inputs contributed to each output.
+    /// </summary>
+    /// <param name="firstSet">First set of Meshes.</param>
+    /// <param name="secondSet">Second set of Meshes.</param>
+    /// <param name="options">The boolean option instance, or null.</param>
+    /// <param name="result">A value indicating success, or cancel, or failure, or nothing.</param>
+    /// <param name="inputMap">
+    /// On success, one array per output mesh (parallel to the returned array), listing the indices of the
+    /// input meshes that contributed faces to that output. The index space is flat-concatenated:
+    /// <paramref name="firstSet"/> occupies 0..n0-1 and <paramref name="secondSet"/> occupies n0..n0+n1-1,
+    /// in enumeration order; null inputs are skipped and not assigned an index. Null when the function fails.
+    /// </param>
+    /// <returns>An array of Mesh results or null on failure.</returns>
+    /// <since>9.0</since>
+    public static Mesh[] CreateBooleanIntersection(IEnumerable<Mesh> firstSet, IEnumerable<Mesh> secondSet, MeshBooleanOptions options, out Result result, out int[][] inputMap)
+    {
+      return MeshBooleanHelper(firstSet, secondSet, UnsafeNativeMethods.MeshBooleanIntDiffConst.Intersect, out result, options, true, out inputMap);
+    }
+
+    /// <summary>
     /// Splits a set of meshes with another set.
     /// </summary>
     /// <param name="meshesToSplit">A list, an array, or any enumerable set of meshes to be split. If this is null, null will be returned.</param>
@@ -3560,6 +3870,27 @@ namespace Rhino.Geometry
     public static Mesh[] CreateBooleanSplit(IEnumerable<Mesh> meshesToSplit, IEnumerable<Mesh> meshSplitters, MeshBooleanOptions options, out Result result)
     {
       return MeshBooleanHelper(meshesToSplit, meshSplitters, UnsafeNativeMethods.MeshBooleanIntDiffConst.Split, out result, options);
+    }
+
+    /// <summary>
+    /// Splits a set of meshes with another set and reports which inputs contributed to each output.
+    /// </summary>
+    /// <param name="meshesToSplit">A list, an array, or any enumerable set of meshes to be split.</param>
+    /// <param name="meshSplitters">A list, an array, or any enumerable set of meshes that cut.</param>
+    /// <param name="options">The boolean option instance, or null.</param>
+    /// <param name="result">A value indicating success, or cancel, or failure, or nothing.</param>
+    /// <param name="inputMap">
+    /// On success, one array per output mesh (parallel to the returned array), listing the indices of the
+    /// input meshes that contributed faces to that output. The index space is flat-concatenated:
+    /// <paramref name="meshesToSplit"/> occupies 0..n0-1 and <paramref name="meshSplitters"/> occupies
+    /// n0..n0+n1-1, in enumeration order; null inputs are skipped and not assigned an index. Null when the
+    /// function fails.
+    /// </param>
+    /// <returns>A new mesh array, or null on error.</returns>
+    /// <since>9.0</since>
+    public static Mesh[] CreateBooleanSplit(IEnumerable<Mesh> meshesToSplit, IEnumerable<Mesh> meshSplitters, MeshBooleanOptions options, out Result result, out int[][] inputMap)
+    {
+      return MeshBooleanHelper(meshesToSplit, meshSplitters, UnsafeNativeMethods.MeshBooleanIntDiffConst.Split, out result, options, true, out inputMap);
     }
 
     /// <summary>
@@ -3690,16 +4021,17 @@ namespace Rhino.Geometry
       var input_ptrs = new IntPtr[count];
       for (int i = 0; i < count; i++) input_ptrs[i] = meshes_inputs[i].ConstPointer();
 
-      SimpleArrayMeshPointer results = new SimpleArrayMeshPointer();
+      using (SimpleArrayMeshPointer results = new SimpleArrayMeshPointer())
+      {
+        var inputs_intptrs = GCHandle.Alloc(input_ptrs, GCHandleType.Pinned);
+        bool result = UnsafeNativeMethods.RHC_MeshArrayIterativeCleanup(inputs_intptrs.AddrOfPinnedObject(), count, tolerance, results.NonConstPointer());
+        inputs_intptrs.Free();
+        GC.KeepAlive(meshes_inputs);
 
-      var inputs_intptrs = GCHandle.Alloc(input_ptrs, GCHandleType.Pinned);
-      bool result = UnsafeNativeMethods.RHC_MeshArrayIterativeCleanup(inputs_intptrs.AddrOfPinnedObject(), count, tolerance, results.NonConstPointer());
-      inputs_intptrs.Free();
-      GC.KeepAlive(meshes_inputs);
-
-      var array = results.ToNonConstArray(); //required in all cases, or the possible new meshes will leak in case of failure
-      if (results.Count == 0 || result == false) return null;
-      return array;
+        var array = results.ToNonConstArray(); //required in all cases, or the possible new meshes will leak in case of failure
+        if (results.Count == 0 || result == false) return null;
+        return array;
+      }
     }
 
 
@@ -3719,13 +4051,16 @@ namespace Rhino.Geometry
     /// <returns>A valid mesh if successful. If there were too few input points, or the input was coplanar
     /// up to the specified tolerance, the result can be null.</returns>
     /// <since>8.5</since>
-    public static Mesh CreateConvexHull3D(IEnumerable<Point3d> points, out int[][] hullFacets, double tolerance, double angleTolerance) {
+    public static Mesh CreateConvexHull3D(IEnumerable<Point3d> points, out int[][] hullFacets, double tolerance, double angleTolerance)
+    {
       hullFacets = new int[][] { };
       var array = points.ToArray();
       int errorCode = 0;
 
-      using (var hullFacetIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
-        using (var facetStartIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt()) {
+      using (var hullFacetIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
+      {
+        using (var facetStartIndices = new Rhino.Runtime.InteropWrappers.SimpleArrayInt())
+        {
           IntPtr hfi = hullFacetIndices.NonConstPointer();
           IntPtr fsi = facetStartIndices.NonConstPointer();
           IntPtr res = UnsafeNativeMethods.RHC_ConvexHull3dMesh_R8SR11(array, array.Length, tolerance, angleTolerance, hfi, fsi, ref errorCode);
@@ -3736,7 +4071,8 @@ namespace Rhino.Geometry
           var hfii = hullFacetIndices.ToArray();
           var fsii = facetStartIndices.ToArray();
           hullFacets = new int[fsii.Length][];
-          for (int i = 0; i < fsii.Length; i++) {
+          for (int i = 0; i < fsii.Length; i++)
+          {
             int start = fsii[i];
             int length;
 
@@ -4195,6 +4531,17 @@ namespace Rhino.Geometry
       get { return m_vertexcolors ?? (m_vertexcolors = new Collections.MeshVertexColorList(this)); }
     }
 
+    private Collections.MeshPrincipalCurvatureList m_principal_curvatures;
+    /// <summary>
+    /// Gets access to the (optional) principal curvatures list in this mesh.
+    /// Principal curvatures are found on analysis meshes, not render meshes.
+    /// </summary>
+    /// <since>9.0</since>
+    public Collections.MeshPrincipalCurvatureList PrincipalCurvatures
+    {
+      get { return m_principal_curvatures ?? (m_principal_curvatures = new Collections.MeshPrincipalCurvatureList(this)); }
+    }
+
     private Collections.MeshTextureCoordinateList m_texcoords;
     /// <summary>
     /// Gets access to the vertex texture coordinate collection in this mesh.
@@ -4321,13 +4668,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Set texture coordinates using given mapping and applying given transform.
-    /// 
-    /// Set lazy to false to generate texture coordinates right away.
+    /// Sets texture coordinates using the given texture mapping and transform.
     /// </summary>
     /// <param name="tm">Texture mapping</param>
     /// <param name="xf">Transform to apply to the texture mapping</param>
-    /// <param name="lazy">Whether to generate lazily (true) or right away (false)</param>
+    /// <param name="lazy">
+    /// If true and the mesh's texture coordinates were already computed from this same
+    /// mapping and transform, no calculation is performed. If false, texture coordinates
+    /// are always recalculated.
+    /// </param>
     /// <since>6.0</since>
     public void SetTextureCoordinates(TextureMapping tm, Transform xf, bool lazy)
     {
@@ -4337,14 +4686,16 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Set texture coordinates using given mapping and applying given transform.
-    /// 
-    /// Set lazy to false to generate texture coordinates right away.
+    /// Sets texture coordinates using the given texture mapping and transform.
     /// </summary>
     /// <param name="tm">Texture mapping</param>
     /// <param name="xf">Transform to apply to the texture mapping</param>
-    /// <param name="lazy">Whether to generate lazily (true) or right away (false)</param>
-    /// <param name="seamCheck">If true then some mesh edges might be unwelded to better 
+    /// <param name="lazy">
+    /// If true and the mesh's texture coordinates were already computed from this same
+    /// mapping and transform, no calculation is performed. If false, texture coordinates
+    /// are always recalculated.
+    /// </param>
+    /// <param name="seamCheck">If true then some mesh edges might be unwelded to better
     /// represent UV discontinuities in the texture mapping.
     /// This only happens for the following mappings:
     /// Box, Sphere, Cylinder</param>
@@ -4495,10 +4846,12 @@ namespace Rhino.Geometry
     /// <returns>True on success and false on failure.</returns>
     /// <since>8.6</since>
     [ConstOperation]
-    public bool ComputeCurvatureApproximation(int type, out double[] perVertexCurvatures) {
+    public bool ComputeCurvatureApproximation(int type, out double[] perVertexCurvatures)
+    {
       perVertexCurvatures = null;
       using (var array = new Rhino.Runtime.InteropWrappers.SimpleArrayDouble())
-        if (UnsafeNativeMethods.RHC_RhinoMeshDiscreteCurvature(this.ConstPointer(), type, array.NonConstPointer())) {
+        if (UnsafeNativeMethods.RHC_RhinoMeshDiscreteCurvature(this.ConstPointer(), type, array.NonConstPointer()))
+        {
           GC.KeepAlive(this);
           perVertexCurvatures = array.ToArray();
           return true;
@@ -4767,6 +5120,25 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Makes sure that faces sharing an edge and having a difference of normal less
+    /// than or equal to angleToleranceRadians share vertices along that edge, vertex normals
+    /// are averaged.
+    /// </summary>
+    /// <param name="angleToleranceRadians">Angle at which to weld vertices.</param>
+    /// <param name="preserveSurfaceParameters">
+    /// If true, vertex copies whose surface parameters differ are never merged into a single vertex -
+    /// the edge between them is left unwelded instead of averaging or discarding one side's parameters.
+    /// Vertex copies whose surface parameters already match are still merged normally.
+    /// </param>
+    /// <since>9.0</since>
+    public void Weld(double angleToleranceRadians, bool preserveSurfaceParameters)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.RHC_RhinoWeldMesh2(ptr_this, angleToleranceRadians, preserveSurfaceParameters);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
     /// Creates a new unwelded mesh from an existing mesh. Texture coordinates are ignored.
     /// </summary>
     /// <param name="mesh">The source mesh to copy.</param>
@@ -4932,12 +5304,20 @@ namespace Rhino.Geometry
     /// <param name="topologyEdgeIndex">Starting naked edge index.</param>
     /// <returns>true if successful, false otherwise.</returns>
     /// <since>6.0</since>
-    public bool FileHole(int topologyEdgeIndex)
+    public bool FillHole(int topologyEdgeIndex)
     {
       IntPtr ptr_this = NonConstPointer();
       bool rc = UnsafeNativeMethods.RHC_RhinoFillMeshHole(ptr_this, topologyEdgeIndex);
       GC.KeepAlive(this);
       return rc;
+    }
+
+    /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use Mesh.FillHole")]
+    public bool FileHole(int topologyEdgeIndex)
+    {
+      return FillHole(topologyEdgeIndex);
     }
 
     /// <summary>
@@ -4959,6 +5339,54 @@ namespace Rhino.Geometry
       bool rc = UnsafeNativeMethods.RHC_RhinoMatchMeshEdge(ptr_this, distance, rachet);
       GC.KeepAlive(this);
       return rc;
+    }
+
+    /// <summary>
+    /// Moves face edges of open meshes to meet near face edges.
+    /// The method will first try to match vertices, and then then it will try to split edges to make the edges match.
+    /// </summary>
+    /// <param name="inputMeshes">
+    /// Input meshes to be split and matched.</param>
+    /// <param name="distance"> 
+    /// The distance tolerance. Use larger tolerances only if you select specific edges to close.</param>
+    /// <param name="simpleSplits"> 
+    /// When this is true and there is only one split in a face the code just divides the face at that vertex.  If
+    /// it is false or there are multiple splits on the same face TL_Triangulate3dPolygon is called and the resulting
+    /// faces replace the existing face.
+    /// </param>
+    /// <param name="rachet">
+    /// If true, matching the mesh takes place in four passes starting at a tolerance that is smaller
+    /// than your specified tolerance and working up to the specified tolerance with successive passes.
+    /// This matches small edges first and works up to larger edges.
+    /// If false, then a single pass is made.
+    /// </param>
+    /// <param name="average">
+    /// Set to true if you want an average to the vertex sets to be modified
+    /// rather than using the first.
+    /// </param>
+    /// <param name="join">
+    /// Set to true if you want the output joined into a single mesh
+    /// </param>
+    /// <returns>The resulting output meshes.</returns>
+    /// <since>9.0</since>
+    public static Mesh[] MatchEdges(IEnumerable<Mesh> inputMeshes, double distance, bool simpleSplits, bool rachet, bool average, bool join)
+    {
+      if (inputMeshes == null) throw new ArgumentNullException("inputMeshes");
+
+      var meshes_buffered = inputMeshes as Mesh[] ?? new List<Mesh>(inputMeshes).ToArray();
+
+      using (var input_mesh_ptrs = new SimpleArrayMeshPointer())
+      using (var outputMeshes = new SimpleArrayMeshPointer())
+      {
+        var output_non_const_array = outputMeshes.NonConstPointer();
+        foreach (var mesh in meshes_buffered)
+          input_mesh_ptrs.Add(mesh, false);
+
+        var input_const_array = input_mesh_ptrs.ConstPointer();
+        UnsafeNativeMethods.RHC_RhinoMatchMeshEdgeEx(input_const_array, output_non_const_array, distance, simpleSplits, rachet, average, join);
+
+        return outputMeshes.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -5093,6 +5521,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">A value for intersection tolerance.
     /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
     /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
     /// </param>
     /// <param name="splitAtCoplanar">If false, coplanar areas will not be separated.</param>
     /// <param name="textLog">A text log to write onto.</param>
@@ -5113,6 +5542,7 @@ namespace Rhino.Geometry
     /// <param name="tolerance">A value for intersection tolerance.
     /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
     /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
     /// </param>
     /// <param name="splitAtCoplanar">If false, coplanar areas will not be separated.</param>
     /// <param name="createNgons">If true, creates ngons along the split ridge.</param>
@@ -5123,6 +5553,38 @@ namespace Rhino.Geometry
     /// <since>7.0</since>
     public Mesh[] Split(IEnumerable<Mesh> meshes, double tolerance, bool splitAtCoplanar, bool createNgons, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
     {
+      return Split(meshes, new MeshSplitOptions
+      {
+        Tolerance = tolerance,
+        SplitAtCoplanar = splitAtCoplanar,
+        CreateNgons = createNgons,
+        TextLog = textLog,
+        CancellationToken = cancel,
+        ProgressReporter = progress
+      });
+    }
+
+    /// <summary>
+    /// Split a mesh with a collection of meshes.
+    /// </summary>
+    /// <param name="meshes">Meshes to split with.</param>
+    /// <param name="options">The split option instance, or null for the defaults.
+    /// <para>Because <see cref="MeshBooleanOptions"/> derives from <see cref="MeshSplitOptions"/>, an
+    /// instance used for mesh booleans can be passed here directly.</para></param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
+    /// <since>9.0</since>
+    public Mesh[] Split(IEnumerable<Mesh> meshes, MeshSplitOptions options)
+    {
+      if (options == null) options = new MeshSplitOptions();
+
+      double tolerance = options.Tolerance;
+      bool splitAtCoplanar = options.SplitAtCoplanar;
+      bool createNgons = options.CreateNgons;
+      bool completeOpenCuts = options.CompleteOpenCuts;
+      TextLog textLog = options.TextLog;
+      CancellationToken cancel = options.CancellationToken;
+      IProgress<double> progress = options.ProgressReporter;
+
       Interop.MarshalProgressAndCancelToken(cancel, progress,
         out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
 
@@ -5143,7 +5605,7 @@ namespace Rhino.Geometry
           IntPtr ptr_result_meshes = on_meshes.NonConstPointer();
           int results = UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, tolerance, splitAtCoplanar,
             ptr_result_meshes, createNgons,
-            textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
+            textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts);
           GC.KeepAlive(meshes);
           GC.KeepAlive(textLog);
           GC.KeepAlive(progress);
@@ -5163,6 +5625,139 @@ namespace Rhino.Geometry
       {
         if (reporter != null) reporter.Disable();
         if (terminator != null) terminator.Dispose();
+      }
+    }
+
+
+    /// <summary>
+    /// Split a mesh with itself.
+    /// </summary>
+    /// <param name="tolerance">A value for intersection tolerance.
+    /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
+    /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
+    /// </param>
+    /// <returns>A new mesh array with the split result. This can be null if no result was found.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Mesh[] SelfSplit(double tolerance)
+    {
+      return SelfSplit(tolerance, true, true, null, CancellationToken.None, null);
+    }
+    /// <summary>
+    /// Split a mesh with itself.
+    /// </summary>
+    /// <param name="tolerance">A value for intersection tolerance.
+    /// <para>WARNING! Correct values are typically in the (10e-8 - 10e-4) range.</para>
+    /// <para>An option is to use the document tolerance diminished by a few orders or magnitude.</para>
+    /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
+    /// </param>
+    /// <param name="splitAtCoplanar">If false, coplanar areas will not be separated.</param>
+    /// <param name="createNgons">If true, creates ngons along the split ridge.</param>
+    /// <param name="textLog">A text log to write onto.</param>
+    /// <param name="cancel">A cancellation token.</param>
+    /// <param name="progress">A progress reporter item. This can be null.</param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Mesh[] SelfSplit(double tolerance, bool splitAtCoplanar, bool createNgons, TextLog textLog, CancellationToken cancel, IProgress<double> progress)
+    {
+      return SelfSplit(new MeshSplitOptions
+      {
+        Tolerance = tolerance,
+        SplitAtCoplanar = splitAtCoplanar,
+        CreateNgons = createNgons,
+        TextLog = textLog,
+        CancellationToken = cancel,
+        ProgressReporter = progress
+      });
+    }
+
+    /// <summary>
+    /// Split a mesh with itself.
+    /// </summary>
+    /// <param name="options">The split option instance, or null for the defaults.
+    /// <para>Because <see cref="MeshBooleanOptions"/> derives from <see cref="MeshSplitOptions"/>, an
+    /// instance used for mesh booleans can be passed here directly.</para></param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh intersected, or if a cancel stopped the computation.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Mesh[] SelfSplit(MeshSplitOptions options)
+    {
+      if (options == null) options = new MeshSplitOptions();
+
+      double tolerance = options.Tolerance;
+      bool splitAtCoplanar = options.SplitAtCoplanar;
+      bool createNgons = options.CreateNgons;
+      bool completeOpenCuts = options.CompleteOpenCuts;
+      TextLog textLog = options.TextLog;
+      CancellationToken cancel = options.CancellationToken;
+      IProgress<double> progress = options.ProgressReporter;
+
+      IntPtr const_ptr_this = ConstPointer();
+      using var meshes = new SimpleArrayMeshPointer();
+      Interop.MarshalProgressAndCancelToken(cancel, progress,
+        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
+
+      try
+      {
+        IntPtr ptr_mesh_array = meshes.NonConstPointer();
+        int rc = UnsafeNativeMethods.RHC_RhinoMeshSelfSplit(const_ptr_this, ptr_mesh_array, tolerance, splitAtCoplanar, createNgons,
+          textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts);
+        GC.KeepAlive(this);
+        GC.KeepAlive(textLog);
+        GC.KeepAlive(progress);
+        if (rc == 0) return null;
+        return meshes.ToNonConstArray();
+      }
+      finally
+      {
+        reporter?.Disable();
+        terminator?.Dispose();
+      }
+    }
+
+    /// <summary>
+    /// Split a mesh where at non-2 manifolds boundaries.
+    /// </summary>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh split, or if a cancel stopped the computation.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Mesh[] SplitNon2Manifolds()
+    {
+      return SplitNon2Manifolds(null, System.Threading.CancellationToken.None, null);
+    }
+    /// <summary>
+    /// Split a mesh where at non-2 manifolds boundaries.
+    /// </summary>
+    /// <param name="textLog">A text log to write onto.</param>
+    /// <param name="cancel">A cancellation token.</param>
+    /// <param name="progress">A progress reporter item. This can be null.</param>
+    /// <returns>An array of mesh parts representing the split result, or null: when no mesh split, or if a cancel stopped the computation.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Mesh[] SplitNon2Manifolds(TextLog textLog, CancellationToken cancel, IProgress<double> progress)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      using var meshes = new SimpleArrayMeshPointer();
+      Interop.MarshalProgressAndCancelToken(cancel, progress,
+        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
+
+      try
+      {
+        IntPtr ptr_mesh_array = meshes.NonConstPointer();
+        int rc = UnsafeNativeMethods.RHC_RhinoSplitNon2Manifolds(const_ptr_this, ptr_mesh_array,
+          textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
+        GC.KeepAlive(this);
+        GC.KeepAlive(textLog);
+        GC.KeepAlive(progress);
+        if (rc == 0) return null;
+        return meshes.ToNonConstArray();
+      }
+      finally
+      {
+        reporter?.Disable();
+        terminator?.Dispose();
       }
     }
 
@@ -5675,32 +6270,34 @@ namespace Rhino.Geometry
 
       if (polyline_curve_const_ptrs.Count == 0) return null;
 
-      var meshes_results = new SimpleArrayMeshPointer();
-      IntPtr new_polyline_crv_ptr = IntPtr.Zero;
-      IntPtr mesh_constptr = ConstPointer();
-      IntPtr meshes_results_simple_array_ptr = meshes_results.NonConstPointer();
-
-      Interop.MarshalProgressAndCancelToken(cancel, progress,
-        out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
-      try
+      using (var meshes_results = new SimpleArrayMeshPointer())
       {
-        GCHandle handle = GCHandle.Alloc(polyline_curve_const_ptrs.m_items, GCHandleType.Pinned);
-        UnsafeNativeMethods.RH_MX_SplitWithProjectedPolylines(Marshal.UnsafeAddrOfPinnedArrayElement(polyline_curve_const_ptrs.m_items, 0),
-          polyline_curve_const_ptrs.Count, mesh_constptr, tolerance, meshes_results_simple_array_ptr, textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
-        handle.Free();
-        GC.KeepAlive(curves);
-        GC.KeepAlive(textLog);
-        GC.KeepAlive(progress);
-        GC.KeepAlive(this);
-      }
-      finally
-      {
-        if (reporter != null) reporter.Disable();
-        if (terminator != null) terminator.Dispose();
-      }
+        IntPtr new_polyline_crv_ptr = IntPtr.Zero;
+        IntPtr mesh_constptr = ConstPointer();
+        IntPtr meshes_results_simple_array_ptr = meshes_results.NonConstPointer();
 
-      if (meshes_results.Count == 0) return null;
-      return meshes_results.ToNonConstArray();
+        Interop.MarshalProgressAndCancelToken(cancel, progress,
+          out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
+        try
+        {
+          GCHandle handle = GCHandle.Alloc(polyline_curve_const_ptrs.m_items, GCHandleType.Pinned);
+          UnsafeNativeMethods.RH_MX_SplitWithProjectedPolylines(Marshal.UnsafeAddrOfPinnedArrayElement(polyline_curve_const_ptrs.m_items, 0),
+            polyline_curve_const_ptrs.Count, mesh_constptr, tolerance, meshes_results_simple_array_ptr, textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt);
+          handle.Free();
+          GC.KeepAlive(curves);
+          GC.KeepAlive(textLog);
+          GC.KeepAlive(progress);
+          GC.KeepAlive(this);
+        }
+        finally
+        {
+          if (reporter != null) reporter.Disable();
+          if (terminator != null) terminator.Dispose();
+        }
+
+        if (meshes_results.Count == 0) return null;
+        return meshes_results.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -5960,10 +6557,14 @@ namespace Rhino.Geometry
           displacement.SweepPitch,
           displacement.WhiteMove,
           displacement.ChannelNumber,
+          true,
           displacement.FaceLimit,
+          true,
           displacement.FairingAmount,
           displacement.RefineStepCount,
           displacement.MemoryLimit,
+          0.0001,
+          0,
           string_ptr
           );
 
@@ -6300,15 +6901,20 @@ namespace Rhino.Geometry
     /// <since>7.10</since>
     public bool CreateVertexColorsFromBitmap(RhinoDoc doc, TextureMapping mapping, Transform xform, System.Drawing.Bitmap bitmap)
     {
-      bool rc = UnsafeNativeMethods.Rhino_CreateVertexColors(
-        doc.RuntimeSerialNumber, 
-        this.ConstPointer(), 
-        (null!=mapping) ? mapping.ConstPointer() : IntPtr.Zero, 
-        ref xform, 
-        RhinoDib.FromBitmap(bitmap).ConstPointer);
-      GC.KeepAlive(mapping);
-      GC.KeepAlive(this);
-      return rc;
+      using (var dib = RhinoDib.FromBitmap(bitmap))
+      {
+        bool rc = UnsafeNativeMethods.Rhino_CreateVertexColors(
+          doc.RuntimeSerialNumber,
+          this.ConstPointer(),
+          (null != mapping) ? mapping.ConstPointer() : IntPtr.Zero,
+          ref xform,
+          dib.ConstPointer);
+
+        GC.KeepAlive(mapping);
+        GC.KeepAlive(this);
+
+        return rc;
+      }
     }
 
     /// <summary>
@@ -6350,6 +6956,25 @@ namespace Rhino.Geometry
       return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, guideCurves, null, CancellationToken.None);
     }
 
+    /// <summary>
+    /// Quad remesh this Brep.
+    /// </summary>
+    /// <param name="brep">
+    /// Set Brep Face Mode by setting QuadRemeshParameters.PreserveMeshArrayEdgesMode
+    /// </param>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves"></param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static Mesh QuadRemeshBrep(Brep brep, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(brep, settings, guideCurves, progress, cancelToken);
+    }
 
     /// <summary>
     /// Quad remesh this Brep asynchronously.
@@ -6425,6 +7050,28 @@ namespace Rhino.Geometry
         throw new ArgumentNullException(nameof(parameters));
       var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
       return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, new List<int>(), settings, guideCurves, null, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Quad remesh this mesh.
+    /// </summary>
+    /// <param name="faceBlocks"></param>
+    /// <param name="parameters"></param>
+    /// <param name="guideCurves">
+    /// A curve array used to influence mesh face layout
+    /// The curves should touch the input mesh
+    /// Set Guide Curve Influence by using QuadRemeshParameters.GuideCurveInfluence
+    /// </param>
+    /// <param name="progress"></param>
+    /// <param name="cancelToken"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public Mesh QuadRemesh(IEnumerable<int> faceBlocks, QuadRemeshParameters parameters, IEnumerable<Curve> guideCurves, IProgress<int> progress, CancellationToken cancelToken)
+    {
+      if (parameters == null)
+        throw new ArgumentNullException(nameof(parameters));
+      var settings = new QuadRemeshPrivate.QuadRemeshSettings(parameters);
+      return QuadRemeshPrivate.QuadRemeshEngine.QuadRemeshWorker(this, faceBlocks, settings, guideCurves, progress, cancelToken);
     }
 
 
@@ -6699,15 +7346,21 @@ namespace Rhino.Geometry
         out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
 
       bool rc;
-      using (var sw = new StringWrapper())
+      try
       {
-        IntPtr ptr_string = sw.NonConstPointer;
-        rc = UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this, desiredPolygonCount, allowDistortion, accuracy, normalizeSize,
-          ptr_terminator, progress_report_serial_number, ptr_string, IntPtr.Zero, IntPtr.Zero, false);
-        problemDescription = sw.ToString();
+        using (var sw = new StringWrapper())
+        {
+          IntPtr ptr_string = sw.NonConstPointer;
+          rc = UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this, desiredPolygonCount, allowDistortion, accuracy, normalizeSize,
+            ptr_terminator, progress_report_serial_number, ptr_string, IntPtr.Zero, IntPtr.Zero, false);
+          problemDescription = sw.ToString();
+        }
       }
-      if (terminator != null) terminator.Dispose();
-      if (reporter != null) reporter.Disable();
+      finally
+      {
+        if (terminator != null) terminator.Dispose();
+        if (reporter != null) reporter.Disable();
+      }
       GC.KeepAlive(this);
       return rc;
     }
@@ -6735,52 +7388,62 @@ namespace Rhino.Geometry
 
       IntPtr ptr_this = NonConstPointer();
 
-      Interop.MarshalProgressAndCancelToken(parameters.CancelToken, parameters.ProgressReporter,
-        out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
-
-      SimpleArrayInt faceTags = new SimpleArrayInt(parameters.FaceTags);
-      IntPtr ptr_face_tags = faceTags.Count == 0 ? IntPtr.Zero : faceTags.NonConstPointer();
-
-      INTERNAL_ComponentIndexArray lockedComponents = new INTERNAL_ComponentIndexArray();
-      if (parameters.LockedComponents != null)
+      using (SimpleArrayInt faceTags = new SimpleArrayInt(parameters.FaceTags))
       {
-        foreach (ComponentIndex ci in parameters.LockedComponents)
+        IntPtr ptr_face_tags = faceTags.Count == 0 ? IntPtr.Zero : faceTags.NonConstPointer();
+
+        using (INTERNAL_ComponentIndexArray lockedComponents = new INTERNAL_ComponentIndexArray())
         {
-          lockedComponents.Add(ci);
+          if (parameters.LockedComponents != null)
+          {
+            foreach (ComponentIndex ci in parameters.LockedComponents)
+            {
+              lockedComponents.Add(ci);
+            }
+          }
+
+          IntPtr ptr_locked_components = lockedComponents.Count == 0 ? IntPtr.Zero : lockedComponents.NonConstPointer();
+
+          // Registered here rather than at the top of the method so that no caller-supplied
+          // enumeration runs while the reporter is in the registry.
+          Interop.MarshalProgressAndCancelToken(parameters.CancelToken, parameters.ProgressReporter,
+            out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
+
+          bool rc;
+          try
+          {
+            using (var sw = new StringWrapper())
+            {
+              IntPtr ptr_string = sw.NonConstPointer;
+              rc = UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this,
+                                                           parameters.DesiredPolygonCount,
+                                                           parameters.AllowDistortion,
+                                                           parameters.Accuracy,
+                                                           parameters.NormalizeMeshSize,
+                                                           ptr_terminator,
+                                                           progress_report_serial_number,
+                                                           sw.NonConstPointer,
+                                                           ptr_face_tags,
+                                                           ptr_locked_components,
+                                                           threaded);
+
+              if (rc)
+              {
+                parameters.Error = sw.ToString();
+                if (ptr_face_tags != IntPtr.Zero)
+                  parameters.FaceTags = faceTags.ToArray();
+              }
+            }
+          }
+          finally
+          {
+            if (terminator != null) terminator.Dispose();
+            if (reporter != null) reporter.Disable();
+          }
+          GC.KeepAlive(this);
+          return rc;
         }
       }
-
-      IntPtr ptr_locked_components = lockedComponents.Count == 0 ? IntPtr.Zero : lockedComponents.NonConstPointer();
-
-      bool rc;
-      using (var sw = new StringWrapper())
-      {
-        IntPtr ptr_string = sw.NonConstPointer;
-        rc = UnsafeNativeMethods.RHC_RhinoReduceMesh(ptr_this,
-                                                     parameters.DesiredPolygonCount,
-                                                     parameters.AllowDistortion,
-                                                     parameters.Accuracy,
-                                                     parameters.NormalizeMeshSize,
-                                                     ptr_terminator,
-                                                     progress_report_serial_number,
-                                                     sw.NonConstPointer,
-                                                     ptr_face_tags,
-                                                     ptr_locked_components,
-                                                     threaded);
-
-        if (rc)
-        {
-          parameters.Error = sw.ToString();
-          if (ptr_face_tags != IntPtr.Zero)
-            parameters.FaceTags = faceTags.ToArray();
-        }
-      }
-      if (terminator != null) terminator.Dispose();
-      if (reporter != null) reporter.Disable();
-      GC.KeepAlive(faceTags);
-      GC.KeepAlive(lockedComponents);
-      GC.KeepAlive(this);
-      return rc;
     }
 
     /// <summary>
@@ -6835,7 +7498,9 @@ namespace Rhino.Geometry
         IntPtr ptr_terminator = IntPtr.Zero;
         if (cancelToken != System.Threading.CancellationToken.None)
         {
+#pragma warning disable CA2000
           ThreadTerminator terminator = new ThreadTerminator();
+#pragma warning restore CA2000
           ptr_terminator = terminator.NonConstPointer();
           cancelToken.Register(terminator.RequestCancel);
         }
@@ -6967,7 +7632,7 @@ namespace Rhino.Geometry
     {
       var list = new RhinoList<Mesh>(1) { this };
       return Intersect.Intersection.MeshMesh_Helper(
-        list, tolerance, true, false, out perforations,
+        list, null, tolerance, true, false, out perforations,
         overlapsPolylines, out overlapsPolylinesResult,
         overlapsMesh, out overlapsMeshResult, false, out int[] _, textLog, cancel, progress);
     }
@@ -6976,17 +7641,20 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
-  /// Contains a set of data to pass to boolean options.
+  /// Contains a set of data to pass to mesh splitting operations.
   /// </summary>
-  public class MeshBooleanOptions
+  /// <remarks>This is the base of <see cref="MeshBooleanOptions"/>, so an instance used for mesh
+  /// booleans can also be passed to the splitting methods that take these options.</remarks>
+  /// <since>9.0</since>
+  public class MeshSplitOptions
   {
     /// <summary>
     /// Gets or sets a tolerance value for intersections and overlaps.
     /// <seealso cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>
     /// </summary>
     /// <value>The default value is <see cref="RhinoMath.ZeroTolerance"/>*10. However, this is
-    /// only a reference value for testing and geometry developers should generally use the 
-    /// document tolerance, multiplied by 
+    /// only a reference value for testing and geometry developers should generally use the
+    /// document tolerance, multiplied by
     /// <see cref="Intersect.Intersection.MeshIntersectionsTolerancesCoefficient"/>.</value>
     /// <since>8.0</since>
     public double Tolerance { get; set; } = RhinoMath.ZeroTolerance * 10;
@@ -7008,6 +7676,41 @@ namespace Rhino.Geometry
     /// </summary>
     /// <since>8.0</since>
     public IProgress<double> ProgressReporter { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether coplanar areas are separated. If false, coplanar areas will not be separated.
+    /// </summary>
+    /// <value>The default value is true.</value>
+    /// <since>9.0</since>
+    public bool SplitAtCoplanar { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets whether ngons are created along the split ridge, to preserve the boundary look.
+    /// </summary>
+    /// <value>The default value is true.</value>
+    /// <since>9.0</since>
+    public bool CreateNgons { get; set; } = true;
+
+    /// <summary>
+    /// <para>Gets or sets whether cuts that stop inside the mesh are completed.</para>
+    /// <para>An intersection curve that stops inside the mesh does not separate one side from the
+    /// other, so the mesh is returned whole. When this is enabled, each such open end is joined to the
+    /// nearest border of the mesh, or to another cut, following edges the mesh already has.</para>
+    /// <para>This yields a best-effort cut where the intersection alone leaves the answer undetermined:
+    /// the added stretch follows existing edges rather than the cutter, so it is not an intersection
+    /// result. No vertex is moved and no face is added. Cuts that already close, or that already run
+    /// from border to border, are unaffected.</para>
+    /// </summary>
+    /// <value>The default value is false.</value>
+    /// <since>9.0</since>
+    public bool CompleteOpenCuts { get; set; } = false;
+  }
+
+  /// <summary>
+  /// Contains a set of data to pass to boolean options.
+  /// </summary>
+  public class MeshBooleanOptions : MeshSplitOptions
+  {
   }
 
 
@@ -7077,7 +7780,8 @@ namespace Rhino.Geometry
     {
       if (m_mesh == null) throw new ObjectDisposedException("The lock was released.");
       m_got_double = true;
-      if (!m_mesh.Vertices.UseDoublePrecisionVertices) throw new InvalidOperationException("The mesh does not use double precision vertices.");
+      if (m_mesh.Vertices.Count > 0 && !m_mesh.Vertices.UseDoublePrecisionVertices)
+        throw new InvalidOperationException("The mesh does not use double precision vertices.");
 
       IntPtr ptr_mesh = Writable ? m_mesh.NonConstPointer() : m_mesh.ConstPointer();
       IntPtr ptr_array = UnsafeNativeMethods.ON_Mesh_VertexArray_Pointer(ptr_mesh, 1);
@@ -7247,6 +7951,268 @@ namespace Rhino.Geometry
     }
   }
 #endif
+
+  /// <summary>
+  /// Analysis mesh curvature statistics.
+  /// </summary>
+  /// <since>9.0</since>
+  public class MeshCurvatureStats : IDisposable
+  {
+    #region members
+    // ON_MeshCurvatureStats*
+    private IntPtr m_ptr = IntPtr.Zero;
+    #endregion
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this object.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    internal IntPtr ConstPointer() => m_ptr;
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this object.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    internal IntPtr NonConstPointer() => m_ptr;
+
+    #region constructors
+
+    /// <summary>
+    /// Internal constructor
+    /// </summary>
+    internal MeshCurvatureStats(IntPtr ptr)
+    {
+      m_ptr = ptr;
+    }
+
+    /// <summary>
+    /// Default constructor.
+    /// </summary>
+    /// <since>9.0</since>
+    public MeshCurvatureStats()
+    {
+      m_ptr = UnsafeNativeMethods.ON_MeshCurvatureStats_New(IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Gets curvature statistics from analysis mesh.
+    /// </summary>
+    /// <param name="analysisMesh">The analysis mesh.</param>
+    /// <param name="curvatureStyle">The curvature style.</param>
+    /// <returns>The curvature statistics.</returns>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <since>9.0</since>
+    public static MeshCurvatureStats CreateFromMesh(Mesh analysisMesh, CurvatureStyle curvatureStyle)
+    {
+      if (null == analysisMesh)
+        throw new NullReferenceException(nameof(analysisMesh));
+      Mesh[] analysisMeshes = new Mesh[] { analysisMesh };
+      GC.KeepAlive(analysisMesh);
+      return CreateFromMeshes(analysisMeshes, curvatureStyle);
+    }
+
+    /// <summary>
+    /// Gets curvature statistics from analysis meshes, and calculate total statistics.
+    /// </summary>
+    /// <param name="analysisMeshes">An enumeration of analysis meshes.</param>
+    /// <param name="curvatureStyle">The curvature style.</param>
+    /// <returns>The curvature statistics.</returns>
+    /// <remarks>
+    /// The meshes must carry principal curvatures. Set
+    /// MeshingParameters.ComputeCurvature before meshing, or use
+    /// Brep.CreateCurvatureAnalysisMesh. Meshes without them are skipped, and if
+    /// none of them have any, the result is a zero range with Count 0 rather than
+    /// an error. Mesh.HasPrincipalCurvatures reports whether a mesh qualifies.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public static MeshCurvatureStats CreateFromMeshes(IEnumerable<Mesh> analysisMeshes, CurvatureStyle curvatureStyle)
+    {
+      if (null == analysisMeshes)
+        throw new ArgumentNullException(nameof(analysisMeshes));
+
+      List<GeometryBase> meshList = new List<GeometryBase>();
+      foreach (Mesh mesh in analysisMeshes)
+      {
+        if (null == mesh)
+          throw new ArgumentNullException(nameof(analysisMeshes));
+        meshList.Add(mesh);
+      }
+      using (SimpleArrayGeometryPointer meshPointers = new SimpleArrayGeometryPointer(meshList))
+      {
+        IntPtr ptr_meshes = meshPointers.ConstPointer();
+        IntPtr ptr = UnsafeNativeMethods.ON_MeshCurvatureStats_CreateFromMeshes(ptr_meshes, (int)curvatureStyle);
+        GC.KeepAlive(analysisMeshes);
+        return new MeshCurvatureStats(ptr);
+      }
+    }
+
+    #endregion // constructors
+
+    #region properties
+
+    /// <summary>
+    /// Gets the curvature style of the curvature statistics.
+    /// </summary>
+    /// <since>9.0</since>
+    public CurvatureStyle CurvatureStyle
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetInt(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.Style);
+        GC.KeepAlive(this);
+        return (CurvatureStyle)rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the minumum and maximum curvature based on the value of CurvatureStyle:
+    /// If CurvatureStyle.GaussianCurvature, the min Gaussian curvature and the max Gaussian curvature.
+    /// If CurvatureStyle.MeanCurvature, the min unsigned mean curvature and the max unsigned mean curvature.
+    /// If CurvatureStyle.MinimumCurvature, the min maximum unsigned radius of curvature and the max maximum unsigned radius of curvature.
+    /// If CurvatureStyle.MaximumCurvature, the min minimum unsigned radius of curvature and the the max minimum unsigned radius of curvature.
+    /// </summary>
+    /// <since>9.0</since>
+    public Interval Range
+    {
+      get
+      {
+        Interval rc = new Interval();
+        IntPtr ptr_const_this = ConstPointer();
+        UnsafeNativeMethods.ON_MeshCurvatureStats_Range(ptr_const_this, ref rc);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Curvature values greater than or equal to this are considered infinite
+    /// and not used to compute the average of "finite" values or the average deviation of "finite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Infinity
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetDouble(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.Infinity);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of "infinite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public int InfiniteCount
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetInt(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.CountInfinite);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of "finite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Count
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetInt(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.Count);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Get the mode of "finite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Mode
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetDouble(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.Mode);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Get the average of "finite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Average
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetDouble(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.Average);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Get the average deviation of "finite" values.
+    /// </summary>
+    /// <since>9.0</since>
+    public double AverageDeviation
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_MeshCurvatureStats_GetDouble(ptr_const_this, (int)UnsafeNativeMethods.MeshCurvatureStatsConst.AverageDeviation);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    #endregion // properties
+
+    #region housekeeping
+
+    /// <summary>
+    /// Actively releases the unmanaged pointer.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Passively releases the unmanaged pointer.
+    /// </summary>
+    ~MeshCurvatureStats()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Releases the unmanaged pointer.
+    /// </summary>
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_MeshCurvatureStats_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    #endregion // housekeeping
+  }
 }
 
 namespace Rhino.Geometry.Collections
@@ -7474,19 +8440,21 @@ namespace Rhino.Geometry.Collections
     /// <since>5.0</since>
     public void AddVertices(IEnumerable<Point3d> vertices)
     {
+      if (vertices == null)
+        throw new ArgumentNullException(nameof(vertices));
+
+      Point3d[] vertices_array = RhinoListHelpers.GetConstArray(vertices, out int appendCount);
+      if (appendCount == 0) return;
+
       IntPtr ptr_mesh = m_mesh.NonConstPointer();
-      int count = Count;
-      int index = count;
-      foreach (Point3d vertex in vertices)
-      {
-        var x = vertex.X;
-        var y = vertex.Y;
-        var z = vertex.Z;
-        UnsafeNativeMethods.ON_Mesh_SetVertex(ptr_mesh, index, x, y, z);
-        index++;
-      }
-      UnsafeNativeMethods.ON_Mesh_RepairHiddenArray(ptr_mesh);
+      if (ptr_mesh == IntPtr.Zero)
+        throw new ObjectDisposedException("The mesh was disposed.");
+
+      bool rc = UnsafeNativeMethods.ON_Mesh_AppendVertices(
+        ptr_mesh, vertices_array, appendCount);
+
       GC.KeepAlive(m_mesh);
+      if (!rc) throw new OutOfMemoryException("Could not add vertices to the mesh.");
     }
 
     /// <summary>
@@ -7710,15 +8678,54 @@ namespace Rhino.Geometry.Collections
 
 #if RHINO_SDK
     /// <summary>
-    /// Moves mesh vertices that belong to naked edges to neighboring vertices, within the specified distance.
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>See the <code>_AlignMeshVertices</code> Rhino command for more information.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
     /// <param name="whichVertices">If not null, defines which vertices should be considered for adjustment.</param>
-    /// <returns>If the operation succeeded, the number of moved vertices, or -1 on error.</returns>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
     /// <since>6.0</since>
     public int Align(double distance, IEnumerable<bool> whichVertices = null)
+    {
+      return AlignInternal(distance, false, whichVertices, false);
+    }
+
+    /// <summary>
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
+    /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
+    /// </summary>
+    /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
+    /// <param name="average">If true, vertices that are candidates for one another are moved towards each other,
+    /// rather than one of them being privileged and the others moved onto it.</param>
+    /// <param name="whichVertices">If not null, defines which vertices should be considered for adjustment.</param>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
+    /// <since>9.0</since>
+    public int Align(double distance, bool average, IEnumerable<bool> whichVertices = null)
+    {
+      return AlignInternal(distance, average, whichVertices, false);
+    }
+
+    /// <summary>
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
+    /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
+    /// </summary>
+    /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
+    /// <param name="onlyNaked">If true, only vertices that lie along naked edges are moved, and only such vertices are used as targets to align to.</param>
+    /// <param name="average">If true, vertices that are candidates for one another are moved towards each other,
+    /// rather than one of them being privileged and the others moved onto it.</param>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
+    /// <since>9.0</since>
+    public int Align(double distance, bool onlyNaked, bool average)
+    {
+      return AlignInternal(distance, average, null, onlyNaked);
+    }
+
+    private int AlignInternal(double distance, bool average, IEnumerable<bool> whichVertices, bool onlyNaked)
     {
       bool[] which_vertices_array;
 
@@ -7737,50 +8744,115 @@ namespace Rhino.Geometry.Collections
       }
 
       var ptr_mesh = m_mesh.NonConstPointer();
-      var rval = UnsafeNativeMethods.RHC_MeshVerticesAlign(ptr_mesh, distance, Count, which_vertices_array);
+      var rval = UnsafeNativeMethods.RHC_MeshVerticesAlign(ptr_mesh, distance, Count, which_vertices_array, average, onlyNaked);
       GC.KeepAlive(m_mesh);
       return rval;
     }
 
     /// <summary>
-    /// Moves mesh vertices that belong to naked edges to neighboring vertices, within the specified distance.
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>See the <code>_AlignMeshVertices</code> Rhino command for more information.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="meshes">The enumerable of meshes that need to have vertices adjusted.</param>
     /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
     /// <param name="whichVertices">If not null, defines which vertices should be considered for adjustment.
     /// <para>If this parameter is non-null, then all items within it have to be non-null as well, defining for each mesh, which vertices to adjust.</para></param>
-    /// <returns>If the operation succeeded, the number of moved vertices, or -1 on error.</returns>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
     public static int Align(IEnumerable<Mesh> meshes, double distance, IEnumerable<IEnumerable<bool>> whichVertices = null)
+    {
+      return AlignInternal(meshes, distance, false, whichVertices, false);
+    }
+
+    /// <summary>
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
+    /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
+    /// </summary>
+    /// <param name="meshes">The enumerable of meshes that need to have vertices adjusted.</param>
+    /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
+    /// <param name="average">If true, vertices that are candidates for one another are moved towards each other,
+    /// rather than one of them being privileged and the others moved onto it.</param>
+    /// <param name="whichVertices">If not null, defines which vertices should be considered for adjustment.
+    /// <para>If this parameter is non-null, then all items within it have to be non-null as well, defining for each mesh, which vertices to adjust.</para></param>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
+    /// <since>9.0</since>
+    public static int Align(IEnumerable<Mesh> meshes, double distance, bool average, IEnumerable<IEnumerable<bool>> whichVertices = null)
+    {
+      return AlignInternal(meshes, distance, average, whichVertices, false);
+    }
+
+    /// <summary>
+    /// Moves mesh vertices to neighboring vertices, within the specified distance.
+    /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
+    /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
+    /// </summary>
+    /// <param name="meshes">The enumerable of meshes that need to have vertices adjusted.</param>
+    /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
+    /// <param name="onlyNaked">If true, only vertices that lie along naked edges are moved, and only such vertices are used as targets to align to.</param>
+    /// <param name="average">If true, vertices that are candidates for one another are moved towards each other,
+    /// rather than one of them being privileged and the others moved onto it.</param>
+    /// <returns>If the operation succeeded, the number of mesh vertices that were moved, or -1 on error.</returns>
+    /// <since>9.0</since>
+    public static int Align(IEnumerable<Mesh> meshes, double distance, bool onlyNaked, bool average)
+    {
+      return AlignInternal(meshes, distance, average, null, onlyNaked);
+    }
+
+    private static int AlignInternal(IEnumerable<Mesh> meshes, double distance, bool average, IEnumerable<IEnumerable<bool>> whichVertices, bool onlyNaked)
     {
       if (meshes == null) throw new ArgumentNullException("meshes");
 
       var meshes_buffered = meshes as Mesh[] ?? new List<Mesh>(meshes).ToArray(); //no extra Linq usings.
 
-      var array_mesh_ptrs = new SimpleArrayMeshPointer();
-      foreach (var mesh in meshes_buffered) array_mesh_ptrs.Add(mesh, false);
-
-      if (whichVertices == null)
+      if (whichVertices != null)
       {
-        var which_vertices_array_array = new bool[array_mesh_ptrs.Count][];
-        int mc = 0;
-        foreach (var mesh in meshes_buffered)
+        var flags_buffered = new List<IEnumerable<bool>>(whichVertices);
+
+        if (flags_buffered.Count != meshes_buffered.Length)
+          throw new ArgumentException("whichVertices has to have one item per mesh.", "whichVertices");
+
+        for (int i = 0; i < flags_buffered.Count; i++)
         {
-          var which_vertices_array = new bool[mesh.Vertices.Count];
-          for (int i = 0; i < which_vertices_array.Length; i++) which_vertices_array[i] = true;
-          which_vertices_array_array[mc++] = which_vertices_array;
+          if (flags_buffered[i] == null) continue;
+
+          int count = 0;
+          foreach (var unused in flags_buffered[i]) count++;
+
+          if (count != meshes_buffered[i].Vertices.Count)
+            throw new ArgumentException("whichVertices items have to have the same length as their mesh Vertices.Count.", "whichVertices");
         }
 
-        whichVertices = which_vertices_array_array;
+        whichVertices = flags_buffered;
       }
 
-      using (var which = ArrayOfTArrayMarshal.Create(whichVertices, NullItemsResponse.Throw))
+      using (var array_mesh_ptrs = new SimpleArrayMeshPointer())
       {
-        var meshes_non_const_array = array_mesh_ptrs.NonConstPointer();
+        foreach (var mesh in meshes_buffered) array_mesh_ptrs.Add(mesh, false);
 
-        return UnsafeNativeMethods.RHC_MeshesVerticesAlign(meshes_non_const_array, distance,
-          which.Length, which.LengthsOfPinnedObjects, which.AddressesOfPinnedObjects);
+        if (whichVertices == null)
+        {
+          var which_vertices_array_array = new bool[array_mesh_ptrs.Count][];
+          int mc = 0;
+          foreach (var mesh in meshes_buffered)
+          {
+            var which_vertices_array = new bool[mesh.Vertices.Count];
+            for (int i = 0; i < which_vertices_array.Length; i++) which_vertices_array[i] = true;
+            which_vertices_array_array[mc++] = which_vertices_array;
+          }
+
+          whichVertices = which_vertices_array_array;
+        }
+
+        using (var which = ArrayOfTArrayMarshal.Create(whichVertices, NullItemsResponse.Throw))
+        {
+          var meshes_non_const_array = array_mesh_ptrs.NonConstPointer();
+
+          return UnsafeNativeMethods.RHC_MeshesVerticesAlign(meshes_non_const_array, distance,
+            which.Length, which.LengthsOfPinnedObjects, which.AddressesOfPinnedObjects, average, onlyNaked);
+        }
       }
     }
 #endif
@@ -11927,7 +12999,7 @@ namespace Rhino.Geometry.Collections
     }
     #endregion
 
-    #region IResizableList<Point3f>, IList and related implementations
+    #region IResizableList<Color>, IList and related implementations
     int IList<Color>.IndexOf(Color item)
     {
       return IndexOfHelper(item);
@@ -12085,6 +13157,313 @@ namespace Rhino.Geometry.Collections
         yield return this[i];
     }
     /// <since>5.0</since>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+    #endregion
+  }
+
+  /// <summary>
+  /// Provides access to the principal curvatures of a mesh object.
+  /// </summary>
+  /// <since>9.0</since>
+  public class MeshPrincipalCurvatureList : IResizableList<SurfaceCurvature>, IList, IReadOnlyList<SurfaceCurvature>
+  {
+    private readonly Mesh m_mesh;
+
+    #region constructors
+    internal MeshPrincipalCurvatureList(Mesh ownerMesh)
+    {
+      m_mesh = ownerMesh;
+    }
+    #endregion
+
+    #region properties
+
+    /// <summary>
+    /// Gets or sets the total number of principal curvatures the internal data structure can hold without resizing.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Capacity
+    {
+      get
+      {
+        IntPtr ptr_const_mesh = m_mesh.ConstPointer();
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(ptr_const_mesh, UnsafeNativeMethods.MeshIntConst.PrincipalCurvatureCapacity);
+        GC.KeepAlive(m_mesh);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_mesh = m_mesh.NonConstPointer();
+        UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.PrincipalCurvatureCapacity, value);
+        GC.KeepAlive(m_mesh);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the number of principal curvatures.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Count
+    {
+      get
+      {
+        IntPtr const_ptr_mesh = m_mesh.ConstPointer();
+        int rc = UnsafeNativeMethods.ON_Mesh_GetInt(const_ptr_mesh, UnsafeNativeMethods.MeshIntConst.PrincipalCurvatureCount);
+        GC.KeepAlive(m_mesh);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_mesh = m_mesh.NonConstPointer();
+        UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.PrincipalCurvatureCount, value);
+        GC.KeepAlive(m_mesh);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the principal curvature at the given index.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns>The principal curvature at [index].</returns>
+    /// <since>9.0</since>
+    public SurfaceCurvature this[int index]
+    {
+      get
+      {
+        IntPtr ptr_const_mesh = m_mesh.ConstPointer();
+        IntPtr ptr = UnsafeNativeMethods.ON_Mesh_GetSurfaceCurvature(ptr_const_mesh, index);
+        if (ptr == IntPtr.Zero)
+          return null;
+        GC.KeepAlive(m_mesh);
+        return new SurfaceCurvature(ptr);
+      }
+      set
+      {
+        IntPtr ptr_mesh = m_mesh.NonConstPointer();
+        IntPtr ptr_const_curvature = value.ConstPointer();
+        UnsafeNativeMethods.ON_Mesh_SetSurfaceCurvature(ptr_mesh, ptr_const_curvature, index);
+        GC.KeepAlive(m_mesh);
+      }
+    }
+
+    #endregion
+
+    #region methods
+
+    /// <summary>
+    /// Clears the principal curvature list on the mesh.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Clear()
+    {
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      UnsafeNativeMethods.ON_Mesh_ClearList(ptr_mesh, UnsafeNativeMethods.MeshClearListConst.ClearPrincipalCurvatures);
+      GC.KeepAlive(m_mesh);
+    }
+
+    /// <summary>
+    /// Releases all memory allocated to store principal curvatures. The list capacity will be 0 after this call.
+    /// <para>Subsequent calls can add new items.</para>
+    /// </summary>
+    /// <since>9.0</since>
+    public void Destroy()
+    {
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      UnsafeNativeMethods.ON_Mesh_SetInt(ptr_mesh, UnsafeNativeMethods.MeshIntConst.PrincipalCurvatureCapacity, 0);
+      GC.KeepAlive(m_mesh);
+    }
+
+    /// <summary>
+    /// Adds a new principal curvature to the end of the principal curvature list.
+    /// </summary>
+    /// <param name="surfaceCurvature">Principal curvature to append.</param>
+    /// <returns>The index of the newly added principal curvature.</returns>
+    /// <since>9.0</since>
+    public int Add(SurfaceCurvature surfaceCurvature)
+    {
+      SetSurfaceCurvature(Count, surfaceCurvature);
+      return Count - 1;
+    }
+
+    /// <summary>
+    /// Sets or adds a principal curvature to the principal curvature iist.
+    /// <para>If [index] is less than [Count], the existing principal curvature at [index] will be modified.</para>
+    /// <para>If [index] equals [Count], a new principal curvature is appended to the end of the principal curvature list.</para> 
+    /// <para>If [index] is larger than [Count], the function will return false.</para>
+    /// </summary>
+    /// <param name="index">Index of vertex color to set. 
+    /// If index equals Count, then the color will be appended.</param>
+    /// <param name="surfaceCurvature">Principal curvature to set.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>9.0</since>
+    public bool SetSurfaceCurvature(int index, SurfaceCurvature surfaceCurvature)
+    {
+      if (null == surfaceCurvature)
+        throw new NullReferenceException(nameof(surfaceCurvature));
+      if (index < 0 || index > Count)
+        throw new IndexOutOfRangeException();
+
+      IntPtr ptr_mesh = m_mesh.NonConstPointer();
+      IntPtr ptr_const_curvature = surfaceCurvature.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Mesh_SetSurfaceCurvature(ptr_mesh, ptr_const_curvature, index);
+      GC.KeepAlive(m_mesh);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the mesh's curvature statistics.
+    /// </summary>
+    /// <param name="curvatureStyle">The curvature style.</param>
+    /// <returns>The mesh's curvature statistics.</returns>
+    /// <remarks>
+    /// If the mesh carries no principal curvatures, the result is a zero range
+    /// with Count 0 rather than an error.
+    /// </remarks>
+    /// <since>9.0</since>
+    public MeshCurvatureStats GetCurvatureStats(CurvatureStyle curvatureStyle)
+    {
+      MeshCurvatureStats stats = MeshCurvatureStats.CreateFromMesh(m_mesh, curvatureStyle);
+      return stats;
+    }
+
+    #endregion
+
+    #region IResizableList<SurfaceCurvature>, IList and related implementations
+
+    int IList<SurfaceCurvature>.IndexOf(SurfaceCurvature item)
+    {
+      return GenericIListImplementation.IndexOf(this, item);
+    }
+
+    void IList<SurfaceCurvature>.Insert(int index, SurfaceCurvature item)
+    {
+      GenericIListImplementation.Insert(this, index, item);
+    }
+
+    void IList<SurfaceCurvature>.RemoveAt(int index)
+    {
+      GenericIListImplementation.RemoveAt(this, index);
+    }
+
+    /// <since>9.0</since>
+    void ICollection<SurfaceCurvature>.Add(SurfaceCurvature item)
+    {
+      Add(item);
+    }
+
+    bool ICollection<SurfaceCurvature>.Contains(SurfaceCurvature item)
+    {
+      return GenericIListImplementation.IndexOf(this, item) != -1;
+    }
+
+    void ICollection<SurfaceCurvature>.CopyTo(SurfaceCurvature[] array, int arrayIndex)
+    {
+      GenericIListImplementation.CopyTo(this, array, arrayIndex);
+    }
+
+    bool ICollection<SurfaceCurvature>.IsReadOnly
+    {
+      get { return false; }
+    }
+
+    bool ICollection<SurfaceCurvature>.Remove(SurfaceCurvature item)
+    {
+      return GenericIListImplementation.Remove(this, item);
+    }
+
+    int IList.Add(object value)
+    {
+      var item = GenericIListImplementation.HelpCoerceSurfaceCurvature(value);
+      return Add(item);
+    }
+
+    bool IList.Contains(object value)
+    {
+      SurfaceCurvature item;
+      if (!GenericIListImplementation.HelperTryCoerce(value, out item)) return false;
+      return GenericIListImplementation.Contains(this, item);
+    }
+
+    int IList.IndexOf(object value)
+    {
+      SurfaceCurvature item;
+      if (!GenericIListImplementation.HelperTryCoerce(value, out item)) return -1;
+      return GenericIListImplementation.IndexOf(this, item);
+    }
+
+    void IList.Insert(int index, object value)
+    {
+      var item = GenericIListImplementation.HelpCoerceSurfaceCurvature(value);
+      GenericIListImplementation.Insert(this, index, item);
+    }
+
+    bool IList.IsFixedSize
+    {
+      get { return false; }
+    }
+
+    bool IList.IsReadOnly
+    {
+      get { return false; }
+    }
+
+    void IList.Remove(object value)
+    {
+      var item = GenericIListImplementation.HelpCoerceSurfaceCurvature(value);
+      GenericIListImplementation.Remove(this, item);
+    }
+
+    void IList.RemoveAt(int index)
+    {
+      GenericIListImplementation.RemoveAt(this, index);
+    }
+
+    object IList.this[int index]
+    {
+      get
+      {
+        return this[index];
+      }
+      set
+      {
+        this[index] = GenericIListImplementation.HelpCoerceSurfaceCurvature(value);
+      }
+    }
+
+    void ICollection.CopyTo(Array array, int index)
+    {
+      GenericIListImplementation.CopyTo(this, array, index);
+    }
+
+    bool ICollection.IsSynchronized
+    {
+      get { return false; }
+    }
+
+    object ICollection.SyncRoot
+    {
+      get
+      {
+        throw GenericIListImplementation.MakeNoSyncException(this);
+      }
+    }
+
+    /// <summary>
+    /// Gets an enumerator that yields all principal curvatures in this collection.
+    /// </summary>
+    /// <returns>The enumerator.</returns>
+    /// <since>9.0</since>
+    public IEnumerator<SurfaceCurvature> GetEnumerator()
+    {
+      var count = Count;
+      for (int i = 0; i < count; i++)
+        yield return this[i];
+    }
+
+    /// <since>9.0</since>
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
@@ -14458,7 +15837,7 @@ namespace Rhino.Runtime
     /// <param name="parameters"></param>
     /// <returns></returns>
     /// <since>8.0</since>
-    Mesh ShrinkWrap(Mesh mesh,ShrinkWrapParameters parameters);
+    Mesh ShrinkWrap(Mesh mesh, ShrinkWrapParameters parameters);
 
     /// <summary>
     /// Create a shrinkwrap from a single mesh

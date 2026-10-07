@@ -40,7 +40,8 @@ RH_C_FUNCTION int ON_Light_GetInt(const ON_Light* pConstLight, int which)
 RH_C_FUNCTION void ON_Light_SetInt(ON_Light* pLight, int which, int val)
 {
   const int idxLightStyle = 0;
-  const int idxCoordinateSystem = 1;
+  // 26-Feb-2025 Dale Fugier, RH-75314, local variable is initialized but not referenced
+  //const int idxCoordinateSystem = 1;
   const int idxLightIndex = 2;
   if( pLight )
   {
@@ -127,6 +128,7 @@ RH_C_FUNCTION double ON_Light_GetDouble(const ON_Light* pConstLight, int which)
   const int idxSpotExponent = 5;
   const int idxHotSpot = 6;
   const int idxShadowIntensity = 7;
+  const int idxRadius = 8;
   double rc = 0;
   if( pConstLight )
   {
@@ -134,6 +136,9 @@ RH_C_FUNCTION double ON_Light_GetDouble(const ON_Light* pConstLight, int which)
     {
     case idxIntensity:
       rc = pConstLight->Intensity();
+      break;
+    case idxRadius:
+      rc = pConstLight->Radius();
       break;
     case idxPowerWatts:
       rc = pConstLight->PowerWatts();
@@ -173,12 +178,16 @@ RH_C_FUNCTION void ON_Light_SetDouble(ON_Light* pLight, int which, double val)
   const int idxSpotExponent = 5;
   const int idxHotSpot = 6;
   const int idxShadowIntensity = 7;
+  const int idxRadius = 8;
   if( pLight )
   {
     switch(which)
     {
     case idxIntensity:
       pLight->SetIntensity(val);
+      break;
+    case idxRadius:
+      pLight->SetRadius(val);
       break;
     case idxPowerWatts:
       pLight->SetPowerWatts(val);

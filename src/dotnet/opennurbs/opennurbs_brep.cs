@@ -1,10 +1,14 @@
+#if RHINO_SDK
+using Rhino.Commands;
+#endif
+using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using Rhino.Runtime.InteropWrappers;
-using Rhino.Runtime;
+using System.Threading;
 
 namespace Rhino.Geometry
 {
@@ -18,6 +22,21 @@ namespace Rhino.Geometry
     Flat = 1,
     /// <summary>Caps with hemispherical surface.</summary>
     Round = 2
+  }
+
+  /// <summary>
+  /// How a deleted edge is re-trimmed by <see cref="Brep.ReplaceEdge"/>. Equivalent
+  /// to the options of the ReplaceEdge command.
+  /// </summary>
+  /// <since>9.0</since>
+  public enum BrepReplaceEdgeMethod
+  {
+    /// <summary>Replace the edge with a straight line across the gap.</summary>
+    Line = 0,
+    /// <summary>Extend the two adjacent edges until they meet.</summary>
+    ExtendSideEdges = 1,
+    /// <summary>Replace the edge with a supplied curve.</summary>
+    Curve = 2
   }
 
   /// <summary>
@@ -179,7 +198,13 @@ namespace Rhino.Geometry
     /// <summary>
     /// Specify an axis for calculating the 3-D rotation of the cross-section.
     /// </summary>
-    Roadlike = 1
+    Roadlike = 1,
+    /// <summary>
+    /// The cross-section rotates to follow the normal of the surface that the rail lies on.
+    /// This requires a rail that knows its surface, so pass a BrepEdge or a BrepTrim as the
+    /// rail. Any other curve falls back to Freeform.
+    /// </summary>
+    AlignWithSurface = 2
   }
 
   /// <summary>
@@ -426,6 +451,50 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       bool rc = UnsafeNativeMethods.RHC_RhinoIsBrepBox(ptr_const_this, tolerance);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>Determines if the Brep is a portion of an extrusion within RhinoMath.ZeroTolerance.</summary>
+    /// <returns>true if the Brep is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsExtrusion()
+    {
+      return IsExtrusion(RhinoMath.ZeroTolerance);
+    }
+    /// <summary>Determines if the Brep is a portion of an extrusion within a given tolerance.</summary>
+    /// <param name="tolerance">tolerance to use when checking.</param>
+    /// <returns>true if the Brep is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsExtrusion(double tolerance)
+    {
+      IntPtr pThis = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Brep_IsExtrusion(pThis, IntPtr.Zero, tolerance, false);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    /// <summary>Tests a Brep to see if it is an extrusion within RhinoMath.ZeroTolerance and returns the extrusion.</summary>
+    /// <param name="extrusion">On success, the extrusion parameters are filled in.</param>
+    /// <returns>true if the Brep is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetExtrusion(out Extrusion extrusion)
+    {
+      return TryGetExtrusion(out extrusion, RhinoMath.ZeroTolerance);
+    }
+    /// <summary>Tests a Brep to see if it is an extrusion and returns the extrusion.</summary>
+    /// <param name="extrusion">On success, the extrusion parameters are filled in.</param>
+    /// <param name="tolerance">tolerance to use when checking.</param>
+    /// <returns>true if the Brep is a portion of an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetExtrusion(out Extrusion extrusion, double tolerance)
+    {
+      extrusion = new Extrusion();
+      IntPtr pThis = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Brep_IsExtrusion(pThis, extrusion.NonConstPointer(), tolerance, true);
       GC.KeepAlive(this);
       return rc;
     }
@@ -987,6 +1056,85 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Constructs a set of planar Breps as outlines by the loops, reporting which input
+    /// curves bounded each Brep.
+    /// </summary>
+    /// <param name="inputLoops">Curve loops that delineate the planar boundaries.</param>
+    /// <param name="tolerance">Tolerance to use when sorting and building the loops.</param>
+    /// <param name="indexMap">
+    /// One entry per returned Brep, in the same order. Entry i lists, ascending, the
+    /// positions in <paramref name="inputLoops"/> of the curves sorted onto Brep i.
+    /// Null when this method returns null.
+    /// </param>
+    /// <returns>An array of planar Breps, or null on failure.</returns>
+    /// <remarks>
+    /// A curve that closes an outer loop and a curve that closes a hole in the same face are
+    /// both listed for that face, and a hole rejected while the Brep is built still leaves
+    /// its curves listed.
+    ///
+    /// The entries are not a partition of <paramref name="inputLoops"/>. A self-intersecting
+    /// input is split into regions, and a curve bounding several of them is listed for each.
+    /// A curve the merge dropped, one sorted onto no face, and one whose face failed to
+    /// produce a valid Brep are listed nowhere.
+    ///
+    /// A null element in <paramref name="inputLoops"/> throws <see cref="ArgumentException"/>,
+    /// because the reported indices are positions in that sequence. The other
+    /// CreatePlanarBreps overloads drop nulls silently and renumber what follows.
+    /// </remarks>
+    public static Brep[] CreatePlanarBrepsWithIndexMap(IEnumerable<Curve> inputLoops, double tolerance, out int[][] indexMap)
+    {
+      if (null == inputLoops)
+        throw new ArgumentNullException(nameof(inputLoops));
+
+      var loops = new List<Curve>(inputLoops);
+      if (loops.Contains(null))
+        throw new ArgumentException("Curve list may not contain nulls.", nameof(inputLoops));
+
+      using (var crvs = new SimpleArrayCurvePointer(loops))
+      using (var breps = new SimpleArrayBrepPointer())
+      using (var output_key = new SimpleArrayInt())
+      {
+        IntPtr ptr_const_inputloops = crvs.ConstPointer();
+        IntPtr ptr_breps = breps.NonConstPointer();
+        IntPtr ptr_output_key = output_key.NonConstPointer();
+        int brep_count = UnsafeNativeMethods.RHC_RhinoMakePlanarBreps2(ptr_const_inputloops, ptr_breps, tolerance, ptr_output_key);
+        GC.KeepAlive(loops);
+        if (brep_count < 1)
+        {
+          indexMap = null;
+          return null;
+        }
+
+        Brep[] rc = breps.ToNonConstArray();
+
+        // Convert flat array, delimited with -1, to jagged array. A Brep no curve was
+        // credited to gives an empty entry, so the two arrays stay aligned.
+        var map = new List<int[]>(rc.Length);
+        var current = new List<int>();
+        foreach (int k in output_key.ToArray())
+        {
+          if (k >= 0)
+            current.Add(k);
+          else
+          {
+            map.Add(current.ToArray());
+            current.Clear();
+          }
+        }
+        // The wrapper terminates every entry, so this only runs if it ever stops doing so.
+        // Without it the last entry would be dropped and then padded back as an empty one,
+        // which reads as a Brep no curve was credited to.
+        if (current.Count > 0)
+          map.Add(current.ToArray());
+        while (map.Count < rc.Length)
+          map.Add(new int[0]);
+
+        indexMap = map.ToArray();
+        return rc;
+      }
+    }
+
+    /// <summary>
     /// Constructs a Brep using the trimming information of a brep face and a surface. 
     /// Surface must be roughly the same shape and in the same location as the trimming brep face.
     /// </summary>
@@ -1200,12 +1348,14 @@ namespace Rhino.Geometry
       if (null == surface0 || null == surface1)
         return null;
 
-      var brep0 = Brep.CreateFromSurface(surface0);
-      var brep1 = Brep.CreateFromSurface(surface1);
+      using (var brep0 = Brep.CreateFromSurface(surface0))
+      using (var brep1 = Brep.CreateFromSurface(surface1))
+      {
       if (null == brep0 || null == brep1)
         return null;
 
       return MergeSurfaces(brep0, brep1, tolerance, angleToleranceRadians, Point2d.Unset, Point2d.Unset, 1.0, true);
+    }
     }
 
     /// <summary>
@@ -1543,11 +1693,12 @@ namespace Rhino.Geometry
     /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
     /// and one curve that defines a surface edge. 
     /// </summary>
-    /// <param name="rail">Rail to sweep shapes along</param>
-    /// <param name="shape">Shape curve</param>
-    /// <param name="closed">Only matters if shape is closed</param>
-    /// <param name="tolerance">Tolerance for fitting surface and rails</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail">Rail to sweep shapes along.</param>
+    /// <param name="shape">Shape curve.</param>
+    /// <param name="closed">Only matters if shape is closed.</param>
+    /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is enabled (true).</remarks>
     /// <since>5.0</since>
     public static Brep[] CreateFromSweep(Curve rail, Curve shape, bool closed, double tolerance)
     {
@@ -1558,11 +1709,12 @@ namespace Rhino.Geometry
     /// Sweep1 function that fits a surface through profile curves that define the surface cross-sections
     /// and one curve that defines a surface edge.
     /// </summary>
-    /// <param name="rail">Rail to sweep shapes along</param>
-    /// <param name="shapes">Shape curves</param>
-    /// <param name="closed">Only matters if shapes are closed</param>
-    /// <param name="tolerance">Tolerance for fitting surface and rails</param>
-    /// <returns>Array of Brep sweep results</returns>
+    /// <param name="rail">Rail to sweep shapes along.</param>
+    /// <param name="shapes">Shape curves.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is enabled (true).</remarks>
     /// <since>5.0</since>
     public static Brep[] CreateFromSweep(Curve rail, IEnumerable<Curve> shapes, bool closed, double tolerance)
     {
@@ -1597,6 +1749,7 @@ namespace Rhino.Geometry
     /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
     /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0</param>
     /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is enabled (true).</remarks>
     /// <since>7.0</since>    
     public static Brep[] CreateFromSweep(
       Curve rail,
@@ -1644,6 +1797,119 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Sweep1 function that fits a surface through a series of profile curves that define the surface cross-sections
+    /// and one curve that defines a surface edge.
+    /// Unlike other CreateFromSweep and CreateFromSweepSegmented overrides, this method:
+    /// - Matches shape curve directions and (for closed shapes) seam points before sweeping, which prevents twisting.
+    /// - Detects when the inputs qualify for a "simple sweep" and creates a simpler surface in this case.
+    /// - Lets the caller pick between the refit - rail and segmented sweep paths.
+    /// - Splits the resulting Breps at fully multiple knots.
+    /// </summary>
+    /// <param name="rail">
+    /// Rail to sweep shapes along. For SweepFrame.AlignWithSurface, pass a BrepEdge or a
+    /// BrepTrim so the sweep can find the surface to align to. An interior edge belongs to two
+    /// faces and a BrepEdge does not say which one, so pass the BrepTrim of the face you want;
+    /// a BrepEdge uses its first trim.
+    /// </param>
+    /// <param name="shapes">Shape curves.</param>
+    /// <param name="startPoint">Optional starting point of sweep. Use Point3d.Unset if you do not want to include a start point.</param>
+    /// <param name="endPoint">Optional ending point of sweep. Use Point3d.Unset if you do not want to include an end point.</param>
+    /// <param name="frameType">The frame type.</param>
+    /// <param name="roadlikeNormal">The roadlike normal directoion. Use Vector3d.Unset if the frame type is not set to roadlike.</param>
+    /// <param name="closed">Only matters if shapes are closed.</param>
+    /// <param name="blendType">The shape blending type.</param>
+    /// <param name="miterType">The mitering type.</param>
+    /// <param name="tolerance"></param>
+    /// <param name="rebuildType">The rebuild style.</param>
+    /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
+    /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0.</param>
+    /// <param name="refitRail">false = segmented sweep, true = refit-rail sweep.</param>
+    /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>This version mimics what Rhino's Sweep1 command does.</remarks>
+    /// <since>9.0</since>    
+    public static Brep[] CreateFromSweep(
+      Curve rail,
+      IEnumerable<Curve> shapes,
+      Point3d startPoint,
+      Point3d endPoint,
+      SweepFrame frameType,
+      Vector3d roadlikeNormal,
+      bool closed,
+      SweepBlend blendType,
+      SweepMiter miterType,
+      double tolerance,
+      SweepRebuild rebuildType,
+      int rebuildPointCount,
+      double refitTolerance,
+      bool refitRail
+    )
+    {
+      // 08-Sep-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-74707
+      // AlignWithSurface needs the surface that the rail lies on, which a plain Curve cannot
+      // supply. When the rail is a brep edge or trim, pass the brep and a trim index along so
+      // the sweep can build the CRhinoPolyEdge that the frame style requires. Only this frame
+      // style takes the extra path, so every other sweep behaves exactly as it did before.
+      Brep rail_brep = null;
+      int[] rail_trim_indices = null;
+      if (SweepFrame.AlignWithSurface == frameType)
+      {
+        BrepTrim rail_trim = rail as BrepTrim;
+        if (null != rail_trim)
+        {
+          rail_brep = rail_trim.Brep;
+          rail_trim_indices = new int[] { rail_trim.TrimIndex };
+        }
+        else
+        {
+          BrepEdge rail_edge = rail as BrepEdge;
+          if (null != rail_edge)
+          {
+            int[] edge_trims = rail_edge.TrimIndices();
+            if (null != edge_trims && edge_trims.Length > 0)
+            {
+              rail_brep = rail_edge.Brep;
+              rail_trim_indices = new int[] { edge_trims[0] };
+            }
+          }
+        }
+      }
+
+      IntPtr const_ptr_rail = rail.ConstPointer();
+      IntPtr const_ptr_rail_brep = (null == rail_brep) ? IntPtr.Zero : rail_brep.ConstPointer();
+      using (var shapearray = new SimpleArrayCurvePointer(shapes))
+      using (var rc = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_shapes = shapearray.ConstPointer();
+        IntPtr ptr_breps = rc.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoSweepOneRail(
+          const_ptr_rail,
+          const_ptr_rail_brep,
+          (null == rail_trim_indices) ? 0 : rail_trim_indices.Length,
+          rail_trim_indices,
+          const_ptr_shapes,
+          startPoint,
+          endPoint,
+          (int)frameType,
+          roadlikeNormal,
+          closed,
+          (int)blendType,
+          (int)miterType,
+          tolerance,
+          (int)rebuildType,
+          rebuildPointCount,
+          refitTolerance,
+          refitRail,
+          ptr_breps
+          );
+
+        GC.KeepAlive(rail);
+        GC.KeepAlive(rail_brep);
+        GC.KeepAlive(shapes);
+        return rc.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
     /// Sweep1 function that fits a surface through a profile curve that define the surface cross-sections
     /// and one curve that defines a surface edge. The Segmented version breaks the rail at curvature kinks
     /// and sweeps each piece separately, then put the results together into a Brep.
@@ -1653,6 +1919,7 @@ namespace Rhino.Geometry
     /// <param name="closed">Only matters if shape is closed</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails</param>
     /// <returns>Array of Brep sweep results</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is disabled (false).</remarks>
     /// <since>6.14</since>
     public static Brep[] CreateFromSweepSegmented(Curve rail, Curve shape, bool closed, double tolerance)
     {
@@ -1669,6 +1936,7 @@ namespace Rhino.Geometry
     /// <param name="closed">Only matters if shapes are closed.</param>
     /// <param name="tolerance">Tolerance for fitting surface and rails.</param>
     /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is disabled (false).</remarks>
     /// <since>6.14</since>
     public static Brep[] CreateFromSweepSegmented(Curve rail, IEnumerable<Curve> shapes, bool closed, double tolerance)
     {
@@ -1704,6 +1972,7 @@ namespace Rhino.Geometry
     /// <param name="rebuildPointCount">If rebuild == SweepRebuild.Rebuild, the number of points. Otherwise specify 0.</param>
     /// <param name="refitTolerance">If rebuild == SweepRebuild.Refit, the refit tolerance. Otherwise, specify 0.0</param>
     /// <returns>Array of Brep sweep results.</returns>
+    /// <remarks>Rhino's Sweep1 command uses this when the "refit rail" option is disabled (false).</remarks>
     /// <since>7.0</since>    
     public static Brep[] CreateFromSweepSegmented(
       Curve rail,
@@ -2085,6 +2354,8 @@ namespace Rhino.Geometry
     /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use the CreateFilletSurface that takes settings and returns results")]
     public static Brep[] CreateFilletSurface(BrepFace face0, Point2d uv0, BrepFace face1, Point2d uv1, double radius, bool extend, double tolerance)
     {
       if (face0 == null) throw new ArgumentNullException(nameof(face0));
@@ -2101,7 +2372,6 @@ namespace Rhino.Geometry
         return rc ? fillets.ToNonConstArray() : new Brep[0];
       }
     }
-
     /// <summary>
     ///  Creates a constant-radius round surface between two surfaces.
     /// </summary>
@@ -2117,6 +2387,8 @@ namespace Rhino.Geometry
     /// <param name="outBreps1">The trim or split results of the Brep owned by face1.</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use the CreateFilletSurface that takes settings and returns results")]
     public static Brep[] CreateFilletSurface(BrepFace face0, Point2d uv0, BrepFace face1, Point2d uv1, double radius, bool trim, bool extend, double tolerance, out Brep[] outBreps0, out Brep[] outBreps1)
     {
       if (face0 == null) throw new ArgumentNullException(nameof(face0));
@@ -2145,7 +2417,7 @@ namespace Rhino.Geometry
           return fillets.ToNonConstArray();
         }
 
-        return new Brep[0];
+        return Array.Empty<Brep>();
       }
     }
 
@@ -2162,6 +2434,8 @@ namespace Rhino.Geometry
     /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use the CreateFilletSurface that takes settings and returns results")]
     public static Brep[] CreateChamferSurface(BrepFace face0, Point2d uv0, double radius0, BrepFace face1, Point2d uv1, double radius1, bool extend, double tolerance)
     {
       if (face0 == null) throw new ArgumentNullException(nameof(face0));
@@ -2196,6 +2470,9 @@ namespace Rhino.Geometry
     /// <param name="outBreps1">The trim or split results of the Brep owned by face1.</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>6.0</since>
+
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Use the CreateFilletSurface that takes settings and returns results")]
     public static Brep[] CreateChamferSurface(BrepFace face0, Point2d uv0, double radius0, BrepFace face1, Point2d uv1, double radius1, bool trim, bool extend, double tolerance, out Brep[] outBreps0, out Brep[] outBreps1)
     {
       if (face0 == null) throw new ArgumentNullException(nameof(face0));
@@ -2229,6 +2506,471 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Settings to use when creating fillets or chamfers
+    /// </summary>
+    public class FilletSurfaceSettings
+    {
+      /// <summary>
+      /// Use the static creation methods
+      /// </summary>
+      private FilletSurfaceSettings()
+      {
+
+      }
+
+      /// <summary>
+      /// Create settings for rational arc fillet surfaces
+      /// </summary>
+      /// <param name="radius">The fillet radius.</param>
+      /// <param name="trim">If true, the input faces will be trimmed, if false, the input faces will be split.</param>
+      /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+      /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+      /// <returns></returns>
+      /// <since>9.0</since>
+      public static FilletSurfaceSettings CreateRationalArcSettings(double radius, double tolerance, bool trim, bool extend)
+      {
+        return new FilletSurfaceSettings
+        {
+          Radius = radius,
+          Tolerance = tolerance,
+          Trim = trim,
+          Extend = extend,
+          SecondRadius = radius,
+          G2Blend = false,
+          Chamfer = false,
+          NonRational = false,
+          Degree = 3,
+          TanSlider = 0.0,
+          InnerSlider = 0.0
+        };
+      }
+
+      /// <summary>
+      /// Create settings for non-rational approximated arc fillet surfaces
+      /// </summary>
+      /// <param name="radius">The fillet radius.</param>
+      /// <param name="trim">If true, the input faces will be trimmed, if false, the input faces will be split.</param>
+      /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+      /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+      /// <param name="degree">Degree of the arc approxiation (3, 4, or 5)</param>
+      /// <param name="tanSlider">A number between -0.95 and 0.95 indicating how far to push the tangent control points toward or away from the theoretical middle control point(s)</param>
+      /// <param name="innerSlider">A number between -0.95 and 0.95 indicating how far to push the inner control point toward or away from the theoretical middle control point</param>      
+      /// <since>9.0</since>
+      public static FilletSurfaceSettings CreateNonRationalSettings(double radius, double tolerance, int degree, double tanSlider, double innerSlider, bool trim, bool extend)
+      {
+        return new FilletSurfaceSettings
+        {
+          Radius = radius,
+          Tolerance = tolerance,
+          Trim = trim,
+          Extend = extend,
+          SecondRadius = radius,
+          G2Blend = false,
+          Chamfer = false,
+          NonRational = true,
+          Degree = degree,
+          TanSlider = tanSlider,
+          InnerSlider = innerSlider
+        };
+      }
+
+      /// <summary>
+      /// Create settings for G2-blended fillet surfaces
+      /// </summary>
+      /// <param name="radius">The fillet radius.</param>
+      /// <param name="trim">If true, the input faces will be trimmed, if false, the input faces will be split.</param>
+      /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+      /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+      /// <returns></returns>
+      /// <since>9.0</since>
+      public static FilletSurfaceSettings CreateG2BlendSettings(double radius, double tolerance, bool trim, bool extend)
+      {
+        return new FilletSurfaceSettings
+        {
+          Radius = radius,
+          Tolerance = tolerance,
+          Trim = trim,
+          Extend = extend,
+          SecondRadius = radius,
+          G2Blend = true,
+          Chamfer = false,
+          NonRational = false,
+          Degree = 3,
+          TanSlider = 0.0,
+          InnerSlider = 0.0
+        };
+      }
+
+      /// <summary>
+      /// Create settings for chamfered surfaces
+      /// </summary>
+      /// <param name="radius0">The distance from the intersection of face0 to the edge of the chamfer.</param>
+      /// <param name="radius1">The distance from the intersection of face1 to the edge of the chamfer.</param>
+      /// <param name="trim">If true, the input faces will be trimmed, if false, the input faces will be split.</param>
+      /// <param name="extend">If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+      /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+
+      /// <since>9.0</since>
+      public static FilletSurfaceSettings CreateChamferSettings(double radius0, double radius1, double tolerance, bool trim, bool extend)
+      {
+        return new FilletSurfaceSettings
+        {
+          Radius = radius0,
+          Tolerance = tolerance,
+          Trim = trim,
+          Extend = extend,
+          SecondRadius = radius1,
+          G2Blend = false,
+          Chamfer = true,
+          NonRational = false,
+          Degree = 5,
+          TanSlider = 0.0,
+          InnerSlider = 0.0
+        };
+      }
+
+      /// <summary>
+      /// The radius of the fillets
+      /// </summary>
+      /// <since>9.0</since>
+      public double Radius { get; internal set; }
+
+      /// <summary>
+      /// The second radius of the fillets (only for chamfered surfaces)
+      /// </summary>
+      /// <since>9.0</since>
+      public double SecondRadius { get; internal set; }
+
+      /// <summary>
+      /// The tolerance. When in doubt, use the document's model absolute tolerance.
+      /// </summary>
+      /// <since>9.0</since>
+      public double Tolerance { get; internal set; }
+
+      /// <summary>
+      /// Angle tolerance to decide when faces are tangent-continuous
+      /// </summary>
+      /// <since>9.0</since>
+      public double AngleTolerance { get; internal set; } = RhinoDoc.DefaultModelAngleToleranceRadians;
+
+      /// <summary>
+      /// If true, the input faces will be trimmed, if false, the input faces will be split.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool Trim { get; internal set; }
+
+      /// <summary>
+      /// If true, a ruled chamfered surface is created. 
+      /// </summary>
+      /// <since>9.0</since>
+      public bool Chamfer { get; internal set; }
+
+      /// <summary>
+      /// If true, a G2-continuous blend will be created
+      /// </summary>
+      /// <since>9.0</since>
+      public bool G2Blend { get; internal set; }
+
+      /// <summary>
+      /// Create a non-rational approximation to the arc. This requires <see cref="Degree"/> to be set to 3, 4, or 5
+      /// and <see cref="TanSlider"/> and <see cref="InnerSlider"/> to a value between -0.95 and 0.95.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool NonRational { get; internal set; }
+
+      /// <summary>
+      /// If true, then when one input surface is longer than the other, the fillet surface is extended to the input surface edges
+      /// </summary>
+      /// <since>9.0</since>
+      public bool Extend { get; internal set; }
+
+      /// <summary>
+      /// Degree of the arc approxiation (3, 4, or 5) - only for non-rational fillets
+      /// </summary>
+      /// <since>9.0</since>
+      public int Degree { get; internal set; }
+
+      /// <summary>
+      /// A number between -0.95 and 0.95 indicating how far to push the tangent control points toward or away from the theoretical middle control point(s) - only for non-rational fillets
+      /// </summary>
+      /// <since>9.0</since>
+      public double TanSlider { get; internal set; }
+
+      /// <summary>
+      /// A number between -0.95 and 0.95 indicating how far to push the inner control point toward or away from the theoretical middle control point - only for non-rational fillets
+      /// </summary>
+      /// <since>9.0</since>
+      public double InnerSlider { get; internal set; }
+
+      /// <summary>
+      /// If true, the fillets or chamfers will be extended to neighboring faces as long as neighboring faces are tangent to the input faces.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool ContinueAcrossTangentFaces { get; set; }
+    }
+
+    /// <summary>
+    /// Results from a fillet surface operation
+    /// </summary>
+    public class FilletSurfaceResults
+    {
+      /// <summary>
+      /// The first face used as input for the fillet surface generation
+      /// </summary>
+      /// <since>9.0</since>
+      public BrepFace Face0 { get; internal set; }
+
+      /// <summary>
+      /// The second face used as input for the fillet surface generation
+      /// </summary>
+      /// <since>9.0</since>
+      public BrepFace Face1 { get; internal set; }
+
+      /// <summary>
+      /// If the first input face was trimmed, the trimmed results are returned here
+      /// </summary>
+      /// <since>9.0</since>
+      public IList<Brep> OutBreps0 { get; internal set; }
+
+      /// <summary>
+      /// If the second input face was trimmed, the trimmed results are returned here
+      /// </summary>
+      /// <since>9.0</since>
+      public IList<Brep> OutBreps1 { get; internal set; }
+
+      /// <summary>
+      /// The fillet surfaces created between the first and second face
+      /// </summary>
+      /// <since>9.0</since>
+      public IList<Brep> Fillets { get; internal set; }
+    }
+
+    private static bool PrepareBreps(ref BrepFace face0, ref Point2d uv0, ref BrepFace face1, ref Point2d uv1)
+    {
+      Brep b0 = face0?.Brep;
+      Brep b1 = face1?.Brep;
+      if (null == b0 || null == b1) return false;
+
+      bool both = !GeometryReferenceEquals(b0, b1);
+
+      Point3d P0 = face0.PointAt(uv0.X, uv0.Y), P1 = face1.PointAt(uv1.X, uv1.Y);
+      int fc0 = b0.Faces.Count, fc1 = b1.Faces.Count;
+      int ec0 = b0.Edges.Count, ec1 = b1.Edges.Count;
+
+      // by setting this to false, only split at curvature discontinuities from zero to non-zero and opposite sign
+      // See RH-92185, RH-86032 (this needs to be split and will be split without aggressive mode)
+      // See RH-92139 (this should not be split and will not be split without aggressive mode)
+      // See RH-83961 (same as 92139: no splits).
+      const bool aggressiveMode = false;
+      b0.Faces.SplitKinkyFaces();
+      b0.Faces.SplitFacesAtTangents(aggressiveMode);
+
+      if (both)
+      {
+        b1.Faces.SplitKinkyFaces();
+        b1.Faces.SplitFacesAtTangents(aggressiveMode);
+      }
+
+      if (fc0 != b0.Faces.Count || ec0 != b0.Edges.Count || fc1 != b1.Faces.Count || ec1 != b1.Edges.Count)
+      {
+        b0.Compact();
+        if (both) b1.Compact();
+
+        if (!b0.ClosestPoint(P0, out _, out var ci0, out double s0, out double t0, 0, out _))
+          return false;
+
+        if (!b1.ClosestPoint(P1, out _, out var ci1, out double s1, out double t1, 0, out _))
+          return false;
+
+        if (ci0.ComponentIndexType != ComponentIndexType.BrepFace ||
+            ci1.ComponentIndexType != ComponentIndexType.BrepFace)
+        {
+          return false;
+        }
+
+        face0 = b0.Faces[ci0.Index];
+        face1 = b1.Faces[ci1.Index];
+        uv0.X = s0; uv0.Y = t0;
+        uv1.X = s1; uv1.Y = t1;
+      }
+      return true;
+    }
+
+    /// <summary>
+    /// Create a fillet (rational arcs or non-rational arc approxiation or chamfered surface
+    /// </summary>
+    /// <param name="face">Face to fillet from.</param>
+    /// <param name="uv">A parameter on the face at the side you want to keep after filleting.</param>
+    /// <param name="curve">Curve to fillet to.</param>
+    /// <param name="t">A parameter on the curve close to the point on the face.</param>
+    /// <param name="settings">The settings to use for filleting</param>
+    /// <param name="results">If true is returned, this contains the fillet results.</param>
+    /// <returns>true if successful</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public static bool CreateFilletSurfaceCurve(BrepFace face, Point2d uv, Curve curve, double t, 
+      FilletSurfaceSettings settings, out FilletSurfaceResults results)
+    {
+      if (face == null) throw new ArgumentNullException(nameof(face));
+      if (curve == null) throw new ArgumentNullException(nameof(curve));
+      if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+      results = null;
+
+      IntPtr pFace = face.ConstPointer();
+      IntPtr pCurve = curve.ConstPointer();
+
+      bool rc = false;
+
+      using (var fillets = new SimpleArrayBrepPointer())
+      using (var out_breps = new SimpleArrayBrepPointer())
+      {
+        IntPtr pFillets = fillets.NonConstPointer();
+        IntPtr pOutBreps = out_breps.NonConstPointer();
+
+        if (settings.NonRational)
+        {
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurveNonRational(pFace, uv, pCurve, t,
+            settings.Degree, settings.TanSlider, settings.InnerSlider, settings.Radius, settings.Tolerance,
+            pOutBreps, 3, settings.Trim, settings.Extend, pFillets);
+        }
+        else if (settings.G2Blend)
+        {
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurveG2Blend(pFace, uv, pCurve, t, settings.Radius, settings.Tolerance,
+            pOutBreps, 3, settings.Trim, settings.Extend, pFillets);
+        }
+        else
+        {
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurve2(pFace, uv, pCurve, t, settings.Radius, settings.Tolerance,
+            pOutBreps, 3, settings.Trim, settings.Extend, pFillets);
+        }
+
+        if (rc)
+        {
+          results = new FilletSurfaceResults
+          {
+            Face0 = face,
+            Face1 = null,
+            Fillets = fillets.ToNonConstArray(),
+            OutBreps0 = out_breps.ToNonConstArray(),
+            OutBreps1 = null
+          };
+        }
+      }
+
+      GC.KeepAlive(face);
+      GC.KeepAlive(curve);
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Create a fillet (rational arcs or non-rational arc approxiation or chamfered surface
+    /// </summary>
+    /// <param name="face0">First face to fillet from.</param>
+    /// <param name="uv0">A parameter face0 at the side you want to keep after filleting.</param>
+    /// <param name="face1">Second face to fillet from.</param>
+    /// <param name="uv1">A parameter face1 at the side you want to keep after filleting.</param>
+    /// <param name="settings">The settings to use for filleting/chamfering</param>
+    /// <param name="results">If true is returned, this contains the fillet results.</param>
+    /// <returns>true if successful</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public static bool CreateFilletSurface(BrepFace face0, Point2d uv0, BrepFace face1, Point2d uv1, FilletSurfaceSettings settings, out FilletSurfaceResults results)
+    {
+      if (face0 == null) throw new ArgumentNullException(nameof(face0));
+      if (face1 == null) throw new ArgumentNullException(nameof(face1));
+      if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+      results = null;
+
+      if (ApplicationSettings.GeneralSettings.SplitCreasedSurfaces)
+      {
+        // it is important to make a copy, then modify the copy, reassign faces. If not, subsequent
+        // calls will have modified the brep here, but stale references to faces and UV's remain
+        // upstream of this call if we modify the BReps of the faces, and these stale references will
+        // be used in subsequent call. Any evaluation of the faces at UVs is no longer the same.
+        bool both = !GeometryReferenceEquals(face0.Brep, face1.Brep);
+        Brep copy0 = face0.Brep.DuplicateBrep();
+        Brep copy1 = both ? face1.Brep.DuplicateBrep() : copy0;
+        face0 = copy0.Faces[face0.FaceIndex];
+        face1 = copy1.Faces[face1.FaceIndex];
+
+        if (!PrepareBreps(ref face0, ref uv0, ref face1, ref uv1))
+          return false;
+      }
+
+      var ptr_const_face0 = face0.ConstPointer();
+      var ptr_const_face1 = face1.ConstPointer();
+
+      bool rc = false;
+      using (var fillets = new SimpleArrayBrepPointer())
+      using (var out_breps0 = new SimpleArrayBrepPointer())
+      using (var out_breps1 = new SimpleArrayBrepPointer())
+      {
+        var ptr_fillets = fillets.NonConstPointer();
+        var ptr_out_breps0 = out_breps0.NonConstPointer();
+        var ptr_out_breps1 = out_breps1.NonConstPointer();
+
+        bool trim = settings.Trim;
+        bool extend = settings.Extend;
+        if (settings.ContinueAcrossTangentFaces)
+        {
+          trim = false;
+          extend = false;
+        }
+        int method = -1;
+        if (settings.NonRational)
+        {
+          method = 1;
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceNonRational(ptr_const_face0, uv0, ptr_const_face1, uv1,
+            settings.Degree, settings.TanSlider, settings.InnerSlider, settings.Radius, trim, extend, settings.Tolerance,
+            ptr_fillets, ptr_out_breps0, ptr_out_breps1);
+        }
+        else if (settings.G2Blend)
+        {
+          method = 2;
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceG2Blend(ptr_const_face0, uv0, ptr_const_face1, uv1,
+            settings.Radius, trim, extend, settings.Tolerance, ptr_fillets, ptr_out_breps0, ptr_out_breps1);
+        }
+        else if (settings.Chamfer)
+        {
+          method = 3;
+          rc = UnsafeNativeMethods.RHC_RhinoChamferSurface2(ptr_const_face0, uv0, settings.Radius, ptr_const_face1, uv1, settings.SecondRadius,
+             trim, extend, settings.Tolerance, ptr_fillets, ptr_out_breps0, ptr_out_breps1);
+        }
+        else
+        {
+          method = 0;
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurface2(ptr_const_face0, uv0, ptr_const_face1, uv1,
+            settings.Radius, trim, extend, settings.Tolerance, ptr_fillets, ptr_out_breps0, ptr_out_breps1);
+        }
+
+        if (rc && settings.ContinueAcrossTangentFaces)
+        {
+          rc = UnsafeNativeMethods.RHC_ContinueFilletAcrossTangentFaces(
+            ptr_const_face0, settings.Radius, ptr_const_face1, settings.SecondRadius, settings.Trim, settings.Extend, settings.Tolerance, settings.AngleTolerance,
+            method, settings.Degree, settings.TanSlider, settings.InnerSlider, ptr_fillets, ptr_out_breps0, ptr_out_breps1);
+        }
+
+        Runtime.CommonObject.GcProtect(face0, face1);
+        if (rc)
+        {
+          results = new FilletSurfaceResults
+          {
+            Face0 = face0,
+            Face1 = face1,
+            Fillets = fillets.ToNonConstArray(),
+            OutBreps0 = out_breps0.ToNonConstArray(),
+            OutBreps1 = out_breps1.ToNonConstArray()
+          };
+        }
+      }
+      return rc;
+    }
+
+
+    /// <summary>
     /// Fillets, chamfers, or blends the edges of a brep.
     /// </summary>
     /// <param name="brep">The brep to fillet, chamfer, or blend edges.</param>
@@ -2240,10 +2982,12 @@ namespace Rhino.Geometry
     /// <param name="tolerance">The tolerance to be used to perform calculations.</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>6.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Prefer the version that takes setbackFillets and angleTolerance options.")]
     public static Brep[] CreateFilletEdges(Brep brep, IEnumerable<int> edgeIndices, IEnumerable<double> startRadii, IEnumerable<double> endRadii, BlendType blendType, RailType railType, double tolerance)
     {
       // use ON_DEFAULT_ANGLE_TOLERANCE for the angle tolerance
-      return CreateFilletEdges(brep, edgeIndices, startRadii, endRadii, blendType, railType, blendType == BlendType.Blend, tolerance, Math.PI/180);
+      return CreateFilletEdges(brep, edgeIndices, startRadii, endRadii, blendType, railType, blendType != BlendType.Chamfer, tolerance, Math.PI/180);
     }
 
     /// <summary>
@@ -2255,9 +2999,9 @@ namespace Rhino.Geometry
     /// <param name="endRadii">An array of ending fillet, chamfer, or blend radaii, one for each edge index.</param>
     /// <param name="blendType">The blend type.</param>
     /// <param name="railType">The rail type.</param>
-    /// <param name="setbackFillets">UJse setback fillets (only used with blendType=<see cref="BlendType.Blend"/>)</param>
+    /// <param name="setbackFillets">Use setback fillets (not used with blendType=<see cref="BlendType.Chamfer"/>)</param>
     /// <param name="tolerance">The tolerance to be used to perform calculations.</param>
-    /// <param name="angleTolerance">Angle tolerance to be used to perform calculations [radians].</param>
+    /// <param name="angleTolerance">Angle tolerance to be used to perform calculations [radians]. If unsure, use Math.PI/180.0 (one degree)</param>
     /// <returns>Array of Breps if successful.</returns>
     /// <since>8.6</since>
     public static Brep[] CreateFilletEdges(Brep brep, IEnumerable<int> edgeIndices, IEnumerable<double> startRadii, IEnumerable<double> endRadii, BlendType blendType, RailType railType, bool setbackFillets, double tolerance, double angleTolerance)
@@ -2294,7 +3038,7 @@ namespace Rhino.Geometry
     /// <param name="edgeDistances">A dictionary with key the edge index on the input brep, and value a list of <see cref="BrepEdgeFilletDistance"/> items to apply.</param>
     /// <param name="blendType">The blend type.</param>
     /// <param name="railType">The rail type.</param>
-    /// <param name="setbackFillets">UJse setback fillets (only used with blendType=<see cref="BlendType.Blend"/>)</param>
+    /// <param name="setbackFillets">Use setback fillets (not used with blendType=<see cref="BlendType.Chamfer"/>)</param>
     /// <param name="tolerance">The tolerance to be used to perform calculations.</param>
     /// <param name="angleTolerance">Angle tolerance to be used to perform calculations [radians].</param>
     /// <returns>Array of Breps if successful.</returns>
@@ -2363,6 +3107,658 @@ namespace Rhino.Geometry
         return new Brep[0];
       }
     }
+
+    #region Variational Patch
+
+    /// <summary>
+    /// Variational curve constraint (position)
+    /// </summary>
+    public sealed class CurveConstraint
+    {
+      /// <summary>
+      /// Constructor, use curve as positional constraint
+      /// </summary>
+      /// <param name="curve"></param>
+      /// <since>9.0</since>
+      public CurveConstraint(Curve curve)
+      {
+        Curve = curve;
+        Continuity = Continuity.C0_continuous;
+      }
+
+      /// <summary>
+      /// Subclass constructor for any continuity
+      /// </summary>
+      /// <param name="curve">The curve to use</param>
+      /// <param name="continuity"></param>
+      /// <since>9.0</since>
+      public CurveConstraint(Curve curve, Continuity continuity)
+        : this(curve)
+      {
+        Continuity = continuity;
+      }
+
+
+      /// <summary>
+      /// The constraint curve
+      /// </summary>
+      /// <since>9.0</since>
+      public Curve Curve { get; }
+
+      /// <summary>
+      /// The constraint continuity
+      /// </summary>
+      public Continuity Continuity;
+
+    }
+
+    /// <summary>
+    /// Constrain the result to go through a point
+    /// </summary>
+    public sealed class PointConstraint
+    {
+      /// <summary>
+      /// Constructor for a given location
+      /// </summary>
+      /// <param name="point"></param>
+      /// <since>9.0</since>
+      public PointConstraint(Point3d point)
+      {
+        Point = point;
+      }
+
+      /// <summary>
+      /// Location of the constraint
+      /// </summary>
+      /// <since>9.0</since>
+      public Point3d Point { get; }
+    }
+
+    /// <summary>
+    /// Settings for the variational patch creation
+    /// </summary>
+    public sealed class VariationalPatchSettings
+    {
+      /// <summary>
+      /// Constructor with defaults
+      /// </summary>
+      /// <since>9.0</since>
+      public VariationalPatchSettings()
+      {
+        Tolerance = 0.001;
+        InternalTolerance = 0.01;
+        AngleToleranceRadians = RhinoMath.ToRadians(1.0);
+        CurvatureRelativeTolerance = 0.05; // 5% difference between non-zero curvatures
+        CurvatureZeroTolerance = 0.001; // flat radius = 1000
+        DegreeU = DegreeV = 5;
+        SpanCountU = SpanCountV = 1;
+        Domain = RhinoVariationalDomain.Molded;
+        Stretching = 0;
+        Bending = 0.0;
+        RocBending = 1.0;
+        MaxRefinements = 5;
+        UVRotation = 0.0;
+        InitialSurface = null;
+        PreserveEdges = false;
+      }
+
+      /// <summary>
+      /// Constructor that sets defaults and takes the tolerance,
+      /// internal tolerance and angle tolerance from the document
+      /// </summary>
+      /// <param name="doc"></param>
+      /// <since>9.0</since>
+      public VariationalPatchSettings(RhinoDoc doc)
+        : this()
+      {
+        Tolerance = doc.ModelAbsoluteTolerance;
+        InternalTolerance = 10 * doc.ModelAbsoluteTolerance;
+        AngleToleranceRadians = doc.ModelAngleToleranceRadians;
+        // todo (Future): document curvature tolerances
+      }
+
+      /// <summary>
+      /// Tolerance for positional (G0) constraints on edges
+      /// </summary>
+      /// <since>9.0</since>
+      public double Tolerance { get; set; }
+
+      /// <summary>
+      /// Tolerance for positional (G0int) constraints on internal curves
+      /// </summary>
+      /// <since>9.0</since>
+      public double InternalTolerance { get; set; }
+
+      /// <summary>
+      /// Tolerance for normal (G1) constraints
+      /// </summary>
+      /// <since>9.0</since>
+      public double AngleToleranceRadians { get; set; }
+
+      /// <summary>
+      /// Relative curvature (G2) tolerance between curvature values that
+      /// are both not smaller than <see cref="CurvatureZeroTolerance"/>.
+      /// </summary>
+      /// <since>9.0</since>
+      public double CurvatureRelativeTolerance { get; set; }
+
+      /// <summary>
+      /// Curvature value considered to be zero.
+      /// </summary>
+      /// <since>9.0</since>
+      public double CurvatureZeroTolerance { get; set; }
+      
+      /// <summary>
+      /// Surface degree in U-direction
+      /// </summary>
+      /// <since>9.0</since>
+      public int DegreeU { get; set; }
+
+      /// <summary>
+      /// Surface degree in V-direction
+      /// </summary>
+      /// <since>9.0</since>
+      public int DegreeV { get; set; }
+
+      /// <summary>
+      /// Number of spans in U-direction
+      /// </summary>
+      /// <since>9.0</since>
+      public int SpanCountU { get; set; }
+      
+      /// <summary>
+      /// Number of spans in V-direction
+      /// </summary>
+      /// <since>9.0</since>
+      public int SpanCountV { get; set; }
+
+      /// <summary>
+      /// The domain creation option
+      /// </summary>
+      /// <since>9.0</since>
+      public RhinoVariationalDomain Domain { get; set; }
+
+      /// <summary>
+      /// Stretching to apply (default 0, better not change)
+      /// </summary>
+      /// <since>9.0</since>
+      public double Stretching { get; set; }
+
+      /// <summary>
+      /// Bending to apply (default 0.3)
+      /// </summary>
+      /// <since>9.0</since>
+      public double Bending { get; set; }
+
+      /// <summary>
+      /// Rate-of-change in bending to apply (default 0.7)
+      /// </summary>
+      /// <since>9.0</since>
+      public double RocBending { get; set; }
+
+      /// <summary>
+      /// The rotation angle of the UV domain
+      /// </summary>
+      /// <since>9.0</since>
+      public double UVRotation { get; set; }
+
+      /// <summary>
+      /// The maximum number of refinements to apply (default 5).
+      /// </summary>
+      /// <since>9.0</since>
+      public int MaxRefinements { get; set; }
+
+      /// <summary>
+      /// The initial surface to use (default: null). The initial surface may not be rational.
+      /// </summary>
+      /// <since>9.0</since>
+      public Surface InitialSurface { get; set; }
+
+      /// <summary>
+      /// When an initial surface has been set, use <see cref="PreserveEdges"/> to fix the surface boundary.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool PreserveEdges { get; set; }
+    }
+
+    /// <summary>
+    /// This result contains additional information about the patch generation: warnings and errors and the continuity achieved.
+    /// </summary>
+    public sealed class VariationalPatchResult
+    {
+      /// <summary>
+      /// Warnings generated during patch generation
+      /// </summary>
+      /// <since>9.0</since>
+      public string Warning { get; internal set; }
+
+      /// <summary>
+      /// Errors generated during patch generation. If no result is obtained, this error can give more information about what went wrong.
+      /// </summary>
+      /// <since>9.0</since>
+      public string Error { get; internal set; }
+
+      /// <summary>
+      /// This value will be not-null if any internal constraints were used.
+      /// It will be true if those constraints were met within the internal positional tolerance.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool? G0Int { get; internal set; }
+
+      /// <summary>
+      /// This value will be not-null if any positional (G0) constraints were used.
+      /// It will be true if those constraints were met within the positional tolerance.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool? G0 { get; internal set; }
+
+      /// <summary>
+      /// This value will be not-null if any tangential (G1) constraints were used.
+      /// It will be true if those constraints were met within the angle tolerance.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool? G1 { get; internal set; }
+
+      /// <summary>
+      /// This value will be not-null if any curvature (G2) constraints were used.
+      /// It will be true if those constraints were met within the curvature relative and zero tolerances.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool? G2 { get; internal set; }
+    }
+
+    /// <summary>
+    /// Create constraints from edge curves. The edge curves may consist of wire curves and <see cref="BrepEdge"/> brep edges.
+    /// </summary>
+    /// <param name="edges"></param>
+    /// <param name="edgeContinuities"></param>
+    /// <param name="tolerance"></param>
+    /// <param name="angleToleranceRadians"></param>
+    /// <param name="curveConstraints">The resulting curve constraints. Note that the number of constraints
+    /// can be less than the number of input edges, as edges that completely overlap are removed
+    /// and edges that are tangent-continuous are merged.</param>
+    /// <param name="error"></param>
+    /// <returns></returns>
+    internal static bool CreateVariationalCurveConstraints(IEnumerable<Curve> edges, IEnumerable<Continuity> edgeContinuities,
+      double tolerance, double angleToleranceRadians,
+      out IList<CurveConstraint> curveConstraints, out string error)
+    {
+      return CreateVariationalCurveConstraints(edges, edgeContinuities, Array.Empty<Curve>(),
+        tolerance, angleToleranceRadians, out curveConstraints, out _, out error);
+    }
+
+    /// <summary>
+    /// Create constraints from edge curves. The edge curves may consist of wire curves and <see cref="BrepEdge"/> brep edges.
+    /// </summary>
+    /// <param name="edges"></param>
+    /// <param name="edgeContinuities"></param>
+    /// <param name="internalCurves"></param>
+    /// <param name="tolerance"></param>
+    /// <param name="angleToleranceRadians"></param>
+    /// <param name="curveConstraints">The resulting curve constraints. Note that the number of constraints
+    /// can be less than the number of input edges, as edges that completely overlap are removed
+    /// and edges that are tangent-continuous are merged.</param>
+    /// <param name="internalCurveConstraints"></param>
+    /// <param name="error"></param>
+    /// <returns></returns>
+    internal static bool CreateVariationalCurveConstraints(IEnumerable<Curve> edges, IEnumerable<Continuity> edgeContinuities,
+      IEnumerable<Curve> internalCurves, double tolerance, double angleToleranceRadians,
+      out IList<CurveConstraint> curveConstraints, out IList<CurveConstraint> internalCurveConstraints, out string error)
+    {
+      IList<int> edgeContinuityValues = edgeContinuities.Select(c =>
+      {
+        switch (c)
+        {
+          case Continuity.C0_continuous:
+          case Continuity.C0_locus_continuous:
+            return 0;
+          case Continuity.C1_continuous:
+          case Continuity.C1_locus_continuous:
+          case Continuity.G1_continuous:
+          case Continuity.G1_locus_continuous:
+            return 1;
+          case Continuity.C2_continuous:
+          case Continuity.G2_continuous:
+          case Continuity.C2_locus_continuous:
+          case Continuity.G2_locus_continuous:
+            return 2;
+          default:
+            return -1;
+        }
+      }).ToList();
+
+      curveConstraints = new List<CurveConstraint>();
+      internalCurveConstraints = new List<CurveConstraint>();
+
+      using (SimpleArrayCurvePointer pEdges = new SimpleArrayCurvePointer(edges))
+      using (SimpleArrayInt pEdgeContinuities = new SimpleArrayInt(edgeContinuityValues))
+      using (SimpleArrayCurvePointer pInternalCurves = new SimpleArrayCurvePointer(internalCurves))
+      using (SimpleArrayCurvePointer pMergedEdgeCurves = new SimpleArrayCurvePointer())
+      using (SimpleArrayInt pMergedEdgeContinuities = new SimpleArrayInt())
+      using (SimpleArrayCurvePointer pInternalSubCurves = new SimpleArrayCurvePointer())
+      using (StringWrapper errorWrapper = new StringWrapper())
+      {
+        bool rc = UnsafeNativeMethods.RHC_RhinoCreateVariationalInput(
+          pEdges.ConstPointer(),
+          pEdgeContinuities.ConstPointer(),
+          pInternalCurves.ConstPointer(),
+          tolerance, angleToleranceRadians,
+          pMergedEdgeCurves.NonConstPointer(),
+          pMergedEdgeContinuities.NonConstPointer(),
+          pInternalSubCurves.NonConstPointer(),
+          errorWrapper.NonConstPointer
+          );
+        
+        if (rc)
+        {
+          Curve[] mergedEdges = pMergedEdgeCurves.ToNonConstArray();
+          int[] mergedContinuityValues = pMergedEdgeContinuities.ToArray();
+          Continuity[] mergedEdgeContinuities = mergedContinuityValues.Select(c =>
+          {
+            switch (c)
+            {
+              case 0:
+                return Continuity.C0_continuous;
+              case 1:
+                return Continuity.G1_continuous;
+              case 2:
+                return Continuity.G2_continuous;
+              default:
+                return Continuity.None;
+            }
+          }).ToArray();
+
+          rc = mergedEdges.Length == mergedEdgeContinuities.Length;
+          if (rc)
+          {
+            for (int i = 0; i < mergedEdges.Length; i++)
+            {
+              curveConstraints.Add(new CurveConstraint(mergedEdges[i], mergedEdgeContinuities[i]));
+            }
+
+            Curve[] internalSubCurves = pInternalSubCurves.ToNonConstArray();
+            foreach (Curve internalCurve in internalSubCurves)
+            {
+              internalCurveConstraints.Add(new CurveConstraint(internalCurve));
+            }
+          }
+        }
+
+        GC.KeepAlive(internalCurves);
+        GC.KeepAlive(edges);
+        GC.KeepAlive(edgeContinuityValues);
+        error = errorWrapper.ToString();
+        return rc;
+      }
+      
+    }
+
+    internal static bool SupportsMatchedParameterization(IEnumerable<CurveConstraint> edges, double tolerance)
+    {
+      bool rc = false;
+      var edgeCurves = edges.Select(e => e.Curve).ToList();
+      using (SimpleArrayCurvePointer pEdges = new SimpleArrayCurvePointer(edgeCurves))
+      {
+        rc = UnsafeNativeMethods.RHC_RhinoSupportsMatchedParameterization(pEdges.ConstPointer(), tolerance);
+      }
+      GC.KeepAlive(edges);
+      return rc;
+    }
+
+    internal static bool CheckVariationalCurveConstraints(IEnumerable<CurveConstraint> edges, double tolerance, double angleToleranceRadians,
+      double curvatureRelativeTolerance, double curvatureZeroTolerance, bool untrimmed, out IList<TextDot> g0Warnings, out IList<TextDot> g1Warnings, out IList<TextDot> g2Warnings)
+    {
+      g0Warnings = new List<TextDot>();
+      g1Warnings = new List<TextDot>();
+      g2Warnings = new List<TextDot>();
+
+      bool rc = true;
+      var edgeCurves = edges.Select(e => e.Curve).ToList();
+      var edgeContinuities = edges.Select(e => GetContinuity(e.Continuity)).ToList();
+      using (SimpleArrayCurvePointer pEdges = new SimpleArrayCurvePointer(edgeCurves))
+      using (SimpleArrayInt pContinuities = new SimpleArrayInt(edgeContinuities))
+      using (SimpleArrayGeometryPointer pg0 = new SimpleArrayGeometryPointer())
+      using (SimpleArrayGeometryPointer pg1 = new SimpleArrayGeometryPointer())
+      using (SimpleArrayGeometryPointer pg2 = new SimpleArrayGeometryPointer())
+      {
+        rc = UnsafeNativeMethods.RHC_RhinoCheckVariationalInput(pEdges.ConstPointer(), pContinuities.ConstPointer(),
+          tolerance, angleToleranceRadians, curvatureRelativeTolerance, curvatureZeroTolerance, untrimmed,
+          pg0.NonConstPointer(), pg1.NonConstPointer(), pg2.NonConstPointer());
+
+        if (rc)
+        {
+          foreach (var item in pg0.ToNonConstArray())
+          {
+            if (item is TextDot td)
+              g0Warnings.Add(td);
+            else
+            {
+              rc = false;
+              break;
+            }
+          }
+          foreach (var item in pg1.ToNonConstArray())
+          {
+            if (item is TextDot td)
+              g1Warnings.Add(td);
+            else
+            {
+              rc = false;
+              break;
+            }
+          }
+          foreach (var item in pg2.ToNonConstArray())
+          {
+            if (item is TextDot td)
+              g2Warnings.Add(td);
+            else
+            {
+              rc = false;
+              break;
+            }
+          }
+        }
+      }
+
+      GC.KeepAlive(edgeCurves);
+      GC.KeepAlive(edgeContinuities);
+
+      return rc;
+    }
+    /// <summary>
+    /// Create a patch using variational approach from edge constraints
+    /// </summary>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    internal static Brep CreateVariationalPatch(IEnumerable<CurveConstraint> edges, VariationalPatchSettings settings, out VariationalPatchResult results)
+    {
+      return CreateVariationalPatch(null, edges, Array.Empty<CurveConstraint>(), Array.Empty<PointConstraint>(), settings, out results);
+    }
+    
+    /// <summary>
+    /// Create a patch using variational approach from edge constraints
+    /// </summary>
+    /// <param name="doc">The Rhino document. Use null if not available.</param>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    internal static Brep CreateVariationalPatch(RhinoDoc doc, IEnumerable<CurveConstraint> edges, VariationalPatchSettings settings, out VariationalPatchResult results)
+    {
+      return CreateVariationalPatch(doc, edges, Array.Empty<CurveConstraint>(), Array.Empty<PointConstraint>(), settings, out results);
+    }
+
+    /// <summary>
+    /// Create a patch using variational approach from edge constraints, internal constraints and point constraints
+    /// </summary>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="internalCurves">Internal curves (may be empty)</param>
+    /// <param name="points">Internal points (may be empty)</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    internal static Brep CreateVariationalPatch(IEnumerable<CurveConstraint> edges,
+      IEnumerable<CurveConstraint> internalCurves, IEnumerable<PointConstraint> points,
+      VariationalPatchSettings settings, out VariationalPatchResult results)
+    {
+      CancellationToken token = CancellationToken.None;
+
+      return CreateVariationalPatch(null, edges, internalCurves, points, settings,
+        true, token, null, out results);
+    }
+
+    /// <summary>
+    /// Create a patch using variational approach from edge constraints, internal constraints and point constraints
+    /// </summary>
+    /// <param name="doc">The Rhino document. Use null if not available.</param>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="internalCurves">Internal curves (may be empty)</param>
+    /// <param name="points">Internal points (may be empty)</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    internal static Brep CreateVariationalPatch(RhinoDoc doc, IEnumerable<CurveConstraint> edges,
+      IEnumerable<CurveConstraint> internalCurves, IEnumerable<PointConstraint> points,
+      VariationalPatchSettings settings, out VariationalPatchResult results)
+    {
+      CancellationToken token = CancellationToken.None;
+
+      return CreateVariationalPatch(doc, edges, internalCurves, points, settings,
+        true, token, null, out results);
+    }
+
+    /// <summary>
+    /// Create a patch using variational approach
+    /// </summary>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="internalCurves">Internal curves</param>
+    /// <param name="points">Internal points</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="multiThreading">Use multi-threading during the calculation</param>
+    /// <param name="cancelToken">The cancellation token.</param>
+    /// <param name="progress">The provider for progress updates.</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    /// <since>9.0</since>
+    public static Brep CreateVariationalPatch(IEnumerable<CurveConstraint> edges, IEnumerable<CurveConstraint> internalCurves,
+      IEnumerable<PointConstraint> points, VariationalPatchSettings settings,
+      bool multiThreading, CancellationToken cancelToken, IProgress<double> progress, out VariationalPatchResult results)
+    {
+      return CreateVariationalPatch(null, edges, internalCurves, points, settings, multiThreading, cancelToken, progress, out results);
+    }
+
+    private static int GetContinuity(Continuity c)
+      {
+        switch (c)
+        {
+          case Continuity.C0_continuous:
+          case Continuity.C0_locus_continuous:
+            return 0;
+          case Continuity.C1_continuous:
+          case Continuity.C1_locus_continuous:
+          case Continuity.G1_continuous:
+          case Continuity.G1_locus_continuous:
+            return 1;
+          case Continuity.C2_continuous:
+          case Continuity.C2_locus_continuous:
+          case Continuity.G2_continuous:
+          case Continuity.G2_locus_continuous:
+            return 2;
+          default:
+            return -1;
+        }
+      }
+
+    /// <summary>
+    /// Create a patch using variational approach
+    /// </summary>
+    /// <param name="doc">The Rhino document. Use null if not available.</param>
+    /// <param name="edges">Edges with continuity constraints</param>
+    /// <param name="internalCurves">Internal curves</param>
+    /// <param name="points">Internal points</param>
+    /// <param name="settings">The settings to use while creating the surface</param>
+    /// <param name="multiThreading">Use multi-threading during the calculation</param>
+    /// <param name="cancelToken">The cancellation token.</param>
+    /// <param name="progress">The provider for progress updates.</param>
+    /// <param name="results">The results of the patching algorithm.</param>
+    /// <returns>Trimmed surface if successful, null otherwise</returns>
+    /// <since>9.0</since>
+    public static Brep CreateVariationalPatch(RhinoDoc doc, IEnumerable<CurveConstraint> edges, IEnumerable<CurveConstraint> internalCurves,
+      IEnumerable<PointConstraint> points, VariationalPatchSettings settings,
+      bool multiThreading, CancellationToken cancelToken, IProgress<double> progress, out VariationalPatchResult results)
+    {
+      using (SimpleArrayCurvePointer pEdges = new SimpleArrayCurvePointer(edges.Select(e => e.Curve)))
+      using (SimpleArrayCurvePointer pCurves = new SimpleArrayCurvePointer(internalCurves.Select(e => e.Curve)))
+      using (SimpleArrayPoint3d pPoints = new SimpleArrayPoint3d(points.Select(p => p.Point)))
+      using (SimpleArrayInt pContinuities = new SimpleArrayInt(edges.Select(e => GetContinuity(e.Continuity))))
+      {
+        using (StringWrapper warningWrapper = new StringWrapper())
+        using (StringWrapper errorWrapper = new StringWrapper())
+        {
+          Interop.MarshalProgressAndCancelToken(cancelToken, progress, out IntPtr pTerminator,
+            out int progressSerialNumber, out var reporter, out var terminator);
+
+          bool g0internal = false, g0 = false, g1 = false, g2 = false;
+
+          int eDomain = (int)settings.Domain;
+          IntPtr pResult;
+          try
+          {
+            pResult = UnsafeNativeMethods.RHC_RhinoCreateVariationalPatch(
+              pEdges.NonConstPointer(),
+              pCurves.NonConstPointer(),
+              pPoints.NonConstPointer(),
+              pContinuities.NonConstPointer(),
+              settings.DegreeU, settings.DegreeV,
+              settings.SpanCountU, settings.SpanCountV,
+              settings.Stretching, settings.Bending, settings.RocBending,
+              settings.UVRotation,
+              settings.MaxRefinements,
+              eDomain,
+              multiThreading,
+              settings.InitialSurface?.ConstPointer() ?? IntPtr.Zero,
+              settings.PreserveEdges,
+              pTerminator,
+              doc?.RuntimeSerialNumber ?? 0,
+              progressSerialNumber,
+              settings.Tolerance,
+              settings.AngleToleranceRadians,
+              settings.CurvatureRelativeTolerance,
+              settings.CurvatureZeroTolerance,
+              settings.InternalTolerance,
+              ref g0internal, ref g0, ref g1, ref g2,
+              warningWrapper.NonConstPointer, errorWrapper.NonConstPointer);
+          }
+          finally
+          {
+            if (terminator != null) terminator.Dispose();
+            if (reporter != null) reporter.Disable();
+          }
+
+          results = new()
+          {
+            Error = errorWrapper.ToString(),
+            Warning = warningWrapper.ToString(),
+            G0Int = ( internalCurves.Any() || points.Any() ) ? g0internal : new bool?(),
+            G0 = edges.Any(e => GetContinuity(e.Continuity) >= 0) ? g0 : new bool?(),
+            G1 = edges.Any(e => GetContinuity(e.Continuity) >= 1) ? g1 : new bool?(),
+            G2 = edges.Any(e => GetContinuity(e.Continuity) >= 2) ? g2 : new bool?()
+          };
+
+          Brep brep = null;
+          if (pResult != IntPtr.Zero)
+          {
+            brep = new Brep(pResult, null);
+          }
+
+          return brep;
+        }
+      }
+    }
+
+    #endregion
 
     /// <summary>
     /// Offsets a Brep.
@@ -2860,6 +4256,11 @@ namespace Rhino.Geometry
     /// <param name="breps">Breps to union.</param>
     /// <param name="tolerance">Tolerance to use for union operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>5.0</since>
     public static Brep[] CreateBooleanUnion(IEnumerable<Brep> breps, double tolerance)
     {
@@ -2873,6 +4274,11 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use for union operation.</param>
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.0</since>
     public static Brep[] CreateBooleanUnion(IEnumerable<Brep> breps, double tolerance, bool manifoldOnly)
     {
@@ -2909,6 +4315,11 @@ namespace Rhino.Geometry
     /// If Boolean failed because the intersection hit a non-manifold edge, a point will be added where the intersection hits the edge.
     /// </param>
     /// <returns>An array of Brep results or null on failure.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>8.0</since>
     public static Brep[] CreateBooleanUnion(IEnumerable<Brep> breps, double tolerance, bool manifoldOnly, out Point3d[] nakedEdgePoints, out Point3d[] badIntersectionPoints, out Point3d[] nonManifoldEdgePoints)
     {
@@ -2941,6 +4352,69 @@ namespace Rhino.Geometry
         GC.KeepAlive(breps);
         return join_count > 0 ? output.ToNonConstArray() : null;
       }
+    }
+
+    /// <summary>
+    /// Compute the Boolean Union of a set of Breps, reporting which inputs produced each result.
+    /// </summary>
+    /// <param name="breps">Breps to union. May not contain nulls.</param>
+    /// <param name="tolerance">Tolerance to use for union operation.</param>
+    /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
+    /// <param name="indexMap">
+    /// indexMap[i] holds the positions in <paramref name="breps"/> of the inputs that produced
+    /// result i. Null when this method returns null.
+    /// </param>
+    /// <returns>
+    /// An array of Brep results or null on failure. May be empty when the union produced no
+    /// geometry.
+    /// </returns>
+    /// <remarks>
+    /// A union result can come from several inputs, so this reports a list per result where
+    /// <see cref="CreateBooleanDifferenceWithIndexMap"/> reports one index.
+    ///
+    /// The indices name the group of inputs a result was built from, which is not always the
+    /// same as the inputs its geometry reached: a result made of disconnected pieces is
+    /// separated into one result per piece, and each piece names the whole group.
+    ///
+    /// An input absorbed by another contributes no geometry and appears in no entry of
+    /// <paramref name="indexMap"/>. An input the operation could not use is absent in the same
+    /// way: one that is non-manifold when <paramref name="manifoldOnly"/> is true, or one the
+    /// Boolean kernel cannot accept. An input whose shells are disjoint produces one result per
+    /// shell, and each of those names it.
+    ///
+    /// A null element in <paramref name="breps"/> throws <see cref="ArgumentException"/>,
+    /// because the reported indices are positions in that sequence. The other
+    /// CreateBooleanUnion overloads drop nulls silently and renumber what follows.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
+    public static Brep[] CreateBooleanUnionWithIndexMap(IEnumerable<Brep> breps, double tolerance, bool manifoldOnly, out int[][] indexMap)
+    {
+      var results = BrepBoolean.Union(breps, tolerance, manifoldOnly, true, false);
+
+      if (!results.Succeeded)
+      {
+        indexMap = null;
+        return null;
+      }
+
+      var out_breps = new List<Brep>(results.Results.Length);
+      var out_map = new List<int[]>(results.Results.Length);
+
+      foreach (var result in results.Results)
+      {
+        // A null Brep is documented for a difference result, not a union one. Skipping it keeps
+        // the returned array free of nulls and aligned with indexMap.
+        if (result.Brep == null)
+          continue;
+
+        out_breps.Add(result.Brep);
+        out_map.Add(result.FirstSetIndices);
+      }
+
+      indexMap = out_map.ToArray();
+      return out_breps.ToArray();
     }
 
     static Brep[] BooleanIntDiffHelper(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool intersection, bool manifoldOnly)
@@ -2980,7 +4454,12 @@ namespace Rhino.Geometry
     /// <param name="secondSet">Second set of Breps.</param>
     /// <param name="tolerance">Tolerance to use for intersection operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>5.0</since>
     public static Brep[] CreateBooleanIntersection(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance)
     {
@@ -2995,7 +4474,12 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use for intersection operation.</param>
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.0</since>
     public static Brep[] CreateBooleanIntersection(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool manifoldOnly)
     {
@@ -3009,7 +4493,12 @@ namespace Rhino.Geometry
     /// <param name="secondBrep">Second Brep for boolean intersection.</param>
     /// <param name="tolerance">Tolerance to use for intersection operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>5.0</since>
     public static Brep[] CreateBooleanIntersection(Brep firstBrep, Brep secondBrep, double tolerance)
     {
@@ -3027,7 +4516,12 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use for intersection operation.</param>
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.0</since>
     public static Brep[] CreateBooleanIntersection(Brep firstBrep, Brep secondBrep, double tolerance, bool manifoldOnly)
     {
@@ -3044,7 +4538,12 @@ namespace Rhino.Geometry
     /// <param name="secondSet">Second set of Breps (the set to subtract).</param>
     /// <param name="tolerance">Tolerance to use for difference operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <example>
     /// <code source='examples\vbnet\ex_booleandifference.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_booleandifference.cs' lang='cs'/>
@@ -3064,7 +4563,12 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use for difference operation.</param>
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <example>
     /// <code source='examples\vbnet\ex_booleandifference.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_booleandifference.cs' lang='cs'/>
@@ -3083,7 +4587,12 @@ namespace Rhino.Geometry
     /// <param name="secondBrep">Second Brep for boolean difference.</param>
     /// <param name="tolerance">Tolerance to use for difference operation.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>5.0</since>
     public static Brep[] CreateBooleanDifference(Brep firstBrep, Brep secondBrep, double tolerance)
     {
@@ -3101,7 +4610,12 @@ namespace Rhino.Geometry
     /// <param name="tolerance">Tolerance to use for difference operation.</param>
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <returns>An array of Brep results or null on failure.</returns>
-    /// <remarks>The solid orientation of the breps make a difference when calling this function</remarks>
+    /// <remarks>
+    /// The solid orientation of the breps make a difference when calling this function.
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.0</since>
     public static Brep[] CreateBooleanDifference(Brep firstBrep, Brep secondBrep, double tolerance, bool manifoldOnly)
     {
@@ -3120,6 +4634,11 @@ namespace Rhino.Geometry
     /// <param name="manifoldOnly">If true, non-manifold input breps are ignored.</param>
     /// <param name="indexMap">results[i] is the result if subtracting something from firstSet[indexMap[i]].</param>
     /// <returns>An array of Brep results or null on failure. May be empty if all of the firstSet is differenced away.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>8.13</since>
     public static Brep[] CreateBooleanDifferenceWithIndexMap(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool manifoldOnly, out int[] indexMap)
     {
@@ -3167,6 +4686,11 @@ namespace Rhino.Geometry
     /// <param name="secondBrep">The cutting Brep.</param>
     /// <param name="tolerance">Tolerance to use for splitting operation. When in doubt, use the document's model absolute tolerance.</param>
     /// <returns>An array of Brep if successful, an empty array on failure.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.16</since>
     public static Brep[] CreateBooleanSplit(Brep firstBrep, Brep secondBrep, double tolerance)
     {
@@ -3182,6 +4706,11 @@ namespace Rhino.Geometry
     /// <param name="secondSet">The cutting Breps.</param>
     /// <param name="tolerance">Tolerance to use for splitting operation. When in doubt, use the document's model absolute tolerance.</param>
     /// <returns>An array of Brep if successful, an empty array on failure.</returns>
+    /// <remarks>
+    /// Breps that have never been added to a document may need preparing first, or
+    /// this method can fail, or return an unexpected result. See
+    /// Brep.PrepareForBooleans.
+    /// </remarks>
     /// <since>6.16</since>
     public static Brep[] CreateBooleanSplit(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance)
     {
@@ -3209,6 +4738,98 @@ namespace Rhino.Geometry
         GC.KeepAlive(secondSet);
 
         return new Brep[0];
+      }
+    }
+
+    /// <summary>
+    /// Cuts this solid brep with extrusions of closed planar curves
+    /// </summary>
+    /// <param name="closedCurves">Closed cutting curves. All are extruded along the same direction.</param>
+    /// <param name="direction">Extrusion direction of the cutters.</param>
+    /// <param name="depth">Extrusion depth. RhinoMath.UnsetValue or a value &lt;= 0 cuts all the way through.</param>
+    /// <param name="bothSides">Extrude the cutters to both sides of the curves. Ignored when cutting through.</param>
+    /// <param name="tolerance">Intersection and boolean tolerance, typically the document absolute tolerance.</param>
+    /// <param name="splitKinkyFaces">Split output pieces along creases.</param>
+    /// <param name="keptPieces">Pieces that remain after the cut (boolean difference side).</param>
+    /// <param name="cutAwayPieces">The cut-away pieces (boolean intersection side).</param>
+    /// <returns>true if successful.</returns>
+    /// <since>9.0</since>
+    public bool WireCut(IEnumerable<Curve> closedCurves, Vector3d direction, double depth, bool bothSides, double tolerance, bool splitKinkyFaces, out Brep[] keptPieces, out Brep[] cutAwayPieces)
+    {
+      if (closedCurves == null) { throw new ArgumentNullException(nameof(closedCurves)); }
+
+      using (var curves = new SimpleArrayCurvePointer(closedCurves))
+      using (var kept = new SimpleArrayBrepPointer())
+      using (var cut_away = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        IntPtr const_ptr_curves = curves.ConstPointer();
+        IntPtr ptr_kept = kept.NonConstPointer();
+        IntPtr ptr_cut_away = cut_away.NonConstPointer();
+
+        bool rc = UnsafeNativeMethods.RHC_RhinoWireCutBrep(const_ptr_this, const_ptr_curves, direction, depth, bothSides, tolerance, splitKinkyFaces, ptr_kept, ptr_cut_away);
+
+        GC.KeepAlive(closedCurves);
+        GC.KeepAlive(this);
+
+        if (rc)
+        {
+          keptPieces = kept.ToNonConstArray();
+          cutAwayPieces = cut_away.ToNonConstArray();
+          return true;
+        }
+
+        keptPieces = null;
+        cutAwayPieces = null;
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Cuts this solid brep with a single open cutting curve. The curve is extruded
+    /// along direction into a sheet, then along trimDirection to close the sheet
+    /// into a solid cutter.
+    /// </summary>
+    /// <param name="openCurve">Open cutting curve.</param>
+    /// <param name="direction">First extrusion direction (the wire sweep).</param>
+    /// <param name="trimDirection">Second extrusion direction that closes the cutter.</param>
+    /// <param name="depth">Depth along direction. RhinoMath.UnsetValue or a value &lt;= 0 cuts through and skips trim capping.</param>
+    /// <param name="trimDepth">Depth along trimDirection. Ignored when cutting through.</param>
+    /// <param name="bothSides">Extrude both ways along direction.</param>
+    /// <param name="trimBothSides">Extrude both ways along trimDirection.</param>
+    /// <param name="tolerance">Intersection and boolean tolerance, typically the document absolute tolerance.</param>
+    /// <param name="splitKinkyFaces">Split output pieces along creases.</param>
+    /// <param name="keptPieces">Pieces that remain after the cut (boolean difference side).</param>
+    /// <param name="cutAwayPieces">The cut-away pieces (boolean intersection side).</param>
+    /// <returns>true if successful.</returns>
+    /// <since>9.0</since>
+    public bool WireCut(Curve openCurve, Vector3d direction, Vector3d trimDirection, double depth, double trimDepth, bool bothSides, bool trimBothSides, double tolerance, bool splitKinkyFaces, out Brep[] keptPieces, out Brep[] cutAwayPieces)
+    {
+      if (openCurve == null) { throw new ArgumentNullException(nameof(openCurve)); }
+
+      using (var kept = new SimpleArrayBrepPointer())
+      using (var cut_away = new SimpleArrayBrepPointer())
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        IntPtr const_ptr_curve = openCurve.ConstPointer();
+        IntPtr ptr_kept = kept.NonConstPointer();
+        IntPtr ptr_cut_away = cut_away.NonConstPointer();
+
+        bool rc = UnsafeNativeMethods.RHC_RhinoWireCutBrepOpenCurve(const_ptr_this, const_ptr_curve, direction, trimDirection, depth, trimDepth, bothSides, trimBothSides, tolerance, splitKinkyFaces, ptr_kept, ptr_cut_away);
+
+        GC.KeepAlive(openCurve);
+        GC.KeepAlive(this);
+
+        if (rc)
+        {
+          keptPieces = kept.ToNonConstArray();
+          cutAwayPieces = cut_away.ToNonConstArray();
+          return true;
+        }
+
+        keptPieces = null;
+        cutAwayPieces = null;
+        return false;
       }
     }
 
@@ -3250,32 +4871,7 @@ namespace Rhino.Geometry
     /// <since>5.0</since>
     public static Brep[] JoinBreps(IEnumerable<Brep> brepsToJoin, double tolerance)
     {
-      if (null == brepsToJoin)
-        return null;
-
-      using (var input = new SimpleArrayBrepPointer())
-      using (var output = new SimpleArrayBrepPointer())
-      {
-        foreach (Brep brep in brepsToJoin)
-          input.Add(brep, true);
-
-        IntPtr ptr_input = input.NonConstPointer();
-        IntPtr ptr_output = output.NonConstPointer();
-
-        Brep[] rc = null;
-        if (UnsafeNativeMethods.RHC_RhinoJoinBreps(ptr_input, ptr_output, tolerance) > 0)
-        {
-          rc = output.ToNonConstArray();
-          for (int i = 0; i < rc.Length; i++)
-          {
-            // 23-Jun-2016 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-34697
-            if (BrepSolidOrientation.Inward == rc[i].SolidOrientation)
-              rc[i].Flip();
-          }
-        }
-        GC.KeepAlive(brepsToJoin);
-        return rc;
-      }
+      return JoinBreps(brepsToJoin, tolerance, RhinoMath.DefaultAngleTolerance);
     }
 
     /// <summary>
@@ -3578,9 +5174,19 @@ namespace Rhino.Geometry
     /// Create an array of analysis meshes for the brep using the specified settings.
     /// Meshes aren't set on the brep.
     /// </summary>
-    /// <param name="brep"></param>
+    /// <param name="brep">The brep to mesh.</param>
     /// <param name="state"> CurvatureAnalysisSettingsState </param>
-    /// <returns>true if meshes were created</returns>
+    /// <returns>The analysis meshes. The array is empty if no mesh could be created.</returns>
+    /// <remarks>
+    /// The mesh density comes from the active document, and falls back to
+    /// MeshingParameters.DefaultAnalysisMesh when there is no active document,
+    /// as when running headless or in Compute.
+    /// <para>
+    /// Each mesh covers the untrimmed surface under a face, so on a trimmed face
+    /// the mesh extends past the trims and any statistic taken from it includes
+    /// area that is not part of the brep.
+    /// </para>
+    /// </remarks>
     /// <since>6.0</since>
     public static Mesh[] CreateCurvatureAnalysisMesh(Brep brep, Rhino.ApplicationSettings.CurvatureAnalysisSettingsState state)
     {
@@ -3597,6 +5203,52 @@ namespace Rhino.Geometry
           (int)state.Style,
           ptr_meshes);
         GC.KeepAlive(brep);
+        return 0 == count ? new Mesh[0] : outmeshes.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Creates an array of analysis meshes for the brep, one per face.
+    /// The meshes are not set on the brep.
+    /// </summary>
+    /// <param name="brep">The brep to mesh.</param>
+    /// <param name="state">Supplies the curvature style and the false color ranges.</param>
+    /// <param name="meshingParameters">The mesh density. RhinoDoc.GetAnalysisMeshingParameters returns what a document uses, and MeshingParameters.DefaultAnalysisMesh is the default.</param>
+    /// <returns>The analysis meshes. The array is empty if no mesh could be created.</returns>
+    /// <remarks>
+    /// Each mesh covers the untrimmed surface under a face, so on a trimmed face
+    /// the mesh extends past the trims and any statistic taken from it includes
+    /// area that is not part of the brep. For statistics, mesh the brep with
+    /// MeshingParameters.ComputeCurvature set and pass the result to
+    /// <see cref="MeshCurvatureStats"/>; the curvature values do not depend on the
+    /// style, so one mesh serves every style.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static Mesh[] CreateCurvatureAnalysisMesh(Brep brep, Rhino.ApplicationSettings.CurvatureAnalysisSettingsState state, MeshingParameters meshingParameters)
+    {
+      if (null == brep)
+        throw new ArgumentNullException(nameof(brep));
+      if (null == state)
+        throw new ArgumentNullException(nameof(state));
+      if (null == meshingParameters)
+        throw new ArgumentNullException(nameof(meshingParameters));
+
+      IntPtr ptr_const_brep = brep.ConstPointer();
+      IntPtr ptr_const_mp = meshingParameters.ConstPointer();
+      using (var outmeshes = new SimpleArrayMeshPointer())
+      {
+        IntPtr ptr_meshes = outmeshes.NonConstPointer();
+        int count = UnsafeNativeMethods.RHC_BrepCalcCurvatureAnalysisMesh2(
+          ptr_const_brep,
+          state.GaussRange,
+          state.MeanRange,
+          state.MinRadiusRange,
+          state.MaxRadiusRange,
+          (int)state.Style,
+          ptr_const_mp,
+          ptr_meshes);
+        GC.KeepAlive(brep);
+        GC.KeepAlive(meshingParameters);
         return 0 == count ? new Mesh[0] : outmeshes.ToNonConstArray();
       }
     }
@@ -4091,12 +5743,14 @@ namespace Rhino.Geometry
     public Curve[] DuplicateEdgeCurves(bool nakedOnly)
     {
       IntPtr const_ptr_this = ConstPointer();
-      var output = new SimpleArrayCurvePointer();
+      using (var output = new SimpleArrayCurvePointer())
+      {
       IntPtr ptr_output = output.NonConstPointer();
 
       UnsafeNativeMethods.ON_Brep_DuplicateEdgeCurves(const_ptr_this, ptr_output, nakedOnly, true, true);
       GC.KeepAlive(this);
       return output.ToNonConstArray();
+    }
     }
 
     /// <summary>
@@ -4168,12 +5822,14 @@ namespace Rhino.Geometry
     public Curve[] GetWireframe(int density)
     {
       IntPtr const_ptr_this = ConstPointer();
-      var output = new SimpleArrayCurvePointer();
+      using (var output = new SimpleArrayCurvePointer())
+      {
       IntPtr ptr_output = output.NonConstPointer();
 
       UnsafeNativeMethods.ON_Brep_GetWireframe(const_ptr_this, density, ptr_output);
       GC.KeepAlive(this);
       return output.ToNonConstArray();
+    }
     }
 #endif
 
@@ -4542,6 +6198,77 @@ namespace Rhino.Geometry
       bool rc = UnsafeNativeMethods.RHC_RhinoGetPointInSolidBrep(const_ptr_this, tolerance, ref point);
       GC.KeepAlive(this);
       return rc;
+    }
+
+    /// <summary>
+    /// Prepares this Brep for a Boolean or intersection operation by applying the
+    /// same cleanup Rhino performs when a Brep is added to the document. Breps that
+    /// have never been added to a document can fail these operations, or return
+    /// unexpected results, without it.
+    /// </summary>
+    /// <returns>true if the Brep is ready to use, false otherwise.</returns>
+    /// <remarks>
+    /// Because kinked surfaces can cause problems downstream, Rhino, by default,
+    /// splits kinked surfaces when adding Breps to the document. So this method
+    /// splits all kinky Brep faces. Also, because inward pointing face normals for
+    /// solid Breps can cause problems, Rhino flips inward pointing normals for solids
+    /// when adding Breps to the document. So this method checks the solid orientation
+    /// and, if inward, flips the face normals.
+    /// <para>
+    /// This method modifies the Brep in place. If it returns false, then the Brep was
+    /// modified but is no longer valid. Duplicate the Brep first if you need to keep
+    /// the original, and note that flipping an inward pointing solid discards a
+    /// deliberately inside out orientation.
+    /// </para>
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool PrepareForBooleans()
+    {
+      return PrepareForBooleans(RhinoMath.DefaultAngleTolerance);
+    }
+
+    /// <summary>
+    /// Prepares this Brep for a Boolean or intersection operation by applying the
+    /// same cleanup Rhino performs when a Brep is added to the document. Breps that
+    /// have never been added to a document can fail these operations, or return
+    /// unexpected results, without it.
+    /// </summary>
+    /// <param name="angleToleranceRadians">
+    /// Angle tolerance, in radians, used to split kinky faces.
+    /// When in doubt, use the document's model angle tolerance.
+    /// </param>
+    /// <returns>true if the Brep is ready to use, false otherwise.</returns>
+    /// <remarks>
+    /// Because kinked surfaces can cause problems downstream, Rhino, by default,
+    /// splits kinked surfaces when adding Breps to the document. So this method
+    /// splits all kinky Brep faces. Also, because inward pointing face normals for
+    /// solid Breps can cause problems, Rhino flips inward pointing normals for solids
+    /// when adding Breps to the document. So this method checks the solid orientation
+    /// and, if inward, flips the face normals.
+    /// <para>
+    /// This method modifies the Brep in place. If it returns false, then the Brep was
+    /// modified but is no longer valid. Duplicate the Brep first if you need to keep
+    /// the original, and note that flipping an inward pointing solid discards a
+    /// deliberately inside out orientation.
+    /// </para>
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool PrepareForBooleans(double angleToleranceRadians)
+    {
+      int face_count = Faces.Count;
+      int edge_count = Edges.Count;
+
+      Faces.SplitKinkyFaces(angleToleranceRadians, true);
+      bool modified = face_count != Faces.Count || edge_count != Edges.Count;
+
+      if (BrepSolidOrientation.Inward == SolidOrientation)
+      {
+        Flip();
+        modified = true;
+      }
+
+      // Validating an unmodified Brep is expensive and pointless.
+      return !modified || IsValid;
     }
 
     /// <summary>
@@ -5335,6 +7062,71 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Untrims the outer boundary of a face, expanding the face back to the boundary
+    /// of its underlying surface. Inner loops (holes) are left in place. The outer
+    /// boundary is only untrimmed when all of its edges are naked; otherwise the
+    /// operation fails to avoid corrupting adjacent faces.
+    /// </summary>
+    /// <param name="faceIndex">The index of the face to untrim.</param>
+    /// <returns>The untrimmed Brep if successful, null otherwise.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Brep UntrimOuterLoop(int faceIndex)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_brep = UnsafeNativeMethods.RHC_RhinoBrepUntrimOuterLoop(ptr_const_this, faceIndex);
+      GC.KeepAlive(this);
+      return CreateGeometryHelper(ptr_brep, null) as Brep;
+    }
+
+    /// <summary>
+    /// Untrims a face completely, expanding it back to its underlying surface: the
+    /// outer boundary is untrimmed and all inner loops (holes) are removed.
+    /// </summary>
+    /// <param name="faceIndex">The index of the face to untrim.</param>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>The untrimmed Brep if successful, null otherwise.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Brep UntrimFace(int faceIndex, double tolerance)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_brep = UnsafeNativeMethods.RHC_RhinoBrepUntrimFace(ptr_const_this, faceIndex, tolerance);
+      GC.KeepAlive(this);
+      return CreateGeometryHelper(ptr_brep, null) as Brep;
+    }
+
+    /// <summary>
+    /// Re-trims the given edges of this single-face Brep, replacing each deleted edge
+    /// with new boundary geometry. This is the SDK equivalent of the ReplaceEdge command.
+    /// </summary>
+    /// <param name="edgeIndices">The indices of the edges to replace.</param>
+    /// <param name="method">How the deleted edges are re-trimmed.</param>
+    /// <param name="replacementCurve">
+    /// The curve used to re-trim when <paramref name="method"/> is
+    /// <see cref="BrepReplaceEdgeMethod.Curve"/>; ignored (may be null) otherwise.
+    /// </param>
+    /// <param name="tolerance">The tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <returns>The modified Brep if successful, null otherwise (for example, if this Brep has more than one face).</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Brep ReplaceEdge(IEnumerable<int> edgeIndices, BrepReplaceEdgeMethod method, Curve replacementCurve, double tolerance)
+    {
+      if (edgeIndices == null)
+        throw new ArgumentNullException(nameof(edgeIndices));
+      int[] indices = edgeIndices.ToArray();
+      if (indices.Length == 0)
+        return null;
+
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_curve = replacementCurve == null ? IntPtr.Zero : replacementCurve.ConstPointer();
+      IntPtr ptr_brep = UnsafeNativeMethods.RHC_RhinoBrepReplaceEdges(ptr_const_this, indices.Length, indices, (int)method, ptr_const_curve, tolerance);
+      GC.KeepAlive(this);
+      GC.KeepAlive(replacementCurve);
+      return CreateGeometryHelper(ptr_brep, null) as Brep;
+    }
+
 #endif
 
     bool CullUnusedHelper(UnsafeNativeMethods.BrepCullUnused which)
@@ -5779,6 +7571,36 @@ namespace Rhino.Geometry
     #region methods
 
 #if RHINO_SDK
+
+    /// <summary>
+    /// For each trim at this edge, find the 3d unit vector at the edge parameter in the trim's surface tangent plane,
+    /// perpendicular to the edge, which points to the active side of the trim.
+    /// </summary>
+    /// <param name="t">edge parameter where vectors and normals are evaluated</param>
+    /// <param name="vectors">3d vectors point into the face(s). One for each trim, in order of <see cref="BrepEdge.TrimIndices"/></param>
+    /// <param name="normals">Surface normals at edge parameter. Perpendicular to the 3d vectors.</param>
+    /// <returns>True if vectors can be found. False if edge tangent or surface normals can't be found, or if input is bad.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Get3dVectorsIntoFaces(double t, out Vector3d[] vectors, out Vector3d[] normals)
+    {
+      vectors = normals = null;
+      bool rc = false;
+      IntPtr ptr_const_this = ConstPointer();
+      using (SimpleArrayVector3d vs = new SimpleArrayVector3d())
+      using (SimpleArrayVector3d ns = new SimpleArrayVector3d())
+      {
+        rc = UnsafeNativeMethods.RHC_BrepEdge_Get3dVectorsIntoFaces(ptr_const_this, t, vs.NonConstPointer(), ns.NonConstPointer());
+        if (rc)
+        {
+          vectors = vs.ToArray();
+          normals = ns.ToArray();
+        }  
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+
     /// <summary>
     /// For a manifold, non-boundary edge, decides whether or not the two surfaces
     /// on either side meet smoothly.
@@ -6705,6 +8527,27 @@ namespace Rhino.Geometry
       return CreateGeometryHelper(ptr_brep, null) as Brep;
     }
 
+    /// <summary>
+    /// Get the closest point to this face. Closest point finding respects the trims on the face.
+    /// </summary>
+    /// <param name="testPoint"></param>
+    /// <param name="maximumDistance">The maximum allowed distance.
+    /// <para>Past this distance, the search is given up and false is returned.</para>
+    /// <para>Use 0 to turn off this parameter.</para></param>
+    /// <param name="u">The surface u-parameter for the closest point</param>
+    /// <param name="v">The surface v-parameter for the closest point</param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool ClosestPointOnFace(Point3d testPoint, out double u, out double v, double maximumDistance)
+    {
+      u = v = RhinoMath.UnsetValue;
+      IntPtr ptr_const_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.RHC_RhinoBrepFaceGetClosestPoint(ptr_const_this, testPoint, maximumDistance, ref u, ref v);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
 #endif
 
     /// <summary>
@@ -6802,6 +8645,53 @@ namespace Rhino.Geometry
         GC.KeepAlive(this);
         return fitSurfaces;
       }
+    }
+
+    /// <summary>
+    /// Refits this face so that a trimmed edge becomes an untrimmed side, and re-applies the face's
+    /// other trims to the refit surface. Unlike
+    /// <see cref="RefitTrim(BrepEdge, IEnumerable{double}, double, bool, ref double)"/>, this works on
+    /// faces trimmed on more than one side.
+    /// </summary>
+    /// <param name="edge">
+    /// An edge of this face's outer loop, from the same Brep. Its trim must run across the face in U
+    /// or V without turning back. The face may have only one loop.
+    /// </param>
+    /// <param name="knots">
+    /// Knots to add in the direction the edge runs across the face, as normalized parameters from 0
+    /// to 1. Empty or null keeps the surface's knots.
+    /// </param>
+    /// <param name="degree">The minimum degree of the refit surface in that direction; 0 keeps the surface's degree.</param>
+    /// <param name="bezierSections">If true, the result has one face per span of the refit surface in that direction.</param>
+    /// <param name="tolerance">The 3d tolerance for projection, splitting, and fitting.</param>
+    /// <param name="maxDeviation">
+    /// The largest deviation of the result from this face: from the new side to edge, or from a
+    /// re-applied edge to the trimmed edge it replaces. <see cref="Line.Unset"/> when it could not be measured.
+    /// </param>
+    /// <param name="failure">Why no Brep was returned; <see cref="RefitTrimFailure.None"/> on success.</param>
+    /// <returns>A Brep with one face, or one face per section; or null on failure.</returns>
+    public Brep RefitTrim(BrepEdge edge, IEnumerable<double> knots, int degree, bool bezierSections, double tolerance,
+      out Line maxDeviation, out RefitTrimFailure failure)
+    {
+      if (null == edge)
+        throw new ArgumentNullException(nameof(edge));
+      maxDeviation = Line.Unset;
+      Line deviation = Line.Unset;
+      int why = 0;
+      IntPtr ptr_brep;
+      using (var simpleKnots = new SimpleArrayDouble(knots ?? new double[0]))
+      {
+        ptr_brep = UnsafeNativeMethods.RHC_RhinoRefitTrimEdge(ConstPointer(), edge.ConstPointer(), simpleKnots.ConstPointer(),
+          degree, bezierSections, tolerance, ref deviation, ref why);
+      }
+      GC.KeepAlive(edge);
+      GC.KeepAlive(this);
+      failure = (RefitTrimFailure)why;
+      if (IntPtr.Zero == ptr_brep)
+        return null;
+      if (deviation.From.IsValid && deviation.To.IsValid)
+        maxDeviation = deviation;
+      return new Brep(ptr_brep, null);
     }
 
     /// <summary>
@@ -6948,6 +8838,32 @@ namespace Rhino.Geometry
         return PointFaceRelation.Interior;
       return 2 == rc ? PointFaceRelation.Boundary : PointFaceRelation.Exterior;
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Tries to get a 3-D point that is comfortably in the interior of this face,
+    /// which is useful for face labeling and for face classification.
+    /// </summary>
+    /// <param name="point">The interior point if successful.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <remarks>
+    /// The returned point is not necessarily the point on the face that is
+    /// furthest away from the face's boundary. It is just a point that is
+    /// relatively far away from all of the face's trimming curves.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetInteriorPoint(out Point3d point)
+    {
+      point = Point3d.Unset;
+      IntPtr ptr_const_brep = m_brep.ConstPointer();
+      bool rc = UnsafeNativeMethods.TL_Brep_FaceInteriorPoint(ptr_const_brep, FaceIndex, RhinoMath.SqrtEpsilon, ref point);
+      GC.KeepAlive(m_brep);
+      if (!rc)
+        point = Point3d.Unset;
+      return rc;
+    }
+#endif
 
     /// <summary>
     /// Gets intervals where the iso curve exists on a BrepFace (trimmed surface)
@@ -7741,6 +9657,521 @@ namespace Rhino.Geometry
       return IntPtr.Zero;
     }
   }
+
+  /// <summary>
+  /// Boolean operations on Breps that report which inputs produced each result.
+  /// </summary>
+  /// <remarks>
+  /// Overlapping cutters are unioned into one, so a difference credits both of them even when
+  /// only one reached the input.
+  ///
+  /// An input consumed entirely is usually reported by its absence, because no result
+  /// describes it. Absence is not proof of consumption: a non-manifold Brep when manifoldOnly
+  /// is true, and every input of a failed operation, are also absent. Less often the kernel
+  /// does return a result for it, carrying <see cref="BrepBooleanOutcome.Removed"/> and a null
+  /// Brep, so a caller must handle both forms.
+  ///
+  /// The reported indices are positions in the sequence passed in, so these methods reject a
+  /// null element with <see cref="ArgumentException"/> rather than skipping it and renumbering
+  /// the elements after it. That is stricter than the <see cref="Brep"/> CreateBoolean
+  /// methods, which drop nulls silently and report no indices.
+  /// </remarks>
+
+// The Brep Boolean helpers use RHINO_SDK-only types (BrepBooleanOutcome) and
+// RHC_* exports, so they are excluded from the stand-alone opennurbs (Rhino3dm) build.
+#if RHINO_SDK
+  // Internal until B Cook, D Rutten, J Kennedy and S Baer can review the following issues:
+  //
+  // First, a flat int[] cannot express the results. Three things in the kernel prevent it:
+  //
+  // 1. Input-side merging: both sets are unioned before the Boolean operation runs, and
+  //    individual members of a set lose their separate identity at that step.
+  //    * An input lying entirely inside another is absorbed and contributes no geometry. Its
+  //      slot would have to be -1, its own removed entry, or the index of the input that
+  //      absorbed it.
+  //    * Overlapping cutters are merged into one, so a difference credits both even when only
+  //      one reached the input. A second source of the same problem.
+  //
+  // 2. Output-side splitting: a result that consists of several disconnected pieces is
+  //    separated into one result per piece, and each piece receives a copy of the whole
+  //    provenance list.
+  //    * One input can belong to several results. A Brep holding two disjoint shells produces
+  //      one result per shell, and a flat map has one slot for them.
+  //    * A result can credit an input it never touched, because the provenance is copied
+  //      before anything checks which piece the geometry reached. The answer is a superset
+  //      presented as exact.
+  //    * The BooleanUnion command splits its outputs again after the kernel finishes, so at
+  //      command level one input maps to more objects still.
+  //
+  // 3. Absence: an input consumed entirely does not appear in the results, so it belongs to no
+  //    index and the format cannot record why. A caller would see removed in all these cases:
+  //    * Input-side absorption: one Brep absorbed by another when the set is unioned
+  //    * Output-side absorption: a Brep consumed by another during the user's operation
+  //    * Intersected nothing - met no member of the second set
+  //    * Never entered the operation - filtered by bManifoldOnly, or skipped by
+  //      TL_Brep::Promote
+  //    * Its Boolean failed
+  //
+  // Second, TL has a defect: when a Brep holds two disjoint shells and only one of them
+  // overlaps another Brep, a union silently drops the non-overlapping shell. See the test
+  // command TestBooleanUnionDropsShell.
+  //
+  internal static class BrepBoolean
+  {
+    /// <summary>
+    /// Computes the Boolean union of a set of Breps.
+    /// </summary>
+    /// <param name="breps">Breps to union.</param>
+    /// <param name="tolerance">Tolerance to use for the union operation.</param>
+    /// <param name="manifoldOnly">If true, non-manifold input Breps are ignored.</param>
+    /// <param name="stopOnFirstError">
+    /// If false, keep going after a failure and process as many of the inputs as possible.
+    /// </param>
+    /// <param name="tryLooserTolerance">
+    /// If true, an operation that fails at <paramref name="tolerance"/> is attempted again at
+    /// twice it, and <see cref="BrepBooleanResults.RaisedTolerance"/> reports whether that
+    /// happened. Pass false to keep the result at the tolerance asked for.
+    /// </param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// A union input lying entirely inside another input is absorbed by it and contributes
+    /// no geometry. The Boolean kernel does not record which result absorbed it, so it
+    /// produces no result of its own and is not credited to the result that swallowed it.
+    ///
+    /// An input whose shells are disjoint yields one result per shell, each naming that input
+    /// and each reporting <see cref="BrepBooleanOutcome.Divided"/>. None of them is the whole
+    /// input.
+    /// </remarks>
+    public static BrepBooleanResults Union(IEnumerable<Brep> breps, double tolerance, bool manifoldOnly, bool stopOnFirstError, bool tryLooserTolerance)
+    {
+      if (breps == null) { throw new ArgumentNullException(nameof(breps)); }
+
+      using (var input = new SimpleArrayBrepPointer())
+      {
+        AddAll(input, breps, nameof(breps));
+
+        IntPtr const_ptr_input = input.ConstPointer();
+        IntPtr ptr_results = UnsafeNativeMethods.RHC_BrepBooleanResults_Union(const_ptr_input, tolerance, manifoldOnly, stopOnFirstError, tryLooserTolerance);
+        GC.KeepAlive(breps);
+
+        return BrepBooleanResults.FromNativePointer(ptr_results);
+      }
+    }
+
+    /// <summary>
+    /// Computes the Boolean union of a set of Breps.
+    /// </summary>
+    /// <param name="breps">Breps to union.</param>
+    /// <param name="tolerance">Tolerance to use for the union operation.</param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// Matches what <see cref="Brep.CreateBooleanUnion(IEnumerable{Brep}, double)"/> does
+    /// reporting which inputs produced each result on top of it.
+    ///
+    /// Unlike the <see cref="Intersection(Brep, IEnumerable{Brep}, double)"/> and
+    /// <see cref="Difference(Brep, IEnumerable{Brep}, double)"/> short overloads, this one does
+    /// not retry at twice <paramref name="tolerance"/>, because CreateBooleanUnion does not
+    /// either. Use the longer overload to ask for the retry. The rule these short overloads
+    /// follow is the behaviour of the matching Brep.CreateBoolean method, which is not the same
+    /// flag in every case.
+    /// </remarks>
+    public static BrepBooleanResults Union(IEnumerable<Brep> breps, double tolerance)
+    {
+      return Union(breps, tolerance, true, true, false);
+    }
+
+    /// <summary>
+    /// Computes the solid intersection of two sets of Breps.
+    /// </summary>
+    /// <param name="firstSet">First set of Breps.</param>
+    /// <param name="secondSet">Second set of Breps.</param>
+    /// <param name="tolerance">Tolerance to use for the intersection operation.</param>
+    /// <param name="manifoldOnly">If true, non-manifold input Breps are ignored.</param>
+    /// <param name="stopOnFirstError">
+    /// If false, keep going after a failure and process as many of the inputs as possible.
+    /// </param>
+    /// <param name="tryLooserTolerance">
+    /// If true, an operation that fails at <paramref name="tolerance"/> is attempted again at
+    /// twice it, and <see cref="BrepBooleanResults.RaisedTolerance"/> reports whether that
+    /// happened. Pass false to keep the result at the tolerance asked for.
+    /// </param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// A result with an empty <see cref="BrepBooleanResult.SecondSetIndices"/> was not sliced:
+    /// <paramref name="secondSet"/> enclosed it. That is usually the whole of an input from
+    /// <paramref name="firstSet"/>, but it can also be one shell of a multi-shell input whose
+    /// other shells the intersection removed. Both report
+    /// <see cref="BrepBooleanOutcome.Unchanged"/>, because the first set is unioned before
+    /// intersecting and the division is not visible afterwards, so compare the geometry against
+    /// the input if you need to tell them apart.
+    ///
+    /// An input that meets nothing in the other set
+    /// intersects to nothing, so it usually produces no result at all and is named by no
+    /// entry in <see cref="BrepBooleanResults.Results"/>. That applies to both sets: a member of
+    /// <paramref name="secondSet"/> that meets nothing is reported nowhere either.
+    ///
+    /// Intersecting is symmetric in geometry but these results are not.
+    /// <see cref="BrepBooleanResult.Outcome"/> describes what happened to
+    /// <paramref name="firstSet"/>. A Brep in <paramref name="secondSet"/> lying entirely
+    /// inside <paramref name="firstSet"/> comes back whole, but reports
+    /// <see cref="BrepBooleanOutcome.Modified"/> with an empty
+    /// <see cref="BrepBooleanResult.FirstSetIndices"/>, where the same pair passed the
+    /// other way round reports <see cref="BrepBooleanOutcome.Unchanged"/>. Read the index
+    /// arrays rather than the outcome when that distinction matters.
+    ///
+    /// The solid orientation of the Breps makes a difference when calling this function.
+    /// </remarks>
+    public static BrepBooleanResults Intersection(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool manifoldOnly, bool stopOnFirstError, bool tryLooserTolerance)
+    {
+      return TwoSetHelper(firstSet, secondSet, tolerance, manifoldOnly, stopOnFirstError, tryLooserTolerance, true);
+    }
+
+    /// <summary>
+    /// Computes the solid intersection of a Brep with a set of Breps.
+    /// </summary>
+    /// <param name="brep">The Brep to intersect.</param>
+    /// <param name="others">The Breps to intersect it with.</param>
+    /// <param name="tolerance">Tolerance to use for the intersection operation.</param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// Retries at twice <paramref name="tolerance"/> if the intersection fails, matching what
+    /// <see cref="Brep.CreateBooleanIntersection(IEnumerable{Brep}, IEnumerable{Brep}, double)"/>
+    /// does. Use the longer overload to decline that.
+    /// </remarks>
+    public static BrepBooleanResults Intersection(Brep brep, IEnumerable<Brep> others, double tolerance)
+    {
+      if (brep == null) { throw new ArgumentNullException(nameof(brep)); }
+
+      return Intersection(new[] { brep }, others, tolerance, true, true, true);
+    }
+
+    /// <summary>
+    /// Computes the solid difference of two sets of Breps.
+    /// </summary>
+    /// <param name="firstSet">First set of Breps (the set to subtract from).</param>
+    /// <param name="secondSet">Second set of Breps (the set to subtract).</param>
+    /// <param name="tolerance">Tolerance to use for the difference operation.</param>
+    /// <param name="manifoldOnly">If true, non-manifold input Breps are ignored.</param>
+    /// <param name="stopOnFirstError">
+    /// If false, keep going after a failure and process as many of the inputs as possible.
+    /// </param>
+    /// <param name="tryLooserTolerance">
+    /// If true, an operation that fails at <paramref name="tolerance"/> is attempted again at
+    /// twice it, and <see cref="BrepBooleanResults.RaisedTolerance"/> reports whether that
+    /// happened. Pass false to keep the result at the tolerance asked for.
+    /// </param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// A result with an empty <see cref="BrepBooleanResult.SecondSetIndices"/> is an input 
+    /// no cutter reached. An input the cutters removed entirely usually produces no result at
+    /// all, so it is named by no entry in <see cref="BrepBooleanResults.Results"/>, though the
+    /// kernel does sometimes hand one back carrying
+    /// <see cref="BrepBooleanOutcome.Removed"/> and a null Brep.
+    /// </remarks>
+    public static BrepBooleanResults Difference(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool manifoldOnly, bool stopOnFirstError, bool tryLooserTolerance)
+    {
+      return TwoSetHelper(firstSet, secondSet, tolerance, manifoldOnly, stopOnFirstError, tryLooserTolerance, false);
+    }
+
+    /// <summary>
+    /// Subtracts a set of cutters from a single Brep.
+    /// </summary>
+    /// <param name="brep">The Brep to subtract from.</param>
+    /// <param name="cutters">The Breps to subtract.</param>
+    /// <param name="tolerance">Tolerance to use for the difference operation.</param>
+    /// <returns>The results of the operation, never null.</returns>
+    /// <remarks>
+    /// A single result reporting <see cref="BrepBooleanOutcome.Unchanged"/> means no cutter
+    /// reached the Brep. No result at all, or one reporting
+    /// <see cref="BrepBooleanOutcome.Removed"/>, means the cutters consumed it entirely, or
+    /// that the operation could not process it, which
+    /// <see cref="BrepBooleanResults.Succeeded"/> and
+    /// <see cref="BrepBooleanResults.Failures"/> tell apart.
+    ///
+    /// Retries at twice <paramref name="tolerance"/> if the difference fails, matching what
+    /// <see cref="Brep.CreateBooleanDifference(IEnumerable{Brep}, IEnumerable{Brep}, double)"/>
+    /// does. Use the longer overload to decline that.
+    /// </remarks>
+    public static BrepBooleanResults Difference(Brep brep, IEnumerable<Brep> cutters, double tolerance)
+    {
+      if (brep == null) { throw new ArgumentNullException(nameof(brep)); }
+
+      return Difference(new[] { brep }, cutters, tolerance, true, true, true);
+    }
+
+    // SimpleArrayBrepPointer.Add ignores a null Brep, which would hand the native side a
+    // shorter array than the caller passed and shift the reported index of everything
+    // after the gap. Those indices are the reason this class exists, so a null is refused
+    // rather than silently renumbering the inputs that follow it. This is stricter than
+    // the Brep.CreateBoolean methods, which drop nulls and report no indices at all.
+    static void AddAll(SimpleArrayBrepPointer array, IEnumerable<Brep> breps, string paramName)
+    {
+      int index = 0;
+
+      foreach (var brep in breps)
+      {
+        if (brep == null)
+        {
+          throw new ArgumentException(
+            string.Format("Null Brep at index {0}. The reported indices are positions in this sequence, so it cannot contain nulls.", index),
+            paramName);
+        }
+
+        array.Add(brep, true);
+        index++;
+      }
+    }
+
+    static BrepBooleanResults TwoSetHelper(IEnumerable<Brep> firstSet, IEnumerable<Brep> secondSet, double tolerance, bool manifoldOnly, bool stopOnFirstError, bool tryLooserTolerance, bool intersection)
+    {
+      if (firstSet == null) { throw new ArgumentNullException(nameof(firstSet)); }
+      if (secondSet == null) { throw new ArgumentNullException(nameof(secondSet)); }
+
+      using (var input_set1 = new SimpleArrayBrepPointer())
+      using (var input_set2 = new SimpleArrayBrepPointer())
+      {
+        AddAll(input_set1, firstSet, nameof(firstSet));
+        AddAll(input_set2, secondSet, nameof(secondSet));
+
+        IntPtr const_ptr_inputset1 = input_set1.ConstPointer();
+        IntPtr const_ptr_inputset2 = input_set2.ConstPointer();
+
+        IntPtr ptr_results = intersection
+          ? UnsafeNativeMethods.RHC_BrepBooleanResults_Intersection(const_ptr_inputset1, const_ptr_inputset2, tolerance, manifoldOnly, stopOnFirstError, tryLooserTolerance)
+          : UnsafeNativeMethods.RHC_BrepBooleanResults_Difference(const_ptr_inputset1, const_ptr_inputset2, tolerance, manifoldOnly, stopOnFirstError, tryLooserTolerance);
+
+        GC.KeepAlive(firstSet);
+        GC.KeepAlive(secondSet);
+
+        return BrepBooleanResults.FromNativePointer(ptr_results);
+      }
+    }
+  }
+
+  /// <summary>
+  /// One result of a Boolean operation on Breps, along with which inputs produced it.
+  /// </summary>
+  /// <remarks>
+  /// An input that no cutter reached and an input that was consumed entirely both come back
+  /// as an empty set of Breps, so the resulting geometry alone cannot tell the two apart.
+  /// That is what <see cref="Outcome"/> and the index properties are for.
+  /// </remarks>
+  // Internal for the reasons given on BrepBoolean above.
+  internal class BrepBooleanResult
+  {
+    internal BrepBooleanResult(Brep brep, BrepBooleanOutcome outcome, bool success, int[] firstSetIndices, int[] secondSetIndices, Point3d[] nakedEdgePoints, Point3d[] badIntersectionPoints, Point3d[] nonManifoldEdgePoints)
+    {
+      Brep = brep;
+      Outcome = outcome;
+      Success = success;
+      FirstSetIndices = firstSetIndices;
+      SecondSetIndices = secondSetIndices;
+      NakedEdgePoints = nakedEdgePoints;
+      BadIntersectionPoints = badIntersectionPoints;
+      NonManifoldEdgePoints = nonManifoldEdgePoints;
+    }
+
+    /// <summary>
+    /// The resulting Brep. Null when <see cref="Outcome"/> is
+    /// <see cref="BrepBooleanOutcome.Removed"/>, and for every entry in
+    /// <see cref="BrepBooleanResults.Failures"/>.
+    /// </summary>
+    public Brep Brep { get; }
+
+    /// <summary>
+    /// How the operation treated the inputs named by <see cref="FirstSetIndices"/> and
+    /// <see cref="SecondSetIndices"/>.
+    /// </summary>
+    /// <remarks>
+    /// Stated from the first set's point of view. A result built only from second-set
+    /// material reports <see cref="BrepBooleanOutcome.Modified"/> even when nothing
+    /// reshaped it, so use the index arrays rather than this when what matters is which
+    /// inputs a result came from.
+    /// </remarks>
+    public BrepBooleanOutcome Outcome { get; }
+
+    /// <summary>
+    /// False if the Boolean operation failed, in which case the point properties may say where.
+    /// </summary>
+    public bool Success { get; }
+
+    /// <summary>
+    /// Indices into the first set of input Breps that produced this result. Never null.
+    /// </summary>
+    /// <remarks>
+    /// If two cutters overlap each other they are unioned into one, and differencing then
+    /// credits both of them even when only one of them reached the input.
+    /// </remarks>
+    public int[] FirstSetIndices { get; }
+
+    /// <summary>
+    /// Indices into the second set of input Breps that produced this result. Never null, and
+    /// always empty for a union, which takes a single set of inputs.
+    /// </summary>
+    public int[] SecondSetIndices { get; }
+
+    /// <summary>
+    /// If the Boolean failed because an intersection hit a naked edge, a point where the
+    /// intersection hits the edge. Never null.
+    /// </summary>
+    public Point3d[] NakedEdgePoints { get; }
+
+    /// <summary>
+    /// If the Boolean failed because an intersection ends on the interior of both surfaces, a
+    /// point there. This happens when the surface intersector fails. Never null.
+    /// </summary>
+    public Point3d[] BadIntersectionPoints { get; }
+
+    /// <summary>
+    /// If the Boolean failed because an intersection hit a non-manifold edge, a point where
+    /// the intersection hits the edge. Never null.
+    /// </summary>
+    public Point3d[] NonManifoldEdgePoints { get; }
+  }
+
+  /// <summary>
+  /// The results of a Boolean operation on Breps.
+  /// </summary>
+  // Internal for the reasons given on BrepBoolean above.
+  internal class BrepBooleanResults
+  {
+    static readonly BrepBooleanResult[] EmptyResults = new BrepBooleanResult[0];
+
+    BrepBooleanResults(bool succeeded, bool somethingHappened, bool raisedTolerance, BrepBooleanResult[] results, BrepBooleanResult[] failures)
+    {
+      Succeeded = succeeded;
+      SomethingHappened = somethingHappened;
+      RaisedTolerance = raisedTolerance;
+      Results = results;
+      Failures = failures;
+    }
+
+    /// <summary>
+    /// False if the operation errored out.
+    /// </summary>
+    public bool Succeeded { get; }
+
+    /// <summary>
+    /// True if any of the Breps had intersecting faces.
+    /// </summary>
+    /// <remarks>
+    /// This cannot distinguish an input no cutter reached from an input that was consumed
+    /// entirely, since it is false in both cases. Use <see cref="BrepBooleanResult.Outcome"/>
+    /// for that.
+    /// </remarks>
+    public bool SomethingHappened { get; }
+
+    /// <summary>
+    /// True if the operation failed at the requested tolerance but succeeded at twice it, in
+    /// which case the results were built to that looser tolerance. Always false when the
+    /// operation was asked not to try a looser tolerance.
+    /// </summary>
+    public bool RaisedTolerance { get; }
+
+    /// <summary>
+    /// The successful results. Never null.
+    /// </summary>
+    public BrepBooleanResult[] Results { get; }
+
+    /// <summary>
+    /// Failure information for inputs the Boolean could not process. Never null.
+    /// </summary>
+    /// <remarks>
+    /// Stopping on the first error still reports that error here, so this holds at most one
+    /// entry in that case and may hold several when the operation was asked to keep going.
+    /// These entries report <see cref="BrepBooleanOutcome.Unset"/>, since an input the
+    /// operation could not process was not left alone, reshaped or removed.
+    /// </remarks>
+    public BrepBooleanResult[] Failures { get; }
+
+    // Reads everything out of the native results and frees them, so nothing unmanaged
+    // outlives this call.
+    internal static BrepBooleanResults FromNativePointer(IntPtr ptrResults)
+    {
+      if (ptrResults == IntPtr.Zero)
+        return new BrepBooleanResults(false, false, false, EmptyResults, EmptyResults);
+
+      try
+      {
+        bool succeeded = UnsafeNativeMethods.RHC_BrepBooleanResults_Succeeded(ptrResults);
+        bool something_happened = UnsafeNativeMethods.RHC_BrepBooleanResults_SomethingHappened(ptrResults);
+        bool raised_tolerance = UnsafeNativeMethods.RHC_BrepBooleanResults_RaisedTolerance(ptrResults);
+
+        return new BrepBooleanResults(
+          succeeded,
+          something_happened,
+          raised_tolerance,
+          ReadAll(ptrResults, false),
+          ReadAll(ptrResults, true));
+      }
+      finally
+      {
+        UnsafeNativeMethods.RHC_BrepBooleanResults_Delete(ptrResults);
+      }
+    }
+
+    static BrepBooleanResult[] ReadAll(IntPtr ptrResults, bool failures)
+    {
+      int count = UnsafeNativeMethods.RHC_BrepBooleanResults_Count(ptrResults, failures);
+      if (count < 1)
+        return EmptyResults;
+
+      var rc = new BrepBooleanResult[count];
+      for (int i = 0; i < count; i++)
+        rc[i] = ReadOne(ptrResults, failures, i);
+
+      return rc;
+    }
+
+    static BrepBooleanResult ReadOne(IntPtr ptrResults, bool failures, int index)
+    {
+      var outcome = UnsafeNativeMethods.RHC_BrepBooleanResults_Outcome(ptrResults, failures, index);
+      bool success = UnsafeNativeMethods.RHC_BrepBooleanResults_Success(ptrResults, failures, index);
+
+      // Null for a Removed result and for every failure
+      IntPtr ptr_brep = UnsafeNativeMethods.RHC_BrepBooleanResults_HarvestBrep(ptrResults, failures, index);
+
+      Brep brep = null;
+      if (ptr_brep != IntPtr.Zero)
+      {
+        GeometryBase geometry = GeometryBase.CreateGeometryHelper(ptr_brep, null);
+        brep = geometry as Brep;
+
+        // A wrapper the helper made owns ptr_brep, so deleting it is ours to do only when it
+        // made none.
+        if (geometry == null)
+          UnsafeNativeMethods.ON_Object_Delete(ptr_brep);
+      }
+
+      using (var first_set = new SimpleArrayInt())
+      using (var second_set = new SimpleArrayInt())
+      using (var naked_edge_points = new SimpleArrayPoint3d())
+      using (var bad_intersection_points = new SimpleArrayPoint3d())
+      using (var non_manifold_edge_points = new SimpleArrayPoint3d())
+      {
+        UnsafeNativeMethods.RHC_BrepBooleanResults_GetIndices(ptrResults, failures, index, false, first_set.NonConstPointer());
+        UnsafeNativeMethods.RHC_BrepBooleanResults_GetIndices(ptrResults, failures, index, true, second_set.NonConstPointer());
+        UnsafeNativeMethods.RHC_BrepBooleanResults_GetPoints(
+          ptrResults,
+          failures,
+          index,
+          naked_edge_points.NonConstPointer(),
+          bad_intersection_points.NonConstPointer(),
+          non_manifold_edge_points.NonConstPointer());
+
+        return new BrepBooleanResult(
+          brep,
+          outcome,
+          success,
+          first_set.ToArray(),
+          second_set.ToArray(),
+          naked_edge_points.ToArray(),
+          bad_intersection_points.ToArray(),
+          non_manifold_edge_points.ToArray());
+      }
+    }
+  }
+#endif
 }
 
 namespace Rhino.Geometry.Collections
@@ -8040,30 +10471,64 @@ namespace Rhino.Geometry.Collections
 
     /// <summary>
     /// Splits all of the faces of a Brep at tangent locations.
+    /// The face surfaces will be split at locations of curvature discontinuities with constant tangents.
     /// </summary>
     /// <returns>True if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public bool SplitFacesAtTangents()
     {
+      return SplitFacesAtTangents(true);
+    }
+
+    /// <summary>
+    /// Splits all of the faces of a Brep at tangent locations.
+    /// </summary>
+    /// <param name="aggressiveMode">
+    /// If aggressive mode is true, the face surfaces will be split at locations of curvature discontinuities with constant tangents.
+    /// If aggressive mode is false, only split when the curvature change is from no curvature to some curvature or when the curvature vector directions are opposite.
+    /// </param>
+    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>9.0</since>
+    public bool SplitFacesAtTangents(bool aggressiveMode)
+    {
+
       IntPtr ptr_brep = m_brep.NonConstPointer();
-      bool rc = UnsafeNativeMethods.RHC_RhinoSplitFacesAtTangents(ptr_brep);
+      bool rc = UnsafeNativeMethods.RHC_RhinoSplitFacesAtTangents(ptr_brep, aggressiveMode);
       GC.KeepAlive(m_brep);
       return rc;
     }
 
     /// <summary>
     /// Splits the face of a Brep at tangent locations.
+    /// The face surface will be split at locations of curvature discontinuities with constant tangents.
     /// </summary>
     /// <param name="faceIndex">The index of the face to split.</param>
     /// <returns>True if successful, false otherwise.</returns>
     /// <since>6.0</since>
     public bool SplitFaceAtTangents(int faceIndex)
     {
+      return SplitFaceAtTangents(faceIndex, true);
+    }
+
+    /// <summary>
+    /// Splits the face of a Brep at tangent locations.
+    /// The face surface will be split at locations of curvature discontinuities with constant tangents.
+    /// </summary>
+    /// <param name="faceIndex">The index of the face to split.</param>
+    /// <param name="aggressiveMode">
+    /// If aggressive mode is true, the face surface will be split at locations of curvature discontinuities with constant tangents.
+    /// If aggressive mode is false, only split when the curvature change is from no curvature to some curvature or when the curvature vector directions are opposite.
+    /// </param>    /// <returns>True if successful, false otherwise.</returns>
+    /// <since>6.0</since>
+    public bool SplitFaceAtTangents(int faceIndex, bool aggressiveMode)
+    {
       IntPtr ptr_brep = m_brep.NonConstPointer();
-      bool rc = UnsafeNativeMethods.RHC_RhinoSplitFaceAtTangents(ptr_brep, faceIndex);
+      bool rc = UnsafeNativeMethods.RHC_RhinoSplitFaceAtTangents(ptr_brep, faceIndex, aggressiveMode);
       GC.KeepAlive(m_brep);
       return rc;
     }
+
+
 #endif
 
     /// <summary>

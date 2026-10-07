@@ -1,9 +1,9 @@
+using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Rhino.Runtime;
-using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
@@ -46,147 +46,565 @@ namespace Rhino.Geometry
   }
 
   /// <summary>
-  /// Maintains computed information for surface curvature evaluation.
+  /// Curvature style
   /// </summary>
-  public class SurfaceCurvature
+  /// <remarks>
+  /// These values mirror openNURBS and differ from the CurvatureStyle of
+  /// Rhino.ApplicationSettings.CurvatureAnalysisSettings, which mirrors the
+  /// curvature analysis settings of the application. Casting one to the other
+  /// selects the wrong style.
+  /// </remarks>
+  /// <since>9.0</since>
+  public enum CurvatureStyle : int
+  {
+    /// <summary>
+    /// None
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Gaussian curvature
+    /// </summary>
+    GaussianCurvature = 1,
+    /// <summary>
+    /// Unsigned mean curvature
+    /// </summary>
+    MeanCurvature = 2,
+    /// <summary>
+    /// Minimum unsigned radius of curvature
+    /// </summary>
+    MinimumCurvature = 3,
+    /// <summary>
+    /// Maximum unsigned radius of curvature
+    /// </summary>
+    MaximumCurvature = 4
+  }
+
+  /// <summary>
+  /// Maintains computed information for principal surface curvature evaluation.
+  /// </summary>
+  public class SurfaceCurvature : IDisposable, IEquatable<SurfaceCurvature>, IComparable<SurfaceCurvature>
   {
     #region members
-    private readonly Point2d m_uv;
-    private Point3d m_point;
-    private Vector3d m_normal;
-    private Vector3d m_dir1;
-    private Vector3d m_dir2;
-
-    private double m_gauss;
-    private double m_mean;
-    private double m_kappa1;
-    private double m_kappa2;
+    // ON_SurfaceCurvature*
+    private IntPtr m_ptr = IntPtr.Zero;
+    // ON_Surface::Ev2Der
+    internal Point2d m_uv = Point2d.Unset;
+    internal Point3d m_point = Point3d.Unset;
+    internal Vector3d m_normal = Vector3d.Unset;
+    internal Vector3d m_dir1 = Vector3d.Unset;
+    internal Vector3d m_dir2 = Vector3d.Unset;
     #endregion
 
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this object.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    internal IntPtr ConstPointer() => m_ptr;
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this object.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    internal IntPtr NonConstPointer() => m_ptr;
+
     #region constructors
-    private SurfaceCurvature(double u, double v)
+
+    /// <summary>
+    /// Internal constructor
+    /// </summary>
+    internal SurfaceCurvature(IntPtr ptr)
     {
-      m_uv = new Point2d(u, v);
+      m_ptr = ptr;
     }
-    internal static SurfaceCurvature _FromSurfacePointer(IntPtr pConstSurface, double u, double v)
+
+    /// <summary>
+    /// Default constructs a new surface curvature object.
+    /// Both kappa1 and kappa2 are zero.
+    /// </summary>
+    /// <since>9.0</since>
+    public SurfaceCurvature()
     {
-      if (IntPtr.Zero == pConstSurface)
+      m_ptr = UnsafeNativeMethods.ON_SurfaceCurvature_New(IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Create a SurfaceCurvature from by evaluating surface and a u,v parameter.
+    /// </summary>
+    /// <param name="surface">The surface to evaluate.</param>
+    /// <param name="u">A U parameter.</param>
+    /// <param name="v">A V parameter.</param>
+    /// <returns>A SurfaceCurvature if successful, null otherwise.</returns>
+    /// <since>9.0</since>
+    public static SurfaceCurvature CreateFromSurface(Surface surface, double u, double v)
+    {
+      if (null == surface)
         return null;
 
-      SurfaceCurvature rc = new SurfaceCurvature(u, v);
+      IntPtr ptr_const_surface = surface.ConstPointer();
+      Point3d point = Point3d.Unset;
+      Vector3d normal = Vector3d.Unset;
+      Vector3d dir1 = Vector3d.Unset;
+      Vector3d dir2 = Vector3d.Unset;
 
-      if (!UnsafeNativeMethods.ON_Surface_EvCurvature(pConstSurface, u, v,
-                                                     ref rc.m_point, ref rc.m_normal,
-                                                     ref rc.m_dir1, ref rc.m_dir2,
-                                                     ref rc.m_gauss, ref rc.m_mean,
-                                                     ref rc.m_kappa1, ref rc.m_kappa2))
+      IntPtr ptr = UnsafeNativeMethods.ON_Surface_EvCurvature(ptr_const_surface, u, v, ref point, ref normal, ref dir1, ref dir2);
+      if (ptr != IntPtr.Zero)
       {
-        rc = null;
+        SurfaceCurvature rc = new SurfaceCurvature(ptr)
+        {
+          m_uv = new Point2d(u, v),
+          m_point = point,
+          m_normal = normal,
+          m_dir1 = dir1,
+          m_dir2 = dir2
+        };
+        return rc;
       }
-
-      return rc;
+      return null;
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Create a SurfaceCurvature by evaluating a SubD's surface (its limit
+    /// surface) at a surface parameter.
+    /// </summary>
+    /// <param name="subd">The SubD to evaluate.</param>
+    /// <param name="parameter">The surface parameter to evaluate.</param>
+    /// <returns>A SurfaceCurvature if successful, null otherwise.</returns>
+    /// <remarks>
+    /// A SubD limit surface is C1 but generally not C2 exactly on an
+    /// extraordinary vertex, so it has no curvature there and this returns null.
+    /// Everywhere else, including throughout the corner quad of an extraordinary
+    /// vertex, the curvature exists.
+    ///
+    /// Use the overload that takes a
+    /// <see cref="SubD.ExtraordinaryVertexCurvature"/> to get an estimate at
+    /// those vertices instead of nothing.
+    ///
+    /// <see cref="UVPoint"/> is the face corner parameter, since that is what
+    /// parameterizes a SubD surface. See
+    /// <see cref="SubDComponentParameter.FaceCornerParameters"/>.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static SurfaceCurvature CreateFromSubD(SubD subd, SubDComponentParameter parameter)
+    {
+      return CreateFromSubD(subd, parameter, SubD.ExtraordinaryVertexCurvature.None);
+    }
+
+    /// <summary>
+    /// Create a SurfaceCurvature by evaluating a SubD's surface (its limit
+    /// surface) at a surface parameter, choosing what to report exactly on an
+    /// extraordinary vertex.
+    /// </summary>
+    /// <param name="subd">The SubD to evaluate.</param>
+    /// <param name="parameter">The surface parameter to evaluate.</param>
+    /// <param name="extraordinaryVertexCurvature">
+    /// What to report when the parameter is exactly on an extraordinary vertex,
+    /// where the limit surface has no curvature of its own. This changes nothing
+    /// anywhere else, including inside such a vertex's corner quad.
+    /// </param>
+    /// <returns>A SurfaceCurvature if successful, null otherwise.</returns>
+    /// <remarks>
+    /// With <see cref="SubD.ExtraordinaryVertexCurvature.SectorAverage"/> the
+    /// result at an extraordinary vertex is an average of the curvature around
+    /// it, so <see cref="Direction"/> is unset: an average has no single
+    /// principal direction. <see cref="Point"/> and <see cref="Normal"/> are the
+    /// vertex's own and are exact.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static SurfaceCurvature CreateFromSubD(
+      SubD subd,
+      SubDComponentParameter parameter,
+      SubD.ExtraordinaryVertexCurvature extraordinaryVertexCurvature)
+    {
+      if (null == subd)
+        return null;
+
+      Point3d point = Point3d.Unset;
+      Vector3d normal = Vector3d.Unset;
+      Vector3d dir1 = Vector3d.Unset;
+      Vector3d dir2 = Vector3d.Unset;
+      var kappa = new double[2] { RhinoMath.UnsetValue, RhinoMath.UnsetValue };
+
+      IntPtr ptr_const_subd = subd.ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubD_EvaluateSurfaceCurvature(
+        ptr_const_subd, parameter, (byte)extraordinaryVertexCurvature,
+        ref point, ref normal, kappa, ref dir1, ref dir2);
+      GC.KeepAlive(subd);
+      if (!rc)
+        return null;
+
+      SurfaceCurvature curvature = CreateFromPrincipalCurvatures(kappa[0], kappa[1]);
+      if (null == curvature)
+        return null;
+      curvature.m_uv = parameter.FaceCornerParameters;
+      curvature.m_point = point;
+      curvature.m_normal = normal;
+      curvature.m_dir1 = dir1;
+      curvature.m_dir2 = dir2;
+      return curvature;
+    }
+#endif
+
+    /// <summary>
+    /// Create a SurfaceCurvature from the principal curvature values.
+    /// The principal curvature values are the most fundamental curvature properties
+    /// of a surface. Other curvatures are calculated from them.
+    /// </summary>
+    /// <param name="kappa1"></param>
+    /// <param name="kappa2"></param>
+    /// <returns>A SurfaceCurvature if successful, null otherwise.</returns>
+    /// <since>9.0</since>
+    public static SurfaceCurvature CreateFromPrincipalCurvatures(double kappa1, double kappa2)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SurfaceCurvature_CreateFromPrincipalCurvatures(kappa1, kappa2);
+      return (ptr != IntPtr.Zero) ? new SurfaceCurvature(ptr) : null;
+    }
+
+    /// <summary>
+    /// Create a SurfaceCurvature from a gaussian and mean curvature values using the relationship between the principal curvatures, gaussian and mean:
+    /// kappa1 = mean + sqrt(mean*mean - gaussian)
+    /// kappa2 = mean - sqrt(mean*mean - gaussian)
+    /// If the radicand is negative, we assume we're dealing with a bit of numerical noise or estimates and set the principal curvatures:
+    /// kappa1 = kappa2 = sign(mean)*sqrt(gaussian)
+    /// </summary>
+    /// <param name="gaussianCurvature">Gaussian curvature = kappa1*kappa2 (product of principal curvatures).</param>
+    /// <param name="meanCurvature">Mean curvature = (kappa1+kappa2)/2 (average of principal curvatures).</param>
+    /// <returns>A SurfaceCurvature if successful, null otherwise.</returns>
+    /// <since>9.0</since>
+    public static SurfaceCurvature CreateFromGaussianAndMeanCurvatures(double gaussianCurvature, double meanCurvature)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_SurfaceCurvature_CreateFromGaussianAndMeanCurvatures(gaussianCurvature, meanCurvature);
+      return (ptr != IntPtr.Zero) ? new SurfaceCurvature(ptr) : null;
+    }
+
+    /// <summary>
+    /// Create a SurfaceCurvature from explicit principal curvatures and the geometric frame at the
+    /// evaluation point. Use this when you have already computed curvature data from a non-RhinoCommon
+    /// surface representation (planes, spheres, cylinders, cones, etc.).
+    /// </summary>
+    /// <param name="kappa1">Principal curvature with maximum absolute value. Must be a finite number.</param>
+    /// <param name="kappa2">Principal curvature with minimum absolute value. Must be a finite number.</param>
+    /// <param name="uv">The (u,v) parameter where the curvature was evaluated.</param>
+    /// <param name="frame">
+    /// Orthonormal frame at the evaluation point. The origin is the surface point,
+    /// the X axis is the principal direction associated with <paramref name="kappa1"/>,
+    /// the Y axis is the principal direction associated with <paramref name="kappa2"/>,
+    /// and the Z axis is the surface normal.
+    /// </param>
+    /// <returns>A SurfaceCurvature instance.</returns>
+    /// <exception cref="ArgumentException">Thrown when a curvature value is not finite, the uv parameter is invalid, or the frame is not a valid plane.</exception>
+    /// <since>9.0</since>
+    public static SurfaceCurvature Create(double kappa1, double kappa2, Point2d uv, Plane frame)
+    {
+      if (!RhinoMath.IsValidDouble(kappa1))
+        throw new ArgumentException("Value must be a finite number.", nameof(kappa1));
+      if (!RhinoMath.IsValidDouble(kappa2))
+        throw new ArgumentException("Value must be a finite number.", nameof(kappa2));
+      if (!uv.IsValid)
+        throw new ArgumentException("UV parameter is not valid.", nameof(uv));
+      if (!frame.IsValid)
+        throw new ArgumentException("Frame is not a valid plane.", nameof(frame));
+
+      IntPtr ptr = UnsafeNativeMethods.ON_SurfaceCurvature_CreateFromPrincipalCurvatures(kappa1, kappa2);
+      return new SurfaceCurvature(ptr)
+      {
+        m_uv = uv,
+        m_point = frame.Origin,
+        m_normal = frame.ZAxis,
+        m_dir1 = frame.XAxis,
+        m_dir2 = frame.YAxis
+      };
+    }
+
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <param name="other"> An object to compare with this object.</param>
+    /// <returns>true if the current object is equal to the other parameter; otherwise, false.</returns>
+    /// <since>9.0</since>
+    public bool Equals(SurfaceCurvature other)
+    {
+      return 0 == CompareTo(other);
+    }
+
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <param name="other"> An object to compare with this object.</param>
+    /// <returns>true if the current object is equal to the other parameter; otherwise, false.</returns>
+    /// <since>9.0</since>
+    public override bool Equals(object other)
+    {
+      SurfaceCurvature otherCurvature = other as SurfaceCurvature;
+      return otherCurvature != null && Equals(otherCurvature);
+    }
+
+    /// <summary>
+    /// Returns a runtime-stable hash code for this object.
+    /// </summary>
+    /// <returns>A non-unique integer that represents this SurfaceCurvature.</returns>
+    public override int GetHashCode()
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      return UnsafeNativeMethods.ON_SurfaceCurvature_DataCRC(ptr_const_this, 0);
+    }
+
+    /// <summary>
+    /// Compares the current instance with another object of the same type and returns
+    /// an integer that indicates whether the current instance precedes, follows, or
+    /// occurs in the same position in the sort order as the other object.
+    /// </summary>
+    /// <param name="other">An object to compare with this instance.</param>
+    /// <returns>
+    /// A value that indicates the relative order of the objects being compared. The
+    /// return value has these meanings:
+    /// Less than zero - this instance precedes other in the sort order.
+    /// Zero - this instance occurs in the same position in the sort order as other.
+    /// Greater than zero - this instance follows other in the sort order.
+    /// </returns>
+    /// <since>9.0</since>
+    public int CompareTo(SurfaceCurvature other)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_const_other = other.ConstPointer();
+      return UnsafeNativeMethods.ON_SurfaceCurvature_Compare(ptr_const_this, ptr_const_other);
+    }
+
     #endregion
 
     #region properties
-    /// <summary>
-    /// Gets the UV location where the curvature was computed.
+
+     /// <summary>
+    /// True if kappa1 and kappa2 are both valid finite values.
     /// </summary>
-    /// <since>5.0</since>
-    public Point2d UVPoint
+    /// <since>9.0</since>
+    public bool IsSet
     {
-      get { return m_uv; }
-    }
-    /// <summary>
-    /// Gets the surface point at UV.
-    /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
-    public Point3d Point
-    {
-      get { return m_point; }
-    }
-    /// <summary>
-    /// Gets the surface normal at UV.
-    /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
-    /// <since>5.0</since>
-    public Vector3d Normal
-    {
-      get { return m_normal; }
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SurfaceCurvature_IsSet(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
 
     /// <summary>
-    /// Gets the principal curvature direction vector.
+    /// True if both kappa1 and kappa2 are zero.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsZero
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SurfaceCurvature_IsZero(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// True if either of kappa1 or kappa2 is not a valid finite value.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsUnset
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SurfaceCurvature_IsUnset(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// True if either of kappa1 or kappa2 is NaN.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsNaN
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SurfaceCurvature_IsNan(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the u,v parameter where the surface curvature was evaluated.
+    /// </summary>
+    /// <since>5.0</since>
+    public Point2d UVPoint => m_uv;
+
+    /// <summary>
+    /// Gets the point at the u,v parameter where the surface curvature was evaluated.
+    /// </summary>
+    /// <since>5.0</since>
+    public Point3d Point => m_point;
+
+    /// <summary>
+    /// Gets the normal direction of the surface at the u,v parameter where the surface curvature was evaluated.
+    /// </summary>
+    /// <since>5.0</since>
+    public Vector3d Normal => m_normal;
+
+    /// <summary>
+    /// Gets the principal curvature direction vector at the u,v parameter where the surface curvature was evaluated..
     /// </summary>
     /// <param name="direction">Direction index, valid values are 0 and 1.</param>
     /// <returns>The specified direction vector.</returns>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
     /// <since>5.0</since>
-    public Vector3d Direction(int direction)
-    {
-      return direction == 0 ? m_dir1 : m_dir2;
-    }
+    public Vector3d Direction(int direction) => direction == 0 ? m_dir1 : m_dir2;
 
     /// <summary>
-    /// Gets the principal curvature values.
-    ///   Kappa(0) - Principal curvature with maximum absolute value
-    ///   Kappa(1) - Principal curvature with minimum absolute value
+    /// Gets the principal curvature values:
+    /// kappa1 - Principal curvature with maximum absolute value.
+    /// kappa2 - Principal curvature with minimum absolute value.
     /// </summary>
-    /// <param name="direction">Kappa index, valid values are 0 and 1.</param>
-    /// <returns>The specified kappa value.</returns>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
+    /// <param name="direction">Kappa index, valid values are 0 (kappa1) and 1 (kappa2).</param>
     /// <since>5.0</since>
     public double Kappa(int direction)
     {
-      return direction == 0 ? m_kappa1 : m_kappa2;
+      IntPtr ptr_const_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_SurfaceCurvature_Kappa(ptr_const_this, direction);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>
-    /// Gets the Gaussian curvature value at UV.
+    /// The Gaussian curvature is kappa1*kappa2.
     /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
+    /// <remarks>
+    /// If this is set, the Gausian curvature is returned.
+    /// Otherwise, the quiet NaN is returned.
+    /// </remarks>
     /// <since>5.0</since>
     public double Gaussian
     {
-      get { return m_gauss; }
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_GaussianCurvature(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
+
     /// <summary>
-    /// Gets the Mean curvature value at UV.
+    /// The mean curvature is (kappa1+kappa2)/2.
     /// </summary>
-    /// <example>
-    /// <code source='examples\vbnet\ex_principalcurvature.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_principalcurvature.cs' lang='cs'/>
-    /// <code source='examples\py\ex_principalcurvature.py' lang='py'/>
-    /// </example>
+    /// <remarks>
+    /// If this is set, the signed mean curvature is returned.
+    /// Otherwise, the quiet NaN is returned.
+    /// </remarks>
     /// <since>5.0</since>
     public double Mean
     {
-      get { return m_mean; }
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_MeanCurvature(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
     }
+
+    /// <summary>
+    /// The minimum radius of curvature is 1/max(fabs(kappa1),fabs(kappa2)).
+    /// Infinite radius values are returned as RhinoMath.InfiniteRadius.
+    /// </summary>
+    /// <since>9.0</since>
+    public double MinimumRadius
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_MinimumRadius(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// If a principal curvature value is zero or the principal curvatures have opposite signs,
+    /// then the maximum radius of curvature is infinite RhinoMath.InfiniteRadius is returned.
+    /// Otherwise the maximum radius of curvature is 1/min(fabs(kappa1),fabs(kappa2)).
+    /// </summary>
+    /// <since>9.0</since>
+    public double MaximumRadius
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_MaximumRadius(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// If set, the maximum of kapp1 and kappa2 returned.
+    /// Otherwise, the quiet NaN is returned.
+    /// </summary>
+    /// <since>9.0</since>
+    public double MaximumPrincipalCurvature
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_MaximumPrincipalCurvature(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// If set, the minimum of kappa1 and kappa2 returned.
+    /// Otherwise, the quiet NaN is returned.
+    /// </summary>
+    /// <since>9.0</since>
+    public double MinimumPrincipalCurvature
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SurfaceCurvature_MinimumPrincipalCurvature(ptr_const_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
     #endregion
 
     #region methods
+
+    /// <summary>
+    /// Calculate one of the four typical curvature values associated with the two principal
+    /// curvatures and frequently used in false color curvature analysis.
+    /// </summary>
+    /// <param name="curvatureStyle">
+    /// Specifies which type curvature value to calculate from the principal curvatures.
+    /// The Gausian curvature can be positive or negative. The other curvatures are unsigned.
+    /// </param>
+    /// <returns>
+    /// If curvature style and the principal curvatures are valid, the specified type of curvature value is returned.
+    /// Infinite radii are returned as RhinoMath.InfiniteRadius.
+    /// Otherwise, the quiet NaN is returned.
+    /// </returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public double KappaValue(CurvatureStyle curvatureStyle)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_SurfaceCurvature_KappaValue(ptr_const_this, (int)curvatureStyle);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
     /// <summary>
     /// Computes the osculating circle along the given direction.
     /// </summary>
@@ -197,16 +615,50 @@ namespace Rhino.Geometry
     public Circle OsculatingCircle(int direction)
     {
       if (Math.Abs(Kappa(direction)) < 1e-16 || Math.Abs(Kappa(direction)) > 1e16)
-      {
         return Circle.Unset;
-      }
+
       double r = 1.0 / Kappa(direction);
       Point3d pc = m_point + m_normal * r;
       Point3d p0 = pc - Direction(direction) * r;
       Point3d p1 = pc + Direction(direction) * r;
       return new Circle(p0, m_point, p1);
     }
+
     #endregion
+
+    #region Housekeeping
+
+    /// <summary>
+    /// Actively releases the unmanaged pointer.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      InternalDispose();
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Passively releases the unmanaged pointer.
+    /// </summary>
+    ~SurfaceCurvature()
+    {
+      InternalDispose();
+    }
+
+    /// <summary>
+    /// Releases the unmanaged pointer.
+    /// </summary>
+    private void InternalDispose()
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SurfaceCurvature_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    #endregion // Housekeeping
   }
 
   /// <summary>
@@ -540,8 +992,7 @@ namespace Rhino.Geometry
     [ConstOperation]
     public SurfaceCurvature CurvatureAt(double u, double v)
     {
-      IntPtr const_ptr_this = ConstPointer();
-      SurfaceCurvature rc = SurfaceCurvature._FromSurfacePointer(const_ptr_this, u, v);
+      SurfaceCurvature rc = SurfaceCurvature.CreateFromSurface(this, u, v);
       GC.KeepAlive(this);
       return rc;
     }
@@ -903,6 +1354,57 @@ namespace Rhino.Geometry
       GC.KeepAlive(this);
       return CreateGeometryHelper(ptr_curve, null) as Curve;
     }
+
+    /// <summary>
+    /// Gets isoparametric curve. <see cref="IsoStatus.None"/> is not supported, 
+    /// and <see cref="IsoStatus.X"/> and <see cref="IsoStatus.Y"/> need valid t-values in the U- or V-domain respectively.
+    /// </summary>
+    /// <param name="iso"><see cref="IsoStatus.North"/> returns the curve where U varies and V is V_max (paramter t is ignored)
+    ///                   <see cref="IsoStatus.East"/> returns the curve where V varies and U is U_max (paramter t is ignored)
+    ///                   <see cref="IsoStatus.South"/> returns the curve where U varies and V is V_min (paramter t is ignored)
+    ///                   <see cref="IsoStatus.West"/> returns the curve where V varies and U is U_min (paramter t is ignored)
+    ///                   <see cref="IsoStatus.X"/> returns the curve where V varies and U is t (if t is inside the U-domain)
+    ///                   <see cref="IsoStatus.Y"/> returns the curve where U varies and V is t (if t is inside the V-domain)
+    /// </param>
+    /// <param name="t">the parameter used if iso is X or Y.</param>
+    /// <returns>An isoparametric curve or null on error.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Curve IsoCurve(IsoStatus iso, double t)
+    {
+      if (iso == IsoStatus.None)
+        return null;
+
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_curve = UnsafeNativeMethods.ON_Surface_IsoCurve2(const_ptr_this, (int) iso, t);
+      GC.KeepAlive(this);
+      return CreateGeometryHelper(ptr_curve, null) as Curve;
+    }
+
+    /// <summary>
+    /// Gets isoparametric curve that corresponds to one of the four surface edges. Other <see cref="IsoStatus"/> values are not supported.
+    /// </summary>
+    /// <param name="iso"><see cref="IsoStatus.North"/> returns the curve where U varies and V is V_max
+    ///                   <see cref="IsoStatus.East"/> returns the curve where V varies and U is U_max
+    ///                   <see cref="IsoStatus.South"/> returns the curve where U varies and V is V_min
+    ///                   <see cref="IsoStatus.West"/> returns the curve where V varies and U is U_min
+    /// </param>
+    /// <returns>An isoparametric curve or null on error.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Curve IsoCurve(IsoStatus iso)
+    {
+      if (iso == IsoStatus.None || iso == IsoStatus.X || iso == IsoStatus.Y)
+        return null;
+
+      IntPtr const_ptr_this = ConstPointer();
+      double ignored = 0.0;
+      IntPtr ptr_curve = UnsafeNativeMethods.ON_Surface_IsoCurve2(const_ptr_this, (int)iso, ignored);
+      GC.KeepAlive(this);
+      return CreateGeometryHelper(ptr_curve, null) as Curve;
+    }
+
+
 
     /// <summary>
     /// Splits (divides) the surface into two parts at the specified parameter
@@ -1325,6 +1827,50 @@ namespace Rhino.Geometry
       torus = new Torus();
       IntPtr pThis = ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Surface_IsTorus(pThis, ref torus, tolerance, true);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>Determines if the surface is a portion of an extrusion within RhinoMath.ZeroTolerance.</summary>
+    /// <returns>true if the surface is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsExtrusion()
+    {
+      return IsExtrusion(RhinoMath.ZeroTolerance);
+    }
+    /// <summary>Determines if the surface is a portion of an extrusion within a given tolerance.</summary>
+    /// <param name="tolerance">tolerance to use when checking.</param>
+    /// <returns>true if the surface is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsExtrusion(double tolerance)
+    {
+      IntPtr pThis = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Surface_IsExtrusion(pThis, IntPtr.Zero, tolerance, false);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    /// <summary>Tests a surface to see if it is an extrusion within RhinoMath.ZeroTolerance and returns the extrusion.</summary>
+    /// <param name="extrusion">On success, the extrusion parameters are filled in.</param>
+    /// <returns>true if the surface is an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetExtrusion(out Extrusion extrusion)
+    {
+      return TryGetExtrusion(out extrusion, RhinoMath.ZeroTolerance);
+    }
+    /// <summary>Tests a surface to see if it is an extrusion and returns the extrusion.</summary>
+    /// <param name="extrusion">On success, the extrusion parameters are filled in.</param>
+    /// <param name="tolerance">tolerance to use when checking.</param>
+    /// <returns>true if the surface is a portion of an extrusion.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetExtrusion(out Extrusion extrusion, double tolerance)
+    {
+      extrusion = new Extrusion();
+      IntPtr pThis = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Surface_IsExtrusion(pThis, extrusion.NonConstPointer(), tolerance, true);
       GC.KeepAlive(this);
       return rc;
     }

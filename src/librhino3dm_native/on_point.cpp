@@ -138,6 +138,21 @@ RH_C_FUNCTION bool ON_3dVector_Unitize( ON_3dVector* v )
   return rc;
 }
 
+RH_C_FUNCTION bool ON_3dVector_DecomposeVector(ON_3DVECTOR_STRUCT v, ON_3DVECTOR_STRUCT a, ON_3DVECTOR_STRUCT b, double* x, double* y)
+{
+  bool rc = false;
+  const ON_3dVector* V = (const ON_3dVector*)&v;
+  const ON_3dVector* A = (const ON_3dVector*)&a;
+  const ON_3dVector* B = (const ON_3dVector*)&b;
+
+  if (x && y)
+  {
+    int rank = ON_DecomposeVector(*V, *A, *B, x, y);
+    rc = rank == 2;
+  }
+  return rc;
+}
+
 RH_C_FUNCTION int ON_3dVector_IsParallelTo( ON_3DVECTOR_STRUCT v0, ON_3DVECTOR_STRUCT v1, double angleTol)
 {
   const ON_3dVector* _v0 = (const ON_3dVector*)&v0;

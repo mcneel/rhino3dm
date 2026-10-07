@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Rhino
 {
@@ -8,14 +9,21 @@ namespace Rhino
   /// </summary>
   class ProgressReporter
   {
-    static int g_next_serial_number = 1;
-    IProgress<double> m_progress;
-    readonly static List<ProgressReporter> g_all_reporters = new List<ProgressReporter>();
+    static int g_next_serial_number = 0;
+    readonly IProgress<double> m_progress;
+
+    // [RH-89148] The registry is shared by every thread. A reporter is created on the calling
+    // thread, but a computation calls OnProgressReportCallback from whatever worker thread it
+    // reports from, so a per-thread registry loses every report a worker makes.
+    static readonly ConcurrentDictionary<int, ProgressReporter> g_all_reporters =
+      new ConcurrentDictionary<int, ProgressReporter>();
+
     public ProgressReporter(IProgress<double> progress)
     {
       m_progress = progress;
-      SerialNumber = g_next_serial_number++;
-      g_all_reporters.Add(this);
+      SerialNumber = Interlocked.Increment(ref g_next_serial_number);
+
+      g_all_reporters[SerialNumber] = this;
     }
 
     public int SerialNumber { get; private set; }
@@ -23,20 +31,16 @@ namespace Rhino
 
     internal delegate void ProgressReportCallback(int serialNumber, double fractionComplete);
 
-    static ProgressReportCallback g_progress_report_callback;
+    // Native code keeps the address of this delegate's thunk. Creating a new delegate on every
+    // Enable() call would let an earlier one be collected while native still points at it.
+    static readonly ProgressReportCallback g_progress_report_callback = OnProgressReportCallback;
 
     static void OnProgressReportCallback(int serialNumber, double fractionComplete)
     {
       try
       {
-        for (int i = 0; i < g_all_reporters.Count; i++)
-        {
-          if (g_all_reporters[i].SerialNumber == serialNumber)
-          {
-            g_all_reporters[i].m_progress.Report(fractionComplete);
-            return;
-          }
-        }
+        if (g_all_reporters.TryGetValue(serialNumber, out ProgressReporter reporter))
+          reporter.m_progress.Report(fractionComplete);
       }
       catch(Exception ex)
       {
@@ -46,20 +50,13 @@ namespace Rhino
 
     public void Enable()
     {
-      g_progress_report_callback = OnProgressReportCallback;
       UnsafeNativeMethods.ON_ProgressReporter_SetReportCallback(g_progress_report_callback);
     }
 
+    /// <summary>Idempotent. Safe to call from any thread.</summary>
     public void Disable()
     {
-      for( int i=0; i<g_all_reporters.Count; i++)
-      {
-        if (g_all_reporters[i].SerialNumber == SerialNumber)
-        {
-          g_all_reporters.RemoveAt(i);
-          break;
-        }
-      }
+      g_all_reporters.TryRemove(SerialNumber, out _);
     }
   }
 }

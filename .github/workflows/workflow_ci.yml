@@ -35,6 +35,19 @@ jobs:
             echo "$file was changed"
           done
   
+  #Fails if any version-carrying file disagrees with src/version.txt.
+  #Unlike the check_* jobs this is a gate, not a change detector, and it runs
+  #unconditionally: a tree can be half-bumped by an earlier commit, so keying
+  #it to changed files would let a release be cut from one.
+  validate_version:
+    name: validate version numbers
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: check versions against src/version.txt
+        run: python3 script/bump_version.py --check
+
   #checks if build scripts have changed
   check_build_scripts:
     name: check build scripts and tools

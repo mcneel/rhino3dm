@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using Rhino.Runtime;
@@ -212,12 +215,14 @@ namespace Rhino.Geometry
       IntPtr const_ptr_this = ConstPointer();
       //if (UpdateSurfaceMeshCache(true) > 0) DestroySubDDisplay();
 
-      var output = new SimpleArrayCurvePointer();
-      IntPtr ptr_output = output.NonConstPointer();
+      using (var output = new SimpleArrayCurvePointer())
+      {
+        IntPtr ptr_output = output.NonConstPointer();
 
-      UnsafeNativeMethods.ON_SubD_DuplicateEdgeCurves(const_ptr_this, ptr_output, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
-      GC.KeepAlive(this);
-      return output.ToNonConstArray();
+        UnsafeNativeMethods.ON_SubD_DuplicateEdgeCurves(const_ptr_this, ptr_output, boundaryOnly, interiorOnly, smoothOnly, sharpOnly, creaseOnly, clampEnds);
+        GC.KeepAlive(this);
+        return output.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -713,6 +718,405 @@ namespace Rhino.Geometry
 #endif
 
     /// <summary>
+    /// Deletes components from this SubD.
+    /// <para>
+    /// Deleting a vertex deletes every edge and face attached to it. Deleting an edge
+    /// deletes every face attached to it. Deleting a face deletes only that face.
+    /// </para>
+    /// </summary>
+    /// <param name="components">The components to delete.</param>
+    /// <param name="markDeletedFaceEdges">
+    /// If true, edges that survive the deletion of a face they bounded get their runtime
+    /// mark set, so the caller can find the boundary of the hole that was opened.
+    /// </param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<SubDComponent> components, bool markDeletedFaceEdges)
+    {
+      if (null == components)
+        throw new ArgumentNullException(nameof(components));
+
+      IntPtr ptr_this = NonConstPointer();
+      bool rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var component in components)
+          ciArray.Add(ComponentIndexOf(component));
+        if (0 == ciArray.Count)
+          return true; // nothing to delete
+        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
+      }
+      GC.KeepAlive(components);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Deletes components from this SubD, leaving the edges that bounded any deleted face
+    /// unmarked. See
+    /// <see cref="DeleteComponents(IEnumerable{SubDComponent}, bool)"/>.
+    /// </summary>
+    /// <param name="components">The components to delete.</param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<SubDComponent> components)
+    {
+      return DeleteComponents(components, false);
+    }
+
+    /// <summary>
+    /// Deletes components from this SubD, identified by component index.
+    /// </summary>
+    /// <param name="componentIndices">The component indices to delete.</param>
+    /// <param name="markDeletedFaceEdges">
+    /// If true, edges that survive the deletion of a face they bounded get their runtime
+    /// mark set.
+    /// </param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<ComponentIndex> componentIndices, bool markDeletedFaceEdges)
+    {
+      if (null == componentIndices)
+        throw new ArgumentNullException(nameof(componentIndices));
+
+      IntPtr ptr_this = NonConstPointer();
+      bool rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var ci in componentIndices)
+          ciArray.Add(ci);
+        if (0 == ciArray.Count)
+          return true; // nothing to delete
+        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Dissolves the given edges and vertices, merging the faces around them, and deletes
+    /// the given faces.
+    /// <para>
+    /// This is the difference between removing an edge between two quads to get one bigger
+    /// face, and removing the two quads to leave a hole. Use
+    /// <see cref="DeleteComponents(IEnumerable{SubDComponent}, bool)"/> when a hole is what
+    /// you want.
+    /// </para>
+    /// </summary>
+    /// <param name="components">The vertices, edges and faces to dissolve or delete.</param>
+    /// <returns>The number of merged faces created by dissolving edges and vertices.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint DissolveOrDeleteComponents(IEnumerable<SubDComponent> components)
+    {
+      if (null == components)
+        throw new ArgumentNullException(nameof(components));
+
+      IntPtr ptr_this = NonConstPointer();
+      uint rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var component in components)
+          ciArray.Add(ComponentIndexOf(component));
+        if (0 == ciArray.Count)
+          return 0;
+        rc = UnsafeNativeMethods.ON_SubD_DissolveOrDelete(ptr_this, ciArray.NonConstPointer());
+      }
+      GC.KeepAlive(components);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Dissolves or deletes components, identified by component index.
+    /// See <see cref="DissolveOrDeleteComponents(IEnumerable{SubDComponent})"/>.
+    /// </summary>
+    /// <param name="componentIndices">The component indices to dissolve or delete.</param>
+    /// <returns>The number of merged faces created by dissolving edges and vertices.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint DissolveOrDeleteComponents(IEnumerable<ComponentIndex> componentIndices)
+    {
+      if (null == componentIndices)
+        throw new ArgumentNullException(nameof(componentIndices));
+
+      IntPtr ptr_this = NonConstPointer();
+      uint rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var ci in componentIndices)
+          ciArray.Add(ci);
+        if (0 == ciArray.Count)
+          return 0;
+        rc = UnsafeNativeMethods.ON_SubD_DissolveOrDelete(ptr_this, ciArray.NonConstPointer());
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    // Every SubDComponent knows its own component index; this keeps the callers above from
+    // having to switch on the concrete type.
+    static ComponentIndex ComponentIndexOf(SubDComponent component)
+    {
+      if (null == component)
+        throw new ArgumentNullException(nameof(component));
+      var vertex = component as SubDVertex;
+      if (null != vertex)
+        return vertex.ComponentIndex();
+      var edge = component as SubDEdge;
+      if (null != edge)
+        return edge.ComponentIndex();
+      var face = component as SubDFace;
+      if (null != face)
+        return face.ComponentIndex();
+      throw new NotSupportedException("Unknown SubDComponent type.");
+    }
+
+    /// <summary>
+    /// Creates a SubD box.
+    /// </summary>
+    /// <param name="corners">
+    /// The eight box corners. The first four are the bottom face, in order around it, and
+    /// the last four are the top face, in the same order.
+    /// </param>
+    /// <param name="edgeSharpness">
+    /// The sharpness to give the edges where box sides meet.
+    /// <see cref="SubDEdgeSharpness.SmoothValue"/> leaves them smooth and
+    /// <see cref="SubDEdgeSharpness.CreaseValue"/> makes them creases.
+    /// </param>
+    /// <param name="faceCountX">Number of faces along the first bottom edge.</param>
+    /// <param name="faceCountY">Number of faces along the second bottom edge.</param>
+    /// <param name="faceCountZ">Number of faces from the bottom face to the top face.</param>
+    /// <returns>A new SubD box, or null if the input is not valid.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static SubD CreateSubDBox(IEnumerable<Point3d> corners, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
+    {
+      if (null == corners)
+        throw new ArgumentNullException(nameof(corners));
+
+      Point3d[] pts = corners as Point3d[] ?? corners.ToArray();
+      if (8 != pts.Length)
+        throw new ArgumentException("corners must have exactly 8 points.", nameof(corners));
+
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDBox(pts, edgeSharpness, faceCountX, faceCountY, faceCountZ);
+      if (IntPtr.Zero == ptr_subd)
+        return null;
+      return new SubD(ptr_subd, null);
+    }
+
+    /// <summary>
+    /// Creates a SubD box from a <see cref="Box"/>.
+    /// </summary>
+    /// <param name="box">The box to build from. It must be valid.</param>
+    /// <param name="edgeSharpness">
+    /// The sharpness to give the edges where box sides meet. See
+    /// <see cref="CreateSubDBox(IEnumerable{Point3d}, double, uint, uint, uint)"/>.
+    /// </param>
+    /// <param name="faceCountX">Number of faces in the box X direction.</param>
+    /// <param name="faceCountY">Number of faces in the box Y direction.</param>
+    /// <param name="faceCountZ">Number of faces in the box Z direction.</param>
+    /// <returns>A new SubD box, or null if the input is not valid.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static SubD CreateSubDBox(Box box, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
+    {
+      if (!box.IsValid)
+        throw new ArgumentException("box is not valid.", nameof(box));
+
+      // ON_SubD::CreateSubDBox wants the bottom face first, then the top face in the same
+      // order. Box.GetCorners() already returns them that way.
+      return CreateSubDBox(box.GetCorners(), edgeSharpness, faceCountX, faceCountY, faceCountZ);
+    }
+
+    /// <summary>
+    /// The number of errors the SubD code has trapped since the process started.
+    /// <para>
+    /// This is a diagnostic counter, not a per-SubD property. Sample it before and after an
+    /// operation to find out whether that operation hit an internal error, which usually
+    /// means the SubD is not valid.
+    /// </para>
+    /// </summary>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static uint ErrorCount
+    {
+      get { return UnsafeNativeMethods.ON_SubD_ErrorCount(); }
+    }
+
+    /// <summary>
+    /// Gets the number of sharp edges in this SubD.
+    /// See <see cref="SubDEdge.IsSharp"/> for what makes an edge sharp.
+    /// </summary>
+    /// <returns>The number of sharp edges.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    [ConstOperation]
+    public uint SharpEdgeCount()
+    {
+      SubDEdgeSharpness range = default(SubDEdgeSharpness);
+      return SharpEdgeCount(out range);
+    }
+
+    /// <summary>
+    /// Gets the number of sharp edges in this SubD, and the range of sharpness values used.
+    /// </summary>
+    /// <param name="sharpnessRange">
+    /// The smallest and largest sharpness found on the sharp edges. If there are no sharp
+    /// edges, this is <see cref="SubDEdgeSharpness.Smooth"/>.
+    /// </param>
+    /// <returns>The number of sharp edges.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    [ConstOperation]
+    public uint SharpEdgeCount(out SubDEdgeSharpness sharpnessRange)
+    {
+      sharpnessRange = default(SubDEdgeSharpness);
+      IntPtr const_ptr_this = ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_SharpEdgeCount(const_ptr_this, ref sharpnessRange);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Converts every sharp edge in this SubD to a smooth edge.
+    /// </summary>
+    /// <returns>The number of edges that were changed.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint ClearEdgeSharpness()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_ClearEdgeSharpness(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Sets the sharpness of a list of edges.
+    /// </summary>
+    /// <param name="edges">The edges to change.</param>
+    /// <param name="sharpness">
+    /// The sharpness to apply to every edge in the list. Pass
+    /// <see cref="SubDEdgeSharpness.Smooth"/> to make the edges smooth again.
+    /// </param>
+    /// <param name="preserveSymmetry">
+    /// If true and this SubD has symmetric content, the change tries to keep it symmetric.
+    /// </param>
+    /// <returns>The number of edges that were changed.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint SetEdgeSharpness(IEnumerable<SubDEdge> edges, SubDEdgeSharpness sharpness, bool preserveSymmetry)
+    {
+      if (null == edges)
+        throw new ArgumentNullException(nameof(edges));
+      if (sharpness.IsNotValidNorCrease)
+        throw new ArgumentException("sharpness is not a valid edge sharpness.", nameof(sharpness));
+
+      IntPtr ptr_this = NonConstPointer();
+      uint rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var edge in edges)
+        {
+          IntPtr const_ptr_edge = edge.ConstPointer();
+          var ci = new ComponentIndex();
+          UnsafeNativeMethods.ON_SubDEdge_ComponentIndex(const_ptr_edge, ref ci);
+          ciArray.Add(ci);
+        }
+        IntPtr ptr_ci_array = ciArray.NonConstPointer();
+        rc = UnsafeNativeMethods.ON_SubD_SetEdgeSharpness(ptr_this, sharpness, ptr_ci_array, preserveSymmetry);
+      }
+      GC.KeepAlive(edges);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the sharpness of a list of edges, one sharpness per edge.
+    /// <para>
+    /// Use this with <see cref="SubDEdgeSharpness.CreateEdgeChainSharpness(Interval, int)"/>
+    /// to give a chain of edges a sharpness that varies evenly along it.
+    /// </para>
+    /// </summary>
+    /// <param name="edges">The edges to change.</param>
+    /// <param name="sharpnesses">
+    /// One sharpness per edge, in the same order as edges. Must be the same length.
+    /// </param>
+    /// <param name="preserveSymmetry">
+    /// If true and this SubD has symmetric content, the change tries to keep it symmetric.
+    /// </param>
+    /// <returns>The number of edges that were changed.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint SetEdgeSharpness(IEnumerable<SubDEdge> edges, IEnumerable<SubDEdgeSharpness> sharpnesses, bool preserveSymmetry)
+    {
+      if (null == edges)
+        throw new ArgumentNullException(nameof(edges));
+      if (null == sharpnesses)
+        throw new ArgumentNullException(nameof(sharpnesses));
+
+      SubDEdge[] edge_array = edges as SubDEdge[] ?? edges.ToArray();
+      SubDEdgeSharpness[] sharp_array = sharpnesses as SubDEdgeSharpness[] ?? sharpnesses.ToArray();
+      if (edge_array.Length != sharp_array.Length)
+        throw new ArgumentException("edges and sharpnesses must have the same length.", nameof(sharpnesses));
+      if (0 == edge_array.Length)
+        return 0;
+
+      var cptrs = new SubDComponent.SubDComponentPtr[edge_array.Length];
+      for (int i = 0; i < edge_array.Length; i++)
+      {
+        if (null == edge_array[i])
+          throw new ArgumentException("edges contains a null edge.", nameof(edges));
+        if (sharp_array[i].IsNotValidNorCrease)
+          throw new ArgumentException("sharpnesses contains a value that is not a valid edge sharpness.", nameof(sharpnesses));
+        cptrs[i] = edge_array[i].NonConstComponentPtr();
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_SetEdgeSharpnessArray(ptr_this, (uint)cptrs.Length, cptrs, sharp_array, preserveSymmetry);
+      GC.KeepAlive(edges);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the sharpness of a list of edges, identified by their ids.
+    /// </summary>
+    /// <param name="edgeIds">The ids of the edges to change.</param>
+    /// <param name="sharpness">
+    /// The sharpness to apply to every edge in the list. Pass
+    /// <see cref="SubDEdgeSharpness.Smooth"/> to make the edges smooth again.
+    /// </param>
+    /// <param name="preserveSymmetry">
+    /// If true and this SubD has symmetric content, the change tries to keep it symmetric.
+    /// </param>
+    /// <returns>The number of edges that were changed.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint SetEdgeSharpness(IEnumerable<int> edgeIds, SubDEdgeSharpness sharpness, bool preserveSymmetry)
+    {
+      if (null == edgeIds)
+        throw new ArgumentNullException(nameof(edgeIds));
+      if (sharpness.IsNotValidNorCrease)
+        throw new ArgumentException("sharpness is not a valid edge sharpness.", nameof(sharpness));
+
+      IntPtr ptr_this = NonConstPointer();
+      uint rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var id in edgeIds)
+          ciArray.Add(new ComponentIndex(ComponentIndexType.SubdEdge, id));
+        IntPtr ptr_ci_array = ciArray.NonConstPointer();
+        rc = UnsafeNativeMethods.ON_SubD_SetEdgeSharpness(ptr_this, sharpness, ptr_ci_array, preserveSymmetry);
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+#endif
+
+    /// <summary>
     /// Resets the SubD to the default face packing if adding creases or deleting faces breaks the quad grids.
     /// It does not change the topology or geometry of the SubD. SubD face packs always stop at creases.
     /// </summary>
@@ -958,6 +1362,11 @@ namespace Rhino.Geometry
       }
     }
 
+    // These two are backed by ON_SubD::UpdateSurfaceMeshCache / SurfaceMeshCacheExists,
+    // which are declared inside #if defined(OPENNURBS_PLUS) and implemented only in
+    // opennurbs_plus_subd_*.cpp. They are therefore unavailable to an opennurbs-only
+    // build such as Rhino3dm, where the corresponding C exports do not exist.
+#if RHINO_SDK
     /// <summary>
     /// Updates limit surface information returned by
     ///   - <see cref="SubDVertex.SurfacePoint()"/>, 
@@ -1020,6 +1429,323 @@ namespace Rhino.Geometry
       GC.KeepAlive(this);
       return rc;
     }
+#endif
+
+#if RHINO_SDK
+    /// <summary>
+    /// Gets the point on this SubD's surface that is closest to a test point.
+    /// </summary>
+    /// <param name="testPoint">The point to project onto this SubD.</param>
+    /// <param name="closestPoint">
+    /// The closest point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <param name="parameter">
+    /// The parameter of the closest point is returned here, or
+    /// <see cref="SubDComponentParameter.Unset"/> if this fails. Evaluating it
+    /// with <see cref="Evaluate(SubDComponentParameter, out Point3d)"/> returns
+    /// <paramref name="closestPoint"/>.
+    /// </param>
+    /// <returns>True if a closest point was found.</returns>
+    /// <remarks>
+    /// The search is refined on the surface itself, so the result is not limited
+    /// to the surface mesh. The one exception is the corner of an extraordinary
+    /// vertex, where the surface derivatives needed to refine are not available;
+    /// there the result is the closest surface mesh point, so its accuracy is the
+    /// accuracy of the surface mesh. Call
+    /// <see cref="UpdateSurfaceMeshCache(bool)"/> first if you need more accuracy
+    /// near extraordinary vertices.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool ClosestPoint(Point3d testPoint, out Point3d closestPoint, out SubDComponentParameter parameter)
+    {
+      return ClosestPoint(testPoint, out closestPoint, out parameter, 0.0);
+    }
+
+    /// <summary>
+    /// Gets the point on this SubD's surface that is closest to a test point.
+    /// </summary>
+    /// <param name="testPoint">The point to project onto this SubD.</param>
+    /// <param name="closestPoint">
+    /// The closest point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <param name="parameter">
+    /// The parameter of the closest point is returned here, or
+    /// <see cref="SubDComponentParameter.Unset"/> if this fails.
+    /// </param>
+    /// <param name="maximumDistance">
+    /// If larger than 0 and the distance from <paramref name="testPoint"/> to this
+    /// SubD is larger than this, then false is returned. Otherwise this is
+    /// ignored.
+    /// </param>
+    /// <returns>True if a closest point was found.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool ClosestPoint(Point3d testPoint, out Point3d closestPoint, out SubDComponentParameter parameter, double maximumDistance)
+    {
+      closestPoint = Point3d.Unset;
+      parameter = SubDComponentParameter.Unset;
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubD_GetClosestPoint(
+        const_ptr_this, testPoint, maximumDistance, ref closestPoint, ref parameter);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the point on this SubD's surface that is closest to a test point.
+    /// </summary>
+    /// <param name="testPoint">The point to project onto this SubD.</param>
+    /// <returns>
+    /// The closest point, or <see cref="Point3d.Unset"/> if none was found.
+    /// </returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Point3d ClosestPoint(Point3d testPoint)
+    {
+      return ClosestPoint(testPoint, out Point3d closestPoint, out _, 0.0)
+        ? closestPoint
+        : Point3d.Unset;
+    }
+
+    /// <summary>
+    /// Gets the points on this SubD's surface that are closest to each of a list
+    /// of test points. This is faster than calling
+    /// <see cref="ClosestPoint(Point3d, out Point3d, out SubDComponentParameter)"/>
+    /// in a loop because the spatial index over the surface is built once.
+    /// </summary>
+    /// <param name="testPoints">The points to project onto this SubD.</param>
+    /// <param name="closestPoints">
+    /// One point per test point. Entries where no closest point was found are
+    /// <see cref="Point3d.Unset"/>.
+    /// </param>
+    /// <param name="parameters">
+    /// One parameter per test point. Entries where no closest point was found are
+    /// <see cref="SubDComponentParameter.Unset"/>.
+    /// </param>
+    /// <param name="maximumDistance">
+    /// If larger than 0, test points farther than this from the SubD get no
+    /// closest point. Otherwise this is ignored.
+    /// </param>
+    /// <returns>The number of closest points that were found.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public int ClosestPoints(
+      IEnumerable<Point3d> testPoints,
+      out Point3d[] closestPoints,
+      out SubDComponentParameter[] parameters,
+      double maximumDistance)
+    {
+      if (testPoints == null)
+        throw new ArgumentNullException(nameof(testPoints));
+
+      Point3d[] input = testPoints as Point3d[] ?? testPoints.ToArray();
+      closestPoints = new Point3d[input.Length];
+      parameters = new SubDComponentParameter[input.Length];
+      for (int i = 0; i < input.Length; i++)
+      {
+        closestPoints[i] = Point3d.Unset;
+        parameters[i] = SubDComponentParameter.Unset;
+      }
+      if (input.Length == 0)
+        return 0;
+
+      IntPtr const_ptr_this = ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_GetClosestPoints(
+        const_ptr_this, maximumDistance, input.Length, input, closestPoints, parameters);
+      GC.KeepAlive(this);
+      return (int)rc;
+    }
+
+    /// <summary>
+    /// Evaluates the location of a point on this SubD's surface.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="point">
+    /// The surface point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Evaluate(SubDComponentParameter parameter, out Point3d point)
+    {
+      point = Point3d.Unset;
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubD_EvaluateSurfacePoint(const_ptr_this, parameter, ref point);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Evaluates the location and unit normal of a point on this SubD's surface.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="point">
+    /// The surface point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <param name="normal">
+    /// The unit surface normal is returned here, or
+    /// <see cref="Vector3d.Unset"/> if this fails.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <remarks>
+    /// The surface derivatives this needs are not available in the corner of an
+    /// extraordinary vertex unless the parameter is exactly at the vertex, at the
+    /// midpoint of one of its edges, or at the center of the face.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Evaluate(SubDComponentParameter parameter, out Point3d point, out Vector3d normal)
+    {
+      return Evaluate(parameter, out point, out _, out _, out normal);
+    }
+
+    /// <summary>
+    /// Evaluates the location, first derivatives and unit normal of a point on
+    /// this SubD's surface.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="point">
+    /// The surface point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <param name="ds">
+    /// The first derivative in the direction of the first face corner parameter is
+    /// returned here.
+    /// </param>
+    /// <param name="dt">
+    /// The first derivative in the direction of the second face corner parameter
+    /// is returned here.
+    /// </param>
+    /// <param name="normal">
+    /// The unit surface normal is returned here. It is parallel to the cross
+    /// product of <paramref name="ds"/> and <paramref name="dt"/>.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Evaluate(
+      SubDComponentParameter parameter,
+      out Point3d point,
+      out Vector3d ds,
+      out Vector3d dt,
+      out Vector3d normal)
+    {
+      point = Point3d.Unset;
+      ds = Vector3d.Unset;
+      dt = Vector3d.Unset;
+      normal = Vector3d.Unset;
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubD_EvaluateSurface(
+        const_ptr_this, parameter, false, ref point, ref ds, ref dt, ref normal, null);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Evaluates the principal curvatures of a point on this SubD's surface.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="point">
+    /// The surface point is returned here, or <see cref="Point3d.Unset"/> if this
+    /// fails.
+    /// </param>
+    /// <param name="normal">The unit surface normal is returned here.</param>
+    /// <param name="kappa1">
+    /// The largest principal curvature, in absolute value, is returned here.
+    /// </param>
+    /// <param name="kappa2">
+    /// The smallest principal curvature, in absolute value, is returned here.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <remarks>
+    /// This needs second order surface derivatives. They are available throughout
+    /// the corner quad of an extraordinary vertex, but not exactly on such a
+    /// vertex: a SubD limit surface is C1 there but generally not C2, so it has no
+    /// curvature. This returns false in that case, and <paramref name="kappa1"/>
+    /// and <paramref name="kappa2"/> are <see cref="double.NaN"/>.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool EvaluateCurvature(
+      SubDComponentParameter parameter,
+      out Point3d point,
+      out Vector3d normal,
+      out double kappa1,
+      out double kappa2)
+    {
+      point = Point3d.Unset;
+      normal = Vector3d.Unset;
+      kappa1 = double.NaN;
+      kappa2 = double.NaN;
+      var ds = Vector3d.Unset;
+      var dt = Vector3d.Unset;
+      var kappa = new double[2] { double.NaN, double.NaN };
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubD_EvaluateSurface(
+        const_ptr_this, parameter, true, ref point, ref ds, ref dt, ref normal, kappa);
+      GC.KeepAlive(this);
+      if (rc)
+      {
+        kappa1 = kappa[0];
+        kappa2 = kappa[1];
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Evaluates the curvature of a point on this SubD's surface.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="curvature">
+    /// The surface curvature is returned here, or null if this fails.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <remarks>
+    /// Unlike the overload that returns the two principal curvature values, this
+    /// one also reports their directions. See
+    /// <see cref="SurfaceCurvature.CreateFromSubD(SubD, SubDComponentParameter)"/>
+    /// for when the curvature exists.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool EvaluateCurvature(SubDComponentParameter parameter, out SurfaceCurvature curvature)
+    {
+      return EvaluateCurvature(parameter, ExtraordinaryVertexCurvature.None, out curvature);
+    }
+
+    /// <summary>
+    /// Evaluates the curvature of a point on this SubD's surface, choosing what
+    /// to report exactly on an extraordinary vertex.
+    /// </summary>
+    /// <param name="parameter">The parameter to evaluate.</param>
+    /// <param name="extraordinaryVertexCurvature">
+    /// What to report when the parameter is exactly on an extraordinary vertex,
+    /// where the limit surface has no curvature of its own.
+    /// </param>
+    /// <param name="curvature">
+    /// The surface curvature is returned here, or null if this fails.
+    /// </param>
+    /// <returns>True if the evaluation succeeded.</returns>
+    /// <remarks>
+    /// See <see cref="SurfaceCurvature.CreateFromSubD(SubD, SubDComponentParameter, ExtraordinaryVertexCurvature)"/>.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool EvaluateCurvature(
+      SubDComponentParameter parameter,
+      ExtraordinaryVertexCurvature extraordinaryVertexCurvature,
+      out SurfaceCurvature curvature)
+    {
+      curvature = SurfaceCurvature.CreateFromSubD(this, parameter, extraordinaryVertexCurvature);
+      return null != curvature;
+    }
+
+#endif
 
     /// <summary>
     /// Returns a SubDComponent, either a SubDEdge, SubDFace, or SubDVertex, from a component index.
@@ -1170,10 +1896,12 @@ namespace Rhino.Geometry
     [CLSCompliant(false)]
     public bool InterpolateSurfacePoints(uint[] vertexIndices, Point3d[] surfacePoints)
     {
-      SubDSurfaceInterpolator interpolator = SubDSurfaceInterpolator.CreateFromVertexIdList(this, vertexIndices, out uint freeVertexCount);
-      if (freeVertexCount != vertexIndices.Length)
-        return false;
-      return interpolator.Solve(surfacePoints);
+      using (SubDSurfaceInterpolator interpolator = SubDSurfaceInterpolator.CreateFromVertexIdList(this, vertexIndices, out uint freeVertexCount))
+      {
+        if (freeVertexCount != vertexIndices.Length)
+          return false;
+        return interpolator.Solve(surfacePoints);
+      }
     }
 
     /// <summary>
@@ -1514,10 +2242,12 @@ namespace Rhino.Geometry
     public uint[] VertexIdList()
     {
       IntPtr constPtrThis = ConstPointer();
-      SimpleArrayUint vertexIds = new SimpleArrayUint();
-      UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_VertexIdList(constPtrThis, vertexIds.NonConstPointer());
-      GC.KeepAlive(this);
-      return vertexIds.ToArray();
+      using (SimpleArrayUint vertexIds = new SimpleArrayUint())
+      {
+        UnsafeNativeMethods.ON_SubD_SubDSurfaceInterpolator_VertexIdList(constPtrThis, vertexIds.NonConstPointer());
+        GC.KeepAlive(this);
+        return vertexIds.ToArray();
+      }
     }
 
     /// <summary>
@@ -1996,20 +2726,99 @@ namespace Rhino.Geometry
   /// <summary>
   /// A part of SubD geometry. Common base class for vertices, faces, and edges
   /// </summary>
-  public abstract class SubDComponent
+  [DebuggerDisplay("{ToString()}")]
+  public abstract partial class SubDComponent : IEquatable<SubDComponent>
   {
-    IntPtr m_ptr; // either ON_SubDFace*, ON_SubDEdge*, or ON_SubDVertex*
-    // NOTE: If we choose to save ON_SubDFacePtr.m_ptr values, we can add
-    //       another field here to save that value
+    /// <summary>
+    /// An ON_SubDComponentPtr: a component pointer, a direction bit and a component type
+    /// packed into one 8 byte integer. This is not a general purpose type; it exists so
+    /// that a SubDComponent can hold everything the unmanaged side needs, including the
+    /// orientation an edge or face is being referenced with.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 8)]
+    internal struct SubDComponentPtr : IEquatable<SubDComponentPtr>
+    {
+      // Must stay one 8 byte integer: this is marshalled by value as ON_SubDComponentPtr,
+      // which packs an ON_SubDVertex/Edge/Face pointer into the high 61 bits.
+      private readonly ulong m_cptr;
+
+      internal SubDComponentPtr(ulong cptr) { m_cptr = cptr; }
+
+      internal static readonly SubDComponentPtr Null =
+        new SubDComponentPtr((ulong)SubDComponentPtrTypesAndMasks.UnsetType);
+
+      internal ulong Value { get { return m_cptr; } }
+
+      /// <summary>The component pointer, with the type and direction bits cleared.</summary>
+      internal IntPtr BasePointer
+      {
+        get { return (IntPtr)(long)(m_cptr & (ulong)SubDComponentPtrTypesAndMasks.PointerMask); }
+      }
+
+      /// <summary>True when the component is referenced reversed from its natural orientation.</summary>
+      internal bool Direction
+      {
+        get { return 0 != (m_cptr & (ulong)SubDComponentPtrTypesAndMasks.DirectionMask); }
+      }
+
+      internal SubDComponentPtrTypesAndMasks Type
+      {
+        get { return (SubDComponentPtrTypesAndMasks)(m_cptr & (ulong)SubDComponentPtrTypesAndMasks.TypeMask); }
+      }
+
+      internal bool IsNull { get { return IntPtr.Zero == BasePointer; } }
+
+      /// <summary>Packs a raw component pointer with a type and a direction.</summary>
+      internal static SubDComponentPtr Create(IntPtr componentPointer, SubDComponentPtrTypesAndMasks type, bool direction)
+      {
+        ulong bits = (ulong)componentPointer.ToInt64() & (ulong)SubDComponentPtrTypesAndMasks.PointerMask;
+        bits |= (ulong)type;
+        if (direction)
+          bits |= (ulong)SubDComponentPtrTypesAndMasks.DirectionMask;
+        return new SubDComponentPtr(bits);
+      }
+
+      /// <summary>Same component and type, with the direction bit flipped.</summary>
+      internal SubDComponentPtr Reversed()
+      {
+        return new SubDComponentPtr(m_cptr ^ (ulong)SubDComponentPtrTypesAndMasks.DirectionMask);
+      }
+
+      public bool Equals(SubDComponentPtr other) { return m_cptr == other.m_cptr; }
+      public override bool Equals(object obj) { return obj is SubDComponentPtr && Equals((SubDComponentPtr)obj); }
+      public override int GetHashCode() { return m_cptr.GetHashCode(); }
+      public static bool operator ==(SubDComponentPtr a, SubDComponentPtr b) { return a.m_cptr == b.m_cptr; }
+      public static bool operator !=(SubDComponentPtr a, SubDComponentPtr b) { return a.m_cptr != b.m_cptr; }
+      public override string ToString() { return string.Format("0x{0:X16}", m_cptr); }
+    }
+
+    // The component pointer, its type and the orientation it is referenced with.
+    SubDComponentPtr m_cptr;
     ulong m_subd_serial_number;
 
     internal SubDComponent(SubD subd, IntPtr ptr, uint id)
     {
-      m_ptr = ptr;
       ParentSubD = subd;
       Id = id;
       m_subd_serial_number = subd.RuntimeSerialNumber;
+      m_cptr = SubDComponentPtr.Create(ptr, ComponentPtrType, false);
     }
+
+    internal SubDComponent(SubD subd, SubDComponentPtr cptr, uint id)
+    {
+      ParentSubD = subd;
+      Id = id;
+      m_subd_serial_number = subd.RuntimeSerialNumber;
+      m_cptr = cptr;
+    }
+
+    /// <summary>
+    /// The type bits this component sets in its component pointer. Every concrete
+    /// SubDComponent knows what it is, so the type bits never have to be inspected to
+    /// decide how to interpret the pointer.
+    /// </summary>
+    internal abstract SubDComponentPtrTypesAndMasks ComponentPtrType { get; }
 
     /// <summary>
     /// Unique id within the parent SubD for this item
@@ -2024,29 +2833,159 @@ namespace Rhino.Geometry
     /// <since>7.0</since>
     public SubD ParentSubD { get; }
 
-    internal IntPtr ConstPointer()
+    /// <summary>
+    /// True when this component is referenced with the reverse of its natural orientation.
+    /// This is always false for vertices, and for edges and faces obtained directly from
+    /// the parent SubD; it is only set on components reached through an oriented
+    /// reference, such as the face on a given side of an oriented edge.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool ComponentDirection
     {
-      if( m_subd_serial_number != ParentSubD.RuntimeSerialNumber )
+      get { return m_cptr.Direction; }
+      set
+      {
+        RefreshIfStale();
+        if (value != m_cptr.Direction)
+          m_cptr = m_cptr.Reversed();
+      }
+    }
+
+    /// <summary>
+    /// Flips <see cref="ComponentDirection"/> and returns this component, so it can be used
+    /// inline where an oppositely oriented reference is wanted.
+    /// </summary>
+    /// <returns>This component.</returns>
+    /// <since>8.36</since>
+    public SubDComponent ReverseComponentDirection()
+    {
+      ComponentDirection = !ComponentDirection;
+      return this;
+    }
+
+    void RefreshIfStale()
+    {
+      if (m_subd_serial_number != ParentSubD.RuntimeSerialNumber)
       {
         m_subd_serial_number = ParentSubD.RuntimeSerialNumber;
-        m_ptr = UpdatePointer();
+        // The id survives edits to the parent SubD, the address does not. Look it up again
+        // and re-pack, keeping the direction this component was referenced with.
+        m_cptr = SubDComponentPtr.Create(UpdatePointer(), ComponentPtrType, m_cptr.Direction);
       }
-      return m_ptr;
+    }
+
+    internal IntPtr ConstPointer()
+    {
+      RefreshIfStale();
+      return m_cptr.BasePointer;
     }
 
     internal IntPtr NonConstPointer()
     {
       // make sure the parent SubD is non-const
       ParentSubD.NonConstPointer();
-      if (m_subd_serial_number != ParentSubD.RuntimeSerialNumber)
-      {
-        m_subd_serial_number = ParentSubD.RuntimeSerialNumber;
-        m_ptr = UpdatePointer();
-      }
-      return m_ptr;
+      RefreshIfStale();
+      return m_cptr.BasePointer;
+    }
+
+    internal SubDComponentPtr ConstComponentPtr()
+    {
+      RefreshIfStale();
+      return m_cptr;
+    }
+
+    internal SubDComponentPtr NonConstComponentPtr()
+    {
+      // make sure the parent SubD is non-const
+      ParentSubD.NonConstPointer();
+      RefreshIfStale();
+      return m_cptr;
     }
 
     internal abstract IntPtr UpdatePointer();
+
+    /// <summary>
+    /// Determines whether this component and another refer to the same component, with the
+    /// same orientation, in the same SubD.
+    /// </summary>
+    /// <param name="other">The component to compare with.</param>
+    /// <since>8.36</since>
+    public bool Equals(SubDComponent other)
+    {
+      if (other is null)
+        return false;
+      if (ReferenceEquals(this, other))
+        return true;
+      return GetType() == other.GetType()
+        && Id == other.Id
+        && ComponentDirection == other.ComponentDirection
+        && ReferenceEquals(ParentSubD, other.ParentSubD);
+    }
+
+    /// <summary>
+    /// Determines whether an object is a SubDComponent referring to the same component,
+    /// with the same orientation, in the same SubD.
+    /// </summary>
+    /// <param name="obj">The object to compare with.</param>
+    /// <since>8.36</since>
+    public override bool Equals(object obj)
+    {
+      return Equals(obj as SubDComponent);
+    }
+
+    /// <summary>
+    /// Gets a hash code for this component.
+    /// </summary>
+    /// <since>8.36</since>
+    public override int GetHashCode()
+    {
+      int hc = (int)ComponentPtrType;
+      hc = hc * -1521134295 + Id.GetHashCode();
+      hc = hc * -1521134295 + ComponentDirection.GetHashCode();
+      hc = hc * -1521134295 + (ParentSubD is null ? 0 : ParentSubD.GetHashCode());
+      return hc;
+    }
+
+    /// <summary>
+    /// Determines whether two components refer to the same component, with the same
+    /// orientation, in the same SubD.
+    /// </summary>
+    /// <param name="a">The first component.</param>
+    /// <param name="b">The second component.</param>
+    /// <since>8.36</since>
+    public static bool operator ==(SubDComponent a, SubDComponent b)
+    {
+      return a is null ? b is null : a.Equals(b);
+    }
+
+    /// <summary>
+    /// Determines whether two components refer to different components, orientations, or SubDs.
+    /// </summary>
+    /// <param name="a">The first component.</param>
+    /// <param name="b">The second component.</param>
+    /// <since>8.36</since>
+    public static bool operator !=(SubDComponent a, SubDComponent b)
+    {
+      return !(a == b);
+    }
+
+    /// <summary>
+    /// Returns a string of the form "SubDEdge(+12)", naming the component type, the
+    /// orientation it is referenced with, and its id.
+    /// </summary>
+    /// <since>8.36</since>
+    public override string ToString()
+    {
+      string type;
+      switch (ComponentPtrType)
+      {
+        case SubDComponentPtrTypesAndMasks.VertexType: type = "SubDVertex"; break;
+        case SubDComponentPtrTypesAndMasks.EdgeType: type = "SubDEdge"; break;
+        case SubDComponentPtrTypesAndMasks.FaceType: type = "SubDFace"; break;
+        default: type = "SubDComponent"; break;
+      }
+      return string.Format("{0}({1}{2})", type, ComponentDirection ? "-" : "+", Id);
+    }
 
     const int idx_cs_selected = 0;
     const int idx_cs_highlighted = 1;
@@ -2127,10 +3066,37 @@ namespace Rhino.Geometry
     {
     }
 
+    internal SubDFace(SubD subd, SubDComponentPtr cptr, uint id) : base(subd, cptr, id)
+    {
+    }
+
     internal override IntPtr UpdatePointer()
     {
       IntPtr const_ptr_subd = ParentSubD.ConstPointer();
-      return UnsafeNativeMethods.ON_SubDFace_FromId(const_ptr_subd, Id);
+      return UnsafeNativeMethods.ON_SubD_FaceFromId(const_ptr_subd, Id);
+    }
+
+    internal override SubDComponentPtrTypesAndMasks ComponentPtrType
+    {
+      get { return SubDComponentPtrTypesAndMasks.FaceType; }
+    }
+
+    /// <summary>
+    /// Discards the cached subdivision and surface points for this face, so they are
+    /// recomputed on next use.
+    /// </summary>
+    /// <param name="clearNeighborhood">
+    /// If true, the cached points of the neighboring components are discarded too. Moving a
+    /// control net point changes the surface around it, not just at it, so pass true after
+    /// an edit unless you know only this face is affected.
+    /// </param>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public void ClearSavedSubdivisionPoints(bool clearNeighborhood)
+    {
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDFace_ClearSavedSubdivisionPoints(const_ptr_this, clearNeighborhood);
+      GC.KeepAlive(this);
     }
 
     #region properties
@@ -2394,10 +3360,37 @@ namespace Rhino.Geometry
     {
     }
 
+    internal SubDVertex(SubD subd, SubDComponentPtr cptr, uint id) : base(subd, cptr, id)
+    {
+    }
+
     internal override IntPtr UpdatePointer()
     {
       IntPtr const_ptr_subd = ParentSubD.ConstPointer();
-      return UnsafeNativeMethods.ON_SubDVertex_FromId(const_ptr_subd, Id);
+      return UnsafeNativeMethods.ON_SubD_VertexFromId(const_ptr_subd, Id);
+    }
+
+    internal override SubDComponentPtrTypesAndMasks ComponentPtrType
+    {
+      get { return SubDComponentPtrTypesAndMasks.VertexType; }
+    }
+
+    /// <summary>
+    /// Discards the cached subdivision and surface points for this vertex, so they are
+    /// recomputed on next use.
+    /// </summary>
+    /// <param name="clearNeighborhood">
+    /// If true, the cached points of the neighboring components are discarded too. Moving a
+    /// control net point changes the surface around it, not just at it, so pass true after
+    /// an edit unless you know only this vertex is affected.
+    /// </param>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public void ClearSavedSubdivisionPoints(bool clearNeighborhood)
+    {
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDVertex_ClearSavedSubdivisionPoints(const_ptr_this, clearNeighborhood);
+      GC.KeepAlive(this);
     }
 
     #region properties
@@ -2458,6 +3451,7 @@ namespace Rhino.Geometry
     /// Gets the component index of this vertex.
     /// </summary>
     /// <returns>The component index.</returns>
+    /// <since>8.30</since>
     [ConstOperation]
     public ComponentIndex ComponentIndex()
     {
@@ -2665,10 +3659,37 @@ namespace Rhino.Geometry
     {
     }
 
+    internal SubDEdge(SubD subd, SubDComponentPtr cptr, uint id) : base(subd, cptr, id)
+    {
+    }
+
     internal override IntPtr UpdatePointer()
     {
       IntPtr const_ptr_subd = ParentSubD.ConstPointer();
-      return UnsafeNativeMethods.ON_SubDEdge_FromId(const_ptr_subd, Id);
+      return UnsafeNativeMethods.ON_SubD_EdgeFromId(const_ptr_subd, Id);
+    }
+
+    internal override SubDComponentPtrTypesAndMasks ComponentPtrType
+    {
+      get { return SubDComponentPtrTypesAndMasks.EdgeType; }
+    }
+
+    /// <summary>
+    /// Discards the cached subdivision and surface points for this edge, so they are
+    /// recomputed on next use.
+    /// </summary>
+    /// <param name="clearNeighborhood">
+    /// If true, the cached points of the neighboring components are discarded too. Moving a
+    /// control net point changes the surface around it, not just at it, so pass true after
+    /// an edit unless you know only this edge is affected.
+    /// </param>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public void ClearSavedSubdivisionPoints(bool clearNeighborhood)
+    {
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDEdge_ClearSavedSubdivisionPoints(const_ptr_this, clearNeighborhood);
+      GC.KeepAlive(this);
     }
 
     #region properties
@@ -2779,7 +3800,194 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Gets or sets the sharpness of this edge.
+    /// <para>
+    /// The getter reports <see cref="SubDEdgeSharpness.Crease"/> for a crease edge; use
+    /// <see cref="GetSharpness(bool)">GetSharpness(false)</see> to get
+    /// <see cref="SubDEdgeSharpness.Smooth"/> for creases instead.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// Setting this goes through the parent SubD so that the neighboring edges and
+    /// vertices are updated too. Assign <see cref="SubDEdgeSharpness.Smooth"/> to make the
+    /// edge smooth again.
+    /// </remarks>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness Sharpness
+    {
+      get { return GetSharpness(true); }
+#if RHINO_SDK
+      set { ParentSubD.SetEdgeSharpness(new SubDEdge[] { this }, value, false); }
+#endif
+    }
+
+    /// <summary>
+    /// Gets true if this edge is smooth and has a nonzero sharpness.
+    /// A crease edge is not a sharp edge.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsSharp
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDEdge_IsSharp(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
 #endregion
+
+    /// <summary>
+    /// The vertex this edge starts at, taking <see cref="SubDComponent.ComponentDirection"/>
+    /// into account. This is <see cref="VertexFrom"/> for an edge in its natural
+    /// orientation and <see cref="VertexTo"/> for a reversed one.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDVertex RelativeVertexFrom
+    {
+      get { return RelativeVertexAt(0); }
+    }
+
+    /// <summary>
+    /// The vertex this edge ends at, taking <see cref="SubDComponent.ComponentDirection"/>
+    /// into account.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDVertex RelativeVertexTo
+    {
+      get { return RelativeVertexAt(1); }
+    }
+
+    /// <summary>
+    /// Gets one of this edge's two vertices, relative to the direction this edge is
+    /// referenced with.
+    /// </summary>
+    /// <param name="endIndex">0 for the start of the edge, 1 for the end.</param>
+    /// <returns>The vertex, or null if endIndex is out of range.</returns>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public SubDVertex RelativeVertexAt(int endIndex)
+    {
+      if (endIndex < 0 || endIndex > 1)
+        throw new ArgumentOutOfRangeException(nameof(endIndex), "endIndex must be 0 or 1.");
+
+      uint id = 0;
+      IntPtr ptr_vertex = UnsafeNativeMethods.ON_SubDEdgePtr_RelativeVertex(ConstComponentPtr(), endIndex, ref id);
+      GC.KeepAlive(this);
+      if (IntPtr.Zero == ptr_vertex)
+        return null;
+      return new SubDVertex(ParentSubD, ptr_vertex, id);
+    }
+
+    /// <summary>
+    /// The face on the left of this edge, with respect to the direction this edge is
+    /// referenced with. Null for a boundary edge with no face on that side, and for a
+    /// nonmanifold edge.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDFace RelativeFaceLeft
+    {
+      get { return RelativeFaceAt(0); }
+    }
+
+    /// <summary>
+    /// The face on the right of this edge, with respect to the direction this edge is
+    /// referenced with.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDFace RelativeFaceRight
+    {
+      get { return RelativeFaceAt(1); }
+    }
+
+    /// <summary>
+    /// Gets the face on one side of this edge, relative to the direction this edge is
+    /// referenced with.
+    /// </summary>
+    /// <param name="relativeFaceIndex">0 for the left side, 1 for the right side.</param>
+    /// <returns>
+    /// The face, with its <see cref="SubDComponent.ComponentDirection"/> set so its boundary
+    /// runs the same way as this edge. Null if there is no such face, or if the edge is
+    /// nonmanifold.
+    /// </returns>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public SubDFace RelativeFaceAt(int relativeFaceIndex)
+    {
+      if (relativeFaceIndex < 0 || relativeFaceIndex > 1)
+        throw new ArgumentOutOfRangeException(nameof(relativeFaceIndex), "relativeFaceIndex must be 0 or 1.");
+
+      uint id = 0;
+      var cptr = UnsafeNativeMethods.ON_SubDEdgePtr_RelativeFacePtr(ConstComponentPtr(), relativeFaceIndex, ref id);
+      GC.KeepAlive(this);
+      if (0 == id)
+        return null;
+      return new SubDFace(ParentSubD, cptr, id);
+    }
+
+    /// <summary>
+    /// Gets the sharpness of this edge, reporting
+    /// <see cref="SubDEdgeSharpness.Crease"/> for a crease edge.
+    /// </summary>
+    /// <returns>The sharpness of this edge.</returns>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public SubDEdgeSharpness GetSharpness()
+    {
+      return GetSharpness(true);
+    }
+
+    /// <summary>
+    /// Gets the sharpness of this edge.
+    /// </summary>
+    /// <param name="useCreaseSharpness">
+    /// If this edge is a crease and useCreaseSharpness is true, then
+    /// <see cref="SubDEdgeSharpness.Crease"/> is returned. If it is a crease and
+    /// useCreaseSharpness is false, then <see cref="SubDEdgeSharpness.Smooth"/> is
+    /// returned.
+    /// </param>
+    /// <returns>
+    /// The sharpness of a smooth edge, <see cref="SubDEdgeSharpness.Crease"/> for a crease
+    /// edge when useCreaseSharpness is true, and <see cref="SubDEdgeSharpness.Smooth"/> in
+    /// every other case.
+    /// </returns>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public SubDEdgeSharpness GetSharpness(bool useCreaseSharpness)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDEdge_GetSharpness(const_ptr_this, useCreaseSharpness, ref rc);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the sharpness of this edge at one of its ends.
+    /// </summary>
+    /// <param name="endIndex">
+    /// 0 for the <see cref="VertexFrom"/> end, 1 for the <see cref="VertexTo"/> end.
+    /// </param>
+    /// <param name="useCreaseSharpness">
+    /// If this edge is a crease and useCreaseSharpness is true, then
+    /// <see cref="SubDEdgeSharpness.CreaseValue"/> is returned.
+    /// </param>
+    /// <returns>The sharpness at that end, or 0.0 if this edge is not sharp.</returns>
+    /// <since>8.36</since>
+    [ConstOperation]
+    public double EndSharpness(int endIndex, bool useCreaseSharpness)
+    {
+      if (endIndex < 0 || endIndex > 1)
+        throw new ArgumentOutOfRangeException(nameof(endIndex), "endIndex must be 0 or 1.");
+
+      var const_ptr_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_SubDEdge_EndSharpness(const_ptr_this, (uint)endIndex, useCreaseSharpness);
+      GC.KeepAlive(this);
+      return rc;
+    }
 
     /// <summary>
     /// Retrieve a SubDFace from this edge.
@@ -2833,6 +4041,1524 @@ namespace Rhino.Geometry
 
   }
 
+  /// <summary>
+  /// Sharpness values for the two ends of a SubD edge.
+  /// <para>
+  /// A sharp SubD edge is an edge where the limit surface makes a tighter "fillet radius"
+  /// around the edge than a smooth edge would, while still staying smooth, unlike a crease
+  /// edge. It is achieved by applying the crease edge subdivision rules for the number of
+  /// subdivisions given by the sharpness value, and the smooth edge subdivision rules after
+  /// that. Sharpness can differ at the two ends of an edge.
+  /// </para>
+  /// </summary>
+  /// <remarks>
+  /// This is a value type wrapping two floats, and the default value is
+  /// <see cref="Smooth"/>. It is passed to and from the unmanaged library by value.
+  /// </remarks>
+  /// <seealso cref="SubDEdge.Sharpness"/>
+  [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 8)]
+  [DebuggerDisplay("{m_sharpness0}, {m_sharpness1}")]
+  public struct SubDEdgeSharpness : IEquatable<SubDEdgeSharpness>
+  {
+    #region Members
+    // These must stay two floats in this order: the unmanaged side marshals this struct
+    // by value as ON_SUBD_EDGE_SHARPNESS_STRUCT, which mirrors ON_SubDEdgeSharpness.
+    private float m_sharpness0;
+    private float m_sharpness1;
+    #endregion
+
+    #region Constants
+    // These mirror the ON_SubDEdgeSharpness statics. The native values are pinned by the
+    // SubDSharpness.StaticValues test in src4/rhino4/tests/subd/rhtest_subd_sharpness.cpp.
+
+    /// <summary>
+    /// The largest valid sharpness value, 4.0.
+    /// Valid SubD edge sharpness values are between 0.0 and MaximumValue.
+    /// </summary>
+    /// <since>8.36</since>
+    public const double MaximumValue = 4.0;
+
+    /// <summary>
+    /// The sharpness value of a smooth edge, 0.0.
+    /// </summary>
+    /// <since>8.36</since>
+    public const double SmoothValue = 0.0;
+
+    /// <summary>
+    /// The value used to indicate that an edge is a crease, <see cref="MaximumValue"/> + 1.0.
+    /// This is deliberately not a valid sharpness value: a crease edge is not a sharp edge.
+    /// It exists because it is often convenient to use a single value to describe both.
+    /// </summary>
+    /// <since>8.36</since>
+    public const double CreaseValue = MaximumValue + 1.0;
+
+    /// <summary>
+    /// If a sharpness is within Tolerance of an integer value, it is snapped to that
+    /// integer value. See <see cref="Sanitize(double)"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public const double Tolerance = 0.01;
+    #endregion
+
+    #region Constructors
+    /// <summary>
+    /// Creates a sharpness with the same value at both ends.
+    /// </summary>
+    /// <param name="sharpness">
+    /// Between 0.0 and <see cref="MaximumValue"/>, or <see cref="CreaseValue"/>.
+    /// </param>
+    /// <remarks>
+    /// If sharpness is not valid, the result is <see cref="Nan"/>.
+    /// </remarks>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness(double sharpness)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_FromConstant(sharpness, ref rc);
+      m_sharpness0 = rc.m_sharpness0;
+      m_sharpness1 = rc.m_sharpness1;
+    }
+
+    /// <summary>
+    /// Creates a sharpness that varies from one end of the edge to the other.
+    /// </summary>
+    /// <param name="sharpness0">
+    /// Sharpness at the start of the edge, between 0.0 and <see cref="MaximumValue"/>.
+    /// </param>
+    /// <param name="sharpness1">
+    /// Sharpness at the end of the edge, between 0.0 and <see cref="MaximumValue"/>.
+    /// </param>
+    /// <remarks>
+    /// If either value is not valid, the result is <see cref="Nan"/>.
+    /// Passing <see cref="CreaseValue"/> for both values gives <see cref="Crease"/>.
+    /// </remarks>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness(double sharpness0, double sharpness1)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_FromInterval(sharpness0, sharpness1, ref rc);
+      m_sharpness0 = rc.m_sharpness0;
+      m_sharpness1 = rc.m_sharpness1;
+    }
+
+    /// <summary>
+    /// Creates a sharpness that varies from one end of the edge to the other.
+    /// </summary>
+    /// <param name="sharpnessInterval">
+    /// Sharpness at the start and end of the edge. Both values must be between 0.0 and
+    /// <see cref="MaximumValue"/>.
+    /// </param>
+    /// <remarks>
+    /// If either value is not valid, the result is <see cref="Nan"/>.
+    /// </remarks>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness(Interval sharpnessInterval)
+      : this(sharpnessInterval.T0, sharpnessInterval.T1)
+    {
+    }
+
+    /// <summary>
+    /// Creates a sharpness with the same value at both ends, from a percentage.
+    /// This is useful in user interface code that expresses sharpness as a percentage.
+    /// </summary>
+    /// <param name="percentage">
+    /// Between 0.0 and 100.0, or <see cref="double.MaxValue"/> for a crease.
+    /// </param>
+    /// <returns>
+    /// A sharpness with constant value (percentage * <see cref="MaximumValue"/> / 100.0),
+    /// <see cref="Crease"/> if percentage is <see cref="double.MaxValue"/>,
+    /// or <see cref="Nan"/> if percentage is out of range.
+    /// </returns>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness FromConstantPercentage(double percentage)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_FromConstantPercentage(percentage, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Creates a sharpness that varies from one end of the edge to the other, from percentages.
+    /// This is useful in user interface code that expresses sharpness as a percentage.
+    /// </summary>
+    /// <param name="percentage0">
+    /// Percentage at the start of the edge, between 0.0 and 100.0,
+    /// or <see cref="double.MaxValue"/> for a crease.
+    /// </param>
+    /// <param name="percentage1">
+    /// Percentage at the end of the edge, between 0.0 and 100.0,
+    /// or <see cref="double.MaxValue"/> for a crease.
+    /// </param>
+    /// <returns>
+    /// A sharpness running from (percentage0 * <see cref="MaximumValue"/> / 100.0) to
+    /// (percentage1 * <see cref="MaximumValue"/> / 100.0),
+    /// <see cref="Crease"/> if both percentages are <see cref="double.MaxValue"/>,
+    /// or <see cref="Nan"/> otherwise. An edge is either a crease or it is not, so mixing
+    /// <see cref="double.MaxValue"/> with a percentage gives <see cref="Nan"/>.
+    /// </returns>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness FromIntervalPercentage(double percentage0, double percentage1)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_FromIntervalPercentage(percentage0, percentage1, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Creates a sharpness that varies from one end of the edge to the other, from percentages.
+    /// This is useful in user interface code that expresses sharpness as a percentage.
+    /// </summary>
+    /// <param name="percentageInterval">
+    /// Percentages at the start and end of the edge, each between 0.0 and 100.0,
+    /// or <see cref="double.MaxValue"/> for a crease.
+    /// </param>
+    /// <returns>See <see cref="FromIntervalPercentage(double, double)"/>.</returns>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness FromIntervalPercentage(Interval percentageInterval)
+    {
+      return FromIntervalPercentage(percentageInterval.T0, percentageInterval.T1);
+    }
+
+    /// <summary>
+    /// A sharpness of 0.0 at both ends, which is what a smooth edge has.
+    /// This is also the default value of a <see cref="SubDEdgeSharpness"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness Smooth
+    {
+      get { return default(SubDEdgeSharpness); }
+    }
+
+    /// <summary>
+    /// A sharpness of <see cref="MaximumValue"/> at both ends. This is the sharpest an
+    /// edge can be without being a crease.
+    /// </summary>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness Maximum
+    {
+      get { return new SubDEdgeSharpness(MaximumValue); }
+    }
+
+    /// <summary>
+    /// A sharpness of <see cref="CreaseValue"/> at both ends, used to indicate that an
+    /// edge is a crease rather than a sharp edge. <see cref="IsValid"/> is false for this
+    /// value; see <see cref="IsValidOrCrease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness Crease
+    {
+      get { return new SubDEdgeSharpness(CreaseValue, CreaseValue); }
+    }
+
+    /// <summary>
+    /// A sharpness whose ends are both NaN. This is what the factory methods return when
+    /// their input is not valid.
+    /// </summary>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness Nan
+    {
+      get
+      {
+        SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+        rc.m_sharpness0 = float.NaN;
+        rc.m_sharpness1 = float.NaN;
+        return rc;
+      }
+    }
+    #endregion
+
+    #region Properties
+    /// <summary>
+    /// Gets the sharpness at the start or the end of the edge.
+    /// </summary>
+    /// <param name="endIndex">0 for the start of the edge, 1 for the end.</param>
+    /// <returns>The sharpness, or NaN if endIndex is out of range.</returns>
+    /// <since>8.36</since>
+    public double this[int endIndex]
+    {
+      get
+      {
+        if (0 == endIndex)
+          return m_sharpness0;
+        if (1 == endIndex)
+          return m_sharpness1;
+        return double.NaN;
+      }
+    }
+
+    /// <summary>
+    /// Gets the sharpness at the start or the end of the edge.
+    /// </summary>
+    /// <param name="endIndex">0 for the start of the edge, 1 for the end.</param>
+    /// <returns>The sharpness, or NaN if endIndex is out of range.</returns>
+    /// <since>8.36</since>
+    public double EndSharpness(int endIndex)
+    {
+      return this[endIndex];
+    }
+
+    /// <summary>
+    /// Gets the average of the two end sharpness values.
+    /// </summary>
+    /// <since>8.36</since>
+    public double Average
+    {
+      get { return 0.5 * (m_sharpness0 + m_sharpness1); }
+    }
+
+    /// <summary>
+    /// Gets the smaller of the two end sharpness values.
+    /// </summary>
+    /// <since>8.36</since>
+    public double MinimumEndSharpness
+    {
+      get { return m_sharpness0 <= m_sharpness1 ? m_sharpness0 : m_sharpness1; }
+    }
+
+    /// <summary>
+    /// Gets the larger of the two end sharpness values.
+    /// </summary>
+    /// <since>8.36</since>
+    public double MaximumEndSharpness
+    {
+      get { return m_sharpness0 >= m_sharpness1 ? m_sharpness0 : m_sharpness1; }
+    }
+
+    /// <summary>
+    /// Gets <see cref="EndSharpness(int)">EndSharpness(1)</see> - EndSharpness(0),
+    /// or NaN if this is neither valid nor a crease.
+    /// </summary>
+    /// <since>8.36</since>
+    public double Delta
+    {
+      get { return UnsafeNativeMethods.ON_SubDEdgeSharpness_Delta(this); }
+    }
+
+    /// <summary>
+    /// Gets +1 if the sharpness increases along the edge, -1 if it decreases, and 0 if it
+    /// is constant. Returns <see cref="RhinoMath.UnsetIntIndex"/> if this is not valid.
+    /// </summary>
+    /// <since>8.36</since>
+    public int Trend
+    {
+      get { return UnsafeNativeMethods.ON_SubDEdgeSharpness_Trend(this); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends have the same valid sharpness value.
+    /// <see cref="Crease"/> and <see cref="Nan"/> are both false; see
+    /// <see cref="IsConstantOrCrease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsConstant
+    {
+      get { return GetBool(idxIsConstant, false); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends have the same valid sharpness value, or if this is
+    /// <see cref="Crease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsConstantOrCrease
+    {
+      get { return GetBool(idxIsConstant, true); }
+    }
+
+    /// <summary>
+    /// Gets true if this is valid and the two ends differ.
+    /// <see cref="Crease"/> and <see cref="Nan"/> are both false.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsVariable
+    {
+      get { return GetBool(idxIsVariable, false); }
+    }
+
+    /// <summary>
+    /// Gets true if <see cref="EndSharpness(int)">EndSharpness(0)</see> is less than
+    /// EndSharpness(1).
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsIncreasing
+    {
+      get { return GetBool(idxIsIncreasing, false); }
+    }
+
+    /// <summary>
+    /// Gets true if <see cref="EndSharpness(int)">EndSharpness(0)</see> is greater than
+    /// EndSharpness(1).
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsDecreasing
+    {
+      get { return GetBool(idxIsDecreasing, false); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends are 0.0, which is the sharpness of a smooth edge.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsZero
+    {
+      get { return GetBool(idxIsZero, false); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends are valid and at least one is greater than 0.0.
+    /// <see cref="Crease"/> and <see cref="Nan"/> are both false: a crease edge is not a
+    /// sharp edge.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsSharp
+    {
+      get { return GetBool(idxIsSharp, false); }
+    }
+
+    /// <summary>
+    /// Gets true if this is <see cref="Crease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsCrease
+    {
+      get { return GetBool(idxIsCrease, false); }
+    }
+
+    /// <summary>
+    /// Gets (<see cref="IsCrease"/> || <see cref="IsSharp"/>).
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsCreaseOrSharp
+    {
+      get { return GetBool(idxIsCreaseOrSharp, false); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends are between 0.0 and <see cref="MaximumValue"/>.
+    /// <see cref="Crease"/> and <see cref="Nan"/> are both false; see
+    /// <see cref="IsValidOrCrease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsValid
+    {
+      get { return GetBool(idxIsValid, false); }
+    }
+
+    /// <summary>
+    /// Gets true if both ends are between 0.0 and <see cref="MaximumValue"/>, or if this
+    /// is <see cref="Crease"/>.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsValidOrCrease
+    {
+      get { return GetBool(idxIsValid, true); }
+    }
+
+    /// <summary>
+    /// Gets the opposite of <see cref="IsValid"/>.
+    /// <see cref="Crease"/> and <see cref="Nan"/> are both true.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsNotValid
+    {
+      get { return !IsValid; }
+    }
+
+    /// <summary>
+    /// Gets the opposite of <see cref="IsValidOrCrease"/>.
+    /// <see cref="Nan"/> is true and <see cref="Crease"/> is false.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsNotValidNorCrease
+    {
+      get { return !IsValidOrCrease; }
+    }
+    #endregion
+
+    #region Methods
+    /// <summary>
+    /// Gets the sharpness this edge would have after one subdivision.
+    /// </summary>
+    /// <param name="endIndex">0 for the start of the edge, 1 for the end.</param>
+    /// <returns>
+    /// The subdivided sharpness, or <see cref="Smooth"/> if endIndex is out of range.
+    /// </returns>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness Subdivided(int endIndex)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_Subdivided(this, endIndex, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets this sharpness with its two end values swapped.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDEdgeSharpness Reversed()
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_Reversed(this, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Describes this sharpness as a percentage, for user interface code.
+    /// A constant sharpness gives a single percentage, a variable one gives a range, and
+    /// an invalid one gives a warning sign.
+    /// </summary>
+    /// <param name="orderMinToMax">
+    /// If true, a variable sharpness is formatted as min%-max%. If false, it is formatted
+    /// as <see cref="EndSharpness(int)">EndSharpness(0)</see>%-EndSharpness(1)%.
+    /// </param>
+    /// <since>8.36</since>
+    public string ToPercentageText(bool orderMinToMax)
+    {
+      using (var sw = new StringWrapper())
+      {
+        UnsafeNativeMethods.ON_SubDEdgeSharpness_ToPercentageText(this, orderMinToMax, sw.NonConstPointer);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Returns a string that represents this sharpness as a percentage.
+    /// </summary>
+    /// <since>8.36</since>
+    public override string ToString()
+    {
+      return ToPercentageText(false);
+    }
+
+    /// <summary>
+    /// Describes a single end sharpness value as a percentage, for user interface code.
+    /// </summary>
+    /// <param name="sharpness">
+    /// Between 0.0 and <see cref="MaximumValue"/>, or <see cref="CreaseValue"/>.
+    /// </param>
+    /// <returns>
+    /// A number followed by a percent sign, "crease" for <see cref="CreaseValue"/>, or a
+    /// warning sign if sharpness is not valid.
+    /// </returns>
+    /// <since>8.36</since>
+    public static string ToPercentageText(double sharpness)
+    {
+      using (var sw = new StringWrapper())
+      {
+        UnsafeNativeMethods.ON_SubDEdgeSharpness_EndValueToPercentageText(sharpness, sw.NonConstPointer);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Converts a sharpness value to a percentage between 0.0 and 100.0.
+    /// </summary>
+    /// <param name="sharpness">
+    /// Between 0.0 and <see cref="MaximumValue"/>, or <see cref="CreaseValue"/>.
+    /// </param>
+    /// <param name="creasePercentage">
+    /// The value to return when sharpness is <see cref="CreaseValue"/>.
+    /// </param>
+    /// <returns>
+    /// 100.0 * sharpness / <see cref="MaximumValue"/>, creasePercentage for
+    /// <see cref="CreaseValue"/>, or NaN if sharpness is not valid.
+    /// </returns>
+    /// <since>8.36</since>
+    public static double ToPercentage(double sharpness, double creasePercentage)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_ToPercentage(sharpness, creasePercentage);
+    }
+
+    /// <summary>
+    /// Determines whether a value can be used as an edge end sharpness.
+    /// </summary>
+    /// <param name="candidateValue">The value to check.</param>
+    /// <param name="creaseResult">
+    /// The value to return when candidateValue is <see cref="CreaseValue"/>.
+    /// </param>
+    /// <since>8.36</since>
+    public static bool IsValidValue(double candidateValue, bool creaseResult)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_IsValidValue(candidateValue, creaseResult);
+    }
+
+    /// <summary>
+    /// Verifies that sharpness is between 0.0 and <see cref="MaximumValue"/>, and snaps it
+    /// to an integer when it is within <see cref="Tolerance"/> of one.
+    /// </summary>
+    /// <param name="sharpness">The value to sanitize.</param>
+    /// <returns>A usable sharpness value, or 0.0 if sharpness is not valid.</returns>
+    /// <since>8.36</since>
+    public static double Sanitize(double sharpness)
+    {
+      return Sanitize(sharpness, 0.0);
+    }
+
+    /// <summary>
+    /// Verifies that sharpness is between 0.0 and <see cref="MaximumValue"/>, and snaps it
+    /// to an integer when it is within <see cref="Tolerance"/> of one.
+    /// </summary>
+    /// <param name="sharpness">The value to sanitize.</param>
+    /// <param name="invalidInputResult">The value to return when sharpness is not valid.</param>
+    /// <returns>A usable sharpness value, or invalidInputResult if sharpness is not valid.</returns>
+    /// <since>8.36</since>
+    public static double Sanitize(double sharpness, double invalidInputResult)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_Sanitize(sharpness, invalidInputResult);
+    }
+
+    /// <summary>
+    /// Converts a user facing slider value to an edge end sharpness value.
+    /// </summary>
+    /// <param name="sliderDomain">
+    /// The non empty domain of the slider, often <see cref="Interval.ZeroToOne"/>.
+    /// </param>
+    /// <param name="sliderValue">
+    /// A value in sliderDomain. sliderDomain.T0 maps to 0.0 and sliderDomain.T1 maps to
+    /// <see cref="MaximumValue"/>.
+    /// </param>
+    /// <param name="invalidInputResult">The value to return when the input is not valid.</param>
+    /// <since>8.36</since>
+    public static double SharpnessFromSliderValue(Interval sliderDomain, double sliderValue, double invalidInputResult)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_SharpnessFromSliderValue(sliderDomain, sliderValue, invalidInputResult);
+    }
+
+    /// <summary>
+    /// Converts a normalized slider value to an edge end sharpness value.
+    /// </summary>
+    /// <param name="normalizedSliderValue">Between 0.0 and 1.0.</param>
+    /// <returns>
+    /// normalizedSliderValue scaled to the range 0.0 to <see cref="MaximumValue"/>, or NaN
+    /// if it is out of range.
+    /// </returns>
+    /// <since>8.36</since>
+    public static double SharpnessFromNormalizedValue(double normalizedSliderValue)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_SharpnessFromNormalizedValue(normalizedSliderValue);
+    }
+
+    /// <summary>
+    /// Gets the union of two sharpness ranges, ignoring the ones that are zero, a crease,
+    /// or not valid.
+    /// </summary>
+    /// <param name="sharpness0">The first sharpness.</param>
+    /// <param name="sharpness1">The second sharpness.</param>
+    /// <returns>
+    /// The union of the nonzero valid inputs, or <see cref="Smooth"/> if there are none.
+    /// </returns>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness Union(SubDEdgeSharpness sharpness0, SubDEdgeSharpness sharpness1)
+    {
+      SubDEdgeSharpness rc = default(SubDEdgeSharpness);
+      UnsafeNativeMethods.ON_SubDEdgeSharpness_Union(sharpness0, sharpness1, ref rc);
+      return rc;
+    }
+
+    /// <summary>
+    /// Determines whether two sharpnesses meet with the same value, that is, whether
+    /// s0.<see cref="EndSharpness(int)">EndSharpness(1)</see> equals s1.EndSharpness(0).
+    /// </summary>
+    /// <param name="s0">The sharpness of the first edge.</param>
+    /// <param name="s1">The sharpness of the second edge.</param>
+    /// <since>8.36</since>
+    public static bool EqualEndSharpness(SubDEdgeSharpness s0, SubDEdgeSharpness s1)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_EqualEndSharpness(s0, s1);
+    }
+
+    /// <summary>
+    /// Determines whether two sharpnesses have the same <see cref="Trend"/> and meet with
+    /// the same value.
+    /// </summary>
+    /// <param name="s0">The sharpness of the first edge.</param>
+    /// <param name="s1">The sharpness of the second edge.</param>
+    /// <since>8.36</since>
+    public static bool EqualTrend(SubDEdgeSharpness s0, SubDEdgeSharpness s1)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_EqualTrend(s0, s1);
+    }
+
+    /// <summary>
+    /// Determines whether two sharpnesses have the same <see cref="Delta"/> and meet with
+    /// the same value.
+    /// </summary>
+    /// <param name="s0">The sharpness of the first edge.</param>
+    /// <param name="s1">The sharpness of the second edge.</param>
+    /// <since>8.36</since>
+    public static bool EqualDelta(SubDEdgeSharpness s0, SubDEdgeSharpness s1)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_EqualDelta(s0, s1);
+    }
+
+    /// <summary>
+    /// Builds a sequence of evenly changing sharpnesses for the edges of a chain.
+    /// </summary>
+    /// <param name="chainSharpnessRange">
+    /// The sharpness at the start of the chain and at the end of the chain.
+    /// </param>
+    /// <param name="edgeCount">The number of edges in the chain.</param>
+    /// <returns>
+    /// One sharpness per edge, or an empty array if the input is not valid.
+    /// </returns>
+    /// <since>8.36</since>
+    public static SubDEdgeSharpness[] CreateEdgeChainSharpness(Interval chainSharpnessRange, int edgeCount)
+    {
+      if (edgeCount <= 0)
+        return new SubDEdgeSharpness[0];
+
+      var rc = new SubDEdgeSharpness[edgeCount];
+      uint count = UnsafeNativeMethods.ON_SubDEdgeSharpness_SetEdgeChainSharpness(chainSharpnessRange, (uint)edgeCount, rc);
+      if (0 == count)
+        return new SubDEdgeSharpness[0];
+      return rc;
+    }
+
+    /// <summary>
+    /// Calculates the sharpness of a vertex from the sharp edges attached to it.
+    /// Vertices tagged as corners always have a sharpness of 0.0.
+    /// </summary>
+    /// <param name="vertexTag">The vertex tag.</param>
+    /// <param name="interiorCreaseVertexSharpness">
+    /// Only meaningful for an interior crease vertex, where it is the largest sharpness at
+    /// this vertex over the smooth edges of both sectors. This matters in low level SubD
+    /// evaluation code that only has information about one sector. When in doubt, pass 0.0.
+    /// </param>
+    /// <param name="sharpEdgeEndCount">
+    /// The number of sharp edges at the vertex whose sharpness at this vertex is nonzero.
+    /// </param>
+    /// <param name="maximumEdgeEndSharpness">
+    /// The largest sharp edge end sharpness at the vertex.
+    /// </param>
+    /// <returns>The sharpness to use when subdividing the vertex.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static double VertexSharpness(SubDVertexTag vertexTag, double interiorCreaseVertexSharpness, uint sharpEdgeEndCount, double maximumEdgeEndSharpness)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_VertexSharpness(vertexTag, interiorCreaseVertexSharpness, sharpEdgeEndCount, maximumEdgeEndSharpness);
+    }
+    #endregion
+
+    #region Equality
+    /// <summary>
+    /// Determines whether this sharpness has the same end values as another one.
+    /// </summary>
+    /// <param name="other">The sharpness to compare with.</param>
+    /// <since>8.36</since>
+    public bool Equals(SubDEdgeSharpness other)
+    {
+      return m_sharpness0 == other.m_sharpness0 && m_sharpness1 == other.m_sharpness1;
+    }
+
+    /// <summary>
+    /// Determines whether an object is a sharpness with the same end values as this one.
+    /// </summary>
+    /// <param name="obj">The object to compare with.</param>
+    /// <since>8.36</since>
+    public override bool Equals(object obj)
+    {
+      return obj is SubDEdgeSharpness && Equals((SubDEdgeSharpness)obj);
+    }
+
+    /// <summary>
+    /// Gets a hash code for this sharpness.
+    /// </summary>
+    /// <since>8.36</since>
+    public override int GetHashCode()
+    {
+      return m_sharpness0.GetHashCode() ^ (m_sharpness1.GetHashCode() << 1);
+    }
+
+    /// <summary>
+    /// Determines whether two sharpnesses have the same end values.
+    /// </summary>
+    /// <param name="a">The first sharpness.</param>
+    /// <param name="b">The second sharpness.</param>
+    /// <since>8.36</since>
+    public static bool operator ==(SubDEdgeSharpness a, SubDEdgeSharpness b)
+    {
+      return a.Equals(b);
+    }
+
+    /// <summary>
+    /// Determines whether two sharpnesses have different end values.
+    /// </summary>
+    /// <param name="a">The first sharpness.</param>
+    /// <param name="b">The second sharpness.</param>
+    /// <since>8.36</since>
+    public static bool operator !=(SubDEdgeSharpness a, SubDEdgeSharpness b)
+    {
+      return !a.Equals(b);
+    }
+    #endregion
+
+    #region Internals
+    // Must match the indices in ON_SubDEdgeSharpness_GetBool in on_subd.cpp.
+    const int idxIsConstant = 0;
+    const int idxIsVariable = 1;
+    const int idxIsIncreasing = 2;
+    const int idxIsDecreasing = 3;
+    const int idxIsZero = 4;
+    const int idxIsSharp = 5;
+    const int idxIsCrease = 6;
+    const int idxIsCreaseOrSharp = 7;
+    const int idxIsValid = 8;
+
+    bool GetBool(int which, bool creaseResult)
+    {
+      return UnsafeNativeMethods.ON_SubDEdgeSharpness_GetBool(this, which, creaseResult);
+    }
+    #endregion
+  }
+
+  /// <summary>
+  /// An ordered run of connected SubD edges.
+  /// <para>
+  /// Consecutive edges in a chain share a vertex, and each edge carries the direction it is
+  /// traversed with, so the chain has a start and an end even when the individual edges do
+  /// not agree on orientation. Chains are what commands like Bridge, Loft and edge
+  /// sharpening operate on.
+  /// </para>
+  /// </summary>
+  /// <remarks>
+  /// A chain holds a reference to its SubD and does not keep it alive across edits that
+  /// change the SubD topology; rebuild the chain after editing.
+  /// </remarks>
+  /// <since>8.36</since>
+  public sealed class SubDEdgeChain : IDisposable
+  {
+    IntPtr m_ptr; // ON_SubDEdgeChain*
+    readonly SubD m_subd;
+
+    internal IntPtr ConstPointer() { return m_ptr; }
+    internal IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Creates an empty chain in the given SubD.
+    /// </summary>
+    /// <param name="subd">The SubD the chain will run through.</param>
+    /// <since>8.36</since>
+    public SubDEdgeChain(SubD subd)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      m_subd = subd;
+      m_ptr = UnsafeNativeMethods.ON_SubDEdgeChain_New();
+    }
+
+    /// <summary>
+    /// Creates a chain containing a single starting edge. Grow it with
+    /// <see cref="AddAllNeighbors(ChainDirection, SubDChainType)"/> or
+    /// <see cref="AddOneNeighbor(ChainDirection, SubDChainType)"/>.
+    /// </summary>
+    /// <param name="subd">The SubD the chain runs through.</param>
+    /// <param name="startEdge">The edge to start from.</param>
+    /// <since>8.36</since>
+    public SubDEdgeChain(SubD subd, SubDEdge startEdge)
+      : this(subd)
+    {
+      if (null == startEdge)
+        throw new ArgumentNullException(nameof(startEdge));
+      Begin(startEdge);
+    }
+
+    /// <summary>
+    /// The SubD this chain runs through.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubD ParentSubD
+    {
+      get { return m_subd; }
+    }
+
+    /// <summary>
+    /// Clears the chain and restarts it from a single edge.
+    /// </summary>
+    /// <param name="startEdge">The edge to start from.</param>
+    /// <returns>The number of edges in the chain, so 1 on success and 0 on failure.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint Begin(SubDEdge startEdge)
+    {
+      if (null == startEdge)
+        throw new ArgumentNullException(nameof(startEdge));
+      IntPtr ptr_subd_ref = m_subd.SubDRefPointer();
+      IntPtr const_ptr_edge = startEdge.ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_BeginEdgeChain(m_ptr, ptr_subd_ref, const_ptr_edge);
+      GC.KeepAlive(startEdge);
+      GC.KeepAlive(m_subd);
+      return rc;
+    }
+
+    /// <summary>
+    /// The number of edges in this chain.
+    /// </summary>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint EdgeCount
+    {
+      get
+      {
+        uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_EdgeCount(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// True when the chain closes back on itself.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool IsClosedLoop
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_SubDEdgeChain_IsClosedLoop(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// True when the chain is a closed loop that is convex.
+    /// </summary>
+    /// <param name="strictlyConvex">
+    /// If true, a loop with three or more colinear points in a row is not convex.
+    /// </param>
+    /// <since>8.36</since>
+    public bool IsConvexLoop(bool strictlyConvex)
+    {
+      bool rc = UnsafeNativeMethods.ON_SubDEdgeChain_IsConvexLoop(m_ptr, strictlyConvex);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the edge at the given position in the chain. The returned edge carries the
+    /// direction the chain traverses it with, in
+    /// <see cref="SubDComponent.ComponentDirection"/>.
+    /// </summary>
+    /// <param name="index">The position in the chain.</param>
+    /// <returns>The edge, or null if index is out of range.</returns>
+    /// <since>8.36</since>
+    public SubDEdge EdgeAt(int index)
+    {
+      uint id = 0;
+      var cptr = UnsafeNativeMethods.ON_SubDEdgeChain_EdgePtrAt(m_ptr, index, ref id);
+      GC.KeepAlive(this);
+      if (0 == id)
+        return null;
+      return new SubDEdge(m_subd, cptr, id);
+    }
+
+    /// <summary>
+    /// Gets the vertex at the given position along the chain. A chain of N edges has N+1
+    /// vertices, or N when it is a closed loop.
+    /// </summary>
+    /// <param name="index">The position along the chain.</param>
+    /// <returns>The vertex, or null if index is out of range.</returns>
+    /// <since>8.36</since>
+    public SubDVertex VertexAt(int index)
+    {
+      uint id = 0;
+      IntPtr ptr_vertex = UnsafeNativeMethods.ON_SubDEdgeChain_VertexAt(m_ptr, index, ref id);
+      GC.KeepAlive(this);
+      if (IntPtr.Zero == ptr_vertex)
+        return null;
+      return new SubDVertex(m_subd, ptr_vertex, id);
+    }
+
+    /// <summary>
+    /// The edges of this chain, in order.
+    /// </summary>
+    /// <since>8.36</since>
+    public SubDEdge[] Edges
+    {
+      get
+      {
+        uint count = EdgeCount;
+        var rc = new SubDEdge[count];
+        for (int i = 0; i < rc.Length; i++)
+          rc[i] = EdgeAt(i);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Reverses the direction of the chain.
+    /// </summary>
+    /// <since>8.36</since>
+    public void Reverse()
+    {
+      UnsafeNativeMethods.ON_SubDEdgeChain_Reverse(m_ptr);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Removes every edge from the chain.
+    /// </summary>
+    /// <since>8.36</since>
+    public void Clear()
+    {
+      UnsafeNativeMethods.ON_SubDEdgeChain_ClearEdgeChain(m_ptr);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Extends the chain by one edge at one or both ends.
+    /// </summary>
+    /// <param name="direction">Which end or ends to extend.</param>
+    /// <param name="chainType">Which edges and vertices the chain is allowed through.</param>
+    /// <returns>The number of edges that were added.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint AddOneNeighbor(ChainDirection direction, SubDChainType chainType)
+    {
+      uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_AddOneNeighbor(m_ptr, direction, chainType);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Extends the chain as far as it will go at one or both ends.
+    /// </summary>
+    /// <param name="direction">Which end or ends to extend.</param>
+    /// <param name="chainType">Which edges and vertices the chain is allowed through.</param>
+    /// <returns>The number of edges that were added.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint AddAllNeighbors(ChainDirection direction, SubDChainType chainType)
+    {
+      uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_AddAllNeighbors(m_ptr, direction, chainType);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Adds an edge to whichever end of the chain it connects to.
+    /// </summary>
+    /// <param name="edge">The edge to add.</param>
+    /// <returns>
+    /// The number of edges that were added, so 1 on success and 0 if the edge does not
+    /// connect to either end, is already in the chain, or the chain is empty.
+    /// </returns>
+    /// <remarks>
+    /// This cannot start a chain: adding to an empty chain does nothing and returns 0.
+    /// Use <see cref="Begin(SubDEdge)"/> or the
+    /// <see cref="SubDEdgeChain(SubD, SubDEdge)"/> constructor for the first edge.
+    /// </remarks>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint AddEdge(SubDEdge edge)
+    {
+      if (null == edge)
+        throw new ArgumentNullException(nameof(edge));
+      IntPtr const_ptr_edge = edge.ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_AddEdge(m_ptr, const_ptr_edge);
+      GC.KeepAlive(edge);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Trims the chain down to the run of edges between firstEdge and lastEdge, removing
+    /// everything before firstEdge and everything after lastEdge.
+    /// </summary>
+    /// <param name="firstEdge">
+    /// The edge to keep as the new start of the chain. Pass null to keep the current start.
+    /// </param>
+    /// <param name="lastEdge">
+    /// The edge to keep as the new end of the chain. Pass null to keep the current end.
+    /// </param>
+    /// <returns>The number of edges that were removed.</returns>
+    /// <remarks>
+    /// This wraps ON_SubDEdgeChain::RemoveEdges, whose name reads as though the given
+    /// range is what gets removed. It is the other way round: the range is what survives.
+    /// Passing null for both edges therefore removes nothing and returns 0; use
+    /// <see cref="Clear"/> to empty the chain.
+    /// </remarks>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint TrimToRange(SubDEdge firstEdge, SubDEdge lastEdge)
+    {
+      IntPtr ptr_first = null == firstEdge ? IntPtr.Zero : firstEdge.ConstPointer();
+      IntPtr ptr_last = null == lastEdge ? IntPtr.Zero : lastEdge.ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubDEdgeChain_RemoveEdges(m_ptr, ptr_first, ptr_last);
+      GC.KeepAlive(firstEdge);
+      GC.KeepAlive(lastEdge);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sorts a set of edges into chains.
+    /// </summary>
+    /// <param name="subd">The SubD the edges belong to.</param>
+    /// <param name="edges">
+    /// The edges to sort. Where three or more of them meet at one vertex, no chain passes
+    /// through that vertex.
+    /// </param>
+    /// <returns>
+    /// One array of edges per chain, in chain order. Each returned edge carries the
+    /// direction its chain traverses it with.
+    /// </returns>
+    /// <remarks>
+    /// This uses the mark bits on the edges and vertices involved, so it must not run on
+    /// the same SubD from more than one thread at a time.
+    /// </remarks>
+    /// <since>8.36</since>
+    public static SubDEdge[][] SortEdgesIntoEdgeChains(SubD subd, IEnumerable<SubDEdge> edges)
+    {
+      if (null == subd)
+        throw new ArgumentNullException(nameof(subd));
+      if (null == edges)
+        throw new ArgumentNullException(nameof(edges));
+
+      SubDEdge[] edge_array = edges as SubDEdge[] ?? edges.ToArray();
+      if (0 == edge_array.Length)
+        return new SubDEdge[0][];
+
+      var unsorted = new SubDComponent.SubDComponentPtr[edge_array.Length];
+      for (int i = 0; i < edge_array.Length; i++)
+      {
+        if (null == edge_array[i])
+          throw new ArgumentException("edges contains a null edge.", nameof(edges));
+        unsorted[i] = edge_array[i].ConstComponentPtr();
+      }
+
+      // Every edge can end up in its own chain, and each chain adds a null separator.
+      var sorted = new SubDComponent.SubDComponentPtr[2 * unsorted.Length];
+      uint sorted_count = 0;
+      UnsafeNativeMethods.ON_SubDEdgeChain_SortEdgesIntoEdgeChains(
+        (uint)unsorted.Length, unsorted, (uint)sorted.Length, sorted, ref sorted_count);
+
+      // The result is one flat run with a null separator after each chain.
+      var chains = new List<SubDEdge[]>();
+      var current = new List<SubDEdge>();
+      for (uint i = 0; i < sorted_count; i++)
+      {
+        uint id = UnsafeNativeMethods.ON_SubDComponentPtr_ComponentId(sorted[i]);
+        if (0 == id)
+        {
+          if (current.Count > 0)
+          {
+            chains.Add(current.ToArray());
+            current.Clear();
+          }
+          continue;
+        }
+        current.Add(new SubDEdge(subd, sorted[i], id));
+      }
+      if (current.Count > 0)
+        chains.Add(current.ToArray());
+
+      GC.KeepAlive(edges);
+      GC.KeepAlive(subd);
+      return chains.ToArray();
+    }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Gets a NURBS curve on the SubD surface following this chain.
+    /// </summary>
+    /// <returns>The curve, or null if the chain is not valid.</returns>
+    /// <since>8.36</since>
+    public NurbsCurve ToNurbsCurve()
+    {
+      IntPtr ptr_curve = UnsafeNativeMethods.ON_SubDEdgeChain_EdgeSurfaceCurve(m_ptr);
+      GC.KeepAlive(this);
+      return GeometryBase.CreateGeometryHelper(ptr_curve, null) as NurbsCurve;
+    }
+
+    /// <summary>
+    /// Gets a NURBS curve suitable for lofting SubDs, following this chain.
+    /// </summary>
+    /// <returns>The curve, or null if the chain is not valid.</returns>
+    /// <since>8.36</since>
+    public NurbsCurve ToLoftCurve()
+    {
+      IntPtr ptr_curve = UnsafeNativeMethods.ON_SubDEdgeChain_LoftCurve(m_ptr);
+      GC.KeepAlive(this);
+      return GeometryBase.CreateGeometryHelper(ptr_curve, null) as NurbsCurve;
+    }
+#endif
+
+    /// <summary>
+    /// Frees the unmanaged chain.
+    /// </summary>
+    /// <since>8.36</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Finalizer.
+    /// </summary>
+    ~SubDEdgeChain()
+    {
+      Dispose(false);
+    }
+
+    void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_SubDEdgeChain_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }
+  
+  /// <summary>
+  /// Identifies a point on the surface of a <see cref="SubD"/>.
+  /// <para>
+  /// SubDs have no global (u,v) parameterization. Instead a point on the surface
+  /// is identified relative to a component of the SubD: a vertex, a point on an
+  /// edge, or a point inside a face. A point inside a face is given by the index
+  /// of the face corner it belongs to plus two parameters inside that corner,
+  /// because a face with five or more sides has no single well behaved
+  /// (u,v) domain.
+  /// </para>
+  /// <para>
+  /// Use <see cref="SubD.ClosestPoint(Point3d, out Point3d, out SubDComponentParameter)"/>
+  /// to find a parameter and <see cref="SubD.Evaluate(SubDComponentParameter, out Point3d)"/>
+  /// and its overloads to evaluate one.
+  /// </para>
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential)]
+  public struct SubDComponentParameter : IEquatable<SubDComponentParameter>
+  {
+    // These fields mirror ON_SUBD_COMPONENT_PARAMETER_STRUCT and are marshalled
+    // to and from ON_SubDComponentParameter. Do not reorder them.
+    internal uint m_component_type; // ON_SubDComponentPtr::Type: 0 unset, 2 vertex, 4 edge, 6 face
+    internal uint m_component_id;
+    internal uint m_component_dir;
+    internal uint m_value_a;
+    internal uint m_value_b;
+    internal uint m_reserved;
+    internal double m_p0;
+    internal double m_p1;
+
+    private const uint component_type_unset = 0;
+    private const uint component_type_vertex = 2;
+    private const uint component_type_edge = 4;
+    private const uint component_type_face = 6;
+
+    /// <summary>
+    /// The unset parameter. It does not identify a point on any SubD.
+    /// </summary>
+    /// <since>9.0</since>
+    public static SubDComponentParameter Unset
+    {
+      get
+      {
+        var rc = new SubDComponentParameter
+        {
+          m_component_type = component_type_unset,
+          m_p0 = RhinoMath.UnsetValue,
+          m_p1 = RhinoMath.UnsetValue
+        };
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Creates a parameter that identifies the surface point at a SubD vertex.
+    /// </summary>
+    /// <param name="vertexId">The id of a SubD vertex.</param>
+    /// <param name="activeFaceId">
+    /// The id of a face attached to the vertex, or 0 to let the SubD choose one.
+    /// A vertex where several faces meet with a crease has a different surface
+    /// normal in each sector, so evaluation needs to know which face is meant.
+    /// </param>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static SubDComponentParameter CreateVertexParameter(uint vertexId, uint activeFaceId)
+    {
+      var rc = Unset;
+      if (vertexId == 0)
+        return rc;
+      rc.m_component_type = component_type_vertex;
+      rc.m_component_id = vertexId;
+      rc.m_value_b = activeFaceId;
+      return rc;
+    }
+
+    /// <summary>
+    /// Creates a parameter that identifies a surface point on a SubD edge.
+    /// </summary>
+    /// <param name="edgeId">The id of a SubD edge.</param>
+    /// <param name="edgeParameter">
+    /// A value between 0 and 1. 0 is the edge's start vertex and 1 is its end
+    /// vertex.
+    /// </param>
+    /// <param name="activeFaceId">
+    /// The id of a face attached to the edge, or 0 to let the SubD choose one.
+    /// A crease edge has a different surface normal on each side.
+    /// </param>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static SubDComponentParameter CreateEdgeParameter(uint edgeId, double edgeParameter, uint activeFaceId)
+    {
+      var rc = Unset;
+      if (edgeId == 0 || !RhinoMath.IsValidDouble(edgeParameter) || edgeParameter < 0.0 || edgeParameter > 1.0)
+        return rc;
+      rc.m_component_type = component_type_edge;
+      rc.m_component_id = edgeId;
+      rc.m_value_a = activeFaceId;
+      rc.m_p0 = edgeParameter;
+      return rc;
+    }
+
+    /// <summary>
+    /// Creates a parameter that identifies a surface point inside a SubD face.
+    /// </summary>
+    /// <param name="faceId">The id of a SubD face.</param>
+    /// <param name="faceEdgeCount">
+    /// The number of edges of the face. Must be 3 or more.
+    /// </param>
+    /// <param name="cornerIndex">
+    /// The index of the face corner the parameters are measured in.
+    /// Must be less than <paramref name="faceEdgeCount"/>.
+    /// </param>
+    /// <param name="cornerS">
+    /// A value between 0 and 1/2 measured from the corner vertex towards the
+    /// midpoint of the edge that leaves the corner.
+    /// </param>
+    /// <param name="cornerT">
+    /// A value between 0 and 1/2 measured from the corner vertex towards the
+    /// midpoint of the edge that enters the corner.
+    /// </param>
+    /// <remarks>
+    /// (0,0) is the corner vertex and (1/2,1/2) is the center of the face.
+    /// </remarks>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static SubDComponentParameter CreateFaceParameter(
+      uint faceId,
+      int faceEdgeCount,
+      int cornerIndex,
+      double cornerS,
+      double cornerT)
+    {
+      var rc = Unset;
+      if (faceId == 0 || faceEdgeCount < 3 || cornerIndex < 0 || cornerIndex >= faceEdgeCount)
+        return rc;
+      if (!RhinoMath.IsValidDouble(cornerS) || cornerS < 0.0 || cornerS > 0.5)
+        return rc;
+      if (!RhinoMath.IsValidDouble(cornerT) || cornerT < 0.0 || cornerT > 0.5)
+        return rc;
+      rc.m_component_type = component_type_face;
+      rc.m_component_id = faceId;
+      rc.m_value_a = (uint)cornerIndex;
+      rc.m_value_b = (uint)faceEdgeCount;
+      rc.m_p0 = cornerS;
+      rc.m_p1 = cornerT;
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets true if this parameter identifies a point on a SubD.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsSet
+    {
+      get { return m_component_id != 0 && m_component_type != component_type_unset; }
+    }
+
+    /// <summary>
+    /// Gets the id of the SubD component this parameter is relative to, or 0 if
+    /// this parameter is not set.
+    /// </summary>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public uint ComponentId
+    {
+      get { return IsSet ? m_component_id : 0; }
+    }
+
+    /// <summary>
+    /// Gets the component index of the SubD component this parameter is relative
+    /// to. It is <see cref="ComponentIndex.Unset"/> if this parameter is not set.
+    /// </summary>
+    /// <since>9.0</since>
+    public ComponentIndex ComponentIndex
+    {
+      get
+      {
+        if (IsSet)
+        {
+          switch (m_component_type)
+          {
+            case component_type_vertex:
+              return new ComponentIndex(ComponentIndexType.SubdVertex, (int)m_component_id);
+            case component_type_edge:
+              return new ComponentIndex(ComponentIndexType.SubdEdge, (int)m_component_id);
+            case component_type_face:
+              return new ComponentIndex(ComponentIndexType.SubdFace, (int)m_component_id);
+          }
+        }
+        return ComponentIndex.Unset;
+      }
+    }
+    
+    /// <summary>
+    /// Gets true if this parameter identifies the surface point at a SubD vertex.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsVertexParameter
+    {
+      get { return IsSet && m_component_type == component_type_vertex; }
+    }
+
+    /// <summary>
+    /// Gets true if this parameter identifies a surface point on a SubD edge.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsEdgeParameter
+    {
+      get { return IsSet && m_component_type == component_type_edge; }
+    }
+
+    /// <summary>
+    /// Gets true if this parameter identifies a surface point inside a SubD face.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsFaceParameter
+    {
+      get { return IsSet && m_component_type == component_type_face; }
+    }
+
+    /// <summary>
+    /// Gets the id of the face this parameter uses to resolve which sector of a
+    /// vertex or which side of an edge it means, or 0 if there is none.
+    /// It is always 0 when <see cref="IsFaceParameter"/> is true; use
+    /// <see cref="ComponentId"/> in that case.
+    /// </summary>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public uint ActiveFaceId
+    {
+      get
+      {
+        if (IsVertexParameter) return m_value_b;
+        if (IsEdgeParameter) return m_value_a;
+        return 0;
+      }
+    }
+    
+    /// <summary>
+    /// Gets a value between 0 and 1 identifying a point on the edge, or
+    /// <see cref="double.NaN"/> if <see cref="IsEdgeParameter"/> is false.
+    /// </summary>
+    /// <since>9.0</since>
+    public double EdgeParameter
+    {
+      get { return IsEdgeParameter ? m_p0 : double.NaN; }
+    }
+
+    /// <summary>
+    /// Gets the number of edges of the face, or 0 if
+    /// <see cref="IsFaceParameter"/> is false.
+    /// </summary>
+    /// <since>9.0</since>
+    public int FaceEdgeCount
+    {
+      get { return IsFaceParameter ? (int)m_value_b : 0; }
+    }
+
+    /// <summary>
+    /// Gets the index of the face corner the face parameters are measured in, or
+    /// -1 if <see cref="IsFaceParameter"/> is false.
+    /// </summary>
+    /// <since>9.0</since>
+    public int FaceCornerIndex
+    {
+      get { return IsFaceParameter ? (int)m_value_a : -1; }
+    }
+
+    /// <summary>
+    /// Gets the two parameters inside the face corner identified by
+    /// <see cref="FaceCornerIndex"/>. Both run from 0 to 1/2: (0,0) is the corner
+    /// vertex and (1/2,1/2) is the center of the face. X runs towards the
+    /// midpoint of the edge leaving the corner and Y towards the midpoint of the
+    /// edge entering it. The point is <see cref="Point2d.Unset"/> if
+    /// <see cref="IsFaceParameter"/> is false.
+    /// </summary>
+    /// <since>9.0</since>
+    public Point2d FaceCornerParameters
+    {
+      get { return IsFaceParameter ? new Point2d(m_p0, m_p1) : Point2d.Unset; }
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+      if (!IsSet)
+        return "Unset";
+      if (IsVertexParameter)
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture, "v{0}", m_component_id);
+      if (IsEdgeParameter)
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture, "e{0}({1})", m_component_id, m_p0);
+      return string.Format(
+        System.Globalization.CultureInfo.InvariantCulture,
+        "f{0}.{1}({2},{3})", m_component_id, m_value_a, m_p0, m_p1);
+    }
+
+    /// <inheritdoc/>
+    /// <since>9.0</since>
+    public bool Equals(SubDComponentParameter other)
+    {
+      if (!IsSet || !other.IsSet)
+        return IsSet == other.IsSet;
+      return m_component_type == other.m_component_type
+        && m_component_id == other.m_component_id
+        && m_component_dir == other.m_component_dir
+        && m_value_a == other.m_value_a
+        && m_value_b == other.m_value_b
+        && m_p0.Equals(other.m_p0)
+        && m_p1.Equals(other.m_p1);
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object obj)
+    {
+      return obj is SubDComponentParameter other && Equals(other);
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+      if (!IsSet)
+        return 0;
+      return m_component_type.GetHashCode()
+        ^ m_component_id.GetHashCode()
+        ^ m_value_a.GetHashCode()
+        ^ m_p0.GetHashCode()
+        ^ m_p1.GetHashCode();
+    }
+
+    /// <summary>
+    /// Determines whether two parameters are equal.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool operator ==(SubDComponentParameter a, SubDComponentParameter b)
+    {
+      return a.Equals(b);
+    }
+    
+    /// <summary>
+    /// Determines whether two parameters are different.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool operator !=(SubDComponentParameter a, SubDComponentParameter b)
+    {
+      return !a.Equals(b);
+    }
+
+  }
 }
 
 namespace Rhino.Geometry.Collections
@@ -2840,7 +5566,7 @@ namespace Rhino.Geometry.Collections
   /// <summary>
   /// Provides access to all the vertices and vertex-related functionality of a SubD
   /// </summary>
-  public class SubDVertexList
+  public class SubDVertexList : IEnumerable<SubDVertex>
   {
     SubD m_subd;
     internal SubDVertexList(SubD parent)
@@ -2893,7 +5619,7 @@ namespace Rhino.Geometry.Collections
     public SubDVertex Find(uint id)
     {
       IntPtr const_subd_pointer = m_subd.ConstPointer();
-      IntPtr ptr_vertex = UnsafeNativeMethods.ON_SubDVertex_FromId(const_subd_pointer, id);
+      IntPtr ptr_vertex = UnsafeNativeMethods.ON_SubD_VertexFromId(const_subd_pointer, id);
       if (ptr_vertex != IntPtr.Zero)
         return new SubDVertex(m_subd, ptr_vertex, id);
       GC.KeepAlive(m_subd);
@@ -2911,6 +5637,43 @@ namespace Rhino.Geometry.Collections
       if (id < 0)
         throw new IndexOutOfRangeException();
       return Find((uint)id);
+    }
+
+    /// <summary>
+    /// Implementation of IEnumerable, so a vertex list can be used with foreach and LINQ
+    /// the same way <see cref="SubDEdgeList"/> and <see cref="SubDFaceList"/> can.
+    /// </summary>
+    /// <remarks>
+    /// Note that this list has both a <see cref="First"/> property and, now that it is
+    /// enumerable, a LINQ First() extension method. They disagree on an empty SubD: the
+    /// property returns null and First() throws.
+    /// </remarks>
+    /// <since>8.36</since>
+    public IEnumerator<SubDVertex> GetEnumerator()
+    {
+      return VertexEnumerator().GetEnumerator();
+    }
+
+    /// <since>8.36</since>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return VertexEnumerator().GetEnumerator();
+    }
+
+    /// <summary>
+    /// Walks the SubD's linked list of vertices on the active level.
+    /// </summary>
+    IEnumerable<SubDVertex> VertexEnumerator()
+    {
+      IntPtr const_ptr_subd = m_subd.ConstPointer();
+      uint id = 0;
+      IntPtr const_ptr_vertex = UnsafeNativeMethods.ON_SubD_FirstVertex(const_ptr_subd, ref id);
+      while (const_ptr_vertex != IntPtr.Zero)
+      {
+        yield return new SubDVertex(m_subd, const_ptr_vertex, id);
+        const_ptr_vertex = UnsafeNativeMethods.ON_SubDVertex_GetNext(const_ptr_vertex, ref id);
+      }
+      GC.KeepAlive(m_subd);
     }
 
     /// <summary>
@@ -2941,6 +5704,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertexIndices">list of indices for the vertices to set tags on</param>
     /// <param name="tag">The type of vertex tag</param>
+    /// <since>8.30</since>
     public void SetVertexTags(IEnumerable<int> vertexIndices, SubDVertexTag tag)
     {
       if (!SubD.IsSubDVertexTagDefined(tag))
@@ -2965,6 +5729,7 @@ namespace Rhino.Geometry.Collections
     /// </summary>
     /// <param name="vertices">list of vertices to set a specific tag on</param>
     /// <param name="tag">The type of vertex tag</param>
+    /// <since>8.30</since>
     public void SetVertexTags(IEnumerable<SubDVertex> vertices, SubDVertexTag tag)
     {
       if (!SubD.IsSubDVertexTagDefined(tag))
@@ -3027,7 +5792,7 @@ namespace Rhino.Geometry.Collections
     public SubDEdge Find(uint id)
     {
       IntPtr const_subd_pointer = m_subd.ConstPointer();
-      IntPtr ptr_edge = UnsafeNativeMethods.ON_SubDEdge_FromId(const_subd_pointer, id);
+      IntPtr ptr_edge = UnsafeNativeMethods.ON_SubD_EdgeFromId(const_subd_pointer, id);
       if (ptr_edge != IntPtr.Zero)
         return new SubDEdge(m_subd, ptr_edge, id);
       GC.KeepAlive(m_subd);
@@ -3161,6 +5926,33 @@ namespace Rhino.Geometry.Collections
       GC.KeepAlive(edges);
       GC.KeepAlive(m_subd);
     }
+
+    /// <summary>
+    /// Gets the edge between two vertices, adding a smooth edge if there is not one yet.
+    /// </summary>
+    /// <param name="v0">First vertex.</param>
+    /// <param name="v1">Second vertex.</param>
+    /// <returns>The existing or newly added edge, or null on failure.</returns>
+    /// <since>8.36</since>
+    public SubDEdge FindOrAdd(SubDVertex v0, SubDVertex v1)
+    {
+      if (null == v0)
+        throw new ArgumentNullException(nameof(v0));
+      if (null == v1)
+        throw new ArgumentNullException(nameof(v1));
+
+      IntPtr ptr_subd = m_subd.NonConstPointer();
+      IntPtr ptr_v0 = v0.NonConstPointer();
+      IntPtr ptr_v1 = v1.NonConstPointer();
+      uint id = 0;
+      var cptr = UnsafeNativeMethods.ON_SubD_FindOrAddEdge(ptr_subd, ptr_v0, ptr_v1, ref id);
+      GC.KeepAlive(v0);
+      GC.KeepAlive(v1);
+      GC.KeepAlive(m_subd);
+      if (0 == id)
+        return null;
+      return new SubDEdge(m_subd, cptr, id);
+    }
   }
 
   /// <summary> All faces in a SubD </summary>
@@ -3199,7 +5991,7 @@ namespace Rhino.Geometry.Collections
     public SubDFace Find(uint id)
     {
       IntPtr const_subd_pointer = m_subd.ConstPointer();
-      IntPtr ptr_face = UnsafeNativeMethods.ON_SubDFace_FromId(const_subd_pointer, id);
+      IntPtr ptr_face = UnsafeNativeMethods.ON_SubD_FaceFromId(const_subd_pointer, id);
       if (ptr_face != IntPtr.Zero)
         return new SubDFace(m_subd, ptr_face, id);
       GC.KeepAlive(m_subd);
@@ -3337,6 +6129,45 @@ namespace Rhino.Geometry.Collections
         "Impossible to add this face to this SubD.");
 
       GC.KeepAlive(m_subd);
+      return new SubDFace(m_subd, ptr_face, id);
+    }
+
+    /// <summary>
+    /// Adds a face bounded by the given edges.
+    /// </summary>
+    /// <param name="edges">
+    /// The edges of the new face, in order around its boundary. There must be at least
+    /// three. Each edge is traversed according to its
+    /// <see cref="SubDComponent.ComponentDirection"/>, so consecutive edges have to meet:
+    /// the end vertex of one is the start vertex of the next. Set ComponentDirection on the
+    /// edges before calling this to orient the loop.
+    /// </param>
+    /// <returns>The new face, or null if the edges do not form a usable boundary.</returns>
+    /// <since>8.36</since>
+    public SubDFace Add(IEnumerable<SubDEdge> edges)
+    {
+      if (null == edges)
+        throw new ArgumentNullException(nameof(edges));
+
+      SubDEdge[] edge_array = edges as SubDEdge[] ?? edges.ToArray();
+      if (edge_array.Length < 3)
+        throw new ArgumentException("A SubD face needs at least 3 edges.", nameof(edges));
+
+      IntPtr ptr_subd = m_subd.NonConstPointer();
+      var cptrs = new SubDComponent.SubDComponentPtr[edge_array.Length];
+      for (int i = 0; i < edge_array.Length; i++)
+      {
+        if (null == edge_array[i])
+          throw new ArgumentException("edges contains a null edge.", nameof(edges));
+        cptrs[i] = edge_array[i].NonConstComponentPtr();
+      }
+
+      uint id = 0;
+      IntPtr ptr_face = UnsafeNativeMethods.ON_SubD_AddFaceFromEdgePtrs(ptr_subd, (uint)cptrs.Length, cptrs, ref id);
+      GC.KeepAlive(edges);
+      GC.KeepAlive(m_subd);
+      if (IntPtr.Zero == ptr_face || 0 == id)
+        return null;
       return new SubDFace(m_subd, ptr_face, id);
     }
 

@@ -405,19 +405,7 @@ RH_C_FUNCTION bool ON_Curve_GetLength(const ON_Curve* pCurve, double* length, do
   bool rc = false;
   if (pCurve && length)
   {
-    // https://mcneel.myjetbrains.com/youtrack/issue/RH-46324
-    // For whatever reason, a ON_NurbsCurve*, not a TL_NurbsCurve*, was passed in
-    // which means it's vtable is incorrectly set. This fix will ensure NURBS
-    // curves always return a length.
-    const ON_NurbsCurve* on_nc = ON_NurbsCurve::Cast(pCurve);
-    if (nullptr != on_nc)
-    {
-      const TL_NurbsCurve* tl_nc = TL_NurbsCurve::Promote(on_nc);
-      if (nullptr != tl_nc)
-        rc = tl_nc->GetLength(length, fractional_tol, _sub_domain) ? true : false;
-    }
-    if (!rc)
-      rc = pCurve->GetLength(length, fractional_tol, _sub_domain) ? true : false;
+    rc = pCurve->GetLength(length, fractional_tol, _sub_domain) ? true : false;
   }
   return rc;
 }
@@ -631,6 +619,34 @@ RH_C_FUNCTION bool ONC_JoinCurves(const ON_SimpleArray<const ON_Curve*>* pInCurv
     int count = ON_JoinCurves(*pInCurves, *pOutCurves, joinTolerance, bPreserveDirection, key);
     rc = (count > 0);
   }
+  return rc;
+}
+
+RH_C_FUNCTION bool ONC_SortCurveEnds(const ON_SimpleArray<const ON_Curve*>* pInCurves, ON_SimpleArray<int>* pOutSizes,
+  ON_SimpleArray<int>* pOutIds, ON_SimpleArray<int>* pOutRev, ON_SimpleArray<int>* pOutSingles, double joinTol)
+{
+  bool rc = false;
+  if (joinTol < ON_ZERO_TOLERANCE) joinTol = ON_ZERO_TOLERANCE;
+
+  if (pInCurves && pOutSizes && pOutIds && pOutRev && pOutSingles)
+  {
+    ON_ClassArray<ON_SimpleArray<CurveJoinSeg>> sortings;
+    rc = ON_SortCurveEnds(*pInCurves, joinTol, 0, false, false, sortings, *pOutSingles);
+    if (rc)
+    {
+      pOutSizes->SetCapacity(sortings.Count());
+      for (const ON_SimpleArray<CurveJoinSeg>& sorting : sortings)
+      {
+        pOutSizes->Append(sorting.Count());
+        for (const CurveJoinSeg& seg : sorting)
+        {
+          pOutIds->Append(seg.id);
+          pOutRev->Append(seg.bRev ? 1 : 0);
+        }
+      }
+    }
+  }
+
   return rc;
 }
 
@@ -880,6 +896,10 @@ RH_C_FUNCTION bool RHC_RhExtractCurveControlPolygon(const ON_Curve* pCurve, ON_P
   return rc;
 }
 
+#endif
+
+// ONC_SpanVector uses only public opennurbs (ON_Curve::SpanVector), so it is
+// available to Rhino3dm builds and must stay outside the block above.
 RH_C_FUNCTION void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>* vector)
 {
   if (vector)
@@ -891,4 +911,938 @@ RH_C_FUNCTION void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>*
     }
   }
 }
+
+
+RH_C_FUNCTION ON_CurveKinkDefinition* ON_CurveKinkDefinition_New(ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return new ON_CurveKinkDefinition(*p);
+
+  return new ON_CurveKinkDefinition();
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_Delete(ON_CurveKinkDefinition* p)
+{
+  if (p)
+    delete p;
+}
+
+RH_C_FUNCTION ON_CurveKinkDefinition* ON_CurveKinkDefinition_Duplicate(ON_CurveKinkDefinition* p)
+{
+  ON_CurveKinkDefinition* rc = nullptr;
+  if (p)
+    rc = new ON_CurveKinkDefinition(*p);
+  return rc;
+}
+
+RH_C_FUNCTION double ON_CurveKinkDefinition_KinkAngleDegrees(const ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return p->KinkAngleDegrees();
+  return ON_DBL_QNAN;
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_SetKinkAngleDegrees(ON_CurveKinkDefinition* p, double value)
+{
+  if (p)
+    p->SetKinkAngleDegrees(value);
+}
+
+RH_C_FUNCTION double ON_CurveKinkDefinition_CurvatureKinkZeroTolerance(const ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return p->CurvatureKinkZeroTolerance();
+  return ON_DBL_QNAN;
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_SetCurvatureKinkZeroTolerance(ON_CurveKinkDefinition* p, double value)
+{
+  if (p)
+    p->SetCurvatureKinkZeroTolerance(value);
+}
+
+RH_C_FUNCTION double ON_CurveKinkDefinition_CurvatureKinkRadiusRatio(const ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return p->CurvatureKinkRadiusRatio();
+  return ON_DBL_QNAN;
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_SetCurvatureKinkRadiusRatio(ON_CurveKinkDefinition* p, double value)
+{
+  if (p)
+    p->SetCurvatureKinkRadiusRatio(value);
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_KinkAtTangentChange(const ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return p->KinkAtTangentChange();
+  return false;
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_SetKinkAtTangentChange(ON_CurveKinkDefinition* p, bool value)
+{
+  if (p)
+    p->SetKinkAtTangentChange(value);
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_KinkAtCurvatureChange(const ON_CurveKinkDefinition* p)
+{
+  if (p)
+    return p->KinkAtCurvatureChange();
+  return false;
+}
+
+RH_C_FUNCTION void ON_CurveKinkDefinition_SetKinkAtCurvatureChange(ON_CurveKinkDefinition* p, bool value)
+{
+  if (p)
+    p->SetKinkAtCurvatureChange(value);
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsTangentKink(const ON_CurveKinkDefinition* p, const ON_Curve* pCurve, double t)
+{
+  if (p && pCurve)
+    return p->IsTangentKink(*pCurve, t);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsCurvatureKink(const ON_CurveKinkDefinition* p, const ON_Curve* pCurve, double t)
+{
+  if (p && pCurve)
+    return p->IsCurvatureKink(*pCurve, t);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsKink(const ON_CurveKinkDefinition* p, const ON_Curve* pCurve, double t)
+{
+  if (p && pCurve)
+    return p->IsKink(*pCurve, t);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsTangentKink_FromVectors(const ON_CurveKinkDefinition* p, ON_3DVECTOR_STRUCT tangentFromBelow, ON_3DVECTOR_STRUCT tangentFromAbove)
+{
+  if (p)
+  {
+    const ON_3dVector* _tangentFromBelow = (const ON_3dVector*)(&tangentFromBelow);
+    const ON_3dVector* _tangentFromAbove = (const ON_3dVector*)(&tangentFromAbove);
+
+    return p->IsTangentKink(*_tangentFromBelow, *_tangentFromAbove);
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsCurvatureKink_FromVectors(const ON_CurveKinkDefinition* p, ON_3DVECTOR_STRUCT curvatureFromBelow, ON_3DVECTOR_STRUCT curvatureFromAbove)
+{
+  if (p)
+  {
+    const ON_3dVector* _curvatureFromBelow = (const ON_3dVector*)(&curvatureFromBelow);
+    const ON_3dVector* _curvatureFromAbove = (const ON_3dVector*)(&curvatureFromAbove);
+
+    return p->IsCurvatureKink(*_curvatureFromBelow, *_curvatureFromAbove);
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsCurvatureZero_FromVector(const ON_CurveKinkDefinition* p, ON_3DVECTOR_STRUCT curvature)
+{
+  if (p)
+  {
+    const ON_3dVector* _curvature = (const ON_3dVector*)(&curvature);
+    return p->IsCurvatureZero(*_curvature);
+  }
+  return false;
+}
+
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_IsCurvatureZero(const ON_CurveKinkDefinition* p, double curvature)
+{
+  if (p)
+  {
+    return p->IsCurvatureZero(curvature);
+  }
+  return false;
+}
+
+RH_C_FUNCTION bool ON_CurveKinkDefinition_ComputeCurvatureRadiusRatio_FromVectors(const ON_CurveKinkDefinition* p, 
+  ON_3DVECTOR_STRUCT curvatureFromBelow, ON_3DVECTOR_STRUCT curvatureFromAbove,
+  double* radiusOfCurvatureRatio, double* curvatureVectorAngleDegrees)
+{
+  if (p && radiusOfCurvatureRatio && curvatureVectorAngleDegrees)
+  {
+    const ON_3dVector* _curvatureFromBelow = (const ON_3dVector*)(&curvatureFromBelow);
+    const ON_3dVector* _curvatureFromAbove = (const ON_3dVector*)(&curvatureFromAbove);
+    return p->ComputeCurvatureRadiusRatio(*_curvatureFromBelow, *_curvatureFromAbove, 
+      *radiusOfCurvatureRatio, *curvatureVectorAngleDegrees);
+  }
+  return false;
+}
+
+// Depends on Rhino application code; not available in an opennurbs-only (Rhino3dm) build.
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION ON_Curve* RHC_RhinoCreateCatenaryCurveThroughPoint(
+  const ON_3DPOINT_STRUCT catenary_start_struct,
+  const ON_3DPOINT_STRUCT catenary_end_struct,
+  const ON_3DVECTOR_STRUCT axis_dir_struct,
+  const ON_3DPOINT_STRUCT through_point_struct,
+  const bool bSmooth,
+  const int point_count,
+  ON_3dPoint* apex_out,
+  double* parameter_out,
+  double* length_out,
+  double* max_deviation_out)
+{
+  const ON_3dPoint* catenary_start = (const ON_3dPoint*)&catenary_start_struct;
+  const ON_3dPoint* catenary_end = (const ON_3dPoint*)&catenary_end_struct;
+  const ON_3dVector* axis_dir = (const ON_3dVector*)&axis_dir_struct;
+  const ON_3dPoint* through_point = (const ON_3dPoint*)&through_point_struct;
+
+  return RhinoCatenaryThroughPoint(
+    *catenary_start,
+    *catenary_end,
+    *axis_dir,
+    *through_point,
+    bSmooth,
+    point_count,
+    apex_out,
+    parameter_out,
+    length_out,
+    max_deviation_out);
+}
+
+RH_C_FUNCTION ON_Curve* RHC_RhinoCreateCatenaryCurveFromLength(
+  const ON_3DPOINT_STRUCT catenary_start_struct,
+  const ON_3DPOINT_STRUCT catenary_end_struct,
+  const ON_3DVECTOR_STRUCT axis_dir_struct,
+  const double catenary_length,
+  const bool bSmooth,
+  const int point_count,
+  ON_3dPoint* apex_out,
+  double* parameter_out,
+  double* length_out,
+  double* max_deviation_out)
+{
+  const ON_3dPoint* catenary_start = (const ON_3dPoint*)&catenary_start_struct;
+  const ON_3dPoint* catenary_end = (const ON_3dPoint*)&catenary_end_struct;
+  const ON_3dVector* axis_dir = (const ON_3dVector*)&axis_dir_struct;
+
+  return RhinoCatenaryFromLength(
+    *catenary_start,
+    *catenary_end,
+    *axis_dir,
+    catenary_length,
+    bSmooth,
+    point_count,
+    apex_out,
+    parameter_out,
+    length_out,
+    max_deviation_out);
+}
+
+RH_C_FUNCTION ON_Curve* RHC_RhinoCreateCatenaryCurveFromParameter(
+  const ON_3DPOINT_STRUCT catenary_start_struct,
+  const ON_3DPOINT_STRUCT catenary_end_struct,
+  const ON_3DVECTOR_STRUCT axis_dir_struct,
+  const double catenary_parameter,
+  const bool bSmooth,
+  const int point_count,
+  ON_3dPoint* apex_out,
+  double* parameter_out,
+  double* length_out,
+  double* max_deviation_out)
+{
+  const ON_3dPoint* catenary_start = (const ON_3dPoint*)&catenary_start_struct;
+  const ON_3dPoint* catenary_end = (const ON_3dPoint*)&catenary_end_struct;
+  const ON_3dVector* axis_dir = (const ON_3dVector*)&axis_dir_struct;
+  
+  return RhinoCatenaryFromParameter(
+    *catenary_start,
+    *catenary_end,
+    *axis_dir,
+    catenary_parameter,
+    bSmooth,
+    point_count,
+    apex_out,
+    parameter_out,
+    length_out,
+    max_deviation_out);
+}
+
+RH_C_FUNCTION ON_Curve* RHC_RhinoCreateCatenaryCurveFromApex(
+  const ON_3DPOINT_STRUCT catenary_start_struct,
+  const ON_3DPOINT_STRUCT catenary_end_struct,
+  const ON_3DVECTOR_STRUCT axis_dir_struct,
+  const ON_3DPOINT_STRUCT catenary_apex_struct,
+  const bool bSmooth,
+  const int point_count,
+  ON_3dPoint* apex_out,
+  double* parameter_out,
+  double* length_out,
+  double* max_deviation_out)
+{
+  const ON_3dPoint* catenary_start = (const ON_3dPoint*)&catenary_start_struct;
+  const ON_3dPoint* catenary_end = (const ON_3dPoint*)&catenary_end_struct;
+  const ON_3dVector* axis_dir = (const ON_3dVector*)&axis_dir_struct;
+  const ON_3dPoint* catenary_apex = (const ON_3dPoint*)&catenary_apex_struct;
+
+  return RhinoCatenaryFromApex(
+    *catenary_start,
+    *catenary_end,
+    *axis_dir,
+    *catenary_apex,
+    bSmooth,
+    point_count,
+    apex_out,
+    parameter_out,
+    length_out,
+    max_deviation_out);
+}
+#endif
+
+// The ON_NurbsCurveFitParameters/ON_NurbsCurveFitBuilder API and
+// ON_Curve::NurbsCurveFit / RebuildToMatchTemplateCurve require OPENNURBS_PLUS,
+// so these exports are unavailable in an opennurbs-only (Rhino3dm) build.
+#if defined(OPENNURBS_PLUS)
+RH_C_FUNCTION ON_NurbsCurve* ON_Curve_NurbsCurveFit(const ON_Curve* curve, ON_INTERVAL_STRUCT domain,
+  ON_NurbsCurveFitParameters* fit_parameters,
+  ON_Line* maximum_separation,
+  double* this_separation_parameter,
+  double* nurbs_separation_parameter
+)
+{
+  if (nullptr == curve || nullptr == fit_parameters || nullptr == maximum_separation || nullptr == this_separation_parameter || nullptr == nurbs_separation_parameter)
+    return nullptr;
+  if (false == curve->Domain().IsIncreasing())
+    return nullptr;
+
+  *maximum_separation = ON_Line::ZeroLine;
+  this_separation_parameter[0] = ON_UNSET_VALUE;
+  nurbs_separation_parameter[0] = ON_UNSET_VALUE;
+
+  ON_Interval _domain(domain.val[0], domain.val[1]);
+
+  ON_NurbsCurveFitParameters local_fit_parameters(*fit_parameters);
+
+  ON_NurbsCurve* result = curve->NurbsCurveFit(_domain,
+    local_fit_parameters,
+    nullptr,
+    *maximum_separation,
+    *this_separation_parameter,
+    *nurbs_separation_parameter
+  );
+  return result;
+}
+
+RH_C_FUNCTION ON_NurbsCurve* ON_Curve_RebuildToMatchTemplateCurve(
+  const ON_Curve* pConstCurve,
+  const ON_Curve* pConstTemplateCurve,
+  bool bFlipSourceDirection,
+  bool bPreserveEndTangents,
+  bool bMakeSubDFriendly,
+  ON_Line* maximum_deviation
+)
+{
+  if (nullptr == pConstCurve || nullptr == pConstTemplateCurve || nullptr == maximum_deviation)
+    return nullptr;
+
+  *maximum_deviation = ON_Line::NanLine;
+
+  ON_NurbsCurve* result = pConstCurve->RebuildToMatchTemplateCurve(
+    *pConstTemplateCurve,
+    bFlipSourceDirection,
+    bPreserveEndTangents,
+    bMakeSubDFriendly,
+    nullptr,
+    maximum_deviation
+  );
+  return result;
+}
+
+RH_C_FUNCTION ON_NurbsCurveFitParameters* ON_NurbsCurveFitParameters_New()
+{
+  return new ON_NurbsCurveFitParameters();
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_Delete(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters)
+{
+  if (pNurbsCurveFitParameters)
+    delete pNurbsCurveFitParameters;
+}
+enum NurbsCurveFitParametersDouble : int
+{
+  KinkAngleRadians = 0,
+  KinkAngleDegrees = 1,
+  SmoothingCoefficient = 2,
+  UniformityCoefficient = 3,
+  CurvatureBiasCoefficient = 4,
+  Get_PointCountRangeTolerance = 5,
+};
+
+RH_C_FUNCTION double ON_NurbsCurveFitParameters_GetDouble(const ON_NurbsCurveFitParameters* pConstNurbsCurveFitParameters, enum NurbsCurveFitParametersDouble which)
+{
+  double rc = 0;
+  if (pConstNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersDouble::KinkAngleRadians == which)
+      rc = pConstNurbsCurveFitParameters->KinkAngleRadians();
+    else if (NurbsCurveFitParametersDouble::KinkAngleDegrees == which)
+      rc = pConstNurbsCurveFitParameters->KinkAngleDegrees();
+    else if (NurbsCurveFitParametersDouble::SmoothingCoefficient == which)
+      rc = pConstNurbsCurveFitParameters->SmoothingCoefficient();
+    else if (NurbsCurveFitParametersDouble::UniformityCoefficient == which)
+      rc = pConstNurbsCurveFitParameters->UniformityCoefficient();
+    else if (NurbsCurveFitParametersDouble::CurvatureBiasCoefficient == which)
+      rc = pConstNurbsCurveFitParameters->CurvatureBiasCoefficient();
+    else if (NurbsCurveFitParametersDouble::Get_PointCountRangeTolerance == which)
+      rc = pConstNurbsCurveFitParameters->PointCountRangeTolerance();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetDouble(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, enum NurbsCurveFitParametersDouble which, double val)
+{
+  if (pNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersDouble::KinkAngleRadians == which)
+      pNurbsCurveFitParameters->SetKinkAngleRadians(val);
+    else if (NurbsCurveFitParametersDouble::KinkAngleDegrees == which)
+      pNurbsCurveFitParameters->SetKinkAngleDegrees(val);
+    else if (NurbsCurveFitParametersDouble::SmoothingCoefficient == which)
+      pNurbsCurveFitParameters->SetSmoothingCoefficient(val);
+    else if (NurbsCurveFitParametersDouble::UniformityCoefficient == which)
+      pNurbsCurveFitParameters->SetUniformityCoefficient(val);
+    else if (NurbsCurveFitParametersDouble::CurvatureBiasCoefficient == which)
+      pNurbsCurveFitParameters->SetCurvatureBiasCoefficient(val);
+  }
+}
+
+enum NurbsCurveFitParametersBool : int
+{
+  SubDFriendly = 0,
+  Closed = 1,
+  OptimizeCurve = 2,
+  ApplyTangentMatchingAtKinks = 3,
+};
+
+RH_C_FUNCTION bool ON_NurbsCurveFitParameters_GetBool(const ON_NurbsCurveFitParameters* pConstNurbsCurveFitParameters, enum NurbsCurveFitParametersBool which)
+{
+  bool rc = 0;
+  if (pConstNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersBool::SubDFriendly == which)
+      rc = pConstNurbsCurveFitParameters->SubDFriendly();
+    if (NurbsCurveFitParametersBool::Closed == which)
+      rc = pConstNurbsCurveFitParameters->Closed();
+    if (NurbsCurveFitParametersBool::OptimizeCurve == which)
+      rc = pConstNurbsCurveFitParameters->OptimizeCurve();
+    if (NurbsCurveFitParametersBool::ApplyTangentMatchingAtKinks == which)
+      rc = pConstNurbsCurveFitParameters->ApplyTangentMatchingAtKinks();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetBool(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, enum NurbsCurveFitParametersBool which, bool val)
+{
+  if (pNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersBool::SubDFriendly == which)
+      pNurbsCurveFitParameters->SetSubDFriendly(val);
+    if (NurbsCurveFitParametersBool::Closed == which)
+      pNurbsCurveFitParameters->SetClosed(val);
+    if (NurbsCurveFitParametersBool::OptimizeCurve == which)
+      pNurbsCurveFitParameters->SetOptimizeCurve(val);
+    if (NurbsCurveFitParametersBool::ApplyTangentMatchingAtKinks == which)
+      pNurbsCurveFitParameters->SetApplyTangentMatchingAtKinks(val);
+  }
+}
+
+enum NurbsCurveFitParametersByte : int
+{
+  TangentMatching = 0,
+  KinkSplitting = 1,
+  SmoothingIntensity = 2,
+  UniformityIntensity = 3,
+  CurvatureBiasIntensity = 4,
+};
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetByte(const ON_NurbsCurveFitParameters* pConstNurbsCurveFitParameters, enum NurbsCurveFitParametersByte which)
+{
+  int rc = 0;
+  if (pConstNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersByte::TangentMatching == which)
+      rc = (int)(pConstNurbsCurveFitParameters->TangentMatching());
+    else if (NurbsCurveFitParametersByte::KinkSplitting == which)
+      rc = (int)(pConstNurbsCurveFitParameters->KinkSplitting());
+    else if (NurbsCurveFitParametersByte::SmoothingIntensity == which)
+      rc = (int)(pConstNurbsCurveFitParameters->SmoothingIntensity());
+    else if (NurbsCurveFitParametersByte::UniformityIntensity == which)
+      rc = (int)(pConstNurbsCurveFitParameters->UniformityIntensity());
+    else if (NurbsCurveFitParametersByte::CurvatureBiasIntensity == which)
+      rc = (int)(pConstNurbsCurveFitParameters->CurvatureBiasIntensity());
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetByte(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, enum NurbsCurveFitParametersByte which, int val)
+{
+  if (pNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersByte::TangentMatching == which)
+      pNurbsCurveFitParameters->SetTangentMatching((ON_NurbsCurveFitParameters::TangentMatch)val);
+    else if (NurbsCurveFitParametersByte::KinkSplitting == which)
+      pNurbsCurveFitParameters->SetKinkSplitting((ON_NurbsCurveFitParameters::KinkSplit)val);
+    else if (NurbsCurveFitParametersByte::SmoothingIntensity == which)
+      pNurbsCurveFitParameters->SetSmoothingIntensity((ON_NurbsCurveFitParameters::Intensity)val);
+    else if (NurbsCurveFitParametersByte::UniformityIntensity == which)
+      pNurbsCurveFitParameters->SetUniformityIntensity((ON_NurbsCurveFitParameters::Intensity)val);
+    else if (NurbsCurveFitParametersByte::CurvatureBiasIntensity == which)
+      pNurbsCurveFitParameters->SetCurvatureBiasIntensity((ON_NurbsCurveFitParameters::Intensity)val);
+  }
+}
+
+enum NurbsCurveFitParametersInt : int
+{
+  Degree = 0,
+  PointCount = 1,
+  Get_ConstrainedPointCount = 2,
+  Get_PointCountRangeMinimum = 3,
+  Get_PointCountRangeMaximum = 4,
+  Get_ClampedControlPointCount = 5,
+  Get_PeriodicControlPointCount = 6,
+  Get_SampleCount = 7,
+};
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetInt(const ON_NurbsCurveFitParameters* pConstNurbsCurveFitParameters, enum NurbsCurveFitParametersInt which)
+{
+  int rc = 0;
+  if (pConstNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersInt::Degree == which)
+      rc = pConstNurbsCurveFitParameters->Degree();
+    else if (NurbsCurveFitParametersInt::PointCount == which)
+      rc = pConstNurbsCurveFitParameters->PointCount();
+    else if (NurbsCurveFitParametersInt::Get_ConstrainedPointCount == which)
+      rc = pConstNurbsCurveFitParameters->ConstrainedPointCount();
+    else if (NurbsCurveFitParametersInt::Get_PointCountRangeMinimum == which)
+      rc = pConstNurbsCurveFitParameters->PointCountRangeMinimum();
+    else if (NurbsCurveFitParametersInt::Get_PointCountRangeMaximum == which)
+      rc = pConstNurbsCurveFitParameters->PointCountRangeMaximum();
+    else if (NurbsCurveFitParametersInt::Get_ClampedControlPointCount == which)
+      rc = pConstNurbsCurveFitParameters->ClampedControlPointCount();
+    else if (NurbsCurveFitParametersInt::Get_PeriodicControlPointCount == which)
+      rc = pConstNurbsCurveFitParameters->PeriodicControlPointCount();
+    else if (NurbsCurveFitParametersInt::Get_SampleCount == which)
+      rc = pConstNurbsCurveFitParameters->SampleCount();
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetInt(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, enum NurbsCurveFitParametersInt which, int val)
+{
+  if (pNurbsCurveFitParameters)
+  {
+    if (NurbsCurveFitParametersInt::Degree == which)
+      pNurbsCurveFitParameters->SetDegree(val);
+    else if (NurbsCurveFitParametersInt::PointCount == which)
+      pNurbsCurveFitParameters->SetPointCount(val);
+
+  }
+}
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetCurvatureBiasIntensityFromCoefficient(double coefficient)
+{
+  ON_NurbsCurveFitParameters::Intensity rc = ON_NurbsCurveFitParameters::Intensity::None;
+  if (coefficient >= 0.0 && coefficient <= ON_NurbsCurveFitParameters::MaximumCurvatureBiasCoefficient)
+  {
+    if (0.0 == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::None;
+    else if (ON_NurbsCurveFitParameters::LowCurvatureBiasCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Low;
+    else if (ON_NurbsCurveFitParameters::ModerateCurvatureBiasCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Moderate;
+    else if (ON_NurbsCurveFitParameters::MediumCurvatureBiasCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Medium;
+    else if (ON_NurbsCurveFitParameters::HighCurvatureBiasCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::High;
+    else if (ON_NurbsCurveFitParameters::ExtremeCurvatureBiasCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Extreme;
+    else
+    {
+      rc = ON_NurbsCurveFitParameters::Intensity::Custom;
+    }
+  }
+  else
+  {
+    // invalid input
+    rc = ON_NurbsCurveFitParameters::Intensity::None;
+  }
+  return (int)rc;
+}
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetUniformityIntensityFromCoefficient(double coefficient)
+{
+  ON_NurbsCurveFitParameters::Intensity rc = ON_NurbsCurveFitParameters::Intensity::None;
+  if (coefficient >= 0.0 && coefficient <= ON_NurbsCurveFitParameters::MaximumUniformityCoefficient)
+  {
+    if (0.0 == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::None;
+    else if (ON_NurbsCurveFitParameters::LowUniformityCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Low;
+    else if (ON_NurbsCurveFitParameters::ModerateUniformityCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Moderate;
+    else if (ON_NurbsCurveFitParameters::MediumUniformityCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Medium;
+    else if (ON_NurbsCurveFitParameters::HighUniformityCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::High;
+    else if (ON_NurbsCurveFitParameters::ExtremeUniformityCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Extreme;
+    else
+    {
+      rc = ON_NurbsCurveFitParameters::Intensity::Custom;
+    }
+  }
+  else
+  {
+    // invalid input
+    rc = ON_NurbsCurveFitParameters::Intensity::None;
+  }
+  return (int)rc;
+}
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetSmoothingIntensityFromCoefficient(double coefficient)
+{
+  ON_NurbsCurveFitParameters::Intensity rc = ON_NurbsCurveFitParameters::Intensity::None;
+  if (coefficient >= 0.0 && coefficient <= ON_NurbsCurveFitParameters::MaximumSmoothingCoefficient)
+  {
+    if (0.0 == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::None;
+    else if (ON_NurbsCurveFitParameters::LowSmoothingCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Low;
+    else if (ON_NurbsCurveFitParameters::ModerateSmoothingCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Moderate;
+    else if (ON_NurbsCurveFitParameters::MediumSmoothingCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Medium;
+    else if (ON_NurbsCurveFitParameters::HighSmoothingCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::High;
+    else if (ON_NurbsCurveFitParameters::ExtremeSmoothingCoefficient == coefficient)
+      rc = ON_NurbsCurveFitParameters::Intensity::Extreme;
+    else
+    {
+      rc = ON_NurbsCurveFitParameters::Intensity::Custom;
+    }
+  }
+  else
+  {
+    // invalid input
+    rc = ON_NurbsCurveFitParameters::Intensity::None;
+  }
+  return (int)rc;
+}
+
+RH_C_FUNCTION double ON_NurbsCurveFitParameters_GetCurvatureBiasCoefficientFromIntensity(int intensity)
+{
+  double value = ON_DBL_QNAN;
+  switch ((ON_NurbsCurveFitParameters::Intensity)intensity)
+  {
+  case ON_NurbsCurveFitParameters::Intensity::None:
+    value = 0.0;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Low:
+    value = ON_NurbsCurveFitParameters::LowCurvatureBiasCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Moderate:
+    value = ON_NurbsCurveFitParameters::ModerateCurvatureBiasCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Medium:
+    value = ON_NurbsCurveFitParameters::MediumCurvatureBiasCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::High:
+    value = ON_NurbsCurveFitParameters::HighCurvatureBiasCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Extreme:
+    value = ON_NurbsCurveFitParameters::ExtremeCurvatureBiasCoefficient;
+    break;
+  default:
+    value = 0.0;
+    break;
+  }
+  return value;
+}
+RH_C_FUNCTION double ON_NurbsCurveFitParameters_GetSmoothingCoefficientFromIntensity(int intensity)
+{
+  double value = ON_DBL_QNAN;
+  switch ((ON_NurbsCurveFitParameters::Intensity)intensity)
+  {
+  case ON_NurbsCurveFitParameters::Intensity::None:
+    value = 0.0;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Low:
+    value = ON_NurbsCurveFitParameters::LowSmoothingCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Moderate:
+    value = ON_NurbsCurveFitParameters::ModerateSmoothingCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Medium:
+    value = ON_NurbsCurveFitParameters::MediumSmoothingCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::High:
+    value = ON_NurbsCurveFitParameters::HighSmoothingCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Extreme:
+    value = ON_NurbsCurveFitParameters::ExtremeSmoothingCoefficient;
+    break;
+  default:
+    value = 0.0;
+    break;
+  }
+  return value;
+}
+RH_C_FUNCTION double ON_NurbsCurveFitParameters_GetUniformityCoefficientFromIntensity(int intensity)
+{
+  double value = ON_DBL_QNAN;
+  switch ((ON_NurbsCurveFitParameters::Intensity)intensity)
+  {
+  case ON_NurbsCurveFitParameters::Intensity::None:
+    value = 0.0;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Low:
+    value = ON_NurbsCurveFitParameters::LowUniformityCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Moderate:
+    value = ON_NurbsCurveFitParameters::ModerateUniformityCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Medium:
+    value = ON_NurbsCurveFitParameters::MediumUniformityCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::High:
+    value = ON_NurbsCurveFitParameters::HighUniformityCoefficient;
+    break;
+  case ON_NurbsCurveFitParameters::Intensity::Extreme:
+    value = ON_NurbsCurveFitParameters::ExtremeUniformityCoefficient;
+    break;
+  default:
+    value = 0.0;
+    break;
+  }
+  return value;
+}
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMinimumDegree()
+{
+  return ON_NurbsCurveFitParameters::MinimumDegree;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMaximumDegree()
+{
+  return ON_NurbsCurveFitParameters::MaximumDegree;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetDefaultDegree()
+{
+  return ON_NurbsCurveFitParameters::DefaultDegree;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMinimumClampedPointCount()
+{
+  return ON_NurbsCurveFitParameters::MinimumClampedPointCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMinimumClosedPointCount()
+{
+  return ON_NurbsCurveFitParameters::MinimumClosedPointCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMaximumPointCount()
+{
+  return ON_NurbsCurveFitParameters::MaximumPointCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMinimumSampleCount()
+{
+  return ON_NurbsCurveFitParameters::MinimumSampleCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetMaximumSampleCount()
+{
+  return ON_NurbsCurveFitParameters::MaximumSampleCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_GetDefaultSampleCount()
+{
+  return ON_NurbsCurveFitParameters::DefaultSampleCount;
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_MinimumPointCountForDegree(int degree, bool bClosed, bool bSubDFriendly)
+{
+  return ON_NurbsCurveFitParameters::MinimumPointCountForDegree(degree, bClosed, bSubDFriendly);
+}
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_MaximumPointCountForDegree(int point_count, bool bClosed, bool bSubDFreiendly)
+{
+  return ON_NurbsCurveFitParameters::MaximumDegreeForPointCount(point_count, bClosed, bSubDFreiendly);
+}
+
+RH_C_FUNCTION bool ON_NurbsCurveFitParameters_ValidInput(
+  long sample_point_count,
+  int degree,
+  int control_point_count,
+  bool bClosed,
+  ON_INTERVAL_STRUCT curve_domain
+)
+{
+  const ON_Interval* _curve_domain = (const ON_Interval*)&curve_domain;
+
+  return ON_NurbsCurveFitParameters::ValidInput((size_t)sample_point_count, (unsigned)degree, (unsigned)control_point_count, bClosed, *_curve_domain);
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_PointCountRange(const ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, int* i_out, int* j_out)
+{
+  if (nullptr != pNurbsCurveFitParameters && nullptr != i_out && nullptr != j_out)
+  {
+    ON_2dex range = pNurbsCurveFitParameters->PointCountRange();
+    *i_out = range.i;
+    *j_out = range.j;
+  }
+}
+
+RH_C_FUNCTION int ON_NurbsCurveFitParameters_VariablePointCount(const ON_NurbsCurveFitParameters* pNurbsCurveFitParameters)
+{
+  if(nullptr != pNurbsCurveFitParameters)
+    return pNurbsCurveFitParameters->VariablePointCount();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetPointCountRange(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, int minimum, int maximum)
+{
+  if (pNurbsCurveFitParameters)
+    pNurbsCurveFitParameters->SetPointCountRange(minimum, maximum);
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_SetPointCountRange2(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, int minimum, int maximum, double tolerance)
+{
+  if (pNurbsCurveFitParameters)
+    pNurbsCurveFitParameters->SetPointCountRange(minimum, maximum, tolerance);
+}
+
+RH_C_FUNCTION void ON_NurbsCurveFitParameters_PointCountRange2(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, int* minimum, int* maximum, double* tolerance)
+{
+  if (pNurbsCurveFitParameters)
+    pNurbsCurveFitParameters->GetPointCountRange(*minimum, *maximum, *tolerance);
+}
+
+RH_C_FUNCTION ON_NurbsCurveFitParameters* ON_NurbsCurveFitParameters_AssignmentOperator(ON_NurbsCurveFitParameters* pNurbsCurveFitParameters, const ON_NurbsCurveFitParameters* pOther)
+{
+  if (pNurbsCurveFitParameters && pOther)
+    *pNurbsCurveFitParameters = *pOther;
+  return pNurbsCurveFitParameters;
+}
+
+RH_C_FUNCTION ON_NurbsCurve* ON_Curve_NurbsCurveFit2(const ON_Curve* curve,
+  ON_INTERVAL_STRUCT domain,
+  ON_NurbsCurveFitParameters* fit_parameters_ptr,
+  ON_Line* maximum_separation,
+  double* this_separation_parameter,
+  double* nurbs_separation_parameter)
+{
+  *maximum_separation = ON_Line::NanLine;
+  *this_separation_parameter = ON_DBL_QNAN;
+  *nurbs_separation_parameter = ON_DBL_QNAN;
+  ON_NurbsCurveFitParameters curve_options = *fit_parameters_ptr;
+  ON_Interval _domain(domain.val[0], domain.val[1]);
+
+  const int degree = curve_options.Degree();
+  if (degree < 1)
+    return nullptr; // calculation failed
+
+  if (curve_options.PointCount() < degree)
+    return nullptr; // calculation failed
+
+  const ON_Interval this_domain = curve->Domain();
+  if (false == _domain.IsIncreasing() || false == (this_domain.Includes(_domain, true)))
+    _domain = this_domain;
+
+  // Since this is the simple SDK entry point for rebuilding curves,
+  // local_rp is fit_parameters with the common adjustments made
+  // for users who don't tailor the settings to a specific input curve.
+  ON_NurbsCurveFitParameters local_fp(curve_options);
+
+  const bool bIsClosed = _domain == this_domain && curve->IsClosed();
+  local_fp.SetClosed(bIsClosed);
+
+  ON_NurbsCurveFitBuilder builder;
+  if (false == builder.InitializeFromInputCurve(curve, _domain, ON_NurbsCurveFitParameters::KinkSplit::None != local_fp.KinkSplitting()))
+    return nullptr; // calculation failed
+
+  //if (false == builder.CalculateNurbsCurveFit(local_fp, true, 0))
+  //  return nullptr; // calculation failed
+
+  // fix for kinks
+  if (curve_options.OptimizeCurve() && ON_NurbsCurveFitParameters::KinkSplit::None != curve_options.KinkSplitting())
+  {
+    // Fix for RH-85985 
+    // Automatically grow point count if kink splitting requires more points
+    unsigned max_kink_segments_point_count = 0;
+    const ON_CurveKinkDefinition kdef = curve_options.KinkDefinition();
+    const int degree = curve_options.Degree();
+    const int desired_point_count = curve_options.PointCountRangeMinimum();
+
+    {
+      if (builder.SetKinkSegmentsIntervals(kdef) >= 2)
+      {
+        const unsigned kink_segments_point_count = builder.SetKinkSegmentsPointCounts(degree, desired_point_count);
+        if (kink_segments_point_count > max_kink_segments_point_count)
+          max_kink_segments_point_count = kink_segments_point_count;
+      }
+    }
+    if (((int)max_kink_segments_point_count) > desired_point_count && false == curve_options.VariablePointCount())
+    {
+      // kink splitting required increasing point count and user wants all curves to have the same number of points.
+      curve_options.SetPointCount(((int)max_kink_segments_point_count));
+      {
+        if (builder.SetKinkSegmentsIntervals(kdef) >= 2)
+        {
+          // update any curves that were processed before the one that set the final max_kink_segments_point_count.
+          builder.SetKinkSegmentsPointCounts(degree, curve_options.PointCount());
+        }
+      }
+    }
+  }
+
+  // The value of bPeriodic is false if the input curve
+  // is open and true if the input curve is closed.
+  // Thus, when multiple curves are selected (curve_count > 0)
+  // the and some are open while others are closed, the
+  // value of ON_NurbsCurveFitParameters::Periodic() can vary
+  // and that is why ths local variable curve_options
+  // is set the way it is below. Aside from the Periodic
+  // setting, all of the remaining options in m_fit_parameters
+  // apply to both open and closed curves.
+  if (ON_NurbsCurveFitParameters::KinkSplit::None != curve_options.KinkSplitting() && builder.m_kink_segments_point_count > curve_options.PointCountRangeMinimum())
+  {
+    if (curve_options.VariablePointCount() && builder.m_kink_segments_point_count < curve_options.PointCountRangeMaximum())
+      curve_options.SetPointCountRange(builder.m_kink_segments_point_count, curve_options.PointCountRangeMaximum(), curve_options.PointCountRangeTolerance());
+    else
+      curve_options.SetPointCount(builder.m_kink_segments_point_count);
+  }
+
+  if (false == builder.TangentMatchCandidate())
+    curve_options.SetTangentMatching(ON_NurbsCurveFitParameters::TangentMatch::None);
+
+  curve_options.SetClosed(builder.IsClosed());
+
+  const bool bSuccessfulRebuild = builder.CalculateNurbsCurveFit(
+    curve_options,
+    true,
+    0);
+
+  if (bSuccessfulRebuild)
+  {
+    // calculation succeeded.
+    *maximum_separation = builder.m_maximum_separation;
+    *this_separation_parameter = builder.m_maximum_separation_parameters[0];
+    *nurbs_separation_parameter = builder.m_maximum_separation_parameters[1];
+
+    return new ON_NurbsCurve(builder.m_nurbs_curve_fit);
+    //const double sep = builder.MaximumSeparation().Length();
+  }
+  return nullptr; // calculation failed
+}
+
 #endif

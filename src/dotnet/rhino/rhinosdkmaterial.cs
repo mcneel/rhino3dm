@@ -374,7 +374,9 @@ namespace Rhino.DocObjects
         var pointer = UnsafeNativeMethods.ON_3dmObjectAttributes_MaterialFromIndex(const_pointer, i);
         var id = Guid.Empty;
         UnsafeNativeMethods.ON_MaterialRef_PlugInId(pointer, ref id);
+#pragma warning disable CA2000
         array[i] = new KeyValuePair<Guid, MaterialRef>(id, new MaterialRef(this, id));
+#pragma warning restore CA2000
       }
     }
     /// <summary>
@@ -573,7 +575,9 @@ namespace Rhino.DocObjects
       var ref_pointer = UnsafeNativeMethods.ON_3dmObjectAttributes_MaterialFromIndex(pointer, m_index);
       var id = Guid.Empty;
       UnsafeNativeMethods.ON_MaterialRef_PlugInId(ref_pointer, ref id);
+#pragma warning disable CA2000
       Current = new KeyValuePair<Guid,MaterialRef>(id, new MaterialRef(m_parent, id));
+#pragma warning restore CA2000
       return true;
     }
 
@@ -1159,6 +1163,9 @@ namespace Rhino.DocObjects
     /// can have the same RDK material ID.
     /// </remarks>
     /// <since>8.6</since>
+    // ON_Material_RdkMaterialID takes a const CRhinoMaterial*, a Rhino application
+    // class, so this export does not exist in an opennurbs-only build.
+#if RHINO_SDK
     public Guid RDKMaterialID
     {
       get 
@@ -1169,6 +1176,7 @@ namespace Rhino.DocObjects
         return rc;
       }
     }
+#endif
 
     const int IDX_DIFFUSE = 0;
     const int IDX_AMBIENT = 1;
@@ -1316,6 +1324,30 @@ namespace Rhino.DocObjects
     {
       return SetTexture(texture, TextureType.Bitmap);
     }
+#if RHINO_SDK
+    /// <summary>
+    /// Uses the pixels of an in-memory bitmap as this material's bitmap texture, without
+    /// writing an image file.
+    /// <para>
+    /// The pixels are copied into <see cref="Rhino.Display.TextureCache"/> under
+    /// <paramref name="name"/>. Calling this again with the same name replaces them in place,
+    /// and the change shows up on the next redraw.
+    /// </para>
+    /// </summary>
+    /// <param name="name">
+    /// The name to cache the pixels under. See <see cref="Rhino.Display.TextureCache.Set"/>.
+    /// </param>
+    /// <param name="bitmap">The pixels to use.</param>
+    /// <returns>true on success.</returns>
+    /// <since>9.0</since>
+    /// <seealso cref="Rhino.Display.TextureCache"/>
+    public bool SetBitmapTexture(string name, System.Drawing.Bitmap bitmap)
+    {
+      if (!Rhino.Display.TextureCache.Set(name, bitmap))
+        return false;
+      return AddTexture(name, TextureType.Bitmap);
+    }
+#endif
     #endregion
 
     #region Bump
@@ -1574,6 +1606,19 @@ namespace Rhino.DocObjects.Tables
     /// <returns>
     /// If index is out of range, the current material is returned.
     /// </returns>
+    /// <remarks>
+    /// Detaching a worksession reference model, or purging a linked instance
+    /// definition, removes its materials but leaves the table slots they occupied
+    /// empty; the slots cannot be closed up, because table indices are persistent
+    /// references that objects store. Count spans the empty slots and they
+    /// accumulate for the life of the document. An index that lands on one
+    /// returns the default material rather than throwing, and nothing about it
+    /// says it is a stand-in except its index, which is -1 and never the index
+    /// you asked for - so test index == Materials[index].Index before treating an
+    /// entry as real. Enumerating the table with foreach goes through the
+    /// document manifest rather than the raw table array, so it does not visit
+    /// empty slots at all. See RH-97389.
+    /// </remarks>
     public Material this[int index]
     {
       get

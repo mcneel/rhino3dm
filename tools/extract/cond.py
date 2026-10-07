@@ -144,6 +144,12 @@ class _Expr:
         if literal:
             return int(literal.group(1), 0)
         if self.bare_is_defined:
+            # C# has real boolean literals in #if; C does not (there an
+            # identifier is macro-expanded and an undefined one becomes 0).
+            if tok == 'true':
+                return 1
+            if tok == 'false':
+                return 0
             return int(tok in self.defines)
         if tok in self.defines:
             raise UnknownCondition(

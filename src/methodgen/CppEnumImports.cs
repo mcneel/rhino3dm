@@ -245,7 +245,7 @@ namespace MethodGen
       var option_parts = pragmaRegionOptions.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
       if (option_parts.Length < 2 || !option_parts[0].StartsWith("[") || !option_parts[0].EndsWith("]")
           || !option_parts[1].StartsWith("[") || !option_parts[1].EndsWith("]") || option_parts.Length > 3
-          || (option_parts.Length == 3 && (!option_parts[2].StartsWith("[") || !option_parts[1].EndsWith("]"))))
+          || (option_parts.Length == 3 && (!option_parts[2].StartsWith("[") || !option_parts[2].EndsWith("]"))))
       {
         throw new InvalidOperationException(
           string.Format(
@@ -372,7 +372,8 @@ namespace MethodGen
         imported_namespace = imported_namespace.Substring(0, index_of_dot);
       }
 
-      const string s_enum = @"([\s\S]*)(enum\s+class)\s+([a-zA-Z0-9_]*)\s*(:*\s*[a-zA-Z0-9 ]*)([\s\/]*\{[\s\S]*)";
+      // The underlying type may contain underscores, for example "enum class Foo : ON__UINT_PTR".
+      const string s_enum = @"([\s\S]*)(enum\s+class)\s+([a-zA-Z0-9_]*)\s*(:*\s*[a-zA-Z0-9_ ]*)([\s\/]*\{[\s\S]*)";
 
       if (!Regex.IsMatch(enumBody, s_enum))
       {

@@ -57,7 +57,6 @@ RH_C_FUNCTION double ON_MassProperties_MassError(ON_MassProperties* pMassProp)
     massError = pMassProp->m_mass_err;
   return massError;
 }
-
 RH_C_FUNCTION bool ON_MassProperties_Sum(ON_MassProperties* pMassProp, ON_MassProperties* pSummand)
 {
   bool rc = false;
@@ -66,6 +65,48 @@ RH_C_FUNCTION bool ON_MassProperties_Sum(ON_MassProperties* pMassProp, ON_MassPr
     rc = pMassProp->Sum(1, pSummand, true);
 
   return rc;
+}
+RH_C_FUNCTION bool ON_MassProperties_Sum2(ON_MassProperties* pMassProp, const int count, /*ARRAY*/ const ON_MassProperties** ptr_summands, bool bAddTo)
+{
+  if (nullptr == pMassProp || nullptr == ptr_summands || count <= 0) return false;
+  bool rc = false;
+
+  // Need to convert the array of pointers to an array of objects
+  ON_MassProperties* summands = new ON_MassProperties[count];
+  for (int i = 0; i < count; i++)
+  {
+    // there is no operator= overload, but fortunately there isn't anything dynamic in there either,
+    // so it acts like a struct
+    summands[i] = *(ptr_summands[i]);
+  }
+
+  rc = pMassProp->Sum(count, summands, bAddTo);
+
+  return rc;
+}
+
+RH_C_FUNCTION ON_MassProperties* ON_MassProperties_WeightedSum(const int count, /*ARRAY*/ const ON_MassProperties** ptr_summands, /*ARRAY*/const double* weights)
+{
+  if (nullptr == ptr_summands || nullptr == weights || count <= 0) return nullptr;
+
+  ON_MassProperties* pResult = new ON_MassProperties();
+ 
+  // Need to convert the array of pointers to an array of objects
+  ON_MassProperties* summands = new ON_MassProperties[count];
+  for (int i = 0; i < count; i++)
+  {
+    // there is no operator= overload, but fortunately there isn't anything dynamic in there either,
+    // so it acts like a struct
+    summands[i] = *(ptr_summands[i]);
+  }
+  bool bSuccess = pResult->WeightedSum(count, summands, weights);
+  delete[] summands;
+  if (!bSuccess)
+  {
+    delete pResult;
+    pResult = nullptr;
+  }
+  return pResult;
 }
 
 RH_C_FUNCTION bool ON_MassProperties_Transform(ON_MassProperties* pMassProp, ON_Xform* pXform)

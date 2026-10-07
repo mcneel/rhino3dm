@@ -444,8 +444,7 @@ namespace Rhino
       return result;
     }
 
-    /// <summary>
-    /// directory
+    /// <summary>Directory where main RhinoCore binary is located
     /// </summary>
     /// <since>6.7</since>
     public static System.IO.DirectoryInfo GetExecutableDirectory()
@@ -456,6 +455,22 @@ namespace Rhino
         bool rc = UnsafeNativeMethods.CRhinoApp_ExecutableFolder(ptrString);
         if (!rc)
           throw new Exception("ExecutableDirectory call failed");
+        string directoryName = sw.ToString();
+        return new System.IO.DirectoryInfo(directoryName);
+      }
+    }
+
+    /// <summary>
+    /// Directory where all of Rhino is installed
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static System.IO.DirectoryInfo GetInstallDirectory()
+    {
+      using (var sw = new StringWrapper())
+      {
+        IntPtr ptrString = sw.NonConstPointer;
+        UnsafeNativeMethods.CRhinoFileUtilities_GetRhinoInstallFolder(ptrString);
         string directoryName = sw.ToString();
         return new System.IO.DirectoryInfo(directoryName);
       }
@@ -541,6 +556,44 @@ namespace Rhino
     public static bool IsRunningHeadless
     {
       get { return UnsafeNativeMethods.CRhinoApp_IsHeadless(); }
+    }
+
+    /// <summary>
+    /// Is Rhino currently being executed as a batch run, either started with
+    /// the /batchmode command line switch or put into batch mode since by the
+    /// BatchMode command. A batch run has a main window but no user: commands
+    /// take their input from the command line rather than showing dialogs, and
+    /// modal message boxes are written to the command line instead of being
+    /// shown.
+    /// </summary>
+    /// <remarks>
+    /// To decide whether it is safe to show blocking user interface, test
+    /// <see cref="IsRunningUnattended"/> instead - it also covers headless.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static bool IsRunningBatchMode
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_IsBatchMode(); }
+    }
+
+    /// <summary>
+    /// Is Rhino running with no user available to answer a question. True when
+    /// either <see cref="IsRunningHeadless"/> or <see cref="IsRunningBatchMode"/>
+    /// is true.
+    /// </summary>
+    /// <remarks>
+    /// Test this before showing any modal dialog. When it is true there is
+    /// nobody to dismiss the dialog, so it will block until the process is
+    /// killed. Write to the command line instead.
+    /// <para><see cref="IsRunningAutomated"/> is deliberately excluded. COM
+    /// automation clients have driven a fully interactive Rhino since V4 and
+    /// keep that behaviour unchanged; a caller that wants the unattended
+    /// behaviour starts Rhino with /batchmode.</para>
+    /// </remarks>
+    /// <since>9.0</since>
+    public static bool IsRunningUnattended
+    {
+      get { return UnsafeNativeMethods.CRhinoApp_IsUnattended(); }
     }
 
     /// <summary>Is Rhino being executed in safe mode</summary>
@@ -832,6 +885,60 @@ namespace Rhino
       }
     }
 
+    internal delegate void CommandPromptCallback(IntPtr prompt, IntPtr promptDefault, IntPtr commandOptions);
+    private static CommandPromptCallback m_commandPromptCallback;
+    private static EventHandler<Rhino.UI.CommandPromptChangedEventArgs> m_commandPromptChanged;
+    static void OnCommandPrompt(IntPtr ptrPrompt, IntPtr ptrPromptDefault, IntPtr commandOptions)
+    {
+      string prompt = StringWrapper.GetStringFromPointer(ptrPrompt);
+      string promptDefault = StringWrapper.GetStringFromPointer(ptrPromptDefault);
+      int optionCount = UnsafeNativeMethods.CRhCommandOptionArray_Count(commandOptions);
+      var options = new Rhino.Input.Custom.CommandLineOption[optionCount];
+      for (int i = 0; i < optionCount; i++)
+      {
+        IntPtr ptrOption = UnsafeNativeMethods.CRhCommandOptionArray_Get(commandOptions, i);
+        options[i] = Rhino.Runtime.Interop.CommandLineOptionFromNativePointer(ptrOption);
+      }
+
+      var args = new Rhino.UI.CommandPromptChangedEventArgs(prompt, promptDefault, options);
+      m_commandPromptChanged?.SafeInvoke(null, args);
+    }
+
+    /// <summary>
+    /// Fired when the command line changes
+    /// </summary>
+    public static event EventHandler<Rhino.UI.CommandPromptChangedEventArgs> CommandPromptChanged
+    {
+      add
+      {
+        lock (m_event_lock)
+        {
+          if (m_commandPromptCallback == null)
+          {
+            m_commandPromptCallback = OnCommandPrompt;
+            UnsafeNativeMethods.CRhCommandPromptWatcher_SetCallback(m_commandPromptCallback);
+          }
+          m_commandPromptChanged -= value;
+          m_commandPromptChanged += value;
+        }
+      }
+      remove
+      {
+        lock (m_event_lock)
+        {
+          m_commandPromptChanged -= value;
+          if (m_commandPromptChanged == null)
+          {
+            UnsafeNativeMethods.CRhCommandPromptWatcher_SetCallback(null);
+            m_commandPromptCallback = null;
+          }
+        }
+      }
+    }
+
+
+
+
     /// <summary>
     /// Text in Rhino's command history window.
     /// </summary>
@@ -1090,8 +1197,16 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Pauses to keep Windows message pump alive so views will update
-    /// and windows will repaint.
+    /// Request OS to update UI on screen.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void RefreshScreen()
+    {
+      UnsafeNativeMethods.CRhinoApp_RefreshScreen();
+    }
+
+    /// <summary>
+    /// Pauses to keep OS message pump alive.
     /// </summary>
     /// <since>5.0</since>
     public static void Wait()
@@ -1099,12 +1214,15 @@ namespace Rhino
       UnsafeNativeMethods.CRhinoApp_Wait(0);
     }
 
-
     static readonly InvokeHelper g_invoke_helper = new InvokeHelper();
 
     /// <summary>
     /// Execute a function on the main UI thread.
     /// </summary>
+    /// <remarks>
+    /// When called from the UI thread the function runs immediately. From any other thread it is
+    /// posted to the UI thread and this returns without waiting for it to run.
+    /// </remarks>
     /// <param name="method">function to execute</param>
     /// <param name="args">parameters to pass to the function</param>
     /// <since>6.0</since>
@@ -1352,6 +1470,7 @@ namespace Rhino
     ///   true if Rhino is licensed as an Evaluation product
     ///   false otherwise
     /// </summary>
+    /// <since>8.29</since>
     public static bool IsEvaluation
     {
       // RH-92168 (eirannejad 2026-02-05)
@@ -1482,6 +1601,25 @@ namespace Rhino
     {
       var handle_parent = UI.Dialogs.Service.ObjectToWindowHandle(parentWindow, true);
       return UnsafeNativeMethods.CRhinoApp_AskUserForRhinoLicense(standAlone, handle_parent);
+    }
+
+    /// <summary>
+    /// Validates a stand-alone Rhino license key for the given Rhino account email
+    /// against the McNeel validation server, without asking the user for any input.
+    /// Shows the validation wizard's connection/validation progress steps; problems
+    /// reported by the server route to the wizard's normal interactive steps.
+    /// On success the license is locked to this computer (standalone node).
+    /// Used by the rhinoN://license protocol handler to install a license from a web link.
+    /// </summary>
+    /// <param name="licenseKey">The Rhino license key to validate and install.</param>
+    /// <param name="email">The Rhino account email to validate the key against.</param>
+    /// <returns>true if the license validated and was installed; otherwise false.</returns>
+    /// <since>8.34</since>
+    public static bool ValidateRhinoLicense(string licenseKey, string email)
+    {
+      if (string.IsNullOrWhiteSpace(licenseKey) || string.IsNullOrWhiteSpace(email))
+        return false;
+      return UnsafeNativeMethods.CRhinoApp_ValidateRhinoLicense(licenseKey, email);
     }
 
 
@@ -2286,6 +2424,33 @@ namespace Rhino
 
 namespace Rhino.UI
 {
+  /// <summary>
+  /// Event args for the CommandPromptChanged event
+  /// </summary>
+  public class CommandPromptChangedEventArgs : EventArgs
+  {
+    string _prompt;
+    string _promptDefault;
+    Rhino.Input.Custom.CommandLineOption[] _options;
+
+    internal CommandPromptChangedEventArgs(string prompt, string promptDefault, Rhino.Input.Custom.CommandLineOption[] options)
+    {
+      _prompt = prompt;
+      _promptDefault = promptDefault;
+      _options = options;
+    }
+
+    /// <summary>Command line prompt text</summary>
+    /// <since>9.0</since>
+    public string Prompt { get { return _prompt; } }
+    /// <summary>Default command line prompt text</summary>
+    /// <since>9.0</since>
+    public string PromptDefault { get { return _promptDefault; } }
+    /// <summary>Active command line options</summary>
+    /// <since>9.0</since>
+    public Rhino.Input.Custom.CommandLineOption[] Options { get { return _options; } }
+  }
+
   /// <summary>
   /// Contains static methods to control the mouse icon.
   /// </summary>

@@ -447,9 +447,11 @@ namespace Rhino.DocObjects.Tables
         {
             get
             {
-                var ids = new Runtime.InteropWrappers.SimpleArrayGuid();
+              using (var ids = new Runtime.InteropWrappers.SimpleArrayGuid())
+              {
                 UnsafeNativeMethods.RhNamedPosition_Ids(m_doc.RuntimeSerialNumber, ids.NonConstPointer());
                 return ids.ToArray();
+              }
             }
         }
 
@@ -479,11 +481,11 @@ namespace Rhino.DocObjects.Tables
         /// <since>6.0</since>
         public RhinoObject[] Objects(Guid id)
         {
-            var objects = new Runtime.InternalRhinoObjectArray();
-
+          using (var objects = new Runtime.InternalRhinoObjectArray())
+          {
             UnsafeNativeMethods.RhNamedPosition_Objects(m_doc.RuntimeSerialNumber, id, objects.NonConstPointer());
-
             return objects.ToArray();
+          }
         }
 
         /// <summary>Array of Rhino Objects related to a Named Position.</summary>
@@ -667,11 +669,10 @@ namespace Rhino.DocObjects.Tables
         /// <since>6.0</since>
         public Guid Save(string name, IEnumerable<RhinoObject> objects)
         {
-
-            var intObjects = new Runtime.InternalRhinoObjectArray(objects);
-
+          using (var intObjects = new Runtime.InternalRhinoObjectArray(objects))
+          {
             return UnsafeNativeMethods.RhNamedPosition_Save(m_doc.RuntimeSerialNumber, name, intObjects.NonConstPointer());
-
+          }
         }
 
         /// <summary>Save a new Named Position.</summary>
@@ -813,11 +814,10 @@ namespace Rhino.DocObjects.Tables
         /// <since>6.0</since>
         public bool Append(Guid id, IEnumerable<RhinoObject> objects)
         {
-
-            var intObjects = new Runtime.InternalRhinoObjectArray(objects);
-
+          using (var intObjects = new Runtime.InternalRhinoObjectArray(objects))
+          {
             return UnsafeNativeMethods.RhNamedPosition_Append(m_doc.RuntimeSerialNumber, id, intObjects.NonConstPointer());
-
+          }
         }
 
         /// <summary>Append objects to a Named Position.</summary>
@@ -924,9 +924,11 @@ namespace Rhino.DocObjects.Tables
     {
       get
       {
-        ClassArrayString array = new ClassArrayString();
-        UnsafeNativeMethods.ON_3dmSettings_GetSnapShots(m_doc.RuntimeSerialNumber, array.NonConstPointer());
-        return array.ToArray();
+        using (ClassArrayString array = new ClassArrayString())
+        {
+          UnsafeNativeMethods.ON_3dmSettings_GetSnapShots(m_doc.RuntimeSerialNumber, array.NonConstPointer());
+          return array.ToArray();
+        }
       }
     }
   }

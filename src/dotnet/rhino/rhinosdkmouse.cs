@@ -211,11 +211,13 @@ namespace Rhino.UI
     {
       get
       {
-        if ((m_flags & MK_LBUTTON) == MK_LBUTTON)
+        // 16 Aug 2026 S. Baer (RH-97679)
+        // Test for any overlap with the mask, not for an exact match.
+        if ((m_flags & MK_LBUTTON) != 0)
           return MouseButton.Left;
-        if ((m_flags & MK_RBUTTON) == MK_RBUTTON)
+        if ((m_flags & MK_RBUTTON) != 0)
           return MouseButton.Right;
-        if ((m_flags & MK_MBUTTON) == MK_MBUTTON)
+        if ((m_flags & MK_MBUTTON) != 0)
           return MouseButton.Middle;
 
         return MouseButton.None;

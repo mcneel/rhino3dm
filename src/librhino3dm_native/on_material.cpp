@@ -208,6 +208,17 @@ RH_C_FUNCTION bool ON_Material_AddTexture(ON_Material* pMaterial, const RHMONO_S
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Material_DeleteTexture(ON_Material* pMaterial, const RHMONO_STRING* _filename, int which)
+{
+  bool rc = false;
+  if (pMaterial)
+  {
+    INPUTSTRINGCOERCE(filename, _filename);
+    rc = (pMaterial->DeleteTexture(filename, (ON_Texture::TYPE)which) > 0);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Material_SetTexture(ON_Material* pMaterial, const ON_Texture* pConstTexture, int which)
 {
   bool rc = false;
@@ -1146,6 +1157,14 @@ RH_C_FUNCTION bool ON_Material_IsPhysicallyBased(const ON_Material* p)
     return p->IsPhysicallyBased();
   }
   return false;
+}
+
+RH_C_FUNCTION void ON_Material_PBR_ToLegacy(ON_Material* p)
+{
+  if (p && p->IsPhysicallyBased())
+  {
+    p->PhysicallyBased()->ToLegacy();
+  }
 }
 
 RH_C_FUNCTION void ON_Material_ConvertToPBR(ON_Material* p)

@@ -121,6 +121,11 @@ namespace Rhino.Display
       return rc;
     }
 
+    /// <summary>
+    /// Gets a display mode description by id.
+    /// </summary>
+    /// <param name="id">The id of the display mode.</param>
+    /// <returns>The display mode description if found, null otherwise.</returns>
     /// <since>5.0</since>
     public static DisplayModeDescription GetDisplayMode(Guid id)
     {
@@ -130,6 +135,11 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <summary>
+    /// Finds a display mode description by its English name.
+    /// </summary>
+    /// <param name="englishName">The English name of the display mode.</param>
+    /// <returns>The display mode description if found, null otherwise.</returns>
     /// <since>5.0</since>
     public static DisplayModeDescription FindByName(string englishName)
     {
@@ -145,6 +155,12 @@ namespace Rhino.Display
       return null;
     }
 
+    /// <summary>
+    /// Adds a new display mode from an existing description. Note that this only
+    /// registers the mode in memory; call UpdateDisplayMode to persist it to disk.
+    /// </summary>
+    /// <param name="displayMode">The display mode description to add.</param>
+    /// <returns>The id of the new display mode if successful. Guid.Empty on error.</returns>
     /// <since>5.0</since>
     public static Guid AddDisplayMode(DisplayModeDescription displayMode)
     {
@@ -155,7 +171,8 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Adds a new display mode.
+    /// Adds a new display mode. Note that this only registers the mode in memory;
+    /// call UpdateDisplayMode to persist it to disk.
     /// </summary>
     /// <param name="name">The name of the new display mode.</param>
     /// <returns>The id of the new display mode if successful. Guid.Empty on error.</returns>
@@ -168,7 +185,8 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Copies an existing display mode.
+    /// Copies an existing display mode. Note that this only registers the new mode
+    /// in memory; call UpdateDisplayMode to persist it to disk.
     /// </summary>
     /// <param name="id">The id of the existing display mode to copy.</param>
     /// <param name="name">The name of the new display mode.</param>
@@ -181,6 +199,14 @@ namespace Rhino.Display
       return UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Copy(id, name);
     }
 
+    /// <summary>
+    /// Updates an existing display mode and immediately saves it to disk. Call this
+    /// after AddDisplayMode/CopyDisplayMode or changing DisplayAttributes to persist
+    /// the change; otherwise an unrelated settings save elsewhere in Rhino can reload
+    /// the display mode list from disk and silently discard the unsaved mode.
+    /// </summary>
+    /// <param name="displayMode">The display mode description to update.</param>
+    /// <returns>true if successful, false otherwise.</returns>
     /// <example>
     /// <code source='examples\vbnet\ex_advanceddisplay.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_advanceddisplay.cs' lang='cs'/>
@@ -193,6 +219,30 @@ namespace Rhino.Display
       bool rc = UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Update(pConstDisplayMode);
       GC.KeepAlive(displayMode);
       return rc;
+    }
+
+    /// <summary>
+    /// Updates an existing display mode.
+    /// </summary>
+    /// <param name="displayMode">The display mode description to update.</param>
+    /// <param name="bSave">True to save the display mode to disk, false otherwise.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>9.0</since>
+    public static bool UpdateDisplayMode(DisplayModeDescription displayMode, bool bSave)
+    {
+      IntPtr pConstDisplayMode = displayMode.ConstPointer();
+      bool rc = UnsafeNativeMethods.CRhinoDisplayAttrsMgr_Update2(pConstDisplayMode, bSave);
+      GC.KeepAlive(displayMode);
+      return rc;
+    }
+
+    /// <summary>
+    /// Saves all display modes to disk.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void SaveDisplayModes()
+    {
+      UnsafeNativeMethods.CRhinoDisplayAttrsMgr_SaveProfile();
     }
 
     /// <summary>
@@ -357,137 +407,44 @@ namespace Rhino.Display
       get { return DisplayAttributes.LocalName; }
     }
 
+    static Guid SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType type)
+      => UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(type);
+
     /// <since>6.26</since>
-    public static Guid ArtisticId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Artistic);
-      }
-    }
+    public static Guid ArtisticId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Artistic);
 
     /// <since>6.0</since>
-    public static Guid GhostedId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Ghosted);
-      }
-    }
+    public static Guid GhostedId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Ghosted);
 
     /// <since>6.0</since>
-    public static Guid PenId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Pen);
-      }
-    }
+    public static Guid PenId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Pen);
 
     /// <since>6.0</since>
-    public static Guid RenderedId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Rendered);
-      }
-    }
+    public static Guid RenderedId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Rendered);
 
     /// <since>6.0</since>
-    public static Guid RenderedShadowsId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.RenderedShadows);
-      }
-    }
+    public static Guid RenderedShadowsId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.RenderedShadows);
 
     /// <since>6.0</since>
-    public static Guid ShadedId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Shaded);
-      }
-    }
+    public static Guid ShadedId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Shaded);
 
     /// <since>6.0</since>
-    public static Guid TechId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Tech);
-      }
-    }
+    public static Guid TechId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Tech);
 
     /// <since>6.0</since>
-    public static Guid WireframeId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Wireframe);
-      }
-    }
+    public static Guid WireframeId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Wireframe);
 
     /// <since>6.0</since>
-    public static Guid XRayId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.XRay);
-      }
-    }
+    public static Guid XRayId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.XRay);
 
     /// <since>6.0</since>
-    public static Guid AmbientOcclusionId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.AmbientOcclusion);
-      }
-    }
+    public static Guid AmbientOcclusionId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.AmbientOcclusion);
 
     /// <since>6.0</since>
-    public static Guid RaytracedId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Raytraced);
-      }
-    }
+    public static Guid RaytracedId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Raytraced);
 
     /// <since>8.14</since>
-    public static Guid MonochromeId
-    {
-      get
-      {
-        return
-          UnsafeNativeMethods.ON_MaterialRef_DisplayModeSpecialType(
-            UnsafeNativeMethods.DisplayModeSpecialType.Monochrome);
-      }
-    }
+    public static Guid MonochromeId => SpecialModeId(UnsafeNativeMethods.DisplayModeSpecialType.Monochrome);
     #endregion
 
   }

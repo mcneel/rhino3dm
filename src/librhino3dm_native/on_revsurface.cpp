@@ -60,3 +60,11 @@ RH_C_FUNCTION bool ON_RevSurface_Interval(const ON_RevSurface* pConstSurface, ON
   }
   return rc;
 }
+
+RH_C_FUNCTION bool ON_RevSurface_AxisAndCurveCoplanar(const ON_RevSurface* pConstSurface)
+{
+  bool rc = false;
+  if (pConstSurface)
+    rc = pConstSurface->AxisAndCurveCoplanar(ON_DEFAULT_ANGLE_TOLERANCE * 0.01);
+  return rc;
+}

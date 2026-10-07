@@ -99,6 +99,33 @@ RH_C_FUNCTION void ON_HatchPattern_SetFillType(ON_HatchPattern* pHatchPattern, i
   }
 }
 
+RH_C_FUNCTION ON::LengthUnitSystem ON_HatchPattern_PatternUnitSystem(const ON_HatchPattern* pHatchPattern)
+{
+  ON::LengthUnitSystem rc = ON::LengthUnitSystem::Unset;
+  if (pHatchPattern)
+    rc = pHatchPattern->PatternUnitSystem();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_HatchPattern_SetPatternUnitSystem(ON_HatchPattern* pHatchPattern, ON::LengthUnitSystem us)
+{
+  bool rc = false;
+  if (pHatchPattern)
+    rc = pHatchPattern->SetPatternUnitSystem(us);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_HatchPattern_AlwaysModelDistances(const ON_HatchPattern* pHatchPattern)
+{
+  return pHatchPattern && pHatchPattern->AlwaysModelDistances();
+}
+
+RH_C_FUNCTION void ON_HatchPattern_SetAlwaysModelDistances(ON_HatchPattern* pHatchPattern, bool always)
+{
+  if (pHatchPattern)
+    pHatchPattern->SetAlwaysModelDistances(always);
+}
+
 RH_C_FUNCTION ON_Hatch* ON_Hatch_HatchFromBrep(const ON_Brep* constPtrBrep, int faceIndex, int patternIndex, double rotation, double scale, ON_3DPOINT_STRUCT basePt)
 {
   const ON_3dPoint* point = (const ON_3dPoint*)&basePt;

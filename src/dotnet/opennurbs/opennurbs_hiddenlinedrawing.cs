@@ -575,10 +575,16 @@ namespace Rhino.Geometry
       Rhino.Runtime.Interop.MarshalProgressAndCancelToken(cancelToken, progress,
         out IntPtr ptrTerminator, out int progressInt, out var reporter, out var terminator);
 
-      var rc = UnsafeNativeMethods.ON_HiddenLineDrawing_Draw2(ptr_this, allowUseThreads, progressInt, ptrTerminator);
-
-      if (reporter != null) reporter.Disable();
-      if (terminator != null) terminator.Dispose();
+      bool rc;
+      try
+      {
+        rc = UnsafeNativeMethods.ON_HiddenLineDrawing_Draw2(ptr_this, allowUseThreads, progressInt, ptrTerminator);
+      }
+      finally
+      {
+        if (reporter != null) reporter.Disable();
+        if (terminator != null) terminator.Dispose();
+      }
       GC.KeepAlive(this);
 
       return rc;

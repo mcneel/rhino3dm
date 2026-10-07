@@ -127,7 +127,13 @@ namespace Rhino.PlugIns
     /// <summary>Successfully loaded</summary>
     Success,
     SuccessAlreadyLoaded,
-    ErrorUnknown
+    ErrorUnknown,
+    /// <summary>
+    /// The rhp is a valid assembly, but it does not contain a Rhino plugin
+    /// class. Instead it contains what is needed to define grasshopper or
+    /// grasshopper 2 component(s)
+    /// </summary>
+    NotRhinoPlugIn
   }
 
   public class LicenseChangedEventArgs : EventArgs
@@ -400,6 +406,8 @@ namespace Rhino.PlugIns
         return LoadPlugInResult.Success;
       if (rc == (int)LoadPlugInResult.SuccessAlreadyLoaded)
         return LoadPlugInResult.SuccessAlreadyLoaded;
+      if (rc == (int)LoadPlugInResult.NotRhinoPlugIn)
+        return LoadPlugInResult.NotRhinoPlugIn;
       return LoadPlugInResult.ErrorUnknown;
     }
 
@@ -883,9 +891,14 @@ namespace Rhino.PlugIns
             RdkPlugIn.GetRdkPlugIn(p.Id, pluginSerialNumber);
 
           if (HostUtils.CustomComputeEndpointCount() > computeEndpointCount)
-          {
             p.Settings.SetBool("HasComputeEndpoint", true);
-          }
+          else
+            p.Settings.DeleteItem("HasComputeEndpoint");
+
+          if (p.Assembly.GetReferencedAssemblies().Any(x => string.Equals(x.Name, "Grasshopper", StringComparison.OrdinalIgnoreCase)))
+            p.Settings.SetBool("AssemblyReference.Grasshopper", true);
+          else
+            p.Settings.DeleteItem("AssemblyReference.Grasshopper");
         }
         catch (Exception ex)
         {
@@ -1128,7 +1141,7 @@ namespace Rhino.PlugIns
 
             if (service != null)
             {
-              service.StyleEtoControls(section);
+              service.ApplyRhinoStyle(section);
             }
           }
         }
@@ -1163,7 +1176,7 @@ namespace Rhino.PlugIns
 
             if (service != null)
             {
-              service.StyleEtoControls(section);
+              service.ApplyRhinoStyle(section);
             }
           }
         }
@@ -1286,18 +1299,18 @@ namespace Rhino.PlugIns
       {
         if (command_type.IsAssignableFrom(exported_types[i]) && !exported_types[i].IsAbstract)
         {
-          CreateCommandsHelper(this, this.NonConstPointer(), exported_types[i], null);
+          CreateCommandsHelper(this, this.NonConstPointer(), exported_types[i], null, false);
         }
       }
     }
 
     protected bool RegisterCommand(Rhino.Commands.Command command)
     {
-      return CreateCommandsHelper(this, this.NonConstPointer(), command.GetType(), command);
+      return CreateCommandsHelper(this, this.NonConstPointer(), command.GetType(), command, true);
     }
 
     internal static PlugIn m_active_plugin_at_command_creation = null;
-    internal static bool CreateCommandsHelper(PlugIn plugin, IntPtr pPlugIn, Type commandType, Commands.Command newCommand)
+    internal static bool CreateCommandsHelper(PlugIn plugin, IntPtr pPlugIn, Type commandType, Commands.Command newCommand, bool forceRegisterCall)
     {
       bool rc = false;
       try
@@ -1352,7 +1365,7 @@ namespace Rhino.PlugIns
             ct = 3;
         }
 
-        int sn = UnsafeNativeMethods.CRhinoCommand_New(pPlugIn, id, english_name, local_name, command_style, ct);
+        int sn = UnsafeNativeMethods.CRhinoCommand_New(pPlugIn, id, english_name, local_name, command_style, ct, forceRegisterCall);
         newCommand.m_runtime_serial_number = sn;
 
         rc = sn!=0;
@@ -1668,6 +1681,7 @@ namespace Rhino.PlugIns
       if (null == assembly && UnsafeNativeMethods.CRhinoApp_IsRhinoUUID(pluginId) > 0)
       {
         var data_folder = ApplicationSettings.FileSettings.GetDataFolder(bLocalUser);
+
         if (!string.IsNullOrEmpty(data_folder))
           path = System.IO.Path.Combine(data_folder, "settings");
         return path;
@@ -2022,6 +2036,9 @@ namespace Rhino.PlugIns
           if (System.IO.File.Exists(path))
           {
             try {
+              // only get the path appropriate for the current runtime
+              path = GetMultiTargetPath(path) ?? path;
+
               path = System.IO.Path.GetDirectoryName (path);
 
               if (dirs.Contains (path))
@@ -2253,6 +2270,40 @@ namespace Rhino.PlugIns
     #endregion
 
 
+    // 1 September 2026 Brian Gillespie (RH-98269)
+    // Windows error codes, as HRESULTs, that mean the operating system refused to let the
+    // plug-in file be loaded.
+    const int ERROR_VIRUS_INFECTED_HRESULT = unchecked((int)0x800700E1);
+    const int ERROR_VIRUS_DELETED_HRESULT = unchecked((int)0x800700E2);
+    const int ERROR_INVALID_IMAGE_HASH_HRESULT = unchecked((int)0x80070241);
+
+    /// <summary>
+    /// True when the exception means Windows refused to load the file, rather than the
+    /// plug-in itself failing. blockedCode says which kind of refusal it was: Windows could
+    /// not verify the file's signature, which is what a code integrity policy such as Smart
+    /// App Control reports and what a damaged or modified file reports; or antivirus
+    /// software objected to the contents of the file.
+    /// </summary>
+    static bool BlockedByWindows(Exception e, out UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts blockedCode)
+    {
+      // A blocked dependency shows up wrapped, so walk the inner exceptions too.
+      for (; e != null; e = e.InnerException)
+      {
+        switch (e.HResult)
+        {
+          case ERROR_INVALID_IMAGE_HASH_HRESULT:
+            blockedCode = UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.BlockedByWindows;
+            return true;
+          case ERROR_VIRUS_INFECTED_HRESULT:
+          case ERROR_VIRUS_DELETED_HRESULT:
+            blockedCode = UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.BlockedByAntivirus;
+            return true;
+        }
+      }
+      blockedCode = UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
+      return false;
+    }
+
     // Attempt to create a RhinoCommon plugin through reflection.
     // Taken from original Rhino.NET plug-in loading code
     internal static UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts LoadPlugInHelper(string path, IntPtr pluginInfo, IntPtr errorMessage, bool displayDebugInfo, bool bIsDirectoryInstall)
@@ -2312,6 +2363,9 @@ namespace Rhino.PlugIns
       if (!HostUtils.IsManagedDll(path))
         return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
 
+      if (!GetReplacedAssembly(ref path, displayDebugInfo))
+        return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
+        
       // attempt to load the assembly
       // This plugin may be a standard C++ plug-in that uses .NET.
       // If the plug-in does not reference this RhinoCommon, assume it is not plugin
@@ -2340,6 +2394,13 @@ namespace Rhino.PlugIns
           RhinoApp.WriteLine("(ERROR) FileLoadException occurred in LoadPlugIn::ReflectionOnlyLoadFrom" );
           RhinoApp.WriteLine(e.Message);
         }
+        // 1 September 2026 Brian Gillespie (RH-98269)
+        // Windows refusing to load the file is by far the most common reason this throws,
+        // and reporting it as GuidInUse sent people looking for a plug-in ID conflict that
+        // was not happening.
+        UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts blocked_code;
+        if (BlockedByWindows(e, out blocked_code))
+          return blocked_code;
         // 13 Dec 2012 S. Baer
         // The old loading code returned GuidInUse, but I'm not sure why.
         // TODO: look into this once we have plug-in loading working again
@@ -2352,6 +2413,11 @@ namespace Rhino.PlugIns
           RhinoApp.WriteLine("(ERROR) BadImageFormatException occurred in LoadPlugIn::ReflectionOnlyLoadFrom\n");
           RhinoApp.WriteLine(e.Message);
         }
+        // RH-98269: .NET does not always agree with itself about which exception a blocked
+        // file throws, so check here as well.
+        UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts blocked_code;
+        if (BlockedByWindows(e, out blocked_code))
+          return blocked_code;
         return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.UnableToLoad;
       }
       catch(Exception e)
@@ -2361,6 +2427,10 @@ namespace Rhino.PlugIns
           RhinoApp.WriteLine("(ERROR) Exception occurred in LoadPlugIn::ReflectionOnlyLoadFrom");
           RhinoApp.WriteLine(e.Message);
         }
+        // RH-98269: see above.
+        UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts blocked_code;
+        if (BlockedByWindows(e, out blocked_code))
+          return blocked_code;
         UnsafeNativeMethods.ON_wString_Set(errorMessage, e.Message);
         return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
       }
@@ -2393,7 +2463,8 @@ namespace Rhino.PlugIns
 
         int index_rhinocommon = -1;
         int index_rhinodotnet = -1;
-        for( int i=0; i<count && (-1==index_rhinocommon || -1==index_rhinodotnet); i++ )
+        bool grasshopper_referenced = false;
+        for( int i=0; i<count; i++ )
         {
           string name = referenced_assemblies[i].Name;
           if( -1==index_rhinocommon && name.Equals("RhinoCommon", StringComparison.OrdinalIgnoreCase) )
@@ -2404,6 +2475,7 @@ namespace Rhino.PlugIns
           {
             index_rhinodotnet = i;
           }
+          grasshopper_referenced = grasshopper_referenced || name.Equals("Grasshopper", StringComparison.Ordinal) || name.Equals("Grasshopper2", StringComparison.Ordinal);
           ironpython_referenced = ironpython_referenced || name.IndexOf("IronPython", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
@@ -2411,6 +2483,8 @@ namespace Rhino.PlugIns
         // Don't load Rhino_DotNet plug-ins
         if( index_rhinocommon < 0 )
         {
+          if (grasshopper_referenced)
+            return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotRhinoPlugIn;
           if (index_rhinodotnet < 0)
             return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotDotNet;
         }
@@ -2421,9 +2495,19 @@ namespace Rhino.PlugIns
         bool version_check_passed = false;
         if( index_rhinocommon>=0 )
           version_check_passed = CheckPlugInVersioning( referenced_assemblies[index_rhinocommon] );
-        if( !version_check_passed && !CheckPlugInCompatibility(path) )
+        if( !version_check_passed && !CheckPlugInCompatibility(path, null, true, true, out var reasons, out var detailsFile) )
         {
-          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Incompatible;
+          var message = GetIncompatibleMessage(path, reasons, true, detailsFile);
+          RhinoApp.WriteLine(message);
+          UnsafeNativeMethods.ON_wString_Set(errorMessage, message);
+          // RH-95428: so the load error dialog can say who to contact
+          ExtractPlugInDescriptionsFromMetadata(path, pluginInfo);
+
+          // Rhino's error dialog links to help on switching to .NET Framework
+          if ((reasons == CompatFailures.None || reasons == CompatFailures.DotNetFramework) && CanSwitchToDotNetFramework)
+            return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Incompatible;
+
+          return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.IncompatibleWithRhino;
         }
 
         // if(displayDebugInfo)
@@ -2436,14 +2520,14 @@ namespace Rhino.PlugIns
         // actually get loaded along side this DLL.
         {
           string plugin_directory = Path.GetDirectoryName(path);
-          if(!String.IsNullOrEmpty(plugin_directory))
+          if (!String.IsNullOrEmpty(plugin_directory))
           {
             string rhcmn_filename = Path.Combine(plugin_directory, "RhinoCommon.dll");
-            if( File.Exists(rhcmn_filename) )
+            if (File.Exists(rhcmn_filename))
             {
               string exepath = typeof(PlugIn).Assembly.Location;
               string exedir = Path.GetDirectoryName(exepath);
-              if( string.Compare(plugin_directory, exedir, StringComparison.OrdinalIgnoreCase)!=0 )
+              if (string.Compare(plugin_directory, exedir, StringComparison.OrdinalIgnoreCase) != 0)
               {
                 // RhinoCommon.dll exists in this directory. The only directory
                 // that this is OK is this assemblies executing directory
@@ -2464,21 +2548,27 @@ namespace Rhino.PlugIns
         // if(displayDebugInfo)
         //   RhinoApp.Write("- loading assembly using Reflection::Assembly::LoadFrom\n");
 
-        if(ironpython_referenced)
-        {
-          // force load the IronPython that ships with Rhino so we don't accidentally get one from the GAC
-          var ipy_dir = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Plug-ins", "IronPython");
-          try
-          {
-            string forceload_path = Path.Combine(ipy_dir, "IronPython.dll");
-            HostUtils.LoadAssemblyFrom(forceload_path);
-            forceload_path = Path.Combine(ipy_dir, "Microsoft.Dynamic.dll");
-            HostUtils.LoadAssemblyFrom(forceload_path);
-            forceload_path = Path.Combine(ipy_dir, "Microsoft.Scripting.dll");
-            HostUtils.LoadAssemblyFrom(forceload_path);
-          }
-          catch (Exception) { } // this shouldn't happen, but is probably acceptable
-        }
+
+        // Curtis: This has never actually worked with release versions of Rhino as this is not the correct path on
+        // either platform, so we always get exceptions here.  Instead of making it work, I have opted to comment 
+        // it out as that is the current behavior.
+        //
+        // Additionally, we won't ever have the problem mentioned (loading from GAC) when running in .NET Core.
+        // if(ironpython_referenced)
+        // {
+        //   // force load the IronPython that ships with Rhino so we don't accidentally get one from the GAC
+        //   var ipy_dir = Path.Combine(HostUtils.RhinoAssemblyDirectory, "Plug-ins", "IronPython");
+        //   try
+        //   {
+        //     string forceload_path = Path.Combine(ipy_dir, "IronPython.dll");
+        //     HostUtils.LoadAssemblyFrom(forceload_path);
+        //     forceload_path = Path.Combine(ipy_dir, "Microsoft.Dynamic.dll");
+        //     HostUtils.LoadAssemblyFrom(forceload_path);
+        //     forceload_path = Path.Combine(ipy_dir, "Microsoft.Scripting.dll");
+        //     HostUtils.LoadAssemblyFrom(forceload_path);
+        //   }
+        //   catch (Exception) { } // this shouldn't happen, but is probably acceptable
+        // }
 
         var plugin_assembly = HostUtils.LoadAssemblyFrom(path);
 
@@ -2494,8 +2584,25 @@ namespace Rhino.PlugIns
         // if(displayDebugInfo)
         //   RhinoApp.Write("- creating plug-in and command classes\n");
 
-        if( !CreateFromAssembly( plugin_assembly, displayDebugInfo, index_rhinocommon==-1) )
+        bool no_plugin_class_found;
+        if (!CreateFromAssembly(plugin_assembly, displayDebugInfo, index_rhinocommon == -1, out no_plugin_class_found))
+        {
+          if (no_plugin_class_found)
+          {
+            // 7 Aug 2026 S. Baer (RH-97047)
+            // An assembly that references Grasshopper and doesn't define a Rhino
+            // plug-in class is a Grasshopper only rhp. This is not an error.
+            if (grasshopper_referenced)
+              return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.NotRhinoPlugIn;
+
+            // 16 Aug 2026 S. Baer (RH-97047)
+            // Write a message that a developer can act on instead of dumping an
+            // exception with a stack trace in the command line.
+            RhinoApp.WriteLine("No plug-in class found in {0}", path);
+          }
+
           return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.LoadError;
+        }
 
         // if(displayDebugInfo)
         //   RhinoApp.Write("RhinoCommon successfully loaded {0}\n\n", path);
@@ -2511,6 +2618,14 @@ namespace Rhino.PlugIns
           if( nse != null )
             return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.BlockedByCodeAccessSecurity;
         }
+        // 1 September 2026 Brian Gillespie (RH-98269)
+        // Windows would not let the file load. Only trust this for the exception types the
+        // assembly loader throws: CreateFromAssembly above runs the plug-in's own code, and
+        // a plug-in that trips antivirus on some file of its own must not be reported as a
+        // blocked .rhp.
+        UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts blocked_code;
+        if( (ex is FileLoadException || ex is BadImageFormatException) && BlockedByWindows(ex, out blocked_code) )
+          return blocked_code;
         string msg = "(ERROR) Exception while attempting to load plug-in\n";
         msg += ex.Message;
         if(displayDebugInfo)
@@ -2520,6 +2635,63 @@ namespace Rhino.PlugIns
       }
 
       return UnsafeNativeMethods.LoadPlugInFileReturnCodesConsts.Loaded;
+    }
+
+    /// <summary>
+    /// Checks if the plug-in assembly is listed in the RHINO_REPLACE_ASSEMBLIES environment variable
+    /// and swaps it out for the alternate assembly if it is listed.
+    /// 
+    /// NOTE: This is not intended to be used by plug-in developers, but only internally
+    /// by McNeel to develop Rhino-included plugins with a release version of Rhino.
+    /// </summary>
+    /// <param name="path">The path to the assembly, which may be modified with a new path.</param>
+    /// <param name="displayDebugInfo">If true, debug information will be displayed in the Rhino command line.</param>
+    /// <returns>
+    /// Returns false if the assembly should be skipped altogether.
+    /// </returns>
+    internal static bool GetReplacedAssembly(ref string path, bool displayDebugInfo)
+    {
+      var skipPlugins = Environment.GetEnvironmentVariable("RHINO_REPLACE_ASSEMBLIES");
+      if (string.IsNullOrEmpty(skipPlugins))
+        return true;
+
+      // Skip or replace plug-ins that are listed in the environment variable
+      // RHINO_REPLACE_ASSEMBLIES
+      var skipList = skipPlugins.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+      foreach (var skipPlugin in skipList)
+      {
+        var skipDef = skipPlugin.Split(new[] { '=' });
+        if (skipDef.Length == 2)
+        {
+          // if the plugin definition has a name and a path, we only skip it if the path matches
+          if (string.Equals(skipDef[0], Path.GetFileName(path), StringComparison.OrdinalIgnoreCase))
+          {
+            if (displayDebugInfo)
+              RhinoApp.WriteLine($"Replacing plug-in {path} because it is listed in the RHINO_REPLACE_ASSEMBLIES environment variable.");
+            var newPath = skipDef[1].Trim();
+            if (File.Exists(newPath))
+            {
+              path = newPath;
+              if (displayDebugInfo)
+                RhinoApp.WriteLine($"Using alternate path {path} for plug-in {skipDef[0]}.");
+            }
+            else
+            {
+              if (displayDebugInfo)
+                RhinoApp.WriteLine($"Alternate path {newPath} for plug-in {skipDef[0]} does not exist. Skipping plug-in.");
+              return false;
+            }
+          }
+        }
+        else if (string.Equals(skipPlugin, Path.GetFileName(path), StringComparison.OrdinalIgnoreCase))
+        {
+          if (displayDebugInfo)
+            RhinoApp.WriteLine($"Skipping plug-in {path} because it is listed in the RHINO_REPLACE_ASSEMBLIES environment variable.");
+          return false;
+        }
+      }
+
+      return true;
     }
 
     // Match net4xx, net7.0, net7.0-windows10.17123.0
@@ -2549,7 +2721,7 @@ namespace Rhino.PlugIns
       }
 
       // find the runtime specific folder
-      var runtimeSpecificFolder = HostUtils.GetRuntimeSpecificFolder(dir, useRootFiles: HostUtils.RunningOnOSX);
+      var runtimeSpecificFolder = HostUtils.GetRuntimeSpecificFolder(dir, useRootFiles: HostUtils.RunningOnOSX, pluginName);
       var runtimeSpecificPath = Path.Combine(runtimeSpecificFolder.FullName, pluginName);
 
       // if the plugin doesn't exist in the runtime specific folder,
@@ -2561,11 +2733,12 @@ namespace Rhino.PlugIns
 
     static bool CheckPlugInVersioning( System.Reflection.AssemblyName dotnetAssemblyName )
     {
-      var plugin_version = dotnetAssemblyName.Version;
-
       //the major number is always in sync with the current release of Rhino
-      var sdk_version = typeof(RhinoApp).Assembly.GetName().Version;
+      return CheckPlugInVersioning(dotnetAssemblyName.Version, typeof(RhinoApp).Assembly.GetName().Version);
+    }
 
+    static bool CheckPlugInVersioning( Version plugin_version, Version sdk_version )
+    {
       if( sdk_version.Major != plugin_version.Major )
       {
         return false;
@@ -2588,6 +2761,102 @@ namespace Rhino.PlugIns
       return true;
     }
 
+    /// <summary>
+    /// Checks a Grasshopper component library that was built for a different version of Rhino
+    /// or Grasshopper, and prints why it may not work. Call before loading the library.
+    /// </summary>
+    /// <param name="path">The .gha file.</param>
+    /// <param name="grasshopperPath">Grasshopper.dll, so calls into Grasshopper are checked too.</param>
+    /// <param name="message">Why it may not work, for Grasshopper's loading errors; null when compatible.</param>
+    /// <returns>False if the library is not compatible. It can still be loaded.</returns>
+    internal static bool CheckGrasshopperAssemblyCompatibility(string path, string grasshopperPath, out string message)
+    {
+      message = null;
+      try
+      {
+        var rhinocommon_version = typeof(RhinoApp).Assembly.GetName().Version;
+        var grasshopper_version = AssemblyName.GetAssemblyName(grasshopperPath).Version;
+        bool version_check_passed = true;
+        using (var stream = File.OpenRead(path))
+        using (var pe = new System.Reflection.PortableExecutable.PEReader(stream))
+        {
+          if (!pe.HasMetadata)
+            return true;
+          var reader = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+          foreach (var handle in reader.AssemblyReferences)
+          {
+            var reference = reader.GetAssemblyReference(handle);
+            var name = reader.GetString(reference.Name);
+            if (name == "RhinoCommon")
+              version_check_passed &= CheckPlugInVersioning(reference.Version, rhinocommon_version);
+            else if (name == "Grasshopper")
+              version_check_passed &= CheckPlugInVersioning(reference.Version, grasshopper_version);
+          }
+        }
+        if (version_check_passed)
+          return true;
+
+        // A folder shared by several libraries holds DLLs that belong to the others,
+        // so only check the DLLs next to it when this is the only library there.
+        var dir = Path.GetDirectoryName(path);
+        bool own_folder = Directory.GetFiles(dir, "*.gha").Length + Directory.GetFiles(dir, "*.rhp").Length == 1;
+
+        if (CheckPlugInCompatibility(path, new[] { grasshopperPath }, own_folder, false, out var reasons, out var detailsFile))
+          return true;
+
+        message = GetIncompatibleMessage(path, reasons, false, detailsFile);
+        RhinoApp.WriteLine(message);
+        return false;
+      }
+      catch (Exception ex)
+      {
+        // never stop a library from loading because the check itself failed
+        HostUtils.DebugString($"Compatibility check for {path} failed: {ex.Message}");
+        return true;
+      }
+    }
+
+    // Compat reports from this session, by plug-in path
+    static readonly ConcurrentDictionary<string, string> g_compatibility_reports = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    // Where the user finds the report to send to the developer, named after the plug-in rather than its hash
+    static string WriteCompatibilityReport(string path, string report)
+    {
+      try
+      {
+        var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
+        if (!Directory.Exists(outputDir))
+          Directory.CreateDirectory(outputDir);
+
+        var file = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path) + ".txt");
+        File.WriteAllText(file, report);
+        g_compatibility_reports[Path.GetFullPath(path)] = file;
+        return file;
+      }
+      catch (Exception ex)
+      {
+        HostUtils.DebugString($"Writing the compatibility report for {path} failed: {ex.Message}");
+        return null;
+      }
+    }
+
+    /// <summary>
+    /// The compatibility report for a plug-in that failed the check this session, or null.
+    /// </summary>
+    internal static string GetCompatibilityReport(string path)
+    {
+      if (string.IsNullOrEmpty(path))
+        return null;
+      try
+      {
+        return g_compatibility_reports.TryGetValue(Path.GetFullPath(path), out var file) && File.Exists(file) ? file : null;
+      }
+      catch
+      {
+        return null;
+      }
+    }
+
     static bool g_rhcommon_hash_checked = false;
     static string ComputeMd5Hash(string path)
     {
@@ -2599,8 +2868,20 @@ namespace Rhino.PlugIns
         return hash;
       }
     }
-    static bool CheckPlugInCompatibility(string path)
+    /// <summary>
+    /// Runs Compat on an assembly (and optionally the other assemblies next to it), caching the result.
+    /// </summary>
+    /// <param name="path">Assembly to check.</param>
+    /// <param name="extraReferences">Assemblies to check against besides RhinoCommon and Rhino_DotNet, e.g. Grasshopper.</param>
+    /// <param name="checkSiblingAssemblies">Also check every other .dll in the same folder.</param>
+    /// <param name="showProgress">Show a status bar progress meter; pass false when the caller already shows one.</param>
+    /// <param name="reasons">Why the check failed, if it did.</param>
+    /// <param name="detailsFile">Full Compat output, when the check ran and failed.</param>
+    internal static bool CheckPlugInCompatibility(string path, IEnumerable<string> extraReferences, bool checkSiblingAssemblies, bool showProgress, out CompatFailures reasons, out string detailsFile)
     {
+      reasons = CompatFailures.None;
+      detailsFile = null;
+
       // 10 June 2016 (S. Baer)
       // We will probably want to completely redo this caching scheme about
       // four different ways before settling on something that works for us.
@@ -2615,7 +2896,8 @@ namespace Rhino.PlugIns
       // I just want to make sure that a single Directory.Delete call can
       // eliminate our current caching scheme so we can start over in the future.
 
-      string cache_directory = Rhino.ApplicationSettings.FileSettings.GetDataFolder(true);
+      // Local, not roaming: results are per machine and would only bloat a roaming profile
+      string cache_directory = Rhino.ApplicationSettings.FileSettings.LocalProfileDataFolder;
 
       // store different cache results for each runtime
       // this prevents Rhino from re-checking when switching between runtimes.
@@ -2623,6 +2905,11 @@ namespace Rhino.PlugIns
         cache_directory = Path.Combine(cache_directory, "compat_cache_netcore");
       else
         cache_directory = Path.Combine(cache_directory, "compat_cache");
+
+      // the .NET 10 / BinaryFormatter check changes the result, so keep its
+      // cached results separate from a run where the check was not applied.
+      if (ShouldCheckNet10Apis)
+        cache_directory += "_net10";
 
       if ( !g_rhcommon_hash_checked )
       {
@@ -2650,16 +2937,27 @@ namespace Rhino.PlugIns
 
       // check cache using md5 in case we've already checked this file
       // NOTE: cache should be destroyed when Rhino is updated
-      // cache file should contain the result of the check ("true" or "false")
+      // cache file should contain the result of the check ("true" or "false"),
+      // followed by the failure reasons on the next line
       string hash_cache = Path.Combine(cache_directory, hash);
+      // RH-95428: the full Compat output is kept beside the result, so later runs can still offer it
+      string report_cache = hash_cache + ".txt";
       if (File.Exists(hash_cache))
-        return File.ReadAllText(hash_cache).Trim() == "true";
+      {
+        var cached = File.ReadAllLines(hash_cache);
+        if (cached.Length > 1 && int.TryParse(cached[1], out int cached_reasons))
+          reasons = (CompatFailures)cached_reasons;
+        bool cached_result = cached.Length > 0 && cached[0].Trim() == "true";
+        if (!cached_result && File.Exists(report_cache))
+          detailsFile = WriteCompatibilityReport(path, File.ReadAllText(report_cache));
+        return cached_result;
+      }
 
       // if result not already cached... run compat
 
       // find all dlls in same dir as rhp
       var dir = Path.GetDirectoryName(path);
-      var dlls = Directory.GetFiles(dir, "*.dll", SearchOption.TopDirectoryOnly);
+      var dlls = checkSiblingAssemblies ? Directory.GetFiles(dir, "*.dll", SearchOption.TopDirectoryOnly) : new string[0];
 
       // tell the user we're testing for compatibility
       var extra_text = "";
@@ -2684,7 +2982,7 @@ namespace Rhino.PlugIns
       {
         try
         {
-          var res = RunCompat(filePath);
+          var res = RunCompat(filePath, extraReferences);
           lock (results)
           {
             results.Add(res);
@@ -2714,11 +3012,13 @@ namespace Rhino.PlugIns
       });
 
       // run tasks with progress meter and keep rhino alive
-      Rhino.UI.StatusBar.ShowProgressMeter(completedCount, tasks.Count, msg, false, true);
+      if (showProgress)
+        Rhino.UI.StatusBar.ShowProgressMeter(completedCount, tasks.Count, msg, false, true);
       var lastCompleted = 0;
       while (completedCount < tasks.Count)
       {
-        Rhino.UI.StatusBar.UpdateProgressMeter(completedCount, true);
+        if (showProgress)
+          Rhino.UI.StatusBar.UpdateProgressMeter(completedCount, true);
         RhinoApp.Wait();
         var completed = completedCount; // store value since it could change after this point
         if (completed != lastCompleted)
@@ -2727,7 +3027,8 @@ namespace Rhino.PlugIns
           HostUtils.DebugString($"- Tested {completed} / {tasks.Count}");
         }
       }
-      Rhino.UI.StatusBar.HideProgressMeter();
+      if (showProgress)
+        Rhino.UI.StatusBar.HideProgressMeter();
       var time = DateTime.Now - start; // end timer
 
       // fail if one or more of the dlls failed
@@ -2738,6 +3039,7 @@ namespace Rhino.PlugIns
         if (!t.Success)
         {
           result = false;
+          reasons |= t.Reasons;
           output.AppendLine(t.Output);
           output.AppendLine();
         }
@@ -2745,40 +3047,136 @@ namespace Rhino.PlugIns
 
       if (!result)
       {
-        RhinoApp.WriteLine($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
+        HostUtils.DebugString($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
 
-        var outputDir = Path.Combine(Path.GetTempPath(), "RhinoCompat");
-        if (!Directory.Exists(outputDir))
-          Directory.CreateDirectory(outputDir);
-
-        var outputFile = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path) + ".txt");
-
-        File.WriteAllText(outputFile, output.ToString());
-        RhinoApp.WriteLine(Localization.LocalizeString("  Details written to {0}", 68), outputFile);
-
-        if (HostUtils.RunningInNetCore)
-          RhinoApp.WriteLine(Localization.LocalizeString("Some plugins may not be compatible with .NET Core.  To use .NET Framework, use the SetDotNetRuntime command.", 69));
+        detailsFile = WriteCompatibilityReport(path, output.ToString());
+        try
+        {
+          File.WriteAllText(report_cache, output.ToString());
+        }
+        catch { }
       }
 
       // cache result
       try
       {
-        File.WriteAllText(hash_cache, result ? "true" : "false");
+        File.WriteAllText(hash_cache, (result ? "true" : "false") + "\n" + (int)reasons);
       }
       catch { }
 
       return result;
     }
 
+    /// <summary>
+    /// Why an assembly failed the compatibility check, from Compat's "Reason:" lines.
+    /// </summary>
+    [Flags]
+    internal enum CompatFailures
+    {
+      None = 0,
+      RhinoApi = 1,
+      DotNetFramework = 2,
+      Net10OptIn = 4,
+      CppSdk = 8,
+      Other = 16
+    }
+
+    static CompatFailures ParseCompatReasons(string output)
+    {
+      var reasons = CompatFailures.None;
+      using (var reader = new StringReader(output ?? string.Empty))
+      {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+          if (!line.StartsWith("Reason: ", StringComparison.Ordinal))
+            continue;
+          switch (line.Substring(8).Trim())
+          {
+            case "rhino-api": reasons |= CompatFailures.RhinoApi; break;
+            case "dotnet-framework": reasons |= CompatFailures.DotNetFramework; break;
+            case "net10-optin": reasons |= CompatFailures.Net10OptIn; break;
+            case "cpp-sdk": reasons |= CompatFailures.CppSdk; break;
+            default: reasons |= CompatFailures.Other; break;
+          }
+        }
+      }
+      return reasons;
+    }
+
+    /// <summary>
+    /// True when the user can fix a .NET Framework incompatibility by running SetDotNetRuntime.
+    /// </summary>
+    static bool CanSwitchToDotNetFramework => HostUtils.RunningOnWindows && HostUtils.RunningInNetCore && !HostUtils.RunningAsRhinoInside;
+
+    /// <summary>
+    /// Plain-language explanation of why an assembly isn't compatible, for showing to users.
+    /// </summary>
+    /// <param name="path">The plug-in or component library.</param>
+    /// <param name="reasons">From <see cref="CheckPlugInCompatibility"/>.</param>
+    /// <param name="wontLoad">True if it won't be loaded, false if it will be loaded anyway.</param>
+    /// <param name="detailsFile">Full Compat output for developers, or null.</param>
+    internal static string GetIncompatibleMessage(string path, CompatFailures reasons, bool wontLoad, string detailsFile = null)
+    {
+      var name = Path.GetFileName(path);
+      var sb = new StringBuilder();
+      sb.AppendLine(wontLoad
+        ? string.Format(Localization.LocalizeString("Unable to load {0}. It is not compatible with this version of Rhino.", 68), name)
+        : string.Format(Localization.LocalizeString("{0} may not work correctly. It is not compatible with this version of Rhino.", 69), name));
+
+      if (reasons.HasFlag(CompatFailures.RhinoApi))
+        sb.AppendLine(Localization.LocalizeString("- It uses Rhino features that have changed since it was made.", 81));
+      if (reasons.HasFlag(CompatFailures.CppSdk))
+        sb.AppendLine(Localization.LocalizeString("- It was made for an older version of Rhino.", 82));
+      if (reasons.HasFlag(CompatFailures.DotNetFramework))
+      {
+        sb.AppendLine(Localization.LocalizeString("- It uses parts of .NET Framework that are not available in .NET Core.", 83));
+        if (CanSwitchToDotNetFramework)
+          sb.AppendLine(Localization.LocalizeString("  To run Rhino in .NET Framework instead, use the SetDotNetRuntime command.", 84));
+      }
+      if (reasons.HasFlag(CompatFailures.Net10OptIn))
+        sb.AppendLine(Localization.LocalizeString("- It uses a .NET feature that this application has turned off.", 85));
+      if (reasons.HasFlag(CompatFailures.Other))
+        sb.AppendLine(Localization.LocalizeString("- It uses a library that does not match the version Rhino provides.", 86));
+
+      sb.AppendLine(Localization.LocalizeString("Check with the developer for an updated version.", 87));
+
+      if (!string.IsNullOrEmpty(detailsFile))
+        sb.AppendLine(string.Format(Localization.LocalizeString("Details for the developer: {0}", 88), detailsFile));
+
+      return sb.ToString().TrimEnd();
+    }
+
     struct CompatResult
     {
       public bool Success;
       public string Output;
+      public CompatFailures Reasons;
     }
 
     static void DebugStringSafe(string str) => RhinoApp.InvokeOnUiThread(new Action(() => HostUtils.DebugString(str)));
 
-    private static CompatResult RunCompat(string path)
+    /// <summary>
+    /// Whether Compat should check for APIs that require the .NET 10 opt-in
+    /// (e.g. BinaryFormatter). True only on Windows under .NET Core, and only when
+    /// the unsafe BinaryFormatter serialization AppContext switch is NOT enabled.
+    /// Rhino proper enables this switch at startup (see DotNetInitialization.Start),
+    /// so this is false there; Rhino.Inside hosts that don't enable it get the check.
+    /// The compat result depends on this, so it also keys the cache directory.
+    /// </summary>
+    static bool ShouldCheckNet10Apis
+    {
+      get
+      {
+        if (!(HostUtils.RunningInNetCore && HostUtils.RunningOnWindows))
+          return false;
+        bool binaryFormatterEnabled =
+          AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", out bool enabled) && enabled;
+        return !binaryFormatterEnabled;
+      }
+    }
+
+    private static CompatResult RunCompat(string path, IEnumerable<string> extraReferences)
     {
       // get path to rhinocommon.  This may be under netcore\ when running in .NET 7.
       string rhino_common_path = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -2806,6 +3204,11 @@ namespace Rhino.PlugIns
       // Curtis: Use quiet mode as the output of this needs to be human readable
       arguments.Add("-q");
 
+      // Note: Compat parses these flags positionally, so --check-net10 must come
+      // before --check-system-assemblies.
+      if (ShouldCheckNet10Apis)
+        arguments.Add("--check-net10");
+
       if (HostUtils.RunningInNetCore)
         arguments.Add("--check-system-assemblies");
 
@@ -2815,8 +3218,17 @@ namespace Rhino.PlugIns
       if (!string.IsNullOrEmpty(rhino_dotnet_path))
         arguments.Add($"\"{rhino_dotnet_path}\"");
 
+      if (extraReferences != null)
+      {
+        foreach (var reference in extraReferences)
+        {
+          if (File.Exists(reference))
+            arguments.Add($"\"{reference}\"");
+        }
+      }
+
       // shell execute compat
-      Process proc = new Process
+      using (Process proc = new Process
       {
         StartInfo = new ProcessStartInfo
         {
@@ -2827,56 +3239,139 @@ namespace Rhino.PlugIns
           CreateNoWindow = true,
           RedirectStandardError = true
         }
-      };
-
-      if( Runtime.HostUtils.RunningOnOSX )
+      })
       {
-        // 2 Jan 2019 S. Baer (RH-42062)
-        // The mono executable needs to be passed as the application to run
-        // on Mac
-        DirectoryInfo di = new DirectoryInfo(compat_path);
-        di = di.Parent;
-        var arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86_64";
-        string dotnet_path = Path.Combine(di.FullName, "dotnet", arch, "dotnet");
-        proc.StartInfo.FileName = dotnet_path;
-        proc.StartInfo.Arguments = $"\"{compat_path}\" " + proc.StartInfo.Arguments;
-      }
 
-      // read error stream asynchronously
-      var sbError = new StringBuilder();
-      proc.ErrorDataReceived += (sender, e) => sbError.Append(e.Data);
+        if (Runtime.HostUtils.RunningOnOSX)
+        {
+          // 2 Jan 2019 S. Baer (RH-42062)
+          // The mono executable needs to be passed as the application to run
+          // on Mac
+          DirectoryInfo di = new DirectoryInfo(compat_path);
+          di = di.Parent;
+          var arch = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86_64";
+          string dotnet_path = Path.Combine(di.FullName, "dotnet", arch, "dotnet");
+          proc.StartInfo.FileName = dotnet_path;
+          proc.StartInfo.Arguments = $"\"{compat_path}\" " + proc.StartInfo.Arguments;
+        }
 
-      proc.Start();
+        // read error stream asynchronously
+        var sbError = new StringBuilder();
+        proc.ErrorDataReceived += (sender, e) => sbError.Append(e.Data);
 
-      // reading only one stream synchronously to avoid deadlocks
-      // See https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?redirectedfrom=MSDN&view=net-7.0#remarks
-      proc.BeginErrorReadLine();
-      string output = proc.StandardOutput.ReadToEnd();
+        proc.Start();
 
-      proc.WaitForExit();
+        // reading only one stream synchronously to avoid deadlocks
+        // See https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?redirectedfrom=MSDN&view=net-7.0#remarks
+        proc.BeginErrorReadLine();
+        string output = proc.StandardOutput.ReadToEnd();
 
-      //DebugStringSafe ($"Compat output: {output}");
+        proc.WaitForExit();
 
-      if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
-        || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
-        || proc.ExitCode == 114 // don't fail if there's only warnings
-        )
+        //DebugStringSafe ($"Compat output: {output}");
+
+        if (proc.ExitCode == 110 // don't fail if dll is not dotnet (native)
+          || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
+          || proc.ExitCode == 114 // don't fail if there's only warnings
+          )
           return new CompatResult { Success = true, Output = output };
 
-      // write error stream if needed
-      var errout = sbError.ToString();
-      if (!string.IsNullOrWhiteSpace(errout))
-      {
-        DebugStringSafe("ERROR: " + errout);
-        output += "\n\n" + errout;
+        // write error stream if needed
+        var errout = sbError.ToString();
+        if (!string.IsNullOrWhiteSpace(errout))
+        {
+          DebugStringSafe("ERROR: " + errout);
+          output += "\n\n" + errout;
+        }
+
+        if (proc.ExitCode == 112)
+          System.Diagnostics.Debug.Write(output);
+
+        bool result = proc.ExitCode == 0;
+
+        return new CompatResult { Success = result, Output = output, Reasons = ParseCompatReasons(output) };
       }
+    }
 
-      if (proc.ExitCode == 112 )
-        System.Diagnostics.Debug.Write(output);
+    static void SetPlugInDescription(IntPtr pluginInfo, DescriptionType type, string value)
+    {
+      switch (type)
+      {
+        case DescriptionType.Address:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Address);
+          break;
+        case DescriptionType.Country:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Country);
+          break;
+        case DescriptionType.Email:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Email);
+          break;
+        case DescriptionType.Fax:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Fax);
+          break;
+        case DescriptionType.Organization:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Organization);
+          break;
+        case DescriptionType.Phone:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.Phone);
+          break;
+        case DescriptionType.UpdateUrl:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.UpdateUrl);
+          break;
+        case DescriptionType.WebSite:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.WebSite);
+          break;
+        case DescriptionType.Icon:
+          UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, value, UnsafeNativeMethods.SetPlugInInfoConsts.IconResourceName);
+          break;
+      }
+    }
 
-      bool result = proc.ExitCode == 0;
+    /// <summary>
+    /// Reads the PlugInDescription attributes without loading the assembly, for plug-ins that are not going to load.
+    /// </summary>
+    static void ExtractPlugInDescriptionsFromMetadata(string path, IntPtr pluginInfo)
+    {
+      try
+      {
+        using (var stream = File.OpenRead(path))
+        using (var pe = new System.Reflection.PortableExecutable.PEReader(stream))
+        {
+          if (!pe.HasMetadata)
+            return;
+          var reader = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+          foreach (var handle in reader.GetAssemblyDefinition().GetCustomAttributes())
+          {
+            var attribute = reader.GetCustomAttribute(handle);
+            if (!IsPlugInDescriptionAttribute(reader, attribute.Constructor))
+              continue;
+            // Blob is the prolog, then the constructor's (DescriptionType, string) arguments
+            var blob = reader.GetBlobReader(attribute.Value);
+            if (blob.ReadUInt16() != 1)
+              continue;
+            var type = (DescriptionType)blob.ReadInt32();
+            var value = blob.ReadSerializedString();
+            if (!string.IsNullOrEmpty(value))
+              SetPlugInDescription(pluginInfo, type, value);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        // the plug-in isn't loading either way; this only loses its contact details
+        HostUtils.DebugString($"Reading plug-in descriptions from {path} failed: {ex.Message}");
+      }
+    }
 
-      return new CompatResult { Success = result, Output = output };
+    static bool IsPlugInDescriptionAttribute(System.Reflection.Metadata.MetadataReader reader, System.Reflection.Metadata.EntityHandle constructor)
+    {
+      if (constructor.Kind != System.Reflection.Metadata.HandleKind.MemberReference)
+        return false;
+      var parent = reader.GetMemberReference((System.Reflection.Metadata.MemberReferenceHandle)constructor).Parent;
+      if (parent.Kind != System.Reflection.Metadata.HandleKind.TypeReference)
+        return false;
+      var type = reader.GetTypeReference((System.Reflection.Metadata.TypeReferenceHandle)parent);
+      return reader.GetString(type.Name) == nameof(PlugInDescriptionAttribute) && reader.GetString(type.Namespace) == "Rhino.PlugIns";
     }
 
     static void ExtractPlugInAttributes(System.Reflection.Assembly assembly, IntPtr pluginInfo)
@@ -2900,36 +3395,7 @@ namespace Rhino.PlugIns
           foreach (object attr in descr_attrs)
           {
             var description = (PlugInDescriptionAttribute)attr;
-            switch( description.DescriptionType )
-            {
-              case DescriptionType.Address:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Address);
-                break;
-              case DescriptionType.Country:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Country);
-                break;
-              case DescriptionType.Email:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Email);
-                break;
-              case DescriptionType.Fax:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Fax);
-                break;
-              case DescriptionType.Organization:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Organization);
-                break;
-              case DescriptionType.Phone:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.Phone);
-                break;
-              case DescriptionType.UpdateUrl:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.UpdateUrl);
-                break;
-              case DescriptionType.WebSite:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.WebSite);
-                break;
-              case DescriptionType.Icon:
-                UnsafeNativeMethods.CRhinoPlugInInfo_Set(pluginInfo, description.Value, UnsafeNativeMethods.SetPlugInInfoConsts.IconResourceName);
-                break;
-            }
+            SetPlugInDescription(pluginInfo, description.DescriptionType, description.Value);
           }
         }
       }
@@ -2986,8 +3452,15 @@ namespace Rhino.PlugIns
     // http://msdn2.microsoft.com/en-us/library/bakc011f(VS.80).aspx
     // http://msdn2.microsoft.com/en-us/library/0x82tk9k(VS.80).aspx
     //static method for generating .NET plug-in from a DLL through reflection
-    static bool CreateFromAssembly(System.Reflection.Assembly pluginAssembly, bool displayDebugInfo, bool useRhinoDotNet)
+    // 16 Aug 2026 S. Baer (RH-97047)
+    // noPlugInClassFound is set to true when the assembly loaded just fine, but
+    // does not contain a class derived from PlugIn. This is not always an error;
+    // an rhp may exist only to define Grasshopper components. Let the caller
+    // decide if this is worth reporting.
+    static bool CreateFromAssembly(System.Reflection.Assembly pluginAssembly, bool displayDebugInfo, bool useRhinoDotNet, out bool noPlugInClassFound)
     {
+      noPlugInClassFound = false;
+      bool plugin_class_found = false;
       PlugIn rhcmn_plugin = null;
       try
       {
@@ -2997,6 +3470,7 @@ namespace Rhino.PlugIns
           var mgr_type = rh_dn.GetType("RMA.RhDN_Manager");
           var method = mgr_type.GetMethod("LoadPlugInType");
           Type t = method.Invoke(null, new object[] { pluginAssembly }) as System.Type;
+          plugin_class_found = (t != null);
           rhcmn_plugin = HostUtils.CreatePlugIn(t, pluginAssembly, displayDebugInfo, useRhinoDotNet);
         }
         else
@@ -3011,12 +3485,23 @@ namespace Rhino.PlugIns
             {
               if (rhcmn_plugin != null)
                 throw new Exception("Multiple plug-ins not supported in single assembly");
+              plugin_class_found = true;
               rhcmn_plugin = HostUtils.CreatePlugIn(t, displayDebugInfo);
             }
           }
         }
-        if(rhcmn_plugin==null)
-          throw new Exception("No PlugIn subclass found.");
+        // 16 Aug 2026 S. Baer (RH-97047)
+        // Don't throw/report here when there is no plug-in class in the
+        // assembly. That is expected for Grasshopper only rhps and the caller
+        // decides how to report this. A plug-in class that was found, but could
+        // not be created is still treated as an error.
+        if (rhcmn_plugin == null)
+        {
+          noPlugInClassFound = !plugin_class_found;
+          if (plugin_class_found)
+            throw new Exception("Unable to create plug-in class.");
+          return false;
+        }
 
         HostUtils.CreateCommands(rhcmn_plugin);
       }
@@ -3593,11 +4078,12 @@ namespace Rhino.PlugIns
       {
         try
         {
-          var ropts = new FileIO.FileReadOptions(readoptions);
-          RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-          string _filename = Marshal.PtrToStringUni(filename);
-          rc = p.ReadFile(_filename, index, doc, ropts) ? 1 : 0;
-          ropts.Dispose();
+          using (var ropts = new FileIO.FileReadOptions(readoptions))
+          {
+            RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+            string _filename = Marshal.PtrToStringUni(filename);
+            rc = p.ReadFile(_filename, index, doc, ropts) ? 1 : 0;
+          }
         }
         catch (Exception ex)
         {
@@ -3615,9 +4101,15 @@ namespace Rhino.PlugIns
     internal void CallDisplayOptionsDialog(IntPtr parent, string description, string extension) => DisplayOptionsDialog(parent, description, extension);
     protected virtual void DisplayOptionsDialog(IntPtr parent, string description, string extension) { }
 
+    [Obsolete("Use MakeReferenceTableName(RhinoDoc doc, string nameToPrefix) instead. This method will use the active document which will be a poor choice on the Mac")]
     protected string MakeReferenceTableName(string nameToPrefix)
     {
-      IntPtr rc = UnsafeNativeMethods.CRhinoFileImportPlugIn_MakeReferenceTableName(m_runtime_serial_number, nameToPrefix);
+      return MakeReferenceTableName(null, nameToPrefix);
+    }
+
+    protected string MakeReferenceTableName(RhinoDoc doc, string nameToPrefix)
+    {
+      IntPtr rc = UnsafeNativeMethods.CRhinoFileImportPlugIn_MakeReferenceTableName((null == doc) ? 0 : doc.RuntimeSerialNumber, m_runtime_serial_number, nameToPrefix);
       return IntPtr.Zero == rc ? String.Empty : Marshal.PtrToStringUni(rc);
     }
   }
@@ -3702,11 +4194,12 @@ namespace Rhino.PlugIns
       {
         try
         {
-          FileIO.FileWriteOptions wopts = new FileIO.FileWriteOptions(writeoptions);
-          RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
-          string _filename = Marshal.PtrToStringUni(filename);
-          rc = (int)(p.WriteFile(_filename, index, doc, wopts));
-          wopts.Dispose();
+          using (FileIO.FileWriteOptions wopts = new FileIO.FileWriteOptions(writeoptions))
+          {
+            RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+            string _filename = Marshal.PtrToStringUni(filename);
+            rc = (int)(p.WriteFile(_filename, index, doc, wopts));
+          }
         }
         catch (Exception ex)
         {
@@ -4087,13 +4580,15 @@ namespace Rhino.PlugIns
 
       try
       {
-        Bitmap bitmap = render_plug_in.Icon(new Size(width, height));
+        using (Bitmap bitmap = render_plug_in.Icon(new Size(width, height)))
+        {
 
-        if (null == bitmap) return false;
-        IntPtr handle;
-        handle = bitmap.GetHbitmap();
+          if (null == bitmap) return false;
+          IntPtr handle;
+          handle = bitmap.GetHbitmap();
 
-        UnsafeNativeMethods.CRhinoDib_SetFromHBitmap(dibOut, handle, true);
+          UnsafeNativeMethods.CRhinoDib_SetFromHBitmap(dibOut, handle, true);
+        }
       }
 
       catch (Exception exception)
@@ -4140,9 +4635,9 @@ namespace Rhino.PlugIns
       return plug_in.IsTextureSupported(texture);
     }
 
-    internal delegate bool SaveCusomtomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
-    private static readonly SaveCusomtomRenderFileCallback g_save_custom_render_file_callback = OnSaveCusomtomRenderFile;
-    private static bool OnSaveCusomtomRenderFile(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha)
+    internal delegate bool SaveCustomRenderFileCallback(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha);
+    private static readonly SaveCustomRenderFileCallback g_save_custom_render_file_callback = OnSaveCustomRenderFile;
+    private static bool OnSaveCustomRenderFile(int serialNumber, [MarshalAs(UnmanagedType.LPWStr)]string fileName, [MarshalAs(UnmanagedType.LPWStr)]string fileType, Guid sessionId, bool includeAlpha)
     {
       // Get the runtime plug-in to call
       var render_plug_in = LookUpBySerialNumber(serialNumber) as RenderPlugIn;
@@ -4155,9 +4650,12 @@ namespace Rhino.PlugIns
         ? null
         : render_plug_in.m_custom_render_save_file_types.CustomRenderSaveFileTypeFromExtension(fileType));
       // If a CustomRenderSaveFileType was found then use it to save the file
-      var render_window = Rhino.Render.RenderWindow.FromSessionId(sessionId);
-      var success = (file_type != null  && file_type.SaveFileCallback(fileName, includeAlpha, render_window));
-      return success;
+
+      using (var render_window = Rhino.Render.RenderWindow.FromSessionId(sessionId))
+      {
+        var success = (file_type != null && file_type.SaveFileCallback(fileName, includeAlpha, render_window));
+        return success;
+      }
     }
     /// <summary>
     /// Cache the GetCustomRenderSaveFileTypes() result
@@ -4547,10 +5045,12 @@ namespace Rhino.PlugIns
       {
         try
         {
-          var channels = new SimpleArrayGuid(ptrSupportedChannelGuids);
-          foreach(Guid guid in p.SupportedChannels)
+          using (var channels = new SimpleArrayGuid(ptrSupportedChannelGuids))
           {
-            channels.Append(guid);
+            foreach (Guid guid in p.SupportedChannels)
+            {
+              channels.Append(guid);
+            }
           }
         }
         catch (Exception ex)
@@ -5075,7 +5575,7 @@ namespace Rhino.PlugIns
     /// <summary>
     /// Used to cache the list, the cache is built by the
     /// OnCustomRenderSaveFileTypes callback and used by the
-    /// OnSaveCusomtomRenderFile callback to find the specific
+    /// OnSaveCustomRenderFile callback to find the specific
     /// save file callback.
     /// </summary>
     internal IEnumerable<CustomRenderSaveFileType> TypeList { get { return m_type_list; } }
@@ -5162,7 +5662,7 @@ namespace Rhino.PlugIns
     public string Description { get; private set; }
 
     /// <summary>
-    /// Called by OnSaveCusomtomRenderFile to actually write the file.
+    /// Called by OnSaveCustomRenderFile to actually write the file.
     /// </summary>
     internal CustomRenderSaveFileTypes.SaveFileHandler SaveFileCallback { get; set; }
   }
@@ -5571,6 +6071,64 @@ namespace Rhino.PlugIns
 
 
         return ZooClient.AskUserForLicense(new VerifyFromZooCommon(), parameters);
+      }
+      catch (Exception ex)
+      {
+        HostUtils.ExceptionReport(ex);
+      }
+
+      return false;
+    }
+
+    /// <summary>
+    /// RH-92777: Validates a stand-alone license key for the given account email against
+    /// the validation server, asking the user for no input (the validation wizard still
+    /// shows progress), locking it to this computer on success. Used by the
+    /// rhinoN://license protocol handler.
+    /// </summary>
+    internal static bool ValidateLicenseNoPrompt(int productType, string licenseKey, string email, string textMask,
+      ValidateProductKeyDelegate validateProductKeyDelegate, OnLeaseChangedDelegate onLeaseChangedDelegate,
+      VerifyLicenseKeyDelegate verifyLicenseKeyDelegate, VerifyPreviousVersionLicenseDelegate verifyPreviousVersionLicenseKeyDelegate,
+      string product_path, string product_title, Guid pluginId, Guid licenseId, LicenseCapabilities capabilities)
+    {
+      if (null == validateProductKeyDelegate || string.IsNullOrEmpty(licenseKey) || string.IsNullOrEmpty(email))
+      {
+        HostUtils.LogDebugEvent("rhinoN://license validation stopped: called without a license key, an account email, or a product key delegate");
+        return false;
+      }
+
+      try
+      {
+        // Make sure RhinoCommon is the immediate calling assembly
+        var trace = new StackTrace();
+        var frames = trace.GetFrames();
+        if (frames.Length < 2)
+        {
+          HostUtils.LogDebugEvent("rhinoN://license validation stopped: no caller frame to check");
+          return false;
+        }
+
+        System.Reflection.Assembly rh_common = typeof(HostUtils).Assembly;
+        if (frames[1].GetMethod().Module.Assembly != rh_common)
+        {
+          HostUtils.LogDebugEvent("rhinoN://license validation stopped: the calling assembly is not RhinoCommon");
+          return false;
+        }
+
+        // The no-prompt entry point lives on IZooClientUtilities2 so that adding it did not
+        // change the public IZooClientUtilities contract. A zoo client that predates it, or
+        // the do-nothing stub, simply doesn't support this path.
+        if (!(ZooClient is Rhino.Runtime.IZooClientUtilities2 zoo_client2))
+        {
+          HostUtils.LogDebugEvent("rhinoN://license validation stopped: this zoo client does not implement IZooClientUtilities2");
+          return false;
+        }
+
+        var parameters = new ZooClientParameters(pluginId, licenseId, product_title, productType,
+          capabilities, textMask, product_path, null, LicenseTypes.Standalone,
+          validateProductKeyDelegate, onLeaseChangedDelegate, verifyLicenseKeyDelegate, verifyPreviousVersionLicenseKeyDelegate);
+
+        return zoo_client2.ValidateStandaloneLicense(new VerifyFromZooCommon(), parameters, licenseKey, email);
       }
       catch (Exception ex)
       {

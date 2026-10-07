@@ -430,7 +430,7 @@ namespace Rhino.Geometry
     /// <remarks>
     /// Change of basis transformations and rotation transformations are often confused.
     /// This is a change of basis transformation.
-    /// If Q = P0 + a0*X0 + b0*Y0 + c0*Z0 = P1 + a1*X1 + b1*Y1 + c1*Z1, then this transform will map the point (a0,b0,c0) to (a1,b1,c1).
+    /// If Q = P0 + a0*X0 + b0*Y0 + c0*Z0 = P1 + a1*X1 + b1*Y1 + c1*Z1, then this transform will map the coordinates (a0,b0,c0) to (a1,b1,c1).
     /// </remarks>
     /// <since>5.0</since>
     public static Transform ChangeBasis(Plane plane0, Plane plane1)
@@ -981,6 +981,20 @@ namespace Rhino.Geometry
     public bool IsZeroTransformationWithTolerance(double zeroTolerance)
     {
       return UnsafeNativeMethods.ON_Xform_IsZeroTransformation(ref this, zeroTolerance);
+    }
+
+    /// <summary>
+    /// Determines if this transform is uniformly scaled - that is, a similarity
+    /// transformation that scales all directions equally and preserves angles,
+    /// mapping circles to circles. This includes pure rotations, translations
+    /// and mirroring.
+    /// </summary>
+    /// <returns>True if uniformly scaled, false otherwise.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool IsUniformlyScaled()
+    {
+      return SimilarityType != TransformSimilarityType.NotSimilarity;
     }
 
     /// <summary>
@@ -1548,6 +1562,736 @@ namespace Rhino.Geometry
     {
       // https://mcneel.myjetbrains.com/youtrack/issue/RH-70328
       return UnsafeNativeMethods.ON_Xform_Compare(ref this, ref other);
+    }
+  }
+
+  /// <summary>
+  /// Represents the values in a 2d affine transformation.
+  /// <para>This is parallel to C++ ON_Xform2d.</para>
+  /// </summary>
+  [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 48)]
+  [Serializable]
+  public struct Transform2d : IComparable<Transform2d>, IEquatable<Transform2d>, ICloneable
+  {
+    #region members
+    internal double m_00, m_01, m_02;
+    internal double m_10, m_11, m_12;
+    #endregion
+
+    #region constructors
+    /// <summary>
+    /// Initializes a new transform matrix with a specified value along the diagonal.
+    /// </summary>
+    /// <param name="diagonalValue">Value to assign to M00 and M11. The translation is zero.</param>
+    /// <since>9.0</since>
+    public Transform2d(double diagonalValue)
+      : this()
+    {
+      m_00 = diagonalValue;
+      m_11 = diagonalValue;
+    }
+
+    /// <summary>
+    /// Initializes a new transform matrix from another transform matrix.
+    /// </summary>
+    /// <param name="value">The transform to copy.</param>
+    /// <since>9.0</since>
+    public Transform2d(Transform2d value)
+    {
+      m_00 = value.m_00;
+      m_01 = value.m_01;
+      m_02 = value.m_02;
+      m_10 = value.m_10;
+      m_11 = value.m_11;
+      m_12 = value.m_12;
+    }
+
+    /// <summary>
+    /// Initializes a new transform matrix from its six values.
+    /// </summary>
+    /// <param name="m00">Value at [0,0].</param>
+    /// <param name="m01">Value at [0,1].</param>
+    /// <param name="m02">Value at [0,2], the X translation.</param>
+    /// <param name="m10">Value at [1,0].</param>
+    /// <param name="m11">Value at [1,1].</param>
+    /// <param name="m12">Value at [1,2], the Y translation.</param>
+    /// <since>9.0</since>
+    public Transform2d(double m00, double m01, double m02, double m10, double m11, double m12)
+    {
+      m_00 = m00;
+      m_01 = m01;
+      m_02 = m02;
+      m_10 = m10;
+      m_11 = m11;
+      m_12 = m12;
+    }
+
+    /// <summary>
+    /// Gets a new identity transform matrix. An identity matrix defines no transformation.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Transform2d Identity
+    {
+      get
+      {
+        Transform2d xf = new Transform2d();
+        xf.m_00 = 1.0;
+        xf.m_11 = 1.0;
+        return xf;
+      }
+    }
+
+    /// <summary>
+    /// Gets a transform matrix in which every value is zero. This transformation
+    /// maps every point to (0,0).
+    /// </summary>
+    /// <since>9.0</since>
+    public static Transform2d ZeroTransformation
+    {
+      get { return new Transform2d(); }
+    }
+
+    /// <summary>
+    /// Gets a transform matrix filled with RhinoMath.UnsetValue.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Transform2d Unset
+    {
+      get
+      {
+        Transform2d xf = new Transform2d();
+        xf.m_00 = RhinoMath.UnsetValue;
+        xf.m_01 = RhinoMath.UnsetValue;
+        xf.m_02 = RhinoMath.UnsetValue;
+        xf.m_10 = RhinoMath.UnsetValue;
+        xf.m_11 = RhinoMath.UnsetValue;
+        xf.m_12 = RhinoMath.UnsetValue;
+        return xf;
+      }
+    }
+
+    /// <summary>
+    /// Gets a transform matrix in which every value is not-a-number. The static
+    /// constructors return this when they are given invalid input.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Transform2d Nan
+    {
+      get
+      {
+        Transform2d xf = new Transform2d();
+        xf.m_00 = double.NaN;
+        xf.m_01 = double.NaN;
+        xf.m_02 = double.NaN;
+        xf.m_10 = double.NaN;
+        xf.m_11 = double.NaN;
+        xf.m_12 = double.NaN;
+        return xf;
+      }
+    }
+    #endregion
+
+    #region static constructors
+    /// <summary>
+    /// Constructs a new translation (move) transformation.
+    /// </summary>
+    /// <param name="motion">Translation (motion) vector.</param>
+    /// <returns>A transform matrix which moves geometry along the motion vector.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Translation(Vector2d motion)
+    {
+      return Translation(motion.X, motion.Y);
+    }
+
+    /// <summary>
+    /// Constructs a new translation (move) transformation.
+    /// Right column is (dx, dy).
+    /// </summary>
+    /// <param name="dx">Distance to translate (move) geometry along the world X axis.</param>
+    /// <param name="dy">Distance to translate (move) geometry along the world Y axis.</param>
+    /// <returns>A transform matrix which moves geometry with the specified distances.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Translation(double dx, double dy)
+    {
+      Transform2d xf = Identity;
+      xf.m_02 = dx;
+      xf.m_12 = dy;
+      return xf;
+    }
+
+    /// <summary>
+    /// Constructs a new uniform scaling transformation with a specified anchor point.
+    /// </summary>
+    /// <param name="anchor">The fixed point of the scaling.</param>
+    /// <param name="scaleFactor">The scaling factor in both directions.</param>
+    /// <returns>A transform matrix which scales geometry uniformly around the anchor point.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Scale(Point2d anchor, double scaleFactor)
+    {
+      return Scale(anchor, scaleFactor, scaleFactor);
+    }
+
+    /// <summary>
+    /// Constructs a new non-uniform scaling transformation with a specified anchor point.
+    /// </summary>
+    /// <param name="anchor">The fixed point of the scaling.</param>
+    /// <param name="xScaleFactor">The scaling factor along the world X axis.</param>
+    /// <param name="yScaleFactor">The scaling factor along the world Y axis.</param>
+    /// <returns>A transform matrix which scales geometry around the anchor point.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Scale(Point2d anchor, double xScaleFactor, double yScaleFactor)
+    {
+      Transform2d xf = new Transform2d();
+      xf.m_00 = xScaleFactor;
+      xf.m_02 = anchor.X * (1.0 - xScaleFactor);
+      xf.m_11 = yScaleFactor;
+      xf.m_12 = anchor.Y * (1.0 - yScaleFactor);
+      return xf;
+    }
+
+    /// <summary>
+    /// Constructs a new rotation transformation with the origin as the rotation center.
+    /// </summary>
+    /// <param name="angleRadians">Angle, in radians, of the rotation. A positive angle
+    /// rotates the X axis towards the Y axis.</param>
+    /// <returns>A rotation transformation, or Transform2d.Nan if the angle is not valid.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Rotation(double angleRadians)
+    {
+      return Rotation(angleRadians, Point2d.Origin);
+    }
+
+    /// <summary>
+    /// Constructs a new rotation transformation with a specified rotation center.
+    /// </summary>
+    /// <param name="angleRadians">Angle, in radians, of the rotation. A positive angle
+    /// rotates the X axis towards the Y axis.</param>
+    /// <param name="rotationCenter">The fixed point of the rotation.</param>
+    /// <returns>A rotation transformation, or Transform2d.Nan if the input is not valid.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Rotation(double angleRadians, Point2d rotationCenter)
+    {
+      Transform2d xf = new Transform2d();
+      UnsafeNativeMethods.ON_Xform2d_RotationFromAngle(ref xf, angleRadians, rotationCenter);
+      return xf;
+    }
+
+    /// <summary>
+    /// Constructs a new rotation transformation from the sine and cosine of an angle
+    /// and a specified rotation center.
+    /// </summary>
+    /// <param name="sinAngle">The sine of the rotation angle.</param>
+    /// <param name="cosAngle">The cosine of the rotation angle.</param>
+    /// <param name="rotationCenter">The fixed point of the rotation.</param>
+    /// <returns>A rotation transformation, or Transform2d.Nan if the input is not valid.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Rotation(double sinAngle, double cosAngle, Point2d rotationCenter)
+    {
+      Transform2d xf = new Transform2d();
+      UnsafeNativeMethods.ON_Xform2d_RotationFromSineAndCosine(ref xf, sinAngle, cosAngle, rotationCenter);
+      return xf;
+    }
+
+    /// <summary>
+    /// Constructs the rotation that maps one direction onto another while fixing
+    /// a rotation center.
+    /// </summary>
+    /// <param name="startDirection">A nonzero direction. Its length is ignored.</param>
+    /// <param name="endDirection">A nonzero direction. Its length is ignored.</param>
+    /// <param name="rotationCenter">The fixed point of the rotation.</param>
+    /// <returns>A rotation transformation, or Transform2d.Nan if either direction is zero.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Rotation(Vector2d startDirection, Vector2d endDirection, Point2d rotationCenter)
+    {
+      Transform2d xf = new Transform2d();
+      UnsafeNativeMethods.ON_Xform2d_RotationFromVectors(ref xf, startDirection, endDirection, rotationCenter);
+      return xf;
+    }
+    #endregion
+
+    #region operators
+    /// <summary>
+    /// Determines if two transformations are equal in value.
+    /// </summary>
+    /// <param name="a">A transform.</param>
+    /// <param name="b">Another transform.</param>
+    /// <returns>true if transforms are equal; otherwise false.</returns>
+    /// <since>9.0</since>
+    public static bool operator ==(Transform2d a, Transform2d b)
+    {
+      return a.m_00 == b.m_00 && a.m_01 == b.m_01 && a.m_02 == b.m_02 &&
+        a.m_10 == b.m_10 && a.m_11 == b.m_11 && a.m_12 == b.m_12;
+    }
+
+    /// <summary>
+    /// Determines if two transformations are different in value.
+    /// </summary>
+    /// <param name="a">A transform.</param>
+    /// <param name="b">Another transform.</param>
+    /// <returns>true if transforms are different; otherwise false.</returns>
+    /// <since>9.0</since>
+    public static bool operator !=(Transform2d a, Transform2d b)
+    {
+      return a.m_00 != b.m_00 || a.m_01 != b.m_01 || a.m_02 != b.m_02 ||
+        a.m_10 != b.m_10 || a.m_11 != b.m_11 || a.m_12 != b.m_12;
+    }
+
+    /// <summary>
+    /// Multiplies (combines) two transformations.
+    /// </summary>
+    /// <param name="a">First transformation.</param>
+    /// <param name="b">Second transformation.</param>
+    /// <returns>A transformation matrix that combines the effect of both input transformations.
+    /// The resulting Transform2d gives the same result as though you'd first apply B then A.</returns>
+    /// <since>9.0</since>
+    public static Transform2d operator *(Transform2d a, Transform2d b)
+    {
+      // The bottom row of both matrices is (0,0,1).
+      Transform2d xf = new Transform2d();
+      xf.m_00 = a.m_00 * b.m_00 + a.m_01 * b.m_10;
+      xf.m_01 = a.m_00 * b.m_01 + a.m_01 * b.m_11;
+      xf.m_02 = a.m_00 * b.m_02 + a.m_01 * b.m_12 + a.m_02;
+
+      xf.m_10 = a.m_10 * b.m_00 + a.m_11 * b.m_10;
+      xf.m_11 = a.m_10 * b.m_01 + a.m_11 * b.m_11;
+      xf.m_12 = a.m_10 * b.m_02 + a.m_11 * b.m_12 + a.m_12;
+      return xf;
+    }
+
+    /// <summary>
+    /// Multiplies a transformation by a point and gets a new point.
+    /// </summary>
+    /// <param name="m">A transformation.</param>
+    /// <param name="p">A point.</param>
+    /// <returns>The transformed point.</returns>
+    /// <remarks>
+    /// Note well: The right hand column is the translation. It has an important effect
+    /// when transforming a Euclidean point and has no effect when transforming a vector.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static Point2d operator *(Transform2d m, Point2d p)
+    {
+      double x = p.X; // optimizer should put x,y in registers
+      double y = p.Y;
+      return new Point2d(
+        m.m_00 * x + m.m_01 * y + m.m_02,
+        m.m_10 * x + m.m_11 * y + m.m_12);
+    }
+
+    /// <summary>
+    /// Multiplies a transformation by a vector and gets a new vector.
+    /// </summary>
+    /// <param name="m">A transformation.</param>
+    /// <param name="v">A vector.</param>
+    /// <returns>The transformed vector.</returns>
+    /// <remarks>
+    /// Note well: The right hand column is the translation. It has an important effect
+    /// when transforming a Euclidean point and has no effect when transforming a vector.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static Vector2d operator *(Transform2d m, Vector2d v)
+    {
+      double x = v.X; // optimizer should put x,y in registers
+      double y = v.Y;
+      return new Vector2d(
+        m.m_00 * x + m.m_01 * y,
+        m.m_10 * x + m.m_11 * y);
+    }
+
+    /// <summary>
+    /// Multiplies (combines) two transformations.
+    /// <para>This is the same as the * operator between two transformations.</para>
+    /// </summary>
+    /// <param name="a">First transformation.</param>
+    /// <param name="b">Second transformation.</param>
+    /// <returns>A transformation matrix that combines the effect of both input transformations.
+    /// The resulting Transform2d gives the same result as though you'd first apply B then A.</returns>
+    /// <since>9.0</since>
+    public static Transform2d Multiply(Transform2d a, Transform2d b)
+    {
+      return a * b;
+    }
+    #endregion
+
+    #region properties
+    #region accessor properties
+    /// <summary>Gets or sets this[0,0].</summary>
+    /// <since>9.0</since>
+    public double M00 { get { return m_00; } set { m_00 = value; } }
+    /// <summary>Gets or sets this[0,1].</summary>
+    /// <since>9.0</since>
+    public double M01 { get { return m_01; } set { m_01 = value; } }
+    /// <summary>Gets or sets this[0,2], the X translation.</summary>
+    /// <since>9.0</since>
+    public double M02 { get { return m_02; } set { m_02 = value; } }
+
+    /// <summary>Gets or sets this[1,0].</summary>
+    /// <since>9.0</since>
+    public double M10 { get { return m_10; } set { m_10 = value; } }
+    /// <summary>Gets or sets this[1,1].</summary>
+    /// <since>9.0</since>
+    public double M11 { get { return m_11; } set { m_11 = value; } }
+    /// <summary>Gets or sets this[1,2], the Y translation.</summary>
+    /// <since>9.0</since>
+    public double M12 { get { return m_12; } set { m_12 = value; } }
+
+    /// <summary>
+    /// Gets or sets the matrix value at the given row and column indices.
+    /// </summary>
+    /// <param name="row">Index of row to access, must be 0 or 1.</param>
+    /// <param name="column">Index of column to access, must be 0, 1 or 2.</param>
+    /// <returns>The value at [row, column]</returns>
+    /// <value>The new value at [row, column]</value>
+    public double this[int row, int column]
+    {
+      get
+      {
+        if (row < 0) { throw new IndexOutOfRangeException("Negative row indices are not allowed when accessing a Transform2d matrix"); }
+        if (row > 1) { throw new IndexOutOfRangeException("Row indices higher than 1 are not allowed when accessing a Transform2d matrix"); }
+        if (column < 0) { throw new IndexOutOfRangeException("Negative column indices are not allowed when accessing a Transform2d matrix"); }
+        if (column > 2) { throw new IndexOutOfRangeException("Column indices higher than 2 are not allowed when accessing a Transform2d matrix"); }
+
+        if (row == 0)
+        {
+          if (column == 0) { return m_00; }
+          if (column == 1) { return m_01; }
+          if (column == 2) { return m_02; }
+        }
+        else if (row == 1)
+        {
+          if (column == 0) { return m_10; }
+          if (column == 1) { return m_11; }
+          if (column == 2) { return m_12; }
+        }
+
+        throw new IndexOutOfRangeException("One of the cross beams has gone out askew on the treadle.");
+      }
+      set
+      {
+        if (row < 0) { throw new IndexOutOfRangeException("Negative row indices are not allowed when accessing a Transform2d matrix"); }
+        if (row > 1) { throw new IndexOutOfRangeException("Row indices higher than 1 are not allowed when accessing a Transform2d matrix"); }
+        if (column < 0) { throw new IndexOutOfRangeException("Negative column indices are not allowed when accessing a Transform2d matrix"); }
+        if (column > 2) { throw new IndexOutOfRangeException("Column indices higher than 2 are not allowed when accessing a Transform2d matrix"); }
+
+        if (row == 0)
+        {
+          if (column == 0) { m_00 = value; }
+          else if (column == 1) { m_01 = value; }
+          else if (column == 2) { m_02 = value; }
+        }
+        else if (row == 1)
+        {
+          if (column == 0) { m_10 = value; }
+          else if (column == 1) { m_11 = value; }
+          else if (column == 2) { m_12 = value; }
+        }
+      }
+    }
+    #endregion
+
+    /// <summary>Return true if this Transform2d is the identity transform.</summary>
+    /// <since>9.0</since>
+    public bool IsIdentity
+    {
+      get { return this == Identity; }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether or not this Transform2d is a valid matrix.
+    /// A valid transform matrix is not allowed to have any invalid numbers.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        return RhinoMath.IsValidDouble(m_00) && RhinoMath.IsValidDouble(m_01) && RhinoMath.IsValidDouble(m_02) &&
+               RhinoMath.IsValidDouble(m_10) && RhinoMath.IsValidDouble(m_11) && RhinoMath.IsValidDouble(m_12);
+      }
+    }
+
+    /// <summary>
+    /// True if every value is 0. This transformation maps every point to (0,0).
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsZeroTransformation
+    {
+      get
+      {
+        return 0.0 == m_00 && 0.0 == m_01 && 0.0 == m_02 &&
+               0.0 == m_10 && 0.0 == m_11 && 0.0 == m_12;
+      }
+    }
+
+    /// <summary>
+    /// True if this transform is a pure translation, that is the linear part is
+    /// the 2x2 identity.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsTranslation
+    {
+      get
+      {
+        return 1.0 == m_00 && 0.0 == m_01 &&
+               0.0 == m_10 && 1.0 == m_11 &&
+               RhinoMath.IsValidDouble(m_02) && RhinoMath.IsValidDouble(m_12);
+      }
+    }
+
+    /// <summary>
+    /// The determinant of the 2x2 linear part of this matrix. Because the bottom
+    /// row is (0,0,1) this is also the signed area scale factor of the
+    /// transformation. A negative determinant means the transformation reverses
+    /// orientation.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Determinant
+    {
+      get
+      {
+        // Computed here rather than through ON_Xform2d_Determinant: the native body is
+        // this same expression, and this property is read per primitive by drawing code,
+        // where the interop transition costs more than the arithmetic.
+        return m_00 * m_11 - m_01 * m_10;
+      }
+    }
+    #endregion
+
+    #region methods
+    /// <summary>
+    /// Attempts to get the inverse transform of this transform.
+    /// </summary>
+    /// <param name="inverseTransform">The inverse transform. This out reference will be assigned during this call.</param>
+    /// <returns>
+    /// true on success.
+    /// If false is returned and this Transform2d is invalid, inverseTransform will be set to this Transform2d.
+    /// If false is returned and this Transform2d is valid, inverseTransform will be set to a pseudo inverse.
+    /// </returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool TryGetInverse(out Transform2d inverseTransform)
+    {
+      inverseTransform = this;
+      bool rc = false;
+      if (IsValid)
+      {
+        double determinant = 0.0;
+        rc = UnsafeNativeMethods.ON_Xform2d_Invert(ref inverseTransform, ref determinant);
+      }
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the 4x4 transformation that applies this 2d transformation to the x and
+    /// y coordinates and leaves the z coordinate unchanged.
+    /// </summary>
+    /// <returns>The equivalent 4x4 transformation.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Transform ToTransform()
+    {
+      Transform xf = Transform.Identity;
+      xf.M00 = m_00; xf.M01 = m_01; xf.M03 = m_02;
+      xf.M10 = m_10; xf.M11 = m_11; xf.M13 = m_12;
+      return xf;
+    }
+
+    /// <summary>
+    /// Attempts to get the 2d transformation defined by the x and y rows and columns
+    /// of a 4x4 transformation. This succeeds when transform is affine and maps the
+    /// world xy plane to itself.
+    /// </summary>
+    /// <param name="transform">The 4x4 transformation to convert.</param>
+    /// <param name="transform2d">The 2d transformation. This out reference will be assigned during this call.</param>
+    /// <returns>true on success. On failure transform2d is set to Transform2d.Nan.</returns>
+    /// <since>9.0</since>
+    public static bool TryGetTransform2d(Transform transform, out Transform2d transform2d)
+    {
+      return TryGetTransform2d(transform, 0.0, out transform2d);
+    }
+
+    /// <summary>
+    /// Attempts to get the 2d transformation defined by the x and y rows and columns
+    /// of a 4x4 transformation. This succeeds when transform is affine and maps the
+    /// world xy plane to itself.
+    /// </summary>
+    /// <param name="transform">The 4x4 transformation to convert.</param>
+    /// <param name="zeroTolerance">A value of transform is "zero" if its absolute value
+    /// is at most zeroTolerance, and is "one" if it differs from 1.0 by at most zeroTolerance.</param>
+    /// <param name="transform2d">The 2d transformation. This out reference will be assigned during this call.</param>
+    /// <returns>true on success. On failure transform2d is set to Transform2d.Nan.</returns>
+    /// <since>9.0</since>
+    public static bool TryGetTransform2d(Transform transform, double zeroTolerance, out Transform2d transform2d)
+    {
+      transform2d = new Transform2d();
+      return UnsafeNativeMethods.ON_Xform2d_FromXform(ref transform2d, ref transform, zeroTolerance);
+    }
+
+    #region 2d drawing API conversions
+    /// <summary>
+    /// Creates a transform from the six coefficients used by the traditional 2d
+    /// drawing APIs. See the remarks on <see cref="ToAffineElements"/>.
+    /// </summary>
+    /// <param name="a">Becomes M00.</param>
+    /// <param name="b">Becomes M10.</param>
+    /// <param name="c">Becomes M01.</param>
+    /// <param name="d">Becomes M11.</param>
+    /// <param name="tx">Becomes M02, the X translation.</param>
+    /// <param name="ty">Becomes M12, the Y translation.</param>
+    /// <returns>The equivalent transform.</returns>
+    /// <since>9.0</since>
+    public static Transform2d FromAffineElements(double a, double b, double c, double d, double tx, double ty)
+    {
+      return new Transform2d(a, c, tx, b, d, ty);
+    }
+
+    /// <summary>
+    /// Creates a transform from an array of six coefficients in
+    /// (a, b, c, d, tx, ty) order.
+    /// </summary>
+    /// <param name="elements">Six coefficients. This is the layout of Eto.Drawing.IMatrix.Elements.</param>
+    /// <returns>The equivalent transform, or Transform2d.Nan when elements is null or has fewer than six values.</returns>
+    /// <since>9.0</since>
+    public static Transform2d FromAffineElements(double[] elements)
+    {
+      if (elements == null || elements.Length < 6)
+        return Nan;
+      return FromAffineElements(elements[0], elements[1], elements[2], elements[3], elements[4], elements[5]);
+    }
+
+    /// <summary>
+    /// Creates a transform from an array of six coefficients in
+    /// (a, b, c, d, tx, ty) order.
+    /// </summary>
+    /// <param name="elements">Six coefficients. This is the layout of Eto.Drawing.IMatrix.Elements.</param>
+    /// <returns>The equivalent transform, or Transform2d.Nan when elements is null or has fewer than six values.</returns>
+    /// <since>9.0</since>
+    public static Transform2d FromAffineElements(float[] elements)
+    {
+      if (elements == null || elements.Length < 6)
+        return Nan;
+      return FromAffineElements(elements[0], elements[1], elements[2], elements[3], elements[4], elements[5]);
+    }
+
+    /// <summary>
+    /// Gets the six coefficients used by the traditional 2d drawing APIs.
+    /// See the remarks on <see cref="ToAffineElements"/>.
+    /// </summary>
+    /// <param name="a">M00.</param>
+    /// <param name="b">M10.</param>
+    /// <param name="c">M01.</param>
+    /// <param name="d">M11.</param>
+    /// <param name="tx">M02, the X translation.</param>
+    /// <param name="ty">M12, the Y translation.</param>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public void GetAffineElements(out double a, out double b, out double c, out double d, out double tx, out double ty)
+    {
+      a = m_00;
+      b = m_10;
+      c = m_01;
+      d = m_11;
+      tx = m_02;
+      ty = m_12;
+    }
+
+    /// <summary>
+    /// Gets the six coefficients used by the traditional 2d drawing APIs as an
+    /// array in (a, b, c, d, tx, ty) order.
+    /// </summary>
+    /// <returns>Six values.</returns>
+    /// <remarks>
+    /// Those APIs map a point (x,y) to (a*x + c*y + tx, b*x + d*y + ty), so the
+    /// six values are the transpose of the Transform2d value order: a is M00,
+    /// b is M10, c is M01, d is M11, tx is M02 and ty is M12. Composition order
+    /// is reversed as well, because those APIs use the row vector convention:
+    /// A2d * B2d is the equivalent of the platform product B * A.
+    /// </remarks>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public double[] ToAffineElements()
+    {
+      return new double[] { m_00, m_10, m_01, m_11, m_02, m_12 };
+    }
+    #endregion
+
+    /// <summary>
+    /// Determines if another object is a Transform2d and its value equals this transform value.
+    /// </summary>
+    /// <param name="obj">Another object.</param>
+    /// <returns>true if obj is a Transform2d and has the same value as this transform; otherwise, false.</returns>
+    [ConstOperation]
+    public override bool Equals(object obj)
+    {
+      return obj is Transform2d && Equals((Transform2d)obj);
+    }
+
+    /// <summary>
+    /// Determines if another transform equals this transform value.
+    /// </summary>
+    /// <param name="other">Another transform.</param>
+    /// <returns>true if other has the same value as this transform; otherwise, false.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Equals(Transform2d other)
+    {
+      return this == other;
+    }
+
+    /// <summary>
+    /// Gets a non-unique hashing code for this transform.
+    /// </summary>
+    /// <returns>A number that can be used to hash this transform in a dictionary.</returns>
+    [ConstOperation]
+    public override int GetHashCode()
+    {
+      return (int)UnsafeNativeMethods.ON_Xform2d_GetHashCode(ref this);
+    }
+
+    /// <summary>
+    /// Returns a string representation of this transform.
+    /// </summary>
+    /// <returns>A textual representation.</returns>
+    [ConstOperation]
+    public override string ToString()
+    {
+      System.Text.StringBuilder sb = new System.Text.StringBuilder();
+      IFormatProvider provider = System.Globalization.CultureInfo.InvariantCulture;
+      sb.AppendFormat("R0=({0},{1},{2}),", m_00.ToString(provider), m_01.ToString(provider), m_02.ToString(provider));
+      sb.AppendFormat(" R1=({0},{1},{2})", m_10.ToString(provider), m_11.ToString(provider), m_12.ToString(provider));
+      return sb.ToString();
+    }
+
+    /// <since>9.0</since>
+    object ICloneable.Clone()
+    {
+      return this;
+    }
+
+    /// <summary>
+    /// Returns a deep copy of the transform. For languages that treat structures as value types, this can
+    /// be accomplished by a simple assignment.
+    /// </summary>
+    /// <returns>A deep copy of this data structure.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Transform2d Clone()
+    {
+      return this;
+    }
+    #endregion
+
+    /// <summary>
+    /// Compares this transform with another transform.
+    /// <para>M00 has highest value, then M01, etc..</para>
+    /// </summary>
+    /// <param name="other">Another transform.</param>
+    /// <returns>-1 if this &lt; other; 0 if both are equal; 1 otherwise.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public int CompareTo(Transform2d other)
+    {
+      return UnsafeNativeMethods.ON_Xform2d_Compare(ref this, ref other);
     }
   }
 
@@ -2765,5 +3509,146 @@ namespace Rhino.Geometry.Morphs
     }
   }
 
+  /// <summary>
+  /// Morph used by MeshCageMorph command
+  /// </summary>
+  public class MeshCageMorph : Rhino.Geometry.SpaceMorph, IDisposable
+  {
+    internal IntPtr m_space_morph;
+    IntPtr ConstPointer() { return m_space_morph; }
+    IntPtr NonConstPointer() { return m_space_morph; }
+
+    /// <summary>Constructs a mesh cage morph</summary>
+    /// <param name="referenceMesh"></param>
+    /// <param name="targetMesh"></param>
+    /// <since>9.0</since>
+    public MeshCageMorph(Mesh referenceMesh, Mesh targetMesh)
+    {
+      double tolerance = 0;
+      bool quick_preview = false;
+      bool preserve_structure = false;
+
+      IntPtr ptrReferenceMesh = referenceMesh.ConstPointer();
+      IntPtr ptrTargetMesh = targetMesh.ConstPointer();
+
+      m_space_morph = UnsafeNativeMethods.RHC_MeshCageMorph(ptrReferenceMesh, ptrTargetMesh);
+      if (m_space_morph != IntPtr.Zero)
+      {
+        if (UnsafeNativeMethods.ON_SpaceMorph_GetValues(m_space_morph, ref tolerance, ref quick_preview, ref preserve_structure))
+        {
+          Tolerance = tolerance;
+          QuickPreview = quick_preview;
+          PreserveStructure = preserve_structure;
+        }
+      }
+      GC.KeepAlive(referenceMesh);
+      GC.KeepAlive(targetMesh);
+    }
+
+    /// <summary>Returns true if the space morph definition is valid, false otherwise.</summary>
+    /// <since>9.0</since>
+    public bool IsValid
+    {
+      get
+      {
+        return (m_space_morph != IntPtr.Zero);
+      }
+    }
+
+    /// <summary>Morphs an Euclidean point.</summary>
+    /// <param name="point">A point that will be morphed by this object.</param>
+    /// <returns>Resulting morphed point.</returns>
+    /// <since>9.0</since>
+    public override Point3d MorphPoint(Point3d point)
+    {
+      UnsafeNativeMethods.ON_SpaceMorph_MorphPoint(m_space_morph, ref point);
+      return point;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~MeshCageMorph()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>Actively reclaims unmanaged resources that this instance uses</summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_space_morph)
+      {
+        UnsafeNativeMethods.ON_SpaceMorph_Delete(m_space_morph);
+        m_space_morph = IntPtr.Zero;
+      }
+    }
+  }
+
+  /// <summary>
+  /// Keep internal. This is only for Daniel Piker to experiment with for
+  /// comparisons against his existing C# implementation
+  /// </summary>
+  internal class MeshMorphMesh : IDisposable
+  {
+    IntPtr _ptr;
+
+    public MeshMorphMesh(Mesh referenceMesh, Mesh meshToMorph)
+    {
+      IntPtr constPtrReferenceMesh = referenceMesh.ConstPointer();
+      IntPtr constPtrMeshToMorph = meshToMorph.ConstPointer();
+      _ptr = UnsafeNativeMethods.CRhMeshMorphMesh_New(constPtrReferenceMesh, constPtrMeshToMorph);
+      GC.KeepAlive(referenceMesh);
+      GC.KeepAlive(meshToMorph);
+    }
+
+    public bool Apply(Point3d[] vertices, Mesh startMesh, Mesh adjustedMesh)
+    {
+      if (_ptr == IntPtr.Zero)
+        return false;
+
+      IntPtr constPtrStartMesh = startMesh.ConstPointer();
+      IntPtr ptrAdjustedMesh = adjustedMesh.NonConstPointer();
+      bool rc = UnsafeNativeMethods.CRMeshMorphMesh_Apply(_ptr, vertices, vertices.Length, constPtrStartMesh, ptrAdjustedMesh);
+      GC.KeepAlive(startMesh);
+      GC.KeepAlive(adjustedMesh);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    ~MeshMorphMesh()
+    {
+      Dispose(false);
+    }
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != _ptr)
+      {
+        UnsafeNativeMethods.CRhMeshMorphMesh_Delete(_ptr);
+        _ptr = IntPtr.Zero;
+      }
+    }
+  }
 }
 #endif

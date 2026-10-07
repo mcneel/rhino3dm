@@ -652,6 +652,8 @@ namespace Rhino.Geometry
       Vector3d unit = UnitTangent;
       if (!unit.IsValid) { return false; }
 
+      if (pts == null) { return false; }
+
       double t0 = double.MaxValue;
       double t1 = double.MinValue;
 

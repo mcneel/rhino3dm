@@ -538,6 +538,47 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Searches for pairs of bounding boxes that overlap.
+    /// </summary>
+    /// <param name="tolerance">bounds used for searching.</param>
+    /// <param name="callback">An event handler to be raised when items are found.</param>
+    /// <param name="tag">State to be passed inside the <see cref="RTreeEventArgs"/> Tag property.</param>
+    /// <returns>
+    /// true if entire tree was searched. It is possible no results were found.
+    /// </returns>
+    /// <remarks>
+    /// Do not modify the tree while a Search() is in progress. Doing so can
+    /// have unintended consequences, including corruption and crashes.If you
+    /// need to modify the tree, collect the results during the search and modify
+    /// the tree once the search is completed.
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool SearchOverlaps(double tolerance, EventHandler<RTreeEventArgs> callback, object tag)
+    {
+      IntPtr pConstTree = ConstPointer();
+      if (m_callbacks == null)
+        m_callbacks = new List<Callbackholder>();
+      Callbackholder cbh = new Callbackholder();
+      cbh.SerialNumber = m_next_serial_number++;
+      cbh.Callback = callback;
+      cbh.Sender = this;
+      cbh.Tag = tag;
+      m_callbacks.Add(cbh);
+      SearchCallback searcher = CustomSearchCallback;
+      bool rc = UnsafeNativeMethods.ON_RTree_SearchOverlaps(pConstTree, tolerance, cbh.SerialNumber, searcher);
+      for (int i = 0; i < m_callbacks.Count; i++)
+      {
+        if (m_callbacks[i].SerialNumber == cbh.SerialNumber)
+        {
+          m_callbacks.RemoveAt(i);
+          break;
+        }
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
     /// Searches two R-trees for all pairs elements whose bounding boxes overlap.
     /// </summary>
     /// <param name="treeA">A first tree.</param>

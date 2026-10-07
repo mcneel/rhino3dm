@@ -63,6 +63,30 @@ namespace Rhino.DocObjects
     }
     Rhino.Display.RhinoViewport m_viewport;
 
+    /// <summary>
+    /// Gets the page view that this detail view belongs to.
+    /// </summary>
+    /// <remarks>
+    /// Every detail view object belongs to one page view.
+    /// Page views can be parent to multiple detail views.
+    /// </remarks>
+    /// <since>9.0</since>
+    public RhinoPageView ParentPageView
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        IntPtr ptr_view = UnsafeNativeMethods.CRhinoDetailViewObject_ParentPageView(ptr_const_this);
+        if (ptr_const_this != IntPtr.Zero)
+        {
+          RhinoView view = RhinoView.FromIntPtr(ptr_view);
+          if (null != view && view is RhinoPageView pageView)
+            return pageView;
+        }
+        return null;
+      }
+    }
+
     /// <since>5.0</since>
     public bool CommitViewportChanges()
     {
@@ -171,27 +195,43 @@ namespace Rhino.DocObjects
       /// <summary>
       /// No formatting
       /// </summary>
+      /// <since>7.0</since>
       None,
       /// <summary>
       /// #:1
       /// </summary>
+      /// <since>7.0</since>
       PageLengthToOne,
       /// <summary>
       /// 1:#
       /// </summary>
+      /// <since>7.0</since>
       OneToModelLength,
       /// <summary>
       /// 1" = #'
       /// </summary>
+      /// <since>7.0</since>
       OneInchToModelLengthFeet,
       /// <summary>
       /// #" = 1'
       /// </summary>
+      /// <since>7.0</since>
       ModelLengthInchToOneFoot,
       /// <summary>
       /// #' = 1'-0"
       /// </summary>
-      ModelLengthInchToOneFootInch
+      /// <since>7.0</since>
+      ModelLengthInchToOneFootInch,
+      /// <summary>
+      /// # page unit system:1 model unit system
+      /// </summary>
+      /// <since>9.0</since>
+      PageLengthToOneUnitSystem,
+      /// <summary>
+      /// 1 page unit system:# model unit system
+      /// </summary>
+      /// <since>9.0</since>
+      OneToModelLengthUnitSystem,
     };
 
     /// <summary>

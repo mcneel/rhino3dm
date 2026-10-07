@@ -95,19 +95,22 @@ namespace Rhino.Geometry
         public bool ExtrudedMesh(out Mesh extrudedMeshOut, out List<ComponentIndex> componentIndicesOut)
         {
           extrudedMeshOut = new Mesh();
-          var internalComponentIndicesOut = new INTERNAL_ComponentIndexArray();
-          bool ret = UnsafeNativeMethods.RHC_RhinoMeshExtruder_ExtrudedMeshComponentsOut(m_ptr, extrudedMeshOut.NonConstPointer(), internalComponentIndicesOut.NonConstPointer());
-          componentIndicesOut = new List<ComponentIndex>();
-          if (ret)
+
+          using (var internalComponentIndicesOut = new INTERNAL_ComponentIndexArray())
           {
-            for (int i = 0; i < internalComponentIndicesOut.Count; i++)
+            bool ret = UnsafeNativeMethods.RHC_RhinoMeshExtruder_ExtrudedMeshComponentsOut(m_ptr, extrudedMeshOut.NonConstPointer(), internalComponentIndicesOut.NonConstPointer());
+            componentIndicesOut = new List<ComponentIndex>();
+            if (ret)
             {
-              var ci = internalComponentIndicesOut.ToArray()[i];
-              componentIndicesOut.Add(new ComponentIndex(ci.ComponentIndexType, ci.Index));
+              for (int i = 0; i < internalComponentIndicesOut.Count; i++)
+              {
+                var ci = internalComponentIndicesOut.ToArray()[i];
+                componentIndicesOut.Add(new ComponentIndex(ci.ComponentIndexType, ci.Index));
+              }
             }
+            GC.KeepAlive(this);
+            return ret;
           }
-          GC.KeepAlive(this);
-          return ret;
         }
 
         /// <summary>

@@ -539,6 +539,10 @@ namespace Rhino.Geometry
     /// <param name="squished_marks_out">A list of the squished marks, with null entries for marks
     /// that fail to squish. Can be null.</param>
     /// <returns>A brep representing the flattened surface</returns>
+    /// <remarks>NB: If you are using this function from Grasshopper, which does not have a type
+    /// that can hold a trimmed surface, you will need to pass a Brep to your component and get the
+    /// face of interest from this Brep into this function. Otherwise you will lose all trimming information.
+    /// Example: `brep_out = SquishSurface(sp, brep.Faces[0], marks_in, marks_out)`</remarks>
     /// <since>7.9</since>
     public Brep SquishSurface(SquishParameters sp, Surface surface, IEnumerable<GeometryBase> marks, List<GeometryBase> squished_marks_out)
     {
@@ -576,6 +580,10 @@ namespace Rhino.Geometry
     /// <param name="sp">The parameters for the squish operation</param>
     /// <param name="surface">The surface to be squished</param>
     /// <returns>A brep representing the flattened surface</returns>
+    /// <remarks>NB: If you are using this function from Grasshopper, which does not have a type
+    /// that can hold a trimmed surface, you will need to pass a Brep to your component and get the
+    /// face of interest from this Brep into this function. Otherwise you will lose all trimming information.
+    /// Example: `brep_out = SquishSurface(sp, brep.Faces[0])`</remarks>
     /// <since>7.9</since>
     public Brep SquishSurface(SquishParameters sp, Surface surface)
     {

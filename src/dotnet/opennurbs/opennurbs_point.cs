@@ -208,6 +208,30 @@ namespace Rhino.Geometry
         return new Interval(RhinoMath.UnsetValue, RhinoMath.UnsetValue);
       }
     }
+
+    /// <summary>
+    /// Gets an Interval whose limits are 0.0 and 1.0.
+    /// </summary>
+    /// <since>8.36</since>
+    public static Interval ZeroToOne
+    {
+      get
+      {
+        return new Interval(0.0, 1.0);
+      }
+    }
+
+    /// <summary>
+    /// Gets an Interval whose limits are 0.0 and 2*Pi.
+    /// </summary>
+    /// <since>8.36</since>
+    public static Interval ZeroToTwoPi
+    {
+      get
+      {
+        return new Interval(0.0, RhinoMath.TwoPI);
+      }
+    }
     #endregion
 
     #region Properties
@@ -427,6 +451,20 @@ namespace Rhino.Geometry
       if (IsDecreasing) { Swap(); }
       if (m_t0 > value) { m_t0 = value; }
       if (m_t1 < value) { m_t1 = value; }
+    }
+
+    /// <summary>
+    /// Expand an interval by adding the value to T1 and subtracting it from T0.
+    /// If T1 &lt; T0, T0 and T1 are swapped.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <since>9.0</since>
+    public void Expand(double value)
+    {
+      if (!RhinoMath.IsValidDouble(value)) { return; }
+      MakeIncreasing();
+      m_t0 -= value;
+      m_t1 += value;
     }
 
     /// <summary>
@@ -2068,6 +2106,10 @@ namespace Rhino.Geometry
     /// </summary>
     internal static string FormatCoordinates(string format, IFormatProvider provider, params double[] coordinates)
     {
+      // Avoid the number grouping character that is ',' even in INVARIANT
+      format = format?.Replace('C', 'F').Replace('N', 'F').Replace('P', 'F').Replace(",", "");
+      if (provider is null) provider = CultureInfo.CurrentCulture;
+
       var fragments = new string[coordinates.Length];
       for (int i = 0; i < coordinates.Length; i++)
         fragments[i] = coordinates[i].ToString(format, provider);
@@ -2076,27 +2118,13 @@ namespace Rhino.Geometry
       // commas as decimal separators, then we cannot use commas to
       // separate the (x,y,z) coordinates from each other.
       // IFormatProvider *may* be a type of CultureInfo which could
-      // tell us whether the decimal separator is indeed the comma.
-      bool useCommaSeparators = true;
-      if (provider is CultureInfo culture)
-      {
-        if (IsCommaLikeText(culture.NumberFormat.NumberDecimalSeparator))
-          useCommaSeparators = false;
-      }
-      else
-      {
-        // Since the format provider is not a cultureinfo implementation,
-        // format a number to see if it contains any commas:
-        var test = (-12345.67890).ToString(format, provider);
-        if (IsCommaLikeText(test))
-          useCommaSeparators = false;
-      }
+      // tell us the list separator to use.
+      var listSeparator = provider is CultureInfo ci ? ci.TextInfo.ListSeparator :
+        // In the very unlikely case IFormatProvider is a custom one 
+        IsCommaLikeText(NumberFormatInfo.GetInstance(provider).NumberDecimalSeparator) ? ";" : ",";
 
       // Either separate the coordinates using commas, or semi-colons.
-      if (useCommaSeparators)
-        return string.Join(",", fragments);
-      else
-        return string.Join(";", fragments);
+      return string.Join(listSeparator, fragments);
     }
     /// <summary>
     /// Test whether a string contains any char which looks like a comma.
@@ -2257,6 +2285,96 @@ namespace Rhino.Geometry
     {
       return this;
     }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Generates an array of two-dimensional points distributed according to the specified blue noise type.
+    /// </summary>
+    /// <remarks>The distribution and characteristics of the generated points depend on the specified noise
+    /// type.</remarks>
+    /// <param name="targetCount">The number of points to generate. Must be a positive integer. The actual count may
+    /// differ because the algorithm distributes points on a grid whose row and column counts are integers derived
+    /// from the target count and the region's aspect ratio.</param>
+    /// <param name="useOrderedThreshold">Use the blue noise ordered threshold (true) or the blue noise step (false)
+    /// spectra for the noise distribution.</param>
+    /// <param name="xMin">The minimum X coordinate of the bounding rectangle.</param>
+    /// <param name="yMin">The minimum Y coordinate of the bounding rectangle.</param>
+    /// <param name="xMax">The maximum X coordinate of the bounding rectangle.</param>
+    /// <param name="yMax">The maximum Y coordinate of the bounding rectangle.</param>
+    /// <returns>An array of Point3d values.</returns>
+    /// <since>9.0</since>
+    public static Point3d[] CreateNoiseDistribution2D(int targetCount, bool useOrderedThreshold,
+                                                      double xMin = 0.0, double yMin = 0.0,
+                                                      double xMax = 1.0, double yMax = 1.0)
+    {
+      double W = xMax - xMin;
+      double H = yMax - yMin;
+      if (W <= 0.0 || H <= 0.0)
+        throw new ArgumentException("xMax must be greater than xMin and yMax must be greater than yMin.");
+
+      double aspect = W / H;
+
+      int nX = (int)Math.Floor(Math.Sqrt((double)targetCount * aspect));
+      int nY = (int)Math.Floor(Math.Sqrt((double)targetCount / aspect));
+
+      if (nX <= 0 || nY <= 0)
+        return Array.Empty<Point3d>();
+
+      int actualCount = nX * nY;
+
+      Point3d[] points = new Point3d[actualCount];
+      bool success = UnsafeNativeMethods.BlueNoise_CreateNoiseDistribution2D((uint)nX, (uint)nY, useOrderedThreshold, points, xMin, yMin, xMax, yMax);
+      if (!success)
+        throw new InvalidOperationException("Blue noise generation failed.");
+      return points;
+    }
+
+    /// <summary>
+    /// Generates an array of three-dimensional points distributed according to the specified blue noise type.
+    /// </summary>
+    /// <remarks>The distribution and characteristics of the generated points depend on the specified noise
+    /// type.</remarks>
+    /// <param name="targetCount">The number of points to generate. Must be a positive integer. The actual count may
+    /// differ because the algorithm distributes points on a grid whose row and column counts are integers derived
+    /// from the target count and the region's aspect ratio.</param>
+    /// <param name="useOrderedThreshold">Use the blue noise ordered threshold (true) or the blue noise step (false)
+    /// spectra for the noise distribution.</param>
+    /// <param name="xMin">The minimum X coordinate of the bounding box.</param>
+    /// <param name="yMin">The minimum Y coordinate of the bounding box.</param>
+    /// <param name="zMin">The minimum Z coordinate of the bounding box.</param>
+    /// <param name="xMax">The maximum X coordinate of the bounding box.</param>
+    /// <param name="yMax">The maximum Y coordinate of the bounding box.</param>
+    /// <param name="zMax">The maximum Z coordinate of the bounding box.</param>
+    /// <returns>An array of Point3d values.</returns>
+    /// <since>9.0</since>
+    public static Point3d[] CreateNoiseDistribution3D(int targetCount, bool useOrderedThreshold,
+                                                      double xMin = 0.0, double yMin = 0.0, double zMin = 0.0,
+                                                      double xMax = 1.0, double yMax = 1.0, double zMax = 1.0)
+    {
+      double W = xMax - xMin;
+      double H = yMax - yMin;
+      double D = zMax - zMin;
+      if (W <= 0.0 || H <= 0.0 || D <= 0.0)
+        throw new ArgumentException("xMax must be greater than xMin, yMax must be greater than yMin, and zMax must be greater than zMin.");
+
+      // Compute grid dimensions from the cube root of targetCount, scaled by aspect ratios.
+      double cbrt = Math.Pow((double)targetCount * (W / H) * (W / D), 1.0 / 3.0);
+      int nX = (int)Math.Floor(cbrt);
+      int nY = (int)Math.Floor(cbrt * (H / W));
+      int nZ = (int)Math.Floor(cbrt * (D / W));
+
+      if (nX <= 0 || nY <= 0 || nZ <= 0)
+        return Array.Empty<Point3d>();
+
+      int actualCount = nX * nY * nZ;
+
+      Point3d[] points = new Point3d[actualCount];
+      bool success = UnsafeNativeMethods.BlueNoise_CreateNoiseDistribution3D((uint)nX, (uint)nY, (uint)nZ, useOrderedThreshold, points, xMin, yMin, zMin, xMax, yMax, zMax);
+      if (!success)
+        throw new InvalidOperationException("Blue noise generation failed.");
+      return points;
+    }
+#endif
 
     #endregion
 
@@ -3875,6 +3993,24 @@ namespace Rhino.Geometry
     {
       return UnsafeNativeMethods.ON_Plane_IsRightHandFrame(x, y, z);
     }
+
+    /// <summary>
+    /// Find scalars x and y so that the component of v in the plane of a and b 
+    /// is x*a + y*b
+    /// </summary>
+    /// <param name="v"></param>
+    /// <param name="a">non-zero and not parallel to b</param>
+    /// <param name="b">non-zero and not parallel to a</param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns>true if the decomposition is successful.</returns>
+    /// <since>9.0</since>
+    public static bool Decompose(Vector3d v, Vector3d a, Vector3d b, out double x, out double y)
+    {
+      x = y = RhinoMath.UnsetValue;
+      return UnsafeNativeMethods.ON_3dVector_DecomposeVector(v, a, b, ref x, ref  y);
+    }
+
     #endregion
 
     #region properties
