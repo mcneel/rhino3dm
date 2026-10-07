@@ -1,0 +1,86 @@
+"""Assert that api/manifest.json + api/exceptions.toml fully explain
+src/dotnet/AutoNativeMethods.cs.
+
+The identity being enforced: every P/Invoke rhino3dm declares is either
+
+  adopted    portable+generatable in the manifest (the normal case)
+  dead       in the manifest as rhino-only -- a declaration methodgen emits
+             for a guarded C function; tolerated because validate.py proves
+             none are reachable from live C#
+  local      defined in a [[local_file]] from api/exceptions.toml
+             (rhino3dm-only C files that rhino's spec cannot know about)
+
+Anything else is UNEXPLAINED and fails the build: either a P/Invoke was
+hand-added outside the spec, or the sync brought surface the committed
+manifest predates -- in which case the fix is to regenerate it
+(tools/extract/manifest.py) against the rhino commit that was synced.
+
+The reverse direction (portable in the manifest but not declared) is the
+unadopted-drift count. It is reported, not failed: deliberately unshipped
+surface is recorded summary-level in exceptions.toml.
+
+Runs from a plain checkout; no rhino repo and no build needed.
+"""
+
+import json
+import os
+import re
+import sys
+import tomllib
+
+from scan import scan_file
+
+DECLARED = re.compile(r'internal static extern [^\s]+ ([A-Za-z0-9_]+)\s*\(')
+
+
+def main():
+    root = os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))))
+
+    manifest = json.load(open(os.path.join(root, 'api', 'manifest.json')))
+    exceptions = tomllib.load(open(os.path.join(root, 'api', 'exceptions.toml'), 'rb'))
+    auto = open(os.path.join(root, 'src', 'dotnet', 'AutoNativeMethods.cs'),
+                encoding='utf-8', errors='replace').read()
+
+    declared = set(DECLARED.findall(auto))
+    by_name = {f['name']: f for f in manifest['c_surface']}
+    generatable = set(n for n, f in by_name.items()
+                      if f['variant'] == 'portable'
+                      and not f.get('manual') and not f.get('callback'))
+
+    local = set()
+    for entry in exceptions.get('local_file', []):
+        path = os.path.join(root, entry['path'])
+        for decl in scan_file(path, {'RHINO3DM_BUILD'}):
+            if decl.name:
+                local.add(decl.name)
+
+    adopted = declared & generatable
+    dead = set(n for n in declared - generatable
+               if n in by_name and by_name[n]['variant'] == 'rhino-only')
+    local_declared = (declared - generatable - dead) & local
+    unexplained = declared - generatable - dead - local
+    unadopted = generatable - declared
+
+    print('declared P/Invokes           %5d' % len(declared))
+    print('  adopted from manifest      %5d' % len(adopted))
+    print('  dead (guarded upstream)    %5d' % len(dead))
+    print('  rhino3dm-local additions   %5d' % len(local_declared))
+    print('  UNEXPLAINED                %5d' % len(unexplained))
+    print('unadopted portable drift     %5d  (informational)' % len(unadopted))
+
+    if unexplained:
+        print('\nFAIL: declared P/Invokes with no origin in the manifest or')
+        print('exceptions.toml. If these came from a sync, regenerate the')
+        print('manifest against the synced rhino commit:')
+        print('    python3 tools/extract/manifest.py <rhino-checkout>')
+        for name in sorted(unexplained):
+            print('  ' + name)
+        return 1
+
+    print('\nPASS')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

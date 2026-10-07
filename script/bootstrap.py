@@ -35,7 +35,7 @@ from sys import platform as _platform
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
 xcode_logging = False
-valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python"]
+valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python", "generator"]
 submodules = ["opennurbs", "draco", "pybind11"]
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
@@ -139,6 +139,8 @@ def read_required_versions():
     git = BuildTool("Git", "git", "", "", "")
     python = BuildTool("Python", "python", "", "", "")
     cmake = BuildTool("CMake", "cmake", "", "", "")
+    # generator toolchain (tools/extract), not needed to build the library
+    libclang = BuildTool("libclang (python wheel)", "libclang", "", "", "")
     mdk = BuildTool("Mono MDK", "mdk", "", "", "")
     macos = BuildTool("macOS", "macos", "", "", "")
     xcode = BuildTool("Xcode", "xcode", "", "", "")
@@ -154,6 +156,7 @@ def read_required_versions():
                        git=git, 
                        python=python, 
                        cmake=cmake,                  
+                       libclang=libclang,
                        mdk=mdk, 
                        xcode=xcode)
 
@@ -440,6 +443,31 @@ def check_cmake(build_tool):
 
     print_version_comparison(build_tool, running_version)
 
+    return True
+
+
+def check_libclang(build_tool):
+    print_check_preamble(build_tool)
+
+    # The requirement is the *python binding* (import clang.cindex), not a
+    # system libclang: the PyPI wheel bundles its own native library. Probe
+    # with the same interpreter running this script.
+    probe = ("import clang.cindex, importlib.metadata;"
+             "clang.cindex.Index.create();"
+             "print(importlib.metadata.version('libclang'))")
+    try:
+        p = subprocess.Popen([sys.executable, '-c', probe],
+                             stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        running_version, err = p.communicate()
+    except OSError:
+        running_version, err = b'', b'launch failed'
+
+    if p.returncode != 0 or err and not running_version:
+        print_error_message(build_tool.name + " not usable from this python. "
+                            + format_install_instructions(build_tool))
+        return False
+
+    print_version_comparison(build_tool, running_version.decode('utf-8').strip())
     return True
 
 
@@ -782,6 +810,12 @@ def check_handler(check, build_tools):
         check_python(build_tools["python"])
         check_cmake(build_tools["cmake"])
         check_dotnet(build_tools["dotnet"])
+
+    if check == "generator":
+        # the API extractor/generator toolchain (tools/extract); platform-neutral
+        print_platform_preamble("Generator (tools/extract)")
+        check_python(build_tools["python"])
+        check_libclang(build_tools["libclang"])
 
     if check == "macos":
         print_platform_preamble("macOS")

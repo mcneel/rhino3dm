@@ -1,0 +1,71 @@
+# Every deliberate divergence between rhino3dm and its upstream spec
+# (rhino/src4/DotNetSDK/rhinocommon), in one reviewable place.
+#
+# api/manifest.json records what upstream OFFERS; this file records where
+# rhino3dm intentionally departs from it. Together they make the sync
+# auditable: anything that differs and is not listed here is drift.
+#
+# Categories:
+#   [[local_file]]       exists only in rhino3dm, never synced from rhino
+#   [[no_sync]]          upstream file exists but is never copied over this one
+#   [[line_exception]]   synced, then a recorded local edit is re-applied
+#   [[unadopted]]        upstream portable surface deliberately not shipped
+
+schema = 1
+
+# -----------------------------------------------------------------------------
+# Files that exist only in rhino3dm. Their RH_C_FUNCTION exports are absent
+# from api/manifest.json by construction (7 functions as of 2026-10-07).
+# -----------------------------------------------------------------------------
+
+[[local_file]]
+path = "src/librhino3dm_native/rdk_content.cpp"
+reason = "portable RDK content access written for rhino3dm; rhino's rdk layer (c_rdk/) needs the RDK runtime"
+
+[[local_file]]
+path = "src/librhino3dm_native/rdk_decals_portable.cpp"
+reason = "portable decal read/write for rhino3dm; rhino's implementation lives in c_rdk/ and needs the RDK runtime"
+
+# -----------------------------------------------------------------------------
+# Upstream counterpart exists, but the rhino3dm copy is never overwritten.
+# -----------------------------------------------------------------------------
+
+[[no_sync]]
+path = "src/librhino3dm_native/stdafx.h"
+reason = "different opennurbs include path (../lib/opennurbs/), no RHINO_CORE_COMPONENT, and a local `#define ASSERT(x) ((void)0)` shim (ASSERT comes from rhino4/AfxMac.h in Rhino)"
+
+[[no_sync]]
+path = "src/librhino3dm_native/plugin_linking_pragmas.h"
+reason = "wraps the MSVC `#pragma comment(lib,...)` block in #if !defined(ON_CMAKE_BUILD); upstreaming would change rhino's own CMake builds (opennurbs/CMakeLists.txt defines ON_CMAKE_BUILD)"
+
+[[no_sync]]
+path = "src/librhino3dm_native/CMakeLists.txt"
+reason = "rhino3dm's build definition; upstream's c/CMakeLists.txt builds against Rhino's opennurbs"
+
+[[no_sync]]
+path = "src/dotnet/Properties/AssemblyInfo.cs"
+reason = "product identity (version set by script/bump_version.py from src/version.txt)"
+
+# -----------------------------------------------------------------------------
+# Synced, then a recorded local edit is re-applied. The only line-level
+# exception left after RH3DM-213/214 reduced the list from 9.
+# -----------------------------------------------------------------------------
+
+[[line_exception]]
+path = "src/dotnet/opennurbs/opennurbs_viewport.cs"
+edit = "local ViewportInfo.NonConstPointer() override"
+reason = "RH-83697 design divergence; rhino3dm viewports are not document-owned"
+
+# -----------------------------------------------------------------------------
+# Upstream portable surface deliberately not shipped. Kept summary-level here;
+# the per-function list is derivable (manifest portable set minus
+# AutoNativeMethods) and reported by tools/extract/report.py.
+# -----------------------------------------------------------------------------
+
+[[unadopted]]
+scope = "61 new .cs files from the rhino 9.x sync (41 RDK, 5 UI, ...)"
+reason = "rhino3dm carries 11 of 69 RDK files by design; adopt on demand. Exceptions already adopted: opennurbs_lengthunit.cs, opennurbs_textrun.cs (sync depends on them)"
+
+[[unadopted]]
+scope = "66 portable C exports present in the manifest but not in rhino3dm's copied subset (e.g. the on_markup.cpp family)"
+reason = "surface rhino3dm has not yet adopted; this is the drift report the manifest exists to surface, re-counted on every regeneration"

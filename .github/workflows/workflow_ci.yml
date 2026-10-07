@@ -48,6 +48,20 @@ jobs:
       - name: check versions against src/version.txt
         run: python3 script/bump_version.py --check
 
+  #Fails if any P/Invoke in AutoNativeMethods.cs has no origin in the committed
+  #api/manifest.json or api/exceptions.toml. Catches hand-added P/Invokes and
+  #syncs that outrun the manifest (fix: regenerate it against the synced rhino
+  #commit). Reads only committed files, so it needs no rhino checkout and no
+  #build; unconditional like validate_version, and for the same reason.
+  validate_manifest:
+    name: validate api manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: reconcile AutoNativeMethods against the manifest
+        run: cd tools/extract && python3 reconcile.py
+
   #checks if build scripts have changed
   check_build_scripts:
     name: check build scripts and tools
