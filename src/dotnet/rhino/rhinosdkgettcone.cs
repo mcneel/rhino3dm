@@ -181,6 +181,48 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// The minimum number of faces in the vertical direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int VerticalDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_VerticalDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetVerticalDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The minimum number of faces in the around direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int AroundDirectionMinimumCount
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.CArgsRhinoGetCircle_AroundDirectionMinCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CArgsRhinoGetCircle_SetAroundDirectionMinCount(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
     /// Prompt for the getting of a truncated cone.
     /// </summary>
     /// <param name="truncatedCone">The truncated cone in Brep form.</param>

@@ -588,6 +588,23 @@ namespace Rhino.Geometry
       GC.KeepAlive(other);
     }
 
+    /// <summary>
+    /// Constructs a new NURBS surface with knot and control point memory allocated.
+    /// </summary>
+    /// <param name="dimension">The number of dimensions.<para>&gt;= 1. This value is usually 3.</para></param>
+    /// <param name="isRational">true to make a rational NURBS.</param>
+    /// <param name="order0">The order in U direction.<para>&gt;= 2.</para></param>
+    /// <param name="order1">The order in V direction.<para>&gt;= 2.</para></param>
+    /// <param name="controlPointCount0">Control point count in U direction.<para>&gt;= order0.</para></param>
+    /// <param name="controlPointCount1">Control point count in V direction.<para>&gt;= order1.</para></param>
+    /// <remarks>If any argument is out of range, the surface is empty and not valid. Use <see cref="Create"/> to get null instead.</remarks>
+    /// <since>9.0</since>
+    public NurbsSurface(int dimension, bool isRational, int order0, int order1, int controlPointCount0, int controlPointCount1)
+    {
+      IntPtr ptr_this = UnsafeNativeMethods.ON_NurbsSurface_New(dimension, isRational, order0, order1, controlPointCount0, controlPointCount1);
+      ConstructNonConstObject(ptr_this);
+    }
+
     internal NurbsSurface()
     {
       IntPtr ptr = UnsafeNativeMethods.ON_NurbsSurface_New3();

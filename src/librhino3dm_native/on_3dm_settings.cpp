@@ -450,7 +450,7 @@ RH_C_FUNCTION void ON_EarthAnchorPoint_SetDouble(ON_EarthAnchorPoint* pEarthAnch
     else if( EarthAnchorPointDouble::EarthBasepointLongitude==which )
       pEarthAnchor->SetLongitude(val);
     else if( EarthAnchorPointDouble::EarthBasepointElevation==which )
-      pEarthAnchor->SetElevation(ON::LengthUnitSystem::Meters,val);
+      pEarthAnchor->SetElevation(ON_UnitSystem::Meters,val);
   }
 }
 
@@ -564,10 +564,11 @@ RH_C_FUNCTION void ON_EarthAnchorPoint_GetModelCompass(const ON_EarthAnchorPoint
   }
 }
 
-RH_C_FUNCTION void ON_EarthAnchorPoint_GetModelToEarthTransform(const ON_EarthAnchorPoint* pConstEarthAnchor, ON::LengthUnitSystem us, ON_Xform* xform)
+RH_C_FUNCTION void ON_EarthAnchorPoint_GetModelToEarthTransform(const ON_EarthAnchorPoint* pConstEarthAnchor, ON::LengthUnitSystem unit_system, double meters_per_unit, ON_Xform* xform)
 {
   if( pConstEarthAnchor && xform )
   {
+    ON_UnitSystem us = unit_system == ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem(unit_system) : ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
     pConstEarthAnchor->GetModelToEarthXform(us, *xform);
   }
 }
@@ -684,24 +685,79 @@ RH_C_FUNCTION void ON_3dmSettings_SetDouble(ON_3dmSettings* pSettings, enum Unit
   }
 }
 
-RH_C_FUNCTION int ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, int set_val)
+RH_C_FUNCTION bool ON_3dmSettings_GetLengthUnits(const ON_3dmSettings* pSettings, bool model, ON::LengthUnitSystem* us, double* meters_per_unit, CRhCmnStringHolder* pString)
 {
-  int rc = set_val;
+  bool rc = false;
+  if (pSettings && us)
+  {
+    const ON_UnitSystem& unit_system = model ? pSettings->m_ModelUnitsAndTolerances.m_unit_system : pSettings->m_PageUnitsAndTolerances.m_unit_system;
+
+    *us = unit_system.UnitSystem();
+    if (meters_per_unit)
+      *meters_per_unit = unit_system.MetersPerUnit(ON_DBL_QNAN);
+
+    if (pString)
+      pString->Set(unit_system.UnitSystemName());
+
+    rc = true;
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_3dmSettings_SetLengthUnits(ON_3dmSettings* pSettings, bool model, ON::LengthUnitSystem us, double meters_per_unit, const RHMONO_STRING* _name)
+{
+  bool rc = false;
+  if (pSettings)
+  {
+    ON_UnitSystem& unit_system = model ? pSettings->m_ModelUnitsAndTolerances.m_unit_system : pSettings->m_PageUnitsAndTolerances.m_unit_system;
+
+    if (us == ON::LengthUnitSystem::CustomUnits)
+    {
+      if (_name)
+      {
+        INPUTSTRINGCOERCE(name, _name);
+        unit_system = ON_UnitSystem::CreateCustomUnitSystem(name, meters_per_unit);;
+      }
+      else
+      {
+        unit_system = ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+      }
+      rc = true;
+    }
+    else if (ON::LengthUnitSystem::Unset != ON::LengthUnitSystemFromUnsigned((int) us))
+    {
+      unit_system = us;
+      rc = true;
+    }
+  }
+
+  return rc;
+}
+
+RH_C_FUNCTION ON::LengthUnitSystem ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, ON::LengthUnitSystem set_val)
+{
+  ON::LengthUnitSystem rc = ON::LengthUnitSystem::Unset;
   if( pSettings )
   {
     if( set )
     {
-      if( model )
-        pSettings->m_ModelUnitsAndTolerances.m_unit_system = ON::LengthUnitSystemFromUnsigned(set_val);
-      else
-        pSettings->m_PageUnitsAndTolerances.m_unit_system = ON::LengthUnitSystemFromUnsigned(set_val);
+      if (ON::LengthUnitSystem::CustomUnits != set_val && ON::LengthUnitSystem::Unset != ON::LengthUnitSystemFromUnsigned((int)set_val))
+      {
+        if (model)
+          pSettings->m_ModelUnitsAndTolerances.m_unit_system = set_val;
+        else
+          pSettings->m_PageUnitsAndTolerances.m_unit_system = set_val;
+
+        rc = set_val;
+      }
     }
     else
     {
       if( model )
-        rc = (int)static_cast<unsigned int>(pSettings->m_ModelUnitsAndTolerances.m_unit_system.UnitSystem());
+        rc = pSettings->m_ModelUnitsAndTolerances.m_unit_system.UnitSystem();
       else
-        rc = (int)static_cast<unsigned int>(pSettings->m_PageUnitsAndTolerances.m_unit_system.UnitSystem());
+        rc = pSettings->m_PageUnitsAndTolerances.m_unit_system.UnitSystem();
     }
   }
   return rc;

@@ -624,7 +624,9 @@ namespace Rhino.Runtime
         DocObjects.Custom.UserDictionary ud = UserData.Find(typeof(DocObjects.Custom.SharedUserDictionary)) as DocObjects.Custom.SharedUserDictionary;
         if (ud == null)
         {
+#pragma warning disable CA2000
           ud = new DocObjects.Custom.SharedUserDictionary();
+#pragma warning restore CA2000
           if (!UserData.Add(ud))
             return null;
         }
@@ -934,6 +936,27 @@ namespace Rhino.Runtime
       UnsafeNativeMethods.ON_WriteBufferArchive_Delete(pWriteBuffer);
       GC.KeepAlive(this);
       return json;
+    }
+
+    /// <summary>
+    /// Computes an estimate of the number of bytes that this object is using in memory.
+    /// </summary>
+    /// <remarks>
+    /// This is the same as calling GeometryBase.MemoryEstimate, but works for all CommonObject derived classes.
+    /// </remarks>
+    /// <param name="obj"></param>
+    /// <returns>An estimated memory footprint.</returns>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    [ConstOperation]
+    public static uint ComputeMemoryEstimate(CommonObject obj)
+    {
+      if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+      IntPtr constPtr = obj.ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_Object_SizeOf(constPtr);
+      GC.KeepAlive(obj);
+      return rc;
     }
 
     internal static CommonObject CreateCommonObjectHelper(IntPtr pObject)

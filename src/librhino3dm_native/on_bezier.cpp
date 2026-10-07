@@ -5,13 +5,26 @@ RH_C_FUNCTION ON_BezierCurve* ON_BezierCurve_New()
   return new ON_BezierCurve();
 }
 
-RH_C_FUNCTION ON_BezierCurve* ON_BezierCurve_New2(int dimension, bool rational, int order, int cvLength, /*ARRAY*/const double* cvs)
+// Creates a bezier curve from a packed array of Order()*CVSize() control vertex
+// values, as returned by ON_BezierCurve_GetCvs(). Returns nullptr when the array
+// length does not match the requested dimension, rationality and order, so that
+// callers fail loudly instead of receiving a curve full of uninitialized memory.
+// See RH-97256.
+RH_C_FUNCTION ON_BezierCurve* ON_BezierCurve_NewFromCvs(int dimension, bool rational, int order, int length, /*ARRAY*/const double* cvs)
 {
   ON_BezierCurve* rc = new ON_BezierCurve(dimension, rational, order);
-  if (cvLength == rc->m_cv_capacity && cvs)
+  const int cv_size = rc->CVSize();
+  const int cv_count = rc->Order();
+  const int required = (cv_size > 0 && cv_count > 0) ? cv_size * cv_count : 0;
+  if (length != required || (length > 0 && (nullptr == cvs || nullptr == rc->m_cv)))
   {
-    memcpy(rc->m_cv, cvs, cvLength * sizeof(double));
+    delete rc;
+    return nullptr;
   }
+  // ON_BezierCurve::Create() always allocates a packed buffer, so m_cv_stride is
+  // CVSize() here and the incoming packed array can be copied in one shot.
+  if (length > 0)
+    memcpy(rc->m_cv, cvs, (size_t)length * sizeof(double));
   return rc;
 }
 
@@ -96,19 +109,36 @@ RH_C_FUNCTION int ON_BezierCurve_Order(const ON_BezierCurve* pConstBezierCurve)
   return 0;
 }
 
-RH_C_FUNCTION int ON_BezierCurve_CvCapacity(const ON_BezierCurve* pConstBezierCurve)
+// Number of doubles per control vertex: Dimension() + 1 if rational.
+RH_C_FUNCTION int ON_BezierCurve_CVSize(const ON_BezierCurve* pConstBezierCurve)
 {
   if (pConstBezierCurve)
-    return pConstBezierCurve->m_cv_capacity;
+    return pConstBezierCurve->CVSize();
   return 0;
 }
 
-RH_C_FUNCTION void ON_BezierCurve_SetCvs(const ON_BezierCurve* pConstBezierCurve, int length, /*ARRAY*/double* cvs)
+// Copies the logical control vertices into a packed array of Order()*CVSize()
+// values. The raw m_cv buffer cannot be used for this: m_cv_capacity is an
+// allocation size rather than a content size, and m_cv_stride may be larger than
+// CVSize(). See RH-97256.
+RH_C_FUNCTION bool ON_BezierCurve_GetCvs(const ON_BezierCurve* pConstBezierCurve, int length, /*ARRAY*/double* cvs)
 {
-  if (pConstBezierCurve && pConstBezierCurve->m_cv && pConstBezierCurve->m_cv_capacity == length && cvs)
+  if (nullptr == pConstBezierCurve)
+    return 0 == length;
+  const int cv_size = pConstBezierCurve->CVSize();
+  const int cv_count = pConstBezierCurve->Order();
+  if (cv_size < 1 || cv_count < 1)
+    return 0 == length;
+  if (length != cv_size * cv_count || nullptr == cvs)
+    return false;
+  for (int i = 0; i < cv_count; i++)
   {
-    memcpy(cvs, pConstBezierCurve->m_cv, length * sizeof(double));
+    const double* cv = pConstBezierCurve->CV(i);
+    if (nullptr == cv)
+      return false;
+    memcpy(cvs + ((size_t)i * cv_size), cv, cv_size * sizeof(double));
   }
+  return true;
 }
 
 RH_C_FUNCTION ON_BezierCurve* ON_BezierCurve_Loft(int count, /*ARRAY*/const ON_3dPoint* points)
@@ -257,6 +287,19 @@ RH_C_FUNCTION bool ON_BezierCurve_Split(const ON_BezierCurve* pConstBezierCurve,
   }
   return rc;
 }
+
+// Requires OPENNURBS_PLUS; not available in an opennurbs-only (Rhino3dm) build.
+#if defined(OPENNURBS_PLUS)
+RH_C_FUNCTION bool ON_BezierCurve_Derivative(const ON_BezierCurve* pConstBezierCurve, ON_BezierCurve* derivative)
+{
+  bool rc = false;
+  if (pConstBezierCurve && derivative)
+  {
+    rc = ON_BezierCurve::Derivative(*pConstBezierCurve, *derivative);
+  }
+  return rc;
+}
+#endif
 
 RH_C_FUNCTION ON_SimpleArray<ON_BezierCurve*>* ON_BezierCurve_NewSimpleArray()
 {

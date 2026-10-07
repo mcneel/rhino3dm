@@ -360,6 +360,88 @@ RH_C_FUNCTION unsigned int ON_Xform_GetHashCode(const ON_Xform* xf)
 }
 
 ///////////////////////////////////////////////////////////
+// ON_Xform2d
+//
+// Rhino.Geometry.Transform2d is declared
+// [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 48)] and is passed
+// to these functions by reference, so its layout has to keep matching
+// ON_Xform2d exactly.
+static_assert(48 == sizeof(ON_Xform2d), "Rhino.Geometry.Transform2d marshalling assumes ON_Xform2d is 48 bytes.");
+static_assert(std::is_trivially_copyable<ON_Xform2d>::value, "ON_Xform2d must stay trivially copyable to be marshalled as Rhino.Geometry.Transform2d.");
+
+RH_C_FUNCTION void ON_Xform2d_RotationFromAngle(ON_Xform2d* xf, double angleRadians, ON_2DPOINT_STRUCT rotationCenter)
+{
+  if (xf)
+  {
+    const ON_2dPoint* center = (const ON_2dPoint*)&rotationCenter;
+    *xf = ON_Xform2d::RotationTransformationFromAngleRadians(angleRadians, *center);
+  }
+}
+
+RH_C_FUNCTION void ON_Xform2d_RotationFromSineAndCosine(ON_Xform2d* xf, double sinAngle, double cosAngle, ON_2DPOINT_STRUCT rotationCenter)
+{
+  if (xf)
+  {
+    const ON_2dPoint* center = (const ON_2dPoint*)&rotationCenter;
+    *xf = ON_Xform2d::RotationTransformationFromSineAndCosine(sinAngle, cosAngle, *center);
+  }
+}
+
+RH_C_FUNCTION void ON_Xform2d_RotationFromVectors(ON_Xform2d* xf, ON_2DVECTOR_STRUCT startDirection, ON_2DVECTOR_STRUCT endDirection, ON_2DPOINT_STRUCT rotationCenter)
+{
+  if (xf)
+  {
+    const ON_2dVector* start = (const ON_2dVector*)&startDirection;
+    const ON_2dVector* end = (const ON_2dVector*)&endDirection;
+    const ON_2dPoint* center = (const ON_2dPoint*)&rotationCenter;
+    *xf = ON_Xform2d::RotationTransformation(*start, *end, *center);
+  }
+}
+
+RH_C_FUNCTION double ON_Xform2d_Determinant(const ON_Xform2d* xf)
+{
+  double rc = 0.0;
+  if (xf)
+    rc = xf->Determinant();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Xform2d_Invert(ON_Xform2d* xf, double* determinant)
+{
+  bool rc = false;
+  if (xf)
+    rc = xf->Invert(determinant);
+  return rc;
+}
+
+RH_C_FUNCTION int ON_Xform2d_Compare(const ON_Xform2d* pConstXform0, const ON_Xform2d* pConstXform1)
+{
+  int rc = 0;
+  if (pConstXform0 && pConstXform1)
+    rc = pConstXform0->Compare(*pConstXform1);
+  return rc;
+}
+
+RH_C_FUNCTION unsigned int ON_Xform2d_GetHashCode(const ON_Xform2d* xf)
+{
+  unsigned int rc = 0;
+  if (xf)
+    rc = xf->CRC32(0);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Xform2d_FromXform(ON_Xform2d* xf, const ON_Xform* pConstXform, double zeroTolerance)
+{
+  bool rc = false;
+  if (xf)
+  {
+    *xf = pConstXform ? ON_Xform2d::FromXform(*pConstXform, zeroTolerance) : ON_Xform2d::Nan;
+    rc = xf->IsValid();
+  }
+  return rc;
+}
+
+///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 #if !defined(RHINO3DM_BUILD)
 typedef void (CALLBACK* MORPHPOINTPROC)(ON_3DPOINT_STRUCT point, ON_3dPoint* out_point);
@@ -628,3 +710,32 @@ RH_C_FUNCTION bool ON_Matrix_GetBool(const ON_Matrix* pConstMatrix, int which)
   }
   return rc;
 }
+
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION CRhMeshMorphMesh* CRhMeshMorphMesh_New(const ON_Mesh* referenceMesh, const ON_Mesh* meshToMorph)
+{
+  if (nullptr == referenceMesh || nullptr == meshToMorph)
+    return nullptr;;
+
+  CRhMeshMorphMesh* rc = new CRhMeshMorphMesh();
+  rc->Construct(*referenceMesh, *meshToMorph);
+  return rc;
+}
+
+RH_C_FUNCTION void CRhMeshMorphMesh_Delete(CRhMeshMorphMesh* mmm)
+{
+  if (mmm)
+    delete mmm;
+}
+
+RH_C_FUNCTION bool CRMeshMorphMesh_Apply(CRhMeshMorphMesh* mmm, /*ARRAY*/const ON_3dPoint* targetMeshVertices,
+  int targetMeshVertexCount, const ON_Mesh* startMesh, ON_Mesh* adjustedMesh)
+{
+  if (nullptr == mmm || nullptr == targetMeshVertices || targetMeshVertexCount < 1 || nullptr == startMesh || nullptr == adjustedMesh)
+    return false;
+
+  bool rc = mmm->Apply(targetMeshVertices, targetMeshVertexCount, *startMesh, *adjustedMesh);
+  return rc;
+}
+
+#endif

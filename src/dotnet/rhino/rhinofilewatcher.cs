@@ -6,11 +6,8 @@ using Rhino.Runtime;
 #if RHINO_SDK
 namespace Rhino
 {
-  #if DEBUG
-  /// <summary>
-  /// Debugging only
-  /// </summary>
-  public static class RhinoFileWatcherDebugging
+  /// <summary>Debugging only - used by commands plug-in</summary>
+  internal static class RhinoFileWatcherDebugging
   {
     /// <summary>
     /// Dump the current status of the file watcher system to the Rhino command line.
@@ -32,20 +29,24 @@ namespace Rhino
 
       var file_watchers = RhinoFileWatcher.g_file_system_watchers;
 
-      RhinoApp.WriteLine("with " + file_watchers.Count + " FileSystemWatcher objects active");
-      foreach (var entry in file_watchers)
+      lock (file_watchers)
       {
-        var watcher = entry.Value;
 
-        if (watcher != null)
+        RhinoApp.WriteLine("with " + file_watchers.Count + " FileSystemWatcher objects active");
+        foreach (var entry in file_watchers)
         {
-          RhinoApp.WriteLine("Path = \"" + watcher.Impl.Path + "\" Filter = \"" + watcher.Impl.Filter + "\" References = " + watcher.RefCount);
+          var watcher = entry.Value;
+
+          if (watcher != null)
+          {
+            RhinoApp.WriteLine("Path = \"" + watcher.Impl.Path + "\" Filter = \"" + watcher.Impl.Filter + "\" References = " + watcher.RefCount);
+          }
         }
+
       }
 
     }
   }
-  #endif
 
   internal static class RhinoFileEventWatcherHooks
   {
@@ -230,31 +231,36 @@ namespace Rhino
         string key = System.IO.Path.Combine(path, filter);
         RefCountedFileSystemWatcher watcher = null;
 
-        if (g_file_system_watchers.TryGetValue(key, out watcher) && null != watcher)
+        lock (g_file_system_watchers)
         {
-          Watcher = watcher;
-          Watcher.AddRef();
-        }
-        else
-        {
-          if (0 == g_file_system_watchers.Count)
+
+          if (g_file_system_watchers.TryGetValue(key, out watcher) && null != watcher)
           {
-            RhinoApp.Idle += RhinoFileWatcher.Cleanup;
+            Watcher = watcher;
+            Watcher.AddRef();
+          }
+          else
+          {
+            if (0 == g_file_system_watchers.Count)
+            {
+              RhinoApp.Idle += RhinoFileWatcher.Cleanup;
+            }
+
+            if (Runtime.HostUtils.RunningOnOSX && g_file_system_watchers.Count > 512)
+            {
+              //Limit file watchers to 512 because OSX really can't handle any more.
+              return false;
+            }
+
+            watcher = new RefCountedFileSystemWatcher();
+
+            g_file_system_watchers.Add(key, watcher);
+            watcher.Impl.Path = path;
+            watcher.Impl.Filter = filter ?? "*.*";
+
+            Watcher = watcher;
           }
 
-          if (Runtime.HostUtils.RunningOnOSX && g_file_system_watchers.Count > 512)
-          {
-            //Limit file watchers to 512 because OSX really can't handle any more.
-            return false;
-          }
-
-          watcher = new RefCountedFileSystemWatcher();
-
-          g_file_system_watchers.Add(key, watcher);
-          watcher.Impl.Path = path;
-          watcher.Impl.Filter = filter ?? "*.*";
-
-          Watcher = watcher;
         }
 
         Watcher.Impl.Changed += OnChanged;
@@ -341,27 +347,30 @@ namespace Rhino
     //we can still use the same entry in the dictionary if it happens before the cleanup.
     public static void Cleanup(object source, EventArgs args)
     {
-      if (null == g_file_system_watchers)
-        return;
-
-      var keysToDelete = new List<string>();
-
-      foreach ( var entry in g_file_system_watchers)
+      lock (g_file_system_watchers)
       {
-        if (entry.Value.RefCount < 1)
+        if (null == g_file_system_watchers)
+          return;
+
+        var keysToDelete = new List<string>();
+
+        foreach (var entry in g_file_system_watchers)
         {
-          keysToDelete.Add(entry.Key);
+          if (entry.Value.RefCount < 1)
+          {
+            keysToDelete.Add(entry.Key);
+          }
         }
-      }
 
-      foreach(var key in keysToDelete)
-      {
-        g_file_system_watchers.Remove(key);
-      }
+        foreach (var key in keysToDelete)
+        {
+          g_file_system_watchers.Remove(key);
+        }
 
-      if (g_file_system_watchers.Count == 0)
-      {
-        RhinoApp.Idle -= RhinoFileWatcher.Cleanup;
+        if (g_file_system_watchers.Count == 0)
+        {
+          RhinoApp.Idle -= RhinoFileWatcher.Cleanup;
+        }
       }
     }
 

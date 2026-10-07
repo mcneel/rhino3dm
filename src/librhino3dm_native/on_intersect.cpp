@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <map>
 
 #if !defined(RHINO3DM_BUILD)
 // ray shooter and mesh/mesh intersect not supported in stand alone OpenNURBS
@@ -404,6 +403,38 @@ RH_C_FUNCTION int ON_RayShooter_OneSurface(ON_3DPOINT_STRUCT _point, ON_3DVECTOR
   return rc;
 }
 
+// 27 Aug 2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-13351
+// Pairs each surface tree handed to ON_RayShooter with the geometry it came
+// from.  Replaces the map of surface tree serial numbers this used to keep -
+// ON_RayShooter::m_hit_snode_root now reports the tree that was hit.
+// ON_SimpleArray::AppendNew() zeroes rather than constructs, so every field is
+// set explicitly at each append site.
+class CRhRayShootTarget
+{
+public:
+  const ON_SurfaceTreeNode* m_stree;
+  const ON_BrepFace* m_face; // nullptr when m_stree is a plain surface
+  int m_geometry_index;
+  int m_face_index;
+};
+
+// 27 Aug 2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-13351
+static bool RhRayShootTrimFilter(const ON_SurfaceTreeNode* snode_root, double u, double v, void* context)
+{
+  const ON_SimpleArray<CRhRayShootTarget>* targets = (const ON_SimpleArray<CRhRayShootTarget>*)context;
+  if (nullptr == targets)
+    return true;
+
+  for (int i = 0; i < targets->Count(); i++)
+  {
+    const CRhRayShootTarget& target = (*targets)[i];
+    if (target.m_stree == snode_root)
+      return (nullptr == target.m_face) ? true : ON_RayHitIsOnFace(target.m_face, u, v);
+  }
+
+  return true;
+}
+
 RH_C_FUNCTION int ON_RayShooter_ShootRay(
   const ON_SimpleArray<const ON_Geometry*>* pConstGeometry,
   ON_3DPOINT_STRUCT _point,
@@ -411,7 +442,8 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
   int max_reflections,
   ON_SimpleArray<ON_3dPoint>* pPoints,
   ON_SimpleArray<int>* pBreps,
-  ON_SimpleArray<int>* pComponents
+  ON_SimpleArray<int>* pComponents,
+  bool bHonorTrims
   )
 {
   int rc = 0;
@@ -430,7 +462,7 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
   bool bReturnHits = (nullptr != pBreps && nullptr != pComponents);
 
   ON_SimpleArray<const ON_SurfaceTreeNode*> stree_list;
-  std::map<unsigned int, ON_2dex> stree_map;
+  ON_SimpleArray<CRhRayShootTarget> targets;
 
   for (int i = 0; i < pConstGeometry->Count(); i++)
   {
@@ -444,11 +476,11 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
         if (stree)
         {
           stree_list.Append(stree);
-          if (bReturnHits)
-          {
-            ON_2dex dex(i, ON_UNSET_INT_INDEX);
-            stree_map[stree->m_treesn] = dex;
-          }
+          CRhRayShootTarget& target = targets.AppendNew();
+          target.m_stree = stree;
+          target.m_face = nullptr;
+          target.m_geometry_index = i;
+          target.m_face_index = ON_UNSET_INT_INDEX;
         }
         continue;
       }
@@ -464,11 +496,11 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
             if (stree)
             {
               stree_list.Append(stree);
-              if (bReturnHits)
-              {
-                ON_2dex dex(i, fi);
-                stree_map[stree->m_treesn] = dex;
-              }
+              CRhRayShootTarget& target = targets.AppendNew();
+              target.m_stree = stree;
+              target.m_face = face;
+              target.m_geometry_index = i;
+              target.m_face_index = fi;
             }
           }
         }
@@ -484,6 +516,14 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
   ON_3dPoint Q = P;
   ON_3dVector R = D;
 
+  // 27 Aug 2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-13351
+  // Without this the ray reflects off the untrimmed surface under a brep face.
+  if (bHonorTrims)
+  {
+    shooter.m_hit_filter = RhRayShootTrimFilter;
+    shooter.m_hit_filter_context = &targets;
+  }
+
   for (int i = 0; i < max_reflections; i++)
   {
     ON_3dVector T = R;
@@ -495,22 +535,26 @@ RH_C_FUNCTION int ON_RayShooter_ShootRay(
     if (!shooter.Shoot(Q, T, stree_list.Count(), stree_list.Array(), hit))
       break;
 
-    // Get the "hit" surface tree node
-    const ON_SurfaceTreeNode* stn = hit.m_snodeB[0];
-    if (nullptr == stn)
-      stn = hit.m_snodeB[1];
-    if (nullptr == stn)
+    // Shoot() sets this whenever it returns true
+    if (nullptr == shooter.m_hit_snode_root)
       break;
 
-    // Look up the surface or face based on the surface tree node's serial number
+    // Look up the surface or face that was hit
     if (bReturnHits)
     {
-      ON_2dex dex = ON_2dex::Unset;
-      std::map<unsigned int, ON_2dex>::const_iterator pos = stree_map.find(stn->m_treesn);
-      if (pos != stree_map.end())
-        dex = stree_map[stn->m_treesn];
-      pBreps->Append(dex.i);
-      pComponents->Append(dex.j);
+      int geometry_index = ON_UNSET_INT_INDEX;
+      int face_index = ON_UNSET_INT_INDEX;
+      for (int j = 0; j < targets.Count(); j++)
+      {
+        if (targets[j].m_stree == shooter.m_hit_snode_root)
+        {
+          geometry_index = targets[j].m_geometry_index;
+          face_index = targets[j].m_face_index;
+          break;
+        }
+      }
+      pBreps->Append(geometry_index);
+      pComponents->Append(face_index);
     }
 
     Q = hit.m_B[0]; // surface point
@@ -704,71 +748,41 @@ RH_C_FUNCTION double ON_Intersect_MeshRay2(const ON_Mesh* pMesh, const ON_3dRay*
 }
 
 
+// The first intersection of every ray of a range with a mesh, the same value
+// ON_Intersect_MeshRay2() gives for one ray. ts_out must hold count values; the values of the
+// range [start, end) are written, so ranges of one set of rays can run at the same time on
+// several threads. Returns the number of rays of the range that meet the mesh.
+RH_C_FUNCTION int ON_Intersect_MeshRays(const ON_Mesh* pConstMesh, int count, /*ARRAY*/const ON_3dRay* rays, int start, int end, /*ARRAY*/double* ts_out)
+{
+  if (nullptr == pConstMesh || nullptr == rays || nullptr == ts_out)
+    return 0;
+
+  if (start < 0 || end > count || start >= end)
+    return 0;
+
+  int hit_count = 0;
+  for (int i = start; i < end; i++)
+  {
+    const double t = MX::PublicIntersectionOps::MeshRayIntersect(*pConstMesh, rays[i], nullptr, nullptr, true, 0.0);
+    ts_out[i] = t;
+    if (t >= 0.0)
+      hit_count++;
+  }
+
+  return hit_count;
+}
+
+
 RH_C_FUNCTION bool ON_Mesh_IsPointInside(const ON_Mesh* pConstMesh, ON_3DPOINT_STRUCT point, double tolerance, bool strictlyin)
 {
   bool rc = false;
 #if defined(RHINO3DMIO_BUILD)
   // do nothing, not supported
 #else
-  // 27 March 2012 - S. Baer
-  // The low-level ON_Mesh::IsPointInside has not been completed and always returns false.
-  // Calling an intersector for now and counting the number of crossings. Odd == inside.
-  // I realize this isn't foolproof since points on faces may cause problems, but it could
-  // hold us over until Dale completes the function (which looks nearly complete in TL_MeshTools.cpp)
-
-  // These input parameters are not currently used, but should be once a proper OpenNURBS
-  // implementation is done
-  tolerance = 0;
-
-  if (
-    nullptr != pConstMesh && 
-    /*pConstMesh->IsValid() && [Giulio] The validy test is not cached and should only be done outside the call, and only once */
-    pConstMesh->IsClosed() && 
-    pConstMesh->IsManifold()
-    )
+  if (pConstMesh)
   {
-    ON_3dPoint _point(point.val);
-    if (_point.IsValid())
-    {
-      ON_BoundingBox bbox = pConstMesh->BoundingBox();
-      
-      if (bbox.IsPointIn(_point, strictlyin)) // eliminate the obvious
-      {
-        ON_3dRay ray { _point,
-          ON_3dVector(_point.x < (bbox.m_max.x+bbox.m_min.x)*0.5 ? -1 : 1, 0, 0) // a random direction toward a likely "outside"
-        }; 
-
-        ON_SimpleArray<double> ts;
-        if (ON_IntersectMeshRay(pConstMesh, ray, 0.0, ts) && ts.Count() > 0) //[Giulio, Feb 2021] band-aided by using new intersector
-        {
-          ON_SimpleArray<ON_3dPoint> hit_points;
-          for (int i = 0; i < ts.Count(); i++)
-            hit_points.Append(ray.m_P + (ray.m_V * ts[i]));
-
-          // 6-Apr-2020 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57774
-          // Its possible for a point to be inside a closed mesh. But if the random line
-          // happens to intersect the mesh at an edge, you will get two intersection events.
-          // So sort and cull the events.
-          if (hit_points.Count() > 1)
-          {
-            // sort and cull
-            hit_points.QuickSort(&ON_CompareIncreasing<ON_3dPoint>);
-            ON_3dPoint hit = *hit_points.Last();
-            for (int i = hit_points.Count() - 2; i >= 0; i--)
-            {
-              if (hit_points[i].DistanceTo(hit) < ON_ZERO_TOLERANCE)
-                hit_points.Remove(i);
-              else
-                hit = hit_points[i];
-            }
-          }
-
-          rc = (hit_points.Count() % 2 == 1) ? true : false;
-          if (rc && strictlyin)
-            rc = (hit_points[0].DistanceTo(_point) > ON_ZERO_TOLERANCE);
-        }
-      }
-    }
+    ON_3dPoint pt(point.val);
+    rc = TL_MeshIsPointInside(*pConstMesh, pt, tolerance, strictlyin);
   }
 #endif
   return rc;

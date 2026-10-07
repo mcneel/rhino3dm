@@ -311,7 +311,8 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment.
+    /// Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment. Setting this
+    /// property only alters the <see cref="EndAngle"/> property such that Angle = <see cref="EndAngle"/> - <see cref="StartAngle"/>.
     /// </summary>
     /// <since>5.0</since>
     public double Angle

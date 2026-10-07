@@ -138,27 +138,62 @@ using Rhino.Runtime.InteropWrappers;
 
     static string StripNonOpennurbsBlocks(string source)
     {
-      // I know this is terrible and doesn't support nested ifdefs. This is only
-      // used for Rhino3dm building
+      // Blanks out #if !defined(RHINO3DM_BUILD) blocks. Only used for Rhino3dm
+      // building; regular Rhino builds never call this.
+      //
+      // Skipped lines are replaced by empty lines rather than deleted so the
+      // line count is preserved and the line numbers reported for each
+      // declaration stay accurate. This matches the convention already used
+      // when stripping multi-line comments below.
+      //
+      // Nesting depth is tracked so an #endif belonging to an inner #if cannot
+      // terminate the enclosing skip block, and #endif is matched by prefix
+      // because most of them carry a trailing comment.
       var lines = source.Split(g_any_newline);
       var sb = new StringBuilder();
-      bool in_skip_block = false;
+      int depth = 0;
+      int skip_depth = 0; // depth of the active skip block; 0 when not skipping
       foreach (var line in lines)
       {
-        if (line.StartsWith("#if !defined(RHINO3DM_BUILD)", StringComparison.OrdinalIgnoreCase) ||
-            line.StartsWith("#ifndef RHINO3DM_BUILD")
-           )
+        string trimmed = line.TrimStart();
+        bool blank_this_line = skip_depth > 0;
+
+        if (trimmed.StartsWith("#if", StringComparison.Ordinal))
         {
-          in_skip_block = true;
-          continue;
+          depth++;
+          if (skip_depth == 0 &&
+              (line.StartsWith("#if !defined(RHINO3DM_BUILD)", StringComparison.OrdinalIgnoreCase) ||
+               line.StartsWith("#ifndef RHINO3DM_BUILD")
+              )
+             )
+          {
+            skip_depth = depth;
+            blank_this_line = true;
+          }
         }
-        if (in_skip_block && line.Equals("#endif", StringComparison.OrdinalIgnoreCase))
+        else if (trimmed.StartsWith("#endif", StringComparison.OrdinalIgnoreCase))
         {
-          in_skip_block = false;
-          continue;
+          if (skip_depth == depth)
+          {
+            skip_depth = 0;
+            blank_this_line = true;
+          }
+          if (depth > 0)
+            depth--;
         }
-        if( !in_skip_block )
-          sb.AppendLine(line);
+        else if (depth > 0 && skip_depth == depth &&
+                 (trimmed.StartsWith("#else", StringComparison.OrdinalIgnoreCase) ||
+                  trimmed.StartsWith("#elif", StringComparison.OrdinalIgnoreCase)
+                 )
+                )
+        {
+          // The #else of a "not Rhino3dm" block is the Rhino3dm branch, so stop
+          // skipping and keep what follows.
+          skip_depth = 0;
+          blank_this_line = true;
+        }
+
+        sb.AppendLine(blank_this_line ? string.Empty : line);
       }
       return sb.ToString();
     }
@@ -199,7 +234,7 @@ using Rhino.Runtime.InteropWrappers;
       source_code = source_code.Replace("##MANUAL##", MANUAL);
       source_code = source_code.Replace("##ARRAY##", "/*ARRAY*/");
 
-      // dan@mcneel.com - July 31st, 2017 - This follwoing console messages are cluttering
+      // dan@mcneel.com - July 31st, 2017 - This following console messages are cluttering
       // up the log file and adding hundreds or thousands of lines to the log.  They seem
       // to be for debugging purposes, so I am commenting them out...
       //if (source_code.Length != old_length)
@@ -250,7 +285,7 @@ using Rhino.Runtime.InteropWrappers;
       }
       source_code = temp_string_builder.ToString();
 
-      // dan@mcneel.com - July 31st, 2017 - This follwoing console messages are cluttering
+      // dan@mcneel.com - July 31st, 2017 - This following console messages are cluttering
       // up the log file and adding hundreds or thousands of lines to the log.  They seem
       // to be for debugging purposes, so I am commenting them out...
       //if (source_code.Length != old_length)
@@ -664,6 +699,10 @@ using Rhino.Runtime.InteropWrappers;
             return "ERROR_DO_NOT_USE_ON_PLANE";
           if (s.Equals("ON_Circle"))
             return "ERROR_DO_NOT_USE_ON_CIRCLE";
+          // ON_2INTS is a legacy stand-in for ON_COMPONENT_INDEX. Use ON_COMPONENT_INDEX
+          // directly instead: it is trivially copyable, 8 bytes, and marshals identically.
+          if (s.Equals("ON_2INTS"))
+            return "ERROR_DO_NOT_USE_ON_2INTS";
 
           if (s.Equals("ON_Arc") ||
               s.Equals("ON_BoundingBox") ||
@@ -689,7 +728,11 @@ using Rhino.Runtime.InteropWrappers;
             return s;
           }
 
-          if (s.Equals("ON_COMPONENT_INDEX"))
+          // Note: s has already been run through ParameterTypeAsCSharp above, so it holds
+          // the .NET name here, not the C name. Matching the C name would never fire, and
+          // failing to match the .NET name sends these parameters to IntPtr, which breaks
+          // every hand written "ref ci" call site.
+          if (s.Equals("ComponentIndex"))
           {
             if (isArray)
             {
@@ -699,6 +742,32 @@ using Rhino.Runtime.InteropWrappers;
                 return "[In,Out] ComponentIndex[]";
             }
             return "ref ComponentIndex";
+          }
+
+          if (s.Equals("SubDComponent.SubDComponentPtr"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "SubDComponent.SubDComponentPtr[]";
+              else
+                return "[In,Out] SubDComponent.SubDComponentPtr[]";
+            }
+            return "ref SubDComponent.SubDComponentPtr";
+          }
+
+          // Note: s has already been run through ParameterTypeAsCSharp above, so it holds
+          // the .NET name here, not the C name.
+          if (s.Equals("SubDEdgeSharpness"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "SubDEdgeSharpness[]";
+              else
+                return "[In,Out] SubDEdgeSharpness[]";
+            }
+            return "ref SubDEdgeSharpness";
           }
 
           if (s.Equals("ON_Xform") || s.Equals("AR_Transform"))
@@ -711,6 +780,19 @@ using Rhino.Runtime.InteropWrappers;
                 return "[In,Out] Transform[]";
             }
             s = "ref Transform";
+            return s;
+          }
+
+          if (s.Equals("ON_Xform2d"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "Transform2d[]";
+              else
+                return "[In,Out] Transform2d[]";
+            }
+            s = "ref Transform2d";
             return s;
           }
 
@@ -885,7 +967,16 @@ using Rhino.Runtime.InteropWrappers;
           }
 
           if (s.Equals("ON_3dRay"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "Ray3d[]";
+              else
+                return "[In,Out] Ray3d[]";
+            }
             return "ref Ray3d";
+          }
 
           if (s.Equals("ON_X_EVENT"))
             return "ref CurveIntersect";
@@ -924,6 +1015,20 @@ using Rhino.Runtime.InteropWrappers;
                 return "[In,Out] CurveSegment[]";
             }
             return "ref CurveSegment";
+          }
+
+          // The pointee type has already been translated above, so this is the
+          // C# name that ON_SUBD_COMPONENT_PARAMETER_STRUCT maps to.
+          if (s.Equals("SubDComponentParameter"))
+          {
+            if (isArray)
+            {
+              if (is_const)
+                return "SubDComponentParameter[]";
+              else
+                return "[In,Out] SubDComponentParameter[]";
+            }
+            return "ref SubDComponentParameter";
           }
 
           if (s.Equals("MeshCheckParameters"))
@@ -1014,8 +1119,24 @@ using Rhino.Runtime.InteropWrappers;
         if (s_type.Equals("ON_TRIANGLE_STRUCT"))
           return "Triangle3d";
 
-        if (s_type.Equals("ON_2INTS"))
+        // ON_2INTS is the legacy stand-in for ON_COMPONENT_INDEX. Both are 8 bytes and
+        // trivially copyable, so they marshal to ComponentIndex identically. Prefer
+        // ON_COMPONENT_INDEX in new RH_C_FUNCTION signatures.
+        if (s_type.Equals("ON_2INTS") || s_type.Equals("ON_COMPONENT_INDEX"))
           return "ComponentIndex";
+
+        if (s_type.Equals("ON_SUBD_COMPONENT_PARAMETER_STRUCT"))
+          return "SubDComponentParameter";
+          
+        // ON_SubDEdgeSharpness is two floats. It is passed by value, like ON_Interval.
+        if (s_type.Equals("ON_SUBD_EDGE_SHARPNESS_STRUCT"))
+          return "SubDEdgeSharpness";
+
+        // ON_SubDComponentPtr is a single pointer-sized integer packing a component
+        // pointer, a direction bit and a type. It is passed by value as the 8 byte
+        // SubDComponent.SubDComponentPtr struct, which assumes 64-bit pointers.
+        if (s_type.Equals("ON_SubDComponentPtr"))
+          return "SubDComponent.SubDComponentPtr";
 
         if (s_type.Equals("AR_3fColor"))
           return "Point3f";
@@ -1047,17 +1168,35 @@ using Rhino.Runtime.InteropWrappers;
         if (s_type.Equals("char"))
           return "byte";
 
-        if (s_type.Equals("ON__INT64"))
-          return "long";
+        if (s_type.Equals("unsigned char"))
+          return "byte";
 
-        if (s_type.Equals("ON__UINT64"))
-          return "ulong";
+        if (s_type.Equals("signed char"))
+          return "sbyte";
+
+        if (s_type.Equals("ON__INT8"))
+          return "sbyte";
+
+        if (s_type.Equals("ON__UINT8"))
+          return "byte";
+
+        if (s_type.Equals("ON__INT16"))
+          return "short";
+
+        if (s_type.Equals("ON__UINT16"))
+          return "ushort";
 
         if (s_type.Equals("ON__INT32"))
           return "int";
 
         if (s_type.Equals("ON__UINT32"))
           return "uint";
+
+        if (s_type.Equals("ON__INT64"))
+          return "long";
+
+        if (s_type.Equals("ON__UINT64"))
+          return "ulong";
 
         if (s_type.Equals("COleDateTime"))
           return "DateTime";
@@ -1141,6 +1280,7 @@ using Rhino.Runtime.InteropWrappers;
           else if (rc.Equals("ON__UINT64"))
             rc = "ulong";
           else if (rc.Equals("ON__INT64")) rc = "long";
+          else if (rc.Equals("ON_SubDComponentPtr")) rc = "SubDComponent.SubDComponentPtr";
           else
           {
             bool _;

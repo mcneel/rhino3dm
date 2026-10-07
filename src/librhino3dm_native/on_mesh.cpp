@@ -601,6 +601,8 @@ enum MeshIntConst : int
   micTextureCoordinateCapacity = 18,
   micHiddenVertexCapacity = 19,
   micHiddenVertexHiddenCount = 20,
+  micPrincipalCurvatureCapacity = 21,
+  micPrincipalCurvatureCount = 22
 };
 
 RH_C_FUNCTION void ON_Mesh_SetInt(ON_Mesh* pMesh, enum MeshIntConst which, int value)
@@ -672,6 +674,13 @@ RH_C_FUNCTION void ON_Mesh_SetInt(ON_Mesh* pMesh, enum MeshIntConst which, int v
       break;
     case micHiddenVertexCapacity:
       pMesh->m_H.SetCapacity(value);
+      break;
+    case micPrincipalCurvatureCapacity:
+      pMesh->m_K.SetCapacity(value);
+      break;
+    case micPrincipalCurvatureCount:
+      pMesh->m_K.Reserve(value);
+      pMesh->m_K.SetCount(value);
       break;
     default:
       break;
@@ -761,6 +770,12 @@ RH_C_FUNCTION int ON_Mesh_GetInt(const ON_Mesh* pConstMesh, enum MeshIntConst wh
       break;
     case micHiddenVertexHiddenCount:
       rc = pConstMesh->HiddenVertexCount();
+      break;
+    case micPrincipalCurvatureCapacity:
+      rc = pConstMesh->m_K.Capacity();
+      break;
+    case micPrincipalCurvatureCount:
+      rc = pConstMesh->m_K.Count();
       break;
     default:
       break;
@@ -1089,6 +1104,34 @@ RH_C_FUNCTION bool ON_Mesh_GetColor(const ON_Mesh* pConstMesh, int index, int* a
   return rc;
 }
 
+RH_C_FUNCTION ON_SurfaceCurvature* ON_Mesh_GetSurfaceCurvature(const ON_Mesh* pConstMesh, int index)
+{
+  ON_SurfaceCurvature* rc = nullptr;
+  if (pConstMesh && index >= 0 && index < pConstMesh->m_K.Count())
+  {
+    const ON_SurfaceCurvature& k = pConstMesh->m_K[index];
+    rc = new ON_SurfaceCurvature();
+    rc->k1 = k.k1;
+    rc->k2 = k.k2;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_Mesh_SetSurfaceCurvature(ON_Mesh* pMesh, const ON_SurfaceCurvature* pSurfaceCurvature, int index)
+{
+  // if index == Count, then we are appending
+  bool rc = false;
+  if (pMesh && pSurfaceCurvature && index >= 0)
+  {
+    if (index < pMesh->m_K.Count())
+      pMesh->m_K[index] = *pSurfaceCurvature;
+    else if (index == pMesh->m_K.Count())
+      pMesh->m_K.Append(*pSurfaceCurvature);
+    rc = true;
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Mesh_GetFace(const ON_Mesh* pConstMesh, int face_index, ON_MeshFace* face)
 {
   bool rc = false;
@@ -1275,14 +1318,16 @@ enum MeshClearListConst : int
   mclcClearFaceNormals = 3,
   mclcClearColors = 4,
   mclcClearTextureCoordinates = 5,
-  mclcClearHiddenVertices = 6
+  mclcClearHiddenVertices = 6,
+  mclcClearPrincipalCurvatures = 7
 };
 
 RH_C_FUNCTION void ON_Mesh_ClearList(ON_Mesh* pMesh, enum MeshClearListConst which)
 {
   if (pMesh)
   {
-    if (mclcClearVertices == which) {
+    if (mclcClearVertices == which)
+    {
       pMesh->m_V.SetCount(0);
       pMesh->m_dV.SetCount(0);
     }
@@ -1301,8 +1346,11 @@ RH_C_FUNCTION void ON_Mesh_ClearList(ON_Mesh* pMesh, enum MeshClearListConst whi
     }
     else if (mclcClearHiddenVertices == which)
       pMesh->m_H.SetCount(0);
+    else if (mclcClearPrincipalCurvatures == which)
+      pMesh->m_K.SetCount(0);
   }
 }
+
 RH_C_FUNCTION bool ON_Mesh_GetHiddenValue(const ON_Mesh* pConstMesh, int index)
 {
   bool rc = false;
@@ -1406,6 +1454,29 @@ RH_C_FUNCTION void ON_Mesh_RepairHiddenArray(ON_Mesh* pMesh)
       pMesh->m_H.Append(false);
     }
   }
+}
+
+RH_C_FUNCTION bool ON_Mesh_AppendVertices(ON_Mesh* pMesh, /*ARRAY*/ const ON_3dPoint* first_x, int count)
+{
+  bool rc = false;
+  if (pMesh && first_x && count > 0)
+  {
+    int pre_count = pMesh->VertexCount();
+    if (pMesh->HasSinglePrecisionVertices() && !pMesh->HasDoublePrecisionVertices())
+    {
+      pMesh->UpdateDoublePrecisionVertices();
+    }
+    int final_count = pre_count + count;
+    if (pMesh->m_dV.Capacity() < final_count)
+      pMesh->m_dV.SetCapacity(final_count);
+    pMesh->m_dV.SetCount(final_count);
+    memcpy(pMesh->m_dV.Array() + pre_count, first_x, count * sizeof(ON_3dPoint));
+    pMesh->UpdateSinglePrecisionVertices();
+    pMesh->DestroyRuntimeCache();
+    ON_Mesh_RepairHiddenArray(pMesh);
+    rc = true;
+  }
+  return rc;
 }
 
 RH_C_FUNCTION int ON_Mesh_GetVertexFaces(const ON_Mesh* pMesh, ON_SimpleArray<int>* face_indices, int vertex_index)
@@ -1717,10 +1788,37 @@ RH_C_FUNCTION ON_SubDDisplayParameters* ON_SubDDisplayParameters_Default()
   return new ON_SubDDisplayParameters(ON_SubDDisplayParameters::Default);
 }
 
-RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(unsigned int adaptive_subd_display_density, unsigned int subd_face_count)
-{
-  return ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubDFaceCount(adaptive_subd_display_density, subd_face_count);
-}
+
+// THIS FUNCTION SHOULD BE DELETED - see comment below
+//RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubDFaceCount(unsigned int adaptive_subd_display_density, unsigned int subd_face_count)
+//{
+  // May 2025: Dale Lear's opinion
+  // This function is should be deleted because
+  // ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubDFaceCount() 
+  // is deprecated because it returns incorrect densities when SubDs have sharp edges.
+  // 
+  // BEST: 
+  // Remove this and use the .NET lipstick ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD() below
+  // when there is actually a SubD and somebody needs this to create meshing parameters.
+  // 
+  // BETTER: 
+  // First off: Why is this even in .NET? 
+  // This C++ function provided direct access to a low level calculation
+  // needed the C++ implementation of ON_SubDLevel. 
+  // If there is actually a need for this low level access from .NET, then
+  // make a new piece of .NET lipstick with a bHasSharpEdges
+  // that forces the caller to think about the properties of the SubD
+  // being rendered and call
+  // ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubDProperties(adaptive_subd_display_density, subd_face_count, bHasSharpEdge);
+  // If this function is being used in dialog code, 
+  // that dialog code doesn't work right on SubDs with sharp edges.
+  // If ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD() is being used in .NET UI,
+  // that UI probably doesn't work right for SubDs with sharp edges.
+//  return ON_SubDDisplayParameters::AbsoluteDisplayDensityFromSubDFaceCount(
+//    adaptive_subd_display_density, 
+//    subd_face_count
+//  );
+//}
 
 RH_C_FUNCTION unsigned int ON_SubDDisplayParameters_AbsoluteDisplayDensityFromSubD(unsigned int adaptive_subd_display_density, const ON_SubD* pConstSubD)
 {
@@ -3139,8 +3237,11 @@ RH_C_FUNCTION bool ON_TextureMapping_SetTransform(ON_TextureMapping* pTextureMap
     return true;
   case gettPxyz:
     pTextureMapping->m_Pxyz = *xform;
+    pTextureMapping->m_Nxyz = xform->Inverse();
+    pTextureMapping->m_Nxyz.Transpose();
     return true;
   case gettNxyz:
+    ASSERT(false);//Should not be called independently of m_Pxyz
     pTextureMapping->m_Nxyz = *xform;
     return true;
   }
@@ -3276,6 +3377,54 @@ RH_C_FUNCTION bool ON_TextureMapping_SetMeshMappingPrimitive(ON_TextureMapping* 
   }
   return rc;
 }
+
+// Depends on Rhino application code; not available in an opennurbs-only (Rhino3dm) build.
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION bool ON_TextureMapping_UiDecompose(
+  ON_TextureMapping* pTextureMapping, 
+  const ON_Xform* pLocalXform, 
+  ON_3dVector* xyz_position, 
+  ON_3dVector* xyz_size, 
+  ON_3dVector* xyz_rotation,
+  ON_3dVector* uvw_offset,
+  ON_3dVector* uvw_repeat,
+  ON_3dVector* uvw_rotation)
+{
+  if (pTextureMapping && pLocalXform && xyz_position && xyz_size && xyz_rotation && uvw_offset && uvw_repeat && uvw_rotation)
+  {
+    CRhMappingData md;
+    md.GetMappingData(*pTextureMapping, *pLocalXform);
+    
+    xyz_position->x = md.XYZ(CRhMappingData::pos_x);
+    xyz_position->y = md.XYZ(CRhMappingData::pos_y);
+    xyz_position->z = md.XYZ(CRhMappingData::pos_z);
+
+    xyz_size->x = md.XYZ(CRhMappingData::siz_x);
+    xyz_size->y = md.XYZ(CRhMappingData::siz_y);
+    xyz_size->z = md.XYZ(CRhMappingData::siz_z);
+
+    xyz_rotation->x = md.XYZ(CRhMappingData::rot_x);
+    xyz_rotation->y = md.XYZ(CRhMappingData::rot_y);
+    xyz_rotation->z = md.XYZ(CRhMappingData::rot_z);
+
+    uvw_offset->x = md.UVW(CRhMappingData::off_u);
+    uvw_offset->y = md.UVW(CRhMappingData::off_v);
+    uvw_offset->z = md.UVW(CRhMappingData::off_w);
+
+    uvw_repeat->x = md.UVW(CRhMappingData::rep_u);
+    uvw_repeat->y = md.UVW(CRhMappingData::rep_v);
+    uvw_repeat->z = md.UVW(CRhMappingData::rep_w);
+
+    uvw_rotation->x = md.UVW(CRhMappingData::rot_u);
+    uvw_rotation->y = md.UVW(CRhMappingData::rot_v);
+    uvw_rotation->z = md.UVW(CRhMappingData::rot_w);
+
+    return true;
+  }
+
+  return false;
+}
+#endif
 
 RH_C_FUNCTION bool ON_TextureMapping_CopyCustomMappingMeshPrimitive(const ON_TextureMapping* pTextureMapping, ON_Mesh* pMesh)
 {
@@ -3726,6 +3875,83 @@ RH_C_FUNCTION ON_Mesh* ON_Mesh_ControlPolygonMesh(const ON_Surface* pConstSurfac
       rc = ON_ControlPolygonMesh(s, true, nullptr);
   }
   return rc;
+}
+
+RH_C_FUNCTION ON_Mesh* ON_Mesh_CreateQuickHull3D(/*ARRAY*/const ON_3dPoint* points, int pointCount)
+{
+  if (nullptr == points || pointCount < 4)
+    return nullptr;
+
+  ON_QuickHull3D hull;
+  if (!hull.Build(points, pointCount))
+    return nullptr;
+
+  return hull.ToMesh(nullptr);
+}
+
+// Flattens facets (one entry per hull face, point-relative vertex indices) into
+// facetIndexMap as a single array with each face delimited by -1, so the jagged
+// array can easily be rebuilt on the C# side.
+static void AppendQuickHull3DFacetIndexMap(const ON_ClassArray<ON_SimpleArray<int>>& facets, ON_SimpleArray<int>* facetIndexMap)
+{
+  if (nullptr == facetIndexMap)
+    return;
+
+  for (int i = 0; i < facets.Count(); i++)
+  {
+    const ON_SimpleArray<int>& face = facets[i];
+    for (int j = 0; j < face.Count(); j++)
+      facetIndexMap->Append(face[j]);
+    facetIndexMap->Append(-1);
+  }
+}
+
+RH_C_FUNCTION ON_Mesh* ON_Mesh_CreateQuickHull3DWithFacets(/*ARRAY*/const ON_3dPoint* points, int pointCount, ON_SimpleArray<int>* facetIndexMap)
+{
+  if (nullptr == points || pointCount < 4)
+    return nullptr;
+
+  ON_QuickHull3D hull;
+  ON_ClassArray<ON_SimpleArray<int>> facets;
+  if (!hull.Build(points, pointCount, facets))
+    return nullptr;
+
+  ON_Mesh* mesh = hull.ToMesh(nullptr);
+  if (nullptr == mesh)
+    return nullptr;
+
+  AppendQuickHull3DFacetIndexMap(facets, facetIndexMap);
+  return mesh;
+}
+
+RH_C_FUNCTION ON_Mesh* ON_Mesh_CreateQuickHull3DFromPointCloud(const ON_PointCloud* pointCloud)
+{
+  if (nullptr == pointCloud || pointCloud->PointCount() < 4)
+    return nullptr;
+
+  ON_QuickHull3D hull;
+  if (!hull.Build(*pointCloud))
+    return nullptr;
+
+  return hull.ToMesh(nullptr);
+}
+
+RH_C_FUNCTION ON_Mesh* ON_Mesh_CreateQuickHull3DFromPointCloudWithFacets(const ON_PointCloud* pointCloud, ON_SimpleArray<int>* facetIndexMap)
+{
+  if (nullptr == pointCloud || pointCloud->PointCount() < 4)
+    return nullptr;
+
+  ON_QuickHull3D hull;
+  ON_ClassArray<ON_SimpleArray<int>> facets;
+  if (!hull.Build(*pointCloud, facets))
+    return nullptr;
+
+  ON_Mesh* mesh = hull.ToMesh(nullptr);
+  if (nullptr == mesh)
+    return nullptr;
+
+  AppendQuickHull3DFacetIndexMap(facets, facetIndexMap);
+  return mesh;
 }
 
 
@@ -4297,6 +4523,118 @@ RH_C_FUNCTION void ON_MeshParameters_OperatorEqual(const ON_MeshParameters* sour
 }
 
 
+RH_C_FUNCTION ON_MeshCurvatureStats* ON_MeshCurvatureStats_New(const ON_MeshCurvatureStats* pStats)
+{
+  ON_MeshCurvatureStats* rc = (pStats)
+    ? new ON_MeshCurvatureStats(*pStats)
+    : new ON_MeshCurvatureStats();
+  return rc;
+}
+
+RH_C_FUNCTION void ON_MeshCurvatureStats_Delete(ON_MeshCurvatureStats* pStats)
+{
+  if (pStats)
+    delete pStats;
+}
+
+// RH-68580: a failed calculation returns a default constructed object, so a
+// caller cannot tell it apart from a real result whose values are all zero. This
+// happens when no mesh carries principal curvatures. Left as it is for Rhino 9 to
+// avoid changing the behavior of a shipped method; see the managed remarks.
+RH_C_FUNCTION ON_MeshCurvatureStats* ON_MeshCurvatureStats_CreateFromMeshes(ON_SimpleArray<const ON_Mesh*>* pMeshes, int style)
+{
+  ON_MeshCurvatureStats* rc = nullptr;
+  if (pMeshes)
+  {
+    ON::curvature_style kapppa_style = ON::CurvatureStyle(style);
+    ON_MeshCurvatureStats cs;
+    if (ON_MeshCurvatureStats::CreateFromMeshes(*pMeshes, kapppa_style, cs))
+      rc = new ON_MeshCurvatureStats(cs);
+  }
+  if (nullptr == rc)
+    rc = new ON_MeshCurvatureStats();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_MeshCurvatureStats_Range(const ON_MeshCurvatureStats* pStats, ON_Interval* pRange)
+{
+  bool rc = false;
+  if (pStats && pRange)
+  {
+    *pRange = pStats->m_range;
+    rc = true;
+  }
+  return rc;
+}
+
+enum MeshCurvatureStatsConst : int
+{
+  mcsStyle = 0,
+  mcsInfinity = 1,
+  mcsCountInfinite = 2,
+  mcsCount = 3,
+  mcsMode = 4,
+  mcsAverage = 5,
+  mcsAverageDeviation = 6
+};
+
+RH_C_FUNCTION int ON_MeshCurvatureStats_GetInt(const ON_MeshCurvatureStats* pStats, int which)
+{
+  int rc = ON_UNSET_INT_INDEX;
+  if (pStats)
+  {
+    switch (which)
+    {
+    case mcsStyle:
+      rc = (int)pStats->m_style;
+      break;
+    case mcsCountInfinite:
+      rc = pStats->m_count_infinite;
+      break;
+    case mcsCount:
+      rc = pStats->m_count;
+      break;
+    case mcsInfinity:
+    case mcsMode:
+    case mcsAverage:
+    case mcsAverageDeviation:
+    default:
+      break;
+    }
+  }
+  return rc;
+}
+
+RH_C_FUNCTION double ON_MeshCurvatureStats_GetDouble(const ON_MeshCurvatureStats* pStats, int which)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pStats)
+  {
+    switch (which)
+    {
+    case mcsInfinity:
+      rc = pStats->m_infinity;
+      break;
+    case mcsMode:
+      rc = pStats->m_mode;
+      break;
+    case mcsAverage:
+      rc = pStats->m_average;
+      break;
+    case mcsAverageDeviation:
+      rc = pStats->m_adev;
+      break;
+    case mcsStyle:
+    case mcsCountInfinite:
+    case mcsCount:
+    default:
+      break;
+    }
+  }
+  return rc;
+}
+
+
 #if !defined(RHINO3DM_BUILD)
 
 RH_C_FUNCTION ON_MeshIntersectionCache* ON_MeshIntersectionCache_New()
@@ -4315,6 +4653,7 @@ RH_C_FUNCTION int ON_Mesh_GetIntersections(
   ON_MeshIntersectionCache* pCache, 
   int plane_count, /*ARRAY*/const ON_PLANE_STRUCT* pPlanes, 
   double tolerance, 
+  bool overlaps,
   ON_SimpleArray<ON_Polyline*>* pOutPoints
 )
 {
@@ -4342,7 +4681,7 @@ RH_C_FUNCTION int ON_Mesh_GetIntersections(
     {
       ON_Mesh plane_mesh;
       if (plane_surface.CreateMesh(&plane_mesh))
-        plane_mesh.GetIntersections(meshes, pMxCache, tolerance, pOutPoints, pOutPoints, nullptr, nullptr, nullptr, nullptr);
+        plane_mesh.GetIntersections(meshes, pMxCache, tolerance, pOutPoints, overlaps ? pOutPoints : nullptr, nullptr, nullptr, nullptr, nullptr);
     }
   }
 

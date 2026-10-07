@@ -7,7 +7,8 @@ BND_File3dmDisplacement::BND_File3dmDisplacement(ON_3dmObjectAttributes* attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().Displacement();
+    m_mm = const_cast<ON_Displacement*>(
+      static_cast<const ON_3dmObjectAttributes*>(m_attr)->MeshModifiers().Displacement());
   }
 }
 
@@ -15,7 +16,7 @@ void BND_File3dmDisplacement::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().Displacement(true);
+    m_mm = &m_attr->MeshModifiers().Displacement();
   }
 }
 
@@ -25,7 +26,8 @@ BND_File3dmEdgeSoftening::BND_File3dmEdgeSoftening(ON_3dmObjectAttributes* attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().EdgeSoftening();
+    m_mm = const_cast<ON_EdgeSoftening*>(
+      static_cast<const ON_3dmObjectAttributes*>(m_attr)->MeshModifiers().EdgeSoftening());
   }
 }
 
@@ -33,7 +35,7 @@ void BND_File3dmEdgeSoftening::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().EdgeSoftening(true);
+    m_mm = &m_attr->MeshModifiers().EdgeSoftening();
   }
 }
 
@@ -43,7 +45,8 @@ BND_File3dmThickening::BND_File3dmThickening(ON_3dmObjectAttributes* attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().Thickening();
+    m_mm = const_cast<ON_Thickening*>(
+      static_cast<const ON_3dmObjectAttributes*>(m_attr)->MeshModifiers().Thickening());
   }
 }
 
@@ -51,7 +54,7 @@ void BND_File3dmThickening::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().Thickening(true);
+    m_mm = &m_attr->MeshModifiers().Thickening();
   }
 }
 
@@ -61,7 +64,8 @@ BND_File3dmCurvePiping::BND_File3dmCurvePiping(ON_3dmObjectAttributes* attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().CurvePiping();
+    m_mm = const_cast<ON_CurvePiping*>(
+      static_cast<const ON_3dmObjectAttributes*>(m_attr)->MeshModifiers().CurvePiping());
   }
 }
 
@@ -76,7 +80,7 @@ void BND_File3dmCurvePiping::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().CurvePiping(true);
+    m_mm = &m_attr->MeshModifiers().CurvePiping();
   }
 }
 
@@ -86,7 +90,8 @@ BND_File3dmShutLining::BND_File3dmShutLining(ON_3dmObjectAttributes* attr)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().ShutLining();
+    m_mm = const_cast<ON_ShutLining*>(
+      static_cast<const ON_3dmObjectAttributes*>(m_attr)->MeshModifiers().ShutLining());
   }
 }
 
@@ -94,7 +99,7 @@ void BND_File3dmShutLining::CreateNew(void)
 {
   if (nullptr != m_attr)
   {
-    m_mm = m_attr->MeshModifiers().ShutLining(true);
+    m_mm = &m_attr->MeshModifiers().ShutLining();
   }
 }
 

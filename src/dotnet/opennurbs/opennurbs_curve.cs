@@ -1,12 +1,16 @@
-using System;
 using Rhino.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Rhino.Runtime.InteropWrappers;
-using System.Runtime.Serialization;
-using Rhino.Runtime;
 using Rhino.Display;
+using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
+using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Cryptography.X509Certificates;
+#if RHINO_SDK
+using System.Windows.Forms.Design;
+#endif
 
 
 namespace Rhino.Geometry
@@ -18,17 +22,37 @@ namespace Rhino.Geometry
   public enum BlendContinuity : int
   {
     /// <summary>
-    /// G0: The curves or surfaces touch at the join point (position).
+    /// Position (G0 continuity) measures location only.
+    /// If the end points of each curve are in the same location in space, the curves are position continuous (G0) at the ends. 
+    /// In other words, the two curves in question touch each other at their end points.
     /// </summary>
     Position = 0,
     /// <summary>
-    /// G1: The curves or surfaces also share a common tangent direction at the join point (tangent).
+    /// Tangency (G1 continuity) measures position and curve direction at the ends.
+    /// In other words, the two curves not only touch, but they go the same direction at the point where they touch.
+    /// The direction is determined by the first and second point on each curve. If these two points fall on a line, the two curves are tangent at the ends.
+    /// The first derivative of the two curves is equal at the point where they touch.
     /// </summary>
     Tangency = 1,
     /// <summary>
-    /// G2: The curves or surfaces also share a common center of curvature at the join point (curvature).
+    /// Curvature continuity (G2 continuity) between two curves measures position, direction, and radius of curvature at the ends. 
+    /// If the radius of curvature is the same at the common end point, curves are curvature continuous (G2). 
+    /// In other words, the curves not only go the same direction when they meet, but also have the same radius at that point.
+    /// This condition is not easy to determine by just looking at where the points are located.
+    /// Both the first and second derivatives of the equations are equal at that point.
     /// </summary>
-    Curvature = 2
+    Curvature = 2,
+    /// <summary>
+    /// G3 continuity adds a third requirement: planar acceleration.
+    /// Curves that are G3 continuous touch, go the same direction, have the same radius, and that radius is accelerating at the same rate at a certain point.
+    /// G3 continuous curves have equal third derivatives.
+    /// </summary>
+    G3 = 3,
+    /// <summary>
+    /// G4 continuity is very seldom used, but can be important in certain isolated cases.
+    /// G4 continuous curves have all the same requirements as G3 curves, but their curvature acceleration is equal in three dimensions.
+    /// </summary>
+    G4 = 4
   }
 
   /// <summary>
@@ -769,6 +793,81 @@ namespace Rhino.Geometry
       return GeometryBase.CreateGeometryHelper(ptr, null) as NurbsCurve;
     }
 
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+    /// <summary>
+    /// Rebuilds the curve to a NURBS curve with the specified options.
+    /// </summary>
+    /// <param name="curve">The input curve you would like to rebuild</param>
+    /// <param name="domain">The domain to process</param>
+    /// <param name="rebuildOptions">Specifies how to rebuild the curve</param>
+    /// <param name="maximumSeparation"></param>
+    /// <param name="thisSeparationParameter"></param>
+    /// <param name="nurbsSeparationParameter"></param>
+    /// <returns>The resulting curveb</returns>
+    /// <since>9.0</since>
+    public static NurbsCurve CreateNurbsCurveFit(Curve curve, Interval domain, 
+      NurbsCurveFitParameters rebuildOptions, 
+      out Line maximumSeparation, out double thisSeparationParameter, 
+      out double nurbsSeparationParameter)
+    {
+      maximumSeparation = Line.Unset;
+      thisSeparationParameter = RhinoMath.UnsetValue;
+      nurbsSeparationParameter = RhinoMath.UnsetValue;
+      IntPtr curve_ptr = curve.ConstPointer();
+      IntPtr rebuildOptions_ptr = rebuildOptions.ConstPointer();
+      IntPtr result = UnsafeNativeMethods.ON_Curve_NurbsCurveFit2(curve_ptr, domain, rebuildOptions_ptr, 
+        ref maximumSeparation, ref thisSeparationParameter, ref nurbsSeparationParameter);    
+      if (IntPtr.Zero == result) return null;
+      else
+        return GeometryBase.CreateGeometryHelper(result, null) as NurbsCurve;
+    }
+#endif
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+    /// <summary>
+    /// Rebuilds this curve so it takes on the degree, knot vector, and control point count
+    /// of a template curve. 
+    /// </summary>
+    /// <param name="templateCurve">The curve to match.</param>
+    /// <param name="flipSourceDirection">
+    /// If true and this curve is open, its direction is flipped (reversed) before
+    /// sampling. Set this when this curve runs opposite the template.
+    /// </param>
+    /// <param name="preserveEndTangents">
+    /// If true and the result is open with at least 4 control points, the interior end control
+    /// points are adjusted so the result's end tangents match this curve's.
+    /// </param>
+    /// <param name="makeSubDFriendly">If true, the result is converted to a SubD friendly curve.</param>
+    /// <param name="maximumDeviation">
+    /// A line from this curve to the rebuilt curve at the point of maximum separation (the "from"
+    /// point is on this curve, the "to" point is on the rebuilt curve), or Line.Unset if it
+    /// cannot be computed.
+    /// </param>
+    /// <returns>The rebuilt NURBS curve, or null if the template curve is unusable or the rebuild fails.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public NurbsCurve RebuildToMatchTemplateCurve(Curve templateCurve, bool flipSourceDirection, bool preserveEndTangents, bool makeSubDFriendly, out Line maximumDeviation)
+    {
+      maximumDeviation = Line.Unset;
+      if (null == templateCurve)
+        throw new ArgumentNullException(nameof(templateCurve));
+
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr const_ptr_template = templateCurve.ConstPointer();
+      IntPtr result = UnsafeNativeMethods.ON_Curve_RebuildToMatchTemplateCurve(const_ptr_this, const_ptr_template,
+        flipSourceDirection, preserveEndTangents, makeSubDFriendly, ref maximumDeviation);
+      Runtime.CommonObject.GcProtect(this, templateCurve);
+      if (IntPtr.Zero == result)
+        return null;
+      return GeometryBase.CreateGeometryHelper(result, null) as NurbsCurve;
+    }
+#endif
+
     /// <summary>
     /// Creates a soft edited curve from an existing curve using a smooth field of influence.
     /// </summary>
@@ -815,7 +914,133 @@ namespace Rhino.Geometry
       GC.KeepAlive(curve);
       return GeometryBase.CreateGeometryHelper(ptr, null) as Curve;
     }
+    /// <summary>
+    /// Generate a catenary curve through a point
+    /// </summary>
+    /// <param name="catenary_start">catenary start point</param>
+    /// <param name="catenary_end">catenary end point</param>
+    /// <param name="axis_dir">catenary axis/gravity direction</param>
+    /// <param name="through_point">point on the catenary between catenary_start and catenary_end</param>
+    /// <param name="bSmooth">if false generates polyline output</param>
+    /// <param name="point_count">number of points in the output curve</param>
+    /// <param name="apex_out">apex point of the output catenary curve</param>
+    /// <param name="parameter_out">output catenary parameter "a" in the formula y = a * cosh(x/a)</param>
+    /// <param name="length_out">output catenary length</param>
+    /// <param name="max_deviation_out">sampled max deviation between the output curve and the analytic catenary</param>
+    /// <returns>A catenary Curve or null if unsuccessful</returns>
+    /// <since>9.0</since>
+    public static Curve CreateCatenaryCurveThroughPoint(Point3d catenary_start, Point3d catenary_end, Vector3d axis_dir,
+      Point3d through_point, bool bSmooth, int point_count, out Point3d apex_out, out double parameter_out, out double length_out,
+      out double max_deviation_out)
+    {
+      apex_out = Point3d.Unset;
+      parameter_out = double.NaN;
+      length_out = double.NaN;
+      max_deviation_out = double.NaN;
 
+      IntPtr curve_ptr = UnsafeNativeMethods.RHC_RhinoCreateCatenaryCurveThroughPoint(catenary_start, catenary_end, axis_dir, through_point, bSmooth, point_count,
+        ref apex_out, ref parameter_out, ref length_out, ref max_deviation_out);
+      if (IntPtr.Zero == curve_ptr)
+        return null;
+      else
+        return GeometryBase.CreateGeometryHelper(curve_ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Generate a catenary curve of specific length.
+    /// </summary>
+    /// <param name="catenary_start">catenary start point</param>
+    /// <param name="catenary_end">catenary end point</param>
+    /// <param name="axis_dir">catenary axis/gravity direction</param>
+    /// <param name="catenary_length">the desired catenary length</param>
+    /// <param name="bSmooth">if false generates polyline output</param>
+    /// <param name="point_count">number of points in the output curve</param>
+    /// <param name="apex_out">apex point of the output catenary curve</param>
+    /// <param name="parameter_out">output catenary parameter "a" in the formula y = a * cosh(x/a)</param>
+    /// <param name="length_out">output catenary length</param>
+    /// <param name="max_deviation_out">sampled max deviation between the output curve and the analytic catenary</param>
+    /// <returns>A catenary Curve or null if unsuccessful</returns>
+    /// <since>9.0</since>
+    public static Curve CreateCatenaryCurveFromLength(Point3d catenary_start, Point3d catenary_end, Vector3d axis_dir,
+      double catenary_length, bool bSmooth, int point_count, out Point3d apex_out, out double parameter_out, out double length_out,
+      out double max_deviation_out)
+    {
+      apex_out = Point3d.Unset;
+      parameter_out = double.NaN;
+      length_out = double.NaN;
+      max_deviation_out = double.NaN;
+
+      IntPtr curve_ptr = UnsafeNativeMethods.RHC_RhinoCreateCatenaryCurveFromLength(catenary_start, catenary_end, axis_dir, catenary_length, bSmooth, point_count,
+        ref apex_out, ref parameter_out, ref length_out, ref max_deviation_out);
+      if (IntPtr.Zero == curve_ptr)
+        return null;
+      else
+        return GeometryBase.CreateGeometryHelper(curve_ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Generate a catenary curve from catenary parameter.
+    /// </summary>
+    /// <param name="catenary_start">catenary start point</param>
+    /// <param name="catenary_end">catenary end point</param>
+    /// <param name="axis_dir">catenary axis/gravity direction</param>
+    /// <param name="catenary_parameter">catenary parameter</param>
+    /// <param name="bSmooth">if false generates polyline output</param>
+    /// <param name="point_count">number of points in the output curve</param>
+    /// <param name="apex_out">apex point of the output catenary curve</param>
+    /// <param name="parameter_out">output catenary parameter "a" in the formula y = a * cosh(x/a)</param>
+    /// <param name="length_out">output catenary length</param>
+    /// <param name="max_deviation_out">sampled max deviation between the output curve and the analytic catenary</param>
+    /// <returns>A catenary Curve or null if unsuccessful</returns>
+    /// <since>9.0</since>
+    public static Curve CreateCatenaryCurveFromParameter(Point3d catenary_start, Point3d catenary_end, Vector3d axis_dir,
+      double catenary_parameter, bool bSmooth, int point_count, out Point3d apex_out, out double parameter_out, out double length_out,
+      out double max_deviation_out)
+    {
+      apex_out = Point3d.Unset;
+      parameter_out = double.NaN;
+      length_out = double.NaN;
+      max_deviation_out = double.NaN;
+
+      IntPtr curve_ptr = UnsafeNativeMethods.RHC_RhinoCreateCatenaryCurveFromParameter(catenary_start, catenary_end, axis_dir, catenary_parameter, bSmooth, point_count,
+        ref apex_out, ref parameter_out, ref length_out, ref max_deviation_out);
+      if (IntPtr.Zero == curve_ptr)
+        return null;
+      else
+        return GeometryBase.CreateGeometryHelper(curve_ptr, null) as Curve;
+    }
+
+    /// <summary>
+    /// Generate a catenary curve through catenary apex.
+    /// </summary>
+    /// <param name="catenary_start">catenary start point</param>
+    /// <param name="catenary_end">catenary end point</param>
+    /// <param name="axis_dir">catenary axis/gravity direction</param>
+    /// <param name="catenary_apex">desired catenary apex point</param>
+    /// <param name="bSmooth">if false generates polyline output</param>
+    /// <param name="point_count">number of points in the output curve</param>
+    /// <param name="apex_out">apex point of the output catenary curve</param>
+    /// <param name="parameter_out">output catenary parameter "a" in the formula y = a * cosh(x/a)</param>
+    /// <param name="length_out">output catenary length</param>
+    /// <param name="max_deviation_out">sampled max deviation between the output curve and the analytic catenary</param>
+    /// <returns>A catenary Curve or null if unsuccessful</returns>
+    /// <since>9.0</since>
+    public static Curve CreateCatenaryCurveFromApex(Point3d catenary_start, Point3d catenary_end, Vector3d axis_dir,
+      Point3d catenary_apex, bool bSmooth, int point_count, out Point3d apex_out, out double parameter_out, out double length_out,
+      out double max_deviation_out)
+    {
+      apex_out = Point3d.Unset;
+      parameter_out = double.NaN;
+      length_out = double.NaN;
+      max_deviation_out = double.NaN;
+
+      IntPtr curve_ptr = UnsafeNativeMethods.RHC_RhinoCreateCatenaryCurveFromApex(catenary_start, catenary_end, axis_dir, catenary_apex, bSmooth, point_count,
+        ref apex_out, ref parameter_out, ref length_out, ref max_deviation_out);
+      if (IntPtr.Zero == curve_ptr)
+        return null;
+      else
+        return GeometryBase.CreateGeometryHelper(curve_ptr, null) as Curve;
+    }
     private static Curve BuildRoundedCornerRectangle(Rectangle3d rectangle, bool arcMode, double value)
     {
       if (!rectangle.IsValid)
@@ -1028,6 +1253,82 @@ namespace Rhino.Geometry
       return JoinCurves(inputCurves, joinTolerance, preserveDirection, out _);
     }
 
+    /// <summary>
+    /// A segment in a sorted curve collection
+    /// </summary>
+    public struct SortedSegment
+    {
+      /// <summary>
+      /// The id in the original input curve collection
+      /// </summary>
+      public int CurveId;
+
+      /// <summary>
+      /// Indicates if the curve is to be reversed
+      /// </summary>
+      public bool Reversed;
+    }
+
+    /// <summary>
+    /// Sorts the curves into joinable segment groups. No joining is performed, the curves are only analyzed for start/end proximity.
+    /// </summary>
+    /// <param name="inputCurves">The curves to sort</param>
+    /// <param name="tolerance">The tolerance to bridge any gaps between curves</param>
+    /// <param name="groups">The groups of curves that can be formed upon joining. 
+    /// A curve that cannot be joined to any other curve forms a group of size 1. No joining is performed.
+    /// </param>
+    /// <returns></returns>
+    public static bool SortCurves(ICollection<Curve> inputCurves, double tolerance, out IList<IList<SortedSegment>> groups)
+    {
+      bool rc = false;
+      groups = new List<IList<SortedSegment>>();
+
+      if (inputCurves.Count == 0)
+        return true;
+
+      using (SimpleArrayCurvePointer pInputCurves = new SimpleArrayCurvePointer(inputCurves))      
+      using (SimpleArrayInt sizes = new SimpleArrayInt())
+      using (SimpleArrayInt ids = new SimpleArrayInt())
+      using (SimpleArrayInt revs = new SimpleArrayInt())
+      using (SimpleArrayInt sngls = new SimpleArrayInt())
+      { 
+          rc = UnsafeNativeMethods.ONC_SortCurveEnds(pInputCurves.ConstPointer(),
+            sizes.NonConstPointer(), ids.NonConstPointer(),
+            revs.NonConstPointer(), sngls.NonConstPointer(),
+            tolerance);
+
+        if (rc)
+        {
+          int[] aSizes = sizes.ToArray();
+          int[] aIds = ids.ToArray();
+          int[] aRevs = revs.ToArray();
+
+          for(int i = 0, n = 0; i < sizes.Count; ++i)
+          {
+            int size = aSizes[i];
+            List<SortedSegment> sorting = new List<SortedSegment>(size);
+            for(int j = 0; j < size; ++j, ++n)
+            {
+              int id = aIds[n];
+              bool rev = aRevs[n] == 0 ? false : true;
+              sorting.Add(new SortedSegment { CurveId = id, Reversed = rev });
+            }
+            groups.Add(sorting);            
+          }
+
+          int[] aSngl = sngls.ToArray();
+          for(int i = 0; i < sngls.Count; ++i)
+          {
+            List<SortedSegment> single = new List<SortedSegment>(1);
+            single.Add(new SortedSegment { CurveId = aSngl[i], Reversed = false });
+            groups.Add(single);
+          }
+        }
+      }
+
+      return rc;
+    }
+
 #if RHINO_SDK
 
     /// <summary>
@@ -1118,8 +1419,9 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curveA">Curve to blend from (blending will occur at curve end point).</param>
     /// <param name="curveB">Curve to blend to (blending will occur at curve start point).</param>
-    /// <param name="continuity">Continuity of blend.</param>
+    /// <param name="continuity">Continuity of blend, either position (G0), tangency (G1), or curvature (G2).</param>
     /// <returns>A curve representing the blend between A and B or null on failure.</returns>
+    /// <remarks>Note: This function only blends with G0, G1, or G2 continuity.</remarks>
     /// <since>5.0</since>
     public static Curve CreateBlendCurve(Curve curveA, Curve curveB, BlendContinuity continuity)
     {
@@ -1131,10 +1433,11 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="curveA">Curve to blend from (blending will occur at curve end point).</param>
     /// <param name="curveB">Curve to blend to (blending will occur at curve start point).</param>
-    /// <param name="continuity">Continuity of blend.</param>
+    /// <param name="continuity">Continuity of blend, either position (G0), tangency (G1), or curvature (G2).</param>
     /// <param name="bulgeA">Bulge factor at curveA end of blend. Values near 1.0 work best.</param>
     /// <param name="bulgeB">Bulge factor at curveB end of blend. Values near 1.0 work best.</param>
     /// <returns>A curve representing the blend between A and B or null on failure.</returns>
+    /// <remarks>Note: This function only blends with G0, G1, or G2 continuity.</remarks>
     /// <since>5.0</since>
     public static Curve CreateBlendCurve(Curve curveA, Curve curveB, BlendContinuity continuity, double bulgeA, double bulgeB)
     {
@@ -1163,27 +1466,29 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Makes a curve blend between 2 curves at the parameters specified
-    /// with the directions and continuities specified
+    /// Makes a curve blend between two curves at the parameters specified
+    /// with the directions and continuities specified.
     /// </summary>
-    /// <param name="curve0">First curve to blend from</param>
-    /// <param name="t0">Parameter on first curve for blend endpoint</param>
+    /// <param name="curve0">First curve to blend from.</param>
+    /// <param name="t0">Parameter on first curve for blend endpoint.</param>
     /// <param name="reverse0">
     /// If false, the blend will go in the natural direction of the curve.
-    /// If true, the blend will go in the opposite direction to the curve
+    /// If true, the blend will go in the opposite direction to the curve.
     /// </param>
-    /// <param name="continuity0">Continuity for the blend at the start</param>
-    /// <param name="curve1">Second curve to blend from</param>
-    /// <param name="t1">Parameter on second curve for blend endpoint</param>
+    /// <param name="continuity0">Continuity for the blend at the start.</param>
+    /// <param name="curve1">Second curve to blend from.</param>
+    /// <param name="t1">Parameter on second curve for blend endpoint.</param>
     /// <param name="reverse1">
     /// If false, the blend will go in the natural direction of the curve.
-    /// If true, the blend will go in the opposite direction to the curve
+    /// If true, the blend will go in the opposite direction to the curve.
     /// </param>
-    /// <param name="continuity1">Continuity for the blend at the end</param>
-    /// <returns>The blend curve on success. null on failure</returns>
+    /// <param name="continuity1">Continuity for the blend at the end.</param>
+    /// <returns>The blend curve on success, or null on failure.</returns>
     /// <since>5.0</since>
-    public static Curve CreateBlendCurve(Curve curve0, double t0, bool reverse0, BlendContinuity continuity0,
-                                         Curve curve1, double t1, bool reverse1, BlendContinuity continuity1)
+    public static Curve CreateBlendCurve(
+      Curve curve0, double t0, bool reverse0, BlendContinuity continuity0,
+      Curve curve1, double t1, bool reverse1, BlendContinuity continuity1
+      )
     {
       IntPtr pConstCurve0 = curve0.ConstPointer();
       IntPtr pConstCurve1 = curve1.ConstPointer();
@@ -1253,11 +1558,14 @@ namespace Rhino.Geometry
     {
       IntPtr pConstCurve0 = curve0.ConstPointer();
       IntPtr pConstCurve1 = curve1.ConstPointer();
-      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
-      IntPtr outputPtr = output.NonConstPointer();
-      bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurves(pConstCurve0, pConstCurve1, numCurves, tolerance, outputPtr);
-      Runtime.CommonObject.GcProtect(curve0, curve1);
-      return rc ? output.ToNonConstArray() : new Curve[0];
+
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurves(pConstCurve0, pConstCurve1, numCurves, tolerance, outputPtr);
+        Runtime.CommonObject.GcProtect(curve0, curve1);
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
     }
 
     /// <summary>
@@ -1296,11 +1604,14 @@ namespace Rhino.Geometry
     {
       IntPtr pConstCurve0 = curve0.ConstPointer();
       IntPtr pConstCurve1 = curve1.ConstPointer();
-      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
-      IntPtr outputPtr = output.NonConstPointer();
-      bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurvesWithMatching(pConstCurve0, pConstCurve1, numCurves, tolerance, outputPtr);
-      Runtime.CommonObject.GcProtect(curve0, curve1);
-      return rc ? output.ToNonConstArray() : new Curve[0];
+
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurvesWithMatching(pConstCurve0, pConstCurve1, numCurves, tolerance, outputPtr);
+        Runtime.CommonObject.GcProtect(curve0, curve1);
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
     }
 
     /// <summary>
@@ -1341,11 +1652,14 @@ namespace Rhino.Geometry
     {
       IntPtr pConstCurve0 = curve0.ConstPointer();
       IntPtr pConstCurve1 = curve1.ConstPointer();
-      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
-      IntPtr outputPtr = output.NonConstPointer();
-      bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurveWithSampling(pConstCurve0, pConstCurve1, numCurves, numSamples, tolerance, outputPtr);
-      Runtime.CommonObject.GcProtect(curve0, curve1);
-      return rc ? output.ToNonConstArray() : new Curve[0];
+
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        bool rc = UnsafeNativeMethods.RHC_RhinoTweenCurveWithSampling(pConstCurve0, pConstCurve1, numCurves, numSamples, tolerance, outputPtr);
+        Runtime.CommonObject.GcProtect(curve0, curve1);
+        return rc ? output.ToNonConstArray() : new Curve[0];
+      }
     }
 
     /// <summary>
@@ -1540,7 +1854,48 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the boolean intersection of two closed, planar curves. 
+    /// Calculates the boolean union of two or more closed, planar curves, and reports
+    /// which input curve ended up in which output curve.
+    /// Note, curves must be co-planar.
+    /// </summary>
+    /// <param name="curves">The co-planar curves to union.</param>
+    /// <param name="tolerance">The 3d fitting and intersecting tolerance.</param>
+    /// <param name="indexMap">
+    /// An array with one entry per input curve. The value at index i is the index, in the
+    /// returned array, of the union result that input curve i contributed to (the outer
+    /// boundary curve of that result), or -1 if the input curve was not matched to any
+    /// output curve. The input curves are indexed in the order they are enumerated
+    /// <paramref name="curves"/>.
+    /// </param>
+    /// <returns>Result curves on success, empty array if no union could be calculated.</returns>
+    /// <since>9.0</since>
+    public static Curve[] CreateBooleanUnion(IEnumerable<Curve> curves, double tolerance, out int[] indexMap)
+    {
+      if (null == curves)
+        throw new ArgumentNullException(nameof(curves));
+
+      using (SimpleArrayCurvePointer input = new SimpleArrayCurvePointer(curves))
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      using (SimpleArrayInt map = new SimpleArrayInt())
+      {
+        IntPtr inputPtr = input.ConstPointer();
+        IntPtr outputPtr = output.NonConstPointer();
+        IntPtr mapPtr = map.NonConstPointer();
+
+        int rc = UnsafeNativeMethods.ON_Curve_BooleanUnion2(inputPtr, outputPtr, tolerance, mapPtr);
+        GC.KeepAlive(curves);
+        if (rc < 1)
+        {
+          indexMap = new int[0];
+          return new Curve[0];
+        }
+        indexMap = map.ToArray();
+        return output.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Calculates the boolean intersection of two closed, planar curves.
     /// Note, curves must be co-planar.
     /// </summary>
     /// <param name="curveA">The first closed, planar curve.</param>
@@ -1834,8 +2189,10 @@ namespace Rhino.Geometry
     /// <since>8.4</since>
     public static Curve CreateRevisionCloud(IEnumerable<Point3d> points, double angle, bool flip)
     {
-      PolylineCurve curve = new PolylineCurve(points);
-      return CreateRevisionCloud(curve, 0, angle, flip);
+      using (PolylineCurve curve = new PolylineCurve(points))
+      {
+        return CreateRevisionCloud(curve, 0, angle, flip);
+      }
     }
 
     /// <summary>
@@ -2062,22 +2419,24 @@ namespace Rhino.Geometry
         IntPtr ptr_crv_array = crv_array.ConstPointer();
         IntPtr ptr_brp_array = brp_array.ConstPointer();
 
-        SimpleArrayInt brp_top = new SimpleArrayInt();
-        SimpleArrayInt crv_top = new SimpleArrayInt();
-
-        SimpleArrayCurvePointer rc = new SimpleArrayCurvePointer();
-        IntPtr ptr_rc = rc.NonConstPointer();
-
-        if (UnsafeNativeMethods.RHC_RhinoProjectCurveToBrepEx(ptr_brp_array, ptr_crv_array, direction, tolerance, loose, ptr_rc, brp_top.m_ptr, crv_top.m_ptr))
+        using (SimpleArrayInt brp_top = new SimpleArrayInt())
+        using (SimpleArrayInt crv_top = new SimpleArrayInt())
+        using (SimpleArrayCurvePointer rc = new SimpleArrayCurvePointer())
         {
-          brepIndices = brp_top.ToArray();
-          curveIndices = crv_top.ToArray();
-          return rc.ToNonConstArray();
-        }
+          IntPtr ptr_rc = rc.NonConstPointer();
 
-        GC.KeepAlive(curves);
-        GC.KeepAlive(breps);
-        return Array.Empty<Curve>();
+          if (UnsafeNativeMethods.RHC_RhinoProjectCurveToBrepEx(ptr_brp_array, ptr_crv_array, direction, tolerance, loose, ptr_rc, brp_top.m_ptr, crv_top.m_ptr))
+          {
+            brepIndices = brp_top.ToArray();
+            curveIndices = crv_top.ToArray();
+            return rc.ToNonConstArray();
+          }
+
+          GC.KeepAlive(curves);
+          GC.KeepAlive(breps);
+
+          return Array.Empty<Curve>();
+        }
       }
     }
 
@@ -2367,11 +2726,14 @@ namespace Rhino.Geometry
     public Curve[] DuplicateSegments()
     {
       IntPtr ptr = ConstPointer();
-      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
-      IntPtr outputPtr = output.NonConstPointer();
-      int rc = UnsafeNativeMethods.RHC_RhinoDuplicateCurveSegments(ptr, outputPtr);
-      GC.KeepAlive(this);
-      return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        int rc = UnsafeNativeMethods.RHC_RhinoDuplicateCurveSegments(ptr, outputPtr);
+        GC.KeepAlive(this);
+        return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -2388,11 +2750,14 @@ namespace Rhino.Geometry
     public Curve[] GetSubCurves()
     {
       IntPtr ptr = ConstPointer();
-      SimpleArrayCurvePointer output = new SimpleArrayCurvePointer();
-      IntPtr outputPtr = output.NonConstPointer();
-      int rc = UnsafeNativeMethods.RHC_RhinoGetSubCurves(ptr, outputPtr);
-      GC.KeepAlive(this);
-      return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+
+      using (SimpleArrayCurvePointer output = new SimpleArrayCurvePointer())
+      {
+        IntPtr outputPtr = output.NonConstPointer();
+        int rc = UnsafeNativeMethods.RHC_RhinoGetSubCurves(ptr, outputPtr);
+        GC.KeepAlive(this);
+        return rc < 1 ? new Curve[0] : output.ToNonConstArray();
+      }
     }
 
     /// <summary>
@@ -5236,7 +5601,7 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Splits a curve into pieces using a surface.
+    /// Splits a curve into pieces using a cutting plane.
     /// </summary>
     /// <param name="plane">A cutting plane.</param>
     /// <param name="tolerance">Tolerance for computing intersections.</param>
@@ -5400,10 +5765,13 @@ namespace Rhino.Geometry
     public Curve ExtendOnSurface(CurveEnd side, Surface surface)
     {
       if (surface == null) { throw new ArgumentNullException("surface"); }
-      Brep brep = surface.ToBrep();
-      if (brep == null) { return null; }
 
-      return ExtendOnSurface(side, brep.Faces[0]);
+      using (Brep brep = surface.ToBrep())
+      {
+        if (brep == null) { return null; }
+
+        return ExtendOnSurface(side, brep.Faces[0]);
+      }
     }
     /// <summary>
     /// Extends a curve on a surface.
@@ -5628,6 +5996,7 @@ namespace Rhino.Geometry
       GC.KeepAlive(this);
       return GeometryBase.CreateGeometryHelper(rc, null) as NurbsCurve;
     }
+
 #endif
     #endregion
 
@@ -6286,8 +6655,10 @@ namespace Rhino.Geometry
       if (surface == null)
         throw new ArgumentNullException("surface");
 
-      Brep b = Brep.CreateFromSurface(surface);
-      return OffsetOnSurface(b.Faces[0], distance, fittingTolerance);
+      using (Brep b = Brep.CreateFromSurface(surface))
+      {
+        return OffsetOnSurface(b.Faces[0], distance, fittingTolerance);
+      }
     }
   
     /// <summary>
@@ -6339,32 +6710,34 @@ namespace Rhino.Geometry
     )
     {
       bool rc = false;
-      SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble();
-      if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+      using (SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble())
       {
-        fitResults = null;
-        return false;
-      }
-      SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
-      using (var outputFillets = new SimpleArrayBrepPointer())
-      using (var outputBreps0 = new SimpleArrayBrepPointer())
-      using (var outputBreps1 = new SimpleArrayBrepPointer())
-      {
-        IntPtr ptr_outputFillets = outputFillets.NonConstPointer();
-        IntPtr ptr_outputBreps0 = outputBreps0.NonConstPointer();
-        IntPtr ptr_outputBreps1 = outputBreps1.NonConstPointer();
-        rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceToRail(faceWithCurve.ConstPointer(), this.ConstPointer(), 
-          secondFace.ConstPointer(), u1, v1, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
-          numBezierSrfs, extend, split_type, tolerance, ptr_outputFillets, ptr_outputBreps0, ptr_outputBreps1, arr_fitResults.NonConstPointer());
-       
-        fitResults = (rc) ? arr_fitResults.ToArray() : null;
-        out_fillets.AddRange(outputFillets.ToNonConstArray());
-        out_breps0.AddRange(outputBreps0.ToNonConstArray());
-        out_breps1.AddRange(outputBreps1.ToNonConstArray());
-        GC.KeepAlive(this);
-      }
+        if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+        {
+          fitResults = null;
+          return false;
+        }
+        using (SimpleArrayDouble arr_fitResults = new SimpleArrayDouble())
+        using (var outputFillets = new SimpleArrayBrepPointer())
+        using (var outputBreps0 = new SimpleArrayBrepPointer())
+        using (var outputBreps1 = new SimpleArrayBrepPointer())
+        {
+          IntPtr ptr_outputFillets = outputFillets.NonConstPointer();
+          IntPtr ptr_outputBreps0 = outputBreps0.NonConstPointer();
+          IntPtr ptr_outputBreps1 = outputBreps1.NonConstPointer();
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceToRail(faceWithCurve.ConstPointer(), this.ConstPointer(),
+            secondFace.ConstPointer(), u1, v1, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
+            numBezierSrfs, extend, split_type, tolerance, ptr_outputFillets, ptr_outputBreps0, ptr_outputBreps1, arr_fitResults.NonConstPointer());
 
-      return rc;
+          fitResults = (rc) ? arr_fitResults.ToArray() : null;
+          out_fillets.AddRange(outputFillets.ToNonConstArray());
+          out_breps0.AddRange(outputBreps0.ToNonConstArray());
+          out_breps1.AddRange(outputBreps1.ToNonConstArray());
+          GC.KeepAlive(this);
+        }
+
+        return rc;
+      }
     }
 
     /// <summary>
@@ -6412,22 +6785,25 @@ namespace Rhino.Geometry
     )
     {
       bool rc = false;
-      SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble();
-      if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+
+      using (SimpleArrayDouble arr_arcSliders = (null != arcSliders) ? new SimpleArrayDouble(arcSliders) : new SimpleArrayDouble())
       {
-        fitResults = null;
-        return false;
+        if (arcDegree >= 3 && arcDegree <= 5 && arr_arcSliders.Count < 2)
+        {
+          fitResults = null;
+          return false;
+        }
+        using (SimpleArrayDouble arr_fitResults = new SimpleArrayDouble())
+        using (var outputFillets = new SimpleArraySurfacePointer())
+        {
+          rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurve(face.ConstPointer(), this.ConstPointer(), t, u, v, radius, alignToCurve, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
+            numBezierSrfs, tolerance, outputFillets.ConstPointer(), arr_fitResults.NonConstPointer());
+          fitResults = (rc) ? arr_fitResults.ToArray() : null;
+          out_fillets.AddRange(outputFillets.ToNonConstArray().Select(s => s.ToBrep()));
+          GC.KeepAlive(this);
+        }
+        return rc;
       }
-      SimpleArrayDouble arr_fitResults = new SimpleArrayDouble();
-      using (var outputFillets = new SimpleArraySurfacePointer())
-      {
-        rc = UnsafeNativeMethods.RHC_RhinoFilletSurfaceCurve(face.ConstPointer(), this.ConstPointer(), t, u, v, radius, alignToCurve, railDegree, arcDegree, arr_arcSliders.ConstPointer(),
-          numBezierSrfs, tolerance, outputFillets.ConstPointer(), arr_fitResults.NonConstPointer());
-        fitResults = (rc) ? arr_fitResults.ToArray() : null;
-        out_fillets.AddRange(outputFillets.ToNonConstArray().Select(s => s.ToBrep()));
-        GC.KeepAlive(this);
-      }
-      return rc;
   }
   /// <summary>
   /// Offset a curve on a surface. This curve must lie on the surface.
@@ -6445,8 +6821,10 @@ namespace Rhino.Geometry
       if (surface == null)
         throw new ArgumentNullException("surface");
 
-      Brep b = Brep.CreateFromSurface(surface);
-      return OffsetOnSurface(b.Faces[0], throughPoint, fittingTolerance);
+      using (Brep b = Brep.CreateFromSurface(surface))
+      {
+        return OffsetOnSurface(b.Faces[0], throughPoint, fittingTolerance);
+      }
     }
     /// <summary>
     /// Offset this curve on a surface. This curve must lie on the surface.
@@ -6465,8 +6843,10 @@ namespace Rhino.Geometry
       if (surface == null)
         throw new ArgumentNullException("surface");
 
-      Brep b = Brep.CreateFromSurface(surface);
-      return OffsetOnSurface(b.Faces[0], curveParameters, offsetDistances, fittingTolerance);
+      using (Brep b = Brep.CreateFromSurface(surface))
+      {
+        return OffsetOnSurface(b.Faces[0], curveParameters, offsetDistances, fittingTolerance);
+      }
     }
 
     /// <summary>
@@ -6673,6 +7053,1082 @@ namespace Rhino.Geometry
     /// </summary>
     Sweep2NetworkSrf = 2,
   }
+
+  /// <summary>
+  /// A "kink" in a curve is a unit tangent discontinuity or a vector curvature discontinuity.
+  /// This class is used to determine which types and magnitudes of
+  /// unit tangent discontinuities and vector curvature discontinuities
+  /// should are a "kink." It also provides functions for determining
+  /// if there is a kink at a specific curve parameter.
+  /// </summary>
+  public class CurveKinkDefinition : IDisposable
+  {
+    private IntPtr m_ptr = IntPtr.Zero;
+
+    /// <summary>
+    /// Construct a new instance with default values.
+    /// </summary>
+    /// <since>9.0</since>
+    public CurveKinkDefinition()
+    {
+      m_ptr = UnsafeNativeMethods.ON_CurveKinkDefinition_New(IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~CurveKinkDefinition()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (m_ptr != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    private IntPtr ConstPointer() { return m_ptr; }
+    private IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Create a CurveKinkDefinition with specified settings.
+    /// </summary>
+    /// <param name="kinkAngleDegrees">
+    /// 0 &lt;= kinkAngleDegrees &lt;= 180.
+    /// Values &gt; 180 are treated as 180 and
+    /// other values outside the [0,180] are treated as ON_CurveKinkDefinition::DefaultPolylineTangentKinkAngleDegrees.
+    /// If a curve is a polyline and the angle (in degrees) between the tangents
+    /// at a tangent discontinuity is &gt; polyline_tangent_kink_angle_degrees,
+    /// then that discontinuity is treated as a kink.
+    /// In particular, passing 180.0 disables tangent discontinuity checks for polyline curves.
+    /// </param>
+    /// <param name="curvatureKinkRadiusRatio">
+    /// 0 &lt;= curvatureKinkRadiusRatio &lt;= 1.
+    /// Values &gt; 1 are treated as 1 and
+    /// other values outside the [0,1] are treated as ON_CurveKinkDefinition::DefaultCurvatureKinkRadiusRatio.
+    /// If the ratio (minimum radius of curvature)/(maximum radius of curvature)
+    /// at a curvature discontinuity is &lt; curvature_kink_radius_ratio,
+    /// then that discontinuity is treated as a kink.
+    /// In particular, passing 0.0 disables curvature radius discontinuity checks.
+    /// </param>
+    /// <param name="kinkAtTangentChange">
+    /// true if tangent discontinuities should be tested to determine if the tangent discontinuity is a kink.
+    /// false to ignore tangent discontinuities.
+    /// </param>
+    /// <param name="kinkAtCurvatureChange">
+    /// true if curvature discontinuities should be tested to determine if the curvature discontinuity is a kink.
+    /// false to ignore curvature discontinuities.
+    /// </param>
+    /// <since>9.0</since>
+    public CurveKinkDefinition(double kinkAngleDegrees, double curvatureKinkRadiusRatio, bool kinkAtTangentChange, bool kinkAtCurvatureChange)
+      : this()
+    {
+      KinkAngleDegrees = kinkAngleDegrees;
+      CurvatureKinkRadiusRatio = curvatureKinkRadiusRatio;
+      KinkAtTangentChange = kinkAtTangentChange;
+      KinkAtCurvatureChange = kinkAtCurvatureChange;
+    }
+
+
+    /// <summary>
+    /// The angle, in degrees, used to determine if when an abrupt change in tangent or curvature vector
+    /// direction is a kink.
+    /// </summary>
+    /// <returns>
+    /// The tangent or curvature kink angle in degrees.
+    /// </returns>
+    /// <since>9.0</since>
+    public double KinkAngleDegrees
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_CurveKinkDefinition_KinkAngleDegrees(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_SetKinkAngleDegrees(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// If the curvature &lt;= <see cref="CurvatureKinkZeroTolerance"/>, then it
+    /// is treated as zero curvature. Put another way, if
+    /// (radius of curvature) *  <see cref="CurvatureKinkZeroTolerance"/> &gt;= 1,
+    /// then the radius is treated as infinite.
+    /// If <see cref="CurvatureKinkZeroTolerance"/> &gt; 0, then the curvature
+    /// kink test is scale dependent.
+    /// If <see cref="CurvatureKinkZeroTolerance"/> = 0, then the curvature kink
+    /// test is indpendent of scale.
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public double CurvatureKinkZeroTolerance
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_CurveKinkDefinition_CurvatureKinkZeroTolerance(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_SetCurvatureKinkZeroTolerance(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+    /// <summary>
+    /// If the ratio (minimum radius of curvature)/(maximum radius of curvature)
+    /// at a curvature discontinuity is &lt; <see cref="CurvatureKinkRadiusRatio"/>,
+    /// then that curvature discontinuity is treated as a kink.
+    /// In particular, if <see cref="CurvatureKinkRadiusRatio"/> = 0, then curvature radius discontinuity checks are disabled.
+    /// </summary>
+    /// <returns>
+    /// The ratio used to test for curvature vector kinks.
+    /// </returns>
+    /// <since>9.0</since>
+    public double CurvatureKinkRadiusRatio
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_CurveKinkDefinition_CurvatureKinkRadiusRatio(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_SetCurvatureKinkRadiusRatio(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Returns true if tangent discontinuities should be tested when finding kinks.
+    /// The angle used for testing is KinkAngleDegrees().
+    /// </summary>
+    /// <since>9.0</since>
+    public bool KinkAtTangentChange
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_KinkAtTangentChange(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_SetKinkAtTangentChange(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// Returns true if curvature discontinuities should be tested when finding kinks.
+    /// The angle used vector curvature direction discontinuities is KinkAngleDegrees().
+    /// The ratio used for radius of curvature discontinuities is CurvatureKinkRadiusRatio().
+    /// </summary>
+    /// <since>9.0</since>
+    public bool KinkAtCurvatureChange
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_KinkAtCurvatureChange(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_CurveKinkDefinition_SetKinkAtCurvatureChange(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// True if there is a tangent discontinuity at curve(t) and the agnle between the two tangents
+    /// is &gt; <see cref="KinkAngleDegrees"/>
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsTangentKink(Curve curve, double t)
+    {
+      IntPtr pCurve = curve.ConstPointer();
+
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsTangentKink(ConstPointer(), pCurve, t);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    /// <summary>
+    /// True if the angle between tangent_from_below and tangent_from_above is &gt; <see cref="KinkAngleDegrees"/>
+    /// </summary>
+    /// <param name="tangentFromBelow"></param>
+    /// <param name="tangentFromAbove"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsTangentKink(Vector3d tangentFromBelow, Vector3d tangentFromAbove)
+    {
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsTangentKink_FromVectors(ConstPointer(), tangentFromBelow, tangentFromAbove);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// True if there is a curvature discontinuity at curve(t) that passes the curvature kink test.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsCurvatureKink(Curve curve, double t)
+    {
+      IntPtr pCurve = curve.ConstPointer();
+
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsCurvatureKink(ConstPointer(), pCurve, t);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Returns true if the curvature vector is considered to be zero given the
+    /// <see cref="CurvatureKinkZeroTolerance"/>
+    /// </summary>
+    /// <param name="curvature"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsCurvatureZero(Vector3d curvature)
+    {
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsCurvatureZero_FromVector(ConstPointer(), curvature);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    
+    /// <summary>
+    /// Returns true if the curvature vector is considered to be zero given the
+    /// <see cref="CurvatureKinkZeroTolerance"/>
+    /// </summary>
+    /// <param name="curvature"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsCurvatureZero(double curvature)
+    {
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsCurvatureZero(ConstPointer(), curvature);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Calculates the curvature radius ratio and the angle between the two curvature vectors.  
+    /// </summary>
+    /// <param name="curvatureFromBelow"></param>
+    /// <param name="curvatureFromAbove"></param>
+    /// <param name="radiusOfCurvatureRatio"></param>
+    /// <param name="curvatureVectorAngleDegrees">If one or both of the vectors have zero length, this returns RhinoMath.UnsetValue</param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool ComputeCurvatureRadiusRatio(Vector3d curvatureFromBelow, Vector3d curvatureFromAbove, 
+      out double radiusOfCurvatureRatio, out double curvatureVectorAngleDegrees)
+    {
+      radiusOfCurvatureRatio = curvatureVectorAngleDegrees = RhinoMath.UnsetValue;
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_ComputeCurvatureRadiusRatio_FromVectors(ConstPointer(),
+        curvatureFromBelow, curvatureFromAbove,
+        ref radiusOfCurvatureRatio, ref curvatureVectorAngleDegrees);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// True if the angle between curvature_from_below and curvature_from_above is &gt; <see cref="KinkAngleDegrees"/>
+    /// or the ratio min/max &lt; <see cref="CurvatureKinkRadiusRatio"/>, where
+    /// min and max are the minimum and maximum lengths of curvatureFromBelow and v.
+    /// Both of these tests are scale independent.
+    /// If an input curvature vector has length &lt;= <see cref="CurvatureKinkZeroTolerance"/>, then that
+    /// curvature is treated as zero. When is <see cref="CurvatureKinkZeroTolerance"/> &gt; 0, the
+    /// test is scale dependent. The default value is chosen to work reasonably well
+    /// for most models at most scales.
+    /// </summary>
+    /// <param name="curvatureFromBelow"></param>
+    /// <param name="curvatureFromAbove"></param>
+    /// <returns>
+    /// True if either curvature vector is not valid or if, based on the tests
+    /// described above, they are different enough to be considered a "curvature kink."
+    /// </returns>
+    /// <since>9.0</since>
+    public bool IsCurvatureKink(Vector3d curvatureFromBelow, Vector3d curvatureFromAbove)
+    {
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsCurvatureKink_FromVectors(ConstPointer(), curvatureFromBelow, curvatureFromAbove);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    /// <summary>
+    /// True if there is a kink at curve(t).
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool IsKink(Curve curve, double t)
+    {
+      IntPtr pCurve = curve.ConstPointer();
+
+      bool rc = UnsafeNativeMethods.ON_CurveKinkDefinition_IsKink(ConstPointer(), pCurve, t);
+      GC.KeepAlive(curve);
+      GC.KeepAlive(this);
+      return rc;
+    }
+  }
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+  /// <summary>
+  /// The NURBS curve fit tool creates a NURBS curve that approximates
+  /// an existing curve. The NurbsCurveFitParameters class
+  /// contains the paramters that determine NURBS curve properties
+  /// (degree, point count, ...) and other fitting contstraints.
+  /// </summary>
+  public class NurbsCurveFitParameters : ICloneable, IDisposable
+  {
+    IntPtr m_ptr; //ON_NurbsCurveFitParameters*
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NurbsCurveFitParameters"/> class.
+    /// </summary>
+    /// <since>5.0</since>
+    public NurbsCurveFitParameters()
+    {
+      m_ptr = UnsafeNativeMethods.ON_NurbsCurveFitParameters_New();
+    }
+
+    /// <summary>
+    /// Creates a new instance of the <see cref="NurbsCurveFitParameters"/> class as a copy of an existing instance.
+    /// </summary>
+    /// <param name="other">The instance to copy</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public NurbsCurveFitParameters(NurbsCurveFitParameters other)
+    {
+      if (other == null)
+        throw new ArgumentNullException(nameof(other));
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_AssignmentOperator(NonConstPointer(), other.ConstPointer());
+      GC.KeepAlive(this);
+      GC.KeepAlive(other);
+    }
+
+    internal NurbsCurveFitParameters(IntPtr ptr)
+    {
+      m_ptr = ptr;
+    }
+
+    internal IntPtr ConstPointer()
+    {
+      return m_ptr;
+    }
+    IntPtr NonConstPointer()
+    {
+      return m_ptr;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~NurbsCurveFitParameters() { Dispose(false); }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>5.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_NurbsCurveFitParameters_Delete(m_ptr);
+      }
+      m_ptr = IntPtr.Zero;
+    }
+
+    double GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetDouble(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    void SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble which, double val)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetDouble(ptr_this, which, val);
+      GC.KeepAlive(this);
+    }
+    bool GetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetBool(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    void SetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool which, bool val)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetBool(ptr_this, which, val);
+      GC.KeepAlive(this);
+    }
+    byte GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      byte rc = (byte)UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetByte(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    void SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte which, byte val)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetByte(ptr_this, which, (int)val);
+      GC.KeepAlive(this);
+    }
+    int GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt which)
+    {
+      IntPtr ptr_const_this = ConstPointer();
+      int rc = UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetInt(ptr_const_this, which);
+      GC.KeepAlive(this);
+      return rc;
+    }
+    void SetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt which, int val)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetInt(ptr_this, which, val);
+      GC.KeepAlive(this);
+    }
+    /// <summary>
+    /// The TangentMatch enum is used to constrain the tangents of the rebuilt
+    /// curve to match those of the target curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public enum TangentMatch : byte
+    {
+      /// <summary>
+      /// Ignore target curve start and end tangent directions.
+      /// </summary>
+      None = 0,
+
+      /// <summary>
+      /// Match the target curve start tangent direction.
+      /// </summary>
+      AtStart = 1,
+
+      /// <summary>
+      /// Match the target curve end tangent direction.
+      /// </summary>
+      AtEnd = 2,
+
+      /// <summary>
+      /// Match the target curve start and end tangent direction.
+      /// </summary>
+      AtStartAndEnd = 3,
+    };
+    /// <summary>
+    /// Gets ot Sets the TangentMatching value
+    /// </summary>
+    /// <since>9.0</since>
+    public TangentMatch TangentMatching
+    {
+      get { return (TangentMatch)GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.TangentMatching); }
+      set { SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.TangentMatching, (byte)value); }
+    }
+    /// <summary>
+    /// The degree of the resulting curve
+    /// </summary>
+    /// <since>9.0</since>
+    public int Degree
+    {
+      get { return GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Degree); }
+      set { SetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Degree, value); }
+    }
+    /// <summary>
+    /// Number of distinct control points in the NURBS curve fit.
+    /// If a range of point counts is possible, this is the minimum
+    /// number.
+    /// </summary>
+    /// <since>9.0</since>
+    public int PointCount
+    {
+      get { return GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.PointCount); }
+      set { SetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.PointCount, value); }
+    }
+    /// <summary>
+    /// Gets or sets the SubDFriendly property. When true, the resulting curve will be more likely to have good subdivision 
+    /// surface properties, such as fewer kinks and more even parameterization. This is accomplished by using a more 
+    /// aggressive kink splitting strategy and by using the SmoothingCoefficient to bias the fit towards smoother curves.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SubDFriendly
+    {
+      get { return GetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.SubDFriendly); }
+      set { SetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.SubDFriendly, value); }
+    }
+
+    /// <summary>
+    /// The angle, in radians, used to determine if when an abrupt change in tangent or curvature vector
+    /// direction is a kink.
+    /// </summary>
+    /// <since>9.0</since>
+    public double KinkAngleRadians
+    {
+      get { return GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.KinkAngleRadians); }
+      set { SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.KinkAngleRadians, value); }
+    }
+
+    /// <summary>
+    /// The angle, in degrees, used to determine if when an abrupt change in tangent or curvature vector
+    /// direction is a kink.
+    /// </summary>
+    /// <since>9.0</since>
+    public double KinkAngleDegrees
+    {
+      get { return GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.KinkAngleDegrees); }
+      set { SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.KinkAngleDegrees, value); }
+    }
+
+    /// <summary>
+    /// The KinkSplit enum is used to determine how target curve kinks 
+    /// (abrupt changes in target or curvature) are handled during rebuilding.
+    /// </summary>
+    /// <since>9.0</since>
+    public enum KinkSplit : byte
+    {
+      /// <summary>
+      /// All target curve kinks are ignored and rebuilt curves will be G2.
+      /// </summary>
+      None = 0,
+
+      /// <summary>
+      /// The rebuilt curve is permitted have a tangent change at
+      /// locations where the target curve has tangent changes. 
+      /// Curvature changes in the target curve are ignored.
+      /// </summary>
+      AtG1Changes = 1,
+
+      /// <summary>
+      /// The rebuilt curve is permitted have a tangent or curvature changes
+      /// at locations where the target curve has a tangent 
+      /// or large curvature changes. 
+      /// </summary>
+      AtLargeG2Changes = 2,
+
+      /// <summary>
+      /// The rebuilt curve is permitted have a tangent or curvature changes
+      /// at locations where the target curve has a tangent 
+      /// or medium curvature changes.
+      /// </summary>
+      AtMediumG2Changes = 3,
+
+      /// <summary>
+      /// The rebuilt curve is permitted have a tangent or curvature changes
+      /// at locations where the target curve has a tangent 
+      /// or small curvature changes. This option is the most sensitive to splitting
+      /// at any tangent or curvature kink.
+      /// </summary>
+      AtSmallG2Changes = 4,
+    }
+    /// <summary>
+    /// Gets or sets the kink splitting behavior used when fitting a NURBS curve. See also <seealso cref="KinkSplit"/>
+    /// </summary>
+    /// <remarks>This property determines how the curve fitting algorithm handles kinks or sharp changes in
+    /// direction. Adjusting this value can influence the smoothness and accuracy of the resulting curve. Choose an
+    /// appropriate value based on whether preserving or smoothing out kinks is desired for your application.</remarks>
+    /// <since>9.0</since>
+    public KinkSplit KinkSplitting
+    {
+      get { return (KinkSplit)GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.KinkSplitting); }
+      set { SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.KinkSplitting, (byte)value); }
+    }
+
+    /// <summary>
+    /// The Intensity enum is used to select a predefined or a custom value
+    /// for the smoothing, uniformity, and curvature bias coefficients.
+    /// </summary>
+    /// <since>9.0</since>
+    public enum Intensity : byte
+    {
+      /// <summary>
+      /// 
+      /// </summary>
+      None = 0,
+      /// <summary>
+      /// 
+      /// </summary>
+      Low = 1,
+      /// <summary>
+      /// 
+      /// </summary>
+      Moderate = 2,
+      /// <summary>
+      /// 
+      /// </summary>
+      Medium = 3,
+      /// <summary>
+      /// 
+      /// </summary>
+      High = 4,
+      /// <summary>
+      /// 
+      /// </summary>
+      Extreme = 5,
+      /// <summary>
+      /// 
+      /// </summary>
+      Custom = 6
+    };
+
+    /// <summary>
+    /// Smoothing penalty used to make triples of consecutive control polygon points colinear.
+    /// Use SmoothingCoefficient() to convert this enum to the the value passed to the optimizer.
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity SmoothingIntensity
+    {
+      get { return (Intensity)GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.SmoothingIntensity); }
+      set { SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.SmoothingIntensity, (byte)value); }
+    }
+
+    /// <summary>
+    /// Uniformity penalty used to make the distance between control points more equal.
+    /// Use UniformityCoefficient() to convert this enum to the the value passed to the optimizer.
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity UniformityIntensity
+    {
+      get { return (Intensity)GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.UniformityIntensity); }
+      set { SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.UniformityIntensity, (byte)value); }
+    }
+
+    /// <summary>
+    /// Curvature bias is used to make the fit curve stay close to regions of relatively high curvature.
+    /// Use CurvatureBiasCoefficient() to convert this enum to the the value passed to the optimizer.
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity CurvatureBiasIntensity
+    {
+      get { return (Intensity)GetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.CurvatureBiasIntensity); }
+      set { SetByte(UnsafeNativeMethods.NurbsCurveFitParametersByte.CurvatureBiasIntensity, (byte)value); }
+    }
+
+    /// <summary>
+    /// When SmoothingIntensity == NurbsCurveFitParameters.Intensity::Custom,
+    /// this value is used as the smoothing parameter.
+    /// </summary>
+    /// <since>9.0</since>
+    public double SmoothingCoefficient
+    {
+      get { return GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.SmoothingCoefficient); }
+      set { SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.SmoothingCoefficient, value); }
+    }
+
+    /// <summary>
+    /// When UniformityIntensity == NurbsCurveFitParameters.Intensity::Custom,
+    /// this value is used as the uniformity parameter.
+    /// </summary>
+    /// <since>9.0</since>
+    public double UniformityCoefficient
+    {
+      get { return GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.UniformityCoefficient); }
+      set { SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.UniformityCoefficient, value); }
+    }
+
+    /// <summary>
+    /// When CurvatureBiasIntensity == NurbsCurveFitParameters.Intensity::Custom,
+    /// this value is used as the curvature bias parameter.
+    /// </summary>
+    /// <since>9.0</since>
+    public double CurvatureBiasCoefficient
+    {
+      get { return GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.CurvatureBiasCoefficient); }
+      set { SetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.CurvatureBiasCoefficient, value); }
+    }
+
+    /// <summary>
+    /// When a range of point counts is permitted 
+    /// and PointCountRangeTolerance greater than 0,
+    /// then searching for the NURBS curve fit terminates if 
+    /// the separation is less than or equal to PointCountRangeTolerance.
+    /// </summary>
+    /// <returns>
+    /// The desired or target separation value used when a ranged of point counts
+    /// is permitted.
+    /// </returns>
+    /// <since>9.0</since>
+    public double PointCountRangeTolerance =>
+      GetDouble(UnsafeNativeMethods.NurbsCurveFitParametersDouble.Get_PointCountRangeTolerance);
+
+    /// <summary>
+    /// Number of total control points if the NURBS curve will be periodic.
+    /// This number is &gt;= PointCount() and includes periodic duplicates.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Closed
+    {
+      get { return GetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.Closed); }
+      set { SetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.Closed, value); }
+    }
+
+    /// <summary>
+    /// If true, the TangentMatching setting is applied at kinks. 
+    /// Otherwise, TangentMatching applies only to the ends of curves.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ApplyTangentMatchingAtKinks
+    {
+      get { return GetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.ApplyTangentMatchingAtKinks); }
+      set { SetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.ApplyTangentMatchingAtKinks, value); }
+    }
+
+  /// <summary>
+  /// If OptimizeCurve = false, then all options below are ignored
+  /// and the Greville interpolant is returned. 
+  /// Rhino 1 - Rhino 8 Rebuild command created a result similar to what's
+  /// created when m_bOptimizeCurve = false.
+  /// </summary>
+  /// <since>9.0</since>
+  public bool OptimizeCurve
+    {
+      get { return GetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.OptimizeCurve); }
+      set { SetBool(UnsafeNativeMethods.NurbsCurveFitParametersBool.OptimizeCurve, value); }
+    }
+
+    /// <summary>
+    /// Returns the Curvature bias coefficient that corresponds to a given NurbsCurveFitParameters.Intensity value. 
+    /// </summary>
+    /// <since>9.0</since>
+    public double GetCurvatureBiasCoefficientFromIntensity(Intensity intensity)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetCurvatureBiasCoefficientFromIntensity((byte)intensity);
+    }
+
+    /// <summary>
+    /// If Closed() is true,
+    /// the number of constrained points is 
+    /// (TangentMatchStart() || TangentMatchEnd() ? 1 : 0) 
+    /// + (TangentMatchStart()?1:0)
+    /// + (TangentMatchEnd()?1:0).
+    /// If Closed() is false,
+    /// the number of constrained points is 
+    /// 2 
+    /// + (SubDFriendly() ? 2 : 0) 
+    /// + (TangentMatchStart()?1:0)
+    /// + (TangentMatchEnd()?1:0).
+    /// </summary>
+    /// <returns>
+    /// Number of constrained points.
+    /// </returns>
+    /// <since>9.0</since>
+    public int ConstrainedPointCount =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_ConstrainedPointCount);
+
+    /// <returns>
+    /// Minimum number of distinct control points in the NURBS curve fit.
+    /// </returns>
+    /// <since>9.0</since>
+    public int PointCountRangeMinimum =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_PointCountRangeMinimum);
+
+    /// <returns>
+    /// Maximum number of distinct control points in the NURBS curve fit.
+    /// </returns>
+    /// <since>9.0</since>
+    public int PointCountRangeMaximum =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_PointCountRangeMaximum);
+
+    /// <summary>
+    /// Number of control points if the NURBS curve will be clamped.
+    /// Number of total control points if the NURBS curve will be periodic.
+    /// This number is &gt;= PointCount() Includes SubDFriendly constrained points
+    /// and the duplicated point for a clamped closed curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public int ClampedControlPointCount =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_ClampedControlPointCount);
+
+    /// <summary>
+    /// Number of total control points if the NURBS curve will be periodic.
+    /// This number is &gt;= PointCount() and includes periodic duplicates.
+    /// </summary>
+    /// <since>9.0</since>
+    public int PeriodicControlPointCount =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_PeriodicControlPointCount);
+
+    /// <summary>
+    /// This is the number of points the NURBS curve is fit through.
+    /// Is it common for these points to be sampled from an input curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public int SampleCount =>
+     GetInt(UnsafeNativeMethods.NurbsCurveFitParametersInt.Get_SampleCount);
+
+    /// <summary>
+    /// Returns the NurbsCurveFitParameters.Intensity value that corresponds to a given curvature bias coefficient. 
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity GetCurvatureBiasIntensityFromCoefficient(double coefficient)
+    {
+      return (Intensity)UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetCurvatureBiasIntensityFromCoefficient(coefficient);
+    }
+
+    /// <summary>
+    /// Returns the uniformity coefficient that corresponds to a given NurbsCurveFitParameters.Intensity value. 
+    /// </summary>
+    /// <since>9.0</since>
+    public double GetUniformityCoefficientFromIntensity(Intensity intensity)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetUniformityCoefficientFromIntensity((byte)intensity);
+    }
+    /// <summary>
+    /// Returns the NurbsCurveFitParameters.Intensity value that corresponds to a given uniformity coefficient. 
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity GetUniformityIntensityFromCoefficient(double coefficient)
+    {
+      return (Intensity)UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetUniformityIntensityFromCoefficient(coefficient);
+    }
+    /// <summary>
+    /// Returns the smoothing coefficient that corresponds to a given NurbsCurveFitParameters.Intensity value. 
+    /// </summary>
+    /// <since>9.0</since>
+    public double GetSmoothingCoefficientFromIntensity(Intensity intensity)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetSmoothingCoefficientFromIntensity((byte)intensity);
+    }
+    /// <summary>
+    /// Returns the NurbsCurveFitParameters.Intensity value that corresponds to a given smoothing coefficient. 
+    /// </summary>
+    /// <since>9.0</since>
+    public Intensity GetSmoothingIntensityFromCoefficient(double coefficient)
+    {
+      return (Intensity)UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetSmoothingIntensityFromCoefficient(coefficient);
+    }
+    
+    /// <summary>
+    /// The minimum degree of the fit
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MinimumDegree => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMinimumDegree();
+    
+    /// <summary>
+    /// The maximum degree of the fit
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MaximumDegree => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMaximumDegree();
+    
+    /// <summary>
+    /// The default degree of the fit
+    /// </summary>
+    /// <since>9.0</since>
+    public static int DefaultDegree => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetDefaultDegree();
+
+    /// <summary>
+    /// The minimum clamped point count
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MinimumClampedPointCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMinimumClampedPointCount();
+
+    /// <summary>
+    /// The minimum closed point count
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MinimumClosedPointCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMinimumClosedPointCount();
+    
+    /// <summary>
+    /// Gets the maximum number of points supported for NURBS curve fitting operations.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MaximumPointCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMaximumPointCount();
+
+    /// <summary>
+    /// Minimum number of points to sample from input curves and
+    /// pass to the fitter that creates the output NURBS curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MinimumSampleCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMinimumSampleCount();
+
+    /// <summary>
+    /// Maximum number of points to sample from input curves and
+    /// pass to the fitter that creates the output NURBS curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MaximumSampleCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetMaximumSampleCount();
+    /// <summary>
+    /// Default number of points to sample from input curves and
+    /// pass to the fitter that creates the output NURBS curve.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int DefaultSampleCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_GetDefaultSampleCount();
+
+    /// <summary>
+    /// Give a degree and periodic setting, determine the minimum point count.
+    /// </summary>
+    /// <param name="degree">
+    /// Degree of output NURBS curve.
+    /// </param>
+    /// <param name="bClosed">
+    /// True if the output NURBS curve will be closed.
+    /// </param>
+    /// <param name="bSubDFriendly">
+    /// True if the output NURBS curve will be SubDFriendly.
+    /// </param>
+    /// <returns>
+    /// Minimum permitted point count.
+    /// </returns>
+    /// <since>9.0</since>
+    public static int MinimumPointCountForDegree(int degree, bool bClosed, bool bSubDFriendly)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_MinimumPointCountForDegree(degree, bClosed, bSubDFriendly);
+    }
+    /// <summary>
+    /// Given a point count and periodic setting, determine the maximum degree.
+    /// </summary>
+    /// <param name="degree">
+    /// Degree of output NURBS curve.
+    /// </param>
+    /// <param name="bClosed">
+    /// True if the output NURBS curve will be closed.
+    /// </param>
+    /// <param name="bSubDFriendly">
+    /// True if the output NURBS curve will be SubDFriendly.
+    /// </param>
+    /// <returns>
+    /// Maximum permitted degree.
+    /// </returns>
+    /// <since>9.0</since>
+    public static int MaximumPointCountForDegree(int degree, bool bClosed, bool bSubDFriendly)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_MaximumPointCountForDegree(degree, bClosed, bSubDFriendly);
+    }
+
+    /// <summary>
+    /// returns true if the input values are within the acceptable ranges for NURBS curve fitting. If false is returned, the input values should be adjusted before calling the curve fitting function. See also MinimumPointCountForDegree() and MaximumPointCountForDegree().
+    /// </summary>
+    /// <param name="sample_point_count"></param>
+    /// <param name="degree"></param>
+    /// <param name="control_point_count"></param>
+    /// <param name="bClosed"></param>
+    /// <param name="curve_domain"></param>
+    /// <returns></returns>
+    public static bool ValidInput(long sample_point_count, int degree, int control_point_count, bool bClosed, Interval curve_domain)
+    {
+      return UnsafeNativeMethods.ON_NurbsCurveFitParameters_ValidInput(sample_point_count, degree, control_point_count, bClosed, curve_domain);
+    }
+
+    /// <summary>
+    /// Gets or sets  the point count range as an IndexPair.
+    /// </summary>
+    /// <since>9.0</since>
+    public IndexPair PointCountRange
+    {
+      get
+      {
+        int i = 0, j = 0;
+        UnsafeNativeMethods.ON_NurbsCurveFitParameters_PointCountRange(ConstPointer(), ref i, ref j);
+        IndexPair rc = new IndexPair(i, j);
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetPointCountRange(ConstPointer(), value.I, value.J);
+        GC.KeepAlive(this);
+
+      }
+    }
+
+    /// <summary>
+    /// Get the point count range and tolerance.
+    /// </summary>
+    /// <since>9.0</since>
+    public void GetPointCountRange(out int minimum, out int maximum, out double tolerance)
+    {
+      minimum = maximum = 0;
+      tolerance = 0;
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_PointCountRange2(ConstPointer(), ref minimum, ref maximum, ref tolerance);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Set the point count range and tolerance.
+    /// </summary>
+    /// <since>9.0</since>
+    public void SetPointCountRange(int minimum, int maximum)
+    {
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetPointCountRange(ConstPointer(), minimum, maximum);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Set the point count range and tolerance.
+    /// </summary>
+    /// <since>9.0</since>
+    public void SetPointCountRange(int minimum, int maximum, double tolerance)
+    {
+      UnsafeNativeMethods.ON_NurbsCurveFitParameters_SetPointCountRange2(ConstPointer(), minimum, maximum, tolerance);
+      GC.KeepAlive(this);
+    }
+
+    /// <returns>
+    /// Returns true if the best fit in a range of point counts
+    /// should be returned.
+    /// </returns>
+    /// <since>9.0</since>
+    public int VariablePointCount => UnsafeNativeMethods.ON_NurbsCurveFitParameters_VariablePointCount(ConstPointer());
+
+    /// <summary>
+    /// Supports the ICloneable inteface and creates a new NurbsCurveFitParameters object with the same property values as this instance.
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public object Clone()
+    {
+      return new NurbsCurveFitParameters(this);
+    }
+  } // NurbsCurveFitParameters
+#endif
 }
 
 

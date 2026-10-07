@@ -982,6 +982,33 @@ namespace Rhino.DocObjects
       set { SetBool(UnsafeNativeMethods.LayerBool.IsExpanded, value); }
     }
 
+    /// <summary>
+    /// Gets and sets a short description of the layer.
+    /// </summary>
+    /// <since>9.0</since>
+    public string Description
+    {
+      get
+      {
+        IntPtr pConstThis = ConstPointer();
+        if (IntPtr.Zero == pConstThis)
+          return String.Empty;
+        using (var sh = new StringHolder())
+        {
+          IntPtr pString = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_Layer_GetDescription(pConstThis, pString);
+          return sh.ToString();
+        }
+      }
+      set
+      {
+        IntPtr pThis = NonConstPointer();
+        UnsafeNativeMethods.ON_Layer_SetDescription(pThis, value);
+        GC.KeepAlive(this);
+        InternalCommitChanges();
+      }
+    }
+
 #if RHINO_SDK
 
     /// <summary>
@@ -1080,32 +1107,17 @@ namespace Rhino.DocObjects
     {
       get
       {
-        // If set was called and the render material was changed or set to null
-        // then return the cached set to render material.
-        if (m_set_render_material_to_null || m_set_render_material != Guid.Empty)
+        try
         {
-          var result = Render.RenderContent.FromId(m_doc, m_set_render_material) as RenderMaterial;
-          return result;
+          return GetRenderMaterial();
         }
-
-        // Get the document Id
-        var doc_id = (null == m_doc ? 0 : m_doc.RuntimeSerialNumber);
-        if (doc_id < 1) return null;
-
-        var materialIndex = RenderMaterialIndex;
-        if (materialIndex >= 0 && materialIndex < m_doc.Materials.Count)
+        catch (DllNotFoundException)
         {
-          var material = m_doc.Materials[materialIndex];
-          if (!material.IsDeleted) return material.RenderMaterial;
+          // A damaged installation can leave the RDK's native library unloadable. This property
+          // is read while building a tooltip on mouse-move in the Layers panel, so letting it
+          // throw closed Rhino every time the pointer crossed the panel. RH-97065.
+          return null;
         }
-
-        var pointer = ConstPointer();
-        // Get the render material associated with the layers render material
-        // index into the documents material table.
-        var id = UnsafeNativeMethods.Rdk_RenderContent_LayerMaterialInstanceId(doc_id, pointer);
-        var content = Render.RenderContent.FromId(m_doc, id) as RenderMaterial;
-        GC.KeepAlive(this);
-        return content;
       }
       set
       {
@@ -1115,6 +1127,36 @@ namespace Rhino.DocObjects
         m_set_render_material = value == null ? Guid.Empty : value.Id;
         InternalCommitChanges();
       }
+    }
+
+    private RenderMaterial GetRenderMaterial()
+    {
+      // If set was called and the render material was changed or set to null
+      // then return the cached set to render material.
+      if (m_set_render_material_to_null || m_set_render_material != Guid.Empty)
+      {
+        var result = Render.RenderContent.FromId(m_doc, m_set_render_material) as RenderMaterial;
+        return result;
+      }
+
+      // Get the document Id
+      var doc_id = (null == m_doc ? 0 : m_doc.RuntimeSerialNumber);
+      if (doc_id < 1) return null;
+
+      var materialIndex = RenderMaterialIndex;
+      if (materialIndex >= 0 && materialIndex < m_doc.Materials.Count)
+      {
+        var material = m_doc.Materials[materialIndex];
+        if (!material.IsDeleted) return material.RenderMaterial;
+      }
+
+      var pointer = ConstPointer();
+      // Get the render material associated with the layers render material
+      // index into the documents material table.
+      var id = UnsafeNativeMethods.Rdk_RenderContent_LayerMaterialInstanceId(doc_id, pointer);
+      var content = Render.RenderContent.FromId(m_doc, id) as RenderMaterial;
+      GC.KeepAlive(this);
+      return content;
     }
 
     private Guid m_set_render_material = Guid.Empty;
@@ -1380,6 +1422,18 @@ namespace Rhino.DocObjects
       set => SetBool(UnsafeNativeMethods.LayerBool.PerViewportIsVisibleInNewDetails, value);
     }
 
+#if RHINO_SDK
+    /// <summary>
+    /// Gets or sets the section style index for this layer.
+    /// </summary>
+    /// <since>9.0</since>
+    public int SectionStyleIndex
+    {
+      get { return GetInt(UnsafeNativeMethods.LayerInt.SectionStyleIndex); }
+      set { SetInt(UnsafeNativeMethods.LayerInt.SectionStyleIndex, value); }
+    }
+#endif
+
     ///<summary>
     /// Get an optional custom section style associated with these attributes.
     ///</summary>
@@ -1643,6 +1697,29 @@ namespace Rhino.DocObjects.Tables
     /// layer is returned. Note that this reference may become invalid after
     /// AddLayer() is called.
     /// </returns>
+    /// <remarks>
+    /// <para>
+    /// Detaching a worksession reference model, or purging a linked instance
+    /// definition, removes its layers but leaves the table slots they occupied
+    /// empty. The slots cannot be closed up, because table indices are persistent
+    /// references that objects store - object attributes hold a layer index - so
+    /// renumbering would repoint existing objects at the wrong layer. Count spans
+    /// the empty slots, and they accumulate for the life of the document - one
+    /// per purge.
+    /// </para>
+    /// <para>
+    /// An index that lands on an empty slot returns the document's default layer
+    /// rather than throwing. Nothing about that layer says it is a stand-in: it
+    /// reports the name "Default" and ordinary values for every other property,
+    /// so enumerating a table that has been purged several times reports several
+    /// layers that are not there. The one distinguishing mark is the index - a
+    /// stand-in reports Index -1, never the index you asked for - so test
+    /// index == Layers[index].Index before treating an entry as real.
+    /// Enumerating the table with foreach goes through the document manifest
+    /// rather than the raw table array, so it does not visit empty slots at all
+    /// and is the safer way to walk the table. See RH-97389.
+    /// </para>
+    /// </remarks>
     public Layer this[int index]
     {
       get
@@ -1772,8 +1849,10 @@ namespace Rhino.DocObjects.Tables
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int Find(string layerName, bool ignoreDeletedLayers)
     {
-      Layer found = FindNext(-1, layerName);
-      return found == null ? -1 : found.Index;
+      using (Layer found = FindNext(-1, layerName))
+      {
+        return found == null ? -1 : found.Index;
+      }
     }
 
     /// <since>5.0</since>
@@ -1782,8 +1861,10 @@ namespace Rhino.DocObjects.Tables
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public int FindNext(int index, string layerName, bool ignoreDeletedLayers)
     {
-      Layer found = FindNext(index, layerName);
-      return found == null ? -1 : found.Index;
+      using (Layer found = FindNext(index, layerName))
+      {
+        return found == null ? -1 : found.Index;
+      }
     }
 
     /// <summary>
@@ -2383,8 +2464,15 @@ namespace Rhino.DocObjects.Tables
       return index != -1 ? Purge(index, quiet) : false;
     }
 
-    //[skipping]
-    // int DeleteLayers( int layer_index_count, const int* layer_index_list, bool  bQuiet );
+    /// <summary>
+    /// Purges any unused layers.
+    /// </summary>
+    /// <returns>The number of unused layers that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeUnused()
+    {
+      return UnsafeNativeMethods.RHC_RhPurgeLayers(Document.RuntimeSerialNumber);
+    }
 
     /// <summary>
     /// Undeletes a layer that has been deleted by DeleteLayer().

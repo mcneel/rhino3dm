@@ -72,6 +72,7 @@ namespace Rhino.Geometry
     const int IDX_URL = 2;
     const int IDX_URLTAG = 3;
     const int IDX_SOURCEARCHIVE = 4;
+    const int IDX_SOURCEARCHIVE_RELATIVEPATH = 5;
 
     /// <summary>
     /// Gets or sets the description of the definition.
@@ -166,6 +167,123 @@ namespace Rhino.Geometry
         }
       }
     }
+
+    /// <summary>
+    /// Gets the source archive path for linked instance definitions relative to
+    /// the file that contains this definition. Empty if the definition is not linked
+    /// or no relative path is stored.
+    /// </summary>
+    /// <since>9.0</since>
+    public string SourceArchiveRelativePath
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.ON_InstanceDefinition_GetString(ptr, IDX_SOURCEARCHIVE_RELATIVEPATH, ptr_string);
+          GC.KeepAlive(this);
+          return sh.ToString();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets the relationship between this instance definition's geometry and the
+    /// source archive that contains the original definition.
+    /// </summary>
+    /// <since>9.0</since>
+    public InstanceDefinitionUpdateType UpdateType
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_InstanceDefinition_UpdateType(ptr);
+        GC.KeepAlive(this);
+        return (InstanceDefinitionUpdateType)rc;
+      }
+    }
+
+    /// <summary>
+    /// Returns true if this instance definition is linked to an external source archive,
+    /// that is, if its <see cref="UpdateType"/> is <see cref="InstanceDefinitionUpdateType.Linked"/>
+    /// or <see cref="InstanceDefinitionUpdateType.LinkedAndEmbedded"/>.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IsLinkedType
+    {
+      get
+      {
+        var type = UpdateType;
+        return type == InstanceDefinitionUpdateType.Linked || type == InstanceDefinitionUpdateType.LinkedAndEmbedded;
+      }
+    }
+
+    /// <summary>
+    /// Gets the unit system of the instance definition. If the instance definition was
+    /// imported from another 3dm file, the unit system may differ from that of the document.
+    /// </summary>
+    /// <since>9.0</since>
+    public UnitSystem UnitSystem
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        UnitSystem rc = UnsafeNativeMethods.ON_InstanceDefinition_GetUnitSystem(ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Specifies how model components (layers, materials, dimension styles, etc.)
+    /// from linked instance definition files appear in the active model.
+    /// </summary>
+    /// <since>9.0</since>
+    public InstanceDefinitionLayerStyle LayerStyle
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int layer_style = UnsafeNativeMethods.ON_InstanceDefinition_LinkedComponentAppearance(ptr);
+        GC.KeepAlive(this);
+        if (layer_style == (int)InstanceDefinitionLayerStyle.Active)
+          return InstanceDefinitionLayerStyle.Active;
+        if (layer_style == (int)InstanceDefinitionLayerStyle.Reference)
+          return InstanceDefinitionLayerStyle.Reference;
+        return InstanceDefinitionLayerStyle.None;
+      }
+    }
+
+    /// <summary>
+    /// This property applies when an instance definition is linked.
+    /// If true, when reading the file that defines the content of the linked instance definition, skip any linked instance definitions found in that file.
+    /// If false, when reading the file that defines the content of the linked instance definition, recursively load linked instance definitions found in that file.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SkipNestedLinkedDefinitions
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_InstanceDefinition_SkipNestedLinkedDefinitions(ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    // NOTE: Deliberately NOT exposed. The native ON_FileReference::FullPathStatus()
+    // this would return is an optional field and it is commonly Unknown even when
+    // the source archive path is perfectly valid. Use SourceArchive for the stored path, or the
+    // doc-side InstanceDefinition.ArchiveFileStatus (which compares against the file on
+    // disk) when a live status is needed.
+    //public InstanceDefinitionSourceArchiveFileStatus SourceArchiveFileStatus
+
+    // NOTE: Deliberately NOT exposed. The native ON_ContentHash::ContentLastModifiedTime()
+    // this would return is, as documented on that method, often unknown (returns 0) or
+    // incorrectly set. Use SourceArchive for the stored path.
+    //public DateTime? SourceArchiveLastModifiedTime
 
     /// <summary>
     /// Returns <see cref="ModelComponentType.InstanceDefinition"/>.

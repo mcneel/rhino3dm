@@ -88,13 +88,17 @@ namespace Rhino.Display
       if (mode != null)
       {
         var rhobj = Rhino.DocObjects.RhinoObject.CreateRhinoObjectHelper(pConstRhinoObject);
-        DisplayPipelineAttributes attr = new DisplayPipelineAttributes(pDisplayPipelineAttributes);
-        try
+        // RH-97356: these attributes belong to the display pipeline, so the wrapper must not
+        // delete them. Don't delete inside the try: an exception from the override skips it
+		    // and Dispose then frees the core's attributes.
+        using (DisplayPipelineAttributes attr = new DisplayPipelineAttributes(pDisplayPipelineAttributes, true))
         {
-          mode.SetUpDisplayAttributes(rhobj, attr);
-          attr.m_ptr_attributes = IntPtr.Zero;
+          try
+          {
+            mode.SetUpDisplayAttributes(rhobj, attr);
+          }
+          catch (Exception) { }
         }
-        catch (Exception) { }
       }
     }
     static readonly ANALYSISMODESETDISPLAYATTRIBUTESPROC m_ANALYSISMODESETDISPLAYATTRIBUTESPROC = OnSetDisplayAttributesProc;
@@ -139,6 +143,12 @@ namespace Rhino.Display
             mode.DrawBrepObject(brep, dp);
             return;
           }
+          Rhino.DocObjects.ExtrusionObject extrusion = rhobj as Rhino.DocObjects.ExtrusionObject;
+          if (extrusion != null)
+          {
+            mode.DrawExtrusionObject(extrusion, dp);
+            return;
+          }
           Rhino.DocObjects.CurveObject curve = rhobj as Rhino.DocObjects.CurveObject;
           if (curve != null)
           {
@@ -149,6 +159,12 @@ namespace Rhino.Display
           if (mesh != null)
           {
             mode.DrawMeshObject(mesh, dp);
+            return;
+          }
+          Rhino.DocObjects.SubDObject subd = rhobj as Rhino.DocObjects.SubDObject;
+          if (subd != null)
+          {
+            mode.DrawSubDObject(subd, dp);
             return;
           }
           Rhino.DocObjects.PointCloudObject pointcloud = rhobj as Rhino.DocObjects.PointCloudObject;
@@ -287,6 +303,24 @@ namespace Rhino.Display
     {
       get { return new Guid("A5CC27F6-E169-443A-87ED-C10657FF4BC9"); }
     }
+
+    /// <summary>
+    /// Id for Rhino's built-in direction analysis mode.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Guid RhinoDirectionAnalysisModeId
+    {
+      get { return new Guid("83141AA3-563B-4355-8009-48685119BC02"); }
+    }
+
+    /// <summary>
+    /// Id for Rhino's built-in End analysis mode.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Guid RhinoEndAnalysisModeId
+    {
+      get { return new Guid("F4477F56-BC94-4DD2-B941-7D21F9DC674A"); }
+    }
     #endregion
 
     /// <summary>
@@ -303,6 +337,23 @@ namespace Rhino.Display
       return UnsafeNativeMethods.CRhinoVisualAnalysisMode_AnalysisAdjustMeshes(doc.RuntimeSerialNumber, analysisModeId);
     }
 
+    /// <summary>
+    /// Adjusts the auto range values for curvature analysis.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void CurvatureColorAutoRange()
+    {
+      UnsafeNativeMethods.CRhinoVisualAnalysisMode_CurvatureColorAutoRange();
+    }
+
+    /// <summary>
+    /// Adjusts the max range values for curvature analysis.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void CurvatureColorMaxRange()
+    {
+      UnsafeNativeMethods.CRhinoVisualAnalysisMode_CurvatureColorMaxRange();
+    }
     /// <summary>
     /// Registers a custom visual analysis mode for use in Rhino.  It is OK to call
     /// register multiple times for a single custom analysis mode type, since subsequent
@@ -368,6 +419,16 @@ namespace Rhino.Display
       VisualAnalysisMode rc = FindLocal(id);
       if (rc != null)
         return rc;
+
+      // RH-99171: FindLocal never matches native modes; reuse the cached wrapper, don't append another.
+      if (m_registered_modes != null)
+      {
+        foreach (var mode in m_registered_modes)
+        {
+          if (mode is NativeVisualAnalysisMode && mode.m_id == id)
+            return mode;
+        }
+      }
 
       IntPtr pMode = UnsafeNativeMethods.CRhinoVisualAnalysisMode_Mode(id);
       if (pMode != IntPtr.Zero)
@@ -518,6 +579,34 @@ namespace Rhino.Display
     /// <param name="brep">A brep object.</param>
     /// <param name="pipeline">The current display pipeline.</param>
     protected virtual void DrawBrepObject(Rhino.DocObjects.BrepObject brep, DisplayPipeline pipeline )
+    {
+    }
+
+    /// <summary>
+    /// Draws one extrusion. Override this method to add your custom behavior.
+    /// <para>The default implementation does nothing.</para>
+    /// </summary>
+    /// <remarks>
+    /// Extrusions are not breps, so <see cref="DrawBrepObject"/> is not called for them. A mode
+    /// that should treat the two alike needs to override both.
+    /// </remarks>
+    /// <param name="extrusion">An extrusion object.</param>
+    /// <param name="pipeline">The current display pipeline.</param>
+    protected virtual void DrawExtrusionObject(Rhino.DocObjects.ExtrusionObject extrusion, DisplayPipeline pipeline )
+    {
+    }
+
+    /// <summary>
+    /// Draws one SubD. Override this method to add your custom behavior.
+    /// <para>The default implementation does nothing.</para>
+    /// </summary>
+    /// <remarks>
+    /// The default <see cref="ObjectSupportsAnalysisMode"/> does not accept SubD objects, so a
+    /// mode that wants them must override that as well and return true for them.
+    /// </remarks>
+    /// <param name="subd">A SubD object.</param>
+    /// <param name="pipeline">The current display pipeline.</param>
+    protected virtual void DrawSubDObject(Rhino.DocObjects.SubDObject subd, DisplayPipeline pipeline )
     {
     }
 

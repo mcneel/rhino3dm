@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
 
 namespace Rhino.Geometry
 {
@@ -148,6 +150,7 @@ namespace Rhino.Geometry
     /// complete independent 'deep' copies if a non const operation is
     /// perform on the instance (something that mutates the internal data)
     /// </summary>
+    /// <since>8.27</since>
     public bool IsShallowDuplicate
     {
       get { return m_shallow_parent != null; }
@@ -196,61 +199,44 @@ namespace Rhino.Geometry
       var type = UnsafeNativeMethods.ON_Geometry_GetGeometryType(pGeometry);
       if (type < 0)
         return null;
-      GeometryBase rc = null;
 
       switch (type)
       {
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Curve: //1
-          rc = new Curve(pGeometry, parent, subobjectIndex);
-          break;
+          return new Curve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_NurbsCurve: //2
-          rc = new NurbsCurve(pGeometry, parent, subobjectIndex);
-          break;
+          return new NurbsCurve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PolyCurve: // 3
-          rc = new PolyCurve(pGeometry, parent, subobjectIndex);
-          break;
+          return new PolyCurve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PolylineCurve: //4
-          rc = new PolylineCurve(pGeometry, parent, subobjectIndex);
-          break;
+          return new PolylineCurve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_ArcCurve: //5
-          rc = new ArcCurve(pGeometry, parent, subobjectIndex);
-          break;
+          return new ArcCurve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_LineCurve: //6
-          rc = new LineCurve(pGeometry, parent, subobjectIndex);
-          break;
+          return new LineCurve(pGeometry, parent, subobjectIndex);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Mesh: //7
-          rc = new Mesh(pGeometry, parent);
-          break;
+          return new Mesh(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Point: //8
-          rc = new Point(pGeometry, parent);
-          break;
+          return new Point(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_TextDot: //9
-          rc = new TextDot(pGeometry, parent);
-          break;
+          return new TextDot(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Surface: //10
-          rc = new Surface(pGeometry, parent);
-          break;
+          return new Surface(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Brep: //11
-          rc = new Brep(pGeometry, parent);
-          break;
+          return new Brep(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_NurbsSurface: //12
-          rc = new NurbsSurface(pGeometry, parent);
-          break;
+          return new NurbsSurface(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_RevSurface: //13
-          rc = new RevSurface(pGeometry, parent);
-          break;
+          return new RevSurface(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PlaneSurface: //14
-          rc = new PlaneSurface(pGeometry, parent);
-          break;
+          return new PlaneSurface(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_ClippingPlaneSurface: //15
-          rc = new ClippingPlaneSurface(pGeometry, parent);
-          break;
+          return new ClippingPlaneSurface(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Hatch: // 17
-          rc = new Hatch(pGeometry, parent);
-          break;
+          return new Hatch(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_SumSurface: //19
-          rc = new SumSurface(pGeometry, parent);
-          break;
+          return new SumSurface(pGeometry, parent);
+#pragma warning disable CA2000
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_BrepFace: //20
           {
             int faceindex = -1;
@@ -258,7 +244,7 @@ namespace Rhino.Geometry
             if (ptr_brep != IntPtr.Zero && faceindex >= 0)
             {
               Brep b = new Brep(ptr_brep, parent);
-              rc = b.Faces[faceindex];
+              return b.Faces[faceindex];  //This object has a back pointer to Brep
             }
           }
           break;
@@ -269,30 +255,9 @@ namespace Rhino.Geometry
             if (ptr_brep != IntPtr.Zero && edgeindex >= 0)
             {
               Brep b = new Brep(ptr_brep, parent);
-              rc = b.Edges[edgeindex];
+              return b.Edges[edgeindex];//This object has a back pointer to Brep
             }
           }
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_InstanceReference: // 23
-          rc = new InstanceReferenceGeometry(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Extrusion: //24
-          rc = new Extrusion(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PointCloud: // 26
-          rc = new PointCloud(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DetailView: // 27
-          rc = new DetailView(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Light: //32
-          rc = new Light(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PointGrid: //33
-          rc = new Point3dGrid(pGeometry, parent);
-          break;
-        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_MorphControl: //34
-          rc = new MorphControl(pGeometry, parent);
           break;
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_BrepLoop: //35
           {
@@ -301,7 +266,7 @@ namespace Rhino.Geometry
             if (ptr_brep != IntPtr.Zero && loopindex >= 0)
             {
               Brep b = new Brep(ptr_brep, parent);
-              rc = b.Loops[loopindex];
+              return b.Loops[loopindex];//This object has a back pointer to Brep
             }
           }
           break;
@@ -312,41 +277,46 @@ namespace Rhino.Geometry
             if (ptr_brep != IntPtr.Zero && trimindex >= 0)
             {
               Brep b = new Brep(ptr_brep, parent);
-              rc = b.Trims[trimindex];
+              return b.Trims[trimindex];//This object has a back pointer to Brep
             }
           }
           break;
-
+#pragma warning restore CA2000
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_InstanceReference: // 23
+          return new InstanceReferenceGeometry(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Extrusion: //24
+          return new Extrusion(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PointCloud: // 26
+          return new PointCloud(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DetailView: // 27
+          return new DetailView(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Light: //32
+          return new Light(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_PointGrid: //33
+          return new Point3dGrid(pGeometry, parent);
+        case UnsafeNativeMethods.OnGeometryTypeConsts.ON_MorphControl: //34
+          return new MorphControl(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Leader: // 38
-          rc = new Leader(pGeometry, parent);
-          break;
+          return new Leader(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_SubD: // 39
-          rc = new SubD(pGeometry, parent);
-          break;
+          return new SubD(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DimLinear: //40
-          rc = new LinearDimension(pGeometry, parent);
-          break;
+          return new LinearDimension(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DimAngular: //41
-          rc = new AngularDimension(pGeometry, parent);
-          break;
+          return new AngularDimension(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DimRadial: //42
-          rc = new RadialDimension(pGeometry, parent);
-          break;
+          return new RadialDimension(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_DimOrdinate: //43
-          rc = new OrdinateDimension(pGeometry, parent);
-          break;
+          return new OrdinateDimension(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Centermark: //44
-          rc = new Centermark(pGeometry, parent);
-          break;
+          return new Centermark(pGeometry, parent);
         case UnsafeNativeMethods.OnGeometryTypeConsts.ON_Text: //45
-          rc = new TextEntity(pGeometry, parent);
-          break;
+          return new TextEntity(pGeometry, parent);
         default:
-          rc = new UnknownGeometry(pGeometry, parent, subobjectIndex);
-          break;
+          return new UnknownGeometry(pGeometry, parent, subobjectIndex);
       }
 
-      return rc;
+      return null;
     }
 
     #endregion
@@ -860,6 +830,118 @@ namespace Rhino.Geometry
       GC.KeepAlive(other);
       return false;
     }
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+    /// <summary>
+    /// Detects overlapping regions among a set of input objects after they are
+    /// orthogonally projected onto the supplied plane, and reports what should
+    /// happen to each input object so that the overlaps can be removed.
+    /// </summary>
+    /// <param name="objects">
+    /// The geometry to test for overlaps. Supported types are <see cref="Curve"/>
+    /// (curves), <see cref="Point"/> (single points), and <see cref="PointCloud"/>
+    /// (sets of points). Objects of any other type, as well as null or invalid
+    /// objects, are silently ignored.
+    /// </param>
+    /// <param name="plane">
+    /// The plane the geometry is orthogonally projected onto before testing.
+    /// Use Plane.WorldXY to test in the world XY plane (dropping Z).
+    /// </param>
+    /// <param name="tolerance">The overlap distance tolerance, measured in the projected plane.</param>
+    /// <param name="wholeCurves">
+    /// When true, an overlapping curve is treated as a single unit; when false,
+    /// curves may be split at segment boundaries so that only the overlapping
+    /// portions are affected.
+    /// </param>
+    /// <param name="locked">
+    /// Geometry that participates in the overlap test but is never itself
+    /// modified. May be null or empty.
+    /// </param>
+    /// <param name="lockedExclusive">
+    /// When true, overlaps are only reported where an input object overlaps a
+    /// locked object; overlaps purely among the input objects are ignored.
+    /// </param>
+    /// <param name="entire">
+    /// For each returned object index, true if the entire object is an overlap
+    /// and should be removed. This out parameter is assigned during this call.
+    /// </param>
+    /// <param name="deadSegments">
+    /// For each returned object index, the component indices of the segments
+    /// that overlap and should be removed. This out parameter is assigned during
+    /// this call.
+    /// </param>
+    /// <param name="replacements">
+    /// For each returned object index, an optional replacement curve to use in
+    /// place of the original, or null when no replacement is produced. This out
+    /// parameter is assigned during this call.
+    /// </param>
+    /// <returns>
+    /// The indices, into <paramref name="objects"/>, of the objects that are
+    /// affected by an overlap. The <paramref name="entire"/>,
+    /// <paramref name="deadSegments"/>, and <paramref name="replacements"/>
+    /// arrays are parallel to the returned array.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">If objects is null.</exception>
+    /// <since>9.0</since>
+    public static int[] GetOverlaps(
+      IEnumerable<GeometryBase> objects,
+      Plane plane,
+      double tolerance,
+      bool wholeCurves,
+      IEnumerable<GeometryBase> locked,
+      bool lockedExclusive,
+      out bool[] entire,
+      out ComponentIndex[][] deadSegments,
+      out Curve[] replacements)
+    {
+      if (objects == null) throw new ArgumentNullException("objects");
+
+      using (var objectArray = new SimpleArrayGeometryPointer(objects))
+      using (var lockedArray = new SimpleArrayGeometryPointer(locked ?? new GeometryBase[0]))
+      {
+        IntPtr pObjects = objectArray.ConstPointer();
+        IntPtr pLocked = lockedArray.ConstPointer();
+        IntPtr pFates = UnsafeNativeMethods.RHC_RhinoOverlapFateArray_New();
+        try
+        {
+          bool ok = UnsafeNativeMethods.RHC_RhinoGetOverlaps(
+            pObjects, ref plane, tolerance, wholeCurves,
+            pLocked, lockedExclusive, pFates, IntPtr.Zero);
+          GC.KeepAlive(objects);
+          GC.KeepAlive(locked);
+
+          int count = ok ? UnsafeNativeMethods.RHC_RhinoOverlapFate_Count(pFates) : 0;
+          var indices = new int[count];
+          entire = new bool[count];
+          deadSegments = new ComponentIndex[count][];
+          replacements = new Curve[count];
+
+          for (int i = 0; i < count; i++)
+          {
+            indices[i] = UnsafeNativeMethods.RHC_RhinoOverlapFate_ObjectIndex(pFates, i);
+            entire[i] = UnsafeNativeMethods.RHC_RhinoOverlapFate_Entire(pFates, i);
+
+            int segmentCount = UnsafeNativeMethods.RHC_RhinoOverlapFate_DeadSegmentCount(pFates, i);
+            var segments = new ComponentIndex[segmentCount];
+            if (segmentCount > 0)
+              UnsafeNativeMethods.RHC_RhinoOverlapFate_GetDeadSegments(pFates, i, segments);
+            deadSegments[i] = segments;
+
+            IntPtr pReplacement = UnsafeNativeMethods.RHC_RhinoOverlapFate_DuplicateReplacement(pFates, i);
+            replacements[i] = GeometryBase.CreateGeometryHelper(pReplacement, null) as Curve;
+          }
+
+          return indices;
+        }
+        finally
+        {
+          UnsafeNativeMethods.RHC_RhinoOverlapFateArray_Delete(pFates);
+        }
+      }
+    }
+#endif
   }
 
   // DO NOT make public

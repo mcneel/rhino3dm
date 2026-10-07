@@ -79,7 +79,7 @@ using System.Runtime.InteropServices;
 // so they can no longer go stale here. The legacy Xamarin mobile projects (Rhino3dm.Android/iOS)
 // still compile this file without SDK generation, so they keep a literal.
 #if MOBILE_BUILD
-[assembly: AssemblyVersion("8.35.0.0")]
+[assembly: AssemblyVersion("9.0.0.0")]
 #endif
 
 // 2013-12-19, Brian Gillespie

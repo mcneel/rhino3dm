@@ -29,18 +29,23 @@ namespace MethodGen
       string dir_cpp;
       string dir_cs;
 
-      if (1 == args.Length && string.Equals(args[0], "rhino3dmio", StringComparison.InvariantCultureIgnoreCase))
-      {
-        rhino3dm_build = true;
-        // find directories for rhcommon_c and RhinoCommon
-        GetProjectDirectories(out dir_cpp, out dir_cs, false);
-      }
-      else if (args.Length >= 2)
+      if (args.Length >= 2)
       {
         dir_cpp = args[0];
         dir_cs = args[1];
         if (args.Length >= 3)
           force_write = string.Equals(args[2], "--force-write=true", StringComparison.OrdinalIgnoreCase);
+        // A build target may be named in any trailing argument. Without this,
+        // a caller that passes explicit directories has no way to request a
+        // Rhino3dm build, so the opennurbs-only filtering never runs and
+        // Rhino-only exports are declared for a library that does not have them.
+        for (int i = 2; i < args.Length; i++)
+        {
+          if (string.Equals(args[i], "rhino3dm", StringComparison.InvariantCultureIgnoreCase))
+          {
+            rhino3dm_build = true;
+          }
+        }
       }
       else
       {

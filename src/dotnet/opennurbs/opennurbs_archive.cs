@@ -574,8 +574,10 @@ namespace Rhino.Collections
         case ItemType.Font: //29
           {
 #if !RHINO3DM_BUILD && !DOTNETCORE
+#pragma warning disable CA2000
             System.Drawing.Font val = archive.ReadFont();
             rc = Set(key, val);
+#pragma warning restore CA2000
 #endif
           }
           break;
@@ -690,15 +692,19 @@ namespace Rhino.Collections
           break;
         case ItemType.OnMeshParameters: //46
           {
+#pragma warning disable CA2000
             Geometry.MeshingParameters val = archive.ReadMeshingParameters();
             rc = Set(key, val);
+#pragma warning restore CA2000
           }
           break;
         case ItemType.OnObjRef: //48
           {
 #if RHINO_SDK
+#pragma warning disable CA2000
             DocObjects.ObjRef val = archive.ReadObjRef();
             rc = Set(key, val);
+#pragma warning restore CA2000
 #endif
           }
           break;
@@ -4346,9 +4352,29 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public uint Dump3dmChunk(TextLog log)
     {
+      return Dump3dmChunk(log, -1);
+    }
+
+    /// <summary>
+    /// Function for studying contents of a file.  The primary use is as an aid
+    /// to help dig through files that have been damaged (bad disks, transmission
+    /// errors, etc.) If an error is found, a line that begins with the word
+    /// "ERROR" is printed.
+    /// </summary>
+    /// <param name="log">log where information is printed to</param>
+    /// <param name="recursionLimit">
+    /// Subchunk depth to report to. Pass -1 for no limit</param>
+    /// <returns>
+    /// 0 if something went wrong, otherwise the typecode of the chunk that
+    /// was just studied.
+    /// </returns>
+    /// <since>5.1</since>
+    [CLSCompliant(false)]
+    public uint Dump3dmChunk(TextLog log, int recursionLimit)
+    {
       IntPtr ptr_this = NonConstPointer();
       IntPtr ptr_textlog = log.NonConstPointer();
-      uint rc = UnsafeNativeMethods.ON_BinaryArchive_Dump3dmChunk(ptr_this, ptr_textlog);
+      uint rc = UnsafeNativeMethods.ON_BinaryArchive_Dump3dmChunk(ptr_this, ptr_textlog, recursionLimit);
       GC.KeepAlive(log);
       GC.KeepAlive(this);
       return rc;

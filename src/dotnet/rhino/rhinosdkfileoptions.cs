@@ -54,6 +54,21 @@ namespace Rhino.FileIO
       GC.KeepAlive(this);
     }
 
+    void SetString(string value, int which)
+    {
+      if (m_delete_pointer) // means this is not "const"
+        UnsafeNativeMethods.CRhinoFileWriteOptions_SetString(m_ptr, value, which);
+      GC.KeepAlive(this);
+    }
+    string GetString(int which)
+    {
+      using (var sh = new StringHolder())
+      {
+        IntPtr pString = sh.NonConstPointer();
+        UnsafeNativeMethods.CRhinoFileWriteOptions_GetString(m_ptr, which, pString);
+        return sh.ToString();
+      }
+    }
     /// <summary>
     /// If a complete, current version, 3dm file is successfully saved, then
     /// the name of the file will be used to update the document's default file
@@ -143,6 +158,21 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// If true, file writing plug-ins may show user interface (a dialog when
+    /// SuppressDialogBoxes is false, command line getters when it is true) even
+    /// though the document being written is headless.
+    /// </summary>
+    /// <remarks>
+    /// Added 2026-07-10 by wfcook for RH-95100
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool AllowUserInterfaceWithHeadlessDocument
+    {
+      get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.AllowHeadlessUI); }
+      set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.AllowHeadlessUI, value); }
+    }
+
+    /// <summary>
     /// If true, the file written should include only geometry File Writing Plug-in supports it.
     /// </summary>
     /// <since>5.0</since>
@@ -160,6 +190,26 @@ namespace Rhino.FileIO
     {
       get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.SaveUserData); }
       set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.SaveUserData, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool CreateBackupFiles
+    {
+      get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.Create3dmBackup); }
+      set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.Create3dmBackup, value); }
+    }
+    /// <since>9.0</since>
+    public bool CreateOtherBackupFiles
+    {
+      get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.CreateOtherBackup); }
+      set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.CreateOtherBackup, value); }
+    }
+
+    /// <since>9.0</since>
+    public bool UseCompression
+    {
+      get { return GetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.UseCompression); }
+      set { SetBool(UnsafeNativeMethods.FileWriteOptionsBoolConsts.UseCompression, value); }
     }
 
     /// <since>5.0</since>
@@ -216,6 +266,27 @@ namespace Rhino.FileIO
       }
     }
 
+    internal const int idxBackupFolder = 0;
+
+    /// <summary>
+    /// For use on Apple frameworks only.
+    /// Returns the final destination file name.
+    /// </summary>
+    /// <since>6.3</since>
+    public string BackupFileFolder
+    {
+      get
+      {
+        return GetString(idxBackupFolder);
+      }
+      set
+      {
+        if (!string.IsNullOrEmpty(value) && !System.IO.Directory.Exists(value))
+          return; //throw exception or just allow invalid strings??
+        SetString(value, idxBackupFolder);
+      }
+    }
+
     /// <summary>Source RhinoDoc that is being written</summary>
     /// <since>7.7</since>
     public RhinoDoc RhinoDoc
@@ -240,6 +311,90 @@ namespace Rhino.FileIO
           m_archivableDictionary = new Collections.ArchivableDictionary();
         return m_archivableDictionary;
       }
+    }
+
+    /// <summary>
+    /// Returns the version of the saved Rhino file
+    ///  0:
+    ///    The file type is non-3dm file identified by FileTypeId() and FileTypeIndex().
+    ///  >= 2:
+    ///    The file type is a 3dm file and the number specifies the
+    ///    earliest version of Rhino that will be able to read the
+    ///    3dm file.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Rhino3dmVersion
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileVersion(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// Returns the FileTypeIndex that identifies the extension the file writing plugin will create.
+    /// </summary>
+    /// <since>9.0</since>
+    public int FileTypeIndex
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileTypeIndex(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Returns nil for a Rhino .3dm file or the GUID of the plugin that wrote the file
+    /// </summary>
+    /// <since>9.0</since>
+    public Guid FileTypeId
+    {
+      get {
+        Guid rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileTypeId(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+    /// <summary>
+    /// True if the file time is some version of a Rhino 3dm file.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool FileTypeIs3dm
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileTypeIs3dm(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+    /// <summary>
+    /// True if the the file type is the current 3dm file version
+    /// and everything in the document will be saved.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool FileTypeIsComplete3dm
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileTypeIs3dm(m_ptr);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <since>9.0</since>
+    public string GetFileName()
+    {
+        using (var str = new StringHolder())
+        {
+          IntPtr ptr_string = str.NonConstPointer();
+          UnsafeNativeMethods.CRhinoFileWriteOptions_GetFileName(m_ptr, ptr_string);
+          GC.KeepAlive(this);
+          return str.ToString();
+        }
     }
     #endregion
 

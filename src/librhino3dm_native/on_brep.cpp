@@ -48,6 +48,16 @@ RH_C_FUNCTION bool ON_BrepEdge_IsSmoothManifoldEdge(const ON_BrepEdge* pConstBre
   return rc;
 }
 
+// Get3dVectorsIntoFaces is not currently available in stand alone OpenNURBS build
+RH_C_FUNCTION bool RHC_BrepEdge_Get3dVectorsIntoFaces(const ON_BrepEdge* edge, double t, ON_SimpleArray<ON_3dVector>* V, ON_SimpleArray<ON_3dVector>* N)
+{
+  if (edge && V && N)
+  {
+    return edge->Get3dVectorsIntoFaces(t, *V, *N);
+  }
+  return false;
+}
+
 #endif
 
 //////////////////////////////////////////////////////////////////////////
@@ -2215,17 +2225,19 @@ static bool Slow_SubDFaceAreaMassProperties(ON_MassProperties& mp_out, const ON_
     ON_Brep proxy_brep;
     if (nullptr == subd.ProxyBrep(&proxy_brep))
       break;
-    for (const class ON_BrepFace* brepface = subd.ProxyBrepFace(&proxy_brep, subd_face_id, nullptr);
-      nullptr != brepface;
-      brepface = subd.ProxyBrepFace(&proxy_brep, subd_face_id, brepface)
-      )
+    ON_SimpleArray<const ON_BrepFace*> brep_faces{};
+    if (!subd.GetProxyBrepFaces(&proxy_brep, f, brep_faces))
+      break;
+    for (const ON_BrepFace* brep_face : brep_faces)
     {
       ON_MassProperties mp;
-      if (brepface->AreaMassProperties(mp, true, false, false, false))
+      if (brep_face->AreaMassProperties(mp, true, false, false, false))
       {
         rc = true;
         mp_out.Sum(1, &mp, true);
       }
+      else
+        return false;
     }
     break;
   }
@@ -2562,6 +2574,22 @@ RH_C_FUNCTION int ON_Brep_GetTangentConnectedComponents(const ON_Brep* pConstBre
   int rc = 0;
   if (pConstBrep && pOutBreps)
     rc = pConstBrep->GetTangentConnectedComponents(*pOutBreps, angle_tol, bIncludeMeshes);
+  return rc;
+}
+#endif
+
+// Requires OPENNURBS_PLUS; not available in an opennurbs-only (Rhino3dm) build.
+#if defined(OPENNURBS_PLUS)
+RH_C_FUNCTION bool ON_Brep_IsExtrusion(const ON_Brep* pConstBrep, ON_Extrusion* extrusion, double tolerance, bool computeExtrusion)
+{
+  bool rc = false;
+  if (pConstBrep)
+  {
+    ON_Extrusion* fillin = nullptr;
+    if (computeExtrusion)
+      fillin = extrusion;
+    rc = pConstBrep->IsExtrusion(fillin, tolerance) ? true : false;
+  }
   return rc;
 }
 #endif

@@ -213,6 +213,41 @@ namespace Rhino.DocObjects.Custom
 
   public delegate void TurnOnGripsEventHandler(Rhino.DocObjects.RhinoObject rhObj);
 
+  /// <summary>
+  /// The kind of grips a <see cref="CustomObjectGrips"/> presents. Several Rhino commands
+  /// dispatch on this, so claiming a control point type is what lets a plug-in's grips reach
+  /// code paths otherwise reserved for Rhino's own curve and surface control points.
+  /// </summary>
+  /// <remarks>
+  /// The values match the native CRhinoGripObject::GRIP_TYPE numbering, so further types can be
+  /// added here later without changing any signature.
+  /// </remarks>
+  /// <since>8.36</since>
+  public enum ObjectGripsType
+  {
+    /// <summary>
+    /// The grips control the control points of a NURBS curve. A grip that does not report the
+    /// control points it drives is skipped, not reported as an error.
+    /// </summary>
+    CurveControlPoint = 1,
+
+    /// <summary>
+    /// The grips control the control points of a NURBS surface. A grip that does not report the
+    /// control points it drives is skipped, not reported as an error.
+    /// </summary>
+    SurfaceControlPoint = 2,
+
+    /// <summary>
+    /// The grips mean something private to the plug-in. Rhino draws a drag line for them.
+    /// </summary>
+    Custom = 1000,
+
+    /// <summary>
+    /// As <see cref="Custom"/>, but Rhino draws no drag line.
+    /// </summary>
+    CustomNoDragLine = 1001
+  }
+
   public abstract class CustomObjectGrips : IDisposable
   {
     #region statics
@@ -267,16 +302,43 @@ namespace Rhino.DocObjects.Custom
       UnsafeNativeMethods.CRhinoObjectGrips_SetCallbacks(m_OnResetCallback,
         m_OnResetMeshesCallback, m_OnUpdateMeshCallback, m_OnNewGeometryCallback,
         m_OnDrawCallback, m_OnNeighborGripCallback, m_OnNurbsSurfaceGripCallback,
-        m_NurbsSurfaceCallback);
+        m_NurbsSurfaceCallback, m_OnNurbsCurveGripCallback, m_NurbsCurveCallback);
     }
     #endregion
 
     protected CustomObjectGrips()
+      : this(ObjectGripsType.Custom)
     {
+    }
+
+    /// <summary>
+    /// Creates grips that present themselves to Rhino as <paramref name="gripsType"/>.
+    /// </summary>
+    /// <param name="gripsType">
+    /// What the grips control. Fixed for the life of the object.
+    /// </param>
+    protected CustomObjectGrips(ObjectGripsType gripsType)
+    {
+      if (!Enum.IsDefined(typeof(ObjectGripsType), gripsType))
+        throw new ArgumentOutOfRangeException(nameof(gripsType));
+
       m_runtime_serial_number = m_serial_number_counter++;
       Guid id = GetType().GUID;
-      m_ptr = UnsafeNativeMethods.CRhCmnObjectGrips_New(m_runtime_serial_number, id);
+      m_ptr = UnsafeNativeMethods.CRhCmnObjectGrips_New(m_runtime_serial_number, id, (uint)gripsType);
+
+      // Read back rather than storing gripsType: a value this build does not support is
+      // clamped to Custom natively, and GripsType must report what Rhino is actually using.
+      m_grips_type = (ObjectGripsType)UnsafeNativeMethods.CRhCmnObjectGrips_GripsType(m_ptr);
       m_all_custom_grips.Add(this);
+    }
+
+    readonly ObjectGripsType m_grips_type;
+
+    /// <summary>What these grips control. Set at construction.</summary>
+    /// <since>8.36</since>
+    public ObjectGripsType GripsType
+    {
+      get { return m_grips_type; }
     }
 
     readonly List<CustomGripObject> m_grip_list = new List<CustomGripObject>();
@@ -478,9 +540,28 @@ namespace Rhino.DocObjects.Custom
     /// <summary>
     /// If the grips control a NURBS surface, this returns a pointer to that
     /// surface.  You can look at but you must NEVER change this surface.
+    /// Return a surface held in a field, never a temporary: Rhino keeps the underlying
+    /// pointer after this call returns.
     /// </summary>
     /// <returns>A pointer to a NURBS surface or null.</returns>
     protected virtual Rhino.Geometry.NurbsSurface NurbsSurface() { return null; }
+
+    /// <summary>
+    /// If the grips are control points of a NURBS curve, then this gets the
+    /// grip that controls the i-th CV.
+    /// </summary>
+    /// <param name="i">The control point index.</param>
+    /// <returns>A grip controlling a NURBS curve CV or null.</returns>
+    protected virtual GripObject NurbsCurveGrip(int i) { return null; }
+
+    /// <summary>
+    /// If the grips control a NURBS curve, this returns a pointer to that
+    /// curve.  You can look at but you must NEVER change this curve.
+    /// Return a curve held in a field, never a temporary: Rhino keeps the underlying
+    /// pointer after this call returns.
+    /// </summary>
+    /// <returns>A pointer to a NURBS curve or null.</returns>
+    protected virtual Rhino.Geometry.NurbsCurve NurbsCurve() { return null; }
 
     ~CustomObjectGrips() { Dispose(false); }
     /// <since>5.0</since>
@@ -520,6 +601,8 @@ namespace Rhino.DocObjects.Custom
     internal delegate IntPtr CRhinoObjectGripsNeighborGripCallback(int serial_number, int gripIndex, int dr, int ds, int dt, int wrap);
     internal delegate IntPtr CRhinoObjectGripsNurbsSurfaceGripCallback(int serial_number, int i, int j);
     internal delegate IntPtr CRhinoObjectGripsNurbsSurfaceCallback(int serial_number);
+    internal delegate IntPtr CRhinoObjectGripsNurbsCurveGripCallback(int serial_number, int i);
+    internal delegate IntPtr CRhinoObjectGripsNurbsCurveCallback(int serial_number);
     
     private static readonly CRhinoObjectGripsResetCallback m_OnResetCallback = CRhinoObjectGrips_Reset;
     private static readonly CRhinoObjectGripsResetCallback m_OnResetMeshesCallback = CRhinoObjectGrips_ResetMeshes;
@@ -529,6 +612,8 @@ namespace Rhino.DocObjects.Custom
     private static readonly CRhinoObjectGripsNeighborGripCallback m_OnNeighborGripCallback = CRhinoObjectGrips_NeighborGrip;
     private static readonly CRhinoObjectGripsNurbsSurfaceGripCallback m_OnNurbsSurfaceGripCallback = CRhinoObjectGrips_NurbsSurfaceGrip;
     private static readonly CRhinoObjectGripsNurbsSurfaceCallback m_NurbsSurfaceCallback = CRhinoObjectGrips_NurbsSurface;
+    private static readonly CRhinoObjectGripsNurbsCurveGripCallback m_OnNurbsCurveGripCallback = CRhinoObjectGrips_NurbsCurveGrip;
+    private static readonly CRhinoObjectGripsNurbsCurveCallback m_NurbsCurveCallback = CRhinoObjectGrips_NurbsCurve;
 
     private static void CRhinoObjectGrips_Reset(int serial_number)
     {
@@ -665,6 +750,46 @@ namespace Rhino.DocObjects.Custom
           Rhino.Geometry.NurbsSurface ns = grips.NurbsSurface();
           if (ns != null)
             rc = ns.ConstPointer();
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+      return rc;
+    }
+
+    private static IntPtr CRhinoObjectGrips_NurbsCurveGrip(int serial_number, int i)
+    {
+      IntPtr rc = IntPtr.Zero;
+      CustomObjectGrips grips = FromSerialNumber(serial_number);
+      if (grips != null)
+      {
+        try
+        {
+          GripObject grip = grips.NurbsCurveGrip(i);
+          if (grip != null)
+            rc = grip.NonConstPointer();
+        }
+        catch (Exception ex)
+        {
+          Rhino.Runtime.HostUtils.ExceptionReport(ex);
+        }
+      }
+      return rc;
+    }
+
+    private static IntPtr CRhinoObjectGrips_NurbsCurve(int serial_number)
+    {
+      IntPtr rc = IntPtr.Zero;
+      CustomObjectGrips grips = FromSerialNumber(serial_number);
+      if (grips != null)
+      {
+        try
+        {
+          Rhino.Geometry.NurbsCurve nc = grips.NurbsCurve();
+          if (nc != null)
+            rc = nc.ConstPointer();
         }
         catch (Exception ex)
         {

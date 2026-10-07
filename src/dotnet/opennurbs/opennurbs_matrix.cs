@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using Rhino.Runtime;
 
 namespace Rhino.Geometry
@@ -8,7 +9,8 @@ namespace Rhino.Geometry
   /// floating point numbers. If you are working with a 4x4 matrix, then you may want
   /// to use the <see cref="Transform"/> class instead.
   /// </summary>
-  public class Matrix : IDisposable
+  [Serializable]
+  public class Matrix : IDisposable, ISerializable
   {
     IntPtr m_ptr; //ON_Matrix*
     int m_rows;
@@ -44,6 +46,73 @@ namespace Rhino.Geometry
       m_columns = 4;
       m_ptr = UnsafeNativeMethods.ON_Matrix_New2(ref xform);
     }
+
+    #region ISerializable implementation
+
+    const string VALUES = "Values";
+
+    /// <summary>
+    /// Protected constructor for internal use.
+    /// </summary>
+    /// <param name="info">Serialization data.</param>
+    /// <param name="context">Serialization stream.</param>
+    protected Matrix(SerializationInfo info, StreamingContext context)
+    {
+      int rowCount = info.GetInt32(nameof(RowCount));
+      int columnCount = info.GetInt32(nameof(ColumnCount));
+      if (rowCount < 0 || columnCount < 0)
+        throw new SerializationException("Matrix RowCount and ColumnCount must be >= 0");
+
+      double[] values = info.GetValue(VALUES, typeof(double[])) as double[];
+      long expectedLength = (long)rowCount * columnCount;
+      if (null == values || values.Length != expectedLength)
+        throw new SerializationException("Matrix Values length does not match RowCount * ColumnCount");
+
+      m_rows = rowCount;
+      m_columns = columnCount;
+      m_ptr = UnsafeNativeMethods.ON_Matrix_New(rowCount, columnCount);
+
+      for (int row = 0; row < rowCount; row++)
+      {
+        int offset = row * columnCount;
+        for (int column = 0; column < columnCount; column++)
+          UnsafeNativeMethods.ON_Matrix_SetValue(m_ptr, row, column, values[offset + column]);
+      }
+    }
+
+    /// <summary>
+    /// Populates a System.Runtime.Serialization.SerializationInfo with the data needed to serialize the target object.
+    /// </summary>
+    /// <param name="info">The System.Runtime.Serialization.SerializationInfo to populate with data.</param>
+    /// <param name="context">The destination (see System.Runtime.Serialization.StreamingContext) for this serialization.</param>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+      int rowCount = RowCount;
+      int columnCount = ColumnCount;
+
+      long length = (long)rowCount * columnCount;
+      if (length > int.MaxValue)
+        throw new SerializationException("Matrix is too large to serialize");
+
+      info.AddValue(nameof(RowCount), rowCount, typeof(int));
+      info.AddValue(nameof(ColumnCount), columnCount, typeof(int));
+
+      // Values are stored in row-major order. ON_Matrix does not guarantee that its
+      // coefficient memory is contiguous
+      double[] values = new double[(int)length];
+      for (int row = 0; row < rowCount; row++)
+      {
+        int offset = row * columnCount;
+        for (int column = 0; column < columnCount; column++)
+          values[offset + column] = UnsafeNativeMethods.ON_Matrix_GetValue(m_ptr, row, column);
+      }
+      info.AddValue(VALUES, values, typeof(double[]));
+      GC.KeepAlive(this);
+    }
+
+    #endregion ISerializable implementation
 
     /// <summary>
     /// Create a duplicate of this matrix.

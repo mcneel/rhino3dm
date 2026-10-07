@@ -56,8 +56,7 @@ namespace Rhino.DocObjects.Custom
         // Make sure that the class is not attached to an object before deleting.
         if (UnsafeNativeMethods.CRhCmnUserData_Delete(m_native_pointer, true))
         {
-          UserData ud;
-          g_attached_custom_user_datas.TryRemove(m_serial_number, out ud);
+          g_attached_custom_user_datas.TryRemove(m_serial_number, out _);
           m_native_pointer = IntPtr.Zero;
         }
       }
@@ -299,7 +298,7 @@ namespace Rhino.DocObjects.Custom
       {
         ud.m_native_pointer = IntPtr.Zero;
         GC.SuppressFinalize(ud);
-        g_attached_custom_user_datas.TryRemove(serialNumber, out ud);
+        g_attached_custom_user_datas.TryRemove(serialNumber, out _);
       }
     }
 
@@ -358,7 +357,7 @@ namespace Rhino.DocObjects.Custom
     }
     internal static void RemoveFromRuntimeList(UserData ud)
     {
-      g_attached_custom_user_datas.TryRemove(ud.m_serial_number, out ud);
+      g_attached_custom_user_datas.TryRemove(ud.m_serial_number, out _);
     }
 
 

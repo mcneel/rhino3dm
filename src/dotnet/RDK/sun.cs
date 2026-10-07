@@ -274,7 +274,10 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.SunSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      using (var v_which = GetValue(which))
+      {
+        return UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.SunSetting which)
@@ -308,8 +311,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.EnableOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SunSetting.EnableOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.EnableOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.EnableOn, v);
+        }
+      }
     }
 
     /// <since>5.10</since>
@@ -326,8 +340,19 @@ namespace Rhino.Render
     /// <since>8.0</since>
     public bool ManualControlOn
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.ManualControlOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SunSetting.ManualControlOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.ManualControlOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.ManualControlOn, v);
+        }
+      }
     }
 
     /// <since>8.0</since>
@@ -337,8 +362,19 @@ namespace Rhino.Render
     /// <since>8.0</since>
     public Accuracies Accuracy
     {
-      get => (Accuracies)GetValue(UnsafeNativeMethods.SunSetting.Accuracy).ToInt();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Accuracy, new Variant((int)value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Accuracy))
+          return (Accuracies)v.ToInt();
+      }
+
+      set
+      {
+        using (var v = new Variant((int)value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Accuracy, v);
+        }
+      }
     }
 
 #if RHINO_SDK
@@ -352,8 +388,8 @@ namespace Rhino.Render
         var doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(DocumentSerial_ForObsoleteFunctionality);
         if (doc != null)
         {
-          var sky = new Skylight(doc.RuntimeSerialNumber);
-          return sky.Enabled;
+          using (var sky = new Skylight(doc.RuntimeSerialNumber))
+            return sky.Enabled;
         }
         return false;
       }
@@ -362,8 +398,8 @@ namespace Rhino.Render
         var doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(DocumentSerial_ForObsoleteFunctionality);
         if (doc != null)
         {
-          var sky = new Skylight(doc.RuntimeSerialNumber);
-          sky.Enabled = value;
+          using (var sky = new Skylight(doc.RuntimeSerialNumber))
+            sky.Enabled = value;
         }
       }
     }
@@ -382,16 +418,38 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public bool DaylightSavingOn
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingOn, v);
+        }
+      }
     }
 
     /// <summary>Daylight saving time in minutes</summary>
     /// <since>6.0</since>
     public int DaylightSavingMinutes
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes).ToInt();
-      set => SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes))
+          return v.ToInt();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.DaylightSavingMinutes, v);
+        }
+      }
     }
 
     /// <summary>
@@ -400,8 +458,19 @@ namespace Rhino.Render
     /// <since>5.10</since>
     public double TimeZone
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.TimeZone).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.TimeZone, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.TimeZone))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.TimeZone, v);
+        }
+      }
     }
 
     /// <summary>
@@ -412,8 +481,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double North
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.North).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.North, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.North))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.North, v);
+        }
+      }
     }
 
     /// <summary>
@@ -422,15 +502,37 @@ namespace Rhino.Render
     /// <since>7.0</since>
     public double Intensity
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Intensity).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Intensity, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Intensity))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Intensity, v);
+        }
+      }
     }
 
     /// <since>5.0</since>
     public Geometry.Vector3d Vector
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Vector).ToVector3d();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Vector, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Vector))
+          return v.ToVector3d();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Vector, v);
+        }
+      }
     }
 
     /// <summary>
@@ -484,8 +586,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Azimuth
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Azimuth).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Azimuth, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Azimuth))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Azimuth, v);
+        }
+      }
     }
 
     /// <summary>
@@ -495,8 +608,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Altitude
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Altitude).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Altitude, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Altitude))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Altitude, v);
+        }
+      }
     }
 
     /// <summary>
@@ -505,8 +629,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Latitude
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Latitude).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Latitude, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Latitude))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Latitude, v);
+        }
+      }
     }
 
     /// <summary>
@@ -515,8 +650,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Longitude
     {
-      get => GetValue(UnsafeNativeMethods.SunSetting.Longitude).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SunSetting.Longitude, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.Longitude))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.Longitude, v);
+        }
+      }
     }
 
     private UnsafeNativeMethods.SunSetting SunSettingFromDateTimeKind(DateTimeKind kind)
@@ -553,7 +699,11 @@ namespace Rhino.Render
         throw new ArgumentException("DateTimeKind must be specified");
 
       var s = SunSettingFromDateTimeKind(kind);
-      return GetValue(s).ToDateTime();
+      
+      using (var v = GetValue(s))
+      {
+        return v.ToDateTime();
+      }
     }
 
     /// <summary>
@@ -582,7 +732,10 @@ namespace Rhino.Render
     public void SetDateTime(DateTime time, DateTimeKind kind)
     {
       var s = SunSettingFromDateTimeKind(kind);
-      SetValue(s, new Variant(time));
+      using (var v = new Variant(time))
+      {
+        SetValue(s, v);
+      }
     }
 
     /// <summary>Get sun color based on altitude.</summary>
@@ -779,7 +932,10 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.SkylightSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      using (var v_which = GetValue(which))
+      {
+        return UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.SkylightSetting which)
@@ -812,8 +968,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.SkylightSetting.Enabled).ToBool();
-      set => SetValue(UnsafeNativeMethods.SkylightSetting.Enabled, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SkylightSetting.Enabled))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SkylightSetting.Enabled, v);
+        }
+      }
     }
 
     /// <summary>
@@ -822,8 +989,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public double ShadowIntensity
     {
-      get => GetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity).ToDouble();
-      set => SetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SkylightSetting.ShadowIntensity, v);
+        }
+      }
     }
 
     /// <since>6.0</since>
@@ -831,8 +1009,19 @@ namespace Rhino.Render
     [Obsolete("Use RenderSettings methods")]
     public bool CustomEnvironmentOn
     {
-      get => GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride).ToBool();
-      set => SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentOverride, v);
+        }
+      }
     }
 
     /// <since>6.0</since>
@@ -840,8 +1029,19 @@ namespace Rhino.Render
     [Obsolete("Use RenderSettings methods")]
     public Guid CustomEnvironment
     {
-      get => GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId).ToGuid();
-      set => SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId))
+          return v.ToGuid();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SkylightSetting.EnvironmentId, v);
+        }
+      }
     }
   }
 }

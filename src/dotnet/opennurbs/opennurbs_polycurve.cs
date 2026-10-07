@@ -248,7 +248,9 @@ namespace Rhino.Geometry
     public bool Append(Line line)
     {
       if (!line.IsValid) { return false; }
+#pragma warning disable CA2000
       return Append(new LineCurve(line));
+#pragma warning restore CA2000
     }
     /// <summary>
     /// Appends and matches the start of the arc to the end of polycurve. 

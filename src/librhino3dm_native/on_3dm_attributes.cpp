@@ -31,6 +31,9 @@ enum ObjectAttrsInteger : int
   oaiDisplayOrder = 14,
   oaiSectionAttributesSource = 15,
   oaiClippingPlaneLabelStyle = 16,
+  oaiSectionStyleIndex = 17,
+  oaiHatchBoundaryColorSource = 18,
+  oaiHatchBoundaryPrintColorSource = 19,
 };
 
 RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr, enum ObjectAttrsInteger which, bool set, int setValue )
@@ -101,6 +104,15 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiClippingPlaneLabelStyle:
         ptr->SetClippingPlaneLabelStyle(ON::SectionLabelStyleFromUnsigned(setValue));
         break;
+      case oaiSectionStyleIndex:
+        ptr->SetSectionStyleIndex(setValue);
+        break;
+      case oaiHatchBoundaryColorSource:
+        ptr->SetHatchBoundaryColorSource(ON::ItemColorSource(setValue), false);
+        break;
+      case oaiHatchBoundaryPrintColorSource:
+        ptr->SetHatchBoundaryColorSource(ON::ItemColorSource(setValue), true);
+        break;
       }
     }
     else
@@ -158,6 +170,15 @@ RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetInt( ON_3dmObjectAttributes* ptr,
       case oaiClippingPlaneLabelStyle:
         rc = (int)ptr->ClippingPlaneLabelStyle();
         break;
+      case oaiSectionStyleIndex:
+        rc = ptr->SectionStyleIndex();
+        break;
+      case oaiHatchBoundaryColorSource:
+        rc = (int)ptr->HatchBoundaryColorSource(false);
+        break;
+      case oaiHatchBoundaryPrintColorSource:
+        rc = (int)ptr->HatchBoundaryColorSource(true);
+        break;
       }
     }
   }
@@ -171,6 +192,7 @@ enum ObjectAttrsBool : int
   oabCastsShadows = 2,
   oabReceivesShadows = 3,
   oabHatchBoundaryVisible = 4,
+  oabDetailBackgroundVisible = 5,
 };
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Transform(ON_3dmObjectAttributes* ptr, ON_Xform* xform)
@@ -203,6 +225,9 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
       case oabHatchBoundaryVisible:
         ptr->SetHatchBoundaryVisible(setValue);
         break;
+      case oabDetailBackgroundVisible:
+        ptr->SetDetailBackgroundVisible(setValue);
+        break;
       }
     }
     else
@@ -223,6 +248,9 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_GetSetBool(ON_3dmObjectAttributes* ptr
         break;
       case oabHatchBoundaryVisible:
         rc = ptr->HatchBoundaryVisible();
+        break;
+      case oabDetailBackgroundVisible:
+        rc = ptr->DetailBackgroundVisible();
         break;
       }
     }
@@ -278,34 +306,69 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_GetSetString(ON_3dmObjectAttributes* p
   }
 }
 
-RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAttributes, int which, bool set, int setValue)
+enum ObjectAttrsColor : int
 {
-  const int idxColor = 0;
-  const int idxPlotColor = 1;
-  const int idxHatchBackgroundFill = 2;
+  oacColor = 0,
+  oacPlotColor = 1,
+  oacHatchBackgroundFillColor = 2,
+  oacHatchBoundaryColor = 3,
+  oacHatchBoundaryPrintColor = 4,
+  oacHatchBackgroundFillColorPrint = 5,
+};
 
+RH_C_FUNCTION int ON_3dmObjectAttributes_GetSetColor(ON_3dmObjectAttributes* pAttributes, enum ObjectAttrsColor which, bool set, int setValue)
+{
   int rc = setValue;
   if (pAttributes)
   {
     if (set)
     {
       ON_Color color = ARGB_to_ABGR(setValue);
-      if (idxColor == which)
+      switch (which)
+      {
+      case ObjectAttrsColor::oacColor:
         pAttributes->m_color = color;
-      else if (idxPlotColor == which)
+        break;
+      case ObjectAttrsColor::oacPlotColor:
         pAttributes->m_plot_color = color;
-      else if (idxHatchBackgroundFill == which)
-        pAttributes->SetHatchBackgroundFillColor(color);
+        break;
+      case ObjectAttrsColor::oacHatchBackgroundFillColor:
+        pAttributes->SetHatchBackgroundFillColor(color, false);
+        break;
+      case ObjectAttrsColor::oacHatchBoundaryColor:
+        pAttributes->SetHatchBoundaryColor(color, false);
+        break;
+      case ObjectAttrsColor::oacHatchBoundaryPrintColor:
+        pAttributes->SetHatchBoundaryColor(color, true);
+        break;
+      case ObjectAttrsColor::oacHatchBackgroundFillColorPrint:
+        pAttributes->SetHatchBackgroundFillColor(color, true);
+      }
     }
     else
     {
       ON_Color color;
-      if (idxColor == which)
+      switch (which)
+      {
+      case ObjectAttrsColor::oacColor:
         color = pAttributes->m_color;
-      else if (idxPlotColor == which)
+        break;
+      case ObjectAttrsColor::oacPlotColor:
         color = pAttributes->m_plot_color;
-      else if (idxHatchBackgroundFill == which)
-        color = pAttributes->HatchBackgroundFillColor();
+        break;
+      case ObjectAttrsColor::oacHatchBackgroundFillColor:
+        color = pAttributes->HatchBackgroundFillColor(false);
+        break;
+      case ObjectAttrsColor::oacHatchBoundaryColor:
+        color = pAttributes->HatchBoundaryColor(false);
+        break;
+      case ObjectAttrsColor::oacHatchBoundaryPrintColor:
+        color = pAttributes->HatchBoundaryColor(true);
+        break;
+      case ObjectAttrsColor::oacHatchBackgroundFillColorPrint:
+        color = pAttributes->HatchBackgroundFillColor(true);
+        break;
+      }
       rc = (int)ABGR_to_ARGB((unsigned int)color);
     }
   }
@@ -316,6 +379,7 @@ enum ObjectAttrsDouble : int
 {
   oadPlotWeight = 0,
   oadLinetypePatternScale = 1,
+  oadHatchBoundaryPlotWeightMM = 2,
 };
 
 
@@ -334,6 +398,9 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_GetSetDouble(ON_3dmObjectAttributes*
       case oadLinetypePatternScale:
         pAttributes->SetLinetypePatternScale(setValue);
         break;
+      case oadHatchBoundaryPlotWeightMM:
+        pAttributes->SetHatchBoundaryPlotWeightMillimeters(setValue);
+        break;
       }
     }
     else
@@ -345,6 +412,9 @@ RH_C_FUNCTION double ON_3dmObjectAttributes_GetSetDouble(ON_3dmObjectAttributes*
         break;
       case oadLinetypePatternScale:
         rc = pAttributes->LinetypePatternScale();
+        break;
+      case oadHatchBoundaryPlotWeightMM:
+        rc = pAttributes->HatchBoundaryPlotWeightMillimeters();
         break;
       }
     }
@@ -715,7 +785,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HideInDetail(ON_3dmObjectAttributes* p
   return false;
 }
 
-RH_C_FUNCTION void ON_3dmObjectAttributes_HideInDetailIds(const ON_3dmObjectAttributes* pConstObjectAttributes, ON_SimpleArray<ON_UUID>* ids)
+RH_C_FUNCTION void ON_3dmObjectAttributes_GetHideInDetailIds(const ON_3dmObjectAttributes* pConstObjectAttributes, ON_SimpleArray<ON_UUID>* ids)
 {
   if (pConstObjectAttributes && ids)
   {
@@ -726,6 +796,53 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_HideInDetailIds(const ON_3dmObjectAttr
     }
   }
 }
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_GetActiveInViewportOverrides(const ON_3dmObjectAttributes* pObjectAttributes, ON_SimpleArray<ON_UUID>* viewportIds, bool* active)
+{
+  if (pObjectAttributes && viewportIds && active)
+    return pObjectAttributes->GetActiveInViewportOverrides(*active).GetUuids(*viewportIds);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_SetActiveInViewportOverrides(ON_3dmObjectAttributes* pObjectAttributes, /*ARRAY*/ ON_UUID* viewportIds, int count, bool active)
+{
+  if (pObjectAttributes && viewportIds && count >=0)
+  {
+    ON_UuidList ids(count);
+    for (int i = 0; i < count; ++i)
+      ids.AddUuid(viewportIds[i]);
+
+    return pObjectAttributes->SetActiveInViewportOverrides(std::move(ids), active);
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_HasActiveInViewportOverride(const ON_3dmObjectAttributes* pObjectAttributes, ON_UUID viewportId, bool* active)
+{
+  if (pObjectAttributes && viewportId != ON_nil_uuid)
+    return pObjectAttributes->HasActiveInViewportOverride(viewportId, *active);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_AddActiveInViewportOverride(ON_3dmObjectAttributes* pObjectAttributes, ON_UUID viewportId, bool active)
+{
+  if (pObjectAttributes && viewportId != ON_nil_uuid)
+    return pObjectAttributes->AddActiveInViewportOverride(viewportId, active);
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveActiveInViewportOverride(ON_3dmObjectAttributes* pObjectAttributes, ON_UUID viewportId, bool active)
+{
+  if (pObjectAttributes && viewportId != ON_nil_uuid)
+    return pObjectAttributes->RemoveActiveInViewportOverride(viewportId, active);
+
+  return false;
+}
+
 
 RH_C_FUNCTION ON_MeshParameters* ON_3dmObjectAttributes_CustomRenderMeshParameters(const ON_3dmObjectAttributes* pConstObjectAttributes)
 {
@@ -789,7 +906,7 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveDecal(ON_3dmObjectAttributes* at
   if ((nullptr == attr) || (nullptr == decal))
     return false;
 
-  return attr->RemoveDecal(*decal);
+  return attr->RemoveDecal(decal->DecalCRC());
 }
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_RemoveAllDecals(ON_3dmObjectAttributes* attr)
@@ -823,7 +940,24 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetCustomLinetype(ON_3dmObjectAttribut
       attr->RemoveCustomLinetype();
   }
 }
-
+// Depends on Rhino application code; not available in an opennurbs-only (Rhino3dm) build.
+#if !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION ON_SectionStyle* ON_3dmObjectAtributes_ComputedSectionStyle(const CRhinoObjectAttributes* ptr_this,
+  uint docID, const CRhinoObjectAttributes* pSectionerAttributes, bool computeColors, ON_UUID viewport_id)
+  {
+    ON_SectionStyle* rc = nullptr;
+    if (ptr_this && pSectionerAttributes)
+    {
+      const CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(docID);
+      if (pDoc)
+      {
+        ON_SectionStyle result = ptr_this->ComputedSectionStyle(pDoc, pSectionerAttributes, computeColors, viewport_id);
+        rc = result.Duplicate();
+      }
+    }
+    return rc;
+  }
+#endif
 RH_C_FUNCTION ON_SectionStyle* ON_3dmObjectAttributes_GetCustomSectionStyle(const ON_3dmObjectAttributes* attr)
 {
   if (attr)

@@ -650,7 +650,7 @@ def check_msbuild(build_tool):
                 if "Could not find files" not in response:
                     if "MSBuild.exe" in response:
                         msbuild_path = response
-        except:
+        except Exception:
             msbuild_path = ''
 
     # Check for the .NET Framework MSBuild (probably not the wisest to use though)
@@ -693,7 +693,7 @@ def check_msbuild(build_tool):
                 print_warning_message(err)
                 return
             running_version = running_version.decode('utf-8').splitlines()[-1].strip()
-    except:
+    except Exception:
         running_version = ''
 
     if not running_version:
@@ -863,7 +863,7 @@ def connected_to_internet(host='http://google.com'):
     try:
         urllib.urlopen(host)
         return True
-    except:
+    except Exception:
         print_error_message("No internet connection available.")
         return False
 

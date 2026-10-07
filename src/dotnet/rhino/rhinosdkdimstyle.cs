@@ -195,8 +195,14 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public Bitmap CreatePreviewBitmap(int width, int height)
     {
+      return CreatePreviewBitmap(width, height, false);
+    }
+
+    /// <since>9.0</since>
+    public Bitmap CreatePreviewBitmap(int width, int height, bool transparent)
+    {
       IntPtr const_ptr_this = ConstPointer();
-      IntPtr dibptr = UnsafeNativeMethods.ON_Dimstyle_GetPreview_Bitmap(const_ptr_this, width, height);
+      IntPtr dibptr = UnsafeNativeMethods.ON_Dimstyle_GetPreview_Bitmap(const_ptr_this, width, height, transparent);
       GC.KeepAlive(this);
       return RhinoDib.ToBitmap(dibptr, true);
     }
@@ -372,6 +378,20 @@ namespace Rhino.DocObjects
       set { SetBool(Field.TextUnderlined, value); }
     }
 
+    /// <since>9.0</since>
+    public bool UseKerning
+    {
+      get { return GetBool(Field.Kerning); }
+      set { SetBool(Field.Kerning, value); }
+    }
+
+    /// <since>9.0</since>
+    public double LineSpaceScale
+    {
+      get { return GetDouble(Field.LineSpaceScale);}
+      set { SetDouble(Field.LineSpaceScale,value);}
+    }
+
 #endregion
 
 #region double properties
@@ -429,6 +449,13 @@ namespace Rhino.DocObjects
     {
       get { return GetDouble(Field.LeaderArrowsize); }
       set { SetDouble(Field.LeaderArrowsize, value); }
+    }
+
+    /// <since>9.0</since>
+    public double ClippingArrowLength
+    {
+      get { return GetDouble(Field.ClippingArrowSize); }
+      set { SetDouble(Field.ClippingArrowSize, value); }
     }
 
     /// <since>5.0</since>
@@ -608,15 +635,21 @@ namespace Rhino.DocObjects
       set
       {
         ScaleValue sv = DimensionScaleValue;
-        LengthValue lv = sv.LeftLengthValue();
-        LengthValue rv = sv.RightLengthValue();
-        bool frac = UnitSystem.Inches == lv.UnitSystem;
-        var str_fmt = frac ? LengthValue.StringFormat.CleanProperFraction : LengthValue.StringFormat.CleanDecimal;
-        double unit_scale = RhinoMath.UnitScale(UnitSystem.Millimeters, lv.UnitSystem);
-        double lvus = value * unit_scale;
-        LengthValue lvx = LengthValue.Create(lvus, lv.UnitSystem, str_fmt);
-        ScaleValue svx = ScaleValue.Create(lvx, rv, ScaleValue.ScaleStringFormat.None);
-        DimensionScaleValue = svx;
+
+        using (LengthValue lv = sv.LeftLengthValue())
+        using (LengthValue rv = sv.RightLengthValue())
+        {
+          bool frac = UnitSystem.Inches == lv.UnitSystem;
+          var str_fmt = frac ? LengthValue.StringFormat.CleanProperFraction : LengthValue.StringFormat.CleanDecimal;
+          double unit_scale = RhinoMath.UnitScale(UnitSystem.Millimeters, lv.UnitSystem);
+          double lvus = value * unit_scale;
+
+          using (LengthValue lvx = LengthValue.Create(lvus, lv.UnitSystem, str_fmt))
+          {
+            ScaleValue svx = ScaleValue.Create(lvx, rv, ScaleValue.ScaleStringFormat.None);
+            DimensionScaleValue = svx;
+          }
+        }
       }
     }
 
@@ -632,14 +665,20 @@ namespace Rhino.DocObjects
       set
       {
         ScaleValue sv = DimensionScaleValue;
-        LengthValue rv = sv.RightLengthValue();
-        bool frac = UnitSystem.Inches == rv.UnitSystem;
-        var str_fmt = frac ? LengthValue.StringFormat.CleanProperFraction : LengthValue.StringFormat.CleanDecimal;
-        double unit_scale = RhinoMath.UnitScale(UnitSystem.Millimeters, rv.UnitSystem);
-        double rvus = value * unit_scale;
-        LengthValue rvx = LengthValue.Create(rvus, rv.UnitSystem, str_fmt);
-        ScaleValue svx = ScaleValue.Create(rvx, rv, ScaleValue.ScaleStringFormat.None);
-        DimensionScaleValue = svx;
+
+        using (LengthValue rv = sv.RightLengthValue())
+        {
+          bool frac = UnitSystem.Inches == rv.UnitSystem;
+          var str_fmt = frac ? LengthValue.StringFormat.CleanProperFraction : LengthValue.StringFormat.CleanDecimal;
+          double unit_scale = RhinoMath.UnitScale(UnitSystem.Millimeters, rv.UnitSystem);
+          double rvus = value * unit_scale;
+
+          using (LengthValue rvx = LengthValue.Create(rvus, rv.UnitSystem, str_fmt))
+          {
+            ScaleValue svx = ScaleValue.Create(rvx, rv, ScaleValue.ScaleStringFormat.None);
+            DimensionScaleValue = svx;
+          }
+        }
       }
     }
 
@@ -685,6 +724,28 @@ namespace Rhino.DocObjects
     {
       get { return GetBool(Field.ForceDimLine); }
       set { SetBool(Field.ForceDimLine, value); }
+    }
+
+    /// <summary>
+    /// Suppresses the dimension line and arrowhead between the first extension
+    /// line and the dimension text.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SuppressDimensionLine1
+    {
+      get { return GetBool(Field.SuppressDimLine1); }
+      set { SetBool(Field.SuppressDimLine1, value); }
+    }
+
+    /// <summary>
+    /// Suppresses the dimension line and arrowhead between the second extension
+    /// line and the dimension text.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SuppressDimensionLine2
+    {
+      get { return GetBool(Field.SuppressDimLine2); }
+      set { SetBool(Field.SuppressDimLine2, value); }
     }
 
     int GetInt(Field field)
@@ -853,6 +914,20 @@ namespace Rhino.DocObjects
     {
       get { return (ArrowType)GetInt(Field.LeaderArrowType); }
       set { SetInt(Field.LeaderArrowType, (int)value); }
+    }
+
+    /// <since>9.0</since>
+    public ClippingArrowType ClippingArrowType1
+    {
+      get { return (ClippingArrowType)GetInt(Field.ClippingArrowType1); }
+      set { SetInt(Field.ClippingArrowType1, (int)value); }
+    }
+
+    /// <since>9.0</since>
+    public ClippingArrowType ClippingArrowType2
+    {
+      get { return (ClippingArrowType)GetInt(Field.ClippingArrowType2); }
+      set { SetInt(Field.ClippingArrowType2, (int)value); }
     }
 
     /// <since>6.0</since>
@@ -1386,7 +1461,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// Creates an array of default AnnotationStyle objects
+    /// Creates an array of default DimensionStyle objects
     /// </summary>
     /// <since>6.0</since>
     public DimensionStyle[] BuiltInStyles
@@ -1407,6 +1482,16 @@ namespace Rhino.DocObjects.Tables
         UnsafeNativeMethods.CRhinoDimStyleTable_CreateDefaultDimstylesDeleteArray(array);
         return styles.ToArray();
       }
+    }
+
+    /// <summary>
+    /// Purges any unused dimension styles.
+    /// </summary>
+    /// <returns>The number of unused dimension styles that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeUnused()
+    {
+      return UnsafeNativeMethods.RHC_RhPurgeDimStyles(Document.RuntimeSerialNumber);
     }
 
     public DimensionStyle this[int index]

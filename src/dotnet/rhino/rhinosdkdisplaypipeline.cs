@@ -34,13 +34,17 @@ namespace Rhino.Display
       rc.CapStyle = cap;
       rc.JoinStyle = join;
       bool patternBySeg = rc.PatternBySegment;
+      bool patternAutoscale = rc.PatternAutoscale;
       bool patternLengthInWorld = rc.PatternLengthInWorldUnits;
       float offset = rc.PatternOffset;
+      float scale = rc.PatternScale;
       float[] pattern = new float[8];
-      UnsafeNativeMethods.CRhinoDisplayPen_Pattern(ptrPen, ref patternBySeg, ref patternLengthInWorld, ref offset, pattern, pattern.Length);
+      UnsafeNativeMethods.CRhinoDisplayPen_Pattern(ptrPen, ref patternBySeg, ref patternAutoscale, ref patternLengthInWorld, ref offset, ref scale, pattern, pattern.Length);
       rc.PatternBySegment = patternBySeg;
+      rc.PatternAutoscale = patternAutoscale;
       rc.PatternLengthInWorldUnits = patternLengthInWorld;
       rc.PatternOffset = offset;
+      rc.PatternScale = scale;
       rc.SetPattern(pattern);
 
       float taperPosition = -1;
@@ -60,10 +64,10 @@ namespace Rhino.Display
       int argbHalo = HaloColor.ToArgb();
       var pattern = PatternAsArray();
       IntPtr ptrPen = UnsafeNativeMethods.CRhinoDisplayPen_New(
-        argb, Thickness, argbHalo, HaloThickness,
-        pattern.Length, pattern, PatternBySegment,
-        PatternOffset, PatternLengthInWorldUnits, CapStyle, JoinStyle, (int)ThicknessSpace,
-        _taperPosition, _taperThickness, _endThickness);
+        argb, argbHalo, CapStyle, JoinStyle,
+        pattern.Length, pattern, PatternOffset, PatternScale,
+        PatternBySegment, PatternAutoscale, PatternLengthInWorldUnits, 
+        (int)ThicknessSpace, _starThickness, _taperPosition, _taperThickness, _endThickness, HaloThickness);
       return ptrPen;
     }
     internal static void DeleteNativePointer(IntPtr ptrPen)
@@ -85,25 +89,48 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Create a display pen that matches a linetype definition on any viewport.
+    /// </summary>
+    /// <param name="linetype"></param>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static DisplayPen FromLinetype(Linetype linetype, System.Drawing.Color color)
+    {
+      if (linetype == null)
+        return new DisplayPen() { Color = color };
+
+      uint document_serial = linetype.ModelSerialNumber;
+      IntPtr ptrLinetype = linetype.ConstPointer();
+      IntPtr ptrNativePen = UnsafeNativeMethods.CRhinoDisplayPen_FromLinetype(document_serial, ptrLinetype, 0.0, color.ToArgb());
+      var rc = FromNativeCRhinoDisplayPen(ptrNativePen);
+      UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrNativePen);
+      GC.KeepAlive(linetype);
+      return rc;
+    }
+
+    /// <summary>
     /// Create a display pen that matches a linetype definition
     /// </summary>
     /// <param name="linetype"></param>
-    /// <param name="patternScale">scale to be applied to linetype dash pattern. Typically this is 1</param>
+    /// <param name="patternScale">scale to be applied to linetype dash pattern. Typically this is 1.0.</param>
     /// <param name="color"></param>
     /// <returns></returns>
     /// <since>8.0</since>
     public static DisplayPen FromLinetype(Linetype linetype, System.Drawing.Color color, double patternScale)
     {
       if (linetype == null)
-        return null;
+        return new DisplayPen() { Color = color, PatternScale = (float) patternScale };
 
+      uint document_serial = linetype.ModelSerialNumber;
       IntPtr ptrLinetype = linetype.ConstPointer();
-      IntPtr ptrNativePen = UnsafeNativeMethods.CRhinoDisplayPen_FromLinetype(ptrLinetype, patternScale, color.ToArgb());
+      IntPtr ptrNativePen = UnsafeNativeMethods.CRhinoDisplayPen_FromLinetype(document_serial, ptrLinetype, patternScale, color.ToArgb());
       var rc = FromNativeCRhinoDisplayPen(ptrNativePen);
       UnsafeNativeMethods.CRhinoDisplayPen_Delete(ptrNativePen);
       GC.KeepAlive(linetype);
       return rc;
     }
+
 
     /// <summary>
     /// Color applied to stroke
@@ -115,7 +142,20 @@ namespace Rhino.Display
     /// Thickness for stroke
     /// </summary>
     /// <since>8.0</since>
-    public float Thickness { get; set; } = 1.0f;
+    public float Thickness
+    {
+      get
+      {
+        return Math.Max(Math.Max(_starThickness, _endThickness), _taperThickness);
+      }
+      set
+      {
+        _starThickness = value;
+        _taperPosition = 0.5f;
+        _taperThickness = -1.0f;
+        _endThickness = -1.0f;
+      }
+    }
 
     /// <summary>
     /// Coordinate system for the pen's thickness
@@ -198,6 +238,18 @@ namespace Rhino.Display
     public bool PatternBySegment { get; set; } = true;
 
     /// <summary>
+    /// Scale pattern in detail views
+    /// </summary>
+    /// <since>9.0</since>
+    public bool PatternAutoscale { get; set; } = false;
+
+    /// <summary>
+    /// Scale applied to the pattern, use 0.0 to let Rhino apply global scale.
+    /// </summary>
+    /// <since>9.0</since>
+    public float PatternScale { get; set; } = 1.0f;
+
+    /// <summary>
     /// If true, lengths in pattern definition are interpreted to be in world
     /// units. If false, screen pixel distances are used.
     /// </summary>
@@ -213,7 +265,7 @@ namespace Rhino.Display
     /// <since>8.0</since>
     public void SetTaper(float startThickness, float endThickness, Point2f taperPoint)
     {
-      Thickness = startThickness;
+      _starThickness = startThickness;
       _endThickness = endThickness;
       _taperPosition = taperPoint.X;
       _taperThickness = taperPoint.Y;
@@ -231,26 +283,19 @@ namespace Rhino.Display
         return Array.Empty<Point2f>();
 
       if (_taperThickness<0 || _taperPosition<=0 || _taperPosition>=1)
-        return new Point2f[2] { new Point2f(0,Thickness), new Point2f(1, _endThickness)};
+        return new Point2f[2] { new Point2f(0,_starThickness), new Point2f(1, _endThickness)};
 
-      float end = _endThickness < 0 ? Thickness : _endThickness;
-      return new Point2f[3] { new Point2f(0,Thickness), new Point2f(_taperPosition, _taperThickness), new Point2f(1, _endThickness) };
+      float end = _endThickness < 0 ? _starThickness : _endThickness;
+      return new Point2f[3] { new Point2f(0, _starThickness), new Point2f(_taperPosition, _taperThickness), new Point2f(1, _endThickness) };
     }
 
     float[] _pattern = null;
+    float _starThickness = 1.0f;
     float _taperPosition = 0.5f;
     float _taperThickness = -1;
     float _endThickness = -1;
   }
 
-  /*
-  // still a work in progress. Trying to figure out what needs to go here
-  // color stops for gradient
-  // gradient direction
-  // texture
-  // halo thickness
-  // halo color
-  */
 
   /// <since>5.0</since>
   public enum DepthMode
@@ -365,6 +410,7 @@ namespace Rhino.Display
     const int idxProjectionChanged = 10;
     const int idxInitFrameBuffer = 11;
     const int idxPostDrawObject = 12;
+    const int idxPostProcessFrameBuffer = 13;
 
     private static void ConduitReport(int which)
     {
@@ -400,6 +446,10 @@ namespace Rhino.Display
           title = "PreDrawTransparentObjects";
           cb = m_predrawtransparentobjects;
           break;
+        case idxPostProcessFrameBuffer:
+          title = "PostProcessFrameBuffer";
+          cb = m_postprocess_framebuffer;
+          break;
       }
       if (!string.IsNullOrEmpty(title) && cb != null)
       {
@@ -434,6 +484,7 @@ namespace Rhino.Display
     private static ConduitCallback m_DrawOverlayCallback;
     private static ConduitCallback m_PreDrawTransparentObjectsCallback;
     private static ConduitCallback m_ProjectionChangedCallback;
+    private static ConduitCallback m_PostProcessFrameBufferCallback;
     internal delegate void DisplayModeChangedCallback(IntPtr pPipeline, Guid changed, Guid old);
     private static DisplayModeChangedCallback m_DisplayModeChangedCallback;
 
@@ -450,6 +501,7 @@ namespace Rhino.Display
     private static EventHandler<DrawEventArgs> m_predrawtransparentobjects;
     private static EventHandler<DrawEventArgs> m_projectionchanged;
     private static EventHandler<DisplayModeChangedEventArgs> m_displaymode_changed;
+    private static EventHandler<PostProcessFrameBufferEventArgs> m_postprocess_framebuffer;
 
     private static void OnObjectCulling(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
@@ -473,6 +525,11 @@ namespace Rhino.Display
     private static void OnPreDrawObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
     {
       m_predrawobjects?.SafeInvoke(null, new DrawEventArgs(pPipeline, conduitSerialNumber));
+    }
+
+    private static void OnPostProcessFrameBuffer(IntPtr pPipeline, uint conduitSerialNumber, uint _)
+    {
+      m_postprocess_framebuffer?.SafeInvoke(null, new PostProcessFrameBufferEventArgs(pPipeline, conduitSerialNumber));
     }
 
     private static void OnPreDrawTransparentObjects(IntPtr pPipeline, uint conduitSerialNumber, uint _)
@@ -875,6 +932,43 @@ namespace Rhino.Display
         {
           UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxDrawOverlay, null, m_report);
           m_DrawOverlayCallback = null;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Called after the frame has been drawn, with the finished frame available to be read.
+    /// Use this to record or stream a viewport:
+    /// <see cref="PostProcessFrameBufferEventArgs.TryCopyFrameBuffer(IntPtr, int, int)"/> copies
+    /// the frame that was just drawn, and never redraws the scene.
+    /// <para>Every frame drawn while this event is subscribed costs an extra frame buffer read
+    /// back, whether or not the handler reads anything. Unsubscribe as soon as the frames are no
+    /// longer needed.</para>
+    /// <para>The handler runs on the thread that drew the frame and holds up the next one. Copy
+    /// the pixels here and do the rest of the work somewhere else.</para>
+    /// </summary>
+    public static event EventHandler<PostProcessFrameBufferEventArgs> PostProcessFrameBuffer
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(m_postprocess_framebuffer, value))
+          return;
+
+        if (null == m_postprocess_framebuffer)
+        {
+          m_PostProcessFrameBufferCallback = OnPostProcessFrameBuffer;
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostProcessFrameBuffer, m_PostProcessFrameBufferCallback, m_report);
+        }
+        m_postprocess_framebuffer -= value;
+        m_postprocess_framebuffer += value;
+      }
+      remove
+      {
+        m_postprocess_framebuffer -= value;
+        if (m_postprocess_framebuffer == null)
+        {
+          UnsafeNativeMethods.CRhinoDisplayConduit_SetCallback(0, idxPostProcessFrameBuffer, null, m_report);
+          m_PostProcessFrameBufferCallback = null;
         }
       }
     }
@@ -1674,6 +1768,25 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Multisample modes available
+    /// </summary>
+    /// <param name="technology"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static int[] SupportedMultisamlpleModes(DisplayTechnology technology)
+    {
+      int maximum = UnsafeNativeMethods.RHC_MaximumMultisampleLevel((int)technology);
+      Stack<int> rc = new Stack<int>();
+      while (maximum > 1)
+      {
+        rc.Push(maximum);
+        maximum /= 2;
+      }
+      rc.Push(1);
+      return rc.ToArray();
+    }
+
+    /// <summary>
     /// Returns a value indicating if only points on the side of the surface that
     /// face the camera are displayed.
     /// </summary>
@@ -2069,9 +2182,189 @@ namespace Rhino.Display
     {
       DrawMeshShaded(mesh, material, faceIndices as int[] ?? faceIndices.ToArray());
     }
+    
+    /// <summary>
+    /// Draws shaded mesh with isodraw settings applied (zebra)
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="diffuseMaterialColor"></param>
+    /// <param name="zebraSettings"></param>
+    /// <since>9.0</since>
+    public void DrawMeshShaded(Mesh mesh, Color diffuseMaterialColor, IsoDrawEffect zebraSettings)
+    {
+      IntPtr const_ptr_mesh = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      int argb = diffuseMaterialColor.ToArgb();
+      IntPtr ptrIsoDraw = zebraSettings != null ? zebraSettings.CreateNativeVersion() : IntPtr.Zero;
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedMesh3(m_ptr, const_ptr_mesh, argb, ptrIsoDraw, cache);
+      UnsafeNativeMethods.CRhinoIsoDrawEffect_Delete(ptrIsoDraw);
+      GC.KeepAlive(mesh);
+    }
 
     /// <summary>
-    /// Draws the mesh faces as false color patches. 
+    /// Draws a batch of meshes with the Grasshopper 2 ("G2") shaded display: a
+    /// gradient-shaded look driven by a <see cref="GrasshopperDisplayMaterial"/> — a
+    /// diffuse colour plus optional striping, stippling and dark-area desaturation —
+    /// rather than a full <see cref="DisplayMaterial"/>. The whole batch is uploaded as
+    /// one combined GPU buffer and shares one material; for per-mesh settings, call
+    /// once per mesh instead.
+    /// </summary>
+    /// <remarks>
+    /// <para><b>The meshes are uploaded to the GPU on every redraw.</b> Nothing is
+    /// cached between frames, so every redraw re-uploads the whole batch. This is the
+    /// dominant cost of the call and needs to be planned around: draw only the geometry
+    /// you actually need, and prefer one batched call over many single-mesh calls.</para>
+    /// <para><b>Mesh requirements.</b> Every mesh must have up-to-date
+    /// single-precision vertices and vertex normals. The G2 shader reads those
+    /// directly; a mesh that carries only double-precision vertices, or no normals,
+    /// will render badly (missing geometry or flat/garbage shading). Compute the vertex
+    /// normals and make sure the single-precision vertices are current before drawing
+    /// if in doubt. Null entries in <paramref name="meshes"/> are skipped.</para>
+    /// <para><b>Vertex colours.</b> If a mesh has vertex colours, those colours are
+    /// drawn in place of the material's diffuse colour, and
+    /// <see cref="GrasshopperDisplayMaterial.ShadeFalseColor"/> decides whether they are
+    /// shaded or drawn flat. Meshes without vertex colours are shaded from the material's
+    /// diffuse colour alone.</para>
+    /// <para><b>Mixed meshes are safe.</b> A batch is uploaded as one interleaved vertex
+    /// buffer whose layout is the union of its meshes' attributes, and a mesh lacking an
+    /// attribute the union has would be zero-filled for it, so a colourless mesh batched
+    /// with a vertex-coloured one would draw black. This method therefore splits the
+    /// meshes into groups that share the same attributes and draws one batch per group,
+    /// so any mix may be passed in. Meshes keep their relative order within a group and
+    /// the groups are drawn in order of first appearance; order between groups is not
+    /// otherwise guaranteed.</para>
+    /// </remarks>
+    /// <param name="meshes">The meshes to draw as one batch. Each should have current
+    /// single-precision vertices and vertex normals (see remarks); null entries are
+    /// skipped.</param>
+    /// <param name="material">The G2 shaded settings to draw with. When null, default
+    /// settings are used.</param>
+    /// <since>9.0</since>
+    public void DrawMeshesShaded(IEnumerable<Mesh> meshes, GrasshopperDisplayMaterial material)
+    {
+      if (meshes == null)
+        return;
+      if (material == null)
+        material = new GrasshopperDisplayMaterial();
+      // Materialize so the Mesh objects (whose const ON_Mesh* we hand to native) are
+      // kept alive across the draw via GC.KeepAlive below.
+      var live = meshes as IList<Mesh> ?? new List<Mesh>(meshes);
+
+      // One batch becomes ONE interleaved vertex buffer whose layout is the union of its
+      // meshes' attributes, and a mesh missing an attribute the union has is zero-filled
+      // for it, so a colourless mesh batched with a vertex-coloured one draws black.
+      // Batches therefore have to be homogeneous: group by attribute signature and draw
+      // one batch per group. Grasshopper 2 solves the same problem by cutting its draw
+      // runs at signature boundaries. RH-97597.
+      List<uint> signatureOrder = null;
+      Dictionary<uint, List<Mesh>> groups = null;
+      uint firstSignature = 0;
+      bool haveFirstSignature = false;
+
+      for (int i = 0; i < live.Count; i++)
+      {
+        var mesh = live[i];
+        if (mesh == null)
+          continue;
+
+        uint signature = UnsafeNativeMethods.RHC_GH2_MeshAttributeSignature(mesh.ConstPointer());
+        GC.KeepAlive(mesh);
+
+        if (!haveFirstSignature)
+        {
+          firstSignature = signature;
+          haveFirstSignature = true;
+          continue;
+        }
+        if (signature == firstSignature && groups == null)
+          continue;
+
+        // A second signature turned up, so the list really is mixed. Start bucketing;
+        // until this point the common homogeneous case allocates nothing extra.
+        if (groups == null)
+        {
+          groups = new Dictionary<uint, List<Mesh>>();
+          signatureOrder = new List<uint>();
+          var firstBucket = new List<Mesh>();
+          for (int j = 0; j < i; j++)
+          {
+            if (live[j] != null)
+              firstBucket.Add(live[j]);
+          }
+          groups[firstSignature] = firstBucket;
+          signatureOrder.Add(firstSignature);
+        }
+
+        List<Mesh> bucket;
+        if (!groups.TryGetValue(signature, out bucket))
+        {
+          bucket = new List<Mesh>();
+          groups[signature] = bucket;
+          signatureOrder.Add(signature);
+        }
+        bucket.Add(mesh);
+      }
+
+      if (groups == null)
+      {
+        // Every mesh shares one signature, or there are none: draw as a single batch.
+        DrawMeshesShadedHomogeneous(live, material);
+        return;
+      }
+
+      for (int i = 0; i < signatureOrder.Count; i++)
+        DrawMeshesShadedHomogeneous(groups[signatureOrder[i]], material);
+    }
+
+    /// <summary>
+    /// Draws one batch of meshes that all share the same vertex-attribute signature.
+    /// The caller is responsible for that grouping; see DrawMeshesShaded.
+    /// </summary>
+    void DrawMeshesShadedHomogeneous(IList<Mesh> live, GrasshopperDisplayMaterial material)
+    {
+      using (var mesh_array = new Rhino.Runtime.InteropWrappers.SimpleArrayMeshPointer())
+      {
+        for (int i = 0; i < live.Count; i++)
+          mesh_array.Add(live[i], true); // Add skips null meshes
+        if (mesh_array.Count == 0)
+          return;
+        UnsafeNativeMethods.CRhinoDisplayPipeline_DrawMeshG2(
+          m_ptr, mesh_array.ConstPointer(), material.Diffuse.ToArgb(),
+          false, 1, 1, // wire drawing is deliberately not exposed through this API
+          material.Striping, (float)material.StripeWidth, (float)material.StripeContrast,
+          material.Stippling, (float)material.StipplingAmount,
+          (float)material.Desaturation, material.ShadeFalseColor,
+          0UL); // gpuId: no GPU caching — the batch is re-uploaded on every redraw
+        GC.KeepAlive(live);
+        GC.KeepAlive(mesh_array);
+      }
+    }
+
+    /// <summary>
+    /// Draws a single mesh with the Grasshopper 2 ("G2") shaded display. This is a
+    /// convenience overload of <see cref="DrawMeshesShaded"/>; see it for the mesh
+    /// requirements and vertex-colour handling.
+    /// </summary>
+    /// <remarks>
+    /// <para><b>The mesh is uploaded to the GPU on every redraw.</b> Nothing is cached
+    /// between frames, so every redraw re-uploads the mesh. When drawing more than one
+    /// mesh, prefer a single batched <see cref="DrawMeshesShaded"/> call over many
+    /// single-mesh calls.</para>
+    /// </remarks>
+    /// <param name="mesh">The mesh to draw. Should have current single-precision
+    /// vertices and vertex normals (see <see cref="DrawMeshesShaded"/>).</param>
+    /// <param name="material">The G2 shaded settings to draw with. When null, default
+    /// settings are used.</param>
+    /// <since>9.0</since>
+    public void DrawMeshShaded(Mesh mesh, GrasshopperDisplayMaterial material)
+    {
+      if (mesh == null)
+        return;
+      DrawMeshesShaded(new[] { mesh }, material);
+    }
+
+    /// <summary>
+    /// Draws the mesh faces as false color patches.
     /// The mesh must have Vertex Colors defined for this to work.
     /// </summary>
     /// <param name="mesh">Mesh to draw.</param>
@@ -2227,6 +2520,20 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Draw a cipping plane
+    /// </summary>
+    /// <param name="clippingPlane"></param>
+    /// <param name="color"></param>
+    /// <since>9.0</since>
+    public void DrawClippingPlaneWires(ClippingPlaneSurface clippingPlane, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_clippingplane = clippingPlane.ConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawClippingPlane(m_ptr, const_ptr_clippingplane, argb);
+      GC.KeepAlive(clippingPlane);
+    }
+
+    /// <summary>
     /// Draws a shaded Brep with Zebra stripe preview.
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
@@ -2253,6 +2560,147 @@ namespace Rhino.Display
       IntPtr const_ptr_mesh = mesh.ConstPointer();
       IntPtr cache = mesh.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawZebraPreview2(m_ptr, const_ptr_mesh, argb, cache);
+      GC.KeepAlive(mesh);
+    }
+
+    /// <summary>
+    /// Draws a Brep in Environment Map preview.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawEmapPreview(Brep brep, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = brep.ConstPointer();
+      IntPtr cache = brep.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawEmapPreview(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(brep);
+    }
+
+    /// <summary>
+    /// Draws a Mesh in Environment Map preview.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawEmapPreview(Mesh mesh, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawEmapPreview2(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(mesh);
+    }
+
+    /// <summary>
+    /// Draws a Brep in Environment Map preview with a texture of your own, instead of the one in
+    /// <see cref="Rhino.ApplicationSettings.EmapAnalysisSettings"/>.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    /// <param name="color">Object color.</param>
+    /// <param name="settings">
+    /// Settings for this call only. Get a copy of the current ones from
+    /// <see cref="Rhino.ApplicationSettings.EmapAnalysisSettings.GetCurrentState"/> and change what
+    /// you need. A null or empty <see cref="Rhino.ApplicationSettings.EmapAnalysisSettingsState.FileName"/>
+    /// keeps the texture the application settings name.
+    /// </param>
+    /// <since>9.0</since>
+    public void DrawEmapPreview(Brep brep, System.Drawing.Color color, Rhino.ApplicationSettings.EmapAnalysisSettingsState settings)
+    {
+      if (settings == null)
+        throw new ArgumentNullException(nameof(settings));
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = brep.ConstPointer();
+      IntPtr cache = brep.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawEmapPreview3(m_ptr, const_ptr_brep, argb, settings.FileName, settings.BlendWithObjectColor, settings.ShowIsoparams, cache);
+      GC.KeepAlive(brep);
+    }
+
+    /// <summary>
+    /// Draws a Mesh in Environment Map preview with a texture of your own, instead of the one in
+    /// <see cref="Rhino.ApplicationSettings.EmapAnalysisSettings"/>.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="color">Object color.</param>
+    /// <param name="settings">
+    /// Settings for this call only. Get a copy of the current ones from
+    /// <see cref="Rhino.ApplicationSettings.EmapAnalysisSettings.GetCurrentState"/> and change what
+    /// you need. A null or empty <see cref="Rhino.ApplicationSettings.EmapAnalysisSettingsState.FileName"/>
+    /// keeps the texture the application settings name.
+    /// </param>
+    /// <since>9.0</since>
+    public void DrawEmapPreview(Mesh mesh, System.Drawing.Color color, Rhino.ApplicationSettings.EmapAnalysisSettingsState settings)
+    {
+      if (settings == null)
+        throw new ArgumentNullException(nameof(settings));
+      int argb = color.ToArgb();
+      IntPtr const_ptr_mesh = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawEmapPreview4(m_ptr, const_ptr_mesh, argb, settings.FileName, settings.BlendWithObjectColor, settings.ShowIsoparams, cache);
+      GC.KeepAlive(mesh);
+    }
+
+
+
+    /// <summary>
+    /// Draws a Brep in Curvature Analysis preview.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawCurvaturePreview(Brep brep, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = brep.ConstPointer();
+      IntPtr cache = brep.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurvaturePreview(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(brep);
+    }
+
+    /// <summary>
+    /// Draws a Mesh in Curvature Analysis preview.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawCurvaturePreview(Mesh mesh, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawCurvaturePreview2(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(mesh);
+    }
+
+
+    /// <summary>
+    /// Draws a Brep in Draft Angle preview.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawDraftAnglePreview(Brep brep, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = brep.ConstPointer();
+      IntPtr cache = brep.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDraftAnglePreview(m_ptr, const_ptr_brep, argb, cache);
+      GC.KeepAlive(brep);
+    }
+
+    /// <summary>
+    /// Draws a Mesh in Draft Angle preview.
+    /// </summary>
+    /// <param name="mesh">Mesh to draw.</param>
+    /// <param name="color">Objct color.</param>
+    /// <since>9.0</since>
+    public void DrawDraftAnglePreview(Mesh mesh, System.Drawing.Color color)
+    {
+      int argb = color.ToArgb();
+      IntPtr const_ptr_brep = mesh.ConstPointer();
+      IntPtr cache = mesh.CacheHandle();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDraftAnglePreview2(m_ptr, const_ptr_brep, argb, cache);
       GC.KeepAlive(mesh);
     }
 
@@ -2520,6 +2968,99 @@ namespace Rhino.Display
       Line[] lines = { line };
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawArrows2(m_ptr, 1, lines, color.ToArgb(), screenSize, relativeSize);
     }
+
+    /// <summary>
+    /// Draw a Grasshopper 2 style vector arrow. This method is relatively slow
+    /// as it requires the construction of a DisplayPen and a PolylineCurve.
+    /// However it is more accurate than other arrow drawing methods in that the
+    /// tip of the drawn arrow is very close to the actual end of the line,
+    /// the tip is always sharp, and the arrow head is resized to never be too small or large.
+    /// Also note this method already takes into account logical pixel scaling.
+    /// </summary>
+    /// <param name="line">Vector shaft to draw.</param>
+    /// <param name="headSize">Size of the head as a factor of arrow length. 0.1 would be a decent size.</param>
+    /// <param name="color">Color of arrow geometry.</param>
+    /// <param name="shaftWidth">Width of arrow geometry. Note that the shaft is drawn using a method
+    /// which only supports integer thicknesses and the arrow head is drawn thicker to counter
+    /// the human perception of seeing angled lines thinner than they really are.</param>
+    /// <since>9.0</since>
+    public void DrawArrow(Line line, double headSize, System.Drawing.Color color, float shaftWidth)
+    {
+      if (shaftWidth < 0.5)
+        return;
+
+      Vector3d span = line.Direction;
+      double length = span.Length;
+      if (length < 1e-32)
+      {
+        // Zero-length vectors are drawn as dots.
+        DrawPoint(line.From, PointStyle.RoundSimple, shaftWidth * 2, color);
+        return;
+      }
+
+      Point3d A = line.To; // Tip of vector.
+
+      Viewport.GetWorldToScreenScale(A, out var pixelsPerUnit);
+      double unitsPerPixel = 1.0 / pixelsPerUnit;
+
+      int pixShaftWidth = (int)Math.Round(shaftWidth);
+      double pixArrowWidth = shaftWidth * 1.5;
+      double unitArrowWidth = pixArrowWidth * unitsPerPixel;
+
+      // The unit axes of the coordinate system we're drawing the arrowhead in.
+      // It should be facing the camera as much as possible, while being coincident with the arrow shaft.
+      Vector3d x = -line.UnitTangent;
+
+      Vector3d viewDir = Viewport.CameraDirection;
+      if (Viewport.IsPerspectiveProjection)
+        viewDir = line.To - Viewport.CameraLocation;
+
+      Vector3d y = Vector3d.CrossProduct(x, viewDir);
+      y.Unitize();
+
+      const double Shrink = 0.8719; // Amount the sharp arrow tip extends beyond the tip point in thickness units.
+      const double HeadX = 1.0; // Horizontal distance between A and head arrow ends in size units.
+      const double HeadY = 0.7; // Vertical distance between A and head arrow ends in size units.
+
+      double dpiScale = DpiScale;
+      double minSizeDueToPixels = 6 * dpiScale * unitsPerPixel;
+      double minSizeDueToWidth = 2.5 * unitArrowWidth;
+      double maxSizeDueToPixels = 100 * dpiScale * unitsPerPixel; // 100 or some factor of the viewport diagonal?
+
+      double min = Math.Max(minSizeDueToPixels, minSizeDueToWidth);
+      double max = Math.Max(maxSizeDueToPixels, minSizeDueToWidth);
+
+      double arrowSize = headSize * length;
+      arrowSize = RhinoMath.Clamp(arrowSize, min, max);
+
+      double arrowOffset = unitArrowWidth * Shrink;
+
+      // Offset the tip point backwards to account for the width of the arrow head.
+      // This is all in a vain attempt to get the sharp tip closer to the actual vector tip.
+      A += arrowOffset * x;
+
+      // Only draw the shaft if the leading end hasn't been offsetted more than the length of the shaft.
+      if (2 * arrowOffset < length)
+      {
+        var B = A + arrowOffset * x;
+        DrawLine(line.From, B, color, pixShaftWidth);
+      }
+
+      var pen = new DisplayPen
+      {
+        Color = color,
+        Thickness = (float)pixArrowWidth,
+        CapStyle = Rhino.DocObjects.LineCapStyle.Flat,
+        JoinStyle = Rhino.DocObjects.LineJoinStyle.Miter
+      };
+
+      Point3d T1 = A + (HeadX * arrowSize * x) + (HeadY * arrowSize * y);
+      Point3d T2 = A + (HeadX * arrowSize * x) - (HeadY * arrowSize * y);
+      var arrow = new Rhino.Geometry.PolylineCurve(new[] { T1, A, T2 }); // Sounds like an expensive constructor here...
+      DrawCurve(arrow, pen);
+      arrow.Dispose();
+    }
+
     /// <summary>
     /// Draws a collection of arrow objects. An arrow consists of a Shaft and an Arrow head at the end of the shaft.
     /// </summary>
@@ -2884,6 +3425,57 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Draws a bitmap in screen coordinates, scaled to fit the given size.
+    /// </summary>
+    /// <param name="bitmap">bitmap to draw</param>
+    /// <param name="left">where the left edge of the bitmap should appear in screen coordinates</param>
+    /// <param name="top">where the top edge of the bitmap should appear in screen coordinates</param>
+    /// <param name="width">width (in pixels) to draw the bitmap at</param>
+    /// <param name="height">height (in pixels) to draw the bitmap at</param>
+    /// <since>9.0</since>
+    public void DrawBitmap(DisplayBitmap bitmap, int left, int top, int width, int height)
+    {
+      DrawBitmapCore(bitmap, left, top, width, height, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Draws a bitmap in screen coordinates, scaled to fit the given size, through a 2d
+    /// transform.
+    /// </summary>
+    /// <param name="bitmap">bitmap to draw</param>
+    /// <param name="left">where the left edge of the bitmap should appear in screen coordinates</param>
+    /// <param name="top">where the top edge of the bitmap should appear in screen coordinates</param>
+    /// <param name="width">width (in pixels) to draw the bitmap at</param>
+    /// <param name="height">height (in pixels) to draw the bitmap at</param>
+    /// <param name="transform">
+    /// A 2d transform applied to the destination rectangle when the bitmap is drawn, in
+    /// viewport pixels - the same space left, top, width and height are in. It moves the
+    /// rectangle the image lands on and nothing else, so a rotation, a shear or a
+    /// non-uniform scale all work and the image is resampled to suit.
+    /// </param>
+    /// <remarks>
+    /// The transform is honoured by the shader based display engines. The GDI engine and
+    /// the fixed function OpenGL fallback blit the image at a screen position and have no
+    /// matrix to apply it with, so on those the bitmap is drawn untransformed.
+    /// </remarks>
+    /// <since>9.0</since>
+    public void DrawBitmap(DisplayBitmap bitmap, int left, int top, int width, int height, Transform2d transform)
+    {
+      DrawBitmapCore(bitmap, left, top, width, height, true, transform);
+    }
+
+    private void DrawBitmapCore(DisplayBitmap bitmap, int left, int top, int width, int height,
+                                bool hasTransform, Transform2d transform)
+    {
+      if (null == bitmap || width < 1 || height < 1)
+        return;
+      IntPtr ptr_bitmap = bitmap.NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawBitmap6(m_ptr, ptr_bitmap, left, top, width, height,
+                                                            hasTransform, ref transform);
+      GC.KeepAlive(bitmap);
+    }
+
+    /// <summary>
     /// Draws a text dot in screen coordinates.
     /// </summary>
     /// <param name="screenX">X coordinate (in pixels) of dot center.</param>
@@ -2981,6 +3573,319 @@ namespace Rhino.Display
       if (ptrPen!=IntPtr.Zero)
         DisplayPen.DeleteNativePointer(ptrPen);
       GC.KeepAlive(hatch);
+    }
+
+    /// <summary>
+    /// Strokes a 2d path with a pen. The path is in viewport pixels - origin at the top
+    /// left of the frame, y increasing downwards - the same space Draw2dText and
+    /// DrawBitmap work in.
+    /// </summary>
+    /// <param name="path">The path to stroke, in viewport pixels.</param>
+    /// <param name="pen">The pen to stroke it with.</param>
+    internal void DrawPath(Display2dPath path, DisplayPen pen)
+    {
+      DrawPathCore(path, pen, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Strokes a 2d path with a pen, through a 2d transform.
+    /// </summary>
+    /// <param name="path">The path to stroke, in viewport pixels.</param>
+    /// <param name="pen">The pen to stroke it with.</param>
+    /// <param name="transform">
+    /// A 2d transform applied to the path when it is drawn, in the path's own pixel
+    /// space. It moves the path's geometry and nothing else: the pen's thickness and
+    /// pattern lengths stay in viewport pixels, so a scaled up path keeps a 2 pixel
+    /// stroke 2 pixels wide.
+    /// </param>
+    internal void DrawPath(Display2dPath path, DisplayPen pen, Transform2d transform)
+    {
+      DrawPathCore(path, pen, true, transform);
+    }
+
+    private void DrawPathCore(Display2dPath path, DisplayPen pen, bool hasTransform, Transform2d transform)
+    {
+      if (null == path || null == pen || path.IsEmpty)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_pen = pen.ToNativePointer();
+      try
+      {
+        UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dDisplayPath(ptr_this, path.ConstPointer(),
+                                                                    ptr_pen, hasTransform,
+                                                                    ref transform, IntPtr.Zero);
+      }
+      finally
+      {
+        if (IntPtr.Zero != ptr_pen)
+          DisplayPen.DeleteNativePointer(ptr_pen);
+      }
+      GC.KeepAlive(path);
+    }
+
+    /// <summary>
+    /// Strokes a 2d path with a pen whose ink is a gradient rather than the pen's single
+    /// color. The gradient runs from point1 to point2.
+    /// The pen still says how wide the stroke is and how it caps, joins and dashes; the
+    /// gradient says what color each pixel of it comes out.
+    /// </summary>
+    /// <param name="path">The path to stroke, in viewport pixels.</param>
+    /// <param name="pen">The pen to stroke it with.</param>
+    /// <param name="stops">The gradient's colors and their positions.</param>
+    /// <param name="point1">Where the gradient starts, in the path's pixel coordinates.</param>
+    /// <param name="point2">Where the gradient ends, in the path's pixel coordinates.</param>
+    /// <param name="linearGradient">True for a linear gradient, false for a radial one.</param>
+    /// <param name="repeat">How many times the gradient repeats between the two points.</param>
+    internal void DrawPath(Display2dPath path, DisplayPen pen,
+                           System.Collections.Generic.IEnumerable<ColorStop> stops,
+                           Point3d point1, Point3d point2, bool linearGradient, float repeat)
+    {
+      DrawPathCore(path, pen, stops, point1, point2, linearGradient, repeat, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Strokes a 2d path with a pen whose ink is a gradient rather than the pen's single
+    /// color. The gradient runs from point1 to point2.
+    /// The pen still says how wide the stroke is and how it caps, joins and dashes; the
+    /// gradient says what color each pixel of it comes out.
+    /// </summary>
+    /// <param name="path">The path to stroke, in viewport pixels.</param>
+    /// <param name="pen">The pen to stroke it with.</param>
+    /// <param name="stops">The gradient's colors and their positions.</param>
+    /// <param name="point1">Where the gradient starts, in the path's pixel coordinates.</param>
+    /// <param name="point2">Where the gradient ends, in the path's pixel coordinates.</param>
+    /// <param name="linearGradient">True for a linear gradient, false for a radial one.</param>
+    /// <param name="repeat">How many times the gradient repeats between the two points.</param>
+    /// <param name="transform">
+    /// A 2d transform applied to the path when it is drawn, in the path's own pixel
+    /// space. It moves the path and not the gradient, whose start and end points stay in
+    /// viewport pixels - the same split the gradient fill makes.
+    /// </param>
+    internal void DrawPath(Display2dPath path, DisplayPen pen,
+                           System.Collections.Generic.IEnumerable<ColorStop> stops,
+                           Point3d point1, Point3d point2, bool linearGradient, float repeat,
+                           Transform2d transform)
+    {
+      DrawPathCore(path, pen, stops, point1, point2, linearGradient, repeat, true, transform);
+    }
+
+    private void DrawPathCore(Display2dPath path, DisplayPen pen,
+                              System.Collections.Generic.IEnumerable<ColorStop> stops,
+                              Point3d point1, Point3d point2, bool linearGradient, float repeat,
+                              bool hasTransform, Transform2d transform)
+    {
+      if (null == path || null == pen || path.IsEmpty)
+        return;
+
+      // No stops is no gradient, which is the plain stroke rather than nothing drawn.
+      if (null == stops)
+      {
+        DrawPathCore(path, pen, hasTransform, transform);
+        return;
+      }
+
+      var argbList = new System.Collections.Generic.List<int>();
+      var positionList = new System.Collections.Generic.List<double>();
+      foreach (var stop in stops)
+      {
+        argbList.Add(stop.Color.ToArgb());
+        positionList.Add(stop.Position);
+      }
+      if (argbList.Count < 1)
+      {
+        DrawPathCore(path, pen, hasTransform, transform);
+        return;
+      }
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_pen = pen.ToNativePointer();
+      try
+      {
+        UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dDisplayPathGradient(ptr_this, path.ConstPointer(),
+          ptr_pen, argbList.Count, argbList.ToArray(), positionList.ToArray(),
+          point1, point2, linearGradient, repeat, hasTransform, ref transform, IntPtr.Zero);
+      }
+      finally
+      {
+        if (IntPtr.Zero != ptr_pen)
+          DisplayPen.DeleteNativePointer(ptr_pen);
+      }
+      GC.KeepAlive(path);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses under its fill rule, with a solid color.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="color">The color to fill it with.</param>
+    internal void FillPath(Display2dPath path, System.Drawing.Color color)
+    {
+      FillPathCore(path, color, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses under its fill rule, with a solid color,
+    /// through a 2d transform.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="color">The color to fill it with.</param>
+    /// <param name="transform">
+    /// A 2d transform applied to the path when it is drawn, in the path's own pixel
+    /// space. It moves the region's geometry and nothing else.
+    /// </param>
+    internal void FillPath(Display2dPath path, System.Drawing.Color color, Transform2d transform)
+    {
+      FillPathCore(path, color, true, transform);
+    }
+
+    private void FillPathCore(Display2dPath path, System.Drawing.Color color, bool hasTransform,
+                              Transform2d transform)
+    {
+      if (null == path || path.IsEmpty)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Fill2dDisplayPath(ptr_this, path.ConstPointer(),
+                                                                  color.ToArgb(), hasTransform,
+                                                                  ref transform, IntPtr.Zero);
+      GC.KeepAlive(path);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses with a gradient. The gradient runs from
+    /// point1 to point2 in the same pixel coordinates as the path.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="stops">The gradient's colors and their positions.</param>
+    /// <param name="point1">Where the gradient starts, in the path's pixel coordinates.</param>
+    /// <param name="point2">Where the gradient ends, in the path's pixel coordinates.</param>
+    /// <param name="linearGradient">True for a linear gradient, false for a radial one.</param>
+    /// <param name="repeat">How many times the gradient repeats between the two points.</param>
+    internal void FillPath(Display2dPath path, System.Collections.Generic.IEnumerable<ColorStop> stops,
+                           Point3d point1, Point3d point2, bool linearGradient, float repeat)
+    {
+      FillPathCore(path, stops, point1, point2, linearGradient, repeat, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses with a gradient, through a 2d transform. The
+    /// gradient runs from point1 to point2 in the same pixel coordinates as the path.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="stops">The gradient's colors and their positions.</param>
+    /// <param name="point1">Where the gradient starts, in the path's pixel coordinates.</param>
+    /// <param name="point2">Where the gradient ends, in the path's pixel coordinates.</param>
+    /// <param name="linearGradient">True for a linear gradient, false for a radial one.</param>
+    /// <param name="repeat">How many times the gradient repeats between the two points.</param>
+    /// <param name="transform">
+    /// A 2d transform applied to the path when it is drawn, in the path's own pixel
+    /// space. It moves the region and not the gradient, whose start and end points stay
+    /// in viewport pixels.
+    /// </param>
+    internal void FillPath(Display2dPath path, System.Collections.Generic.IEnumerable<ColorStop> stops,
+                           Point3d point1, Point3d point2, bool linearGradient, float repeat,
+                           Transform2d transform)
+    {
+      FillPathCore(path, stops, point1, point2, linearGradient, repeat, true, transform);
+    }
+
+    private void FillPathCore(Display2dPath path, System.Collections.Generic.IEnumerable<ColorStop> stops,
+                              Point3d point1, Point3d point2, bool linearGradient, float repeat,
+                              bool hasTransform, Transform2d transform)
+    {
+      if (null == path || null == stops || path.IsEmpty)
+        return;
+
+      var argbList = new System.Collections.Generic.List<int>();
+      var positionList = new System.Collections.Generic.List<double>();
+      foreach (var stop in stops)
+      {
+        argbList.Add(stop.Color.ToArgb());
+        positionList.Add(stop.Position);
+      }
+      if (argbList.Count < 1)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Fill2dDisplayPathGradient(ptr_this, path.ConstPointer(),
+        argbList.Count, argbList.ToArray(), positionList.ToArray(),
+        point1, point2, linearGradient, repeat, hasTransform, ref transform, IntPtr.Zero);
+      GC.KeepAlive(path);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses with a tiled image - what a texture brush is.
+    ///
+    /// The image is not blitted into the region; it is sampled per pixel through
+    /// <paramref name="fillTransform"/>, so the region can be any shape the path can
+    /// describe, the image repeats over as much of it as it covers, and a rotated or
+    /// skewed transform costs no more than a translated one.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="image">
+    /// The image to tile. Hold on to this across frames rather than building one per
+    /// frame: the display engine's texture cache keys on the bitmap, so a fresh one every
+    /// frame re-uploads to the GPU every frame.
+    /// </param>
+    /// <param name="opacity">
+    /// Multiplies the image's alpha, so an opaque image can fill translucently. 1 leaves
+    /// the image as it is; 0 draws nothing.
+    /// </param>
+    /// <param name="fillTransform">
+    /// Where the image sits in the region. It maps the image's own pixel space - the
+    /// image occupying (0,0) to (width,height), one pixel to the unit, y increasing
+    /// downwards from its top left pixel - into viewport pixels. So
+    /// <see cref="Transform.Identity"/> puts one image pixel on one screen pixel
+    /// with the image's corner at the top left of the frame, which is what a
+    /// System.Drawing.TextureBrush or an Eto TextureBrush with no transform of its own
+    /// means; pass such a brush's own transform straight through.
+    /// </param>
+    /// <remarks>
+    /// Only some display engines sample an image for a fill - the Direct3D 11 engine does.
+    /// On the others this draws nothing at all, and it cannot currently be asked which is
+    /// which, so a caller that has a fallback of its own has no way to know to use it yet.
+    /// </remarks>
+    internal void FillPath(Display2dPath path, DisplayBitmap image, float opacity,
+                           Transform fillTransform)
+    {
+      FillPathCore(path, image, opacity, fillTransform, false, Transform2d.Identity);
+    }
+
+    /// <summary>
+    /// Fills the region a 2d path encloses with a tiled image, through a 2d transform.
+    /// See the overload without one for what the image and its transform mean.
+    /// </summary>
+    /// <param name="path">The region to fill, in viewport pixels.</param>
+    /// <param name="image">The image to tile.</param>
+    /// <param name="opacity">Multiplies the image's alpha.</param>
+    /// <param name="fillTransform">
+    /// Where the image sits in the region, mapping the image's own pixel space into
+    /// viewport pixels.
+    /// </param>
+    /// <param name="transform">
+    /// A 2d transform applied to the path when it is drawn, in the path's own pixel
+    /// space. It moves the region and not the image: <paramref name="fillTransform"/>
+    /// stays in viewport pixels, so a transformed region slides over a fill that stays
+    /// put.
+    /// </param>
+    internal void FillPath(Display2dPath path, DisplayBitmap image, float opacity,
+                           Transform fillTransform, Transform2d transform)
+    {
+      FillPathCore(path, image, opacity, fillTransform, true, transform);
+    }
+
+    private void FillPathCore(Display2dPath path, DisplayBitmap image, float opacity,
+                              Transform fillTransform, bool hasTransform, Transform2d transform)
+    {
+      if (null == path || null == image || path.IsEmpty)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Fill2dDisplayPathTexture(ptr_this, path.ConstPointer(),
+        image.NonConstPointer(), opacity, fillTransform, hasTransform, ref transform);
+      GC.KeepAlive(path);
+      GC.KeepAlive(image);
     }
 
     /// <summary>
@@ -3133,6 +4038,7 @@ namespace Rhino.Display
       if (dx && dy && dz) { return; }
 
       Point3d[] corners = box.GetCorners();
+      if (corners == null || corners.Length < 8) { return; }
 
       // If degenerate in two directions, we can draw a single line.
       if (dx && dy)
@@ -3511,6 +4417,50 @@ namespace Rhino.Display
       UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dText2(ptr_this, text, color.ToArgb(), worldCoordinate, middleJustified, height, fontface);
     }
 
+    /// <summary>
+    /// Draws 2D text on the viewport.
+    /// </summary>
+    /// <param name="text">The string to draw.</param>
+    /// <param name="color">Text color.</param>
+    /// <param name="screenCoordinate">Definition point in screen coordinates (0,0 is top-left corner). The alignment attaches to this point.</param>
+    /// <param name="horizontalAlignment">Where the definition point sits across the text's horizontal advance.</param>
+    /// <param name="verticalAlignment">Where the definition point sits down the text's lines. BottomOfTop puts the first line's baseline on the point; Top puts the top of a capital there, which is what the middleJustified=false overloads draw.</param>
+    /// <param name="height">Height in pixels (good default is 12).</param>
+    /// <param name="fontface">Font name (good default is "Arial").</param>
+    /// <param name="bold">If true, the bold face of the font family is used.</param>
+    /// <param name="italic">If true, the italic face of the font family is used.</param>
+    /// <param name="underline">If true, the text is underlined.</param>
+    /// <param name="strikethrough">If true, the text is struck through.</param>
+    /// <param name="applyKerning">If true, the font's kerning pairs are used to space the glyphs.</param>
+    /// <since>9.0</since>
+    public void Draw2dText(string text, System.Drawing.Color color, Point2d screenCoordinate, DocObjects.TextHorizontalAlignment horizontalAlignment, DocObjects.TextVerticalAlignment verticalAlignment, float height, string fontface, bool bold, bool italic, bool underline, bool strikethrough, bool applyKerning)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dText3(ptr_this, text, color.ToArgb(), screenCoordinate, horizontalAlignment, verticalAlignment, height, fontface, bold, italic, underline, strikethrough, applyKerning);
+    }
+
+    /// <summary>
+    /// Draws 2D text on the viewport.
+    /// </summary>
+    /// <param name="text">The string to draw.</param>
+    /// <param name="color">Text color.</param>
+    /// <param name="worldCoordinate">Definition point in world coordinates. The alignment attaches to this point.</param>
+    /// <param name="horizontalAlignment">Where the definition point sits across the text's horizontal advance.</param>
+    /// <param name="verticalAlignment">Where the definition point sits down the text's lines. BottomOfTop puts the first line's baseline on the point; Top puts the top of a capital there, which is what the middleJustified=false overloads draw.</param>
+    /// <param name="height">Height in pixels (good default is 12).</param>
+    /// <param name="fontface">Font name (good default is "Arial").</param>
+    /// <param name="bold">If true, the bold face of the font family is used.</param>
+    /// <param name="italic">If true, the italic face of the font family is used.</param>
+    /// <param name="underline">If true, the text is underlined.</param>
+    /// <param name="strikethrough">If true, the text is struck through.</param>
+    /// <param name="applyKerning">If true, the font's kerning pairs are used to space the glyphs.</param>
+    /// <since>9.0</since>
+    public void Draw2dText(string text, System.Drawing.Color color, Point3d worldCoordinate, DocObjects.TextHorizontalAlignment horizontalAlignment, DocObjects.TextVerticalAlignment verticalAlignment, float height, string fontface, bool bold, bool italic, bool underline, bool strikethrough, bool applyKerning)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dText4(ptr_this, text, color.ToArgb(), worldCoordinate, horizontalAlignment, verticalAlignment, height, fontface, bold, italic, underline, strikethrough, applyKerning);
+    }
+
     /// <since>6.4</since>
     public void Draw3dText(string text, System.Drawing.Color color, Plane textPlane, double height, string fontface, bool bold, bool italic, DocObjects.TextHorizontalAlignment horizontalAlignment, DocObjects.TextVerticalAlignment verticalAlignment)
     {
@@ -3715,6 +4665,25 @@ namespace Rhino.Display
       IntPtr const_ptr_annotation = annotation.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawAnnotation(ptr_this, const_ptr_annotation, color.ToArgb());
       GC.KeepAlive(annotation);
+    }
+
+    /// <summary>
+    /// Draws an annotation geometry while evaluating any embedded text fields
+    /// (e.g. %&lt;Date&gt;%, %&lt;DocumentText("...")&gt;%) against the supplied
+    /// parent <see cref="DocObjects.RhinoObject"/>. Intended for preview
+    /// conduits that draw a modified copy of an annotation's geometry while
+    /// the user is editing it — the regular geometry-only overload skips
+    /// field evaluation because it has no display cache to anchor to.
+    /// </summary>
+    /// <since>9.0</since>
+    public void DrawAnnotation(AnnotationBase annotation, DocObjects.RhinoObject parentObject, System.Drawing.Color color)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr const_ptr_annotation = annotation.ConstPointer();
+      IntPtr const_ptr_parent = parentObject != null ? parentObject.ConstPointer() : IntPtr.Zero;
+      UnsafeNativeMethods.CRhinoDisplayPipeline_DrawAnnotation2(ptr_this, const_ptr_annotation, const_ptr_parent, color.ToArgb());
+      GC.KeepAlive(annotation);
+      GC.KeepAlive(parentObject);
     }
 
     /// <since>6.0</since>
@@ -3969,6 +4938,16 @@ namespace Rhino.Display
       surface.Draw(this, wireColor, wireDensity);
     }
 
+    /// <summary>
+    /// Draw surface indicators
+    /// </summary>
+    /// <param name="directionIndicators"></param>
+    /// <since>9.0</since>
+    public void DrawSurfaceDirectionIndicators(SurfaceDirectionIndicators directionIndicators)
+    {
+      directionIndicators?.Draw(this);
+    }
+
     #endregion
 
     /// <since>5.0</since>
@@ -4097,6 +5076,91 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Draws a line whose coordinates are viewport pixels rather than world units. The
+    /// origin is the top left of the frame, with y increasing downwards - the same space
+    /// Draw2dText and DrawBitmap work in.
+    /// </summary>
+    /// <param name="from">Start of the line, in screen coordinates.</param>
+    /// <param name="to">End of the line, in screen coordinates.</param>
+    /// <param name="pen">Pen to stroke the line with.</param>
+    /// <since>9.0</since>
+    public void Draw2dLine(Point2f from, Point2f to, DisplayPen pen)
+    {
+      if (null == pen)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_pen = pen.ToNativePointer();
+      try
+      {
+        UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dLine3(ptr_this, from.X, from.Y, to.X, to.Y, ptr_pen);
+      }
+      finally
+      {
+        if (IntPtr.Zero != ptr_pen)
+          DisplayPen.DeleteNativePointer(ptr_pen);
+      }
+    }
+
+    /// <summary>
+    /// Draws a line whose coordinates are viewport pixels rather than world units. The
+    /// origin is the top left of the frame, with y increasing downwards - the same space
+    /// Draw2dText and DrawBitmap work in.
+    /// </summary>
+    /// <param name="from">Start of the line, in screen coordinates.</param>
+    /// <param name="to">End of the line, in screen coordinates.</param>
+    /// <param name="pen">Pen to stroke the line with.</param>
+    /// <since>9.0</since>
+    public void Draw2dLine(System.Drawing.PointF from, System.Drawing.PointF to, DisplayPen pen)
+    {
+      Draw2dLine(new Point2f(from.X, from.Y), new Point2f(to.X, to.Y), pen);
+    }
+
+    /// <summary>
+    /// Draws a polyline whose coordinates are viewport pixels rather than world units.
+    /// The origin is the top left of the frame, with y increasing downwards - the same
+    /// space Draw2dText and DrawBitmap work in.
+    /// </summary>
+    /// <param name="points">The polyline vertices, in screen coordinates. Fewer than two draws nothing.</param>
+    /// <param name="pen">Pen to stroke the polyline with.</param>
+    /// <since>9.0</since>
+    public void Draw2dPolyline(Point2f[] points, DisplayPen pen)
+    {
+      Draw2dPolyline(points, pen, false);
+    }
+
+    /// <summary>
+    /// Draws a polyline whose coordinates are viewport pixels rather than world units.
+    /// The origin is the top left of the frame, with y increasing downwards - the same
+    /// space Draw2dText and DrawBitmap work in.
+    /// </summary>
+    /// <param name="points">The polyline vertices, in screen coordinates. Fewer than two draws nothing.</param>
+    /// <param name="pen">Pen to stroke the polyline with.</param>
+    /// <param name="closed">
+    /// When true the polyline is closed back to its first point as part of the same
+    /// figure, so that corner is stroked as a join rather than as two loose ends. Do not
+    /// repeat the first point at the end when passing true.
+    /// </param>
+    /// <since>9.0</since>
+    public void Draw2dPolyline(Point2f[] points, DisplayPen pen, bool closed)
+    {
+      if (null == points || points.Length < 2 || null == pen)
+        return;
+
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_pen = pen.ToNativePointer();
+      try
+      {
+        UnsafeNativeMethods.CRhinoDisplayPipeline_Draw2dPolyline(ptr_this, points.Length, points, ptr_pen, closed);
+      }
+      finally
+      {
+        if (IntPtr.Zero != ptr_pen)
+          DisplayPen.DeleteNativePointer(ptr_pen);
+      }
+    }
+
+    /// <summary>
     /// Sets up a display material.
     /// </summary>
     /// <param name="doc">The active document.</param>
@@ -4173,6 +5237,16 @@ namespace Rhino.Display
       }
 
       return material;
+    }
+
+    internal void PushObjectColor(Color color)
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_PushObjectColor(m_ptr, color.ToArgb());
+    }
+
+    internal void PopObjectColor()
+    {
+      UnsafeNativeMethods.CRhinoDisplayPipeline_PopObjectColor(m_ptr);
     }
   }
 
@@ -4402,6 +5476,133 @@ namespace Rhino.Display
     }
   }
 
+  /// <summary>
+  /// Gives a <see cref="DisplayPipeline.PostProcessFrameBuffer"/> handler access to the frame
+  /// that was just drawn.
+  /// </summary>
+  public class PostProcessFrameBufferEventArgs : DrawEventArgs
+  {
+    internal PostProcessFrameBufferEventArgs(IntPtr pDisplayPipeline, uint conduitSerialNumber)
+      : base(pDisplayPipeline, conduitSerialNumber)
+    {
+    }
+
+    /// <summary>
+    /// Width and height in pixels of the frame this handler can read. A layout runs this channel
+    /// once per detail, so this is not always the size of the view.
+    /// </summary>
+    /// <since>9.0</since>
+    public System.Drawing.Size FrameBufferSize
+    {
+      get
+      {
+        int width = 0, height = 0;
+        if (!UnsafeNativeMethods.CChannelAttributes_GetFrameBufferSize(m_conduitSerialNumber, ref width, ref height))
+          return System.Drawing.Size.Empty;
+        return new System.Drawing.Size(width, height);
+      }
+    }
+
+    /// <summary>
+    /// Copies the frame into caller owned memory as 32 bit BGRA, with every pixel made opaque.
+    /// </summary>
+    /// <param name="destination">
+    /// Start of the destination buffer. This is the start of the buffer whichever row order is
+    /// asked for, unlike the GDI convention of pointing at the last row.
+    /// </param>
+    /// <param name="destinationStride">
+    /// Bytes from the start of one destination row to the start of the next. A positive value
+    /// writes the top row of the image first, a negative value writes the bottom row first.
+    /// </param>
+    /// <param name="destinationCapacityInBytes">Bytes available at <paramref name="destination"/>.</param>
+    /// <returns>true if the frame was copied.</returns>
+    /// <since>9.0</since>
+    public bool TryCopyFrameBuffer(IntPtr destination, int destinationStride, int destinationCapacityInBytes)
+    {
+      return TryCopyFrameBuffer(destination, destinationStride, destinationCapacityInBytes, false);
+    }
+
+    /// <summary>
+    /// Copies the frame into caller owned memory as 32 bit BGRA.
+    /// </summary>
+    /// <param name="destination">
+    /// Start of the destination buffer. This is the start of the buffer whichever row order is
+    /// asked for, unlike the GDI convention of pointing at the last row.
+    /// </param>
+    /// <param name="destinationStride">
+    /// Bytes from the start of one destination row to the start of the next. A positive value
+    /// writes the top row of the image first, a negative value writes the bottom row first.
+    /// </param>
+    /// <param name="destinationCapacityInBytes">Bytes available at <paramref name="destination"/>.</param>
+    /// <param name="preserveAlpha">
+    /// true to copy the alpha channel as the display engine left it. A frame buffer read back can
+    /// carry an alpha channel the engine never wrote, which makes the whole frame transparent, so
+    /// pass false unless the alpha is known to be meaningful. Passing true is also the faster of
+    /// the two copies, since it leaves the alpha channel alone.
+    /// </param>
+    /// <returns>true if the frame was copied.</returns>
+    /// <since>9.0</since>
+    public bool TryCopyFrameBuffer(IntPtr destination, int destinationStride, int destinationCapacityInBytes, bool preserveAlpha)
+    {
+      if (IntPtr.Zero == destination)
+        throw new ArgumentNullException(nameof(destination));
+      if (destinationCapacityInBytes < 0)
+        throw new ArgumentOutOfRangeException(nameof(destinationCapacityInBytes));
+
+      return UnsafeNativeMethods.CChannelAttributes_CopyFrameBuffer(m_conduitSerialNumber, destination,
+        destinationStride, destinationCapacityInBytes, preserveAlpha);
+    }
+
+    /// <summary>
+    /// Copies the frame into a caller owned array as 32 bit BGRA, with every pixel made opaque.
+    /// Reuse one array across frames; allocating per frame defeats the point of this event.
+    /// </summary>
+    /// <param name="destination">Destination array.</param>
+    /// <param name="destinationStride">
+    /// Bytes from the start of one destination row to the start of the next. A positive value
+    /// writes the top row of the image first, a negative value writes the bottom row first.
+    /// </param>
+    /// <returns>true if the frame was copied.</returns>
+    /// <since>9.0</since>
+    public bool TryCopyFrameBuffer(byte[] destination, int destinationStride)
+    {
+      return TryCopyFrameBuffer(destination, destinationStride, false);
+    }
+
+    /// <summary>
+    /// Copies the frame into a caller owned array as 32 bit BGRA. Reuse one array across frames;
+    /// allocating per frame defeats the point of this event.
+    /// </summary>
+    /// <param name="destination">Destination array.</param>
+    /// <param name="destinationStride">
+    /// Bytes from the start of one destination row to the start of the next. A positive value
+    /// writes the top row of the image first, a negative value writes the bottom row first.
+    /// </param>
+    /// <param name="preserveAlpha">
+    /// true to copy the alpha channel as the display engine left it. A frame buffer read back can
+    /// carry an alpha channel the engine never wrote, which makes the whole frame transparent, so
+    /// pass false unless the alpha is known to be meaningful. Passing true is also the faster of
+    /// the two copies, since it leaves the alpha channel alone.
+    /// </param>
+    /// <returns>true if the frame was copied.</returns>
+    /// <since>9.0</since>
+    public bool TryCopyFrameBuffer(byte[] destination, int destinationStride, bool preserveAlpha)
+    {
+      if (destination == null)
+        throw new ArgumentNullException(nameof(destination));
+
+      var handle = System.Runtime.InteropServices.GCHandle.Alloc(destination, System.Runtime.InteropServices.GCHandleType.Pinned);
+      try
+      {
+        return TryCopyFrameBuffer(handle.AddrOfPinnedObject(), destinationStride, destination.Length, preserveAlpha);
+      }
+      finally
+      {
+        handle.Free();
+      }
+    }
+  }
+
   public class DisplayModeChangedEventArgs : EventArgs
   {
     internal IntPtr m_ptr_display_pipeline;
@@ -4605,195 +5806,166 @@ namespace Rhino.Display
   }
 
 
-  internal class FlairDefinition
+  /// <summary>
+  /// A 2d path - figures of lines and bezier segments, with a fill rule - that the
+  /// display pipeline can stroke and fill. Wraps a native CRhino2dDisplayPath.
+  ///
+  /// Coordinates are viewport pixels: the origin is the top left of the frame and y
+  /// increases downwards, which is the space DisplayPipeline's other 2d entry points
+  /// (Draw2dText, DrawBitmap, DrawDot) work in.
+  ///
+  /// Internal on purpose. CRhino2dDisplayPath is not public SDK yet, and neither is
+  /// this; Rhino.UI reaches it through InternalsVisibleTo.
+  /// </summary>
+  internal sealed class Display2dPath : IDisposable
   {
-    Guid _id;
-    private FlairDefinition(Guid id)
+    IntPtr m_ptr;
+
+    public Display2dPath()
     {
-      _id = id;
+      m_ptr = UnsafeNativeMethods.CRhino2dDisplayPath_New();
     }
 
-    public static FlairDefinition Find(Guid definitionId)
+    Display2dPath(IntPtr ptr)
     {
-      IntPtr ptr = UnsafeNativeMethods.RhFlair_FindDefinition(definitionId);
-      if (ptr == IntPtr.Zero)
-        return null;
-
-      FlairDefinition def = new FlairDefinition(definitionId);
-      return def;
+      m_ptr = ptr;
     }
 
-    public static FlairDefinition ActiveDefinition()
+    ~Display2dPath()
     {
-      IntPtr ptr = UnsafeNativeMethods.RhFlair_GetActiveDefinition();
-      Guid id = UnsafeNativeMethods.RhFlair_GetDefinitionId(ptr);
-      return Find(id);
+      Dispose(false);
     }
 
-    public static FlairDefinition[] GetDefinitions(RhinoDoc doc)
+    internal IntPtr ConstPointer() => m_ptr;
+    internal IntPtr NonConstPointer() => m_ptr;
+
+    public void Dispose()
     {
-      using(var ids = new Rhino.Runtime.InteropWrappers.SimpleArrayGuid())
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
       {
-        IntPtr ptrIds = ids.NonConstPointer();
-        UnsafeNativeMethods.RhFlair_GetDefinitions(doc.RuntimeSerialNumber, ptrIds);
-        Guid[] defIds = ids.ToArray();
-        FlairDefinition[] rc = new FlairDefinition[defIds.Length];
-        for (int i=0; i<defIds.Length; i++)
-        {
-          rc[i] = Find(defIds[i]);
-        }
+        UnsafeNativeMethods.CRhino2dDisplayPath_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>How a self overlapping or nested path decides what is inside it.</summary>
+    public enum PathFillRule
+    {
+      /// <summary>Odd numbers of crossings are inside. GDI+ Alternate, WPF EvenOdd.</summary>
+      EvenOdd = 0,
+      /// <summary>Non zero signed crossings are inside. GDI+ Winding, WPF Nonzero.</summary>
+      Winding = 1
+    }
+
+    public Display2dPath Duplicate()
+    {
+      return new Display2dPath(UnsafeNativeMethods.CRhino2dDisplayPath_NewCopy(m_ptr));
+    }
+
+    public void Clear() => UnsafeNativeMethods.CRhino2dDisplayPath_Clear(m_ptr);
+
+    /// <summary>
+    /// Ends the current figure without closing it. The next segment added starts a new one.
+    /// </summary>
+    public void StartFigure() => UnsafeNativeMethods.CRhino2dDisplayPath_StartFigure(m_ptr);
+
+    /// <summary>
+    /// Closes the current figure. The closing segment back to the figure's start is
+    /// implied rather than stored, so a stroke and a fill can treat it differently.
+    /// </summary>
+    public void CloseFigure() => UnsafeNativeMethods.CRhino2dDisplayPath_CloseFigure(m_ptr);
+
+    /// <summary>Starts a new figure. Nothing is drawn between figures.</summary>
+    public void MoveTo(Point2d point) => UnsafeNativeMethods.CRhino2dDisplayPath_MoveTo(m_ptr, point);
+
+    public void LineTo(Point2d end) => UnsafeNativeMethods.CRhino2dDisplayPath_LineTo(m_ptr, end);
+
+    public void QuadraticBezierTo(Point2d control, Point2d end)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_QuadraticBezierTo(m_ptr, control, end);
+
+    public void CubicBezierTo(Point2d control1, Point2d control2, Point2d end)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_CubicBezierTo(m_ptr, control1, control2, end);
+
+    /// <summary>
+    /// Adds a line. When a figure is open and does not already end at start, the two are
+    /// joined by a straight segment first.
+    /// </summary>
+    public void AddLine(Point2d start, Point2d end)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_AddLine(m_ptr, start, end);
+
+    public void AddPolyline(Point2d[] points)
+    {
+      if (null == points || points.Length < 1)
+        return;
+      UnsafeNativeMethods.CRhino2dDisplayPath_AddPolyline(m_ptr, points.Length, points);
+    }
+
+    /// <summary>Adds a closed rectangle as a figure of its own.</summary>
+    public void AddRectangle(Point2d corner, double width, double height)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_AddRectangle(m_ptr, corner, width, height);
+
+    /// <summary>Adds a closed ellipse inscribed in the rectangle, as a figure of its own.</summary>
+    public void AddEllipse(Point2d corner, double width, double height)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_AddEllipse(m_ptr, corner, width, height);
+
+    /// <summary>
+    /// Adds an elliptical arc inscribed in the rectangle. Angles are degrees from the
+    /// positive x axis, sweeping towards positive y - the GDI+ convention, which reads
+    /// clockwise on screen because y points down.
+    /// </summary>
+    public void AddArc(Point2d corner, double width, double height,
+                       double startAngleDegrees, double sweepAngleDegrees)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_AddArc(m_ptr, corner, width, height,
+                                                        startAngleDegrees, sweepAngleDegrees);
+
+    /// <summary>
+    /// Appends another path's figures. When connect is true, and both this path's open
+    /// figure and the first incoming figure are open, they are joined into one.
+    /// </summary>
+    public void AddPath(Display2dPath path, bool connect)
+    {
+      if (null == path)
+        return;
+      UnsafeNativeMethods.CRhino2dDisplayPath_AddPath(m_ptr, path.ConstPointer(), connect);
+      GC.KeepAlive(path);
+    }
+
+    /// <summary>Applies an affine transform to every point. Only x and y are used.</summary>
+    public void Transform(Geometry.Transform xform)
+      => UnsafeNativeMethods.CRhino2dDisplayPath_Transform(m_ptr, xform);
+
+    public PathFillRule FillRule
+    {
+      get => (PathFillRule)UnsafeNativeMethods.CRhino2dDisplayPath_GetFillRule(m_ptr);
+      set => UnsafeNativeMethods.CRhino2dDisplayPath_SetFillRule(m_ptr, (int)value);
+    }
+
+    public bool IsEmpty => UnsafeNativeMethods.CRhino2dDisplayPath_IsEmpty(m_ptr);
+
+    public int FigureCount => UnsafeNativeMethods.CRhino2dDisplayPath_FigureCount(m_ptr);
+
+    /// <summary>
+    /// Tight bounding box of the path. Bezier extrema are solved rather than bounding
+    /// the control points, so this is the area the drawn path actually occupies.
+    /// Empty when the path has nothing in it.
+    /// </summary>
+    public Geometry.BoundingBox BoundingBox
+    {
+      get
+      {
+        var rc = Geometry.BoundingBox.Empty;
+        if (!UnsafeNativeMethods.CRhino2dDisplayPath_BoundingBox(m_ptr, ref rc))
+          return Geometry.BoundingBox.Empty;
         return rc;
       }
     }
-
-    public Guid Id { get { return _id; } }
-
-    public string Name
-    {
-      get
-      {
-        IntPtr ptrDefinition = UnsafeNativeMethods.RhFlair_FindDefinition(Id);
-        using(var s = new Rhino.Runtime.InteropWrappers.StringWrapper())
-        {
-          IntPtr ptrString = s.NonConstPointer;
-          UnsafeNativeMethods.RhFlair_FlrDefinitionGetName(ptrDefinition, ptrString);
-          return s.ToString();
-        }
-      }
-    }
-
-    public FlairParameters GetParameters()
-    {
-      IntPtr ptrDefinition = UnsafeNativeMethods.RhFlair_FindDefinition(Id);
-      IntPtr ptrParams = UnsafeNativeMethods.RhFlair_NewParams();
-      UnsafeNativeMethods.RhFlair_GetRenderParams(ptrDefinition, ptrParams);
-      FlairParameters rc = FlairParameters.FromPointer(ptrParams);
-      UnsafeNativeMethods.RhFlair_DeleteParams(ptrParams);
-      return rc;
-    }
-
-    public void UpdateParameters(FlairParameters newParameters)
-    {
-      IntPtr ptrParams = newParameters.CreateNative();
-      UnsafeNativeMethods.RhFlair_UpdateParams(Id, ptrParams);
-      UnsafeNativeMethods.RhFlair_DeleteParams(ptrParams);
-    }
-
-    public void Enable(RhinoViewport viewport)
-    {
-      var view = viewport.ParentView;
-      UnsafeNativeMethods.RhFlair_EnableRhinoFlair(view.RuntimeSerialNumber, Id);
-    }
-
-    public static void Disable(RhinoViewport viewport)
-    {
-      var view = viewport.ParentView;
-      UnsafeNativeMethods.RhFlair_DisableRhinoFlair(view.RuntimeSerialNumber);
-    }
-
-    public static FlairDefinition EnabledDefinitionForViewport(RhinoViewport viewport)
-    {
-      IntPtr ptrViewport = viewport.ConstPointer();
-      Guid id = Guid.Empty;
-      UnsafeNativeMethods.RhFlair_RhinoFlairEnabledViewport(ptrViewport, ref id);
-      GC.KeepAlive(viewport);
-      return Find(id);
-    }
   }
 
-  internal class FlairParameters
-  {
-    public float PrimaryColorMag { get; set; } = 10.0f;
-    public float EdgeColorMag { get; set; } = 80.0f;
-    public float BrushSize { get; set; } = 16.0f;
-    public float BrushStroke { get; set; } = 1.5f;
-    public int QuantizeMethod { get; set; } = 2;
-    public int ColorSource { get; set; } = 1;
-    public int ColorSteps { get; set; } = 2000;
-    public Color4f MainInkColor { get; set; } = new Color4f(0, 0, 0, 0);
-    public Color4f CSB { get; set; } = new Color4f(1.0f, 1.0f, 1.0f, 0.0f);
-    public int EdgeMixingMode { get; set; } = 0;
-    public int BackgroundMixingMode { get; set; } = 1;
-    public float BackgroundMixFactor { get; set; } = 2.5f;
-
-    internal static FlairParameters FromPointer(IntPtr ptr)
-    {
-      if (IntPtr.Zero == ptr)
-        return null;
-
-      float primaryColorMag = 10.0f;
-      float edgeColorMag = 80.0f;
-      float brushSize = 16.0f;
-      float brushStroke = 1.5f;
-      int quantizeMethod = 2;
-      int colorSource = 1;
-      int colorSteps = 2000;
-      Color4f mainInkColor = new Color4f(0, 0, 0, 0);
-      Color4f csb = new Color4f(1.0f, 1.0f, 1.0f, 0.0f);
-      int edgeMixingMode = 0;
-      int backgroundMixingMode = 1;
-      float backgroundMixFactor = 2.5f;
-      UnsafeNativeMethods.RhFlair_GetParams(ptr, ref primaryColorMag, ref edgeColorMag, ref brushSize, ref brushStroke,
-        ref quantizeMethod, ref colorSource, ref colorSteps, ref mainInkColor, ref csb, ref edgeMixingMode,
-        ref backgroundMixingMode, ref backgroundMixFactor);
-
-      FlairParameters rc = new FlairParameters();
-      rc.PrimaryColorMag = primaryColorMag;
-      rc.EdgeColorMag = edgeColorMag;
-      rc.BrushSize = brushSize;
-      rc.BrushStroke = brushStroke;
-      rc.QuantizeMethod = quantizeMethod;
-      rc.ColorSource = colorSource;
-      rc.ColorSteps = colorSteps;
-      rc.MainInkColor = mainInkColor;
-      rc.CSB = csb;
-      rc.EdgeMixingMode = edgeMixingMode;
-      rc.BackgroundMixingMode = backgroundMixingMode;
-      rc.BackgroundMixFactor = backgroundMixFactor;
-      return rc;
-    }
-
-    internal IntPtr CreateNative()
-    {
-      IntPtr ptr = UnsafeNativeMethods.RhFlair_NewParams();
-      UnsafeNativeMethods.RhFlair_SetParams(ptr, PrimaryColorMag, EdgeColorMag, BrushSize, BrushStroke, QuantizeMethod,
-        ColorSource, ColorSteps, MainInkColor, CSB, EdgeMixingMode, BackgroundMixingMode, BackgroundMixFactor);
-      return ptr;
-    }
-  }
-
-  /*
-  internal class Flair
-  {
-    public static string ProductName
-    { 
-      get 
-      {
-        using(var s = new Rhino.Runtime.InteropWrappers.StringWrapper())
-        {
-          IntPtr ptr = s.NonConstPointer;
-          UnsafeNativeMethods.RhFlair_ProductName(ptr);
-          return s.ToString();
-        }
-      }
-    }
-
-    public static Guid ProductId
-    {
-      get
-      {
-        return UnsafeNativeMethods.RhFliar_ProductId();
-      }
-    }
-
-    public static bool CapabilitiesAvailable
-    {
-      get
-      {
-        return UnsafeNativeMethods.RhFlair_CapabilitiesAvailable();
-      }
-    }
-  }
-  */
 }
 #endif

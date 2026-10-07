@@ -2,16 +2,27 @@
 
 ## Updating version numbers
 
-There are several places where version numbers should be updated:
+`src/version.txt` is the single source of truth. Don't hand-edit the other files —
+`script/bump_version.py` propagates it, giving each ecosystem the spelling it requires:
 
-- [JavaScript] package.json, line 3
-- [.NET] 
-    - src/dotnet/Rhino3dm.csproj, line 11
-    - src/dotnet/Properties/AssemblyInfo.cs, line 78
-- [Python]
-  - setup.py, line 127
-  - src/rhino3dm/\_\_init\_\_.py, line 7
-- src/version.txt, line 1
+```bash
+python3 script/bump_version.py 9.0.0-beta   # set version.txt, then propagate
+python3 script/bump_version.py              # propagate the current version.txt
+python3 script/bump_version.py --check      # verify only; non-zero exit if out of sync
+```
+
+| file | spelling | why |
+|---|---|---|
+| `src/version.txt` | `9.0.0-beta` | source of truth; also embedded into docgen at build time |
+| `package.json` | `9.0.0-beta` | npm |
+| `src/dotnet/Rhino3dm.csproj` | `9.0.0-beta` | NuGet package version |
+| `src/dotnet/Properties/AssemblyInfo.cs` | `9.0.0.0` | `AssemblyVersion` must be four numeric parts and cannot carry a pre-release suffix |
+| `setup.py` | `9.0.0b0` | PEP 440 — `-beta` is not a valid Python version |
+| `src/rhino3dm/__init__.py` | `9.0.0b0` | PEP 440 |
+
+The version in `src/version.txt` is semver: `MAJOR.MINOR.PATCH` with an optional
+`-alpha` / `-beta` / `-rc` suffix, e.g. `9.0.0-beta` or `9.1.0-rc2`. The script fails
+rather than guessing if a file's version line is missing or ambiguous.
 
 ## Updating Documentation with docgen
 

@@ -44,19 +44,19 @@ RH_C_FUNCTION void SharedPtr_ON_Decal_Delete(std::shared_ptr<ON_Decal>* decal_sp
   delete decal_sp;
 }
 
-RH_C_FUNCTION ON_UUID ON_Decal_TextureInstanceId(const ON_Decal* decal)
+RH_C_FUNCTION ON_UUID ON_Decal_AssetInstanceId(const ON_Decal* decal)
 {
   if (nullptr == decal)
     return ON_nil_uuid;
 
-  return decal->TextureInstanceId();
+  return decal->AssetInstanceId();
 }
 
-RH_C_FUNCTION void ON_Decal_SetTextureInstanceId(ON_Decal* decal, ON_UUID id)
+RH_C_FUNCTION void ON_Decal_SetAssetInstanceId(ON_Decal* decal, ON_UUID id)
 {
   if (nullptr != decal)
   {
-    decal->SetTextureInstanceId(id);
+    decal->SetAssetInstanceId(id);
   }
 }
 
@@ -106,6 +106,23 @@ RH_C_FUNCTION void ON_Decal_SetMapToInside(ON_Decal* decal, bool b)
   {
     decal->SetMapToInside(b);
   }
+}
+
+RH_C_FUNCTION bool ON_Decal_OriginOffset(const ON_Decal* decal, ON_3dVector* vec)
+{
+  if ((nullptr == decal) || (nullptr == vec))
+    return false;
+
+  if (ON_Decal::Mappings::Planar == decal->Mapping())
+  {
+    *vec = decal->GetOriginOffset();
+  }
+  else
+  {
+    vec->Zero();
+  }
+
+  return true;
 }
 
 RH_C_FUNCTION bool ON_Decal_Origin(const ON_Decal* decal, ON_3dPoint* pt)
@@ -299,8 +316,15 @@ RH_C_FUNCTION void ON_Decal_CustomData(const ON_Decal* decal, ON_XMLParameters* 
 
   ON_XMLRootNode node;
   decal->GetCustomXML(*renderer, node);
-
   parms->SetAsString(node.String());
+}
+
+RH_C_FUNCTION void ON_Decal_SetCustomData(ON_Decal* decal, const ON_XMLParameters* parms, const ON_UUID* renderer)
+{
+  if ((nullptr == decal) || (nullptr == parms) || (nullptr == renderer))
+    return;
+
+  decal->SetCustomXML(*renderer, parms->Node());
 }
 
 RH_C_FUNCTION ON_XMLParameters* ON_XMLParameters_NewParamBlock()
@@ -340,91 +364,4 @@ RH_C_FUNCTION bool ON_XMLParameters_NextParam(ON_XMLParameters* p, ON_XMLParamet
 RH_C_FUNCTION void ON_XMLParameters_DeleteIterator(ON_XMLParameters::CIterator* it)
 {
   delete it;
-}
-
-// Support functions for adding a decal to an object
-//
-// Roy: native class CDecalCreateParams, derived from ON_Decal is used for this.
-// Per Steve B -- to avoid IDisposable in the managed code this support class is created and destroyed
-// during the C# call to RhinoObject.AddDecal()-- see rhinosdkobject.cs
-//
-// Split the call up to make it more manageable and extensible-- too many args for a single function.
-// Gets bracketed by CDecalCreateParams_New() and CDecalCreateParams_Delete() which news and deletes
-// the native object
-
-class CDecalCreateParams final : public ON_Decal
-{
-public:
-  CDecalCreateParams()
-  {
-    SetTextureInstanceId(ON_nil_uuid);
-    SetMapping(ON_Decal::Mappings::Planar);
-    SetProjection(ON_Decal::Projections::Both);
-    SetMapToInside(false);
-    SetTransparency(0.0);
-    SetOrigin(ON_3dPoint::Origin);
-    SetVectorUp(ON_3dVector::ZAxis);
-    SetVectorAcross(ON_3dVector::YAxis);
-    SetHeight(5.0);
-    SetRadius(2.0);
-    SetHorzSweep(0.0, 40.0);
-    SetVertSweep(0.0, 20.0);
-    SetUVBounds(0.0, 0.0, 1.0, 1.0);
-  }
-
-  virtual const ON_Decal& operator = (const ON_Decal& d) override { return ON_Decal::operator = (d); }
-
-  virtual bool operator == (const ON_Decal& d) const override { return ON_Decal::operator == (d); }
-  virtual bool operator != (const ON_Decal& d) const override { return ON_Decal::operator != (d); }
-};
-
-RH_C_FUNCTION CDecalCreateParams* CDecalCreateParams_New()
-{
-  return new CDecalCreateParams;
-}
-
-RH_C_FUNCTION void CDecalCreateParams_SetMap(CDecalCreateParams* cp, ON_UUID textureInstanceId, int mapping, int projection, bool bMapToInside, double transparency)
-{
-  if (nullptr != cp)
-  {
-    cp->SetTextureInstanceId(textureInstanceId);
-    cp->SetMapping(ON_Decal::Mappings(mapping));
-    cp->SetProjection(ON_Decal::Projections(projection));
-    cp->SetMapToInside(bMapToInside);
-    cp->SetTransparency(transparency);
-  }
-}
-
-RH_C_FUNCTION void CDecalCreateParams_SetFrame(CDecalCreateParams* cp, ON_3dPoint* origin, ON_3dVector* up, ON_3dVector* across)
-{
-  if (nullptr != cp)
-  {
-    if (nullptr != origin) cp->SetOrigin(*origin);
-    if (nullptr != up)     cp->SetVectorUp(*up);
-    if (nullptr != across) cp->SetVectorAcross(*across);
-  }
-}
-
-RH_C_FUNCTION void CDecalCreateParams_SetCylindricalAndSpherical(CDecalCreateParams* cp, double height, double radius, double latStart, double latEnd, double longStart, double longEnd)
-{
-  if (nullptr != cp)
-  {
-    cp->SetHeight(height);
-    cp->SetRadius(radius);
-    cp->SetHorzSweep(latStart, latEnd);
-    cp->SetVertSweep(longStart, longEnd);
-  }
-}
-
-RH_C_FUNCTION void CDecalCreateParams_SetUV(CDecalCreateParams* cp, double minU, double minV, double maxU, double maxV)
-{
-  if (nullptr != cp)
-  {
-    cp->SetUVBounds(minU, minV, maxU, maxV);
-  }
-}
-
-RH_C_FUNCTION void CDecalCreateParams_Delete(CDecalCreateParams* c)
-{
-  delete c;
 }

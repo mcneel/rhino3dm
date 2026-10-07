@@ -1317,11 +1317,17 @@ namespace Rhino.Geometry
       Rhino.Runtime.Interop.MarshalProgressAndCancelToken(cancelToken, progress,
         out IntPtr ptr_terminator, out int progress_report_serial_number, out var reporter, out var terminator);
 
-      IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, ptr_terminator, progress_report_serial_number);
+      IntPtr ptr;
+      try
+      {
+        ptr = UnsafeNativeMethods.ON_PointCloud_RandomSubsample(ptr_const_this, numberOfPoints, ptr_terminator, progress_report_serial_number);
+      }
+      finally
+      {
+        if (terminator != null) terminator.Dispose();
+        if (reporter != null) reporter.Disable();
+      }
       GC.KeepAlive(this);
-
-      if (terminator != null) terminator.Dispose();
-      if (reporter != null) reporter.Disable();
 
       if (IntPtr.Zero == ptr)
         return null;
@@ -1448,6 +1454,64 @@ namespace Rhino.Geometry
     {
       return GetEnumerator();
     }
+
+    /// <summary>
+    /// Split a point cloud into two parts using a plane,
+    /// or returns false if the pointcloud is not partitioned by plane.
+    /// </summary>
+    /// <param name="plane">The splitting plane</param>
+    /// <param name="above">The part of the point cloud that is above the plane</param>
+    /// <param name="below">The part of the point cloud that is below the plane</param>
+    /// <returns>true on success, false if the plane does not partition the cloud, or on error.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public bool Split(Plane plane, out PointCloud above, out PointCloud below)
+    {
+      above = null;
+      below = null;
+      IntPtr ptr_const_this = ConstPointer();
+      IntPtr ptr_a = IntPtr.Zero, ptr_b = IntPtr.Zero;
+      bool rc = UnsafeNativeMethods.ON_PointCloud_Split(ptr_const_this, plane, ref ptr_a, ref ptr_b);
+      GC.KeepAlive(this);
+
+      if (rc)
+      {
+        if (ptr_a != IntPtr.Zero)
+          above = new PointCloud(ptr_a, null);
+        if (ptr_b != IntPtr.Zero)
+          below = new PointCloud(ptr_b, null);
+      }
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Expert tool to get all values of a point cloud item.
+    /// This method minimizes the number of pInvoke function calls.
+    /// </summary>
+    /// <param name="index">The index of the point cloud item.</param>
+    /// <param name="location">Output location of the point cloud item.</param>
+    /// <param name="normal">Output normal vector of the point cloud item.</param>
+    /// <param name="color">Output color of the point cloud item.</param>
+    /// <param name="hidden">Output hidden flag of the point cloud item.</param>
+    /// <param name="extra">Extra value of the point cloud item.</param>
+    /// <returns>True on success.</returns>
+    /// <since>9.0</since>
+    public bool ExpertGetValues(int index, out Point3d location, out Vector3d normal, out Color color, out double extra, out bool hidden)
+    {
+      IntPtr ptr = this.ConstPointer();
+      location = default;
+      normal = default;
+      int argb = 0;
+      hidden = false;
+      extra = RhinoMath.UnsetValue;
+      bool rc = UnsafeNativeMethods.ON_PointCloud_ExpertGetValues(ptr, index,
+        ref location, ref normal, ref argb, ref extra, ref hidden);
+      GC.KeepAlive(this);
+      color = Color.FromArgb(argb);
+      return rc;
+    }
+
     private class PointCloudItemEnumerator : IEnumerator<PointCloudItem>
     {
 #region members

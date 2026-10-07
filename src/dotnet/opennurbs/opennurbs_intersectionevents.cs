@@ -585,5 +585,116 @@ namespace Rhino.Geometry.Intersect
     }
     #endregion
   }
+
+  /// <summary>
+  /// The kind of mesh feature a <see cref="MeshCurveIntersection"/> lies on, determined by
+  /// mesh topology after deduplication.
+  /// </summary>
+  /// <since>9.0</since>
+  // RH-97386: internal until automated geometry error reporting covers every cgk path.
+  internal enum MeshIncidence : int
+  {
+    /// <summary>Strictly inside a face (also reported for hits on the internal diagonal of a
+    /// quad's two-triangle split, which is not a real mesh edge).</summary>
+    Face = 0,
+    /// <summary>On a mesh edge (shared by 2+ faces, or a 1-valence boundary edge).</summary>
+    Edge = 1,
+    /// <summary>At a mesh topology vertex.</summary>
+    Vertex = 2,
+  }
+
+  /// <summary>
+  /// One certified hit from a curve-mesh intersection. Either a single isolated crossing
+  /// (<see cref="IsPoint"/>) or a parameter range over which the curve lies in a face's plane
+  /// (<see cref="IsOverlap"/>). For a point hit, <see cref="CurveParameter"/> is degenerate and
+  /// <see cref="PointA"/> equals <see cref="PointB"/>. In a results array, every overlap is
+  /// reported as two Point hits at its endpoints plus one Overlap hit for the span. The
+  /// <c>*Tolerance</c> properties are certified half-widths derived from interval enclosures.
+  /// </summary>
+  /// <since>9.0</since>
+  // RH-97386: internal until automated geometry error reporting covers every cgk path.
+  internal sealed class MeshCurveIntersection
+  {
+    internal int m_type;
+    internal int m_incidence;
+    internal int m_face_index;
+    internal int m_face_triangle_index;
+    internal int[] m_face_indices;
+    internal double m_t0;
+    internal double m_t1;
+    internal Point3d m_point0;
+    internal Point3d m_point1;
+    internal Vector3d m_barycentric0;
+    internal Vector3d m_barycentric1;
+    internal double m_t_tolerance;
+    internal double m_point_tolerance;
+    internal double m_barycentric_tolerance;
+    internal bool m_on_boundary;
+
+    /// <summary>The kind of mesh feature this hit lies on: face, edge, or vertex.</summary>
+    /// <since>9.0</since>
+    public MeshIncidence Incidence => (MeshIncidence)m_incidence;
+
+    /// <summary>Index into <see cref="Mesh.Faces"/> of the canonical face that produced this hit
+    /// (the lowest face index among <see cref="FaceIndices"/>).</summary>
+    /// <since>9.0</since>
+    public int FaceIndex => m_face_index;
+
+    /// <summary>0 for a triangle face; 0 or 1 for the two sub-triangles of a quad face.</summary>
+    /// <since>9.0</since>
+    public int FaceTriangleIndex => m_face_triangle_index;
+
+    /// <summary>All mesh faces that share this hit, sorted ascending. For a face-interior hit
+    /// or a 1-valence mesh boundary edge, contains just <see cref="FaceIndex"/>. For a hit on
+    /// a shared mesh edge, contains the 2+ faces meeting at that edge. For a vertex hit,
+    /// contains every face incident to that vertex.</summary>
+    /// <since>9.0</since>
+    public System.Collections.Generic.IReadOnlyList<int> FaceIndices => m_face_indices;
+
+    /// <summary>True if this event is an isolated crossing.</summary>
+    /// <since>9.0</since>
+    public bool IsPoint => m_type == 1;
+
+    /// <summary>True if this event is a range over which the curve lies in the face's plane.</summary>
+    /// <since>9.0</since>
+    public bool IsOverlap => m_type == 2;
+
+    /// <summary>Curve parameter range of the hit.</summary>
+    /// <since>9.0</since>
+    public Interval CurveParameter => new Interval(m_t0, m_t1);
+
+    /// <summary>3D point on the curve at the start of the event.</summary>
+    /// <since>9.0</since>
+    public Point3d PointA => m_point0;
+
+    /// <summary>3D point on the curve at the end of the event.</summary>
+    /// <since>9.0</since>
+    public Point3d PointB => m_point1;
+
+    /// <summary>Barycentric coordinates of <see cref="PointA"/> wrt the face's triangle.</summary>
+    /// <since>9.0</since>
+    public Vector3d BarycentricA => m_barycentric0;
+
+    /// <summary>Barycentric coordinates of <see cref="PointB"/>.</summary>
+    /// <since>9.0</since>
+    public Vector3d BarycentricB => m_barycentric1;
+
+    /// <summary>Certified half-width on each curve parameter slot.</summary>
+    /// <since>9.0</since>
+    public double CurveParameterTolerance => m_t_tolerance;
+
+    /// <summary>Certified half-width on each 3D point slot.</summary>
+    /// <since>9.0</since>
+    public double PointTolerance => m_point_tolerance;
+
+    /// <summary>Certified half-width on each barycentric slot.</summary>
+    /// <since>9.0</since>
+    public double BarycentricTolerance => m_barycentric_tolerance;
+
+    /// <summary>True if this hit lies on a mesh-level boundary (<see cref="Incidence"/> is
+    /// <see cref="MeshIncidence.Edge"/> or <see cref="MeshIncidence.Vertex"/>).</summary>
+    /// <since>9.0</since>
+    public bool IsOnTriangleBoundary => m_on_boundary;
+  }
 #endif
 }

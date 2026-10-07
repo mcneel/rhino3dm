@@ -202,35 +202,32 @@ RH_C_FUNCTION ON_Curve* ON_Extrusion_Profile3d(const ON_Extrusion* pConstExtrusi
   return rc;
 }
 
-RH_C_FUNCTION ON_Curve* ON_Extrusion_Profile3d2(const ON_Extrusion* pConstExtrusion, ON_2INTS componentIndex)
+RH_C_FUNCTION ON_Curve* ON_Extrusion_Profile3d2(const ON_Extrusion* pConstExtrusion, ON_COMPONENT_INDEX componentIndex)
 {
   ON_Curve* rc = nullptr;
   if( pConstExtrusion )
   {
-    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
-    rc = pConstExtrusion->Profile3d(*ci);
+    rc = pConstExtrusion->Profile3d(componentIndex);
   }
   return rc;
 }
 
-RH_C_FUNCTION ON_Curve* ON_Extrusion_WallEdge(const ON_Extrusion* pConstExtrusion, ON_2INTS componentIndex)
+RH_C_FUNCTION ON_Curve* ON_Extrusion_WallEdge(const ON_Extrusion* pConstExtrusion, ON_COMPONENT_INDEX componentIndex)
 {
   ON_Curve* rc = nullptr;
   if( pConstExtrusion )
   {
-    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
-    rc = pConstExtrusion->WallEdge(*ci);
+    rc = pConstExtrusion->WallEdge(componentIndex);
   }
   return rc;
 }
 
-RH_C_FUNCTION ON_Surface* ON_Extrusion_WallSurface(const ON_Extrusion* pConstExtrusion, ON_2INTS componentIndex)
+RH_C_FUNCTION ON_Surface* ON_Extrusion_WallSurface(const ON_Extrusion* pConstExtrusion, ON_COMPONENT_INDEX componentIndex)
 {
   ON_Surface* rc = nullptr;
   if( pConstExtrusion )
   {
-    const ON_COMPONENT_INDEX* ci = (const ON_COMPONENT_INDEX*)&componentIndex;
-    rc = pConstExtrusion->WallSurface(*ci);
+    rc = pConstExtrusion->WallSurface(componentIndex);
   }
   return rc;
 }

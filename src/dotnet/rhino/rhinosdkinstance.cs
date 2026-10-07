@@ -79,6 +79,30 @@ namespace Rhino.DocObjects
   }
 
   /// <summary>
+  /// Specifies how to resolve a name collision when an instance definition is created
+  /// from a file and the model already contains an instance definition with that name.
+  /// </summary>
+  /// <since>9.0</since>
+  public enum InstanceDefinitionNameConflictResolution
+  {
+    /// <summary>
+    /// Keep the instance definition that is already in the model and discard the new one.
+    /// </summary>
+    KeepCurrent = 2,
+    /// <summary>
+    /// Replace the instance definition that is already in the model with the new one.
+    /// References to the discarded instance definition are changed to reference the new one.
+    /// This is what the Insert command does.
+    /// </summary>
+    Redefine = 3,
+    /// <summary>
+    /// Keep both instance definitions, giving the new one an automatically generated
+    /// unused name, such as "Block 01".
+    /// </summary>
+    KeepBoth = 4
+  }
+
+  /// <summary>
   /// The archive file of a linked instance definition can have the following possible states.
   /// Use InstanceObject.ArchiveFileStatus to query a instance definition's archive file status.
   /// </summary>
@@ -330,16 +354,11 @@ namespace Rhino.DocObjects
       }
     }
 
+    // This was moved to InstganceDefinitionGeometry in 9.0, but left here to avoid reflection issues: changes to
+    // it's decxlaring type, setting off API checkers, amnd a failing reflection typeof check fail.
+    // full compatibility maintained
     /// <since>5.0</since>
-    public InstanceDefinitionUpdateType UpdateType
-    {
-      get
-      {
-        IntPtr const_ptr = ConstPointer();
-        int rc = UnsafeNativeMethods.CRhinoInstanceDefinition_UpdateType(const_ptr);
-        return (InstanceDefinitionUpdateType)rc;
-      }
-    }
+    public new InstanceDefinitionUpdateType UpdateType => base.UpdateType;
 
     /// <summary>
     /// returns an object used as part of this definition.
@@ -569,13 +588,9 @@ namespace Rhino.DocObjects
     /// If false, when reading the file that defines the content of the linked instance definition, recursively load linked instance definitions found in that file.
     /// </summary>
     /// <since>7.8</since>
-    public bool SkipNestedLinkedDefinitions
+    public new bool SkipNestedLinkedDefinitions
     {
-      get
-      {
-        IntPtr const_ptr = ConstPointer();
-        return UnsafeNativeMethods.CRhinoInstanceDefinition_SkipNestedLinkedDefinitions(const_ptr);
-      }
+      get => base.SkipNestedLinkedDefinitions;
       set
       {
         IntPtr const_ptr = ConstPointer();
@@ -588,18 +603,9 @@ namespace Rhino.DocObjects
     /// from linked instance definition files appear in the active model.
     /// </summary>
     /// <since>7.8</since>
-    public InstanceDefinitionLayerStyle LayerStyle
+    public new InstanceDefinitionLayerStyle LayerStyle
     {
-      get
-      {
-        IntPtr const_ptr = ConstPointer();
-        int layer_style = UnsafeNativeMethods.CRhinoInstanceDefinition_LinkedComponentAppearance(const_ptr);
-        if (layer_style == (int)InstanceDefinitionLayerStyle.Active)
-          return InstanceDefinitionLayerStyle.Active;
-        if (layer_style == (int)InstanceDefinitionLayerStyle.Reference)
-          return InstanceDefinitionLayerStyle.Reference;
-        return InstanceDefinitionLayerStyle.None;
-      }
+      get => base.LayerStyle;
       set
       {
         IntPtr const_ptr = ConstPointer();
@@ -612,13 +618,9 @@ namespace Rhino.DocObjects
     /// imported from another 3dm file, the unit system may differ from that of the document.
     /// </summary>
     /// <since>7.0</since>
-    public UnitSystem UnitSystem
+    public new UnitSystem UnitSystem
     {
-      get
-      {
-        IntPtr ptr_const_idef = ConstPointer();
-        return UnsafeNativeMethods.CRhinoInstanceDefinition_GetUnitSystem(ptr_const_idef);
-      }
+      get => base.UnitSystem;
       set
       {
         IntPtr ptr_const_idef = ConstPointer();
@@ -1022,6 +1024,41 @@ namespace Rhino.DocObjects.Tables
     /// <since>7.0</since>
     public int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
+      return Add(name, description, url, urlTag, basePoint, geometry, attributes, false);
+    }
+
+    /// <summary>
+    /// Adds an instance definition to the instance definition table, optionally replacing an
+    /// existing definition of the same name.
+    /// </summary>
+    /// <param name="name">The definition name.</param>
+    /// <param name="description">The definition description.</param>
+    /// <param name="url">
+    /// A URL or hyperlink. When overriding, null leaves the existing value unchanged and an
+    /// empty string clears it.
+    /// </param>
+    /// <param name="urlTag">
+    /// A description of the URL or hyperlink. When overriding, null leaves the existing value
+    /// unchanged and an empty string clears it.
+    /// </param>
+    /// <param name="basePoint">A base point.</param>
+    /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
+    /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
+    /// <param name="overrideExisting">
+    /// If true and a definition with this name exists, its geometry, description and URL are
+    /// replaced. The definition keeps its index, id, name and user data, and every existing
+    /// instance reference keeps its transform. Linked and reference definitions cannot be
+    /// replaced this way, and -1 is returned for those, as it is for geometry that would make
+    /// the definition reference itself.
+    /// If false, a name already in use is an error: -1 is returned and a message naming the
+    /// definition is printed to the command line.
+    /// </param>
+    /// <returns>
+    /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
+    /// </returns>
+    /// <since>9.0</since>
+    public int Add(string name, string description, string url, string urlTag, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes, bool overrideExisting)
+    {
       using (SimpleArrayGeometryPointer g = new SimpleArrayGeometryPointer(geometry))
       {
         IntPtr ptr_array_attributes = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
@@ -1034,14 +1071,14 @@ namespace Rhino.DocObjects.Tables
           }
         }
         IntPtr const_ptr_geometry = g.ConstPointer();
-        int rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Add(m_doc.RuntimeSerialNumber, name, description, url, urlTag, basePoint, const_ptr_geometry, ptr_array_attributes);
+        int rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Add(m_doc.RuntimeSerialNumber, name, description, url, urlTag, basePoint, const_ptr_geometry, ptr_array_attributes, overrideExisting);
 
         UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_array_attributes);
         return rc;
       }
 
     }
-    
+
     /// <summary>
     /// Adds an instance definition to the instance definition table.
     /// </summary>
@@ -1061,7 +1098,36 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes)
     {
-      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, attributes);
+      return Add(name, description, string.Empty, string.Empty, basePoint, geometry, attributes, false);
+    }
+
+    /// <summary>
+    /// Adds an instance definition to the instance definition table, optionally replacing an
+    /// existing definition of the same name.
+    /// </summary>
+    /// <param name="name">The definition name.</param>
+    /// <param name="description">The definition description.</param>
+    /// <param name="basePoint">A base point.</param>
+    /// <param name="geometry">An array, a list or any enumerable set of geometry.</param>
+    /// <param name="attributes">An array, a list or any enumerable set of attributes.</param>
+    /// <param name="overrideExisting">
+    /// If true and a definition with this name exists, its geometry and description are replaced.
+    /// The definition keeps its index, id, name, URL and user data, and every existing instance
+    /// reference keeps its transform. Linked and reference definitions cannot be replaced this
+    /// way, and -1 is returned for those, as it is for geometry that would make the definition
+    /// reference itself.
+    /// If false, a name already in use is an error: -1 is returned and a message naming the
+    /// definition is printed to the command line.
+    /// </param>
+    /// <returns>
+    /// &gt;=0  index of instance definition in the instance definition table. -1 on failure.
+    /// </returns>
+    /// <since>9.0</since>
+    public int Add(string name, string description, Point3d basePoint, IEnumerable<GeometryBase> geometry, IEnumerable<ObjectAttributes> attributes, bool overrideExisting)
+    {
+      // null, not string.Empty: this overload has no url parameter, so the caller supplied no
+      // url and an override must leave the existing one alone. An empty string would erase it.
+      return Add(name, description, null, null, basePoint, geometry, attributes, overrideExisting);
     }
 
     /// <summary>
@@ -1262,6 +1328,40 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
+    /// Modifies the insertion point of an instance definition. The definition's geometry
+    /// is re-origined so that the supplied point becomes the new insertion point - the point
+    /// that aligns with the insertion location when the block is inserted. Existing instance
+    /// references are not modified, so they will appear to move. Only embedded instance
+    /// definitions are supported; the function returns false for linked definitions.
+    /// </summary>
+    /// <param name="idefIndex">The index of the instance definition to be modified.</param>
+    /// <param name="point">The new insertion point, in the definition's current coordinates.</param>
+    /// <returns>true if operation succeeded.</returns>
+    /// <since>9.0</since>
+    public bool ModifyInsertionPoint(int idefIndex, Point3d point)
+    {
+      Plane plane = Plane.WorldXY;
+      plane.Origin = point;
+      return ModifyInsertionPlane(idefIndex, plane);
+    }
+
+    /// <summary>
+    /// Modifies the insertion plane of an instance definition. The definition's geometry
+    /// is re-origined so that the supplied plane becomes the new insertion plane - its origin
+    /// is the new insertion point and its axes become the definition's axes. Existing instance
+    /// references are not modified, so they will appear to move. Only embedded instance
+    /// definitions are supported; the function returns false for linked definitions.
+    /// </summary>
+    /// <param name="idefIndex">The index of the instance definition to be modified.</param>
+    /// <param name="plane">The new insertion plane, in the definition's current coordinates.</param>
+    /// <returns>true if operation succeeded.</returns>
+    /// <since>9.0</since>
+    public bool ModifyInsertionPlane(int idefIndex, Plane plane)
+    {
+      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_ModifyInsertionPlane(m_doc.RuntimeSerialNumber, idefIndex, ref plane);
+    }
+
+    /// <summary>
     /// Destroys all source archive information.
     /// Specifically:
     /// * <see cref="InstanceDefinitionGeometry.SourceArchive"/> is set to the empty string.
@@ -1298,9 +1398,10 @@ namespace Rhino.DocObjects.Tables
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool ModifySourceArchive(int idefIndex, string sourceArchive, InstanceDefinitionUpdateType updateType, bool quiet)
     {
-      var reference = FileReference.CreateFromFullPath(sourceArchive);
-
-      return ModifySourceArchive(idefIndex, reference, updateType, quiet);
+      using (var reference = FileReference.CreateFromFullPath(sourceArchive))
+      {
+        return ModifySourceArchive(idefIndex, reference, updateType, quiet);
+      }
     }
 
     /// <summary>
@@ -1317,11 +1418,41 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public bool ModifySourceArchive(int idefIndex, FileReference sourceArchive, InstanceDefinitionUpdateType updateType, bool quiet)
     {
-      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_SetSourceArchive(
+      return ModifySourceArchive(idefIndex, sourceArchive, updateType, InstanceDefinitionLayerStyle.None, quiet);
+    }
+
+    /// <summary>
+    /// If the instance definition is linked or embedded, use SetSource to
+    /// specify the source archive.
+    /// </summary>
+    /// <param name="idefIndex">The index of the instance definition to be modified.</param>
+    /// <param name="sourceArchive">The new source archive file name.</param>
+    /// <param name="updateType"></param>
+    /// <param name="layerStyle">
+    /// The layer style to apply when <paramref name="updateType"/> is
+    /// <see cref="InstanceDefinitionUpdateType.Linked"/>. Pass
+    /// <see cref="InstanceDefinitionLayerStyle.None"/> to use the default layer style,
+    /// which is <see cref="InstanceDefinitionLayerStyle.Reference"/>.
+    /// This parameter is ignored for all other update types.
+    /// </param>
+    /// <param name="quiet">If true, then message boxes about erroneous parameters will not be shown.</param>
+    /// <returns>
+    /// Returns true if the definition was successfully modified otherwise returns false.
+    /// </returns>
+    /// <remarks>
+    /// A linked instance definition does not remember its layer style once it has been
+    /// changed to another update type. Use this overload to restore the layer style when
+    /// changing an instance definition back to InstanceDefinitionUpdateType.Linked.
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool ModifySourceArchive(int idefIndex, FileReference sourceArchive, InstanceDefinitionUpdateType updateType, InstanceDefinitionLayerStyle layerStyle, bool quiet)
+    {
+      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_SetSourceArchive2(
         m_doc.RuntimeSerialNumber,
         idefIndex,
         sourceArchive.ConstPtr(),
         (int)updateType,
+        (int)layerStyle,
         quiet);
     }
 
@@ -1418,6 +1549,16 @@ namespace Rhino.DocObjects.Tables
     public bool Purge(int idefIndex)
     {
       return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_PurgeInstanceDefinition(m_doc.RuntimeSerialNumber, idefIndex);
+    }
+
+    /// <summary>
+    /// Purges any unused instance definitions.
+    /// </summary>
+    /// <returns>The number of unused instance definitions that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeUnused()
+    {
+      return UnsafeNativeMethods.RHC_RhPurgeBlockDefinitions(Document.RuntimeSerialNumber);
     }
 
     /// <summary>
@@ -1539,6 +1680,112 @@ namespace Rhino.DocObjects.Tables
         UnsafeNativeMethods.CRhinoInstanceDefinitionTable_GetUnusedName2(m_doc.RuntimeSerialNumber, root, ptr_string);
         return sh.ToString();
       }
+    }
+
+    /// <summary>
+    /// Exports the block definition's component objects to one of the file formats supported by Rhino.
+    /// </summary>
+    /// <param name="idefIndex">Index of the instance definition to export.</param>
+    /// <param name="filename">Name of the file to create.</param>
+    /// <since>9.0</since>
+    public bool Export(int idefIndex, string filename)
+    {
+      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_Export(m_doc.RuntimeSerialNumber, idefIndex, filename);
+    }
+
+    /// <summary>
+    /// Creates an instance definition by reading a file, the way the Insert command does when
+    /// inserting a file as a block. No instance reference is created.
+    /// </summary>
+    /// <param name="filename">
+    /// The name of the file to read. This can be any type of file that Rhino or a plug-in can read.
+    /// </param>
+    /// <param name="name">The name of the instance definition to create. This must be a valid name.</param>
+    /// <param name="updateType">The type of instance definition to create.</param>
+    /// <param name="layerStyle">
+    /// How layers from the file appear in the model.
+    /// This is used only when updateType is InstanceDefinitionUpdateType.Linked.
+    /// </param>
+    /// <param name="conflictResolution">
+    /// What to do when the model already contains an instance definition named name.
+    /// </param>
+    /// <param name="skipNestedLinkedDefinitions">
+    /// If true, then linked instance definitions nested in the file are not read.
+    /// </param>
+    /// <returns>
+    /// The index of the new instance definition, or the index of an existing linked instance
+    /// definition that already references filename. -1 on error.
+    /// </returns>
+    /// <since>9.0</since>
+    public int CreateFromFile(
+      string filename,
+      string name,
+      InstanceDefinitionUpdateType updateType,
+      InstanceDefinitionLayerStyle layerStyle,
+      InstanceDefinitionNameConflictResolution conflictResolution,
+      bool skipNestedLinkedDefinitions)
+    {
+      return CreateFromFile(filename, name, null, null, null, updateType, layerStyle, conflictResolution, skipNestedLinkedDefinitions);
+    }
+
+    /// <summary>
+    /// Creates an instance definition by reading a file, the way the Insert command does when
+    /// inserting a file as a block. No instance reference is created.
+    /// </summary>
+    /// <param name="filename">
+    /// The name of the file to read. This can be any type of file that Rhino or a plug-in can read.
+    /// </param>
+    /// <param name="name">The name of the instance definition to create. This must be a valid name.</param>
+    /// <param name="description">
+    /// The description of the instance definition. If null or empty, then the notes of the file
+    /// being read, if any, are used.
+    /// </param>
+    /// <param name="url">
+    /// The URL of the instance definition. If null or empty, then the model URL of the file
+    /// being read, if any, is used.
+    /// </param>
+    /// <param name="urlTag">
+    /// The URL description, or hyperlink text, of the instance definition. If null or empty,
+    /// then the model URL of the file being read, if any, is used.
+    /// </param>
+    /// <param name="updateType">The type of instance definition to create.</param>
+    /// <param name="layerStyle">
+    /// How layers from the file appear in the model.
+    /// This is used only when updateType is InstanceDefinitionUpdateType.Linked.
+    /// </param>
+    /// <param name="conflictResolution">
+    /// What to do when the model already contains an instance definition named name.
+    /// </param>
+    /// <param name="skipNestedLinkedDefinitions">
+    /// If true, then linked instance definitions nested in the file are not read.
+    /// </param>
+    /// <returns>
+    /// The index of the new instance definition, or the index of an existing linked instance
+    /// definition that already references filename. -1 on error.
+    /// </returns>
+    /// <since>9.0</since>
+    public int CreateFromFile(
+      string filename,
+      string name,
+      string description,
+      string url,
+      string urlTag,
+      InstanceDefinitionUpdateType updateType,
+      InstanceDefinitionLayerStyle layerStyle,
+      InstanceDefinitionNameConflictResolution conflictResolution,
+      bool skipNestedLinkedDefinitions)
+    {
+      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_CreateFromFile(
+        m_doc.RuntimeSerialNumber,
+        filename,
+        name,
+        description,
+        url,
+        urlTag,
+        (int)updateType,
+        (int)layerStyle,
+        (int)conflictResolution,
+        skipNestedLinkedDefinitions);
     }
 
     /// <summary>

@@ -1083,6 +1083,7 @@ namespace Rhino.Input.Custom
 
       return (GetResult)rc;
     }
+
     /// <summary>
     /// After setting up options and so on, call GetPoint::Get to get a 3d point. The
     /// point is retrieved when the mouse goes down.
@@ -1112,6 +1113,39 @@ namespace Rhino.Input.Custom
         GC.KeepAlive(this);
         return (Rhino.ApplicationSettings.OsnapModes)rc;
       }
+    }
+
+    /// <summary>
+    /// Calculates the point the current object snap settings would produce,
+    /// in the specified view, given a test point. This function does not prompt.
+    /// </summary>
+    /// <param name="view">The view in which to snap.</param>
+    /// <param name="testPoint">The world coordinate point to snap.</param>
+    /// <param name="snapPoint">
+    /// The snapped point. If no object snap applied, then testPoint is returned.
+    /// </param>
+    /// <param name="osnapMode">
+    /// The type of object snap used to obtain the point. If no object snap
+    /// applied, then OsnapModes.None is returned.
+    /// </param>
+    /// <returns>true if successful, false otherwise.</returns>
+    /// <since>9.0</since>
+    public static bool Snap(RhinoView view, Point3d testPoint, out Point3d snapPoint, out Rhino.ApplicationSettings.OsnapModes osnapMode)
+    {
+      snapPoint = testPoint;
+      osnapMode = Rhino.ApplicationSettings.OsnapModes.None;
+      if (null == view)
+        throw new ArgumentNullException(nameof(view));
+
+      Point3d point = Point3d.Unset;
+      int mode = 0;
+      bool rc = UnsafeNativeMethods.CRhinoGetPoint_Snap(view.RuntimeSerialNumber, testPoint, ref point, ref mode);
+      if (rc)
+      {
+        snapPoint = point;
+        osnapMode = (Rhino.ApplicationSettings.OsnapModes)mode;
+      }
+      return rc;
     }
 
     /// <summary>
@@ -1208,12 +1242,17 @@ namespace Rhino.Input.Custom
     {
       u = RhinoMath.UnsetValue;
       v = RhinoMath.UnsetValue;
-      DocObjects.ObjRef objref = PointOnObject();
-      if (objref == null)
-        return null;
-      objref.SurfaceParameter(out u, out v);
-      BrepFace rc = objref.Face();
-      return rc;
+      using (DocObjects.ObjRef objref = PointOnObject())
+      {
+        if (objref != null)
+        {
+          using (objref.SurfaceParameter(out u, out v))
+          {
+            return objref.Face();
+          }
+        }
+      }
+      return null;
     }
   }
 

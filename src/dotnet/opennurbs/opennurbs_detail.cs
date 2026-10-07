@@ -147,14 +147,37 @@ namespace Rhino.Geometry
     /// <code source='examples\py\ex_addlayout.py' lang='py'/>
     /// </example>
     /// <since>5.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Since 9.0")]
     public bool SetScale(double modelLength, Rhino.UnitSystem modelUnits, double pageLength, Rhino.UnitSystem pageUnits)
+    {
+      return SetScale(modelLength, LengthUnit.FromKnownUnitSystem(modelUnits), pageLength, LengthUnit.FromKnownUnitSystem(pageUnits));
+    }
+
+    /// <summary>
+    /// Sets the detail viewport's projection so geometry is displayed at a certain scale.
+    /// </summary>
+    /// <param name="modelLength">Reference model length.</param>
+    /// <param name="modelUnits">Units for model length.</param>
+    /// <param name="pageLength">Length on page that the modelLength should equal.</param>
+    /// <param name="pageUnits">Units for page length.</param>
+    /// <returns>
+    /// true on success. false if the DetailView projection is perspective or input values are incongruous.
+    /// </returns>
+    /// <example>
+    /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
+    /// <code source='examples\py\ex_addlayout.py' lang='py'/>
+    /// </example>
+    /// <since>9.0</since>
+    public bool SetScale(double modelLength, Rhino.LengthUnit modelUnits, double pageLength, Rhino.LengthUnit pageUnits)
     {
       // SetScale only works on parallel projections
       if (!IsParallelProjection)
         return false;
 
       IntPtr pThis = NonConstPointer();
-      bool rc = UnsafeNativeMethods.ON_DetailView_SetScale(pThis, modelLength, (int)modelUnits, pageLength, (int)pageUnits);
+      bool rc = UnsafeNativeMethods.ON_DetailView_SetScale(pThis, modelLength, modelUnits.ToUnitSystem(out var modelMetersPerUnit), modelMetersPerUnit, pageLength, pageUnits.ToUnitSystem(out var pageMetersPerUnit), pageMetersPerUnit);
       GC.KeepAlive(this);
       return rc;
     }

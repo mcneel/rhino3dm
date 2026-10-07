@@ -1,5 +1,7 @@
 
 using System;
+using System.Diagnostics;
+using System.Net.WebSockets;
 using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 
@@ -182,11 +184,12 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.GroundPlaneSetting which, Variant v)
     {
-      var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
-
-      GC.KeepAlive(v);
-
-      return ret;
+      using (var v_which = GetValue(which))
+      {
+        var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+        GC.KeepAlive(this);
+        return ret;
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.GroundPlaneSetting which)
@@ -218,7 +221,7 @@ namespace Rhino.Render
 
       GC.KeepAlive(this);
 #if RHINO_SDK
-      GC.KeepAlive(rs);   // rhino3dm-local: rs only exists in the RHINO_SDK branch above
+      GC.KeepAlive(rs);   // rs is only declared in the RHINO_SDK branch above
 #endif
       GC.KeepAlive(v);
     }
@@ -229,8 +232,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.Enabled, v);
+        }
+      }
     }
 
     /// <summary>
@@ -239,8 +253,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool ShadowOnly
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShadowOnly, v);
+        }
+      }
     }
 
     /// <summary>
@@ -249,8 +274,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool AutoAltitude
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.AutoAltitude, v);
+        }
+      }
     }
 
     /// <summary>
@@ -259,8 +295,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool ShowUnderside
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.ShowUnderside, v);
+        }
+      }
     }
 
     /// <summary>
@@ -269,8 +316,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double Altitude
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude).ToDouble();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.Altitude, v);
+        }
+      }
     }
 
     /// <summary>
@@ -279,8 +337,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Guid MaterialInstanceId
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId).ToGuid();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId))
+          return v.ToGuid();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.MaterialInstanceId, v);
+        }
+      }
     }
 
     /// <summary>
@@ -289,8 +358,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Rhino.Geometry.Vector2d TextureOffset
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset).ToVector2d();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset))
+          return v.ToVector2d();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffset, v);
+        }
+      }
     }
 
     /// <summary>
@@ -299,8 +379,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public Rhino.Geometry.Vector2d TextureSize
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize).ToVector2d();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize))
+          return v.ToVector2d();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSize, v);
+        }
+      }
     }
 
     /// <summary>
@@ -309,8 +400,19 @@ namespace Rhino.Render
     /// <since>5.0</since>
     public double TextureRotation
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation).ToDouble();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation))
+          return v.ToDouble();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureRotation, v);
+        }
+      }
     }
 
     /// <summary>
@@ -319,8 +421,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool TextureSizeLocked
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureSizeLocked, v);
+        }
+      }
     }
 
     /// <summary>
@@ -329,8 +442,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool TextureOffsetLocked
     {
-      get => GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked).ToBool();
-      set => SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.GroundPlaneSetting.TextureOffsetLocked, v);
+        }
+      }
     }
   }
 
@@ -495,29 +619,33 @@ namespace Rhino.Render
 
     private Guid[] GetCustomList()
     {
-      var array = new SimpleArrayGuid();
-      UnsafeNativeMethods.ON_RenderChannels_GetCustomList(CppPointer, array.NonConstPointer());
-      GC.KeepAlive(this);
-      return array.ToArray();
+      using (var array = new SimpleArrayGuid())
+      {
+        UnsafeNativeMethods.ON_RenderChannels_GetCustomList(CppPointer, array.NonConstPointer());
+        GC.KeepAlive(this);
+        return array.ToArray();
+      }
     }
 
     private void SetCustomList(Guid[] list)
     {
-      var array = new SimpleArrayGuid(list);
+      using (var array = new SimpleArrayGuid(list))
+      {
 
 #if RHINO_SDK
-      var rs = GetDocumentRenderSettings();
-      var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
-      if (ptr != IntPtr.Zero)
-      {
-        UnsafeNativeMethods.ON_3dmRenderSettings_RenderChannels_SetCustomList(ptr, array.ConstPointer());
-        rs.Commit();
-      }
-      else
+        var rs = GetDocumentRenderSettings();
+        var ptr = (rs != null) ? rs.NonConstPointer() : IntPtr.Zero;
+        if (ptr != IntPtr.Zero)
+        {
+          UnsafeNativeMethods.ON_3dmRenderSettings_RenderChannels_SetCustomList(ptr, array.ConstPointer());
+          rs.Commit();
+        }
+        else
 #endif
-      {
-        UnsafeNativeMethods.ON_RenderChannels_SetCustomList(CppPointer, array.ConstPointer());
-        GC.KeepAlive(this);
+        {
+          UnsafeNativeMethods.ON_RenderChannels_SetCustomList(CppPointer, array.ConstPointer());
+          GC.KeepAlive(this);
+        }
       }
     }
 

@@ -1,8 +1,10 @@
 using Rhino.Geometry;
+using Rhino.Runtime.InteropWrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Rhino
 {
@@ -291,6 +293,12 @@ namespace Rhino
     public const int UnsetIntIndex = int.MinValue + 1;
 
     /// <summary>
+    /// Value used to indicate a radius of curvature is infinite.
+    /// </summary>
+    /// <since>9.0</since>
+    public const double InfiniteRadius = 1e300;
+
+    /// <summary>
     /// Convert an angle from degrees to radians.
     /// </summary>
     /// <param name="degrees">Degrees to convert (180 degrees equals pi radians).</param>
@@ -390,7 +398,7 @@ namespace Rhino
     /// <since>7.1</since>
     public static double MetersPerUnit(UnitSystem units)
     {
-      return UnsafeNativeMethods.ONC_MetersPerUnit(units);
+      return UnsafeNativeMethods.ONC_MetersPerLengthUnit(units);
     }
 
     /// <summary>
@@ -701,149 +709,333 @@ namespace Rhino
     }
 
     #region Integration
-#if false // moving into rhino 9 for now
+// The RhinoMath.Integrate family is backed by ON_Integrate_* exports, which are
+// excluded from an opennurbs-only (Rhino3dm) build, so guard the whole feature.
+#if RHINO_SDK // was: #if true // moving into rhino 9 for now
+    private static int _callbackSerialNumber;
+    private static ConcurrentDictionary<uint, Tuple<Func<object, int, double, double>, object, CancellationToken>> _integrate1Functions = new ConcurrentDictionary<uint, Tuple<Func<object, int, double, double>, object, CancellationToken>>();
+    private static ConcurrentDictionary<uint, Tuple<Func<object, int, double, double, double>, object, CancellationToken>> _integrate2Functions = new ConcurrentDictionary<uint, Tuple<Func<object, int, double, double, double>, object, CancellationToken>>();
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="side"></param>
-    /// <param name="t"></param>
-    /// <returns></returns>
-    public delegate double Integrate1Callback(Object context, Rhino.Geometry.CurveEvaluationSide side, double t);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="side"></param>
-    /// <param name="s"></param>
-    /// <param name="t"></param>
-    /// <returns></returns>
-    public delegate double Integrate2Callback(Object context, Rhino.Geometry.CurveEvaluationSide side, double s, double t);
-
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate double Integrate1CallbackWrapperDelegate(IntPtr gchContextWrapper, int limitDirection, double t);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate double Integrate2CallbackWrapperDelegate(IntPtr gchContextWrapper, int limitDirection, double s, double t);
-
-    private class Context1Wrapper
+    internal delegate double OnIntegrate1DCallback(IntPtr sn, int limitDirection, double t);
+    internal delegate double OnIntegrate2DCallback(IntPtr sn, int limitDirection, double s, double t);
+    private static double Integrate1CallbackHelper(IntPtr pSN, int limitDirection, double t)
     {
-      public Integrate1Callback func;
-      public Object context;
+      uint sn = (uint)pSN.ToInt32();
+      if (!_integrate1Functions.TryGetValue(sn, out var item) || item == null)
+        return double.NaN;
 
-      public Context1Wrapper(Integrate1Callback _func, Object _context)
+      if (item.Item3.IsCancellationRequested)
+        return double.NaN;
+
+      object context = item.Item2;
+      double rc = item.Item1(context, limitDirection, t);
+      return rc;
+    }
+
+    private static double Integrate2CallbackHelper(IntPtr pSN, int limitDirection, double s, double t)
+    {
+      uint sn = (uint)pSN.ToInt32();
+      if (!_integrate2Functions.TryGetValue(sn, out var item) || item == null)
+        return double.NaN;
+
+      if (item.Item3.IsCancellationRequested)
+        return double.NaN;
+
+      object context = item.Item2;
+      double rc = item.Item1(context, limitDirection, s, t);
+      return rc;
+    }
+
+    private static OnIntegrate1DCallback m_OnIntegrate1Callback;
+    private static OnIntegrate2DCallback m_OnIntegrate2Callback;
+
+
+    /// <summary>
+    /// Calculates the definite integral of a smooth (C-infinity) 
+    /// function using a Rhomberg integration technique.
+    /// </summary>
+    /// <param name="integrandFunction">
+    /// The integrand function is
+    /// double f(object context, int limit_direction, double t) 
+    /// and returns the value of the integrand at t.
+    /// The limit_direction parameter will be -1, 0, or +1 and specifies
+    /// which limit direction should be used in the evaluation.
+    /// If limit_direction = 1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from above.
+    /// If limit_direction = -1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from below.
+    /// If limit_direction = 0, then the integrand is C-infinity at t and may
+    /// and evaluation from above and below will return the same answer.
+    /// </param>
+    /// <param name="context">
+    /// Anything you want to be passed to and used by the integrandFunction
+    /// </param>
+    /// <param name="limits">
+    /// Limits of integration. The integrand must be C-infinity on each
+    /// interval (limits[0],limits[1]).
+    /// </param>
+    /// <param name="relativeTolerance">
+    /// Desired relative tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= relative_tolerance*|I|.
+    /// For example, if you want to know the answer with 5 digits of accuracy,
+    /// then pass 1e-5.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// Desired absolute tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= absolute_tolerance.
+    /// </param>
+    /// <param name="errorBound">
+    /// upper bound on the error in the calculation
+    /// </param>
+    /// <returns>
+    /// If the calulation succeeds, then the numerical integral is returned.
+    /// Otherwise double.NaN is returned.
+    /// </returns>
+    public static double Integrate(
+      Func<object, int, double, double> integrandFunction,
+      object context, Interval limits, double relativeTolerance, double absoluteTolerance, out double errorBound)
+    {
+      return Integrate(integrandFunction, context, limits, relativeTolerance, absoluteTolerance, CancellationToken.None, out errorBound);
+    }
+
+    /// <summary>
+    /// Calculates the definite integral of a smooth (C-infinity)
+    /// function using a Rhomberg integration technique.
+    /// The calculation can be canceled through the cancellation token.
+    /// </summary>
+    /// <param name="integrandFunction">
+    /// The integrand function is
+    /// double f(object context, int limit_direction, double t)
+    /// and returns the value of the integrand at t.
+    /// The limit_direction parameter will be -1, 0, or +1 and specifies
+    /// which limit direction should be used in the evaluation.
+    /// If limit_direction = 1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from above.
+    /// If limit_direction = -1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from below.
+    /// If limit_direction = 0, then the integrand is C-infinity at t and may
+    /// and evaluation from above and below will return the same answer.
+    /// </param>
+    /// <param name="context">
+    /// Anything you want to be passed to and used by the integrandFunction
+    /// </param>
+    /// <param name="limits">
+    /// Limits of integration. The integrand must be C-infinity on each
+    /// interval (limits[0],limits[1]).
+    /// </param>
+    /// <param name="relativeTolerance">
+    /// Desired relative tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= relative_tolerance*|I|.
+    /// For example, if you want to know the answer with 5 digits of accuracy,
+    /// then pass 1e-5.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// Desired absolute tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= absolute_tolerance.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the calculation. Cancellation is cooperative:
+    /// it is checked each time the integrand is evaluated, and a canceled
+    /// calculation returns double.NaN.
+    /// </param>
+    /// <param name="errorBound">
+    /// upper bound on the error in the calculation
+    /// </param>
+    /// <returns>
+    /// If the calulation succeeds, then the numerical integral is returned.
+    /// Otherwise double.NaN is returned.
+    /// </returns>
+    /// <since>9.0</since>
+    public static double Integrate(
+      Func<object, int, double, double> integrandFunction,
+      object context, Interval limits, double relativeTolerance, double absoluteTolerance,
+      CancellationToken cancellationToken, out double errorBound)
+    {
+      double rc = 0.0;
+      uint sn = (uint)Interlocked.Increment(ref _callbackSerialNumber);
+      errorBound = 0;
+      try
       {
-        func = _func;
-        context = _context;
-      }
-    }
-    private class Context2Wrapper
-    {
-      public Integrate2Callback func;
-      public Object context;
+        _integrate1Functions[sn] = Tuple.Create(integrandFunction, context, cancellationToken);
 
-      public Context2Wrapper(Integrate2Callback _func, Object _context)
+        m_OnIntegrate1Callback = Integrate1CallbackHelper;
+        rc = UnsafeNativeMethods.ON_Integrate_1D(m_OnIntegrate1Callback, sn, limits, relativeTolerance, absoluteTolerance, ref errorBound);
+        _integrate1Functions.TryRemove(sn, out var _);
+      }
+      catch
       {
-        func = _func;
-        context = _context;
+        _integrate1Functions.TryRemove(sn, out var _);
+        rc = double.NaN;
       }
-    }
-    private static double Integrate1CallbackWrapper(IntPtr ptrContextWrapper, int limitDirection, double t)
-    {
-      Context1Wrapper contextWrapper = (GCHandle.FromIntPtr(ptrContextWrapper).Target) as Context1Wrapper;
-      if (null == contextWrapper) return double.NaN;
-      if (null == contextWrapper.context || null == contextWrapper.func) return double.NaN;
-
-      // use the side enum
-      Rhino.Geometry.CurveEvaluationSide side;
-      if (limitDirection == 0) side = CurveEvaluationSide.Default;
-      else if (limitDirection < 0) side = CurveEvaluationSide.Below;
-      else side = CurveEvaluationSide.Above;
-
-      return contextWrapper.func(contextWrapper.context, side, t);
+      return rc;
     }
 
-    private static double Integrate2CallbackWrapper(IntPtr ptrContextWrapper, int limitDirection, double s, double t)
+    /// <summary>
+    /// Calculates the definite integral of a smooth (C-infinity) 
+    /// function of one variable using a Rhomberg integration technique
+    /// and returns returns Integral(f(t)*|curve'(t)|*dt). 
+    /// The C-infinity requirement is used by the Rhomberg algorithm when
+    /// estimating error bounds and convergence. If you choose to pass a 
+    /// C2 function, you are likely to converge while getting less accurate
+    /// results and incorrect error bound estimates.
+    /// Using a C0 or C1 fucntion will often return nonsense.
+    /// </summary>
+    /// <param name="curve">
+    /// The integration is performed over the C-infinity spans of the curve
+    /// and |curve'(t)| is automatically included in the integrand.
+    /// The integrand must be C-infinity on the intesection each curve span 
+    /// with the interval (limits[0],limits[1]).
+    /// The curve may have any dimension.
+    /// </param>
+    /// <param name="integrandFunction">
+    /// The integrand function is
+    /// double f(ON__UINT_PTR context, int limit_direction, double t) 
+    /// and returns the value of the integrand at t.
+    /// The limit_direction parameter will be -1, 0, or +1 and specifies
+    /// which limit direction should be used in the evaluation.
+    /// If limit_direction = 1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from above.
+    /// If limit_direction = -1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from below.
+    /// If limit_direction = 0, then the integrand is C-infinity at t and may
+    /// and evaluation from above and below will return the same answer.
+    /// </param>
+    /// <param name="context">
+    /// First parameter passed into the integrand function.
+    /// </param>
+    /// <param name="relativeTolerance">
+    /// Desired relative tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= relative_tolerance*|I|.
+    /// For example, if you want to know the answer with 5 digits of accuracy,
+    /// then pass 1e-5.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// Desired absolute tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= absolute_tolerance.
+    /// </param>
+    /// <param name="errorBound">
+    /// If error_bound is not nullptr, then the returned value is upper bound 
+    /// on the error in the calculation. 
+    /// If I = mathematical value and N = returned value,
+    /// then |I - N| &lt;= *error_bound;
+    /// </param>
+    /// <returns>
+    /// If the calulation succeeds, then the numerical integral is returned.
+    /// Otherwise ON_DBL_QNAN is returned.
+    /// </returns>
+    public static double Integrate(
+      Func<object, int, double, double> integrandFunction,
+      object context, Curve curve, double relativeTolerance, double absoluteTolerance, out double errorBound)
     {
-      Context2Wrapper contextWrapper = (GCHandle.FromIntPtr(ptrContextWrapper).Target) as Context2Wrapper;
-      if (null == contextWrapper) return double.NaN;
-      if (null == contextWrapper.context || null == contextWrapper.func) return double.NaN;
+      return Integrate(integrandFunction, context, curve, relativeTolerance, absoluteTolerance, CancellationToken.None, out errorBound);
+    }
 
-      Rhino.Geometry.CurveEvaluationSide side;
-      if (limitDirection == 0) side = CurveEvaluationSide.Default;
-      else if (limitDirection < 0) side = CurveEvaluationSide.Below;
-      else side = CurveEvaluationSide.Above;
-      return contextWrapper.func(contextWrapper.context, side, s, t);
+    /// <summary>
+    /// Calculates the definite integral of a smooth (C-infinity)
+    /// function of one variable using a Rhomberg integration technique
+    /// and returns returns Integral(f(t)*|curve'(t)|*dt).
+    /// The C-infinity requirement is used by the Rhomberg algorithm when
+    /// estimating error bounds and convergence. If you choose to pass a
+    /// C2 function, you are likely to converge while getting less accurate
+    /// results and incorrect error bound estimates.
+    /// Using a C0 or C1 fucntion will often return nonsense.
+    /// The calculation can be canceled through the cancellation token.
+    /// </summary>
+    /// <param name="curve">
+    /// The integration is performed over the C-infinity spans of the curve
+    /// and |curve'(t)| is automatically included in the integrand.
+    /// The integrand must be C-infinity on the intesection each curve span
+    /// with the interval (limits[0],limits[1]).
+    /// The curve may have any dimension.
+    /// </param>
+    /// <param name="integrandFunction">
+    /// The integrand function is
+    /// double f(ON__UINT_PTR context, int limit_direction, double t)
+    /// and returns the value of the integrand at t.
+    /// The limit_direction parameter will be -1, 0, or +1 and specifies
+    /// which limit direction should be used in the evaluation.
+    /// If limit_direction = 1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from above.
+    /// If limit_direction = -1, then the integrand may not be C-infinity at t and
+    /// should be evaluated using the limit from below.
+    /// If limit_direction = 0, then the integrand is C-infinity at t and may
+    /// and evaluation from above and below will return the same answer.
+    /// </param>
+    /// <param name="context">
+    /// First parameter passed into the integrand function.
+    /// </param>
+    /// <param name="relativeTolerance">
+    /// Desired relative tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= relative_tolerance*|I|.
+    /// For example, if you want to know the answer with 5 digits of accuracy,
+    /// then pass 1e-5.
+    /// </param>
+    /// <param name="absoluteTolerance">
+    /// Desired absolute tolerance.
+    /// If I = mathematical value and N = numerical integration value,
+    /// then the algorithm will terminate when
+    /// |I - N| &lt;= absolute_tolerance.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the calculation. Cancellation is cooperative:
+    /// it is checked each time the integrand is evaluated, and a canceled
+    /// calculation returns double.NaN.
+    /// </param>
+    /// <param name="errorBound">
+    /// If error_bound is not nullptr, then the returned value is upper bound
+    /// on the error in the calculation.
+    /// If I = mathematical value and N = returned value,
+    /// then |I - N| &lt;= *error_bound;
+    /// </param>
+    /// <returns>
+    /// If the calulation succeeds, then the numerical integral is returned.
+    /// Otherwise ON_DBL_QNAN is returned.
+    /// </returns>
+    /// <since>9.0</since>
+    public static double Integrate(
+      Func<object, int, double, double> integrandFunction,
+      object context, Curve curve, double relativeTolerance, double absoluteTolerance,
+      CancellationToken cancellationToken, out double errorBound)
+    {
+      double rc = 0.0;
+      uint sn = (uint)Interlocked.Increment(ref _callbackSerialNumber);
+      errorBound = 0;
+      try
+      {
+        _integrate1Functions[sn] = Tuple.Create(integrandFunction, context, cancellationToken);
+
+        m_OnIntegrate1Callback = Integrate1CallbackHelper;
+        IntPtr constPtrCurve = curve.ConstPointer();
+        rc = UnsafeNativeMethods.ON_Integrate_1D_Curve(m_OnIntegrate1Callback, sn, constPtrCurve, relativeTolerance, absoluteTolerance, ref errorBound);
+        GC.KeepAlive(curve);
+        _integrate1Functions.TryRemove(sn, out var _);
+      }
+      catch
+      {
+        _integrate1Functions.TryRemove(sn, out var _);
+        rc = double.NaN;
+      }
+      return rc;
     }
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="func"></param>
-    /// <param name="context"></param>
-    /// <param name="limits"></param>
-    /// <param name="relativeTolerance"></param>
-    /// <param name="absoluteTolerance"></param>
-    /// <param name="errorBound"></param>
-    /// <returns></returns>
-    public static double Integrate(Integrate1Callback func, object context, Interval limits, double relativeTolerance, double absoluteTolerance, ref double errorBound)
-    {
-      if (null != func && null != context)
-      {
-        Integrate1CallbackWrapperDelegate funcWrapper = new Integrate1CallbackWrapperDelegate(Integrate1CallbackWrapper);
-        Context1Wrapper contextWrapper = new Context1Wrapper(func, context);
-
-        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
-        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
-        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
-        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
-        double rc = UnsafeNativeMethods.ON_Integrate_1D(ptrCallbackWrapper, ptrContextWrapper, limits, relativeTolerance, absoluteTolerance, ref errorBound);
-
-        gchContextWrapper.Free();
-        gchCallbackWrapper.Free();
-
-        return rc;
-      }
-      return 0.0;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="func"></param>
-    /// <param name="context"></param>
-    /// <param name="curve"></param>
-    /// <param name="relativeTolerance"></param>
-    /// <param name="absoluteTolerance"></param>
-    /// <param name="errorBound"></param>
-    /// <returns></returns>
-    public static double Integrate(Integrate1Callback func, object context, Curve curve, double relativeTolerance, double absoluteTolerance, ref double errorBound)
-    {
-      if (null != func && null != context && null != curve)
-      {
-        Integrate1CallbackWrapperDelegate funcWrapper = new Integrate1CallbackWrapperDelegate(Integrate1CallbackWrapper);
-        Context1Wrapper contextWrapper = new Context1Wrapper(func, context);
-
-        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
-        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
-        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
-        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
-        double rc = UnsafeNativeMethods.ON_Integrate_1D_Curve(ptrCallbackWrapper, ptrContextWrapper, curve.ConstPointer(), relativeTolerance, absoluteTolerance, ref errorBound);
-
-        gchContextWrapper.Free();
-        gchCallbackWrapper.Free();
-
-        return rc;
-      }
-      return 0.0;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="func"></param>
+    /// <param name="integrandFunction"></param>
     /// <param name="context"></param>
     /// <param name="limits1"></param>
     /// <param name="limits2"></param>
@@ -851,59 +1043,260 @@ namespace Rhino
     /// <param name="absoluteTolerance"></param>
     /// <param name="errorBound"></param>
     /// <returns></returns>
-    public static double Integrate(Integrate2Callback func, object context, Interval limits1, Interval limits2, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    public static double Integrate(
+      Func<object, int, double, double, double> integrandFunction,
+      object context, Interval limits1, Interval limits2, double relativeTolerance, double absoluteTolerance, out double errorBound)
     {
-      if (null != func && null != context)
+      return Integrate(integrandFunction, context, limits1, limits2, relativeTolerance, absoluteTolerance, CancellationToken.None, out errorBound);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="integrandFunction"></param>
+    /// <param name="context"></param>
+    /// <param name="limits1"></param>
+    /// <param name="limits2"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the calculation. Cancellation is cooperative:
+    /// it is checked each time the integrand is evaluated, and a canceled
+    /// calculation returns double.NaN.
+    /// </param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static double Integrate(
+      Func<object, int, double, double, double> integrandFunction,
+      object context, Interval limits1, Interval limits2, double relativeTolerance, double absoluteTolerance,
+      CancellationToken cancellationToken, out double errorBound)
+    {
+      double rc = 0.0;
+      uint sn = (uint)Interlocked.Increment(ref _callbackSerialNumber);
+      errorBound = 0;
+      try
       {
-        Integrate2CallbackWrapperDelegate funcWrapper = new Integrate2CallbackWrapperDelegate(Integrate2CallbackWrapper);
-        Context2Wrapper contextWrapper = new Context2Wrapper(func, context);
+        _integrate2Functions[sn] = Tuple.Create(integrandFunction, context, cancellationToken);
 
-        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
-        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
-        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
-        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
-        double rc = UnsafeNativeMethods.ON_Integrate_2D(ptrCallbackWrapper, ptrContextWrapper, limits1, limits2, relativeTolerance, absoluteTolerance, ref errorBound);
-
-        gchContextWrapper.Free();
-        gchCallbackWrapper.Free();
-
-        return rc;
+        m_OnIntegrate2Callback = Integrate2CallbackHelper;
+        rc = UnsafeNativeMethods.ON_Integrate_2D(m_OnIntegrate2Callback, sn, limits1, limits2, relativeTolerance, absoluteTolerance, ref errorBound);
+        _integrate2Functions.TryRemove(sn, out var _);
       }
-      return 0.0;
+      catch
+      {
+        _integrate2Functions.TryRemove(sn, out var _);
+        rc = double.NaN;
+      }
+      return rc;
     }
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="callback"></param>
+    /// <param name="integrandFunction"></param>
     /// <param name="context"></param>
     /// <param name="surface"></param>
     /// <param name="relativeTolerance"></param>
     /// <param name="absoluteTolerance"></param>
     /// <param name="errorBound"></param>
     /// <returns></returns>
-    public static double Integrate(Integrate2Callback callback, object context, Surface surface, double relativeTolerance, double absoluteTolerance, ref double errorBound)
+    public static double Integrate(
+      Func<object, int, double, double, double> integrandFunction,
+      object context, Surface surface, double relativeTolerance, double absoluteTolerance, out double errorBound)
     {
-      if (null != callback && null != context && null != surface)
+      return Integrate(integrandFunction, context, surface, relativeTolerance, absoluteTolerance, CancellationToken.None, out errorBound);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="integrandFunction"></param>
+    /// <param name="context"></param>
+    /// <param name="surface"></param>
+    /// <param name="relativeTolerance"></param>
+    /// <param name="absoluteTolerance"></param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the calculation. Cancellation is cooperative:
+    /// it is checked each time the integrand is evaluated, and a canceled
+    /// calculation returns double.NaN.
+    /// </param>
+    /// <param name="errorBound"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static double Integrate(
+      Func<object, int, double, double, double> integrandFunction,
+      object context, Surface surface, double relativeTolerance, double absoluteTolerance,
+      CancellationToken cancellationToken, out double errorBound)
+    {
+      double rc = 0.0;
+      uint sn = (uint)Interlocked.Increment(ref _callbackSerialNumber);
+      errorBound = 0;
+      try
       {
-        Integrate2CallbackWrapperDelegate funcWrapper = new Integrate2CallbackWrapperDelegate(Integrate2CallbackWrapper);
-        Context2Wrapper contextWrapper = new Context2Wrapper(callback, context);
+        _integrate2Functions[sn] = Tuple.Create(integrandFunction, context, cancellationToken);
 
-        var gchCallbackWrapper = GCHandle.Alloc(funcWrapper);
-        IntPtr ptrCallbackWrapper = Marshal.GetFunctionPointerForDelegate(funcWrapper);
-        var gchContextWrapper = GCHandle.Alloc(contextWrapper);
-        IntPtr ptrContextWrapper = GCHandle.ToIntPtr(gchContextWrapper);
-        double rc = UnsafeNativeMethods.ON_Integrate_1D_Curve(ptrCallbackWrapper, ptrContextWrapper, surface.ConstPointer(), relativeTolerance, absoluteTolerance, ref errorBound);
-
-        gchContextWrapper.Free();
-        gchCallbackWrapper.Free();
-
-        return rc;
+        m_OnIntegrate2Callback = Integrate2CallbackHelper;
+        IntPtr constPtrSurface = surface.ConstPointer();
+        rc = UnsafeNativeMethods.ON_Integrate_2D_Surface(m_OnIntegrate2Callback, sn, constPtrSurface, relativeTolerance, absoluteTolerance, ref errorBound);
+        GC.KeepAlive(surface);
+        _integrate2Functions.TryRemove(sn, out var _);
       }
-      return 0.0;
+      catch
+      {
+        _integrate2Functions.TryRemove(sn, out var _);
+        rc = double.NaN;
+      }
+      return rc;
     }
 #endif
     #endregion // Integration
+
+    #region Minimize
+
+    private static double MinimizeCallbackHelper(IntPtr pSN, double[] t, int lenT, double[] grad, int lenG)
+    {
+      uint sn = (uint)pSN.ToInt32();
+      if (!ObjectiveFunctions.TryGetValue(sn, out var item) || item == null)
+        return double.NaN;
+
+      object context = item.Item2;
+      double rc = item.Item1(context, t, grad);
+      return rc;
+    }
+
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate double ObjectiveFunctionCallback(
+      [In] IntPtr pSN,
+      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+      [In] double[] t,
+      [In] int lenT,
+      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 4)]
+      [Out] double[] grad, 
+      [In] int lenG);
+
+    private static ObjectiveFunctionCallback m_OnMinimizeCallback;
+
+    static ConcurrentDictionary<uint, Tuple<Func<object, double[], double[], double>,object>> _objFn;
+    static ConcurrentDictionary<uint, Tuple<Func<object, double[], double[], double>, object>> 
+      ObjectiveFunctions => _objFn ?? (_objFn = new ConcurrentDictionary<uint, Tuple<Func<object, double[], double[], double>, object>>());
+
+// Backed by ON_Math_Minimize, unavailable in an opennurbs-only (Rhino3dm) build.
+#if RHINO_SDK
+    /// <summary>
+    /// Find a local minimum of the objective function f(t[]) of n independent variables.
+    /// The function must be C2 on the search domain. The search begins at t0[]
+    /// </summary>
+    /// <param name="objectiveFunction">
+    /// The objective function which returns the value of the objective function of f() at (t[0], t[1], ..., t[n-1])
+    /// Caling f() should return grad = gradient of f at t.
+    /// </param>
+    /// <param name="context">
+    /// the context object passed to the objective function as first argument
+    /// </param>
+    /// <param name="limits">
+    /// Lower and upper bounds for each variable. These intervals should be finite at set to something reasonable.
+    /// </param>
+    /// <param name="t0">
+    /// The input array of n evaluation parameters where that specify where the search begins
+    /// </param>
+    /// <param name="terminateValue">
+    /// The search for a minimum will terminate and return t[] if f(t) &lt;= terminate_value.
+    /// If you don't know what value of f(t) should terminate the search for a minimum,
+    /// then pass <see cref="double.NaN"/>.
+    /// </param>
+    /// <param name="terminateGradient">
+    /// The search for a minimum will terminate and return t[] if |Grad(f)(t)| &lt;= terminate_gradient.
+    /// If you don't know what gradient magnitude should stop the search for a minimum,
+    /// then pass <see cref="double.NaN"/>.
+    /// </param>
+    /// <param name="relativeTolerance">
+    /// relative_tolerance &gt; 0.
+    /// The search for a minimum will terminate when 
+    /// 2*|f(t + delta) - f(t)| &lt;= relative_tolerance*(|f(t + delta)| + |f(t)|) + zero_tolerance.
+    /// For example, set relative_tolerance = 1e-6 if you want to find a t[] where the first 6 significant 
+    /// digits of f(t) have stabilized during the search. 
+    /// When in doubt, try 1e-6 and generally avoid values >= 1e-4. Always avoid values &lt; 1e-16.
+    /// </param>
+    /// <param name="zeroTolerance">
+    /// zero_tolerance &gt; 0.
+    /// See the description of the relative_tolerance parameter for the use of the zero_tolerance parameter.
+    /// When in doubt, pass something around 1e-16.
+    /// </param>
+    /// <param name="maxIterations">
+    /// The local minimum is found by iterating from the starting parameters t0[] to a local minimum.
+    /// Tha maximum_iterations parameter specifies the masimum number of iterations to try 
+    /// before giving up. When in doubt, pass something around 200 for efficient evaluators
+    /// and smaller vaules for slow evaluators. In some situations, there may be significantly 
+    /// more evaluations than maximum_iterations (from the line search step in each iteration).
+    /// </param>
+    /// <param name="t">
+    /// t[] is an output array of n evaluation parameters that specify where the search ended.
+    /// </param>
+    /// <param name="converged">converged will be true if the search terminated 
+    /// because of the conditions controlled by terminate_value, relative_tolerance and relative_tolerance.
+    /// Otherwise converged will be false.</param>
+    /// <returns>If successful, the local minimum value of f is returned. Otherwise <see cref="double.NaN"/> is returned.</returns>
+    internal static double Minimize(
+      Func<object, double[], double[], double> objectiveFunction,
+      object context,
+      Interval[] limits,
+      double[] t0,
+      double terminateValue,
+      double terminateGradient,
+      double relativeTolerance,
+      double zeroTolerance,
+      int maxIterations,
+      out double[] t,
+      out bool converged)
+    {
+      double rc = double.NaN;
+      uint sn = (uint)Interlocked.Increment(ref _callbackSerialNumber);
+
+      int n = t0.Length;
+      t = new double[n];
+      converged = false;
+
+      try
+      {
+        ObjectiveFunctions[sn] = Tuple.Create(objectiveFunction, context);
+        m_OnMinimizeCallback = MinimizeCallbackHelper;
+
+
+        if (limits.Length != n)
+          return rc;
+
+        using (SimpleArrayInterval limitsArray = new SimpleArrayInterval(limits))
+        {
+          rc = UnsafeNativeMethods.ON_Math_Minimize(m_OnMinimizeCallback, sn,
+            n,
+            limitsArray.ConstPointer(),
+            t0,
+            terminateValue,
+            terminateGradient,
+            relativeTolerance,
+            zeroTolerance,
+            maxIterations,
+            t,
+            ref converged);
+        }
+
+      }
+      catch
+      {
+        rc = double.NaN;
+      }
+      finally
+      {
+        ObjectiveFunctions.TryRemove(sn, out _);
+      }
+      return rc;
+    }
+#endif
+
+
+    #endregion // Minimize
   }
 
 
@@ -1189,6 +1582,33 @@ namespace Rhino
     }
 
     /// <summary>
+    /// Color source for a per-item color override on object attributes (for
+    /// example, hatch boundary color or hatch pattern color). Selects
+    /// whether the color is read from the layer, from the object's main
+    /// attribute color, inherited from the parent, or read from a custom
+    /// override color stored on the attribute itself.
+    /// </summary>
+    /// <since>9.0</since>
+    public enum ItemColorSource
+    {
+      /// <summary>Use color assigned to layer.</summary>
+      ColorFromLayer = 0,
+      /// <summary>Use the object's main attribute color.</summary>
+      ColorFromObject = 1,
+      /// <summary>
+      /// For objects with parents (like objects in instance references), use
+      /// the parent's color. If no parent, treat as ColorFromLayer.
+      /// </summary>
+      ColorFromParent = 3,
+      /// <summary>
+      /// Use the per-item custom override color stored on the attribute
+      /// (for example, the color set by the matching color property such as
+      /// HatchBoundaryColor or HatchPatternColor).
+      /// </summary>
+      ColorCustom = 4
+    }
+
+    /// <summary>
     /// Defines enumerated values for the source of plotting/printing color of single objects.
     /// </summary>
     /// <since>5.0</since>
@@ -1297,6 +1717,7 @@ namespace Rhino
     /// Defines enumerated values for the display of distances in US customary and Imperial units.
     /// </summary>
     /// <since>5.0</since>
+    /// <deprecated>8.35</deprecated>
     [Obsolete("Use Rhino.UI.DistanceDisplayMode")]
     public enum DistanceDisplayMode
     {

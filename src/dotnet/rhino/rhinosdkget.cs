@@ -682,6 +682,27 @@ namespace Rhino.Input
       return rc;
     }
 
+    /// <summary>
+    /// Gets a 3d rectangle with prompts for counts in X and Y directions,
+    /// and a SubDCorners option.
+    /// </summary>
+    /// <param name="xMin">Minimum value allowed for count in the x direction.</param>
+    /// <param name="xCount">Count in the x direction.</param>
+    /// <param name="yMin">Minimum value allowed for count in the y direction.</param>
+    /// <param name="yCount">Count in the y direction.</param>
+    /// <param name="subDCorners">Value of the SubDCorners option.</param>
+    /// <param name="corners">corners of the rectangle in counter-clockwise order.</param>
+    /// <returns>Commands.Result.Success if successful.</returns>
+    /// <since>9.0</since>
+    public static Result GetRectangleWithCounts(int xMin, ref int xCount, int yMin, ref int yCount, ref bool subDCorners, out Point3d[] corners)
+    {
+      corners = new Point3d[4];
+      var rc = (Result)UnsafeNativeMethods.RHC_RhinoGetRectangleWithCounts2(corners, xMin, ref xCount, yMin, ref yCount, ref subDCorners);
+      if (rc != Result.Success)
+        corners = null;
+      return rc;
+    }
+
     /// <summary> Gets a 3d box with prompts for counts in X, Y and Z directions.</summary>
     /// <param name="xMin">Minimum value allowed for count in the x direction.</param>
     /// <param name="xCount">Count in the x direction.</param>
@@ -832,6 +853,79 @@ namespace Rhino.Input
       }
 
       return rc;
+    }
+
+    /// <summary>
+    /// Interactively picks the points of a curve interpolated through a surface.
+    /// This is the getter behind the Rhino InterpCrvOnSrf command.
+    /// </summary>
+    /// <param name="surface">The surface to draw on, or null to have the user pick one.</param>
+    /// <param name="curve">The resulting curve, or null when the result is not Success.</param>
+    /// <returns>The command result.</returns>
+    /// <since>9.0</since>
+    public static Result GetInterpolatedCurveOnSurface(Surface surface, out Curve curve)
+    {
+      var rc = GetInterpolatedCurveOnSurface(surface, out curve, out ObjRef objref, out _);
+      if (null != objref)
+        objref.Dispose();
+      return rc;
+    }
+
+    /// <summary>
+    /// Interactively picks the points of a curve interpolated through a surface.
+    /// This is the getter behind the Rhino InterpCrvOnSrf command.
+    /// </summary>
+    /// <param name="surface">The surface to draw on, or null to have the user pick one.</param>
+    /// <param name="curve">The resulting curve, or null when the result is not Success.</param>
+    /// <param name="surfaceObjRef">
+    /// The face the user picked, or null when a surface was supplied or nothing was picked.
+    /// </param>
+    /// <param name="surfaceParameters">The picked points in the parameter space of the surface.</param>
+    /// <returns>
+    /// The command result. UnknownCommand means the user chose the Edit option, which the
+    /// InterpCrvOnSrf command answers by restarting in edit mode.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Result GetInterpolatedCurveOnSurface(Surface surface, out Curve curve, out ObjRef surfaceObjRef, out Point2d[] surfaceParameters)
+    {
+      IntPtr ptr_const_surface = null == surface ? IntPtr.Zero : surface.ConstPointer();
+      var objref = new ObjRef();
+      int result = (int)Result.Failure;
+
+      using (var points2d = new SimpleArrayPoint2d())
+      {
+        IntPtr ptr_curve = UnsafeNativeMethods.RHC_RhinoGetInterpolatedCurveOnSurface(ptr_const_surface, objref.NonConstPointer(), points2d.NonConstPointer(), ref result);
+        GC.KeepAlive(surface);
+
+        // The native curve is owned here. CreateGeometryHelper returns null for a type it does not
+        // know, which would leave nothing to free the pointer.
+        var geometry = GeometryBase.CreateGeometryHelper(ptr_curve, null);
+        curve = geometry as Curve;
+        if (null == curve)
+        {
+          if (null != geometry)
+            geometry.Dispose();
+          else if (IntPtr.Zero != ptr_curve)
+            UnsafeNativeMethods.ON_Object_Delete(ptr_curve);
+        }
+
+        surfaceParameters = points2d.ToArray();
+      }
+
+      // The native function reports success even when the interpolation produced nothing.
+      if (null == curve && (int)Result.Success == result)
+        result = (int)Result.Failure;
+
+      if (Guid.Empty == objref.ObjectId)
+      {
+        objref.Dispose();
+        surfaceObjRef = null;
+      }
+      else
+      {
+        surfaceObjRef = objref;
+      }
+      return (Result)result;
     }
 
     /// <summary>
@@ -1038,6 +1132,41 @@ namespace Rhino.Input
     }
 
     /// <summary>
+    /// Easy to use getter for selecting multiple viewports.
+    /// </summary>
+    /// <param name="commandPrompt">Prompt to display in command line during the operation.</param>
+    /// <param name="viewports">An array of /selected Viewports.</param>
+    /// <returns>
+    /// Commands.Result.Success - got point
+    /// Commands.Result.Cancel - user cancel point getting.
+    /// </returns>
+    /// <since>9.0</since>
+    public static Result GetViewports(string commandPrompt, out RhinoViewport[] viewports)
+    {
+      using (SimpleArrayGuid ids = new SimpleArrayGuid())
+      {
+        IntPtr ptr_id_array = ids.NonConstPointer();
+        uint rc = UnsafeNativeMethods.RHC_RhinoGetViewports(commandPrompt, ptr_id_array);
+        if (rc != (uint)Result.Success)
+        {
+          viewports = null;
+          return (Result)rc;
+        }
+        List<RhinoViewport> vps = new List<RhinoViewport>();
+        for (int i = 0; i < ids.Count; i++)
+        {
+          Guid id = ids[i];
+          RhinoViewport vp = RhinoViewport.FromId(id);
+          if (null != vp) vps.Add(vp);
+        }
+
+        viewports = vps.ToArray();
+
+        return (Result)rc;
+      }
+    }
+
+    /// <summary>
     /// Allows user to interactively pick an angle
     /// </summary>
     /// <param name="commandPrompt">if null, a default prompt will be displayed</param>
@@ -1055,6 +1184,31 @@ namespace Rhino.Input
                                             ref angleRadians);
       GetResult get_rc = (GetResult)rc;
       if (get_rc == GetResult.Angle)
+        return Result.Success;
+      if (get_rc == GetResult.ExitRhino)
+        return Result.ExitRhino;
+      if (get_rc == GetResult.Cancel)
+        return Result.Cancel;
+      if (get_rc == GetResult.Nothing)
+        return Result.Nothing;
+      return Result.Failure;
+    }
+
+    /// <summary>
+    /// Allows the user to interactively pick a distance
+    /// </summary>
+    /// <param name="commandPrompt">if null, a default prompt will be displayed</param>
+    /// <param name="defaultDistance"></param>
+    /// <param name="distance"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static Result GetDistance(string commandPrompt, double defaultDistance, out double distance)
+    {
+      distance = 0.0;
+      int rc = UnsafeNativeMethods.RHC_RhinoGetDistance(commandPrompt, defaultDistance, ref distance);
+
+      GetResult get_rc = (GetResult)rc;
+      if (get_rc == GetResult.Distance)
         return Result.Success;
       if (get_rc == GetResult.ExitRhino)
         return Result.ExitRhino;
@@ -1261,7 +1415,12 @@ namespace Rhino.Input.Custom
 
     ~GetBaseClass()
     {
-      Dispose(false);
+      // 24 Sep 2026 S. Baer (RH-98838)
+      // Make sure the CRhinoGet* instances get deleted on the main thread.
+      // Deleting CRhinoGet can cause static conduit lists to get adjusted
+      // and that is not thread safe code.
+      // Do not directly call Dispose(false) in this finalizer
+      HostUtils.AddObjectsToDeleteOnMainThread(this);
     }
 
     /// <since>5.0</since>
@@ -1833,6 +1992,60 @@ namespace Rhino.Input.Custom
     }
 
     /// <summary>
+    /// Add a command line option to get a string and automatically save the value.
+    /// </summary>
+    /// <param name="optionName">The option description.</param>
+    /// <param name="stringValue">The current string value.</param>
+    /// <param name="prompt">Command prompt to be shown if the picks this option.</param>
+    /// <returns>The option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>9.0</since>
+    public int AddOptionString(LocalizeStringPair optionName, ref OptionString stringValue, string prompt)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_option = stringValue.OptionHolderPointer;
+      int rc = UnsafeNativeMethods.CRhinoGet_AddCommandOption6Loc(ptr_this, optionName.English, optionName.Local, ptr_option, prompt, stringValue.m_allowEmptyString);
+      return rc;
+    }
+
+    /// <summary>
+    /// Add a command line option to get a string and automatically save the value.
+    /// </summary>
+    /// <param name="optionName">The option description.</param>
+    /// <param name="stringValue">The current string value.</param>
+    /// <returns>The option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>9.0</since>
+    public int AddOptionString(LocalizeStringPair optionName, ref OptionString stringValue)
+    {
+      return AddOptionString(optionName, ref stringValue, null);
+    }
+
+    /// <summary>
+    /// Add a command line option to get a string and automatically save the value.
+    /// </summary>
+    /// <param name="englishName">The option description.</param>
+    /// <param name="stringValue">The current string value.</param>
+    /// <param name="prompt">Command prompt to be shown if the picks this option.</param>
+    /// <returns>The option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>9.0</since>
+    public int AddOptionString(string englishName, ref OptionString stringValue, string prompt)
+    {
+      return AddOptionString(new LocalizeStringPair(englishName, englishName), ref stringValue, prompt);
+    }
+
+    /// <summary>
+    /// Add a command line option to get a string and automatically save the value.
+    /// </summary>
+    /// <param name="englishName">The option description.</param>
+    /// <param name="stringValue">The current string value.</param>
+    /// <returns>The option index value (&gt;0) or 0 if option cannot be added.</returns>
+    /// <since>9.0</since>
+    public int AddOptionString(string englishName, ref OptionString stringValue)
+    {
+      return AddOptionString(new LocalizeStringPair(englishName, englishName), ref stringValue, null);
+    }
+
+
+    /// <summary>
     /// Adds a command line option to toggle a setting.
     /// </summary>
     /// <param name="englishName">
@@ -1969,18 +2182,55 @@ namespace Rhino.Input.Custom
     public int AddOptionEnumList<T>(string englishOptionName, T defaultValue, T[] include)
         where T : struct, IConvertible
     {
+      return AddOptionEnumList(new LocalizeStringPair(englishOptionName, englishOptionName), defaultValue, include);
+    }
+
+    /// <summary>
+    /// Adds a choice of enumerated values as list option
+    /// </summary>
+    /// <typeparam name="T">The enumerated type</typeparam>
+    /// <param name="optionName">The name of the option</param>
+    /// <param name="defaultValue">The default value</param>
+    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enumerated type.</exception>
+    /// <returns>Option index</returns>
+    /// <since>8.37</since>
+    [CLSCompliant(false)]
+    public int AddOptionEnumList<T>(LocalizeStringPair optionName, T defaultValue)
+        where T : struct, IConvertible
+    {
+      return AddOptionEnumList(optionName, defaultValue, null);
+    }
+
+    /// <summary>
+    /// Adds a choice of enumerated values as list option. Allows to include only some enumerated values.
+    /// </summary>
+    /// <typeparam name="T">The enumerated type</typeparam>
+    /// <param name="optionName">The name of the option</param>
+    /// <param name="defaultValue">The default value</param>
+    /// <param name="include">An array of enumerated values to use. This argument can also be null; in this case, the whole enumerated is used.</param>
+    /// <exception cref="ArgumentException">Gets thrown if defaultValue provided is not an enumerated type.</exception>
+    /// <returns>Option index</returns>
+    /// <since>8.37</since>
+    [CLSCompliant(false)]
+    public int AddOptionEnumList<T>(LocalizeStringPair optionName, T defaultValue, T[] include)
+        where T : struct, IConvertible
+    {
       Type enum_type = typeof(T);
       if (!enum_type.IsEnum) throw new ArgumentException("!typeof(T).IsEnum");
       Array include_array = include;
       if (include_array == null) include_array = Enum.GetValues(enum_type);
 
       string[] names = new string[include_array.Length];
+      LocalizeStringPair[] values = new LocalizeStringPair[include_array.Length];
 
-      for(int i = 0; i < include_array.Length; i++)
+      for (int i = 0; i < include_array.Length; i++)
+      {
         names[i] = Enum.GetName(enum_type, include_array.GetValue(i));
+        values[i] = new LocalizeStringPair(names[i], names[i]);
+      }
 
       int index = Array.IndexOf(names, defaultValue.ToString(CultureInfo.InvariantCulture));
-      return AddOptionList(englishOptionName, names, index);
+      return AddOptionList(optionName, values, index);
     }
 
     /// <summary>
@@ -1996,14 +2246,33 @@ namespace Rhino.Input.Custom
     public int AddOptionEnumSelectionList<T>(string englishOptionName, IEnumerable<T> enumSelection, int listCurrentIndex)
         where T : struct, IConvertible
     {
+        return AddOptionEnumSelectionList(new LocalizeStringPair(englishOptionName, englishOptionName), enumSelection, listCurrentIndex);
+    }
+
+    /// <summary>
+    /// Adds a list of enumerated values as option list. Use enumSelection[go.Option.CurrentListOptionIndex] to retrieve selection.
+    /// </summary>
+    /// <typeparam name="T">The enumerated type</typeparam>
+    /// <param name="optionName">The name of the option</param>
+    /// <param name="enumSelection">The enumerated values to use.</param>
+    /// <param name="listCurrentIndex">Zero based index of current option.</param>
+    /// <returns>Option index</returns>
+    /// <since>8.37</since>
+    [CLSCompliant(false)]
+    public int AddOptionEnumSelectionList<T>(LocalizeStringPair optionName, IEnumerable<T> enumSelection, int listCurrentIndex)
+        where T : struct, IConvertible
+    {
         if (!typeof(T).IsEnum) throw new ArgumentException("!typeof(T).IsEnum");
         if (null == enumSelection) throw new ArgumentNullException("enumSelection");
 
-        List<String> names = new List<String>();
-        foreach(T e in enumSelection)
-            names.Add(e.ToString(CultureInfo.InvariantCulture));
+        List<LocalizeStringPair> values = new List<LocalizeStringPair>();
+        foreach (T e in enumSelection)
+        {
+            string name = e.ToString(CultureInfo.InvariantCulture);
+            values.Add(new LocalizeStringPair(name, name));
+        }
 
-        return AddOptionList(englishOptionName, names, listCurrentIndex);
+        return AddOptionList(optionName, values, listCurrentIndex);
     }
 
     /// <summary>
@@ -2033,7 +2302,7 @@ namespace Rhino.Input.Custom
 
     /// <summary>
     /// Returns the selected enumerated value by looking at the list of values from which to select.
-    /// Use this in combination with <see cref="AddOptionEnumSelectionList{T}"/>
+    /// Use this in combination with AddOptionEnumSelectionList.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="selectionList"> </param>
@@ -2599,6 +2868,64 @@ namespace Rhino.Input.Custom
         }
       }
     }
+    
+    /// <summary>
+    /// The index of the accelerator
+    /// </summary>
+    /// <since>9.0</since>
+    internal int AcceleratorIndex
+    {
+      get
+      {
+          return UnsafeNativeMethods.CRhinoCommandOption_AcceleratorIndex(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// The accelerator character
+    /// </summary>
+    /// <since>9.0</since>
+    internal char AcceleratorChar
+    {
+      get
+      {
+          return (char)UnsafeNativeMethods.CRhinoCommandOption_AcceleratorChar(m_ptr);
+      }
+    }
+
+    /// <summary>
+    /// The command option simple value
+    /// </summary>
+    /// <since>9.0</since>
+    internal string SimpleOptionValue
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoCommandOption_SimpleOptionValue(m_ptr, ptr_string);
+          return sh.ToString();
+        }
+      }
+    }
+
+    /// <summary>
+    /// The command option color value
+    /// </summary>
+    /// <since>9.0</since>
+    internal System.Drawing.Color ColorOptionValue
+    {
+      get
+      {
+        using (var sh = new StringHolder())
+        {
+          int value = 0;
+          UnsafeNativeMethods.CRhinoCommandOption_ColorOptionValue(m_ptr, ref value);
+          return Color.FromArgb(value);
+        }
+      }
+    }
 
     /// <summary>
     /// Assigned by RhinoGet.Get if an option value is specified in a script or by a command window control.
@@ -2690,6 +3017,51 @@ namespace Rhino.Input.Custom
       get
       {
         double rc = UnsafeNativeMethods.CRhinoCommandOption_CurrentNumericValue(m_ptr);
+        return rc;
+      }
+    }
+    
+    internal double NumericUpperLimit
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.CRhinoCommandOption_NumericUpperLimit(m_ptr);
+        return rc;
+      }
+    }
+    
+    internal double NumericLowerLimit
+    {
+      get
+      {
+        double rc = UnsafeNativeMethods.CRhinoCommandOption_NumericLowerLimit(m_ptr);
+        return rc;
+      }
+    }
+    
+    internal bool IsIntegerNumberValue
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.CRhinoCommandOption_IsIntegerNumberValue(m_ptr);
+        return rc;
+      }
+    }
+    
+    internal int NumericFormat
+    {
+      get
+      {
+        int rc = UnsafeNativeMethods.CRhinoCommandOption_NumericFormat(m_ptr);
+        return rc;
+      }
+    }
+
+    internal bool Varies
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.CRhinoCommandOption_Varies(m_ptr);
         return rc;
       }
     }
@@ -3102,6 +3474,121 @@ namespace Rhino.Input.Custom
     }
   }
 
+  /// <summary>
+  /// RhinoGet string option helper
+  /// </summary>
+  /// <since>9.0</since>
+  public class OptionString : IDisposable
+  {
+    internal IntPtr m_pOptionHolder = IntPtr.Zero;
+    internal readonly string m_initialString;
+    internal readonly bool m_allowEmptyString;
+
+    /// <summary>
+    /// Constructs the option object.
+    /// </summary>
+    /// <param name="initialString">The initial value.</param>
+    /// <since>9.0</since>
+    public OptionString(string initialString)
+    {
+      m_initialString = initialString;
+      m_allowEmptyString = false;
+    }
+
+    /// <summary>
+    /// Constructs the option object.
+    /// </summary>
+    /// <param name="initialString">The initial value.</param>
+    /// <param name="allowEmptyString">
+    /// If false, the value is not allowed to be changed to an empty string. It is allowed to remain empty if it starts out as empty.
+    /// If true, the string is allowed to be changed to an empty string.
+    /// </param>
+    /// <since>9.0</since>
+    public OptionString(string initialString, bool allowEmptyString)
+    {
+      m_initialString = initialString;
+      m_allowEmptyString = allowEmptyString;
+    }
+
+    ~OptionString()
+    {
+      Dispose(false);
+    }
+
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    protected void Dispose(bool disposing)
+    {
+      if (m_pOptionHolder != IntPtr.Zero)
+      {
+        UnsafeNativeMethods.CRhCommonOptionHolder_Delete(m_pOptionHolder);
+        m_pOptionHolder = IntPtr.Zero;
+      }
+    }
+
+    /// <summary>
+    /// Gets and sets the current value of the option.
+    /// </summary>
+    /// <since>9.0</since>
+    public string CurrentValue
+    {
+      get
+      {
+        var rc = m_initialString;
+        if (IntPtr.Zero != m_pOptionHolder)
+        {
+          using (var stringHolder = new Rhino.Runtime.InteropWrappers.StringHolder())
+          {
+            IntPtr ptr_string = stringHolder.NonConstPointer();
+            bool result = UnsafeNativeMethods.CRhCommonOptionHolder_String(m_pOptionHolder, ptr_string);
+            if (result)
+              rc = stringHolder.ToString();
+          }
+        }
+        return rc;
+      }
+      set
+      {
+        using (var stringWrapper = new Rhino.Runtime.InteropWrappers.StringWrapper(value))
+        {
+          IntPtr ptr_this = OptionHolderPointer;
+          IntPtr ptr_const_string = stringWrapper.ConstPointer;
+          UnsafeNativeMethods.CRhCommonOptionHolder_SetString(ptr_this, ptr_const_string);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets the initial value of the option.
+    /// </summary>
+    /// <since>9.0</since>
+    public string InitialValue
+    {
+      get { return m_initialString; }
+    }
+
+    internal IntPtr OptionHolderPointer
+    {
+      get
+      {
+        if (IntPtr.Zero == m_pOptionHolder)
+        {
+          using (var stringWrapper = new Rhino.Runtime.InteropWrappers.StringWrapper(m_initialString))
+          {
+            IntPtr ptr_const_string = stringWrapper.ConstPointer;
+            m_pOptionHolder = UnsafeNativeMethods.CRhCommonOptionHolder_New5(ptr_const_string);
+          }
+        }
+        return m_pOptionHolder;
+      }
+    }
+  }
+
   public class TaskCompleteEventArgs : EventArgs
   {
     /// <since>6.0</since>
@@ -3135,6 +3622,15 @@ namespace Rhino.Input.Custom
       IntPtr ptr = NonConstPointer();
       int rc = UnsafeNativeMethods.CRhGetEscape_Get(ptr);
       return (GetResult)rc;
+    }
+
+    /// <summary>
+    /// Cancel all running tasks
+    /// </summary>
+    /// <since>9.0</since>
+    public void Cancel()
+    {
+      m_token_source.Cancel();
     }
 
     readonly CancellationTokenSource m_token_source = new CancellationTokenSource();
@@ -3205,74 +3701,77 @@ namespace Rhino.Input.Custom
       Task[] tasks_to_run = new Task[incomplete_tasks.Count];
       for (int i = 0; i < tasks_to_run.Length; i++)
         tasks_to_run[i] = incomplete_tasks[i];
-      WaitCursor cursor = new WaitCursor();
-      cursor.Set();
-      //int iteration = 0;
 
-      m_old_progress_value = -1;
-      m_new_progress_value = -1;
-
-      while (true)
+      using (WaitCursor cursor = new WaitCursor())
       {
-        //iteration++;
-        //SetCommandPrompt(string.Format("computing {0}  (press escape to exit)", iteration));
-        var result = Get();
-        if (result == GetResult.Cancel)
-        {
-          try
-          {
-            m_token_source.Cancel();
-            Task.WaitAll(tasks_to_run);
-          }
-          catch (Exception)
-          {
-            RhinoApp.WriteLine("canceled");
-          }
-          m_new_progress_value = -1;
-          m_old_progress_value = -1;
-          cursor.Clear();
-          StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
-          return Commands.Result.Cancel;
-        }
-        bool redraw = false;
+        cursor.Set();
+        //int iteration = 0;
 
-        var completed = new List<Task>();
-        for (int i = incomplete_tasks.Count - 1; i >= 0; i--)
+        m_old_progress_value = -1;
+        m_new_progress_value = -1;
+
+        while (true)
         {
-          var task = incomplete_tasks[i];
-          if (task.IsCompleted)
+          //iteration++;
+          //SetCommandPrompt(string.Format("computing {0}  (press escape to exit)", iteration));
+          var result = Get();
+          if (result == GetResult.Cancel)
           {
-            incomplete_tasks.RemoveAt(i);
-            completed.Add(task);
+            try
+            {
+              m_token_source.Cancel();
+              Task.WaitAll(tasks_to_run);
+            }
+            catch (Exception)
+            {
+              RhinoApp.WriteLine("canceled");
+            }
+            m_new_progress_value = -1;
+            m_old_progress_value = -1;
+            cursor.Clear();
+            StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
+            return Commands.Result.Cancel;
           }
-        }
+          bool redraw = false;
 
-        if (TaskCompleted != null)
-        {
-          foreach (var task in completed)
+          var completed = new List<Task>();
+          for (int i = incomplete_tasks.Count - 1; i >= 0; i--)
           {
-            var args = new TaskCompleteEventArgs(task, doc);
-            TaskCompleted(this, args);
-            redraw |= args.Redraw;
+            var task = incomplete_tasks[i];
+            if (task.IsCompleted)
+            {
+              incomplete_tasks.RemoveAt(i);
+              completed.Add(task);
+            }
           }
-        }
 
-        if (Math.Abs(m_new_progress_value - m_old_progress_value) > 0.01)
-        {
-          StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, (int)(m_new_progress_value * 100.0), true);
-          m_old_progress_value = m_new_progress_value;
-        }
+          if (TaskCompleted != null)
+          {
+            foreach (var task in completed)
+            {
+              var args = new TaskCompleteEventArgs(task, doc);
+              TaskCompleted(this, args);
+              redraw |= args.Redraw;
+            }
+          }
 
-        if (redraw)
-          doc.Views.Redraw();
-        if (incomplete_tasks.Count == 0)
-          break;
+          if (Math.Abs(m_new_progress_value - m_old_progress_value) > 0.01)
+          {
+            StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, (int)(m_new_progress_value * 100.0), true);
+            m_old_progress_value = m_new_progress_value;
+          }
+
+          if (redraw)
+            doc.Views.Redraw();
+          if (incomplete_tasks.Count == 0)
+            break;
+        }
+        m_new_progress_value = -1;
+        m_old_progress_value = -1;
+        cursor.Clear();
+        StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
+        return Commands.Result.Success;
       }
-      m_new_progress_value = -1;
-      m_old_progress_value = -1;
-      cursor.Clear();
-      StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
-      return Commands.Result.Success;
     }
     /// <summary>
     /// Awaits some tasks to finish.

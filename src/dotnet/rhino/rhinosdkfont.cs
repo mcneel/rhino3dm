@@ -169,10 +169,12 @@ namespace Rhino.DocObjects
 
       if (null == rc || rc.Length < 1)
       {
-        System.Drawing.Text.InstalledFontCollection fonts = new System.Drawing.Text.InstalledFontCollection();
-        rc = new string[fonts.Families.Length];
-        for (int i = 0; i < fonts.Families.Length; i++)
-          rc[i] = fonts.Families[i].Name;
+        using (System.Drawing.Text.InstalledFontCollection fonts = new System.Drawing.Text.InstalledFontCollection())
+        {
+          rc = new string[fonts.Families.Length];
+          for (int i = 0; i < fonts.Families.Length; i++)
+            rc[i] = fonts.Families[i].Name;
+        }
       }
       Array.Sort(rc);
       return rc;
@@ -377,6 +379,9 @@ namespace Rhino.DocObjects
     public bool IsSingleStrokeFont => UnsafeNativeMethods.ON_Font_IsSingleStrokeFont(m_managed_font);
     /// <since>6.5</since>
     public bool IsSimulated => UnsafeNativeMethods.ON_Font_IsSimulated(m_managed_font);
+    /// <since>9.0</since>
+    public bool IsGeometricToleranceFont => UnsafeNativeMethods.ON_Font_IsGeometricToleranceFont(m_managed_font);
+
     /// <since>6.0</since>
     public FontStyle Style => UnsafeNativeMethods.ON_Font_Style(m_managed_font);
     /// <since>6.0</since>
@@ -385,6 +390,23 @@ namespace Rhino.DocObjects
     public FontStretch Stretch => UnsafeNativeMethods.ON_Font_Stretch(m_managed_font);
     /// <since>6.0</since>
     public double PointSize => UnsafeNativeMethods.ON_Font_PointSize(m_managed_font);
+
+    /// <summary>
+    /// The number of design units per em in this font's normalized metrics. Together with
+    /// <see cref="AscentOfCapital"/> this converts between an em size - the "font size" used by
+    /// CSS, SVG, PDF and most page layout - and the height of a capital letter, which is what
+    /// Rhino means by a text height. Zero when the font has no usable metrics.
+    /// </summary>
+    /// <since>9.0</since>
+    public int UnitsPerEm => UnsafeNativeMethods.ON_Font_UnitsPerEm(m_managed_font);
+
+    /// <summary>
+    /// The font's typographic capital height, in the design units reported by
+    /// <see cref="UnitsPerEm"/>. This is the metric a "text height" is measured against, so
+    /// text of height h renders its capitals h tall. Zero when the font has no usable metrics.
+    /// </summary>
+    /// <since>9.0</since>
+    public int AscentOfCapital => UnsafeNativeMethods.ON_Font_AscentOfCapital(m_managed_font);
 
     /// <since>6.5</since>
     public string FamilyName

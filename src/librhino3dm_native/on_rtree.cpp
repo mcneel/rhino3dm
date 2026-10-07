@@ -63,7 +63,7 @@ RH_C_FUNCTION ON_RTree* ON_RTree_CreatePointArrayTree(/*ARRAY*/const ON_3dPoint*
 struct ON_RTreeSearchContext
 {
   int m_serial_number;
-  int m_mode; //0=none, 1=bbox, 2=sphere, 3=capsule
+  int m_mode; //0=none, 1=bbox, 2=sphere, 3=capsule, 4=selfoverlaps
   ON_RTreeBBox m_bbox;
   ON_RTreeSphere m_sphere;
   // ON_RTreeCapsule m_capsule; // not using yet
@@ -182,6 +182,23 @@ static bool RhCmnTreeSearch1_thread_safe(void* context, ON__INT_PTR a_id)
   return rc;
 }
 
+static bool RhCmnTreeSearch1_thread_safe2(void* context, ON__INT_PTR a_id0, ON__INT_PTR a_id1)
+{
+  bool rc = false;
+  struct RhCmnTreeSearch1_thread_safe_context* thread_safe_context = static_cast<struct RhCmnTreeSearch1_thread_safe_context*>(context);
+  if (nullptr != thread_safe_context && nullptr != thread_safe_context->m_searchCallback)
+  {
+    int cbrc = thread_safe_context->m_searchCallback(
+      thread_safe_context->m_last_searchCallback_parameter.m_serial_number,
+      (void*)a_id0,
+      (void*)a_id1,
+      &thread_safe_context->m_last_searchCallback_parameter
+    );
+    rc = cbrc ? true : false;
+  }
+  return rc;
+}
+
 struct RhCmnTreeSearch2_thread_safe_context
 {
   RTREESEARCHPROC m_searchCallback;
@@ -219,6 +236,21 @@ RH_C_FUNCTION bool ON_RTree_Search(const ON_RTree* pConstTree, ON_3DPOINT_STRUCT
     context.m_last_searchCallback_parameter.m_bbox.m_max[1] = bbox.m_max[1];
     context.m_last_searchCallback_parameter.m_bbox.m_max[2] = bbox.m_max[2];
     rc = pConstTree->Search(&(context.m_last_searchCallback_parameter.m_bbox), RhCmnTreeSearch1_thread_safe, &context);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_RTree_SearchOverlaps(const ON_RTree* pConstTree, double tolerance, int serial_number, RTREESEARCHPROC searchCB)
+{
+  bool rc = false;
+  if (pConstTree && searchCB)
+  {
+    RhCmnTreeSearch1_thread_safe_context context;
+    context.m_searchCallback = searchCB;
+    context.m_last_searchCallback_parameter.m_mode = 4;
+    context.m_last_searchCallback_parameter.m_serial_number = serial_number;
+    //context.m_last_searchCallback_parameter.m_tolerance = tolerance
+    rc = pConstTree->Search(tolerance, RhCmnTreeSearch1_thread_safe2, &context);
   }
   return rc;
 }

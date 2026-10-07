@@ -56,11 +56,11 @@ RH_C_FUNCTION bool ON_BinaryArchive_Read3dmStartSection(ON_BinaryArchive* pBinar
 
 
 
-RH_C_FUNCTION unsigned int ON_BinaryArchive_Dump3dmChunk(ON_BinaryArchive* pBinaryArchive, ON_TextLog* pTextLog)
+RH_C_FUNCTION unsigned int ON_BinaryArchive_Dump3dmChunk(ON_BinaryArchive* pBinaryArchive, ON_TextLog* pTextLog, int recursionLimit)
 {
   unsigned int rc = 0;
   if( pBinaryArchive && pTextLog )
-    rc = pBinaryArchive->Dump3dmChunk(*pTextLog);
+    rc = pBinaryArchive->Dump3dmChunk(*pTextLog, 0, recursionLimit);
   return rc;
 }
 
@@ -902,54 +902,26 @@ RH_C_FUNCTION ONX_Model* ONX_Model_New()
 
 RH_C_FUNCTION void ONX_Model_ReadNotes(const RHMONO_STRING* path, CRhCmnStringHolder* pString)
 {
-  if( path && pString )
+  if (path && pString)
   {
     INPUTSTRINGCOERCE(_path, path);
-
-    FILE* fp = ON::OpenFile( _path, L"rb" );
-    if( fp )
-    {
-      ON_BinaryFile file( ON::archive_mode::read3dm, fp);
-      int version = 0;
-      ON_String comments;
-      bool rc = file.Read3dmStartSection( &version, comments );
-      if(rc)
-      {
-        ON_3dmProperties prop;
-        file.Read3dmProperties(prop);
-        if( prop.m_Notes.IsValid() )
-        {
-          pString->Set( prop.m_Notes.m_notes );
-        }
-      }
-      ON::CloseFile(fp);
-    }
+    ONX_Model model;
+    if (model.ReadSettings(_path) && model.m_properties.m_Notes.IsValid())
+      pString->Set(model.m_properties.m_Notes.m_notes);
   }
 }
 
 RH_C_FUNCTION int ONX_Model_ReadArchiveVersion(const RHMONO_STRING* path)
 {
-  if( path )
+  int rc = 0;
+  if (path)
   {
     INPUTSTRINGCOERCE(_path, path);
-    
-    FILE* fp = ON::OpenFile( _path, L"rb" );
-    if( fp )
-    {
-      ON_BinaryFile file( ON::archive_mode::read3dm, fp);
-      int version = 0;
-      ON_String comment_block;
-      bool rc = file.Read3dmStartSection( &version, comment_block );
-      if(rc)
-      {
-        ON::CloseFile(fp);
-        return version;
-      }
-      ON::CloseFile(fp);
-    }
+    ONX_Model model;
+    model.ReadSettings(_path);
+    rc = model.m_3dm_file_version;
   }
-  
-  return 0;
+  return rc;
 }
 
 RH_C_FUNCTION bool ONX_Model_AddEmbeddedFile(ONX_Model* model, const RHMONO_STRING* filename)
@@ -975,27 +947,9 @@ RH_C_FUNCTION ON_3dmSettings* ONX_Model_ReadSettings(const RHMONO_STRING* path)
   if (path)
   {
     INPUTSTRINGCOERCE(_path, path);
-
-    FILE* fp = ON::OpenFile(_path, L"rb");
-    if (fp)
-    {
-      ON_BinaryFile file(ON::archive_mode::read3dm, fp);
-      int version = 0;
-      ON_String comments;
-
-      if (file.Read3dmStartSection(&version, comments))
-      {
-        ON_3dmProperties prop;
-        if (file.Read3dmProperties(prop))
-        {
-          ON_3dmSettings settings;
-          file.Read3dmSettings(settings);
-
-          rc = new ON_3dmSettings(settings);
-        }
-      }
-      ON::CloseFile(fp);
-    }
+    ONX_Model model;
+    if (model.ReadSettings(_path))
+      rc = new ON_3dmSettings(model.m_settings);
   }
   return rc;
 }
@@ -1017,28 +971,17 @@ RH_C_FUNCTION void ONX_Model_SetEarthAnchorPoint(ONX_Model* pModel, const ON_Ear
 RH_C_FUNCTION ON_3dmRevisionHistory* ONX_Model_ReadRevisionHistory(const RHMONO_STRING* path, CRhCmnStringHolder* pStringCreated, CRhCmnStringHolder* pStringLastEdited, int* revision)
 {
   ON_3dmRevisionHistory* rc = nullptr;
-  if( path && pStringCreated && pStringLastEdited && revision )
+  if (path && pStringCreated && pStringLastEdited && revision)
   {
     INPUTSTRINGCOERCE(_path, path);
-
-    FILE* fp = ON::OpenFile( _path, L"rb" );
-    if( fp )
+    ONX_Model model;
+    if (model.ReadSettings(_path))
     {
-      ON_BinaryFile file( ON::archive_mode::read3dm, fp);
-      int version = 0;
-      ON_String comments;
-      
-      if(file.Read3dmStartSection( &version, comments ))
-      {
-        ON_3dmProperties prop;
-        file.Read3dmProperties(prop);
-
-        rc = new ON_3dmRevisionHistory(prop.m_RevisionHistory);
-        pStringCreated->Set(prop.m_RevisionHistory.m_sCreatedBy);
-        pStringLastEdited->Set(prop.m_RevisionHistory.m_sLastEditedBy);
-        *revision = prop.m_RevisionHistory.m_revision_count;
-      }
-      ON::CloseFile(fp);
+      const ON_3dmRevisionHistory& history = model.m_properties.m_RevisionHistory;
+      rc = new ON_3dmRevisionHistory(history);
+      pStringCreated->Set(history.m_sCreatedBy);
+      pStringLastEdited->Set(history.m_sLastEditedBy);
+      *revision = history.m_revision_count;
     }
   }
   return rc;
@@ -1080,29 +1023,44 @@ RH_C_FUNCTION void ON_3dmRevisionHistory_Delete(ON_3dmRevisionHistory* pRevision
 
 RH_C_FUNCTION void ONX_Model_ReadApplicationDetails(const RHMONO_STRING* path, CRhCmnStringHolder* pApplicationName, CRhCmnStringHolder* pApplicationUrl, CRhCmnStringHolder* pApplicationDetails)
 {
-  if( path && pApplicationName && pApplicationUrl && pApplicationDetails )
+  if (path && pApplicationName && pApplicationUrl && pApplicationDetails)
   {
     INPUTSTRINGCOERCE(_path, path);
-
-    FILE* fp = ON::OpenFile( _path, L"rb" );
-    if( fp )
+    ONX_Model model;
+    if (model.ReadSettings(_path))
     {
-      ON_BinaryFile file( ON::archive_mode::read3dm, fp);
-      int version = 0;
-      ON_String comments;
-      bool rc = file.Read3dmStartSection( &version, comments );
-      if(rc)
-      {
-        ON_3dmProperties prop;
-        file.Read3dmProperties(prop);
-        pApplicationName->Set(prop.m_Application.m_application_name);
-        pApplicationUrl->Set(prop.m_Application.m_application_URL);
-        pApplicationDetails->Set(prop.m_Application.m_application_details);
-      }
-      ON::CloseFile(fp);
+      const ON_3dmApplication& app = model.m_properties.m_Application;
+      pApplicationName->Set(app.m_application_name);
+      pApplicationUrl->Set(app.m_application_URL);
+      pApplicationDetails->Set(app.m_application_details);
     }
   }
 }
+
+#if !defined(ON_RUNTIME_APPLE_IOS) && !defined(RHINO3DM_BUILD)
+RH_C_FUNCTION bool ONX_Model_ReadPageViews(const RHMONO_STRING* pPath, ON_SimpleArray<ON_3dmView*>* pPageViews)
+{
+  bool rc = false;
+  if (pPath && pPageViews)
+  {
+    INPUTSTRINGCOERCE(path, pPath);
+    ON_ClassArray<ON_3dmView> page_views;
+    rc = RhGetLayoutsFromFile(path, page_views);
+    if (rc)
+    {
+      const int count = page_views.Count();
+      for (int i = 0; i < count; i++)
+      {
+        // Memory for views is allocated. It is the responsiblity of ViewInfo to dispose.
+        ON_3dmView* pView = new ON_3dmView(page_views[i]);
+        pPageViews->Append(pView);
+      }
+      rc = pPageViews->Count() > 0;
+    }
+  }
+  return rc;
+}
+#endif
 
 RH_C_FUNCTION ONX_Model* ONX_Model_ReadFile(const RHMONO_STRING* path, CRhCmnStringHolder* pStringHolder)
 {
@@ -1121,6 +1079,22 @@ RH_C_FUNCTION ONX_Model* ONX_Model_ReadFile(const RHMONO_STRING* path, CRhCmnStr
     }
     if( pStringHolder )
       pStringHolder->Set(s);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION ONX_Model* ONX_Model_ReadFileSettings(const RHMONO_STRING* path)
+{
+  ONX_Model* rc = nullptr;
+  if (path)
+  {
+    INPUTSTRINGCOERCE(_path, path);
+    rc = new ONX_Model();
+    if (!rc->ReadSettings(_path))
+    {
+      delete rc;
+      rc = nullptr;
+    }
   }
   return rc;
 }
@@ -1178,26 +1152,34 @@ RH_C_FUNCTION ONX_Model* ONX_Model_FromByteArray(int length, /*ARRAY*/ const uns
 }
 
 
+// 29 May 2026 S. Baer (RH-94441)
+// These bit values MUST match ON_3dmArchiveTableType in opennurbs_archive.h.
+// ONX_Model::Read() masks the incoming filter against ON_3dmArchiveTableType bits,
+// so any mismatch silently reads the wrong table (or no table) with no error.
 enum ReadFileTableTypeFilter : int
 {
-  ttfNone = 0,
-  ttfPropertiesTable          = 0x000001,
-  ttfSettingsTable            = 0x000002,
-  ttfBitmapTable              = 0x000004,
-  ttfTextureMappingTable      = 0x000008,
-  ttfMaterialTable            = 0x000010,
-  ttfLinetypeTable            = 0x000020,
-  ttfLayerTable               = 0x000040,
-  ttfGroupTable               = 0x000080,
-  ttfFontTable                = 0x000100,
-  ttfFutureFontTable          = 0x000200,
-  ttfDimstyleTable            = 0x000400,
-  ttfLightTable               = 0x000800,
-  ttfHatchpatternTable        = 0x001000,
-  ttfInstanceDefinitionTable  = 0x002000,
-  ttfObjectTable              = 0x004000, 
-  ttfHistoryrecordTable       = 0x008000,
-  ttfUserTable                = 0x010000
+  ttfNone                     = 0,
+  ttfStartSection             = 0x00000001,
+  ttfPropertiesTable          = 0x00000002,
+  ttfSettingsTable            = 0x00000004,
+  ttfBitmapTable              = 0x00000008,
+  ttfTextureMappingTable      = 0x00000010,
+  ttfMaterialTable            = 0x00000020,
+  ttfLinetypeTable            = 0x00000040,
+  ttfLayerTable               = 0x00000080,
+  ttfGroupTable               = 0x00000100,
+  ttfFontTable                = 0x00000200,
+  ttfFutureFontTable          = 0x00000400,
+  ttfDimstyleTable            = 0x00000800,
+  ttfLightTable               = 0x00001000,
+  ttfHatchpatternTable        = 0x00002000,
+  ttfSectionStyleTable        = 0x00004000,
+  ttfMarkupTable              = 0x00008000,
+  ttfPageviewGroupTable       = 0x00010000,
+  ttfInstanceDefinitionTable  = 0x00020000,
+  ttfObjectTable              = 0x00040000,
+  ttfHistoryRecordTable       = 0x00080000,
+  ttfUserTable                = 0x10000000 
 };
 
 enum ObjectTypeFilter : unsigned int
@@ -1272,10 +1254,10 @@ RH_C_FUNCTION bool ONX_Model_WriteFile(ONX_Model* pModel, const RHMONO_STRING* p
 {
   bool rc = false;
   INPUTSTRINGCOERCE(_path, path);
-  if( pModel && _path )
+  if (pModel && _path)
   {
     FILE* fp = ON::OpenFile(_path, L"wb");
-    if( 0==fp )
+    if (nullptr == fp)
       return false;
 
     ON_wString s;
@@ -2987,7 +2969,6 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
   if (nullptr == pModel)
     return false;
 
-#if defined(ON_RUNTIME_WIN)
   if (pRhinoDib)
   {
     ON_WindowsBitmap* pWindowsBitmap = pRhinoDib->ToOnWindowsBitmap();
@@ -3003,93 +2984,134 @@ RH_C_FUNCTION bool ONX_Model_SetPreviewImage(ONX_Model* pModel, const CRhinoDib*
     pModel->m_properties.m_PreviewImage = ON_WindowsBitmap::Unset;
     rc = true;
   }
-#endif
   return rc;
 }
 #endif
 
-// 4-28-2021 Dale Fugier, this work on Window, with our without Rhino
+// 4-28-2021 Dale Fugier, this works on Windows, with or without Rhino
 #if defined(ON_RUNTIME_WIN)
+static HBITMAP ONX_Internal_PreviewImageToHBitmap(const ON_WindowsBitmap& preview)
+{
+  HBITMAP rc = nullptr;
+  if (preview.IsValid())
+  {
+    HDC hdc = ::GetDC(0);
+    rc = ::CreateDIBitmap(
+      hdc,                          // handle to DC
+      &preview.m_bmi->bmiHeader,    // bitmap data
+      CBM_INIT,                     // initialization option
+      (const void*)preview.m_bits,  // initialization data
+      preview.m_bmi,                // color-format data
+      DIB_RGB_COLORS                // color-data usage
+    );
+    ::ReleaseDC(0, hdc);
+  }
+  return rc;
+}
+
 RH_C_FUNCTION HBITMAP ONX_Model_WinReadPreviewImage(const RHMONO_STRING* path)
 {
   HBITMAP rc = nullptr;
   INPUTSTRINGCOERCE(_path, path);
-  FILE* fp = ON::OpenFile(_path, L"rb");
-  if (fp)
-  {
-    ON_BinaryFile file(ON::archive_mode::read3dm, fp);
-    int version = 0;
-    ON_String comments;
-    if (file.Read3dmStartSection(&version, comments))
-    {
-      ON_3dmProperties props;
-      if (file.Read3dmProperties(props))
-      {
-        // 1-Mar-2021 Dale Fugier,
-        // This non-CRhinoDib code is also used by the Windows
-        // Shell extension that displays thumbnails in Explorer.
-        if (props.m_PreviewImage.IsValid())
-        {
-          HDC hdc = ::GetDC(0);
-          rc = ::CreateDIBitmap(
-            hdc,                                      // handle to DC
-            &props.m_PreviewImage.m_bmi->bmiHeader,   // bitmap data
-            CBM_INIT,                                 // initialization option
-            (const void*)props.m_PreviewImage.m_bits, // initialization data
-            props.m_PreviewImage.m_bmi,               // color-format data
-            DIB_RGB_COLORS                            // color-data usage
-          );
-          ::ReleaseDC(0, hdc);
-        }
-      }
-    }
-    ON::CloseFile(fp);
-  }
+  ONX_Model model;
+  if (model.ReadSettings(_path))
+    rc = ONX_Internal_PreviewImageToHBitmap(model.m_properties.m_PreviewImage);
   return rc;
 }
 #endif // if defined(ON_RUNTIME_WIN)
 
-// 4-28-2021 Dale Fugier, this work on Mac, only with Rhino
-// When librhino3dm_native included the AppKit framework we
-// can revisit this.
+
+// 4-28-2021 Dale Fugier, this works on Mac only with Rhino
+// When librhino3dm_native included the AppKit framework we can revisit this.
 #if !defined(RHINO3DM_BUILD)
 #if defined(ON_RUNTIME_APPLE_MACOS)
-RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
-{
-  INPUTSTRINGCOERCE(_path, path);
-  int width = 128, height = 128;
 
-  // Use OpenNURBS to extract the bitmap first so we can get the preview image size
-  FILE* fp = ON::OpenFile(_path, L"rb");
-  if (fp)
+// Build an NSImage from an embedded preview DIB. Uses only AppKit.
+static NSImage* ONX_Internal_PreviewImageToNSImage(const ON_WindowsBitmap& preview)
+{
+  NSImage* rc = nil;
+  if (preview.IsValid())
   {
-    ON_BinaryFile file(ON::archive_mode::read3dm, fp);
-    int version = 0;
-    ON_String comments;
-    if (file.Read3dmStartSection(&version, comments))
+    // An ON_WindowsBitmap is a bottom-up, blue-green-red-ordered Windows DIB.
+    // Build an NSBitmapImageRep from the pixels, then flip it vertically and
+    // swap the red/blue samples.
+    struct ON_WindowsBITMAPINFOHEADER* infoHdr = &preview.m_bmi->bmiHeader;
+    int color_depth = infoHdr->biBitCount;
+    int width = infoHdr->biWidth;
+    int height = infoHdr->biHeight;
+    NSBitmapImageRep* bitmapRep = [[NSBitmapImageRep alloc]
+      initWithBitmapDataPlanes: NULL
+      pixelsWide: width
+      pixelsHigh: height
+      bitsPerSample: 8
+      samplesPerPixel: color_depth / 8
+      hasAlpha: color_depth == 32
+      isPlanar: NO
+      colorSpaceName: NSCalibratedRGBColorSpace
+      bitmapFormat: (NSBitmapFormat)0
+      bytesPerRow: width * color_depth / 8
+      bitsPerPixel: 0];
+
+    // copy preview bitmap data into bitmapRep
+    unsigned char* bitmapData = bitmapRep.bitmapData;
+    memcpy(bitmapData, preview.m_bits, (size_t)height * width * color_depth / 8);
+
+    // flip vertically (Windows DIBs are bottom-up)
+    int bytesPerRow = (int)bitmapRep.bytesPerRow;
+    unsigned char* sp = bitmapData;
+    int h = height;
+    while (h > 1)
     {
-      ON_3dmProperties props;
-      if (file.Read3dmProperties(props))
+      unsigned char* pt = sp;
+      unsigned char* pb = sp + (h - 1) * bytesPerRow;
+      for (int w = 0; w < bytesPerRow; w++)
       {
-        width = props.m_PreviewImage.Width();
-        height = props.m_PreviewImage.Height();
+        unsigned char tmp = *pt;
+        *pt++ = *pb;
+        *pb++ = tmp;
+      }
+      sp += bytesPerRow;
+      h -= 2;
+    }
+
+    // swap red and blue samples (Windows DIBs are BGR)
+    unsigned int bytesPerPixel = color_depth / 8;
+    if (bytesPerPixel == 3 || bytesPerPixel == 4)
+    {
+      unsigned char* rowStart = bitmapData;
+      for (int y = 0; y < height; y++)
+      {
+        unsigned char* color = rowStart;
+        for (int x = 0; x < width; x++)
+        {
+          unsigned char t = color[0];
+          color[0] = color[2];
+          color[2] = t;
+          if (bytesPerPixel > 3 && color[3] == 0)
+            color[3] = 255;  // fix up the alpha value which is usually 0 in a Windows BMP
+          color += bytesPerPixel;
+        }
+        rowStart += bytesPerRow;
       }
     }
-    ON::CloseFile(fp);
+
+    rc = [[NSImage alloc] initWithSize: NSMakeSize(width, height)];
+    [rc addRepresentation: bitmapRep];
   }
+  return rc;
+}
 
-  // This will try to get the preview image as a NSImage regardless of the
-  // success of the OpenNURBS attempt above.  It will default to trying
-  // to get a image 128x128
-
-  // It can take some time to generate a thumbnail, so generate it on a background thread
-  NSSize maxThumbnailSize = { static_cast<CGFloat>(width), static_cast<CGFloat>(height) };
-  NSString* ns_path = [NSString stringWithLPCTSTR : _path];
-  NSImage* thumbnailImage = [NSImage imageWithPreviewOfFileAtPath : ns_path ofSize : maxThumbnailSize asIcon : NO];
-  return thumbnailImage;
+RH_C_FUNCTION NSImage* ONX_Model_MacReadPreviewImage(const RHMONO_STRING* path)
+{
+  NSImage* rc = nil;
+  INPUTSTRINGCOERCE(_path, path);
+  ONX_Model model;
+  if (model.ReadSettings(_path))
+    rc = ONX_Internal_PreviewImageToNSImage(model.m_properties.m_PreviewImage);
+  return rc;
 }
 #endif // #if defined(ON_RUNTIME_APPLE_MACOS)
-#endif
+#endif // !defined(RHINO3DM_BUILD)
 
 
 class CBinaryFileHelper : public ON_BinaryFile
@@ -3107,23 +3129,22 @@ public:
 RH_C_FUNCTION ON_BinaryFile* ON_BinaryFile_Open(const RHMONO_STRING* path, int mode)
 {
   // 22-Jan-2014 Dale Fugier, http://mcneel.myjetbrains.com/youtrack/issue/RH-23765
-
   ON::archive_mode archive_mode = ON::ArchiveMode(mode);
   if (archive_mode == ON::archive_mode::unset_archive_mode)
     return nullptr;
 
   INPUTSTRINGCOERCE(_path, path);
 
-  FILE* fp;
-  if( archive_mode == ON::archive_mode::read || archive_mode == ON::archive_mode::read3dm )
-    fp = ON::OpenFile( _path, L"rb" );
-  else if( archive_mode == ON::archive_mode::write || archive_mode == ON::archive_mode::write3dm )
-    fp = ON::OpenFile( _path, L"wb" );
+  FILE* fp = nullptr;
+  if (archive_mode == ON::archive_mode::read || archive_mode == ON::archive_mode::read3dm)
+    fp = ON::OpenFile(_path, L"rb");
+  else if (archive_mode == ON::archive_mode::write || archive_mode == ON::archive_mode::write3dm)
+    fp = ON::OpenFile(_path, L"wb");
   else
-    fp = ON::OpenFile( _path, L"r+b" );
-  
-  if( fp )
-    return new CBinaryFileHelper( archive_mode, fp );
+    fp = ON::OpenFile(_path, L"r+b");
+
+  if (fp)
+    return new CBinaryFileHelper(archive_mode, fp);
 
   return nullptr;
 }

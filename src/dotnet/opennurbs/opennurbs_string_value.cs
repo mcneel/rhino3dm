@@ -28,13 +28,13 @@ namespace Rhino
     // no need for non-const pointer since this class is immutable
     //internal IntPtr NonConstPointer() { return m_ptr; }
 
-    /// <summary>passively reclaim native allocated ON_LenghtValue*</summary>
+    /// <summary>passively reclaim native allocated ON_LengthValue*</summary>
     ~LengthValue()
     {
       PrivateDispose();
     }
 
-    /// <summary>actively reclaim native allocated ON_LenghtValue*</summary>
+    /// <summary>actively reclaim native allocated ON_LengthValue*</summary>
     /// <since>6.0</since>
     public void Dispose()
     {
@@ -85,7 +85,31 @@ namespace Rhino
     [CLSCompliant(false)]
     public static LengthValue Create(double length, UnitSystem us, StringFormat format, uint localeId)
     {
-      IntPtr ptr = UnsafeNativeMethods.ON_LengthValue_Create_From_US(length, us, localeId, format);
+      IntPtr ptr = UnsafeNativeMethods.ON_LengthValue_Create_From_US(length, us, 1.0, string.Empty, localeId, format);
+      return FromIntPtr(ptr);
+    }
+
+    /// <summary>Create from Length and LengthUnit</summary>
+    /// <param name="length">Numeric length value</param>
+    /// <param name="units">Length units</param>
+    /// <param name="format"></param>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static LengthValue Create(double length, LengthUnit units, StringFormat format)
+    {
+      return Create(length, units, format);
+    }
+
+    /// <summary>Create from Length and LengthUnit</summary>
+    /// <param name="length">Numeric length value</param>
+    /// <param name="units">Length units</param>
+    /// <param name="format"></param>
+    /// <param name="localeId"></param>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public static LengthValue Create(double length, LengthUnit units, StringFormat format, uint localeId)
+    {
+      IntPtr ptr = UnsafeNativeMethods.ON_LengthValue_Create_From_US(length, units.ToUnitSystem(out var metersPerUnit), metersPerUnit, units.Name, localeId, format);
       return FromIntPtr(ptr);
     }
 #endregion creation
@@ -97,7 +121,22 @@ namespace Rhino
     /// <since>6.0</since>
     public double Length()
     {
-      return Length(UnitSystem);
+      IntPtr const_ptr_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_LengthValue_Length(const_ptr_this);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary> Length value in a given unit system </summary>
+    /// <param name="units"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public double Length(LengthUnit units)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      double rc = UnsafeNativeMethods.ON_LengthValue_Length_Units(const_ptr_this, units.ToUnitSystem(out var metersPerUnit), metersPerUnit);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary> Length value in a given unit system </summary>
@@ -107,7 +146,7 @@ namespace Rhino
     public double Length(UnitSystem units)
     {
       IntPtr const_ptr_this = ConstPointer();
-      double rc = UnsafeNativeMethods.ON_LengthValue_Length(const_ptr_this, units);
+      double rc = UnsafeNativeMethods.ON_LengthValue_Length_Units(const_ptr_this, units, 1.0);
       GC.KeepAlive(this);
       return rc;
     }
@@ -146,7 +185,23 @@ namespace Rhino
       GC.KeepAlive(this);
       return new LengthValue(lv_ptr);
     }
-    
+
+    /// <summary>
+    /// Change the UnitSystem of a LengthValue
+    /// The numeric value of Length is scaled by new_us / current unit system
+    /// so that the absolute length stays the same
+    /// </summary>
+    /// <param name="newUnits"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public LengthValue ChangeUnits(LengthUnit newUnits)
+    {
+      double rl = Length(newUnits);
+      StringFormat fmt = LengthStringFormat;
+      uint locale_id = ContextLocaleId;
+      return Create(rl, newUnits, fmt, locale_id);
+    }
+
     /// <summary>
     /// Change the UnitSystem of a LengthValue
     /// The numeric value of Length is scaled by new_us / current unit system
@@ -162,7 +217,7 @@ namespace Rhino
       uint locale_id = ContextLocaleId;
       return Create(rl, newUnits, fmt, locale_id);
     }
-    
+
     /// <summary> Parse settings </summary>
     /// <since>6.0</since>
     public StringParserSettings ParseSettings
@@ -186,6 +241,29 @@ namespace Rhino
         UnitSystem rc = UnsafeNativeMethods.ON_LengthValue_LengthUnitSystem(ConstPointer());
         GC.KeepAlive(this);
         return rc;
+      }
+    }
+
+    /// <summary>
+    /// LengthUnit used by this LengthValue
+    /// </summary>
+    /// <since>9.0</since>
+    public LengthUnit Units
+    {
+      get
+      {
+        UnitSystem us = UnsafeNativeMethods.ON_LengthValue_LengthUnitSystem(ConstPointer());
+        if (us != UnitSystem.CustomUnits)
+          return LengthUnit.FromKnownUnitSystem(us);
+
+        using (var sh = new StringHolder())
+        {
+          IntPtr pString = sh.NonConstPointer();
+          double metersPerUnit = double.NaN;
+          us = UnsafeNativeMethods.ON_LengthValue_LengthUnits(ConstPointer(), ref metersPerUnit, pString);
+          GC.KeepAlive(this);
+          return LengthUnit.FromCustomUnitSystem(sh.ToString() ?? string.Empty, metersPerUnit);
+        }
       }
     }
 

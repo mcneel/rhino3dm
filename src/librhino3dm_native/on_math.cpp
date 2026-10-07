@@ -85,51 +85,110 @@ RH_C_FUNCTION bool ONC_EvSectionalCurvature(
   return rc;
 }
 
-typedef double (*Callback1Delegate)(ON__UINT_PTR context, int limit_direction, double t);
-typedef double (*Callback2Delegate)(ON__UINT_PTR context, int limit_direction, double s, double t);
+typedef double (CALLBACK* INTEGRATE1DPROC)(ON__UINT_PTR sn, int limit_direction, double t);
+typedef double (CALLBACK* INTEGRATE2DPROC)(ON__UINT_PTR sn, int limit_direction, double s, double t);
 
 #if !defined(RHINO3DM_BUILD)
-RH_C_FUNCTION double ON_Integrate_1D(void* func, void* context, ON_INTERVAL_STRUCT limits, double relative_tolerance, double absolute_tolerance, double* error_bound)
+RH_C_FUNCTION double ON_Integrate_1D(INTEGRATE1DPROC func, unsigned int serialNumber, ON_INTERVAL_STRUCT limits, double relative_tolerance, double absolute_tolerance, double* error_bound)
 {
-  if (context && func)
+  if (func)
   {
     const ON_Interval* t = (const ON_Interval*)&limits;
-    return ON_Integrate((Callback1Delegate)func, (ON__UINT_PTR)context, *t, relative_tolerance, absolute_tolerance, error_bound);
+    return ON_Integrate(func, serialNumber, *t, relative_tolerance, absolute_tolerance, error_bound);
   }
-
-  // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
-  return 0.0;
+  return ON_DBL_QNAN;
 }
 
-RH_C_FUNCTION double ON_Integrate_1D_Curve(void* func, void* context, const ON_Curve* curve, double relative_tolerance, double absolute_tolerance, double* error_bound)
+RH_C_FUNCTION double ON_Integrate_1D_Curve(INTEGRATE1DPROC func, unsigned int serialNumber, const ON_Curve* curve, double relative_tolerance, double absolute_tolerance, double* error_bound)
 {
-  if (curve && func && context)
-    return ON_Integrate(*curve, (Callback1Delegate)func, (ON__UINT_PTR)context, curve->Domain(), relative_tolerance, absolute_tolerance, error_bound);
-
-  // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
-  return 0.0;
-}
-
-RH_C_FUNCTION double ON_Integrate_2D(void* func, void* context, ON_INTERVAL_STRUCT limits1, ON_INTERVAL_STRUCT limits2, double relative_tolerance, double absolute_tolerance,
-  double* error_bound)
-{
-  if (context && func)
+  if (func && curve)
   {
-    const ON_Interval* s = (const ON_Interval*)&limits1;
-    const ON_Interval* t = (const ON_Interval*)&limits2;
-    return ON_Integrate((Callback2Delegate)func, (ON__UINT_PTR)context, *s, *t, relative_tolerance, absolute_tolerance, error_bound);
+    return ON_Integrate(*curve, func, serialNumber, curve->Domain(), relative_tolerance, absolute_tolerance, error_bound);
   }
-
-  // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
-  return 0.0;
+  return ON_DBL_QNAN;
 }
 
-RH_C_FUNCTION double ON_Integrate_2D_Surface(void* func, void* context, const ON_Surface* surface, double relative_tolerance, double absolute_tolerance, double* error_bound)
-{
-  if (surface && func && context)
-    return ON_Integrate(*surface, (Callback2Delegate)func, (ON__UINT_PTR)context, surface->Domain(0), surface->Domain(1), relative_tolerance, absolute_tolerance, error_bound);
 
-  // DALE LEAR thinks you should return ON_DBL_QNAN if the input is bogus
-  return 0.0;
+RH_C_FUNCTION double ON_Integrate_2D(INTEGRATE2DPROC func, unsigned int serialNumber, ON_INTERVAL_STRUCT limits1, ON_INTERVAL_STRUCT limits2,
+  double relative_tolerance, double absolute_tolerance, double* error_bound)
+{
+  if (func)
+  {
+    const ON_Interval* l1 = (const ON_Interval*)&limits1;
+    const ON_Interval* l2 = (const ON_Interval*)&limits2;
+    return ON_Integrate(func, serialNumber, *l1, *l2, relative_tolerance, absolute_tolerance, error_bound);
+  }
+  return ON_DBL_QNAN;
+}
+
+RH_C_FUNCTION double ON_Integrate_2D_Surface(INTEGRATE2DPROC func, unsigned int serialNumber, const ON_Surface* surface,
+  double relative_tolerance, double absolute_tolerance, double* error_bound)
+{
+  if (func && surface)
+  {
+    return ON_Integrate(*surface, func, serialNumber, surface->Domain(0), surface->Domain(1), relative_tolerance, absolute_tolerance, error_bound);
+  }
+  return ON_DBL_QNAN;
+}
+
+typedef double (CALLBACK* MINIMIZEPROC)(ON__UINT_PTR sn, const double* t, int lenT, double* grad, int lenG);
+std::unordered_map<ON__UINT_PTR, MINIMIZEPROC*> _callbacks;
+std::unordered_map<ON__UINT_PTR, int> _sizes;
+
+double proc(ON__UINT_PTR p, const double* t, double* g)
+{
+  auto it = _sizes.find(p);
+  if (it != _sizes.end())
+  {
+    int len = it->second;
+    auto at = _callbacks.find(p);
+    if (at != _callbacks.end())
+    {
+      return (*at->second)(p, t, len, g, len);
+    }
+  }
+  return ON_DBL_QNAN;
+}
+std::mutex _getsetmutex;
+RH_C_FUNCTION double ON_Math_Minimize(MINIMIZEPROC func, unsigned int serialNumber,
+  int n,
+  const ON_SimpleArray<ON_Interval>* search_domain,
+  const double *t0,
+  double terminate_value,
+  double terminate_gradient,
+  double relative_tolerance,
+  double zero_tolerance,
+  int maximum_iterations,
+  double *t,
+  bool* converged)
+{
+  if (func && search_domain && t0 && t && converged)
+  {
+    {
+      std::lock_guard<std::mutex> lock(_getsetmutex);
+      _callbacks[serialNumber] = &func;
+      _sizes[serialNumber] = n;
+    }
+
+    double res = ON_Minimize(n, proc, serialNumber,
+      *search_domain,
+      t0,
+      terminate_value,
+      terminate_gradient,
+      relative_tolerance,
+      zero_tolerance,
+      maximum_iterations,
+      t,
+      converged);
+    
+    {
+      std::lock_guard<std::mutex> lock(_getsetmutex);
+      _callbacks.erase(serialNumber);
+      _sizes.erase(serialNumber);
+    }
+
+    return res;
+  }
+  return ON_DBL_QNAN;
 }
 #endif

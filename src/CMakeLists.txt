@@ -77,9 +77,15 @@ if(${RHINO3DM_JS})
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
   endif()
   # WASM64 (wasm memory64) is its own build dimension, independent of NODE.
-  # It produces a 64-bit-memory binary that breaks the 4GB limit. Chrome ships
-  # memory64 unflagged and Node supports it; Firefox/Safari are still gated, so
-  # the default build stays wasm32 and WASM64 is opt-in.
+  # It produces a 64-bit-memory binary that breaks the 4GB limit. Support
+  # (MDN browser-compat-data, checked 2026-10-07): Chrome 133, Firefox 134,
+  # Node 24; Safari still Technology Preview only.
+  #
+  # WASM64 is the DEFAULT as of 9.0 (script/setup.py passes -D WASM64=TRUE unless
+  # --wasm32 is given). This is not a preference: opennurbs 9.x packs a type tag
+  # into the low bits of SubD component pointers and requires 64-bit pointers, so
+  # a wasm32 build does not compile. Awaiting RH3DM-215; once that is resolved the
+  # default should be revisited, since Safari and Node < 24 cannot run memory64.
   if(WASM64)
     message("WASM64 (memory64) build")
     # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied
@@ -123,7 +129,15 @@ endif()
 
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DON_COMPILING_OPENNURBS)
-add_definitions(-DOPENNURBS_FREETYPE_INC_)
+# NOTE: OPENNURBS_FREETYPE_INC_ is opennurbs_freetype.h's OWN include guard.
+# Pre-defining it makes that header a no-op, hiding every ON_FreeType*
+# declaration. opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT whenever
+# ON_RUNTIME_LINUX is set, so on Linux the .cpp files call functions this
+# would hide. Skip it there; same fix as src/librhino3dm_native/CMakeLists.txt.
+# (EMSCRIPTEN is unaffected either way: it gets ON_RUNTIME_WASM, no freetype.)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOPENNURBS_FREETYPE_INC_)
+endif()
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 # RH3DM-179: we link zlib via CMake, not the MSVC #pragma comment(lib,...) path, so tell
@@ -165,6 +179,15 @@ if (${RHINO3DM_PY})
       C_VISIBILITY_PRESET hidden
       VISIBILITY_INLINES_HIDDEN ON
     )
+    # opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT whenever ON_RUNTIME_LINUX is
+    # set (opennurbs_system.h); in 8.x that was Android only. The vendored FreeType
+    # is therefore required to build opennurbs on Linux. Mirrors opennurbs' own
+    # CMakeLists (freetype263 + include dir + link; it already sets
+    # POSITION_INDEPENDENT_CODE so the static lib links into this shared module).
+    # CMAKE_DL_LIBS is for dladdr(), used by Internal_GetLinuxInstalledFonts.
+    add_subdirectory(lib/opennurbs/freetype263 freetype263)
+    target_include_directories(_rhino3dm PRIVATE lib/opennurbs/freetype263/include)
+    target_link_libraries(_rhino3dm PRIVATE opennurbs_public_freetype ${CMAKE_DL_LIBS})
     #pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
     #target_link_libraries(_rhino3dm -luuid)
   else()

@@ -324,6 +324,8 @@ enum SectionStyleDouble : int
   ssdBoundaryWidthScale = 0,
   ssdHatchScale = 1,
   ssdHatchRotation = 2,
+  ssdBoundaryPlotWeightMillimeters = 3,
+  ssdHatchPatternPlotWeightMillimeters = 4,
 };
 
 
@@ -345,6 +347,12 @@ RH_C_FUNCTION double ON_SectionStyle_GetSetDouble(ON_SectionStyle* pSectionStyle
       case ssdHatchRotation:
         pSectionStyle->SetHatchRotation(setValue);
         break;
+      case ssdBoundaryPlotWeightMillimeters:
+        pSectionStyle->SetBoundaryPlotWeightMillimeters(setValue);
+        break;
+      case ssdHatchPatternPlotWeightMillimeters:
+        pSectionStyle->SetHatchPatternPlotWeightMillimeters(setValue);
+        break;
       }
     }
     else
@@ -359,6 +367,12 @@ RH_C_FUNCTION double ON_SectionStyle_GetSetDouble(ON_SectionStyle* pSectionStyle
         break;
       case ssdHatchRotation:
         rc = pSectionStyle->HatchRotation();
+        break;
+      case ssdBoundaryPlotWeightMillimeters:
+        rc = pSectionStyle->BoundaryPlotWeightMillimeters();
+        break;
+      case ssdHatchPatternPlotWeightMillimeters:
+        rc = pSectionStyle->HatchPatternPlotWeightMillimeters();
         break;
       }
     }
@@ -467,3 +481,112 @@ RH_C_FUNCTION void ON_SectionStyle_SetCustomLinetype(ON_SectionStyle* sectionSty
       sectionStyle->RemoveBoundaryLinetype();
   }
 }
+
+RH_C_FUNCTION void ON_SectionStyle_SetLinetypeIndex(ON_SectionStyle* sectionStyle, int index)
+{
+  if (sectionStyle)
+  {
+    sectionStyle->SetBoundaryLinetypeIndex(index);
+  }
+}
+
+RH_C_FUNCTION int ON_SectionStyle_LinetypeIndex(const ON_SectionStyle* sectionStyle)
+{
+  if (sectionStyle)
+    return sectionStyle->BoundaryLinetypeIndex();
+  return ON_UNSET_INT_INDEX;
+}
+
+RH_C_FUNCTION bool ON_SectionStyle_IsUnset(const ON_SectionStyle* sectionStyle)
+{
+  if (sectionStyle)
+    return sectionStyle->SectionAttributesEqual(ON_SectionStyle::Unset);
+  return true;
+}
+
+RH_C_FUNCTION int ON_Linetype_ShapeCount(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->LinetypeShapeCount() : 0;
+}
+
+RH_C_FUNCTION void ON_Linetype_RemoveAllShapes(ON_Linetype* linetype)
+{
+  if (linetype)
+    linetype->RemoveAllShapes();
+}
+
+RH_C_FUNCTION double ON_Linetype_GetShapeSpacing(const ON_Linetype* linetype)
+{
+  return linetype ? linetype->ShapeSpacing() : 0;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetShapeSpacing(ON_Linetype* linetype, double spacing)
+{
+  if (linetype)
+    linetype->SetShapeSpacing(spacing);
+}
+
+RH_C_FUNCTION double ON_Linetype_GetShapeGap(const ON_Linetype* linetype)
+{
+  if (linetype)
+    return linetype->ShapeGap();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_Linetype_SetShapeGap(ON_Linetype* linetype, double gap)
+{
+  if (linetype)
+  {
+    linetype->SetShapeGap(gap);
+  }
+}
+
+RH_C_FUNCTION void ON_Linetype_GetLocalShapeOffset(const ON_Linetype* linetype, ON_2dVector* offset)
+{
+  if (linetype && offset)
+    *offset = linetype->ShapeLocalOffset();
+}
+
+RH_C_FUNCTION void ON_Linetype_SetLocalShapeOffset(ON_Linetype* linetype, ON_2DVECTOR_STRUCT offset)
+{
+  if (linetype)
+  {
+    ON_2dVector v(offset.val);
+    linetype->SetShapeLocalOffset(v);
+  }
+}
+
+RH_C_FUNCTION bool ON_Linetype_AddShape1(ON_Linetype* linetype, const ON_Curve* curve, double offset)
+{
+  if (linetype && curve)
+    return linetype->AddShape(*curve, offset);
+  return false;
+}
+
+RH_C_FUNCTION bool ON_Linetype_AddShape2(ON_Linetype* linetype, const ON_Text* text, double offset)
+{
+#if defined(RHINO3DM_BUILD)
+  return false;
+#else
+  if (nullptr == linetype || nullptr == text)
+    return false;
+
+  CRhinoDoc* doc = RhinoApp().ActiveDoc();
+  if (nullptr == doc)
+    return false;
+
+  int index = doc->m_dimstyle_table.FindDimStyleFromId(text->DimensionStyleId(), true, true, ON_UNSET_INT_INDEX);
+  if (ON_UNSET_INT_INDEX == index)
+    return false;
+
+  const ON_DimStyle& resolved = text->DimensionStyle(doc->m_dimstyle_table[index]);
+  return linetype->AddShape(text->RtfText(), resolved, text->Plane(), offset);
+#endif
+}
+
+RH_C_FUNCTION void ON_Linetype_GetShapeBounds(const ON_Linetype* linetype, ON_BoundingBox* bbox)
+{
+  if (linetype && bbox)
+    *bbox = linetype->ShapeBounds();
+}
+

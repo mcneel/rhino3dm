@@ -555,6 +555,17 @@ namespace Rhino.Commands
     }
 
     /// <summary>
+    /// Returns a command's style flags.
+    /// </summary>
+    /// <param name="commandId">A command ID.</param>
+    /// <returns>The command's style flags, or <see cref="Style.None"/> if the command is not found.</returns>
+    /// <since>9.0</since>
+    public static Style GetCommandStyle(Guid commandId)
+    {
+      return (Style)UnsafeNativeMethods.CRhinoApp_CommandStyle(commandId);
+    }
+
+    /// <summary>
     /// Gets list of command names in Rhino. This list does not include Test, Alpha, or System commands.
     /// </summary>
     /// <param name="english">
@@ -681,15 +692,15 @@ namespace Rhino.Commands
       }
     }
 
-
-    internal delegate void UndoCallback(int undo_event, uint undo_record_sn, Guid command_id);
+    // 23-Aug-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-89004
+    internal delegate void UndoCallback(int undo_event, uint undo_record_sn, Guid command_id, uint document_serial_number);
     private static UndoCallback m_OnUndoEvent;
     [MonoPInvokeCallback(typeof(UndoCallback))]
-    private static void OnUndoEvent(int undo_event, uint undo_record_sn, Guid command_id)
+    private static void OnUndoEvent(int undo_event, uint undo_record_sn, Guid command_id, uint document_serial_number)
     {
       if (m_undo_event != null)
       {
-        m_undo_event.SafeInvoke(null, new UndoRedoEventArgs(undo_event, undo_record_sn, command_id));
+        m_undo_event.SafeInvoke(null, new UndoRedoEventArgs(undo_event, undo_record_sn, command_id, document_serial_number));
       }
     }
     internal static EventHandler<UndoRedoEventArgs> m_undo_event;
@@ -848,6 +859,16 @@ namespace Rhino.Commands
     }
     
 
+    /// <summary>
+    /// Returns true if the command that raised this event is hidden from the user;
+    /// that is it doesn't autocomplete on the command line.
+    /// </summary>
+    /// <since>8.36</since>
+    public bool CommandIsHiddenFromUser
+    {
+      get { return UnsafeNativeMethods.CRhinoCommand_IsHiddenFromUser(m_pCommand); }
+    }
+
     string m_plugin_name;
     /// <summary>
     /// Gets the name of the plug-in that this command belongs to.  If the command is internal
@@ -888,24 +909,43 @@ namespace Rhino.Commands
     public RhinoDoc Document { get { return RhinoDoc.FromRuntimeSerialNumber(DocumentRuntimeSerialNumber); } }
   }
 
+  /// <summary>
+  /// Undo Redo Event Arguments
+  /// </summary>
+  /// <since>5.0</since>
   public class UndoRedoEventArgs : EventArgs
   {
-    readonly int m_event_type;
-    readonly uint m_serial_number;
-    readonly Guid m_command_id;
-    internal UndoRedoEventArgs(int undo_event, uint sn, Guid id)
+    readonly int m_event_type = 0;
+    readonly uint m_serial_number = 0;
+    readonly Guid m_command_id = Guid.Empty;
+    readonly uint m_document_serial_number;
+    internal UndoRedoEventArgs(int undo_event, uint sn, Guid id, uint document_serial_number)
     {
       m_event_type = undo_event;
       m_serial_number = sn;
       m_command_id = id;
+      m_document_serial_number = document_serial_number;
     }
 
+    /// <summary>
+    /// The document runtime serial number.
+    /// </summary>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber => m_document_serial_number;
+
+    /// <summary>
+    /// The id of the Rhino command. This can be Guid.Empty.
+    /// </summary>
     /// <since>5.0</since>
     public Guid CommandId
     {
       get { return m_command_id; }
     }
 
+    /// <summary>
+    /// The undo record serial number.
+    /// </summary>
     /// <since>5.0</since>
     [CLSCompliant(false)]
     public uint UndoSerialNumber
@@ -1617,6 +1657,21 @@ namespace Rhino.DocObjects
     {
       value = 0;
       return UnsafeNativeMethods.CRhinoHistoryRecord_GetInt(m_pConstRhinoHistoryRecord, id, ref value);
+    }
+
+    /// since 9.0
+    /// <since>9.0</since>
+    public bool TryGetInts(int id, out int[] values)
+    {
+      values = null;
+      using (var array = new SimpleArrayInt())
+      {
+        IntPtr ptr_array = array.NonConstPointer();
+        bool rc = UnsafeNativeMethods.CRhinoHistoryRecord_GetInts(m_pConstRhinoHistoryRecord, id, ptr_array);
+        if (rc)
+          values = array.ToArray();
+        return rc;
+      }
     }
 
     /// <since>5.0</since>

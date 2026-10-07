@@ -29,6 +29,9 @@ else:
 import time
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
+# how many trailing output lines to echo when a build command fails
+ERROR_TAIL_LINES = 40
+
 xcode_logging = False
 verbose = False
 overwrite = False
@@ -102,36 +105,34 @@ def run_command(command, suppress_errors=False):
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=dev_null, shell=popen_shell_mode)
     else:
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=popen_shell_mode)    
-    
-    while True:
-        line = process.stdout.readline()               
-        if process.poll() is not None:
-            break   
-        if line:
-            if sys.version_info[0] < 3:
-                if verbose:
-                    print(line.strip())
-            else:
-                if verbose:
-                    line = line.decode('utf-8').strip()
-                    print(line)
-        elif suppress_errors == False:
-            if process.stderr != None: 
-                error = process.stderr.readline()                
-                if error:
-                    if sys.version_info[0] < 3:
-                        print_error_message(error.strip())
-                        delete_cache_file()
-                        sys.exit(1)
-                    else:
-                        error = error.decode('utf-8').strip()
-                        print_error_message(error)
-                        delete_cache_file()
-                        sys.exit(1)
-            else:
-                continue
 
-    rc = process.poll()
+    # Read to EOF, not until poll() goes non-None. A compiler error is the LAST
+    # thing a failing build prints, so breaking as soon as the process exits
+    # discards exactly the lines needed to diagnose it -- the build then fails
+    # with no error text at all.
+    tail = []
+    for raw in iter(process.stdout.readline, b''):
+        if sys.version_info[0] < 3:
+            line = raw.strip()
+        else:
+            line = raw.decode('utf-8', 'replace').rstrip()
+        if not line:
+            continue
+        tail.append(line)
+        if len(tail) > ERROR_TAIL_LINES:
+            tail.pop(0)
+        if verbose:
+            print(line)
+
+    process.stdout.close()
+    rc = process.wait()
+
+    if rc != 0 and suppress_errors == False:
+        print_error_message(command.split()[0] + " exited " + str(rc) +
+                            ". Last " + str(len(tail)) + " line(s) of output:")
+        for line in tail:
+            print("    " + line)
+
     return rc
 
 

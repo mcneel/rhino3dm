@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Rhino.DocObjects;
 using Rhino.Runtime;
@@ -17,7 +18,16 @@ namespace Rhino.Geometry
     Column = UnsafeNativeMethods.TextRunTypeConsts.Column,
     Field = UnsafeNativeMethods.TextRunTypeConsts.Field,
     Fontdef = UnsafeNativeMethods.TextRunTypeConsts.Fontdef,
-    Header = UnsafeNativeMethods.TextRunTypeConsts.Header
+    Header = UnsafeNativeMethods.TextRunTypeConsts.Header,
+    Softreturn = UnsafeNativeMethods.TextRunTypeConsts.Softreturn,
+    FieldValue = UnsafeNativeMethods.TextRunTypeConsts.FieldValue,
+    FontTable = UnsafeNativeMethods.TextRunTypeConsts.Fonttbl,
+    ColorTable = UnsafeNativeMethods.TextRunTypeConsts.Colortbl,
+    Tab = UnsafeNativeMethods.TextRunTypeConsts.Tab,
+    ListBegin = UnsafeNativeMethods.TextRunTypeConsts.ListBegin,
+    ListEnd = UnsafeNativeMethods.TextRunTypeConsts.ListEnd,
+    ListItemBegin = UnsafeNativeMethods.TextRunTypeConsts.ListItemBegin,
+    ListItemEnd = UnsafeNativeMethods.TextRunTypeConsts.ListItemEnd
   }
 
   [Serializable]
@@ -90,6 +100,15 @@ namespace Rhino.Geometry
       var rc = new TextEntity(ptr_text, null);
       rc.ParentDimensionStyle = style;
       return rc;
+    }
+
+    internal static TextEntity CreateWithTextRuns(List<TextRun> textRuns, DimensionStyle style)
+    {
+      var te = new TextEntity();
+      te.ParentDimensionStyle = style;
+      te.SetTextRuns(textRuns);
+      te.WasCreatedWithTextRuns = true;
+      return te;
     }
 
     #region properties originating from dim style that can be overridden
@@ -306,6 +325,32 @@ namespace Rhino.Geometry
       return xform;
     }
 
+    /// <summary>
+    /// Get the transform for this text object's text geometry as it is drawn in a
+    /// particular viewport. Unlike the parameterless-viewport overload, this honors the
+    /// dimension style's <see cref="TextOrientation"/> (for example "Horizontal to view")
+    /// and DrawForward, orienting the text against the viewport exactly as the display
+    /// pipeline does. Use this when previewing text so the preview matches how the placed
+    /// object will be drawn.
+    /// </summary>
+    /// <param name="viewport">Viewport the text is being drawn in.</param>
+    /// <param name="textscale">Scale to apply to the text.</param>
+    /// <param name="dimstyle">The text's dimension style.</param>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Transform GetTextTransform(ViewportInfo viewport, double textscale, DimensionStyle dimstyle)
+    {
+      Transform xform = new Transform();
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr const_ptr_viewport = viewport.ConstPointer();
+      IntPtr const_ptr_dimstyle = dimstyle.ConstPointer();
+      UnsafeNativeMethods.ON_V6_TextObject_GetTextXform2(const_ptr_this, const_ptr_viewport, const_ptr_dimstyle, textscale, ref xform);
+      GC.KeepAlive(viewport);
+      GC.KeepAlive(dimstyle);
+      GC.KeepAlive(this);
+      return xform;
+    }
+
 #if RHINO_SDK
     /// <summary>
     /// Explodes this text entity into an array of curves.
@@ -356,6 +401,21 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Brep[] CreateSurfaces(DimensionStyle dimstyle, double smallCapsScale = 1.0, double spacing = 0.0)
     {
+      return CreateSurfaces(dimstyle, 1.0 != smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Creates planar breps from the outline curves.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>An array of planar breps.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Brep[] CreateSurfaces(DimensionStyle dimstyle, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr const_ptr_parent = IntPtr.Zero;
       IntPtr const_ptr_this = IntPtr.Zero;
 
@@ -369,7 +429,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, spacing, ptr_breps, IntPtr.Zero);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, spacing, ptr_breps, IntPtr.Zero);
         GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
@@ -387,6 +447,22 @@ namespace Rhino.Geometry
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreateSurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double spacing)
     {
+      return CreateSurfacesGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Creates planar Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="makeSmallCaps"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Brep[]> CreateSurfacesGrouped(DimensionStyle dimstyle, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr constPtrParent = IntPtr.Zero;
       IntPtr constPtrThis = IntPtr.Zero;
 
@@ -402,7 +478,7 @@ namespace Rhino.Geometry
         IntPtr ptrBreps = breps.NonConstPointer();
         IntPtr constPtrDimstyle = dimstyle.ConstPointer();
         IntPtr ptrIndices = indices.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, spacing, ptrBreps, ptrIndices);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, makeSmallCaps, smallCapsScale, spacing, ptrBreps, ptrIndices);
         GC.KeepAlive(dimstyle);
         int[] letterIndices = indices.ToArray();
         Brep[] brepArray = breps.ToNonConstArray();
@@ -443,6 +519,23 @@ namespace Rhino.Geometry
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreatePolysurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
     {
+      return CreatePolysurfacesGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, height, spacing);
+    }
+
+    /// <summary>
+    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="makeSmallCaps"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="height"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Brep[]> CreatePolysurfacesGrouped(DimensionStyle dimstyle, bool makeSmallCaps, double smallCapsScale, double height, double spacing)
+    {
       IntPtr constPtrParent = IntPtr.Zero;
       IntPtr constPtrThis = IntPtr.Zero;
 
@@ -458,7 +551,7 @@ namespace Rhino.Geometry
         IntPtr ptrBreps = breps.NonConstPointer();
         IntPtr constPtrDimstyle = dimstyle.ConstPointer();
         IntPtr ptrIndices = indices.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, height, spacing, ptrBreps, ptrIndices);
+        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(constPtrParent, constPtrThis, constPtrDimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptrBreps, ptrIndices);
         GC.KeepAlive(dimstyle);
         int[] letterIndices = indices.ToArray();
         Brep[] brepArray = breps.ToNonConstArray();
@@ -498,6 +591,22 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Brep[] CreatePolySurfaces(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
+      return CreatePolySurfaces(dimstyle, height, 1.0 != smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Creates breps from the outline curves with specified height.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>An array of planar breps.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Brep[] CreatePolySurfaces(DimensionStyle dimstyle, double height, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr const_ptr_parent = IntPtr.Zero;
       IntPtr const_ptr_this = IntPtr.Zero;
 
@@ -511,7 +620,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_breps, IntPtr.Zero);
+        UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptr_breps, IntPtr.Zero);
         GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
@@ -531,6 +640,24 @@ namespace Rhino.Geometry
     [ConstOperation]
     public System.Collections.Generic.List<Extrusion[]> CreateExtrusionsGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
     {
+      return CreateExtrusionsGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, height, spacing);
+    }
+
+    /// <summary>
+    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="makeSmallCaps"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="height"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public System.Collections.Generic.List<Extrusion[]> CreateExtrusionsGrouped(DimensionStyle dimstyle, bool makeSmallCaps, 
+      double smallCapsScale, double height, double spacing)
+    {
       IntPtr constPtrParent = IntPtr.Zero;
       IntPtr constPtrThis = IntPtr.Zero;
 
@@ -546,7 +673,7 @@ namespace Rhino.Geometry
         IntPtr ptrExtrusions = extrusions.NonConstPointer();
         IntPtr constPtrDimstyle = dimstyle.ConstPointer();
         IntPtr ptrIndices = indices.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(constPtrParent, constPtrThis, constPtrDimstyle, smallCapsScale, height, spacing, ptrExtrusions, ptrIndices);
+        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(constPtrParent, constPtrThis, constPtrDimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptrExtrusions, ptrIndices);
         GC.KeepAlive(dimstyle);
         int[] letterIndices = indices.ToArray();
         Extrusion[] extrusionArray = extrusions.ToNonConstArray();
@@ -586,6 +713,22 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Extrusion[] CreateExtrusions(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
+      return CreateExtrusions(dimstyle, height, 1.0 != smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Creates extrusions from the outline curves with specified height.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>An array of planar breps.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Extrusion[] CreateExtrusions(DimensionStyle dimstyle, double height, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr const_ptr_parent = IntPtr.Zero;
       IntPtr const_ptr_this = IntPtr.Zero;
 
@@ -599,7 +742,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_extrusions = extrusions.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, smallCapsScale, height, spacing, ptr_extrusions, IntPtr.Zero);
+        UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptr_extrusions, IntPtr.Zero);
         GC.KeepAlive(this);
         return extrusions.ToNonConstArray();
       }
@@ -617,6 +760,22 @@ namespace Rhino.Geometry
     [ConstOperation]
     public Curve[] CreateCurves(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale = 1.0, double spacing = 0.0)
     {
+      return CreateCurves(dimstyle, allowOpen, 1.0 == smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Returns the outline curves.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
+    /// <param name="makeSmallCaps"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, this will be the scale factor for small caps.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public Curve[] CreateCurves(DimensionStyle dimstyle, bool allowOpen, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr const_ptr_parent = IntPtr.Zero;
       IntPtr const_ptr_this = IntPtr.Zero;
 
@@ -630,7 +789,7 @@ namespace Rhino.Geometry
       {
         IntPtr ptr_curves = curves.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !allowOpen, smallCapsScale, spacing, ptr_curves, IntPtr.Zero);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, !allowOpen, makeSmallCaps, smallCapsScale, spacing, ptr_curves, IntPtr.Zero);
         GC.KeepAlive(dimstyle);
         GC.KeepAlive(this);
         return curves.ToNonConstArray();
@@ -649,6 +808,22 @@ namespace Rhino.Geometry
     /// <since>8.0</since>
     public System.Collections.Generic.List<Curve[]> CreateCurvesGrouped(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale, double spacing)
     {
+      return CreateCurvesGrouped(dimstyle, allowOpen, 1.0 == smallCapsScale, smallCapsScale, spacing);
+    }
+
+    /// <summary>
+    /// Creates planar curve from text outline curves. Curves are grouped such that each element
+    /// in the list being returned represents a single character.
+    /// </summary>
+    /// <param name="dimstyle"></param>
+    /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
+    /// <param name="makeSmallCaps"></param>
+    /// <param name="smallCapsScale"></param>
+    /// <param name="spacing"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public System.Collections.Generic.List<Curve[]> CreateCurvesGrouped(DimensionStyle dimstyle, bool allowOpen, bool makeSmallCaps, double smallCapsScale, double spacing)
+    {
       IntPtr constPtrParent = IntPtr.Zero;
       IntPtr constPtrThis = IntPtr.Zero;
 
@@ -664,7 +839,7 @@ namespace Rhino.Geometry
         IntPtr ptrCurves = curves.NonConstPointer();
         IntPtr constPtrDimstyle = dimstyle.ConstPointer();
         IntPtr ptrIndices = indices.NonConstPointer();
-        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(constPtrParent, constPtrThis, constPtrDimstyle, !allowOpen, smallCapsScale, spacing, ptrCurves, ptrIndices);
+        UnsafeNativeMethods.RHC_RhinoGetPlanarCurvesFromText(constPtrParent, constPtrThis, constPtrDimstyle, !allowOpen, makeSmallCaps, smallCapsScale, spacing, ptrCurves, ptrIndices);
         GC.KeepAlive(dimstyle);
 
         Curve[] curveArray = curves.ToNonConstArray();

@@ -75,7 +75,10 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.DitheringSetting which, Variant v)
     {
-      return UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
+      using (var v_which = GetValue(which))
+      {
+        return UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.DitheringSetting which)
@@ -142,13 +145,17 @@ namespace Rhino.Render
     {
       get
       {
-        var m = GetValue(UnsafeNativeMethods.DitheringSetting.Method).ToInt();
-        return (m == 0) ? Methods.SimpleNoise : Methods.FloydSteinberg;
+        using (var m = GetValue(UnsafeNativeMethods.DitheringSetting.Method))
+        {
+          return (m.ToInt() == 0) ? Methods.SimpleNoise : Methods.FloydSteinberg;
+        }
       }
       set
       {
-        var v = (Methods.SimpleNoise == value) ? 0 : 1;
-        SetValue(UnsafeNativeMethods.DitheringSetting.Method, new Variant(v));
+        using (var v = new Variant((Methods.SimpleNoise == value) ? 0 : 1))
+        {
+          SetValue(UnsafeNativeMethods.DitheringSetting.Method, v);
+        }
       }
     }
 
@@ -164,8 +171,19 @@ namespace Rhino.Render
     /// <since>8.0</since>
     public bool Enabled
     {
-      get => GetValue(UnsafeNativeMethods.DitheringSetting.Enabled).ToBool();
-      set => SetValue(UnsafeNativeMethods.DitheringSetting.Enabled, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.DitheringSetting.Enabled))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.DitheringSetting.Enabled, v);
+        }
+      }
     }
   }
 }

@@ -119,6 +119,26 @@ namespace Rhino
       }
 
       /// <summary>
+      /// Gets the SVG string for an image in this toolbar file.
+      /// </summary>
+      /// <param name="imageId">The id of the image. This is the same id returned for a macro's bitmap.</param>
+      /// <param name="darkMode">
+      /// Set to true to get the dark-mode SVG. When the image only has a light SVG, its custom
+      /// dark-mode attributes are applied to produce the result.
+      /// </param>
+      /// <returns>The SVG string, or an empty string if the image was not found or has no SVG representation.</returns>
+      /// <since>9.0</since>
+      public string GetSvg(Guid imageId, bool darkMode)
+      {
+        using (var sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoUiFile_Svg(m_id, imageId, darkMode, ptr_string);
+          return sh.ToString();
+        }
+      }
+
+      /// <summary>
       /// Gets a toolbar.
       /// </summary>
       /// <param name="index">The index of the toolbar.</param>

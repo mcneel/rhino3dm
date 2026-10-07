@@ -2,6 +2,7 @@ using System;
 using Rhino.FileIO;
 using Rhino.Geometry;
 using Rhino.Render;
+using Rhino.Runtime;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Display;
 using System.Collections.Generic;
@@ -145,6 +146,7 @@ namespace Rhino.DocObjects
     internal delegate void RhinoObjectPickCallback(uint docSerialNumber, uint serialNumber, IntPtr pConstRhinoObject, IntPtr pRhinoObjRefArray);
     internal delegate void RhinoObjectPickedCallback(uint docSerialNumber, uint serialNumber, IntPtr pConstRhinoObject, IntPtr pRhinoObjRefArray, int count);
     internal delegate void RhinoObjectDeletedCallback(uint serialNumber);
+    internal delegate void RhinoObjectAnalysisModeChangedCallback(uint documentSerialNumber, Guid objectId, Guid analysisModeId, bool enabled);
 
     static RhinoObjectDuplicateCallback g_the_duplicate_callback;
     static RhinoObjectDocNotifyCallback g_the_doc_notify_callback;
@@ -155,12 +157,52 @@ namespace Rhino.DocObjects
     static RhinoObjectPickCallback g_the_pick_callback;
     static RhinoObjectPickedCallback g_the_picked_callback;
     static RhinoObjectDeletedCallback g_the_delete_callback;
+    static RhinoObjectAnalysisModeChangedCallback g_the_analysis_mode_changed_callback;
+
+    private static EventHandler<RhinoObjectAnalysisModeChangedEventArgs> g_the_analysis_mode_changed_handler;
+    private static void OnRhinoObjectAnalysisModeChanged(uint documentSerialNumber, Guid objectId, Guid analysisModeId, bool enabled)
+    {
+      g_the_analysis_mode_changed_handler?.SafeInvoke(null, new RhinoObjectAnalysisModeChangedEventArgs(documentSerialNumber, objectId, analysisModeId, enabled));
+    }
+
+    /// <summary>
+    /// Called when the visual analysis mode of a <seealso cref="RhinoObject"/> changes.
+    /// </summary>
+    /// <since>9.0</since>
+    public static event EventHandler<RhinoObjectAnalysisModeChangedEventArgs> AnalysisModeChanged
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_the_analysis_mode_changed_handler, value))
+          return;
+        if (g_the_analysis_mode_changed_handler == null)
+        {
+          g_the_analysis_mode_changed_callback = OnRhinoObjectAnalysisModeChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetObjectAnalysisModeChangedCallback(g_the_analysis_mode_changed_callback);
+        }
+        g_the_analysis_mode_changed_handler -= value;
+        g_the_analysis_mode_changed_handler += value;
+      }
+      remove
+      {
+        g_the_analysis_mode_changed_handler -= value;
+        if (g_the_analysis_mode_changed_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetObjectAnalysisModeChangedCallback(null);
+          g_the_analysis_mode_changed_handler = null;
+        }
+      }
+    }
+
 
     void GetRhinoObjectBoundingBoxVp(IntPtr pConstRhinoObject, IntPtr pRhinoViewport, ref BoundingBox bbox)
     {
       try
       {
-        bbox = GetBoundingBox((pRhinoViewport != null) ? new RhinoViewport(null, pRhinoViewport) : null);
+        using (var view = (pRhinoViewport != null) ? new RhinoViewport(null, pRhinoViewport) : null)
+        {
+          bbox = GetBoundingBox(view);
+        }
       }
       catch (Exception ex) 
       {
@@ -332,15 +374,19 @@ namespace Rhino.DocObjects
 
     static int OnRhinoObjectActiveInViewport(uint docSerialNumber, uint serialNumber, IntPtr pRhinoViewport)
     {
-      var rc = -1;
       var doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
       if (doc != null)
       {
         var rhobj = doc.Objects.FindCustomObject(serialNumber);
         if (rhobj != null)
-          rc = rhobj.IsActiveInViewport(new Display.RhinoViewport(null, pRhinoViewport)) ? 1 : 0;
+        {
+          using (var vp = new Display.RhinoViewport(null, pRhinoViewport))
+          {
+            return rhobj.IsActiveInViewport(vp) ? 1 : 0;
+          }
+        }
       }
-      return rc;
+      return -1;
     }
 
     static void OnRhinoObjectSelection(uint docSerialNumber, uint serialNumber)
@@ -432,13 +478,16 @@ namespace Rhino.DocObjects
         var rhobj = doc.Objects.FindCustomObject(serialNumber);
         if (rhobj != null)
         {
-          System.Collections.Generic.IEnumerable<ObjRef> objs = rhobj.OnPick(new Input.Custom.PickContext(pConstRhinoPickContext));
-          if (objs != null)
+          using (var pc = new Input.Custom.PickContext(pConstRhinoPickContext))
           {
-            foreach (var objref in objs)
+            System.Collections.Generic.IEnumerable<ObjRef> objs = rhobj.OnPick(pc);
+            if (objs != null)
             {
-              var p_const_obj_ref = objref.ConstPointer();
-              UnsafeNativeMethods.CRhinoObjRefArray_Append(pRhinoObjRefArray, p_const_obj_ref);
+              foreach (var objref in objs)
+              {
+                var p_const_obj_ref = objref.ConstPointer();
+                UnsafeNativeMethods.CRhinoObjRefArray_Append(pRhinoObjRefArray, p_const_obj_ref);
+              }
             }
           }
         }
@@ -454,7 +503,10 @@ namespace Rhino.DocObjects
         var list = ObjRefCollectionFromIntPtr(pRhinoObjRefArray, count);
         if (rhobj != null)
         {
-          rhobj.OnPicked(new Input.Custom.PickContext(pConstRhinoPickContext), list);
+          using (var pc = new Input.Custom.PickContext(pConstRhinoPickContext))
+          {
+            rhobj.OnPicked(pc, list);
+          }
         }
       }
     }
@@ -477,6 +529,7 @@ namespace Rhino.DocObjects
           return custom;
       }
 
+#pragma warning disable CA2000
       var type = UnsafeNativeMethods.CRhinoRhinoObject_GetRhinoObjectType(pRhinoObject);
       if (type < 0)
         return null;
@@ -568,8 +621,9 @@ namespace Rhino.DocObjects
           rc = new RhinoObject(sn);
           break;
       }
+#pragma warning restore CA2000
 
-      if( doc==null )
+      if ( doc==null )
       {
         rc.m_pRhinoObject = pRhinoObject;
       }
@@ -1773,6 +1827,93 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Turns on grips of one particular kind, replacing grips of any other kind.
+    /// </summary>
+    /// <param name="gripsId">
+    /// Id of a grips enabler registered with <see cref="Custom.CustomObjectGrips.RegisterGripsEnabler"/>.
+    /// <see cref="Guid.Empty"/> means no custom grips: the object's own default grips, which is
+    /// what the PointsOn command turns on. For edit points call
+    /// <see cref="EnableEditPointGrips"/> rather than naming a kind here; curves and SubDs use
+    /// different ones and it picks between them.
+    /// </param>
+    /// <returns>
+    /// true if the object has grips of the requested kind when this returns. false if nothing is
+    /// registered for <paramref name="gripsId"/>, if the object has no grips of that kind (a
+    /// polysurface has no default grips), or if the grips already on refused to turn off, which
+    /// they do while they are being dragged.
+    /// </returns>
+    /// <remarks>
+    /// <para>Grips that were on are put back when the requested kind cannot be made, so a false
+    /// return leaves the object with the grips it had.</para>
+    /// <para>Except when the requested kind is already on, the grips are new objects afterwards
+    /// and a <see cref="GripObject"/> held across this call is stale.</para>
+    /// <para>Grips this turns on are not subject to Automatic Points On. They stay on until
+    /// something turns them off, as with PointsOn and EditPtOn.</para>
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool EnableGrips(Guid gripsId)
+    {
+      // Enabling grips is a const operation - see the GripsOn setter.
+      var ptr = ConstPointer();
+      return UnsafeNativeMethods.CRhinoObject_EnableGripsOfType(ptr, gripsId);
+    }
+
+    /// <summary>
+    /// Turns on edit point grips, the ones the EditPtOn command turns on.
+    /// </summary>
+    /// <returns>
+    /// true if the object has edit point grips when this returns. false for an object that has
+    /// none: anything that is not a curve or a SubD, a curve with more than 1000 edit points or
+    /// too few control points to have any, an empty SubD, and the cases
+    /// <see cref="EnableGrips(Guid)"/> returns false for.
+    /// </returns>
+    /// <remarks>
+    /// Curves and SubDs carry separate kinds of edit point grips. This picks the one that suits
+    /// the object, as EditPtOn does, so a caller does not have to. An object that is neither is
+    /// left exactly as it was. For a curve or a SubD, what happens to grips already on is
+    /// described by <see cref="EnableGrips(Guid)"/>.
+    /// </remarks>
+    public bool EnableEditPointGrips()
+    {
+      var ptr = ConstPointer();
+      return UnsafeNativeMethods.CRhinoObject_EnableEditPointGrips(ptr);
+    }
+
+    /// <summary>
+    /// true when the grips this object has on are edit points, of either kind.
+    /// </summary>
+    /// <remarks>
+    /// The read-side companion of <see cref="EnableEditPointGrips"/>. <see cref="EnabledGripsId"/>
+    /// answers the same question for a plug-in's own kind, by comparing the id it registered.
+    /// </remarks>
+    public bool EditPointGripsOn
+    {
+      get
+      {
+        var ptr = ConstPointer();
+        return UnsafeNativeMethods.CRhinoObject_EditPointGripsOn(ptr);
+      }
+    }
+
+    /// <summary>
+    /// Which kind of grips this object currently has on.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Guid.Empty"/> both for default grips and for no grips at all.
+    /// <see cref="GripsOn"/> tells those two apart. Record it to replay a grip selection later:
+    /// handing it back to <see cref="EnableGrips(Guid)"/> restores the same kind. From a grip,
+    /// reach it as <see cref="GripObject.Owner"/>.<see cref="EnabledGripsId"/>.
+    /// </remarks>
+    public Guid EnabledGripsId
+    {
+      get
+      {
+        var ptr = ConstPointer();
+        return UnsafeNativeMethods.CRhinoObject_EnabledGripsId(ptr);
+      }
+    }
+
+    /// <summary>
     /// true if grips are turned on and at least one is selected.
     /// </summary>
     /// <since>5.0</since>
@@ -1962,6 +2103,20 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// 21-May-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-2256
+    /// </summary>
+    /// <since>9.0</since>
+    internal bool IsGeometricTolerance
+    {
+      get
+      {
+        var ptr_const_this = ConstPointer();
+        return UnsafeNativeMethods.CRhinoObject_IsGeometricTolerance(ptr_const_this);
+      }
+    }
+
+
+    /// <summary>
     /// Returns true if the object is capable of having a mesh of the specified type
     /// </summary>
     /// <param name="meshType"></param>
@@ -2079,6 +2234,18 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
+    /// Destroys cached meshes of type meshType
+    /// </summary>
+    /// <param name="meshType">type of meshes to create</param>
+    /// <returns>number of meshes created</returns>
+    /// <since>9.0</since>
+    public virtual void DestroyMeshes(MeshType meshType)
+    {
+      var p_this = NonConstPointer_I_KnowWhatImDoing();
+      UnsafeNativeMethods.CRhinoObject_DestroyMeshes(p_this, (int)meshType);
+    }
+
+    /// <summary>
     /// Get existing meshes used to render and analyze surface and polysurface objects.
     /// </summary>
     /// <param name="meshType"></param>
@@ -2110,6 +2277,33 @@ namespace Rhino.DocObjects
       var distance = new Vector3d();
       var mode = 0;
       var rc = UnsafeNativeMethods.RHC_RhTryGetRhinoObjectGumballFrame(ptr_const_this, ref plane, ref distance, ref mode);
+      if (rc)
+        frame = new GumballFrame(plane, distance, (GumballScaleMode)mode);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the gumball frame for this object under the current gumball alignment mode
+    /// (Object / World / CPlane). For Object mode the frame always reflects the object's
+    /// orientation (including any user relocation in that mode). For World and CPlane mode
+    /// the frame is only returned when the user has manually repositioned the gumball for
+    /// this object; if it has never been moved in that mode, the method returns false.
+    /// Sub-object selections are not taken into account; this is a whole-object helper.
+    /// </summary>
+    /// <param name="frame">The gumball frame for the current alignment mode.</param>
+    /// <returns>
+    /// true if a frame is available for the current alignment mode; false when the
+    /// gumball has not been repositioned in the active World or CPlane mode.
+    /// </returns>
+    /// <since>9.0</since>
+    public bool TryGetGumballFrameForCurrentAlignment(out GumballFrame frame)
+    {
+      frame = new GumballFrame();
+      var ptr_const_this = ConstPointer();
+      var plane = new Plane();
+      var distance = new Vector3d();
+      var mode = 0;
+      var rc = UnsafeNativeMethods.RHC_RhTryGetRhinoObjectGumballFrameForCurrentAlignment(ptr_const_this, ref plane, ref distance, ref mode);
       if (rc)
         frame = new GumballFrame(plane, distance, (GumballScaleMode)mode);
       return rc;
@@ -2157,6 +2351,7 @@ namespace Rhino.DocObjects
     }
 
     /// <since>8.0</since>
+    /// <deprecated>8.31</deprecated>
     [Obsolete("Use Attributes.SetObjectFrame instead")]
     public void SetObjectFrame(Transform xform)
     {
@@ -2165,11 +2360,85 @@ namespace Rhino.DocObjects
     }
 
     /// <since>8.0</since>
+    /// <deprecated>8.31</deprecated>
     [Obsolete("Use Attributes.SetObjectFrame instead")]
     public void SetObjectFrame(Plane plane)
     {
       Attributes.SetObjectFrame(plane);
       CommitChanges();
+    }
+
+    /// <summary>
+    /// Generate slices by intersecting a plane with an object of type Brep, Extrusion, SubD , Mesh, or Block Instance.
+    /// </summary>
+    /// <param name="centerPlane">Intesecting plane.</param>
+    /// <param name="name">Name for section of objects.</param>
+    /// <param name="thickness">Thickness of the slice. If thickness is less than tolerance, a surface will be created instead of a solid slice.</param>
+    /// <param name="tolerance">The intersection tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <param name="objectAttributes">Object attributes, one for each returned geometry item.</param>
+    /// <returns>Slice geometry in the form of Breps, Extrusions, Meshes, and Curves if successful. An empty array if unsuccessful.</returns>
+    /// <since>9.0</since>
+    public GeometryBase[] CreateSlices(Plane centerPlane, string name, double thickness, double tolerance, out ObjectAttributes[] objectAttributes)
+    {
+      var geometry = Array.Empty<GeometryBase>();
+      objectAttributes = Array.Empty<ObjectAttributes>();
+      using (var geometry_array = new SimpleArrayGeometryPointer())
+      {
+        var ptr_const_this = ConstPointer();
+        var ptr_geometry_array = geometry_array.NonConstPointer();
+        var ptr_attributes_array = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
+        var rc = UnsafeNativeMethods.RHC_RhinoCreateSlices(ptr_const_this, ref centerPlane, name, thickness, tolerance, ptr_geometry_array, ptr_attributes_array);
+        if (rc)
+        {
+          geometry = geometry_array.ToNonConstArray();
+          var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributes_array);
+          objectAttributes = new ObjectAttributes[attrib_count];
+          for (var i = 0; i < attrib_count; i++)
+          {
+            var ptr_attribute = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Get(ptr_attributes_array, i);
+            objectAttributes[i] = new ObjectAttributes(ptr_attribute);
+          }
+        }
+        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributes_array); // don't leak
+        GC.KeepAlive(this);
+        return geometry;
+      }
+    }
+
+    /// <summary>
+    /// Generate section curves by intersecting a plane with an object of type Brep, Extrusion, SubD ,Mesh or Block Instance.
+    /// </summary>
+    /// <param name="plane">Intersecting plane.</param>
+    /// <param name="name">Name for section of objects.</param>
+    /// <param name="tolerance">The intersection tolerance. When in doubt, use the document's model absolute tolerance.</param>
+    /// <param name="objectAttributes">Object attributes, one for each returned geometry item.</param>
+    /// <returns>Section geometry in the form of Breps, Extrusions, Meshes, and Curves if successful. An empty array if unsuccessful.</returns>
+    /// <since>9.0</since>
+    public GeometryBase[] CreateSections(Plane plane, string name, double tolerance, out ObjectAttributes[] objectAttributes)
+    {
+      var geometry = Array.Empty<GeometryBase>();
+      objectAttributes = Array.Empty<ObjectAttributes>();
+      using (var geometry_array = new SimpleArrayGeometryPointer())
+      {
+        var ptr_const_this = ConstPointer();
+        var ptr_geometry_array = geometry_array.NonConstPointer();
+        var ptr_attributes_array = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_New();
+        var rc = UnsafeNativeMethods.RHC_RhinoCreateSections(ptr_const_this, ref plane, name, true, tolerance, ptr_geometry_array, ptr_attributes_array);
+        if (rc)
+        {
+          geometry = geometry_array.ToNonConstArray();
+          var attrib_count = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Count(ptr_attributes_array);
+          objectAttributes = new ObjectAttributes[attrib_count];
+          for (var i = 0; i < attrib_count; i++)
+          {
+            var ptr_attribute = UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Get(ptr_attributes_array, i);
+            objectAttributes[i] = new ObjectAttributes(ptr_attribute);
+          }
+        }
+        UnsafeNativeMethods.ON_SimpleArray_3dmObjectAttributes_Delete(ptr_attributes_array); // don't leak
+        GC.KeepAlive(this);
+        return geometry;
+      }
     }
 
     /// <summary>
@@ -2194,12 +2463,12 @@ namespace Rhino.DocObjects
       // The plug-in Id is optionally used by the custom mesh provider to determine if the plug-in
       // is allowed access to the custom meshes.  Currently none of our custom mesh providers
       // pay attention to the Id.
-      var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero);
-
-      bool rc = UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
-      GC.KeepAlive(viewport);
-      GC.KeepAlive(da);
-      return rc;
+      using (var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero))
+      {
+        bool rc = UnsafeNativeMethods.Rdk_CRMManager_WillBuildCustomMesh(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
+        GC.KeepAlive(viewport);
+        return rc;
+      }
     }
 
     /// <summary>
@@ -2253,14 +2522,19 @@ namespace Rhino.DocObjects
       // is allowed access to the custom meshes.  Currently none of our custom mesh providers
       // pay attention to the Id.
       var primitives = new RenderPrimitiveList(this);
-      var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero);
 
-      var success = UnsafeNativeMethods.Rdk_CRMManager_BuildCustomMeshes(viewport.ConstPointer(), Document.RuntimeSerialNumber, primitives.NonConstPointer(), Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
-      if (success)
-        return primitives;
-      primitives.Dispose();
-      GC.KeepAlive(viewport);
-      return null;
+      using (var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero))
+      {
+        var success = UnsafeNativeMethods.Rdk_CRMManager_BuildCustomMeshes(viewport.ConstPointer(), Document.RuntimeSerialNumber, primitives.NonConstPointer(), Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero);
+        GC.KeepAlive(viewport); 
+        
+        if (success)
+          return primitives;
+
+        primitives?.Dispose();
+        
+        return null;
+      }
     }
 
 #pragma warning disable 0618
@@ -2300,7 +2574,9 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered.</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">See <see cref="RenderMeshProvider.Flags"/>. This is an in/out
+    /// parameter: on return it also carries any status flags, so reset it before each call.
+    /// See <see cref="RenderMeshes"/> for how to wait for an asynchronous provider.</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
     /// <returns>Returns true if the object will has a set of custom render primitives</returns>
@@ -2338,14 +2614,33 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// Returns a set of custom render primitives for this object.
+    /// <para>Some providers - Displacement in particular - compute their meshes
+    /// asynchronously. Until that work finishes, this method returns the object's
+    /// ordinary render mesh instead of the custom one and reports that by setting
+    /// <see cref="RenderMeshProvider.Flags.Incomplete"/> in <paramref name="flags"/>.
+    /// That mesh is valid geometry but does not yet reflect the provider, so a caller
+    /// that measures it will see the object as it was beforehand. Test for the flag
+    /// rather than trusting the first result.</para>
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>
     /// <param name="ancestry">The ancestry tree - only used for by-parent object properties assignments.</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">
+    /// On input, the options to apply; on return, the same value with any status flags
+    /// added. Reset it before each call rather than passing the returned value back in.
+    /// To wait for an asynchronous provider, call again while
+    /// <see cref="RenderMeshProvider.Flags.Incomplete"/> remains set, calling
+    /// <see cref="RhinoApp.Wait"/> in between: the provider needs the main thread's
+    /// message queue pumped before it can publish its result, so a retry loop that
+    /// does not pump will never see the flag clear.
+    /// </param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
-    /// <returns> Returns a set of custom render primitives for this object</returns>
+    /// <returns>
+    /// A set of custom render primitives for this object, or the object's ordinary render
+    /// mesh if an asynchronous provider has not finished - see <paramref name="flags"/>.
+    /// Null if the object is not in a document.
+    /// </returns>
     /// <seealso cref="HasCustomRenderMeshes"/>
     /// <since>8.0</since>
     public RenderMeshes RenderMeshes(MeshType mt, ViewportInfo vp, List<DocObjects.InstanceObject> ancestry, ref RenderMeshProvider.Flags flags, PlugIns.PlugIn plugin, Display.DisplayPipelineAttributes attrs)
@@ -2359,17 +2654,23 @@ namespace Rhino.DocObjects
       var primitives = new RenderMeshes(Document, Id, Guid.Empty, 0, (uint)flags);
 
       uint f = (uint)flags;
+      bool need_spare_vp = (vp == null);
 
-      if (vp == null) vp = new ViewportInfo();
-      if (ancestry == null) ancestry = new List<InstanceObject>();
+      using (ViewportInfo spare_vp = need_spare_vp ? new ViewportInfo() : null)
+      {
+        IntPtr vp_ptr = need_spare_vp ? spare_vp.ConstPointer() : vp.ConstPointer();
 
-      UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp.ConstPointer(), Document.RuntimeSerialNumber, Id, ref f, null == plugin ? IntPtr.Zero : plugin.NonConstPointer(), attrs == null ? IntPtr.Zero : attrs.ConstPointer(), IntPtr.Zero);
+        if (ancestry == null)
+        {
+          ancestry = new List<InstanceObject>();
+        }
 
-      flags = (RenderMeshProvider.Flags)f;
-      GC.KeepAlive(primitives);
-      GC.KeepAlive(vp);
-      GC.KeepAlive(attrs);
-      return primitives;
+        UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp_ptr, Document.RuntimeSerialNumber, Id, ref f, null == plugin ? IntPtr.Zero : plugin.NonConstPointer(), attrs == null ? IntPtr.Zero : attrs.ConstPointer(), IntPtr.Zero);
+
+        flags = (RenderMeshProvider.Flags)f;
+
+        return primitives;
+      }
     }
 
     /// <summary>
@@ -2377,7 +2678,9 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">See <see cref="RenderMeshProvider.Flags"/>. This is an in/out
+    /// parameter: on return it also carries any status flags, so reset it before each call.
+    /// See <see cref="RenderMeshes"/> for how to wait for an asynchronous provider.</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
     /// <param name="boundingBox">The requested bounding box</param>
@@ -2439,15 +2742,20 @@ namespace Rhino.DocObjects
       // The plug-in Id is optionally used by the custom mesh provider to determine if the plug-in
       // is allowed access to the custom meshes.  Currently none of our custom mesh providers
       // pay attention to the Id.
-      var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero);
-
-      if (UnsafeNativeMethods.Rdk_CRMManager_BoundingBox(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero, ref min, ref max))
+      using (var da = new Rhino.Display.DisplayPipelineAttributes(IntPtr.Zero))
       {
-        boundingBox = new BoundingBox(min, max);
-        return boundingBox.IsValid;
+        bool ret = UnsafeNativeMethods.Rdk_CRMManager_BoundingBox(viewport.ConstPointer(), ConstPointer(), Document.RuntimeSerialNumber, Guid.Empty, preview ? da.ConstPointer() : IntPtr.Zero, ref min, ref max);
+
+        GC.KeepAlive(viewport);
+
+        if (ret)
+        {
+          boundingBox = new BoundingBox(min, max);
+          return boundingBox.IsValid;
+        }
+
+        return false;
       }
-      GC.KeepAlive(viewport);
-      return false;
     }
 
 
@@ -2510,6 +2818,22 @@ namespace Rhino.DocObjects
         RhinoObject[] rc = arr.ToNonConstArray();
         return rc;
       }
+    }
+
+    /// <summary>
+    /// True when the display should draw this object's preview mesh instead of its render or
+    /// analysis mesh.
+    /// </summary>
+    /// <remarks>
+    /// Only meaningful while drawing: the meshing worker thread raises this for the objects it is
+    /// previewing and it is false the rest of the time. A texture or false colour
+    /// <see cref="Rhino.Display.VisualAnalysisMode"/> reads it from SetUpDisplayAttributes to
+    /// decide whether to show mesh wires, which is what the built-in analysis modes do.
+    /// </remarks>
+    /// <since>9.0</since>
+    public bool UsePreviewMesh
+    {
+      get { return GetBool(UnsafeNativeMethods.RhinoObjectGetBool.UsePreviewMesh); }
     }
 
     /// <summary>
@@ -2844,16 +3168,20 @@ namespace Rhino.DocObjects
       get
       {
         var pointer = ConstPointer();
-        var array = new INTERNAL_ComponentIndexArray();
-        var array_pointer = array.NonConstPointer();
-        var result = UnsafeNativeMethods.CRhinoObject_GetSubobjectMaterialComponents(pointer, array_pointer);
-        if (result < 1)
+
+        using (var array = new INTERNAL_ComponentIndexArray())
         {
-          array.Dispose();
-          return new ComponentIndex[0];
+          var array_pointer = array.NonConstPointer();
+          var result = UnsafeNativeMethods.CRhinoObject_GetSubobjectMaterialComponents(pointer, array_pointer);
+          
+          if (result < 1)
+          {
+            return new ComponentIndex[0];
+          }
+
+          var value = array.ToArray();
+          return value;
         }
-        var value = array.ToArray();
-        return value;
       }
     }
 
@@ -2993,10 +3321,10 @@ namespace Rhino.DocObjects
     /// <since>6.0</since>
     public virtual void SetCustomRenderMeshParameter(Guid providerId, String parameterName, object value)
     {
-      var v = new Variant(value);
-
-      UnsafeNativeMethods.Rdk_SetCRMParameter(ConstPointer(), providerId, parameterName, v.ConstPointer());
-      GC.KeepAlive(v);
+      using (var v = new Variant(value))
+      {
+        UnsafeNativeMethods.Rdk_SetCRMParameter(ConstPointer(), providerId, parameterName, v.ConstPointer());
+      }
     }
 
 
@@ -3176,6 +3504,18 @@ namespace Rhino.DocObjects
 
     /// <summary>
     /// For expert use only.
+    /// Deletes existing history record
+    /// </summary>
+    /// <returns>true if history record was purged</returns>
+    /// <since>9.0</since>
+    public bool DeleteHistoryRecord()
+    {
+      var p_this = NonConstPointer_I_KnowWhatImDoing();
+      return UnsafeNativeMethods.CRhinoObject_DeleteHistoryRecord(p_this);
+    }
+
+    /// <summary>
+    /// For expert use only.
     /// Sets the history record that describes how this object was created.
     /// This information is used to update this object when Rhino history is enabled and an input object changes.
     /// </summary>
@@ -3227,6 +3567,72 @@ namespace Rhino.DocObjects
       }
     }
   }
+
+  /// <summary>
+  /// Rhino object visual analysis mode changed event argument.
+  /// </summary>
+  /// <since>9.0</since>
+  public class RhinoObjectAnalysisModeChangedEventArgs : EventArgs
+  {
+    internal RhinoObjectAnalysisModeChangedEventArgs(uint documentSerialNumber, Guid objectId, Guid analysisModeId, bool enabled)
+    {
+      DocumentSerialNumber = documentSerialNumber;
+      ObjectId = objectId;
+      AnalysisModeId = analysisModeId;
+      Enabled = enabled;
+    }
+
+    /// <summary>
+    /// The serial number of the Rhino document.
+    /// </summary>
+    /// <since>9.0</since>
+    [CLSCompliant(false)]
+    public uint DocumentSerialNumber { get; private set; }
+
+    /// <summary>
+    /// The id of the Rhino object whose visual analysis mode changed.
+    /// </summary>
+    /// <since>9.0</since>
+    public Guid ObjectId { get; private set; }
+
+    /// <summary>
+    /// The id of the visual analysis mode.
+    /// </summary>
+    /// <since>9.0</since>
+    public Guid AnalysisModeId { get; private set; }
+
+    /// <summary>
+    /// True if the visual analysis mode was enabled, false otherwise.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Enabled { get; private set; }
+
+    /// <summary>
+    /// Gets the Rhino document.
+    /// </summary>
+    /// <since>9.0</since>
+    public RhinoDoc Document => RhinoDoc.FromRuntimeSerialNumber(DocumentSerialNumber);
+
+    /// <summary>
+    /// The Rhino object whose visual analysis mode changed.
+    /// </summary>
+    /// <since>9.0</since>
+    public RhinoObject TheObject
+    {
+      get
+      {
+        RhinoDoc doc = Document;
+        return doc?.Objects.FindId(ObjectId);
+      }
+    }
+
+    /// <summary>
+    /// The visual analysis mode.
+    /// </summary>
+    /// <since>9.0</since>
+    public VisualAnalysisMode AnalysisMode => VisualAnalysisMode.Find(AnalysisModeId);
+  }
+
 
   /// <summary>
   /// A proxy object (not saved in files)

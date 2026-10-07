@@ -22,14 +22,14 @@ namespace Rhino
     /// <since>7.5</since>
     public static bool IsNormalMap(this System.Drawing.Bitmap bitmap, bool bLossyCompressionSource, out bool bPositiveZComponent)
     {
-      var dib = RhinoDib.FromBitmap(bitmap);
+      using (var dib = RhinoDib.FromBitmap(bitmap))
+      {
+        bool bz = false;
 
-      bool bz = false;
-
-      bool rc = UnsafeNativeMethods.CRhinoDib_IsNormalMap(dib.ConstPointer, bLossyCompressionSource, ref bz);
-      GC.KeepAlive(dib);
-      bPositiveZComponent = bz;
-      return rc;
+        bool rc = UnsafeNativeMethods.CRhinoDib_IsNormalMap(dib.ConstPointer, bLossyCompressionSource, ref bz);
+        bPositiveZComponent = bz;
+        return rc;
+      }
     }
 
     /// <summary>

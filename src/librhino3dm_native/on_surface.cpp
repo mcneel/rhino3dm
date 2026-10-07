@@ -240,6 +240,19 @@ RH_C_FUNCTION bool ON_Surface_IsTorus( const ON_Surface* pConstSurface, ON_Torus
   return rc;
 }
 
+RH_C_FUNCTION bool ON_Surface_IsExtrusion(const ON_Surface* pConstSurface, ON_Extrusion* extrusion, double tolerance, bool computeExtrusion)
+{
+  bool rc = false;
+  if (pConstSurface)
+  {
+    ON_Extrusion* fillin = nullptr;
+    if (computeExtrusion)
+      fillin = extrusion;
+    rc = pConstSurface->IsExtrusion(fillin, tolerance) ? true : false;
+  }
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_Surface_GetBool(const ON_Surface* pConstSurface, int direction, int which)
 {
   const int idxIsClosed = 0;
@@ -370,6 +383,16 @@ RH_C_FUNCTION ON_Curve* ON_Surface_IsoCurve(const ON_Surface* pConstSurface, int
   return nullptr;
 }
 
+RH_C_FUNCTION ON_Curve* ON_Surface_IsoCurve2(const ON_Surface* pConstSurface, int iso, double t)
+{
+  RHCHECK_LICENSE
+    if (pConstSurface)
+    {
+      return pConstSurface->CurveIso((ON_Surface::ISO)iso, t);
+    }
+  return nullptr;
+}
+
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 
@@ -421,49 +444,222 @@ RH_C_FUNCTION bool ON_Surface_EvPoint( const ON_Surface* pConstSurface, double s
   return rc;
 }
 
-RH_C_FUNCTION bool ON_Surface_EvCurvature( const ON_Surface* pConstSurface, 
-                                           double s, double t, 
-                                           ON_3dPoint* point, 
-                                           ON_3dVector* normal, 
-                                           ON_3dVector* kappa1, 
-                                           ON_3dVector* kappa2, 
-                                           double* gauss, 
-                                           double* mean, 
-                                           double* k1,
-                                           double* k2)
+
+RH_C_FUNCTION ON_SurfaceCurvature* ON_SurfaceCurvature_New(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  ON_SurfaceCurvature* rc = new ON_SurfaceCurvature();
+  if (pSurfaceCurvature)
+  {
+    *rc = *pSurfaceCurvature;
+  }
+  else
+  {
+    rc->k1 = 0.0;
+    rc->k2 = 0.0;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION void ON_SurfaceCurvature_Delete(ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  if (pSurfaceCurvature)
+    delete pSurfaceCurvature;
+}
+
+RH_C_FUNCTION ON_SurfaceCurvature* ON_SurfaceCurvature_CreateFromPrincipalCurvatures(double kappa1, double kappa2)
+{
+  ON_SurfaceCurvature* rc = new ON_SurfaceCurvature();
+  rc->k1 = kappa1;
+  rc->k2 = kappa2;
+  return rc;
+}
+
+RH_C_FUNCTION ON_SurfaceCurvature* ON_SurfaceCurvature_CreateFromGaussianAndMeanCurvatures(double gaussianCurvature, double meanCurvature)
+{
+  const ON_SurfaceCurvature sc = ON_SurfaceCurvature::CreateFromGaussianAndMeanCurvatures(gaussianCurvature, meanCurvature);
+  ON_SurfaceCurvature* rc = new ON_SurfaceCurvature();
+  *rc = sc;
+  return rc;
+}
+
+RH_C_FUNCTION int ON_SurfaceCurvature_Compare(const ON_SurfaceCurvature* pSurfaceCurvature1, const ON_SurfaceCurvature* pSurfaceCurvature2)
+{
+  int rc = 0;
+  if (pSurfaceCurvature1 && pSurfaceCurvature2)
+    rc = ON_SurfaceCurvature::Compare(*pSurfaceCurvature1, *pSurfaceCurvature2);
+  return rc;
+}
+
+RH_C_FUNCTION int ON_SurfaceCurvature_DataCRC(const ON_SurfaceCurvature* pSurfaceCurvature, unsigned int currentRemainder)
+{
+  int rc = 0;
+  if (pSurfaceCurvature)
+    rc = (int)pSurfaceCurvature->DataCRC(currentRemainder);
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SurfaceCurvature_IsSet(const ON_SurfaceCurvature* pSurfaceCurvature)
 {
   bool rc = false;
-  
-  if( pConstSurface && point && normal && kappa1 && kappa2 )
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->IsSet();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SurfaceCurvature_IsZero(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  bool rc = true;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->IsZero();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SurfaceCurvature_IsUnset(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  bool rc = true;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->IsUnset();
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_SurfaceCurvature_IsNan(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  bool rc = true;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->IsNan();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_Kappa(const ON_SurfaceCurvature* pSurfaceCurvature, int dir)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = (0 == dir) ? pSurfaceCurvature->k1 : pSurfaceCurvature->k2;
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_GaussianCurvature(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->GaussianCurvature();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_MeanCurvature(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->MeanCurvature();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_MinimumRadius(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->MinimumRadius();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_MaximumRadius(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->MaximumRadius();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_KappaValue(const ON_SurfaceCurvature* pSurfaceCurvature, int style)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
   {
-    if( pConstSurface->EvNormal(s, t, *point, *normal) )
+    ON::curvature_style kappa_style = ON::CurvatureStyle(style);
+    rc = pSurfaceCurvature->KappaValue(kappa_style);
+  }
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_MaximumPrincipalCurvature(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->MaximumPrincipalCurvature();
+  return rc;
+}
+
+RH_C_FUNCTION double ON_SurfaceCurvature_MinimumPrincipalCurvature(const ON_SurfaceCurvature* pSurfaceCurvature)
+{
+  double rc = ON_UNSET_VALUE;
+  if (pSurfaceCurvature)
+    rc = pSurfaceCurvature->MinimumPrincipalCurvature();
+  return rc;
+}
+
+RH_C_FUNCTION ON_SurfaceCurvature* ON_Surface_EvCurvature(
+  const ON_Surface* pConstSurface,
+  double s, double t, 
+  ON_3dPoint* point, 
+  ON_3dVector* normal, 
+  ON_3dVector* kappa_dir1, 
+  ON_3dVector* kappa_dir2
+)
+{
+  ON_SurfaceCurvature* rc = nullptr;
+  if (pConstSurface && point && normal && kappa_dir1 && kappa_dir2)
+  {
+    if (pConstSurface->EvNormal(s, t, *point, *normal))
     {
       ON_3dPoint origin;
       ON_3dVector du, dv, duu, duv, dvv;
-
-      if( pConstSurface->Ev2Der(s, t, origin, du, dv, duu, duv, dvv) )
+      if (pConstSurface->Ev2Der(s, t, origin, du, dv, duu, duv, dvv))
       {
-        if( ON_EvPrincipalCurvatures(du, dv, duu, duv, dvv, *normal, gauss, mean, k1, k2, *kappa1, *kappa2) )
+        double gauss, mean, kappa1, kappa2;
+        if (ON_EvPrincipalCurvatures(du, dv, duu, duv, dvv, *normal, &gauss, &mean, &kappa1, &kappa2, *kappa_dir1, *kappa_dir2))
         {
-          rc = true;
+          rc = new ON_SurfaceCurvature();
+          rc->k1 = kappa1;
+          rc->k2 = kappa2;
         }
       }
     }
   }
-
   return rc;
 }
+
 
 // not currently available in stand alone OpenNURBS build
 #if !defined(RHINO3DM_BUILD)
 
-RH_C_FUNCTION bool ON_Surface_GetClosestPoint( const ON_Surface* pConstSurface, ON_3DPOINT_STRUCT test_point, double* s, double* t )
+RH_C_FUNCTION bool ON_Surface_GetClosestPoint(const ON_Surface* pConstSurface, ON_3DPOINT_STRUCT test_point, double* s, double* t)
 {
   bool rc = false;
-  if( pConstSurface && s && t )
+  if (pConstSurface && s && t)
   {
     const ON_3dPoint* _test_point = (const ON_3dPoint*)&test_point;
-    rc = pConstSurface->GetClosestPoint( *_test_point, s, t );
+
+    // 15-May-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-29005
+    // ON_RevSurface::GetClosestPoint() does not work (accurately or correctly)
+    // if theaxis of revolution and the curve are not co-planar.
+    // Work around this until a proper fix is implemented.
+    const ON_RevSurface* pConstRevSurface = ON_RevSurface::Cast(pConstSurface);
+    if (pConstRevSurface && !pConstRevSurface->AxisAndCurveCoplanar(ON_DEFAULT_ANGLE_TOLERANCE * 0.01))
+    {
+      ON_NurbsSurface ns;
+      if (pConstRevSurface->GetNurbForm(ns))
+      {
+        double u = ON_UNSET_VALUE, v = ON_UNSET_VALUE;
+        rc = ns.GetClosestPoint(*_test_point, &u, &v);
+        if (rc)
+        {
+          pConstRevSurface->GetSurfaceParameterFromNurbFormParameter(u, v, s, t);
+          return rc;
+        }
+      }
+    }
+
+    rc = pConstSurface->GetClosestPoint(*_test_point, s, t);
   }
   return rc;
 }

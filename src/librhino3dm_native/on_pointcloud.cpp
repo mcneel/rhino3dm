@@ -416,6 +416,71 @@ RH_C_FUNCTION bool ON_PointCloud_SetExtra(ON_PointCloud* pPointCloud, int index,
   return rc;
 }
 
+RH_C_FUNCTION bool ON_PointCloud_ExpertGetValues(const ON_PointCloud* pConstPointCloud, int index, ON_3dPoint* pt, ON_3dVector* nr, int* argb, double* value, bool* hidden)
+{
+  bool rc = false;
+  if (pConstPointCloud && pt && nr && argb && value && hidden && (index >= 0) && (index < pConstPointCloud->m_P.Count()))
+  {
+    *pt = pConstPointCloud->m_P[index];
+
+    if (pConstPointCloud->m_N.Count() > 0)
+      *nr = pConstPointCloud->m_N[index];
+
+    else
+      *nr = ON_3dVector::ZeroVector;
+
+    if (pConstPointCloud->m_C.Count() > 0)
+    {
+      unsigned int c = (unsigned int)(pConstPointCloud->m_C[index]);
+      *argb = (int)ABGR_to_ARGB(c);
+    }
+    else
+      *argb = 0;
+
+    if (pConstPointCloud->m_V.Count() > 0)
+      *value = pConstPointCloud->m_V[index];
+    else
+      *value = ON_UNSET_VALUE;
+
+    if (pConstPointCloud->m_H.Count() > 0)
+      *hidden = pConstPointCloud->m_H[index];
+    else
+      *hidden = false;
+
+    rc = true;
+  }
+  return rc;
+}
+
+RH_C_FUNCTION bool ON_PointCloud_Split(ON_PointCloud* pPointCloud, ON_PLANE_STRUCT plane, ON_PointCloud** pCloud1, ON_PointCloud** pCloud2)
+{
+  bool rc = false;
+  if (pPointCloud && pCloud1 && pCloud2)
+  {
+    ON_Plane _plane = FromPlaneStruct(plane);
+
+    ON_PointCloud* pCloud1_out = new ON_PointCloud();
+    ON_PointCloud* pCloud2_out = new ON_PointCloud();
+
+    rc = pPointCloud->Split(_plane, *pCloud1_out, *pCloud2_out);
+
+    if (rc)
+    {
+      *pCloud1 = pCloud1_out;
+      *pCloud2 = pCloud2_out;
+    }
+    else
+    {
+      delete pCloud1_out;
+      delete pCloud2_out;
+    }
+
+    rc = true;
+  }
+
+  return rc;
+}
+
 RH_C_FUNCTION bool ON_PointCloud_RemovePoint(ON_PointCloud* pPointCloud, int index)
 {
   bool rc = false;

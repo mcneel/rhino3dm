@@ -355,7 +355,10 @@ namespace Rhino.FileIO
     {
       var v = new Rhino.Render.Variant();
       if (!UnsafeNativeMethods.ON_RenderContent_GetParameter(ConstPointer(), param, v.NonConstPointer()))
+      {
+        v?.Dispose();
         return null;
+      }
 
       GC.KeepAlive(this);
       return v;

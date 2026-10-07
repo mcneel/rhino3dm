@@ -397,7 +397,10 @@ namespace Rhino.Geometry
     [ConstOperation]
     public NurbsCurve ToNurbsCurve()
     {
-      return ToPolylineCurve()?.ToNurbsCurve();
+      using (var pc = ToPolylineCurve())
+      {
+        return pc?.ToNurbsCurve();
+      }
     }
 
     /// <summary>

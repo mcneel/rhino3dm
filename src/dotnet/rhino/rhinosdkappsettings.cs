@@ -1,10 +1,14 @@
 #if RHINO_SDK
-using System;
-using System.Drawing;
-using Rhino.Runtime.InteropWrappers;
+using Rhino.Display;
 using Rhino.Geometry;
+using Rhino.Runtime.InteropWrappers;
+using System;
 using System.Collections.Generic;
-using Rhino.Runtime;
+using System.Drawing;
+using System.IO;
+using System.Runtime;
+using System.Threading.Tasks;
+using static UnsafeNativeMethods;
 
 namespace Rhino.ApplicationSettings
 {
@@ -152,6 +156,20 @@ namespace Rhino.ApplicationSettings
     ///<summary>Gets or sets a value that determines if cross hairs are visible.</summary>
     /// <since>5.0</since>
     public bool ShowCrosshairs { get; set; }
+
+    ///<summary>Gets or sets a value that determines the length, in pixels, of the cross hairs if they are visible.</summary>
+    /// <since>9.0</since>
+    public double CrosshairScreenLength { get; set; }
+
+    ///<summary>
+    /// Gets or sets a value that determines if the cross hairs are drawn horizontally and
+    /// vertically on the screen instead of running along the construction plane's x and y axes.
+    ///</summary>
+    /// <since>9.0</since>
+    public bool CrosshairsAlignedToScreen { get; set; }
+
+    /// <since>9.0</since>
+    public bool ShowCursorWhenCrosshairsVisible { get; set; }
 
     /// <summary>
     /// Display the drop shadow of layouts
@@ -331,6 +349,9 @@ namespace Rhino.ApplicationSettings
       rc.EchoCommandsToHistoryWindow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxEchoCommandsToHistoryWindow, pAppearanceSettings);
       rc.ShowFullPathInTitleBar = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxFullPathInTitleBar, pAppearanceSettings);
       rc.ShowCrosshairs = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsVisible, pAppearanceSettings);
+      rc.CrosshairScreenLength = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetDouble(idxCrosshairScreenLength, pAppearanceSettings);
+      rc.CrosshairsAlignedToScreen = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsAlignedToScreen, pAppearanceSettings);
+      rc.ShowCursorWhenCrosshairsVisible = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowCursorWhenCrosshairsVisible, pAppearanceSettings);
       rc.ShowLayoutDropShadow = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowLayoutDropShadow, pAppearanceSettings);
       rc.DirectionArrowIconShaftSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconShaftSize, pAppearanceSettings);
       rc.DirectionArrowIconHeadSize = UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconHeadSize, pAppearanceSettings);
@@ -432,6 +453,9 @@ namespace Rhino.ApplicationSettings
       EchoPromptsToHistoryWindow = state.EchoPromptsToHistoryWindow;
       ShowFullPathInTitleBar = state.ShowFullPathInTitleBar;
       ShowCrosshairs = state.ShowCrosshairs;
+      CrosshairScreenLength = state.CrosshairScreenLength;
+      CrosshairsAlignedToScreen = state.CrosshairsAlignedToScreen;
+      ShowCursorWhenCrosshairsVisible = state.ShowCursorWhenCrosshairsVisible;
       ShowLayoutDropShadow = state.ShowLayoutDropShadow;
       DirectionArrowIconShaftSize = state.DirectionArrowIconShaftSize;
       DirectionArrowIconHeadSize = state.DirectionArrowIconHeadSize;
@@ -690,6 +714,17 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetColor(idxLockedObjectColor); }
       set { SetColor(idxLockedObjectColor, value); }
+    }
+
+    /// <summary>
+    /// Mode where white objects are drawn black when on a light background and
+    /// black objects are drawn white when on a dark background
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool BlackWhiteSwitching
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxBlackWhiteSwitching, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxBlackWhiteSwitching, value); }
     }
 
     /// <summary>
@@ -963,14 +998,14 @@ namespace Rhino.ApplicationSettings
     public static property bool WorldCoordIconMoveLabels{ bool get(); void set(bool); }
 
     ///<summary>
-    ///3d "flag" text (like the Dot command) can either be depth 
+    ///3d "flag" text (like the Dot command) can either be depth
     ///tested or shown on top. true means on top.
     ///</summary>
     public static property bool FlagTextOnTop{ bool get(); void set(bool); }
 
     public static property System::String^ CommandPromptFontName{System::String^ get(); void set(System::String^);}
     public static property int CommandPromptHeightInLines{ int get(); void set(int); }
-    
+
     public static property bool StatusBarVisible{ bool get(); void set(bool); }
     public static property bool OsnapDialogVisible{ bool get(); void set(bool); }
     */
@@ -986,7 +1021,7 @@ namespace Rhino.ApplicationSettings
     ///length of direction arrow shaft icon in pixels.
     ///</summary>
     /// <since>8.0</since>
-    public static int DirectionArrowIconShaftSize 
+    public static int DirectionArrowIconShaftSize
     {
       get => UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetInt(idxDirectionArrowIconShaftSize, IntPtr.Zero);
       set => UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetInt(idxDirectionArrowIconShaftSize, value);
@@ -1047,6 +1082,10 @@ namespace Rhino.ApplicationSettings
     const int idxShowTitleBar = 10;
     const int idxShowViewportTabs = 11;
     const int idxShowSelectionFilterBar = 12;
+    const int idxBlackWhiteSwitching = 13;
+    const int idxCrosshairScreenLength = 14; // index into the GetDouble/SetDouble dispatch
+    const int idxCrosshairsAlignedToScreen = 14; // index into the GetBool/SetBool dispatch
+    const int idxShowCursorWhenCrosshairsVisible = 15; // index into the GetBool/SetBool dispatch
 
     ///<summary>Gets or sets a value that determines if prompt messages are written to the history window.</summary>
     /// <since>5.0</since>
@@ -1076,6 +1115,35 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsVisible, IntPtr.Zero); }
       set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxCrosshairsVisible, value); }
     }
+
+    ///<summary>Gets or sets a value that determines the length, in pixels, of the cross hairs if they are visible.</summary>
+    /// <since>9.0</since>
+    public static double CrosshairScreenLength
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetDouble(idxCrosshairScreenLength, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetDouble(idxCrosshairScreenLength, value); }
+    }
+
+    ///<summary>
+    /// Gets or sets a value that determines if the cross hairs are drawn horizontally and
+    /// vertically on the screen (as if fixed to the camera) instead of running along the
+    /// construction plane's x and y axes. When enabled, the cross hairs stay vertical and
+    /// horizontal as the view is rotated, for example in a perspective viewport.
+    ///</summary>
+    /// <since>9.0</since>
+    public static bool CrosshairsAlignedToScreen
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxCrosshairsAlignedToScreen, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxCrosshairsAlignedToScreen, value); }
+    }
+
+    /// <since>9.0</since>
+    public static bool ShowCursorWhenCrosshairsVisible
+    {
+      get { return UnsafeNativeMethods.CRhinoAppAppearanceSettings_GetBool(idxShowCursorWhenCrosshairsVisible, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppAppearanceSettings_SetBool(idxShowCursorWhenCrosshairsVisible, value); }
+    }
+
     /// <summary>
     /// Shows or hides the side bar user interface.
     /// </summary>
@@ -1174,16 +1242,63 @@ namespace Rhino.ApplicationSettings
       get
       {
         // ZO-135 - called by the Zoo, and needs some answer.
-        if (Rhino.Runtime.HostUtils.RunningInRhino)
+        if (Rhino.Runtime.HostUtils.RunningInRhino && ! Rhino.Runtime.HostUtils.RunningOnLinux)
         {
           uint rc = UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(0, false, 0);
           return (int)rc;
+        }
+        if (Rhino.Runtime.HostUtils.RunningOnLinux)
+        {
+          int lcid = System.Globalization.CultureInfo.CurrentCulture.LCID;
+          if(lcid != System.Globalization.CultureInfo.InvariantCulture.LCID)
+            return lcid;
         }
         return 1033;
       }
       set
       {
         UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(0, true, (uint)value);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the language identifier used by the Help system (the Help
+    /// panel, F1 context help and the online help web site). This is
+    /// independent of <see cref="LanguageIdentifier"/>, which is the language
+    /// used by the user interface.
+    /// A value of zero, the default, means the Help follows the user interface
+    /// language. See <see cref="EffectiveHelpLanguageIdentifier"/> for the
+    /// identifier the Help system actually uses.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int HelpLanguageIdentifier
+    {
+      get
+      {
+        if (!Rhino.Runtime.HostUtils.RunningInRhino)
+          return 0;
+        return (int)UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(2, false, 0);
+      }
+      set
+      {
+        UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(2, true, (uint)(value < 0 ? 0 : value));
+      }
+    }
+
+    /// <summary>
+    /// Gets the language identifier the Help system uses. This is
+    /// <see cref="HelpLanguageIdentifier"/> when it has been set, otherwise
+    /// <see cref="LanguageIdentifier"/>. Never returns zero.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int EffectiveHelpLanguageIdentifier
+    {
+      get
+      {
+        if (!Rhino.Runtime.HostUtils.RunningInRhino)
+          return LanguageIdentifier;
+        uint rc = UnsafeNativeMethods.RhAppearanceSettings_GetSetUINT(3, false, 0);
+        return 0 == rc ? LanguageIdentifier : (int)rc;
       }
     }
 
@@ -1221,6 +1336,61 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>
+  /// A command alias is a set of characters that can be defined to run a macro
+  /// </summary>
+  public class CommandAlias
+  {
+    private string _alias;
+    private string _macro;
+    private bool _instant;
+
+    /// <summary>
+    /// Create a new command alias
+    /// </summary>
+    /// <param name="alias"></param>
+    /// <param name="macro"></param>
+    /// <param name="instant"></param>
+    /// <since>9.0</since>
+    public CommandAlias(string alias, string macro, bool instant)
+    {
+      _alias = alias;
+      _macro = macro;
+      _instant = instant;
+    }
+
+    /// <summary>
+    /// String that represents an alias
+    /// </summary>
+    /// <since>9.0</since>
+    public string Alias
+    {
+      get { return _alias; }
+      set { _alias = value; }
+    }
+
+    /// <summary>
+    /// Macro to run when an alias is input
+    /// </summary>
+    /// <since>9.0</since>
+    public string Macro
+    {
+      get { return _macro; }
+      set { _macro = value; }
+    }
+
+    /// <summary>
+    /// Is the command alias instant? Instant aliases run without the need for
+    /// spacebar or enter
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Instant
+    {
+      get { return _instant; }
+      set { _instant = value; }
+    }
+  }
+
+  /// <summary>
   /// Contains static methods and properties to access command aliases.
   /// </summary>
   public static class CommandAliasList
@@ -1233,6 +1403,55 @@ namespace Rhino.ApplicationSettings
       {
         return UnsafeNativeMethods.CRhinoAppAliasList_Count(IntPtr.Zero);
       }
+    }
+
+    /// <summary>
+    /// Timer delay to use before triggering instant aliases
+    /// </summary>
+    /// <since>9.0</since>
+    public static int InstantAliasDelayMilliseconds
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoAppAliasList_GetInstantDelay(IntPtr.Zero);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoAppAliasList_SetInstantDelay(IntPtr.Zero, value);
+      }
+    }
+
+    /// <summary>
+    /// Get command alias from the list
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns>null is index is out of range</returns>
+    /// <since>9.0</since>
+    public static CommandAlias GetAlias(int index)
+    {
+      using(var aliasString = new StringWrapper())
+      using (var macroString = new StringWrapper())
+      {
+        IntPtr ptrAlias = aliasString.NonConstPointer;
+        IntPtr ptrMacro = macroString.NonConstPointer;
+        bool instant = false;
+        bool exists = UnsafeNativeMethods.CRhinoAppAliasList_Item2(index, ptrAlias, ptrMacro, ref instant);
+        if (!exists)
+          return null;
+        return new CommandAlias(aliasString.ToString(), macroString.ToString(), instant);
+      }
+    }
+
+    /// <summary>
+    /// Find an existing CommandAlias given the alias string
+    /// </summary>
+    /// <param name="alias"></param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static CommandAlias FindAlias(string alias)
+    {
+      int index = UnsafeNativeMethods.CRhinoAppAliastList_IndexOfAlias(alias);
+      return GetAlias(index);
     }
 
     ///<summary>Returns a list of command alias names.</summary>
@@ -1310,6 +1529,35 @@ namespace Rhino.ApplicationSettings
     public static bool IsAlias(string alias)
     {
       return UnsafeNativeMethods.RhCommandAliasList_IsAlias(alias);
+    }
+
+    /// <summary>
+    /// Add or modify the command aliases with a list of aliases
+    /// </summary>
+    /// <param name="aliases"></param>
+    /// <param name="replaceAll"></param>
+    /// <since>9.0</since>
+    public static void Update(IEnumerable<CommandAlias> aliases, bool replaceAll)
+    {
+      using(var names = new ClassArrayString())
+      using(var macros = new ClassArrayString())
+      {
+        List<bool> instantStates = new List<bool>();
+        foreach(var alias in aliases)
+        {
+          if (alias == null)
+            continue;
+          names.Add(alias.Alias);
+          macros.Add(alias.Macro);
+          instantStates.Add(alias.Instant);
+        }
+
+        IntPtr ptrNames = names.ConstPointer();
+        IntPtr ptrMacros = macros.ConstPointer();
+        bool[] instant = instantStates.ToArray();
+
+        UnsafeNativeMethods.RhCommandAliasList_Update(ptrNames, ptrMacros, instant.Length, instant, replaceAll);
+      }
     }
 
     /// <summary>
@@ -1416,7 +1664,7 @@ namespace Rhino.ApplicationSettings
   }
 
   /// <summary>
-  /// 
+  ///
   /// </summary>
   public static class DraftAngleAnalysisSettings
   {
@@ -1645,6 +1893,463 @@ namespace Rhino.ApplicationSettings
     }
   }
 
+  /// <summary>Represents a snapshot of <see cref="DirectionAnalysisSettings"/>.</summary>
+  public class DirectionAnalysisSettingsState
+  {
+    internal DirectionAnalysisSettingsState() { }
+
+    /// <summary>
+    /// Gets or sets a color used to display the direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color Color { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Direction { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the U dir.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool U { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the V dir.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool V { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify the visibility of edges in edge-related commands.
+  /// </summary>
+  public static class DirectionAnalysisSettings
+  {
+    static DirectionAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr pSettings = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_New(current);
+      DirectionAnalysisSettingsState rc = new DirectionAnalysisSettingsState();
+
+      int abgr = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Color(pSettings, 0, false);
+      rc.Color = Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      rc.Direction = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(pSettings, true, 0, false);
+      rc.U = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(pSettings, true, 1, false);
+      rc.V = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(pSettings, true, 2, false);
+      UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Delete(pSettings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    ///
+    public static DirectionAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static DirectionAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool Direction
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, false, 0, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, value, 0, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the U dir.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool U
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, false, 1, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, value, 1, true);
+      }
+    }
+    /// <summary>
+    /// Gets or sets whether to display the V dir.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool V
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, false, 2, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Bool(IntPtr.Zero, value, 2, true);
+      }
+    }
+
+    ///<summary>Gets or sets a color used to show curve or surface direction.</summary>
+    /// <since>9.0</since>
+    public static Color Color
+    {
+      get
+      {
+        int abgr = UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Color(IntPtr.Zero, 0, false);
+        return Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      }
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoDirectionAnalysisSettings_Color(IntPtr.Zero, argb, true);
+      }
+    }
+  }
+
+  /// <summary>Represents a snapshot of <see cref="EndAnalysisSettings"/>.</summary>
+  public class EndAnalysisSettingsState
+  {
+    internal EndAnalysisSettingsState() { }
+
+    /// <summary>
+    /// Gets or sets a color used to display the points.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color Color { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the open curve start points.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool OpenStarts { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the open curve end points.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool OpenEnds { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the closed curve seam points.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ClosedSeams { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display the polycurve joint points.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool PolycurveJoints { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify the visibility of curve ends.
+  /// </summary>
+  public static class EndAnalysisSettings
+  {
+    static EndAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr pSettings = UnsafeNativeMethods.CRhinoEndAnalysisSettings_New(current);
+      EndAnalysisSettingsState rc = new EndAnalysisSettingsState();
+
+      int abgr = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Color(pSettings, 0, false);
+      rc.Color = Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      rc.OpenStarts = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(pSettings, true, 0, false);
+      rc.OpenEnds = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(pSettings, true, 1, false);
+      rc.ClosedSeams = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(pSettings, true, 2, false);
+      rc.PolycurveJoints = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(pSettings, true, 3, false);
+      UnsafeNativeMethods.CRhinoEndAnalysisSettings_Delete(pSettings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    ///
+    public static EndAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static EndAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the open curve start points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool OpenStarts
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, false, 0, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, value, 0, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the open curve end points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool OpenEnds
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, false, 1, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, value, 1, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the closed curve seam points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ClosedSeams
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, false, 2, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, value, 2, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display the polycurve joint points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool PolycurveJoints
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, false, 3, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEndAnalysisSettings_Bool(IntPtr.Zero, value, 3, true);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets a color used to display the points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color Color
+    {
+      get
+      {
+        int abgr = UnsafeNativeMethods.CRhinoEndAnalysisSettings_Color(IntPtr.Zero, 0, false);
+        return Rhino.Runtime.Interop.ColorFromWin32(abgr);
+      }
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoEndAnalysisSettings_Color(IntPtr.Zero, argb, true);
+      }
+    }
+  }
+
+  /// <summary>Represents a snapshot of <see cref="EmapAnalysisSettings"/>.</summary>
+  public class EmapAnalysisSettingsState
+  {
+    internal EmapAnalysisSettingsState() { }
+
+    /// <summary>
+    /// Gets or sets the current emap file name.
+    /// </summary>
+    /// <since>9.0</since>
+    public String FileName { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to blend the image with the object's color.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool BlendWithObjectColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to display iso curves.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ShowIsoparams { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify the visibility of curve ends.
+  /// </summary>
+  public static class EmapAnalysisSettings
+  {
+    static EmapAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr pSettings = UnsafeNativeMethods.CRhinoEmapAnalysisSettings_New(current);
+      EmapAnalysisSettingsState rc = new EmapAnalysisSettingsState();
+
+      using (var sw = new StringWrapper())
+      {
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetFileName(pSettings, sw.NonConstPointer);
+        rc.FileName = sw.ToString();
+      }
+      rc.BlendWithObjectColor = UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetBool(pSettings, UnsafeNativeMethods.EmapSettingsBool.BlendWithObjectColor);
+      rc.ShowIsoparams = UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetBool(pSettings, UnsafeNativeMethods.EmapSettingsBool.ShowIsoParams);
+
+      UnsafeNativeMethods.CRhinoEmapAnalysisSettings_Delete(pSettings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    ///
+    public static EmapAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static EmapAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Gets or sets the current emap file name.
+    /// </summary>
+    /// <since>9.0</since>
+    public static string FileName
+    {
+      get
+      {
+        using (var sw = new StringWrapper())
+        {
+          IntPtr pString = sw.NonConstPointer;
+          UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetFileName(IntPtr.Zero, pString);
+          return sw.ToString();
+        }
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_SetFileName(IntPtr.Zero, value);
+      }
+    }
+
+
+    /// <summary>
+    /// Gets or sets whether to blend the image with the object's color.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool BlendWithObjectColor
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetBool(IntPtr.Zero, UnsafeNativeMethods.EmapSettingsBool.BlendWithObjectColor);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_SetBool(IntPtr.Zero, value, UnsafeNativeMethods.EmapSettingsBool.BlendWithObjectColor);
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets whether to display iso curves.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ShowIsoparams
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetBool(IntPtr.Zero, UnsafeNativeMethods.EmapSettingsBool.ShowIsoParams);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_SetBool(IntPtr.Zero, value, UnsafeNativeMethods.EmapSettingsBool.ShowIsoParams);
+      }
+    }
+
+    /// <summary>
+    /// Get available list of emap filenames
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static string[] GetFileNames()
+    {
+      using (var strings = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+      {
+        IntPtr ptrStrings = strings.NonConstPointer();
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetFilenames(ptrStrings);
+        return strings.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Set available list of emap filenames
+    /// </summary>
+    /// <param name="filenames"></param>
+    /// <since>9.0</since>
+    public static void SetFileNames(IEnumerable<string> filenames)
+    {
+      using (var strings = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+      {
+        foreach (string filename in filenames)
+          strings.Add(filename);
+        IntPtr ptrStrings = strings.NonConstPointer();
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_SetFilenames(ptrStrings);
+      }
+    }
+
+    /// <summary>
+    /// Get list of emap's Default MRU filenames
+    /// </summary>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public static string[] GetDefaultFileNames()
+    {
+      using (var strings = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+      {
+        IntPtr ptrStrings = strings.NonConstPointer();
+        UnsafeNativeMethods.CRhinoEmapAnalysisSettings_GetDefaultMruFilenames(ptrStrings);
+        return strings.ToArray();
+      }
+    }
+
+  }
+
   /// <summary>
   /// Represents a snapshot of <see cref="FileSettings"/>.
   /// </summary>
@@ -1697,6 +2402,12 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public bool CreateBackupFiles { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Export command fills in the file name.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool PrefillExportFileName { get; set; }
+
 
     /// <summary>
     /// Gets or sets the directory used for template files.
@@ -1724,6 +2435,7 @@ namespace Rhino.ApplicationSettings
       rc.ClipboardCopyToPreviousRhinoVersion = UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(pFileSettings, idxClipboardCopyToPreviousRhinoVersion);
       rc.ClipboardOnExit = (ClipboardState)UnsafeNativeMethods.CRhinoAppFileSettings_GetClipboardOnExit(pFileSettings);
       rc.CreateBackupFiles = UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(pFileSettings, idxCreateBackupFiles);
+      rc.PrefillExportFileName = UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(pFileSettings, idxPrefillExportFileName);
       rc.TemplateFileDir = TemplateFolder;
       UnsafeNativeMethods.CRhinoAppFileSettings_Delete(pFileSettings);
 
@@ -1767,6 +2479,7 @@ namespace Rhino.ApplicationSettings
       ClipboardCopyToPreviousRhinoVersion = state.ClipboardCopyToPreviousRhinoVersion;
       ClipboardOnExit = state.ClipboardOnExit;
       CreateBackupFiles = state.CreateBackupFiles;
+      PrefillExportFileName = state.PrefillExportFileName;
       TemplateFolder = state.TemplateFileDir;
     }
 
@@ -1804,6 +2517,37 @@ namespace Rhino.ApplicationSettings
         UnsafeNativeMethods.CRhinoFileUtilities_GetDataFolder(pStringHolder, which);
         return sh.ToString();
       }
+    }
+
+    /// <summary>
+    /// Get full path to a Rhino specific sub-folder under the per-user Local
+    /// (non-roaming) Profile folder.
+    ///
+    /// On Windows 7, 8, usually someplace like:
+    ///   "C:\Users\[USERNAME]\AppData\Local\McNeel\Rhinoceros\"
+    /// </summary>
+    internal static string GetRootFolder(bool currentUser) // TODO : bool currentUser
+    {
+      string versionSpecific = GetDataFolder(currentUser);
+      if (versionSpecific.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        versionSpecific = versionSpecific.Substring(0, versionSpecific.Length - 1);
+
+      return Path.GetDirectoryName(versionSpecific);
+    }
+
+    /// <summary>
+    /// Get full path to the current Rhino specific scheme under the per-user Local
+    /// (non-roaming) Profile folder.
+    ///
+    /// On Windows 7, 8, usually someplace like:
+    ///   "C:\Users\[USERNAME]\AppData\Local\McNeel\Rhinoceros\8.0\settings\Scheme__Default"
+    /// </summary>
+    internal static string GetSchemeFolder()
+    {
+      string settingsFolder = PlugIns.PlugIn.SettingsDirectoryHelper(true, null, RhinoApp.CurrentRhinoId);
+      string schemeName = PlugInSettings.GetRhinoSchemeRegistryPath();
+      string schemeFolder = Path.Combine(settingsFolder, schemeName);
+      return schemeFolder;
     }
 
     /// <summary>
@@ -1929,6 +2673,8 @@ namespace Rhino.ApplicationSettings
     const int idxTemplateFolder = 0;
     const int idxTemplateFile = 1;
     const int idxAutoSaveFile = 2;
+    const int idxBackupFolder = 3;
+
     static void SetFileString(string value, int which)
     {
       UnsafeNativeMethods.CRhinoAppFileSettings_SetFile(value, which);
@@ -1956,6 +2702,22 @@ namespace Rhino.ApplicationSettings
         if (!string.IsNullOrEmpty(value) && !System.IO.Directory.Exists(value))
           return; //throw exception or just allow invalid strings??
         SetFileString(value, idxTemplateFolder);
+      }
+    }
+
+    ///<summary>Returns or sets the location of Rhino's backup files.</summary>
+    /// <since>9.0</since>
+    public static string BackupFileFolder
+    {
+      get
+      {
+        return GetFileString(idxBackupFolder);
+      }
+      set
+      {
+        if (!string.IsNullOrEmpty(value) && !System.IO.Directory.Exists(value))
+          return; //throw exception or just allow invalid strings??
+        SetFileString(value, idxBackupFolder);
       }
     }
 
@@ -2042,6 +2804,8 @@ namespace Rhino.ApplicationSettings
     const int idxFileLockingOpenWarning = 4;
     const int idxClipboardCopyToPreviousRhinoVersion = 5;
     const int idxCreateBackupFiles = 6;
+    const int idxCreateOtherBackupFiles = 7;
+    const int idxPrefillExportFileName = 8;
 
     ///<summary>Enables or disables Rhino&apos;s automatic file saving mechanism.</summary>
     /// <since>5.0</since>
@@ -2122,6 +2886,28 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxCreateBackupFiles); }
       set { UnsafeNativeMethods.CRhinoAppFileSettings_SetBool(IntPtr.Zero, idxCreateBackupFiles, value); }
     }
+
+    /// <summary>Gets or sets a value that controls the creation of other types of backup files.</summary>
+    /// <since>9.0</since>
+    public static bool CreateOtherBackupFiles
+    {
+      get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxCreateOtherBackupFiles); }
+      set { UnsafeNativeMethods.CRhinoAppFileSettings_SetBool(IntPtr.Zero, idxCreateOtherBackupFiles, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value that controls whether the Export command fills in the file name.
+    /// When enabled, the file dialog starts out with the model's name in the last used export
+    /// folder, made unique with a number suffix if that file already exists. When disabled, the
+    /// file name starts out empty.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool PrefillExportFileName
+    {
+      get { return UnsafeNativeMethods.CRhinoAppFileSettings_GetBool(IntPtr.Zero, idxPrefillExportFileName); }
+      set { UnsafeNativeMethods.CRhinoAppFileSettings_SetBool(IntPtr.Zero, idxPrefillExportFileName, value); }
+    }
+
     /// <summary>
     /// Gets or sets a value that decides if copies to the clipboard are performed in both the current
     /// and previous Rhino clipboard formats.  This means you will double the size of what is saved in
@@ -2206,7 +2992,7 @@ namespace Rhino.ApplicationSettings
     /// Get full path to a Rhino specific sub-folder under the per-user Local
     /// (non-roaming) Profile folder.  This is the folder where user-specific
     /// data is stored.
-    /// 
+    ///
     /// On Windows 7, 8, usually someplace like:
     ///   "C:\Users\[USERNAME]\AppData\Local\McNeel\Rhinoceros\[VERSION_NUMBER]\"
     /// </summary>
@@ -2223,7 +3009,6 @@ namespace Rhino.ApplicationSettings
         }
       }
     }
-
 
     /// <summary>
     /// Gets the path to the default RUI file.
@@ -2482,6 +3267,16 @@ namespace Rhino.ApplicationSettings
       get { return UnsafeNativeMethods.RHC_RhinoExtrusionObjectsEnabled(); }
     }
 
+    /// <summary>
+    /// Should surfaces be split into polysurfaces with smooth faces.
+    /// This setting is read-only.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool SplitCreasedSurfaces
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoSplitCreasedSurfaces(); }
+    }
+
     const int idxMouseSelectMode = 0;
     const int idxMaxPopupMenuLines = 1;
     const int idxMinUndoSteps = 2;
@@ -2510,8 +3305,32 @@ namespace Rhino.ApplicationSettings
       set { UnsafeNativeMethods.CRhinoAppGeneralSettings_SetInt(IntPtr.Zero, idxMaxPopupMenuLines, value); }
     }
 
-    //// Popup menu
-    //ON_ClassArray<ON_wString> m_popup_favorites;
+    /// <summary>
+    /// Gets or sets the popup menu favorites
+    /// </summary>
+    internal static string[] PopupMenuFavorites
+    {
+      get
+      {
+        using (var strings = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+        {
+          IntPtr ptrStrings = strings.NonConstPointer();
+          UnsafeNativeMethods.CRhinoAppGeneralSettings_GetPopupMenuFavorites(IntPtr.Zero, ptrStrings);
+          return strings.ToArray();
+        }
+      }
+      set
+      {
+        using (var strings = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+        {
+          foreach (string entry in value)
+            strings.Add(entry);
+          IntPtr ptrStrings = strings.NonConstPointer();
+          UnsafeNativeMethods.CRhinoAppGeneralSettings_SetPopupMenuFavorites(IntPtr.Zero, ptrStrings);
+        }
+      }
+    }
+
     //// Commands
     //ON_wString m_startup_commands;
 
@@ -2662,7 +3481,7 @@ namespace Rhino.ApplicationSettings
     // or layer.
     bool m_bSaveUnreferencedMaterials;
 
-    // If m_bSplitCreasedSurfaces is true, then 
+    // If m_bSplitCreasedSurfaces is true, then
     // surfaces are automatically split into
     // polysurfaces with smooth faces when they are added
     // to the CRhinoDoc.  Never perminantly change the
@@ -2672,7 +3491,7 @@ namespace Rhino.ApplicationSettings
     // To temporarily set m_bSplitCreasedSurfaces to false,
     // create a CRhinoKeepKinkySurfaces on the stack
     // like this:
-    // {  
+    // {
     //   CRhinoKeepKinkySurfaces keep_kinky_surfaces;
     //   ... code that adds kinky surfaces to CRhinoDoc ...
     // }
@@ -2684,7 +3503,7 @@ namespace Rhino.ApplicationSettings
     bool m_bEnableParentLayerControl;
 
     // If true, objects with texture mappings that are
-    // copied from other objects will get the same 
+    // copied from other objects will get the same
     // texture mapping.  Otherwise the new object gets
     // a duplicate of the original texture mapping so
     // that the object's mappings can be independently
@@ -2833,12 +3652,30 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public bool SnapToLocked { get; set; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <since>8.0</since>
+    public bool SnapToOccluded { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <since>8.0</since>
+    public bool SnapToFiltered { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <since>8.0</since>
+    public bool OnlySnapToSelected { get; set; }
+
     /// <summary>Gets or sets the locked state of the snap modeling aid.</summary>
     /// <since>5.0</since>
     public bool UniversalConstructionPlaneMode { get; set; }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <since>8.0</since>
     public bool AutoAlignCPlane { get; set; }
@@ -2877,6 +3714,9 @@ namespace Rhino.ApplicationSettings
     /// <since>5.0</since>
     public double ShiftNudgeKeyStep { get; set; }
 
+    /// <since>9.0</since>
+    public double DigitizerOsnapPickboxRadius { get; set; }
+
     ///<summary>Enables or disables Rhino's planar modeling aid.</summary>
     /// <since>5.0</since>
     public int OsnapPickboxRadius { get; set; }
@@ -2913,6 +3753,30 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>8.0</since>
     public bool OrthoUseZ { get; set; }
+
+    /// <since>9.0</since>
+    public  bool ProjectToCPlaneInPlanParallelViews { get; set; }
+
+    /// <since>9.0</since>
+    public bool NearMidIntPerpSnapToMeshes { get; set; }
+
+    /// <since>9.0</since>
+    public bool CenterSnapToApproximations { get; set; }
+
+    /// <since>9.0</since>
+    public bool EnableOsnapHighlight { get; set; }
+
+    /// <since>9.0</since>
+    public bool DragStartsWindowSelection { get; set; }
+
+    /// <since>9.0</since>
+    public bool AutoGumballEnabled { get; set; }
+
+    /// <since>9.0</since>
+    public bool GumballExtrudeMergeFaces { get; set; }
+
+    /// <since>9.0</since>
+    public bool SnappyGumballEnabled { get; set; }
   }
 
   /// <summary>
@@ -2936,11 +3800,15 @@ namespace Rhino.ApplicationSettings
       rc.HighlightControlPolygon = GetBool(idxHighlightControlPolygon, pSettings);
       rc.Osnap = !GetBool(idxOsnap, pSettings);
       rc.SnapToLocked = GetBool(idxSnapToLocked, pSettings);
+      rc.SnapToOccluded = GetBool(idxSnapToOccluded, pSettings);
+      rc.SnapToFiltered = GetBool(idxSnapToFiltered, pSettings);
+      rc.OnlySnapToSelected = GetBool(idxOnlySnapToSelected, pSettings);
       rc.UniversalConstructionPlaneMode = GetBool(idxUniversalConstructionPlaneMode, pSettings);
       rc.OrthoAngle = GetDouble(idxOrthoAngle, pSettings);
       rc.NudgeKeyStep = GetDouble(idxNudgeKeyStep, pSettings);
       rc.CtrlNudgeKeyStep = GetDouble(idxCtrlNudgeKeyStep, pSettings);
       rc.ShiftNudgeKeyStep = GetDouble(idxShiftNudgeKeyStep, pSettings);
+      rc.DigitizerOsnapPickboxRadius = GetDouble(idxDigitizerOsnapPickboxRadius, pSettings);
       rc.OsnapPickboxRadius = GetInt(idxOsnapPickboxRadius, pSettings);
       rc.NudgeMode = GetInt(idxNudgeMode, pSettings);
       rc.ControlPolygonDisplayDensity = GetInt(idxControlPolygonDisplayDensity, pSettings);
@@ -2953,6 +3821,14 @@ namespace Rhino.ApplicationSettings
       rc.StickyAutoCPlane = GetBool(idxStickyAutoCPlane, pSettings);
       rc.OrientAutoCPlaneToView = GetBool(idxOrientAutoCPlaneToView, pSettings);
       rc.OrthoUseZ = GetBool(idxOrthoUseZ, pSettings);
+      rc.ProjectToCPlaneInPlanParallelViews = GetBool(idxProjectToCPlaneInPlanParallelViews, pSettings);
+      rc.NearMidIntPerpSnapToMeshes = GetBool(idxNearMidIntPerpSnapToMeshes, pSettings);
+      rc.CenterSnapToApproximations = GetBool(idxCenterSnapToApproximations, pSettings);
+      rc.EnableOsnapHighlight = GetBool(idxEnableOsnapHighlight, pSettings);
+      rc.DragStartsWindowSelection = GetBool(idxDragStartsWindowSelection, pSettings);
+      rc.AutoGumballEnabled = GetBool(idxShowAutoGumball, pSettings);
+      rc.GumballExtrudeMergeFaces = GetBool(idxGumballExtrudeMergeFaces, pSettings);
+      rc.SnappyGumballEnabled = GetBool(idxSnappyGumball, pSettings);
 
       UnsafeNativeMethods.CRhinoAppModelAidSettings_Delete(pSettings);
       return rc;
@@ -2997,11 +3873,15 @@ namespace Rhino.ApplicationSettings
       HighlightControlPolygon = state.HighlightControlPolygon;
       Osnap = state.Osnap;
       SnapToLocked = state.SnapToLocked;
+      SnapToOccluded = state.SnapToOccluded;
+      SnapToFiltered = state.SnapToFiltered;
+      SnapToFiltered = state.OnlySnapToSelected;
       UniversalConstructionPlaneMode = state.UniversalConstructionPlaneMode;
       OrthoAngle = state.OrthoAngle;
       NudgeKeyStep = state.NudgeKeyStep;
       CtrlNudgeKeyStep = state.CtrlNudgeKeyStep;
       ShiftNudgeKeyStep = state.ShiftNudgeKeyStep;
+      DigitizerOsnapPickboxRadius = state.DigitizerOsnapPickboxRadius;
       OsnapPickboxRadius = state.OsnapPickboxRadius;
       NudgeMode = state.NudgeMode;
       ControlPolygonDisplayDensity = state.ControlPolygonDisplayDensity;
@@ -3014,12 +3894,21 @@ namespace Rhino.ApplicationSettings
       StickyAutoCPlane = state.StickyAutoCPlane;
       OrientAutoCPlaneToView = state.OrientAutoCPlaneToView;
       OrthoUseZ = state.OrthoUseZ;
+      ProjectToCPlaneInPlanParallelViews = state.ProjectToCPlaneInPlanParallelViews;
+      NearMidIntPerpSnapToMeshes = state.NearMidIntPerpSnapToMeshes;
+      CenterSnapToApproximations = state.CenterSnapToApproximations;
+      EnableOsnapHighlight = state.EnableOsnapHighlight;
+      DragStartsWindowSelection = state.DragStartsWindowSelection;
+      AutoGumballEnabled = state.AutoGumballEnabled;
+      GumballExtrudeMergeFaces = state.GumballExtrudeMergeFaces;
+      SnappyGumballEnabled = state.SnappyGumballEnabled;
     }
 
     static bool GetBool(int which, IntPtr pSettings)
     {
       return UnsafeNativeMethods.RhModelAidSettings_GetSetBool(which, false, false, pSettings);
     }
+
     static bool GetBool(int which) { return GetBool(which, IntPtr.Zero); }
     static void SetBool(int which, bool b) { UnsafeNativeMethods.RhModelAidSettings_GetSetBool(which, true, b, IntPtr.Zero); }
     const int idxGridSnap = 0;
@@ -3046,6 +3935,12 @@ namespace Rhino.ApplicationSettings
     const int idxGumballExtrudeMergeFaces = 21;
     const int idxOrientAutoCPlaneToView = 22;
     const int idxGumballAutoReset = 23;
+    const int idxProjectToCPlaneInPlanParallelViews = 24;
+    const int idxNearMidIntPerpSnapToMeshes = 25;
+    const int idxCenterSnapToApproximations = 26;
+    const int idxEnableOsnapHighlight = 27;
+    const int idxDragStartsWindowSelection = 28;
+
 
     ///<summary>Gets or sets the enabled state of Rhino's grid snap modeling aid.</summary>
     /// <since>5.0</since>
@@ -3158,7 +4053,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <since>8.0</since>
     public static bool SnapToOccluded
@@ -3168,7 +4063,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <since>8.0</since>
     public static bool SnapToFiltered
@@ -3178,7 +4073,7 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <since>8.0</since>
     public static bool OnlySnapToSelected
@@ -3252,6 +4147,7 @@ namespace Rhino.ApplicationSettings
     const int idxNudgeKeyStep = 1;
     const int idxCtrlNudgeKeyStep = 2;
     const int idxShiftNudgeKeyStep = 3;
+    const int idxDigitizerOsnapPickboxRadius = 4;
 
     /// <summary>Gets or sets the base orthogonal angle.</summary>
     /// <since>5.0</since>
@@ -3283,6 +4179,13 @@ namespace Rhino.ApplicationSettings
     {
       get { return GetDouble(idxShiftNudgeKeyStep); }
       set { SetDouble(idxShiftNudgeKeyStep, value); }
+    }
+
+    /// <since>9.0</since>
+    public static double DigitizerOsnapPickboxRadius
+    {
+      get { return GetDouble(idxDigitizerOsnapPickboxRadius); }
+      set { SetDouble(idxDigitizerOsnapPickboxRadius, value); }
     }
 
     static int GetInt(int which, IntPtr pSettings) { return UnsafeNativeMethods.RhModelAidSettings_GetSetInt(which, false, 0, pSettings); }
@@ -3431,7 +4334,49 @@ namespace Rhino.ApplicationSettings
       get => GetBool(idxGumballAutoReset);
       set => SetBool(idxGumballAutoReset, value);
     }
+
+    /// <since>9.0</since>
+    public static bool ProjectToCPlaneInPlanParallelViews
+    {
+      get => GetBool(idxProjectToCPlaneInPlanParallelViews);
+      set => SetBool(idxProjectToCPlaneInPlanParallelViews, value);
+    }
+
+    /// <since>9.0</since>
+    public static bool NearMidIntPerpSnapToMeshes
+    {
+      get => GetBool(idxNearMidIntPerpSnapToMeshes);
+      set => SetBool(idxNearMidIntPerpSnapToMeshes, value);
+    }
+
+    /// <since>9.0</since>
+    public static bool CenterSnapToApproximations
+    {
+      get => GetBool(idxCenterSnapToApproximations);
+      set => SetBool(idxCenterSnapToApproximations, value);
+    }
+
+    /// <since>9.0</since>
+    public static bool EnableOsnapHighlight
+    {
+      get => GetBool(idxEnableOsnapHighlight);
+      set => SetBool(idxEnableOsnapHighlight, value);
+    }
+
+    /// <summary>
+    /// When enabled, a click and drag that starts on top of an object starts a
+    /// window/crossing selection instead of dragging the object, the same as holding
+    /// down the Alt key. Grip dragging and gumball dragging are not affected, and a
+    /// click that does not drag still selects normally.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool DragStartsWindowSelection
+    {
+      get => GetBool(idxDragStartsWindowSelection);
+      set => SetBool(idxDragStartsWindowSelection, value);
+    }
   }
+
 
   /// <summary>
   /// Represents a snapshot of <see cref="ViewSettings"/>.
@@ -3546,6 +4491,9 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>8.20</since>
     public double TwoPointPerspectiveLensLength { get; internal set; }
+
+    /// <since>9.0</since>
+    public bool RotateViewAroundAutogumball { get; set; }
   }
 
   /// <summary>
@@ -3574,6 +4522,7 @@ namespace Rhino.ApplicationSettings
         ViewRotation = GetViewRotation(pViewSettings),
         ThreePointPerspectiveLensLength = GetDouble(UnsafeNativeMethods.AppViewSettings.ThreePointPerspectiveLensLength, pViewSettings),
         TwoPointPerspectiveLensLength = GetDouble(UnsafeNativeMethods.AppViewSettings.TwoPointPerspectiveLensLength, pViewSettings),
+        RotateViewAroundAutogumball = GetBool(idxRotateViewAroundAutogumball, pViewSettings)
       };
       UnsafeNativeMethods.CRhinoAppViewSettings_Delete(pViewSettings);
       return rc;
@@ -3629,6 +4578,7 @@ namespace Rhino.ApplicationSettings
       ZoomExtentsParallelViewBorder = state.ZoomExtentsParallelViewBorder;
       ZoomExtentsPerspectiveViewBorder = state.ZoomExtentsPerspectiveViewBorder;
       ViewRotation = state.ViewRotation;
+      RotateViewAroundAutogumball = state.RotateViewAroundAutogumball;
     }
 
     // bool items
@@ -4988,6 +5938,11 @@ namespace Rhino.ApplicationSettings
     MacControlShiftF11,
     /// <summary>Control + Shift + F12 (Mac)</summary>
     MacControlShiftF12,
+
+    /// <summary>Ctrl/Command + Plus</summary>
+    CtrlPlus,
+    /// <summary>Ctrl/Command + Minus</summary>
+    CtrlMinus
   }
 
   /// <summary>
@@ -5180,7 +6135,7 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>Gets or sets the maximum number of smart points.</summary>
     /// <since>5.0</since>
-    public static int MaxSmartPoints { get; set; }
+    public int MaxSmartPoints { get; set; }
 
     /// <summary>Gets or sets the smart track line color.</summary>
     /// <since>5.0</since>
@@ -5197,12 +6152,55 @@ namespace Rhino.ApplicationSettings
     /// <summary>Gets or sets the active point color.</summary>
     /// <since>5.0</since>
     public Color ActivePointColor { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the active guide color
     /// </summary>
     /// <since>8.21</since>
     public Color GuideColor { get; set; }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool MarkerSmartPoint { get; set; }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SmartSuppress { get; set; }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool StrongOrtho { get; set; }
+
+    /// <summary>
+    ///  Toggles the retaining of captured points for the duration of a command as opposed to discarding them after each mouse click. For example, when you use the Copy command, clicking the mouse to place an object does not clear the existing smart points.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SemiPermanentPoints { get; set; }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ShowMultipleTypes { get; set; }
+
+    /// <summary>Turns on and off the ability to draw parallel tracking lines.</summary>
+    /// <since>9.0</since>
+    public bool Parallels { get; set; }
+
+    /// <summary>See Implied from. When a single Smart point is active, you will see the cursor tooltip with a distance.You can either type a distance or enter relative coordinates (e.g. @10,5) to place a point relative to the active smart point.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SmartBasePoint { get; set; }
+
+    ///<summary>The active viewport construction plane origin is automatically tagged as a smart point, making it possible to snap to it, and snap to ortho lines radiating from it.</summary>
+    /// <since>9.0</since>
+    public bool SmartPointAtCPlaneOrigin { get; set; }
   }
 
   /// <summary>
@@ -5214,7 +6212,8 @@ namespace Rhino.ApplicationSettings
     {
       IntPtr pSettings = UnsafeNativeMethods.CRhinoAppSmartTrackSettings_New(current);
       SmartTrackSettingsState rc = new SmartTrackSettingsState();
-      rc.ActivationDelayMilliseconds = UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetInt(true, pSettings);
+      rc.ActivationDelayMilliseconds = UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxActivationDelayMilliseconds, false, 0, pSettings);
+      rc.MaxSmartPoints = UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxMaxSmartPoints, false, 0, pSettings);
       rc.ActivePointColor = GetColor(idxActivePointColor, pSettings);
       rc.LineColor = GetColor(idxLineColor, pSettings);
       rc.PointColor = GetColor(idxPointColor, pSettings);
@@ -5224,6 +6223,14 @@ namespace Rhino.ApplicationSettings
       rc.UseDottedLines = GetBool(idxDottedLines, pSettings);
       rc.UseSmartTrack = GetBool(idxUseSmartTrack, pSettings);
       rc.GuideColor = GetColor(idxGuideColor, pSettings);
+      rc.MarkerSmartPoint = GetBool(idxMarkerSmartPoint, pSettings);
+      rc.SmartSuppress = GetBool(idxSmartSuppress, pSettings);
+      rc.StrongOrtho = GetBool(idxStrongOrtho, pSettings);
+      rc.SemiPermanentPoints = GetBool(idxSemiPermanentPoints, pSettings);
+      rc.ShowMultipleTypes = GetBool(idxShowMultipleTypes, pSettings);
+      rc.Parallels = GetBool(idxParallels, pSettings);
+      rc.SmartBasePoint = GetBool(idxSmartBasePoint, pSettings);
+      rc.SmartPointAtCPlaneOrigin = GetBool(idxSmartPointAtCPlaneOrigin, pSettings);
 
       UnsafeNativeMethods.CRhinoAppSmartTrackSettings_Delete(pSettings);
       return rc;
@@ -5257,6 +6264,7 @@ namespace Rhino.ApplicationSettings
     public static void UpdateFromState(SmartTrackSettingsState state)
     {
       ActivationDelayMilliseconds = state.ActivationDelayMilliseconds;
+      MaxSmartPoints = state.MaxSmartPoints;
       ActivePointColor = state.ActivePointColor;
       LineColor = state.LineColor;
       PointColor = state.PointColor;
@@ -5266,21 +6274,28 @@ namespace Rhino.ApplicationSettings
       UseDottedLines = state.UseDottedLines;
       UseSmartTrack = state.UseSmartTrack;
       GuideColor = state.GuideColor;
+      MarkerSmartPoint = state.MarkerSmartPoint;
+      SmartSuppress = state.SmartSuppress;
+      StrongOrtho = state.StrongOrtho;
+      SemiPermanentPoints = state.SemiPermanentPoints;
+      ShowMultipleTypes = state.ShowMultipleTypes;
+      Parallels = state.Parallels;
+      SmartBasePoint = state.SmartBasePoint;
+      SmartPointAtCPlaneOrigin = state.SmartPointAtCPlaneOrigin;
     }
 
     const int idxUseSmartTrack = 0;
     const int idxDottedLines = 1;
     const int idxSmartOrtho = 2;
     const int idxSmartTangents = 3;
-    // skipping the following until we can come up with good
-    // descriptions of what each does
-    //BOOL m_bMarkerSmartPoint;
-    //BOOL m_bSmartSuppress;
-    //BOOL m_bStrongOrtho;
-    //BOOL m_bSemiPermanentPoints;
-    //BOOL m_bShowMultipleTypes;
-    //BOOL m_bParallels;
-    //BOOL m_bSmartBasePoint;
+    const int idxMarkerSmartPoint = 4;
+    const int idxSmartSuppress = 5;
+    const int idxStrongOrtho = 6;
+    const int idxSemiPermanentPoints = 7;
+    const int idxShowMultipleTypes = 8;
+    const int idxParallels = 9;
+    const int idxSmartBasePoint = 10;
+    const int idxSmartPointAtCPlaneOrigin = 11;
 
     static bool GetBool(int which, IntPtr pSmartTrackSettings)
     {
@@ -5326,20 +6341,96 @@ namespace Rhino.ApplicationSettings
       set { SetBool(idxSmartTangents, value); }
     }
 
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool MarkerSmartPoint
+    {
+      get { return GetBool(idxMarkerSmartPoint); }
+      set { SetBool(idxMarkerSmartPoint, value); }
+    }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool SmartSuppress
+    {
+      get { return GetBool(idxSmartSuppress); }
+      set { SetBool(idxSmartSuppress, value); }
+    }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool StrongOrtho
+    {
+      get { return GetBool(idxStrongOrtho); }
+      set { SetBool(idxStrongOrtho, value); }
+    }
+
+    /// <summary>
+    ///  Toggles the retaining of captured points for the duration of a command as opposed to discarding them after each mouse click. For example, when you use the Copy command, clicking the mouse to place an object does not clear the existing smart points.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool SemiPermanentPoints
+    {
+      get { return GetBool(idxSemiPermanentPoints); }
+      set { SetBool(idxSemiPermanentPoints, value); }
+    }
+
+    /// <summary>
+    /// TODO - Figure out what this does.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ShowMultipleTypes
+    {
+      get { return GetBool(idxShowMultipleTypes); }
+      set { SetBool(idxShowMultipleTypes, value); }
+    }
+
+    /// <summary>Turns on and off the ability to draw parallel tracking lines.</summary>
+    /// <since>9.0</since>
+    public static bool Parallels
+    {
+      get { return GetBool(idxParallels); }
+      set { SetBool(idxParallels, value); }
+    }
+
+    /// <summary>See Implied from. When a single Smart point is active, you will see the cursor tooltip with a distance.You can either type a distance or enter relative coordinates (e.g. @10,5) to place a point relative to the active smart point. </summary>
+    /// <since>9.0</since>
+    public static bool SmartBasePoint
+    {
+      get { return GetBool(idxSmartBasePoint); }
+      set { SetBool(idxSmartBasePoint, value); }
+    }
+    ///<summary>The active viewport construction plane origin is automatically tagged as a smart point, making it possible to snap to it, and snap to ortho lines radiating from it.</summary>
+    /// <since>9.0</since>
+    public static bool SmartPointAtCPlaneOrigin
+    {
+      get { return GetBool(idxSmartPointAtCPlaneOrigin); }
+      set { SetBool(idxParallels, value); }
+    }
+
+    const int idxActivationDelayMilliseconds = 0;
+    const int idxMaxSmartPoints = 1;
+
     /// <summary>Gets or sets the activation delay in milliseconds.</summary>
     /// <since>5.0</since>
     public static int ActivationDelayMilliseconds
     {
-      get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetInt(true, IntPtr.Zero); }
-      set { UnsafeNativeMethods.CRhinoAppSmartTrackSettings_SetInt(true, value, IntPtr.Zero); }
+      get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxActivationDelayMilliseconds, false, 0, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxActivationDelayMilliseconds, true, value, IntPtr.Zero); }
     }
 
     /// <summary>Gets or sets the maximum number of smart points.</summary>
     /// <since>5.0</since>
     public static int MaxSmartPoints
     {
-      get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetInt(false, IntPtr.Zero); }
-      set { UnsafeNativeMethods.CRhinoAppSmartTrackSettings_SetInt(false, value, IntPtr.Zero); }
+      get { return UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxMaxSmartPoints, false, 0, IntPtr.Zero); }
+      set { UnsafeNativeMethods.CRhinoAppSmartTrackSettings_GetSetInt(idxMaxSmartPoints, true, value, IntPtr.Zero); }
     }
 
     const int idxLineColor = 0;
@@ -5496,6 +6587,22 @@ namespace Rhino.ApplicationSettings
       rc.EnableGumballToolTips = GetInt(idx_bEnableGumballTooltips, pSettings) != 0;
       UnsafeNativeMethods.CRhinoAppCursorToolTipSettings_Delete(pSettings);
       return rc;
+    }
+
+    /// <since>9.0</since>
+    public static void UpdateFromState(CursorTooltipSettingsState state)
+    {
+      TooltipsEnabled = state.TooltipsEnabled;
+      Offset = state.Offset;
+      BackgroundColor = state.BackgroundColor;
+      TextColor = state.TextColor;
+      OsnapPane = state.OsnapPane;
+      DistancePane = state.DistancePane;
+      PointPane = state.PointPane;
+      RelativePointPane = state.RelativePointPane;
+      CommandPromptPane = state.CommandPromptPane;
+      AutoSuppress = state.AutoSuppress;
+      EnableGumballToolTips = state.EnableGumballToolTips;
     }
 
     /// <summary>
@@ -5723,15 +6830,15 @@ namespace Rhino.ApplicationSettings
       IntPtr ptr_settings = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_New(current);
       ZebraAnalysisSettingsState rc = new ZebraAnalysisSettingsState();
 
-      rc.VerticalStripes = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, 0, false);
-      
-      rc.ShowIsoCurves = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, 1, false);
+      rc.VerticalStripes = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.StripeDirection, false);
+
+      rc.ShowIsoCurves = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.ShowIsoParams, false);
 
       int abgr = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Color(ptr_settings, 0, false);
       rc.StripeColor = Rhino.Runtime.Interop.ColorFromWin32(abgr);
 
       rc.StripeThickness = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Int(ptr_settings, 0, false);
- 
+
       UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Delete(ptr_settings);
       return rc;
     }
@@ -5784,11 +6891,11 @@ namespace Rhino.ApplicationSettings
     {
       get
       {
-        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, 0, false);
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.StripeDirection, false);
       }
       set
       {
-        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, 0, true);
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.StripeDirection, true);
       }
     }
 
@@ -5800,11 +6907,11 @@ namespace Rhino.ApplicationSettings
     {
       get
       {
-        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, 1, false);
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.ShowIsoParams, false);
       }
       set
       {
-        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, 1, true);
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.ShowIsoParams, true);
       }
     }
 
@@ -5841,12 +6948,191 @@ namespace Rhino.ApplicationSettings
         UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Int(IntPtr.Zero, value, true);
       }
     }
+
+
+    internal static bool UseIsoDrawEffectSettings
+    {
+      get
+      {
+        return UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.UseDrawEffectSettings, false);
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(IntPtr.Zero, value, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.UseDrawEffectSettings, true);
+      }
+    }
+
+    internal static Rhino.Display.IsoDrawEffect GetIsoDrawEffect()
+    {
+      int mode = 0;
+      int frequency = 0;
+      double gapsize = 0;
+      double falloff = 0;
+      double rotation = 0;
+      int[] colors = new int[10];
+      int gapcolor = 0;
+      int bandcount = 0;
+      bool discardGap = false;
+      Point3d point = new Point3d();
+      Vector3d dir = new Vector3d();
+
+      UnsafeNativeMethods.CRhinoZebraAnalysisSettings_GetIsoDrawSettings(ref mode, ref frequency, ref gapsize, ref falloff, ref rotation, colors, ref gapcolor,
+        ref bandcount, ref discardGap, ref point, ref dir);
+
+      var rc = new IsoDrawEffect();
+      rc.DrawMode = (IsoDrawMode)mode;
+      rc.Frequency = frequency;
+      rc.GapSize = gapsize;
+      rc.Falloff = falloff;
+      rc.RotationRadians = rotation;
+      for (int i = 0; i < 10; i++)
+      {
+        rc.SetBandColor(i, Color.FromArgb(colors[i]));
+      }
+      rc.GapColor = Color.FromArgb(gapcolor);
+      rc.UsedBandColorCount = bandcount;
+      rc.DiscardGap = discardGap;
+      rc.Point = point;
+      rc.Direction = dir;
+      return rc;
+    }
+
+    internal static void SetIsoDrawEffect(IsoDrawEffect effect)
+    {
+      int[] colors = new int[10];
+      for (int i = 0; i < 10; i++)
+      {
+        colors[i] = effect.GetBandColor(i).ToArgb();
+      }
+      UnsafeNativeMethods.CRhinoZebraAnalysisSettings_SetIsoDrawSettings((int)effect.DrawMode, effect.Frequency, effect.GapSize,
+        effect.Falloff, effect.RotationRadians, colors, effect.GapColor.ToArgb(), effect.UsedBandColorCount, effect.DiscardGap,
+        effect.Point, effect.Direction);
+    }
+
   }
 
+  /// <summary>
+  /// Represents a snapshot of <see cref="ThicknessAnalysisSettings"/>.
+  /// </summary>
+  /// <since>9.0</since>
+  public class ThicknessAnalysisSettingsState
+  {
+    internal ThicknessAnalysisSettingsState() { }
+
+    /// <summary>
+    /// The distance range.
+    /// </summary>
+    /// <since>9.0</since>
+    public Interval DistanceRange { get; set; } = new Interval(1.0, 2.0);
+
+    /// <summary>
+    /// Get or sets the display of surface isocurves.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ShowIsoCurves { get; set; } = false;
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify Zebra analysis-related commands.
+  /// </summary>
+  /// <since>9.0</since>
+  public static class ThicknessAnalysisSettings
+  {
+    private static ThicknessAnalysisSettingsState CreateState(bool current)
+    {
+      IntPtr ptr_settings = UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_New(current);
+      ThicknessAnalysisSettingsState rc = new ThicknessAnalysisSettingsState();
+
+      Interval distance_range = new Interval(1.0, 2.0);
+      if (UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_DistanceRange(ptr_settings, ref distance_range, false))
+        rc.DistanceRange = distance_range;
+
+      rc.ShowIsoCurves = UnsafeNativeMethods.CRhinoZebraAnalysisSettings_Bool(ptr_settings, false, UnsafeNativeMethods.CRhinoZebraAnalysisSettingsBool.ShowIsoParams, false);
+
+      UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_Delete(ptr_settings);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static ThicknessAnalysisSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static ThicknessAnalysisSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>9.0</since>
+    public static void UpdateFromState(ThicknessAnalysisSettingsState state)
+    {
+      DistanceRange = state.DistanceRange;
+      ShowIsoCurves = state.ShowIsoCurves;
+    }
+
+    /// <summary>
+    /// The distance range.
+    /// </summary>
+    /// <since>9.0</since>
+    ///
+    public static Interval DistanceRange
+    {
+      get
+      {
+        Interval rc = new Interval(1.0, 2.0);
+        UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_DistanceRange(IntPtr.Zero, ref rc, false);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_DistanceRange(IntPtr.Zero, ref value, true);
+      }
+    }
+
+    /// <summary>
+    /// Get or sets the display of surface isocurves.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ShowIsoCurves
+    {
+      get
+      {
+        bool rc = false;
+        UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_Isocurves(IntPtr.Zero, ref rc, false);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.CRhinoThicknessAnalysisSettings_Isocurves(IntPtr.Zero, ref value, true);
+      }
+    }
+  }
 
   /// <summary>
   /// Represents a snapshot of <see cref="CurvatureGraphSettings"/>.
   /// </summary>
+  /// <since>8.0</since>
   public class CurvatureGraphSettingsState
   {
     internal CurvatureGraphSettingsState() { }
@@ -5903,6 +7189,7 @@ namespace Rhino.ApplicationSettings
   /// <summary>
   /// Contains static methods and properties to modify curvature graph commands.
   /// </summary>
+  /// <since>8.0</since>
   public static class CurvatureGraphSettings
   {
     private static CurvatureGraphSettingsState CreateState(bool current)
@@ -6046,7 +7333,7 @@ namespace Rhino.ApplicationSettings
     /// Gets or sets the surface U hairs are on;
     /// </summary>
     /// <since>8.0</since>
-    public static bool SrfUHair 
+    public static bool SrfUHair
     {
       get
       {
@@ -6118,7 +7405,6 @@ namespace Rhino.ApplicationSettings
       }
     }
 
-
     /// <summary>
     /// Gets or sets the sampling density;
     /// </summary>
@@ -6175,6 +7461,12 @@ namespace Rhino.ApplicationSettings
     /// </summary>
     /// <since>6.0</since>
     public CurvatureAnalysisSettings.CurvatureStyle Style { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to show isocurves.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ShowIsoCurves { get; set; }
   }
 
   /// <summary>
@@ -6185,6 +7477,14 @@ namespace Rhino.ApplicationSettings
     /// <summary>
     /// Curvature analysis styles
     /// </summary>
+    /// <remarks>
+    /// These values mirror the curvature analysis settings of the application and
+    /// differ from <see cref="Rhino.Geometry.CurvatureStyle"/>, which mirrors
+    /// openNURBS. Casting one to the other selects the wrong style. The geometry
+    /// methods, such as
+    /// <see cref="Rhino.Geometry.MeshCurvatureStats.CreateFromMeshes"/>, take the
+    /// openNURBS values.
+    /// </remarks>
     /// <since>6.0</since>
     public enum CurvatureStyle : int
     {
@@ -6235,6 +7535,10 @@ namespace Rhino.ApplicationSettings
       if (UnsafeNativeMethods.RhCurvatureAnalysisSettings_Int(ptr_settings, ref style, false))
         rc.Style = (CurvatureStyle)style;
 
+      bool show = false;
+      UnsafeNativeMethods.RhCurvatureAnalysisSettings_Bool(ptr_settings, ref show, false);
+      rc.ShowIsoCurves = show;
+
       UnsafeNativeMethods.CRhinoCurvatureAnalysisSettings_Delete(ptr_settings);
       return rc;
     }
@@ -6278,6 +7582,7 @@ namespace Rhino.ApplicationSettings
       MinRadiusRange = state.MinRadiusRange;
       MaxRadiusRange = state.MaxRadiusRange;
       Style = state.Style;
+      ShowIsoCurves = state.ShowIsoCurves;
     }
 
     private static Rhino.Geometry.Interval GetRange(CurvatureStyle style)
@@ -6352,7 +7657,24 @@ namespace Rhino.ApplicationSettings
     }
 
     /// <summary>
-    /// 
+    /// Gets or sets whether to show isocurves.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ShowIsoCurves
+    {
+      get
+      {
+        bool show = false;
+        UnsafeNativeMethods.RhCurvatureAnalysisSettings_Bool(IntPtr.Zero, ref show, false);
+        return show;
+      }
+      set
+      {
+        UnsafeNativeMethods.RhCurvatureAnalysisSettings_Bool(IntPtr.Zero, ref value, true);
+      }
+    }
+    /// <summary>
+    ///
     /// </summary>
     /// <param name="meshes"></param>
     /// <param name="settings"></param>
@@ -6390,6 +7712,61 @@ namespace Rhino.ApplicationSettings
           }
         }
       }
+      return rc;
+    }
+
+    /// <summary>
+    /// Calculates the full range of curvature values found on the analysis meshes.
+    /// On success the range is written to the range of settings that matches
+    /// settings.Style.
+    /// </summary>
+    /// <param name="meshes">The analysis meshes to measure. Brep.CreateCurvatureAnalysisMesh creates them.</param>
+    /// <param name="settings">Supplies the curvature style, and receives the calculated range.</param>
+    /// <returns>true if the range was calculated.</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <since>9.0</since>
+    public static bool CalculateCurvatureMaxRange(IEnumerable<Mesh> meshes, CurvatureAnalysisSettingsState settings)
+    {
+      if (null == meshes)
+        throw new ArgumentNullException(nameof(meshes));
+      if (null == settings)
+        throw new ArgumentNullException(nameof(settings));
+
+      bool rc = false;
+      using (var inmeshes = new SimpleArrayMeshPointer())
+      {
+        foreach (Mesh m in meshes)
+        {
+          if (null == m)
+            throw new ArgumentNullException(nameof(meshes));
+          inmeshes.Add(m, true);
+        }
+
+        IntPtr ptr_meshes = inmeshes.ConstPointer();
+
+        Rhino.Geometry.Interval range = Rhino.Geometry.Interval.Unset;
+        rc = UnsafeNativeMethods.RHC_CalculateCurvatureMaxRange(ptr_meshes, (int)settings.Style, ref range);
+        if (rc)
+        {
+          switch (settings.Style)
+          {
+            default:
+            case CurvatureStyle.Gaussian:
+              settings.GaussRange = range;
+              break;
+            case CurvatureStyle.MaxRadius:
+              settings.MaxRadiusRange = range;
+              break;
+            case CurvatureStyle.MinRadius:
+              settings.MinRadiusRange = range;
+              break;
+            case CurvatureStyle.Mean:
+              settings.MeanRange = range;
+              break;
+          }
+        }
+      }
+      GC.KeepAlive(meshes);
       return rc;
     }
   }
@@ -6807,7 +8184,7 @@ namespace Rhino.ApplicationSettings
 
     /// <summary>FollowCursor</summary>
     /// <since>8.0</since>
-    public static bool FollowCursor 
+    public static bool FollowCursor
     {
       get
       {
@@ -7019,7 +8396,737 @@ namespace Rhino.ApplicationSettings
     }
   }
 
+  /// <summary>
+  /// Represents a snapshot of <see cref="SoftTransformSettings"/>.
+  /// </summary>
+  /// <since>9.0</since>
+  public class SoftTransformSettingsState
+  {
+    /// <summary>
+    /// When enabled other unselected components on an object will be moved during a transformation within the specified radius according
+    /// to the falloff shape.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool Enabled { get; set; }
 
+    /// <summary>
+    /// The radius of effect for soft transform. Other components on the object this distance and closer to selected components
+    /// will be transformed.
+    /// </summary>
+    /// <since>9.0</since>
+    public double Radius { get; set; }
+
+    /// <summary>
+    /// The shape of the falloff curve.
+    ///  0 = Smooth
+    ///  1 = Linear
+    ///  2 = Round
+    ///  3 = Sharp
+    /// </summary>
+    /// <since>9.0</since>
+    public int Shape { get; set; }
+
+    /// <summary>
+    /// When true the distance for components affected by soft transform is calculated along the object. Otherwise world distance is used.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool MeasureDistanceAlong { get; set; }
+
+    /// <summary>
+    /// Controls the color used to shade meshes and edges when an object is affected by soft transform.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color FalloffColor { get; set; }
+
+    /// <summary>
+    /// Controls the number of control vertices affected by soft transform for surfaces in the U direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int CvCountU { get; set; }
+
+    /// <summary>
+    /// Controls the number of control vertices affected by soft transform for surfaces in the V direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public int CvCountV { get; set; }
+
+    /// <summary>
+    /// Enables or disables constraint widgets on the edges of surfaces when points are on.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool ShowConstraintWidgets { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static methods and properties to modify soft transform settings
+  /// </summary>
+  public static class SoftTransformSettings
+  {
+    const int idxEnabled = 0;
+    const int idxDistanceAlong = 1;
+    const int idxShowConstraintWidgets = 2;
+
+    const int idxShape = 0;
+    const int idxCvCountU = 1;
+    const int idxCvCountV = 2;
+
+    const int idxRadius = 0;
+
+    const int idxFalloffColor = 0;
+
+    /// <summary>
+    /// When enabled other unselected components on an object will be moved during a transformation within the specified radius according
+    /// to the falloff shape.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool Enabled
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxEnabled, false, false, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxEnabled, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// The radius of effect for soft transform. Other components on the object this distance and closer to selected components
+    /// will be transformed.
+    /// </summary>
+    /// <since>9.0</since>
+    public static double Radius
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetDouble(idxRadius, false, 5.0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetDouble(idxRadius, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// The shape of the falloff curve.
+    ///  0 = Smooth
+    ///  1 = Linear
+    ///  2 = Round
+    ///  3 = Sharp
+    /// </summary>
+    /// <since>9.0</since>
+    public static int Shape
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxShape, false, 0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxShape, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// When true the distance for components affected by soft transform is calculated along the object. Otherwise world distance is used.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool MeasureDistanceAlong
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxDistanceAlong, false, false, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxDistanceAlong, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Controls the color used to shade meshes and edges when an object is affected by soft transform.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color FalloffColor
+    {
+      get
+      {
+        int argb = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetColor(idxFalloffColor, false, 0, IntPtr.Zero);
+        return Color.FromArgb(argb);
+      }
+
+      set
+      {
+        int argb = value.ToArgb();
+        UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetColor(idxFalloffColor, true, argb, IntPtr.Zero);
+      }
+    }
+
+    /// <summary>
+    /// Controls the number of control vertices affected by soft transform for surfaces in the U direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int CvCountU
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountU, false, 0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountU, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Controls the number of control vertices affected by soft transform for surfaces in the V direction.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int CvCountV
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountV, false, 0, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountV, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Enables or disables constraint widgets on the edges of surfaces when points are on.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool ShowConstraintWidgets
+    {
+      get => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxShowConstraintWidgets, false, false, IntPtr.Zero);
+      set => UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxShowConstraintWidgets, true, value, IntPtr.Zero);
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static SoftTransformSettingsState GetDefaultState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static SoftTransformSettingsState GetCurrentState()
+    {
+      return CreateState(true);
+    }
+
+    private static SoftTransformSettingsState CreateState(bool current)
+    {
+      IntPtr ptr = UnsafeNativeMethods.CRhinoSoftTransformSettings_New(current);
+
+      SoftTransformSettingsState rc = new SoftTransformSettingsState();
+
+      rc.Enabled = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxEnabled, false, false, ptr);
+      rc.Radius = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetDouble(idxRadius, false, 0.0, ptr);
+      rc.Shape = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxShape, false, 0, ptr);
+      rc.MeasureDistanceAlong = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxDistanceAlong, false, false, ptr);
+
+      int argb = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetColor(idxFalloffColor, false, 0, ptr);
+      rc.FalloffColor = Color.FromArgb(argb);
+
+      rc.CvCountU = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountU, false, 0, ptr);
+      rc.CvCountV = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetInt(idxCvCountV, false, 0, ptr);
+
+      rc.ShowConstraintWidgets = UnsafeNativeMethods.CRhinoSoftTransformSettings_GetSetBool(idxShowConstraintWidgets, false, false, ptr);
+
+      UnsafeNativeMethods.CRhinoSoftTransformSettings_Delete(ptr);
+
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>9.0</since>
+    public static void UpdateFromState(SoftTransformSettingsState state)
+    {
+      Enabled = state.Enabled;
+      Radius = state.Radius;
+      Shape = state.Shape;
+      MeasureDistanceAlong = state.MeasureDistanceAlong;
+      FalloffColor = state.FalloffColor;
+      CvCountU = state.CvCountU;
+      CvCountV = state.CvCountV;
+      ShowConstraintWidgets = state.ShowConstraintWidgets;
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+  }
+
+  /// <summary>
+  /// Specifies the plane the gumball aligns itself to.
+  /// </summary>
+  /// <since>9.0</since>
+  public enum GumballAlignment
+  {
+    /// <summary>Aligns the gumball to the world axes.</summary>
+    WorldPlane = 0,
+    /// <summary>Aligns the gumball to the construction plane of the active viewport.</summary>
+    ConstructionPlane = 1,
+    /// <summary>Aligns the gumball to the plane of the active viewport.</summary>
+    ViewPlane = 2,
+    /// <summary>Aligns the gumball to the object.</summary>
+    ObjectPlane = 3,
+    /// <summary>
+    /// Aligns the gumball to the control polygon of the object.
+    /// <see cref="ObjectPlane"/> when no control polygon frame can be made.
+    /// </summary>
+    ControlPolygon = 4
+  }
+
+  /// <summary>
+  /// Represents a snapshot of <see cref="GumballSettings"/>.
+  /// </summary>
+  /// <since>9.0</since>
+  public class GumballSettingsState
+  {
+    internal GumballSettingsState() { }
+
+    /// <summary>
+    /// Turns the gumball widget on any time objects are selected.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool EnableGumball { get; set; }
+
+    /// <summary>
+    /// Sets the view rotation center to the gumball origin.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool RotateViewAroundGumball { get; set; }
+
+    /// <summary>
+    /// Merges faces after extruding.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool MergeFacesAfterExtrude { get; set;  }
+
+    /// <summary>
+    /// If true, snaps to object snap locations.
+    /// if false, ignores object snap locations.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool SnappyGumball { get; set; }
+
+    /// <summary>
+    /// Specifies the gumball x axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color XAxisColor { get; set; }
+
+    /// <summary>
+    /// Specifies the gumball y axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color YAxisColor { get; set; }
+
+    /// <summary>
+    /// Specifies the gumball z axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color ZAxisColor { get; set; }
+
+    /// <summary>
+    /// Specifies the gumball menu ball color.
+    /// </summary>
+    /// <since>9.0</since>
+    public Color MenuBallColor {  get; set; }
+
+    /// <summary>
+    /// Specifies the radius of the gumball widget in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int GumballRadius { get; set; }
+
+    /// <summary>
+    /// Specifies the length of the direction arrows in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int TipLength { get; set; }
+
+    /// <summary>
+    /// Specifies the width of the direction arrows in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int TipWidth { get; set; }
+
+    /// <summary>
+    /// Specifies the size of the scale handles in pixels.
+    /// Set scale handle size to zero to turn off scale handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public int ScaleHandleSize { get; set; }
+
+    /// <summary>
+    /// Specifies the distance of the plane indicators from the gumball origin in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int PlaneLocation { get; set; }
+
+    /// <summary>
+    /// Specifies the size of the plane indicators in pixels.
+    /// Set plane size to zero to turn off the plane indicators.
+    /// <since>9.0</since>
+    /// </summary>
+    public int PlaneSize { get; set; }
+
+    /// <summary>
+    /// Sets the angle of view for the plane to be visible. The range is from 0 to 90 degrees.
+    /// 0 degrees means the plane only shows if the gumball is perfectly aligned to the view,
+    /// 90 means the plane always shows.
+    /// The default is 50 degrees.
+    /// </summary>
+    /// <since>9.0</since>
+    public double PlaneVisibilityAngle { get; set; }
+
+    /// <summary>
+    /// Specifies the thickness of the axis arrows in pixels.
+    /// Set axis thickness to zero to turn of move handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public int AxisThickness { get; set; }
+
+    /// <summary>
+    /// Specifies the thickness of the rotation arcs in pixels.
+    /// Set arc thickness to zero to turn off rotation handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public int ArcThickness { get; set; }
+
+    /// <summary>
+    /// Specifies the distance of the menu ball from the gumball origin in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int MenuBallLocation { get; set; }
+
+    /// <summary>
+    /// Specifies the size of the menu dots in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int MenuBallSize { get; set; }
+
+    /// <summary>
+    /// Specifies the size of the extrude dots in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public int ExtrudeBallSize { get; set; }
+  }
+
+  /// <summary>
+  /// Contains static metthods and properties to modify Rhino gumball settings.
+  /// </summary>
+  /// <since>9.0</since>
+  public static class GumballSettings
+  {
+    private static GumballSettingsState CreateState(bool bDefault)
+    {
+      GumballSettingsState state = new GumballSettingsState
+      {
+        // bool
+        EnableGumball = UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.EnableGumball, bDefault, false, false),
+        RotateViewAroundGumball = UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.RotateViewAroundGumball, bDefault, false, false),
+        MergeFacesAfterExtrude = UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.MergeFacesAfterExtrude, bDefault, false, false),
+        SnappyGumball = UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.SnappyGumball, bDefault, false, false),
+        // color
+        XAxisColor = Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.XAxisColor, bDefault, 0, false)),
+        YAxisColor = Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.YAxisColor, bDefault, 0, false)),
+        ZAxisColor = Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.ZAxisColor, bDefault, 0, false)),
+        MenuBallColor = Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.MenuButtonColor, bDefault, 0, false)),
+        // int
+        GumballRadius = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.GumballRadius, bDefault, 0, false),
+        TipLength = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipLength, bDefault, 0, false),
+        TipWidth = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipWidth, bDefault, 0, false),
+        ScaleHandleSize = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ScaleHandleSize, bDefault, 0, false),
+        PlaneLocation = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneLocation, bDefault, 0, false),
+        PlaneSize = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneSize, bDefault, 0, false),
+        AxisThickness = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.AxisThickness, bDefault, 0, false),
+        ArcThickness = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ArcThickness, bDefault, 0, false),
+        MenuBallLocation = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallLocation, bDefault, 0, false),
+        MenuBallSize = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallSize, bDefault, 0, false),
+        ExtrudeBallSize = UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ExtrudeBallSize, bDefault, 0, false),
+        // double
+        PlaneVisibilityAngle = UnsafeNativeMethods.RHC_RhinoGumballSettings_PlaneAngle(bDefault, 0.0, false)
+      };
+      return state;
+    }
+
+    /// <summary>
+    /// Gets the factory settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static GumballSettingsState GetDefaultState()
+    {
+      return CreateState(true);
+    }
+
+    /// <summary>
+    /// Gets the current settings of the application.
+    /// </summary>
+    /// <since>9.0</since>
+    public static GumballSettingsState GetCurrentState()
+    {
+      return CreateState(false);
+    }
+
+    /// <summary>
+    /// Commits the default settings as the current settings.
+    /// </summary>
+    /// <since>9.0</since>
+    public static void RestoreDefaults()
+    {
+      UpdateFromState(GetDefaultState());
+    }
+
+    /// <summary>
+    /// Sets all settings to a particular defined joined state.
+    /// </summary>
+    /// <param name="state">The particular state.</param>
+    /// <since>9.0</since>
+    public static void UpdateFromState(GumballSettingsState state)
+    {
+      EnableGumball = state.EnableGumball;
+      RotateViewAroundGumball = state.RotateViewAroundGumball;
+      MergeFacesAfterExtrude = state.MergeFacesAfterExtrude;
+      SnappyGumball = state.SnappyGumball;
+      XAxisColor = state.XAxisColor;
+      YAxisColor = state.YAxisColor;
+      ZAxisColor = state.ZAxisColor;
+      MenuBallColor = state.MenuBallColor;
+      GumballRadius = state.GumballRadius;
+      TipLength = state.TipLength;
+      TipWidth = state.TipWidth;
+      ScaleHandleSize = state.ScaleHandleSize;
+      PlaneLocation = state.PlaneLocation;
+      PlaneSize = state.PlaneSize;
+      PlaneVisibilityAngle = state.PlaneVisibilityAngle;
+      AxisThickness = state.AxisThickness;
+      ArcThickness = state.ArcThickness;
+      MenuBallLocation = state.MenuBallLocation;
+      MenuBallSize = state.MenuBallSize;
+      ExtrudeBallSize = state.ExtrudeBallSize;
+    }
+
+    /// <summary>
+    /// Turns the gumball widget on any time objects are selected.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool EnableGumball
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.EnableGumball, false, false, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.EnableGumball, false, value, true); }
+    }
+
+    /// <summary>
+    /// Sets the view rotation center to the gumball origin.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool RotateViewAroundGumball
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.RotateViewAroundGumball, false, false, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.RotateViewAroundGumball, false, value, true); }
+    }
+
+    /// <summary>
+    /// Merges faces after extruding.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool MergeFacesAfterExtrude
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.MergeFacesAfterExtrude, false, false, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.MergeFacesAfterExtrude, false, value, true); }
+    }
+
+    /// <summary>
+    /// If true, snaps to object snap locations.
+    /// if false, ignores object snap locations.
+    /// </summary>
+    /// <since>9.0</since>
+    public static bool SnappyGumball
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.SnappyGumball, false, false, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Bool((int)UnsafeNativeMethods.RhinoAutoGumballBool.SnappyGumball, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the gumball x axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color XAxisColor
+    {
+      get { return Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.XAxisColor, false, 0, false)); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.XAxisColor, false, value.ToArgb(), true); }
+    }
+
+    /// <summary>
+    /// Specifies the gumball y axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color YAxisColor
+    {
+      get { return Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.YAxisColor, false, 0, false)); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.YAxisColor, false, value.ToArgb(), true); }
+    }
+
+    /// <summary>
+    /// Specifies the gumball z axis color.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color ZAxisColor
+    {
+      get { return Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.ZAxisColor, false, 0, false)); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.ZAxisColor, false, value.ToArgb(), true); }
+    }
+
+    /// <summary>
+    /// Specifies the gumball menu ball color.
+    /// </summary>
+    /// <since>9.0</since>
+    public static Color MenuBallColor
+    {
+      get { return Color.FromArgb(UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.MenuButtonColor, false, 0, false)); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Color((int)UnsafeNativeMethods.RhinoAutoGumballColors.MenuButtonColor, false, value.ToArgb(), true); }
+    }
+
+    /// <summary>
+    /// Specifies the radius of the gumball widget in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int GumballRadius
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.GumballRadius, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.GumballRadius, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the length of the direction arrows in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int TipLength
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipLength, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipLength, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the width of the direction arrows in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int TipWidth
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipWidth, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.TipWidth, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the size of the scale handles in pixels.
+    /// Set scale handle size to zero to turn off scale handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int ScaleHandleSize
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ScaleHandleSize, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ScaleHandleSize, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the distance of the plane indicators from the gumball origin in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int PlaneLocation
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneLocation, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneLocation, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the size of the plane indicators in pixels.
+    /// Set plane size to zero to turn off the plane indicators.
+    /// <since>9.0</since>
+    /// </summary>
+    public static int PlaneSize
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneSize, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.PlaneSize, false, value, true); }
+    }
+
+    /// <summary>
+    /// Sets the angle of view for the plane to be visible. The range is from 0 to 90 degrees.
+    /// 0 degrees means the plane only shows if the gumball is perfectly aligned to the view,
+    /// 90 means the plane always shows.
+    /// The default is 50 degrees.
+    /// </summary>
+    /// <since>9.0</since>
+    public static double PlaneVisibilityAngle
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_PlaneAngle(false, 0.0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_PlaneAngle(false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the thickness of the axis arrows in pixels.
+    /// Set axis thickness to zero to turn of move handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int AxisThickness
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.AxisThickness, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.AxisThickness, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the thickness of the rotation arcs in pixels.
+    /// Set arc thickness to zero to turn off rotation handles.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int ArcThickness
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ArcThickness, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ArcThickness, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the distance of the menu ball from the gumball origin in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MenuBallLocation
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallLocation, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallLocation, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the size of the menu dots in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int MenuBallSize
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallSize, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.MenuBallSize, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the size of the extrude dots in pixels.
+    /// </summary>
+    /// <since>9.0</since>
+    public static int ExtrudeBallSize
+    {
+      get { return UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ExtrudeBallSize, false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Int((int)UnsafeNativeMethods.RhinoAutoGumballInt.ExtrudeBallSize, false, value, true); }
+    }
+
+    /// <summary>
+    /// Specifies the plane the gumball aligns itself to.
+    /// </summary>
+    /// <remarks>
+    /// Setting this does not re-align a gumball that is already on screen; the new alignment
+    /// is picked up the next time the gumball is built, for example when the selection changes.
+    /// Run the GumballAlignment command instead if you need the visible gumball updated.
+    /// <para>
+    /// This setting is deliberately not part of <see cref="GumballSettingsState"/>, so it is
+    /// left alone by <see cref="RestoreDefaults"/>. This matches the RestoreDefaults behavior
+    /// of the -GumballSettings command, which does not reset the alignment either.
+    /// </para>
+    /// </remarks>
+    /// <since>9.0</since>
+    public static GumballAlignment AutoGumballAlignment
+    {
+      get { return (GumballAlignment)UnsafeNativeMethods.RHC_RhinoGumballSettings_Alignment(false, 0, false); }
+      set { UnsafeNativeMethods.RHC_RhinoGumballSettings_Alignment(false, (int)value, true); }
+    }
+
+    /// <summary>
+    /// Gets the factory default value of <see cref="AutoGumballAlignment"/>.
+    /// </summary>
+    /// <since>9.0</since>
+    public static GumballAlignment GetDefaultAlignment()
+    {
+      return (GumballAlignment)UnsafeNativeMethods.RHC_RhinoGumballSettings_Alignment(true, 0, false);
+    }
+  }
 }
 
 #endif

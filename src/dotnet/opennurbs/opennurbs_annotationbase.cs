@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Runtime;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Rhino.Geometry
 {
@@ -557,6 +559,40 @@ namespace Rhino.Geometry
       }
     }
 
+    internal void SetFontDirect(DocObjects.Font font, bool keepOverrides)
+    {
+      IntPtr thisptr = NonConstPointer();
+      IntPtr fontptr = font.ConstPointer();
+      IntPtr styleptr = ConstParentDimStylePointer();
+      UnsafeNativeMethods.ON_Annotation_SetFont2(thisptr, styleptr, fontptr, keepOverrides);
+      GC.KeepAlive(m_parent_dimstyle);
+      GC.KeepAlive(font);
+      GC.KeepAlive(this);
+    }
+
+    internal void SetFontDirect(DocObjects.Font font, bool keepOverrides, bool underline)
+    {
+      IntPtr thisptr = NonConstPointer();
+      IntPtr fontptr = font.ConstPointer();
+      IntPtr styleptr = ConstParentDimStylePointer();
+      UnsafeNativeMethods.ON_Annotation_SetFont3(thisptr, styleptr, fontptr, keepOverrides, underline);
+      GC.KeepAlive(m_parent_dimstyle);
+      GC.KeepAlive(font);
+      GC.KeepAlive(this);
+    }
+
+
+    /// set bold, italic, or underline on every text run while preserving
+    /// each run's own font face.  which: 0=bold, 1=italic, 2=underline.
+    internal void SetRunsFontAttribute(int which, bool value)
+    {
+      IntPtr thisptr = NonConstPointer();
+      IntPtr styleptr = ConstParentDimStylePointer();
+      UnsafeNativeMethods.ON_Annotation_SetRunsFontAttribute(thisptr, styleptr, which, value);
+      GC.KeepAlive(m_parent_dimstyle);
+      GC.KeepAlive(this);
+    }
+
 #if RHINO_SDK
     /// <summary> Obsolete; use Font property instead </summary>
     /// <since>6.1</since>
@@ -673,6 +709,52 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Use kerning data in font to set distances between glyphs
+    /// </summary>
+    /// <since>9.0</since>
+    public bool UseKerning
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        IntPtr constPtrDimStyle = ConstParentDimStylePointer();
+        bool rc = UnsafeNativeMethods.ON_Annotation_UseKerning(constPtrThis, constPtrDimStyle);
+        GC.KeepAlive(m_parent_dimstyle);
+        return rc;
+      }
+      set
+      {
+        IntPtr constPtrThis = NonConstPointer();
+        IntPtr constPtrDimStyle = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_Annotation_SetUseKerning(constPtrThis, constPtrDimStyle, value);
+        GC.KeepAlive(m_parent_dimstyle);
+      }
+    }
+
+    /// <summary>
+    /// Scale applied to line spacing
+    /// </summary>
+    /// <since>9.0</since>
+    public double LineSpaceScale
+
+    {
+      get
+      {
+        IntPtr constPtrThis = ConstPointer();
+        IntPtr constPtrDimStyle = ConstParentDimStylePointer();
+        double rc = UnsafeNativeMethods.ON_Annotation_LineSpaceScale(constPtrThis, constPtrDimStyle);
+        GC.KeepAlive(m_parent_dimstyle);
+        return rc;
+      }
+      set
+      {
+        IntPtr constPtrThis = NonConstPointer();
+        IntPtr constPtrDimStyle = ConstParentDimStylePointer();
+        UnsafeNativeMethods.ON_Annotation_SetLineSpaceScale(constPtrThis, constPtrDimStyle, value);
+        GC.KeepAlive(m_parent_dimstyle);
+      }
+    }
 
     #endregion properties originating from dim style that can be overridden
 
@@ -704,6 +786,11 @@ namespace Rhino.Geometry
     /// </param>
     string GetText(bool rich)
     {
+      // V9 don't trigger RTF compose
+      if (rich == false)
+      {
+        return PlainTextFromTextRuns;
+      }
       using (var sw = new StringWrapper())
       {
         var ptr_stringholder = sw.NonConstPointer;
@@ -748,6 +835,52 @@ namespace Rhino.Geometry
       }
     }
 
+    internal TextRun[] GetTextRuns()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr const_ptr_textrun_array = UnsafeNativeMethods.ON_V9_Annotation_GetTextRuns(const_ptr_this);
+      int count = UnsafeNativeMethods.ON_TextRunArray_Count(const_ptr_textrun_array);
+      TextRun[] textruns = new TextRun[count];
+      for (int i=0; i<count; i++)
+      {
+        IntPtr ptrRun = UnsafeNativeMethods.ON_TextRunArray_ON_TextRun_At(const_ptr_textrun_array, i);
+        if (ptrRun != IntPtr.Zero)
+        {
+          textruns[i] = new TextRun(ptrRun);
+        }
+      }
+      GC.KeepAlive(this);
+      return textruns;
+    }
+
+    internal void SetTextRuns(IEnumerable<TextRun> textRuns)
+    {
+      IntPtr ptr_this = NonConstPointer();
+      IntPtr ptr_textrun_array = UnsafeNativeMethods.ON_TextRunArray_New();
+      if (textRuns != null)
+      {
+        foreach(var run in textRuns)
+        {
+          IntPtr const_ptr_textrun = run.ConstPointer();
+          UnsafeNativeMethods.ON_TextRunArray_Append(ptr_textrun_array, const_ptr_textrun);
+        }
+      }
+      // Preserve the annotation's TextHeight, LineSpaceScale, and UseKerning on
+      // the new runs. These are dimstyle properties (potentially overridden
+      // per-annotation) that are not part of the editor document model, so
+      // MapDocumentToTextRuns does not set them. Without this, they reset to
+      // defaults. TextHeight must be uniform across all runs in an annotation.
+      UnsafeNativeMethods.ON_TextRunArray_SetTextHeight(ptr_textrun_array, TextHeight);
+      UnsafeNativeMethods.ON_TextRunArray_SetLineSpaceScale(ptr_textrun_array, LineSpaceScale);
+      UnsafeNativeMethods.ON_TextRunArray_SetApplyKerning(ptr_textrun_array, UseKerning);
+      UnsafeNativeMethods.ON_V9_Annotation_SetTextRuns(ptr_this, ptr_textrun_array);
+      UnsafeNativeMethods.ON_TextRunArray_Delete(ptr_textrun_array);
+      GC.KeepAlive(textRuns);
+      GC.KeepAlive(this);
+    }
+    // doesn't get save to the file.
+    internal bool WasCreatedWithTextRuns { get; set; } = false;
+
     /// <summary>
     /// See RichText
     /// </summary>
@@ -777,6 +910,15 @@ namespace Rhino.Geometry
         GC.KeepAlive(this);
       }
     }
+
+    internal string PlainTextFromTextRuns =>
+      GetTextRuns()?
+        .Where(r => r.RunType == TextRunType.Text || r.RunType == TextRunType.Newline || r.RunType == TextRunType.Paragraph)
+        // @todo: in opennurbs multi-line plain text is always returned with newlines as \r\n, should be reviewed.
+        .Select(r => r.RunType == TextRunType.Text ? r.Text ?? "" : "\r\n")
+        .Aggregate("", (a, b) => a + b) ?? "";
+
+    internal bool TextIsNullOrWhiteSpace => string.IsNullOrWhiteSpace(PlainTextFromTextRuns);
 
     /// <summary>
     /// Text including additional RTF formatting information
@@ -815,22 +957,118 @@ namespace Rhino.Geometry
 
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
     /// <since>6.0</since>
-    public static string PlainTextToRtf(string str) => 
-      @"{\rtf1{\ltrch " 
+    public static string PlainTextToRtf(string str) =>
+      @"{\rtf1{\ltrch "
       + str.Replace("\n", Ph)
       .Replace(System.Environment.NewLine, Ph)
       .Replace(@"\", @"\\")
       .Replace("{", @"\{")
       .Replace("}", @"\}")
-      .Replace(Ph, @"}\par {") 
+      .Replace(Ph, @"}\par {")
       + "}}";
 
     private const string Ph = "E368C572-BF39-4EA3-B02B-F7D9C63D6580";
+
+    /// <summary>
+    /// Parse a Rhino RTF string into a list of TextRun objects. Pure
+    /// helper: does not read or mutate any annotation instance state.
+    /// TextRun is currently internal, so this method is internal as
+    /// well; callers are the V9 view models (Rhino.UI has
+    /// InternalsVisibleTo access).
+    /// </summary>
+    /// <param name="rtfString">The RTF string to parse.</param>
+    /// <param name="dimStyle">
+    /// Dimension style used to resolve the default font and the text
+    /// position hash. May be null, in which case the opennurbs default
+    /// dimension style is used.
+    /// </param>
+    /// <returns>
+    /// The parsed runs. An empty array is returned if the input string
+    /// is null/empty or the parse fails.
+    /// </returns>
+    internal static IList<TextRun> RtfToTextRuns(string rtfString, DimensionStyle dimStyle)
+    {
+      if (string.IsNullOrEmpty(rtfString))
+        return Array.Empty<TextRun>();
+
+      IntPtr const_ptr_dim_style = (dimStyle != null) ? dimStyle.ConstPointer() : IntPtr.Zero;
+      IntPtr ptr_run_array = UnsafeNativeMethods.ON_RtfParser_ParseToRuns(rtfString, const_ptr_dim_style);
+      GC.KeepAlive(dimStyle);
+      if (ptr_run_array == IntPtr.Zero)
+        return Array.Empty<TextRun>();
+
+      try
+      {
+        int count = UnsafeNativeMethods.ON_TextRunArray_Count(ptr_run_array);
+        TextRun[] textruns = new TextRun[count];
+        for (int i = 0; i < count; i++)
+        {
+          IntPtr ptrRun = UnsafeNativeMethods.ON_TextRunArray_ON_TextRun_At(ptr_run_array, i);
+          if (ptrRun != IntPtr.Zero)
+            textruns[i] = new TextRun(ptrRun);
+        }
+        return textruns;
+      }
+      finally
+      {
+        UnsafeNativeMethods.ON_TextRunArray_Delete(ptr_run_array);
+      }
+    }
+
+    /// <summary>
+    /// Compose a Rhino RTF string from a sequence of TextRun objects and
+    /// an explicit default (style) font. Pure helper: does not read or
+    /// mutate any annotation instance state and does not consult the
+    /// runtime RTF-recompose flag. TextRun is currently internal, so
+    /// this method is internal as well; callers are the V9 view models
+    /// (Rhino.UI has InternalsVisibleTo access).
+    /// </summary>
+    /// <param name="textRuns">The runs to compose into an RTF string.</param>
+    /// <param name="defaultFont">
+    /// The annotation's default / style font. Used to decide whether
+    /// per-run font / bold / italic / underline overrides must be
+    /// emitted.
+    /// </param>
+    /// <returns>
+    /// The composed RTF string, or an empty string if the inputs are
+    /// null or the composer fails.
+    /// </returns>
+    internal static string TextRunsToRtf(IEnumerable<TextRun> textRuns, Rhino.DocObjects.Font defaultFont)
+    {
+      if (textRuns == null || defaultFont == null)
+        return string.Empty;
+
+      IntPtr ptr_run_array = UnsafeNativeMethods.ON_TextRunArray_New();
+      try
+      {
+        foreach (var run in textRuns)
+        {
+          if (run == null)
+            continue;
+          IntPtr const_ptr_textrun = run.ConstPointer();
+          UnsafeNativeMethods.ON_TextRunArray_Append(ptr_run_array, const_ptr_textrun);
+        }
+        IntPtr const_ptr_font = defaultFont.ConstPointer();
+        using (var sw = new StringWrapper())
+        {
+          var ptr_stringholder = sw.NonConstPointer;
+          bool ok = UnsafeNativeMethods.ON_RtfComposer_ComposeFromRuns(
+            ptr_run_array, const_ptr_font, ptr_stringholder);
+          GC.KeepAlive(textRuns);
+          GC.KeepAlive(defaultFont);
+          return ok ? sw.ToString() : string.Empty;
+        }
+      }
+      finally
+      {
+        UnsafeNativeMethods.ON_TextRunArray_Delete(ptr_run_array);
+      }
+    }
 
     /// <summary>
     /// Sets the annotation's text as rich text (RTF), optionally using a specified dimension style for formatting overrides.
@@ -862,7 +1100,10 @@ namespace Rhino.Geometry
     /// Returns true if the text begins with an RTF header; otherwise, false.
     /// </summary>
     /// <since>6.0</since>
-    public bool TextHasRtfFormatting => Regex.Match(RichText ?? "", @"^{\\\\?rtf").Success; // sometimes the string only has one backslack - only seen it in Dimensions
+    public bool TextHasRtfFormatting =>
+      // V9 don't trigger RTF compose
+      //Regex.Match(RichText ?? "", @"^{\\\\?rtf").Success; // sometimes the string only has one backslack - only seen it in Dimensions
+      GetTextRuns().Where(rt => rt.IsText).Count() > 1;
 
     /// <summary>
     /// Modifies the formatting of an RTF (Rich Text Format) string by setting or clearing bold, italic, underline, and font face properties on the first character run.
@@ -1186,12 +1427,7 @@ namespace Rhino.Geometry
     /// <param name="endRunPosition"></param>
     /// <returns></returns>
     /// <since>7.0</since>
-    public bool RunReplace(
-      string replaceString,
-      int startRunIndex, 
-      int startRunPosition,
-      int endRunIndex,
-      int endRunPosition)
+    public bool RunReplace(string replaceString, int startRunIndex, int startRunPosition, int endRunIndex, int endRunPosition)
     {
       var this_ptr = NonConstPointer();
       IntPtr styleptr = ConstParentDimStylePointer();

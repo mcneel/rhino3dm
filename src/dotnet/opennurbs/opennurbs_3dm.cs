@@ -106,7 +106,25 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public const uint TCODE_ANONYMOUS_CHUNK = (TCODE_USER | TCODE_CRC | 0x0000);
 
-  
+    /// <summary>(TCODE_USER | TCODE_CRC | 0x0001)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_UTF8_STRING_CHUNK = (TCODE_USER | TCODE_CRC | 0x0001);
+    /// <summary>(TCODE_USER | TCODE_CRC | 0x0002)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_MODEL_ATTRIBUTES_CHUNK = (TCODE_USER | TCODE_CRC | 0x0002);
+    /// <summary>(TCODE_USER | 0x0001)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_XDATA = (TCODE_USER | 0x0001);
+
+    [CLSCompliant(false)]
+    public const uint TCODE_DICTIONARY = (TCODE_USER | TCODE_CRC | 0x0010);
+    [CLSCompliant(false)]
+    public const uint TCODE_DICTIONARY_ID = (TCODE_USER | TCODE_CRC | 0x0011);
+    [CLSCompliant(false)]
+    public const uint TCODE_DICTIONARY_ENTRY = (TCODE_USER | TCODE_CRC | 0x0012);
+    [CLSCompliant(false)]
+    public const uint TCODE_DICTIONARY_END = (TCODE_USER | TCODE_SHORT | 0x0013);
+
     /// <summary>rendering materials.</summary>
     [CLSCompliant(false)]
     public const uint TCODE_MATERIAL_TABLE = (TCODE_TABLE | 0x0010);
@@ -168,6 +186,16 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public const uint TCODE_HISTORYRECORD_TABLE = (TCODE_TABLE | 0x0026); // history records
 
+    /// <summary>(TCODE_TABLE | 0x0027)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_SECTION_STYLE_TABLE = (TCODE_TABLE | 0x0027);
+    /// <summary>(TCODE_TABLE | 0x0028)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_MARKUP_TABLE = (TCODE_TABLE | 0x0028);
+    /// <summary>(TCODE_TABLE | 0x0029)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_PAGEVIEWGROUP_TABLE = (TCODE_TABLE | 0x0029);
+
     [CLSCompliant(false)]
     public const uint TCODE_ENDOFTABLE = 0xFFFFFFFF;
 
@@ -185,7 +213,11 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public const uint TCODE_PROPERTIES_OPENNURBS_VERSION = (TCODE_TABLEREC | TCODE_SHORT | 0x0026);
 
-// records in settings table
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x0027)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_PROPERTIES_AS_FILE_NAME = (TCODE_TABLEREC | TCODE_CRC | 0x0027);
+
+    // records in settings table
     [CLSCompliant(false)]
     public const uint TCODE_SETTINGS_PLUGINLIST = (TCODE_TABLEREC | TCODE_CRC | 0x0135);
     [CLSCompliant(false)]
@@ -226,8 +258,11 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public const uint TCODE_SETTINGS_ATTRIBUTES = (TCODE_TABLEREC | TCODE_CRC | 0x0134);
 
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x0136)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_SETTINGS_RENDER_USERDATA = (TCODE_TABLEREC | TCODE_CRC | 0x0136);
 
-// views are subrecords in the settings table
+    // views are subrecords in the settings table
     [CLSCompliant(false)]
     public const uint TCODE_VIEW_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x003B);
 // subrecords if view record
@@ -290,6 +325,11 @@ namespace Rhino.FileIO
 // records in user table
     [CLSCompliant(false)]
     public const uint TCODE_USER_TABLE_UUID = (TCODE_TABLEREC | TCODE_CRC | 0x0080); //table id
+
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x0082)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_USER_TABLE_RECORD_HEADER = (TCODE_TABLEREC | TCODE_CRC | 0x0082);
+
     [CLSCompliant(false)]
     public const uint TCODE_USER_RECORD = (TCODE_TABLEREC | 0x0081); // records in user table are in TCODE_USER_RECORD chunks
 
@@ -329,7 +369,17 @@ namespace Rhino.FileIO
     [CLSCompliant(false)]
     public const uint TCODE_HISTORYRECORD_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x007B);
 
-// records in object table
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x007C)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_SECTION_STYLE_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x007C);
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x007D)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_MARKUP_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x007D);
+    /// <summary>(TCODE_TABLEREC | TCODE_CRC | 0x007E)</summary>
+    [CLSCompliant(false)]
+    public const uint TCODE_PAGEVIEWGROUP_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x007E);
+
+    // records in object table
     [CLSCompliant(false)]
     public const uint TCODE_OBJECT_RECORD = (TCODE_TABLEREC | TCODE_CRC | 0x0070);
     [CLSCompliant(false)]
@@ -627,9 +677,6 @@ namespace Rhino.FileIO
     public const uint TCODE_LAYERREF = (TCODE_SHORT | TCODE_TABLEREC | 0x0001);
 
     [CLSCompliant(false)]
-    public const uint TCODE_XDATA = (TCODE_USER | 0x0001);
-
-    [CLSCompliant(false)]
     public const uint TCODE_RGB = (TCODE_SHORT | TCODE_DISPLAY | 0x0001);
     [CLSCompliant(false)]
     public const uint TCODE_TEXTUREMAP = (TCODE_DISPLAY | 0x0002);
@@ -702,14 +749,5 @@ namespace Rhino.FileIO
     public const uint TCODE_LEGACY_TOL_FIT = (TCODE_TOLERANCE | 0x0001);
     [CLSCompliant(false)]
     public const uint TCODE_LEGACY_TOL_ANGLE = (TCODE_TOLERANCE | 0x0002);
-
-    [CLSCompliant(false)]
-    public const uint TCODE_DICTIONARY = (TCODE_USER | TCODE_CRC | 0x0010);
-    [CLSCompliant(false)]
-    public const uint TCODE_DICTIONARY_ID = (TCODE_USER | TCODE_CRC | 0x0011);
-    [CLSCompliant(false)]
-    public const uint TCODE_DICTIONARY_ENTRY = (TCODE_USER | TCODE_CRC | 0x0012);
-    [CLSCompliant(false)]
-    public const uint TCODE_DICTIONARY_END = (TCODE_USER | TCODE_SHORT | 0x0013);
   }
 }

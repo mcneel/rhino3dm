@@ -34,14 +34,9 @@ namespace Rhino.DocObjects
 
     // rhino3dm-local (sync exception): when this ViewportInfo belongs to a parent
     // ViewInfo, edits must write straight into the parent view's ON_Viewport
-    // (&ON_3dmView.m_vp) so camera changes persist (e.g. ViewInfo.Viewport.SetCameraLocation
-    // followed by File3dm.Views.Add + write/read). ON_3dmView_ViewportPointer returns a
-    // pointer INTO the view (non-owning), so this proxy allocates nothing and cannot leak.
-    // Upstream reverted the original fix for RH-83697 (two-point perspective), but that only
-    // affected full-Rhino UI code (ViewportPropertiesPanel / SetViewProjection) which rhino3dm
-    // does not ship. We deliberately avoid the parent==null/IsNonConst fall-through that made
-    // the original revert-prone version leak an untracked copy. TODO(9.x): adopt upstream's
-    // reworked ownership model if/when it lands.
+    // (&ON_3dmView.m_vp) so camera changes persist through File3dm.Views.Add +
+    // write/read. ON_3dmView_ViewportPointer returns a pointer INTO the view
+    // (non-owning), so this proxy allocates nothing and cannot leak.
     internal override IntPtr NonConstPointer()
     {
       var vi = m_parent as ViewInfo;
@@ -1256,7 +1251,7 @@ namespace Rhino.DocObjects
     }
 
     /// <summary>
-    /// Gets or sets the 1/2 smallest angle. See <see cref="GetCameraAngles"/> for more information.
+    /// Gets or sets the 1/2 of smallest subtended view angle. See <see cref="GetCameraAngles"/> for more information.
     /// </summary>
     /// <since>5.0</since>
     public double CameraAngle
@@ -1522,9 +1517,12 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="geometry"></param>
     /// <param name="border">
-    /// If border > 1.0, then the frustum in enlarged by this factor
-    /// to provide a border around the view.  1.1 works well for
-    /// parallel projections; 0.0 is suggested for perspective projections.
+    /// If border > 1.0, then the frustum is enlarged by this factor
+    /// to provide a border around the view.  If 0.0 &lt; border &lt; 1.0, then
+    /// the frustum is shrunk by this factor and the objects will extend
+    /// past the edges of the view.  A border of 0.0 or 1.0 adds no border.
+    /// 1.1 works well for parallel projections; 0.0 is suggested for
+    /// perspective projections.
     /// </param>
     /// <returns>True if successful.</returns>
     /// <since>5.6</since>
@@ -1547,9 +1545,12 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <param name="cameraCoordinateBoundingBox"></param>
     /// <param name="border">
-    /// If border > 1.0, then the frustum in enlarged by this factor
-    /// to provide a border around the view.  1.1 works well for
-    /// parallel projections; 0.0 is suggested for perspective projections.
+    /// If border > 1.0, then the frustum is enlarged by this factor
+    /// to provide a border around the view.  If 0.0 &lt; border &lt; 1.0, then
+    /// the frustum is shrunk by this factor and the objects will extend
+    /// past the edges of the view.  A border of 0.0 or 1.0 adds no border.
+    /// 1.1 works well for parallel projections; 0.0 is suggested for
+    /// perspective projections.
     /// </param>
     /// <returns>True if successful.</returns>
     /// <since>5.6</since>
@@ -1558,7 +1559,10 @@ namespace Rhino.DocObjects
       bool rc = false;
       if (cameraCoordinateBoundingBox.IsValid)
       {
-        if (border > 1.0 && RhinoMath.IsValidDouble(border))
+        // 8-Sep-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-90801
+        // A border less than 1.0 shrinks the frustum. A border of 0.0 still means
+        // "no border" - see the documentation.
+        if (border > 0.0 && border != 1.0 && RhinoMath.IsValidDouble(border))
         {
           double dx = cameraCoordinateBoundingBox.Max.X - cameraCoordinateBoundingBox.Min.X;
           dx *= 0.5 * (border - 1.0);

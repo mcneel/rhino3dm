@@ -404,5 +404,25 @@ namespace Rhino.Geometry
       UnsafeNativeMethods.ON_ClippingPlaneSurface_ClearParticipationLists(ptr_this);
       GC.KeepAlive(this);
     }
+
+    /// <summary>
+    /// The id of the dimstyle used by this clipping plane surface. This is used
+    /// to help determine how the clipping plane is drawn with respect to things
+    /// like arrows and fonts
+    /// </summary>
+    /// <since>9.0</since>
+    public Guid DimensionStyleId
+    {
+      get
+      {
+        IntPtr ptrThis = ConstPointer();
+        return UnsafeNativeMethods.ON_ClippingPlaneSurface_DimensionStyleId(ptrThis);
+      }
+      set
+      {
+        IntPtr ptrThis = NonConstPointer();
+        UnsafeNativeMethods.ON_ClippingPlaneSurface_SetDimensionStyleId(ptrThis, value);
+      }
+    }
   }
 }

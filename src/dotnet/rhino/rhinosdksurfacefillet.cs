@@ -55,6 +55,30 @@ namespace Rhino.Geometry
       GC.KeepAlive(FaceA);
       GC.KeepAlive(FaceB);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="FaceA"></param>
+    /// <param name="uvA"></param>
+    /// <param name="FaceB"></param>
+    /// <param name="uvB"></param>
+    /// <param name="radius0"></param>
+    /// <param name="radius1"></param>
+    /// <param name="allowExtend"></param>
+    /// <param name="tolerance"></param>
+    protected SurfaceFilletBase(BrepFace FaceA, Point2d uvA, BrepFace FaceB, Point2d uvB,
+      double radius0, double radius1, bool allowExtend, double tolerance)
+    {
+      m_ptr = UnsafeNativeMethods.CRhinoSurfaceFillet_New3(FaceA.ConstPointer(), ref uvA, FaceB.ConstPointer(), ref uvB, 
+        radius0, radius1, allowExtend, tolerance);
+      // I know that throwing an exception is frowned upon in a constructor, but after talking with Steve Baer, the decision was:
+      //     "this case is really never going to happen."
+      if (null == m_ptr) throw new NullReferenceException("Could not instantiate a new SurfaceFillet.");
+      GC.KeepAlive(FaceA);
+      GC.KeepAlive(FaceB);
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -162,6 +186,31 @@ namespace Rhino.Geometry
           return bResult;
         }
       }
+      GC.KeepAlive(this);
+      return false;
+    }
+
+    /// <summary>
+    /// make chamfer surfaces and hack them up to active pieces. Adjusts cross sections 
+    /// </summary>
+    /// <param name="railDegree">The degree of the rail</param>
+    /// <param name="bExtend">If true, when one input surface is longer than the other, the fillet surface is extended to the input surface edges.</param>
+    /// <param name="Fillets">the fillet8s that were created</param>
+    /// <returns>true if successful</returns>
+    /// <since>9.0</since>
+    public bool Lines(int railDegree, bool bExtend, List<Brep> Fillets)
+    {
+      using (SimpleArrayBrepPointer fillets = new SimpleArrayBrepPointer())
+      {
+        bool bResult = UnsafeNativeMethods.CRhinoSurfaceFillet_Lines(m_ptr, railDegree, bExtend, fillets.NonConstPointer());
+        if (bResult)
+        {
+          Fillets.AddRange(fillets.ToNonConstArray());
+          return bResult;
+        }
+      }
+
+      GC.KeepAlive(Fillets);
       GC.KeepAlive(this);
       return false;
     }
@@ -835,6 +884,14 @@ namespace Rhino.Geometry
       return base.ChangeFilletRadius(radius);
     }
 
+  }
+
+  internal class SurfaceChamfer: SurfaceFilletBase
+  {
+    public SurfaceChamfer(BrepFace FaceA, Point2d uvA, BrepFace FaceB, Point2d uvB,
+      double radius0, double radius1, bool allowExtend, double tolerance) 
+      : base(FaceA, uvA, FaceB, uvB, radius0, radius1, allowExtend, tolerance)
+    { }
   }
 
   internal class SurfaceToCurveFillet : SurfaceFilletBase

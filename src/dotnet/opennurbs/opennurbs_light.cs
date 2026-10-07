@@ -26,14 +26,15 @@ namespace Rhino.Geometry
     {
       HostUtils.CheckForRdk(true, true);
 
-      var sun = new Rhino.Render.Sun()
+      using (var sun = new Rhino.Render.Sun()
       {
         North = northAngleDegrees,
         Azimuth = azimuthDegrees,
         Altitude = altitudeDegrees
-      };
-
-      return sun.Light;
+      })
+      {
+        return sun.Light;
+      }
     }
 
     /// <summary>
@@ -51,16 +52,16 @@ namespace Rhino.Geometry
     {
       HostUtils.CheckForRdk(true, true);
 
-      var sun = new Rhino.Render.Sun
+      using (var sun = new Rhino.Render.Sun
       {
         North = northAngleDegrees,
-        Latitude  = latitudeDegrees,
+        Latitude = latitudeDegrees,
         Longitude = longitudeDegrees
-      };
-
-      sun.SetDateTime(when, DateTimeKind.Local);
-
-      return sun.Light;
+      })
+      {
+        sun.SetDateTime(when, DateTimeKind.Local);
+        return sun.Light;
+      }
     }
 
     /// <summary>
@@ -343,6 +344,7 @@ namespace Rhino.Geometry
     const int idxSpotExponent = 5;
     const int idxHotSpot = 6;
     const int idxShadowIntensity = 7;
+    const int idxRadius = 8;
     double GetDouble(int which)
     {
       IntPtr pConstThis = ConstPointer();
@@ -583,6 +585,17 @@ namespace Rhino.Geometry
     {
       get { return GetVector(idxWidth); }
       set { SetVector(idxWidth, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the emitter radius (of the emitting sphere, in model units) for point and spot lights.
+    /// <para>Ignored for other light types; linear light radius is derived from <see cref="Width"/>.</para>
+    /// </summary>
+    /// <since>9.0</since>
+    public double Radius
+    {
+      get { return GetDouble(idxRadius); }
+      set { SetDouble(idxRadius, value); }
     }
 
     /// <summary>

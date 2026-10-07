@@ -92,9 +92,13 @@ namespace Rhino.Render
 
     private bool IsValueEqual(UnsafeNativeMethods.LinearWorkflowSetting which, Variant v)
     {
-      var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(GetValue(which).ConstPointer(), v.ConstPointer());
-      GC.KeepAlive(v);
-      return ret;
+      using (var v_which = GetValue(which))
+      {
+        var ret = UnsafeNativeMethods.ON_XMLVariant_IsEqual(v_which.ConstPointer(), v.ConstPointer());
+        GC.KeepAlive(this);
+        GC.KeepAlive(v);
+        return ret;
+      }
     }
 
     private Variant GetValue(UnsafeNativeMethods.LinearWorkflowSetting which)
@@ -134,8 +138,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PreProcessColors
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessColorsOn, v);
+        }
+      }
     }
 
     /// <summary>
@@ -144,8 +159,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PreProcessTextures
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessTexturesOn, v);
+        }
+      }
     }
 
     /// <summary>
@@ -154,8 +180,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PostProcessFrameBuffer
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessFrameBufferOn, v);
+        }
+      }
     }
 
     /// <summary>
@@ -164,8 +201,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public float PreProcessGamma
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma).ToFloat();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma))
+          return v.ToFloat();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGamma, v);
+        }
+      }
     }
 
     /// <summary>
@@ -174,8 +222,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public float PostProcessGamma
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma).ToFloat();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma))
+          return v.ToFloat();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGamma, v);
+        }
+      }
     }
 
     /// <summary>
@@ -184,8 +243,19 @@ namespace Rhino.Render
     /// <since>6.0</since>
     public bool PostProcessGammaOn
     {
-      get => GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn).ToBool();
-      set => SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn, new Variant(value));
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PostProcessGammaOn, v);
+        }
+      }
     }
 
     /// <summary>

@@ -1382,7 +1382,7 @@ namespace Rhino.Runtime.InteropWrappers
     {
       int count = Count;
       if (count < 1)
-        return new Guid[0];
+        return Array.Empty<Guid>();
       Guid[] rc = new Guid[count];
       UnsafeNativeMethods.ON_UUIDArray_CopyValues(m_ptr, rc);
       GC.KeepAlive(this);
@@ -1445,7 +1445,22 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public SimpleArrayInterval()
     {
-      m_ptr = UnsafeNativeMethods.ON_IntervalArray_New();
+      m_ptr = UnsafeNativeMethods.ON_IntervalArray_New(0);
+    }
+
+    /// <summary>
+    /// Create an array of intervals
+    /// </summary>
+    /// <param name="intervals"></param>
+    /// <since>9.0</since>
+    public SimpleArrayInterval(IEnumerable<Interval> intervals)
+    {
+      int count = intervals.Count();
+      m_ptr = UnsafeNativeMethods.ON_IntervalArray_New(count);
+      foreach (Interval iv in intervals)
+      {
+        UnsafeNativeMethods.ON_IntervalArray_Add(m_ptr, iv);
+      }
     }
 
     /// <summary>
@@ -1725,6 +1740,135 @@ namespace Rhino.Runtime.InteropWrappers
       }
     }
   }
+
+  /// <summary>
+  /// ON_SimpleArray&lt;ON_3dVector&gt;, ON_3dVectorArray all have the same size
+  /// This class wraps all of these C++ versions.  If you are not writing C++ code then this
+  /// class is not for you.
+  /// </summary>
+  public class SimpleArrayVector3d : IDisposable
+  {
+    private IntPtr m_ptr;
+
+    /// <summary>
+    /// Gets the constant (immutable) pointer of this array.
+    /// </summary>
+    /// <returns>The constant pointer.</returns>
+    /// <since>9.0</since>
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Gets the non-constant pointer (for modification) of this array.
+    /// </summary>
+    /// <returns>The non-constant pointer.</returns>
+    /// <since>9.0</since>
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    /// <summary>
+    /// Initializes a new empty <see cref="SimpleArrayVector3d"/> instance.
+    /// </summary>
+    /// <since>9.0</since>
+    public SimpleArrayVector3d()
+    {
+      m_ptr = UnsafeNativeMethods.ON_3dVectorArray_New(0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayVector3d"/> instance from a set of vectors
+    /// </summary>
+    /// <param name="vectors"></param>
+    /// <since>9.0</since>
+    public SimpleArrayVector3d(IEnumerable<Vector3d> vectors)
+    {
+      int count = vectors.Count();
+      m_ptr = UnsafeNativeMethods.ON_3dVectorArray_New(count);
+      foreach (var v in vectors)
+      {
+        Vector3d vec = v;
+        UnsafeNativeMethods.ON_3dVectorArray_Append(m_ptr, ref vec);
+      }
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Gets the amount of vectors in this array.
+    /// </summary>
+    /// <since>9.0</since>
+    public int Count
+    {
+      get
+      {
+        IntPtr ptr = ConstPointer();
+        int count = UnsafeNativeMethods.ON_3dVectorArray_Count(ptr);
+        GC.KeepAlive(this);
+        return count;
+      }
+    }
+
+    /// <summary>
+    /// Adds a vector to the list
+    /// </summary>
+    /// <param name="v"></param>
+    /// <since>9.0</since>
+    public void Add(Vector3d v)
+    {
+      IntPtr ptr = NonConstPointer();
+      UnsafeNativeMethods.ON_3dVectorArray_Append(ptr, ref v);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Copies the unmanaged array to a managed counterpart.
+    /// </summary>
+    /// <returns>The managed array.</returns>
+    /// <since>9.0</since>
+    public Vector3d[] ToArray()
+    {
+      int count = Count;
+      if (count < 1)
+        return new Vector3d[0];
+
+      Vector3d[] rc = new Vector3d[count];
+      UnsafeNativeMethods.ON_3dVectorArray_CopyValues(m_ptr, rc);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+    /// </summary>
+    ~SimpleArrayVector3d()
+    {
+      Dispose(false);
+    }
+
+    /// <summary>
+    /// Actively reclaims unmanaged resources that this instance uses.
+    /// </summary>
+    /// <since>9.0</since>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// For derived class implementers.
+    /// <para>This method is called with argument true when class user calls Dispose(), while with argument false when
+    /// the Garbage Collector invokes the finalizer, or Finalize() method.</para>
+    /// <para>You must reclaim all used unmanaged resources in both cases, and can use this chance to call Dispose on disposable fields if the argument is true.</para>
+    /// <para>Also, you must call the base virtual method within your overriding method.</para>
+    /// </summary>
+    /// <param name="disposing">true if the call comes from the Dispose() method; false if it comes from the Garbage Collector finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.ON_3dVectorArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+  }  
 
   /// <summary>
   /// ON_SimpleArray&lt;ON_3dPoint&gt;, ON_3dPointArray, ON_PolyLine all have the same size
@@ -2125,7 +2269,23 @@ namespace Rhino.Runtime.InteropWrappers
     /// <since>5.0</since>
     public SimpleArrayLine()
     {
-      m_ptr = UnsafeNativeMethods.ON_LineArray_New();
+      m_ptr = UnsafeNativeMethods.ON_LineArray_New(0);
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="SimpleArrayLine"/> instance from a set of lines
+    /// </summary>
+    /// <param name="lines"></param>
+    /// <since>9.0</since>
+    public SimpleArrayLine(IEnumerable<Line> lines)
+    {
+      int count = lines.Count();
+      m_ptr = UnsafeNativeMethods.ON_LineArray_New(count);
+      foreach (var line in lines)
+      {
+        Line l = line;
+        UnsafeNativeMethods.ON_LineArray_Append(m_ptr, ref l);
+      }
     }
 
     /// <summary>
@@ -2592,6 +2752,18 @@ namespace Rhino.Runtime.InteropWrappers
     }
 
     /// <summary>
+    /// Get the number of elements in the array
+    /// </summary>
+    /// <since>9.0</since>
+    public int Count
+    {
+      get
+      {
+        return UnsafeNativeMethods.ON_GeometryArray_Count(m_ptr);
+      }
+    }
+
+    /// <summary>
     /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
     /// </summary>
     ~SimpleArrayGeometryPointer()
@@ -2703,6 +2875,19 @@ namespace Rhino.Runtime.InteropWrappers
         GC.KeepAlive(mesh);
         GC.KeepAlive(this);
       }
+    }
+
+    internal void AddConstKeepingNullSlot(Geometry.Mesh meshOrNull)
+    {
+      IntPtr pConstMeshOrNull = IntPtr.Zero;
+      if (null != meshOrNull)
+      {
+        pConstMeshOrNull = meshOrNull.ConstPointer();
+        m_keep_alive.Add(meshOrNull);
+      }
+      UnsafeNativeMethods.ON_MeshArray_AppendKeepingNullSlot(NonConstPointer(), pConstMeshOrNull);
+      GC.KeepAlive(meshOrNull);
+      GC.KeepAlive(this);
     }
     
     /// <summary>
@@ -4666,4 +4851,172 @@ namespace Rhino.Runtime.InteropWrappers
     }
   }
 
+  ///// <summary>
+  ///// Wrapper for ON_SimpleArray&lt;ON_TextRun&gt;. If you are not writing C++ code
+  ///// then this class is not for you.
+  ///// </summary>
+  //internal class SimpleArrayTextRun : IDisposable
+  //{
+  //  IntPtr m_ptr; // ON_SimpleArray<ON_TextRun>
+
+  //  /// <summary>
+  //  /// Gets the constant (immutable) pointer of this array.
+  //  /// </summary>
+  //  /// <returns>The constant pointer.</returns>
+  //  /// <since>9.0</since>
+  //  public IntPtr ConstPointer()
+  //  {
+  //    return m_ptr;
+  //  }
+
+  //  /// <summary>
+  //  /// Gets the non-constant pointer (for modification) of this array.
+  //  /// </summary>
+  //  /// <returns>The non-constant pointer.</returns>
+  //  /// <since>9.0</since>
+  //  public IntPtr NonConstPointer()
+  //  {
+  //    return m_ptr;
+  //  }
+
+  //  /// <summary>
+  //  /// Initializes a new <see cref="SimpleArrayTextRun"/> instance.
+  //  /// </summary>
+  //  /// <since>9.0</since>
+  //  public SimpleArrayTextRun()
+  //  {
+  //    m_ptr = UnsafeNativeMethods.ON_TextRunArray_New(/*0*/);
+  //  }
+
+  //  ///// <summary>
+  //  ///// Initializes a new <see cref="SimpleArrayTextRun"/> instance from a set of lines
+  //  ///// </summary>
+  //  ///// <param name="lines"></param>
+  //  ///// <since>9.0</since>
+  //  //public SimpleArrayLine(IEnumerable<Line> lines)
+  //  //{
+  //  //  int count = lines.Count();
+  //  //  m_ptr = UnsafeNativeMethods.ON_LineArray_New(count);
+  //  //  foreach (var line in lines)
+  //  //  {
+  //  //    Line l = line;
+  //  //    UnsafeNativeMethods.ON_LineArray_Append(m_ptr, ref l);
+  //  //  }
+  //  //}
+
+  //  /// <summary>
+  //  /// Gets the amount of text runs in this array.
+  //  /// </summary>
+  //  /// <since>9.0</since>
+  //  public int Count
+  //  {
+  //    get
+  //    {
+  //      int rc = UnsafeNativeMethods.ON_TextRunArray_Count(m_ptr);
+  //      GC.KeepAlive(this);
+  //      return rc;
+  //    }
+  //  }
+
+  //  /// <summary>
+  //  /// Copies the unmanaged array to a managed counterpart.
+  //  /// </summary>
+  //  /// <returns>The managed array.</returns>
+  //  /// <since>9.0</since>
+  //  ///*public*/internal (string text, string runType)[] ToArray()
+  //  /*public*/internal TextRun[] ToArray()
+  //  {
+  //    int count = Count;
+  //    if (count < 1)
+  //      return default;
+  //    SimpleArrayTextRun[] rc = new SimpleArrayTextRun[count];
+  //    //UnsafeNativeMethods.ON_TextRunArray_CopyValues(m_ptr, /*rc*/);
+  //    GC.KeepAlive(this);
+  //    return rc;
+  //  }
+
+  //  /// <summary>
+  //  /// Passively reclaims unmanaged resources when the class user did not explicitly call Dispose().
+  //  /// </summary>
+  //  ~SimpleArrayTextRun()
+  //  {
+  //    InternalDispose();
+  //  }
+
+  //  /// <summary>
+  //  /// Actively reclaims unmanaged resources that this instance uses.
+  //  /// </summary>
+  //  /// <since>5.0</since>
+  //  public void Dispose()
+  //  {
+  //    InternalDispose();
+  //    GC.SuppressFinalize(this);
+  //  }
+
+  //  private void InternalDispose()
+  //  {
+  //    if (IntPtr.Zero != m_ptr)
+  //    {
+  //      UnsafeNativeMethods.ON_TextRunArray_Delete(m_ptr);
+  //      m_ptr = IntPtr.Zero;
+  //    }
+  //  }
+  //}
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+  internal class SimpleArrayFonts: IDisposable
+  {
+    IntPtr m_ptr; // ON_SimpleArray<const ON_Font*>*
+
+    public IntPtr ConstPointer() { return m_ptr; }
+
+    public IntPtr NonConstPointer() { return m_ptr; }
+
+    public SimpleArrayFonts()
+    {
+      m_ptr = UnsafeNativeMethods.SimpleConstFontArray_New();
+    }
+
+    ~SimpleArrayFonts()
+    {
+      Dispose(false);
+    }
+
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (IntPtr.Zero != m_ptr)
+      {
+        UnsafeNativeMethods.SimpleConstFontArray_Delete(m_ptr);
+        m_ptr = IntPtr.Zero;
+      }
+    }
+
+    public DocObjects.Font[] ToConstArray()
+    {
+      int count = UnsafeNativeMethods.SimpleConstFontArray_Count(m_ptr);
+      if (count < 1)
+        return new DocObjects.Font[0];
+
+      IntPtr ptr_const_this = ConstPointer();
+
+      DocObjects.Font[] rc = new DocObjects.Font[count];
+      for (int i = 0; i < count; i++)
+      {
+        IntPtr ptr_const_font = UnsafeNativeMethods.SimpleConstFontArray_Get(ptr_const_this, i);
+        if (IntPtr.Zero != ptr_const_font)
+          rc[i] = new DocObjects.Font(ptr_const_font);
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+  }
+#endif
 }

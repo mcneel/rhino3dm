@@ -55,6 +55,13 @@
 // Rhino System Plug-in linking pragmas
 #include "plugin_linking_pragmas.h"
 
+// ASSERT comes from Rhino's MFC-emulation layer (src4/rhino4/AfxMac.h), which an
+// opennurbs-only build does not include. The portable C sources use it only as a
+// debug assertion, so define it away rather than guarding those functions out.
+#if !defined(ASSERT)
+#define ASSERT(x) ((void)0)
+#endif
+
 #include "rhcommon_c/rhcommon_c_api.h"
 #include "rhcommon_c.h"
 

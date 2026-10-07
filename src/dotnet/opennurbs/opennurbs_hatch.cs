@@ -126,25 +126,27 @@ namespace Rhino.Geometry
     {
       if (curves == null) throw new ArgumentNullException("curves");
 
-      var curvearray = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves);
-      IntPtr ptr_curve_array = curvearray.NonConstPointer();
-      var hatcharray = new Runtime.InteropWrappers.SimpleArrayGeometryPointer();
-      IntPtr ptr_hatch_array = hatcharray.NonConstPointer();
-      UnsafeNativeMethods.RHC_RhinoCreateHatches(ptr_curve_array, tolerance, hatchPatternIndex, rotationRadians, scale, ptr_hatch_array);
-      GeometryBase[] g = hatcharray.ToNonConstArray();
-      if (g == null)
-        return new Hatch[0];
-      List<Hatch> hatches = new List<Hatch>();
-      for (int i = 0; i < g.Length; i++)
+      using (var curvearray = new Runtime.InteropWrappers.SimpleArrayCurvePointer(curves))
       {
-        Hatch hatch = g[i] as Hatch;
-        if (hatch != null)
-          hatches.Add(hatch);
+        IntPtr ptr_curve_array = curvearray.NonConstPointer();
+        using (var hatcharray = new Runtime.InteropWrappers.SimpleArrayGeometryPointer())
+        {
+          IntPtr ptr_hatch_array = hatcharray.NonConstPointer();
+          UnsafeNativeMethods.RHC_RhinoCreateHatches(ptr_curve_array, tolerance, hatchPatternIndex, rotationRadians, scale, ptr_hatch_array);
+          GeometryBase[] g = hatcharray.ToNonConstArray();
+          if (g == null)
+            return new Hatch[0];
+          List<Hatch> hatches = new List<Hatch>();
+          for (int i = 0; i < g.Length; i++)
+          {
+            Hatch hatch = g[i] as Hatch;
+            if (hatch != null)
+              hatches.Add(hatch);
+          }
+          GC.KeepAlive(curves);
+          return hatches.ToArray();
+        }
       }
-      GC.KeepAlive(curvearray);
-      GC.KeepAlive(hatcharray);
-      GC.KeepAlive(curves);
-      return hatches.ToArray();
     }
 
     /// <example>

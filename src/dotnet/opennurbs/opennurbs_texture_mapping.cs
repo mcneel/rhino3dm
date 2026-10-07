@@ -1,6 +1,7 @@
 using System;
 using Rhino.Geometry;
 using Rhino.DocObjects;
+using Rhino.Runtime;
 
 namespace Rhino.Render
 {
@@ -868,6 +869,49 @@ namespace Rhino.Render
       GC.KeepAlive(mesh);
       return rc;
     }
+
+// Backed by native exports that are unavailable in an opennurbs-only (Rhino3dm)
+// build, so this is excluded there.
+#if RHINO_SDK
+    /// <summary>
+    /// Gets the same decomposition of the texture mapping transforms as is used in the UI.
+    /// </summary>
+    /// <param name="localTransform"></param>
+    /// <param name="xyz_position"></param>
+    /// <param name="xyz_scale"></param>
+    /// <param name="xyz_rotation"></param>
+    /// <param name="uvw_offset"></param>
+    /// <param name="uvw_repeat"></param>
+    /// <param name="uvw_rotation"></param>
+    /// <since>9.0</since>
+    [ConstOperation]
+    public void Decompose(Transform localTransform, 
+      out Vector3d xyz_position, 
+      out Vector3d xyz_scale, 
+      out Vector3d xyz_rotation, 
+      out Vector3d uvw_offset, 
+      out Vector3d uvw_repeat, 
+      out Vector3d uvw_rotation)
+    {
+      xyz_position = Vector3d.Unset;
+      xyz_scale = Vector3d.Unset;
+      xyz_rotation = Vector3d.Unset;
+
+      uvw_offset = Vector3d.Unset;
+      uvw_repeat = Vector3d.Unset;
+      uvw_rotation = Vector3d.Unset;
+
+      UnsafeNativeMethods.ON_TextureMapping_UiDecompose(
+        ConstPointer(), 
+        ref localTransform, 
+        ref xyz_position, 
+        ref xyz_scale, 
+        ref xyz_rotation,
+        ref uvw_offset,
+        ref uvw_repeat,
+        ref uvw_rotation);
+    }
+#endif
 
 #if RHINO_SDK
     internal override IntPtr _InternalGetConstPointer()

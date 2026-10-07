@@ -1,25 +1,108 @@
 #pragma warning disable 1591
 #if RHINO_SDK
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Linq;
-using Rhino.Geometry;
-using Rhino.Display;
 using Rhino.Collections;
-using System.Collections.Generic;
+using Rhino.Display;
 using Rhino.DocObjects;
-using Rhino.Render;
-using Rhino.Render.PostEffects;
-using Rhino.Runtime.InteropWrappers;
 using Rhino.DocObjects.Tables;
 using Rhino.FileIO;
-using System.Diagnostics;
+using Rhino.Geometry;
+using Rhino.Render;
 using Rhino.Render.CustomRenderMeshes;
+using Rhino.Render.PostEffects;
 using Rhino.Runtime;
+using Rhino.Runtime.InteropWrappers;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Rhino
 {
+  /// <summary>
+  /// The document table object types that <see cref="RhinoDoc.Purge(PurgeFilter)"/> can purge.
+  /// </summary>
+  /// <since>9.0</since>
+  [Flags]
+  public enum PurgeFilter
+  {
+    /// <summary>Purge nothing.</summary>
+    None = 0,
+    /// <summary>Unused annotation styles.</summary>
+    AnnotationStyles = 0x1,
+    /// <summary>Embedded bitmaps.</summary>
+    Bitmaps = 0x2,
+    /// <summary>Unused block definitions.</summary>
+    BlockDefinitions = 0x4,
+    /// <summary>Unused render environments.</summary>
+    Environments = 0x8,
+    /// <summary>Empty groups.</summary>
+    Groups = 0x10,
+    /// <summary>Unused hatch patterns.</summary>
+    HatchPatterns = 0x20,
+    /// <summary>Empty layers.</summary>
+    Layers = 0x40,
+    /// <summary>Empty layout groups.</summary>
+    LayoutGroups = 0x80,
+    /// <summary>Unused linetypes.</summary>
+    Linetypes = 0x100,
+    /// <summary>Unused legacy materials and unused render materials.</summary>
+    Materials = 0x200,
+    /// <summary>Unused section styles.</summary>
+    SectionStyles = 0x400,
+    /// <summary>Unused render textures.</summary>
+    Textures = 0x800,
+    /// <summary>Everything listed above.</summary>
+    All = AnnotationStyles | Bitmaps | BlockDefinitions | Environments | Groups |
+          HatchPatterns | Layers | LayoutGroups | Linetypes | Materials |
+          SectionStyles | Textures
+  }
+
+  /// <summary>
+  /// Describes what <see cref="RhinoDoc.Purge(PurgeFilter)"/> purged.
+  /// </summary>
+  public class PurgeStatistics
+  {
+    private readonly int[] m_counts;
+
+    internal PurgeStatistics(int total, int[] counts)
+    {
+      TotalPurgedCount = total;
+      m_counts = counts ?? new int[0];
+    }
+
+    /// <summary>
+    /// The total number of table objects that were purged.
+    /// </summary>
+    /// <since>9.0</since>
+    public int TotalPurgedCount { get; }
+
+    /// <summary>
+    /// The number of table objects that were purged.
+    /// </summary>
+    /// <param name="filter">
+    /// The document table object types of interest. Values can be or-ed together, in
+    /// which case the sum of the counts of each type is returned.
+    /// </param>
+    /// <returns>The number of table objects that were purged.</returns>
+    /// <since>9.0</since>
+    public int PurgedCount(PurgeFilter filter)
+    {
+      var value = (int)filter;
+
+      var rc = 0;
+      for (var i = 0; i < m_counts.Length; i++)
+      {
+        if ((value & (1 << i)) != 0)
+          rc += m_counts[i];
+      }
+
+      return rc;
+    }
+  }
+
   namespace Render
   {
     public class ImageFileEventArgs : EventArgs
@@ -141,7 +224,7 @@ namespace Rhino
         }
       }
       private static event EventHandler<ImageFileEventArgs> DeletedEvent;
-      
+
       private static void OnAddEvent()
       {
         if (g_on_render_image_event != null)
@@ -321,9 +404,54 @@ namespace Rhino
       }
       else
       {
-        // only open the document if not yet opened, otherwise 
+        // only open the document if not yet opened, otherwise
         // active doc serial# will be out of sync, see RH-82580
-        if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath))
+        if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath, false))
+          return null;
+        doc = FromFilePath(filePath);
+      }
+      return doc;
+    }
+
+    /// <summary>
+    /// Opens a 3dm file and makes it the active document. If called on
+    /// windows the active document will be saved and closed and the new
+    /// document will be opened and become the active document.  If called
+    /// on the Mac the file will be opened in a new document window. This
+    /// function is interactive in that it will ask you if you want to open
+    /// a document as read only if it is already open in a different process
+    /// </summary>
+    /// <param name="filePath">Full path to the 3dm file to open</param>
+    /// <param name="wasAlreadyOpen">
+    /// Will get set to true if there is a currently open document with the
+    /// specified path; otherwise it will get set to false.
+    /// </param>
+    /// <returns>
+    /// Returns the newly opened document on success or null on error.
+    /// </returns>
+    /// <since>6.0</since>
+    public static RhinoDoc OpenInteractive(string filePath, out bool wasAlreadyOpen)
+    {
+      // look for an already opened document
+      RhinoDoc openDoc = FromFilePath(filePath);
+      wasAlreadyOpen = (null != openDoc);
+
+      // the file may have been removed, but if it was
+      // already open let's return the opened file
+      if (!wasAlreadyOpen && !System.IO.File.Exists(filePath))
+        return null;
+
+      // assign the doc if it was already open
+      RhinoDoc doc;
+      if (wasAlreadyOpen)
+      {
+        doc = openDoc;
+      }
+      else
+      {
+        // only open the document if not yet opened, otherwise
+        // active doc serial# will be out of sync, see RH-82580
+        if (!UnsafeNativeMethods.CRhinoFileMenu_Open(filePath, true))
           return null;
         doc = FromFilePath(filePath);
       }
@@ -354,6 +482,7 @@ namespace Rhino
     /// <since>5.0</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("OpenFile is obsolete, use Open instead")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static bool OpenFile(string path)
     {
       RhinoDoc unused = Open(path, out _);
@@ -449,7 +578,7 @@ namespace Rhino
     /// </param>
     /// <returns>
     /// New RhinoDoc on success. Note that this is a "headless" RhinoDoc and it's
-    /// lifetime is under your control. 
+    /// lifetime is under your control.
     /// </returns>
     /// <since>7.0</since>
     public static RhinoDoc CreateHeadless(string file3dmTemplatePath)
@@ -680,6 +809,23 @@ namespace Rhino
     /// <since>8.0</since>
     public bool SaveAs(string file3dmPath, int version, bool saveSmall, bool saveTextures, bool saveGeometryOnly, bool savePluginData)
     {
+      return SaveAs(file3dmPath, version, saveSmall, saveTextures, saveGeometryOnly, savePluginData, true);
+    }
+
+    /// <summary>
+    /// Save doc as a 3dm to a specified path
+    /// </summary>
+    /// <param name="file3dmPath"></param>
+    /// <param name="version">Rhino file version</param>
+    /// <param name="saveSmall">whether to inlcude render meshes and preview image</param>
+    /// <param name="saveTextures">whether to include the bitmap table</param>
+    /// <param name="saveGeometryOnly">whether to write enything besides geometry</param>
+    /// <param name="savePluginData">whether to write plugin user data</param>
+    /// <param name="useCompression">"whether to compress meshes and embedded files</param>
+    /// <returns>true on success</returns>
+    /// <since>9.0</since>
+    public bool SaveAs(string file3dmPath, int version, bool saveSmall, bool saveTextures, bool saveGeometryOnly, bool savePluginData, bool useCompression)
+    {
       // This line checks filePath is a valid path, well formatted, not too long...
       var info = new System.IO.FileInfo(file3dmPath);
 
@@ -699,7 +845,8 @@ namespace Rhino
           IncludePreviewImage = !saveSmall,
           IncludeBitmapTable = saveTextures,
           WriteGeometryOnly = saveGeometryOnly,
-          WriteUserData = savePluginData
+          WriteUserData = savePluginData,
+          UseCompression = useCompression
         }
       )
       {
@@ -850,7 +997,7 @@ namespace Rhino
     //public bool ExportWithOrigin(string filePath, Point3d Origin)
 
     /// <summary>
-    /// Write information in this document to a file. 
+    /// Write information in this document to a file.
     /// Note, the active document's name will be changed to that
     /// of the path provided.
     /// </summary>
@@ -873,7 +1020,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Write information in this document to a .3dm file. 
+    /// Write information in this document to a .3dm file.
     /// Note, the active document's name will not be changed.
     /// </summary>
     /// <param name="path">The name of the .3dm file to write.</param>
@@ -1002,6 +1149,7 @@ namespace Rhino
     /// <since>5.0</since>
     /// <deprecated>6.0</deprecated>
     [Obsolete("Use FromRuntimeSerialNumber")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static RhinoDoc FromId(int docId)
     {
       if( docId<0 )
@@ -1111,9 +1259,10 @@ namespace Rhino
         return sh.ToString();
       }
     }
+
     //const int idxName = 0;
     const int IDX_PATH = 1;
-    //const int idxUrl = 2;
+    const int IDX_MODELURL = 2;
     const int IDX_NOTES = 3;
     const int IDX_TEMPLATE_FILE_USED = 4;
 
@@ -1141,17 +1290,49 @@ namespace Rhino
         return GetString(IDX_PATH);
       }
     }
-    /*
-        ///<summary>
-        ///Returns or sets the uniform resource locator (URL) of the currently
-        ///loaded Rhino document (3DM file).
-        ///</summary>
-        public string URL
-        {
-          get { return GetString(idxUrl); }
-          set { CRhinoDoc_GetSetString(m_doc.RuntimeSerialNumber, idxUrl, true, value); }
-        }
-    */
+
+    /// <summary>
+    /// Gets and sets the link address, or URL, for the model.
+    /// </summary>
+    /// <since>9.0</since>
+    public string ModelUrl
+    {
+      get { return GetString(IDX_MODELURL); }
+      set { UnsafeNativeMethods.CRhinoDoc_GetSetString(RuntimeSerialNumber, IDX_MODELURL, true, value, IntPtr.Zero); }
+    }
+
+    /// <summary>
+    /// Gets the link address, or URL, for the model.
+    /// </summary>
+    /// <param name="url">The URL.</param>
+    /// <param name="urlDescription">The URL description.</param>
+    /// <since>9.0</since>
+    public void GetModelUrl(out string url, out string urlDescription)
+    {
+      url = string.Empty;
+      urlDescription = string.Empty;
+      using (var shUrl = new StringHolder())
+      using (var shTag = new StringHolder())
+      {
+        IntPtr ptr_url = shUrl.NonConstPointer();
+        IntPtr ptr_tag = shTag.NonConstPointer();
+        UnsafeNativeMethods.CRhinoDocProperties_GetModelUrl(RuntimeSerialNumber, ptr_url, ptr_tag);
+        url = shUrl.ToString();
+        urlDescription = shTag.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Sets the link address, or URL, for the model.
+    /// </summary>
+    /// <param name="url">The URL.</param>
+    /// <param name="urlDescription">The URL description.</param>
+    /// <since>9.0</since>
+    public void SetModelUrl(string url, string urlDescription)
+    {
+      UnsafeNativeMethods.CRhinoDocProperties_SetModelUrl(RuntimeSerialNumber, url, urlDescription);
+    }
+
     ///<summary>Returns or sets the document&apos;s notes.</summary>
     /// <since>5.0</since>
     public string Notes
@@ -1237,7 +1418,7 @@ namespace Rhino
 
     /// <summary>
     /// Returns the active plane of Rhino's auto-gumball widget.
-    /// Note, when calling from a Rhino command, make sure the command 
+    /// Note, when calling from a Rhino command, make sure the command
     /// class has the Rhino.Commands.Style.Transparent command style attribute.
     /// </summary>
     /// <param name="plane">The active plane.</param>
@@ -1259,7 +1440,14 @@ namespace Rhino
     }
 
     internal const double DefaultModelAbsoluteTolerance = 0.001;
-    internal const double DefaultModelAngleToleranceRadians = Math.PI / 180.0; 
+    /// <summary>
+    /// Default model angle tolerance corresponds to 1 degree (ON_DEFAULT_ANGLE_TOLERANCE_RADIANS)
+    /// </summary>
+    internal const double DefaultModelAngleToleranceRadians = Math.PI / 180.0;
+    /// <summary>
+    /// Minimum model angle tolerance corresponds to 0.1 degree (ON_MINIMUM_ANGLE_TOLERANCE)
+    /// </summary>
+    internal const double MinimumModelAngleToleranceRadians = Math.PI / 180.0 / 10.0;
 
     /// <summary>Model space absolute tolerance.</summary>
     /// <since>5.0</since>
@@ -1298,6 +1486,12 @@ namespace Rhino
       get { return GetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelRelTol); }
       set { SetDouble(UnsafeNativeMethods.CRhDocPropertiesDoubleConsts.ModelRelTol, value); }
     }
+
+    /// <since>5.0</since>
+    /// <deprecated>9.0</deprecated>
+    [Obsolete("Since 9.0. Use ModelDistanceDisplayPrecision instead.")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
+    public int DistanceDisplayPrecision => ModelDistanceDisplayPrecision;
 
     /// <example>
     /// <code source='examples\vbnet\ex_displayprecision.vb' lang='vbnet'/>
@@ -1421,11 +1615,17 @@ namespace Rhino
     }
 
     ///<summary>
-    ///Returns the file version of the current document.  
-    ///Use this function to determine which version of Rhino last saved the document.
+    ///Returns the major version of Rhino that wrote the .3dm file this document was read from.
+    ///Values from referenced or merged files are not reported.
     ///</summary>
+    ///<remarks>
+    ///This is the Rhino version, not the 3dm archive version: a file written by Rhino 8
+    ///returns 8, not 80. Use <see cref="Rhino.FileIO.File3dm.ReadArchiveVersion"/> for the
+    ///archive version of a file on disk, or <see cref="Rhino.FileIO.File3dm.ReadRevisionHistory"/>
+    ///for who last edited it. A document created by "New" returns -1 even when a template was read.
+    ///</remarks>
     ///<returns>
-    ///The file version (e.g. 1, 2, 3, 4, etc.) or -1 if the document has not been read from disk.
+    ///The Rhino major version (e.g. 1, 2, 3, ... 8, 9), or -1 if this document was not read from a .3dm file.
     ///</returns>
     /// <since>5.0</since>
     public int ReadFileVersion()
@@ -1433,14 +1633,44 @@ namespace Rhino
       return UnsafeNativeMethods.CRhinoDocProperties_ReadFileVersion(RuntimeSerialNumber);
     }
 
-    /// <since>5.0</since>
-    public UnitSystem ModelUnitSystem
+    #region LengthUnit
+    /// <summary>Length unit used on model space.</summary>
+    /// <since>9.0</since>
+    public LengthUnit ModelUnits
     {
-      get { return UnsafeNativeMethods.CRhinoDocProperties_GetUnitSystem(RuntimeSerialNumber, true); }
-      set { UnsafeNativeMethods.CRhinoDocProperties_SetUnitSystem(RuntimeSerialNumber, true, value); }
+      get => GetLengthUnits(modelUnits: true);
+      set => SetLengthUnits(modelUnits: true, value);
     }
 
-    /// <since>5.0</since>
+    /// <summary>Length unit used on page space geometry.</summary>
+    /// <since>9.0</since>
+    public LengthUnit PageUnits
+    {
+      get => GetLengthUnits(modelUnits: false);
+      set => SetLengthUnits(modelUnits: false, value);
+    }
+
+    private LengthUnit GetLengthUnits(bool modelUnits)
+    {
+      var us = modelUnits ? ModelUnitSystem : PageUnitSystem;
+      if (us == UnitSystem.CustomUnits && GetCustomUnitSystem(modelUnits, out var name, out var metersPerCustomUnit))
+        return LengthUnit.FromCustomUnitSystem(name, metersPerCustomUnit, UnitSystem.Meters);
+      else
+        return LengthUnit.FromKnownUnitSystem(us);
+    }
+
+    private bool SetLengthUnits(bool modelUnits, LengthUnit units)
+    {
+      return UnsafeNativeMethods.CRhinoDocProperties_AdjustLengthUnits(RuntimeSerialNumber, modelUnits, units.ToUnitSystem(out var metersPerUnit), units.Name, metersPerUnit, scale:false);
+    }
+
+    /// <since>9.0</since>
+    public bool AdjustLengthUnits(bool modelUnits, LengthUnit units, bool scale)
+    {
+      return UnsafeNativeMethods.CRhinoDocProperties_AdjustLengthUnits(RuntimeSerialNumber, modelUnits, units.ToUnitSystem(out var metersPerUnit), units.Name, metersPerUnit, scale);
+    }
+
+    // <since>5.0</since>
     public string GetUnitSystemName(bool modelUnits, bool capitalize, bool singular, bool abbreviate)
     {
       using (var sh = new StringHolder())
@@ -1451,17 +1681,22 @@ namespace Rhino
       }
     }
 
+    #endregion
+
+    #region UnitSystem
+    /// <since>5.0</since>
+    public UnitSystem ModelUnitSystem
+    {
+      get { return UnsafeNativeMethods.CRhinoDocProperties_GetUnitSystem(RuntimeSerialNumber, true); }
+      set { UnsafeNativeMethods.CRhinoDocProperties_SetUnitSystem(RuntimeSerialNumber, true, value); }
+    }
+
     /// <since>5.0</since>
     public void AdjustModelUnitSystem(UnitSystem newUnitSystem, bool scale)
     {
-      UnsafeNativeMethods.CRhinoDocProperties_AdjustUnitSystem(RuntimeSerialNumber, true, newUnitSystem, scale);
+      UnsafeNativeMethods.CRhinoDocProperties_AdjustLengthUnits(RuntimeSerialNumber, true, newUnitSystem, null, double.NaN, scale);
     }
 
-    /// <example>
-    /// <code source='examples\vbnet\ex_addlayout.vb' lang='vbnet'/>
-    /// <code source='examples\cs\ex_addlayout.cs' lang='cs'/>
-    /// <code source='examples\py\ex_addlayout.py' lang='py'/>
-    /// </example>
     /// <since>5.0</since>
     public UnitSystem PageUnitSystem
     {
@@ -1472,7 +1707,7 @@ namespace Rhino
     /// <since>5.0</since>
     public void AdjustPageUnitSystem(UnitSystem newUnitSystem, bool scale)
     {
-      UnsafeNativeMethods.CRhinoDocProperties_AdjustUnitSystem(RuntimeSerialNumber, false, newUnitSystem, scale);
+      UnsafeNativeMethods.CRhinoDocProperties_AdjustLengthUnits(RuntimeSerialNumber, false, newUnitSystem, null, double.NaN, scale);
     }
 
     /// <summary>
@@ -1485,9 +1720,6 @@ namespace Rhino
     {
       return UnsafeNativeMethods.ONC_IsMetricLengthUnit(modelUnits ? ModelUnitSystem : PageUnitSystem);
     }
-
-    /// <since>5.0</since>
-    public int DistanceDisplayPrecision => ModelDistanceDisplayPrecision;
 
     /// <summary>
     /// Get the custom unit system name and custom unit scale.
@@ -1503,7 +1735,7 @@ namespace Rhino
     public bool GetCustomUnitSystem(bool modelUnits, out string customUnitName, out double metersPerCustomUnit)
     {
       customUnitName = null;
-      metersPerCustomUnit = RhinoMath.UnsetValue;
+      metersPerCustomUnit = double.NaN;
       var rc = false;
       using (var sh = new StringHolder())
       {
@@ -1529,10 +1761,11 @@ namespace Rhino
     /// <since>7.9</since>
     public bool SetCustomUnitSystem(bool modelUnits, string customUnitName, double metersPerCustomUnit, bool scale)
     {
-      if (string.IsNullOrEmpty(customUnitName))
+      if (customUnitName == null)
         throw new ArgumentNullException(nameof(customUnitName));
       return UnsafeNativeMethods.CRhinoDocProperties_SetCustomUnitSystem(RuntimeSerialNumber, modelUnits, customUnitName, metersPerCustomUnit, scale);
     }
+    #endregion
 
     /// <since>8.13</since>
     public ConstructionPlaneGridDefaults GetGridDefaults()
@@ -1631,7 +1864,7 @@ namespace Rhino
     /// </summary>
     /// <since>5.0</since>
     [Obsolete("Use RuntimeSerialNumber instead")]
-    [System.ComponentModel.Browsable(false), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Browsable(false), DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public int DocumentId => (int)RuntimeSerialNumber;
 
     /// <summary>
@@ -1641,6 +1874,11 @@ namespace Rhino
     /// <since>6.0</since>
     [CLSCompliant(false)]
     public uint RuntimeSerialNumber { get; private set; }
+
+    internal void BringToFront()
+    {
+      UnsafeNativeMethods.CRhinoDoc_Display(RuntimeSerialNumber);
+    }
 
     /// <since>5.0</since>
     public DocObjects.EarthAnchorPoint EarthAnchorPoint
@@ -1799,7 +2037,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// If ModelSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by 
+    /// If ModelSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by
     /// dimscale when the annotation is displayed in a model space viewport not in a detail
     /// </summary>
     /// <since>6.0</since>
@@ -1810,7 +2048,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// If LayoutSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by 
+    /// If LayoutSpaceAnnotationScaling is on, sizes in dimstyles are multiplied by
     /// dimscale when the annotation is displayed in a detail viewport not in a detail
     /// </summary>
     /// <since>6.0</since>
@@ -1832,6 +2070,10 @@ namespace Rhino
     /// <since>5.0</since>
     public ViewTable Views => m_view_table ?? (m_view_table = new ViewTable(this));
 
+    private ViewUserInterfaceTable m_ui_table;
+    /// <since>9.0</since>
+    public ViewUserInterfaceTable ViewUserInterface => m_ui_table ?? (m_ui_table = new ViewUserInterfaceTable(this));
+
     private ObjectTable m_object_table;
     /// <since>5.0</since>
     public ObjectTable Objects => m_object_table ?? (m_object_table = new ObjectTable(this));
@@ -1841,8 +2083,8 @@ namespace Rhino
     public ManifestTable Manifest => m_manifest_table ?? (m_manifest_table = new RhinoDocManifestTable(this));
 
     /// <summary>
-    /// Gets the default object attributes for this document. 
-    /// The attributes will be linked to the currently active layer 
+    /// Gets the default object attributes for this document.
+    /// The attributes will be linked to the currently active layer
     /// and they will inherit the Document WireDensity setting.
     /// </summary>
     /// <example>
@@ -1899,9 +2141,10 @@ namespace Rhino
     public GroupTable Groups => m_group_table ?? (m_group_table = new GroupTable(this));
 
     private FontTable m_font_table;
-    
+
     /// <since>5.0</since>
     [Obsolete("Use DimStyles table instead")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public FontTable Fonts => m_font_table ?? (m_font_table = new FontTable(this));
 
     private DimStyleTable m_dimstyle_table;
@@ -1967,8 +2210,37 @@ namespace Rhino
     public StringTable Strings => m_strings ?? (m_strings = new StringTable(this));
 
     /// <summary>
+    /// Collection of section styles in this document
+    /// </summary>
+    /// <since>9.0</since>
+    public SectionStyleTable SectionStyles => m_section_styles ?? (m_section_styles = new SectionStyleTable(this));
+    private SectionStyleTable m_section_styles;
+
+    /// <summary>
+    /// Collection of markups in this document
+    /// </summary>
+    /// <since>9.0</since>
+    public MarkupTable Markups => m_markups ?? (m_markups = new MarkupTable(this));
+    private MarkupTable m_markups;
+
+    /// <summary>
+    /// The markup mode this document is currently in: creating, viewing or editing
+    /// a markup, or <see cref="Rhino.DocObjects.Tables.MarkupMode.None"/> when not
+    /// in markup mode. <see cref="MarkupViewChanged"/> reports changes to this value.
+    /// </summary>
+    /// <since>9.0</since>
+    public MarkupMode MarkupMode => (MarkupMode)UnsafeNativeMethods.CRhinoDoc_MarkupMode(RuntimeSerialNumber);
+
+    /// <summary>
+    /// Collection of markups in this document
+    /// </summary>
+    /// <since>9.0</since>
+    public PageViewGroupTable PageViewGroups => m_pageview_group_table ?? (m_pageview_group_table = new PageViewGroupTable(this));
+    private PageViewGroupTable m_pageview_group_table;
+
+    /// <summary>
     /// Collection of document runtime data. This is a good place to
-    /// put non-serializable, per document data, such as panel view models.  
+    /// put non-serializable, per document data, such as panel view models.
     /// Note well: This data will be dispose with the document and does not
     /// get serialized.
     /// </summary>
@@ -2021,6 +2293,7 @@ namespace Rhino
     /// </summary>
     /// <since>6.0</since>
     [Obsolete("Please use Rhino.Render.RenderSettings methods")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public ICurrentEnvironment CurrentEnvironment => new CurrentEnvironmentImpl(RuntimeSerialNumber);
 
     /// <summary>
@@ -2028,6 +2301,7 @@ namespace Rhino
     /// </summary>
     /// <since>7.0</since>
     [Obsolete("Please use Rhino.Render.RenderSettings methods")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public IPostEffects PostEffects => new PostEffectsImpl(RuntimeSerialNumber);
 
     /// <summary>
@@ -2043,6 +2317,7 @@ namespace Rhino
     /// <since>6.0</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete("This version is obsolete because - uses the old school custom render meshes.  Prefer CustomRenderMeshes")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, null, forceTriangleMeshes, quietly);
@@ -2063,6 +2338,7 @@ namespace Rhino
     /// <since>6.0</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete ("This version is obsolete because - uses the old school custom render meshes.  Prefer RenderMeshes")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IEnumerable<RenderPrimitive> GetRenderPrimitives(DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, Guid.Empty, viewport, forceTriangleMeshes, quietly);
@@ -2086,7 +2362,8 @@ namespace Rhino
     /// <since>6.0</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete("This version is obsolete because - uses the old school custom render meshes.  Prefer RenderPrimitives")]
-    public IEnumerable<RenderPrimitive> GetRenderPrimitives(Guid plugInId, DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly) 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IEnumerable<RenderPrimitive> GetRenderPrimitives(Guid plugInId, DocObjects.ViewportInfo viewport, bool forceTriangleMeshes, bool quietly)
     {
       return new RenderPrimitiveEnumerable(RuntimeSerialNumber, plugInId, viewport, forceTriangleMeshes, quietly);
     }
@@ -2096,7 +2373,10 @@ namespace Rhino
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered.</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">See <see cref="RenderMeshProvider.Flags"/>. This is an in/out
+    /// parameter: on return it also carries any status flags - including
+    /// <see cref="RenderMeshProvider.Flags.Incomplete"/> when an asynchronous provider has
+    /// not finished - so reset it before each call and test it afterwards.</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
     /// <returns>Returns true if the object will has a set of custom render primitives</returns>
@@ -2132,7 +2412,10 @@ namespace Rhino
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">See <see cref="RenderMeshProvider.Flags"/>. This is an in/out
+    /// parameter: on return it also carries any status flags - including
+    /// <see cref="RenderMeshProvider.Flags.Incomplete"/> when an asynchronous provider has
+    /// not finished - so reset it before each call and test it afterwards.</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
     /// <returns> Returns a set of custom render primitives for this object</returns>
@@ -2161,8 +2444,8 @@ namespace Rhino
           outList.Add(primitives);
         }
       }
-      
-      
+
+
       flags = (RenderMeshProvider.Flags)f;
       GC.KeepAlive(vp);
       return outList.ToArray();
@@ -2173,7 +2456,10 @@ namespace Rhino
     /// </summary>
     /// <param name="mt">The mesh type requested (render or analysis).</param>
     /// <param name="vp">The viewport being rendered</param>
-    /// <param name="flags">See MeshProvider.Flags</param>
+    /// <param name="flags">See <see cref="RenderMeshProvider.Flags"/>. This is an in/out
+    /// parameter: on return it also carries any status flags - including
+    /// <see cref="RenderMeshProvider.Flags.Incomplete"/> when an asynchronous provider has
+    /// not finished - so reset it before each call and test it afterwards.</param>
     /// <param name="plugin">The requesting plug-in (typically the calling plugin)</param>
     /// <param name="attrs">Display attributes for the caller - null if this is a full rendering.</param>
     /// <param name="boundingBox">The requested bounding box</param>
@@ -2223,6 +2509,7 @@ namespace Rhino
     /// <since>5.0</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public GroundPlane GroundPlane
     {
       get
@@ -2273,10 +2560,18 @@ namespace Rhino
     /// </summary>
     internal bool InGetObject => GetBool(UnsafeNativeMethods.DocumentStatusBool.InGetObject);
 
+    /// <summary>
+    /// Exit the active get operation with a timeout
+    /// </summary>
+    /// <since>9.0</since>
+    public void TimeoutActiveGet()
+    {
+      UnsafeNativeMethods.CRhinoDoc_TimeoutActiveGet(RuntimeSerialNumber);
+    }
     #endregion
 
     /// <summary>
-    /// Audits the contents of the document.  
+    /// Audits the contents of the document.
     /// </summary>
     /// <param name="textLog">If an error is detected, then a description of the error is logged here.</param>
     /// <param name="attemptRepair">If true, then the method attempts to repair any detected errors.</param>
@@ -2318,6 +2613,93 @@ namespace Rhino
     /// </summary>
     /// <since>5.0</since>
     public string TemplateFileUsed => GetString(IDX_TEMPLATE_FILE_USED);
+
+    /// <summary>
+    /// Purges unused table objects from this document, the same way the Purge command does.
+    /// </summary>
+    /// <param name="filter">The document table object types to purge.</param>
+    /// <returns>What was purged.</returns>
+    /// <remarks>
+    /// The order in which the table object types are purged matters, and purging one type
+    /// can make another type purgeable, so this purges everything <paramref name="filter"/>
+    /// asks for in a single operation.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var stats = doc.Purge(PurgeFilter.Layers | PurgeFilter.Materials);
+    /// RhinoApp.WriteLine($"Purged {stats.PurgedCount(PurgeFilter.Layers)} layers.");
+    /// </code>
+    /// </example>
+    /// <since>9.0</since>
+    public PurgeStatistics Purge(PurgeFilter filter)
+    {
+      return Purge(filter, true);
+    }
+
+    /// <summary>
+    /// Purges unused table objects from this document, the same way the Purge command does.
+    /// </summary>
+    /// <param name="filter">The document table object types to purge.</param>
+    /// <param name="quiet">Set to true to suppress any output or progress messages.</param>
+    /// <returns>What was purged.</returns>
+    /// <since>9.0</since>
+    public PurgeStatistics Purge(PurgeFilter filter, bool quiet)
+    {
+      using (var counts = new SimpleArrayInt())
+      {
+        var total = UnsafeNativeMethods.RHC_RhinoPurgeDocument(RuntimeSerialNumber, (uint)filter, quiet, counts.NonConstPointer());
+        return new PurgeStatistics(total, counts.ToArray());
+      }
+    }
+
+    /// <summary>
+    /// Purges the history records of every object in this document.
+    /// </summary>
+    /// <returns>The number of objects that had a history record purged.</returns>
+    /// <remarks>
+    /// Objects that are deleted (and therefore on the undo stack) have their history records
+    /// purged but are not included in the returned count.
+    /// </remarks>
+    /// <since>9.0</since>
+    public int PurgeObjectHistory()
+    {
+      var hiddenCount = 0;
+      return UnsafeNativeMethods.RHC_RhinoPurgeDocumentHistory(RuntimeSerialNumber, ref hiddenCount);
+    }
+
+    /// <summary>
+    /// Purges the history records of every object in this document.
+    /// </summary>
+    /// <param name="hiddenCount">
+    /// The number of purged objects that were hidden or on a hidden layer.
+    /// </param>
+    /// <returns>The number of objects that had a history record purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeObjectHistory(out int hiddenCount)
+    {
+      hiddenCount = 0;
+      return UnsafeNativeMethods.RHC_RhinoPurgeDocumentHistory(RuntimeSerialNumber, ref hiddenCount);
+    }
+
+    /// <summary>
+    /// Purges the history records of a list of objects.
+    /// </summary>
+    /// <param name="objects">
+    /// The objects whose history records are to be purged. Objects that have no history
+    /// record are skipped.
+    /// </param>
+    /// <returns>The number of objects that had a history record purged.</returns>
+    /// <since>9.0</since>
+    public int PurgeObjectHistory(IEnumerable<RhinoObject> objects)
+    {
+      if (objects == null)
+        return 0;
+
+      using (var rharray = new Runtime.InternalRhinoObjectArray(objects))
+      {
+        return UnsafeNativeMethods.RHC_RhinoPurgeObjectHistory(RuntimeSerialNumber, rharray.NonConstPointer());
+      }
+    }
 
     /// <since>5.0</since>
     public void ClearUndoRecords(bool purgeDeletedObjects)
@@ -2448,7 +2830,7 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true if Undo is currently active. 
+    /// Returns true if Undo is currently active.
     /// </summary>
     /// <since>6.0</since>
     public bool UndoActive
@@ -2457,12 +2839,58 @@ namespace Rhino
     }
 
     /// <summary>
-    /// Returns true if Redo is currently active. 
+    /// Returns true if Redo is currently active.
     /// </summary>
     /// <since>6.0</since>
     public bool RedoActive
     {
       get { return UnsafeNativeMethods.CRhinoDoc_UndoRedoActive(RuntimeSerialNumber, false); }
+    }
+
+
+    /// <summary>
+    /// Gets this document's undo history, ordered from the most recently
+    /// recorded action to the oldest recorded action.
+    /// </summary>
+    /// <returns>
+    /// The undo records. The list is empty when there is nothing to undo.
+    /// </returns>
+    /// <since>9.0</since>
+    public UndoRecordEntry[] GetUndoRecords()
+    {
+      return GetUndoRedoRecords(true);
+    }
+
+    /// <summary>
+    /// Gets this document's redo history, ordered from the action that the next
+    /// call to <see cref="Redo"/> repeats to the oldest action that can be redone.
+    /// </summary>
+    /// <returns>
+    /// The redo records. The list is empty when there is nothing to redo.
+    /// </returns>
+    /// <since>9.0</since>
+    public UndoRecordEntry[] GetRedoRecords()
+    {
+      return GetUndoRedoRecords(false);
+    }
+
+    private UndoRecordEntry[] GetUndoRedoRecords(bool undo)
+    {
+      using (var serialNumbers = new Rhino.Runtime.InteropWrappers.SimpleArrayUint())
+      using (var descriptions = new Rhino.Runtime.InteropWrappers.ClassArrayString())
+      {
+        int count = UnsafeNativeMethods.CRhinoDoc_GetUndoRecords(RuntimeSerialNumber, undo, serialNumbers.NonConstPointer(), descriptions.NonConstPointer());
+        if (count < 1)
+          return Array.Empty<UndoRecordEntry>();
+
+        uint[] numbers = serialNumbers.ToArray();
+        string[] texts = descriptions.ToArray();
+        int length = Math.Min(numbers.Length, texts.Length);
+        var records = new UndoRecordEntry[length];
+        for (int i = 0; i < length; i++)
+          records[i] = new UndoRecordEntry(numbers[i], texts[i]);
+        return records;
+      }
     }
 
     //  bool Undo( CRhUndoRecord* = NULL );
@@ -2486,16 +2914,10 @@ namespace Rhino
     //  Returns:
     //    Number of undo records.
     //  */
-    //  int GetUndoRecords( ON_SimpleArray<CRhUndoRecord* >& ) const;
-
-    //  /*
-    //  Returns: 
-    //    Number of undo records.
-    //  */
     //  int UndoRecordCount() const;
 
     //  /*
-    //  Returns: 
+    //  Returns:
     //    Number bytes in used by undo records
     //  */
     //  size_t UndoRecordMemorySize() const;
@@ -2504,20 +2926,20 @@ namespace Rhino
     //  Description:
     //    Culls the undo list to release memory.
     //  Parameters:
-    //    min_step_count - [in] 
+    //    min_step_count - [in]
     //      minimum number of undo steps to keep.
-    //    max_memory_size_bytes - [in] 
+    //    max_memory_size_bytes - [in]
     //      maximum amount of memory, in bytes, for undo list to use.
     //  Returns:
-    //    Number of culled records.    
+    //    Number of culled records.
     //  Remarks:
     //    In the version with no arguments, the settings in
     //    RhinoApp().AppSettings().GeneralSettings() are used.
     //  */
     //  int CullUndoRecords();
 
-    //  int CullUndoRecords( 
-    //        int min_step_count, 
+    //  int CullUndoRecords(
+    //        int min_step_count,
     //        size_t max_memory_size_bytes
     //        );
 
@@ -2526,12 +2948,6 @@ namespace Rhino
     //  Returns true if document contains undo records.
     //  */
     //  bool HasUndoRecords() const;
-
-    //  /*
-    //  Returns:
-    //    Number of undo records.
-    //  */
-    //  int GetRedoRecords( ON_SimpleArray<CRhUndoRecord* >& ) const;
 
     //  class CRhSelSetManager* m_selset_manager;
 
@@ -2621,6 +3037,7 @@ namespace Rhino
     /// <since>6.9</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public bool SupportsRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2648,6 +3065,7 @@ namespace Rhino
     /// <since>6.9</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public RenderPrimitiveList GetRenderPrimitiveList(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs)
     {
       // Andy, we are just passing Guid.Empty for the plug-in Id for now until there is an actual
@@ -2686,6 +3104,7 @@ namespace Rhino
     /// <since>6.9</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryGetRenderPrimitiveBoundingBox(ViewportInfo viewport, Rhino.Display.DisplayPipelineAttributes attrs, out BoundingBox boundingBox)
     {
       boundingBox = BoundingBox.Unset;
@@ -2720,7 +3139,7 @@ namespace Rhino
     /// This is a low level tool to determine if Rhino is currently running a command.
     /// </summary>
     /// <param name="bIgnoreScriptRunnerCommands">
-    /// If true, script running commands, like "ReadCommandFile" and the 
+    /// If true, script running commands, like "ReadCommandFile" and the
     /// RhinoScript plug-ins "RunScript" command, are not counted.
     /// </param>
     /// <returns>Number of active commands.</returns>
@@ -2941,7 +3360,7 @@ namespace Rhino
     internal static EventHandler<UnitsChangedWithScalingEventArgs> m_units_changed_with_scaling;
     /// <summary>
     /// Called when a change in the model units results in a scaling operation on all of the objects in the document.
-    /// This call is made before any of the objects are scaled.  
+    /// This call is made before any of the objects are scaled.
     /// A call to RhinoDoc.DocumentPropertiesChanged follows.
     /// </summary>
     /// <since>7.20</since>
@@ -3041,6 +3460,106 @@ namespace Rhino
         _userStringChangedEvent?.Invoke(doc, new UserStringChangedArgs(doc, key));
     }
 
+    // 29 May 2026, Rajaa, RH-95912
+    /// <summary>
+    /// Whether a worksession reference model is being attached or detached.
+    /// </summary>
+    /// <since>9.0</since>
+    public enum WorksessionFileChangeKind
+    {
+      /// <summary>A worksession reference model has just been attached.</summary>
+      Attached = 0,
+      /// <summary>A worksession reference model has just been detached.</summary>
+      Detached = 1,
+      // 29 May 2026, Rajaa, RH-95735
+      /// <summary>A worksession reference model is about to be detached.
+      /// The doc still contains the reference content at this point, so
+      /// subscribers can identify what will be affected before it's purged.</summary>
+      BeforeDetach = 2,
+    }
+
+    /// <summary>
+    /// Event arguments for <see cref="WorksessionFileChanged"/>. At the time of
+    /// the notification, the document state already reflects the change:
+    /// attached models' objects/layers are present, detached models'
+    /// objects/layers have been purged.
+    /// </summary>
+    public class WorksessionFileChangedEventArgs : EventArgs
+    {
+      internal WorksessionFileChangedEventArgs(RhinoDoc doc, uint modelSerialNumber, string filePath, WorksessionFileChangeKind kind)
+      {
+        Document = doc;
+        WorksessionModelRuntimeSerialNumber = modelSerialNumber;
+        FilePath = filePath;
+        ChangeKind = kind;
+      }
+
+      /// <summary>Document the worksession belongs to.</summary>
+      /// <since>9.0</since>
+      public RhinoDoc Document { get; }
+
+      /// <summary>
+      /// Runtime serial number of the worksession reference model being
+      /// attached or detached. Not persistent across sessions.
+      /// </summary>
+      /// <since>9.0</since>
+      [CLSCompliant(false)]
+      public uint WorksessionModelRuntimeSerialNumber { get; }
+
+      /// <summary>Full path of the .3dm file being attached or detached.</summary>
+      /// <since>9.0</since>
+      public string FilePath { get; }
+
+      /// <summary>Whether the model was attached or detached.</summary>
+      /// <since>9.0</since>
+      public WorksessionFileChangeKind ChangeKind { get; }
+    }
+
+    /// <summary>
+    /// Raised after a worksession reference model has been attached to or
+    /// detached from a document. The document state already reflects the
+    /// change at the time the event fires.
+    /// </summary>
+    /// <since>9.0</since>
+    public static event EventHandler<WorksessionFileChangedEventArgs> WorksessionFileChanged
+    {
+      add
+      {
+        lock (g_event_lock)
+        {
+          if (_worksessionFileChangedCallback == null)
+          {
+            _worksessionFileChangedCallback = OnWorksessionFileChanged;
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnWorksessionFileChangedCallback(_worksessionFileChangedCallback);
+          }
+          _worksessionFileChangedEvent -= value;
+          _worksessionFileChangedEvent += value;
+        }
+      }
+      remove
+      {
+        lock (g_event_lock)
+        {
+          _worksessionFileChangedEvent -= value;
+          if (_worksessionFileChangedEvent == null)
+          {
+            UnsafeNativeMethods.CRhinoEventWatcher_SetOnWorksessionFileChangedCallback(null);
+            _worksessionFileChangedCallback = null;
+          }
+        }
+      }
+    }
+    private static event EventHandler<WorksessionFileChangedEventArgs> _worksessionFileChangedEvent;
+    internal delegate void WorksessionFileChangedCallback(uint docRuntimeSerialNumber, uint modelRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string filePath, uint changeType);
+    private static WorksessionFileChangedCallback _worksessionFileChangedCallback = null;
+    [MonoPInvokeCallback(typeof(WorksessionFileChangedCallback))]
+    private static void OnWorksessionFileChanged(uint docRuntimeSerialNumber, uint modelRuntimeSerialNumber, [MarshalAs(UnmanagedType.LPWStr)] string filePath, uint changeType)
+    {
+      var doc = RhinoDoc.FromRuntimeSerialNumber(docRuntimeSerialNumber);
+      if (doc != null)
+        _worksessionFileChangedEvent?.Invoke(doc, new WorksessionFileChangedEventArgs(doc, modelRuntimeSerialNumber, filePath, (WorksessionFileChangeKind)changeType));
+    }
+
     private static DocumentIoCallback g_on_begin_open_document;
     private static DocumentIoCallback g_on_end_open_document;
     private static DocumentIoCallback g_on_end_open_document_initial_view_update;
@@ -3049,7 +3568,7 @@ namespace Rhino
     internal static EventHandler<DocumentOpenEventArgs> m_begin_open_document;
     /// <summary>
     /// This event is raised when the document open operation begins.
-    /// NOTE: On Windows, this event will be fired when a clipboard paste 
+    /// NOTE: On Windows, this event will be fired when a clipboard paste
     /// operation occurs, as Rhino opens a .tmp file in the User's
     /// Local folder with the contents of the pasted document.
     /// </summary>
@@ -3124,8 +3643,8 @@ namespace Rhino
     /// documents initial views have been created and initialized.
     /// </summary>
     /// <since>5.11</since>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("Typo: use EndOpenDocumentInitialViewUpdate")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static event EventHandler<DocumentOpenEventArgs> EndOpenDocumentInitialiViewUpdate
     {
       add
@@ -3361,15 +3880,16 @@ namespace Rhino
       m_replace_object?.SafeInvoke(null, new DocObjects.RhinoReplaceObjectEventArgs(docSerialNumber, pOldObject, pNewObject));
     }
     internal static EventHandler<DocObjects.RhinoReplaceObjectEventArgs> m_replace_object;
+
     /// <summary>
     /// Called if an object is about to be replaced.
-    /// If both RhinoDoc.UndoActive() and RhinoDoc.RedoActive() return false,
-    /// then immediately after the ReplaceObject event, there will be a DeleteObject
-    /// event followed by an AddObject event.
+    /// If both <see cref="RhinoDoc.UndoActive"/> and <see cref="RhinoDoc.RedoActive"/> return false,
+    /// then immediately after the  <see cref="RhinoDoc.ReplaceRhinoObject"/> event, there will be a <see cref="RhinoDoc.DeleteRhinoObject"/>
+    /// event followed by a <see cref="RhinoDoc.AddRhinoObject"/> event.
     ///
-    /// If either RhinoDoc.UndoActive() or RhinoDoc::RedoActive() return true,
-    /// then immediately after the ReplaceObject event, there will be a DeleteObject
-    /// event followed by an UndeleteObject event.
+    /// If either <see cref="RhinoDoc.UndoActive"/> or <see cref="RhinoDoc.UndoActive"/> return true,
+    /// then immediately after the <see cref="RhinoDoc.ReplaceRhinoObject"/> event, there will be a <see cref="RhinoDoc.DeleteRhinoObject"/>
+    /// event followed by a <see cref="RhinoDoc.UndeleteRhinoObject"/> event.
     /// </summary>
     /// <since>5.0</since>
     public static event EventHandler<DocObjects.RhinoReplaceObjectEventArgs> ReplaceRhinoObject
@@ -3965,6 +4485,168 @@ namespace Rhino
       }
     }
     #endregion
+
+    #region Section style table event
+    // 8-Apr-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-86217
+    internal delegate void RhinoDocSectionStyleTableChangedCallback(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldSettings);
+    private static RhinoDocSectionStyleTableChangedCallback g_the_section_style_table_changed_callback;
+    private static EventHandler<SectionStyleTableEventArgs> g_the_section_style_table_changed_handler;
+    private static void OnRhinoDocSectionStyleTableChanged(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldSettings)
+    {
+      g_the_section_style_table_changed_handler?.SafeInvoke(null, new SectionStyleTableEventArgs(documentSerialNumber, eventType, index, pConstOldSettings));
+    }
+    /// <summary>
+    /// Called when any modification happens to a document's section style table.
+    /// </summary>
+    /// <since>9.0</since>
+    public static event EventHandler<SectionStyleTableEventArgs> SectionStyleTableEvent
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_the_section_style_table_changed_handler, value))
+          return;
+        if (g_the_section_style_table_changed_handler == null)
+        {
+          g_the_section_style_table_changed_callback = OnRhinoDocSectionStyleTableChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetSectionStyleTableChangedCallback(g_the_section_style_table_changed_callback);
+        }
+        g_the_section_style_table_changed_handler -= value;
+        g_the_section_style_table_changed_handler += value;
+      }
+      remove
+      {
+        g_the_section_style_table_changed_handler -= value;
+        if (g_the_section_style_table_changed_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetSectionStyleTableChangedCallback(null);
+          g_the_section_style_table_changed_handler = null;
+        }
+      }
+    }
+    #endregion // Section style table event
+
+    #region Markup table event
+    internal delegate void RhinoDocMarkupTableChangedCallback(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldMarkup);
+    private static RhinoDocMarkupTableChangedCallback g_the_markup_table_changed_callback;
+    private static EventHandler<MarkupTableEventArgs> g_the_markup_table_changed_handler;
+    private static void OnRhinoDocMarkupTableChanged(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldMarkup)
+    {
+      g_the_markup_table_changed_handler?.SafeInvoke(null, new MarkupTableEventArgs(documentSerialNumber, eventType, index, pConstOldMarkup));
+    }
+    /// <summary>
+    /// Called when any modification happens to a document's markup table.
+    /// </summary>
+    /// <since>9.0</since>
+    public static event EventHandler<MarkupTableEventArgs> MarkupTableEvent
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_the_markup_table_changed_handler, value))
+          return;
+        if (g_the_markup_table_changed_handler == null)
+        {
+          g_the_markup_table_changed_callback = OnRhinoDocMarkupTableChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetMarkupTableChangedCallback(g_the_markup_table_changed_callback);
+        }
+        g_the_markup_table_changed_handler -= value;
+        g_the_markup_table_changed_handler += value;
+      }
+      remove
+      {
+        g_the_markup_table_changed_handler -= value;
+        if (g_the_markup_table_changed_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetMarkupTableChangedCallback(null);
+          g_the_markup_table_changed_handler = null;
+        }
+      }
+    }
+    #endregion // Markup table event
+
+    #region Markup view changed event
+    // https://mcneel.myjetbrains.com/youtrack/issue/RH-92369
+    internal delegate void RhinoDocMarkupViewChangedCallback(uint documentSerialNumber, int markupMode, int markupIndex);
+    private static RhinoDocMarkupViewChangedCallback g_the_markup_view_changed_callback;
+    private static EventHandler<MarkupViewChangedEventArgs> g_the_markup_view_changed_handler;
+    private static void OnRhinoDocMarkupViewChanged(uint documentSerialNumber, int markupMode, int markupIndex)
+    {
+      g_the_markup_view_changed_handler?.SafeInvoke(null, new MarkupViewChangedEventArgs(documentSerialNumber, markupMode, markupIndex));
+    }
+    /// <summary>
+    /// Called when a document's markup view state changes, i.e. when the document enters or
+    /// leaves markup viewing/editing, or switches which markup is being viewed or edited.
+    /// Unlike <see cref="MarkupTableEvent"/> (which reports markup add/delete/modify), this
+    /// reports which markup is currently active so UI can indicate it.
+    /// </summary>
+    /// <remarks>
+    /// Switching directly from one markup to another first leaves the current markup, so the
+    /// switch is reported as two events: an intervening <see cref="MarkupMode.None"/> (index -1)
+    /// followed by the new markup. Handlers should treat each event as the current state.
+    /// </remarks>
+    /// <since>9.0</since>
+    public static event EventHandler<MarkupViewChangedEventArgs> MarkupViewChanged
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_the_markup_view_changed_handler, value))
+          return;
+        if (g_the_markup_view_changed_handler == null)
+        {
+          g_the_markup_view_changed_callback = OnRhinoDocMarkupViewChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetMarkupViewChangedCallback(g_the_markup_view_changed_callback);
+        }
+        g_the_markup_view_changed_handler -= value;
+        g_the_markup_view_changed_handler += value;
+      }
+      remove
+      {
+        g_the_markup_view_changed_handler -= value;
+        if (g_the_markup_view_changed_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetMarkupViewChangedCallback(null);
+          g_the_markup_view_changed_handler = null;
+        }
+      }
+    }
+    #endregion // Markup view changed event
+
+    #region PageView group table event
+    internal delegate void RhinoDocPageViewGroupTableChangedCallback(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldPageViewGroup);
+    private static RhinoDocPageViewGroupTableChangedCallback g_the_pageview_group_table_changed_callback;
+    private static EventHandler<PageViewGroupTableEventArgs> g_the_pageview_group_table_changed_handler;
+    private static void OnRhinoDocPageViewGroupTableChanged(uint documentSerialNumber, int eventType, int index, IntPtr pConstOldPageViewGroup)
+    {
+      g_the_pageview_group_table_changed_handler?.SafeInvoke(null, new PageViewGroupTableEventArgs(documentSerialNumber, eventType, index, pConstOldPageViewGroup));
+    }
+    /// <summary>
+    /// Called when any modification happens to a document's pageview group table.
+    /// </summary>
+    /// <since>9.0</since>
+    public static event EventHandler<PageViewGroupTableEventArgs> PageViewGroupTableEvent
+    {
+      add
+      {
+        if (Runtime.HostUtils.ContainsDelegate(g_the_pageview_group_table_changed_handler, value))
+          return;
+        if (g_the_pageview_group_table_changed_handler == null)
+        {
+          g_the_pageview_group_table_changed_callback = OnRhinoDocPageViewGroupTableChanged;
+          UnsafeNativeMethods.CRhinoEventWatcher_SetPageViewGroupTableChangedCallback(g_the_pageview_group_table_changed_callback);
+        }
+        g_the_pageview_group_table_changed_handler -= value;
+        g_the_pageview_group_table_changed_handler += value;
+      }
+      remove
+      {
+        g_the_pageview_group_table_changed_handler -= value;
+        if (g_the_pageview_group_table_changed_handler == null)
+        {
+          UnsafeNativeMethods.CRhinoEventWatcher_SetPageViewGroupTableChangedCallback(null);
+          g_the_pageview_group_table_changed_handler = null;
+        }
+      }
+    }
+    #endregion // PageView group table event
 
     #region InstanceDefinition table event
     private static RhinoTableCallback g_on_idef_table_event_callback;
@@ -4716,10 +5398,11 @@ namespace Rhino
     /// </summary>
     /// <since>5.0</since>
     [Obsolete("Use DocumentSerialNumber or Document properties")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public int DocumentId => (int)DocumentSerialNumber;
 
     /// <summary>
-    /// Gets the uniques document serial number for this event
+    /// Gets the unique document serial number for this event
     /// </summary>
     /// <since>6.0</since>
     [CLSCompliant(false)]
@@ -4986,6 +5669,13 @@ namespace Rhino
       }
 
       /// <summary>
+      /// The document runtime serial number.
+      /// </summary>
+      /// <since>9.0</since>
+      [CLSCompliant(false)]
+      public uint DocumentSerialNumber => m_doc_serial_number;
+
+      /// <summary>
       /// The existing object, or the object about to be deleted.
       /// At the time <seealso cref="RhinoDoc.ReplaceRhinoObject"/> is called, this object has not been deleted.
       /// </summary>
@@ -5066,6 +5756,13 @@ namespace Rhino
         m_pRhinoObject = pRhinoObject;
         m_pOldObjectAttributes = pOldObjectAttributes;
       }
+
+      /// <summary>
+      /// The document runtime serial number.
+      /// </summary>
+      /// <since>9.0</since>
+      [CLSCompliant(false)]
+      public uint DocumentSerialNumber => m_doc_serial_number;
 
       RhinoDoc m_doc;
       /// <since>5.0</since>
@@ -5472,9 +6169,11 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public void FlashObjects(IEnumerable<RhinoObject> list, bool useSelectionColor)
     {
-      var rharray = new Runtime.InternalRhinoObjectArray(list);
-      IntPtr ptr_array = rharray.NonConstPointer();
-      UnsafeNativeMethods.CRhinoDoc_FlashObjectList(Document.RuntimeSerialNumber, ptr_array, useSelectionColor);
+      using (var rharray = new Runtime.InternalRhinoObjectArray(list))
+      {
+        IntPtr ptr_array = rharray.NonConstPointer();
+        UnsafeNativeMethods.CRhinoDoc_FlashObjectList(Document.RuntimeSerialNumber, ptr_array, useSelectionColor);
+      }
     }
 
     /// <summary>Redraws all views.</summary>
@@ -5495,7 +6194,29 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public void Redraw()
     {
-      UnsafeNativeMethods.CRhinoDoc_Redraw(Document.RuntimeSerialNumber);
+      UnsafeNativeMethods.CRhinoDoc_Redraw(Document.RuntimeSerialNumber, false);
+    }
+
+    /// <summary>Redraws all views.</summary>
+    /// <param name="deferred">false if screen needs to be refreshed now; false otherwise.</param>
+    /// <remarks>
+    /// If you change something in the document -- like adding objects,
+    /// deleting objects, modifying layer or object display attributes, etc.,
+    /// then you need to call Redraw to redraw all the views.
+    ///
+    /// If you change something in a particular view like the projection,
+    /// construction plane, background bitmap, etc., then you need to
+    /// call CRhinoView::Redraw to redraw that particular view.
+    ///</remarks>
+    /// <example>
+    /// <code source='examples\vbnet\ex_addcircle.vb' lang='vbnet'/>
+    /// <code source='examples\cs\ex_addcircle.cs' lang='cs'/>
+    /// <code source='examples\py\ex_addcircle.py' lang='py'/>
+    /// </example>
+    /// <since>9.0</since>
+    public void Redraw(bool deferred)
+    {
+      UnsafeNativeMethods.CRhinoDoc_Redraw(Document.RuntimeSerialNumber, deferred);
     }
 
     /// <summary>Gets an array of all the views.</summary>
@@ -5505,6 +6226,7 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     /// <deprecated>8.0</deprecated>
     [Obsolete]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public RhinoView[] GetViewList(bool includeStandardViews, bool includePageViews)
     {
       var vtf = ViewTypeFilter.All;
@@ -5531,19 +6253,18 @@ namespace Rhino.DocObjects.Tables
     /// <since>8.0</since>
     public RhinoView[] GetViewList(ViewTypeFilter filter)
     {
-      int count = UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, (int)filter);
-      if (count < 1)
-        return new RhinoView[0];
-      var views = new List<RhinoView>(count);
-      for (int i = 0; i < count; i++)
+      using (var serialnumbers = new Rhino.Runtime.InteropWrappers.SimpleArrayUint())
       {
-        IntPtr ptr_view = UnsafeNativeMethods.CRhinoDoc_ViewListGet(Document.RuntimeSerialNumber, i);
-        RhinoView view = RhinoView.FromIntPtr(ptr_view);
-        if (view != null)
-          views.Add(view);
+        IntPtr ptrSerialNumbers = serialnumbers.NonConstPointer();
+        UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, (int)filter, ptrSerialNumbers);
+        uint[] sns = serialnumbers.ToArray();
+        RhinoView[] rc = new RhinoView[sns.Length];
+        for (int i=0; i<sns.Length; i++)
+        {
+          rc[i] = RhinoView.FromRuntimeSerialNumber(sns[i]);
+        }
+        return rc;
       }
-      UnsafeNativeMethods.CRhinoDoc_ViewListBuild(Document.RuntimeSerialNumber, (int)ViewTypeFilter.None); // calling with None empties the static list used by ViewListGet
-      return views.ToArray();
     }
 
     /// <since>5.0</since>
@@ -5551,7 +6272,7 @@ namespace Rhino.DocObjects.Tables
     {
       return GetViewList(ViewTypeFilter.Model);
     }
-    
+
     /// <summary>
     /// Gets all page views in the document.
     /// </summary>
@@ -5573,6 +6294,30 @@ namespace Rhino.DocObjects.Tables
         pages[i] = views[i] as RhinoPageView;
       }
       return pages;
+    }
+
+    /// <summary>
+    /// Gets the number of page views in the document
+    /// </summary>
+    /// <since>9.0</since>
+    public int PageViewCount => UnsafeNativeMethods.CRhinoDoc_PageViewCount(Document.RuntimeSerialNumber);
+
+    /// <summary>
+    /// Imports a page view, or layout, from a Rhino file into this document.
+    /// </summary>
+    /// <param name="filename">The name of Rhino file to read from.</param>
+    /// <param name="mainViewportId">The id of the page view on the Rhino file.</param>
+    /// <param name="pageName">The name to give the newly imported page view.</param>
+    /// <returns></returns>
+    /// <since>9.0</since>
+    public bool ImportPageView(string filename, Guid mainViewportId, string pageName)
+    {
+      if (!System.IO.File.Exists(filename))
+        return false;
+      bool rc = string.IsNullOrEmpty(pageName)
+        ? UnsafeNativeMethods.CRhinoDoc_ImportPageView(Document.RuntimeSerialNumber, filename, mainViewportId, null)
+        : UnsafeNativeMethods.CRhinoDoc_ImportPageView(Document.RuntimeSerialNumber, filename, mainViewportId, pageName);
+      return rc;
     }
 
     /// <summary>
@@ -5669,6 +6414,9 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>
     /// Constructs a new page view with a given title and, at the same time, adds it to the list.
+    /// On Windows the new page view becomes the active view; on Mac the active view
+    /// does not change. Use the overload with a setActive parameter for behavior
+    /// that is consistent across platforms.
     /// </summary>
     /// <param name="title">
     /// If null or empty, a name will be generated as "Page #" where # is the largest page number.
@@ -5677,12 +6425,38 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public RhinoPageView AddPageView(string title)
     {
-      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, 0, 0);
+      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateViewDefaultActivation(Document.RuntimeSerialNumber, title, 0, 0);
+      return RhinoView.FromIntPtr(ptr_page_view) as RhinoPageView;
+    }
+
+    /// <summary>
+    /// Constructs a new page view with a given title and, at the same time, adds it to the list.
+    /// </summary>
+    /// <param name="title">
+    /// If null or empty, a name will be generated as "Page #" where # is the largest page number.
+    /// </param>
+    /// <param name="setActive">
+    /// If true, the new page view becomes the active view.
+    /// If false, the view that was active before this call remains the active view.
+    /// </param>
+    /// <returns>The newly created page view on success; or null on error.</returns>
+    /// <remarks>
+    /// On Mac, building a page view's window is main-thread work. If setActive is true
+    /// and this is called from another thread, the page view is created but may not
+    /// have become the active view by the time this returns.
+    /// </remarks>
+    /// <since>9.0</since>
+    public RhinoPageView AddPageView(string title, bool setActive)
+    {
+      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, 0, 0, setActive);
       return RhinoView.FromIntPtr(ptr_page_view) as RhinoPageView;
     }
 
     /// <summary>
     /// Constructs a new page view with a given title and size and, at the same time, adds it to the list.
+    /// On Windows the new page view becomes the active view; on Mac the active view
+    /// does not change. Use the overload with a setActive parameter for behavior
+    /// that is consistent across platforms.
     /// </summary>
     /// <param name="title">
     /// If null or empty, a name will be generated as "Page #" where # is the largest page number.
@@ -5698,11 +6472,38 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public RhinoPageView AddPageView(string title, double pageWidth, double pageHeight)
     {
-      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, pageWidth, pageHeight);
+      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateViewDefaultActivation(Document.RuntimeSerialNumber, title, pageWidth, pageHeight);
+      return RhinoView.FromIntPtr(ptr_page_view) as RhinoPageView;
+    }
+
+    /// <summary>
+    /// Constructs a new page view with a given title and size and, at the same time, adds it to the list.
+    /// </summary>
+    /// <param name="title">
+    /// If null or empty, a name will be generated as "Page #" where # is the largest page number.
+    /// </param>
+    /// <param name="pageWidth">The page total width.</param>
+    /// <param name="pageHeight">The page total height.</param>
+    /// <param name="setActive">
+    /// If true, the new page view becomes the active view.
+    /// If false, the view that was active before this call remains the active view.
+    /// </param>
+    /// <returns>The newly created page view on success; or null on error.</returns>
+    /// <remarks>
+    /// On Mac, building a page view's window is main-thread work. If setActive is true
+    /// and this is called from another thread, the page view is created but may not
+    /// have become the active view by the time this returns.
+    /// </remarks>
+    /// <since>9.0</since>
+    public RhinoPageView AddPageView(string title, double pageWidth, double pageHeight, bool setActive)
+    {
+      IntPtr ptr_page_view = UnsafeNativeMethods.CRhinoPageView_CreateView(Document.RuntimeSerialNumber, title, pageWidth, pageHeight, setActive);
       return RhinoView.FromIntPtr(ptr_page_view) as RhinoPageView;
     }
 
     /// <since>5.0</since>
+    [Obsolete("Since 9.0. Use RhinoDoc.ActiveSpace instead")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never), EditorBrowsable(EditorBrowsableState.Never)]
     public bool ModelSpaceIsActive
     {
       get
@@ -5874,10 +6675,12 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public RhinoObject[] FindByLayer(string layerName)
     {
-      Layer layer = Document.Layers.FindName(layerName);
-      if (layer == null) return null;
+      using (Layer layer = Document.Layers.FindName(layerName))
+      {
+        if (layer == null) return null;
 
-      return FindByLayer(layer);
+        return FindByLayer(layer);
+      }
     }
 
     /// <summary>
@@ -5898,6 +6701,28 @@ namespace Rhino.DocObjects.Tables
     {
       var list = new List<RhinoObject>(GetObjectList(typeFilter));
       return list.ToArray();
+    }
+
+    /// <summary>
+    /// Fast existence test for the current selection, with a reference breakdown, that does
+    /// NOT materialize the selected objects. This is equivalent to testing whether
+    /// <see cref="FindByFilter(ObjectEnumeratorSettings)"/> with NormalObjects, ActiveObjects,
+    /// ReferenceObjects, IncludeLights and SelectedObjectsFilter would return any objects (and
+    /// whether any of them are reference objects / reference blocks), but it uses the fast
+    /// selection iterator and stops at the first match instead of building a RhinoObject[] of
+    /// the entire selection. Intended for selection-change UI guards (e.g. the Layers panel).
+    /// </summary>
+    /// <param name="referenceObjectSelected">Set to true if any selected object is a reference object.</param>
+    /// <param name="referenceBlockSelected">Set to true if any selected reference object is a block (instance reference).</param>
+    /// <returns>true if any object is selected.</returns>
+    /// <since>9.0</since>
+    public bool AnySelectedObjects(out bool referenceObjectSelected, out bool referenceBlockSelected)
+    {
+      bool refObj = false, refBlock = false;
+      bool rc = UnsafeNativeMethods.CRhinoDoc_AnySelectedObjectInfo(m_doc.RuntimeSerialNumber, ref refObj, ref refBlock);
+      referenceObjectSelected = refObj;
+      referenceBlockSelected = refBlock;
+      return rc;
     }
 
     /// <summary>
@@ -5960,14 +6785,16 @@ namespace Rhino.DocObjects.Tables
       var rhobjs = new Runtime.InternalRhinoObjectArray();
       IntPtr ptr_array = rhobjs.NonConstPointer();
 
-      var it = new ObjectIterator(m_doc, filter);
-      IntPtr ptr_iterator = it.NonConstPointer();
+      using (var it = new ObjectIterator(m_doc, filter))
+      {
+        IntPtr ptr_iterator = it.NonConstPointer();
 
-      UnsafeNativeMethods.CRhinoDoc_LookupObjectsByUserText(key, value, caseSensitive, searchGeometry, searchAttributes, ptr_iterator, ptr_array);
-      GC.KeepAlive(it);
-      RhinoObject[] objs = rhobjs.ToArray();
-      rhobjs.Dispose();
-      return objs;
+        UnsafeNativeMethods.CRhinoDoc_LookupObjectsByUserText(key, value, caseSensitive, searchGeometry, searchAttributes, ptr_iterator, ptr_array);
+
+        RhinoObject[] objs = rhobjs.ToArray();
+        rhobjs.Dispose();
+        return objs;
+      }
     }
 
     /// <summary>
@@ -5995,6 +6822,15 @@ namespace Rhino.DocObjects.Tables
       return rc.ToArray();
     }
 
+    /// <summary>
+    /// Finds objects bounded by a polyline region.
+    /// </summary>
+    /// <param name="viewport">Viewport to use for selection.</param>
+    /// <param name="region">Enumeratoin of points that define the selection region.</param>
+    /// <param name="mode">The selection mode: 0 = window, 1 = crossing, 2 = outside window, 3 = outside crossing window.</param>
+    /// <param name="filter">Geometry filter.</param>
+    /// <returns>An array of Rhino objects if successful.</returns>
+    /// <since>5.0</since>
     RhinoObject[] FindByRegion(RhinoViewport viewport, IEnumerable<Point3d> region, int mode, ObjectType filter)
     {
       IntPtr ptr_const_viewport = viewport.ConstPointer();
@@ -6017,6 +6853,16 @@ namespace Rhino.DocObjects.Tables
       }
     }
 
+    /// <summary>
+    /// Finds objects bounded by a polyline region.
+    /// </summary>
+    /// <param name="viewport">Viewport to use for selection.</param>
+    /// <param name="screen1">First screen coordinate corner.</param>
+    /// <param name="screen2">Second screen coordinate corner.</param>
+    /// <param name="mode">The selection mode: 0 = window, 1 = crossing, 2 = outside window, 3 = outside crossing window.</param>
+    /// <param name="filter">Geometry filter.</param>
+    /// <returns>An array of Rhino objects if successful.</returns>
+    /// <since>5.0</since>
     RhinoObject[] FindByRegion(RhinoViewport viewport, Point2d screen1, Point2d screen2, int mode, ObjectType filter)
     {
       double min_x = screen1.X < screen2.X ? screen1.X : screen2.X;
@@ -6425,7 +7271,7 @@ namespace Rhino.DocObjects.Tables
             default: throw new NotImplementedException("Add currently does not support this annotation type.");
           }
           break;
-          
+
         case ObjectType.InstanceDefinition:
           throw new NotImplementedException("Add currently does not support instance definition types.");
         case ObjectType.InstanceReference:
@@ -6709,7 +7555,7 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="xCt">Number of points in X dir.</param>
-    /// <param name="yCt">Number of points in Y dir.</param> 
+    /// <param name="yCt">Number of points in Y dir.</param>
     /// <param name="zCt">Number of points in Z dir.</param>
     /// <param name="min">point at x0,y0,z0 of bounding box of the pointcloud</param>
     /// <param name="max">point at x1,y1,z1 of bounding box of the pointcloud</param>
@@ -6720,7 +7566,7 @@ namespace Rhino.DocObjects.Tables
     /// not persist in archives
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
-    /// <since>8.0</since>    
+    /// <since>8.0</since>
     public Guid AddOrderedPointCloud(int xCt, int yCt, int zCt, Point3d min, Point3d max, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
 
@@ -6735,7 +7581,7 @@ namespace Rhino.DocObjects.Tables
 
     /// <summary>Adds a point cloud object to the document.</summary>
     /// <param name="xCt">Number of points in X dir.</param>
-    /// <param name="yCt">Number of points in Y dir.</param> 
+    /// <param name="yCt">Number of points in Y dir.</param>
     /// <param name="zCt">Number of points in Z dir.</param>
     /// <param name="box">box to use for output, does not need to be a boundingbox.  The function that takes to points assumes it's a bounding box.</param>
     /// <param name="attributes">Attributes to apply to point cloud. null is acceptable</param>
@@ -6745,7 +7591,7 @@ namespace Rhino.DocObjects.Tables
     /// not persist in archives
     /// </param>
     /// <returns>A unique identifier for the object.</returns>
-    /// <since>8.0</since>    
+    /// <since>8.0</since>
     public Guid AddOrderedPointCloud(int xCt, int yCt, int zCt, Point3d[] box, ObjectAttributes attributes, HistoryRecord history, bool reference)
     {
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
@@ -7026,7 +7872,7 @@ namespace Rhino.DocObjects.Tables
     {
       if (!box.IsValid)
         throw new ArgumentException("Box is invalid.", nameof(box));
-      
+
       var extr = box.ToExtrusion();
       return AddExtrusion(extr, attributes, history, reference);
     }
@@ -7380,6 +8226,26 @@ namespace Rhino.DocObjects.Tables
       var const_ptr_attributes = null == attributes ? IntPtr.Zero : attributes.ConstPointer();
       var ptr_history = null == history ? IntPtr.Zero : history.Handle;
       var success = UnsafeNativeMethods.CRhinoDoc_AddRichTextObject(doc_id, const_ptr_text, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(text);
+      GC.KeepAlive(attributes);
+      GC.KeepAlive(history);
+      return success;
+    }
+
+    /// <summary>
+    /// 21-May-2025 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-2256
+    /// </summary>
+    /// <since>9.0</since>
+    internal Guid AddGeometricTolerance(TextEntity text, ObjectAttributes attributes, HistoryRecord history, bool reference)
+    {
+      if (null == text)
+        throw new ArgumentNullException(nameof(text));
+      var doc = Document;
+      var doc_id = null == doc ? 0 : doc.RuntimeSerialNumber;
+      var const_ptr_text = text.ConstPointer();
+      var const_ptr_attributes = null == attributes ? IntPtr.Zero : attributes.ConstPointer();
+      var ptr_history = null == history ? IntPtr.Zero : history.Handle;
+      var success = UnsafeNativeMethods.CRhinoDoc_AddGeometricTolerance(doc_id, const_ptr_text, const_ptr_attributes, ptr_history, reference);
       GC.KeepAlive(text);
       GC.KeepAlive(attributes);
       GC.KeepAlive(history);
@@ -8214,7 +9080,7 @@ namespace Rhino.DocObjects.Tables
 
     #region Object deletion
     /// <summary>
-    /// Deletes objref.Object(). The deletion can be undone by calling UndeleteObject(). 
+    /// Deletes objref.Object(). The deletion can be undone by calling UndeleteObject().
     /// </summary>
     /// <param name="objref">objref.Object() will be deleted.</param>
     /// <param name="quiet">If false, a message box will appear when an object cannot be deleted.</param>
@@ -8551,7 +9417,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">Object represented by this ObjRef is selected.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
@@ -8566,7 +9432,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">Object represented by this ObjRef is selected.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
@@ -8584,7 +9450,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objref">Object represented by this ObjRef is selected.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
@@ -8596,7 +9462,7 @@ namespace Rhino.DocObjects.Tables
     /// decides if the object can be selected when it has grips turned on.
     /// </param>
     /// <param name="ignoreLayerLocking">
-    /// If true, then objects on locked layers can be selected. 
+    /// If true, then objects on locked layers can be selected.
     /// </param>
     /// <param name="ignoreLayerVisibility">
     /// If true, then objects on hidden layers can be selectable.
@@ -8629,7 +9495,7 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objRefs">References to objects to select or deselect.</param>
     /// <param name="select">
-    /// If true, objects will be selected. 
+    /// If true, objects will be selected.
     /// If false, objects will be deselected.
     /// </param>
     /// <returns>Number of objects successfully selected or deselected.</returns>
@@ -8681,7 +9547,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to select.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <returns>true on success, false on failure.</returns>
@@ -8697,7 +9563,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to select.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
@@ -8716,7 +9582,7 @@ namespace Rhino.DocObjects.Tables
     /// <param name="objectId">Id of object to select.</param>
     /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
     /// <param name="syncHighlight">
-    /// If true, then the object is highlighted if it is selected 
+    /// If true, then the object is highlighted if it is selected
     /// and unhighlighted if is not selected.
     /// </param>
     /// <param name="persistentSelect">
@@ -8728,7 +9594,7 @@ namespace Rhino.DocObjects.Tables
     /// decides if the object can be selected when it has grips turned on.
     /// </param>
     /// <param name="ignoreLayerLocking">
-    /// If true, then objects on locked layers can be selected. 
+    /// If true, then objects on locked layers can be selected.
     /// </param>
     /// <param name="ignoreLayerVisibility">
     /// If true, then objects on hidden layers can be selectable.
@@ -8761,20 +9627,139 @@ namespace Rhino.DocObjects.Tables
     /// </summary>
     /// <param name="objectIds">Ids of objects to select or deselect.</param>
     /// <param name="select">
-    /// If true, objects will be selected. 
+    /// If true, objects will be selected.
     /// If false, objects will be deselected.
     /// </param>
     /// <returns>Number of objects successfully selected or deselected.</returns>
     /// <since>5.0</since>
     public int Select(IEnumerable<Guid> objectIds, bool select)
     {
+      return Select(objectIds, select, true, true, false, false, false);
+    }
+
+    /// <summary>
+    /// Select or deselect a colletion of objects.
+    /// </summary>
+    /// <param name="objectIds"></param>
+    /// <param name="select">If true, the object will be selected, if false, it will be deselected.</param>
+    /// <param name="syncHighlight">
+    /// If true, then the object is highlighted if it is selected
+    /// and unhighlighted if is not selected.
+    /// </param>
+    /// <param name="persistentSelect">
+    /// Objects that are persistently selected stay selected when a command terminates.
+    /// </param>
+    /// <param name="ignoreGripsState">
+    /// If true, then objects with grips on can be selected.
+    /// If false, then the value returned by the object's IsSelectableWithGripsOn() function
+    /// decides if the object can be selected when it has grips turned on.
+    /// </param>
+    /// <param name="ignoreLayerLocking">
+    /// If true, then objects on locked layers can be selected.
+    /// </param>
+    /// <param name="ignoreLayerVisibility">
+    /// If true, then objects on hidden layers can be selectable.
+    /// </param>
+    /// <returns>Number of objects successfully selected or deselected.</returns>
+    /// <since>9.0</since>
+    public int Select(IEnumerable<Guid> objectIds, bool select, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
+    {
       if (objectIds == null) { throw new ArgumentNullException("objectIds"); }
-      int count = 0;
-      foreach (Guid objectId in objectIds)
-      {
-        if (Select(objectId, select)) { count++; }
-      }
-      return count;
+
+      var ids = objectIds.ToArray();
+      if (ids.Length == 0) return 0;
+      return UnsafeNativeMethods.CRhinoDoc_SelectObjects(m_doc.RuntimeSerialNumber, ids.Length, ids, select, syncHighlight, persistentSelect, ignoreGripsState, ignoreLayerLocking, ignoreLayerVisibility);
+    }
+
+    /// <summary>
+    /// Set object selection.
+    /// </summary>
+    /// <param name="objectIds"></param>
+    /// <param name="syncHighlight">
+    /// If true, then the object is highlighted if it is selected
+    /// and unhighlighted if is not selected.
+    /// </param>
+    /// <param name="persistentSelect">
+    /// Objects that are persistently selected stay selected when a command terminates.
+    /// </param>
+    /// <param name="ignoreGripsState">
+    /// If true, then objects with grips on can be selected.
+    /// If false, then the value returned by the object's IsSelectableWithGripsOn() function
+    /// decides if the object can be selected when it has grips turned on.
+    /// </param>
+    /// <param name="ignoreLayerLocking">
+    /// If true, then objects on locked layers can be selected.
+    /// </param>
+    /// <param name="ignoreLayerVisibility">
+    /// If true, then objects on hidden layers can be selectable.
+    /// </param>
+    /// <returns>Number of objects successfully selected.</returns>
+    /// <remarks>This method clears current selection before set the new one.</remarks>
+    /// <since>9.0</since>
+    public int SetSelectedObjects(IEnumerable<Guid> objectIds, bool syncHighlight, bool persistentSelect, bool ignoreGripsState, bool ignoreLayerLocking, bool ignoreLayerVisibility)
+    {
+      if (objectIds == null) { throw new ArgumentNullException("objectIds"); }
+
+      var ids = objectIds.ToArray();
+      return UnsafeNativeMethods.CRhinoDoc_SetSelectedObjects(m_doc.RuntimeSerialNumber, ids.Length, ids, syncHighlight, persistentSelect, ignoreGripsState, ignoreLayerLocking, ignoreLayerVisibility);
+    }
+
+    /// <summary>
+    /// Selects or deselects a collection of grips in one pass, so a native
+    /// CRhinoOnChangeObjectSelectState watcher sees one change rather than one per grip.
+    /// </summary>
+    /// <param name="grips">
+    /// Grips to select or deselect, from <see cref="RhinoObject.GetGrips"/>. They may
+    /// belong to several objects. Grips whose owner has since had its grips turned off, and
+    /// anything in the collection that is not a grip, are skipped. null selects nothing, which
+    /// is what <see cref="RhinoObject.GetGrips"/> hands back for an object with no grips.
+    /// </param>
+    /// <param name="select">If true, the grips will be selected, otherwise deselected.</param>
+    /// <returns>Number of grips successfully selected or deselected.</returns>
+    /// <remarks>
+    /// <see cref="RhinoDoc.SelectObjects"/> and <see cref="RhinoDoc.DeselectObjects"/> do not
+    /// report grips whichever way they are selected; the old event watchers have filtered
+    /// grips out since Rhino 5 because grip pointers do not outlive the selection.
+    /// </remarks>
+    /// <since>9.0</since>
+    public int SelectGrips(IEnumerable<GripObject> grips, bool select)
+    {
+      return SelectGrips(grips, select, true, true);
+    }
+
+    /// <summary>
+    /// Selects or deselects a collection of grips in one pass, so a native
+    /// CRhinoOnChangeObjectSelectState watcher sees one change rather than one per grip.
+    /// </summary>
+    /// <param name="grips">
+    /// Grips to select or deselect, from <see cref="RhinoObject.GetGrips"/>. They may
+    /// belong to several objects. Grips whose owner has since had its grips turned off, and
+    /// anything in the collection that is not a grip, are skipped. null selects nothing, which
+    /// is what <see cref="RhinoObject.GetGrips"/> hands back for an object with no grips.
+    /// </param>
+    /// <param name="select">If true, the grips will be selected, otherwise deselected.</param>
+    /// <param name="syncHighlight">
+    /// If true, then a grip is highlighted if it is selected and unhighlighted if it is not.
+    /// </param>
+    /// <param name="persistentSelect">
+    /// Grips that are persistently selected stay selected when a command terminates.
+    /// </param>
+    /// <returns>Number of grips successfully selected or deselected.</returns>
+    /// <remarks>
+    /// <see cref="RhinoDoc.SelectObjects"/> and <see cref="RhinoDoc.DeselectObjects"/> do not
+    /// report grips whichever way they are selected; the old event watchers have filtered
+    /// grips out since Rhino 5 because grip pointers do not outlive the selection.
+    /// </remarks>
+    /// <since>9.0</since>
+    public int SelectGrips(IEnumerable<GripObject> grips, bool select, bool syncHighlight, bool persistentSelect)
+    {
+      // Null rather than an exception: RhinoObject.GetGrips returns null for an object with no
+      // grips, so SelectGrips(obj.GetGrips(), true) is an ordinary call, not a caller error.
+      if (grips == null) return 0;
+
+      var serial_numbers = grips.Where(g => g != null).Select(g => g.RuntimeSerialNumber).ToArray();
+      if (serial_numbers.Length == 0) return 0;
+      return UnsafeNativeMethods.CRhinoDoc_SelectGrips(m_doc.RuntimeSerialNumber, serial_numbers.Length, serial_numbers, select, syncHighlight, persistentSelect);
     }
 
     /// <summary>Unselect objects.</summary>
@@ -8787,6 +9772,7 @@ namespace Rhino.DocObjects.Tables
     {
       return UnsafeNativeMethods.CRhinoDoc_UnselectAll(m_doc.RuntimeSerialNumber, ignorePersistentSelections);
     }
+
     /// <summary>Unselect objects.</summary>
     /// <returns>Number of object that were unselected.</returns>
     /// <example>
@@ -8913,7 +9899,7 @@ namespace Rhino.DocObjects.Tables
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="objRef"></param>
     /// <param name="channel"></param>
@@ -8926,7 +9912,7 @@ namespace Rhino.DocObjects.Tables
       return ModifyTextureMapping(obj, channel, mapping);
     }
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="objId"></param>
     /// <param name="channel"></param>
@@ -8939,7 +9925,7 @@ namespace Rhino.DocObjects.Tables
       return ModifyTextureMapping(obj_ref, channel, mapping);
     }
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="channel"></param>
@@ -9247,7 +10233,8 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(ObjRef objref, Line line)
     {
-      return Replace(objref, new LineCurve(line));
+      using (var lc = new LineCurve(line))
+        return Replace(objref,lc);
     }
 
     /// <summary>Replaces one object with new line curve object.</summary>
@@ -9272,7 +10259,8 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(ObjRef objref, Circle circle)
     {
-      return Replace(objref, new ArcCurve(circle));
+      using (var ac = new ArcCurve(circle))
+        return Replace(objref, ac);
     }
 
     /// <summary>Replaces one object with new curve object.</summary>
@@ -9297,7 +10285,8 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(ObjRef objref, Arc arc)
     {
-      return Replace(objref, new ArcCurve(arc));
+      using (var ac = new ArcCurve(arc))
+        return Replace(objref, ac);
     }
 
     /// <summary>Replaces one object with new curve object.</summary>
@@ -9322,7 +10311,8 @@ namespace Rhino.DocObjects.Tables
     /// <since>5.0</since>
     public bool Replace(ObjRef objref, Polyline polyline)
     {
-      return Replace(objref, new PolylineCurve(polyline));
+      using (var pc = new PolylineCurve(polyline))
+        return Replace(objref, pc);
     }
 
     /// <summary>Replaces one object with new curve object.</summary>
@@ -9662,7 +10652,7 @@ namespace Rhino.DocObjects.Tables
       return RhinoObject.CreateRhinoObjectHelper(ptr);
     }
     /// <summary>
-    /// Gets all the objects that have been added to the document since a given runtime serial number. 
+    /// Gets all the objects that have been added to the document since a given runtime serial number.
     /// </summary>
     /// <param name="runtimeSerialNumber">Runtime serial number of the last object not to include in the list.</param>
     /// <returns>An array of objects or null if no objects were added since the given runtime serial number.</returns>
@@ -9743,7 +10733,7 @@ namespace Rhino.DocObjects.Tables
     public bool Hide(ObjRef objref, bool ignoreLayerMode, string hideGroup)
     {
       bool rc = Hide(objref, ignoreLayerMode);
-      
+
       if (rc)
       {
         if (!String.IsNullOrEmpty(hideGroup))
@@ -9778,6 +10768,7 @@ namespace Rhino.DocObjects.Tables
       return Hide(obj.Id, ignoreLayerMode);
     }
 
+    /// <since>8.32</since>
     public bool Hide(RhinoObject obj, bool ignoreLayerMode, string hideGroup)
     {
       if (null == obj)
@@ -9799,6 +10790,7 @@ namespace Rhino.DocObjects.Tables
       return Hide(objectId, ignoreLayerMode, null);
     }
 
+    /// <since>8.32</since>
     public bool Hide(Guid objectId, bool ignoreLayerMode, string hideGroup)
     {
       if (Guid.Empty == objectId)
@@ -10234,16 +11226,16 @@ namespace Rhino.DocObjects.Tables
 
     //  Description:
     //    Creates a new object that is the transformation of the
-    //    existing object and deletes the existing object if 
+    //    existing object and deletes the existing object if
     //    bDeleteOriginal is true.
     //  Parameters:
     //    old_object - [in] reference to object to morph.  The object
     //        objref.Object() will be deleted if bDeleteOriginal is true.
     //    xform - [in] transformation to apply
-    //    bAddNewObjectToDoc - [in] 
+    //    bAddNewObjectToDoc - [in]
     //        if true, the new object is added to the document.
     //        if false, the new object is not added to the document.
-    //    bDeleteOriginal - [in] 
+    //    bDeleteOriginal - [in]
     //        if true, the original object is deleted
     //        if false, the original object is not deleted
     //    bAddTransformHistory - [in]
@@ -10254,14 +11246,14 @@ namespace Rhino.DocObjects.Tables
     //        auxiliary input objects.  For fancier commands,
     //        that have an auxiliary object, like the spine
     //        curve in ArrayAlongCrv, set bAddTransformHistory
-    //        to false. 
+    //        to false.
     //  Returns:
     //    New object that is the morph of the existing_object.
     //    The new object has identical attributes.
     //  Remarks:
     //    If the object is locked or on a locked layer, then it cannot
     //    be transformed.
-    //  CRhinoObject* TransformObject( 
+    //  CRhinoObject* TransformObject(
     //    const CRhinoObject* old_object,
     //    const ON_Xform& xform,
     //    bool bAddNewObjectToDoc,
@@ -10276,12 +11268,12 @@ namespace Rhino.DocObjects.Tables
     //  Parameters:
     //    it - [in] iterates through list of objects to transform
     //    xform - [in] transformation to apply
-    //    bDeleteOriginal = [in] 
+    //    bDeleteOriginal = [in]
     //         if true, the original objects are deleted
     //         if false, the original objects are not deleted
     //    bIgnoreModes - [in] If true, locked and hidden objects
     //        are transformed.  If false objects that are locked,
-    //        hidden, or on locked or hidden layers are not 
+    //        hidden, or on locked or hidden layers are not
     //        transformed.
     //    bAddTransformHistory - [in]
     //        If true and history recording is turned on, then
@@ -10291,7 +11283,7 @@ namespace Rhino.DocObjects.Tables
     //        auxiliary input objects.  For fancier commands,
     //        that have an auxiliary object, like the spine
     //        curve in ArrayAlongCrv, set bAddTransformHistory
-    //        to false. 
+    //        to false.
     //  Returns:
     //    Number of objects that were transformed.
     //  Remarks:
@@ -10577,7 +11569,7 @@ namespace Rhino.DocObjects.Tables
       if (!Enum.IsDefined(typeof(ModelComponentType), type))
         throw new ArgumentNullException(nameof(type));
 
-      int index = RhinoMath.UnsetIntIndex; 
+      int index = RhinoMath.UnsetIntIndex;
       IntPtr ptr_comp = UnsafeNativeMethods.CRhinoDoc_LookupDocumentObject(m_doc.RuntimeSerialNumber, id, ref type, ref index);
 
       if (ptr_comp == IntPtr.Zero) return null;
@@ -10672,6 +11664,12 @@ namespace Rhino.DocObjects.Tables
         case ModelComponentType.DimStyle:
           return new DimensionStyle(index, doc);
 
+        case ModelComponentType.SectionStyle:
+          return new SectionStyle(index, doc);
+
+        case ModelComponentType.PageViewGroup:
+          return new PageViewGroup(index, doc);
+
         case ModelComponentType.RenderLight:
           return doc.Lights[index]; // Get the light from the table index
 
@@ -10686,6 +11684,9 @@ namespace Rhino.DocObjects.Tables
 
         case ModelComponentType.HistoryRecord:
           goto default; //not yet ON_ModelComponent derived
+
+        case ModelComponentType.Markup:
+          return new Markup(index, doc);
 
         default:
           throw new NotImplementedException(
@@ -10890,7 +11891,7 @@ namespace Rhino.DocObjects.Tables
     {
       // 10-Mar-2017 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-38337
       //if (key != null && key.Contains("\\"))
-      // back slash is reserved as a separator for "section\entry" in 
+      // back slash is reserved as a separator for "section\entry" in
       // rhinoscriptsyntax.SetDocumentData which uses the SetString(str, str, str) overload
       //throw new ArgumentException("key cannot contain '\\' (back slashes)");
 
@@ -10973,8 +11974,8 @@ namespace Rhino.DocObjects
 
   /// <summary>
   /// Settings used for getting an enumerator of objects in a document.
-  /// See <see cref="ObjectTable.FindByFilter(ObjectEnumeratorSettings)"/>, 
-  /// <see cref="ObjectTable.GetObjectsByType{T}(ObjectEnumeratorSettings)"/>, 
+  /// See <see cref="ObjectTable.FindByFilter(ObjectEnumeratorSettings)"/>,
+  /// <see cref="ObjectTable.GetObjectsByType{T}(ObjectEnumeratorSettings)"/>,
   /// and <see cref="ObjectTable.GetEnumerator(ObjectEnumeratorSettings)"/>.
   /// </summary>
   /// <example>
@@ -11189,6 +12190,17 @@ namespace Rhino.DocObjects
     public bool SelectedObjectsFilter { get; set; }
 
     /// <summary>
+    /// When <see cref="SelectedObjectsFilter"/> is true, enables an optimized iterator
+    /// that walks only the document's selected objects rather than scanning the whole
+    /// object table. Use this for selection-driven UI that re-queries on every selection
+    /// change (e.g. panel enable-state). Only valid for the current selection set: do not
+    /// use it while selection is actively changing. Ignored unless
+    /// <see cref="SelectedObjectsFilter"/> is also true.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool UseFastSelection { get; set; }
+
+    /// <summary>
     /// The default object enumerator settings ignore the visibility state of objects.
     /// If you want the iterator to limit itself to visible objects, then set this property to true.
     /// </summary>
@@ -11267,6 +12279,12 @@ namespace Rhino.DocObjects
     /// </summary>
     /// <since>5.6</since>
     public RhinoViewport ViewportFilter { get; set; }
+
+    /// <summary>
+    /// The viewport filter property can be used to limit the iteration to objects that reside on specific space.
+    /// </summary>
+    /// <since>9.0</since>
+    public ActiveSpace SpaceFilter { get; set; }
   }
 
   class ObjectIdIterator : IEnumerator<Guid>
@@ -11360,7 +12378,9 @@ namespace Rhino.DocObjects
         (uint)s.m_objectfilter,
         s.LayerIndexFilter,
         s.MaterialIndexFilter,
-        const_ptr_viewport);
+        const_ptr_viewport,
+        (byte)s.SpaceFilter,
+        s.UseFastSelection);
     }
 
     ~ObjectIdIterator()
@@ -11475,7 +12495,9 @@ namespace Rhino.DocObjects
         (uint)s.m_objectfilter,
         s.LayerIndexFilter,
         s.MaterialIndexFilter,
-        const_ptr_viewport);
+        const_ptr_viewport,
+        (byte)s.SpaceFilter,
+        s.UseFastSelection);
     }
 
     ~ObjectIterator()
@@ -11502,7 +12524,7 @@ namespace Rhino.DocObjects
   class ObjectIteratorOfType<T> : IEnumerator<T> where T : RhinoObject
   {
     readonly ObjectIterator m_iterator;
-    
+
     public ObjectIteratorOfType(RhinoDoc doc, ObjectEnumeratorSettings s)
     {
       m_iterator = new ObjectIterator(doc, s);

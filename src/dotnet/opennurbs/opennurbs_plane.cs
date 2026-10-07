@@ -627,6 +627,8 @@ namespace Rhino.Geometry
       double t1 = double.MinValue;
       bool valid = false;
 
+      if (pts == null) { return valid; }
+
       foreach (Point3d pt in pts)
       {
         double sp, tp;

@@ -55,15 +55,16 @@ RH_C_FUNCTION double ON_DetailView_GetPageToModelRatio(const ON_DetailView* pCon
   return rc;
 }
 
-RH_C_FUNCTION bool ON_DetailView_SetScale(ON_DetailView* pDetail, double model_length, int modelUnitSystem, double paper_length, int pageUnitSystem)
+RH_C_FUNCTION bool ON_DetailView_SetScale(ON_DetailView* pDetail, double model_length, ON::LengthUnitSystem model_unit_system, double metersPerModelUnit, double paper_length, ON::LengthUnitSystem paper_unit_system, double metersPerPageUnit)
 {
   bool rc = false;
-  ON::LengthUnitSystem model_units = ON::LengthUnitSystemFromUnsigned(modelUnitSystem);
-  ON::LengthUnitSystem paper_units = ON::LengthUnitSystemFromUnsigned(pageUnitSystem);
+  ON_UnitSystem model_units = model_unit_system == ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem::CreateCustomUnitSystem(L"", metersPerModelUnit) : ON_UnitSystem(model_unit_system);
+  ON_UnitSystem paper_units = paper_unit_system == ON::LengthUnitSystem::CustomUnits ? ON_UnitSystem::CreateCustomUnitSystem(L"", metersPerPageUnit) : ON_UnitSystem(paper_unit_system);;
+
   if( pDetail &&
       pDetail->m_view.m_vp.Projection()==ON::parallel_view &&
-      model_units != ON::LengthUnitSystem::None &&
-      paper_units != ON::LengthUnitSystem::None )
+      model_units.IsSet() &&
+      paper_units.IsSet() )
   {
     double model_length_mm = ::fabs( model_length * ON::UnitScale(model_units, ON::LengthUnitSystem::Millimeters ) );
     double paper_length_mm = ::fabs( paper_length * ON::UnitScale(paper_units, ON::LengthUnitSystem::Millimeters ) );

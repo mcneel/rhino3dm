@@ -653,6 +653,17 @@ namespace Rhino.UI
       // require any .NET looping through object lists.
       uint docSerialNumber = RhinoPageHooks.RhinoDocRuntimeSerialNumberFromPage(this);
       RhinoDoc doc = RhinoDoc.FromRuntimeSerialNumber(docSerialNumber);
+      // RH-97662: in markup create/edit mode the doc enumerators used by the fast
+      // path below skip the active markup session's objects, so a selected markup
+      // annotation would be invisible here and its Properties pages would never
+      // show. Skip the fast path and use the page event args path at the bottom,
+      // which reads the markup aware Properties panel selection (RH-96158).
+      if (doc != null)
+      {
+        var markup_mode = doc.MarkupMode;
+        if (markup_mode == DocObjects.Tables.MarkupMode.Create || markup_mode == DocObjects.Tables.MarkupMode.Edit)
+          doc = null;
+      }
       if (doc != null)
       {
         if (!doc.Objects.SelectedObjectsExist(filter, true))
@@ -685,7 +696,10 @@ namespace Rhino.UI
         return allMustMatch && listHasElements;
       }
 
-      // This code should never be hit anymore since doc should always exist
+      // Reached when no document was found or when the document is in markup
+      // create/edit mode: the properties panel selection behind the page event
+      // args includes the active session's markup objects (RH-96158), while the
+      // doc enumerators above do not.
       var page_pointer = RhinoPageHooks.UnmanagedIRhinoPagePointerFromPage(this);
       var count = 0;
       var array_pointer = UnsafeNativeMethods.IRhinoPropertiesPanelPage_GetObjects(page_pointer, (uint)filter, ref count);
@@ -765,6 +779,8 @@ namespace Rhino.UI
       return rc.ToArray();
     }
     #endregion Public properties
+
+    internal virtual bool UseScrollbar => true;
   }
 }
 #endif

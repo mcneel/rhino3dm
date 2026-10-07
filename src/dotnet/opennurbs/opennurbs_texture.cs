@@ -228,6 +228,12 @@ namespace Rhino.DocObjects
     {
       m__parent = parent;
     }
+
+    internal Texture(int index, Display.DisplayAttributeMaterial parent)
+    {
+      m_index = index;
+      m__parent = parent;
+    }
 #endif
 
     internal override IntPtr _InternalGetConstPointer()
@@ -254,6 +260,15 @@ namespace Rhino.DocObjects
       {
         IntPtr pSimulatedTexture = parent_simulated_texture.ConstPointer();
         return UnsafeNativeMethods.Rdk_SimulatedTexture_OnTexturePointer(pSimulatedTexture);
+      }
+
+      // CDisplayAttributeMaterial derives from ON_Material, so its pointer serves as one.
+      Display.DisplayAttributeMaterial parent_attribute_material =
+        m__parent as Display.DisplayAttributeMaterial;
+      if (parent_attribute_material != null)
+      {
+        IntPtr pMaterial = parent_attribute_material.MaterialPointer();
+        return UnsafeNativeMethods.ON_Material_GetTexturePointer(pMaterial, m_index);
       }
 #endif
       return IntPtr.Zero;

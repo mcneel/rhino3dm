@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Rhino.Runtime;
 
@@ -121,6 +122,29 @@ namespace Rhino.Geometry
       }
     }
     #endregion
+
+#if RHINO_SDK
+    /// <summary>
+    /// Attempt to fit an ellipse through a set of points.
+    /// </summary>
+    /// <param name="points">The points through which to fit.</param>
+    /// <param name="ellipse">The resulting ellipse on success.</param>
+    /// <returns>true on success, false on failure.</returns>
+    /// <since>9.0</since>
+    public static bool TryFitEllipseToPoints(IEnumerable<Point3d> points, out Ellipse ellipse)
+    {
+      ellipse = new Ellipse();
+      if (null == points)
+        return false;
+
+      int count;
+      Point3d[] ptArray = Rhino.Collections.RhinoListHelpers.GetConstArray(points, out count);
+      if (count < 3)
+        return false;
+      bool rc = UnsafeNativeMethods.RHC_RhinoFitEllipseToPoints(count, ptArray, ref ellipse);
+      return rc;
+    }
+#endif
 
     #region methods
 

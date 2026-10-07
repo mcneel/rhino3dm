@@ -25,7 +25,7 @@ namespace Rhino.UI
 		public static IntPtr NewPropertiesPanelPagePointer(ObjectPropertiesPage page, uint rhinoDocRuntimeSn) => RhinoPageHooks.NewIRhinoPropertiesPanelPagePointer(page, rhinoDocRuntimeSn);
 
     /// <summary>
-    /// For internal use only, provides access to unmanaged core 
+    /// For internal use only, provides access to unmanaged core
     /// </summary>
     /// <param name="pointer"></param>
     /// <returns></returns>
@@ -248,7 +248,7 @@ namespace Rhino.UI
 			var page = FromIRhinoPageRuntimeId(runtimeId);
       var stacked = page as StackedDialogPage;
       // Total hack to get around the fact that OnHelp returns void, this
-      // will set to true if RhinoHelp.Show is called and returns true. 
+      // will set to true if RhinoHelp.Show is called and returns true.
       RhinoHelp.ShowHelpCalled = false;
       stacked?.OnHelp();
       var props = page as ObjectPropertiesPage;
@@ -295,13 +295,30 @@ namespace Rhino.UI
     private static RhinoPageReleaseDelegate g_rhino_page_release;
     private static void RhinoPageReleaseHook(IntPtr constPointer, Guid runtimeId)
     {
-			if (!g_irhino_page_dictionary.ContainsKey(runtimeId))
-        return;
-      var instance = g_irhino_page_dictionary[runtimeId];
-      g_irhino_page_dictionary.Remove(runtimeId);
-      if (instance.PageObject != instance.PageControlObject)
-        (instance.PageObject as IDisposable)?.Dispose();
-      (instance.PageControlObject as IDisposable)?.Dispose();
+      // This gets called from the core, never let an exception escape back
+      // across the native boundary, doing so is fatal.
+      try
+      {
+        if (!g_irhino_page_dictionary.TryGetValue(runtimeId, out RhinoPageInsnce instance))
+          return;
+        g_irhino_page_dictionary.Remove(runtimeId);
+        if (instance != null)
+        {
+          Panels.Service.DestroyNativeWindow(instance.PageObject, instance.PageControlObject, true);
+          // The page host (EtoElementHost/WpfElementHost on Windows) was created for this page, so
+          // it needs to be destroyed too. It subscribes to WPF's InputManager and stays rooted
+          // (along with the entire page) until it is disposed. RH-97708
+          var host = instance.PageHost;
+          if (host != null && !ReferenceEquals(host, instance.PageObject) && !ReferenceEquals(host, instance.PageControlObject))
+            Panels.Service.DestroyNativeWindow(host, null, false);
+          instance.PageHost = null;
+          instance.PageControlObject = null;
+        }
+      }
+      catch (Exception e)
+      {
+        Runtime.HostUtils.ExceptionReport(e);
+      }
     }
 
     internal delegate void RhinoPageRefreshDelegate(IntPtr constPointer, Guid runtimeId, int immediate);
@@ -760,7 +777,7 @@ namespace Rhino.UI
     public static ObjectPropertiesPage ObjectPropertiesPageFromPointer(IntPtr pointer)
     {
       return pointer == IntPtr.Zero
-                        ? null 
+                        ? null
                         : (from item in g_irhino_page_dictionary where item.Value.IRhinoPagePointer == pointer select item.Value.PageObject).FirstOrDefault() as ObjectPropertiesPage;
     }
     public static StackedDialogPage StackedDialogPageFromPointer(IntPtr pointer)

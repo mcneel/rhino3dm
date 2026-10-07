@@ -245,7 +245,7 @@ namespace Rhino.Geometry
         
         from.Transform(xform);
         to.Transform(xform);
-
+        
         Vector3d v = to - from;
         rc = v.IsTiny() || c.Normal.IsParallelTo(v, 1e-6) != 0;
         if (rc)

@@ -377,6 +377,16 @@ namespace Rhino.DocObjects
       }
 
       /// <summary>
+      /// Purges any unused groups.
+      /// </summary>
+      /// <returns>The number of unused groups that were purged.</returns>
+      /// <since>9.0</since>
+      public int PurgeUnused()
+      {
+        return UnsafeNativeMethods.RHC_RhPurgeGroups(Document.RuntimeSerialNumber);
+      }
+
+      /// <summary>
       /// Verifies a group is deleted.
       /// </summary>
       /// <param name="groupIndex">The index of the group.</param>

@@ -66,6 +66,19 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// If the TextLog was constructed using the empty constructor, then the
+    /// text information is stored in a runtime string. This function resets
+    /// the data held by the string, but retains the strings allocated memory
+    /// to allow for quicker logging because the stored string doesn't
+    /// constantly need to reallocate.
+    /// </summary>
+    /// <since>9.0</since>
+    public void ResetString()
+    {
+      UnsafeNativeMethods.ON_wString_SetLengthZero(m_pString);
+    }
+
+    /// <summary>
     /// Increase the indentation level
     /// </summary>
     /// <example>

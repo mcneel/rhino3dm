@@ -327,6 +327,29 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Gets or sets the 1/2 of smallest subtended view angle.
+    /// </summary>
+    /// <since>9.0</since>
+    public double CameraAngle
+    {
+      get
+      {
+        double half_smallest_angle = 0.0;
+        IntPtr const_ptr_this = ConstPointer();
+        if (!UnsafeNativeMethods.CRhinoViewport_GetCameraAngle(const_ptr_this, ref half_smallest_angle))
+          half_smallest_angle = 0.0;
+        GC.KeepAlive(this);
+        return half_smallest_angle;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.CRhinoViewport_SetCameraAngle(ptr_this, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
     /// Viewport target point.
     /// </summary>
     /// <since>5.0</since>
@@ -651,6 +674,33 @@ namespace Rhino.Display
       bool rc = UnsafeNativeMethods.CRhinoViewport_SetProjection(ptr_this, (int)projection, viewName, updateConstructionPlane);
       GC.KeepAlive(this);
       return rc;
+    }
+
+    /// <summary>
+    /// Set viewport to a defined projection.
+    /// </summary>
+    /// <param name="projection">The "isometric" projection type.</param>
+    /// <param name="viewName">If not null or empty, the name is set.</param>
+    /// <param name="updateConstructionPlane">If true, the construction plane is set to the viewport plane.</param>
+    /// <returns>true if successful.</returns>
+    /// <since>9.0</since>
+    public bool SetProjection(IsometricCamera projection, string viewName, bool updateConstructionPlane)
+    {
+      var camera = Vector3d.Zero;
+      switch (projection)
+      {
+        case IsometricCamera.Northeast: camera = new Vector3d(+1.0, +1.0, +1.0); break;
+        case IsometricCamera.Northwest: camera = new Vector3d(-1.0, +1.0, +1.0); break;
+        case IsometricCamera.Southeast: camera = new Vector3d(+1.0, -1.0, +1.0); break;
+        case IsometricCamera.Southwest: camera = new Vector3d(-1.0, -1.0, +1.0); break;
+        default: return false;
+      }
+
+      if (!SetProjection(DefinedViewportProjection.Top, viewName, updateConstructionPlane))
+        return false;
+
+      SetCameraDirection(-camera, updateTargetLocation: false);
+      return true;
     }
 
     /// <summary>
@@ -1839,6 +1889,35 @@ namespace Rhino.Display
       return rc;
     }
 
+    /// <summary>
+    /// Location of viewport in pixels.  These are provided so you can set the port you are using
+    /// and get the appropriate transformations to and from screen space.
+    /// </summary>
+    /// <param name="portLeft">portLeft != portRight.</param>
+    /// <param name="portRight">portLeft != portRight.</param>
+    /// <param name="portBottom">portTop != portBottom.</param>
+    /// <param name="portTop">portTop != portBottom.</param>
+    /// <param name="portNear">The viewport near value.</param>
+    /// <param name="portFar">The viewport far value.</param>
+    /// <returns>true if the operation is successful.</returns>
+    /// <since>9.0</since>
+    public bool SetScreenPort(int portLeft, int portRight, int portBottom, int portTop, int portNear = 0, int portFar = 0)
+    {
+      var items = new int[]
+      {
+        portLeft,
+        portRight,
+        portBottom,
+        portTop,
+        portNear,
+        portFar
+      };
+
+      IntPtr const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.CRhinoViewport_VP_SetScreenPort(const_ptr_this, items);
+      GC.KeepAlive(this);
+      return rc;
+    }
 
     /// <summary>
     /// Gets the size and location of the viewport, in pixels, relative to the parent view.
@@ -2118,6 +2197,17 @@ namespace Rhino.Display
       bool rc = UnsafeNativeMethods.CRhinoViewport_SetTraceImage(ptr_this, bitmapFileName, ref plane, width, height, grayscale, filtered);
       GC.KeepAlive(this);
       return rc;
+    }
+
+    /// <summary>
+    /// Returns the lens length of this viewport the last time it was using
+    /// perspective projection in this session.
+    /// </summary>
+    /// <since>9.0</since>
+    public double LastLensLength()
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      return UnsafeNativeMethods.CRhinoViewport_LastLensLength(const_ptr_this);
     }
 
     /// <since>5.0</since>

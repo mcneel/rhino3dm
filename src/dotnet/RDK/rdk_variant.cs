@@ -55,10 +55,10 @@ namespace Rhino.Render
 
       foreach (var item in list) // [MARKER]
       {
-        var variant = new Variant(item.Value);
-        UnsafeNativeMethods.Rdk_XmlSection_SetParam(pXmlSection, item.Name, variant.ConstPointer());
-        GC.KeepAlive(variant);
-
+        using (var variant = new Variant(item.Value))
+        {
+          UnsafeNativeMethods.Rdk_XmlSection_SetParam(pXmlSection, item.Name, variant.ConstPointer());
+        }
       }
     }
 

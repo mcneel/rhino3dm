@@ -346,8 +346,14 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Returns the name of the layout's destination printer.
+    /// Gets and sets the name of the layout's destination printer.
     /// </summary>
+    /// <remarks>
+    /// The name is not validated against the printers installed on this system.
+    /// On Windows, setting it can change what <see cref="PaperName"/> returns, because
+    /// that name is looked up in the destination printer's list of forms. Other platforms
+    /// do not consult the printer, so <see cref="PaperName"/> is unaffected there.
+    /// </remarks>
     /// <since>6.15</since>
     public string PrinterName
     {
@@ -360,6 +366,11 @@ namespace Rhino.Display
             return sh.ToString();
           return null;
         }
+      }
+      // The setter was added in 9.0.
+      set
+      {
+        UnsafeNativeMethods.CRhinoPageView_SetPrinterName(RuntimeSerialNumber, value);
       }
     }
 
@@ -382,6 +393,120 @@ namespace Rhino.Display
       }
     }
 
+    /// <summary>
+    /// Gets and sets a brief description of the page view.
+    /// </summary>
+    /// <since>9.0</since>
+    public string Description
+    {
+      get
+      {
+        using (StringHolder sh = new StringHolder())
+        {
+          IntPtr pString = sh.NonConstPointer();
+          UnsafeNativeMethods.CRhinoPageView_GetDescription(RuntimeSerialNumber, pString);
+          return sh.ToString();
+        }
+      }
+      set => UnsafeNativeMethods.CRhinoPageView_SetDescription(RuntimeSerialNumber, value);
+    }
+
+    /// <summary>
+    /// Gets the number of page view groups this page view belongs to.
+    /// </summary>
+    /// <since>9.0</since>
+    public int PageViewGroupCount => UnsafeNativeMethods.CRhinoPageView_PageViewGroupCount(RuntimeSerialNumber);
+
+    /// <summary>
+    /// Gets an array of page view group indices this page view belongs to.
+    /// </summary>
+    /// <returns>An array of page view group indices if successful, otherwise an empty array.</returns>
+    /// <since>9.0</since>
+    public int[] GetPageViewGroupList()
+    {
+      using SimpleArrayInt group_list = new SimpleArrayInt();
+      IntPtr ptr_group_list = group_list.NonConstPointer();
+      UnsafeNativeMethods.CRhinoPageView_PageViewGroupList(RuntimeSerialNumber, ptr_group_list);
+      GC.KeepAlive(this);
+      return group_list.ToArray();
+    }
+
+    /// <summary>
+    /// Determines if this page view belongs in a page view group.
+    /// </summary>
+    /// <param name="pageViewGroupIndex"></param>
+    /// <returns>True if the page view belongs in the page view group, otherwise false.</returns>
+    /// <since>9.0</since>
+    public bool IsInPageViewGroup(int pageViewGroupIndex)
+    {
+      return UnsafeNativeMethods.CRhinoPageView_IsInPageViewGroup(RuntimeSerialNumber, pageViewGroupIndex);
+    }
+
+    /// <summary>
+    /// Add this page view to a page view group.
+    /// </summary>
+    /// <param name="pageViewGroupIndex">Zero-based index of the page view group.</param>
+    /// <since>9.0</since>
+    public void AddToPageViewGroup(int pageViewGroupIndex)
+    {
+      UnsafeNativeMethods.CRhinoPageView_AddToPageViewGroup(RuntimeSerialNumber, pageViewGroupIndex);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Removes this page view to a page view group.
+    /// </summary>
+    /// <param name="pageViewGroupIndex">Zero-based index of the page view group.</param>
+    /// <since>9.0</since>
+    public void RemoveFromPageViewGroup(int pageViewGroupIndex)
+    {
+      UnsafeNativeMethods.CRhinoPageView_RemoveFromPageViewGroup(RuntimeSerialNumber, pageViewGroupIndex);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Removes this page view to all page view groups.
+    /// </summary>
+    /// <since>9.0</since>
+    public void RemoveFromAllageViewGroups()
+    {
+      UnsafeNativeMethods.CRhinoPageView_RemoveFromAllPageViewGroups(RuntimeSerialNumber);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Gets this page view's sort index within a page view group. The sort index
+    /// determines the order of the page view among the other members of the group,
+    /// independent of the document page (view-table) order.
+    /// </summary>
+    /// <param name="pageViewGroupIndex">Zero-based index of the page view group.</param>
+    /// <returns>
+    /// The zero-based sort index, or <see cref="RhinoMath.UnsetIntIndex"/> when the
+    /// page view is not in the group or the group is unsorted (uses page-number order).
+    /// </returns>
+    /// <since>9.0</since>
+    public int PageViewGroupSortIndex(int pageViewGroupIndex)
+    {
+      int rc = UnsafeNativeMethods.CRhinoPageView_PageViewGroupSortIndex(RuntimeSerialNumber, pageViewGroupIndex);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets this page view's sort index (position) within a page view group,
+    /// repositioning it among the group's members and renumbering the rest so the
+    /// group stays contiguously ordered. A sort index at or beyond the member count
+    /// moves the page view to the end. If the page view is not yet in the group, it
+    /// is added.
+    /// </summary>
+    /// <param name="pageViewGroupIndex">Zero-based index of the page view group.</param>
+    /// <param name="sortIndex">The desired zero-based position within the group.</param>
+    /// <since>9.0</since>
+    public void SetPageViewGroupSortIndex(int pageViewGroupIndex, int sortIndex)
+    {
+      UnsafeNativeMethods.CRhinoPageView_SetPageViewGroupSortIndex(RuntimeSerialNumber, pageViewGroupIndex, sortIndex);
+      GC.KeepAlive(this);
+    }
 
     internal delegate void PageViewCallback(IntPtr pView, Guid newDetailId, Guid oldDetailId);
     private static PageViewCallback g_on_page_space_changed;
@@ -446,7 +571,7 @@ namespace Rhino.Display
         g_pageview_properties_change -= value;
         if (g_pageview_properties_change == null)
         {
-          UnsafeNativeMethods.CRhinoEventWatcher_SetDetailEventCallback(null);
+          UnsafeNativeMethods.CRhinoEventWatcher_SetPageViewPropertiesCallback(null);
           g_pageview_properties_callback = null;
         }
       }

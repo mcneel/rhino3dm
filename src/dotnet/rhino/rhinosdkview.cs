@@ -163,6 +163,7 @@ namespace Rhino.Display
       return new System.Drawing.Point(x, y);
     }
 
+
     /// <since>5.0</since>
     public Geometry.Point2d ClientToScreen(Geometry.Point2d clientPoint)
     {
@@ -365,8 +366,10 @@ namespace Rhino.Display
     /// <since>5.0</since>
     public System.Drawing.Bitmap CaptureToBitmap(System.Drawing.Size size, DisplayModeDescription mode)
     {
-      var attr = new DisplayPipelineAttributes(mode);
-      return CaptureToBitmap(size, attr);
+      using (var attr = new DisplayPipelineAttributes(mode))
+      {
+        return CaptureToBitmap(size, attr);
+      }
     }
 
     /// <summary>
@@ -710,7 +713,7 @@ namespace Rhino.Display
       System.Drawing.Size _messageSize = System.Drawing.Size.Empty;
       System.Drawing.Color _strokeColor;
       System.Drawing.Color _fillColor;
-      private int m_text_height = 18;
+      private int m_text_height = 14;
       private System.Drawing.PointF m_location = System.Drawing.PointF.Empty;
 
       public void Start(RhinoDoc doc, RhinoView view)
@@ -753,13 +756,14 @@ namespace Rhino.Display
 
       void DrawOverlay(object sender, DrawEventArgs e)
       {
+        double scale = e.Display.DpiScale;
         if (e.Viewport.Id != _viewId)
           return;
 
         if (_messageSize.IsEmpty)
         {
-          var rect = e.Display.Measure2dText(Message, Rhino.Geometry.Point2d.Origin, true, 0.0, TextHeight, "Arial");
-          _messageSize = new System.Drawing.Size(Math.Abs(rect.Width) + 16, Math.Abs(rect.Height) + 12);
+          var rect = e.Display.Measure2dText(Message, Rhino.Geometry.Point2d.Origin, true, 0.0, (int)(TextHeight*scale), "Arial");
+          _messageSize = new System.Drawing.Size(Math.Abs(rect.Width) + (int)(16*scale), Math.Abs(rect.Height) + (int)(12*scale));
         }
 
         // If there is a HUD in the view, then show the toast message
@@ -812,8 +816,8 @@ namespace Rhino.Display
           e.Display.PushDepthTesting(false);
           e.Display.PushDepthWriting(false);
           e.Display.DrawRoundedRectangle(new System.Drawing.PointF(centerX, centerY), _messageSize.Width, _messageSize.Height,
-            4.0f, stroke, 1.0f, fill);
-          e.Display.Draw2dText(Message, stroke, new Rhino.Geometry.Point2d(centerX, centerY), true, TextHeight, "Arial");
+            (float)scale*4.0f, stroke, 1.0f, fill);
+          e.Display.Draw2dText(Message, stroke, new Rhino.Geometry.Point2d(centerX, centerY), true, (int)(TextHeight*scale), "Arial");
           e.Display.PopDepthTesting();
           e.Display.PopDepthWriting();
         }
@@ -851,6 +855,7 @@ namespace Rhino.Display
     /// <summary>
     /// Called when the state of <seealso cref="EnableDrawing"/> changes.
     /// </summary>
+    /// <since>8.15</since>
     public static event EventHandler<ViewEnableDrawingEventArgs> EnableDrawingChanged
     {
       add
@@ -870,7 +875,7 @@ namespace Rhino.Display
         g_view_enable_drawing_handler -= value;
         if (g_view_enable_drawing_handler == null)
         {
-          UnsafeNativeMethods.CRhinoEventWatcher_SetDetailEventCallback(null);
+          UnsafeNativeMethods.CRhinoEventWatcher_SetViewEnableDrawingCallback(null);
           g_view_enable_drawing_handler = null;
         }
       }

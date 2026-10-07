@@ -138,9 +138,9 @@ def print_platform_preamble(platform_target_name):
 
 def check_or_create_path(target_path):
     try:
-        if not os.path.exists(target_path):
-            os.mkdir(target_path)
-    except:
+        # exist_ok also closes the check-then-create race the old exists()/mkdir pair had
+        os.makedirs(target_path, exist_ok=True)
+    except OSError:
         return ''
     
     return target_path
@@ -562,6 +562,10 @@ def setup_js():
     if wasm64:
         print("generating WASM64 (memory64) build")
         cmakecommand = cmakecommand + "-D WASM64=TRUE "
+    else:
+        print_warning_message("generating a 32-bit wasm build. opennurbs 9.x SubD "
+                              "requires 64-bit pointers, so this is expected to fail "
+                              "to compile. See RH3DM-215.")
     try:
         if debug:
             print("generating debug build")
@@ -649,7 +653,10 @@ def main():
     parser.add_argument('--module', '-m', action='store_true',
                         help="generate a ES6 module build (wasm only)")
     parser.add_argument('--wasm64', '-w', action='store_true',
-                        help="generate a WASM64 (memory64) build that breaks the 4GB limit (wasm only, opt-in)")
+                        help="(default since 9.0, retained for compatibility) generate a WASM64 (memory64) build")
+    parser.add_argument('--wasm32', action='store_true',
+                        help="generate a 32-bit wasm build instead of the default WASM64 (wasm only). "
+                             "Currently does not compile: opennurbs 9.x SubD requires 64-bit pointers (RH3DM-215)")
     parser.add_argument('--winarm64', action='store_true',
                         help="also generate a Windows ARM64 native build (windows only, opt-in; requires MSVC ARM64 build tools)")
     parser.add_argument('--library', '-l', action='store_true',
@@ -684,7 +691,11 @@ def main():
     module = args.module
 
     global wasm64
-    wasm64 = args.wasm64
+    # WASM64 is the default as of 9.0. opennurbs 9.x packs a type tag into the low
+    # bits of SubD component pointers and requires 64-bit pointers, so a wasm32
+    # build does not compile. Tracked in RH3DM-215; --wasm32 is kept so the 32-bit
+    # build can be re-enabled the moment that is resolved.
+    wasm64 = not args.wasm32
 
     global winarm64
     winarm64 = args.winarm64

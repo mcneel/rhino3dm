@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.0-beta] - 2026.10.07
+
+First 9.x pre-release. Rebases rhino3dm on Rhino 9: the .NET and native C layers are re-synced from the Rhino 9.x branch, openNURBS moves to 9.1, and the sync is now checked by CI.
+
+diff: https://github.com/mcneel/rhino3dm/compare/8.35.0...9.0.0-beta
+
+### Changed
+
+- openNURBS submodule 8.35 (`v8.35.26251.13001`) to 9.1 (`8a849575`, 2026-10-06).
+- (dotnet) `src/dotnet/` (135 files) and `src/librhino3dm_native/` (42 files) re-synced from the Rhino 9.x branch. `AutoNativeMethods.cs` regenerated (3,200 P/Invokes) along with `AutoNativeEnums.cs` (69 shared enums).
+- `src/methodgen/` updated from Rhino's methodgen. `StripNonOpennurbsBlocks` is now nesting-aware, prefix-matches `#endif` (552 of 910 in rhino's `c/` carry trailing comments), handles `#else`, and preserves line numbering; `Program.cs` honours the trailing `rhino3dm` build-target argument that was previously ignored, so opennurbs-only filtering actually runs. Rhino-mode output is byte-identical. Fixed upstream as RH-99224.
+- Version numbers are now derived from `src/version.txt` by `script/bump_version.py` rather than hand-edited in six places. See `docs/publishing.md`.
+
+### Added
+
+- (dotnet) `LengthUnit` — a readonly struct representing a length unit, with conversion between unit systems (RhinoCommon `<since>9.0</since>`).
+- (js) WASM64 (memory64) is now the default build, replacing wasm32. This is not a preference: opennurbs 9.x packs a type tag into the low bits of SubD component pointers and requires 64-bit pointers, so a wasm32 build no longer compiles. Awaiting RH3DM-215; `script/setup.py -p js --wasm32` is kept so the 32-bit build can be re-enabled once that is resolved. Note memory64 requires Chrome 133+, Firefox 134+, or Node 24+; Safari supports it only in Technology Preview. The default should be revisited once RH3DM-215 is resolved.
+- `script/bump_version.py` — propagates `src/version.txt` to `package.json`, `Rhino3dm.csproj`, `AssemblyInfo.cs`, `setup.py` and `src/rhino3dm/__init__.py`, converting to each ecosystem's required spelling (semver, PEP 440, and the four-part numeric `AssemblyVersion`). `--check` verifies without writing.
+- CI: a `validate_version` job fails the build if any version file disagrees with `src/version.txt`.
+- CI: a `check_native` job watching `src/librhino3dm_native/**`. Previously no job watched the native C sources, so a C-only sync built nothing.
+- CI: a `validate native surface` gate in `build_dotnet` that fails if any P/Invoke declared in `AutoNativeMethods.cs` is absent from the built library *and* reachable from C# that rhino3dm compiles. This is the regression gate for the class of defect below, which the C# compiler cannot see. RH3DM-212.
+
+### Fixed
+
+- (dotnet) `Curve.SpanVector()` no longer throws `EntryPointNotFoundException`. Its backing `ONC_SpanVector` was inside an `#if !defined(RHINO3DM_BUILD)` block and is now portable (fixed upstream, RH3DM-213).
+- (dotnet) Roughly 30 members whose backing C functions are Rhino-only or `OPENNURBS_PLUS`-only are now guarded at the source, so they no longer appear in rhino3dm as declarations that fail on call (fixed upstream, RH3DM-214).
+
+### Removed
+
+- (dotnet) `SubD.UpdateSurfaceMeshCache()`, `SubD.SurfaceMeshCacheExists()` and `Material.RdkMaterialId`. These were present but non-functional — they threw `EntryPointNotFoundException` on every call, because `ON_SubD::UpdateSurfaceMeshCache` / `SurfaceMeshCacheExists` are `OPENNURBS_PLUS`-only and `ON_Material_RdkMaterialID` is Rhino-only. They are now correctly absent from an opennurbs-only build rather than failing at runtime.
+
 ## [8.35.0] - 2026.09.15
 
 Final 8.35.0 release, built against the released openNURBS 8.35 (v8.35.26251.13001). Final .NET/C sync from the released Rhino 8.35 branch, which completes the template-authoring accessor set — the values needed to author Rhino templates headlessly that previously had no managed accessor and were silently dropped from generated files.

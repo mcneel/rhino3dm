@@ -35,18 +35,40 @@ RH_C_FUNCTION ON_LengthValue* ON_LengthValue_CreateFromSubString(
 RH_C_FUNCTION ON_LengthValue* ON_LengthValue_Create_From_US(
   double length_value,
   const ON::LengthUnitSystem length_unit_system,
+  double meters_per_unit,
+  const RHMONO_STRING* unit_name,
   unsigned int locale_id,
   ON_LengthValue::StringFormat string_format
   )
 {
-  ON_LengthValue* lv = new ON_LengthValue(ON_LengthValue::Create(length_value, length_unit_system, locale_id, string_format));
-  return lv;
+  if (length_unit_system == ON::LengthUnitSystem::CustomUnits)
+  {
+    INPUTSTRINGCOERCE(_unit_name, unit_name);
+    return new ON_LengthValue(ON_LengthValue::Create(length_value, ON_UnitSystem::CreateCustomUnitSystem(_unit_name, meters_per_unit), locale_id, string_format));
+  }
+
+  return new ON_LengthValue(ON_LengthValue::Create(length_value, length_unit_system, locale_id, string_format));
 }
 
-RH_C_FUNCTION double ON_LengthValue_Length(const ON_LengthValue* constPtrLengthValue, ON::LengthUnitSystem context_unit_system)
+RH_C_FUNCTION double ON_LengthValue_Length(const ON_LengthValue* constPtrLengthValue)
 {
   if (constPtrLengthValue)
-    return constPtrLengthValue->Length(context_unit_system);
+    return constPtrLengthValue->Length(constPtrLengthValue->LengthUnitSystem());
+
+  return 0;
+}
+
+RH_C_FUNCTION double ON_LengthValue_Length_Units(const ON_LengthValue* constPtrLengthValue, ON::LengthUnitSystem context_unit_system, double meters_per_unit)
+{
+  if (constPtrLengthValue)
+  {
+    if (context_unit_system != ON::LengthUnitSystem::CustomUnits)
+      return constPtrLengthValue->Length(context_unit_system);
+
+    ON_UnitSystem us = ON_UnitSystem::CreateCustomUnitSystem(L"", meters_per_unit);
+    return constPtrLengthValue->Length(us);
+  }
+
   return 0;
 }
 
@@ -83,6 +105,24 @@ RH_C_FUNCTION ON::LengthUnitSystem ON_LengthValue_LengthUnitSystem(
     us = lv_ptr->LengthUnitSystem().UnitSystem();
   return us;
 }
+
+RH_C_FUNCTION ON::LengthUnitSystem ON_LengthValue_LengthUnits(
+  const ON_LengthValue* lv_ptr,
+  double* meters_per_unit,
+  CRhCmnStringHolder* pName)
+{
+  ON::LengthUnitSystem us = ON::LengthUnitSystem::Unset;
+
+  if (nullptr != lv_ptr && meters_per_unit && pName)
+  {
+    const ON_UnitSystem& unit_system = lv_ptr->LengthUnitSystem();
+    us = unit_system.UnitSystem();
+    *meters_per_unit = unit_system.MetersPerUnit(ON_DBL_QNAN);
+    pName->Set(unit_system.UnitSystemName());
+  }
+  return us;
+}
+
 
 RH_C_FUNCTION ON::AngleUnitSystem ON_LengthValue_ContextAngleUnitSystem(
   const ON_LengthValue* lv_ptr)
