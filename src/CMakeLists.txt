@@ -129,7 +129,15 @@ endif()
 
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DON_COMPILING_OPENNURBS)
-add_definitions(-DOPENNURBS_FREETYPE_INC_)
+# NOTE: OPENNURBS_FREETYPE_INC_ is opennurbs_freetype.h's OWN include guard.
+# Pre-defining it makes that header a no-op, hiding every ON_FreeType*
+# declaration. opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT whenever
+# ON_RUNTIME_LINUX is set, so on Linux the .cpp files call functions this
+# would hide. Skip it there; same fix as src/librhino3dm_native/CMakeLists.txt.
+# (EMSCRIPTEN is unaffected either way: it gets ON_RUNTIME_WASM, no freetype.)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOPENNURBS_FREETYPE_INC_)
+endif()
 add_definitions(-DMY_ZCALLOC -DZ_PREFIX)
 add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 # RH3DM-179: we link zlib via CMake, not the MSVC #pragma comment(lib,...) path, so tell
@@ -171,6 +179,15 @@ if (${RHINO3DM_PY})
       C_VISIBILITY_PRESET hidden
       VISIBILITY_INLINES_HIDDEN ON
     )
+    # opennurbs 9.x defines OPENNURBS_FREETYPE_SUPPORT whenever ON_RUNTIME_LINUX is
+    # set (opennurbs_system.h); in 8.x that was Android only. The vendored FreeType
+    # is therefore required to build opennurbs on Linux. Mirrors opennurbs' own
+    # CMakeLists (freetype263 + include dir + link; it already sets
+    # POSITION_INDEPENDENT_CODE so the static lib links into this shared module).
+    # CMAKE_DL_LIBS is for dladdr(), used by Internal_GetLinuxInstalledFonts.
+    add_subdirectory(lib/opennurbs/freetype263 freetype263)
+    target_include_directories(_rhino3dm PRIVATE lib/opennurbs/freetype263/include)
+    target_link_libraries(_rhino3dm PRIVATE opennurbs_public_freetype ${CMAKE_DL_LIBS})
     #pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
     #target_link_libraries(_rhino3dm -luuid)
   else()
