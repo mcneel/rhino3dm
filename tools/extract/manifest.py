@@ -149,28 +149,43 @@ def build(rhino_root):
     return header, functions
 
 
-def write(path, header, functions):
-    """One function per line: regeneration diffs are per-function."""
+def write(path, header, functions, members=()):
+    """One record per line: regeneration diffs are per-function/per-member."""
     with open(path, 'w', encoding='utf-8', newline='\n') as out:
         out.write('{\n')
         for key in ('schema', 'source', 'defines', 'counts'):
             out.write('"%s": %s,\n' % (key, json.dumps(header[key], sort_keys=True)))
         out.write('"c_surface": [\n')
-        body = ',\n'.join(json.dumps(f, sort_keys=True) for f in functions)
-        out.write(body)
+        out.write(',\n'.join(json.dumps(f, sort_keys=True) for f in functions))
+        if members:
+            out.write('\n],\n"members": [\n')
+            out.write(',\n'.join(json.dumps(m, sort_keys=True) for m in members))
         out.write('\n]\n}\n')
 
 
+def load_members(path):
+    """Member records produced by tools/extract/structure (the Roslyn pass):
+    one per public RhinoCommon member in the RHINO3DM_BUILD view, carrying the
+    UnsafeNativeMethods invocations that join it to c_surface."""
+    with open(path, encoding='utf-8') as handle:
+        return json.load(handle)
+
+
 def main(argv):
-    rhino_root = os.path.expanduser(argv[1] if len(argv) > 1
-                                    else '~/dev/rhino')
+    args = [a for a in argv[1:] if not a.startswith('--')]
+    members_path = next((a.split('=', 1)[1] for a in argv[1:]
+                         if a.startswith('--members=')), None)
+    rhino_root = os.path.expanduser(args[0] if args else '~/dev/rhino')
     repo_root = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
     out_path = os.path.join(repo_root, 'api', 'manifest.json')
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
     header, functions = build(rhino_root)
-    write(out_path, header, functions)
+    members = load_members(members_path) if members_path else []
+    if members:
+        header['counts']['members'] = len(members)
+    write(out_path, header, functions, members)
 
     c = header['counts']
     print('api/manifest.json written from %s' % rhino_root)
