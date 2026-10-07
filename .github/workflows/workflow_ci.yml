@@ -48,20 +48,6 @@ jobs:
       - name: check versions against src/version.txt
         run: python3 script/bump_version.py --check
 
-  #Fails if any P/Invoke in AutoNativeMethods.cs has no origin in the committed
-  #api/manifest.json or api/exceptions.toml. Catches hand-added P/Invokes and
-  #syncs that outrun the manifest (fix: regenerate it against the synced rhino
-  #commit). Reads only committed files, so it needs no rhino checkout and no
-  #build; unconditional like validate_version, and for the same reason.
-  validate_manifest:
-    name: validate api manifest
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4.1.1
-      - name: reconcile AutoNativeMethods against the manifest
-        run: cd tools/extract && python3 reconcile.py
-
   #checks if build scripts have changed
   check_build_scripts:
     name: check build scripts and tools
@@ -80,10 +66,12 @@ jobs:
           files: |
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
+            api/**
             script/**
             setup.py
             src/CMakeLists.txt
             src/librhino3dm_native/CMakeLists.txt
+            tools/extract/**
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -421,6 +409,11 @@ jobs:
       # Catches a C# member being synced without its backing C export.
       - name: validate native surface
         run: python3 tools/extract/validate.py src/build/linux/librhino3dm_native.so
+      # AutoNativeMethods.cs is gitignored and produced by methodgen during
+      # setup, so the manifest reconciliation can only run after that -- here,
+      # not as a standalone job on a bare checkout.
+      - name: reconcile api manifest
+        run: cd tools/extract && python3 reconcile.py
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj -c Debug
       - name: artifacts
