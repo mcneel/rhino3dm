@@ -138,9 +138,9 @@ def print_platform_preamble(platform_target_name):
 
 def check_or_create_path(target_path):
     try:
-        if not os.path.exists(target_path):
-            os.mkdir(target_path)
-    except:
+        # exist_ok also closes the check-then-create race the old exists()/mkdir pair had
+        os.makedirs(target_path, exist_ok=True)
+    except OSError:
         return ''
     
     return target_path
