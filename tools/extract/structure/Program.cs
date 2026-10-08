@@ -90,6 +90,25 @@ foreach (var m in sdkView)
 if (rhino3dmOnly)
     members.RemoveAll(m => m.Variant == "rhino-only");
 
+// resolve expr arguments that name a const of the enclosing type: the
+// generator bakes these (selector constants), everything else stays expr
+for (int i = 0; i < members.Count; i++)
+{
+    var m = members[i];
+    if (m.Calls == null || !Walker.Consts.TryGetValue(m.Type, out var table))
+        continue;
+    members[i] = m with
+    {
+        Calls = m.Calls.Select(call => call with
+        {
+            Args = call.Args.Select(a =>
+                a.Kind == "expr" && table.TryGetValue(a.Text, out var v)
+                    ? a with { Kind = "const", Value = v }
+                    : a).ToArray()
+        }).ToArray()
+    };
+}
+
 members.Sort((a, b) =>
 {
     int c = string.CompareOrdinal(a.Type, b.Type);
@@ -128,6 +147,25 @@ record MemberRecord
     public string[] Native { get; init; }    // distinct UnsafeNativeMethods.* called
     public string[] Values { get; init; }    // enum members ("Name" or "Name = expr")
     public string Variant { get; init; }     // portable | rhino-only | rhino3dm-only
+    public CallInfo[] Calls { get; init; }   // each native invocation, with args
+}
+
+// One UnsafeNativeMethods invocation as written in the member body. Args are
+// classified SYNTACTICALLY: param (identifier matching a member parameter),
+// literal (numeric/bool/string token, incl. negated), out (ref/out keyword),
+// expr (anything else -- self pointers, locals, constants; text kept verbatim).
+// The generator decides what each expr means; the extractor does not guess.
+record CallInfo
+{
+    public string Name { get; init; }
+    public ArgInfo[] Args { get; init; }
+}
+
+record ArgInfo
+{
+    public string Kind { get; init; }        // param | literal | const | out | expr
+    public string Text { get; init; }
+    public string Value { get; init; }       // const only: the initializer text
 }
 
 class Walker : CSharpSyntaxWalker
@@ -169,23 +207,39 @@ class Walker : CSharpSyntaxWalker
     public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         => PushType(node, () => base.VisitInterfaceDeclaration(node));
 
-    static string[] NativeCalls(SyntaxNode body)
+    static CallInfo[] AnalyzeCalls(SyntaxNode body, ISet<string> paramNames)
     {
         if (body == null) return null;
         // Only invocations: UnsafeNativeMethods also nests helper ENUMS, and a
         // bare member access like UnsafeNativeMethods.MeshBoolConst is an enum
         // value read, not a P/Invoke.
-        var names = body.DescendantNodes()
-            .OfType<InvocationExpressionSyntax>()
-            .Select(i => i.Expression)
-            .OfType<MemberAccessExpressionSyntax>()
-            .Where(m => m.Expression is IdentifierNameSyntax id
-                        && id.Identifier.Text == "UnsafeNativeMethods")
-            .Select(m => m.Name.Identifier.Text)
-            .Distinct()
-            .OrderBy(n => n, StringComparer.Ordinal)
-            .ToArray();
-        return names.Length == 0 ? null : names;
+        var calls = new List<CallInfo>();
+        foreach (var inv in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            if (inv.Expression is not MemberAccessExpressionSyntax m
+                || m.Expression is not IdentifierNameSyntax id
+                || id.Identifier.Text != "UnsafeNativeMethods")
+                continue;
+            var args = inv.ArgumentList.Arguments.Select(a =>
+            {
+                var text = a.Expression.ToString();
+                string kind;
+                if (!a.RefOrOutKeyword.IsKind(SyntaxKind.None))
+                    kind = "out";
+                else if (a.Expression is LiteralExpressionSyntax
+                         || (a.Expression is PrefixUnaryExpressionSyntax pre
+                             && pre.Operand is LiteralExpressionSyntax))
+                    kind = "literal";
+                else if (a.Expression is IdentifierNameSyntax arg
+                         && paramNames.Contains(arg.Identifier.Text))
+                    kind = "param";
+                else
+                    kind = "expr";
+                return new ArgInfo { Kind = kind, Text = text };
+            }).ToArray();
+            calls.Add(new CallInfo { Name = m.Name.Identifier.Text, Args = args });
+        }
+        return calls.Count == 0 ? null : calls.ToArray();
     }
 
     string Since(SyntaxNode node)
@@ -199,13 +253,32 @@ class Walker : CSharpSyntaxWalker
         return since?.Content.ToString().Trim();
     }
 
+    static readonly HashSet<string> NoParams = new();
+
+    // const-field initializers of the enclosing type, any visibility: the C
+    // selector constants (idxIsClosed = 0, ...) are private implementation
+    // details that generated bindings must bake in
+    public static readonly Dictionary<string, Dictionary<string, string>> Consts = new();
+
+    void RecordConsts(FieldDeclarationSyntax node)
+    {
+        if (CurrentType == null) return;
+        if (!node.Modifiers.Any(x => x.IsKind(SyntaxKind.ConstKeyword))) return;
+        if (!Consts.TryGetValue(CurrentType, out var table))
+            Consts[CurrentType] = table = new Dictionary<string, string>();
+        foreach (var v in node.Declaration.Variables)
+            if (v.Initializer != null)
+                table[v.Identifier.Text] = v.Initializer.Value.ToString().Trim();
+    }
+
     void Add(string kind, string name, string signature, SyntaxTokenList mods,
              SyntaxNode node, SyntaxNode body, string[] values = null,
-             bool allowNamespaceOwner = false)
+             bool allowNamespaceOwner = false, ISet<string> paramNames = null)
     {
         var owner = CurrentType ?? (allowNamespaceOwner && _ns.Length > 0 ? _ns : null);
         if (owner == null || !IsPublic(mods)) return;
         var pos = node.SyntaxTree.GetLineSpan(node.Span);
+        var calls = AnalyzeCalls(body, paramNames ?? NoParams);
         _out.Add(new MemberRecord
         {
             Type = owner,
@@ -216,7 +289,9 @@ class Walker : CSharpSyntaxWalker
             Since = Since(node),
             File = _file,
             Line = pos.StartLinePosition.Line + 1,
-            Native = NativeCalls(body),
+            Native = calls?.Select(c => c.Name).Distinct()
+                           .OrderBy(n => n, StringComparer.Ordinal).ToArray(),
+            Calls = calls,
             Values = values,
         });
     }
@@ -225,7 +300,9 @@ class Walker : CSharpSyntaxWalker
     {
         Add("method", node.Identifier.Text,
             node.ReturnType + " " + node.Identifier.Text + node.ParameterList,
-            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody);
+            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody,
+            paramNames: node.ParameterList.Parameters
+                .Select(x => x.Identifier.Text).ToHashSet());
         base.VisitMethodDeclaration(node);
     }
 
@@ -233,7 +310,9 @@ class Walker : CSharpSyntaxWalker
     {
         Add("constructor", node.Identifier.Text,
             node.Identifier.Text + node.ParameterList,
-            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody);
+            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody,
+            paramNames: node.ParameterList.Parameters
+                .Select(x => x.Identifier.Text).ToHashSet());
         base.VisitConstructorDeclaration(node);
     }
 
@@ -241,9 +320,11 @@ class Walker : CSharpSyntaxWalker
     {
         // native calls live in the accessors (or an expression body)
         SyntaxNode body = node.AccessorList ?? (SyntaxNode)node.ExpressionBody;
+        // a setter's implicit parameter is `value`
         Add("property", node.Identifier.Text,
             node.Type + " " + node.Identifier.Text,
-            node.Modifiers, node, body);
+            node.Modifiers, node, body,
+            paramNames: new HashSet<string> { "value" });
         base.VisitPropertyDeclaration(node);
     }
 
@@ -252,7 +333,9 @@ class Walker : CSharpSyntaxWalker
         SyntaxNode body = node.AccessorList ?? (SyntaxNode)node.ExpressionBody;
         Add("indexer", "this",
             node.Type + " this" + node.ParameterList.ToString(),
-            node.Modifiers, node, body);
+            node.Modifiers, node, body,
+            paramNames: node.ParameterList.Parameters
+                .Select(x => x.Identifier.Text).Append("value").ToHashSet());
         base.VisitIndexerDeclaration(node);
     }
 
@@ -294,6 +377,7 @@ class Walker : CSharpSyntaxWalker
 
     public override void VisitFieldDeclaration(FieldDeclarationSyntax node)
     {
+        RecordConsts(node);
         var kind = node.Modifiers.Any(m => m.IsKind(SyntaxKind.ConstKeyword))
             ? "const" : "field";
         foreach (var v in node.Declaration.Variables)
