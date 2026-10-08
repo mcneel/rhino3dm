@@ -123,8 +123,12 @@ _variablename = (LPCTSTR) _variablename##_;                        \
 #endif // __APPLE__
 
 
-// Android compile
-#if defined (ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX)
+// Android / Linux / WebAssembly compile. ON_RUNTIME_WASM is defined by
+// opennurbs under emscripten, where wchar_t is 4 bytes like Linux, so the
+// same RHMONO_STRING/UTF-16 treatment applies. No Rhino build defines it;
+// it takes effect only when a consumer (rhino3dm) compiles this layer for
+// wasm. RH3DM-216.
+#if defined (ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_WASM)
 #define RH_CPP_FUNCTION __attribute__ ((visibility ("default")))
 #define RH_CPP_CLASS __attribute__ ((visibility ("default")))
 #define RH_C_FUNCTION extern "C" __attribute__ ((visibility ("default")))
@@ -288,7 +292,7 @@ private:
 #else
   ON_wString m_winString;
 #endif
-#if defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX)
+#if defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_WASM)
   ON_SimpleArray<ON__UINT16> m_android;
 #endif
 };

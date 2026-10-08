@@ -166,6 +166,10 @@ record MemberRecord
     public string Holder { get; init; }      // using-holder idiom: wrapper type
     public int HolderArg { get; init; } = -1;// which call arg is the holder ptr
     public ArgInfo[] DelegateArgs { get; init; } // its argument expressions
+    public string BodyHash { get; init; }    // token-stream hash: trivia-blind
+                                             // drift alarm for member LOGIC
+    public string[] Pure { get; init; }      // Body=="pure": construct tags,
+                                             // the generatability catalog
 }
 
 // `if (COND) throw new ExType("msg");` -- COND restricted to identifiers,
@@ -177,6 +181,7 @@ record GuardInfo
     public string[] Ids { get; init; }
     public string Exception { get; init; }
     public string Message { get; init; }
+    public string NullCheckOf { get; init; } // cond is exactly `<ident> == null`
 }
 
 record SuccessInfo
@@ -483,6 +488,84 @@ class Walker : CSharpSyntaxWalker
         return ("pure", null, null);
     }
 
+    // Token-stream hash of a member body: whitespace- and comment-blind, so a
+    // changed hash in a manifest diff means the member's LOGIC changed
+    // upstream -- the drift alarm for pure members whose math is hand-ported
+    // in the bindings. 10 hex chars: collisions would need ~1M same-named
+    // members, and a false "unchanged" verdict is the only cost.
+    static string HashBody(SyntaxNode body)
+    {
+        if (body == null) return null;
+        var sb = new StringBuilder();
+        foreach (var t in body.DescendantTokens())
+            sb.Append(t.Text).Append('\u0001');
+        var h = System.Security.Cryptography.SHA256.HashData(
+            Encoding.UTF8.GetBytes(sb.ToString()));
+        return Convert.ToHexString(h, 0, 5).ToLowerInvariant();
+    }
+
+    static readonly HashSet<string> MathReceivers = new()
+    { "Math", "MathF", "System.Math", "RhinoMath" };
+
+    // Construct tags for a pure (no-native-call) body, the raw material for
+    // deciding which of the ~3,300 pure members could be generated: a body
+    // tagged only {exprbody, s1, arith} is mechanical struct math; one tagged
+    // {loop, call, stringfmt} is a hand-written member forever.
+    static string[] PureProfile(SyntaxNode body)
+    {
+        var tags = new SortedSet<string>();
+        if (body is ArrowExpressionClauseSyntax) tags.Add("exprbody");
+        int stmts = body is BlockSyntax blk ? blk.Statements.Count : 1;
+        tags.Add(stmts <= 1 ? "s1" : stmts <= 3 ? "s2-3" : stmts <= 8 ? "s4-8" : "s9+");
+        foreach (var n in body.DescendantNodes())
+        {
+            switch (n)
+            {
+                case InvocationExpressionSyntax inv:
+                    if (inv.Expression is IdentifierNameSyntax { Identifier.Text: "nameof" })
+                        break;
+                    if (inv.Expression is MemberAccessExpressionSyntax ma
+                        && MathReceivers.Contains(ma.Expression.ToString()))
+                        tags.Add("mathcall");
+                    else
+                        tags.Add("call");
+                    break;
+                case ObjectCreationExpressionSyntax or ImplicitObjectCreationExpressionSyntax:
+                    tags.Add("new");
+                    break;
+                case ConditionalExpressionSyntax: tags.Add("cond"); break;
+                case IfStatementSyntax: tags.Add("branch"); break;
+                case ForStatementSyntax or ForEachStatementSyntax
+                     or WhileStatementSyntax or DoStatementSyntax:
+                    tags.Add("loop");
+                    break;
+                case SwitchStatementSyntax or SwitchExpressionSyntax:
+                    tags.Add("switch");
+                    break;
+                case ThrowStatementSyntax or ThrowExpressionSyntax: tags.Add("throw"); break;
+                case QueryExpressionSyntax: tags.Add("linq"); break;
+                case InterpolatedStringExpressionSyntax: tags.Add("stringfmt"); break;
+                case AssignmentExpressionSyntax: tags.Add("assign"); break;
+                case BinaryExpressionSyntax b:
+                    var k = b.Kind();
+                    if (k is SyntaxKind.AddExpression or SyntaxKind.SubtractExpression
+                          or SyntaxKind.MultiplyExpression or SyntaxKind.DivideExpression
+                          or SyntaxKind.ModuloExpression)
+                        tags.Add("arith");
+                    else if (k is SyntaxKind.EqualsExpression or SyntaxKind.NotEqualsExpression
+                          or SyntaxKind.LessThanExpression or SyntaxKind.GreaterThanExpression
+                          or SyntaxKind.LessThanOrEqualExpression
+                          or SyntaxKind.GreaterThanOrEqualExpression)
+                        tags.Add("cmp");
+                    else if (k is SyntaxKind.LogicalAndExpression
+                          or SyntaxKind.LogicalOrExpression)
+                        tags.Add("bool");
+                    break;
+            }
+        }
+        return tags.ToArray();
+    }
+
     static string CalleeName(InvocationExpressionSyntax inv) => inv.Expression switch
     {
         MemberAccessExpressionSyntax ma => ma.Name.Identifier.Text,
@@ -591,17 +674,37 @@ class Walker : CSharpSyntaxWalker
                 && args.Value[0].Expression is LiteralExpressionSyntax lit
                 && lit.IsKind(SyntaxKind.StringLiteralExpression))
                 msg = lit.Token.ValueText;
+            else if (args is { Count: 1 }
+                     && args.Value[0].Expression is InvocationExpressionSyntax nof
+                     && nof.Expression is IdentifierNameSyntax { Identifier.Text: "nameof" }
+                     && nof.ArgumentList.Arguments.Count == 1)
+                msg = nof.ArgumentList.Arguments[0].Expression.ToString();
             else if (args is { Count: > 0 })
-                break;                               // nameof()/computed message
+                break;                               // computed message
             var ids = new List<string>();
             if (!GuardCondOk(gif.Condition, ids))
                 break;
+            // `x == null` / `null == x`: the binding layer marshals params by
+            // value, so a pure null-guard on a marshaled param is enforced by
+            // the boundary itself -- tag it so the generator may omit it
+            string nullOf = null;
+            if (gif.Condition is BinaryExpressionSyntax nb
+                && nb.IsKind(SyntaxKind.EqualsExpression))
+            {
+                if (nb.Left is IdentifierNameSyntax li
+                    && nb.Right.IsKind(SyntaxKind.NullLiteralExpression))
+                    nullOf = li.Identifier.Text;
+                else if (nb.Right is IdentifierNameSyntax ri
+                    && nb.Left.IsKind(SyntaxKind.NullLiteralExpression))
+                    nullOf = ri.Identifier.Text;
+            }
             guards.Add(new GuardInfo
             {
                 Cond = gif.Condition.ToString(),
                 Ids = ids.Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray(),
                 Exception = oc.Type.ToString(),
                 Message = msg,
+                NullCheckOf = nullOf,
             });
             i++;
         }
@@ -716,6 +819,8 @@ class Walker : CSharpSyntaxWalker
         if (holderArg < 0) holder = null;
         _out.Add(new MemberRecord
         {
+            BodyHash = HashBody(body),
+            Pure = bodyClass == "pure" ? PureProfile(body) : null,
             Body = bodyClass,
             Guards = guards,
             Success = success,

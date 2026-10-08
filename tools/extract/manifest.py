@@ -166,9 +166,19 @@ def write(path, header, functions, members=()):
 def load_members(path):
     """Member records produced by tools/extract/structure (the Roslyn pass):
     one per public RhinoCommon member in the RHINO3DM_BUILD view, carrying the
-    UnsafeNativeMethods invocations that join it to c_surface."""
+    UnsafeNativeMethods invocations that join it to c_surface.
+
+    Line is dropped from the COMMITTED manifest: measured on the first real
+    upstream pull (a8e27b8b -> 70a34f68), 4,056 of 4,151 changed records
+    differed ONLY by line shifts in big upstream files -- 98% diff noise
+    drowning the 95 records whose logic actually changed (BodyHash). The
+    extractor's own output keeps Line for debugging; File stays here because
+    it changes only when a member moves between files."""
     with open(path, encoding='utf-8') as handle:
-        return json.load(handle)
+        members = json.load(handle)
+    for m in members:
+        m.pop('Line', None)
+    return members
 
 
 def main(argv):
