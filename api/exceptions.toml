@@ -69,3 +69,53 @@ reason = "rhino3dm carries 11 of 69 RDK files by design; adopt on demand. Except
 [[unadopted]]
 scope = "66 portable C exports present in the manifest but not in rhino3dm's copied subset (e.g. the on_markup.cpp family)"
 reason = "surface rhino3dm has not yet adopted; this is the drift report the manifest exists to surface, re-counted on every regeneration"
+
+# -----------------------------------------------------------------------------
+# Members that exist only in a binding language. Hand-written forever; the
+# generated surface appends them from this list so nothing is silent.
+# Seeded from the actual registrations in src/bindings (grep toThreejs/
+# createFromThreejs), NOT from rhino3dm.d.ts, which is not a source of truth.
+# -----------------------------------------------------------------------------
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSON"
+reason = "three.js interop; no RhinoCommon counterpart"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSONRotate"
+reason = "three.js interop (Y-up rotation variant)"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsBuffers"
+reason = "three.js interop; zero-copy typed-array buffers"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSONMerged"
+kind = "static"
+reason = "three.js interop; merges meshes before export"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "createFromThreejsJSON"
+kind = "static"
+reason = "three.js interop; inverse of toThreejsJSON"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "toThreejsJSON"
+reason = "three.js interop; no RhinoCommon counterpart"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "toThreejsBuffers"
+reason = "three.js interop; zero-copy typed-array buffers"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "createFromThreejsJSON"
+kind = "static"
+reason = "three.js interop; inverse of toThreejsJSON"
