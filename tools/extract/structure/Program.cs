@@ -18,10 +18,18 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-var rhinoDotnet = args.Length > 0 ? args[0]
+// --rhino3dm limits the OUTPUT to the surface rhino3dm ships (portable +
+// rhino3dm-only); the default is the whole API, which is what the committed
+// api/manifest.json is built from -- the Rhino-only surface is part of the
+// spec (full Python-in-Rhino bindings are a vNext goal) and is filtered at
+// generation time, not at extraction time. Both modes still parse both views:
+// the portable/rhino-only verdict itself needs the comparison.
+var rhino3dmOnly = args.Contains("--rhino3dm");
+var positional = args.Where(a => !a.StartsWith("--")).ToArray();
+var rhinoDotnet = positional.Length > 0 ? positional[0]
     : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                    "dev", "rhino", "src4", "DotNetSDK", "rhinocommon", "dotnet");
-var outPath = args.Length > 1 ? args[1] : "members.json";
+var outPath = positional.Length > 1 ? positional[1] : "members.json";
 
 if (!Directory.Exists(rhinoDotnet))
 {
@@ -29,11 +37,22 @@ if (!Directory.Exists(rhinoDotnet))
     return 1;
 }
 
-var parseOptions = new CSharpParseOptions(
+// Two views of the same sources, mirroring c_surface's variant tagging. The
+// end goal (vNext) is generating the FULL API -- including Python bindings for
+// use when running IN Rhino -- so the Rhino-only surface is recorded, not
+// filtered. A member in both views is portable; only under RHINO_SDK is
+// rhino-only; only under RHINO3DM_BUILD (rare: #if !RHINO_SDK code) is
+// rhino3dm-only. For portable members the portable view's record wins, so its
+// Native list reflects what rhino3dm actually calls.
+var portableOptions = new CSharpParseOptions(
     documentationMode: DocumentationMode.Parse,
     preprocessorSymbols: new[] { "RHINO3DM_BUILD" });
+var sdkOptions = new CSharpParseOptions(
+    documentationMode: DocumentationMode.Parse,
+    preprocessorSymbols: new[] { "RHINO_SDK" });
 
-var members = new List<MemberRecord>();
+var portableView = new List<MemberRecord>();
+var sdkView = new List<MemberRecord>();
 var files = Directory.EnumerateFiles(rhinoDotnet, "*.cs", SearchOption.AllDirectories)
     .Where(p => !p.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
              && !p.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
@@ -42,10 +61,34 @@ var files = Directory.EnumerateFiles(rhinoDotnet, "*.cs", SearchOption.AllDirect
 
 foreach (var file in files)
 {
-    var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(file), parseOptions);
-    var walker = new Walker(Path.GetFileName(file), members);
-    walker.Visit(tree.GetRoot());
+    var text = File.ReadAllText(file);
+    new Walker(Path.GetFileName(file), portableView)
+        .Visit(CSharpSyntaxTree.ParseText(text, portableOptions).GetRoot());
+    new Walker(Path.GetFileName(file), sdkView)
+        .Visit(CSharpSyntaxTree.ParseText(text, sdkOptions).GetRoot());
 }
+
+static string KeyOf(MemberRecord m) => m.Type + "|" + m.Kind + "|" + m.Signature;
+var portableKeys = portableView.Select(KeyOf).ToHashSet();
+var sdkKeys = sdkView.Select(KeyOf).ToHashSet();
+
+var members = new List<MemberRecord>();
+var emitted = new HashSet<string>();
+foreach (var m in portableView)
+{
+    var k = KeyOf(m);
+    if (!emitted.Add(k)) continue;   // partial types can repeat a signature
+    members.Add(m with { Variant = sdkKeys.Contains(k) ? "portable" : "rhino3dm-only" });
+}
+foreach (var m in sdkView)
+{
+    var k = KeyOf(m);
+    if (!emitted.Add(k)) continue;
+    members.Add(m with { Variant = "rhino-only" });
+}
+
+if (rhino3dmOnly)
+    members.RemoveAll(m => m.Variant == "rhino-only");
 
 members.Sort((a, b) =>
 {
@@ -65,7 +108,9 @@ json.AppendJoin(",\n", members.Select(m => JsonSerializer.Serialize(m, opts)));
 json.Append("\n]\n");
 File.WriteAllText(outPath, json.ToString());
 
-Console.WriteLine($"{outPath}: {members.Count} public members from {files.Count} files");
+Console.WriteLine($"{outPath}: {members.Count} public members from {files.Count} files"
+    + (rhino3dmOnly ? "  [--rhino3dm: portable surface only]" : "  [full API]"));
+Console.WriteLine($"  portable {members.Count(m => m.Variant == "portable")}, rhino-only {members.Count(m => m.Variant == "rhino-only")}, rhino3dm-only {members.Count(m => m.Variant == "rhino3dm-only")}");
 Console.WriteLine($"  with native calls: {members.Count(m => m.Native is { Length: > 0 })}");
 Console.WriteLine($"  with <since>:      {members.Count(m => m.Since != null)}");
 return 0;
@@ -81,6 +126,8 @@ record MemberRecord
     public string File { get; init; }
     public int Line { get; init; }
     public string[] Native { get; init; }    // distinct UnsafeNativeMethods.* called
+    public string[] Values { get; init; }    // enum members ("Name" or "Name = expr")
+    public string Variant { get; init; }     // portable | rhino-only | rhino3dm-only
 }
 
 class Walker : CSharpSyntaxWalker
@@ -153,13 +200,15 @@ class Walker : CSharpSyntaxWalker
     }
 
     void Add(string kind, string name, string signature, SyntaxTokenList mods,
-             SyntaxNode node, SyntaxNode body)
+             SyntaxNode node, SyntaxNode body, string[] values = null,
+             bool allowNamespaceOwner = false)
     {
-        if (CurrentType == null || !IsPublic(mods)) return;
+        var owner = CurrentType ?? (allowNamespaceOwner && _ns.Length > 0 ? _ns : null);
+        if (owner == null || !IsPublic(mods)) return;
         var pos = node.SyntaxTree.GetLineSpan(node.Span);
         _out.Add(new MemberRecord
         {
-            Type = CurrentType,
+            Type = owner,
             Kind = kind,
             Name = name,
             Signature = signature,
@@ -168,6 +217,7 @@ class Walker : CSharpSyntaxWalker
             File = _file,
             Line = pos.StartLinePosition.Line + 1,
             Native = NativeCalls(body),
+            Values = values,
         });
     }
 
@@ -195,5 +245,76 @@ class Walker : CSharpSyntaxWalker
             node.Type + " " + node.Identifier.Text,
             node.Modifiers, node, body);
         base.VisitPropertyDeclaration(node);
+    }
+
+    public override void VisitIndexerDeclaration(IndexerDeclarationSyntax node)
+    {
+        SyntaxNode body = node.AccessorList ?? (SyntaxNode)node.ExpressionBody;
+        Add("indexer", "this",
+            node.Type + " this" + node.ParameterList.ToString(),
+            node.Modifiers, node, body);
+        base.VisitIndexerDeclaration(node);
+    }
+
+    public override void VisitOperatorDeclaration(OperatorDeclarationSyntax node)
+    {
+        Add("operator", "operator " + node.OperatorToken.Text,
+            node.ReturnType + " operator " + node.OperatorToken.Text + node.ParameterList,
+            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody);
+        base.VisitOperatorDeclaration(node);
+    }
+
+    public override void VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+    {
+        Add("conversion",
+            node.ImplicitOrExplicitKeyword.Text + " operator " + node.Type,
+            node.ImplicitOrExplicitKeyword.Text + " operator " + node.Type + node.ParameterList,
+            node.Modifiers, node, (SyntaxNode)node.Body ?? node.ExpressionBody);
+        base.VisitConversionOperatorDeclaration(node);
+    }
+
+    // `public event EventHandler Foo;` is an EventFIELDDeclaration; the
+    // add/remove-accessor form is an EventDeclaration. RhinoCommon has both.
+    public override void VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
+    {
+        foreach (var v in node.Declaration.Variables)
+            Add("event", v.Identifier.Text,
+                node.Declaration.Type + " " + v.Identifier.Text,
+                node.Modifiers, node, null);
+        base.VisitEventFieldDeclaration(node);
+    }
+
+    public override void VisitEventDeclaration(EventDeclarationSyntax node)
+    {
+        Add("event", node.Identifier.Text,
+            node.Type + " " + node.Identifier.Text,
+            node.Modifiers, node, node.AccessorList);
+        base.VisitEventDeclaration(node);
+    }
+
+    public override void VisitFieldDeclaration(FieldDeclarationSyntax node)
+    {
+        var kind = node.Modifiers.Any(m => m.IsKind(SyntaxKind.ConstKeyword))
+            ? "const" : "field";
+        foreach (var v in node.Declaration.Variables)
+            Add(kind, v.Identifier.Text,
+                node.Declaration.Type + " " + v.Identifier.Text,
+                node.Modifiers, node, null);
+        base.VisitFieldDeclaration(node);
+    }
+
+    public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
+    {
+        // Values cross the C boundary as ints and join against methodgen's
+        // RH_C_SHARED_ENUM machinery, so record them verbatim.
+        var values = node.Members.Select(m =>
+            m.EqualsValue == null
+                ? m.Identifier.Text
+                : m.Identifier.Text + " = " + m.EqualsValue.Value.ToString().Trim())
+            .ToArray();
+        // enums may sit directly in a namespace (CurrentType == null)
+        Add("enum", node.Identifier.Text, "enum " + node.Identifier.Text,
+            node.Modifiers, node, null, values, allowNamespaceOwner: true);
+        base.VisitEnumDeclaration(node);
     }
 }
