@@ -57,7 +57,22 @@ class Decl:
         if open_paren < 0 or ')' not in body:
             return
         head = body[:open_paren].strip()
-        self.params = body[open_paren + 1:body.rindex(')')].strip()
+        # Depth-match the closing paren: rindex(')') grabbed the LAST paren,
+        # which for a one-line DEFINITION is the body's, so 38 functions had
+        # their bodies recorded as parameters (caught by verify_types.py).
+        depth = 0
+        close_paren = -1
+        for i in range(open_paren, len(body)):
+            if body[i] == '(':
+                depth += 1
+            elif body[i] == ')':
+                depth -= 1
+                if depth == 0:
+                    close_paren = i
+                    break
+        if close_paren < 0:
+            return
+        self.params = body[open_paren + 1:close_paren].strip()
         parts = head.split()
         if parts:
             self.name = parts[-1].lstrip('*&')
