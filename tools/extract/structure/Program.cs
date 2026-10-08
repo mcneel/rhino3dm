@@ -148,6 +148,26 @@ record MemberRecord
     public string[] Values { get; init; }    // enum members ("Name" or "Name = expr")
     public string Variant { get; init; }     // portable | rhino-only | rhino3dm-only
     public CallInfo[] Calls { get; init; }   // each native invocation, with args
+    public string Body { get; init; }        // trivial | pattern | a reason
+    public GuardInfo[] Guards { get; init; } // leading arg-validation throws
+    public SuccessInfo Success { get; init; }// if (CALL) return out; return fallback;
+}
+
+// `if (COND) throw new ExType("msg");` -- COND restricted to identifiers,
+// literals, comparisons and boolean operators so the generator can translate
+// it by identifier substitution alone (params stay, sibling members -> calls).
+record GuardInfo
+{
+    public string Cond { get; init; }
+    public string[] Ids { get; init; }
+    public string Exception { get; init; }
+    public string Message { get; init; }
+}
+
+record SuccessInfo
+{
+    public string Out { get; init; }
+    public string Fallback { get; init; }    // constant text, or the out local
 }
 
 // One UnsafeNativeMethods invocation as written in the member body. Args are
@@ -255,6 +275,63 @@ class Walker : CSharpSyntaxWalker
 
     static readonly HashSet<string> NoParams = new();
 
+    // invocations every trivial body is allowed besides the native call:
+    // pointer plumbing and lifetime pins, nothing that computes
+    static readonly HashSet<string> PlumbingCalls = new()
+    { "ConstPointer", "NonConstPointer", "KeepAlive", "ConstPointerOfInputCurves" };
+
+    // A generated binding reproduces ONLY the native call. If the C# body does
+    // anything else -- branches, loops, extra calls, arithmetic around the
+    // call -- generating from it silently drops that logic. Classify bodies so
+    // the generator can refuse nontrivial ones (exceptions.toml whitelists).
+    static string ClassifyBody(SyntaxNode body)
+    {
+        if (body == null) return null;
+        foreach (var n in body.DescendantNodes())
+        {
+            switch (n)
+            {
+                case IfStatementSyntax: return "branches";
+                case ConditionalExpressionSyntax: return "conditional";
+                case ForStatementSyntax or ForEachStatementSyntax
+                     or WhileStatementSyntax or DoStatementSyntax: return "loops";
+                case SwitchStatementSyntax or SwitchExpressionSyntax: return "switch";
+                case TryStatementSyntax: return "try";
+                case BinaryExpressionSyntax b
+                    when !b.IsKind(SyntaxKind.EqualsExpression)
+                      && !b.IsKind(SyntaxKind.NotEqualsExpression):
+                    return "arithmetic";
+                case InvocationExpressionSyntax inv:
+                {
+                    string callee = inv.Expression switch
+                    {
+                        MemberAccessExpressionSyntax ma => ma.Name.Identifier.Text,
+                        IdentifierNameSyntax idn => idn.Identifier.Text,
+                        _ => null,
+                    };
+                    bool unm = inv.Expression is MemberAccessExpressionSyntax m2
+                               && m2.Expression is IdentifierNameSyntax i2
+                               && i2.Identifier.Text == "UnsafeNativeMethods";
+                    if (!unm && (callee == null || !PlumbingCalls.Contains(callee)))
+                        return "calls " + (callee ?? "?");
+                    break;
+                }
+                case ObjectCreationExpressionSyntax oc:
+                {
+                    // `var rc = new Point3d();` initializing a local that the
+                    // native call fills is out-param plumbing, not logic
+                    bool bare = oc.ArgumentList == null
+                                || oc.ArgumentList.Arguments.Count == 0;
+                    bool localInit = oc.Parent is EqualsValueClauseSyntax
+                                     { Parent: VariableDeclaratorSyntax };
+                    if (!(bare && localInit)) return "constructs";
+                    break;
+                }
+            }
+        }
+        return "trivial";
+    }
+
     // const-field initializers of the enclosing type, any visibility: the C
     // selector constants (idxIsClosed = 0, ...) are private implementation
     // details that generated bindings must bake in
@@ -271,6 +348,122 @@ class Walker : CSharpSyntaxWalker
                 table[v.Identifier.Text] = v.Initializer.Value.ToString().Trim();
     }
 
+    // guard conditions may contain ONLY these node kinds; anything else makes
+    // the guard unrecognizable and the body falls back to plain classification
+    static bool GuardCondOk(ExpressionSyntax cond, List<string> ids)
+    {
+        foreach (var n in cond.DescendantNodesAndSelf())
+        {
+            switch (n)
+            {
+                case IdentifierNameSyntax id: ids.Add(id.Identifier.Text); break;
+                case LiteralExpressionSyntax: break;
+                case ParenthesizedExpressionSyntax: break;
+                case PrefixUnaryExpressionSyntax pu
+                    when pu.IsKind(SyntaxKind.LogicalNotExpression)
+                      || pu.IsKind(SyntaxKind.UnaryMinusExpression): break;
+                case BinaryExpressionSyntax b
+                    when b.IsKind(SyntaxKind.LessThanExpression)
+                      || b.IsKind(SyntaxKind.LessThanOrEqualExpression)
+                      || b.IsKind(SyntaxKind.GreaterThanExpression)
+                      || b.IsKind(SyntaxKind.GreaterThanOrEqualExpression)
+                      || b.IsKind(SyntaxKind.EqualsExpression)
+                      || b.IsKind(SyntaxKind.NotEqualsExpression)
+                      || b.IsKind(SyntaxKind.LogicalAndExpression)
+                      || b.IsKind(SyntaxKind.LogicalOrExpression): break;
+                default: return false;
+            }
+        }
+        return true;
+    }
+
+    static bool IsUnmCall(ExpressionSyntax e) =>
+        e is InvocationExpressionSyntax inv
+        && inv.Expression is MemberAccessExpressionSyntax m
+        && m.Expression is IdentifierNameSyntax i
+        && i.Identifier.Text == "UnsafeNativeMethods";
+
+    // The recognized shape: [guards]* [trivial decls] [success-if] [fallback
+    // return], with everything residual put through the plain classifier.
+    static (string, GuardInfo[], SuccessInfo) RecognizeShape(SyntaxNode body)
+    {
+        if (body is not BlockSyntax block)
+            return (ClassifyBody(body), null, null);
+
+        var stmts = block.Statements;
+        int i = 0;
+        var guards = new List<GuardInfo>();
+        while (i < stmts.Count && stmts[i] is IfStatementSyntax gif && gif.Else == null)
+        {
+            var inner = gif.Statement is BlockSyntax b && b.Statements.Count == 1
+                ? b.Statements[0] : gif.Statement;
+            if (inner is not ThrowStatementSyntax th
+                || th.Expression is not ObjectCreationExpressionSyntax oc)
+                break;
+            var args = oc.ArgumentList?.Arguments;
+            string msg = null;
+            if (args is { Count: 1 }
+                && args.Value[0].Expression is LiteralExpressionSyntax lit
+                && lit.IsKind(SyntaxKind.StringLiteralExpression))
+                msg = lit.Token.ValueText;
+            else if (args is { Count: > 0 })
+                break;                               // nameof()/computed message
+            var ids = new List<string>();
+            if (!GuardCondOk(gif.Condition, ids))
+                break;
+            guards.Add(new GuardInfo
+            {
+                Cond = gif.Condition.ToString(),
+                Ids = ids.Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray(),
+                Exception = oc.Type.ToString(),
+                Message = msg,
+            });
+            i++;
+        }
+
+        SuccessInfo success = null;
+        var residual = new List<SyntaxNode>();
+        for (; i < stmts.Count; i++)
+        {
+            var st = stmts[i];
+            if (success == null && st is IfStatementSyntax sif && sif.Else == null
+                && IsUnmCall(sif.Condition))
+            {
+                var then = sif.Statement is BlockSyntax tb && tb.Statements.Count == 1
+                    ? tb.Statements[0] : sif.Statement;
+                if (then is ReturnStatementSyntax rts
+                    && rts.Expression is IdentifierNameSyntax outId)
+                {
+                    success = new SuccessInfo { Out = outId.Identifier.Text };
+                    continue;
+                }
+            }
+            if (success is { Fallback: null } && st is ReturnStatementSyntax rs
+                && (rs.Expression is IdentifierNameSyntax
+                    || rs.Expression is MemberAccessExpressionSyntax))
+            {
+                success = success with { Fallback = rs.Expression.ToString() };
+                continue;
+            }
+            residual.Add(st);
+        }
+
+        if (success is { Fallback: null })           // if-around-call but no
+            return ("branches", null, null);         // recognizable fallback
+
+        foreach (var st in residual)
+        {
+            var c = ClassifyBody(st);
+            if (c != "trivial")
+                return (c, null, null);
+        }
+        if (guards.Count == 0 && success == null)
+            return ("trivial", null, null);
+        return ("pattern",
+                guards.Count > 0 ? guards.ToArray() : null,
+                success);
+    }
+
     void Add(string kind, string name, string signature, SyntaxTokenList mods,
              SyntaxNode node, SyntaxNode body, string[] values = null,
              bool allowNamespaceOwner = false, ISet<string> paramNames = null)
@@ -279,8 +472,13 @@ class Walker : CSharpSyntaxWalker
         if (owner == null || !IsPublic(mods)) return;
         var pos = node.SyntaxTree.GetLineSpan(node.Span);
         var calls = AnalyzeCalls(body, paramNames ?? NoParams);
+        var (bodyClass, guards, success) = calls != null
+            ? RecognizeShape(body) : (null, null, null);
         _out.Add(new MemberRecord
         {
+            Body = bodyClass,
+            Guards = guards,
+            Success = success,
             Type = owner,
             Kind = kind,
             Name = name,
