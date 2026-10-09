@@ -398,6 +398,10 @@ jobs:
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: ls && git submodule update --init --recursive
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
       - name: bootstrap
         run: python3 script/bootstrap.py -p linux
       - name: setup
@@ -436,6 +440,10 @@ jobs:
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v4.1.1
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: download artifact

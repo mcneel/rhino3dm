@@ -1,9 +1,8 @@
-// Extract the public RhinoCommon structure from rhino's dotnet/ sources:
-// for every public type, its public members, each member's signature, its
-// <since> tag, and the UnsafeNativeMethods.* calls its body makes -- the join
-// key to api/manifest.json's c_surface.
-//
-//   dotnet run --project tools/extract/structure -- <rhino-dotnet-dir> <out.json>
+// `specgen extract`: the public RhinoCommon surface -> members JSON
+// (feeds api/manifest.json via tools/extract/manifest.py). For every public
+// type, its public members, each member's signature, its <since> tag, and the
+// UnsafeNativeMethods.* calls its body makes -- the join key to the manifest's
+// c_surface.
 //
 // Parsing is syntax-only (no compilation): fast, no reference assemblies, and
 // sufficient because the join key is textual. Files are parsed with
@@ -18,131 +17,115 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-// --rhino3dm limits the OUTPUT to the surface rhino3dm ships (portable +
-// rhino3dm-only); the default is the whole API, which is what the committed
-// api/manifest.json is built from -- the Rhino-only surface is part of the
-// spec (full Python-in-Rhino bindings are a vNext goal) and is filtered at
-// generation time, not at extraction time. Both modes still parse both views:
-// the portable/rhino-only verdict itself needs the comparison.
-var rhino3dmOnly = args.Contains("--rhino3dm");
-var positional = args.Where(a => !a.StartsWith("--")).ToArray();
-var rhinoDotnet = positional.Length > 0 ? positional[0]
-    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                   "dev", "rhino", "src4", "DotNetSDK", "rhinocommon", "dotnet");
-var outPath = positional.Length > 1 ? positional[1] : "members.json";
-
-if (!Directory.Exists(rhinoDotnet))
+static class ExtractCommand
 {
-    Console.Error.WriteLine($"not a rhinocommon dotnet dir: {rhinoDotnet}");
-    return 1;
-}
-
-// Two views of the same sources, mirroring c_surface's variant tagging. The
-// end goal (vNext) is generating the FULL API -- including Python bindings for
-// use when running IN Rhino -- so the Rhino-only surface is recorded, not
-// filtered. A member in both views is portable; only under RHINO_SDK is
-// rhino-only; only under RHINO3DM_BUILD (rare: #if !RHINO_SDK code) is
-// rhino3dm-only. For portable members the portable view's record wins, so its
-// Native list reflects what rhino3dm actually calls.
-var portableOptions = new CSharpParseOptions(
-    documentationMode: DocumentationMode.Parse,
-    preprocessorSymbols: new[] { "RHINO3DM_BUILD" });
-var sdkOptions = new CSharpParseOptions(
-    documentationMode: DocumentationMode.Parse,
-    preprocessorSymbols: new[] { "RHINO_SDK" });
-
-var portableView = new List<MemberRecord>();
-var sdkView = new List<MemberRecord>();
-var files = Directory.EnumerateFiles(rhinoDotnet, "*.cs", SearchOption.AllDirectories)
-    .Where(p => !p.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
-             && !p.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
-    .OrderBy(p => p, StringComparer.Ordinal)
-    .ToList();
-
-foreach (var file in files)
-{
-    var text = File.ReadAllText(file);
-    new Walker(Path.GetFileName(file), portableView)
-        .Visit(CSharpSyntaxTree.ParseText(text, portableOptions).GetRoot());
-    new Walker(Path.GetFileName(file), sdkView)
-        .Visit(CSharpSyntaxTree.ParseText(text, sdkOptions).GetRoot());
-}
-
-static string KeyOf(MemberRecord m) => m.Type + "|" + m.Kind + "|" + m.Signature;
-var portableKeys = portableView.Select(KeyOf).ToHashSet();
-var sdkKeys = sdkView.Select(KeyOf).ToHashSet();
-
-var members = new List<MemberRecord>();
-var emitted = new HashSet<string>();
-foreach (var m in portableView)
-{
-    var k = KeyOf(m);
-    if (!emitted.Add(k)) continue;   // partial types can repeat a signature
-    members.Add(m with { Variant = sdkKeys.Contains(k) ? "portable" : "rhino3dm-only" });
-}
-foreach (var m in sdkView)
-{
-    var k = KeyOf(m);
-    if (!emitted.Add(k)) continue;
-    members.Add(m with { Variant = "rhino-only" });
-}
-
-if (rhino3dmOnly)
-    members.RemoveAll(m => m.Variant == "rhino-only");
-
-// resolve expr arguments that name a const of the enclosing type: the
-// generator bakes these (selector constants), everything else stays expr
-for (int i = 0; i < members.Count; i++)
-{
-    var m = members[i];
-    if (m.Calls == null)
-        continue;
-    Walker.Consts.TryGetValue(m.Type, out var table);
-    table ??= new Dictionary<string, string>();
-    members[i] = m with
+    public static int Run(string rhinoDotnet, string outPath, bool rhino3dmOnly, Sources src)
     {
-        Calls = m.Calls.Select(call => call with
+        // --rhino3dm limits the OUTPUT to the surface rhino3dm ships (portable +
+        // rhino3dm-only); the default is the whole API, which is what the committed
+        // api/manifest.json is built from -- the Rhino-only surface is part of the
+        // spec (full Python-in-Rhino bindings are a vNext goal) and is filtered at
+        // generation time, not at extraction time. Both modes still parse both views:
+        // the portable/rhino-only verdict itself needs the comparison.
+        if (!Directory.Exists(rhinoDotnet))
         {
-            Args = call.Args.Select(a =>
+            Console.Error.WriteLine($"not a rhinocommon dotnet dir: {rhinoDotnet}");
+            return 1;
+        }
+
+        // Two views of the same sources, mirroring c_surface's variant tagging. The
+        // end goal (vNext) is generating the FULL API -- including Python bindings for
+        // use when running IN Rhino -- so the Rhino-only surface is recorded, not
+        // filtered. A member in both views is portable; only under RHINO_SDK is
+        // rhino-only; only under RHINO3DM_BUILD (rare: #if !RHINO_SDK code) is
+        // rhino3dm-only. For portable members the portable view's record wins, so its
+        // Native list reflects what rhino3dm actually calls.
+        var portableView = new List<MemberRecord>();
+        var sdkView = new List<MemberRecord>();
+        var files = src.Files;
+        foreach (var file in files)
+        {
+            new Walker(Path.GetFileName(file), portableView).Visit(src.Root(file, Sources.Portable));
+            new Walker(Path.GetFileName(file), sdkView).Visit(src.Root(file, Sources.Sdk));
+        }
+
+        static string KeyOf(MemberRecord m) => m.Type + "|" + m.Kind + "|" + m.Signature;
+        var portableKeys = portableView.Select(KeyOf).ToHashSet();
+        var sdkKeys = sdkView.Select(KeyOf).ToHashSet();
+
+        var members = new List<MemberRecord>();
+        var emitted = new HashSet<string>();
+        foreach (var m in portableView)
+        {
+            var k = KeyOf(m);
+            if (!emitted.Add(k)) continue;   // partial types can repeat a signature
+            members.Add(m with { Variant = sdkKeys.Contains(k) ? "portable" : "rhino3dm-only" });
+        }
+        foreach (var m in sdkView)
+        {
+            var k = KeyOf(m);
+            if (!emitted.Add(k)) continue;
+            members.Add(m with { Variant = "rhino-only" });
+        }
+
+        if (rhino3dmOnly)
+            members.RemoveAll(m => m.Variant == "rhino-only");
+
+        // resolve expr arguments that name a const of the enclosing type: the
+        // generator bakes these (selector constants), everything else stays expr
+        for (int i = 0; i < members.Count; i++)
+        {
+            var m = members[i];
+            if (m.Calls == null)
+                continue;
+            Walker.Consts.TryGetValue(m.Type, out var table);
+            table ??= new Dictionary<string, string>();
+            members[i] = m with
             {
-                if (a.Kind != "expr") return a;
-                if (table.TryGetValue(a.Text, out var v))
-                    return a with { Kind = "const", Value = v };
-                var mm = System.Text.RegularExpressions.Regex.Match(
-                    a.Text, @"^UnsafeNativeMethods\.(\w+\.\w+)$");
-                if (mm.Success && Walker.EnumConsts.TryGetValue(mm.Groups[1].Value,
-                                                                out var ev))
-                    return a with { Kind = "const", Value = ev };
-                return a;
-            }).ToArray()
-        }).ToArray()
-    };
+                Calls = m.Calls.Select(call => call with
+                {
+                    Args = call.Args.Select(a =>
+                    {
+                        if (a.Kind != "expr") return a;
+                        if (table.TryGetValue(a.Text, out var v))
+                            return a with { Kind = "const", Value = v };
+                        var mm = System.Text.RegularExpressions.Regex.Match(
+                            a.Text, @"^UnsafeNativeMethods\.(\w+\.\w+)$");
+                        if (mm.Success && Walker.EnumConsts.TryGetValue(mm.Groups[1].Value,
+                                                                        out var ev))
+                            return a with { Kind = "const", Value = ev };
+                        return a;
+                    }).ToArray()
+                }).ToArray()
+            };
+        }
+
+        members.Sort((a, b) =>
+        {
+            int c = string.CompareOrdinal(a.Type, b.Type);
+            if (c != 0) return c;
+            c = string.CompareOrdinal(a.Name, b.Name);
+            if (c != 0) return c;
+            return string.CompareOrdinal(a.Signature, b.Signature);
+        });
+
+        // one member per line, same rationale as manifest.py: regeneration diffs
+        // read per-member
+        var json = new StringBuilder();
+        json.Append("[\n");
+        var opts = new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+        json.AppendJoin(",\n", members.Select(m => JsonSerializer.Serialize(m, opts)));
+        json.Append("\n]\n");
+        File.WriteAllText(outPath, json.ToString());
+
+        Console.WriteLine($"{outPath}: {members.Count} public members from {files.Count} files"
+            + (rhino3dmOnly ? "  [--rhino3dm: portable surface only]" : "  [full API]"));
+        Console.WriteLine($"  portable {members.Count(m => m.Variant == "portable")}, rhino-only {members.Count(m => m.Variant == "rhino-only")}, rhino3dm-only {members.Count(m => m.Variant == "rhino3dm-only")}");
+        Console.WriteLine($"  with native calls: {members.Count(m => m.Native is { Length: > 0 })}");
+        Console.WriteLine($"  with <since>:      {members.Count(m => m.Since != null)}");
+        return 0;
+    }
 }
-
-members.Sort((a, b) =>
-{
-    int c = string.CompareOrdinal(a.Type, b.Type);
-    if (c != 0) return c;
-    c = string.CompareOrdinal(a.Name, b.Name);
-    if (c != 0) return c;
-    return string.CompareOrdinal(a.Signature, b.Signature);
-});
-
-// one member per line, same rationale as manifest.py: regeneration diffs
-// read per-member
-var json = new StringBuilder();
-json.Append("[\n");
-var opts = new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-json.AppendJoin(",\n", members.Select(m => JsonSerializer.Serialize(m, opts)));
-json.Append("\n]\n");
-File.WriteAllText(outPath, json.ToString());
-
-Console.WriteLine($"{outPath}: {members.Count} public members from {files.Count} files"
-    + (rhino3dmOnly ? "  [--rhino3dm: portable surface only]" : "  [full API]"));
-Console.WriteLine($"  portable {members.Count(m => m.Variant == "portable")}, rhino-only {members.Count(m => m.Variant == "rhino-only")}, rhino3dm-only {members.Count(m => m.Variant == "rhino3dm-only")}");
-Console.WriteLine($"  with native calls: {members.Count(m => m.Native is { Length: > 0 })}");
-Console.WriteLine($"  with <since>:      {members.Count(m => m.Since != null)}");
-return 0;
 
 record MemberRecord
 {
@@ -260,6 +243,22 @@ class Walker : CSharpSyntaxWalker
         // bare member access like UnsafeNativeMethods.MeshBoolConst is an enum
         // value read, not a P/Invoke.
         var calls = new List<CallInfo>();
+        // `IntPtr ptr_c = curve.ConstPointer();` -- a local aliasing a
+        // PARAMETER's native pointer. Args naming such a local (or the call
+        // inline) are recorded as kind "paramptr" with the parameter's name,
+        // so a generator can pass the wrapped object's pointer directly.
+        static string ParamPtr(ExpressionSyntax e, ISet<string> ps)
+            => e is InvocationExpressionSyntax pi
+               && pi.Expression is MemberAccessExpressionSyntax pm
+               && pm.Name.Identifier.Text is "ConstPointer" or "NonConstPointer"
+               && pm.Expression is IdentifierNameSyntax pid
+               && ps.Contains(pid.Identifier.Text)
+               && pi.ArgumentList.Arguments.Count == 0
+                ? pid.Identifier.Text : null;
+        var ptrAlias = new Dictionary<string, string>();
+        foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+            if (v.Initializer != null && ParamPtr(v.Initializer.Value, paramNames) is string src)
+                ptrAlias[v.Identifier.Text] = src;
         foreach (var inv in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
             if (inv.Expression is not MemberAccessExpressionSyntax m
@@ -279,6 +278,11 @@ class Walker : CSharpSyntaxWalker
                 else if (a.Expression is IdentifierNameSyntax arg
                          && paramNames.Contains(arg.Identifier.Text))
                     kind = "param";
+                else if (ParamPtr(a.Expression, paramNames) is string direct)
+                    return new ArgInfo { Kind = "paramptr", Text = direct };
+                else if (a.Expression is IdentifierNameSyntax al
+                         && ptrAlias.TryGetValue(al.Identifier.Text, out var aliased))
+                    return new ArgInfo { Kind = "paramptr", Text = aliased };
                 else
                     kind = "expr";
                 return new ArgInfo { Kind = kind, Text = text };
@@ -302,9 +306,14 @@ class Walker : CSharpSyntaxWalker
     static readonly HashSet<string> NoParams = new();
 
     // invocations every trivial body is allowed besides the native call:
-    // pointer plumbing and lifetime pins, nothing that computes
+    // pointer plumbing and lifetime pins, nothing that computes.
+    // ConstructNonConstObject is the CONSTRUCTOR plumbing -- `X() {
+    // ConstructNonConstObject(UnsafeNativeMethods.ON_X_New(...)); }` is the
+    // standard RhinoCommon default-ctor idiom; the generator reproduces the
+    // native creation call and owns the returned pointer.
     static readonly HashSet<string> PlumbingCalls = new()
-    { "ConstPointer", "NonConstPointer", "KeepAlive", "ConstPointerOfInputCurves" };
+    { "ConstPointer", "NonConstPointer", "KeepAlive", "ConstPointerOfInputCurves",
+      "ConstructNonConstObject" };
 
     // A generated binding reproduces ONLY the native call. If the C# body does
     // anything else -- branches, loops, extra calls, arithmetic around the

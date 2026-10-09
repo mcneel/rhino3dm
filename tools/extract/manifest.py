@@ -164,7 +164,7 @@ def write(path, header, functions, members=()):
 
 
 def load_members(path):
-    """Member records produced by tools/extract/structure (the Roslyn pass):
+    """Member records produced by `tools/specgen extract` (the Roslyn pass):
     one per public RhinoCommon member in the RHINO3DM_BUILD view, carrying the
     UnsafeNativeMethods invocations that join it to c_surface.
 
