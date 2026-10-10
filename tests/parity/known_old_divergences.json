@@ -1,0 +1,9 @@
+{
+  "about": "TEMPORARY: where the old hand bindings differ from RhinoCommon (.NET) on a parity case, with the reason. Doubles as migration-guide input. Delete with the old bindings.",
+  "point3d.distanceto.unset_self": "old binds ON_3dPoint::DistanceTo (opennurbs): no IsValid guard (pilot-findings #14)",
+  "point3d.distanceto.unset_arg": "same as unset_self",
+  "viewport.getfrustum": "return shape: old returns a named dict and throws on failure; RhinoCommon is (success, left, right, bottom, top, near, far) (pilot-findings #5)",
+  "construct.controlpointcurve": "old CreateControlPointCurve builds a uniform clamped NURBS; RhinoCommon uses the 2023 CurveThroughPolyline-style construction -- a different curve (pilot-findings #18)",
+  "vector3d.unitize": "old Unitize discards opennurbs' bool and returns None (pilot-findings #19)",
+  "vector3d.unitize.zero": "same as vector3d.unitize"
+}

@@ -31,10 +31,24 @@ static class TranslateCommand
         // part of the semantics, e.g. IsValidDouble) but never registered.
         var Wanted = new Dictionary<string, string>
         {
-            ["RhinoMath"] = "RH3DM_RhinoMath",
-            ["Interval"]  = "BND_IntervalX",
-            ["Point3d"]   = "BND_Point3dX",
-            ["Vector3d"]  = "BND_Vector3dX",
+            ["RhinoMath"]   = "RH3DM_RhinoMath",
+            ["Interval"]    = "BND_IntervalX",
+            ["Point2d"]     = "BND_Point2dX",
+            ["Vector2d"]    = "BND_Vector2dX",
+            ["Point3d"]     = "BND_Point3dX",
+            ["Vector3d"]    = "BND_Vector3dX",
+            ["Line"]        = "BND_LineX",
+            ["BoundingBox"] = "BND_BoundingBoxX",
+            ["Plane"]       = "BND_PlaneX",
+            ["Circle"]      = "BND_CircleX",
+            ["Arc"]         = "BND_ArcX",
+            ["Sphere"]      = "BND_SphereX",
+            ["Transform"]   = "BND_TransformX",
+            ["Ellipse"]     = "BND_EllipseX",
+            ["Cylinder"]    = "BND_CylinderX",
+            ["Cone"]        = "BND_ConeX",
+            ["Torus"]       = "BND_TorusX",
+            ["Box"]         = "BND_BoxX",
         };
 
         var decls = new Dictionary<string, List<TypeDeclarationSyntax>>();
@@ -42,6 +56,14 @@ static class TranslateCommand
         {
             // the extractor's portable view: same trees, parsed once
             var root = src.Root(f, Sources.Portable);
+            // namespace-level public enums with constant values: translated
+            // members may use them (Transform.SimilarityType); emitted as
+            // `enum class RH3DM_<Name> : <underlying>` -- plain C++
+            foreach (var e in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
+            {
+                if (e.Parent is TypeDeclarationSyntax || !e.Modifiers.Any(SyntaxKind.PublicKeyword)) continue;
+                Tx.Enums.TryAdd(e.Identifier.Text, e);
+            }
             foreach (var t in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
                 var n = t.Identifier.Text;
@@ -59,6 +81,12 @@ static class TranslateCommand
         var types = Wanted.Keys.Where(decls.ContainsKey)
             .Select(n => new TypeInfo(n, Wanted[n], decls[n])).ToDictionary(t => t.Cs);
         foreach (var t in types.Values) t.Collect();
+        // field types: primitives, or other translated value types (Plane's
+        // Point3d origin); a field of any other type keeps the struct out
+        foreach (var t in types.Values)
+            foreach (var kv in t.FieldCs)
+                t.Fields[kv.Key] = Tx.TypeOrNull(SyntaxFactory.ParseTypeName(kv.Value))
+                    ?? (types.TryGetValue(kv.Value, out var ft) && !ft.IsStaticClass ? ft.Cpp : null);
 
         var results = new List<Member>();
         foreach (var t in types.Values)
@@ -102,9 +130,20 @@ static class TranslateCommand
         var json = new StringBuilder("{\n\"types\": [\n");
         json.AppendJoin(",\n", types.Values.Select(t => JsonSerializer.Serialize(new
         {
-            t.Cs, t.Cpp, IsStaticClass = t.IsStaticClass,
+            t.Cs, t.Cpp, IsStaticClass = t.IsStaticClass, t.LayoutSize,
             Fields = t.Fields.Select(kv => new { Name = kv.Key, Type = kv.Value }).ToArray(),
         })));
+        json.Append("\n],\n\"enums\": [\n");
+        json.AppendJoin(",\n", Tx.UsedEnums.Select(n =>
+        {
+            var e = Tx.Enums[n];
+            return JsonSerializer.Serialize(new
+            {
+                Cs = n, Cpp = "RH3DM_" + n,
+                Underlying = e.BaseList?.Types.FirstOrDefault()?.Type.ToString() ?? "int",
+                Values = e.Members.Select(m => new { Name = m.Identifier.Text, Value = m.EqualsValue?.Value.ToString() }).ToArray(),
+            });
+        }));
         json.Append("\n],\n\"members\": [\n");
         json.AppendJoin(",\n", results.Select(r => JsonSerializer.Serialize(r)));
         json.Append("\n]\n}\n");
@@ -149,11 +188,13 @@ class Member
     public string Setter { get; set; }       // property/indexer: C++ setter name, if any
     public string Op { get; set; }           // operator token, e.g. "+"
     public string[] Refs { get; set; } = Array.Empty<string>();
+    public string[] Native { get; set; } = Array.Empty<string>();   // flat C functions called
     public string[] Keys { get; set; } = Array.Empty<string>();
     public string ConstInit { get; set; }    // field-const: initializer, for ordering
     public bool Mutates { get; set; }        // instance member that changes `this` (directly or via a call)
-    [System.Text.Json.Serialization.JsonIgnore]
-    public string[] SelfCallsTmp { get; set; } = Array.Empty<string>();
+    public string[] SelfCallsTmp { get; set; } = Array.Empty<string>();   // own instance-method calls
+    public bool MutatesDirect { get; set; }                               // writes its own fields/this
+    public string[] NativeRefThis { get; set; } = Array.Empty<string>();  // C fns given `ref this`
 }
 
 class Param
@@ -170,7 +211,9 @@ class TypeInfo
     public string Cs, Cpp;
     public bool IsStaticClass;
     public List<TypeDeclarationSyntax> Decls;
-    public Dictionary<string, string> Fields = new();          // instance fields
+    public Dictionary<string, string> Fields = new();          // instance fields -> C++ type
+    public Dictionary<string, string> FieldCs = new();         // instance fields -> C# type
+    public int LayoutSize;                                      // [StructLayout(Size = N)], 0 if none
     public Dictionary<string, bool> Props = new();             // name -> static
     public HashSet<string> Consts = new();
     public HashSet<string> StaticFields = new();               // static readonly
@@ -185,6 +228,13 @@ class TypeInfo
 
     public void Collect()
     {
+        foreach (var d in Decls)
+            foreach (var at in d.AttributeLists.SelectMany(l => l.Attributes))
+                if (at.Name.ToString().EndsWith("StructLayout") && at.ArgumentList != null)
+                    foreach (var a in at.ArgumentList.Arguments)
+                        if (a.NameEquals?.Name.Identifier.Text == "Size"
+                            && int.TryParse(a.Expression.ToString(), out var sz))
+                            LayoutSize = sz;
         foreach (var m in Decls.SelectMany(d => d.Members))
         {
             bool st = m.Modifiers.Any(SyntaxKind.StaticKeyword);
@@ -196,12 +246,16 @@ class TypeInfo
                         MemberTypes.TryAdd(v.Identifier.Text, f.Declaration.Type.ToString());
                         if (f.Modifiers.Any(SyntaxKind.ConstKeyword)) Consts.Add(v.Identifier.Text);
                         else if (st) StaticFields.Add(v.Identifier.Text);
-                        else Fields[v.Identifier.Text] = Tx.TypeOrNull(f.Declaration.Type);
+                        else FieldCs[v.Identifier.Text] = f.Declaration.Type.ToString();
                     }
                     break;
                 case PropertyDeclarationSyntax p when p.ExplicitInterfaceSpecifier == null:
                     Props[p.Identifier.Text] = st;
                     MemberTypes.TryAdd(p.Identifier.Text, p.Type.ToString()); break;
+                case OperatorDeclarationSyntax op:
+                    Tx.OpRet.TryAdd(Tx.TypedKey("op", op.OperatorToken.Text,
+                        op.ParameterList.Parameters.Select(p => p.Type.ToString())), op.ReturnType.ToString());
+                    break;
                 case MethodDeclarationSyntax md when md.ExplicitInterfaceSpecifier == null:
                     Methods.TryAdd(md.Identifier.Text, st);
                     MemberTypes.TryAdd(md.Identifier.Text + "()", md.ReturnType.ToString()); break;
@@ -225,7 +279,17 @@ class Tx
     readonly Dictionary<string, TypeInfo> All;
     readonly Dictionary<string, string> Scope = new();
     readonly List<string> Refs = new();
+    readonly List<string> Natives = new();
+    readonly List<string> ParamCs = new();       // C# parameter types of the member being translated
+    static string Norm(string t) => t is "double" or "float" or "int" or "long" or "uint" or "short" or "byte" ? "num" : t;
+    static string Typed(string owner, string name, IEnumerable<string> types) => $"{owner}.{name}({string.Join(",", types.Select(Norm))})";
+    public static string TypedKey(string owner, string name, IEnumerable<string> types) => Typed(owner, name, types);
+    public static readonly Dictionary<string, string> OpRet = new();   // typed operator key -> C# return type
+    public static readonly Dictionary<string, EnumDeclarationSyntax> Enums = new();
+    public static readonly SortedSet<string> UsedEnums = new(StringComparer.Ordinal);
     bool MutatesSelf;
+    bool MutatesDirectly;
+    readonly List<string> NativeThis = new();
     readonly List<string> SelfCalls = new();     // unqualified own instance-method calls
 
     public Tx(TypeInfo cur, Dictionary<string, TypeInfo> all) { Cur = cur; All = all; }
@@ -234,7 +298,10 @@ class Tx
     { "default", "register", "union", "template", "delete", "auto", "explicit",
       "friend", "inline", "mutable", "typename", "virtual", "export", "and", "or",
       "not", "xor", "bitand", "bitor", "compl", "signed", "unsigned", "small" };
-    static string Rn(string id) => CppKeywords.Contains(id) ? id + "_" : id;
+    // C++ keywords, and MACRO-shaped names (a C# local `ON_DBL_MIN` would be
+    // expanded by opennurbs' #define of the same name)
+    static string Rn(string id) => CppKeywords.Contains(id) || id.StartsWith("ON_")
+        || (id.Length > 1 && id.All(ch => char.IsUpper(ch) || char.IsDigit(ch) || ch == '_')) ? id + "_cs" : id;
 
     static readonly Dictionary<string, string> Prim = new()
     {
@@ -252,6 +319,11 @@ class Tx
         if (t is PredefinedTypeSyntax p && Prim.TryGetValue(p.Keyword.Text, out var c)) return c;
         if (t is IdentifierNameSyntax id && All.TryGetValue(id.Identifier.Text, out var ti)
             && !ti.IsStaticClass) return ti.Cpp;
+        if (t is IdentifierNameSyntax eid && Enums.ContainsKey(eid.Identifier.Text))
+        {
+            UsedEnums.Add(eid.Identifier.Text);
+            return "RH3DM_" + eid.Identifier.Text;
+        }
         throw new NotSupported("type: " + t);
     }
 
@@ -288,19 +360,27 @@ class Tx
         }
         r.Refs = Refs.Distinct().ToArray();
         r.Mutates = MutatesSelf && !r.Static;
+        r.MutatesDirect = MutatesSelf && !r.Static;
+        r.NativeRefThis = NativeThis.Distinct().ToArray();
+        r.Native = Natives.Distinct().ToArray();
         r.SelfCallsTmp = SelfCalls.Distinct().ToArray();
         return r;
     }
 
     Member Field(FieldDeclarationSyntax f, Member r)
     {
-        var v = f.Declaration.Variables.Single();
+        // `internal double m_00, m_01, m_02, m_03;` (Transform): instance
+        // storage comes from Collect(); the record keys every variable
+        var vars = f.Declaration.Variables;
+        var v = vars[0];
         r.Name = v.Identifier.Text;
         r.Signature = f.ToString().Trim();
         try
         {
             var ty = Type(f.Declaration.Type);
             r.Ret = ty;
+            if (vars.Count > 1 && (r.Static || f.Modifiers.Any(SyntaxKind.ConstKeyword)))
+                throw new NotSupported("multi-variable static field");
             if (f.Modifiers.Any(SyntaxKind.ConstKeyword))
             {
                 r.Kind = "field-const";
@@ -322,11 +402,12 @@ class Tx
             else
             {
                 r.Kind = "field";   // emitted as struct storage, not as a member
-                r.Keys = new[] { $"{Cur.Cs}.{r.Name}" };
+                r.Keys = vars.Select(x => $"{Cur.Cs}.{x.Identifier.Text}").ToArray();
             }
         }
         catch (NotSupported e) { r.Ok = false; r.Reason = e.Message; }
         r.Refs = Refs.Distinct().ToArray();
+        r.Native = Natives.Distinct().ToArray();
         return r;
     }
 
@@ -347,6 +428,7 @@ class Tx
             if (p.Default != null && allowDefaults) def = " = " + Expr(p.Default.Value);
             parts.Add($"{ty}{(mode != "" ? "&" : "")} {nm}{def}");
             ps.Add(new Param { Type = ty, Name = nm, Mode = mode });
+            ParamCs.Add(p.Type.ToString());
         }
         return (string.Join(", ", parts), ps.ToArray());
     }
@@ -371,7 +453,7 @@ class Tx
             if (Cur.IsStaticClass) throw new NotSupported("static class ctor");
             var (list, ps) = Params(c.ParameterList);
             r.Params = ps;
-            r.Keys = new[] { $"{Cur.Cs}.#ctor/{ps.Length}" };
+            r.Keys = new[] { $"{Cur.Cs}.#ctor/{ps.Length}", Typed(Cur.Cs, "#ctor", ParamCs) };
             if (ps.Length == 1 && ps[0].Type == Cur.Cpp && ps[0].Mode == "")
             {
                 // C# copy ctor == C++ implicit copy (and C++ forbids a by-value one)
@@ -385,7 +467,9 @@ class Tx
                 if (!c.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.ThisKeyword))
                     throw new NotSupported("base ctor initializer");
                 var a = Args(c.Initializer.ArgumentList);
-                Refs.Add($"{Cur.Cs}.#ctor/{c.Initializer.ArgumentList.Arguments.Count}");
+                // `: this()` is the struct's implicit default ctor -- always there
+                if (c.Initializer.ArgumentList.Arguments.Count > 0)
+                    RefCall(Cur.Cs, "#ctor", c.Initializer.ArgumentList);
                 init = $"\n  : {Cur.Cpp}({a})";
             }
             r.Decl = $"{Cur.Cpp}({list});";
@@ -393,6 +477,7 @@ class Tx
         }
         catch (NotSupported e) { r.Ok = false; r.Reason = e.Message; }
         r.Refs = Refs.Distinct().ToArray();
+        r.Native = Natives.Distinct().ToArray();
         return r;
     }
 
@@ -404,7 +489,7 @@ class Tx
         var ret = Type(m.ReturnType);
         var (list, ps) = Params(m.ParameterList);
         r.Ret = ret; r.Params = ps;
-        r.Keys = new[] { $"{Cur.Cs}.{r.Name}/{ps.Length}" };
+        r.Keys = new[] { $"{Cur.Cs}.{r.Name}/{ps.Length}", Typed(Cur.Cs, r.Name, ParamCs) };
         r.Decl = $"{(r.Static ? "static " : "")}{ret} {Rn(r.Name)}({list});";
         r.Def = $"{ret} {Cur.Cpp}::{Rn(r.Name)}({StripDefaults(list)})\n" + Body(m.Body, m.ExpressionBody, ret == "void");
     }
@@ -424,7 +509,18 @@ class Tx
         if (p.ExpressionBody != null || get != null)
         {
             if (get != null && get.Body == null && get.ExpressionBody == null)
-                throw new NotSupported("auto-property");
+            {
+                // `public static BoundingBox Unset { get; } = new BoundingBox(...);`
+                // is a static readonly field in property form: a getter
+                // returning the initializer (a value type: same semantics)
+                if (!r.Static || set != null || p.Initializer == null)
+                    throw new NotSupported("auto-property");
+                decl.Append($"static {ty} {r.Name}();");
+                def.Append($"{ty} {Cur.Cpp}::{r.Name}()\n{{\n  return {Expr(p.Initializer.Value)};\n}}");
+                keys.Add($"{Cur.Cs}.{r.Name}");
+                r.Decl = decl.ToString(); r.Def = def.ToString(); r.Keys = keys.ToArray();
+                return;
+            }
             decl.Append($"{st}{ty} {r.Name}();");
             def.Append($"{ty} {Cur.Cpp}::{r.Name}()\n" +
                        (p.ExpressionBody != null ? Body(null, p.ExpressionBody, false)
@@ -472,7 +568,7 @@ class Tx
         var ret = Type(op.ReturnType);
         var (list, ps) = Params(op.ParameterList);
         r.Ret = ret; r.Params = ps;
-        r.Keys = new[] { $"{Cur.Cs}.operator{r.Op}/{ps.Length}" };
+        r.Keys = new[] { $"{Cur.Cs}.operator{r.Op}/{ps.Length}", Typed("op", r.Op, ParamCs) };
         // free function: C++ binary expressions in other translated bodies
         // resolve to it exactly as C# resolves to the C# operator
         r.Decl = $"{ret} operator{r.Op}({list});";
@@ -631,6 +727,16 @@ class Tx
     }
 
     // --------------------------------------------------------- expressions
+    // a reference by parameter types when they are all known, else by arity
+    // (an arity match can be the WRONG overload: Sphere(Point3d,double) vs
+    // Sphere(Plane,double) -- pruning must see the difference)
+    void RefCall(string owner, string name, ArgumentListSyntax al)
+    {
+        var n = al?.Arguments.Count ?? 0;
+        var ts = al == null ? new List<string>() : al.Arguments.Select(a => TypeOf(a.Expression)).ToList();
+        Refs.Add(ts.All(t => t != null) ? Typed(owner, name, ts) : $"{owner}.{name}/{n}");
+    }
+
     string Args(ArgumentListSyntax al)
     {
         foreach (var a in al.Arguments)
@@ -716,6 +822,40 @@ class Tx
         throw new NotSupported("member access ." + name);
     }
 
+    // `m_from.X = v` / `Origin += d`: a PROPERTY on the left is a setter call;
+    // the receiver (a field or local) is mutated in place, as in C#
+    string PropertySetter(AssignmentExpressionSyntax a)
+    {
+        string recv, recvType, name;
+        if (a.Left is MemberAccessExpressionSyntax ma && ma.Expression is not ThisExpressionSyntax
+            && !IsTypeName(ma.Expression, out _))
+        {
+            recvType = TypeOf(ma.Expression);
+            name = ma.Name.Identifier.Text;
+            if (recvType == null || !All.TryGetValue(recvType, out var rt) || rt.Fields.ContainsKey(name)
+                || !rt.Props.TryGetValue(name, out var st) || st) return null;
+            recv = "(" + Expr(ma.Expression) + ").";
+            if (ma.Expression is IdentifierNameSyntax rid && !Scope.ContainsKey(rid.Identifier.Text)
+                && Cur.Fields.ContainsKey(rid.Identifier.Text)) MutatesSelf = true;
+            Refs.Add($"{rt.Cs}.set_{name}");
+        }
+        else if (a.Left is IdentifierNameSyntax id && !Scope.ContainsKey(id.Identifier.Text)
+                 && !Cur.Fields.ContainsKey(id.Identifier.Text)
+                 && Cur.Props.TryGetValue(id.Identifier.Text, out var st2) && !st2)
+        {
+            recv = ""; name = id.Identifier.Text; MutatesSelf = true;
+            Refs.Add($"{Cur.Cs}.set_{name}");
+        }
+        else return null;
+        var rhs = Expr(a.Right);
+        if (!a.IsKind(SyntaxKind.SimpleAssignmentExpression))
+        {
+            var op = a.OperatorToken.Text.TrimEnd('=');
+            rhs = $"{recv}{name}() {op} ({rhs})";
+        }
+        return $"{recv}set_{name}({rhs})";
+    }
+
     bool WritesSelf(ExpressionSyntax left) => left switch
     {
         ThisExpressionSyntax => true,
@@ -784,45 +924,112 @@ class Tx
                     if (lt is not ("int" or "uint" or "long") || rt is not ("int" or "uint" or "long"))
                         throw new NotSupported("% on unknown operand types");
                 }
+                {
+                    var lt2 = TypeOf(b.Left); var rt2 = TypeOf(b.Right);
+                    if ((lt2 != null && All.ContainsKey(lt2)) || (rt2 != null && All.ContainsKey(rt2)))
+                    {
+                        if (lt2 == null || rt2 == null) throw new NotSupported("operator on unknown operand type");
+                        Refs.Add(Typed("op", b.OperatorToken.Text, new[] { lt2, rt2 }));
+                    }
+                }
                 return Expr(b.Left) + " " + b.OperatorToken.Text + " " + Expr(b.Right);
             case ConditionalExpressionSyntax c:
                 return "(" + Expr(c.Condition) + " ? " + Expr(c.WhenTrue) + " : " + Expr(c.WhenFalse) + ")";
             case AssignmentExpressionSyntax a:
-                if (a.Left is ElementAccessExpressionSyntax) throw new NotSupported("indexer assignment");
+                if (a.Left is ElementAccessExpressionSyntax lhsIx)
+                {
+                    // x[i, j] = v  ->  x.set_Item(i, j, v); compound: read, op, write
+                    Refs.Add("*.this[]");
+                    bool self = lhsIx.Expression is ThisExpressionSyntax;
+                    if (self) MutatesSelf = true;
+                    var recv = self ? "" : Expr(lhsIx.Expression) + ".";
+                    var idx = string.Join(", ", lhsIx.ArgumentList.Arguments.Select(x => Expr(x.Expression)));
+                    var rhs = Expr(a.Right);
+                    if (!a.IsKind(SyntaxKind.SimpleAssignmentExpression))
+                    {
+                        var op = a.OperatorToken.Text.TrimEnd('=');
+                        if (op is not ("+" or "-" or "*" or "/")) throw new NotSupported("indexer " + a.OperatorToken.Text);
+                        rhs = $"{recv}get_Item({idx}) {op} ({rhs})";
+                    }
+                    return $"{recv}set_Item({idx}, {rhs})";
+                }
                 if (WritesSelf(a.Left)) MutatesSelf = true;
+                if (PropertySetter(a) is string setter) return setter;
+                // `v *= d` on a value type: C# defines no compound operators,
+                // it rewrites to `v = v * d` with the binary operator -- so must we
+                if (!a.IsKind(SyntaxKind.SimpleAssignmentExpression) && TypeOf(a.Left) is string clt
+                    && All.TryGetValue(clt, out var cti) && !cti.IsStaticClass)
+                {
+                    var bop = a.OperatorToken.Text.TrimEnd('=');
+                    var crt = TypeOf(a.Right);
+                    if (crt == null) throw new NotSupported("compound assignment of unknown type");
+                    Refs.Add(Typed("op", bop, new[] { clt, crt }));
+                    var lhs = Expr(a.Left);
+                    return $"{lhs} = {lhs} {bop} ({Expr(a.Right)})";
+                }
                 if (a.IsKind(SyntaxKind.CoalesceAssignmentExpression)) throw new NotSupported("??=");
                 return Expr(a.Left) + " " + a.OperatorToken.Text + " " + Expr(a.Right);
             case CastExpressionSyntax ce:
             {
                 var t = Type(ce.Type);
-                if (!t.StartsWith("BND_") && !t.StartsWith("RH3DM_")) return $"(({t})({Expr(ce.Expression)}))";
+                bool isEnum = ce.Type is IdentifierNameSyntax cid && Enums.ContainsKey(cid.Identifier.Text);
+                if (isEnum || (!t.StartsWith("BND_") && !t.StartsWith("RH3DM_"))) return $"(({t})({Expr(ce.Expression)}))";
                 throw new NotSupported("cast to value type");
             }
             case DefaultExpressionSyntax de:
                 return Type(de.Type) + "()";
+            case ObjectCreationExpressionSyntax oc when oc.Initializer != null:
+            {
+                // `new Plane { XAxis = x, ... }`: construct, then apply the
+                // assignments in order -- a C# object initializer's semantics
+                if (oc.Type is not IdentifierNameSyntax itn || !All.TryGetValue(itn.Identifier.Text, out var it)
+                    || it.IsStaticClass || !oc.Initializer.IsKind(SyntaxKind.ObjectInitializerExpression))
+                    throw new NotSupported("object initializer");
+                var ctorArgs = oc.ArgumentList != null && oc.ArgumentList.Arguments.Count > 0 ? Args(oc.ArgumentList) : "";
+                if (ctorArgs != "") RefCall(it.Cs, "#ctor", oc.ArgumentList);
+                var steps = new List<string>();
+                foreach (var ie in oc.Initializer.Expressions)
+                {
+                    if (ie is not AssignmentExpressionSyntax ia || ia.Left is not IdentifierNameSyntax iname)
+                        throw new NotSupported("object initializer element");
+                    var nm = iname.Identifier.Text;
+                    var v = Expr(ia.Right);
+                    if (it.Fields.ContainsKey(nm)) steps.Add($"o.{nm} = {v};");
+                    else if (it.Props.TryGetValue(nm, out var pst) && !pst) { Refs.Add($"{it.Cs}.set_{nm}"); steps.Add($"o.set_{nm}({v});"); }
+                    else throw new NotSupported("object initializer member " + nm);
+                }
+                var decl = ctorArgs == "" ? $"{it.Cpp} o;" : $"{it.Cpp} o({ctorArgs});";   // `T o();` declares a function
+                return $"([&]() {{ {decl} {string.Join(" ", steps)} return o; }}())";
+            }
             case ObjectCreationExpressionSyntax oc:
             {
-                if (oc.Initializer != null) throw new NotSupported("object initializer");
                 if (oc.Type is IdentifierNameSyntax tn && All.TryGetValue(tn.Identifier.Text, out var ti)
                     && !ti.IsStaticClass)
                 {
                     var n = oc.ArgumentList?.Arguments.Count ?? 0;
-                    if (n > 0) Refs.Add($"{ti.Cs}.#ctor/{n}");
+                    if (n > 0) RefCall(ti.Cs, "#ctor", oc.ArgumentList);
                     return $"{ti.Cpp}({(oc.ArgumentList != null ? Args(oc.ArgumentList) : "")})";
                 }
                 throw new NotSupported("new " + oc.Type);
             }
             case ElementAccessExpressionSyntax ea:
             {
-                if (ea.ArgumentList.Arguments.Count != 1) throw new NotSupported("multi-index");
+                // this[i] / this[row, column] (Transform): the indexer's getter
                 Refs.Add("*.this[]");
                 var recv = ea.Expression is ThisExpressionSyntax ? "" : Expr(ea.Expression) + ".";
-                return $"{recv}get_Item({Expr(ea.ArgumentList.Arguments[0].Expression)})";
+                return $"{recv}get_Item({string.Join(", ", ea.ArgumentList.Arguments.Select(x => Expr(x.Expression)))})";
             }
             case MemberAccessExpressionSyntax ma:
             {
                 var name = ma.Name.Identifier.Text;
                 if (ma.Expression is ThisExpressionSyntax) return Ident(name);
+                if (ma.Expression is IdentifierNameSyntax en && Enums.TryGetValue(en.Identifier.Text, out var ed)
+                    && !Scope.ContainsKey(en.Identifier.Text) && !All.ContainsKey(en.Identifier.Text)
+                    && ed.Members.Any(x => x.Identifier.Text == name))
+                {
+                    UsedEnums.Add(en.Identifier.Text);
+                    return $"RH3DM_{en.Identifier.Text}::{name}";
+                }
                 if (ma.Expression is PredefinedTypeSyntax pt && Prim.TryGetValue(pt.Keyword.Text, out var pty))
                     return Limits(pty, name);
                 if (ma.Expression is IdentifierNameSyntax mx && mx.Identifier.Text == "Math"
@@ -876,6 +1083,7 @@ class Tx
             case ConditionalExpressionSyntax ce: return TypeOf(ce.WhenTrue) ?? TypeOf(ce.WhenFalse);
             case PrefixUnaryExpressionSyntax pu:
                 return pu.IsKind(SyntaxKind.LogicalNotExpression) ? "bool" : TypeOf(pu.Operand);
+            case ImplicitObjectCreationExpressionSyntax: return null;
             case PostfixUnaryExpressionSyntax po: return TypeOf(po.Operand);
             case BinaryExpressionSyntax b:
             {
@@ -885,6 +1093,8 @@ class Tx
                     || b.IsKind(SyntaxKind.LessThanOrEqualExpression) || b.IsKind(SyntaxKind.GreaterThanOrEqualExpression))
                     return "bool";
                 var l = TypeOf(b.Left); var r = TypeOf(b.Right);
+                if (l != null && r != null && (All.ContainsKey(l) || All.ContainsKey(r)))
+                    return OpRet.TryGetValue(Typed("op", b.OperatorToken.Text, new[] { l, r }), out var ort) ? ort : null;
                 if (l == "double" || r == "double") return Num.Contains(l ?? "") && Num.Contains(r ?? "") ? "double" : null;
                 if (l == "float" || r == "float") return Num.Contains(l ?? "") && Num.Contains(r ?? "") ? "float" : null;
                 if (l != null && l == r && Num.Contains(l)) return l;
@@ -934,9 +1144,45 @@ class Tx
         return inv;
     }
 
+    // `UnsafeNativeMethods.ON_X(ref this, point, t)`: the same flat C function
+    // .NET P/Invokes. Structs mirror RhinoCommon's layout (padding included),
+    // so like the P/Invoke marshaller we pass `this`/refs as pointers and
+    // value structs by bits; RH3DM_Ptr/RH3DM_Val adapt to the C parameter
+    // types (declared by bnd_gen from the manifest) and static_assert sizes.
+    string NativeCall(InvocationExpressionSyntax inv, string fn)
+    {
+        Natives.Add(fn);
+        var args = new List<string>();
+        foreach (var a in inv.ArgumentList.Arguments)
+        {
+            var isRef = !a.RefKindKeyword.IsKind(SyntaxKind.None);
+            var e = a.Expression;
+            if (isRef)
+            {
+                if (e is ThisExpressionSyntax) { args.Add("RH3DM_Ptr(this)"); NativeThis.Add(fn); continue; }
+                if (WritesSelf(e)) MutatesSelf = true;
+                var ty = TypeOf(e);
+                if (ty == null) throw new NotSupported("native ref arg of unknown type");
+                args.Add(All.TryGetValue(ty, out _) ? $"RH3DM_Ptr(&{Expr(e)})" : $"&{Expr(e)}");
+                continue;
+            }
+            var t = TypeOf(e);
+            if (t != null && All.TryGetValue(t, out var vt) && !vt.IsStaticClass)
+                args.Add($"RH3DM_Val({Expr(e)})");
+            else if (t is "double" or "float" or "int" or "bool" or "uint")
+                args.Add(Expr(e));
+            else
+                throw new NotSupported("native arg " + e);
+        }
+        return $"{fn}({string.Join(", ", args)})";
+    }
+
     string Invocation(InvocationExpressionSyntax inv)
     {
         inv = Unqualify(inv);
+        if (inv.Expression is MemberAccessExpressionSyntax um
+            && um.Expression is IdentifierNameSyntax uid && uid.Identifier.Text == "UnsafeNativeMethods")
+            return NativeCall(inv, um.Name.Identifier.Text);
         var n = inv.ArgumentList.Arguments.Count;
         if (inv.Expression is MemberAccessExpressionSyntax ma)
         {
@@ -954,7 +1200,7 @@ class Tx
                 {
                     if (!t.Methods.TryGetValue(name, out var st) || !st)
                         throw new NotSupported($"call {rn}.{name}");
-                    Refs.Add($"{t.Cs}.{name}/{n}");
+                    RefCall(t.Cs, name, inv.ArgumentList);
                     return $"{t.Cpp}::{Rn(name)}({Args(inv.ArgumentList)})";
                 }
             }
@@ -969,7 +1215,7 @@ class Tx
                 if (!All.TryGetValue(recvT, out var rti) || rti.IsStaticClass
                     || !rti.Methods.TryGetValue(name, out var rs) || rs)
                     throw new NotSupported($"call {recvT}.{name}");
-                Refs.Add($"{rti.Cs}.{name}/{n}");
+                RefCall(rti.Cs, name, inv.ArgumentList);
                 return $"({Expr(ma.Expression)}).{Rn(name)}({Args(inv.ArgumentList)})";
             }
             if (All.Values.Any(t => t.Methods.TryGetValue(name, out var s) && !s))
@@ -985,7 +1231,7 @@ class Tx
             if (name == "nameof") throw new NotSupported("nameof");
             if (Cur.Methods.ContainsKey(name))
             {
-                Refs.Add($"{Cur.Cs}.{name}/{n}");
+                RefCall(Cur.Cs, name, inv.ArgumentList);
                 if (!Cur.Methods[name]) SelfCalls.Add($"{Cur.Cs}.{name}/{n}");
                 return $"{Rn(name)}({Args(inv.ArgumentList)})";
             }

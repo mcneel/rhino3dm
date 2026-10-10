@@ -21,14 +21,38 @@ var goldenDir = Path.Combine(root, "golden");
 Directory.CreateDirectory(goldenDir);
 
 var asm = typeof(Point3d).Assembly;
-Type T(string name) => asm.GetType("Rhino.Geometry." + name) ?? asm.GetType("Rhino." + name)
+// the namespaces a case's short type name may live in
+string[] namespaces = { "Rhino.Geometry.", "Rhino.DocObjects.", "Rhino.Geometry.Intersect.",
+                        "Rhino.FileIO.", "Rhino.Render.", "Rhino.Geometry.Collections.", "Rhino." };
+Type T(string name) => namespaces.Select(ns => asm.GetType(ns + name)).FirstOrDefault(t => t != null)
     ?? throw new Exception("unknown type " + name);
 
 foreach (var file in Directory.EnumerateFiles(casesDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))
 {
     var doc = JsonDocument.Parse(File.ReadAllText(file));
+    recipes = doc.RootElement.TryGetProperty("recipes", out var rc) ? rc : default;
     var outp = new StringBuilder("{\n");
     var first = true;
+    // fixtures: every recipe object built ONCE here and serialized (opennurbs
+    // archive, exact), so all runners evaluate members on the identical object
+    // instead of re-constructing it through APIs that may differ (#18)
+    if (recipes.ValueKind == JsonValueKind.Object)
+    {
+        var fx = new List<string>();
+        foreach (var rp in recipes.EnumerateObject())
+        {
+            var obj = Decode(rp.Value);
+            string enc = obj switch
+            {
+                Rhino.Runtime.CommonObject co => co.ToJSON(new Rhino.FileIO.SerializationOptions()),
+                Transform x => Encode(x),
+                _ => null,
+            };
+            if (enc != null) fx.Add($"    {JsonSerializer.Serialize(rp.Name)}: {enc}");
+        }
+        outp.Append("  \"__fixtures__\": {\n").Append(string.Join(",\n", fx)).Append("\n  }");
+        first = false;
+    }
     int n = 0;
     foreach (var c in doc.RootElement.GetProperty("cases").EnumerateArray())
     {
@@ -76,13 +100,29 @@ object Eval(JsonElement c)
             .First(mi => mi.Name == name && Fits(mi.GetParameters(), args));
         return m.Invoke(null, Coerce(m.GetParameters(), args));
     }
+    if (c.TryGetProperty("via", out var via))
+    {
+        // a collection view: evaluate on obj.<via> (Knots, Faces, ...)
+        self = type.GetProperty(via.GetString()).GetValue(self);
+        type = self.GetType();
+    }
     if (c.TryGetProperty("index", out var ix))
     {
-        var item = type.GetProperty("Item");
+        var item = type.GetProperties().First(p => p.GetIndexParameters().Length == 1);
         return item.GetValue(self, new object[] { ix.GetInt32() });
     }
 
     var member = c.GetProperty("member").GetString();
+    if (c.TryGetProperty("set", out var setEl))
+    {
+        // property setter: assign, then read `then` back (on the box, so a
+        // struct self sees its own mutation)
+        var sp = type.GetProperty(member, BindingFlags.Public | BindingFlags.Instance);
+        var sv = Decode(setEl);
+        sp.SetValue(self, Coerce(new[] { sp.SetMethod.GetParameters()[0] }, new[] { sv })[0]);
+        var tp = self.GetType().GetProperty(c.GetProperty("then").GetString());
+        return new Dictionary<string, object> { ["then"] = tp.GetValue(self) };
+    }
     if (!c.TryGetProperty("args", out var argsEl))
     {
         var p = type.GetProperty(member, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
@@ -92,12 +132,36 @@ object Eval(JsonElement c)
     }
     var a2 = argsEl.EnumerateArray().Select(Decode).ToArray();
     var flags = BindingFlags.Public | (self == null ? BindingFlags.Static : BindingFlags.Instance);
-    var mi2 = type.GetMethods(flags).First(mi => mi.Name == member && Fits(mi.GetParameters(), a2));
+    var mi2 = type.GetMethods(flags).Where(mi => mi.Name == member && FitsIn(mi.GetParameters(), a2))
+        .OrderBy(mi => mi.GetParameters().Count(p => p.IsOut))   // prefer the fewest out-params
+        // then the generator's rule for overloads a binding cannot tell apart
+        // (DecomposeAffine's out-orders): lowest parameter-type sequence
+        .ThenBy(mi => string.Join(",", mi.GetParameters().Select(p => p.ParameterType.Name.TrimEnd('&'))), StringComparer.Ordinal)
+        .First();
+    var ps2 = mi2.GetParameters();
+    // inputs fill the non-out slots in order; out slots stay null and are read back
+    var full = new object[ps2.Length];
+    var ins = Coerce(ps2.Where(p => !p.IsOut).ToArray(), a2);
+    for (int i = 0, k = 0; i < ps2.Length; i++)
+        if (!ps2[i].IsOut) full[i] = ins[k++];
     var boxed = self;                          // invoke on the box so mutation is visible
-    var ret = mi2.Invoke(boxed, Coerce(mi2.GetParameters(), a2));
+    var ret = mi2.Invoke(boxed, full);
+    object result = ret;
+    if (ps2.Any(p => p.IsOut))
+    {
+        var list = new List<object>();
+        if (mi2.ReturnType != typeof(void)) list.Add(ret);
+        for (int i = 0; i < ps2.Length; i++) if (ps2[i].IsOut) list.Add(full[i]);
+        result = list;
+    }
     if (c.TryGetProperty("mutates", out var mu) && mu.GetBoolean())
         return new Dictionary<string, object> { ["self"] = boxed, ["returns"] = ret };
-    return ret;
+    if (c.TryGetProperty("then", out var then))
+    {
+        var tp = boxed.GetType().GetProperty(then.GetString());
+        return new Dictionary<string, object> { ["returns"] = result, ["then"] = tp.GetValue(boxed) };
+    }
+    return result;
 }
 
 static bool Fits(ParameterInfo[] ps, object[] args)
@@ -110,16 +174,24 @@ static bool Fits(ParameterInfo[] ps, object[] args)
         if (a is double && (pt == typeof(double) || pt == typeof(int))) continue;
         if (a is bool && pt == typeof(bool)) continue;
         if (a != null && pt == a.GetType()) continue;
+        if (a != null && !pt.IsByRef && pt.IsAssignableFrom(a.GetType())) continue;   // Point3d[] -> IEnumerable<Point3d>, NurbsCurve -> Curve
         return false;
     }
     return true;
 }
+
+static bool FitsIn(ParameterInfo[] ps, object[] args)
+    => Fits(ps.Where(p => !p.IsOut).ToArray(), args);
 
 static object[] Coerce(ParameterInfo[] ps, object[] args)
     => args.Select((a, i) => ps[i].ParameterType == typeof(int) && a is double d ? (object)(int)d : a).ToArray();
 
 object MakeSelf(Type type, JsonElement s)
 {
+    if (s.ValueKind == JsonValueKind.String)
+        return Decode(Program.recipes.GetProperty(s.GetString()));
+    if (s.ValueKind == JsonValueKind.Object && !s.TryGetProperty("static", out _))
+        return Decode(s);
     if (s.ValueKind == JsonValueKind.Object && s.TryGetProperty("static", out var st))
         return StaticValue(type.Name + "." + st.GetString());
     var vals = s.EnumerateArray().Select(Decode).Select(v => (object)Convert.ToDouble(v)).ToArray();
@@ -149,14 +221,54 @@ object Decode(JsonElement e)
             return e.GetString() switch
             {
                 "NaN" => double.NaN, "Inf" => double.PositiveInfinity, "-Inf" => double.NegativeInfinity,
-                var x => throw new Exception("string value " + x),
+                var x => x,
             };
         case JsonValueKind.Object:
+            if (e.TryGetProperty("new", out var nw))
+            {
+                var t = T(nw.GetString());
+                var a = e.GetProperty("args").EnumerateArray().Select(Decode).ToArray();
+                var k = t.GetConstructors().First(c => Fits(c.GetParameters(), a));
+                return k.Invoke(Coerce(k.GetParameters(), a));
+            }
+            if (e.TryGetProperty("call", out var call))
+            {
+                var a = e.GetProperty("args").EnumerateArray().Select(Decode).ToArray();
+                if (e.TryGetProperty("on", out var on))
+                {
+                    var target = Decode(on);
+                    var m = target.GetType().GetMethods().First(mi => mi.Name == call.GetString() && Fits(mi.GetParameters(), a));
+                    return m.Invoke(target, Coerce(m.GetParameters(), a));
+                }
+                var dot = call.GetString().LastIndexOf('.');
+                var st = T(call.GetString()[..dot]);
+                var sm = st.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .First(mi => mi.Name == call.GetString()[(dot + 1)..] && Fits(mi.GetParameters(), a));
+                return sm.Invoke(null, Coerce(sm.GetParameters(), a));
+            }
             var prop = e.EnumerateObject().Single();
             if (prop.Name == "static") return StaticValue(prop.Value.GetString());
-            var v = prop.Value.EnumerateArray().Select(x => (object)(double)Decode(x)).ToArray();
-            return T(prop.Name).GetConstructors().First(k => k.GetParameters().Length == v.Length
-                && k.GetParameters().All(p => p.ParameterType == typeof(double))).Invoke(v);
+            if (prop.Name == "enum")
+            {
+                var parts = prop.Value.GetString().Split('.');
+                return Enum.Parse(T(parts[0]), parts[1]);
+            }
+            if (prop.Name == "Color")
+            {
+                var cc = prop.Value.EnumerateArray().Select(x => x.GetInt32()).ToArray();
+                return System.Drawing.Color.FromArgb(cc[3], cc[0], cc[1], cc[2]);
+            }
+            if (prop.Name == "Point3dList")
+                return prop.Value.EnumerateArray()
+                    .Select(p => new Point3d(p[0].GetDouble(), p[1].GetDouble(), p[2].GetDouble())).ToArray();
+            var raw = prop.Value.EnumerateArray().Select(Decode).ToArray();
+            if (raw.All(x => x is double))
+                return T(prop.Name).GetConstructors().First(k => k.GetParameters().Length == raw.Length
+                    && k.GetParameters().All(p => p.ParameterType == typeof(double))).Invoke(raw);
+            // nested values ({"Line": [{"Point3d": ..}, {"Point3d": ..}]}): the
+            // constructor whose parameter types fit the decoded arguments
+            var vk = T(prop.Name).GetConstructors().First(k => Fits(k.GetParameters(), raw));
+            return vk.Invoke(Coerce(vk.GetParameters(), raw));
     }
     throw new Exception("value " + e);
 }
@@ -170,9 +282,25 @@ static string Encode(object v) => v switch
     bool b => b ? "true" : "false",
     double d => Num(d),
     int i => i.ToString(),
+    System.Drawing.Color col => $"{{\"Color\": [{col.R}, {col.G}, {col.B}, {col.A}]}}",
+    string str => System.Text.Json.JsonSerializer.Serialize(str),
     Point3d p => $"{{\"Point3d\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
     Vector3d p => $"{{\"Vector3d\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
     Interval p => $"{{\"Interval\": [{Num(p.T0)}, {Num(p.T1)}]}}",
+    Point2d p => $"{{\"Point2d\": [{Num(p.X)}, {Num(p.Y)}]}}",
+    Line l => $"{{\"Line\": [{Num(l.FromX)}, {Num(l.FromY)}, {Num(l.FromZ)}, {Num(l.ToX)}, {Num(l.ToY)}, {Num(l.ToZ)}]}}",
+    BoundingBox b => $"{{\"BoundingBox\": [{Num(b.Min.X)}, {Num(b.Min.Y)}, {Num(b.Min.Z)}, {Num(b.Max.X)}, {Num(b.Max.Y)}, {Num(b.Max.Z)}]}}",
     Dictionary<string, object> m => "{" + string.Join(", ", m.Select(kv => $"\"{kv.Key}\": {Encode(kv.Value)}")) + "}",
+    Plane p => $"{{\"Plane\": [{Num(p.OriginX)}, {Num(p.OriginY)}, {Num(p.OriginZ)}, {Num(p.XAxis.X)}, {Num(p.XAxis.Y)}, {Num(p.XAxis.Z)}, {Num(p.YAxis.X)}, {Num(p.YAxis.Y)}, {Num(p.YAxis.Z)}]}}",
+    Transform x => "{\"Transform\": [" + string.Join(", ", Enumerable.Range(0, 16).Select(i => Num(x[i / 4, i % 4]))) + "]}",
+    Enum en => $"{{\"enum\": \"{en}\"}}",
+    double[] arr => "[" + string.Join(", ", arr.Select(Num)) + "]",
+    System.Collections.IList list => "[" + string.Join(", ", list.Cast<object>().Select(Encode)) + "]",
+    Rhino.Runtime.CommonObject co => $"{{\"class\": \"{co.GetType().Name}\"}}",
     _ => throw new Exception("cannot encode " + v.GetType()),
 };
+
+partial class Program
+{
+    internal static JsonElement recipes;
+}

@@ -13,15 +13,25 @@ const fs = require('fs');
 const path = require('path');
 
 const UNSET = -1.23432101234321e+308;
-const FIELDS = { Point3d: ['X', 'Y', 'Z'], Vector3d: ['X', 'Y', 'Z'], Interval: ['T0', 'T1'] };
+const FIELDS = { Point3d: ['X', 'Y', 'Z'], Vector3d: ['X', 'Y', 'Z'], Interval: ['T0', 'T1'], Point2d: ['X', 'Y'],
+                 Line: ['From', 'To'], Plane: ['Origin', 'XAxis', 'YAxis'] };
+const VALUE_TYPES = new Set(['Point2d', 'Point3d', 'Vector3d', 'Interval', 'Line', 'BoundingBox', 'Plane', 'Circle', 'Arc', 'Sphere', 'Transform']);
 const OPS = { '+': 'op_Addition', '-': 'op_Subtraction', '*': 'op_Multiply', '/': 'op_Division',
               '==': 'op_Equality', '!=': 'op_Inequality', '<': 'op_LessThan', '>': 'op_GreaterThan',
               '<=': 'op_LessThanOrEqual', '>=': 'op_GreaterThanOrEqual' };
 
+const SPECIAL = { NaN: NaN, Inf: Infinity, '-Inf': -Infinity };
+
 function decode(rhino, v) {
-  if (typeof v === 'string') return { NaN: NaN, Inf: Infinity, '-Inf': -Infinity }[v];
+  if (typeof v === 'string') return v in SPECIAL ? SPECIAL[v] : v;
+  if (v !== null && typeof v === 'object' && 'new' in v) {
+    // {"new": T, "args": [...]}: a value type through its RhinoCommon constructor
+    return rhino[v.new + 'X'].Create(...v.args.map(a => decode(rhino, a)));
+  }
   if (v !== null && typeof v === 'object') {
     const [[k, x]] = Object.entries(v);
+    if (k === 'enum') { const [tn, vn] = x.split('.'); return rhino[tn][vn]; }
+    if (k === 'Color') return { r: x[0], g: x[1], b: x[2], a: x[3] };
     if (k === 'static') {
       const [tn, mn] = x.split('.');
       if (tn === 'RhinoMath' && mn === 'UnsetValue') return UNSET;
@@ -29,14 +39,54 @@ function decode(rhino, v) {
     }
     const o = {};
     FIELDS[k].forEach((f, i) => { o[f] = decode(rhino, x[i]); });
+    if (k === 'Plane') {        // RhinoCommon's Plane(origin, x, y): z = x cross y (cases use orthonormal axes)
+      const a = o.XAxis, b = o.YAxis;
+      o.ZAxis = { X: a.Y * b.Z - a.Z * b.Y, Y: a.Z * b.X - a.X * b.Z, Z: a.X * b.Y - a.Y * b.X };
+    }
     return o;
   }
   return v;
 }
 
-function encodeLike(want, got) {
+const ENUMS = ['Continuity', 'IsoStatus', 'TransformSimilarityType', 'TransformRigidType', 'CoordinateSystem'];
+
+function encodeLike(want, got, rhino) {
   // JS objects carry no type tag: shape the result like the golden
   if (got === null || got === undefined) return null;
+  if (Array.isArray(want)) {
+    const g = Array.isArray(got) ? got : [got];
+    return g.map((x, i) => encodeLike(want[i], x, rhino));
+  }
+  if (want && typeof want === 'object' && 'class' in want) {
+    const n = got && got.$$ && got.$$.ptrType && got.$$.ptrType.registeredClass.name;
+    return { class: n ? n.replace(/X$/, '') : String(got) };
+  }
+  if (want && typeof want === 'object' && 'enum' in want) {
+    for (const en of ENUMS) for (const [k, v] of Object.entries(rhino[en] || {}))
+      if (v === got) return { enum: k };
+    // any other registered enum (generated RH3DM_ enums included)
+    for (const en of Object.keys(rhino)) {
+      const e = rhino[en];
+      if (e && typeof e === 'function' && e.values) for (const [k, v] of Object.entries(e))
+        if (v === got) return { enum: k };
+    }
+    return { enum: String(got) };
+  }
+  if (want && typeof want === 'object' && 'Plane' in want)
+    return got.Origin   // generated PlaneX value object vs old JS SimplePlane
+      ? { Plane: [got.Origin.X, got.Origin.Y, got.Origin.Z, got.XAxis.X, got.XAxis.Y, got.XAxis.Z, got.YAxis.X, got.YAxis.Y, got.YAxis.Z] }
+      : { Plane: [...got.origin, ...got.xAxis, ...got.yAxis] };
+  if (want && typeof want === 'object' && 'Color' in want)
+    return { Color: [got.r, got.g, got.b, got.a] };
+  if (want && typeof want === 'object' && 'Line' in want)
+    return { Line: [got.From.X, got.From.Y, got.From.Z, got.To.X, got.To.Y, got.To.Z] };
+  if (want && typeof want === 'object' && 'BoundingBox' in want)
+    return { BoundingBox: [got.Min.X, got.Min.Y, got.Min.Z, got.Max.X, got.Max.Y, got.Max.Z] };
+  if (want && typeof want === 'object' && 'Transform' in want)
+    return { Transform: Array.from({ length: 16 }, (_, i) => {
+      const k = Math.floor(i / 4) + '' + (i % 4);
+      return 'M' + k in got ? got['M' + k] : got['m' + k];     // generated value object / old class
+    }) };
   if (typeof got === 'number')
     return Number.isNaN(got) ? 'NaN' : got === Infinity ? 'Inf' : got === -Infinity ? '-Inf' : got;
   if (typeof got === 'boolean') return got;
@@ -44,7 +94,7 @@ function encodeLike(want, got) {
     const [k] = Object.keys(want);
     if (FIELDS[k]) return { [k]: FIELDS[k].map(f => encodeLike(null, got[f])) };
     const out = {};
-    for (const key of Object.keys(want)) out[key] = encodeLike(want[key], got[key]);
+    for (const key of Object.keys(want)) out[key] = encodeLike(want[key], got[key], rhino);
     return out;
   }
   return got;
@@ -58,13 +108,83 @@ function same(a, b) {
   return false;
 }
 
-function evaluate(rhino, c) {
+const ALIAS = { ViewportInfoX: 'ViewportX' };
+const camel = s => s[0].toLowerCase() + s.slice(1);
+
+// class cases: the object is the oracle's serialized FIXTURE, decoded with the
+// old JS API and wrapped into the generated class (bridge-free classes are
+// default-constructed, matching the oracle's default object)
+function fixtureObject(rhino, c, fixtures) {
+  const name = ALIAS[c.type + 'X'] || (c.type + 'X');
+  const Gen = rhino[name];
+  if (!Gen) throw new Error('missing class ' + name);
+  const fx = fixtures[c.self];
+  let hand;
+  if (fx.Transform) {
+    hand = new rhino.Transform(1.0);
+    fx.Transform.forEach((m, i) => { hand['m' + Math.floor(i / 4) + (i % 4)] = m; });
+  } else {
+    hand = rhino.CommonObject.decode(fx);
+  }
+  try { return new Gen(hand); } catch (e) { return new Gen(); }
+}
+
+function evaluateClass(rhino, c, fixtures) {
+  if (c.self === undefined) {
+    // a static member (Intersection.LineLine): call it on the class
+    const cls = rhino[(ALIAS[c.type + 'X'] || (c.type + 'X'))];
+    const fn = cls && cls[camel(c.member)];
+    if (!fn) throw new Error('missing ' + c.member);
+    return fn(...(c.args || []).map(x => decode(rhino, x)));
+  }
+  if (c.via) {
+    const parent = fixtureObject(rhino, c, fixtures);
+    const view = parent[camel(c.via)];
+    if (view === undefined) throw new Error('missing ' + c.via);
+    if (c.index !== undefined) return view.get(c.index);
+    const mem = view[camel(c.member)];
+    if (mem === undefined) throw new Error('missing ' + c.via + '.' + c.member);
+    return typeof mem === 'function' ? mem.apply(view, (c.args || []).map(x => decode(rhino, x))) : mem;
+  }
+  if (VALUE_TYPES.has(c.type)) {
+    // a value type from a fixture (Transform: 16 numbers -> {M00..M33})
+    const fx = fixtures[c.self];
+    const self = Object.fromEntries(fx.Transform.map((m, i) => ['M' + Math.floor(i / 4) + (i % 4), m]));
+    return evaluate(rhino, Object.assign({}, c, { self: undefined }), self);
+  }
+  const obj = fixtureObject(rhino, c, fixtures);
+  const name = camel(c.member);
+  const member = obj[name];
+  if (member === undefined) throw new Error('missing ' + name);
+  if ('set' in c) {
+    obj[name] = decode(rhino, c.set);
+    if (obj[name] === member && typeof member !== 'object') throw new Error('missing setter ' + name);
+    const t = obj[camel(c.then)];
+    return { then: typeof t === 'function' ? t.call(obj) : t };
+  }
+  let ret;
+  if (typeof member === 'function') {
+    try { ret = member.apply(obj, (c.args || []).map(x => decode(rhino, x))); }
+    catch (e) { if (/argument|parameter|expected|function/i.test(String(e))) throw new Error('missing overload ' + name + ': ' + String(e).slice(0, 60)); throw e; }
+  } else {
+    ret = member;
+  }
+  if (c.then) {
+    const t = obj[camel(c.then)];
+    return { returns: ret, then: typeof t === 'function' ? t.call(obj) : t };
+  }
+  return ret;
+}
+
+function evaluate(rhino, c, prebuilt) {
   const NS = rhino[c.type + 'X'];
-  let self = null;
+  let self = prebuilt || null;
   if (c.self !== undefined)
     self = Array.isArray(c.self)
       ? Object.fromEntries(FIELDS[c.type].map((f, i) => [f, decode(rhino, c.self[i])]))
-      : NS[c.self.static]();
+      : c.self.new
+        ? rhino[c.self.new + 'X'].Create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
+        : NS[c.self.static]();
   if (c.op) {
     const a = c.args.map(x => decode(rhino, x));
     const name = a.length === 1 ? 'op_UnaryNegation' : OPS[c.op];
@@ -77,9 +197,9 @@ function evaluate(rhino, c) {
     throw new Error('missing operator ' + name);
   }
   if (c.index !== undefined) throw new Error('missing indexer');
-  const fields = FIELDS[c.type];
   if (!('args' in c)) {
-    if (self && fields.includes(c.member)) return self[c.member];
+    // field-backed properties are plain fields of the value object
+    if (self && typeof self === 'object' && c.member in self) return self[c.member];
     const fn = NS[c.member];
     if (!fn) throw new Error('missing ' + c.member);
     return self ? fn(self) : fn();
@@ -98,15 +218,19 @@ async function main() {
   const factory = require(path.resolve(process.argv[2]));
   const rhino = await factory();
   const here = __dirname;
-  let pass = 0, fail = 0, skipped = 0, missing = [];
+  let pass = 0, fail = 0, skipped = 0, missing = [], pending = [];
   for (const f of fs.readdirSync(path.join(here, 'cases')).sort()) {
-    const cases = JSON.parse(fs.readFileSync(path.join(here, 'cases', f))).cases;
+    const doc = JSON.parse(fs.readFileSync(path.join(here, 'cases', f)));
+    const cases = doc.cases;
     const golden = JSON.parse(fs.readFileSync(path.join(here, 'golden', f)));
+    const fixtures = golden.__fixtures__ || {};
     for (const c of cases) {
+      if (!(c.id in golden)) { pending.push(c.id); continue; }   // the oracle has not run it yet
       const want = golden[c.id];
       if (want && want.throws) { skipped++; continue; }
+      if (c.construct) { skipped++; continue; }     // construction tests the old API: python only
       let got;
-      try { got = encodeLike(want, evaluate(rhino, c)); }
+      try { got = encodeLike(want, doc.recipes ? evaluateClass(rhino, c, fixtures) : evaluate(rhino, c), rhino); }
       catch (e) {
         if (/^Error: missing/.test(String(e))) { missing.push(c.id + ' (' + String(e).slice(7) + ')'); continue; }
         got = { error: String(e) };
@@ -117,8 +241,9 @@ async function main() {
       else { fail++; console.log('  GENERATED MISMATCH', c.id, JSON.stringify(want), JSON.stringify(got)); }
     }
   }
-  console.log(`parity vs .NET (js): generated ${pass}/${pass + fail} match, ${skipped} throw-cases skipped, ${missing.length} not reachable in JS`);
+  console.log(`parity vs .NET (js): generated ${pass}/${pass + fail} match, ${skipped} skipped (throw / construction cases), ${missing.length} not reachable in JS`);
   for (const m of missing) console.log('  not reachable:', m);
+  if (pending.length) console.log('  pending (no golden yet; run the oracle):', pending.join(', '));
   process.exit(fail ? 1 : 0);
 }
 

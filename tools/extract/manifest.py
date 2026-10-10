@@ -178,6 +178,12 @@ def load_members(path):
         members = json.load(handle)
     for m in members:
         m.pop('Line', None)
+        for k in ('Setter', 'Inlined', 'Bases', 'Compare', 'ResultConv', 'FillPtr', 'FillFail'):   # present only where they apply
+            if m.get(k) is None:
+                m.pop(k, None)
+        for k in ('Inlined', 'Compare', 'ResultConv', 'FillPtr', 'FillFail'):
+            if m.get('Setter') and m['Setter'].get(k) is None:
+                m['Setter'].pop(k, None)
     return members
 
 

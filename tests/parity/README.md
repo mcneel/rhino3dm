@@ -12,10 +12,22 @@ One set of cases, one oracle, one runner per language.
 | `known_old_divergences.json` | Temporary: each case where the old bindings compute something different from .NET, with the reason. Missing members are counted, not listed. Delete with the old bindings. |
 
 ```sh
-dotnet run --project tests/parity/oracle                      # regenerate goldens
+bash tests/parity/oracle/run_linux.sh  # regenerate goldens (see the script: docker, fresh native build)
 RH3DM_MODULE_DIR=<dir with _rhino3dm*.so> pytest tests/parity  # python
 node tests/parity/parity_js.js <path/to/rhino3dm.js>           # js
 ```
+
+**Exactness needs no fused multiply-add.** Compilers may fuse `a*b + c` into
+one FMA instruction (gcc does at -O2 on arm64), which changes the last bit.
+Goldens and every binding build under test compile with `-ffp-contract=off`;
+then results are IEEE-exact across compilers, optimization levels and CPUs
+(measured: Linux/gcc and macOS/clang goldens are bitwise identical). A
+last-bit mismatch in a native-backed case means a build without it.
+
+**Fixtures.** Class cases evaluate members on objects the oracle built once
+and serialized (`__fixtures__` in the golden, an opennurbs archive), so a
+binding's member is compared on the identical object. `construct: true` cases
+instead build the object with each binding's own API, testing construction.
 
 When to regenerate goldens: when `api/manifest.json`'s `BodyHash` changes for
 a member a case exercises (upstream changed its logic). The golden diff is

@@ -44,7 +44,7 @@ def main():
 
     surface = []
     for m in manifest['members']:
-        if m['Variant'] not in ('portable', 'rhino3dm-only'):
+        if m['Variant'] not in ('portable', 'rhino3dm-only') or m['Kind'] == 'type':
             continue
         rec = {
             'type': m['Type'],
