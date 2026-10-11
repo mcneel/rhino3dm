@@ -14,6 +14,8 @@ def emit(p):
     st = 'static ' if p['static'] else ''
     L = []
     guard_lines = [
+        ('    if (%s) return%s;' % (g['cond_cpp'], ' ' + g['ret_cpp'] if g['ret_cpp'] else ''))
+        if g.get('Exception') is None else
         '    if (%s) throw %s("%s");'
         % (g['cond_cpp'], EXMAP[g['Exception']],
            (g['Message'] or m['Name']).replace('"', "'"))
@@ -24,6 +26,17 @@ def emit(p):
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    %s%s;' % ('' if ret == 'void' else 'return ', call))
+    elif shape[0] == 'failthrow':
+        # `if (!CALL) throw new E(msg);` / `if (!CALL) { if (COND) throw new E(); }`
+        ft = shape[1]
+        L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        throw = 'throw %s("%s");' % (EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'"))
+        if ft.get('Cond'):
+            L.append('    if (!(%s)) { if (%s) %s }' % (call, ft['cond_cpp'], throw))
+        else:
+            L.append('    if (!(%s)) %s' % (call, throw))
     elif shape[0] == 'fromout':
         cs, out = shape[1], shape[2]
         L.append('  %s%s %s(%s)%s {' % (st, CS_RET_CPP[cs], name, sig, cq))
@@ -35,6 +48,15 @@ def emit(p):
             fb_cpp = (CS_RET_EXPR[cs].format(n=out) if fb == out
                       else local_value(fb)[0])
             L.append('    return %s;' % fb_cpp)
+        elif p.get('failthrow'):
+            # `if (!F(..., ref rc)) { if (COND) throw ...; } return rc;`
+            ft = p['failthrow']
+            throw = 'throw %s("%s");' % (EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'"))
+            if ft.get('Cond'):
+                L.append('    if (!(%s)) { if (%s) %s }' % (call, ft['cond_cpp'], throw))
+            else:
+                L.append('    if (!(%s)) %s' % (call, throw))
+            L.append('    return %s;' % CS_RET_EXPR[cs].format(n=out))
         else:
             L.append('    %s;' % call)
             L.append('    return %s;' % CS_RET_EXPR[cs].format(n=out))
@@ -72,6 +94,14 @@ def emit(p):
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    return (%s)%s;' % (cpp, call))
+    elif shape[0] == 'proxywrap':
+        # a File3dm proxy of the component the native call found (by id)
+        target, idl = shape[1], shape[2]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    const void* rc = %s;' % call)
+        L.append('    return rc ? new %s(m_ptr, %s) : nullptr;' % (target['gen'], idl))
     elif shape[0] == 'wrap':
         target = BY_CS[shape[1]]
         L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
@@ -162,8 +192,13 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         return ('class {gen}\n{{\npublic:\n  {gen}() = delete;\n\n{methods}\n}};\n').format(
             gen=cls['gen'], methods=methods)
     if cls['mode'] == 'abstract':
+        # two getters, as RhinoCommon has two accessors: ConstPointer and
+        # NonConstPointer (they differ for a File3dm proxy)
         storage = '''  virtual ~{gen}() = default;
-  virtual {on}* {getter}() const = 0;'''
+  virtual {on}* {getter}() const = 0;
+  virtual {on}* {getter}NC() const = 0;''' + ('''
+  // CommonObject.IsDocumentControlled (`IntPtr.Zero == m_ptr`): the derived storage answers
+  virtual bool RH3DM_NoOwnedPtr() const = 0;''' if cls['reg'] in NO_OWNED_ABSTRACT else '')
         return ('class {gen}\n{{\npublic:\n' + storage
                 + '\n\n{methods}\n}};\n').format(
             gen=cls['gen'], on=cls['on'], getter=cls['getter'],
@@ -179,13 +214,47 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
             gen=cls['gen'], on=cls['on'], hand=cls['hand'],
             basegen=base['gen'], methods=methods, inherit=inherit,
             dctor=dctor, bridge=bridge)
-    override = ('\n  %s* %s() const override { return m_ptr; }'
-                % (base['on'], base['getter'])) if base else ''
+    acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') else ('m_ptr', 'm_ptr')
+    override = ('\n  %s* %s() const override { return %s; }\n  %s* %sNC() const override { return %s; }'
+                % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
+    if base and base['reg'] in NO_OWNED_ABSTRACT:
+        override += '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }'
     if cls['mode'] == 'child':
         # a VIEW onto the parent's object (Mesh.Vertices): borrows the
         # parent's pointer, never deletes it; the binding keeps the parent alive
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* parent) : m_ptr(parent) {{}}'''
+        tp = cls.get('table')
+        if tp:
+            # the table protocols (planner.table_protocol): `this[int]` with
+            # the language's own out-of-range signal, and RhinoCommon's foreach
+            methods += '''
+  // table protocols: `this[int]` (FindIndex; Python raises for a hole) and foreach
+  class {item}* Gen_getitem(int index) const {{
+    class {item}* p = {find}(index);
+    if (!p) throw std::out_of_range("index");
+    return p;
+  }}
+  class {gen}Iter* Gen_iter() const;'''.format(item=tp['item']['gen'], find=tp['find'], gen=cls['gen'])
+    elif cls['mode'] == 'pointer' and cls.get('proxy'):
+        # RhinoCommon's two CommonObject states: an owned pointer, or a File3dm
+        # PROXY (`new Layer(id, file)`, what the file's tables hand out) that
+        # owns nothing and resolves the component by id on every access
+        storage = '''  {on}* m_ptr = nullptr;
+  ONX_Model* m_model = nullptr;   // a File3dm proxy: the model ...
+  ON_UUID m_id = ON_nil_uuid;     // ... and the component's id
+  explicit {gen}({on}* owned) : m_ptr(owned) {{}}
+  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{bridge}{dctor}
+  ~{gen}() {{ delete {delete_expr}; }}{nocopy}
+  // CommonObject.ConstPointer: a proxy whose component left the model throws
+  {on}* RH3DM_Const() const {{
+    if (m_ptr) return m_ptr;
+    {on}* p = ({on}*){resolver}(m_model, m_id);
+    if (!p) throw std::runtime_error("{cs_full}: the component is no longer in the File3dm");
+    return p;
+  }}
+  // NonConstPointer, File3dm branch: the same component (edits go into the model)
+  {on}* RH3DM_NonConst() const {{ return m_ptr ? m_ptr : ({on}*){resolver}(m_model, m_id); }}{override}'''
     elif cls['mode'] == 'pointer':
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
@@ -196,9 +265,52 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
             + '\n\n{methods}\n}};\n').format(
         gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
         inherit=inherit, override=override, dctor=dctor, bridge=bridge,
+        resolver=(cls.get('proxy') or {}).get('Resolver'), cs_full=cls['type'],
         # ON_Annotation's destructor is protected: delete through ON_Object (public, virtual)
         delete_expr='static_cast<ON_Object*>(m_ptr)' if cls.get('delete_as_object') else 'm_ptr',
         nocopy='' if self_copy else '\n  %s(const %s&) = delete;' % (cls['gen'], cls['gen']))
+
+
+def emit_table_iter(cls):
+    """the iterator class of a table (declaration, definition): RhinoCommon's
+    File3dmManifestTable.GetEnumerator(type), one proxy per live component"""
+    tp = cls['table']
+    gen, item = cls['gen'], tp['item']['gen']
+    decl = '''
+// %s's enumerator: ONX_ModelComponentIterator over the live components of one
+// type (RhinoCommon File3dmManifestTable.GetEnumerator), yielding File3dm proxies
+class %sIter
+{
+public:
+  ONX_Model* m_model = nullptr;
+  ONX_ModelComponentIterator* m_it = nullptr;
+  explicit %sIter(ONX_Model* model);
+  ~%sIter() { ONX_ModelComponentIterator_Delete(m_it); }
+  %sIter(const %sIter&) = delete;
+  class %s* Gen_next();   // nullptr at the end
+};
+''' % (cls['reg'], gen, gen, gen, gen, gen, item)
+    defn = '''
+%sIter::%sIter(ONX_Model* model)
+  : m_model(model), m_it(ONX_ModelComponentIterator_New(model, (ON_ModelComponent::Type)%s)) {}
+
+class %s* %sIter::Gen_next()
+{
+  int index = 0;
+  ON_ModelComponent::Type outType = (ON_ModelComponent::Type)0;
+  ON_UUID id = ON_nil_uuid;
+  ON_ModelComponent* p = ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id);
+  if (!p) return nullptr;
+  if (outType != (ON_ModelComponent::Type)%s) throw std::out_of_range("type");
+  return new %s(m_model, id);
+}
+
+%sIter* %s::Gen_iter() const
+{
+  return new %sIter(m_ptr);
+}
+''' % (gen, gen, tp['type_value'], item, gen, tp['type_value'], item, gen, gen, gen)
+    return decl, defn
 
 
 def js_class_shape(t):
@@ -209,7 +321,7 @@ def js_class_shape(t):
         return 'number', '{v}.isNumber()', '{v}.as<%s>()' % t
     if t == 'bool':
         return 'boolean', '({v}.typeOf().as<std::string>() == "boolean")', '{v}.as<bool>()'
-    enum_js = {v['cpp']: k for k, v in CS_ENUMS.items()}
+    enum_js = {v['cpp']: v.get('js', k) for k, v in CS_ENUMS.items()}
     if t in enum_js:
         return ('enum:' + enum_js[t],
                 '{v}.instanceof(emscripten::val::module_property("%s"))' % enum_js[t],
@@ -282,6 +394,9 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 py.append('      .def_property_readonly("%s", &%s::%s)' % (n, cls['gen'], g))
                 js.append('      .property("%s", &%s::%s)' % (camel(n), cls['gen'], g))
             continue
+        elif p['shape'][0] == 'proxywrap':
+            # a proxy refers to this table's model: it keeps the table (and the File3dm) alive
+            py.append('      .def("%s", &%s::%s, py::keep_alive<0, 1>()%s)' % (n, cls['gen'], g, pyargs))
         else:
             py.append('      .def("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
         js_methods.setdefault((camel(n), len(p['bind_args']), p['static']), []).append(p)
@@ -297,7 +412,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         ps = list(by_shape.values())
         if len(ps) == 1:
             p = ps[0]
-            rawp = (', allow_raw_pointers()' if p['shape'][0] in ('wrap', 'fill')
+            rawp = (', allow_raw_pointers()' if p['shape'][0] in ('wrap', 'fill', 'proxywrap')
                     or any(t.endswith('*') for t, _ in p['bind_args']) else '')
             js.append('      .%s("%s", &%s::%s%s)'
                       % ('class_function' if static else 'function', jn, cls['gen'], p['cpp'], rawp))
@@ -322,7 +437,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             if common is not None:
                 branches.append('if (%s) %s%s;' % (cond, '' if common == 'void' else 'return ', call)
                                 + (' return;' if common == 'void' else ''))
-            elif p['shape'][0] == 'direct' and p['shape'][1] == 'void':
+            elif (p['shape'][0] == 'direct' and p['shape'][1] == 'void') or p['shape'][0] == 'failthrow':
                 branches.append('if (%s) { %s; return emscripten::val::undefined(); }' % (cond, call))
             else:
                 branches.append('if (%s) return emscripten::val(%s);' % (cond, call))
@@ -382,6 +497,14 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                      ' allow_raw_pointers())\n'
                      % (', '.join('emscripten::val v%d' % i for i in range(arity)), cls['gen'],
                         '\n        '.join(branches), cls['reg']))
+    tp = cls.get('table')
+    if tp:
+        g = cls['gen']
+        py += ['      .def("__len__", &%s::%s)' % (g, tp['count']),
+               '      .def("__getitem__", &%s::Gen_getitem, py::keep_alive<0, 1>(), py::arg("index"))' % g,
+               '      .def("__iter__", &%s::Gen_iter, py::keep_alive<0, 1>())' % g]
+        js += ['      .function("get", &%s::%s, allow_raw_pointers())' % (g, tp['find']),
+               '      .function("iterator", &%s::Gen_iter, allow_raw_pointers())' % g]
     has_bridge = cls.get('bridge', True)
     if not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static'):
         raise SystemExit('%s: bridge-free class needs a generated constructor'
@@ -409,4 +532,24 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 '{defs};').format(js_base=js_base, reg=cls['reg'],
                                   hand=cls['hand'], js_dctor=js_dctor, js_bridge=js_bridge,
                                   defs='\n'.join(js))
+    if tp:
+        # the iterator: Python's __next__ signals the end with StopIteration, JS
+        # with {done: true}; items keep the iterator alive (keep_alive), which
+        # keeps the table, which keeps the File3dm
+        it = cls['gen'] + 'Iter'
+        py_block += ('\n  py::class_<{it}>(m, "{reg}Iter")\n'
+                     '      .def("__iter__", [](py::object self) {{ return self; }})\n'
+                     '      .def("__next__", []({it}& it) {{\n'
+                     '        class {item}* p = it.Gen_next();\n'
+                     '        if (!p) throw py::stop_iteration();\n'
+                     '        return p;\n'
+                     '      }}, py::keep_alive<0, 1>());').format(it=it, reg=cls['reg'], item=tp['item']['gen'])
+        js_block += ('\n  class_<{it}>("{reg}Iter")\n'
+                     '      .function("next", optional_override([]({it}& it) -> emscripten::val {{\n'
+                     '        emscripten::val r = emscripten::val::object();\n'
+                     '        class {item}* p = it.Gen_next();\n'
+                     '        r.set("done", p == nullptr);\n'
+                     '        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));\n'
+                     '        return r;\n'
+                     '      }}), allow_raw_pointers());').format(it=it, reg=cls['reg'], item=tp['item']['gen'])
     return py_block, js_block

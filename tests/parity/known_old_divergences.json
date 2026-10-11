@@ -5,5 +5,6 @@
   "viewport.getfrustum": "return shape: old returns a named dict and throws on failure; RhinoCommon is (success, left, right, bottom, top, near, far) (pilot-findings #5)",
   "construct.controlpointcurve": "old CreateControlPointCurve builds a uniform clamped NURBS; RhinoCommon uses the 2023 CurveThroughPolyline-style construction -- a different curve (pilot-findings #18)",
   "vector3d.unitize": "old Unitize discards opennurbs' bool and returns None (pilot-findings #19)",
-  "vector3d.unitize.zero": "same as vector3d.unitize"
+  "vector3d.unitize.zero": "same as vector3d.unitize",
+  "nurbssurface.create.invalid": "old Create skips RhinoCommon's argument check (dimension < 1, order < 2, count < order) and returns an invalid surface instead of null (pilot-findings #23)"
 }

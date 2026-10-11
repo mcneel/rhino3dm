@@ -161,3 +161,283 @@ def test_static_holder_members_are_emitted_static():
     p['cpp'] = 'Gen_M'
     decl, _ = E.emit_decl_def(p, CURVE)
     assert decl.strip().startswith('static std::wstring Gen_M(')
+
+
+def test_failure_fallback_literal_and_value_type():
+    # G28: `if (!F(ptr, ref d)) d = 0; return d;` and `if (!F(...)) rc = Point3d.Unset;`
+    # are the Success idiom; a literal fallback suits a plain C value return only
+    out_d = {'Kind': 'out', 'Text': 'd', 'Value': '0.0'}
+    p, why = P.plan(member('double', calls=[SELF, out_d],
+                           Success={'Out': 'd', 'Fallback': '0', 'Form': 'assign'}),
+                    cfn('bool', 'const ON_Curve*', 'double*'), CURVE)
+    assert why is None and p['shape'][0] == 'fromout' and p['success']['Fallback'] == '0'
+    out_rc = {'Kind': 'out', 'Text': 'rc', 'Value': None}
+    p, why = P.plan(member('Point3d', calls=[SELF, out_rc],
+                           Success={'Out': 'rc', 'Fallback': 'Interval.Unset', 'Form': 'assign'}),
+                    cfn('bool', 'const ON_Curve*', 'ON_3dPoint*'), CURVE)
+    assert p is None and why.startswith('fallback')       # a static of ANOTHER type: refuse
+
+
+def test_early_return_guards_need_a_matching_value():
+    # G28: `if (COND) return X;` -- X must be expressible in the member's own shape
+    guard = {'Cond': 'Count == 0', 'Ids': ['Count'], 'Exception': None, 'Return': 'false'}
+    p, why = P.plan(member('bool', calls=[SELF], Guards=[guard]),
+                    cfn('bool', 'const ON_Curve*'), CURVE)
+    assert why is None and p['guards'][0]['ret_cpp'] == 'false'
+    p, why = P.plan(member('int', calls=[SELF], Guards=[dict(guard, Return='false')]),
+                    cfn('int', 'const ON_Curve*'), CURVE)
+    assert p is None and why.startswith('early return')    # bool literal for an int: refuse
+    p, why = P.plan(member('void', calls=[SELF], Guards=[dict(guard, Return='')]),
+                    cfn('void', 'const ON_Curve*'), CURVE)
+    assert why is None and p['guards'][0]['ret_cpp'] == ''
+
+
+def test_early_return_on_null_class_argument_makes_it_optional():
+    # G28: `if (null == curve) return false;` -- reachable only through an optional argument
+    guard = {'Cond': 'null == curve', 'Ids': ['curve'], 'Exception': None, 'Return': 'false',
+             'NullCheckOf': 'curve'}
+    arg = {'Kind': 'paramptr', 'Text': 'curve', 'Value': None}
+    p, why = P.plan(member('bool', params=[('', 'Curve', 'curve')], calls=[SELF, arg], Guards=[guard]),
+                    cfn('bool', 'ON_Curve*', 'const ON_Curve*'), CURVE)
+    assert why is None and p['bind_args'] == [('const BND_CurveX*', 'curve')]
+    assert 'curve ?' in p['call_exprs'][1]
+    guard2 = dict(guard, Cond='null == name', Ids=['name'], NullCheckOf='name')
+    p, why = P.plan(member('bool', params=[('', 'string', 'name')],
+                           calls=[SELF, {'Kind': 'param', 'Text': 'name'}], Guards=[guard2]),
+                    cfn('bool', 'ON_Curve*', 'const RHMONO_STRING*'), CURVE)
+    assert p is None and 'non-class' in why               # a string cannot carry null: refuse
+
+
+def test_self_null_guard_tests_the_self_pointer():
+    # G28: `if (IntPtr.Zero == pConstThis) return String.Empty;` -- a model-backed
+    # proxy's pointer can be null; a value-mode member's address cannot
+    guard = {'Cond': 'IntPtr.Zero == pConstThis', 'Ids': [], 'Exception': None,
+             'Return': 'String.Empty', 'SelfNull': True}
+    holder = {'Kind': 'expr', 'Text': 'pString', 'Value': None}
+    p, why = P.plan(member('string', calls=[SELF, holder], Guards=[guard], Body='pattern',
+                           Holder='StringHolder', HolderArg=1),
+                    cfn('void', 'const ON_Curve*', 'CRhCmnStringHolder*'), CURVE)
+    assert why is None and p['guards'][0]['cond_cpp'] == '!(m_ptr)'
+    assert p['guards'][0]['ret_cpp'] == 'std::wstring()'
+
+
+def test_guard_dotted_ids_enum_constant_and_value_type_property():
+    # G28: `iso == IsoStatus.None` (valued by specgen) and `domain.Min` (a translated
+    # property); a plain sibling `Count` must not rewrite the tail of a dotted id
+    cnt = dict(member('int', calls=[SELF]), Name='Count', Kind='property', Signature='int Count',
+               Calls=[{'Name': 'G', 'Args': [SELF]}])
+    g = {'Cond': 'iso == IsoStatus.None || domain.Min > Count', 'Exception': None, 'Return': 'false',
+         'Ids': ['Count', 'IsoStatus.None', 'domain.Min', 'iso'], 'IdValues': {'IsoStatus.None': '0'}}
+    m = dict(member('bool', params=[('', 'IsoStatus', 'iso'), ('', 'Interval', 'domain')],
+                    calls=[SELF, {'Kind': 'param', 'Text': 'iso'}]),
+             Signature='bool M(IsoStatus iso, Interval domain)', Guards=[g])
+    fns = {'F': cfn('bool', 'const ON_Curve*', 'int'), 'G': dict(cfn('int', 'const ON_Curve*'), name='G')}
+    plans = P.plan_class(CURVE, {'members': [cnt, m]}, fns, {})
+    pm = [p for p in plans if p['m']['Name'] == 'M'][0]
+    assert pm['guards'][0]['cond_cpp'] == \
+        'iso == (RH3DM_IsoStatus)0 || domain.Min() > Gen_Count()'
+
+
+# ---- File3dm tables (G29): generic bases instantiated per concrete table
+LAYERS = R.BY_CS['File3dmLayerTable']
+LAYER = R.BY_CS['Layer']
+
+
+def _tables_manifest(extra=()):
+    T = 'Rhino.FileIO.'
+    recs = [
+        {'Type': T + 'CommonComponentTable', 'Kind': 'type', 'Name': 'CommonComponentTable',
+         'Bases': ['IList'], 'BaseArgs': [['T']], 'TypeParams': ['T'], 'Variant': 'portable'},
+        {'Type': T + 'File3dmCommonComponentTable', 'Kind': 'type', 'Name': 'File3dmCommonComponentTable',
+         'Bases': ['CommonComponentTable', 'ICollection'], 'BaseArgs': [['T'], ['T']], 'TypeParams': ['T'],
+         'Variant': 'portable'},
+        {'Type': T + 'File3dmLayerTable', 'Kind': 'type', 'Name': 'File3dmLayerTable',
+         'Bases': ['File3dmCommonComponentTable', 'IList'], 'BaseArgs': [['Layer'], ['Layer']], 'Variant': 'portable'},
+        {'Type': 'Rhino.DocObjects.Layer', 'Kind': 'type', 'Name': 'Layer', 'Bases': ['ModelComponent'],
+         'Variant': 'portable', 'FileProxy': {'Resolver': 'ONX_Model_GetModelComponentPointer', 'NonConst': 'resolve'}},
+        {'Type': T + 'File3dmLayerTable', 'Kind': 'property', 'Name': 'ComponentType', 'Variant': 'portable',
+         'Const': 'ModelComponentType.Layer', 'ConstValue': '5', 'Returns': 'ModelComponentType'},
+        {'Type': 'Rhino.DocObjects.ModelComponentType', 'Kind': 'enum', 'Name': 'ModelComponentType',
+         'Variant': 'portable', 'Values': ['Unset = 0', 'Material = 3', 'RenderMaterial = Material', 'Layer = 5']},
+    ]
+    return {'members': recs + list(extra)}
+
+
+@pytest.fixture
+def tables():
+    m = _tables_manifest()
+    R.index_types(m)
+    yield m
+    R.index_types({'members': []})       # leave no 'proxy' marks behind
+
+
+def test_generic_base_members_are_instantiated_per_concrete_table(tables):
+    dump = {'Type': 'Rhino.FileIO.File3dmCommonComponentTable', 'Kind': 'method', 'Name': 'Delete',
+            'Variant': 'portable', 'Returns': 'bool', 'Signature': 'bool Delete(T item)',
+            'Params': [{'Name': 'item', 'Type': 'T', 'Mode': ''}]}
+    over = dict(dump, Type=LAYERS['type'], Signature='bool Delete(Layer item)',
+                Params=[{'Name': 'item', 'Type': 'Layer', 'Mode': ''}], Body='own')
+    got = P.class_members(LAYERS, {'members': tables['members'] + [dump]})
+    inst = [x for x in got if x['Name'] == 'Delete']
+    assert len(inst) == 1 and inst[0]['Params'][0]['Type'] == 'Layer' and inst[0]['Type'] == LAYERS['type']
+    got = P.class_members(LAYERS, {'members': tables['members'] + [dump, over]})
+    assert [x.get('Body') for x in got if x['Name'] == 'Delete'] == ['own']    # the override wins
+    assert R.ENUM_VALUES['ModelComponentType'] == [0, 3, 5]                     # alias resolved
+
+
+def test_class_constant_argument_and_layer_proxy(tables):
+    assert LAYER.get('proxy') and not R.BY_CS['Curve'].get('proxy')
+    ct = {'Kind': 'expr', 'Text': 'ComponentType', 'Value': None}
+    selfm = {'Kind': 'expr', 'Text': 'pParent', 'Value': None}
+    m = dict(member('int', calls=[selfm, ct]), Type=LAYERS['type'])
+    p, why = P.plan(m, cfn('int', 'ONX_Model*', 'ON_ModelComponent::Type'), LAYERS)
+    assert why is None and p['call_exprs'][1] == '(ON_ModelComponent::Type)5 /*Layer*/'
+    nc = {'Kind': 'expr', 'Text': 'ptr', 'Value': 'NonConstPointer'}
+    p, why = P.plan(dict(member('void', calls=[nc]), Type=LAYER['type']), cfn('void', 'ON_Layer*'), LAYER)
+    assert p['call_exprs'][0] == 'RH3DM_NonConst()'
+
+
+def test_nested_native_call_and_result_cast(tables):
+    R.C_BY_NAME['G'] = {'name': 'G', 'returns': 'const ON_ComponentManifest*',
+                        'params': [{'type': 'const ONX_Model*', 'name': 'm'}]}
+    nested = {'Kind': 'nativecall', 'Text': 'GetPtr', 'Call': {'Name': 'G', 'Args': [{'Kind': 'expr', 'Text': 'p'}]}}
+    m = dict(member('int', calls=[nested], ResultCast='int'), Type=LAYERS['type'])
+    p, why = P.plan(m, cfn('unsigned int', 'const ON_ComponentManifest*'), LAYERS)
+    assert why is None and p['call_exprs'] == ['G(m_ptr)'] and p['shape'][2] == '(int)({c})'
+    p, why = P.plan(dict(m, ResultCast=None), cfn('unsigned int', 'const ON_ComponentManifest*'), LAYERS)
+    assert p is None                                   # uint -> int without the recorded cast: refuse
+
+
+def test_factory_builds_the_tables_own_proxy_or_refuses(tables):
+    fac = {'Name': 'Instantiate', 'SwitchArg': 1,
+           'Args': [{'Kind': 'expr', 'Text': 'm_parent'}, {'Kind': 'expr', 'Text': 'ComponentType'},
+                    {'Kind': 'expr', 'Text': 'id'}, {'Kind': 'param', 'Text': 'index'}],
+           'Cases': {'5': {'New': 'Layer', 'Args': ['id', 'm_parent']}, '3': None}}
+    calls = [{'Kind': 'expr', 'Text': 'file3dm_ptr'}, {'Kind': 'param', 'Text': 'index'},
+             {'Kind': 'out', 'Text': 'id', 'Value': 'default(Guid)'}]
+    m = dict(member('Layer', params=[('', 'int', 'index')], calls=calls, Factory=fac, Body='pattern'),
+             Type=LAYERS['type'])
+    fn = cfn('const ON_ModelComponent*', 'const ONX_Model*', 'int', 'ON_UUID*')
+    p, why = P.plan(m, fn, LAYERS)
+    assert why is None and p['shape'][0] == 'proxywrap' and p['locals'] == ['ON_UUID id = ON_nil_uuid;']
+    p, why = P.plan(dict(m, Returns='Material'), fn, LAYERS)
+    assert p is None and why.startswith('factory constructs')     # the case is Layer, not T
+
+
+def test_fail_throw_needs_a_void_member_over_a_bool_call():
+    ft = {'Exception': 'NotSupportedException', 'Message': 'Addition failed.'}
+    p, why = P.plan(member('void', calls=[SELF], FailThrow=ft, Body='pattern'),
+                    cfn('bool', 'ON_Curve*'), CURVE)
+    assert why is None and p['shape'][0] == 'failthrow'
+    p, why = P.plan(member('void', calls=[SELF], FailThrow=ft, Body='pattern'),
+                    cfn('int', 'ON_Curve*'), CURVE)
+    assert p is None
+
+
+def test_child_view_requires_new_T_of_this(tables):
+    base = {'Kind': 'property', 'Child': 'File3dmLayerTable', 'ChildArgs': ['this']}
+    assert P.child_view(dict(base, Returns='IList<Layer>')) is LAYERS          # an interface it implements
+    assert P.child_view(dict(base, Returns='IList<Material>')) is None
+    assert P.child_view(dict(base, Returns='File3dmLayerTable', ChildArgs=['this', 'true'])) is None
+
+
+def test_nested_enum_resolves_in_the_members_own_type():
+    # G35: `ArrowType` inside DimensionStyle is DimensionStyle.ArrowType
+    R.CS_ENUMS['DimensionStyle.ArrowType'] = {'cpp': 'RH3DM_DimensionStyle_ArrowType', 'gen': True,
+                                              'owner': 'DimensionStyle', 'js': 'DimensionStyleArrowType'}
+    try:
+        ds = {'Type': 'Rhino.DocObjects.DimensionStyle', 'Returns': 'ArrowType',
+              'Params': [{'Name': 'a', 'Type': 'ArrowType', 'Mode': ''}]}
+        assert R.cs_signature(ds) == ('DimensionStyle.ArrowType', [('', 'DimensionStyle.ArrowType', 'a')])
+        other = dict(ds, Type='Rhino.Geometry.Curve')
+        assert R.cs_signature(other)[0] == 'ArrowType'          # not nested there
+    finally:
+        del R.CS_ENUMS['DimensionStyle.ArrowType']
+
+
+def test_uint_cast_of_an_int_parameter_is_kept():
+    # G35: `(uint)count` into an unsigned int
+    m = member('void', params=[('', 'int', 'count')], calls=[SELF, {'Kind': 'expr', 'Text': '(uint)count'}])
+    p, why = P.plan(m, cfn('void', 'ON_Curve*', 'unsigned int'), CURVE)
+    assert why is None and p['call_exprs'][1] == '(unsigned int)count'
+
+
+def test_fail_throw_then_return_the_out_value():
+    # G36: `if (!F(ptr, i, ref rc)) { if (i >= Count) throw ...; } return rc;`
+    ft = {'Exception': 'IndexOutOfRangeException', 'Message': None, 'Cond': 'i < 0', 'Ids': ['i']}
+    out = {'Kind': 'out', 'Text': 'rc', 'Value': None}
+    m = member('Point3d', params=[('', 'int', 'i')], calls=[SELF, {'Kind': 'param', 'Text': 'i'}, out],
+               FailThrow=ft, Body='pattern')
+    p, why = P.plan(m, cfn('bool', 'const ON_Curve*', 'int', 'ON_3dPoint*'), CURVE)
+    assert why is None and p['shape'][0] == 'fromout' and p['failthrow']['Exception'] == ft['Exception']
+
+
+def test_guard_helper_call_becomes_its_native_call(tables):
+    # G37: `!ModelComponent.ModelComponentTypeRequiresUniqueName(ModelComponentType.Layer)`
+    R.C_BY_NAME['ON_ModelComponent_RequiresUniqueName'] = {
+        'name': 'ON_ModelComponent_RequiresUniqueName', 'returns': 'bool',
+        'params': [{'type': 'ON_ModelComponent::Type', 'name': 't'}]}
+    g = {'Calls': [{'Name': 'ModelComponent.ModelComponentTypeRequiresUniqueName',
+                    'Args': [{'Kind': 'expr', 'Text': 'ModelComponentType.Layer'}]}],
+         'Native': [{'Name': 'ON_ModelComponent_RequiresUniqueName',
+                     'Args': [{'Kind': 'const', 'Text': 'ModelComponentType.Layer', 'Value': '5'}]}]}
+    p = {}
+    cond = P.guard_calls_cpp(g, '!ModelComponent.ModelComponentTypeRequiresUniqueName(ModelComponentType.Layer)',
+                             LAYERS, set(), {}, p)
+    assert cond == '!ON_ModelComponent_RequiresUniqueName((ON_ModelComponent::Type)5)'
+    assert P.guard_calls_cpp(dict(g, Native=None), cond, LAYERS, set(), {}, {}) is None   # unresolved: refuse
+
+
+def test_enum_isdefined_folds_named_members_and_refuses_others(tables):
+    R.CS_ENUMS.setdefault('ModelComponentType', {'cpp': 'RH3DM_ModelComponentType', 'gen': True})
+    c = '!Enum.IsDefined(typeof(ModelComponentType), ModelComponentType.Layer)'
+    assert P.enum_isdefined_cpp(c, LAYERS, {}) == '!true'
+    assert P.enum_isdefined_cpp('!Enum.IsDefined(typeof(ModelComponentType), x)', LAYERS, {}) is None
+
+
+def test_inherited_guards_are_resolved_per_table():
+    # G37 review: an inherited member's guard dicts are shared by every table;
+    # each plan must resolve its own copy (the constant differs per table)
+    T = 'Rhino.FileIO.'
+    m = _tables_manifest([
+        {'Type': T + 'File3dmMaterialTable', 'Kind': 'type', 'Name': 'File3dmMaterialTable',
+         'Bases': ['File3dmCommonComponentTable'], 'BaseArgs': [['Material']], 'Variant': 'portable'},
+        {'Type': T + 'File3dmMaterialTable', 'Kind': 'property', 'Name': 'ComponentType', 'Variant': 'portable',
+         'Const': 'ModelComponentType.RenderMaterial', 'ConstValue': '3', 'Returns': 'ModelComponentType'},
+        {'Type': T + 'File3dmCommonComponentTable', 'Kind': 'method', 'Name': 'Check', 'Variant': 'portable',
+         'Body': 'pattern', 'Returns': 'int', 'Signature': 'int Check()', 'Params': [],
+         'Calls': [{'Name': 'F', 'Args': [{'Kind': 'expr', 'Text': 'p'}]}],
+         'Guards': [{'Cond': 'ModelComponentType.Unset == ComponentType', 'Exception': 'ArgumentException',
+                     'Ids': ['ComponentType', 'ModelComponentType.Unset'], 'Message': 'x',
+                     'IdValues': {'ModelComponentType.Unset': '0'}}]}])
+    R.index_types(m)
+    R.CS_ENUMS.setdefault('ModelComponentType', {'cpp': 'RH3DM_ModelComponentType', 'gen': True})
+    try:
+        fns = {'F': dict(cfn('int', 'ONX_Model*'), name='F')}
+        # plan BOTH, then read -- emission happens after every class is planned
+        planned = {cs: P.plan_class(R.BY_CS[cs], {'members': P.class_members(R.BY_CS[cs], m)}, fns, {})
+                   for cs in ('File3dmLayerTable', 'File3dmMaterialTable')}
+        conds = {cs: [p for p in plans if p['m']['Name'] == 'Check'][0]['guards'][0]['cond_cpp']
+                 for cs, plans in planned.items()}
+        assert conds['File3dmLayerTable'].endswith('(RH3DM_ModelComponentType)5')
+        assert conds['File3dmMaterialTable'].endswith('(RH3DM_ModelComponentType)3')
+    finally:
+        R.index_types({'members': []})
+
+
+def test_table_protocol_requires_rhinocommons_own_pieces(tables):
+    # G39: len/[i]/iteration are granted only when Count, a proxy FindIndex and the
+    # base's `foreach` (m_manifest.GetEnumerator<T>) are all there
+    T = 'Rhino.FileIO.'
+    enum = {'Type': T + 'CommonComponentTable', 'Kind': 'method', 'Name': 'GetEnumerator', 'Variant': 'portable',
+            'Body': 'delegates', 'Delegates': '@m_manifest.GetEnumerator<T>', 'Returns': 'IEnumerator<T>'}
+    m = {'members': tables['members'] + [enum]}
+    for fn in ('ONX_ModelComponentIterator_New', 'ONX_ModelComponentIterator_GetNext', 'ONX_ModelComponentIterator_Delete'):
+        R.C_BY_NAME[fn] = {'name': fn, 'returns': 'void', 'params': []}
+    count = {'m': {'Name': 'Count', 'Kind': 'property'}, 'bind_args': [], 'cpp': 'Gen_Count', 'shape': ('direct', 'int')}
+    find = {'m': {'Name': 'FindIndex', 'Kind': 'method'}, 'bind_args': [('int', 'index')], 'cpp': 'Gen_FindIndex',
+            'shape': ('proxywrap', LAYER, 'id')}
+    tp = P.table_protocol(LAYERS, m, [count, find])
+    assert tp and tp['item'] is LAYER and tp['type_value'] == '5' and tp['find'] == 'Gen_FindIndex'
+    assert P.table_protocol(LAYERS, m, [count]) is None                      # no FindIndex: no [i], no iteration
+    assert P.table_protocol(LAYERS, {'members': tables['members']}, [count, find]) is None   # no foreach in the spec

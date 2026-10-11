@@ -194,7 +194,8 @@ def main(argv):
     rhino_root = os.path.expanduser(args[0] if args else '~/dev/rhino')
     repo_root = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
-    out_path = os.path.join(repo_root, 'api', 'manifest.json')
+    # RH3DM_MANIFEST_OUT: write a candidate elsewhere (a build round reads api/manifest.json)
+    out_path = os.environ.get('RH3DM_MANIFEST_OUT') or os.path.join(repo_root, 'api', 'manifest.json')
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
     header, functions = build(rhino_root)
@@ -204,7 +205,7 @@ def main(argv):
     write(out_path, header, functions, members)
 
     c = header['counts']
-    print('api/manifest.json written from %s' % rhino_root)
+    print('%s written from %s' % (os.path.relpath(out_path, repo_root), rhino_root))
     print('  rhino commit : %s' % header['source']['commit'])
     print('  functions    : %(total)d  (portable %(portable)d, '
           'rhino-only %(rhino_only)d)' % c)

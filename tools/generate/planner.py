@@ -4,12 +4,33 @@ marshalling, return shape) or a refusal reason."""
 from gen_registry import *
 
 
+def self_access(cls, self_expr, accessor):
+    """the this-pointer as C# obtained it. A File3dm proxy has two:
+    ConstPointer (resolve, or throw DocumentCollectedException) and
+    NonConstPointer (resolve; may be null). Abstract bases forward to the
+    derived class's pair. Anything else: its one pointer."""
+    nonconst = accessor == 'NonConstPointer'
+    if cls.get('proxy'):
+        return 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()'
+    if cls['mode'] == 'abstract':
+        return '%s%s()' % (cls['getter'], 'NC' if nonconst else '')
+    return self_expr
+
+
 def plan(member, cfn, cls):
     if member.get('Body') not in ('trivial', 'pattern'):
         return None, 'body: %s' % (member.get('Body') or 'unknown')
+    if (member.get('Wrap') or '').startswith('@') or member.get('FactoryArgs'):
+        return None, 'unresolved factory'           # specgen could not resolve it: never guess
     for g in member.get('Guards') or []:
+        if g.get('Exception') is None:
+            continue                     # an early return: checked once the shape is known
         if g['Exception'] not in EXMAP:
             return None, 'guard exception %s' % g['Exception']
+    # `if (null == curve) return false;`: the argument is optional (None /
+    # null) so the early return is reachable, exactly as in C#
+    retnull = {g['NullCheckOf'] for g in member.get('Guards') or []
+               if g.get('Exception') is None and g.get('NullCheckOf')}
     sig_ret, sig_params = cs_signature(member)
     if sig_ret is None:
         return None, 'unparsed C# signature'
@@ -48,8 +69,9 @@ def plan(member, cfn, cls):
     else:
         self_expr = 'const_cast<%s*>(&m_val)' % cls['on']
     cs_param_modes = {n: (mode, t) for mode, t, n in sig_params}
-    nullable_params = set()
-    call_exprs, locals_, out_by_name = [], [], {}
+    # a class argument null-checked by an early return is optional (None/null)
+    nullable_params = {n for n in retnull if cs_param_modes.get(n, ('', ''))[1] in BY_CS}
+    call_exprs, locals_, out_by_name, extra_fns = [], [], {}, []
     for pos, (carg, cparam) in enumerate(zip(call['Args'], cfn['params'])):
         k, ctype = carg['Kind'], cparam['type']
         # self arrives as kind 'expr' (ptr locals) on classes and as kind
@@ -59,13 +81,32 @@ def plan(member, cfn, cls):
         # by the ordinary out machinery below.
         if (not member.get('Static') and pos == 0
                 and ctype in selfs and k in ('expr', 'out')):
-            call_exprs.append(self_expr)
+            call_exprs.append(self_access(cls, self_expr, carg.get('Value')))
             continue
         if holder and pos == holder_arg:
             if ctype != holder['ctype']:
                 return None, 'holder ctype %s vs %s' % (ctype, holder['ctype'])
             locals_.append(holder['local'].format(n='holder_out'))
             call_exprs.append('&holder_out')
+            continue
+        if k == 'nativecall':
+            # `IntPtr p = GetConstOnComponentManifestPtr();` resolved by specgen to
+            # one native call: emitted nested, its result typed as this parameter
+            inner = carg['Call']
+            ifn = C_BY_NAME.get(inner['Name'])
+            if ifn is None or ifn['returns'].replace('const ', '') != ctype.replace('const ', '') \
+                    or len(ifn['params']) != len(inner['Args']):
+                return None, 'nested call %s' % inner['Name']
+            iargs = []
+            for ipos, (ia, iq) in enumerate(zip(inner['Args'], ifn['params'])):
+                if ipos == 0 and ia['Kind'] == 'expr' and iq['type'] in selfs and not member.get('Static'):
+                    iargs.append(self_access(cls, self_expr, ia.get('Value')))
+                elif ia['Kind'] == 'literal':
+                    iargs.append('nullptr' if ia['Text'] == 'null' else ia['Text'])
+                else:
+                    return None, 'nested call arg %s' % ia['Text']
+            call_exprs.append('%s(%s)' % (inner['Name'], ', '.join(iargs)))
+            extra_fns.append(ifn)
             continue
         if k == 'fillptr':                    # the object the fill idiom created
             call_exprs.append('fill_ptr')
@@ -89,6 +130,16 @@ def plan(member, cfn, cls):
             pn, _, mem = carg['Text'].partition('.')
             pcs = cs_param_modes.get(pn, ('', ''))[1]
             ret = VT_PROP_RET.get((pcs, mem))
+            if ret is None and pcs in BY_CS and '.' not in mem:
+                # item.Id: a generated CLASS's property, read through its own
+                # generated getter (the same RhinoCommon member)
+                g = generated_getter(BY_CS[pcs], mem)
+                conv = g and C_FROM_BINDING.get((plan_cpp_ret(g), ctype))
+                if conv is None:
+                    return None, 'parammember %s' % carg['Text']
+                acc = '->' if pn in nullable_params else '.'
+                call_exprs.append(conv.format('%s%s%s()' % (pn, acc, g['cpp'])))
+                continue
             if ret is None or '.' in mem:
                 return None, 'parammember %s' % carg['Text']
             expr = '%s.%s()' % (pn, mem)
@@ -113,12 +164,23 @@ def plan(member, cfn, cls):
             else:
                 call_exprs.append(expr)
             continue
+        if k == 'expr' and re.match(r'^\w+$', carg['Text']) and carg['Text'] not in cs_param_modes:
+            # `ComponentType`: a property of this class whose getter is a
+            # constant (File3dmLayerTable overrides it: ModelComponentType.Layer)
+            cv = class_const(cls['type'], carg['Text'])
+            if cv is not None and cv[1] is not None:
+                k, carg = 'const', {'Kind': 'const', 'Text': cv[0], 'Value': cv[1]}
         if k == 'expr':
             # a widening/enum cast of a declared parameter is the parameter:
             # RhinoCommon spells enum args `(int)continuityType` at the call site
-            mm = re.match(r'^\((?:int|uint|double)\)\s*(\w+)$', carg['Text'])
-            if mm and mm.group(1) in cs_param_modes:
-                k, carg = 'param', {'Kind': 'param', 'Text': mm.group(1)}
+            mm = re.match(r'^\((int|uint|double)\)\s*(\w+)$', carg['Text'])
+            if mm and mm.group(2) in cs_param_modes:
+                # `(uint)count` into an unsigned int: the same cast, kept
+                if (mm.group(1) == 'uint' and ctype == 'unsigned int'
+                        and cs_param_modes[mm.group(2)] == ('', 'int')):
+                    call_exprs.append('(unsigned int)%s' % mm.group(2))
+                    continue
+                k, carg = 'param', {'Kind': 'param', 'Text': mm.group(2)}
             else:
                 return None, 'opaque expr arg: %s' % carg['Text']
         if k == 'const':
@@ -140,10 +202,13 @@ def plan(member, cfn, cls):
             argcls = BY_CS.get(cstype)
             if argcls is None:
                 return None, 'class arg %s: %s not in registry' % (name, cstype)
-            nullable = carg.get('Value') == 'nullable'     # `x == null ? IntPtr.Zero : x.ConstPointer()`
+            # `x == null ? IntPtr.Zero : x.ConstPointer()`, or null-checked by an early return
+            nullable = carg.get('Value') == 'nullable' or name in retnull
             acc = '->' if nullable else '.'
             if argcls['mode'] == 'abstract':
                 ptr = '%s%s%s()' % (name, acc, argcls['getter'])
+            elif argcls.get('proxy'):
+                ptr = '%s%sRH3DM_Const()' % (name, acc)      # item.ConstPointer(): a proxy resolves
             elif argcls['mode'] in ('pointer', 'child'):
                 ptr = '%s%sm_ptr' % (name, acc)
             else:
@@ -205,7 +270,7 @@ def plan(member, cfn, cls):
                        and (local_value(carg['Value']) or (None, None))[1] == vcs)
             if ctype in OUTLOCAL and not (vcs in VT_CPP and vcs not in CS_ARG) and not vt_init:
                 decl = OUTLOCAL[ctype][0].format(n=name)
-                if carg.get('Value') and ctype in ('double*', 'int*', 'bool*'):
+                if carg.get('Value') and ctype in ('double*', 'int*', 'bool*', 'ON_UUID*'):
                     # `double t = RhinoMath.UnsetValue; F(ptr, ref t)`: the C
                     # side may READ it (ref), so reproduce the initializer
                     init = local_value(carg['Value'])
@@ -264,7 +329,8 @@ def plan(member, cfn, cls):
             if sig_ret != 'bool' or cret != 'bool':
                 return None, 'holder sig-out needs bool/bool'
             shape = ('holdertuple', member['Holder'])
-        elif sig_ret == holder['cs'] and cret in ('void', 'bool'):
+        elif sig_ret == holder['cs'] and (cret in ('void', 'bool') or member.get('ResultUnused')):
+            # a C status (or any value) the C# call site discards is discarded here too
             shape = ('holder', member['Holder'])
         else:
             return None, 'holder return %s vs %s' % (sig_ret, holder['cs'])
@@ -272,8 +338,16 @@ def plan(member, cfn, cls):
         shape = ('tuple', cret == 'bool', ret_outs)
         if sig_ret != 'bool' and cret == 'bool':
             return None, 'out-params with non-bool C# return'
+    elif member.get('Factory'):
+        shape = factory_shape(member['Factory'], cls, sig_ret, cret, out_by_name)
+        if isinstance(shape, str):
+            return None, shape
     elif sig_ret in CS_RET_DIRECT and cret == CS_RET_DIRECT[sig_ret]:
         shape = ('direct', cret)
+    elif (sig_ret in CS_RET_DIRECT and member.get('ResultCast') == sig_ret and not out_by_name
+          and cret in ('int', 'unsigned int', 'double')):
+        # `return (int)UNM.F(...)` over an unsigned C result: the same cast
+        shape = ('conv', CS_RET_DIRECT[sig_ret], '(%s)({c})' % CS_RET_DIRECT[sig_ret])
     elif (sig_ret == 'bool' and cret in ('int', 'unsigned int') and not out_by_name
           and member.get('Compare')):
         # `return rc != 0;` -- the comparison RhinoCommon wrote, recorded by specgen
@@ -314,6 +388,40 @@ def plan(member, cfn, cls):
     else:
         return None, 'return type %s (C: %s)' % (sig_ret, cret)
 
+    if retnull - nullable_params:
+        return None, 'early return on null of non-class %s' % sorted(retnull - nullable_params)[0]
+    guards = []
+    for g in member.get('Guards') or []:
+        if g.get('Exception') is not None:
+            guards.append(g)
+            continue
+        rv = early_return_cpp(g, shape, sig_ret)
+        if rv is None:
+            return None, 'early return %s' % (g.get('Return') or 'void')
+        g = dict(g, ret_cpp=rv)
+        if g.get('SelfNull'):
+            # `if (IntPtr.Zero == pConstThis) return ...`: a value member's
+            # address is never null; a pointer can be (a model-backed proxy)
+            if cls['mode'] == 'value':
+                continue
+            g['cond_cpp'] = '!(%s)' % self_access(cls, self_expr, 'ConstPointer')
+        guards.append(g)
+
+    failthrow = member.get('FailThrow')
+    ft_attached = None
+    if failthrow:
+        # `if (!CALL) throw new E(msg);` (optionally `if (COND) throw`): the C
+        # call's bool decides. A void member is just that; a member returning
+        # its out value (`... ref rc)) {...} return rc;`) throws, then returns it
+        if cfn['returns'] != 'bool' or failthrow['Exception'] not in EXMAP:
+            return None, 'fail-throw shape'
+        if shape == ('direct', 'void'):
+            shape = ('failthrow', failthrow)
+        elif shape[0] == 'fromout' and not member.get('Success'):
+            ft_attached = failthrow
+        else:
+            return None, 'fail-throw shape'
+
     success = member.get('Success')
     if success:
         if shape[0] != 'fromout' or success['Out'] != shape[2]:
@@ -321,13 +429,192 @@ def plan(member, cfn, cls):
         fb = success['Fallback']
         if fb != success['Out']:
             known = local_value(fb)                # Interval.Unset -> BND_IntervalX::Unset()
-            if known is None or known[1] != sig_ret:
+            # `if (!F(ptr, ref d)) d = 0;`: a literal suits a plain C value return
+            literal_ok = known is not None and known[1] is None and sig_ret in CS_RET_DIRECT
+            if known is None or (known[1] != sig_ret and not literal_ok):
                 return None, 'fallback %s' % fb
     return {'m': member, 'fn': cfn, 'cls': cls,
             'static': bool(member.get('Static')),
             'call_exprs': call_exprs, 'locals': locals_,
-            'bind_args': bind_args, 'shape': shape,
-            'guards': member.get('Guards') or [], 'success': success}, None
+            'bind_args': bind_args, 'shape': shape, 'extra_fns': extra_fns,
+            'guards': guards, 'success': success, 'failthrow': ft_attached}, None
+
+
+def factory_shape(fac, cls, sig_ret, cret, out_by_name):
+    """`if (p == IntPtr.Zero) return null; return Instantiate(m_parent, type,
+    id, index);` -- the switch factory's case for this class's constant
+    (`type` is ComponentType), which must construct the member's own return
+    type as a File3dm proxy from the Guid the native call wrote and the
+    table's File3dm. Returns the shape, or a refusal reason (str)."""
+    sw = fac['Args'][fac['SwitchArg']]
+    value = None
+    if sw['Kind'] == 'expr':
+        cv = class_const(cls['type'], sw['Text'])
+        value = cv[1] if cv else None
+    elif sw['Kind'] == 'const':
+        value = sw.get('Value')               # FindName<Layer>: the type map's constant
+    if value is None:
+        return 'factory switch %s' % sw['Text']
+    case = (fac.get('Cases') or {}).get(value)
+    if case is None:
+        return 'factory case %s' % value
+    target = BY_CS.get(case['New'])
+    if target is None or case['New'] != sig_ret or not target.get('proxy'):
+        return 'factory constructs %s' % case['New']
+    if not cret.endswith('*') or len(case['Args']) != 2:
+        return 'factory result'
+    idl, parent = case['Args']
+    if out_by_name.get(idl) != 'ON_UUID*':
+        return 'factory id %s' % idl
+    # the File3dm the proxy refers to: the table's own (its pointer is the model)
+    if parent != 'm_parent' or cls.get('parent') != 'File3dmX' or cls['on'] != 'ONX_Model':
+        return 'factory parent %s' % parent
+    return ('proxywrap', target, idl)
+
+
+# a generated getter's C++ return -> the C parameter type it feeds: how to convert
+C_FROM_BINDING = {('BND_UUID', 'ON_UUID'): 'Binding_to_ON_UUID({})',
+                  ('double', 'double'): '{}', ('int', 'int'): '{}', ('bool', 'bool'): '{}',
+                  ('unsigned int', 'unsigned int'): '{}'}
+
+
+def plan_cpp_ret(p):
+    """the C++ type a planned zero-argument getter returns (the shapes a
+    getter feeding another call can have), or None"""
+    sh = p['shape']
+    if sh[0] in ('direct', 'conv'):
+        return sh[1]
+    if sh[0] == 'fromout':
+        return CS_RET_CPP.get(sh[1])
+    return None
+
+
+def generated_getter(cls, name):
+    """the plan of class `cls`'s (or a registry base's) generated zero-argument
+    property `name`; classes are planned in CLASSES order, so only an earlier
+    class can be asked"""
+    c = cls
+    while c is not None:
+        for p in PLANNED.get(c['reg'], []):
+            if (p['m']['Kind'] == 'property' and p['m']['Name'] == name and not p['bind_args']
+                    and not p.get('setter_of')):
+                return p
+        c = BY_REG.get(c.get('base', ''))
+    return None
+
+
+def no_owned_pointer_cpp(cls, ident):
+    """`IsDocumentControlled` where the nearest PORTABLE declaration in the
+    RhinoCommon chain is CommonObject's `IntPtr.Zero == m_ptr` (specgen
+    Const "@NoOwnedPointer"): the generated storage answers it exactly -- a
+    proxy owns nothing, an owned object always has its pointer, a value
+    never is one. Abstract bases ask the derived class (RH3DM_NoOwnedPtr)."""
+    for t in [cls['type']] + [b for b, _ in base_chain(cls['type'])]:
+        decl = [x for x in PROPS_BY_TYPE.get(t, []) if x['Name'] == ident]
+        if decl:
+            if decl[0].get('Const') != '@NoOwnedPointer':
+                return None
+            if cls['mode'] == 'abstract':
+                NO_OWNED_ABSTRACT.add(cls['reg'])
+                return 'RH3DM_NoOwnedPtr()'
+            if cls['mode'] in ('pointer', 'child'):
+                return '(m_ptr == nullptr)'
+            return 'false'
+    return None
+
+
+def guard_calls_cpp(g, cond, cls, argnames, ptypes, p):
+    """replace each helper call of a guard condition with its native call;
+    arguments: the member's own parameters, or constants (a class constant,
+    an enum member) cast to the C parameter type. None: refuse."""
+    native = g.get('Native') or []
+    if len(native) != len(g['Calls']):
+        return None
+    for call, nat in zip(g['Calls'], native):
+        fn = C_BY_NAME.get(nat['Name'])
+        if fn is None or len(fn['params']) != len(nat['Args']):
+            return None
+        args = []
+        for a, q in zip(nat['Args'], fn['params']):
+            ctype = q['type']
+            if a['Kind'] in ('param', 'expr') and a['Text'] in argnames:
+                cs = ptypes.get(a['Text'])
+                args.append('(%s)%s' % (ctype, a['Text']) if cs in CS_ENUMS else a['Text'])
+                continue
+            cv = class_const(cls['type'], a['Text']) if a['Kind'] == 'expr' else None
+            val = cv[1] if cv else (a.get('Value') if a['Kind'] == 'const' else None)
+            if val is None or ctype.endswith('*'):
+                return None
+            args.append('(%s)%s' % (ctype, val))
+        text = '%s(%s)' % (call['Name'], ', '.join(x['Text'] for x in call['Args']))
+        if text not in re.sub(r'\s+', ' ', cond).replace('( ', '(').replace(' )', ')'):
+            return None
+        cond = cond.replace(text, '%s(%s)' % (nat['Name'], ', '.join(args)))
+        p.setdefault('extra_fns', []).append(fn)
+    return cond
+
+
+def class_const_cpp(cls, ident):
+    """`ComponentType` on File3dmLayerTable: the constant, typed as the enum
+    the bindings register (`(RH3DM_ModelComponentType)5`), or None"""
+    cv = class_const(cls['type'], ident)
+    if cv is None or cv[1] is None:
+        return None
+    enum = cv[0].split('.')[0]
+    if enum not in CS_ENUMS:
+        return None
+    GUARD_ENUMS.add(enum)
+    return '(%s)%s' % (CS_ENUMS[enum]['cpp'], cv[1])
+
+
+def enum_isdefined_cpp(cond, cls, ptypes):
+    """`Enum.IsDefined(typeof(E), x)` exactly: true for a class constant of E
+    (a named member by construction), a membership test over E's declared
+    values for an E-typed parameter; anything else None (refuse)"""
+    def rep(mm):
+        e, x = mm.group(1), mm.group(2)
+        if x.startswith(e + '.') and x.count('.') == 1:
+            # a named member of E (ModelComponentType.Layer): defined by construction
+            if ENUM_VALUES.get(e) is not None and e in CS_ENUMS:
+                return 'true'
+            raise KeyError(x)
+        cv = class_const(cls['type'], x)
+        if cv is not None and cv[0].startswith(e + '.') and cv[1] is not None:
+            return 'true'
+        if ptypes.get(x) == e and e in CS_ENUMS and ENUM_VALUES.get(e):
+            return '(%s)' % ' || '.join('(int)%s == %s' % (x, v) for v in ENUM_VALUES[e])
+        raise KeyError(x)
+    try:
+        return re.sub(r'\bEnum\.IsDefined\s*\(\s*typeof\s*\(\s*(\w+)\s*\)\s*,\s*(\w+(?:\.\w+)?)\s*\)', rep, cond)
+    except KeyError:
+        return None
+
+
+def early_return_cpp(g, shape, sig_ret):
+    """the C++ value of an early `return X;` for this member's return shape,
+    or None (refuse): void, literals of the member's own type, String.Empty,
+    null for a wrapped class, an enum constant (by its recorded value), a
+    translated value-type static (Point3d.Unset)"""
+    r = g.get('Return')
+    kind = shape[0]
+    if r == '':
+        return '' if kind == 'direct' and shape[1] == 'void' else None
+    if r in ('true', 'false'):
+        return r if sig_ret == 'bool' and kind in ('direct', 'conv', 'fromout') else None
+    if re.match(r'^-?\d+(\.\d*)?$', r):
+        return r if sig_ret in ('int', 'double', 'uint') and kind in ('direct', 'fromout') else None
+    if r == 'null':
+        return 'nullptr' if kind in ('wrap', 'fill') else None
+    if r in ('String.Empty', 'string.Empty', '""'):
+        return 'std::wstring()' if sig_ret == 'string' and kind == 'holder' else None
+    mm = re.match(r'^(\w+)\.(\w+)$', r)
+    if mm and mm.group(1) == sig_ret and sig_ret in CS_ENUMS and g.get('ReturnValue') is not None \
+            and kind == 'enumret':
+        return '(%s)%s' % (CS_ENUMS[sig_ret]['cpp'], g['ReturnValue'])
+    known = local_value(r)
+    if known is not None and known[1] == sig_ret and kind == 'fromout':
+        return known[0]
+    return None
 
 
 def default_ctor_call(cls, manifest, c_by_name):
@@ -541,7 +828,10 @@ def plan_forward(x, cls, by_name_arity):
         elif k == 'literal':
             call_args.append({'true': 'true', 'false': 'false'}.get(t, t.rstrip('dDfF') or t))
         elif k == 'const' and a.get('Value') is not None:
-            call_args.append(a['Value'])
+            # an enum constant into an enum-typed target parameter keeps its type
+            tt = target['bind_args'][len(call_args)][0] if len(call_args) < len(target['bind_args']) else None
+            enum_cpp = {v['cpp'] for v in CS_ENUMS.values()}
+            call_args.append('(%s)%s' % (tt, a['Value']) if tt in enum_cpp else a['Value'])
         elif k == 'expr' and re.match(r'^RhinoMath\.\w+$', t):
             call_args.append('RH3DM_RhinoMath::' + t.split('.')[1])
         elif k == 'expr' and re.match(r'^(?:\w+\.)*(\w+)\.(\w+)$', t) and \
@@ -579,6 +869,73 @@ def plan_forward(x, cls, by_name_arity):
             'call_exprs': [], 'locals': [], 'bind_args': bind_args,
             'shape': ('forward', None, target), 'guards': [], 'success': None,
             'forward_args': call_args, 'sib_refs': sib_refs}, None
+
+
+def _subst(t, binding):
+    """T -> Layer in a C# type text (`T`, `IEnumerable<T>`, `T[]`)"""
+    if not t or not binding:
+        return t
+    return re.sub(r'\b(%s)\b' % '|'.join(map(re.escape, binding)), lambda mm: binding[mm.group(1)], t)
+
+
+def class_members(cls, manifest):
+    """the members a registry class plans: its own, plus those its GENERIC
+    RhinoCommon bases declare (File3dmCommonComponentTable<Layer>.Delete(T)
+    planned as File3dmLayerTable.Delete(Layer)), with the type parameters
+    bound. A generic base is never a C++ class of its own (a C++ method
+    cannot return T per subclass), so its members are instantiated per
+    concrete class -- as C# itself does. A member the class (or a nearer
+    base) redeclares with the same signature is the override: the base's is
+    skipped. Registry bases are left to C++ inheritance, as before."""
+    own = [x for x in manifest['members'] if x['Type'] == cls['type']]
+    if not TYPE_RECS:
+        return own
+    def key(x):
+        _, ps = cs_signature(x)
+        return (x['Kind'], x['Name'], tuple(t for _, t, _ in (ps or [])))
+    seen = {key(x) for x in own}
+    by_type = {}
+    for x in manifest['members']:
+        by_type.setdefault(x['Type'], []).append(x)
+    out = list(own)
+    for bt, binding in base_chain(cls['type']):
+        if bt in BY_TYPE or not TYPE_RECS[bt].get('TypeParams'):
+            continue
+        for x in by_type.get(bt, []):
+            if x['Kind'] in ('type', 'constructor'):
+                continue
+            y = dict(x, Type=cls['type'], InheritedFrom=bt,
+                     Returns=_subst(x.get('Returns'), binding),
+                     Params=[dict(q, Type=_subst(q['Type'], binding)) for q in x.get('Params') or []],
+                     Signature=_subst(x.get('Signature'), binding))
+            if key(y) in seen:
+                continue
+            seen.add(key(y))
+            out.append(y)
+    return out
+
+
+def child_view(x):
+    """the registry child class a property hands out, or None: the getter must
+    construct exactly `new T(this)` (specgen Child/ChildArgs) -- the view
+    holds nothing but its parent (`new File3dmViewTable(this, true)` carries
+    state a pointer view cannot, so it is refused) -- and the declared type is
+    T itself or an interface T implements with the same arguments
+    (`IList<Layer> Layers` is a File3dmLayerTable)"""
+    child = BY_CS.get(cs_unqualify(x.get('Child') or ''))
+    if child is None or x.get('ChildArgs') != ['this']:
+        return None
+    ret = cs_unqualify(x.get('Returns') or '')
+    if ret == child['cs']:
+        return child
+    mm = re.match(r'^([\w.]+)<(.+)>$', ret)
+    rec = TYPE_RECS.get(child['type']) or {}
+    for i, b in enumerate(rec.get('Bases') or []):
+        args = (rec.get('BaseArgs') or [None] * len(rec['Bases']))[i] or []
+        if mm and cs_unqualify(b) == cs_unqualify(mm.group(1)) \
+                and [cs_unqualify(a) for a in args] == [cs_unqualify(a.strip()) for a in mm.group(2).split(',')]:
+            return child
+    return None
 
 
 def plan_class(cls, manifest, c_by_name, skipped):
@@ -620,7 +977,7 @@ def plan_class(cls, manifest, c_by_name, skipped):
         if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
                 and x['Kind'] == 'property' and x['Name'] not in have):
             continue
-        child = BY_CS.get(cs_unqualify(x.get('Returns') or ''))
+        child = child_view(x)
         if child and child['mode'] == 'child' and child.get('parent') == cls['reg'] \
                 and cls['mode'] in ('pointer', 'child'):
             plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
@@ -647,14 +1004,16 @@ def plan_class(cls, manifest, c_by_name, skipped):
         if fn is None:
             skipped['setter: C fn not in manifest'] = skipped.get('setter: C fn not in manifest', 0) + 1
             continue
-        sm = {'Type': g['m']['Type'], 'Variant': g['m']['Variant'],
-              'Kind': 'method', 'Name': g['m']['Name'],
-              'Static': g['m'].get('Static'), 'Body': st.get('Body'),
-              'Guards': st.get('Guards'), 'Calls': st['Calls'],
-              'Holder': st.get('Holder'), 'HolderArg': st.get('HolderArg', -1),
-              'Params': (list(g['m'].get('Params') or []) if g['m']['Kind'] == 'indexer' else [])
-                        + [{'Name': 'value', 'Type': g['m']['Returns'], 'Mode': ''}],
-              'Returns': 'void'}
+        # EVERYTHING the setter's analysis recorded travels (FailThrow, Success...):
+        # a field left behind is logic silently dropped (G28)
+        sm = dict(st)
+        sm.update({'Type': g['m']['Type'], 'Variant': g['m']['Variant'],
+                   'Kind': 'method', 'Name': g['m']['Name'],
+                   'Static': g['m'].get('Static'),
+                   'HolderArg': st.get('HolderArg', -1),
+                   'Params': (list(g['m'].get('Params') or []) if g['m']['Kind'] == 'indexer' else [])
+                             + [{'Name': 'value', 'Type': g['m']['Returns'], 'Mode': ''}],
+                   'Returns': 'void'})
         sp, why = plan(sm, fn, cls)
         if sp is None:
             why = 'setter: ' + why.split(':')[0]
@@ -717,29 +1076,130 @@ def plan_class(cls, manifest, c_by_name, skipped):
         argnames = {n for _, n in p['bind_args']}
         ok = True
         kept = []
+        # each plan resolves its OWN copy: an inherited generic member's guards
+        # are shared by every concrete table, and their translation can depend
+        # on the table (`ModelComponentType.Unset == ComponentType`)
+        p['guards'] = [dict(g) for g in p['guards']]
         for g in p['guards']:
             # a pure null-check on a by-value marshaled param is enforced by
             # the binding boundary (pybind/embind reject None before the body)
-            if g.get('NullCheckOf') and g['NullCheckOf'] in argnames:
+            if g.get('NullCheckOf') and g['NullCheckOf'] in argnames and g.get('Exception'):
                 continue
             kept.append(g)
+            if 'cond_cpp' in g and g.get('SelfNull'):
+                continue                      # resolved by plan(): the self pointer
             # File.Exists(path), the one call a guard may contain (specgen)
             cond = re.sub(r'\bFile\.Exists\s*\(', 'RH3DM_FileExists(', g['Cond'])
-            for ident in g['Ids']:
+            cond = re.sub(r'\bnull\b', 'nullptr', cond)     # `null == curve`, curve now a pointer
+            ptypes = {n: t for _, t, n in (cs_signature(p['m'])[1] or [])}
+            cond = enum_isdefined_cpp(cond, cls, ptypes)
+            if cond is None:
+                ok = False
+                break
+            if g.get('Calls'):
+                # `!ModelComponent.ModelComponentTypeRequiresUniqueName(type)`: each
+                # helper call becomes its resolved native call (specgen Native), or refuse
+                cond = guard_calls_cpp(g, cond, cls, argnames, ptypes, p)
+                if cond is None:
+                    ok = False
+                    break
+            # dotted ids first: `Count` must not rewrite the tail of `curve.Count`
+            for ident in sorted(g['Ids'], key=lambda i: '.' not in i):
                 if ident in argnames:
                     continue
-                if ident in zero_arg:
-                    cond = re.sub(r'\b%s\b' % re.escape(ident),
+                if '.' in ident:
+                    a, b = ident.split('.', 1)
+                    vals = g.get('IdValues') or {}
+                    if a in CS_ENUMS and ident in vals:          # IsoStatus.None
+                        rep = '(%s)%s' % (CS_ENUMS[a]['cpp'], vals[ident])
+                        GUARD_ENUMS.add(a)
+                    elif a in argnames and (ptypes.get(a), b) in VT_PROPS:
+                        rep = '%s.%s()' % (a, b)                  # xform.IsIdentity
+                    else:
+                        ok = False
+                        break
+                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), rep, cond)
+                elif ident in zero_arg:
+                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident),
                                   '%s()' % zero_arg[ident], cond)
+                elif no_owned_pointer_cpp(cls, ident) is not None:
+                    # `IsDocumentControlled`: CommonObject's `IntPtr.Zero == m_ptr`
+                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), no_owned_pointer_cpp(cls, ident), cond)
+                elif class_const_cpp(cls, ident) is not None:
+                    # `ComponentType` -> (ON_ModelComponent::Type)5: this class's constant
+                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), class_const_cpp(cls, ident), cond)
                 else:
                     ok = False
                     break
             if not ok:
                 break
             g['cond_cpp'] = cond
+        fts = p['shape'][1] if p['shape'][0] == 'failthrow' else p.get('failthrow')
+        if ok and fts and fts.get('Cond'):
+            # `if (!CALL) { if (index < 0 || index >= Count) throw ...; }`:
+            # the inner condition resolves exactly like a guard's
+            ft = dict(fts)
+            cond = re.sub(r'\bnull\b', 'nullptr', ft['Cond'])
+            for ident in ft.get('Ids') or []:
+                if ident in argnames:
+                    continue
+                if ident in zero_arg:
+                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), '%s()' % zero_arg[ident], cond)
+                else:
+                    ok = False
+                    break
+            ft['cond_cpp'] = cond
+            if p['shape'][0] == 'failthrow':
+                p['shape'] = ('failthrow', ft)
+            else:
+                p['failthrow'] = ft
         if ok:
             p['guards'] = kept
             resolved.append(p)
         else:
             skipped['guard id'] = skipped.get('guard id', 0) + 1
     return resolved
+
+
+def table_protocol(cls, manifest, plans):
+    """The language protocols of a File3dm component table (a concession,
+    like value-type operators: not generated from a member). Granted only
+    when the table has exactly what RhinoCommon's own protocols use:
+      - `foreach`: the generic base's `GetEnumerator` delegates to
+        `m_manifest.GetEnumerator` (File3dmManifestTable.GetEnumerator(type):
+        ONX_ModelComponentIterator_New / GetNext / Delete, `Instantiate`)
+      - `this[int]` (explicit IList<T>): the generated FindIndex
+      - `Count`: the generated Count
+    and the item type T is a proxy-capable registry class, so the iterator
+    can construct `new T(id, file)` exactly as Instantiate does.
+    Returns {item, type_value, count, find} or None."""
+    if cls['mode'] != 'child' or cls.get('parent') != 'File3dmX' or cls['on'] != 'ONX_Model':
+        return None
+    item = None
+    enumer = False
+    for bt, binding in base_chain(cls['type']):
+        if TYPE_RECS[bt].get('TypeParams') and binding.get('T') and item is None:
+            item = BY_CS.get(binding['T'])
+        for x in manifest['members']:
+            if (x['Type'] == bt and x['Name'] == 'GetEnumerator' and x['Kind'] == 'method'
+                    and x.get('Body') == 'delegates'
+                    and re.sub(r'<.*>$', '', x.get('Delegates') or '') == '@m_manifest.GetEnumerator'):
+                enumer = True
+    if item is None or not item.get('proxy') or not enumer:
+        return None
+    cv = class_const(cls['type'], 'ComponentType')
+    if cv is None or cv[1] is None:
+        return None
+    for fn in ('ONX_ModelComponentIterator_New', 'ONX_ModelComponentIterator_GetNext',
+               'ONX_ModelComponentIterator_Delete'):
+        if fn not in C_BY_NAME:
+            return None
+    count = [p for p in plans if p['m']['Name'] == 'Count' and p['m']['Kind'] == 'property' and not p['bind_args']]
+    find = [p for p in plans if p['m']['Name'] == 'FindIndex' and p['shape'][0] == 'proxywrap'
+            and [t for t, _ in p['bind_args']] == ['int']]
+    if len(count) != 1 or len(find) != 1 or find[0]['shape'][1] is not item:
+        return None
+    return {'item': item, 'type_value': cv[1], 'count': count[0]['cpp'], 'find': find[0]['cpp'],
+            'fns': [C_BY_NAME[n] for n in ('ONX_ModelComponentIterator_New',
+                                           'ONX_ModelComponentIterator_GetNext',
+                                           'ONX_ModelComponentIterator_Delete')]}

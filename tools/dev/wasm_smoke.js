@@ -139,5 +139,22 @@ factory().then(rhino => {
   assert(isoN instanceof rhino.NurbsCurveX, 'wrap did not downcast');
   console.log('  subtypes: LineCurveX standalone, PolyCurveX.append, isoCurve ->', isoN.constructor.name);
 
+  // G39 table protocols: iteration over the native component list survives a
+  // delete (pilot-findings #24: the old `for (i < count) get(i)` silently drops items)
+  if (rhino.File3dmX) {
+    const f = new rhino.File3dmX();
+    const t = f.allLayers;
+    for (const n of 'abc') t.addLayer(n, { r: 0, g: 0, b: 0, a: 255 });
+    assert.strictEqual(t.delete(t.findIndex(1)), true);
+    assert.strictEqual(t.count, 2);
+    assert.deepStrictEqual([...t].map(l => l.name), ['a', 'c']);
+    assert.deepStrictEqual([...f.layers].map(l => l.index), [0, 2]);
+    assert.strictEqual(t.get(1), null);                   // a hole: RhinoCommon's indexer
+    assert.strictEqual(t.get(2).name, 'c');
+    t.addLayer('d', { r: 0, g: 0, b: 0, a: 255 });
+    assert.deepStrictEqual(Array.from(t, l => l.name), ['a', 'c', 'd']);
+    console.log('  File3dmLayerTableX: for...of after a delete ->', [...t].map(l => l.name));
+  }
+
   console.log('WASM TIER: PASS');
 }).catch(e => { console.error('SMOKE FAIL:', e); process.exit(1); });

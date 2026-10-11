@@ -1,5 +1,7 @@
 #!/bin/bash
-# Python (pybind11) build + tests, inside ubuntu:24.04. Mounts: /src = repo, /work = build dir.
+# Python (pybind11) build + tests, inside ubuntu:24.04. Mounts: /src = repo,
+# /work = logs + built module (host-visible), /build = build trees (a named
+# volume: container-local disk, see tools/dev/round.sh).
 #   python.sh check   compile only the generated objects (fast: catches generator output errors)
 #   python.sh build   full module build
 #   python.sh test    regression + parity + planner tests against the built module
@@ -11,11 +13,20 @@ set -u
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq >/dev/null 2>&1
 apt-get install -yqq build-essential cmake python3 python3-dev python3-numpy python3-pytest >/dev/null 2>&1
-B=/work/python
-mkdir -p $B
+B=/build/python
+mkdir -p $B /work/python
+
+publish() {   # the module where host-side tools expect it (build/dev/python)
+  cp -f $B/_rhino3dm*.so /work/python/ 2>/dev/null || true
+}
 
 configure() {
+  # IPO off: pybind11_add_module enables -flto by default, which moves all the
+  # optimization into the LINK -- 16 minutes to re-optimize opennurbs after a
+  # one-file change. A dev round wants fast incremental builds; the release
+  # wheels (setup.py) keep LTO.
   cd $B && cmake /src/src -DRHINO3DM_PY=TRUE -DPYBIND11_FINDPYTHON=ON \
+    -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
     -DCMAKE_CXX_FLAGS=-ffp-contract=off -DCMAKE_C_FLAGS=-ffp-contract=off > /work/python_cfg.log 2>&1 \
     || { echo "PY CONFIGURE FAIL"; tail -8 /work/python_cfg.log; exit 1; }
 }
@@ -34,6 +45,7 @@ build() {
   make -j"$(nproc)" > /work/python_make.log 2>&1
   ec=$?; echo "PY MAKE EXIT = $ec"
   [ $ec -ne 0 ] && { grep -E "error" /work/python_make.log | sort -u | head -14; exit 1; }
+  publish
   return 0
 }
 

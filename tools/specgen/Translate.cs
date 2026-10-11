@@ -49,6 +49,13 @@ static class TranslateCommand
             ["Cone"]        = "BND_ConeX",
             ["Torus"]       = "BND_TorusX",
             ["Box"]         = "BND_BoxX",
+            // collection elements (Mesh vertices/faces, NURBS control points)
+            ["Point2f"]     = "BND_Point2fX",
+            ["Point3f"]     = "BND_Point3fX",
+            ["Vector3f"]    = "BND_Vector3fX",
+            ["Point4d"]     = "BND_Point4dX",
+            ["MeshFace"]    = "BND_MeshFaceX",
+            ["ControlPoint"] = "BND_ControlPointX",
         };
 
         var decls = new Dictionary<string, List<TypeDeclarationSyntax>>();
@@ -87,6 +94,31 @@ static class TranslateCommand
             foreach (var kv in t.FieldCs)
                 t.Fields[kv.Key] = Tx.TypeOrNull(SyntaxFactory.ParseTypeName(kv.Value))
                     ?? (types.TryGetValue(kv.Value, out var ft) && !ft.IsStaticClass ? ft.Cpp : null);
+
+        // no [StructLayout(Size = N)]: a C# struct is LayoutKind.Sequential by
+        // default, which for blittable fields IS the natural C layout -- compute
+        // it from the fields (recursively through translated types); unknown
+        // field types leave it 0 (the generator then keeps the type off the C boundary)
+        var prim = new Dictionary<string, int> { ["double"] = 8, ["float"] = 4, ["int"] = 4, ["unsigned int"] = 4,
+            ["long long"] = 8, ["unsigned long long"] = 8, ["bool"] = 1, ["short"] = 2, ["unsigned short"] = 2, ["unsigned char"] = 1 };
+        var byCpp = types.Values.ToDictionary(t => t.Cpp);
+        (int size, int align) Layout(TypeInfo t, int depth)
+        {
+            if (t.IsStaticClass || depth > 8 || t.Fields.Count == 0) return (0, 0);
+            int off = 0, al = 1;
+            foreach (var f in t.Fields.Values)
+            {
+                (int sz, int a) = f != null && prim.TryGetValue(f, out var ps) ? (ps, ps)
+                    : f != null && byCpp.TryGetValue(f, out var ft) ? (ft.LayoutSize > 0 ? (ft.LayoutSize, Layout(ft, depth + 1).align) : Layout(ft, depth + 1))
+                    : (0, 0);
+                if (sz == 0) return (0, 0);
+                off = (off + a - 1) / a * a + sz;
+                al = Math.Max(al, a);
+            }
+            return ((off + al - 1) / al * al, al);
+        }
+        foreach (var t in types.Values.Where(t => t.LayoutSize == 0 && !t.IsStaticClass))
+            t.LayoutSize = Layout(t, 0).size;
 
         var results = new List<Member>();
         foreach (var t in types.Values)
@@ -890,8 +922,15 @@ class Tx
                     case SyntaxKind.NumericLiteralExpression:
                     {
                         var t = lit.Token.Text;
+                        if (t.StartsWith("0x") || t.StartsWith("0X"))
+                            return t.EndsWith("L") || t.EndsWith("l") ? t[..^1] + "LL" : t;   // D/F are hex digits here
+                        bool real = t.Contains('.') || t.Contains('e') || t.Contains('E');
+                        // `1d` / `0f`: a C# double / float literal must stay one in C++
+                        // (`1` would be an int: `1d / 3` turned into integer division)
                         if (t.EndsWith("d") || t.EndsWith("D") || t.EndsWith("m") || t.EndsWith("M"))
-                            t = t[..^1];
+                            return real ? t[..^1] : t[..^1] + ".0";
+                        if (t.EndsWith("f") || t.EndsWith("F"))
+                            return real ? t : t[..^1] + ".0f";
                         if (t.EndsWith("L") || t.EndsWith("l")) t = t[..^1] + "LL";
                         // C# 1e10 / 1E-12 are double literals; so are they in C++
                         return t;

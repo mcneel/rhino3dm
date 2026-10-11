@@ -19,7 +19,9 @@ import os
 import re
 
 PY_CLASS = re.compile(r'py::class_<[^>]*>\(m, "(\w+)"')
-JS_CLASS = re.compile(r'\bclass_<[^>]*>\("(\w+)"\)')
+# `class_<BND_SurfaceX, base<BND_GeometryBaseX>>("SurfaceX")`: the template
+# arguments nest, so match lazily up to `>("` (`[^>]*` missed every derived class)
+JS_CLASS = re.compile(r'\bclass_<.*?>\("(\w+)"\)')
 PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static)\("(\w+)"(.*)')
 PY_INIT = re.compile(r'\.def\(py::init<([^>]*)>\(\)')
 JS_DEF = re.compile(r'\.(function|class_function|property)\("(\w+)"')

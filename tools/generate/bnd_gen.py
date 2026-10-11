@@ -26,10 +26,45 @@ from emit_classes import *
 from emit_values import *
 
 
+def check_override_shadowing(manifest, per_class):
+    """A derived class inherits its generated base's members through C++. If
+    RhinoCommon OVERRIDES one in the derived class and that override is not
+    generated, Python/JS would silently run the BASE logic on derived objects.
+    Allowed only when the override is a pure forward to `base` (specgen
+    Body "base"); anything else stops generation with the list."""
+    names = {cls['reg']: {('set ' if p.get('setter_of') else '') + p['m']['Name'] for p in plans}
+             for cls, plans in per_class}
+    def sig(x):
+        return (x['Kind'], x['Name'], tuple(q['Type'] for q in x.get('Params') or []))
+    by_type = {}
+    for x in manifest['members']:
+        if x['Variant'] == 'portable' and x['Kind'] in ('method', 'property'):
+            by_type.setdefault(x['Type'], []).append(x)
+    bad = []
+    for cls, _ in per_class:
+        own = {sig(x): x for x in by_type.get(cls['type'], [])}
+        b = BY_REG.get(cls.get('base', ''))
+        while b is not None:
+            for x in by_type.get(b['type'], []):
+                o = own.get(sig(x))
+                if o is None:
+                    continue
+                for acc, prefix in (('get', ''), ('set', 'set ')):
+                    if prefix + x['Name'] in names[b['reg']] and prefix + x['Name'] not in names[cls['reg']]:
+                        body = o.get('Body') if acc == 'get' else (o.get('Setter') or {}).get('Body')
+                        if body != 'base':
+                            bad.append('%s.%s%s (%s overrides %s: %s)' % (cls['reg'], prefix, x['Name'], cls['cs'], b['cs'], body))
+            b = BY_REG.get(b.get('base', ''))
+    if bad:
+        raise SystemExit('override shadowed by an inherited generated member:\n  ' + '\n  '.join(bad))
+
+
 def main():
     # RH3DM_MANIFEST: dry runs against a candidate manifest (with RH3DM_GEN_OUT)
     manifest = json.load(open(os.environ.get('RH3DM_MANIFEST') or os.path.join(ROOT, 'api', 'manifest.json')))
     c_by_name = {f['name']: f for f in manifest['c_surface']}
+    C_BY_NAME.clear(); C_BY_NAME.update(c_by_name)
+    GUARD_ENUMS.clear()
     # rhcommon_c.h declares some exports with opaque handle types
     # (ON_LineCurveImpl*) while the definitions use the real ones
     # (ON_LineCurve*); same C symbol. Generate against the real types.
@@ -44,10 +79,30 @@ def main():
     vt_path = (os.environ.get('RH3DM_VALUETYPES') or os.path.join(ROOT, 'api', 'valuetypes.json'))
     if os.path.exists(vt_path):
         register_value_types(json.load(open(vt_path)))
-    per_class = [(cls, plan_class(cls, manifest, c_by_name, skipped))
-                 for cls in CLASSES]
+    index_types(manifest)
+    per_class = []
+    for cls in CLASSES:
+        # own members plus generic bases' (File3dmCommonComponentTable<T>), instantiated
+        plans = plan_class(cls, {'members': class_members(cls, manifest)}, c_by_name, skipped)
+        PLANNED[cls['reg']] = plans
+        per_class.append((cls, plans))
 
     all_plans = [p for _, plans in per_class for p in plans]
+    check_override_shadowing(manifest, per_class)
+    # File3dm table protocols (len / [i] / iteration): a concession granted
+    # only where RhinoCommon's own protocols are fully generated
+    for cls, plans in per_class:
+        cls.pop('table', None)
+        tp = table_protocol(cls, manifest, plans)
+        if tp:
+            cls['table'] = tp
+    # a base's guard asks the derived storage for IsDocumentControlled: every
+    # derived class must resolve it to the same idiom (no portable override)
+    for cls in CLASSES:
+        b = BY_REG.get(cls.get('base', ''))
+        if b and b['reg'] in NO_OWNED_ABSTRACT and no_owned_pointer_cpp(cls, 'IsDocumentControlled') is None:
+            raise SystemExit('%s overrides IsDocumentControlled; %s asks it through RH3DM_NoOwnedPtr'
+                             % (cls['cs'], b['cs']))
     # opaque declarations for C enums appearing in planned signatures
     enum_decls = sorted({t[5:] for p in all_plans if p['fn'] for t in
                          ([p['fn']['returns']] + [q['type'] for q in p['fn']['params']])
@@ -74,15 +129,21 @@ def main():
                 used_enums.add(cpp_to_enum[t])
         if p['shape'][0] == 'enumret' and CS_ENUMS[p['shape'][1]]['gen']:
             used_enums.add(p['shape'][1])
+    used_enums |= {e for e in GUARD_ENUMS if CS_ENUMS[e]['gen']}
     enum_values = {}
+    type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
     for x in manifest['members']:
-        if (x['Kind'] == 'enum' and x['Name'] in used_enums
-                and x['Name'] not in enum_values and x.get('Values')):
-            enum_values[x['Name']] = x['Values']
+        if x['Kind'] != 'enum' or x['Variant'] != 'portable' or not x.get('Values'):
+            continue
+        # nested enums are keyed by owner (DimensionStyle.ArrowType), as in CS_ENUMS
+        key = (x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name']
+               if x['Type'] in type_names else x['Name'])
+        if key in used_enums and key not in enum_values:
+            enum_values[key] = x['Values']
     missing = used_enums - set(enum_values)
     if missing:
         raise SystemExit('no manifest Values for enums: %s' % sorted(missing))
-    gen_enum_defs, gen_enum_py, gen_enum_js = [], [], []
+    gen_enum_defs, gen_enum_py, gen_enum_js, gen_enum_py_nested = [], [], [], []
     for ename in sorted(used_enums):
         cpp = CS_ENUMS[ename]['cpp']
         # verbatim: C++ enum classes number implicit enumerators exactly as
@@ -92,8 +153,16 @@ def main():
                              % (cpp, ', '.join(v for _, v in pairs)))
         vals = '\n'.join('      .value("%s", %s::%s)' % (n, cpp, n)
                          for n, _ in pairs)
-        gen_enum_py.append('  py::enum_<%s>(m, "%s")\n%s;' % (cpp, ename, vals))
-        gen_enum_js.append('  enum_<%s>("%s")\n%s;' % (cpp, ename, vals))
+        owner = CS_ENUMS[ename].get('owner')
+        if owner:
+            # nested: registered in the owner's generated class, after the classes exist
+            if owner not in BY_CS:
+                raise SystemExit('nested enum %s: owner %s is not a generated class' % (ename, owner))
+            gen_enum_py_nested.append('  py::enum_<%s>(m.attr("%s"), "%s")\n%s;'
+                                      % (cpp, BY_CS[owner]['reg'], ename.split('.')[1], vals))
+        else:
+            gen_enum_py.append('  py::enum_<%s>(m, "%s")\n%s;' % (cpp, ename, vals))
+        gen_enum_js.append('  enum_<%s>("%s")\n%s;' % (cpp, CS_ENUMS[ename].get('js', ename), vals))
     vt_path = (os.environ.get('RH3DM_VALUETYPES') or os.path.join(ROOT, 'api', 'valuetypes.json'))
     if os.path.exists(vt_path):
         vt = json.load(open(vt_path))
@@ -157,7 +226,9 @@ def main():
         for n in vt_natives} | {'extern "C" %s %s(%s);' % (
         p['fn']['returns'], p['fn']['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in p['fn']['params']))
-        for p in all_plans if p['fn']}
+        for p in all_plans if p['fn']} | {'extern "C" %s %s(%s);' % (
+        f['returns'], f['name'], ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in f['params']))
+        for p in all_plans for f in p.get('extra_fns') or []}
 
     ctors = {cls['reg']: default_ctor_call(cls, manifest, c_by_name)
              for cls in CLASSES}
@@ -172,6 +243,16 @@ def main():
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
         for expr_fn in ctors.values() if expr_fn
         for fn in [expr_fn[1]]}
+    decls |= {'extern "C" %s %s(%s);' % (
+        fn['returns'], fn['name'],
+        ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
+        for c in CLASSES if c.get('table') for fn in c['table']['fns']}
+    # the File3dm proxies' resolvers (called by the class headers' accessors)
+    decls |= {'extern "C" %s %s(%s);' % (
+        fn['returns'], fn['name'],
+        ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
+        for c in CLASSES if c.get('proxy')
+        for fn in [c_by_name[c['proxy']['Resolver']]]}
 
     js_pruned = []
     reg_blocks = {cls['reg']: emit_registrations(cls, plans, js_pruned,
@@ -318,21 +399,24 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         # complete type inheritance requires
         base_inc = ('#include "gen_%s.h"\n' % cls['base'].lower()
                     if cls.get('base') else '')
+        table_decl, table_def = emit_table_iter(cls) if cls.get('table') else ('', '')
         files[fname(cls) + '.h'] = (
             BANNER + '#pragma once\n#include "gen_common.h"\n' + base_inc
-            + '\n' + emit_class(cls, plans, bool(ctors[cls['reg']]), argctors[cls['reg']]))
+            + '\n' + emit_class(cls, plans, bool(ctors[cls['reg']]), argctors[cls['reg']]) + table_decl)
 
         # cross-class returns need the target's complete type where the
         # BODIES live -- the cpp
+        # (an optional argument, `const X*`, dereferences too: `x ? x->m_ptr : nullptr`)
         arg_classes = {c['reg'] for p in plans + argctors[cls['reg']] for t, _ in p['bind_args']
-                       for c in CLASSES if t == 'const %s&' % c['gen']}
+                       for c in CLASSES if t in ('const %s&' % c['gen'], 'const %s*' % c['gen'])}
         deps = sorted(({BY_CS[p['shape'][1]]['reg'] for p in plans
                         if p['shape'][0] == 'wrap'}
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'fill'}
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'child'}
+                       | ({cls['table']['item']['reg']} if cls.get('table') else set())
                        | arg_classes) - {cls['reg']})
         dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps)
-        defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans)
+        defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans) + table_def
 
         py_block, js_block = reg_blocks[cls['reg']]
         if cls['mode'] == 'abstract':
@@ -419,6 +503,7 @@ void initGeneratedBindings(rh3dmpymodule& m)
   }});
 {enums_py}
 {vt_py}{inits_py}
+{enums_py_nested}
 }}
 #endif
 
@@ -430,7 +515,7 @@ void initGeneratedBindings(void)
 {{
 {enums_js}
 {vt_js}{inits_js}
-}}
+{js_iter}}}
 #endif
 '''.format(
         py_decls='\n'.join('void initGen%s(rh3dmpymodule&);' % cls['reg']
@@ -438,11 +523,18 @@ void initGeneratedBindings(void)
         js_decls='\n'.join('void initGen%s(void);' % cls['reg']
                            for cls in CLASSES),
         enums_py='\n'.join(gen_enum_py), enums_js='\n'.join(gen_enum_js),
+        enums_py_nested='\n'.join(gen_enum_py_nested),
         inits_py=inits_py, inits_js=inits_js,
         vt_py_decls=''.join('void initGen%s(rh3dmpymodule&);\n' % r for r in vt_regs),
         vt_js_decls=''.join('void initGen%s(void);\n' % r for r in vt_regs),
         vt_py=''.join('  initGen%s(m);\n' % r for r in vt_regs),
-        vt_js=''.join('  initGen%s();\n' % r for r in vt_regs))
+        vt_js=''.join('  initGen%s();\n' % r for r in vt_regs),
+        # `for (const x of table)`: embind cannot register a Symbol-keyed method,
+        # so once every class exists, alias the registered `iterator()` under
+        # Symbol.iterator on the table's prototype
+        js_iter=''.join('  { emscripten::val proto = emscripten::val::module_property("%s")["prototype"];\n'
+                        '    proto.set(emscripten::val::global("Symbol")["iterator"], proto["iterator"]); }\n'
+                        % c['reg'] for c in CLASSES if c.get('table')))
 
     # the C-layer translation units the generated code calls into, from the
     # manifest's defining file per function -- replaces discovering the link

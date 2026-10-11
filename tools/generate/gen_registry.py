@@ -143,6 +143,15 @@ CLASSES = [
      'copy': ('source.m_dimstyle'
               ' ? new ON_DimStyle(*source.m_dimstyle) : nullptr'),
      'gen': 'BND_DimensionStyleX', 'reg': 'DimensionStyleX', 'bridge': False, 'base': 'ModelComponentX'},
+    {'type': 'Rhino.DocObjects.Group', 'cs': 'Group', 'on': 'ON_Group',
+     'mode': 'pointer', 'hand': 'BND_Group', 'hand_header': 'bnd_group.h',
+     'copy': 'source.m_group ? new ON_Group(*source.m_group) : nullptr',
+     'gen': 'BND_GroupX', 'reg': 'GroupX', 'base': 'ModelComponentX'},
+    {'type': 'Rhino.Geometry.InstanceDefinitionGeometry', 'cs': 'InstanceDefinitionGeometry',
+     'on': 'ON_InstanceDefinition',
+     'mode': 'pointer', 'hand': 'BND_InstanceDefinitionGeometry', 'hand_header': 'bnd_instance.h',
+     'copy': 'source.m_idef ? new ON_InstanceDefinition(*source.m_idef) : nullptr',
+     'gen': 'BND_InstanceDefinitionGeometryX', 'reg': 'InstanceDefinitionGeometryX', 'base': 'ModelComponentX'},
     # -- replacement phase 2: classes not begun before (docs/vnext/old-coverage.md)
     {'type': 'Rhino.DocObjects.Layer', 'cs': 'Layer', 'on': 'ON_Layer',
      'mode': 'pointer', 'hand': 'BND_Layer', 'hand_header': 'bnd_layer.h',
@@ -342,7 +351,9 @@ C_VT = {'ON_3dPoint*': 'Point3d', 'ON_3DPOINT_STRUCT*': 'Point3d',
         'ON_Interval*': 'Interval', 'ON_INTERVAL_STRUCT*': 'Interval',
         'ON_PLANE_STRUCT*': 'Plane', 'ON_Xform*': 'Transform', 'ON_Line*': 'Line', 'ON_BoundingBox*': 'BoundingBox',
         'ON_Arc*': 'Arc', 'ON_Circle*': 'Circle', 'ON_Sphere*': 'Sphere',
-        'ON_2DPOINT_STRUCT*': 'Point2d', 'ON_2dVector*': 'Vector2d', 'ON_2DVECTOR_STRUCT*': 'Vector2d'}
+        'ON_2DPOINT_STRUCT*': 'Point2d', 'ON_2dVector*': 'Vector2d', 'ON_2DVECTOR_STRUCT*': 'Vector2d',
+        # sizes static_assert'ed where they cross (RH3DM_Ptr)
+        'ON_Cone*': 'Cone', 'ON_Cylinder*': 'Cylinder', 'ON_Torus*': 'Torus', 'ON_Ellipse*': 'Ellipse'}
 VT_JS_KEY = {}       # generated struct -> JS shape-test property
 
 
@@ -415,6 +426,9 @@ HOLDERS = {
     'SimpleArrayPoint3d':{'ctype': 'ON_3dPointArray*',
                           'local': 'ON_3dPointArray {n};',
                           'cs': 'Point3d[]', 'elem': 'RH3DM_P({n}[i])'},
+    'SimpleArrayGuid':   {'ctype': 'ON_SimpleArray<ON_UUID>*',
+                          'local': 'ON_SimpleArray<ON_UUID> {n};',
+                          'cs': 'Guid[]', 'elem': 'ON_UUID_to_Binding({n}[i])'},
 }
 
 EXMAP = {
@@ -426,6 +440,8 @@ EXMAP = {
     'NotSupportedException': 'std::runtime_error',
     # -> Python FileNotFoundError (translator registered in gen_init.cpp)
     'FileNotFoundException': 'RH3DM_FileNotFound',
+    # a File3dm proxy whose component is no longer in the model (CommonObject.ConstPointer)
+    'DocumentCollectedException': 'std::runtime_error',
 }
 # C# enum parameter/return types. The C side always takes/returns int (the C#
 # call site casts, `(int)continuityType`). 'cpp' is the binding-side spelling:
@@ -448,14 +464,27 @@ def extend_enum_table(manifest):
     (re-registering it would throw), otherwise a generated RH3DM_<Name>
     defined from the manifest's values. Nested enums (DimensionStyle.Field)
     are left out: their short names repeat across types."""
-    hand = {}
+    hand, hand_js = {}, {}
     for f in glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.cpp')):
-        for cpp, name in re.findall(r'py::enum_<([^>]+)>\(m, "(\w+)"', open(f, errors='replace').read()):
+        text = open(f, errors='replace').read()
+        for cpp, name in re.findall(r'py::enum_<([^>]+)>\(m, "(\w+)"', text):
             hand.setdefault(name, cpp.strip())
+        # nested under a class: `py::class_<...> pyDimStyle(m, "DimensionStyle");
+        # py::enum_<ON_DimStyle::field>(pyDimStyle, "Field")` is DimensionStyle.Field
+        cls_vars = dict((v, n) for v, n in re.findall(r'py::class_<[^;]*?>\s*(\w+)\s*\(m,\s*"(\w+)"', text))
+        for cpp, var, name in re.findall(r'py::enum_<([^>]+)>\((\w+), "(\w+)"', text):
+            if var in cls_vars:
+                hand.setdefault(cls_vars[var] + '.' + name, cpp.strip())
+        for cpp, name in re.findall(r'\benum_<([^>]+)>\("(\w+)"\)', text):
+            hand_js.setdefault(cpp.strip(), name)
     type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
-    seen = {}
+    seen, nested = {}, {}
     for x in manifest['members']:
-        if x['Kind'] != 'enum' or x['Variant'] != 'portable' or x['Type'] in type_names:
+        if x['Kind'] != 'enum' or x['Variant'] != 'portable':
+            continue
+        if x['Type'] in type_names:
+            # nested (DimensionStyle.ArrowType): keyed by its owner's simple name
+            nested.setdefault(x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name'], set()).add(x['Type'])
             continue
         seen.setdefault(x['Name'], set()).add(x['Type'])
     for name, owners in seen.items():
@@ -463,6 +492,19 @@ def extend_enum_table(manifest):
             continue
         CS_ENUMS[name] = ({'cpp': hand[name], 'gen': False} if name in hand
                           else {'cpp': 'RH3DM_' + name, 'gen': True})
+    # nested: Python registers it IN its owner's generated class (DimensionStyleX.ArrowType,
+    # as RhinoCommon nests it); JS has no nesting -- owner + name (the old bindings'
+    # DimensionStyleField). A hand registration under the same qualified name is reused.
+    for key, owners in nested.items():
+        if key in CS_ENUMS or len(owners) != 1:
+            continue
+        owner = key.split('.')[0]
+        if key in hand:
+            CS_ENUMS[key] = {'cpp': hand[key], 'gen': False, 'owner': owner,
+                             'js': hand_js.get(hand[key], key.replace('.', ''))}
+        else:
+            CS_ENUMS[key] = {'cpp': 'RH3DM_' + key.replace('.', '_'), 'gen': True, 'owner': owner,
+                             'js': key.replace('.', '')}
 
 
 def camel(n):
@@ -488,10 +530,15 @@ def cs_signature(member):
     """(return type, [(mode, type, name)]) from the manifest's STRUCTURED
     record (specgen writes Roslyn's parse: Returns + Params) -- no signature
     text parsing, so generics and default values cannot confuse it.
-    Unsupported parameter modifiers (params, this) yield (None, None)."""
+    Unsupported parameter modifiers (params, this) yield (None, None).
+    A bare nested enum name resolves in the member's own type, as C# does
+    (`ArrowType` in DimensionStyle is DimensionStyle.ArrowType)."""
     if 'Params' not in member and 'Returns' not in member:
         return None, None
-    ret = cs_unqualify(member.get('Returns') or member.get('Type', '').split('.')[-1])
+    owner = member.get('Type', '').replace('+', '.').split('.')[-1]
+    def q(t):
+        return owner + '.' + t if t and '.' not in t and (owner + '.' + t) in CS_ENUMS else t
+    ret = q(cs_unqualify(member.get('Returns') or member.get('Type', '').split('.')[-1]))
     params = []
     for p in member.get('Params') or []:
         mode = p.get('Mode') or ''
@@ -499,7 +546,7 @@ def cs_signature(member):
             mode = ''                      # by-value for our purposes
         if mode not in ('', 'out', 'ref'):
             return None, None
-        params.append((mode, cs_unqualify(p['Type']), p['Name']))
+        params.append((mode, q(cs_unqualify(p['Type'])), p['Name']))
     return ret, params
 
 
@@ -516,10 +563,15 @@ def local_value(init):
         return t, None
     if t == 'IntPtr.Zero':
         return 'nullptr', None
+    # `Guid id = default(Guid);` and the other zero values C# spells default(T)
+    zero = {'default(Guid)': 'ON_nil_uuid', 'Guid.Empty': 'ON_nil_uuid', 'default(int)': '0',
+            'default(double)': '0.0', 'default(bool)': 'false', 'default(uint)': '0'}
+    if t in zero:
+        return zero[t], None
     mm = re.match(r'^RhinoMath\.(\w+)$', t)
     if mm and ('RhinoMath', mm.group(1)) in VT_CONSTS:
         return 'RH3DM_RhinoMath::' + mm.group(1), None
-    mm = re.match(r'^(\w+)\.(\w+)$', t)
+    mm = re.match(r'^(\w+)\.(\w+)$', cs_unqualify(t))     # Geometry.Transform.Unset too
     if mm and mm.group(1) in VT_CPP and (mm.group(1), mm.group(2)) in VT_STATICS:
         return '%s::%s()' % (VT_CPP[mm.group(1)], mm.group(2)), mm.group(1)
     return None
@@ -553,3 +605,117 @@ VT_PROP_RET = {}     # (C# type, name) -> C++ return type of that property's get
 BRIDGE_STATICS = {}     # (class C# name, static name) -> generated static plans
 BRIDGE_CANDIDATES = {}  # value type C# name -> manifest members delegating to a class static
 BRIDGE_INCLUDES = {}    # value type C# name -> generated class headers its bindings need
+
+
+# ---------------------------------------------------------------- RhinoCommon types
+# the manifest's `type` records, indexed once (index_types): inheritance with
+# generic arguments, and properties whose getter is a constant
+TYPE_RECS = {}       # full type -> type record
+SIMPLE_TYPES = {}    # simple name -> [full types]
+CONST_PROPS = {}     # (full type, property) -> (C# constant text, value or None)
+PLANNED = {}         # registry name -> its plans, filled as classes are planned (in CLASSES order)
+ENUM_VALUES = {}     # C# enum name -> its declared values (ints, distinct), when all are literal
+GUARD_ENUMS = set()  # C# enums a guard condition names (must be defined even if no signature uses them)
+C_BY_NAME = {}       # the C surface by function name (bnd_gen fills it)
+PROPS_BY_TYPE = {}   # full type -> its portable property records (nearest-declaration lookups)
+NO_OWNED_ABSTRACT = set()  # abstract bases whose guards ask RH3DM_NoOwnedPtr() (derived classes answer)
+
+
+def index_types(manifest):
+    TYPE_RECS.clear(); SIMPLE_TYPES.clear(); CONST_PROPS.clear(); PLANNED.clear(); ENUM_VALUES.clear()
+    PROPS_BY_TYPE.clear(); NO_OWNED_ABSTRACT.clear()
+    for x in manifest['members']:
+        if x['Kind'] == 'property' and x['Variant'] in ('portable', 'rhino3dm-only'):
+            PROPS_BY_TYPE.setdefault(x['Type'], []).append(x)
+    owners = {}
+    for x in manifest['members']:
+        if x['Kind'] == 'enum' and x['Variant'] in ('portable', 'rhino3dm-only') and x.get('Values'):
+            owners.setdefault(x['Name'], []).append(x)
+    for name, recs in owners.items():
+        if len(recs) != 1:
+            continue                          # the short name repeats: ambiguous
+        vals, nxt, named = [], 0, {}
+        for v in recs[0]['Values']:
+            n, _, e = v.partition('=')
+            n, e = n.strip(), e.strip()
+            if e:
+                if e in named:
+                    val = named[e]            # RenderMaterial = Material
+                else:
+                    try:
+                        val = int(e, 0)
+                    except ValueError:
+                        vals = None
+                        break
+            else:
+                val = nxt
+            named[n] = val
+            vals.append(val)
+            nxt = val + 1
+        if vals:
+            ENUM_VALUES[name] = sorted(set(vals))
+    for x in manifest['members']:
+        if x['Kind'] == 'type':
+            TYPE_RECS[x['Type']] = x
+            SIMPLE_TYPES.setdefault(x['Type'].replace('+', '.').split('.')[-1], []).append(x['Type'])
+        elif x['Kind'] == 'property' and x.get('Const') and x['Variant'] in ('portable', 'rhino3dm-only'):
+            CONST_PROPS[(x['Type'], x['Name'])] = (x['Const'], x.get('ConstValue'))
+    # the File3dm proxy idiom (specgen FileProxy): a registry class that has it
+    # gets a second storage state -- (model, id), resolved on every access.
+    # Only NonConst "resolve" (edits go into the model) is reproduced; a
+    # copy-on-write NonConstPointer is not, so such a class gets no proxies.
+    for c in CLASSES:
+        fp = (TYPE_RECS.get(c['type']) or {}).get('FileProxy')
+        base = BY_REG.get(c.get('base', ''))
+        if (fp and fp['NonConst'] == 'resolve' and c['mode'] == 'pointer'
+                and (base is None or base['mode'] == 'abstract')):
+            c['proxy'] = fp
+        else:
+            c.pop('proxy', None)
+
+
+def resolve_type(name, near):
+    """a base named `File3dmCommonComponentTable` (or `DocObjects.Linetype`)
+    from type `near`: the unique full type of that simple name, preferring
+    near's namespace"""
+    simple = cs_unqualify(name).split('.')[-1]
+    cands = SIMPLE_TYPES.get(simple, [])
+    if len(cands) == 1:
+        return cands[0]
+    ns = near.rsplit('.', 1)[0]
+    same = [c for c in cands if c.rsplit('.', 1)[0] == ns]
+    return same[0] if len(same) == 1 else None
+
+
+def base_chain(full_type):
+    """[(base full type, {type param: argument})], nearest first, through
+    every base CLASS (interfaces have no type record with members we use)"""
+    out, todo, seen = [], [(full_type, {})], set()
+    while todo:
+        t, binding = todo.pop(0)
+        rec = TYPE_RECS.get(t)
+        if rec is None or t in seen:
+            continue
+        seen.add(t)
+        for i, b in enumerate(rec.get('Bases') or []):
+            bt = resolve_type(b, t)
+            if bt is None or bt in seen:
+                continue
+            args = (rec.get('BaseArgs') or [None] * len(rec['Bases']))[i] or []
+            params = TYPE_RECS.get(bt, {}).get('TypeParams') or []
+            # a base's own arguments may name OUR type parameters (T -> T)
+            b2 = {p: cs_unqualify(binding.get(a, a)) for p, a in zip(params, args)}
+            out.append((bt, b2))
+            todo.append((bt, b2))
+    return out
+
+
+def class_const(full_type, name):
+    """the constant a property of this type (or its nearest declaring base)
+    returns: `ComponentType` on File3dmLayerTable -> ('ModelComponentType.Layer', '5')"""
+    if (full_type, name) in CONST_PROPS:
+        return CONST_PROPS[(full_type, name)]
+    for bt, _ in base_chain(full_type):
+        if (bt, name) in CONST_PROPS:
+            return CONST_PROPS[(bt, name)]
+    return None
