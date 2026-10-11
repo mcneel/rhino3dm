@@ -4,14 +4,28 @@ marshalling, return shape) or a refusal reason."""
 from gen_registry import *
 
 
+def storage_owner(cls):
+    """the class holding m_ptr: itself, or the concrete base it extends"""
+    while True:
+        b = BY_REG.get(cls.get('base', ''))
+        if b is None or b['mode'] == 'abstract':
+            return cls
+        cls = b
+
+
 def self_access(cls, self_expr, accessor):
-    """the this-pointer as C# obtained it. A File3dm proxy has two:
-    ConstPointer (resolve, or throw DocumentCollectedException) and
-    NonConstPointer (resolve; may be null). Abstract bases forward to the
-    derived class's pair. Anything else: its one pointer."""
+    """the this-pointer as C# obtained it. A view (File3dm proxy, or the
+    geometry/attributes of a File3dmObject) has two: ConstPointer (resolve, or
+    throw DocumentCollectedException) and NonConstPointer (resolve, or copy on
+    write). A class sharing a view-capable base's storage downcasts the base's
+    pair. Abstract bases forward to the derived class's pair. Anything else:
+    its one pointer."""
     nonconst = accessor == 'NonConstPointer'
     if cls.get('proxy'):
         return 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()'
+    owner = storage_owner(cls)
+    if owner is not cls and owner.get('proxy'):
+        return 'static_cast<%s*>(%s)' % (cls['on'], 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()')
     if cls['mode'] == 'abstract':
         return '%s%s()' % (cls['getter'], 'NC' if nonconst else '')
     return self_expr
@@ -71,18 +85,33 @@ def plan(member, cfn, cls):
     cs_param_modes = {n: (mode, t) for mode, t, n in sig_params}
     # a class argument null-checked by an early return is optional (None/null)
     nullable_params = {n for n in retnull if cs_param_modes.get(n, ('', ''))[1] in BY_CS}
-    call_exprs, locals_, out_by_name, extra_fns = [], [], {}, []
+    call_exprs, locals_, out_by_name, extra_fns, typearg_pos = [], [], {}, [], []
     for pos, (carg, cparam) in enumerate(zip(call['Args'], cfn['params'])):
         k, ctype = carg['Kind'], cparam['type']
-        # self arrives as kind 'expr' (ptr locals) on classes and as kind
-        # 'out' with text `this` on value structs (`ref this`); position 0
-        # plus the class's own pointer type is the discriminator. STATICS have
-        # no self: their pos-0 out is the RESULT (the factory idiom), handled
-        # by the ordinary out machinery below.
-        if (not member.get('Static') and pos == 0
-                and ctype in selfs and k in ('expr', 'out')):
+        fp = (TYPE_RECS.get(cls['type']) or {}).get('FileProxy') or {}
+        if k == 'fieldptr' and cls.get('proxy') and carg['Text'] == fp.get('FileField'):
+            # a File3dm proxy's own file (`m_parent.ConstPointer()`)
+            if ctype.replace('const ', '') != 'ONX_Model*':
+                return None, 'field pointer %s -> %s' % (carg['Text'], ctype)
+            call_exprs.append('m_model')
+            continue
+        if k == 'expr' and cls.get('proxy') and carg['Text'] == fp.get('IdField'):
+            if ctype != 'ON_UUID':
+                return None, 'id field %s -> %s' % (carg['Text'], ctype)
+            call_exprs.append('m_id')
+            continue
+        # self arrives as kind 'expr' (ptr locals) on classes, as kind 'out'
+        # with text `this` on value structs (`ref this`), and as 'fieldptr' on
+        # a child VIEW (`m_mesh.ConstPointer()`: the parent object the view is
+        # of); position 0 plus the class's own pointer type is the
+        # discriminator. STATICS have no self: their pos-0 out is the RESULT
+        # (the factory idiom), handled by the ordinary out machinery below.
+        if (not member.get('Static') and pos == 0 and ctype in selfs
+                and (k in ('expr', 'out') or (k == 'fieldptr' and cls['mode'] == 'child'))):
             call_exprs.append(self_access(cls, self_expr, carg.get('Value')))
             continue
+        if k == 'fieldptr':
+            return None, 'field pointer %s' % carg['Text']
         if holder and pos == holder_arg:
             if ctype != holder['ctype']:
                 return None, 'holder ctype %s vs %s' % (ctype, holder['ctype'])
@@ -99,8 +128,11 @@ def plan(member, cfn, cls):
                 return None, 'nested call %s' % inner['Name']
             iargs = []
             for ipos, (ia, iq) in enumerate(zip(inner['Args'], ifn['params'])):
-                if ipos == 0 and ia['Kind'] == 'expr' and iq['type'] in selfs and not member.get('Static'):
+                if (ipos == 0 and iq['type'] in selfs and not member.get('Static')
+                        and (ia['Kind'] == 'expr' or (ia['Kind'] == 'fieldptr' and cls['mode'] == 'child'))):
                     iargs.append(self_access(cls, self_expr, ia.get('Value')))
+                elif ia['Kind'] == 'fieldptr' and cls.get('proxy') and ia['Text'] == fp.get('FileField'):
+                    iargs.append('m_model')
                 elif ia['Kind'] == 'literal':
                     iargs.append('nullptr' if ia['Text'] == 'null' else ia['Text'])
                 else:
@@ -170,6 +202,8 @@ def plan(member, cfn, cls):
             cv = class_const(cls['type'], carg['Text'])
             if cv is not None and cv[1] is not None:
                 k, carg = 'const', {'Kind': 'const', 'Text': cv[0], 'Value': cv[1]}
+                if carg['Text'].startswith('ModelComponentType.'):
+                    typearg_pos.append(len(call_exprs))      # a multi-type table sums over it
         if k == 'expr':
             # a widening/enum cast of a declared parameter is the parameter:
             # RhinoCommon spells enum args `(int)continuityType` at the call site
@@ -342,6 +376,10 @@ def plan(member, cfn, cls):
         shape = factory_shape(member['Factory'], cls, sig_ret, cret, out_by_name)
         if isinstance(shape, str):
             return None, shape
+    elif member.get('ConstView'):
+        shape = constview_shape(member['ConstView'], cls, sig_ret)
+        if isinstance(shape, str):
+            return None, shape
     elif sig_ret in CS_RET_DIRECT and cret == CS_RET_DIRECT[sig_ret]:
         shape = ('direct', cret)
     elif (sig_ret in CS_RET_DIRECT and member.get('ResultCast') == sig_ret and not out_by_name
@@ -407,6 +445,9 @@ def plan(member, cfn, cls):
             g['cond_cpp'] = '!(%s)' % self_access(cls, self_expr, 'ConstPointer')
         guards.append(g)
 
+    commits = bool(member.get('Commits'))
+    if commits and not (cls.get('proxy') or {}).get('Commit'):
+        return None, 'Commit() on a class without a recorded commit'
     failthrow = member.get('FailThrow')
     ft_attached = None
     if failthrow:
@@ -422,6 +463,8 @@ def plan(member, cfn, cls):
         else:
             return None, 'fail-throw shape'
 
+    if commits and not (shape == ('direct', 'void') or shape[0] == 'failthrow'):
+        return None, 'Commit() after a non-void shape'
     success = member.get('Success')
     if success:
         if shape[0] != 'fromout' or success['Out'] != shape[2]:
@@ -437,7 +480,53 @@ def plan(member, cfn, cls):
             'static': bool(member.get('Static')),
             'call_exprs': call_exprs, 'locals': locals_,
             'bind_args': bind_args, 'shape': shape, 'extra_fns': extra_fns,
-            'guards': guards, 'success': success, 'failthrow': ft_attached}, None
+            'guards': guards, 'success': success, 'failthrow': ft_attached,
+            'typearg_pos': typearg_pos, 'commits': commits}, None
+
+
+def proxy_id_field(cls):
+    fp = (TYPE_RECS.get(cls['type']) or {}).get('FileProxy') or {}
+    return fp.get('IdField')
+
+
+def constview_shape(cv, cls, sig_ret):
+    """`p = GetGeometryConstPointer(); if (cache stale) cache = CreateGeometryHelper(p, this);
+    return cache;` on a File3dm proxy: the result is a VIEW of (this file, this
+    id) whose class has that very resolver. CreateGeometryHelper picks the
+    most-derived geometry class at run time (RH3DM_View_<root>); `new T(this)`
+    names the class. The cache is not reproduced: a view resolves on every
+    access, which is what the cache guaranteed."""
+    if not cls.get('proxy') or not cv.get('Native'):
+        return 'constview on a non-proxy'
+    fp = (TYPE_RECS.get(cls['type']) or {}).get('FileProxy') or {}
+    a = cv['Native']['Args']
+    if not (len(a) == 2 and a[0]['Kind'] == 'fieldptr' and a[0]['Text'] == fp.get('FileField')
+            and a[1]['Kind'] == 'expr' and a[1]['Text'] == fp.get('IdField')):
+        return 'constview resolver args'
+    target = BY_CS.get(cv['New'] or sig_ret)
+    if target is None:
+        return 'constview target %s' % (cv['New'] or sig_ret)
+    if cv['New'] is None:
+        # CreateGeometryHelper: an abstract root whose derived classes carry the view
+        if target['mode'] != 'abstract':
+            return 'constview root %s' % target['cs']
+        views = [c for c in CLASSES if c.get('proxy') and c['proxy'].get('Parent') == cls['cs']
+                 and derives_from(c, target)]
+        if not views or any(c['proxy']['Resolver'] != cv['Native']['Name'] for c in views):
+            return 'constview resolver mismatch'
+        return ('constview', target, cv['Native']['Name'], True)
+    if (target.get('proxy') or {}).get('Resolver') != cv['Native']['Name'] or target['proxy'].get('Parent') != cls['cs']:
+        return 'constview resolver mismatch'
+    return ('constview', target, cv['Native']['Name'], False)
+
+
+def derives_from(c, base):
+    b = BY_REG.get(c.get('base', ''))
+    while b is not None:
+        if b is base:
+            return True
+        b = BY_REG.get(b.get('base', ''))
+    return False
 
 
 def factory_shape(fac, cls, sig_ret, cret, out_by_name):
@@ -890,6 +979,10 @@ def class_members(cls, manifest):
     own = [x for x in manifest['members'] if x['Type'] == cls['type']]
     if not TYPE_RECS:
         return own
+    if (TYPE_RECS.get(cls['type']) or {}).get('ExtraComponentTypeValues'):
+        # a multi-type table (File3dmObjectTable): its Count and GetEnumerator
+        # overrides are the base's over several types -- planned from the base
+        own = [x for x in own if not (x['Kind'] in ('method', 'property') and x['Name'] in ('Count', 'GetEnumerator'))]
     def key(x):
         _, ps = cs_signature(x)
         return (x['Kind'], x['Name'], tuple(t for _, t, _ in (ps or [])))
@@ -972,6 +1065,10 @@ def plan_class(cls, manifest, c_by_name, skipped):
     basecls = BY_REG.get(cls.get('base', ''))
     self_ptr = ('static_cast<%s*>(m_ptr)' % cls['on']
                 if basecls and basecls['mode'] not in ('abstract',) else 'm_ptr')
+    # a child view of a VIEW parent (curve.Points on a File3dmObject's geometry)
+    # gets the writable pointer: the parent copies on write right there, so
+    # writes through the child land in the private copy, as in .NET
+    self_ptr = self_access(cls, self_ptr, 'NonConstPointer')
     have = {p['m']['Name'] for p in plans if p['m']['Kind'] == 'property'}
     for x in manifest['members']:
         if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
@@ -983,10 +1080,84 @@ def plan_class(cls, manifest, c_by_name, skipped):
             plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
                           'call_exprs': [], 'locals': [], 'bind_args': [],
                           'shape': ('child', child), 'guards': [], 'success': None,
-                          # a child may view a PART of the parent (File3dmSettings:
-                          # &model->m_settings), per its registry 'derive'
-                          'self_ptr': child.get('derive', '{p}').format(p=self_ptr)})
+                          # a child that views a PART of the parent (File3dmSettings:
+                          # &model->m_settings, registry 'derive') derives it itself
+                          # and keeps the parent too (its own file views need it)
+                          'self_ptr': self_ptr})
             have.add(x['Name'])
+
+    # file views (File3dmSettings.RenderSettings => new RenderSettings(m_parent)):
+    # the property hands out a view of the FILE; the owner must carry the model
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
+                and x['Kind'] == 'property' and x['Name'] not in have and x.get('Child')):
+            continue
+        target = BY_CS.get(cs_unqualify(x['Child']))
+        if not (target and (target.get('proxy') or {}).get('NoId') and x.get('ChildArgKinds') == ['file']
+                and cs_unqualify(x.get('Returns') or '') == target['cs']):
+            continue
+        if not (cls['mode'] == 'child' and cls.get('parent') == 'File3dmX'):
+            skipped['fileview: owner has no model'] = skipped.get('fileview: owner has no model', 0) + 1
+            continue
+        plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
+                      'call_exprs': [], 'locals': [], 'bind_args': [],
+                      'shape': ('fileview', target), 'guards': [], 'success': None})
+        have.add(x['Name'])
+
+    # Variant properties (the RDK settings): `using (var v = GetValue(E.M)) return v.ToX();`
+    # and `using (var v = new Variant(value)) SetValue(E.M, v);` -- the natives
+    # of the class's helpers and of the Variant wrapper, in that exact order
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
+                and x['Kind'] == 'property' and x.get('VariantGet') and x['Name'] not in have):
+            continue
+        g, why = plan_variant(x, cls)
+        if g is None:
+            skipped['variant: ' + why] = skipped.get('variant: ' + why, 0) + 1
+            continue
+        plans.append(g)
+        have.add(x['Name'])
+        if x.get('VariantSet'):
+            sp, swhy = plan_variant(x, cls, setter=True)
+            if sp is None:
+                skipped['variant setter: ' + swhy] = skipped.get('variant setter: ' + swhy, 0) + 1
+            else:
+                sp['setter_of'] = g
+                g['setter'] = sp
+                plans.append(sp)
+
+    # settings views (RenderSettings.GroundPlane): a file view when the render
+    # settings are the file's, else a pointer into these render settings
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
+                and x['Kind'] == 'property' and x.get('SettingsView') and x['Name'] not in have):
+            continue
+        target = BY_CS.get(x['SettingsView']['New'])
+        fn = C_BY_NAME.get(x['SettingsView']['Native'])
+        if not (target and target.get('ff') and target.get('proxy') and fn and (cls.get('proxy') or {}).get('NoId')
+                and fn['returns'].replace('const ', '') == target['on'] + '*'
+                and cs_unqualify(x.get('Returns') or '') == target['cs']):
+            skipped['settingsview: %s' % x['SettingsView']['New']] = skipped.get('settingsview: %s' % x['SettingsView']['New'], 0) + 1
+            continue
+        plans.append({'m': x, 'fn': fn, 'cls': cls, 'static': False,
+                      'call_exprs': [], 'locals': [], 'bind_args': [],
+                      'shape': ('settingsview', target, fn['name']), 'guards': [], 'success': None})
+        have.add(x['Name'])
+
+    # const views (File3dmObject.Geometry / .Attributes): no native call of their
+    # own -- the result is a view of (this file, this id)
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
+                and x['Kind'] == 'property' and x.get('ConstView') and x['Name'] not in have):
+            continue
+        sh = constview_shape(x['ConstView'], cls, cs_unqualify(x.get('Returns') or ''))
+        if isinstance(sh, str):
+            skipped['constview: ' + sh] = skipped.get('constview: ' + sh, 0) + 1
+            continue
+        plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
+                      'call_exprs': [], 'locals': [], 'bind_args': [],
+                      'shape': sh, 'guards': [], 'success': None})
+        have.add(x['Name'])
 
     # property setters: the manifest's Setter is the `set` accessor analyzed
     # like a method body, planned as `void set(T value)` and registered with
@@ -1042,6 +1213,29 @@ def plan_class(cls, manifest, c_by_name, skipped):
             plans.append(f)
         else:
             skipped['forward: ' + why] = skipped.get('forward: ' + why, 0) + 1
+
+    # property chains (`File3dmObject.Name => Attributes.Name`): a property of
+    # the object a sibling property returns, both generated -- the sibling here
+    # (a view or child), the member on its class (planned earlier, PLANNED)
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
+                and x['Kind'] == 'property' and x.get('Body') == 'chain'):
+            continue
+        c, why = plan_chain(x, cls, plans, x['Delegates'], setter=False)
+        if c is None:
+            skipped['chain: ' + why] = skipped.get('chain: ' + why, 0) + 1
+            continue
+        st = x.get('Setter') or {}
+        if st.get('Body') == 'chain' and st.get('Delegates') == x['Delegates'] \
+                and [a['Kind'] for a in st.get('DelegateArgs') or []] == ['param']:
+            sp, swhy = plan_chain(x, cls, plans, x['Delegates'], setter=True)
+            if sp is not None:
+                sp['setter_of'] = c
+                c['setter'] = sp
+                plans.append(sp)
+            else:
+                skipped['chain setter: ' + swhy] = skipped.get('chain setter: ' + swhy, 0) + 1
+        plans.append(c)
 
     # overloads: every plan gets a unique C++ method name; registration puts
     # them all under the one RhinoCommon name (pybind dispatches by type, the
@@ -1161,6 +1355,86 @@ def plan_class(cls, manifest, c_by_name, skipped):
     return resolved
 
 
+def plan_chain(x, cls, plans, chain, setter):
+    """`Attributes.Name`: sibling property `Attributes` (a generated view/child
+    returning class T*), then T's generated property `Name` (its getter, or its
+    setter for the chain's setter). Refuses when either half is not generated."""
+    sib_name, _, mem = chain.partition('.')
+    sibs = [p for p in plans if p['m']['Kind'] == 'property' and p['m']['Name'] == sib_name
+            and not p.get('setter_of') and p['shape'][0] in ('constview', 'child')]
+    if len(sibs) != 1:
+        return None, 'sibling %s' % sib_name
+    sib = sibs[0]
+    target = sib['shape'][1]
+    if target['mode'] == 'abstract':
+        return None, 'sibling %s is an abstract view' % sib_name
+    getter = generated_getter(target, mem)
+    if getter is None:
+        return None, 'member %s.%s' % (target['cs'], mem)
+    if setter:
+        sp = getter.get('setter')
+        if sp is None:
+            return None, 'setter %s.%s' % (target['cs'], mem)
+        decl = None
+        return {'m': dict(x, Kind='method', Returns='void'), 'fn': None, 'cls': cls, 'static': False,
+                'call_exprs': [], 'locals': [], 'bind_args': list(sp['bind_args']),
+                'shape': ('chain', sib, sp, True), 'guards': [], 'success': None}, None
+    return {'m': x, 'fn': None, 'cls': cls, 'static': False,
+            'call_exprs': [], 'locals': [], 'bind_args': [],
+            'shape': ('chain', sib, getter, False), 'guards': [], 'success': None}, None
+
+
+# the Variant's C# value types the binding carries, and how
+VARIANT_TYPES = {
+    'bool':     ('bool', None),           # (binding type, value-type C# name or None)
+    'double':   ('double', None),
+    'int':      ('int', None),
+    'Guid':     ('BND_UUID', None),
+    'Vector2d': ('BND_Vector2dX', 'Vector2d'),
+    'Vector3d': ('BND_Vector3dX', 'Vector3d'),
+}
+
+
+def plan_variant(x, cls, setter=False):
+    ff = cls.get('ff') or {}
+    wr = WRAPPER
+    if not (ff.get('GetValueNative') and wr.get('New') and wr.get('Delete')):
+        return None, 'no helpers'
+    va = x['VariantSet' if setter else 'VariantGet']
+    if va.get('WhichValue') is None:
+        return None, 'which %s' % va['Which']
+    cs = cs_unqualify(x.get('Returns') or '')
+    if cs not in VARIANT_TYPES:
+        return None, 'type %s' % cs
+    getfn = C_BY_NAME.get(ff['GetValueNative'])
+    if not getfn or len(getfn['params']) != 3:
+        return None, 'GetValue signature'
+    which_t = getfn['params'][1]['type']
+    bt, vt = VARIANT_TYPES[cs]
+    if setter:
+        if not (ff.get('SetValueNative') and ff.get('EqualNative')):
+            return None, 'no SetValue/IsValueEqual'
+        setn = wr['Set'].get(cs)
+        if setn is None or (wr.get('SetConv') or {}).get(cs):
+            return None, 'Variant.SetValue(%s)' % cs
+        return {'m': dict(x, Kind='method', Returns='void'), 'fn': getfn, 'cls': cls, 'static': False,
+                'call_exprs': [], 'locals': [], 'bind_args': [(bt, 'value')],
+                'shape': ('vset', {'which': '(%s)%s' % (which_t, va['WhichValue']), 'set': setn, 'cs': cs,
+                                   'vt': vt, 'get': ff['GetValueNative'], 'put': ff['SetValueNative'],
+                                   'eq': ff['EqualNative']}),
+                'guards': [], 'success': None,
+                'extra_fns': [C_BY_NAME[n] for n in (wr['New'], wr['Delete'], setn, ff['SetValueNative'], ff['EqualNative']) if n in C_BY_NAME]}, None
+    get = (wr.get('Get') or {}).get(va['Conv'])
+    if get is None or cs_unqualify(get['Returns']) != cs:
+        return None, 'Variant.%s' % va['Conv']
+    return {'m': x, 'fn': getfn, 'cls': cls, 'static': False,
+            'call_exprs': [], 'locals': [], 'bind_args': [],
+            'shape': ('vget', {'which': '(%s)%s' % (which_t, va['WhichValue']), 'conv': get, 'cs': cs, 'vt': vt,
+                               'get': ff['GetValueNative']}),
+            'guards': [], 'success': None,
+            'extra_fns': [C_BY_NAME[n] for n in (wr['New'], wr['Delete'], get['Native']) if n in C_BY_NAME]}, None
+
+
 def table_protocol(cls, manifest, plans):
     """The language protocols of a File3dm component table (a concession,
     like value-type operators: not generated from a member). Granted only
@@ -1197,9 +1471,26 @@ def table_protocol(cls, manifest, plans):
     count = [p for p in plans if p['m']['Name'] == 'Count' and p['m']['Kind'] == 'property' and not p['bind_args']]
     find = [p for p in plans if p['m']['Name'] == 'FindIndex' and p['shape'][0] == 'proxywrap'
             and [t for t, _ in p['bind_args']] == ['int']]
-    if len(count) != 1 or len(find) != 1 or find[0]['shape'][1] is not item:
+    if len(count) != 1 or len(find) > 1 or (find and find[0]['shape'][1] is not item):
         return None
-    return {'item': item, 'type_value': cv[1], 'count': count[0]['cpp'], 'find': find[0]['cpp'],
+    types = [cv[1]]
+    extras = (TYPE_RECS.get(cls['type']) or {}).get('ExtraComponentTypeValues') or []
+    if extras:
+        # `Count => base.Count + m_manifest.ActiveObjectCount(RenderLight)`: the
+        # base's Count call once per type, summed; the iterator chains the types
+        c = count[0]
+        if c['shape'][0] != 'conv' or len(c.get('typearg_pos') or []) != 1 or c['locals']:
+            return None
+        pos = c['typearg_pos'][0]
+        calls = []
+        for v in types + extras:
+            args = list(c['call_exprs'])
+            args[pos] = '(ON_ModelComponent::Type)%s' % v
+            calls.append(c['shape'][2].format(c='%s(%s)' % (c['fn']['name'], ', '.join(args))))
+        c['shape'] = ('sum', 'int', calls)
+        types = types + extras
+    # no FindIndex (the object table): len and iteration, no [i]
+    return {'item': item, 'type_value': cv[1], 'types': types, 'count': count[0]['cpp'], 'find': find[0]['cpp'] if find else None,
             'fns': [C_BY_NAME[n] for n in ('ONX_ModelComponentIterator_New',
                                            'ONX_ModelComponentIterator_GetNext',
                                            'ONX_ModelComponentIterator_Delete')]}

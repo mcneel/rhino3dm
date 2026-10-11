@@ -439,5 +439,157 @@ def test_table_protocol_requires_rhinocommons_own_pieces(tables):
             'shape': ('proxywrap', LAYER, 'id')}
     tp = P.table_protocol(LAYERS, m, [count, find])
     assert tp and tp['item'] is LAYER and tp['type_value'] == '5' and tp['find'] == 'Gen_FindIndex'
-    assert P.table_protocol(LAYERS, m, [count]) is None                      # no FindIndex: no [i], no iteration
+    assert P.table_protocol(LAYERS, m, [count])['find'] is None             # no FindIndex: iteration and len, no [i]
     assert P.table_protocol(LAYERS, {'members': tables['members']}, [count, find]) is None   # no foreach in the spec
+
+
+# ---- views (G40): copy-on-write geometry, write-through attributes, chains, multi-type tables
+
+def _views_manifest():
+    T = 'Rhino.FileIO.'
+    recs = _tables_manifest()['members'] + [
+        {'Type': T + 'File3dmObject', 'Kind': 'type', 'Name': 'File3dmObject', 'Bases': ['ModelComponent'],
+         'Variant': 'portable', 'Duplicate': 'ON_Object_Duplicate',
+         'FileProxy': {'Resolver': 'ONX_Model_ModelObjectGeometryConstPtrFromId', 'NonConst': 'base',
+                       'IdField': 'm_id', 'FileField': 'm_parent'}},
+        {'Type': 'Rhino.Geometry.GeometryBase', 'Kind': 'type', 'Name': 'GeometryBase', 'Variant': 'portable',
+         'Duplicate': 'ON_Object_Duplicate',
+         'ParentViews': [{'ParentType': 'File3dmObject', 'Const': 'GetGeometryConstPointer', 'NonConst': None,
+                          'ConstNative': {'Name': 'ONX_Model_ModelObjectGeometry',
+                                          'Args': [{'Kind': 'fieldptr', 'Text': 'm_parent', 'Value': 'ConstPointer'},
+                                                   {'Kind': 'expr', 'Text': 'm_id'}]}}]},
+        {'Type': 'Rhino.Geometry.Curve', 'Kind': 'type', 'Name': 'Curve', 'Bases': ['GeometryBase'],
+         'Variant': 'portable', 'Duplicate': 'ON_Curve_DuplicateCurve',
+         'ParentViews': [{'ParentType': 'CurveHolder', 'Const': 'ConstCurvePointer', 'NonConst': None}]},
+        {'Type': 'Rhino.DocObjects.ObjectAttributes', 'Kind': 'type', 'Name': 'ObjectAttributes', 'Variant': 'portable',
+         'Duplicate': 'ON_Object_Duplicate',
+         'ParentViews': [{'ParentType': 'File3dmObject', 'Const': 'GetAttributesConstPointer',
+                          'NonConst': 'GetAttributesNonConstPointer',
+                          'ConstNative': {'Name': 'ONX_Model_ModelObjectAttributes',
+                                          'Args': [{'Kind': 'fieldptr', 'Text': 'm_parent', 'Value': 'ConstPointer'},
+                                                   {'Kind': 'expr', 'Text': 'm_id'}]},
+                          'NonConstNative': {'Name': 'ONX_Model_ModelObjectAttributes',
+                                             'Args': [{'Kind': 'fieldptr', 'Text': 'm_parent', 'Value': 'NonConstPointer'},
+                                                      {'Kind': 'expr', 'Text': 'm_id'}]}}]},
+    ]
+    return {'members': recs}
+
+
+@pytest.fixture
+def views():
+    m = _views_manifest()
+    R.index_types(m)
+    yield m
+    R.index_types({'members': []})
+
+
+def test_views_are_derived_from_the_recorded_idioms(views):
+    # the geometry of a File3dmObject: copy on write through the class's own duplicate;
+    # its attributes: write through; a holder parent (CurveHolder) grants nothing by itself
+    assert R.BY_CS['Curve']['proxy'] == {'Resolver': 'ONX_Model_ModelObjectGeometry', 'NonConst': 'cow',
+                                         'Dup': 'ON_Curve_DuplicateCurve', 'Origin': 'object', 'Parent': 'File3dmObject'}
+    assert R.BY_CS['ObjectAttributes']['proxy']['NonConst'] == 'resolve'
+    assert R.BY_CS['File3dmObject']['proxy'] == {'Resolver': 'ONX_Model_ModelObjectGeometryConstPtrFromId',
+                                                 'NonConst': 'cow', 'Dup': 'ON_Object_Duplicate', 'Origin': 'file'}
+    assert not R.BY_CS['PolyCurve'].get('proxy')          # shares CurveX's storage: forwards, no view of its own
+    assert P.self_access(R.BY_CS['PolyCurve'], 'static_cast<ON_PolyCurve*>(m_ptr)', 'NonConstPointer') \
+        == 'static_cast<ON_PolyCurve*>(RH3DM_NonConst())'   # ... and reaches it through the base's pair
+    assert not R.BY_CS['Brep'].get('proxy')               # Brep has no type record here: no view
+
+
+def test_constview_shape_requires_matching_resolver(views):
+    OBJ = R.BY_CS['File3dmObject']
+    native = {'Name': 'ONX_Model_ModelObjectGeometry',
+              'Args': [{'Kind': 'fieldptr', 'Text': 'm_parent', 'Value': 'ConstPointer'}, {'Kind': 'expr', 'Text': 'm_id'}]}
+    sh = P.constview_shape({'Helper': 'GetGeometryConstPointer', 'Native': native, 'New': None}, OBJ, 'GeometryBase')
+    assert sh[0] == 'constview' and sh[1] is R.BY_CS['GeometryBase'] and sh[3] is True
+    sh = P.constview_shape({'Helper': 'GetAttributesConstPointer', 'New': 'ObjectAttributes',
+                            'Native': dict(native, Name='ONX_Model_ModelObjectAttributes')}, OBJ, 'ObjectAttributes')
+    assert sh[0] == 'constview' and sh[3] is False
+    bad = P.constview_shape({'Helper': 'X', 'New': 'ObjectAttributes', 'Native': native}, OBJ, 'ObjectAttributes')
+    assert isinstance(bad, str)                            # the view's resolver is not that helper's
+
+
+def test_multi_type_table_sums_counts_and_chains_types(views):
+    T = 'Rhino.FileIO.'
+    m = _views_manifest()
+    m['members'] += [
+        {'Type': T + 'File3dmObjectTable', 'Kind': 'type', 'Name': 'File3dmObjectTable',
+         'Bases': ['File3dmCommonComponentTable'], 'BaseArgs': [['File3dmObject']], 'Variant': 'portable',
+         'ExtraComponentTypes': ['ModelComponentType.RenderLight'], 'ExtraComponentTypeValues': ['9']},
+        {'Type': T + 'File3dmObjectTable', 'Kind': 'property', 'Name': 'ComponentType', 'Variant': 'portable',
+         'Const': 'ModelComponentType.ModelGeometry', 'ConstValue': '12', 'Returns': 'ModelComponentType'},
+        {'Type': T + 'CommonComponentTable', 'Kind': 'method', 'Name': 'GetEnumerator', 'Variant': 'portable',
+         'Body': 'delegates', 'Delegates': '@m_manifest.GetEnumerator<T>', 'Returns': 'IEnumerator<T>'},
+    ]
+    R.index_types(m)
+    for fn in ('ONX_ModelComponentIterator_New', 'ONX_ModelComponentIterator_GetNext', 'ONX_ModelComponentIterator_Delete'):
+        R.C_BY_NAME[fn] = {'name': fn, 'returns': 'void', 'params': []}
+    OT = R.BY_CS['File3dmObjectTable']
+    count = {'m': {'Name': 'Count', 'Kind': 'property'}, 'bind_args': [], 'cpp': 'Gen_Count', 'locals': [], 'guards': [],
+             'fn': {'name': 'F'}, 'call_exprs': ['m', '(ON_ModelComponent::Type)12 /*ModelGeometry*/'],
+             'shape': ('conv', 'int', '(int)({c})'), 'typearg_pos': [1]}
+    tp = P.table_protocol(OT, m, [count])
+    assert tp and tp['types'] == ['12', '9'] and tp['find'] is None
+    assert count['shape'] == ('sum', 'int', ['(int)(F(m, (ON_ModelComponent::Type)12))', '(int)(F(m, (ON_ModelComponent::Type)9))'])
+
+
+def test_commit_marker_needs_a_recorded_commit_and_a_void_shape(views):
+    # G41: `SetBool(...); Commit();` -- the write-back is the class's recorded Commit
+    RS = dict(CURVE, type='Rhino.Render.RenderSettings', cs='RenderSettings', on='ON_3dmRenderSettings',
+              base=None, proxy={'Resolver': 'R', 'NonConst': 'cow', 'Dup': 'D', 'Origin': 'file', 'NoId': True,
+                                'Commit': 'ON_3dmRenderSettings_ONX_Model_Commit'})
+    m = dict(member('void', calls=[SELF, {'Kind': 'param', 'Text': 'b'}], Commits=True, Body='pattern'),
+             Type=RS['type'], Params=[{'Name': 'b', 'Type': 'bool', 'Mode': ''}])
+    p, why = P.plan(m, cfn('void', 'ON_3dmRenderSettings*', 'bool'), RS)
+    assert why is None and p['commits'] is True
+    p, why = P.plan(m, cfn('void', 'ON_Curve*', 'bool'), CURVE)
+    assert p is None and 'Commit' in why                       # Curve has no commit: refuse
+    p, why = P.plan(dict(m, Returns='bool'), cfn('bool', 'ON_3dmRenderSettings*', 'bool'), RS)
+    assert p is None and 'non-void' in why                     # a value after the commit: refuse
+
+
+# ---- G42: the RDK settings -- free-floating views and the Variant idiom
+
+@pytest.fixture
+def rdk():
+    T = 'Rhino.Render.'
+    m = {'members': [
+        {'Type': T + 'Variant', 'Kind': 'type', 'Name': 'Variant', 'Variant': 'portable', 'Internal': True,
+         'Wrapper': {'New': 'ON_XMLVariant_New', 'Delete': 'ON_XMLVariant_Delete',
+                     'Set': {'bool': 'ON_XMLVariant_SetBoolValue', 'Vector2d': 'ON_XMLVariant_Set2dVectorValue',
+                             'Color': 'ON_XMLVariant_SetOnColorValue'},
+                     'SetConv': {'Color': 'ToArgb'},
+                     'Get': {'ToBool': {'Native': 'ON_XMLVariant_GetBoolValue', 'Returns': 'bool', 'Form': 'ne0'},
+                             'ToVector2d': {'Native': 'ON_XMLVariant_Get2dVectorValue', 'Returns': 'Vector2d', 'Form': 'ref'}}}},
+        {'Type': T + 'GroundPlane', 'Kind': 'type', 'Name': 'GroundPlane', 'Variant': 'portable',
+         'FreeFloating': {'New': 'ON_GroundPlane_New', 'Delete': 'ON_GroundPlane_Delete',
+                          'FromFile': 'ON_GroundPlane_FromONX_Model', 'GetValueNative': 'ON_GroundPlane_GetValue',
+                          'SetValueNative': 'ON_GroundPlane_SetValue', 'EqualNative': 'ON_XMLVariant_IsEqual'}},
+    ]}
+    R.index_types(m)
+    R.C_BY_NAME['ON_GroundPlane_GetValue'] = {'name': 'ON_GroundPlane_GetValue', 'returns': 'void',
+        'params': [{'type': 'const ON_GroundPlane*'}, {'type': 'GroundPlaneSetting'}, {'type': 'ON_XMLVariant*'}]}
+    yield m
+    R.index_types({'members': []})
+
+
+def test_free_floating_class_is_a_write_through_view_with_its_own_delete(rdk):
+    GP = R.BY_CS['GroundPlane']
+    assert GP['ff']['Delete'] == 'ON_GroundPlane_Delete'
+    assert GP['proxy'] == {'Resolver': 'ON_GroundPlane_FromONX_Model', 'NonConst': 'resolve', 'Dup': None,
+                           'Origin': 'file', 'NoId': True}
+
+
+def test_variant_property_plans_from_the_wrapper_and_helper_natives(rdk):
+    GP = R.BY_CS['GroundPlane']
+    x = {'Type': GP['type'], 'Kind': 'property', 'Name': 'Enabled', 'Returns': 'bool', 'Variant': 'portable',
+         'VariantGet': {'Which': 'UnsafeNativeMethods.GroundPlaneSetting.Enabled', 'WhichValue': '0', 'Conv': 'ToBool'},
+         'VariantSet': {'Which': 'UnsafeNativeMethods.GroundPlaneSetting.Enabled', 'WhichValue': '0'}}
+    g, why = P.plan_variant(x, GP)
+    assert why is None and g['shape'][0] == 'vget' and g['shape'][1]['conv']['Form'] == 'ne0'
+    s, why = P.plan_variant(x, GP, setter=True)
+    assert why is None and s['shape'][1]['set'] == 'ON_XMLVariant_SetBoolValue' and s['bind_args'] == [('bool', 'value')]
+    assert P.plan_variant(dict(x, Returns='Color'), GP, setter=True)[0] is None   # a converted argument: refused
+    assert P.plan_variant(dict(x, Returns='float'), GP)[0] is None                 # no binding type for it
+    assert P.plan_variant(dict(x, VariantGet=dict(x['VariantGet'], WhichValue=None)), GP)[0] is None

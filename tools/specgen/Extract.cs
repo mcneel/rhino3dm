@@ -111,6 +111,9 @@ static class ExtractCommand
 
         if (rhino3dmOnly)
             members.RemoveAll(m => m.Variant == "rhino-only");
+        foreach (var (t, w) in Walker.InternalWrappers)
+            members.Add(new MemberRecord { Type = t, Kind = "type", Name = t.Split('.').Last(), Variant = "portable",
+                                           Signature = "internal class " + t.Split('.').Last(), Internal = true, Wrapper = w });
 
         HelperInliner.Run(members);
         var simpleToFull = members.Where(m => m.Kind == "type")
@@ -125,6 +128,15 @@ static class ExtractCommand
             if (m.Const != null && Walker.EnumConsts.TryGetValue(m.Const, out var cv)
                 && Walker.EnumDecls.GetValueOrDefault(m.Const.Split('.')[0]) == 1 && long.TryParse(cv, out _))
                 members[i] = m = m with { ConstValue = cv };
+            // UnsafeNativeMethods.GroundPlaneSetting.Enabled: the nested selector enums
+            VariantAccessInfo Which(VariantAccessInfo va)
+            {
+                if (va == null) return null;
+                var mm = System.Text.RegularExpressions.Regex.Match(va.Which, @"^(?:UnsafeNativeMethods\.)?(\w+\.\w+)$");
+                return mm.Success && Walker.EnumConsts.TryGetValue(mm.Groups[1].Value, out var wv) ? va with { WhichValue = wv } : va;
+            }
+            if (m.VariantGet != null || m.VariantSet != null)
+                members[i] = m = m with { VariantGet = Which(m.VariantGet), VariantSet = Which(m.VariantSet) };
             if (m.Calls == null && m.Setter?.Calls == null && m.DelegateArgs == null)
                 continue;
             Walker.Consts.TryGetValue(m.Type, out var table);
@@ -299,7 +311,7 @@ static class HelperInliner
         {
             Calls = calls, Body = h.Body, Native = h.Native, Inlined = a.Delegates,
             Holder = h.Holder, HolderArg = h.HolderArg, Compare = h.Compare, ResultConv = h.ResultConv,
-            Success = h.Success,
+            Success = h.Success, Commits = h.Commits || a.Commits,
             Delegates = null, DelegateArgs = null,
         };
     }
@@ -537,9 +549,41 @@ static class HelperInliner
                 if (full.TryGetValue(b.Split('.').Last(), out var ts))
                     (_bases.TryGetValue(m.Type, out var l) ? l : _bases[m.Type] = new()).AddRange(ts);
 
+        // a helper of `type` (own or inherited) that is ONE native call whose
+        // arguments are the self pointer and/or fields: returned as that call
+        static CallInfo SingleNative(string type, string helper, bool selfOnly, int arity = 0)
+        {
+            if (FindBody(type, helper, arity) is not var (_, b) || b.Info is not { Body: "trivial", Calls: [var c] }
+                || b.Info.Guards != null || b.Info.Success != null || b.Info.Wrap != null || b.Info.Holder != null)
+                return null;
+            if (selfOnly && !c.Args.All(a => a.Kind == "expr" && a.Value is "ConstPointer" or "NonConstPointer"))
+                return null;
+            return c;
+        }
         for (int i = 0; i < members.Count; i++)
         {
             var m = members[i];
+            if (m.Kind == "type")
+            {
+                var dup = SingleNative(m.Type, "_InternalDuplicate", selfOnly: true, arity: 1);   // (out bool applymempressure)
+                var pvs = m.ParentViews?.Select(pv =>
+                {
+                    var owners = FullOf(pv.ParentType, m.Type);
+                    CallInfo cn = null, nn = null;
+                    foreach (var o in owners)
+                    {
+                        cn ??= SingleNative(o, pv.Const, selfOnly: false);
+                        if (pv.NonConst != null) nn ??= SingleNative(o, pv.NonConst, selfOnly: false);
+                    }
+                    return pv with { ConstNative = cn, NonConstNative = nn };
+                }).ToArray();
+                var etv = m.ExtraComponentTypes?.Select(t => Walker.EnumConsts.TryGetValue(t, out var v) ? v : null).ToArray();
+                members[i] = m = m with { Duplicate = dup?.Name, ParentViews = pvs,
+                                          ExtraComponentTypeValues = etv != null && etv.All(v => v != null) ? etv : null };
+                continue;
+            }
+            if (m.ConstView != null)
+                members[i] = m = m with { ConstView = m.ConstView with { Native = SingleNative(m.Type, m.ConstView.Helper, selfOnly: false) } };
             if (m.Guards?.Any(g => g.Calls != null) == true)
                 members[i] = m = m with { Guards = ResolveGuardCalls(m.Type, m.Guards) };
             var setter = Inline(m.Type, m.Setter);
@@ -574,7 +618,7 @@ static class HelperInliner
             members[i] = calls == null ? m with { Setter = setter, Native = native.Length > 0 ? native : null }
                 : m with
                 {
-                    Calls = calls, Body = h.Body, Inlined = m.Delegates, Success = h.Success,
+                    Calls = calls, Body = h.Body, Inlined = m.Delegates, Success = h.Success, Commits = h.Commits || m.Commits,
                     Holder = h.Holder, HolderArg = h.HolderArg, Compare = h.Compare, ResultConv = h.ResultConv,
                     Delegates = null, DelegateArgs = null, Pure = null,
                     Native = native, Setter = setter,
@@ -625,6 +669,20 @@ record MemberRecord
     public string[][] BaseArgs { get; init; }// Kind=="type": each base's generic arguments (null: none)
     public string[] TypeParams { get; init; }// Kind=="type": a generic type's parameters (CommonComponentTable<T>: T)
     public FileProxyInfo FileProxy { get; init; } // Kind=="type": the File3dm proxy idiom (see DetectFileProxy)
+    public ParentViewInfo[] ParentViews { get; init; } // Kind=="type": how a CONST object resolves through a parent (see DetectParentViews)
+    public string Duplicate { get; init; }   // Kind=="type": the native call _InternalDuplicate makes (copy-on-write)
+    public ConstViewInfo ConstView { get; init; } // property: `p = H(); if (cache null or stale) cache = Create(p, this); return cache;`
+    public bool Commits { get; init; }       // the body ends in `Commit();` (the type's CommitInfo says what that does)
+    public WrapperInfo Wrapper { get; init; } // Kind=="type": a native value wrapper (Rhino.Render.Variant)
+    public bool Internal { get; init; }      // Kind=="type": not public API; recorded for what public members are written in terms of
+    public FreeFloatingInfo FreeFloating { get; init; } // Kind=="type": DocumentOrFreeFloatingBase's New/Delete/FromFile natives
+    public VariantAccessInfo VariantGet { get; init; }  // property getter: `using (var v = GetValue(E.M)) return v.ToX();`
+    public VariantAccessInfo VariantSet { get; init; }  // property setter: `using (var v = new Variant(value)) SetValue(E.M, v);`
+    public SettingsViewInfo SettingsView { get; init; } // property: `if (m_file3dm != null) return new T(m_file3dm); ... return new T(UNM.X(cpp));`
+    public CommitInfo Commit { get; init; }  // Kind=="type": the internal Commit() -- push the private copy back into the file
+    public string[] ChildArgKinds { get; init; } // Child: per ChildArgs entry, "this" | "file" (a File3dm field) | "other"
+    public string[] ExtraComponentTypes { get; init; } // Kind=="type": a multi-type table's extra types ("ModelComponentType.RenderLight")
+    public string[] ExtraComponentTypeValues { get; init; } // ... their values
     public string Child { get; init; }       // property getter `return new T(args);` (or `f ?? (f = new T(args))`): T
     public string[] ChildArgs { get; init; } // ... its constructor arguments as written ("this")
     public string Const { get; init; }       // property whose getter is `return E.M;` (a constant): "E.M"
@@ -658,6 +716,59 @@ record AccessorInfo
     public string ResultConv { get; init; }
     public string FillPtr { get; init; }
     public string FillFail { get; init; }
+    public bool Commits { get; init; }
+}
+
+// Rhino.Render.Variant: `new Variant()` / Dispose / SetValue(T) overloads / ToX()
+// getters, each one native call on ON_XMLVariant
+record WrapperInfo
+{
+    public string New { get; init; }
+    public string Delete { get; init; }
+    public Dictionary<string, string> Set { get; init; }        // C# param type -> native (SetValue(bool) -> ON_XMLVariant_SetBoolValue)
+    public Dictionary<string, string> SetConv { get; init; }    // ... a recorded conversion of the argument (Color -> ToArgb)
+    public Dictionary<string, WrapperGet> Get { get; init; }    // ToX -> how
+}
+record WrapperGet
+{
+    public string Native { get; init; }
+    public string Returns { get; init; }     // C# type
+    public string Form { get; init; }        // "return" (value returned) | "ne0" (`!= 0`) | "ref" (out local filled)
+}
+
+// DocumentOrFreeFloatingBase subclass (GroundPlane): DefaultCppConstructor,
+// DeleteCpp, CppFromFile3dm -- each one native call; and its GetValue/SetValue
+// helpers (SetValue's portable branch: IsValueEqual then the native write)
+record FreeFloatingInfo
+{
+    public string New { get; init; }
+    public string Delete { get; init; }
+    public string FromFile { get; init; }
+    public string GetValueNative { get; init; }   // ON_GroundPlane_GetValue(CppPointer, which, variant)
+    public string SetValueNative { get; init; }   // ON_GroundPlane_SetValue(CppPointer, which, variant)
+    public string EqualNative { get; init; }      // ON_XMLVariant_IsEqual(current, v) -- SetValue's early return
+}
+
+record VariantAccessInfo
+{
+    public string Which { get; init; }       // the setting constant as written (E.M)
+    public string WhichValue { get; init; }  // ... resolved
+    public string Conv { get; init; }        // getter: the ToX used
+}
+
+record SettingsViewInfo
+{
+    public string New { get; init; }         // the class constructed
+    public string Native { get; init; }      // the pointer getter for the free-floating case (ON_3dmRenderSettings_GetGroundPlane)
+}
+
+// `internal void Commit() { if (!IsNonConst) return; [RHINO_SDK...] if (m_file3dm != null)
+//   { IntPtr p = ConstPointer(); UNM.X(p, m_file3dm.NonConstPointer()); } GC.KeepAlive(this); }`
+// -- RenderSettings: a detached copy is written back into the file
+record CommitInfo
+{
+    public string Native { get; init; }
+    public string FileField { get; init; }
 }
 
 // `if (COND) throw new ExType("msg");` -- COND restricted to identifiers,
@@ -702,10 +813,36 @@ record FailThrowInfo
 // (CommonObject.ConstPointer throws DocumentCollectedException on null), and
 // NonConstPointer either resolves the same way ("resolve": edits go straight
 // into the model) or is CommonObject's copy-on-write ("base").
+// `var o = m__parent as File3dmObject; if (o != null) return o.GetGeometryConstPointer();`
+// inside _InternalGetConstPointer (Const) / NonConstPointer (NonConst): a const
+// object whose pointer is owned by a parent of type ParentType. Helpers are
+// resolved after the walk to the parent's single native call.
+record ParentViewInfo
+{
+    public string ParentType { get; init; }  // simple name (File3dmObject)
+    public string Const { get; init; }       // helper name on the parent
+    public string NonConst { get; init; }    // helper name on the parent, or null (copy-on-write via Duplicate)
+    public CallInfo ConstNative { get; init; }    // the helper's native call (args in the parent's terms)
+    public CallInfo NonConstNative { get; init; }
+}
+
+// `IntPtr p = GetGeometryConstPointer(); if (m_g == null || m_g.ConstPointer() != p)
+//   m_g = CreateGeometryHelper(p, this); return m_g;` -- a cached const view of a
+// pointer this object resolves; the view's class is the pointer's (CreateGeometryHelper)
+// or the named type (`new ObjectAttributes(this)`)
+record ConstViewInfo
+{
+    public string Helper { get; init; }      // the pointer helper
+    public CallInfo Native { get; init; }    // ... resolved to its native call
+    public string New { get; init; }         // the type constructed with (this), or null for CreateGeometryHelper
+}
+
 record FileProxyInfo
 {
     public string Resolver { get; init; }    // ONX_Model_GetModelComponentPointer, ONX_Model_GetLinetypePointer
     public string NonConst { get; init; }    // resolve | base
+    public string IdField { get; init; }     // the field holding the component id (m_id)
+    public string FileField { get; init; }   // the field holding the File3dm (m_onx_model / m_parent / m__parent)
 }
 
 record BodyRec
@@ -801,9 +938,11 @@ class Walker : CSharpSyntaxWalker
 
     void RecordBases(TypeDeclarationSyntax node)
     {
-        AllBases[CurrentType] = node.BaseList?.Types
+        // partial classes: the bases are on ONE declaration; union, never clobber
+        var bs = node.BaseList?.Types
             .Select(b => System.Text.RegularExpressions.Regex.Replace(b.Type.ToString(), @"<.*>$", "").Split('.').Last())
             .ToArray() ?? Array.Empty<string>();
+        AllBases[CurrentType] = AllBases.TryGetValue(CurrentType, out var prev) ? prev.Union(bs).ToArray() : bs;
     }
 
     // every method/property body of the portable view by "type|name|arity",
@@ -853,6 +992,11 @@ class Walker : CSharpSyntaxWalker
                 _hidden++;
                 _types.Push(node.Identifier.Text);
                 RecordBases(node);
+                // an INTERNAL value wrapper (Rhino.Render.Variant) is not API, but the
+                // settings properties are written in terms of it: recorded as a type
+                // record marked internal (ExtractCommand appends it)
+                if (DetectWrapper(node) is WrapperInfo w)
+                    InternalWrappers[CurrentType] = w;
                 visitBase();
                 _types.Pop();
                 _hidden--;
@@ -862,6 +1006,11 @@ class Walker : CSharpSyntaxWalker
         _types.Push(node.Identifier.Text);
         if (_portable) RecordBases(node);
         var fileProxy = _portable ? DetectFileProxy(node) : null;
+        var parentViews = _portable ? DetectParentViews(node) : null;
+        var extraTypes = _portable ? DetectExtraTypes(node) : null;
+        var commit = _portable ? DetectCommit(node) : null;
+        var wrapper = _portable ? DetectWrapper(node) : null;
+        var freeFloating = _portable ? DetectFreeFloating(node) : null;
         // the type itself: RhinoCommon's inheritance (members are declared on
         // bases -- CommonObject.Decode, GeometryBase.GetBoundingBox -- and a
         // consumer resolving "is X a member of T" must walk it)
@@ -885,6 +1034,11 @@ class Walker : CSharpSyntaxWalker
                 Bases = bases is { Length: > 0 } ? bases : null,
                 BaseArgs = baseArgs is { Length: > 0 } && baseArgs.Any(a => a != null) ? baseArgs : null,
                 FileProxy = fileProxy,
+                ParentViews = parentViews,
+                ExtraComponentTypes = extraTypes,
+                Commit = commit,
+                Wrapper = wrapper,
+                FreeFloating = freeFloating,
                 TypeParams = node.TypeParameterList?.Parameters.Select(tp => tp.Identifier.Text).ToArray(),
                 File = _file,
                 Line = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line + 1,
@@ -896,6 +1050,179 @@ class Walker : CSharpSyntaxWalker
 
     static bool IsFile3dmType(string t) => t is "File3dm" or "FileIO.File3dm" or "Rhino.FileIO.File3dm";
 
+    static string UnmName(ExpressionSyntax e) =>
+        e is InvocationExpressionSyntax inv && IsUnmCall(inv) ? ((MemberAccessExpressionSyntax)inv.Expression).Name.Identifier.Text : null;
+
+    // the Variant value wrapper, verified member by member
+    static WrapperInfo DetectWrapper(TypeDeclarationSyntax node)
+    {
+        if (node.Identifier.Text != "Variant") return null;
+        string nw = null, del = null;
+        var set = new Dictionary<string, string>(); var conv = new Dictionary<string, string>();
+        var get = new Dictionary<string, WrapperGet>();
+        foreach (var c in node.Members.OfType<ConstructorDeclarationSyntax>())
+            if (c.ParameterList.Parameters.Count == 0 && c.Body is { Statements: [ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Right: var rhs } }] })
+                nw = UnmName(rhs);
+        foreach (var md in node.Members.OfType<MethodDeclarationSyntax>())
+        {
+            var body = md.Body;
+            var ps = md.ParameterList.Parameters;
+            if (md.Identifier.Text == "Dispose" && ps.Count == 1)
+                del = body?.DescendantNodes().OfType<InvocationExpressionSyntax>().Select(UnmName).FirstOrDefault(n => n != null && n.EndsWith("_Delete"));
+            else if (md.Identifier.Text == "SetValue" && ps.Count == 1 && body is { Statements.Count: 1 or 2 }
+                     && body.Statements[0] is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax si } && IsUnmCall(si)
+                     && si.ArgumentList.Arguments.Count == 2)
+            {
+                var a1 = si.ArgumentList.Arguments[1].Expression;
+                var pn = ps[0].Identifier.Text;
+                if (a1.ToString() == pn) { set[ps[0].Type.ToString()] = UnmName(si); }
+                else if (a1 is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax ci, Name.Identifier.Text: var cm }, ArgumentList.Arguments.Count: 0 } && ci.Identifier.Text == pn)
+                { set[ps[0].Type.ToString()] = UnmName(si); conv[ps[0].Type.ToString()] = cm; }
+            }
+            else if (md.Identifier.Text.StartsWith("To") && ps.Count == 0 && body != null && md.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword)))
+            {
+                var st = body.Statements.Where(x => !(x is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+                // var ret = UNM.GetX(ConstPointer()) [!= 0]; return ret;
+                if (st is [LocalDeclarationStatementSyntax { Declaration.Variables: [var rv] }, ReturnStatementSyntax { Expression: IdentifierNameSyntax rr }] && rr.Identifier.Text == rv.Identifier.Text)
+                {
+                    var init = rv.Initializer?.Value;
+                    if (init is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.NotEqualsExpression, Right: LiteralExpressionSyntax { Token.ValueText: "0" } } ne && UnmName(ne.Left) is string n1)
+                        get[md.Identifier.Text] = new WrapperGet { Native = n1, Returns = md.ReturnType.ToString(), Form = "ne0" };
+                    else if (UnmName(init) is string n2)
+                        get[md.Identifier.Text] = new WrapperGet { Native = n2, Returns = md.ReturnType.ToString(), Form = "return" };
+                }
+                // var v = new T(); UNM.GetX(ConstPointer(), ref v); return v;
+                else if (st is [LocalDeclarationStatementSyntax { Declaration.Variables: [var ov] }, ExpressionStatementSyntax { Expression: InvocationExpressionSyntax oi }, ReturnStatementSyntax { Expression: IdentifierNameSyntax orr }]
+                         && IsUnmCall(oi) && orr.Identifier.Text == ov.Identifier.Text
+                         && oi.ArgumentList.Arguments.Count == 2 && !oi.ArgumentList.Arguments[1].RefOrOutKeyword.IsKind(SyntaxKind.None))
+                    get[md.Identifier.Text] = new WrapperGet { Native = UnmName(oi), Returns = md.ReturnType.ToString(), Form = "ref" };
+            }
+        }
+        return nw != null && del != null ? new WrapperInfo { New = nw, Delete = del, Set = set, SetConv = conv, Get = get } : null;
+    }
+
+    // DocumentOrFreeFloatingBase subclass: DefaultCppConstructor / DeleteCpp /
+    // CppFromFile3dm + the GetValue/SetValue/IsValueEqual helpers, exactly
+    static FreeFloatingInfo DetectFreeFloating(TypeDeclarationSyntax node)
+    {
+        if (node.BaseList?.Types.Any(b => b.Type.ToString().EndsWith("DocumentOrFreeFloatingBase")) != true) return null;
+        string Single(string name, Func<MethodDeclarationSyntax, bool> ok)
+        {
+            var md = node.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == name);
+            if (md?.Body == null || !ok(md)) return null;
+            var calls = md.Body.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall).ToList();
+            return calls.Count == 1 ? UnmName(calls[0]) : null;
+        }
+        var nw = Single("DefaultCppConstructor", m => m.ParameterList.Parameters.Count == 0);
+        var del = Single("DeleteCpp", m => m.ParameterList.Parameters.Count == 0);
+        var ff = Single("CppFromFile3dm", m => m.ParameterList.Parameters.Count == 1);
+        // GetValue(which): var v = new Variant(); UNM.X_GetValue(CppPointer, which, v.NonConstPointer()); return v;
+        string gv = null, sv = null, eq = null;
+        foreach (var md in node.Members.OfType<MethodDeclarationSyntax>().Where(m => m.Identifier.Text == "GetValue" && m.ParameterList.Parameters.Count == 1 && m.Body != null))
+        {
+            var calls = md.Body.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall).ToList();
+            if (calls.Count == 1 && calls[0].ArgumentList.Arguments.Count == 3
+                && calls[0].ArgumentList.Arguments[0].Expression.ToString() == "CppPointer"
+                && calls[0].ArgumentList.Arguments[1].Expression.ToString() == md.ParameterList.Parameters[0].Identifier.Text)
+                gv = UnmName(calls[0]);
+        }
+        foreach (var md in node.Members.OfType<MethodDeclarationSyntax>().Where(m => m.Identifier.Text == "IsValueEqual" && m.ParameterList.Parameters.Count == 2 && m.Body != null))
+        {
+            var calls = md.Body.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall).ToList();
+            if (calls.Count == 1 && calls[0].ArgumentList.Arguments.Count == 2) eq = UnmName(calls[0]);
+        }
+        foreach (var md in node.Members.OfType<MethodDeclarationSyntax>().Where(m => m.Identifier.Text == "SetValue" && m.ParameterList.Parameters.Count == 2 && m.Body != null))
+        {
+            // portable statements: `if (IsValueEqual(which, v)) return;` then the native write (RHINO_SDK branch is disabled)
+            var st = md.Body.Statements.Where(x => !(x is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+            if (st.Count == 2 && st[0] is IfStatementSyntax { Else: null } f && f.Condition is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "IsValueEqual" } }
+                && (f.Statement is BlockSyntax { Statements: [var fs] } ? fs : f.Statement) is ReturnStatementSyntax { Expression: null })
+            {
+                var w = st[1] is BlockSyntax wb && wb.Statements.Count == 1 ? wb.Statements[0] : st[1];
+                if (w is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax wi } && IsUnmCall(wi)
+                    && wi.ArgumentList.Arguments.Count == 3 && wi.ArgumentList.Arguments[0].Expression.ToString() == "CppPointer")
+                    sv = UnmName(wi);
+            }
+        }
+        return nw == null || del == null ? null
+            : new FreeFloatingInfo { New = nw, Delete = del, FromFile = ff, GetValueNative = gv, SetValueNative = sv, EqualNative = eq };
+    }
+
+    // `using (var v = GetValue(E.M)) return v.ToX();`
+    static VariantAccessInfo DetectVariantGet(SyntaxNode body)
+    {
+        var us = body is BlockSyntax { Statements: [UsingStatementSyntax u] } ? u : null;
+        if (us?.Declaration is not { Variables: [var v] } || v.Initializer?.Value is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "GetValue" }, ArgumentList.Arguments: [var wa] })
+            return null;
+        var inner = us.Statement is BlockSyntax { Statements: [var only] } ? only : us.Statement;
+        if (inner is not ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax rv, Name.Identifier.Text: var conv }, ArgumentList.Arguments.Count: 0 } }
+            || rv.Identifier.Text != v.Identifier.Text || !conv.StartsWith("To"))
+            return null;
+        return new VariantAccessInfo { Which = wa.Expression.ToString(), Conv = conv };
+    }
+
+    // `using (var v = new Variant(value)) { SetValue(E.M, v); }`
+    static VariantAccessInfo DetectVariantSet(SyntaxNode body)
+    {
+        var us = body is BlockSyntax { Statements: [UsingStatementSyntax u] } ? u : null;
+        if (us?.Declaration is not { Variables: [var v] } || v.Initializer?.Value is not ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax { Identifier.Text: "Variant" }, ArgumentList.Arguments: [var va] }
+            || va.Expression.ToString() != "value")
+            return null;
+        var inner = us.Statement is BlockSyntax { Statements: [var only] } ? only : us.Statement;
+        if (inner is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "SetValue" }, ArgumentList.Arguments: [var wa, var sa] } }
+            || sa.Expression.ToString() != v.Identifier.Text)
+            return null;
+        return new VariantAccessInfo { Which = wa.Expression.ToString() };
+    }
+
+    // RenderSettings.GroundPlane: `if (m_file3dm != null) return new T(m_file3dm);
+    //   var cpp = ConstPointer(); var p = UNM.X(cpp); [KeepAlive] return new T(p);`
+    static SettingsViewInfo DetectSettingsView(SyntaxNode body)
+    {
+        if (body is not BlockSyntax b) return null;
+        var st = b.Statements.Where(x => !(x is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+        if (st.Count != 4 || st[0] is not IfStatementSyntax { Else: null } f
+            || f.Condition.ToString().Replace(" ", "") != "m_file3dm!=null"
+            || (f.Statement is BlockSyntax { Statements: [var fs] } ? fs : f.Statement) is not ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax t1, ArgumentList.Arguments: [var fa] } }
+            || fa.Expression.ToString() != "m_file3dm")
+            return null;
+        if (st[1] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var cv] } || cv.Initializer?.Value is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ConstPointer" } }
+            || st[2] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] } || UnmName(pv.Initializer?.Value) is not string nat
+            || ((InvocationExpressionSyntax)pv.Initializer.Value).ArgumentList.Arguments is not [var ca] || ca.Expression.ToString() != cv.Identifier.Text
+            || st[3] is not ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax t2, ArgumentList.Arguments: [var pa] } }
+            || pa.Expression.ToString() != pv.Identifier.Text || t2.Identifier.Text != t1.Identifier.Text)
+            return null;
+        return new SettingsViewInfo { New = t1.Identifier.Text, Native = nat };
+    }
+
+    // the internal Commit() of a file view, exactly (anything else -> null):
+    //   if (!IsNonConst) return;
+    //   [RHINO_SDK block: disabled trivia]
+    //   if (<field> != null) { IntPtr p = ConstPointer(); UNM.X(p, <field>.NonConstPointer()); }
+    //   [GC.KeepAlive(this);]
+    static CommitInfo DetectCommit(TypeDeclarationSyntax node)
+    {
+        var md = node.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == "Commit" && m.ParameterList.Parameters.Count == 0);
+        if (md?.Body == null) return null;
+        var st = md.Body.Statements.Where(x => !(x is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+        if (st.Count != 2) return null;
+        if (st[0] is not IfStatementSyntax { Else: null } g || g.Condition.ToString().Replace(" ", "") != "!IsNonConst"
+            || (g.Statement is BlockSyntax { Statements: [var gs] } ? gs : g.Statement) is not ReturnStatementSyntax { Expression: null })
+            return null;
+        if (st[1] is not IfStatementSyntax { Else: null } f
+            || f.Condition is not BinaryExpressionSyntax { RawKind: (int)SyntaxKind.NotEqualsExpression, Left: IdentifierNameSyntax fld } ne
+            || !ne.Right.IsKind(SyntaxKind.NullLiteralExpression)
+            || f.Statement is not BlockSyntax { Statements.Count: 2 } fb
+            || fb.Statements[0] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] }
+            || pv.Initializer?.Value is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ConstPointer" or "NonConstPointer" }, ArgumentList.Arguments.Count: 0 }
+            || fb.Statements[1] is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ci } || !IsUnmCall(ci)
+            || ci.ArgumentList.Arguments.Count != 2
+            || ci.ArgumentList.Arguments[0].Expression.ToString() != pv.Identifier.Text
+            || ci.ArgumentList.Arguments[1].Expression.ToString().Replace(" ", "") != fld.Identifier.Text + ".NonConstPointer()")
+            return null;
+        return new CommitInfo { Native = ((MemberAccessExpressionSyntax)ci.Expression).Name.Identifier.Text, FileField = fld.Identifier.Text };
+    }
+
     // The File3dm proxy idiom, verified hop by hop; anything unexpected -> null.
     //   internal Layer(Guid id, File3dm file) { m_id = id; m__parent = file; }
     //   internal override IntPtr _InternalGetConstPointer() { ...
@@ -905,26 +1232,36 @@ class Walker : CSharpSyntaxWalker
     //     if (m__parent is FileIO.File3dm) return _InternalGetConstPointer(); ... }
     static FileProxyInfo DetectFileProxy(TypeDeclarationSyntax node)
     {
+        // `(Guid id, File3dm file)` -- a component proxy -- or `(File3dm file)` -- a
+        // file view with no id (RenderSettings)
         var ctor = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(c =>
             c.ParameterList.Parameters.Count == 2
             && c.ParameterList.Parameters[0].Type?.ToString() is "Guid" or "System.Guid"
-            && IsFile3dmType(c.ParameterList.Parameters[1].Type?.ToString() ?? ""));
+            && IsFile3dmType(c.ParameterList.Parameters[1].Type?.ToString() ?? ""))
+            ?? node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(c =>
+            c.ParameterList.Parameters.Count == 1 && IsFile3dmType(c.ParameterList.Parameters[0].Type?.ToString() ?? ""));
         if (ctor?.Body == null) return null;
-        string idP = ctor.ParameterList.Parameters[0].Identifier.Text, fileP = ctor.ParameterList.Parameters[1].Identifier.Text;
+        bool withId = ctor.ParameterList.Parameters.Count == 2;
+        string idP = withId ? ctor.ParameterList.Parameters[0].Identifier.Text : null;
+        string fileP = ctor.ParameterList.Parameters[withId ? 1 : 0].Identifier.Text;
         string idField = null;
         var fileFields = new HashSet<string>();
         foreach (var st in ctor.Body.Statements)
         {
+            // ConstructConstObject(<fileField>, -1): the const-object plumbing
+            if (st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ConstructConstObject" } } cc }
+                && cc.ArgumentList.Arguments.Count == 2 && fileFields.Contains(cc.ArgumentList.Arguments[0].Expression.ToString()))
+                continue;
             if (st is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax asg }
                 || !asg.IsKind(SyntaxKind.SimpleAssignmentExpression) || asg.Right is not IdentifierNameSyntax r)
                 return null;                        // the ctor does more than store its arguments
             var left = asg.Left is MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } tl ? tl.Name.ToString() : asg.Left.ToString();
-            if (r.Identifier.Text == idP) idField = left;
+            if (withId && r.Identifier.Text == idP) idField = left;
             else if (r.Identifier.Text == fileP) fileFields.Add(left);
             else return null;
         }
         // `: base()` is what every initializer-less constructor runs anyway
-        if (idField == null || fileFields.Count == 0
+        if ((withId && idField == null) || fileFields.Count == 0
             || ctor.Initializer is { } ci && !(ci.ThisOrBaseKeyword.IsKind(SyntaxKind.BaseKeyword) && ci.ArgumentList.Arguments.Count == 0))
             return null;
         bool FileRef(ExpressionSyntax e, HashSet<string> fileVars) => e is IdentifierNameSyntax fi && fileVars.Contains(fi.Identifier.Text);
@@ -945,8 +1282,8 @@ class Walker : CSharpSyntaxWalker
                 if (v.Initializer != null && FilePtr(v.Initializer.Value))
                     ptrVars.Add(v.Identifier.Text);
             var hits = body.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall)
-                .Where(i => i.ArgumentList.Arguments.Count == 2
-                            && i.ArgumentList.Arguments[1].Expression.ToString() == idField
+                .Where(i => i.ArgumentList.Arguments.Count == (idField == null ? 1 : 2)
+                            && (idField == null || i.ArgumentList.Arguments[1].Expression.ToString() == idField)
                             && (FilePtr(i.ArgumentList.Arguments[0].Expression)
                                 || i.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax pv && ptrVars.Contains(pv.Identifier.Text)))
                 .Select(i => ((MemberAccessExpressionSyntax)i.Expression).Name.Identifier.Text).Distinct().ToList();
@@ -969,7 +1306,119 @@ class Walker : CSharpSyntaxWalker
                    is ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_InternalGetConstPointer" } } });
             nonConst = viaGcp || ResolverIn(nb) == resolver ? "resolve" : "other";
         }
-        return new FileProxyInfo { Resolver = resolver, NonConst = nonConst };
+        return new FileProxyInfo { Resolver = resolver, NonConst = nonConst, IdField = idField,
+                                   FileField = fileFields.OrderBy(f => f == "m__parent" ? 1 : 0).First() };
+    }
+
+    // _InternalGetConstPointer / NonConstPointer branches of the form
+    //   var v = m__parent as T; if (v != null) return v.Helper();   (either null-test order)
+    // (RHINO_SDK branches are disabled trivia in the portable view)
+    static ParentViewInfo[] DetectParentViews(TypeDeclarationSyntax node)
+    {
+        Dictionary<string, string> Branches(string method)
+        {
+            var map = new Dictionary<string, string>();
+            var md = node.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == method && m.ParameterList.Parameters.Count == 0);
+            if (md?.Body == null) return map;
+            var asVars = new Dictionary<string, string>();   // local -> parent type simple name
+            foreach (var v in md.Body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+                if (v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression } ae && ae.Left.ToString() == "m__parent")
+                    asVars[v.Identifier.Text] = ae.Right.ToString().Split('.').Last();
+            foreach (var f in md.Body.DescendantNodes().OfType<IfStatementSyntax>())
+            {
+                if (f.Condition is not BinaryExpressionSyntax { RawKind: (int)SyntaxKind.NotEqualsExpression } ne) continue;
+                var id = ne.Left is IdentifierNameSyntax l && ne.Right.IsKind(SyntaxKind.NullLiteralExpression) ? l.Identifier.Text
+                       : ne.Right is IdentifierNameSyntax r && ne.Left.IsKind(SyntaxKind.NullLiteralExpression) ? r.Identifier.Text : null;
+                if (id == null || !asVars.TryGetValue(id, out var pt)) continue;
+                var then = f.Statement is BlockSyntax { Statements.Count: 1 } b ? b.Statements[0] : f.Statement;
+                if (then is ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax rv, Name.Identifier.Text: var h }, ArgumentList.Arguments.Count: 0 } }
+                    && rv.Identifier.Text == id)
+                    map[pt] = h;
+            }
+            return map;
+        }
+        var c = Branches("_InternalGetConstPointer");
+        var nc = Branches("NonConstPointer");
+        var all = c.Keys.Union(nc.Keys).OrderBy(x => x, StringComparer.Ordinal)
+            .Where(c.ContainsKey)                       // a const resolver is the minimum
+            .Select(pt => new ParentViewInfo { ParentType = pt, Const = c[pt], NonConst = nc.GetValueOrDefault(pt) }).ToArray();
+        return all.Length > 0 ? all : null;
+    }
+
+    // the cached-const-view getter: returns (helper, newType) or default
+    static (string helper, string newType) DetectConstView(SyntaxNode getBody)
+    {
+        if (getBody is not BlockSyntax b || b.Statements.Count < 3
+            || b.Statements[0] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] }
+            || b.Statements[1] is not IfStatementSyntax { Else: null } f)
+            return default;
+        if (pv.Initializer?.Value is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax hn, ArgumentList.Arguments.Count: 0 })
+            return default;
+        var p = pv.Identifier.Text;
+        // tail: optional KeepAlive, then `return m_cache;`
+        var tail = b.Statements.Skip(2).Where(st => !(st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+        if (tail is not [ReturnStatementSyntax { Expression: IdentifierNameSyntax cache }]) return default;
+        var cname = cache.Identifier.Text;
+        // if (cache == null || cache.ConstPointer() != p) cache = <create>;
+        if (f.Condition is not BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalOrExpression } or
+            || !(or.Left.ToString().Replace(" ", "") == $"{cname}==null" || or.Left.ToString().Replace(" ", "") == $"null=={cname}")
+            || or.Right.ToString().Replace(" ", "") != $"{cname}.ConstPointer()!={p}")
+            return default;
+        var then = f.Statement is BlockSyntax { Statements.Count: 1 } tb ? tb.Statements[0] : f.Statement;
+        if (then is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax al, Right: var create } } || al.Identifier.Text != cname)
+            return default;
+        if (create is InvocationExpressionSyntax ci && CalleeName(ci) == "CreateGeometryHelper" && ci.ArgumentList.Arguments.Count == 2
+            && ci.ArgumentList.Arguments[0].Expression.ToString() == p && ci.ArgumentList.Arguments[1].Expression is ThisExpressionSyntax)
+            return (hn.Identifier.Text, null);
+        if (create is ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax nt, ArgumentList.Arguments: [var a0] } && a0.Expression is ThisExpressionSyntax)
+            return (hn.Identifier.Text, nt.Identifier.Text);
+        return default;
+    }
+
+    // A MULTI-TYPE table (File3dmObjectTable): `Count => base.Count +
+    // m_manifest.ActiveObjectCount(E.M)` and a GetEnumerator override that yields
+    // base.GetEnumerator() then, per extra type, `m_manifest.GetEnumerator(E.M)`
+    // wrapping each as `new T(e.Current.Id, m_parent)`. Both must list the same
+    // extra types, in order; anything else -> null.
+    static string[] DetectExtraTypes(TypeDeclarationSyntax node)
+    {
+        var count = node.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(p => p.Identifier.Text == "Count");
+        var ex = count?.ExpressionBody?.Expression
+                 ?? (count?.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.ExpressionBody?.Expression);
+        if (ex == null) return null;
+        var fromCount = new List<string>();
+        ExpressionSyntax e = ex;
+        while (e is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AddExpression } add)
+        {
+            if (add.Right is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "m_manifest" }, Name.Identifier.Text: "ActiveObjectCount" }, ArgumentList.Arguments: [var ca] }
+                || ca.Expression is not MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax, Name: IdentifierNameSyntax } cm)
+                return null;
+            fromCount.Insert(0, cm.ToString());
+            e = add.Left;
+        }
+        if (e.ToString() != "base.Count" || fromCount.Count == 0) return null;
+        var ge = node.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == "GetEnumerator" && m.ParameterList.Parameters.Count == 0);
+        if (ge?.Body == null) return null;
+        var st = ge.Body.Statements;
+        if (st.Count != 2 + 2 * fromCount.Count) return null;
+        // var b = base.GetEnumerator(); while (b.MoveNext()) yield return b.Current;
+        if (st[0] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var bv] } || bv.Initializer?.Value.ToString() != "base.GetEnumerator()"
+            || st[1] is not WhileStatementSyntax bw || bw.Condition.ToString() != bv.Identifier.Text + ".MoveNext()"
+            || (bw.Statement is BlockSyntax { Statements: [var bs] } ? bs : bw.Statement) is not YieldStatementSyntax { Expression: var by }
+            || by.ToString() != bv.Identifier.Text + ".Current")
+            return null;
+        var fromEnum = new List<string>();
+        for (int i = 0; i < fromCount.Count; i++)
+        {
+            if (st[2 + 2 * i] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var ev] }
+                || ev.Initializer?.Value is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "m_manifest" }, Name.Identifier.Text: "GetEnumerator" }, ArgumentList.Arguments: [var ea] }
+                || st[3 + 2 * i] is not WhileStatementSyntax ew || ew.Condition.ToString() != ev.Identifier.Text + ".MoveNext()"
+                || (ew.Statement is BlockSyntax { Statements: [var es] } ? es : ew.Statement) is not YieldStatementSyntax { Expression: ObjectCreationExpressionSyntax { ArgumentList.Arguments: [var a0, var a1] } }
+                || a0.Expression.ToString() != ev.Identifier.Text + ".Current.Id" || a1.Expression.ToString() != "m_parent")
+                return null;
+            fromEnum.Add(ea.Expression.ToString());
+        }
+        return fromCount.SequenceEqual(fromEnum) ? fromCount.ToArray() : null;
     }
 
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -1005,6 +1454,14 @@ class Walker : CSharpSyntaxWalker
         // `IntPtr ptr_this = NonConstPointer();`: which accessor produced a THIS
         // pointer -- a File3dm proxy resolves the two differently (ConstPointer
         // throws when the component is gone; NonConstPointer may be overridden)
+        // `IntPtr p = m_parent.ConstPointer();` -- a FIELD's native pointer (a
+        // proxy's file): kind "fieldptr", Text the field, Value the accessor
+        var fieldPtr = new Dictionary<string, (string field, string acc)>();
+        foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+            if (v.Initializer?.Value is InvocationExpressionSyntax
+                { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax fo, Name.Identifier.Text: ("ConstPointer" or "NonConstPointer") and var facc }, ArgumentList.Arguments.Count: 0 }
+                && fo.Identifier.Text.StartsWith("m_") && !paramNames.Contains(fo.Identifier.Text))
+                fieldPtr[v.Identifier.Text] = (fo.Identifier.Text, facc);
         var selfAcc = new Dictionary<string, string>();
         foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
             if (v.Initializer?.Value is InvocationExpressionSyntax
@@ -1091,6 +1548,12 @@ class Walker : CSharpSyntaxWalker
                     return new ArgInfo { Kind = "local", Text = text, Value = lv };
                 else if (a.Expression is IdentifierNameSyntax hl && helperLocal.TryGetValue(hl.Identifier.Text, out var hname))
                     return new ArgInfo { Kind = "helpercall", Text = hname };
+                else if (a.Expression is IdentifierNameSyntax fl && fieldPtr.TryGetValue(fl.Identifier.Text, out var fp))
+                    return new ArgInfo { Kind = "fieldptr", Text = fp.field, Value = fp.acc };
+                else if (a.Expression is InvocationExpressionSyntax
+                         { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax fo2, Name.Identifier.Text: ("ConstPointer" or "NonConstPointer") and var facc2 }, ArgumentList.Arguments.Count: 0 }
+                         && fo2.Identifier.Text.StartsWith("m_") && !paramNames.Contains(fo2.Identifier.Text))
+                    return new ArgInfo { Kind = "fieldptr", Text = fo2.Identifier.Text, Value = facc2 };
                 else if (a.Expression is IdentifierNameSyntax sl && selfAcc.TryGetValue(sl.Identifier.Text, out var acc))
                     return new ArgInfo { Kind = "expr", Text = text, Value = acc };
                 else if (a.Expression is InvocationExpressionSyntax
@@ -1499,6 +1962,20 @@ class Walker : CSharpSyntaxWalker
         // inliner resolves it or turns it back into "pure"
         if (expr is IdentifierNameSyntax alias && !paramNames.Contains(alias.Identifier.Text))
             return ("alias", alias.Identifier.Text, Array.Empty<ArgInfo>());
+        // `return Attributes.Name;` / `Attributes.Name = value;`: a property of a
+        // sibling property's object (File3dmObject.Name) -- a chain, resolved by
+        // the generator against both generated members
+        static bool IsChain(ExpressionSyntax e, ISet<string> ps) =>
+            e is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax a, Name: IdentifierNameSyntax }
+            && !ps.Contains(a.Identifier.Text) && char.IsUpper(a.Identifier.Text[0])
+            && !EnumDecls.ContainsKey(a.Identifier.Text)                       // ModelComponentType.Layer: a constant
+            && a.Identifier.Text is not ("Math" or "RhinoMath" or "UnsafeNativeMethods" or "GC" or "String" or "Guid" or "IntPtr");
+        if (expr is MemberAccessExpressionSyntax chainGet && IsChain(chainGet, paramNames)
+            && body is not BlockSyntax { Statements: [ExpressionStatementSyntax] })
+            return ("chain", chainGet.ToString(), Array.Empty<ArgInfo>());
+        if (expr is AssignmentExpressionSyntax { Left: MemberAccessExpressionSyntax chainSet, Right: IdentifierNameSyntax rv } ca
+            && ca.IsKind(SyntaxKind.SimpleAssignmentExpression) && IsChain(chainSet, paramNames) && paramNames.Contains(rv.Identifier.Text))
+            return ("chain", chainSet.ToString(), new[] { new ArgInfo { Kind = "param", Text = rv.Identifier.Text } });
         if (expr is InvocationExpressionSyntax inv)
         {
             string callee = inv.Expression switch
@@ -1717,6 +2194,7 @@ class Walker : CSharpSyntaxWalker
     // set by RecognizeShape for the body it just recognized (single-threaded walk)
     [ThreadStatic] static FailThrowInfo _failThrow;
     [ThreadStatic] static (string name, string[] args)? _factoryCall;
+    [ThreadStatic] static bool _commits;
 
     static (string exType, string msg) ThrowOf(StatementSyntax st)
     {
@@ -1761,6 +2239,7 @@ class Walker : CSharpSyntaxWalker
     {
         _failThrow = null;
         _factoryCall = null;
+        _commits = false;
         if (body is not BlockSyntax block)
             return (ClassifyBody(body), null, null, null, null, null);
 
@@ -2028,6 +2507,13 @@ class Walker : CSharpSyntaxWalker
             // class argument, recorded on the call (AnalyzeCalls)
             if (NullableAssign(st, paramNames).local != null)
                 continue;
+            // `Commit();` -- the write-back marker (RenderSettings setters); what it
+            // does is the type's CommitInfo, resolved by the generator
+            if (st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "Commit" }, ArgumentList.Arguments.Count: 0 } })
+            {
+                _commits = true;
+                continue;
+            }
             // `IntPtr p = GetConstOnComponentManifestPtr();` whose every use is an
             // argument of a native call: the call's argument (kind helpercall),
             // resolved by the inliner -- or the member stays unplannable
@@ -2065,7 +2551,7 @@ class Walker : CSharpSyntaxWalker
             if (c != "trivial")
                 return (c, null, null, null, null, null);
         }
-        if (guards.Count == 0 && success == null && wrap == null && holder == null && _failThrow == null)
+        if (guards.Count == 0 && success == null && wrap == null && holder == null && _failThrow == null && !_commits)
             return ("trivial", null, null, null, null, null);
         return ("pattern",
                 guards.Count > 0 ? guards.ToArray() : null,
@@ -2186,10 +2672,12 @@ class Walker : CSharpSyntaxWalker
         var calls = AnalyzeCalls(body, paramNames);
         _failThrow = null;
         _factoryCall = null;
+        _commits = false;
         var (bodyClass, guards, success, wrap, holder, holderRefs) = calls != null
             ? RecognizeShape(body, paramNames) : (null, null, null, null, null, null);
         var failThrow = bodyClass == "pattern" ? _failThrow : null;
         var factoryCall = bodyClass == "pattern" ? _factoryCall : null;
+        var commits = bodyClass == "pattern" && _commits;
         string delegates = null;
         ArgInfo[] delegateArgs = null;
         if (calls == null)
@@ -2214,6 +2702,7 @@ class Walker : CSharpSyntaxWalker
             Calls = calls, Body = bodyClass, Guards = guards, Success = success, FailThrow = failThrow,
             Wrap = wrap, Delegates = delegates, DelegateArgs = delegateArgs,
             FactoryArgs = factoryCall?.args,
+            Commits = commits,
             ResultCast = calls is { Length: 1 } ? ResultCastOf(body) : null,
             // the single native call is a bare statement: C# discards its result
             ResultUnused = calls is { Length: 1 } && body.DescendantNodes().OfType<InvocationExpressionSyntax>()
@@ -2230,7 +2719,9 @@ class Walker : CSharpSyntaxWalker
              bool allowNamespaceOwner = false, ISet<string> paramNames = null,
              BaseParameterListSyntax parameters = null, TypeSyntax returns = null,
              SyntaxNode hashNode = null, AccessorInfo setter = null, string constant = null,
-             string child = null, string[] childArgs = null)
+             string child = null, string[] childArgs = null, ConstViewInfo constView = null,
+             string[] childArgKinds = null, VariantAccessInfo variantGet = null, VariantAccessInfo variantSet = null,
+             SettingsViewInfo settingsView = null)
     {
         var owner = CurrentType ?? (allowNamespaceOwner && _ns.Length > 0 ? _ns : null);
         if (owner == null || !IsPublic(mods) || _hidden > 0) return;
@@ -2246,6 +2737,9 @@ class Walker : CSharpSyntaxWalker
             Const = constant,
             Child = child,
             ChildArgs = childArgs,
+            ChildArgKinds = childArgKinds,
+            ConstView = constView,
+            VariantGet = variantGet, VariantSet = variantSet, SettingsView = settingsView,
             FillPtr = a.FillPtr, FillFail = a.FillFail,
             Compare = a.Compare,
             ResultConv = a.ResultConv,
@@ -2255,6 +2749,7 @@ class Walker : CSharpSyntaxWalker
             Guards = a.Guards,
             Success = a.Success,
             FailThrow = a.FailThrow,
+            Commits = a.Commits,
             ResultCast = a.ResultCast,
             ResultUnused = a.ResultUnused,
             Wrap = a.Wrap,
@@ -2298,7 +2793,7 @@ class Walker : CSharpSyntaxWalker
     // with the call: its names are the helper's own locals, never parameters.
     static bool IsInlinable(AccessorInfo h) =>
         h.Calls is { Length: 1 } && h.Body is "trivial" or "pattern"
-        && h.Guards == null && h.Wrap == null && h.FailThrow == null;
+        && h.Guards == null && h.Wrap == null && h.FailThrow == null;   // (a trailing Commit() travels along)
 
     public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
@@ -2394,7 +2889,22 @@ class Walker : CSharpSyntaxWalker
                    && co.Right is ParenthesizedExpressionSyntax { Expression: AssignmentExpressionSyntax ca }
                    && ca.Left.ToString() == co.Left.ToString()
                 ? ca.Right : constExpr;
+        // the statement form: `if (f == null) { f = new T(args); } return f;`
+        if (made == null && getBody is BlockSyntax { Statements: [IfStatementSyntax { Else: null } lf, ReturnStatementSyntax { Expression: IdentifierNameSyntax lr }] }
+            && lf.Condition.ToString().Replace(" ", "") == lr.Identifier.Text + "==null"
+            && (lf.Statement is BlockSyntax { Statements: [var ls] } ? ls : lf.Statement) is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax la, Right: ObjectCreationExpressionSyntax lnew } }
+            && la.Identifier.Text == lr.Identifier.Text)
+            made = lnew;
         var child = made as ObjectCreationExpressionSyntax;
+        string[] childArgKinds = child?.ArgumentList?.Arguments.Select(a =>
+            a.Expression is ThisExpressionSyntax ? "this"
+            : a.Expression is IdentifierNameSyntax fa && CurrentType != null && FieldTypes.TryGetValue(CurrentType, out var ftm)
+              && ftm.TryGetValue(fa.Identifier.Text, out var fty) && IsFile3dmType(fty) ? "file"
+            : "other").ToArray();
+        var cv = getBody != null ? DetectConstView(getBody) : default;
+        var vget = getBody != null ? DetectVariantGet(getBody) : null;
+        var vset = publicSet && set != null ? DetectVariantSet(Body(set)) : null;
+        var sview = getBody != null ? DetectSettingsView(getBody) : null;
         Add("property", node.Identifier.Text,
             node.Type + " " + node.Identifier.Text,
             node.Modifiers, node, getBody,
@@ -2408,7 +2918,10 @@ class Walker : CSharpSyntaxWalker
                   && System.Text.RegularExpressions.Regex.Replace(constExpr.ToString(), @"[\s()]", "") is "IntPtr.Zero==m_ptr" or "m_ptr==IntPtr.Zero"
                     ? "@NoOwnedPointer" : null,
             child: child?.Type.ToString(),
-            childArgs: child?.ArgumentList?.Arguments.Select(a => a.Expression.ToString()).ToArray());
+            childArgs: child?.ArgumentList?.Arguments.Select(a => a.Expression.ToString()).ToArray(),
+            childArgKinds: childArgKinds,
+            constView: cv.helper == null ? null : new ConstViewInfo { Helper = cv.helper, New = cv.newType },
+            variantGet: vget, variantSet: vset, settingsView: sview);
         base.VisitPropertyDeclaration(node);
     }
 
@@ -2493,6 +3006,9 @@ class Walker : CSharpSyntaxWalker
                 node.Modifiers, node, null);
         base.VisitFieldDeclaration(node);
     }
+
+    // internal value wrappers found in the portable walk (full type -> info)
+    public static readonly Dictionary<string, WrapperInfo> InternalWrappers = new();
 
     // types some declaration marks `public partial` (namespace + nesting)
     public static readonly HashSet<string> PublicPartials = new();

@@ -20,12 +20,14 @@ def emit(p):
         % (g['cond_cpp'], EXMAP[g['Exception']],
            (g['Message'] or m['Name']).replace('"', "'"))
         for g in p['guards']]
+    commit_line = ['    RH3DM_Commit();'] if p.get('commits') else []
     if shape[0] == 'direct':
         ret = shape[1]
         L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    %s%s;' % ('' if ret == 'void' else 'return ', call))
+        L += commit_line
     elif shape[0] == 'failthrow':
         # `if (!CALL) throw new E(msg);` / `if (!CALL) { if (COND) throw new E(); }`
         ft = shape[1]
@@ -37,6 +39,7 @@ def emit(p):
             L.append('    if (!(%s)) { if (%s) %s }' % (call, ft['cond_cpp'], throw))
         else:
             L.append('    if (!(%s)) %s' % (call, throw))
+        L += commit_line
     elif shape[0] == 'fromout':
         cs, out = shape[1], shape[2]
         L.append('  %s%s %s(%s)%s {' % (st, CS_RET_CPP[cs], name, sig, cq))
@@ -94,6 +97,66 @@ def emit(p):
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    return (%s)%s;' % (cpp, call))
+    elif shape[0] == 'sum':
+        # a multi-type table's Count: the base's count once per type
+        L.append('  %s%s %s(%s)%s {' % (st, shape[1], name, sig, cq))
+        L += guard_lines
+        L.append('    return %s;' % ' + '.join('(%s)' % c for c in shape[2]))
+    elif shape[0] == 'chain':
+        # `Attributes.Name`: through the sibling's view object (owned for the call)
+        sib, mem, is_set = shape[1], shape[2], shape[3]
+        tdecl = emit_decl_def(mem, mem['cls'])[0]
+        ret = 'void' if is_set else tdecl[:tdecl.index(' %s(' % mem['cpp'])].replace('static ', '').strip()
+        L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
+        L.append('    std::unique_ptr<%s> via(%s());' % (sib['shape'][1]['gen'], sib['cpp']))
+        L.append('    %svia->%s(%s);' % ('' if is_set else 'return ', mem['cpp'], ', '.join(n for _, n in p['bind_args'])))
+    elif shape[0] == 'vget':
+        # Variant: new, GetValue(ptr, which, v), ToX, delete
+        v = shape[1]
+        L.append('  %s%s %s(%s)%s {' % (st, VARIANT_BT[v['cs']], name, sig, cq))
+        L.append('    ON_XMLVariant* v = %s();' % WRAPPER['New'])
+        L.append('    %s(RH3DM_Const(), %s, v);' % (v['get'], v['which']))
+        g = v['conv']
+        if g['Form'] == 'ne0':
+            L.append('    %s rc = %s(v) != 0;' % (VARIANT_BT[v['cs']], g['Native']))
+        elif g['Form'] == 'return':
+            L.append('    %s rc = %s;' % (VARIANT_BT[v['cs']], ('ON_UUID_to_Binding(%s(v))' if v['cs'] == 'Guid' else '%s(v)') % g['Native']))
+        else:                                 # ref: the native fills the value type
+            L.append('    %s rc;' % VARIANT_BT[v['cs']])
+            L.append('    %s(v, RH3DM_Ptr(&rc));' % g['Native'])
+        L.append('    %s(v);' % WRAPPER['Delete'])
+        L.append('    return rc;')
+    elif shape[0] == 'vset':
+        # Variant: new + SetX(value); IsValueEqual (GetValue into a second one); SetValue; delete both
+        v = shape[1]
+        L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
+        L.append('    ON_XMLVariant* v = %s();' % WRAPPER['New'])
+        arg = {'Guid': 'Binding_to_ON_UUID(value)'}.get(v['cs'], 'RH3DM_Val(value)' if v['vt'] else 'value')
+        L.append('    %s(v, %s);' % (v['set'], arg))
+        L.append('    ON_XMLVariant* cur = %s();' % WRAPPER['New'])
+        L.append('    %s(RH3DM_Const(), %s, cur);' % (v['get'], v['which']))
+        L.append('    if (!%s(cur, v)) %s(RH3DM_NonConst(), %s, v);' % (v['eq'], v['put'], v['which']))
+        L.append('    %s(cur);' % WRAPPER['Delete'])
+        L.append('    %s(v);' % WRAPPER['Delete'])
+    elif shape[0] == 'settingsview':
+        # RenderSettings.GroundPlane: the file's (a view) or this object's (a pointer into it)
+        target, fn = shape[1], shape[2]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L.append('    if (m_model) return new %s(m_model);' % target['gen'])
+        L.append('    return new %s((%s*)%s(RH3DM_Const()), false);' % (target['gen'], target['on'], fn))
+    elif shape[0] == 'fileview':
+        # a view of this object's FILE (File3dmSettings.RenderSettings)
+        L.append('  %sclass %s* %s(%s)%s {' % (st, shape[1]['gen'], name, sig, cq))
+        L.append('    return new %s(m_model);' % shape[1]['gen'])
+    elif shape[0] == 'constview':
+        # a view of (this file, this id): most-derived geometry class, or the named class
+        target, resolver, is_root = shape[1], shape[2], shape[3]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        if is_root:
+            L.append('    return RH3DM_View_%s(m_model, m_id);' % target['reg'])
+        else:
+            L.append('    return new %s(m_model, m_id);' % target['gen'])
     elif shape[0] == 'proxywrap':
         # a File3dm proxy of the component the native call found (by id)
         target, idl = shape[1], shape[2]
@@ -175,7 +238,7 @@ def emit_decl_def(p, cls):
 
 def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     methods = '\n'.join(emit_decl_def(p, cls)[0] for p in plans)
-    dctor = '\n  %s();' % cls['gen'] if has_default_ctor else ''
+    dctor = '\n  %s();' % cls['gen'] if has_default_ctor and not cls.get('ff') else ''
     for p in arg_ctors:
         dctor += '\n  %s(%s);' % (cls['gen'], ', '.join('%s %s' % a for a in p['bind_args']))
     # RhinoCommon's own copy ctor (`X(X other)` -> ON_X_New(other)) replaces
@@ -209,6 +272,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # concrete base owns the pointer (and the abstract getter override);
         # this class only adds members and a forwarding constructor
         storage = '''  explicit {gen}({on}* owned) : {basegen}(owned) {{}}{bridge}{dctor}'''
+        if base.get('proxy'):
+            storage += '''
+  {gen}(ONX_Model* model, ON_UUID id) : {basegen}(model, id) {{}}'''
         return ('class {gen}{inherit}\n{{\npublic:\n' + storage
                 + '\n\n{methods}\n}};\n').format(
             gen=cls['gen'], on=cls['on'], hand=cls['hand'],
@@ -219,7 +285,14 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
                 % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
     if base and base['reg'] in NO_OWNED_ABSTRACT:
         override += '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }'
-    if cls['mode'] == 'child':
+    if cls['mode'] == 'child' and cls.get('derive'):
+        # a VIEW onto a PART of the parent (File3dmSettings: &model->m_settings),
+        # keeping the parent for the file views it hands out (RenderSettings)
+        parent_on = BY_REG[cls['parent']]['on']
+        storage = '''  {on}* m_ptr = nullptr;
+  %s* m_model = nullptr;
+  explicit {gen}(%s* parent) : m_ptr(%s), m_model(parent) {{}}''' % (parent_on, parent_on, cls['derive'].format(p='parent'))
+    elif cls['mode'] == 'child':
         # a VIEW onto the parent's object (Mesh.Vertices): borrows the
         # parent's pointer, never deletes it; the binding keeps the parent alive
         storage = '''  {on}* m_ptr = nullptr;
@@ -228,33 +301,71 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         if tp:
             # the table protocols (planner.table_protocol): `this[int]` with
             # the language's own out-of-range signal, and RhinoCommon's foreach
-            methods += '''
+            if tp['find']:
+                methods += '''
   // table protocols: `this[int]` (FindIndex; Python raises for a hole) and foreach
   class {item}* Gen_getitem(int index) const {{
     class {item}* p = {find}(index);
     if (!p) throw std::out_of_range("index");
     return p;
-  }}
-  class {gen}Iter* Gen_iter() const;'''.format(item=tp['item']['gen'], find=tp['find'], gen=cls['gen'])
-    elif cls['mode'] == 'pointer' and cls.get('proxy'):
-        # RhinoCommon's two CommonObject states: an owned pointer, or a File3dm
-        # PROXY (`new Layer(id, file)`, what the file's tables hand out) that
-        # owns nothing and resolves the component by id on every access
+  }}'''.format(item=tp['item']['gen'], find=tp['find'])
+            methods += '''
+  class {gen}Iter* Gen_iter() const;'''.format(gen=cls['gen'])
+    elif cls['mode'] == 'pointer' and cls.get('ff'):
+        # DocumentOrFreeFloatingBase (GroundPlane): owns through its own New/Delete
+        # (not an ON_Object), may point INTO another object without owning (the
+        # render settings' ground plane), or is a write-through view of the file
+        ff = cls['ff']
         storage = '''  {on}* m_ptr = nullptr;
-  ONX_Model* m_model = nullptr;   // a File3dm proxy: the model ...
-  ON_UUID m_id = ON_nil_uuid;     // ... and the component's id
+  bool m_owned = false;
+  ONX_Model* m_model = nullptr;   // a view of the file (CppFromFile3dm)
+  explicit {gen}({on}* owned) : m_ptr(owned), m_owned(true) {{}}
+  {gen}({on}* p, bool owned) : m_ptr(p), m_owned(owned) {{}}
+  explicit {gen}(ONX_Model* model) : m_model(model) {{}}
+  {gen}() : m_ptr(''' + ff['New'] + '''()), m_owned(true) {{}}
+  ~{gen}() {{ if (m_owned && m_ptr) ''' + ff['Delete'] + '''(m_ptr); }}
+  {gen}(const {gen}&) = delete;
+  // CppPointer: the file's object (resolved each time) or this one's
+  {on}* RH3DM_Const() const {{
+    if (m_ptr) return m_ptr;''' + ('''
+    {on}* p = ({on}*)''' + ff['FromFile'] + '''(m_model);
+    if (!p) throw std::runtime_error("{cs_full}: the object is no longer in the File3dm");
+    return p;''' if ff.get('FromFile') else '''
+    throw std::runtime_error("{cs_full}: no object");''') + '''
+  }}
+  {on}* RH3DM_NonConst() const {{ return RH3DM_Const(); }}{override}'''
+    elif cls['mode'] == 'pointer' and cls.get('proxy'):
+        # RhinoCommon's two CommonObject states: an owned pointer, or a VIEW of
+        # (file, id) -- a File3dm proxy (`new Layer(id, file)`) or the const
+        # geometry/attributes of a File3dmObject -- that owns nothing and
+        # resolves on every access. Writes: 'resolve' edits the file;
+        # 'cow' duplicates once (RhinoCommon NonConstOperation) and detaches.
+        pr = cls['proxy']
+        rargs = 'm_model' if pr.get('NoId') else 'm_model, m_id'
+        commit = ('''
+  // RenderSettings.Commit: the private copy is written back into the file
+  void RH3DM_Commit() const {{ if (m_ptr && m_model) %s(m_ptr, m_model); }}''' % pr['Commit']) if pr.get('Commit') else ''
+        nonconst = ('''  {on}* RH3DM_NonConst() const {{ return m_ptr ? m_ptr : ({on}*){resolver}(%s); }}''' % rargs
+                    if pr['NonConst'] == 'resolve' else
+                    '''  {on}* RH3DM_NonConst() const {{
+    if (!m_ptr) m_ptr = ({on}*){dup}(({dup_arg}*)RH3DM_Const());   // first write: a private copy, as in .NET
+    return m_ptr;
+  }}''')
+        storage = '''  mutable {on}* m_ptr = nullptr;
+  ONX_Model* m_model = nullptr;   // a view: the file ...
+  ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
-  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{bridge}{dctor}
+  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{bridge}{dctor}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}
-  // CommonObject.ConstPointer: a proxy whose component left the model throws
+  // CommonObject.ConstPointer: a view whose object left the file throws
   {on}* RH3DM_Const() const {{
     if (m_ptr) return m_ptr;
-    {on}* p = ({on}*){resolver}(m_model, m_id);
-    if (!p) throw std::runtime_error("{cs_full}: the component is no longer in the File3dm");
+    {on}* p = ({on}*){resolver}(%s);
+    if (!p) throw std::runtime_error("{cs_full}: the object is no longer in the File3dm");
     return p;
   }}
-  // NonConstPointer, File3dm branch: the same component (edits go into the model)
-  {on}* RH3DM_NonConst() const {{ return m_ptr ? m_ptr : ({on}*){resolver}(m_model, m_id); }}{override}'''
+  // NonConstPointer: ''' % rargs + ('the same object (edits go into the file)' if pr['NonConst'] == 'resolve'
+                             else 'copy on write (NonConstOperation -> _InternalDuplicate)') + '\n' + nonconst + commit + '{override}'
     elif cls['mode'] == 'pointer':
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
@@ -266,9 +377,16 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
         inherit=inherit, override=override, dctor=dctor, bridge=bridge,
         resolver=(cls.get('proxy') or {}).get('Resolver'), cs_full=cls['type'],
+        viewctor=('\n  explicit %s(ONX_Model* model) : m_model(model) {}' % cls['gen']) if (cls.get('proxy') or {}).get('NoId') else '',
+        dup=(cls.get('proxy') or {}).get('Dup'),
+        dup_arg=(C_BY_NAME.get((cls.get('proxy') or {}).get('Dup') or '') or {'params': [{'type': 'ON_Object*'}]})['params'][0]['type'].replace('const ', '').rstrip('*').strip(),
         # ON_Annotation's destructor is protected: delete through ON_Object (public, virtual)
         delete_expr='static_cast<ON_Object*>(m_ptr)' if cls.get('delete_as_object') else 'm_ptr',
         nocopy='' if self_copy else '\n  %s(const %s&) = delete;' % (cls['gen'], cls['gen']))
+
+
+VARIANT_BT = {'bool': 'bool', 'double': 'double', 'int': 'int', 'Guid': 'BND_UUID',
+              'Vector2d': 'BND_Vector2dX', 'Vector3d': 'BND_Vector3dX'}
 
 
 def emit_table_iter(cls):
@@ -276,40 +394,49 @@ def emit_table_iter(cls):
     File3dmManifestTable.GetEnumerator(type), one proxy per live component"""
     tp = cls['table']
     gen, item = cls['gen'], tp['item']['gen']
+    types = tp.get('types') or [tp['type_value']]
     decl = '''
-// %s's enumerator: ONX_ModelComponentIterator over the live components of one
-// type (RhinoCommon File3dmManifestTable.GetEnumerator), yielding File3dm proxies
+// %s's enumerator: ONX_ModelComponentIterator over the live components of each
+// of its type(s) in turn (RhinoCommon File3dmManifestTable.GetEnumerator; a
+// multi-type table chains them), yielding File3dm proxies
 class %sIter
 {
 public:
   ONX_Model* m_model = nullptr;
   ONX_ModelComponentIterator* m_it = nullptr;
-  explicit %sIter(ONX_Model* model);
-  ~%sIter() { ONX_ModelComponentIterator_Delete(m_it); }
+  unsigned m_k = 0;                 // which type is being iterated
+  explicit %sIter(ONX_Model* model) : m_model(model) {}
+  ~%sIter() { if (m_it) ONX_ModelComponentIterator_Delete(m_it); }
   %sIter(const %sIter&) = delete;
   class %s* Gen_next();   // nullptr at the end
 };
 ''' % (cls['reg'], gen, gen, gen, gen, gen, item)
     defn = '''
-%sIter::%sIter(ONX_Model* model)
-  : m_model(model), m_it(ONX_ModelComponentIterator_New(model, (ON_ModelComponent::Type)%s)) {}
-
 class %s* %sIter::Gen_next()
 {
-  int index = 0;
-  ON_ModelComponent::Type outType = (ON_ModelComponent::Type)0;
-  ON_UUID id = ON_nil_uuid;
-  ON_ModelComponent* p = ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id);
-  if (!p) return nullptr;
-  if (outType != (ON_ModelComponent::Type)%s) throw std::out_of_range("type");
-  return new %s(m_model, id);
+  static const ON_ModelComponent::Type types[] = { %s };
+  while (m_k < %d) {
+    if (!m_it) m_it = ONX_ModelComponentIterator_New(m_model, types[m_k]);
+    int index = 0;
+    ON_ModelComponent::Type outType = (ON_ModelComponent::Type)0;
+    ON_UUID id = ON_nil_uuid;
+    ON_ModelComponent* p = m_it ? ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id) : nullptr;
+    if (p) {
+      if (outType != types[m_k]) throw std::out_of_range("type");
+      return new %s(m_model, id);
+    }
+    if (m_it) ONX_ModelComponentIterator_Delete(m_it);
+    m_it = nullptr;
+    m_k++;
+  }
+  return nullptr;
 }
 
 %sIter* %s::Gen_iter() const
 {
   return new %sIter(m_ptr);
 }
-''' % (gen, gen, tp['type_value'], item, gen, tp['type_value'], item, gen, gen, gen)
+''' % (item, gen, ', '.join('(ON_ModelComponent::Type)%s' % v for v in types), len(types), item, gen, gen, gen)
     return decl, defn
 
 
@@ -365,7 +492,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             pass               # Python: one name cannot be static AND instance; JS keeps it
         elif p['static']:
             py.append('      .def_static("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
-        elif p['shape'][0] == 'child':
+        elif p['shape'][0] in ('child', 'constview', 'fileview', 'settingsview'):
             # a view onto this object: Python owns the view and keeps the parent alive
             # def_property* cannot take keep_alive itself: wrap the getter
             py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))'
@@ -500,14 +627,15 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     tp = cls.get('table')
     if tp:
         g = cls['gen']
-        py += ['      .def("__len__", &%s::%s)' % (g, tp['count']),
-               '      .def("__getitem__", &%s::Gen_getitem, py::keep_alive<0, 1>(), py::arg("index"))' % g,
-               '      .def("__iter__", &%s::Gen_iter, py::keep_alive<0, 1>())' % g]
-        js += ['      .function("get", &%s::%s, allow_raw_pointers())' % (g, tp['find']),
-               '      .function("iterator", &%s::Gen_iter, allow_raw_pointers())' % g]
+        py += ['      .def("__len__", &%s::%s)' % (g, tp['count'])]
+        if tp['find']:
+            py += ['      .def("__getitem__", &%s::Gen_getitem, py::keep_alive<0, 1>(), py::arg("index"))' % g]
+            js += ['      .function("get", &%s::%s, allow_raw_pointers())' % (g, tp['find'])]
+        py += ['      .def("__iter__", &%s::Gen_iter, py::keep_alive<0, 1>())' % g]
+        js += ['      .function("iterator", &%s::Gen_iter, allow_raw_pointers())' % g]
     has_bridge = cls.get('bridge', True)
-    if not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static'):
-        raise SystemExit('%s: bridge-free class needs a generated constructor'
+    if not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static') and not cls.get('proxy'):
+        raise SystemExit('%s: bridge-free class needs a generated constructor (or a view)'
                          % cls['reg'])
     py_bridge = ('      .def(py::init<const %s&>(), py::arg("source"))\n'
                  % cls['hand']) if has_bridge else ''

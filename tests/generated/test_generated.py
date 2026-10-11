@@ -304,3 +304,145 @@ def test_table_iteration_keeps_the_file_alive():
     assert layer.Name == 'only'
     with pytest.raises(StopIteration):
         next(iter([]))
+
+
+# --- G40: File3dmObject, copy-on-write geometry (deviations D1), write-through attributes
+
+needs_objects = pytest.mark.skipif(not hasattr(r, 'File3dmObjectX'), reason='module built before File3dmObjectX')
+
+
+def _file_with_line():
+    f = r.File3dmX()
+    f.Objects.AddLine(r.Point3dX(0, 0, 0), r.Point3dX(1, 0, 0), None)
+    return f
+
+
+@needs_objects
+def test_objects_iterate_as_file3dmobject_proxies():
+    f = _file_with_line()
+    f.Objects.AddPoint(r.Point3dX(5, 5, 5), None)
+    objs = list(f.Objects)
+    assert len(f.Objects) == 2 and len(objs) == 2
+    assert isinstance(objs[0], r.File3dmObjectX)
+    assert isinstance(objs[0].Geometry, r.LineCurveX)        # the most-derived view class
+    assert isinstance(objs[1].Geometry, r.PointX)
+
+
+@needs_objects
+def test_geometry_is_copy_on_write_as_in_rhinocommon():
+    # deviations.md D1 / pilot-findings #22: the old bindings edited the file in place
+    f = _file_with_line()
+    obj = next(iter(f.Objects))
+    g = obj.Geometry
+    assert g.PointAtStart.X == 0.0
+    assert g.Transform(r.TransformX.Translation(r.Vector3dX(10, 0, 0))) is True
+    assert g.PointAtStart.X == 10.0                             # the private copy moved ...
+    assert obj.Geometry.PointAtStart.X == 0.0                   # ... the file did not
+    # the .NET way to change the file: Delete + Add
+    f.Objects.Delete(obj.Id)
+    f.Objects.AddCurve(g, None)
+    assert [o.Geometry.PointAtStart.X for o in f.Objects] == [10.0]
+
+
+@needs_objects
+def test_attributes_write_through_and_name_chains_to_them():
+    f = _file_with_line()
+    obj = next(iter(f.Objects))
+    obj.Attributes.Name = 'via attributes'
+    assert obj.Name == 'via attributes'                         # File3dmObject.Name => Attributes.Name
+    obj.Name = 'via name'
+    assert next(iter(f.Objects)).Attributes.Name == 'via name'  # written into the file
+
+
+@needs_objects
+def test_geometry_view_of_a_deleted_object_raises():
+    f = _file_with_line()
+    obj = next(iter(f.Objects))
+    g = obj.Geometry
+    f.Objects.Delete(obj.Id)
+    with pytest.raises(RuntimeError):                           # DocumentCollectedException
+        g.PointAtStart
+
+
+# --- G41: RenderSettings, a view of the file that copies on write and commits back
+
+needs_rs = pytest.mark.skipif(not hasattr(r, 'RenderSettingsX'), reason='module built before RenderSettingsX')
+
+
+@needs_rs
+def test_render_settings_setters_commit_into_the_file():
+    f = r.File3dmX()
+    rs = f.Settings.RenderSettings
+    before = rs.ScaleBackgroundToFit
+    rs.ScaleBackgroundToFit = not before                  # copy on write, then Commit() into the file
+    assert rs.ScaleBackgroundToFit is (not before)        # the detached copy
+    assert f.Settings.RenderSettings.ScaleBackgroundToFit is (not before)   # a fresh view of the file: committed
+    rs.ShadowmapLevel = 3
+    assert f.Settings.RenderSettings.ShadowmapLevel == 3
+
+
+@needs_rs
+def test_render_settings_same_file_result_as_the_old_in_place_bindings(tmp_path):
+    # the old bindings wrote in place; vNext copies and commits -- the file is the same
+    import os
+    new = r.File3dmX()
+    new.Settings.RenderSettings.ShadowmapLevel = 2
+    new.Settings.RenderSettings.TransparentBackground = True
+    old = r.File3dm()
+    old.Settings.RenderSettings.ShadowMapLevel = 2  # the old binding's spelling (RhinoCommon: ShadowmapLevel)
+    old.Settings.RenderSettings.TransparentBackground = True
+    pn, po = str(tmp_path / 'new.3dm'), str(tmp_path / 'old.3dm')
+    assert new.Write(pn, 8) if hasattr(new, 'Write') else True
+    old.Write(po, 8)
+    back = r.File3dm.Read(po)
+    assert back.Settings.RenderSettings.ShadowMapLevel == 2 and back.Settings.RenderSettings.TransparentBackground is True
+    if os.path.exists(pn):
+        assert r.File3dm.Read(pn).Settings.RenderSettings.ShadowmapLevel == 2
+
+
+@needs_rs
+def test_render_settings_view_keeps_the_file_alive():
+    f = r.File3dmX()
+    rs = f.Settings.RenderSettings
+    del f
+    gc.collect()
+    rs.ShadowmapLevel = 1
+    assert rs.ShadowmapLevel == 1
+
+
+# --- G42: the RDK settings (GroundPlane, Sun, ...): write-through file views, Variant properties
+
+needs_rdk = pytest.mark.skipif(not hasattr(r, 'GroundPlaneX'), reason='module built before GroundPlaneX')
+
+
+@needs_rdk
+def test_ground_plane_writes_through_into_the_file():
+    f = r.File3dmX()
+    gp = f.Settings.RenderSettings.GroundPlane            # a view of the file (CppFromFile3dm)
+    gp.Enabled = True
+    gp.Altitude = 2.5
+    gp.TextureOffset = r.Vector2dX(0.25, 0.75)
+    again = f.Settings.RenderSettings.GroundPlane
+    assert again.Enabled is True and again.Altitude == 2.5
+    assert (again.TextureOffset.X, again.TextureOffset.Y) == (0.25, 0.75)
+
+
+@needs_rdk
+def test_free_floating_settings_own_their_object():
+    gp = r.GroundPlaneX()                                  # DefaultCppConstructor / DeleteCpp
+    gp.Altitude = 7.0
+    assert gp.Altitude == 7.0
+    rs = r.RenderSettingsX()                               # free-floating render settings ...
+    inner = rs.GroundPlane                                  # ... hand out a pointer INTO them, not a copy
+    inner.Altitude = 3.0
+    assert rs.GroundPlane.Altitude == 3.0
+
+
+@needs_rdk
+def test_sun_and_safe_frame_round_trip():
+    f = r.File3dmX()
+    rs = f.Settings.RenderSettings
+    rs.Sun.Enabled = True
+    rs.SafeFrame.Enabled = True
+    assert f.Settings.RenderSettings.Sun.Enabled is True
+    assert f.Settings.RenderSettings.SafeFrame.Enabled is True

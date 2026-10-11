@@ -219,10 +219,35 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Intersect.Intersection', 'cs': 'Intersection', 'on': None,
      'mode': 'static', 'hand': None, 'bridge': False,
      'gen': 'BND_IntersectionX', 'reg': 'IntersectionX'},
+    # the file's render settings: a VIEW of the file (no id) whose setters copy
+    # on write and commit back (RenderSettings.Commit, see G41)
+    {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'on': 'ON_3dmRenderSettings',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_RenderSettingsX', 'reg': 'RenderSettingsX'},
+    # the RDK settings inside the render settings (DocumentOrFreeFloatingBase):
+    # write-through views of the file (ON_X_FromONX_Model), or free-floating
+    # objects with their own New/Delete; every property is the Variant idiom (G42)
+    {'type': 'Rhino.Render.GroundPlane', 'cs': 'GroundPlane', 'on': 'ON_GroundPlane',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_GroundPlaneX', 'reg': 'GroundPlaneX'},
+    {'type': 'Rhino.Render.SafeFrame', 'cs': 'SafeFrame', 'on': 'ON_SafeFrame',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SafeFrameX', 'reg': 'SafeFrameX'},
+    {'type': 'Rhino.Render.Sun', 'cs': 'Sun', 'on': 'ON_Sun',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SunX', 'reg': 'SunX'},
+    {'type': 'Rhino.Render.Skylight', 'cs': 'Skylight', 'on': 'ON_Skylight',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SkylightX', 'reg': 'SkylightX'},
+    {'type': 'Rhino.Render.LinearWorkflow', 'cs': 'LinearWorkflow', 'on': 'ON_LinearWorkflow',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_LinearWorkflowX', 'reg': 'LinearWorkflowX'},
+    {'type': 'Rhino.Render.Dithering', 'cs': 'Dithering', 'on': 'ON_Dithering',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_DitheringX', 'reg': 'DitheringX'},
     # -- File3dm: an owning ONX_Model; its tables are views onto it
     {'type': 'Rhino.FileIO.File3dm', 'cs': 'File3dm', 'on': 'ONX_Model',
      'mode': 'pointer', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmX', 'reg': 'File3dmX'},
+    # the items of File3dm.Objects: a proxy (model, id) whose Geometry is a
+    # copy-on-write VIEW and whose Attributes write through (ParentViews)
+    {'type': 'Rhino.FileIO.File3dmObject', 'cs': 'File3dmObject', 'on': 'ON_ModelGeometryComponent',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
+     'gen': 'BND_File3dmObjectX', 'reg': 'File3dmObjectX'},
     {'type': 'Rhino.FileIO.File3dmObjectTable', 'cs': 'File3dmObjectTable', 'on': 'ONX_Model',
      'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmObjectTableX', 'reg': 'File3dmObjectTableX'},
@@ -615,6 +640,7 @@ SIMPLE_TYPES = {}    # simple name -> [full types]
 CONST_PROPS = {}     # (full type, property) -> (C# constant text, value or None)
 PLANNED = {}         # registry name -> its plans, filled as classes are planned (in CLASSES order)
 ENUM_VALUES = {}     # C# enum name -> its declared values (ints, distinct), when all are literal
+WRAPPER = {}         # the Variant value wrapper's natives (specgen Wrapper on the internal type)
 GUARD_ENUMS = set()  # C# enums a guard condition names (must be defined even if no signature uses them)
 C_BY_NAME = {}       # the C surface by function name (bnd_gen fills it)
 PROPS_BY_TYPE = {}   # full type -> its portable property records (nearest-declaration lookups)
@@ -656,22 +682,97 @@ def index_types(manifest):
             ENUM_VALUES[name] = sorted(set(vals))
     for x in manifest['members']:
         if x['Kind'] == 'type':
-            TYPE_RECS[x['Type']] = x
-            SIMPLE_TYPES.setdefault(x['Type'].replace('+', '.').split('.')[-1], []).append(x['Type'])
+            # a partial class yields one record per declaration (its bases differ):
+            # merge -- union the bases, keep the first non-null of each fact
+            prev = TYPE_RECS.get(x['Type'])
+            if prev is None:
+                TYPE_RECS[x['Type']] = dict(x)
+                SIMPLE_TYPES.setdefault(x['Type'].replace('+', '.').split('.')[-1], []).append(x['Type'])
+            else:
+                for k, v in x.items():
+                    if k == 'Bases' and v:
+                        pb = list(prev.get('Bases') or []); pa = list(prev.get('BaseArgs') or [None] * len(pb))
+                        for i, b in enumerate(v):
+                            if b not in pb:
+                                pb.append(b); pa.append((x.get('BaseArgs') or [None] * len(v))[i])
+                        prev['Bases'], prev['BaseArgs'] = pb, (pa if any(pa) else None)
+                    elif prev.get(k) is None and v is not None and k != 'BaseArgs':
+                        prev[k] = v
         elif x['Kind'] == 'property' and x.get('Const') and x['Variant'] in ('portable', 'rhino3dm-only'):
             CONST_PROPS[(x['Type'], x['Name'])] = (x['Const'], x.get('ConstValue'))
-    # the File3dm proxy idiom (specgen FileProxy): a registry class that has it
-    # gets a second storage state -- (model, id), resolved on every access.
-    # Only NonConst "resolve" (edits go into the model) is reproduced; a
-    # copy-on-write NonConstPointer is not, so such a class gets no proxies.
+    # VIEWS: a registry class gets a second storage state -- (ONX_Model*, id),
+    # resolved on every access -- when RhinoCommon constructs it that way:
+    #  - the File3dm proxy idiom (specgen FileProxy: `new Layer(id, file)`), or
+    #  - a const object whose pointer a File3dm PROXY parent owns (specgen
+    #    ParentViews: GeometryBase/ObjectAttributes with a File3dmObject parent),
+    #    where the parent's helper resolves (file pointer, id) -- the same pair.
+    # Writes either RESOLVE again (edits reach the file: Layer, ObjectAttributes)
+    # or COPY ON WRITE through the class's `_InternalDuplicate` (File3dmObject's
+    # geometry). Anything else (a holder parent, no duplicate) gets no view.
+    # The dict is kept under 'proxy': {Resolver, NonConst: resolve|cow, Dup}.
+    proxies = {c['cs']: (TYPE_RECS.get(c['type']) or {}).get('FileProxy') for c in CLASSES}
+    def chain_fact(t, key):
+        rec = TYPE_RECS.get(t) or {}
+        if rec.get(key):
+            return rec[key]
+        for bt, _ in base_chain(t):
+            if (TYPE_RECS.get(bt) or {}).get(key):
+                return TYPE_RECS[bt][key]
+        return None
+    WRAPPER.clear()
+    for rec in TYPE_RECS.values():
+        if rec.get('Wrapper'):
+            WRAPPER.update(rec['Wrapper'])
     for c in CLASSES:
-        fp = (TYPE_RECS.get(c['type']) or {}).get('FileProxy')
+        c.pop('proxy', None); c.pop('ff', None)
         base = BY_REG.get(c.get('base', ''))
-        if (fp and fp['NonConst'] == 'resolve' and c['mode'] == 'pointer'
-                and (base is None or base['mode'] == 'abstract')):
-            c['proxy'] = fp
-        else:
-            c.pop('proxy', None)
+        if c['mode'] != 'pointer' or (base is not None and base['mode'] != 'abstract'):
+            continue                       # a concrete-base derived class shares its base's storage
+        dup = chain_fact(c['type'], 'Duplicate')
+        ff = (TYPE_RECS.get(c['type']) or {}).get('FreeFloating')
+        if ff and ff.get('New') and ff.get('Delete'):
+            # DocumentOrFreeFloatingBase: owns through its own New/Delete; backed by
+            # a file it is a write-through view (CppPointer -> CppFromFile3dm)
+            c['ff'] = ff
+            if ff.get('FromFile'):
+                c['proxy'] = {'Resolver': ff['FromFile'], 'NonConst': 'resolve', 'Dup': None, 'Origin': 'file', 'NoId': True}
+            continue
+        fp = (TYPE_RECS.get(c['type']) or {}).get('FileProxy')
+        if fp:
+            if fp['NonConst'] == 'resolve':
+                c['proxy'] = {'Resolver': fp['Resolver'], 'NonConst': 'resolve', 'Dup': None, 'Origin': 'file'}
+            elif fp['NonConst'] == 'base' and dup:
+                c['proxy'] = {'Resolver': fp['Resolver'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'file'}
+            if c.get('proxy') and fp.get('IdField') is None:
+                # a view of the file itself (RenderSettings): no id, and a write
+                # back (`Commit()`) when the type's commit targets the same file field
+                c['proxy']['NoId'] = True
+                cm = (TYPE_RECS.get(c['type']) or {}).get('Commit')
+                if cm and cm.get('FileField') == fp.get('FileField'):
+                    c['proxy']['Commit'] = cm['Native']
+            continue
+        # every ParentViews entry along the chain (Curve has its own CurveHolder
+        # entry; the File3dmObject one is GeometryBase's)
+        all_pvs = [pv for t in [c['type']] + [bt for bt, _ in base_chain(c['type'])]
+                   for pv in (TYPE_RECS.get(t) or {}).get('ParentViews') or []]
+        for pv in all_pvs:
+            parent = proxies.get(pv['ParentType'])
+            if not parent or not pv.get('ConstNative'):
+                continue
+            def is_file_id(call):      # the parent's (file pointer, id) exactly
+                a = call['Args']
+                return (len(a) == 2 and a[0]['Kind'] == 'fieldptr' and a[0]['Text'] == parent['FileField']
+                        and a[1]['Kind'] == 'expr' and a[1]['Text'] == parent['IdField'])
+            if not is_file_id(pv['ConstNative']):
+                continue
+            nc = pv.get('NonConstNative')
+            if nc is not None and is_file_id(nc) and nc['Name'] == pv['ConstNative']['Name']:
+                c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'resolve', 'Dup': None,
+                              'Origin': 'object', 'Parent': pv['ParentType']}
+            elif nc is None and dup:
+                c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'cow', 'Dup': dup,
+                              'Origin': 'object', 'Parent': pv['ParentType']}
+            break
 
 
 def resolve_type(name, near):
