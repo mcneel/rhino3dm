@@ -210,6 +210,75 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_SubD', 'hand_header': 'bnd_subd.h',
      'copy': ('ON_SubD::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
      'gen': 'BND_SubDX', 'reg': 'SubDX', 'base': 'GeometryBaseX'},
+    # -- batch 2 (G46): native-backed classes
+    # an IDisposable HANDLE (specgen Handle): owns its pointer, frees it with its own Delete
+    {'type': 'Rhino.FileIO.FileReference', 'cs': 'FileReference', 'on': 'ON_FileReference',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
+     'gen': 'BND_FileReferenceX', 'reg': 'FileReferenceX'},
+    # mesh modifiers (G46): children of an object's attributes (old names: Displacement, ...)
+    {'type': 'Rhino.FileIO.File3dmMeshModifiers', 'cs': 'File3dmMeshModifiers', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'ObjectAttributesX', 'hand': 'BND_File3dmMeshModifiers', 'bridge': False,
+     'gen': 'BND_File3dmMeshModifiersX', 'reg': 'File3dmMeshModifiersX'},
+    {'type': 'Rhino.FileIO.File3dmDisplacement', 'cs': 'File3dmDisplacement', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmDisplacement', 'bridge': False,
+     'gen': 'BND_File3dmDisplacementX', 'reg': 'File3dmDisplacementX'},
+    {'type': 'Rhino.FileIO.File3dmEdgeSoftening', 'cs': 'File3dmEdgeSoftening', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmEdgeSoftening', 'bridge': False,
+     'gen': 'BND_File3dmEdgeSofteningX', 'reg': 'File3dmEdgeSofteningX'},
+    {'type': 'Rhino.FileIO.File3dmThickening', 'cs': 'File3dmThickening', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmThickening', 'bridge': False,
+     'gen': 'BND_File3dmThickeningX', 'reg': 'File3dmThickeningX'},
+    {'type': 'Rhino.FileIO.File3dmCurvePiping', 'cs': 'File3dmCurvePiping', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmCurvePiping', 'bridge': False,
+     'gen': 'BND_File3dmCurvePipingX', 'reg': 'File3dmCurvePipingX'},
+    {'type': 'Rhino.FileIO.File3dmShutLining', 'cs': 'File3dmShutLining', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmShutLining', 'bridge': False,
+     'gen': 'BND_File3dmShutLiningX', 'reg': 'File3dmShutLiningX'},
+    # a BORROWED pointer into a mesh (specgen Borrowed): never deleted; the mesh is kept alive
+    {'type': 'Rhino.Render.CachedTextureCoordinates', 'cs': 'CachedTextureCoordinates', 'on': 'ON_TextureCoordinates',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
+     'gen': 'BND_CachedTextureCoordinatesX', 'reg': 'CachedTextureCoordinatesX'},
+    {'type': 'Rhino.DocObjects.Environment', 'cs': 'Environment', 'on': 'ON_Environment',
+     'mode': 'pointer', 'hand': 'BND_Environment', 'hand_header': 'bnd_texture.h',
+     'copy': 'source.m_env ? new ON_Environment(*source.m_env) : nullptr',
+     'gen': 'BND_EnvironmentX', 'reg': 'EnvironmentX'},
+    # -- batch 1 (G43): COMPONENTS -- objects RhinoCommon makes as (owner, key) and
+    # resolves through the owner on every access (specgen Component). The proxy
+    # bases exist for RhinoCommon's inheritance (protected constructors: no init).
+    {'type': 'Rhino.Geometry.SurfaceProxy', 'cs': 'SurfaceProxy', 'on': 'ON_SurfaceProxy',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
+     'gen': 'BND_SurfaceProxyX', 'reg': 'SurfaceProxyX', 'base': 'SurfaceX'},
+    {'type': 'Rhino.Geometry.CurveProxy', 'cs': 'CurveProxy', 'on': 'ON_CurveProxy',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
+     'gen': 'BND_CurveProxyX', 'reg': 'CurveProxyX', 'base': 'CurveX'},
+    {'type': 'Rhino.Geometry.BrepFace', 'cs': 'BrepFace', 'on': 'ON_BrepFace',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepFaceX', 'reg': 'BrepFaceX', 'base': 'SurfaceProxyX'},
+    {'type': 'Rhino.Geometry.BrepEdge', 'cs': 'BrepEdge', 'on': 'ON_BrepEdge',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepEdgeX', 'reg': 'BrepEdgeX', 'base': 'CurveProxyX'},
+    {'type': 'Rhino.Geometry.BrepTrim', 'cs': 'BrepTrim', 'on': 'ON_BrepTrim',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepTrimX', 'reg': 'BrepTrimX', 'base': 'CurveProxyX'},
+    {'type': 'Rhino.Geometry.BrepVertex', 'cs': 'BrepVertex', 'on': 'ON_BrepVertex',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepVertexX', 'reg': 'BrepVertexX', 'base': 'PointX'},
+    {'type': 'Rhino.Geometry.BrepLoop', 'cs': 'BrepLoop', 'on': 'ON_BrepLoop',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepLoopX', 'reg': 'BrepLoopX', 'base': 'GeometryBaseX'},
+    # the SubD components' abstract base (G46): `Id` is the components' key
+    {'type': 'Rhino.Geometry.SubDComponent', 'cs': 'SubDComponent', 'on': 'ON_SubDComponentBase',
+     'mode': 'abstract', 'getter': 'RH3DM_SubDCompPtr',
+     'gen': 'BND_SubDComponentX', 'reg': 'SubDComponentX'},
+    {'type': 'Rhino.Geometry.SubDFace', 'cs': 'SubDFace', 'on': 'ON_SubDFace',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDFaceX', 'reg': 'SubDFaceX', 'base': 'SubDComponentX'},
+    {'type': 'Rhino.Geometry.SubDEdge', 'cs': 'SubDEdge', 'on': 'ON_SubDEdge',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDEdgeX', 'reg': 'SubDEdgeX', 'base': 'SubDComponentX'},
+    {'type': 'Rhino.Geometry.SubDVertex', 'cs': 'SubDVertex', 'on': 'ON_SubDVertex',
+     'mode': 'pointer', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDVertexX', 'reg': 'SubDVertexX', 'base': 'SubDComponentX'},
     {'type': 'Rhino.Geometry.AnnotationBase', 'cs': 'AnnotationBase', 'on': 'ON_Annotation',
      'mode': 'pointer', 'hand': 'BND_AnnotationBase', 'hand_header': 'bnd_annotationbase.h',
      'copy': ('ON_Annotation::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
@@ -310,6 +379,14 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Collections.MeshTopologyEdgeList', 'cs': 'MeshTopologyEdgeList', 'on': 'ON_Mesh',
      'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
      'gen': 'BND_MeshTopologyEdgeListX', 'reg': 'MeshTopologyEdgeListX'},
+    # G47: reached through `new BrepLoopList(this)` -- the (Brep) constructor, which nulls
+    # m_brepface: members are planned from the bodies specialized for it
+    {'type': 'Rhino.Geometry.Collections.BrepLoopList', 'cs': 'BrepLoopList', 'on': 'ON_Brep',
+     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepLoopListX', 'reg': 'BrepLoopListX'},
+    {'type': 'Rhino.Geometry.Collections.BrepTrimList', 'cs': 'BrepTrimList', 'on': 'ON_Brep',
+     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
+     'gen': 'BND_BrepTrimListX', 'reg': 'BrepTrimListX'},
     {'type': 'Rhino.Geometry.Collections.BrepFaceList', 'cs': 'BrepFaceList', 'on': 'ON_Brep',
      'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
      'gen': 'BND_BrepFaceListX', 'reg': 'BrepFaceListX'},
@@ -331,6 +408,27 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Collections.NurbsSurfacePointList', 'cs': 'NurbsSurfacePointList', 'on': 'ON_NurbsSurface',
      'mode': 'child', 'parent': 'NurbsSurfaceX', 'hand': None, 'bridge': False,
      'gen': 'BND_NurbsSurfacePointListX', 'reg': 'NurbsSurfacePointListX'},
+    # -- batch 1 (G43): lists of components, and children with a key
+    # (`new NurbsSurfaceKnotList(this, 0)`, `new PointCloudItem(this, index)`)
+    {'type': 'Rhino.Geometry.Collections.SubDFaceList', 'cs': 'SubDFaceList', 'on': 'ON_SubD',
+     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDFaceListX', 'reg': 'SubDFaceListX'},
+    {'type': 'Rhino.Geometry.Collections.SubDEdgeList', 'cs': 'SubDEdgeList', 'on': 'ON_SubD',
+     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDEdgeListX', 'reg': 'SubDEdgeListX'},
+    {'type': 'Rhino.Geometry.Collections.SubDVertexList', 'cs': 'SubDVertexList', 'on': 'ON_SubD',
+     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
+     'gen': 'BND_SubDVertexListX', 'reg': 'SubDVertexListX'},
+    {'type': 'Rhino.Geometry.Collections.NurbsSurfaceKnotList', 'cs': 'NurbsSurfaceKnotList', 'on': 'ON_NurbsSurface',
+     'mode': 'child', 'parent': 'NurbsSurfaceX', 'hand': None, 'bridge': False,
+     'gen': 'BND_NurbsSurfaceKnotListX', 'reg': 'NurbsSurfaceKnotListX'},
+    {'type': 'Rhino.Geometry.PointCloudItem', 'cs': 'PointCloudItem', 'on': 'ON_PointCloud',
+     'mode': 'child', 'parent': 'PointCloudX', 'hand': None, 'bridge': False,
+     'gen': 'BND_PointCloudItemX', 'reg': 'PointCloudItemX'},
+    # `Material.PhysicallyBased => IsPhysicallyBased ? new PhysicallyBasedMaterial(this) : null`
+    {'type': 'Rhino.DocObjects.PhysicallyBasedMaterial', 'cs': 'PhysicallyBasedMaterial', 'on': 'ON_Material',
+     'mode': 'child', 'parent': 'MaterialX', 'hand': None, 'bridge': False,
+     'gen': 'BND_PhysicallyBasedMaterialX', 'reg': 'PhysicallyBasedMaterialX'},
 ]
 BY_CS = {c['cs']: c for c in CLASSES}
 BY_TYPE = {c['type']: c for c in CLASSES}
@@ -344,6 +442,7 @@ OUTLOCAL = {
     # value types reach the binding as the GENERATED value types (translated
     # RhinoCommon bodies), converted from the C layer's opennurbs locals
     'ON_UUID*':         ('ON_UUID {n} = ON_nil_uuid;', 'ON_UUID_to_Binding({n})'),
+    'unsigned int*':    ('unsigned int {n} = 0;', '{n}'),     # a component id (`uint id = 0; ... ref id`)
 }
 CS_ARG = {
     'double':   ('double', '{n}'),
@@ -403,6 +502,9 @@ def register_value_types(vt):
             VT_STATICS.add((m['Type'], m['Name']))
         if m.get('Ok') and m['Kind'] == 'field-const':
             VT_CONSTS.add((m['Type'], m['Name']))
+        if m.get('Ok') and m['Kind'] == 'ctor' and m.get('Params') and all(
+                q['Type'] in ('double', 'float', 'int') and not q.get('Mode') for q in m['Params']):
+            VT_NUM_CTORS.add((m['Type'], len(m['Params'])))
         if m.get('Ok') and m['Kind'] == 'property' and not m.get('Static'):
             VT_PROPS.add((m['Type'], m['Name']))
             VT_PROP_RET[(m['Type'], m['Name'])] = m.get('Ret')
@@ -465,6 +567,7 @@ EXMAP = {
     'NotSupportedException': 'std::runtime_error',
     # -> Python FileNotFoundError (translator registered in gen_init.cpp)
     'FileNotFoundException': 'RH3DM_FileNotFound',
+    'ApplicationException': 'std::runtime_error',
     # a File3dm proxy whose component is no longer in the model (CommonObject.ConstPointer)
     'DocumentCollectedException': 'std::runtime_error',
 }
@@ -502,6 +605,17 @@ def extend_enum_table(manifest):
                 hand.setdefault(cls_vars[var] + '.' + name, cpp.strip())
         for cpp, name in re.findall(r'\benum_<([^>]+)>\("(\w+)"\)', text):
             hand_js.setdefault(cpp.strip(), name)
+    # a hand enum declared only inside a .cpp (bnd_intersect.cpp's
+    # LineSphereIntersection) cannot be named by generated code -- and its
+    # Python name is taken, so no RH3DM_ copy either: members using it are
+    # refused (G49; before, a tuple silently dropped it)
+    in_headers = set()
+    for f in glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.h')):
+        in_headers |= set(re.findall(r'\benum\s+(?:class\s+)?(\w+)', open(f, errors='replace').read()))
+    def visible(cpp):
+        return '::' in cpp or cpp.startswith('ON') or cpp in in_headers
+    HIDDEN_ENUMS.clear()
+    HIDDEN_ENUMS.update(n for n, c in hand.items() if not visible(c))
     type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
     seen, nested = {}, {}
     for x in manifest['members']:
@@ -513,7 +627,7 @@ def extend_enum_table(manifest):
             continue
         seen.setdefault(x['Name'], set()).add(x['Type'])
     for name, owners in seen.items():
-        if name in CS_ENUMS or len(owners) != 1:
+        if name in CS_ENUMS or len(owners) != 1 or name in HIDDEN_ENUMS:
             continue
         CS_ENUMS[name] = ({'cpp': hand[name], 'gen': False} if name in hand
                           else {'cpp': 'RH3DM_' + name, 'gen': True})
@@ -524,9 +638,17 @@ def extend_enum_table(manifest):
         if key in CS_ENUMS or len(owners) != 1:
             continue
         owner = key.split('.')[0]
+        joined = key.replace('.', '')
+        if key in HIDDEN_ENUMS or joined in HIDDEN_ENUMS:
+            continue
         if key in hand:
             CS_ENUMS[key] = {'cpp': hand[key], 'gen': False, 'owner': owner,
-                             'js': hand_js.get(hand[key], key.replace('.', ''))}
+                             'js': hand_js.get(hand[key], joined)}
+        elif joined in hand:
+            # registered by the old bindings at module level under the joined name
+            # (`EnvironmentBackgroundProjections`): reuse it, never register it twice
+            CS_ENUMS[key] = {'cpp': hand[joined], 'gen': False, 'owner': owner,
+                             'js': hand_js.get(hand[joined], joined)}
         else:
             CS_ENUMS[key] = {'cpp': 'RH3DM_' + key.replace('.', '_'), 'gen': True, 'owner': owner,
                              'js': key.replace('.', '')}
@@ -593,6 +715,23 @@ def local_value(init):
             'default(double)': '0.0', 'default(bool)': 'false', 'default(uint)': '0'}
     if t in zero:
         return zero[t], None
+    mm = re.match(r'^default\((\w+)\)$', t)
+    if mm and mm.group(1) in VT_CPP:
+        # `Point3d rc = default(Point3d);`: the all-zero struct (value-initialized)
+        return '%s{}' % VT_CPP[mm.group(1)], mm.group(1)
+    # `new Point3d(0, 0, 0)` -- the translated constructor, numeric literals only;
+    # integer literals written as doubles so no other one-argument constructor
+    # (Transform(Transform)) can compete in overload resolution (G49)
+    mm = re.match(r'^new\s+([\w.]+)\s*\((.*)\)$', t)
+    if mm and cs_unqualify(mm.group(1)) in VT_CPP:
+        vt = cs_unqualify(mm.group(1))
+        vals = [v.strip() for v in mm.group(2).split(',')]
+        num = r'^-?(\d+\.?\d*([eE][-+]?\d+)?|\.\d+)[dDfF]?$'
+        if (vt, len(vals)) in VT_NUM_CTORS and all(re.match(num, v) for v in vals):
+            vals = [v.rstrip('dDfF') for v in vals]
+            vals = [v if re.search(r'[.eE]', v) else v + '.0' for v in vals]
+            return '%s(%s)' % (VT_CPP[vt], ', '.join(vals)), vt
+        return None
     mm = re.match(r'^RhinoMath\.(\w+)$', t)
     if mm and ('RhinoMath', mm.group(1)) in VT_CONSTS:
         return 'RH3DM_RhinoMath::' + mm.group(1), None
@@ -624,6 +763,8 @@ VT_STATICS = set()   # (C# type, name) of translated static getters (Plane.World
 VT_CONSTS = set()    # (C# type, name) of translated constants (RhinoMath.UnsetValue)
 VT_PROPS = set()     # (C# type, name) of translated instance properties (Interval.Min)
 VT_PROP_RET = {}     # (C# type, name) -> C++ return type of that property's getter
+VT_NUM_CTORS = set() # (C# type, arity) of translated all-numeric constructors (Point3d(x, y, z))
+HIDDEN_ENUMS = set() # Python names of hand enums declared only in a .cpp (see extend_enum_table)
 
 
 
@@ -640,6 +781,7 @@ SIMPLE_TYPES = {}    # simple name -> [full types]
 CONST_PROPS = {}     # (full type, property) -> (C# constant text, value or None)
 PLANNED = {}         # registry name -> its plans, filled as classes are planned (in CLASSES order)
 ENUM_VALUES = {}     # C# enum name -> its declared values (ints, distinct), when all are literal
+ENUM_NAMED = {}      # C# enum name -> {member: value}, same condition
 WRAPPER = {}         # the Variant value wrapper's natives (specgen Wrapper on the internal type)
 GUARD_ENUMS = set()  # C# enums a guard condition names (must be defined even if no signature uses them)
 C_BY_NAME = {}       # the C surface by function name (bnd_gen fills it)
@@ -680,6 +822,7 @@ def index_types(manifest):
             nxt = val + 1
         if vals:
             ENUM_VALUES[name] = sorted(set(vals))
+            ENUM_NAMED[name] = dict(named)
     for x in manifest['members']:
         if x['Kind'] == 'type':
             # a partial class yields one record per declaration (its bases differ):
@@ -755,6 +898,19 @@ def index_types(manifest):
         # entry; the File3dmObject one is GeometryBase's)
         all_pvs = [pv for t in [c['type']] + [bt for bt, _ in base_chain(c['type'])]
                    for pv in (TYPE_RECS.get(t) or {}).get('ParentViews') or []]
+        # `new Texture(index, material)` (G57): a view of (owner object, index) the
+        # type's own _InternalGetConstPointer resolves with one native call; no
+        # NonConstPointer branch, so writes copy (NonConstOperation)
+        own_pvs = [pv for pv in (TYPE_RECS.get(c['type']) or {}).get('ParentViews') or [] if pv.get('IndexNative')]
+        if own_pvs and dup:
+            pv = own_pvs[0]
+            owner = BY_CS.get(pv['ParentType'])
+            fn = C_BY_NAME.get(pv['IndexNative'])
+            if (len(own_pvs) == 1 and owner and owner['mode'] == 'pointer' and fn and fn.get('variant') != 'rhino-only'
+                    and len(fn['params']) == 2 and fn['params'][1]['type'] == 'int'):
+                c['proxy'] = {'Resolver': pv['IndexNative'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'parent',
+                              'Parent': pv['ParentType'], 'Owner': owner['reg'], 'Field': pv['IndexField']}
+                continue
         for pv in all_pvs:
             parent = proxies.get(pv['ParentType'])
             if not parent or not pv.get('ConstNative'):
@@ -773,6 +929,96 @@ def index_types(manifest):
                 c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'cow', 'Dup': dup,
                               'Origin': 'object', 'Parent': pv['ParentType']}
             break
+    index_components()
+    index_ctor_keys()
+
+
+def index_ctor_keys():
+    """a child class whose RhinoCommon type has constructors that null fields
+    (BrepLoopList(Brep): m_brepface = null) and that its parent reaches through ONE
+    of them (`Brep.Loops => new BrepLoopList(this)`): c['ctor_key'] = that
+    constructor's key ("(Brep)"). Its members are planned from the bodies specialized
+    for it (specgen Specialized). Two accessors reaching it differently: no key."""
+    for c in CLASSES:
+        c.pop('ctor_key', None)
+        rec = TYPE_RECS.get(c['type']) or {}
+        if c['mode'] != 'child' or not rec.get('NullingCtors'):
+            continue
+        parent = BY_REG.get(c.get('parent', ''))
+        if parent is None:
+            continue
+        keys = set()
+        for x in PROPS_BY_TYPE.get(parent['type'], []):
+            if cs_unqualify(x.get('Child') or '') == c['cs'] and x.get('ChildArgs') == ['this']:
+                keys.add('(%s)' % parent['cs'])
+        nulling = {n['Key'] for n in rec['NullingCtors']}
+        if len(keys) == 1 and keys <= nulling:
+            c['ctor_key'] = keys.pop()
+
+
+def storage_host(c):
+    """the class holding a registry class's storage: itself, or the concrete
+    base it extends (planner.storage_owner, for the registry pass)"""
+    while True:
+        b = BY_REG.get(c.get('base', ''))
+        if b is None or b['mode'] == 'abstract':
+            return c
+        c = b
+
+
+def index_components():
+    """COMPONENTS (G43): RhinoCommon's `new BrepFace(index, brep)` -- an object
+    made of (owner, key) and resolved through the owner on every access
+    (specgen Component). A POINTER class whose record carries its own pointer
+    resolver is a component (c['comp']); a CHILD class whose record is a
+    pointer-less component is a child WITH A KEY (c['key']: PointCloudItem,
+    NurbsSurfaceKnotList -- the owner's pointer plus an index or direction).
+    A component deriving a concrete class (BrepFace : Surface) keeps that
+    class's storage, which then hosts the component state (c['comp_host']).
+    Anything else -- an unregistered owner, a resolver missing from the C
+    surface, a host that is not view-capable -- grants nothing."""
+    for c in CLASSES:
+        c.pop('comp', None); c.pop('comp_host', None); c.pop('key', None); c.pop('handle', None); c.pop('borrowed', None)
+        if (TYPE_RECS.get(c['type']) or {}).get('Borrowed') and c['mode'] == 'pointer':
+            c['borrowed'] = True             # G48: a pointer into another object, never deleted
+            c.pop('proxy', None)
+        hd = (TYPE_RECS.get(c['type']) or {}).get('Handle')
+        if hd and c['mode'] == 'pointer' and hd.get('Delete') in C_BY_NAME \
+                and C_BY_NAME[hd['Delete']].get('variant') != 'rhino-only':
+            # an IDisposable HANDLE (G46): owns its pointer, frees it with its Delete
+            c['handle'] = {'Delete': hd['Delete'], 'Field': hd['Field']}
+            c.pop('proxy', None)
+    for c in CLASSES:
+        rec = (TYPE_RECS.get(c['type']) or {}).get('Component')
+        if not rec or rec.get('KeyType') not in CS_ARG:
+            continue
+        owner = BY_CS.get(rec['Owner'])
+        if owner is None:
+            continue
+        if c['mode'] == 'child':
+            if rec.get('Const') is None and c.get('parent') == owner['reg'] and 'ptr' not in rec['Ctor']:
+                c['key'] = {'Type': CS_ARG[rec['KeyType']][0], 'Names': rec['KeyNames'],
+                            'OwnerNames': rec['OwnerNames'], 'Ctor': rec['Ctor']}
+            continue
+        if c['mode'] != 'pointer' or not rec.get('Const') or owner['mode'] != 'pointer':
+            continue
+        if rec['Const'] not in C_BY_NAME or (rec.get('NonConst') and rec['NonConst'] not in C_BY_NAME):
+            continue
+        host = storage_host(c)
+        if host is not c and (not host.get('proxy') or rec['KeyType'] != 'int'):
+            continue
+        c['comp'] = {'Owner': owner, 'Const': rec['Const'], 'NonConst': rec.get('NonConst'),
+                     'Key': CS_ARG[rec['KeyType']][0], 'KeyNames': rec['KeyNames'],
+                     'OwnerNames': rec['OwnerNames'], 'Ctor': rec['Ctor']}
+        if host is c:
+            c.pop('proxy', None)          # a component is never a File3dm view
+        else:
+            host['comp_host'] = True
+    # views INSIDE another object (G58: PolyCurve.SegmentCurve, BrepFace.GetMesh)
+    # use the same (fn, owner, key) state: every geometry view class hosts it
+    for c in CLASSES:
+        if c['mode'] == 'pointer' and storage_host(c) is c and (c.get('proxy') or {}).get('Origin') == 'object':
+            c['comp_host'] = True
 
 
 def resolve_type(name, near):

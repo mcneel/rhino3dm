@@ -35,6 +35,65 @@ def _derives(d, base):
     return False
 
 
+def refuse_overridden(manifest, per_class, skipped):
+    """A base member that a derived generated class OVERRIDES in RhinoCommon
+    with logic the generator does not produce is refused on the base (G49:
+    GeometryBase.GetBoundingBox(Transform) vs AnnotationBase's managed
+    override): C++ inheritance would hand derived objects the base logic.
+    Exact signatures; a `base` forward or a generated override keeps it.
+    check_override_shadowing stays the final assertion."""
+    def sig(x):
+        return (x['Kind'], x['Name'], tuple(q['Type'] for q in x.get('Params') or []))
+    def acc(p):
+        return 'set' if p.get('setter_of') else 'get'
+    by_type = {}
+    for x in manifest['members']:
+        if x['Variant'] == 'portable' and x['Kind'] in ('method', 'property'):
+            by_type.setdefault(x['Type'], []).append(x)
+    plans_of = {cls['reg']: plans for cls, plans in per_class}
+    changed = True
+    while changed:
+        changed = False
+        gen = {reg: {(acc(p), sig(p['m'])) for p in plans} for reg, plans in plans_of.items()}
+        for cls, _ in per_class:
+            own = {sig(x): x for x in by_type.get(cls['type'], [])}
+            b = BY_REG.get(cls.get('base', ''))
+            while b is not None:
+                bplans = plans_of.get(b['reg'], [])
+                for p in list(bplans):
+                    if p['shape'][0] == 'forward':
+                        continue
+                    o = own.get(sig(p['m']))
+                    if o is None or (acc(p), sig(p['m'])) in gen[cls['reg']]:
+                        continue
+                    body = o.get('Body') if acc(p) == 'get' else (o.get('Setter') or {}).get('Body')
+                    if body == 'base':
+                        continue
+                    gone = [q for q in bplans if q is p or (q['shape'][0] == 'forward' and q['shape'][2] is p)]
+                    for q in gone:
+                        bplans.remove(q)
+                    key = 'overridden in a derived class'
+                    skipped[key] = skipped.get(key, 0) + len(gone)
+                    changed = True
+                b = BY_REG.get(b.get('base', ''))
+
+
+def refuse_overridden_count(per_class, skipped):
+    """An array fill sized by a sibling (`SpanCount(direction) + 1`) calls the
+    generated sibling non-virtually; if a derived generated class has its own
+    member of that name, C# would dispatch to it: refused (G54)."""
+    for cls, plans in per_class:
+        for p in list(plans):
+            if p['shape'][0] != 'arrayfill':
+                continue
+            af = p['shape'][1]
+            name = af.get('count_prop') or (af.get('count_method') or (None,))[0]
+            if name and any(_derives(d, cls) and any(q['m']['Name'] == name for q in dplans)
+                            for d, dplans in per_class):
+                plans.remove(p)
+                skipped['arrayfill: count overridden'] = skipped.get('arrayfill: count overridden', 0) + 1
+
+
 def check_override_shadowing(manifest, per_class):
     """A derived class inherits its generated base's members through C++. If
     RhinoCommon OVERRIDES one in the derived class and that override is not
@@ -96,6 +155,8 @@ def main():
         PLANNED[cls['reg']] = plans
         per_class.append((cls, plans))
 
+    refuse_overridden(manifest, per_class, skipped)
+    refuse_overridden_count(per_class, skipped)
     all_plans = [p for _, plans in per_class for p in plans]
     check_override_shadowing(manifest, per_class)
     # File3dm table protocols (len / [i] / iteration): a concession granted
@@ -105,6 +166,27 @@ def main():
         tp = table_protocol(cls, manifest, plans)
         if tp:
             cls['table'] = tp
+    # `return Brep.Faces[index];` (G43): through the list's own generated
+    # indexer -- or not at all
+    for cls, plans in per_class:
+        keep = []
+        for p in plans:
+            if p['shape'][0] == 'via':
+                ips = [q for q in PLANNED.get(p['shape'][1]['reg'], [])
+                       if q['m']['Kind'] == 'indexer' and q['shape'][0] == 'construct']
+                if len(ips) != 1:
+                    skipped['via: list indexer not generated'] = skipped.get('via: list indexer not generated', 0) + 1
+                    continue
+                p['via_plan'] = ips[0]
+            keep.append(p)
+        plans[:] = keep
+    # linked enumerators (G43: SubDFaceList foreach -- First/Next over the owner's
+    # components): a list of generated components gets len and iteration
+    for cls, plans in per_class:
+        cls.pop('liter', None)
+        li = linked_iter(cls, plans)
+        if li:
+            cls['liter'] = li
     # a base's guard asks the derived storage for IsDocumentControlled: every
     # derived class must resolve it to the same idiom (no portable override)
     for cls in CLASSES:
@@ -138,6 +220,9 @@ def main():
                 used_enums.add(cpp_to_enum[t])
         if p['shape'][0] == 'enumret' and CS_ENUMS[p['shape'][1]]['gen']:
             used_enums.add(p['shape'][1])
+        # a tuple led by an enum result (G49: Intersection.CircleCircle)
+        if p['shape'][0] == 'tuple' and isinstance(p['shape'][1], tuple) and p['shape'][1][1] in cpp_to_enum:
+            used_enums.add(cpp_to_enum[p['shape'][1][1]])
     used_enums |= {e for e in GUARD_ENUMS if CS_ENUMS[e]['gen']}
     enum_values = {}
     type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
@@ -246,6 +331,30 @@ def main():
             ctors[cls['reg']] = ('%s()' % cls['ff']['New'], c_by_name[cls['ff']['New']])
     argctors = {cls['reg']: arg_ctor_plans(cls, manifest, c_by_name, skipped)
                 for cls in CLASSES}
+    # a factory's `new T()` through a NON-public constructor (specgen
+    # InternalNew): a C++ default constructor, never registered -- C# callers
+    # cannot construct T that way either (G49)
+    hidden_ctors = set()
+    newobj_targets = {p['shape'][1]['reg'] for _, plans in per_class for p in plans if p['shape'][0] == 'newobj'}
+    for cls in CLASSES:
+        if cls['reg'] not in newobj_targets or ctors.get(cls['reg']) or cls.get('ff') or cls['mode'] != 'pointer':
+            continue
+        n = (TYPE_RECS.get(cls['type']) or {}).get('InternalNew')
+        fn = c_by_name.get(n or '')
+        if fn and fn['returns'] == '%s*' % cls['on']:
+            ctors[cls['reg']] = ('%s(%s)' % (n, ', '.join(['nullptr'] * len(fn['params']))), fn)
+            hidden_ctors.add(cls['reg'])
+    # `var t = new T(); F(..., t.NonConstPointer()); return t;` needs T's generated
+    # default constructor -- or nothing
+    for cls, plans in per_class:
+        keep = [p for p in plans if p['shape'][0] != 'newobj' or ctors.get(p['shape'][1]['reg'])]
+        # a forward whose target went with them goes too (G49: CreatePlaneMapping's
+        # 4-argument overload outlived its 5-argument target and called nothing)
+        gone = {id(p) for p in plans} - {id(p) for p in keep}
+        keep = [p for p in keep if not (p['shape'][0] == 'forward' and id(p['shape'][2]) in gone)]
+        if len(keep) != len(plans):
+            skipped['newobj: no generated default ctor'] = skipped.get('newobj: no generated default ctor', 0) + len(plans) - len(keep)
+            plans[:] = keep
     decls |= {'extern "C" %s %s(%s);' % (
         p['fn']['returns'], p['fn']['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in p['fn']['params']))
@@ -259,6 +368,19 @@ def main():
         fn['returns'], fn['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
         for c in CLASSES if c.get('table') for fn in c['table']['fns']}
+    # components (G43): their resolvers; linked lists: First/Next
+    decls |= {'extern "C" %s %s(%s);' % (
+        fn['returns'], fn['name'],
+        ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
+        for c in CLASSES for n in ([c['comp']['Const'], c['comp']['NonConst']] if c.get('comp') else [])
+        + ([c['liter']['first']['name'], c['liter']['next']['name']] if c.get('liter') else [])
+        if n for fn in [c_by_name[n]]}
+    # tripwire: a C function rhino3dm does not ship (variant rhino-only) would only
+    # fail at link time; refuse here, naming it
+    shipped_not = sorted({re.search(r'\b(\w+)\(', d.split('"C"')[1]).group(1) for d in decls}
+                         & {n for n, f in c_by_name.items() if f.get('variant') == 'rhino-only'})
+    if shipped_not:
+        raise SystemExit('generated code calls C functions rhino3dm does not ship: ' + ', '.join(shipped_not))
     # the views' resolvers and duplicators (called by the class headers' accessors)
     decls |= {'extern "C" %s %s(%s);' % (
         fn['returns'], fn['name'],
@@ -272,10 +394,14 @@ def main():
         for c in CLASSES if c.get('ff')
         for n in [c['ff']['New'], c['ff']['Delete'], c['ff'].get('FromFile')] if n and n in c_by_name
         for fn in [c_by_name[n]]}
+    decls |= {'extern "C" %s %s(%s);' % (
+        fn['returns'], fn['name'],
+        ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
+        for c in CLASSES if c.get('handle') for fn in [c_by_name[c['handle']['Delete']]]}
 
     js_pruned = []
     reg_blocks = {cls['reg']: emit_registrations(cls, plans, js_pruned,
-                                                 bool(ctors[cls['reg']]),
+                                                 bool(ctors[cls['reg']]) and cls['reg'] not in hidden_ctors,
                                                  argctors[cls['reg']])
                   for cls, plans in per_class}
 
@@ -289,11 +415,14 @@ def main():
                 return d
             d = b
     for root in [c for c in CLASSES if c['mode'] == 'abstract']:
-        viewers = [d for d in CLASSES if d['mode'] == 'pointer' and _derives(d, root)
+        viewers = [d for d in CLASSES if d['mode'] == 'pointer' and _derives(d, root) and not d.get('comp')
                    and (storage_owner(d).get('proxy') or {}).get('Origin') == 'object']
         resolvers = {storage_owner(d)['proxy']['Resolver'] for d in viewers}
         if viewers and len(resolvers) == 1:
             view_roots.append((root, viewers, c_by_name[resolvers.pop()]))
+    # views inside another object (G58): one factory per returned class
+    sub_targets = sorted({p['shape'][1]['reg'] for p in all_plans if p['shape'][0] == 'subview'})
+    sub_targets = [BY_REG[r] for r in sub_targets]
 
     BANNER = ('// GENERATED by tools/generate/bnd_gen.py (v3) -- DO NOT EDIT.\n'
               '// Shaped by RhinoCommon signatures, calling the flat C layer with\n'
@@ -354,6 +483,20 @@ ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
 ''' + vt_includes + vt_pub + '''inline BND_Point3dX RH3DM_P(const ON_3dPoint& p) { BND_Point3dX r; r.m_x = p.x; r.m_y = p.y; r.m_z = p.z; return r; }
 inline BND_Vector3dX RH3DM_V(const ON_3dVector& v) { BND_Vector3dX r; r.m_x = v.x; r.m_y = v.y; r.m_z = v.z; return r; }
 inline BND_IntervalX RH3DM_I(const ON_Interval& i) { BND_IntervalX r; r.m_t0 = i.m_t[0]; r.m_t1 = i.m_t[1]; return r; }
+
+// a tuple result C# may return as null (`if (count < 1) return null;`): BND_TUPLE
+// is py::tuple, which cannot hold None -- the old NullTuple() raises TypeError
+// in Python (pilot-findings #29) -- so these return an object (G54)
+#if defined(ON_PYTHON_COMPILE)
+typedef py::object RH3DM_NTUPLE;
+inline RH3DM_NTUPLE RH3DM_NoneTuple() { return py::none(); }
+#else
+typedef emscripten::val RH3DM_NTUPLE;
+inline RH3DM_NTUPLE RH3DM_NoneTuple() { return emscripten::val::null(); }
+#endif
+
+// `return (1 == rc || 3 == rc);` -- the C# result test, as written (G49)
+template <typename T, typename... V> inline bool RH3DM_In(T v, V... vals) { return ((v == vals) || ...); }
 
 // a guard's File.Exists(path) / FileNotFoundException (File3dm.Read)
 struct RH3DM_FileNotFound : std::runtime_error { using std::runtime_error::runtime_error; };
@@ -423,7 +566,10 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         + '\n'.join('class %s;' % cls['gen'] for cls in CLASSES) + '\n\n' \
         + '// subclass-aware wrapping: the most-derived generated class (gen_wrap.cpp)\n' \
         + '\n'.join('%s* RH3DM_Wrap_%s(%s* p);' % (c['gen'], c['reg'], c['on'])
-                    for c in CLASSES if c['mode'] == 'pointer') + '\n' \
+                    for c in CLASSES if c['mode'] == 'pointer' and not c.get('comp') and not c.get('handle') and not c.get('borrowed')) + '\n' \
+        + '// views inside another object (G58): the most-derived generated class (gen_wrap.cpp)\n' \
+        + '\n'.join('%s* RH3DM_Sub_%s(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow);'
+                    % (t['gen'], t['reg']) for t in sub_targets) + '\n' \
         + '// views of a File3dmObject\'s geometry: the most-derived generated class (gen_wrap.cpp)\n' \
         + '\n'.join('%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id);' % (root['gen'], root['reg'])
                     for root, _, _ in view_roots) + '\n'
@@ -437,7 +583,8 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         # complete type inheritance requires
         base_inc = ('#include "gen_%s.h"\n' % cls['base'].lower()
                     if cls.get('base') else '')
-        table_decl, table_def = emit_table_iter(cls) if cls.get('table') else ('', '')
+        table_decl, table_def = (emit_table_iter(cls) if cls.get('table') else
+                                 emit_linked_iter(cls) if cls.get('liter') else ('', ''))
         files[fname(cls) + '.h'] = (
             BANNER + '#pragma once\n#include "gen_common.h"\n' + base_inc
             + '\n' + emit_class(cls, plans, bool(ctors[cls['reg']]), argctors[cls['reg']]) + table_decl)
@@ -450,12 +597,23 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         deps = sorted(({BY_CS[p['shape'][1]]['reg'] for p in plans
                         if p['shape'][0] == 'wrap'}
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'fill'}
-                       | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'child'}
+                       | {p['shape'][1]['reg'] for p in plans if p['shape'][0] in ('child', 'construct', 'via', 'newobj', 'valadopt', 'subview')}
+                       | {p['via_plan']['shape'][1]['reg'] for p in plans if p['shape'][0] == 'via'}
+                       | ({cls['liter']['item']['reg']} if cls.get('liter') else set())
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] in ('constview', 'fileview', 'settingsview')}   # the view it constructs
                        | ({cls['table']['item']['reg']} if cls.get('table') else set())
+                       | ({cls['proxy']['Owner']} if (cls.get('proxy') or {}).get('Origin') == 'parent' else set())
                        | arg_classes) - {cls['reg']})
         dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps)
         defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans) + table_def
+        pvp = cls.get('proxy') or {}
+        if pvp.get('Origin') == 'parent':
+            # the owner's const pointer, where the owner's class is complete (G57)
+            own = BY_REG[pvp['Owner']]
+            oarg = C_BY_NAME[pvp['Resolver']]['params'][0]['type']
+            defs = ('%s %s::RH3DM_PvOwner(const %s* owner)\n{\n  return (%s)owner->%s;\n}\n\n'
+                    % (oarg, cls['gen'], own['gen'], oarg,
+                       'RH3DM_Const()' if own.get('proxy') else 'm_ptr')) + defs
 
         py_block, js_block = reg_blocks[cls['reg']]
         if cls['mode'] == 'abstract':
@@ -515,9 +673,10 @@ void initGen{reg}(void)
         return False
 
     wrap = []
-    for c in [c for c in CLASSES if c['mode'] == 'pointer']:
+    # components (G43) are never owned objects: an ON_BrepFace* wraps as its first non-component base
+    for c in [c for c in CLASSES if c['mode'] == 'pointer' and not c.get('comp') and not c.get('handle') and not c.get('borrowed')]:
         body = ['%s* RH3DM_Wrap_%s(%s* p)\n{' % (c['gen'], c['reg'], c['on'])]
-        for d in sorted((d for d in CLASSES if d['mode'] == 'pointer' and derives(d, c)),
+        for d in sorted((d for d in CLASSES if d['mode'] == 'pointer' and derives(d, c) and not d.get('comp') and not d.get('handle') and not d.get('borrowed')),
                         key=lambda d: (-depth(d), d['reg'])):
             body.append('  if (%s* d = %s::Cast(p)) return new %s(d);'
                         % (d['on'], d['on'], d['gen']))
@@ -533,6 +692,18 @@ void initGen{reg}(void)
             vb.append('  if (%s::Cast(p)) return new %s(model, id);' % (d['on'], d['gen']))
         vb.append('  return nullptr;   // a geometry type with no generated class\n}')
         wrap.append('\n'.join(vb))
+    # RH3DM_Sub_<T>(fn, owner, key, cow): CreateGeometryHelper on the resolved
+    # pointer -- the most-derived generated class hosting the view state (G58)
+    for t in sub_targets:
+        hosts = [d for d in CLASSES if d['mode'] == 'pointer' and (d is t or derives(d, t)) and not d.get('comp')
+                 and storage_owner(d).get('comp_host')]
+        sb = ['%s* RH3DM_Sub_%s(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow)\n{' % (t['gen'], t['reg']),
+              '  ON_Object* p = fn(owner, key, false);',
+              '  if (!p) return nullptr;']
+        for d in sorted(hosts, key=lambda d: (-depth(d), d['reg'])):
+            sb.append('  if (%s::Cast(p)) return new %s(fn, owner, key, cow);' % (d['on'], d['gen']))
+        sb.append('  return nullptr;   // a geometry type with no generated class\n}')
+        wrap.append('\n'.join(sb))
     files['gen_wrap.cpp'] = (BANNER + ''.join('#include "gen_%s.h"\n' % c['reg'].lower()
                                              for c in CLASSES) + '\n' + '\n\n'.join(wrap) + '\n')
 
@@ -583,7 +754,7 @@ void initGeneratedBindings(void)
         # Symbol.iterator on the table's prototype
         js_iter=''.join('  { emscripten::val proto = emscripten::val::module_property("%s")["prototype"];\n'
                         '    proto.set(emscripten::val::global("Symbol")["iterator"], proto["iterator"]); }\n'
-                        % c['reg'] for c in CLASSES if c.get('table')))
+                        % c['reg'] for c in CLASSES if c.get('table') or c.get('liter')))
 
     # the C-layer translation units the generated code calls into, from the
     # manifest's defining file per function -- replaces discovering the link

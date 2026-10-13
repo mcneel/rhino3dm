@@ -4,6 +4,15 @@ marshalling, return shape) or a refusal reason."""
 from gen_registry import *
 
 
+def _derives_from(d, base):
+    b = BY_REG.get(d.get('base', ''))
+    while b is not None:
+        if b is base:
+            return True
+        b = BY_REG.get(b.get('base', ''))
+    return False
+
+
 def storage_owner(cls):
     """the class holding m_ptr: itself, or the concrete base it extends"""
     while True:
@@ -24,6 +33,9 @@ def self_access(cls, self_expr, accessor):
     if cls.get('proxy'):
         return 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()'
     owner = storage_owner(cls)
+    if cls.get('comp') and owner is cls:
+        # a component (BrepLoop, SubDFace): resolved through its owner (G43)
+        return 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()'
     if owner is not cls and owner.get('proxy'):
         return 'static_cast<%s*>(%s)' % (cls['on'], 'RH3DM_NonConst()' if nonconst else 'RH3DM_Const()')
     if cls['mode'] == 'abstract':
@@ -32,7 +44,7 @@ def self_access(cls, self_expr, accessor):
 
 
 def plan(member, cfn, cls):
-    if member.get('Body') not in ('trivial', 'pattern'):
+    if member.get('Body') not in ('trivial', 'pattern', 'construct'):
         return None, 'body: %s' % (member.get('Body') or 'unknown')
     if (member.get('Wrap') or '').startswith('@') or member.get('FactoryArgs'):
         return None, 'unresolved factory'           # specgen could not resolve it: never guess
@@ -51,6 +63,14 @@ def plan(member, cfn, cls):
     call = member['Calls'][0]
     if len(call['Args']) != len(cfn['params']):
         return None, 'arity mismatch manifest vs call'
+    if cfn.get('variant') == 'rhino-only':
+        # the C function lives in the rhino repo only (DracoCompression -> draco.cpp)
+        return None, 'native not in rhino3dm'
+    if member.get('NativeUnless'):
+        # `rc = IsDocumentControlled ? m_id : F(...)`: the native arm only where the
+        # property is statically false for this class (G57)
+        if no_owned_pointer_cpp(cls, member['NativeUnless']) != 'false':
+            return None, 'native unless %s' % member['NativeUnless']
 
     holder = HOLDERS.get(member.get('Holder') or '')
     holder_arg = member.get('HolderArg', -1)
@@ -86,6 +106,7 @@ def plan(member, cfn, cls):
     # a class argument null-checked by an early return is optional (None/null)
     nullable_params = {n for n in retnull if cs_param_modes.get(n, ('', ''))[1] in BY_CS}
     call_exprs, locals_, out_by_name, extra_fns, typearg_pos = [], [], {}, [], []
+    newobj = None
     for pos, (carg, cparam) in enumerate(zip(call['Args'], cfn['params'])):
         k, ctype = carg['Kind'], cparam['type']
         fp = (TYPE_RECS.get(cls['type']) or {}).get('FileProxy') or {}
@@ -109,6 +130,30 @@ def plan(member, cfn, cls):
         if (not member.get('Static') and pos == 0 and ctype in selfs
                 and (k in ('expr', 'out') or (k == 'fieldptr' and cls['mode'] == 'child'))):
             call_exprs.append(self_access(cls, self_expr, carg.get('Value')))
+            continue
+        comp = cls.get('comp')
+        if (k == 'fieldptr' and comp and carg['Text'] in comp['OwnerNames']
+                and ctype.replace('const ', '').rstrip('*').strip() == comp['Owner']['on']):
+            # `Brep.ConstPointer()` in a component: its owner's pointer (G43)
+            call_exprs.append('RH3DM_Owner()')
+            continue
+        if k == 'newobj':
+            # `var tex = new Texture(); F(..., tex.NonConstPointer()); return tex;`:
+            # the generated class's own default constructor, filled by the call
+            target = BY_CS.get(carg.get('Value') or '')
+            if (target is None or target['mode'] != 'pointer' or newobj is not None
+                    or member.get('ReturnLocal') != carg['Text'] or not ctype.endswith('*')):
+                return None, 'newobj %s' % carg['Text']
+            acc = 'RH3DM_NonConst()' if (storage_owner(target).get('proxy') or target.get('comp')) else 'm_ptr'
+            locals_.append('%s* %s = new %s();' % (target['gen'], carg['Text'], target['gen']))
+            call_exprs.append('(%s)%s->%s' % (ctype, carg['Text'], acc))
+            newobj = (target, carg['Text'])
+            continue
+        keyinfo = comp or cls.get('key')
+        if (k == 'expr' and keyinfo and carg['Text'] in (keyinfo.get('KeyNames') or keyinfo.get('Names') or ())
+                and ctype in ('int', 'unsigned int')):
+            # `FaceIndex` / `m_direction`: the component's key (G43)
+            call_exprs.append('(%s)%s' % (ctype, 'RH3DM_Key()' if comp else 'm_key'))
             continue
         if k == 'fieldptr':
             return None, 'field pointer %s' % carg['Text']
@@ -228,6 +273,29 @@ def plan(member, cfn, cls):
                 call_exprs.append(carg['Value'])
         elif k == 'literal':
             call_exprs.append('nullptr' if carg['Text'] == 'null' else carg['Text'])
+        elif k == 'arrcount':
+            # an array fill's element count (plan_arrayfill)
+            if ctype not in ('int', 'unsigned int'):
+                return None, 'array count -> %s' % ctype
+            call_exprs.append(carg['Text'] if ctype == 'int' else '(unsigned int)%s' % carg['Text'])
+        elif k == 'arrayout':
+            # the caller-allocated array the native fills (plan_arrayfill): its C
+            # element type must be the C# element's (layout-equal value types)
+            elem = carg.get('Value')
+            scalar = {'int': 'int*', 'double': 'double*', 'float': 'float*', 'uint': 'unsigned int*'}
+            ok = (scalar.get(elem) == ctype or (elem in VT_CPP and ctype.endswith('*')
+                                                 and C_VT.get(ctype.replace('const ', '').strip()) == elem))
+            if not ok:
+                return None, 'array %s[] -> %s' % (elem, ctype)
+            # value types through RH3DM_Ptr: the element size is static_assert'ed
+            call_exprs.append(('%s.data()' if elem in scalar else 'RH3DM_Ptr(%s.data())') % carg['Text'])
+        elif k == 'paramcond':
+            # `start ? 0 : 1` on a bool parameter (G49)
+            name = carg['Text']
+            arms = (carg.get('Value') or '').split(':')
+            if cs_param_modes.get(name) != ('', 'bool') or len(arms) != 2:
+                return None, 'conditional arg on %s' % name
+            call_exprs.append('(%s ? %s : %s)' % (name, arms[0], arms[1]))
         elif k == 'paramptr':
             # a generated class passed as an argument: hand the C function the
             # wrapped object's native pointer (abstract bases via their getter)
@@ -242,7 +310,10 @@ def plan(member, cfn, cls):
             if argcls['mode'] == 'abstract':
                 ptr = '%s%s%s()' % (name, acc, argcls['getter'])
             elif argcls.get('proxy'):
-                ptr = '%s%sRH3DM_Const()' % (name, acc)      # item.ConstPointer(): a proxy resolves
+                # item.ConstPointer(): a proxy resolves; item.NonConstPointer() on a
+                # copy-on-write view copies first (BrepFace.SetMesh's mesh; G59)
+                cow_nc = carg.get('Value') == 'NonConstPointer' and argcls['proxy'].get('NonConst') == 'cow'
+                ptr = '%s%s%s' % (name, acc, 'RH3DM_NonConst()' if cow_nc else 'RH3DM_Const()')
             elif argcls['mode'] in ('pointer', 'child'):
                 ptr = '%s%sm_ptr' % (name, acc)
             else:
@@ -304,7 +375,7 @@ def plan(member, cfn, cls):
                        and (local_value(carg['Value']) or (None, None))[1] == vcs)
             if ctype in OUTLOCAL and not (vcs in VT_CPP and vcs not in CS_ARG) and not vt_init:
                 decl = OUTLOCAL[ctype][0].format(n=name)
-                if carg.get('Value') and ctype in ('double*', 'int*', 'bool*', 'ON_UUID*'):
+                if carg.get('Value') and ctype in ('double*', 'int*', 'bool*', 'ON_UUID*', 'unsigned int*'):
                     # `double t = RhinoMath.UnsetValue; F(ptr, ref t)`: the C
                     # side may READ it (ref), so reproduce the initializer
                     init = local_value(carg['Value'])
@@ -368,10 +439,52 @@ def plan(member, cfn, cls):
             shape = ('holder', member['Holder'])
         else:
             return None, 'holder return %s vs %s' % (sig_ret, holder['cs'])
+    elif newobj is not None:
+        if sig_ret != newobj[0]['cs'] or (cret not in ('void', 'bool') and not member.get('ResultUnused')):
+            return None, 'newobj return %s' % sig_ret
+        fail = member.get('NewObjFail')
+        if fail is not None:
+            # `if (!CALL) { rc.Dispose(); rc = null; }`: the C status decides (G49)
+            if fail != newobj[1] or cret != 'bool':
+                return None, 'newobj failure %s on %s' % (fail, cret)
+            fail = 'null'
+        shape = ('newobj', newobj[0], newobj[1], fail)
+    elif member.get('Body') == 'construct':
+        shape = construct_shape(member, cls, self_expr, {n for _, n in bind_args}, cret, out_by_name)
+        if isinstance(shape, str):
+            return None, shape
     elif ret_outs:
         shape = ('tuple', cret == 'bool', ret_outs)
         if sig_ret != 'bool' and cret == 'bool':
             return None, 'out-params with non-bool C# return'
+        if sig_ret == 'bool' and cret not in ('bool', 'int', 'unsigned int'):
+            return None, 'out-params: C# bool from C %s' % cret
+        if sig_ret not in ('void', 'bool'):
+            # the C# result leads the tuple, as a bool status does -- never
+            # dropped (G49: SegmentIndexes lost its count, the Intersection
+            # methods their intersection type, ToNurbsSurface its surface)
+            if sig_ret in CS_RET_DIRECT and cret == CS_RET_DIRECT[sig_ret]:
+                shape = ('tuple', ('result', cret, '{c}'), ret_outs)
+            elif sig_ret in CS_ENUMS and (cret in ('int', 'unsigned int') or cret.startswith('enum ')
+                                          or cret == CS_ENUMS[sig_ret]['cpp']):
+                cpp = CS_ENUMS[sig_ret]['cpp']
+                expr = '(%s)({c})' % cpp
+                if member.get('ResultGuard'):
+                    expr = result_guard_expr(member, sig_ret)
+                    if expr is None:
+                        return None, 'result guard %s' % member['ResultGuard'].get('Cond')
+                shape = ('tuple', ('result', cpp, expr), ret_outs)
+            else:
+                return None, 'out-params: C# result %s (C: %s)' % (sig_ret, cret)
+        if member.get('ResultGuard') and not (isinstance(shape[1], tuple) and 'rh3dm_r' in shape[1][2]):
+            return None, 'result guard on this shape'
+        if sig_ret == 'bool' and cret in ('int', 'unsigned int'):
+            # `return (success > 0);`: the comparison RhinoCommon wrote decides
+            if not member.get('Compare'):
+                return None, 'out-params: int status without a recorded comparison'
+            if member['Compare'].startswith('in '):
+                return None, 'out-params: compare %s' % member['Compare']
+            shape = ('tuple', member['Compare'], ret_outs)
     elif member.get('Factory'):
         shape = factory_shape(member['Factory'], cls, sig_ret, cret, out_by_name)
         if isinstance(shape, str):
@@ -388,14 +501,27 @@ def plan(member, cfn, cls):
         shape = ('conv', CS_RET_DIRECT[sig_ret], '(%s)({c})' % CS_RET_DIRECT[sig_ret])
     elif (sig_ret == 'bool' and cret in ('int', 'unsigned int') and not out_by_name
           and member.get('Compare')):
-        # `return rc != 0;` -- the comparison RhinoCommon wrote, recorded by specgen
-        shape = ('conv', 'bool', '({c}) ' + member['Compare'])
+        # `return rc != 0;` -- the comparison RhinoCommon wrote, recorded by specgen;
+        # `return (1 == rc || 3 == rc);` arrives as "in 1,3" (G49)
+        cmp = member['Compare']
+        if cmp.startswith('in '):
+            vals = cmp[3:].split(',')
+            if not all(v.isdigit() for v in vals):
+                return None, 'compare %s' % cmp
+            shape = ('conv', 'bool', 'RH3DM_In(({c}), %s)' % ', '.join(vals))
+        else:
+            shape = ('conv', 'bool', '({c}) ' + cmp)
     elif (sig_ret in CS_RET_DIRECT and cret in ('void', 'bool')
           and [t for t in out_by_name.values()] == [CS_RET_DIRECT[sig_ret] + '*']):
         # `double d = 0; F(ptr, ref d); return d;` (the status is ignored, as in C#)
         shape = ('fromout', sig_ret, next(iter(out_by_name)))
     elif sig_ret in CS_RET_DIRECT:
         return None, 'return mismatch %s vs %s' % (sig_ret, cret)
+    elif (sig_ret == 'Color' and member.get('ConvOut') and member.get('ResultConv') in ('FromArgb', 'FromWin32')
+          and list(out_by_name) == [member['ConvOut']] and out_by_name[member['ConvOut']] in ('int*', 'unsigned int*')
+          and cret in ('void', 'bool')):
+        # `int argb = 0; F(..., ref argb); return Color.FromArgb(argb);` (G53)
+        shape = ('fromoutconv', 'BND_Color', 'RH3DM_Color%s({n})' % member['ResultConv'], member['ConvOut'])
     elif (sig_ret == 'Color' and cret in ('int', 'unsigned int') and not out_by_name
           and member.get('ResultConv') in ('FromArgb', 'FromWin32')):
         # Color.FromArgb(rc) / Interop.ColorFromWin32(abgr): the recorded conversion
@@ -414,22 +540,96 @@ def plan(member, cfn, cls):
         if cret not in ('void', 'bool') or len(outs) != 1:
             return None, '%s return without single %s out' % (sig_ret, want)
         shape = ('fromout', sig_ret, outs[0])
+    elif sig_ret in CS_ENUMS and member.get('ResultSelect'):
+        # `return value == (int)E.Clamp ? E.Clamp : E.Repeat;` (G55): every constant
+        # must be a member of the returned enum (or a plain integer key)
+        rs = member['ResultSelect']
+        named = ENUM_NAMED.get(sig_ret.split('.')[-1]) or {}
+        def enum_val(t, key=False):
+            t = re.sub(r'^\((int|uint)\)', '', t)
+            if key and re.match(r'^-?\d+$', t):
+                return t
+            mm = re.match(r'^(\w+)\.(\w+)$', t)
+            if mm and mm.group(1) == sig_ret.split('.')[-1] and mm.group(2) in named:
+                return str(named[mm.group(2)])
+            return None
+        k, a, b = enum_val(rs['Key'], True), enum_val(rs['True']), enum_val(rs['False'])
+        if None in (k, a, b) or cret not in ('int', 'unsigned int'):
+            return None, 'result select %s' % rs
+        cpp = CS_ENUMS[sig_ret]['cpp']
+        shape = ('conv', cpp, '((int)({c}) == %s ? (%s)%s : (%s)%s)' % (k, cpp, a, cpp, b))
     elif sig_ret in CS_ENUMS:
-        if cret not in ('int', 'unsigned int') and not cret.startswith('enum ') and cret != CS_ENUMS[sig_ret]['cpp']:
+        # an opennurbs enum (`ON::AnnotationType`): RhinoCommon's P/Invoke receives
+        # its integer as the C# enum, so the explicit cast is the same (G53)
+        if (cret not in ('int', 'unsigned int') and not cret.startswith('enum ') and cret != CS_ENUMS[sig_ret]['cpp']
+                and not re.match(r'^ON(_\w+)?::\w+$', cret)):
             return None, 'enum return %s vs C %s' % (sig_ret, cret)
         shape = ('enumret', sig_ret)
-    elif (sig_ret in BY_CS and BY_CS[sig_ret]['mode'] == 'pointer'
-          and cret == '%s*' % BY_CS[sig_ret]['on']):
+    elif (member.get('SubView') and sig_ret in BY_CS and BY_CS[sig_ret]['mode'] in ('pointer', 'abstract')
+          and cret.replace('const ', '').strip() == '%s*' % BY_CS[sig_ret]['on']):
+        shape = ('wrap', sig_ret)          # a view, never owned: a const pointer is fine (G58)
+    elif (sig_ret in BY_CS and BY_CS[sig_ret]['mode'] == 'pointer' and not BY_CS[sig_ret].get('comp')
+          and (cret == '%s*' % BY_CS[sig_ret]['on']
+               or BY_CS[sig_ret].get('borrowed') and cret == 'const %s*' % BY_CS[sig_ret]['on'])):
+        if member.get('WrapArity') == 1:
+            # `new T(p)`: only T's (IntPtr) constructor says whether p is ADOPTED;
+            # TextureMapping's copies (NewFromPointer), Font's keeps a managed
+            # pointer it never deletes (G49)
+            target = BY_CS[sig_ret]
+            pc = (TYPE_RECS.get(target['type']) or {}).get('PtrCtor') or ''
+            if pc.endswith('+nullthrow'):
+                # the constructor throws on a null p; the binding returns None
+                # instead -- the same only where the member checked p first
+                if not member.get('WrapChecked'):
+                    return None, 'wrap through %s(IntPtr): throws on null' % sig_ret
+                pc = pc[:-len('+nullthrow')]
+            handle_field = (target.get('handle') or {}).get('Field')
+            if not (pc == 'own' or (handle_field and pc == 'field:' + handle_field)
+                    or (pc == 'borrowed' and target.get('borrowed'))):
+                return None, 'wrap through %s(IntPtr): %s' % (sig_ret, pc or 'unknown')
         shape = ('wrap', sig_ret)
+    elif (sig_ret in BY_CS and BY_CS[sig_ret]['mode'] == 'value' and cret == '%s*' % BY_CS[sig_ret]['on']
+          and member.get('WrapArity') == 1):
+        # `new MeshingParameters(p)` adopting a native result, on a class stored
+        # by value: only when T(IntPtr) stores p in its handle field and the
+        # handle's Delete is in the C layer (copy in, then release) (G49)
+        target = BY_CS[sig_ret]
+        rec = TYPE_RECS.get(target['type']) or {}
+        h = rec.get('Handle') or {}
+        if not h or rec.get('PtrCtor') != 'field:%s' % h.get('Field') or h.get('Delete') not in C_BY_NAME:
+            return None, 'adopt %s into a value: %s' % (sig_ret, rec.get('PtrCtor'))
+        extra_fns.append(C_BY_NAME[h['Delete']])
+        shape = ('valadopt', target, h['Delete'], bool(member.get('WrapChecked')))
     elif sig_ret == 'void' and (cret == 'void' or cret in CVALUE):
         shape = ('direct', 'void')         # a C status C# ignores is ignored here too
     else:
         return None, 'return type %s (C: %s)' % (sig_ret, cret)
 
+    if member.get('ResultGuard') and not (shape[0] == 'tuple' and isinstance(shape[1], tuple)
+                                          and 'rh3dm_r' in shape[1][2]):
+        return None, 'result guard on shape %s' % shape[0]     # never dropped (G57)
     if retnull - nullable_params:
         return None, 'early return on null of non-class %s' % sorted(retnull - nullable_params)[0]
+    # `if (p != IntPtr.Zero) return new T(...); if (COND) throw ...; throw ...;` (G43):
+    # the conditional throws resolve like guards, emitted in the null branch
+    fail_final, fail_guards = None, []
+    if shape[0] == 'construct' and member.get('ChildFail'):
+        cf = member['ChildFail']
+        if shape[4] != 'ptr' or cf[-1].get('Cond') or any(g.get('Exception') not in EXMAP for g in cf):
+            return None, 'construct failure tail'
+        fail_final = cf[-1]
+        fail_guards = [dict(g, fail=True) for g in cf[:-1]]
     guards = []
     for g in member.get('Guards') or []:
+        if g.get('Assign'):
+            # `if (direction != 0) direction = 1;`: a by-value scalar parameter,
+            # normalized in place before the call, as C# does (G49)
+            if (cs_param_modes.get(g['Assign'], ('', ''))[1] not in CS_RET_DIRECT
+                    or cs_param_modes[g['Assign']][0] != ''
+                    or not re.match(r'^-?(\d+\.?\d*|true|false)$', g.get('AssignValue') or '')):
+                return None, 'parameter normalization %s = %s' % (g['Assign'], g.get('AssignValue'))
+            guards.append(dict(g, assign_cpp='%s = %s' % (g['Assign'], g['AssignValue'])))
+            continue
         if g.get('Exception') is not None:
             guards.append(g)
             continue
@@ -445,6 +645,7 @@ def plan(member, cfn, cls):
             g['cond_cpp'] = '!(%s)' % self_access(cls, self_expr, 'ConstPointer')
         guards.append(g)
 
+    guards += fail_guards
     commits = bool(member.get('Commits'))
     if commits and not (cls.get('proxy') or {}).get('Commit'):
         return None, 'Commit() on a class without a recorded commit'
@@ -456,17 +657,28 @@ def plan(member, cfn, cls):
         # its out value (`... ref rc)) {...} return rc;`) throws, then returns it
         if cfn['returns'] != 'bool' or failthrow['Exception'] not in EXMAP:
             return None, 'fail-throw shape'
+        if any(g.get('Exception') not in EXMAP or not g.get('Cond') for g in failthrow.get('More') or []):
+            return None, 'fail-throw: further throws'
         if shape == ('direct', 'void'):
             shape = ('failthrow', failthrow)
         elif shape[0] == 'fromout' and not member.get('Success'):
             ft_attached = failthrow
+        elif shape[0] == 'holder' and not failthrow.get('Cond'):
+            ft_attached = failthrow          # `if (!F(..., holder)) throw E; return holder.ToString();`
         else:
             return None, 'fail-throw shape'
 
     if commits and not (shape == ('direct', 'void') or shape[0] == 'failthrow'):
         return None, 'Commit() after a non-void shape'
     success = member.get('Success')
-    if success:
+    if success and shape[0] == 'fromoutconv':
+        # `if (!F(..., ref argb)) return Color.Empty;` -- Color.Empty is (0,0,0,0),
+        # the binding's FromArgb(0) (G53)
+        if success['Out'] != shape[3] or cret != 'bool' or success.get('Fallback') not in (
+                'Color.Empty', 'System.Drawing.Color.Empty'):
+            return None, 'success form vs shape'
+        success = dict(success, fb_cpp='RH3DM_ColorFromArgb(0)')
+    elif success:
         if shape[0] != 'fromout' or success['Out'] != shape[2]:
             return None, 'success form vs shape'
         fb = success['Fallback']
@@ -476,12 +688,56 @@ def plan(member, cfn, cls):
             literal_ok = known is not None and known[1] is None and sig_ret in CS_RET_DIRECT
             if known is None or (known[1] != sig_ret and not literal_ok):
                 return None, 'fallback %s' % fb
+    adopt = None
+    if member.get('Adopt'):
+        # BrepFace.SetMesh (G59): the argument's private copy goes to the native,
+        # then the argument becomes a view of it through the holder
+        ad = member['Adopt']
+        pcls = BY_CS.get(cs_param_modes.get(ad['Param'], ('', ''))[1])
+        host = storage_owner(pcls) if pcls else None
+        if (shape != ('direct', 'bool') or pcls is None or not host.get('comp_host')
+                or (host.get('proxy') or {}).get('NonConst') != 'cow' or ad['Param'] in nullable_params
+                or any(a != 'this' and a not in cs_param_modes for a in ad['HolderArgs'])):
+            return None, 'adopt %s' % ad['Param']
+        adopt = {'param': ad['Param'], 'holder': ad['Holder'], 'args': ad['HolderArgs']}
+    if member.get('SubView'):
+        # a VIEW inside this object (G58): never wrapped as an owned pointer
+        sv = member['SubView']
+        target = BY_CS.get(sig_ret)
+        keys = [a for a in sv['Args'] if a != 'this']
+        if (not sv.get('Verified') or shape[0] != 'wrap' or target is None or target['mode'] not in ('pointer', 'abstract')
+                or len(keys) > 1 or locals_ or member.get('Static')):
+            return None, 'sub-view %s' % sv.get('Form')
+        hosts = [c for c in CLASSES if c['mode'] == 'pointer' and (c is target or _derives_from(c, target))
+                 and storage_owner(c).get('comp_host') and not c.get('comp')]
+        if not hosts:
+            return None, 'sub-view: no generated class hosts views of %s' % sig_ret
+        if sv['Write'] == 'copy' and any(not (storage_owner(c).get('proxy') or {}).get('Dup') for c in hosts):
+            return None, 'sub-view: copy-on-write without a recorded duplicate'
+        ktype = None
+        if keys:
+            kb = [t for t, n in bind_args if n == keys[0]]
+            if not kb or not (kb[0] in ('int', 'unsigned int') or kb[0] in VT_ENUMS.values()
+                              or any(kb[0] == e['cpp'] for e in CS_ENUMS.values())):
+                return None, 'sub-view key %s' % keys[0]
+            ktype = kb[0]
+        nc_exprs = None
+        if sv['Write'] == 'through':
+            # NonConstPointer: the same native on the owner's writable pointer
+            ncm = dict(member, SubView=None, Calls=[dict(member['Calls'][0], Args=[
+                dict(a, Value='NonConstPointer') if i == 0 and a.get('Value') == 'ConstPointer' else a
+                for i, a in enumerate(member['Calls'][0]['Args'])])])
+            ncp, why = plan(ncm, cfn, cls)
+            if ncp is None or ncp['call_exprs'] == call_exprs:
+                return None, 'sub-view write-through: %s' % (why or 'no writable self')
+            nc_exprs = ncp['call_exprs']
+        shape = ('subview', target, keys[0] if keys else None, ktype, sv['Write'], nc_exprs)
     return {'m': member, 'fn': cfn, 'cls': cls,
             'static': bool(member.get('Static')),
             'call_exprs': call_exprs, 'locals': locals_,
             'bind_args': bind_args, 'shape': shape, 'extra_fns': extra_fns,
-            'guards': guards, 'success': success, 'failthrow': ft_attached,
-            'typearg_pos': typearg_pos, 'commits': commits}, None
+            'guards': guards, 'success': success, 'failthrow': ft_attached, 'adopt': adopt,
+            'typearg_pos': typearg_pos, 'commits': commits, 'fail_final': fail_final}, None
 
 
 def proxy_id_field(cls):
@@ -518,6 +774,118 @@ def constview_shape(cv, cls, sig_ret):
     if (target.get('proxy') or {}).get('Resolver') != cv['Native']['Name'] or target['proxy'].get('Parent') != cls['cs']:
         return 'constview resolver mismatch'
     return ('constview', target, cv['Native']['Name'], False)
+
+
+def construct_owner(cls, text, kind, owner_cls, self_expr):
+    """the owner pointer a construction passes, in this class's terms, or None:
+    `this` when this class IS the owner, or a field that holds the owner -- a
+    list's parent (`m_brep`), a keyed child's owner, a component's owner
+    (`Brep`, `ParentSubD`: its siblings share it)"""
+    if kind == 'this':
+        if cls is not owner_cls or cls['mode'] != 'pointer':
+            return None
+        # as a child view takes its parent: writes through the view land in the owner
+        return self_access(cls, self_expr, 'NonConstPointer')
+    if kind != 'field':
+        return None
+    rec = TYPE_RECS.get(cls['type']) or {}
+    if cls['mode'] == 'child' and BY_REG.get(cls.get('parent', '')) is owner_cls \
+            and (text in (rec.get('ParentFields') or []) or text in ((cls.get('key') or {}).get('OwnerNames') or [])):
+        return 'm_ptr'
+    if cls.get('comp') and cls['comp']['Owner'] is owner_cls and text in cls['comp']['OwnerNames']:
+        return 'RH3DM_Owner()'
+    return None
+
+
+def construct_shape(member, cls, self_expr, argnames, cret, out_by_name):
+    """Body "construct" (specgen): the member returns a COMPONENT it makes from
+    (owner, key) -- `new BrepFace(index, m_brep)`, `new SubDVertex(ParentSubD,
+    p, id)` after `if (p != IntPtr.Zero)`, `new PointCloudItem(this, index)` --
+    or takes one from a list's indexer (`return Brep.Faces[index];`). Returns
+    ('construct', target, owner, key, mode, check) / ('via', list, owner, check),
+    or a refusal (str). mode: 'ptr' (the native returned the component's
+    pointer: only its non-null-ness is used, the key re-resolves it), 'key'
+    (the native returned the key), None (no native call)."""
+    kinds, args = member.get('ChildArgKinds') or [], member.get('ChildArgs') or []
+    check = member.get('ChildCheck')
+    if member.get('ChildVia'):
+        if len(args) != 2 or kinds[1] != 'result' or check != 'neg' or cret not in ('int', 'unsigned int'):
+            return 'via form'
+        via = member['ChildVia']
+        if via == 'this':
+            lst, owner = cls, 'this'
+            if cls['mode'] != 'child':
+                return 'via this on a non-list'
+        else:
+            # `Brep.Faces[index]`: the owner's list property, a generated child
+            ocls = None
+            if kinds[0] == 'field' and cls.get('comp') and args[0] in cls['comp']['OwnerNames']:
+                ocls, owner = cls['comp']['Owner'], 'RH3DM_Owner()'
+            if ocls is None:
+                return 'via owner %s' % args[0]
+            prop = [x for x in PROPS_BY_TYPE.get(ocls['type'], []) if x['Name'] == via]
+            lst = child_view(prop[0]) if prop else None
+            if lst is None or lst.get('parent') != ocls['reg']:
+                return 'via list %s' % via
+        return ('via', lst, owner, check)
+    target = BY_CS.get(cs_unqualify(member.get('Child') or ''))
+    if target and target['mode'] == 'child' and not target.get('key') and target.get('parent') == cls['reg']:
+        # a plain child this class makes (`new File3dmDisplacement(m_attr)`): from this
+        # object itself, or from the owner field it shares the pointer with
+        rec = TYPE_RECS.get(cls['type']) or {}
+        if len(args) != 1 or target['on'] != (cls['on'] if cls['mode'] in ('pointer', 'child') else None):
+            return 'construct child args'
+        if kinds[0] == 'this':
+            owner = self_access(cls, self_expr, 'NonConstPointer')
+        elif kinds[0] == 'field' and cls['mode'] == 'child' and args[0] in (rec.get('ParentFields') or []):
+            owner = 'm_ptr'
+        else:
+            return 'construct child owner %s' % args[0]
+        if cret is None:
+            return ('construct', target, owner, None, None, check)
+        if check == 'true' and cret == 'bool':
+            return ('construct', target, owner, None, 'check', check)   # `if (!F(...)) return null;`
+        return 'construct child after a call'
+    pv = (target or {}).get('proxy') or {}
+    if pv.get('Origin') == 'parent':
+        # `if (index >= 0) return new Texture(index, this); return null;` (Material.GetTexture):
+        # a view of (this, index), copy-on-write on its first edit (G57)
+        if pv['Owner'] != cls['reg'] or sorted(kinds) != ['result', 'this'] or check != 'neg' \
+                or cret not in ('int', 'unsigned int'):
+            return 'construct view of %s' % pv['Owner']
+        return ('construct', target, 'this', None, 'key', check)
+    info = target and (target.get('comp') or target.get('key'))
+    if not info:
+        return 'construct target %s' % member.get('Child')
+    roles = info['Ctor']
+    if len(roles) != len(args):
+        return 'construct arity'
+    by = {r: (a, k) for r, a, k in zip(roles, args, kinds)}
+    owner_cls = target['comp']['Owner'] if target.get('comp') else BY_REG[target['parent']]
+    owner = construct_owner(cls, by['owner'][0], by['owner'][1], owner_cls, self_expr)
+    if owner is None:
+        return 'construct owner %s (%s)' % by['owner']
+    ktype = info.get('Key') or info.get('Type')
+    ktext, kkind = by['key']
+    mode = None
+    if 'ptr' in by:
+        # the native returned the component pointer, null-checked first
+        if by['ptr'][1] != 'result' or check != 'null' or not cret.endswith('*'):
+            return 'construct pointer'
+        mode = 'ptr'
+    if kkind == 'param' and ktext in argnames:
+        key = '(%s)%s' % (ktype, ktext)
+    elif kkind == 'const' and re.match(r'^\d+$', ktext):
+        key = ktext
+    elif kkind == 'out' and out_by_name.get(ktext) in ('unsigned int*', 'int*'):
+        key = '(%s)%s' % (ktype, ktext)
+    elif kkind == 'result' and mode is None and cret in ('int', 'unsigned int'):
+        key, mode = None, 'key'                       # the call itself
+    else:
+        return 'construct key %s (%s)' % (ktext, kkind)
+    if mode is None and cret is not None:
+        return 'construct after an unrelated call'
+    return ('construct', target, owner, key, mode, check)
 
 
 def derives_from(c, base):
@@ -606,6 +974,12 @@ def no_owned_pointer_cpp(cls, ident):
             if cls['mode'] == 'abstract':
                 NO_OWNED_ABSTRACT.add(cls['reg'])
                 return 'RH3DM_NoOwnedPtr()'
+            # an owned object never is document-controlled in rhino3dm: a pointer
+            # class with no proxy/view state, no component, not borrowed or a handle
+            # (decided with Luis 2026-10-13, G57)
+            if (cls['mode'] == 'pointer' and not storage_owner(cls).get('proxy') and not cls.get('comp')
+                    and not cls.get('borrowed') and not cls.get('handle')):
+                return 'false'
             if cls['mode'] in ('pointer', 'child'):
                 return '(m_ptr == nullptr)'
             return 'false'
@@ -679,6 +1053,33 @@ def enum_isdefined_cpp(cond, cls, ptypes):
         return None
 
 
+def enum_const_value(t, enum):
+    """`E.Member` (or a bare integer) as the integer C# gives it, for enum E"""
+    if re.match(r'^-?\d+$', t):
+        return t
+    mm = re.match(r'^(\w+)\.(\w+)$', t)
+    named = ENUM_NAMED.get(enum.split('.')[-1]) or {}
+    if mm and mm.group(1) == enum.split('.')[-1] and mm.group(2) in named:
+        return str(named[mm.group(2)])
+    return None
+
+
+def result_guard_expr(member, sig_ret):
+    """`int rc = F(...); if (rc <= 0 || rc > 3) return E.None; return (E)rc;`
+    as one C++ expression over the call (a str.format template on {c}), or
+    None (refuse). The condition reads only the result local and literals (G57)."""
+    rg = member['ResultGuard']
+    local = rg['Ids'][0]
+    cpp = CS_ENUMS[sig_ret]['cpp']
+    v = enum_const_value(rg.get('Return') or '', sig_ret)
+    if v is None or not re.match(r'^[\w\s<>=!|&()-]+$', rg['Cond']):
+        return None
+    if set(re.findall(r'[A-Za-z_]\w*', rg['Cond'])) - {local}:
+        return None
+    cond = re.sub(r'\b%s\b' % re.escape(local), 'rh3dm_r', rg['Cond'])
+    return '[&]{{ int rh3dm_r = (int)({c}); return (%s) ? (%s)%s : (%s)rh3dm_r; }}()' % (cond, cpp, v, cpp)
+
+
 def early_return_cpp(g, shape, sig_ret):
     """the C++ value of an early `return X;` for this member's return shape,
     or None (refuse): void, literals of the member's own type, String.Empty,
@@ -700,6 +1101,11 @@ def early_return_cpp(g, shape, sig_ret):
     if mm and mm.group(1) == sig_ret and sig_ret in CS_ENUMS and g.get('ReturnValue') is not None \
             and kind == 'enumret':
         return '(%s)%s' % (CS_ENUMS[sig_ret]['cpp'], g['ReturnValue'])
+    # `return LineCircleIntersection.None;` from a member whose result leads a
+    # tuple: the tuple of that value and the outs as initialized (G57)
+    if (mm and mm.group(1) == sig_ret and sig_ret in CS_ENUMS and g.get('ReturnValue') is not None
+            and kind == 'tuple' and isinstance(shape[1], tuple)):
+        return 'TUPLE:(%s)%s' % (CS_ENUMS[sig_ret]['cpp'], g['ReturnValue'])
     known = local_value(r)
     if known is not None and known[1] == sig_ret and kind == 'fromout':
         return known[0]
@@ -864,7 +1270,7 @@ def plan_fill(x, cls, c_by_name):
     return p, None
 
 
-def plan_forward(x, cls, by_name_arity):
+def plan_forward(x, cls, by_name_arity, members=()):
     """a RhinoCommon member whose body only calls a sibling overload"""
     args = x.get('DelegateArgs') or []
     targets = by_name_arity.get((x['Delegates'], len(args)), [])
@@ -876,6 +1282,39 @@ def plan_forward(x, cls, by_name_arity):
     sig_ret, sig_params = cs_signature(x)
     if sig_ret is None:
         return None, 'unparsed signature'
+    # C# picks the overload by argument TYPES: among every RhinoCommon overload
+    # of that name and arity, the ones whose parameters take the forwarded
+    # parameters' types -- it must be exactly one, and the generated target
+    # (`Add(BrepVertex, ...)` forwards to Add(BrepVertex, ...), not to the
+    # generated Add(int, ...))
+    own = {n: t for _, t, n in sig_params}
+    NUMERIC = ('int', 'uint', 'long', 'ulong', 'short', 'ushort', 'byte', 'float', 'double')
+    def arg_fits(a, pt):
+        k, t = a['Kind'], a['Text']
+        if k == 'param' and t in own:
+            return pt == own[t]
+        if k == 'parammember' and t.count('.') == 1:
+            pn, fld = t.split('.')
+            rt = VT_PROP_RET.get((own.get(pn), fld))
+            cs_rt = {v: k for k, v in VT_CPP.items()}.get(rt) or {'unsigned int': 'uint'}.get(rt, rt)
+            return rt is None or pt == cs_rt
+        if k == 'literal':
+            if t in ('true', 'false'):
+                return pt == 'bool'
+            if t == 'null':
+                return pt not in NUMERIC and pt != 'bool'
+            if re.match(r'^-?\d+$', t):                      # an int literal converts to any numeric
+                return pt in NUMERIC
+            if re.match(r'^-?[\d.]+([eE][-+]?\d+)?[dD]?$', t):
+                return pt == 'double'
+        return True                                         # untyped here: does not discriminate
+    def takes(m):
+        _, ps = cs_signature(m)
+        return ps is not None and len(ps) == len(args) and all(arg_fits(a, ps[i][1]) for i, a in enumerate(args))
+    overloads = [m for m in members if m['Name'] == x['Delegates'] and m['Kind'] == target['m']['Kind']
+                 and m.get('Variant') == 'portable' and m is not x and takes(m)]
+    if members and (len(overloads) != 1 or overloads[0].get('Signature') != target['m'].get('Signature')):
+        return None, 'target overload by type'
     # an `out` param handed straight to an `out` slot of the target is
     # dropped from both sides: the generated target already returns it in
     # its tuple (TryGetPlane(out plane) -> TryGetPlane(out plane, tol))
@@ -977,6 +1416,11 @@ def class_members(cls, manifest):
     base) redeclares with the same signature is the override: the base's is
     skipped. Registry bases are left to C++ inheritance, as before."""
     own = [x for x in manifest['members'] if x['Type'] == cls['type']]
+    if cls.get('ctor_key'):
+        # reached through one constructor that nulls fields: each body as analyzed
+        # with those fields null (G47) -- the record's analysis keys replaced
+        own = [dict(x, **x['Specialized'][cls['ctor_key']])
+               if (x.get('Specialized') or {}).get(cls['ctor_key']) else x for x in own]
     if not TYPE_RECS:
         return own
     if (TYPE_RECS.get(cls['type']) or {}).get('ExtraComponentTypeValues'):
@@ -1016,7 +1460,11 @@ def child_view(x):
     T itself or an interface T implements with the same arguments
     (`IList<Layer> Layers` is a File3dmLayerTable)"""
     child = BY_CS.get(cs_unqualify(x.get('Child') or ''))
-    if child is None or x.get('ChildArgs') != ['this']:
+    if child is None:
+        return None
+    if child.get('key') and child_key(x, child) is not None:
+        return child
+    if x.get('ChildArgs') != ['this']:
         return None
     ret = cs_unqualify(x.get('Returns') or '')
     if ret == child['cs']:
@@ -1029,6 +1477,143 @@ def child_view(x):
                 and [cs_unqualify(a) for a in args] == [cs_unqualify(a.strip()) for a in mm.group(2).split(',')]:
             return child
     return None
+
+
+def child_key(x, child):
+    """`new NurbsSurfaceKnotList(this, 0)`: the constant key a keyed child is
+    made with (its constructor roles: owner, key), or None"""
+    roles = child['key']['Ctor']
+    args, kinds = x.get('ChildArgs') or [], x.get('ChildArgKinds') or []
+    if len(args) != len(roles) or len(roles) != 2:
+        return None
+    by = dict(zip(roles, zip(args, kinds)))
+    if by['owner'] != ('this', 'this') or not re.match(r'^\d+$', by['key'][0]):
+        return None
+    return by['key'][0]
+
+
+def plan_construct_nocall(x, cls):
+    """a construction with no native call (`this[int]` of a list after its
+    guards: `new BrepFace(index, m_brep)`; `new PointCloudItem(this, index)`)"""
+    sig_ret, sig_params = cs_signature(x)
+    if sig_params is None or any(m for m, _, _ in sig_params):
+        return None, 'construct params'
+    bind_args = []
+    for _, t, n in sig_params:
+        if t not in ('int', 'uint'):
+            return None, 'construct param %s' % t
+        bind_args.append((CS_ARG[t][0], n))
+    basecls = BY_REG.get(cls.get('base', ''))
+    self_expr = ('static_cast<%s*>(m_ptr)' % cls['on']
+                 if basecls and basecls['mode'] not in ('abstract',) else 'm_ptr')
+    shape = construct_shape(x, cls, self_expr, {n for _, n in bind_args}, None, {})
+    if isinstance(shape, str):
+        return None, shape
+    if any(g.get('Assign') for g in x.get('Guards') or []):
+        return None, 'parameter normalization in a construction'
+    return {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
+            'bind_args': bind_args, 'shape': shape, 'extra_fns': [],
+            'guards': [g for g in x.get('Guards') or []], 'success': None, 'failthrow': None,
+            'typearg_pos': [], 'commits': False}, None
+
+
+def plan_arrayfill(x, cls, c_by_name):
+    """`int count = <native | property>; if (count < 1) return <new T[0] | null>;
+    T[] a = new T[count]; UNM.Fill(..., count, a); return a;` (specgen ArrayFill):
+    a std::vector the native fills, returned as a tuple (G54). Each native call
+    is planned by plan() itself, so arguments obey the ordinary rules."""
+    af = x['ArrayFill']
+    sig_ret, _ = cs_signature(x)
+    elem = af['Elem']
+    conv = None
+    if af.get('ElemConv'):
+        # `res[i] = Color.FromArgb(rc[i])`: the ints converted as the C# loop does
+        how, to = af['ElemConv'].split(':')
+        if elem != 'int' or cs_unqualify(to) != 'Color' or how not in ('FromArgb', 'FromWin32'):
+            return None, 'arrayfill: conversion %s' % af['ElemConv']
+        conv = 'RH3DM_Color%s(%%s)' % how
+        if sig_ret != 'Color[]':
+            return None, 'arrayfill: returns %s' % sig_ret
+    elif sig_ret != elem + '[]':
+        return None, 'arrayfill: returns %s' % sig_ret
+    if elem in VT_CPP:
+        elem_cpp = VT_CPP[elem]
+    elif elem in ('int', 'double', 'float'):
+        elem_cpp = elem
+    elif elem == 'uint':
+        elem_cpp = 'unsigned int'
+    else:
+        return None, 'arrayfill: element %s' % elem
+    def sub(call, ret):
+        args = [{'Kind': 'arrcount', 'Text': a['Text']} if a['Text'] == af['Count'] and a['Kind'] in ('expr', 'local')
+                else {'Kind': 'arrayout', 'Text': a['Text'], 'Value': elem} if a['Text'] == af['Local']
+                else a for a in call['Args']]
+        m = dict(x, Calls=[dict(call, Args=args)], Returns=ret, Body='trivial', ArrayFill=None,
+                 Success=None, FailThrow=None, Wrap=None, WrapArity=0, Compare=None, ResultConv=None,
+                 ConvOut=None, ResultCast=None, ResultUnused=(ret == 'void'), Holder=None, NewObjFail=None)
+        fn = c_by_name.get(call['Name'])
+        if fn is None:
+            return None, 'arrayfill: C fn %s' % call['Name']
+        return plan(m, fn, cls)
+    fill, why = sub(x['Calls'][-1], 'bool' if af['FillForm'] == 'success' else 'void')
+    if fill is None:
+        return None, 'arrayfill: fill: ' + why
+    if af['FillForm'] == 'success' and fill['fn']['returns'] != 'bool':
+        return None, 'arrayfill: fill status %s' % fill['fn']['returns']
+    info = {'elem': elem_cpp, 'local': af['Local'], 'count': af['Count'], 'empty': af.get('Empty'),
+            'empty_cond': af.get('EmptyCond'), 'form': af['FillForm'], 'conv': conv}
+    cm = re.match(r'^(call|prop:(\w+)|method:(\w+)\(([\w,]*)\))(?:\+(\d+))?$', af['CountFrom'])
+    if not cm:
+        return None, 'arrayfill: count from %s' % af['CountFrom']
+    info['count_add'] = cm.group(5)                     # `SpanCount(direction) + 1`
+    if cm.group(1) == 'call':
+        size, why = sub(x['Calls'][0], 'int')
+        if size is None or size['locals'] or size['shape'] != ('direct', 'int'):
+            return None, 'arrayfill: size: %s' % (why or 'shape')
+        info['count_expr'] = '%s(%s)' % (size['fn']['name'], ', '.join(size['call_exprs']))
+        fill['extra_fns'] = list(fill.get('extra_fns') or []) + [size['fn']]
+    elif cm.group(2):
+        info['count_prop'] = cm.group(2)               # a zero-arg sibling, resolved with the guards
+    else:
+        # a sibling method on this member's own parameters, resolved with the guards
+        names = [a for a in cm.group(4).split(',') if a]
+        if any(a not in {n for _, n in fill['bind_args']} for a in names):
+            return None, 'arrayfill: count method args'
+        info['count_method'] = (cm.group(3), names)
+    if info['count_add'] and 'count_expr' in info:
+        info['count_expr'] += ' + ' + info['count_add']
+    if info['empty_cond'] is not None and not re.match(r'^(%s\s*(<|<=|==)\s*-?\d+|-?\d+\s*(>|>=|==)\s*%s)$'
+                                                       % (re.escape(af['Count']), re.escape(af['Count'])), info['empty_cond']):
+        return None, 'arrayfill: empty condition %s' % info['empty_cond']
+    fill['m'] = x
+    fill['shape'] = ('arrayfill', info)
+    return fill, None
+
+
+def plan_sequence(x, cls, c_by_name):
+    """`UNM.A(p, ...); UNM.B(p);` (specgen Sequence): a void member whose native
+    calls are bare statements, in order (MeshVertexList.Clear). Each call is
+    planned by plan(); the member's guards run once, first (G54)."""
+    sig_ret, _ = cs_signature(x)
+    if sig_ret != 'void':
+        return None, 'sequence: returns %s' % sig_ret
+    subs = []
+    for i, call in enumerate(x['Calls']):
+        fn = c_by_name.get(call['Name'])
+        if fn is None:
+            return None, 'sequence: C fn %s' % call['Name']
+        m = dict(x, Calls=[call], ResultUnused=True, Sequence=False,
+                 Guards=x.get('Guards') if i == 0 else None)
+        p, why = plan(m, fn, cls)
+        if p is None:
+            return None, 'sequence: call %d: %s' % (i, why)
+        if p['locals'] or p['shape'] != ('direct', 'void') or (i and p['guards']):
+            return None, 'sequence: call %d shape' % i
+        subs.append(p)
+    first = dict(subs[0])
+    first['shape'] = ('seq', ['%s(%s)' % (q['fn']['name'], ', '.join(q['call_exprs'])) for q in subs])
+    first['extra_fns'] = [f for q in subs for f in [q['fn']] + list(q.get('extra_fns') or [])]
+    return first, None
 
 
 def plan_class(cls, manifest, c_by_name, skipped):
@@ -1059,6 +1644,26 @@ def plan_class(cls, manifest, c_by_name, skipped):
                 skipped[why.split(':')[0] + ': ' + why.split(':')[1].split()[0]] = \
                     skipped.get(why.split(':')[0] + ': ' + why.split(':')[1].split()[0], 0) + 1
 
+    # native calls in sequence (MeshVertexList.Clear) (G54)
+    for x in manifest['members']:
+        if (x['Type'] == cls['type'] and x['Variant'] == 'portable' and x.get('Sequence')
+                and x['Kind'] == 'method' and x.get('Body') == 'trivial'):
+            p, why = plan_sequence(x, cls, c_by_name)
+            if p:
+                plans.append(p)
+            else:
+                skipped[why.split(':')[0]] = skipped.get(why.split(':')[0], 0) + 1
+
+    # caller-allocated arrays the native fills (PointCloud.GetPoints) (G54)
+    for x in manifest['members']:
+        if (x['Type'] == cls['type'] and x['Variant'] == 'portable' and x.get('Body') == 'arrayfill'
+                and x['Kind'] == 'method' and x.get('ArrayFill')):
+            p, why = plan_arrayfill(x, cls, c_by_name)
+            if p:
+                plans.append(p)
+            else:
+                skipped[why.split(':')[0] + ':' + why.split(':')[1]] = skipped.get(why.split(':')[0] + ':' + why.split(':')[1], 0) + 1
+
     # collection accessors (Mesh.Vertices => new MeshVertexList(this)): a
     # property whose type is a registered CHILD of this class returns a
     # view bound to this object's pointer
@@ -1079,7 +1684,12 @@ def plan_class(cls, manifest, c_by_name, skipped):
                 and cls['mode'] in ('pointer', 'child'):
             plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
                           'call_exprs': [], 'locals': [], 'bind_args': [],
-                          'shape': ('child', child), 'guards': [], 'success': None,
+                          'shape': ('child', child), 'success': None,
+                          'child_key': child_key(x, child) if child.get('key') else None,
+                          # `IsPhysicallyBased ? new T(this) : null`: an early return on
+                          # the sibling property, resolved like any guard (zero-arg sibling)
+                          'guards': ([{'Cond': '!%s' % x['ChildIf'], 'Ids': [x['ChildIf']], 'Exception': None,
+                                       'Return': 'null', 'ret_cpp': 'nullptr'}] if x.get('ChildIf') else []),
                           # a child that views a PART of the parent (File3dmSettings:
                           # &model->m_settings, registry 'derive') derives it itself
                           # and keeps the parent too (its own file views need it)
@@ -1208,11 +1818,63 @@ def plan_class(cls, manifest, c_by_name, skipped):
         if not (x['Type'] == cls['type'] and x['Variant'] == 'portable'
                 and x['Kind'] in ('method', 'property') and x.get('Body') == 'delegates'):
             continue
-        f, why = plan_forward(x, cls, by_name_arity)
+        f, why = plan_forward(x, cls, by_name_arity,
+                              [m for m in manifest['members'] if m['Type'] == cls['type']])
         if f:
             plans.append(f)
         else:
             skipped['forward: ' + why] = skipped.get('forward: ' + why, 0) + 1
+
+    # constructions with no native call (G43): a list's `this[int]`, `new PointCloudItem(this, index)`
+    have = {(p['m']['Kind'], p['m'].get('Signature')) for p in plans}
+    for x in manifest['members']:
+        if not (x['Type'] == cls['type'] and x['Variant'] == 'portable' and x.get('Body') == 'construct'
+                and not x.get('Calls') and x['Kind'] in ('method', 'property', 'indexer')
+                and (x['Kind'], x['Signature']) not in have):
+            continue
+        c, why = plan_construct_nocall(x, cls)
+        if c is None:
+            skipped['construct: ' + why.split(' ')[0] + ' ' + (why.split(' ')[1] if ' ' in why else '')] = \
+                skipped.get('construct: ' + why.split(' ')[0] + ' ' + (why.split(' ')[1] if ' ' in why else ''), 0) + 1
+            continue
+        plans.append(c)
+    # a component's key (`public int FaceIndex { get; }`, `Index => m_index`): the key itself.
+    # On an abstract base of components (SubDComponent.Id) every derived component must
+    # name it as its key, with one key type: the base asks the derived storage (virtual)
+    keyinfo = cls.get('comp') or cls.get('key')
+    cls.pop('abstract_key', None)
+    if cls['mode'] == 'abstract':
+        kids = [d for d in CLASSES if d.get('base') == cls['reg'] and d.get('comp')]
+        if kids and len({d['comp']['Key'] for d in kids}) == 1:
+            common = set.intersection(*(set(d['comp']['KeyNames']) for d in kids))
+            if common:
+                keyinfo = {'KeyNames': sorted(common), 'Key': kids[0]['comp']['Key'], 'abstract': True}
+    if keyinfo:
+        names = keyinfo.get('KeyNames') or keyinfo.get('Names')
+        ktype = keyinfo.get('Key') or keyinfo.get('Type')
+        for x in manifest['members']:
+            if (x['Type'] == cls['type'] and x['Variant'] == 'portable' and x['Kind'] == 'property'
+                    and x['Name'] in names and not x.get('Calls') and not x.get('Setter')
+                    and x.get('Body') in ('pure', 'alias') and CS_ARG.get(cs_unqualify(x.get('Returns') or ''), ('',))[0] == ktype
+                    and not any(p['m']['Name'] == x['Name'] for p in plans)):
+                plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
+                              'bind_args': [], 'shape': ('keyprop', ktype), 'extra_fns': [], 'guards': [],
+                              'success': None, 'failthrow': None, 'typearg_pos': [], 'commits': False})
+                if keyinfo.get('abstract'):
+                    cls['abstract_key'] = ktype
+
+    # literal constant properties (`IsReadOnly => true`; G48): the value itself
+    for x in manifest['members']:
+        c = x.get('Const') or ''
+        if (x['Type'] == cls['type'] and x['Variant'] == 'portable' and x['Kind'] == 'property'
+                and c.startswith('@literal:') and not x.get('Setter') and cls['mode'] != 'static'
+                and not any(p['m']['Name'] == x['Name'] for p in plans)):
+            ret = cs_unqualify(x.get('Returns') or '')
+            lit = c[len('@literal:'):]
+            if ret in ('bool', 'int', 'double', 'uint') and (lit in ('true', 'false')) == (ret == 'bool'):
+                plans.append({'m': x, 'fn': None, 'cls': cls, 'static': bool(x.get('Static')), 'call_exprs': [], 'locals': [],
+                              'bind_args': [], 'shape': ('constprop', CS_ARG[ret][0], lit.rstrip('dDfFuU')), 'extra_fns': [],
+                              'guards': [], 'success': None, 'failthrow': None, 'typearg_pos': [], 'commits': False})
 
     # property chains (`File3dmObject.Name => Attributes.Name`): a property of
     # the object a sibling property returns, both generated -- the sibling here
@@ -1267,6 +1929,40 @@ def plan_class(cls, manifest, c_by_name, skipped):
             zero_arg[p['m']['Name']] = p['cpp']
     resolved = []
     for p in plans:
+        if p.get('adopt'):
+            # the getter handing out the same holder (BrepFace.GetMesh) gives its resolver
+            ad = p['adopt']
+            ptypes = dict((n, t) for t, n in p['bind_args'])
+            sib = [q for q in plans if q['shape'][0] == 'subview' and (q['m'].get('SubView') or {}).get('Holder') == ad['holder']
+                   and len(q['m']['SubView']['Args']) == len(ad['args'])
+                   and [ptypes.get(a) for a in ad['args'] if a != 'this'] == ([q['shape'][3]] if q['shape'][2] else [])]
+            if len(sib) != 1:
+                skipped['adopt: sibling view'] = skipped.get('adopt: sibling view', 0) + 1
+                continue
+            key = [a for a in ad['args'] if a != 'this']
+            p['adopt'] = dict(ad, tramp='RH3DM_SubT_%s' % sib[0]['cpp'], key=key[0] if key else None,
+                              cow=sib[0]['shape'][4] == 'copy')
+        if p['shape'][0] == 'arrayfill' and (p['shape'][1].get('count_prop') or p['shape'][1].get('count_method')):
+            # `int count = GroupCount;` / `SpanCount(direction) + 1`: the generated
+            # int sibling of this class, taking exactly these parameters' types
+            af = p['shape'][1]
+            ptypes = dict((n, t) for t, n in p['bind_args'])
+            if af.get('count_prop'):
+                src = [q for q in plans if q['m']['Name'] == af['count_prop'] and q['m']['Kind'] == 'property'
+                       and not q.get('setter_of') and not q['bind_args'] and q['shape'] == ('direct', 'int')]
+                expr = src and '%s()' % src[0]['cpp']
+            else:
+                mname, margs = af['count_method']
+                src = [q for q in plans if q['m']['Name'] == mname and q['m']['Kind'] == 'method'
+                       and q['shape'] == ('direct', 'int') and not q.get('static')
+                       and [t for t, _ in q['bind_args']] == [ptypes[a] for a in margs]]
+                expr = len(src) == 1 and '%s(%s)' % (src[0]['cpp'], ', '.join(margs))
+            if not src or not expr:
+                skipped['arrayfill: count sibling'] = skipped.get('arrayfill: count sibling', 0) + 1
+                continue
+            if af.get('count_add'):
+                expr += ' + ' + af['count_add']
+            p['shape'] = ('arrayfill', dict(af, count_expr=expr))
         argnames = {n for _, n in p['bind_args']}
         ok = True
         kept = []
@@ -1333,15 +2029,27 @@ def plan_class(cls, manifest, c_by_name, skipped):
             # `if (!CALL) { if (index < 0 || index >= Count) throw ...; }`:
             # the inner condition resolves exactly like a guard's
             ft = dict(fts)
-            cond = re.sub(r'\bnull\b', 'nullptr', ft['Cond'])
-            for ident in ft.get('Ids') or []:
-                if ident in argnames:
-                    continue
-                if ident in zero_arg:
-                    cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), '%s()' % zero_arg[ident], cond)
-                else:
+            def ft_cond(c, ids):
+                c = re.sub(r'\bnull\b', 'nullptr', c)
+                for ident in ids or []:
+                    if ident in argnames:
+                        continue
+                    if ident in zero_arg:
+                        c = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), '%s()' % zero_arg[ident], c)
+                    else:
+                        return None
+                return c
+            cond = ft_cond(ft['Cond'], ft.get('Ids'))
+            ok = cond is not None
+            # PointCloud.PointAt: `if (!CALL) { if (C1) throw ...; if (C2) throw ...; }` (G49)
+            more = []
+            for g in ft.get('More') or []:
+                mc = ft_cond(g['Cond'], g.get('Ids'))
+                if mc is None:
                     ok = False
                     break
+                more.append(dict(g, cond_cpp=mc))
+            ft['More'] = more
             ft['cond_cpp'] = cond
             if p['shape'][0] == 'failthrow':
                 p['shape'] = ('failthrow', ft)
@@ -1494,3 +2202,29 @@ def table_protocol(cls, manifest, plans):
             'fns': [C_BY_NAME[n] for n in ('ONX_ModelComponentIterator_New',
                                            'ONX_ModelComponentIterator_GetNext',
                                            'ONX_ModelComponentIterator_Delete')]}
+
+
+def linked_iter(cls, plans):
+    """RhinoCommon's linked enumerator over an owner's components (specgen
+    Enumerator: SubDFaceList.GetEnumerator -> `p = First(subd, ref id); while
+    (p != 0) { yield new SubDFace(subd, p, id); p = Next(p, ref id); }`): the
+    list is a generated child of the owner, the element a generated component
+    of that owner keyed by the id, and both natives exist. Returns {item,
+    first, next, count, find: None} or None."""
+    if cls['mode'] != 'child' or cls.get('key'):
+        return None
+    rec = TYPE_RECS.get(cls['type']) or {}
+    en = rec.get('Enumerator')
+    if not en or en.get('OwnerName') not in (rec.get('ParentFields') or []):
+        return None
+    item = BY_CS.get(cs_unqualify(en['Element']))
+    if not item or not item.get('comp') or item['comp']['Owner']['reg'] != cls.get('parent') \
+            or item['comp']['Key'] != 'unsigned int':
+        return None
+    first, nxt = C_BY_NAME.get(en['First']), C_BY_NAME.get(en['Next'])
+    if not first or not nxt or [q['type'] for q in first['params']] != ['const %s*' % cls['on'], 'unsigned int*'] \
+            or [q['type'] for q in nxt['params']] != [first['returns'], 'unsigned int*']:
+        return None
+    count = [p for p in plans if p['m']['Name'] == 'Count' and p['m']['Kind'] == 'property' and not p['bind_args']]
+    return {'item': item, 'first': first, 'next': nxt,
+            'count': count[0]['cpp'] if len(count) == 1 else None, 'find': None}

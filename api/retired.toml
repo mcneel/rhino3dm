@@ -1,0 +1,214 @@
+# Old (hand-bound) rhino3dm members retired in favour of generated members.
+#
+# Read by tools/generate/old_coverage.py, which tags the rows of
+# docs/vnext/rhino3dm-only-members.md and checks every `by` member exists in
+# the built generated module (a missing one is reported, never tagged as
+# replaced). Human-readable rationale: docs/vnext/retired-members.md.
+#
+#   status = "replaced"       an equivalent is generated (`by`) and tested (`test`)
+#   status = "proposed-drop"  no RhinoCommon equivalent; retired only if Luis accepts
+#
+# `by` names generated classes as registered (X suffix while both surfaces coexist).
+
+# ---- SubD component iterators: rooted at the SubD (subd.Faces / Edges / Vertices)
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromSubD"
+member = "Count"
+status = "replaced"
+by = ["SubDFaceListX.Count"]
+test = "test_subd_lists_iterate_like_foreach"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromSubD"
+member = "Count"
+status = "replaced"
+by = ["SubDEdgeListX.Count"]
+test = "test_subd_lists_iterate_like_foreach"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromSubD"
+member = "Count"
+status = "replaced"
+by = ["SubDVertexListX.Count"]
+test = "test_subd_lists_iterate_like_foreach"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromSubD"
+member = "First"
+status = "replaced"
+by = ["SubDVertexListX.First"]
+test = "test_subd_lists_iterate_like_foreach"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromSubD"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; iterate subd.Faces"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromSubD"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; iterate subd.Edges"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromSubD"
+members = ["Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; iterate subd.Vertices"
+
+# ---- SubD component iterators: rooted at a component (its neighbours)
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromFace"
+member = "Count"
+status = "replaced"
+by = ["SubDFaceX.EdgeCount"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromFace"
+member = "Count"
+status = "replaced"
+by = ["SubDFaceX.VertexCount"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromEdge"
+member = "Count"
+status = "replaced"
+by = ["SubDEdgeX.FaceCount"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromEdge"
+member = "Count"
+status = "replaced"
+by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+test = "test_subd_lists_iterate_like_foreach"
+note = "always 2"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromVertex"
+member = "Count"
+status = "replaced"
+by = ["SubDVertexX.FaceCount"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromVertex"
+member = "Count"
+status = "replaced"
+by = ["SubDVertexX.EdgeCount"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromFace"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; face.EdgeAt(i) for i in range(face.EdgeCount)"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromFace"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; face.VertexAt(i) for i in range(face.VertexCount)"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromEdge"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; edge.FaceAt(i) for i in range(edge.FaceCount)"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromEdge"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; edge.VertexFrom / edge.VertexTo"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromVertex"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; vertex.FaceAt(i) for i in range(vertex.FaceCount)"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromVertex"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "proposed-drop"
+note = "no RhinoCommon cursor; vertex.EdgeAt(i) for i in range(vertex.EdgeCount)"
+
+# ---- SubD components: neighbour access (old names -> RhinoCommon's)
+
+[[retired]]
+class = "SubDFace"
+member = "Edge"
+status = "replaced"
+by = ["SubDFaceX.EdgeAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDFace"
+member = "Vertex"
+status = "replaced"
+by = ["SubDFaceX.VertexAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDFace"
+member = "Edges"
+status = "replaced"
+by = ["SubDFaceX.EdgeCount", "SubDFaceX.EdgeAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDFace"
+member = "Vertices"
+status = "replaced"
+by = ["SubDFaceX.VertexCount", "SubDFaceX.VertexAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDVertex"
+member = "Edge"
+status = "replaced"
+by = ["SubDVertexX.EdgeAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDVertex"
+member = "Faces"
+status = "replaced"
+by = ["SubDVertexX.FaceCount", "SubDVertexX.FaceAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+[[retired]]
+class = "SubDEdge"
+member = "Vertex"
+status = "replaced"
+by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+test = "test_subd_lists_iterate_like_foreach"
+note = "index 0 / 1"
+
+[[retired]]
+class = "SubDEdge"
+member = "Vertices"
+status = "replaced"
+by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+test = "test_subd_lists_iterate_like_foreach"
+
+[[retired]]
+class = "SubDEdge"
+member = "VertexCount"
+status = "replaced"
+by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+test = "test_subd_lists_iterate_like_foreach"
+note = "always 2"
+
+[[retired]]
+class = "SubDEdge"
+member = "Faces"
+status = "replaced"
+by = ["SubDEdgeX.FaceCount", "SubDEdgeX.FaceAt"]
+test = "test_subd_neighbours_replace_the_old_component_iterators"

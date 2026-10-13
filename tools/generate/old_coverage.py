@@ -49,6 +49,15 @@ def main(argv):
     for t in json.load(open(vt_path))['types']:
         if not t['IsStaticClass']:
             gen_of[t['Cs']] = t['Cs'] + 'X'
+    # an old class registered under another name than its C++ type's RhinoCommon
+    # name (`BND_InstanceDefinitionGeometry` as "InstanceDefinition"): pair it
+    # through the registry's hand class, not the name
+    sys.path.insert(0, os.path.join(root, 'tools', 'generate'))
+    import logic_match
+    old_cpp2py = logic_match.LogicIndex(root).old_cpp2py
+    for c in bnd_gen.CLASSES:
+        if c.get('hand') and old_cpp2py.get(c['hand']):
+            gen_of.setdefault(old_cpp2py[c['hand']], c['reg'])
     gen_names = set(gen_of.values())
 
     # RhinoCommon member names per SIMPLE type name, by variant. Several
@@ -119,6 +128,11 @@ def main(argv):
         for k in h.__mro__:
             if k.__name__ not in ('object', 'pybind11_object'):
                 rc_chain(k.__name__, chain)
+                # an old class registered under another name (`Displacement` is
+                # BND_File3dmDisplacement): RhinoCommon's type is the paired one
+                paired = bnd_gen.BY_REG.get(gen_of.get(k.__name__, ''))
+                if paired:
+                    rc_chain(paired['cs'], chain)
         spec = set().union(*(portable.get(k, set()) for k in chain))
         rhino_only = set().union(*(anyvariant.get(k, set()) for k in chain)) - spec
         b = {'covered': set(), 'gap': set(), 'notbegun': set(), 'notrc': set(), 'rhinoonly': set()}
@@ -175,6 +189,12 @@ def main(argv):
         % (tot['rhinoonly'], pct(tot['rhinoonly'], total)),
         '| **Total old-binding members** | **%d** | | |' % total,
         '',
+        '**Generator target: %d / %d (%s)** -- the old members that have a RhinoCommon'
+        % (tot['covered'], total - tot['notrc'], pct(tot['covered'], total - tot['notrc'])),
+        'counterpart (everything but the rhino3dm-only bucket, which is decided per member,',
+        'not generated). %d to go: %d gap + %d not begun + %d rhino-only.'
+        % (total - tot['notrc'] - tot['covered'], tot['gap'], tot['notbegun'], tot['rhinoonly']),
+        '',
         'Hand classes: %d, of which %d have a generated counterpart.' % (len(rows), len(begun)),
         '',
         '## Classes with a generated counterpart',
@@ -198,13 +218,13 @@ def main(argv):
         'No generated class yet. "RC" marks whether RhinoCommon has a type of',
         'that name (no: a rhino3dm-only class, e.g. File3dm table wrappers).',
         '',
-        '| Old class | RC | Old members | In RhinoCommon | Not RhinoCommon | Not-RhinoCommon names |',
-        '|---|---|---|---|---|---|',
+        '| Old class | RC | Old members | In RhinoCommon | Rhino-only in RC | Not RhinoCommon | Not-RhinoCommon names |',
+        '|---|---|---|---|---|---|---|',
     ]
     for hname, _, inrc, b in sorted(notbegun, key=lambda row: (-size(row[3]), row[0])):
-        nr = sorted(b['notrc'] | b['rhinoonly'])
-        L.append('| %s | %s | %d | %d | %d | %s |' % (
-            hname, 'yes' if inrc else '**no**', size(b), len(b['notbegun']), len(nr),
+        nr = sorted(b['notrc'])
+        L.append('| %s | %s | %d | %d | %d | %d | %s |' % (
+            hname, 'yes' if inrc else '**no**', size(b), len(b['notbegun']), len(b['rhinoonly']), len(nr),
             ', '.join(nr[:12]) + (' ... (+%d)' % (len(nr) - 12) if len(nr) > 12 else '') or '-'))
     text = '\n'.join(L) + '\n'
     print(text)
@@ -212,7 +232,7 @@ def main(argv):
         with open(out_path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(text)
         write_review(os.path.join(os.path.dirname(out_path), 'rhino3dm-only-members.md'),
-                     review, stamp, commit)
+                     review, stamp, commit, load_retired(root, r), r, gen_of, root, bnd_gen)
     return 0
 
 
@@ -239,7 +259,34 @@ def hint(name, rc_names, declared):
     return ''
 
 
-def write_review(path, review, stamp, commit):
+def load_retired(root, r):
+    """api/retired.toml -> {(old class, member): entry}, each `by` checked
+    against the built generated module: a missing replacement is flagged,
+    never reported as replaced"""
+    path = os.path.join(root, 'api', 'retired.toml')
+    if not os.path.exists(path):
+        return {}
+    import tomllib
+    out = {}
+    for e in tomllib.load(open(path, 'rb')).get('retired', []):
+        missing = [b for b in e.get('by', [])
+                   if not hasattr(getattr(r, b.split('.')[0], None), b.split('.', 1)[1])]
+        for m in e.get('members') or [e['member']]:
+            out[(e['class'], m)] = dict(e, missing=missing)
+    return out
+
+
+def retired_tag(e):
+    if e['status'] == 'replaced':
+        if e['missing']:
+            return '**replacement missing**: %s' % ', '.join('`%s`' % b for b in e['missing'])
+        tag = '**replaced** by %s' % ', '.join('`%s`' % b for b in e['by'])
+    else:
+        tag = '**proposed drop**'
+    return tag + (' (%s)' % e['note'] if e.get('note') else '')
+
+
+def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None, root=None, bnd_gen=None):
     """every old-binding member that is NOT a portable RhinoCommon member, one
     row each, with a mechanical hint -- the list Luis classifies (keep by hand
     / rename to the RhinoCommon name / drop)"""
@@ -267,24 +314,79 @@ def write_review(path, review, stamp, commit):
          'The **Hint** column is mechanical (name similarity, numbered suffixes); it is a',
          'suggestion for the reviewer, not a classification. Fill in **Decision**.',
          '',
+         'The **Generated** column says what the generated surface already offers:',
+         '- **replaced** -- an equivalent is generated and tested (`api/retired.toml`;',
+         '  rationale in `retired-members.md`); **proposed drop** -- no RhinoCommon',
+         '  equivalent, awaiting a decision.',
+         '- **same logic** / **close** / **partial** -- found by comparing CODE, not names',
+         '  (`tools/generate/logic_match.py`): the opennurbs operations the old binding',
+         '  performs vs those the generated member reaches through its C function, with',
+         "  the C function specialized for the constants the generated call passes (its",
+         '  selector branch). *same*: every accessor performs the same operations; *close*:',
+         '  the generated member does all of that and more (listed -- often a real',
+         '  behavior difference, e.g. `SetFieldOverride()`); *partial*: some accessors',
+         '  match, the rest have no generated counterpart. Evidence for review, not a',
+         '  decision: argument handling is not compared.',
+         '',
          '| Category (by hint) | Members |', '|---|---|']
     for k, v in sorted(cats.items(), key=lambda kv: -len(kv[1])):
         L.append('| %s | %d |' % (k, len(v)))
     L += ['| **Total** | **%d** |' % len(notrc), '']
+    retired = retired or {}
+    import logic_match
+    lm = logic_match.LogicIndex(root) if root else None
+    def gen_chain(c):
+        """the generated counterpart of old class c and its generated bases"""
+        reg = (gen_of or {}).get(c)
+        out = []
+        while reg:
+            out.append(reg)
+            cls = bnd_gen.BY_REG.get(reg) if bnd_gen else None
+            reg = cls.get('base') if cls else None
+        return out
+    memo = {}
+    def generated(c, n, hh):
+        if (c, n) in memo:
+            return memo[(c, n)]
+        e = retired.get((c, n))
+        tag = ''
+        if e:
+            tag = retired_tag(e)
+        elif lm is not None:
+            hits = lm.best_match(c, n, gen_chain(c))
+            tag = '; '.join(logic_match.describe(*h) for h in hits[:2])
+        memo[(c, n)] = tag
+        return tag
+    tags = [generated(c, n, hint(n, rcn, decl) if inrc else '') for c, h, inrc, rcn, decl, n in notrc]
+    L += ['| Generated | Members |', '|---|---|',
+          '| replaced (tested) | %d |' % sum(t.startswith('**replaced') for t in tags),
+          '| proposed drop | %d |' % sum(t.startswith('**proposed') for t in tags),
+          '| same logic (by code) | %d |' % sum(t.startswith('**same logic') for t in tags),
+          '| close: generated does more (by code) | %d |' % sum(t.startswith('**close') for t in tags),
+          '| partial (by code) | %d |' % sum(t.startswith('**partial') for t in tags),
+          '| replacement missing | %d |' % sum(t.startswith('**replacement missing') for t in tags), '']
     by_class = {}
     for c, h, inrc, rcn, decl, n in notrc:
-        by_class.setdefault((c, inrc), []).append((n, kind(h, n), hint(n, rcn, decl) if inrc else ''))
+        hh = hint(n, rcn, decl) if inrc else ''
+        by_class.setdefault((c, inrc), []).append((n, kind(h, n), hh, generated(c, n, hh)))
     L += ['## By class', '']
     for (c, inrc), items in sorted(by_class.items(), key=lambda kv: (not kv[0][1], kv[0][0])):
         L += ['### %s%s' % (c, '' if inrc else ' -- class not in RhinoCommon'), '',
-              '| Member | Kind | Hint | Decision |', '|---|---|---|---|']
-        L += ['| `%s` | %s | %s | |' % (n, k, hh) for n, k, hh in items]
+              '| Member | Kind | Hint | Generated | Decision |', '|---|---|---|---|---|']
+        L += ['| `%s` | %s | %s | %s | |' % (n, k, hh, gt) for n, k, hh, gt in items]
         L.append('')
     L += ['## In RhinoCommon, but Rhino-only there', '',
           'These ARE RhinoCommon members, but compiled out of the portable build (they need',
           'a running Rhino in .NET). rhino3dm ships them today; they need review too.', '',
           '| Class | Member | Decision |', '|---|---|---|']
     L += ['| %s | `%s` | |' % (c, n) for c, _, n in sorted(rhonly)]
+    # an entry of api/retired.toml that matches no row is stale (the member was
+    # renamed, or turned out to be RhinoCommon): say so rather than drop it silently
+    rows = {(c, n) for c, _, _, _, _, n in notrc}
+    stale = sorted(k for k in retired if k not in rows)
+    if stale:
+        L += ['', '## api/retired.toml entries that match no row', '']
+        L += ['- %s.`%s`' % k for k in stale]
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(L) + '\n')
 

@@ -4,6 +4,17 @@ pybind11 / embind registrations."""
 from gen_registry import *
 
 
+def failthrow_line(ft, call, m):
+    """`if (!CALL) throw E(msg);`, `if (!CALL) { if (COND) throw E(msg); }`, or
+    several conditional throws in order (G49: PointCloud.PointAt)"""
+    def throw(g):
+        return 'throw %s("%s");' % (EXMAP[g['Exception']], (g.get('Message') or m['Name']).replace('"', "'"))
+    if not ft.get('Cond'):
+        return '    if (!(%s)) %s' % (call, throw(ft))
+    inner = ' '.join('if (%s) %s' % (g['cond_cpp'], throw(g)) for g in [ft] + list(ft.get('More') or []))
+    return '    if (!(%s)) { %s }' % (call, inner)
+
+
 def emit(p):
     m = p['m']
     name = p['cpp']
@@ -14,14 +25,27 @@ def emit(p):
     st = 'static ' if p['static'] else ''
     L = []
     guard_lines = [
+        ('    if (%s) %s;' % (g['cond_cpp'], g['assign_cpp'])) if g.get('assign_cpp') else
         ('    if (%s) return%s;' % (g['cond_cpp'], ' ' + g['ret_cpp'] if g['ret_cpp'] else ''))
         if g.get('Exception') is None else
         '    if (%s) throw %s("%s");'
         % (g['cond_cpp'], EXMAP[g['Exception']],
            (g['Message'] or m['Name']).replace('"', "'"))
-        for g in p['guards']]
+        for g in p['guards'] if not g.get('fail')]
     commit_line = ['    RH3DM_Commit();'] if p.get('commits') else []
-    if shape[0] == 'direct':
+    if shape[0] == 'direct' and p.get('adopt'):
+        # BrepFace.SetMesh (G59): `mesh.SetParent(new MeshHolder(this, meshType))` --
+        # the native now owns the mesh's private copy; the argument views it
+        ad = p['adopt']
+        L.append('  %s%s %s(%s)%s {' % (st, shape[1], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    %s rc = %s;' % (shape[1], call))
+        L.append('    %s.RH3DM_SetParent(&%s::%s, (void*)this, %s, %s);'
+                 % (ad['param'], p['cls']['gen'], ad['tramp'], '(int)' + ad['key'] if ad['key'] else '0',
+                    'true' if ad['cow'] else 'false'))
+        L.append('    return rc;')
+    elif shape[0] == 'direct':
         ret = shape[1]
         L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
         L += guard_lines
@@ -34,11 +58,7 @@ def emit(p):
         L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
-        throw = 'throw %s("%s");' % (EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'"))
-        if ft.get('Cond'):
-            L.append('    if (!(%s)) { if (%s) %s }' % (call, ft['cond_cpp'], throw))
-        else:
-            L.append('    if (!(%s)) %s' % (call, throw))
+        L.append(failthrow_line(ft, call, m))
         L += commit_line
     elif shape[0] == 'fromout':
         cs, out = shape[1], shape[2]
@@ -53,16 +73,60 @@ def emit(p):
             L.append('    return %s;' % fb_cpp)
         elif p.get('failthrow'):
             # `if (!F(..., ref rc)) { if (COND) throw ...; } return rc;`
-            ft = p['failthrow']
-            throw = 'throw %s("%s");' % (EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'"))
-            if ft.get('Cond'):
-                L.append('    if (!(%s)) { if (%s) %s }' % (call, ft['cond_cpp'], throw))
-            else:
-                L.append('    if (!(%s)) %s' % (call, throw))
+            L.append(failthrow_line(p['failthrow'], call, m))
             L.append('    return %s;' % CS_RET_EXPR[cs].format(n=out))
         else:
             L.append('    %s;' % call)
             L.append('    return %s;' % CS_RET_EXPR[cs].format(n=out))
+    elif shape[0] == 'subview':
+        # `return CreateGeometryHelper(p, this, index) as Curve;` (G58): a view of the
+        # geometry INSIDE this object, re-resolved by this very call on every access
+        target, key, ktype, write = shape[1], shape[2], shape[3], shape[4]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        L.append('    if (!RH3DM_SubR_%s(%sfalse)) return nullptr;' % (name, key + ', ' if key else ''))
+        L.append('    return RH3DM_Sub_%s(&%s::RH3DM_SubT_%s, (void*)this, %s, %s);'
+                 % (target['reg'], p['cls']['gen'], name, '(int)' + key if key else '0',
+                    'true' if write == 'copy' else 'false'))
+    elif shape[0] == 'seq':
+        # `UNM.A(p, ...); UNM.B(p);` in order (G54)
+        L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
+        L += guard_lines
+        L += ['    %s;' % c for c in shape[1]]
+    elif shape[0] == 'arrayfill':
+        # `int count = ...; if (count < 1) return ...; T[] a = new T[count];
+        # UNM.Fill(..., a); return a;` -- the vector the native fills, as a tuple (G54)
+        af = shape[1]
+        nullable = af['empty'] == 'null' or af['form'] == 'success'
+        L.append('  %s%s %s(%s)%s {' % (st, 'RH3DM_NTUPLE' if nullable else 'BND_TUPLE', name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    int %s = %s;' % (af['count'], af['count_expr']))
+        if af['empty_cond']:
+            L.append('    if (%s) return %s;' % (af['empty_cond'], 'CreateTuple(0)' if af['empty'] == 'empty' else 'RH3DM_NoneTuple()'))
+        L.append('    std::vector<%s> %s(%s);' % (af['elem'], af['local'], af['count']))
+        if af['form'] == 'success':
+            L.append('    if (!(%s)) return RH3DM_NoneTuple();' % call)
+        else:
+            L.append('    %s;' % call)
+        # (C# names the array `rc` often: the tuple takes a reserved name)
+        L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%s);' % af['count'])
+        item = '%s[rh3dm_i]' % af['local']
+        if af.get('conv'):
+            item = af['conv'] % item                  # Color.FromArgb(rc[i]) (G54)
+        L.append('    for (int rh3dm_i = 0; rh3dm_i < %s; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, %s);' % (af['count'], item))
+        L.append('    return rh3dm_tuple;')
+    elif shape[0] == 'fromoutconv':
+        # `int argb = 0; F(..., ref argb); return Color.FromArgb(argb);` (G53)
+        ret, conv, out = shape[1], shape[2], shape[3]
+        L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        if p['success']:
+            L.append('    if (!(%s)) return %s;' % (call, p['success']['fb_cpp']))
+        else:
+            L.append('    %s;' % call)
+        L.append('    return %s;' % conv.format(n=out))
     elif shape[0] == 'forward':
         # the target's own C++ return type (wrap shapes return BND_*X*),
         # resolved here: C++ names are assigned after planning
@@ -85,7 +149,94 @@ def emit(p):
     elif shape[0] == 'child':
         child = shape[1]
         L.append('  %s* %s()%s {' % (child['gen'], name, cq))
-        L.append('    return new %s(%s);' % (child['gen'], p['self_ptr']))
+        L += guard_lines
+        if p.get('child_key') is not None:
+            # a keyed child (`new NurbsSurfaceKnotList(this, 0)`)
+            L.append('    return new %s(%s, %s);' % (child['gen'], p['self_ptr'], p['child_key']))
+        else:
+            L.append('    return new %s(%s);' % (child['gen'], p['self_ptr']))
+    elif shape[0] == 'construct':
+        # a COMPONENT made of (owner, key) (G43); the native call, when there is
+        # one, produced the key or proved the component exists
+        target, owner, key, mode, check = shape[1:]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        args_ = owner if key is None else '%s, %s' % (owner, key)
+        if mode == 'check':
+            L.append('    if (!(%s)) return nullptr;' % call)
+            L.append('    return new %s(%s);' % (target['gen'], args_))
+        elif key is None and mode is None:
+            L.append('    return new %s(%s);' % (target['gen'], args_))
+        elif mode == 'ptr' and p.get('fail_final'):
+            # C#'s failure tail instead of null
+            L.append('    const void* rc = %s;' % call)
+            L.append('    if (rc) return new %s(%s, %s);' % (target['gen'], owner, key))
+            for g in p['guards']:
+                if g.get('fail'):
+                    L.append('    if (%s) throw %s("%s");' % (g['cond_cpp'], EXMAP[g['Exception']],
+                                                            (g['Message'] or m['Name']).replace('"', "'")))
+            ff = p['fail_final']
+            L.append('    throw %s("%s");' % (EXMAP[ff['Exception']], (ff['Message'] or m['Name']).replace('"', "'")))
+        elif mode == 'ptr':
+            L.append('    const void* rc = %s;' % call)
+            L.append('    return rc ? new %s(%s, %s) : nullptr;' % (target['gen'], owner, key))
+        elif mode == 'key':
+            kt = (target.get('comp') or {}).get('Key') or (target.get('key') or {}).get('Type') or 'int'
+            L.append('    %s k = (%s)(%s);' % (kt, kt, call))
+            if check == 'neg':
+                L.append('    if ((int)k < 0) return nullptr;')
+            L.append('    return new %s(%s, k);' % (target['gen'], owner))
+        else:
+            L.append('    return new %s(%s, %s);' % (target['gen'], owner, key))
+    elif shape[0] == 'via':
+        # `return Brep.Faces[index];`: the list's own generated indexer (its guards included)
+        lst, owner, check = shape[1:]
+        ip = p['via_plan']
+        L.append('  %sclass %s* %s(%s)%s {' % (st, ip['shape'][1]['gen'], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    int k = (int)(%s);' % call)
+        L.append('    if (k < 0) return nullptr;')
+        if owner == 'this':
+            L.append('    return %s(k);' % ip['cpp'])
+        else:
+            L.append('    return %s(%s).%s(k);' % (lst['gen'], owner, ip['cpp']))
+    elif shape[0] == 'newobj':
+        # a new object of the generated class, filled by the native call
+        target, local = shape[1], shape[2]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        if len(shape) > 3 and shape[3] == 'null':
+            # the factory's failure path: the object it made is dropped (G49)
+            L.append('    if (!(%s)) { delete %s; return nullptr; }' % (call, local))
+        else:
+            L.append('    %s;' % call)
+        L.append('    return %s;' % local)
+    elif shape[0] == 'valadopt':
+        # `var p = UNM.F(); var mp = new MeshingParameters(p); return mp;` on a
+        # class this binding stores BY VALUE: copy the native object in, then
+        # release it with the type's own Delete, as its Dispose would (G49)
+        # A new object the caller owns; null -> None where C# checked for it
+        # (`if (IntPtr.Zero == p) return null;`), else an error: C# would hand
+        # back an object around a null pointer
+        target, delete, checked = shape[1], shape[2], shape[3]
+        L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    %s* p = %s;' % (target['on'], call))
+        L.append('    if (!p) %s;' % ('return nullptr' if checked
+                                     else 'throw std::runtime_error("%s returned null")' % p['fn']['name']))
+        L.append('    %s* rc = new %s(*p);' % (target['gen'], target['gen']))
+        L.append('    %s(p);' % delete)
+        L.append('    return rc;')
+    elif shape[0] == 'constprop':
+        L.append('  %s%s %s()%s {' % (st, shape[1], name, cq))
+        L.append('    return %s;' % shape[2])
+    elif shape[0] == 'keyprop':
+        L.append('  %s %s()%s {' % (shape[1], name, cq))
+        L.append('    return %s;' % ('RH3DM_Key()' if p['cls'].get('comp') or p['cls']['mode'] == 'abstract' else 'm_key'))
     elif shape[0] == 'conv':
         L.append('  %s%s %s(%s)%s {' % (st, shape[1], name, sig, cq))
         L += guard_lines
@@ -170,23 +321,33 @@ def emit(p):
         L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
-        L.append('    %s* rc = %s;' % (target['on'], call))
-        # most-derived generated class (an ON_Curve* may be a NURBS curve);
-        # pybind11/embind then downcast the polymorphic result automatically
-        L.append('    return rc ? RH3DM_Wrap_%s(rc) : nullptr;' % target['reg'])
+        L.append('    %s%s* rc = %s;' % ('const ' if target.get('borrowed') else '', target['on'], call))
+        if target.get('handle'):
+            # a handle is not an ON_Object: the class itself owns it
+            L.append('    return rc ? new %s(rc) : nullptr;' % target['gen'])
+        elif target.get('borrowed'):
+            # a view INTO this object (never deleted; the binding keeps the owner alive)
+            L.append('    return rc ? new %s((%s*)rc) : nullptr;' % (target['gen'], target['on']))
+        else:
+            # most-derived generated class (an ON_Curve* may be a NURBS curve);
+            # pybind11/embind then downcast the polymorphic result automatically
+            L.append('    return rc ? RH3DM_Wrap_%s(rc) : nullptr;' % target['reg'])
     elif shape[0] == 'holder':
         hp = HOLDERS[shape[1]]
+        ft = p.get('failthrow')
+        call_line = (('    if (!(%s)) throw %s("%s");' % (call, EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'")))
+                     if ft else '    %s;' % call)
         if 'conv' in hp:                      # string
             L.append('  %sstd::wstring %s(%s)%s {' % (st, name, sig, cq))
             L += guard_lines
             L += ['    %s' % x for x in p['locals']]
-            L.append('    %s;' % call)
+            L.append(call_line)
             L.append('    return %s;' % hp['conv'].format(n='holder_out'))
         else:                                 # array -> tuple of elements
             L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
             L += guard_lines
             L += ['    %s' % x for x in p['locals']]
-            L.append('    %s;' % call)
+            L.append(call_line)
             L.append('    BND_TUPLE rc = CreateTuple(holder_out.Count());')
             L.append('    for (int i = 0; i < holder_out.Count(); i++)')
             L.append('      SetTuple(rc, i, %s);' % hp['elem'].format(n='holder_out'))
@@ -204,9 +365,28 @@ def emit(p):
     else:  # tuple
         _, has_success, outs = shape
         L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
-        L += guard_lines
-        L += ['    %s' % x for x in p['locals']]
-        L.append('    %s%s;' % ('bool success = ' if has_success else '', call))
+        tguards = [g for g in p['guards'] if not g.get('fail') and (g.get('ret_cpp') or '').startswith('TUPLE:')]
+        if tguards:
+            # `return E.None;` before the call (Intersection.LineCircle): the outs
+            # as C# initialized them, so declared first, then the tuple (G57)
+            L += ['    %s' % x for x in p['locals']]
+            for g, line in zip([g for g in p['guards'] if not g.get('fail')], guard_lines):
+                if g in tguards:
+                    parts = ['SetTuple(rt, 0, %s);' % g['ret_cpp'][len('TUPLE:'):]]
+                    parts += ['SetTuple(rt, %d, %s);' % (j + 1, OUTLOCAL[t][1].format(n=n)) for j, (n, t) in enumerate(outs)]
+                    L.append('    if (%s) { BND_TUPLE rt = CreateTuple(%d); %s return rt; }'
+                             % (g['cond_cpp'], len(outs) + 1, ' '.join(parts)))
+                else:
+                    L.append(line)
+        else:
+            L += guard_lines
+            L += ['    %s' % x for x in p['locals']]
+        if isinstance(has_success, str):                       # a recorded comparison (`> 0`)
+            L.append('    bool success = (%s) %s;' % (call, has_success))
+        elif isinstance(has_success, tuple):                   # the C# result itself (G49)
+            L.append('    %s success = %s;' % (has_success[1], has_success[2].format(c=call)))
+        else:
+            L.append('    %s%s;' % ('bool success = ' if has_success else '', call))
         L.append('    BND_TUPLE rc = CreateTuple(%d);' % (len(outs) + (1 if has_success else 0)))
         i = 0
         if has_success:
@@ -233,6 +413,21 @@ def emit_decl_def(p, cls):
     body = [l[2:] if l.startswith('  ') else l for l in body]
     if body[0].startswith('static '):
         body[0] = body[0][len('static '):]
+    if p['shape'][0] == 'subview':
+        # the view's resolver (this call, const or writable) and its trampoline (G58)
+        _, target, key, ktype, write, nc_exprs = p['shape']
+        gen, n = cls['gen'], p['cpp']
+        call_c = '%s(%s)' % (p['fn']['name'], ', '.join(p['call_exprs']))
+        call_nc = ('(ON_Object*)%s(%s)' % (p['fn']['name'], ', '.join(nc_exprs))) if nc_exprs else 'nullptr'
+        kparam = '%s %s, ' % (ktype, key) if key else ''
+        decl += '\n  ON_Object* RH3DM_SubR_%s(%sbool nonconst) const;' % (n, kparam)
+        decl += '\n  static ON_Object* RH3DM_SubT_%s(void* owner, int key, bool nonconst);' % n
+        extra = ('ON_Object* %s::RH3DM_SubR_%s(%sbool nonconst) const {\n'
+                 '  return nonconst ? %s : (ON_Object*)%s;\n}\n\n'
+                 'ON_Object* %s::RH3DM_SubT_%s(void* owner, int key, bool nonconst) {\n'
+                 '  return ((const %s*)owner)->RH3DM_SubR_%s(%snonconst);\n}\n\n'
+                 % (gen, n, kparam, call_nc, call_c, gen, n, gen, n, ('(%s)key, ' % ktype) if key else ''))
+        return decl, extra + '\n'.join(body)
     return decl, '\n'.join(body)
 
 
@@ -261,7 +456,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   virtual {on}* {getter}() const = 0;
   virtual {on}* {getter}NC() const = 0;''' + ('''
   // CommonObject.IsDocumentControlled (`IntPtr.Zero == m_ptr`): the derived storage answers
-  virtual bool RH3DM_NoOwnedPtr() const = 0;''' if cls['reg'] in NO_OWNED_ABSTRACT else '')
+  virtual bool RH3DM_NoOwnedPtr() const = 0;''' if cls['reg'] in NO_OWNED_ABSTRACT else '') + ('''
+  // the key of the derived component (SubDComponent.Id; G46)
+  virtual %s RH3DM_Key() const = 0;''' % cls['abstract_key'] if cls.get('abstract_key') else '')
         return ('class {gen}\n{{\npublic:\n' + storage
                 + '\n\n{methods}\n}};\n').format(
             gen=cls['gen'], on=cls['on'], getter=cls['getter'],
@@ -275,16 +472,62 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         if base.get('proxy'):
             storage += '''
   {gen}(ONX_Model* model, ON_UUID id) : {basegen}(model, id) {{}}'''
+        if storage_host(cls).get('comp_host') and not cls.get('comp'):
+            storage += '''
+  {gen}(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : {basegen}(comp, owner, key, cow) {{}}'''
+        if cls.get('comp'):
+            # a COMPONENT (BrepFace of a Brep) in its host's storage: never owned,
+            # resolved through the owner by the host on every access (G43)
+            cp = cls['comp']
+            oon = cp['Owner']['on']
+            rnc = ('(ON_Object*)%s((%s*)owner, key)' % (cp['NonConst'], oon)) if cp['NonConst'] else 'nullptr'
+            storage = ('  // RhinoCommon `new %s(index, owner)`: (owner, key), resolved on every access\n'
+                       '  static ON_Object* RH3DM_Resolve(void* owner, int key, bool nonconst) {{\n'
+                       '    return nonconst ? %s : (ON_Object*)%s((%s*)owner, key);\n'
+                       '  }}\n'
+                       '  {gen}(%s* owner, int key) : {basegen}(&RH3DM_Resolve, owner, key) {{}}\n'
+                       '  %s* RH3DM_Owner() const {{ return (%s*)m_comp_owner; }}\n'
+                       '  int RH3DM_Key() const {{ return m_comp_key; }}'
+                       % (cls['cs'], rnc, cp['Const'], oon, oon, oon, oon))
         return ('class {gen}{inherit}\n{{\npublic:\n' + storage
                 + '\n\n{methods}\n}};\n').format(
             gen=cls['gen'], on=cls['on'], hand=cls['hand'],
             basegen=base['gen'], methods=methods, inherit=inherit,
             dctor=dctor, bridge=bridge)
-    acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') else ('m_ptr', 'm_ptr')
+    acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') or cls.get('comp') else ('m_ptr', 'm_ptr')
     override = ('\n  %s* %s() const override { return %s; }\n  %s* %sNC() const override { return %s; }'
                 % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
     if base and base['reg'] in NO_OWNED_ABSTRACT:
-        override += '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }'
+        override += ('\n  bool RH3DM_NoOwnedPtr() const override { return true; }' if cls.get('comp') else
+                     '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }')
+    if cls['mode'] == 'pointer' and cls.get('comp'):
+        # a COMPONENT with its own storage (BrepLoop, SubDFace; G43): RhinoCommon's
+        # (owner, key) -- owns nothing, resolves through the owner on every access
+        cp = cls['comp']
+        oon, kt, on = cp['Owner']['on'], cp['Key'], cls['on']
+        lines = [
+            '  %s* m_owner = nullptr;   // RhinoCommon `new %s(owner, key)`: the owner ...' % (oon, cls['cs']),
+            '  %s m_key = 0;             // ... and the key it resolves' % kt,
+            '  %s(%s* owner, %s key) : m_owner(owner), m_key(key) {}' % (cls['gen'], oon, kt),
+            '  %s(const %s&) = delete;' % (cls['gen'], cls['gen']),
+            '  %s* RH3DM_Const() const {' % on,
+            '    %s* p = (%s*)%s(m_owner, m_key);' % (on, on, cp['Const']),
+            '    if (!p) throw std::runtime_error("%s: the component is no longer in its owner");' % cls['type'],
+            '    return p;',
+            '  }']
+        if cp['NonConst']:
+            lines += ['  %s* RH3DM_NonConst() const {' % on,
+                      '    %s* p = (%s*)%s(m_owner, m_key);' % (on, on, cp['NonConst']),
+                      '    if (!p) throw std::runtime_error("%s: the component is no longer in its owner");' % cls['type'],
+                      '    return p;',
+                      '  }']
+        else:
+            # RhinoCommon has no writable pointer here: NonConstPointer yields IntPtr.Zero
+            lines += ['  %s* RH3DM_NonConst() const { throw std::runtime_error("%s: non-const operations are not allowed"); }'
+                      % (on, cls['type'])]
+        lines += ['  %s* RH3DM_Owner() const { return m_owner; }' % oon,
+                  '  %s RH3DM_Key() const { return m_key; }' % kt]
+        return 'class %s%s\n{\npublic:\n%s%s\n\n%s\n};\n' % (cls['gen'], inherit, '\n'.join(lines), override, methods)
     if cls['mode'] == 'child' and cls.get('derive'):
         # a VIEW onto a PART of the parent (File3dmSettings: &model->m_settings),
         # keeping the parent for the file views it hands out (RenderSettings)
@@ -297,7 +540,13 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # parent's pointer, never deletes it; the binding keeps the parent alive
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* parent) : m_ptr(parent) {{}}'''
-        tp = cls.get('table')
+        if cls.get('key'):
+            # a child WITH A KEY (G43: `new PointCloudItem(cloud, index)`): the
+            # parent's pointer plus the index/direction RhinoCommon keeps beside it
+            storage = '''  {on}* m_ptr = nullptr;
+  %s m_key = 0;
+  {gen}({on}* parent, %s key) : m_ptr(parent), m_key(key) {{}}''' % (cls['key']['Type'], cls['key']['Type'])
+        tp = cls.get('table') or cls.get('liter')
         if tp:
             # the table protocols (planner.table_protocol): `this[int]` with
             # the language's own out-of-range signal, and RhinoCommon's foreach
@@ -311,6 +560,18 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   }}'''.format(item=tp['item']['gen'], find=tp['find'])
             methods += '''
   class {gen}Iter* Gen_iter() const;'''.format(gen=cls['gen'])
+    elif cls['mode'] == 'pointer' and cls.get('borrowed'):
+        # a BORROWED pointer into another object (CachedTextureCoordinates in a mesh):
+        # never deleted; whatever hands it out keeps the owner alive
+        storage = '''  {on}* m_ptr = nullptr;
+  explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}
+  {gen}(const {gen}&) = delete;{override}'''
+    elif cls['mode'] == 'pointer' and cls.get('handle'):
+        # an IDisposable HANDLE (FileReference, File3dm): the plain storage, freed
+        # with RhinoCommon's own Delete instead of `delete` (it may not be an ON_Object)
+        storage = '''  {on}* m_ptr = nullptr;
+  explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
+  ~{gen}() {{ if (m_ptr) ''' + cls['handle']['Delete'] + '''(m_ptr); }}{nocopy}{override}'''
     elif cls['mode'] == 'pointer' and cls.get('ff'):
         # DocumentOrFreeFloatingBase (GroundPlane): owns through its own New/Delete
         # (not an ON_Object), may point INTO another object without owning (the
@@ -334,6 +595,33 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     throw std::runtime_error("{cs_full}: no object");''') + '''
   }}
   {on}* RH3DM_NonConst() const {{ return RH3DM_Const(); }}{override}'''
+    elif cls['mode'] == 'pointer' and (cls.get('proxy') or {}).get('Origin') == 'parent':
+        # RhinoCommon `new Texture(index, material)` (G57): an owned pointer, or a VIEW
+        # of (owner, index) resolved through the owner on every access; the first
+        # write copies it (NonConstOperation -> _InternalDuplicate) and detaches
+        pr = cls['proxy']
+        own = BY_REG[pr['Owner']]
+        rfn = C_BY_NAME[pr['Resolver']]
+        storage = '''  mutable {on}* m_ptr = nullptr;
+  const class %(ogen)s* m_pv_owner = nullptr;   // a view: the owner ...
+  int m_pv_index = -1;                           // ... and its index (C# %(field)s)
+  explicit {gen}({on}* owned) : m_ptr(owned) {{}}
+  {gen}(const class %(ogen)s* owner, int index) : m_pv_owner(owner), m_pv_index(index) {{}}{bridge}{dctor}
+  ~{gen}() {{ delete {delete_expr}; }}{nocopy}
+  static %(oarg)s RH3DM_PvOwner(const class %(ogen)s* owner);   // the owner's const pointer (gen_*.cpp)
+  // CommonObject.ConstPointer: a view whose object left its owner throws
+  {on}* RH3DM_Const() const {{
+    if (m_ptr) return m_ptr;
+    {on}* p = ({on}*)%(res)s(RH3DM_PvOwner(m_pv_owner), m_pv_index);
+    if (!p) throw std::runtime_error("{cs_full}: the object is no longer in its %(parent)s");
+    return p;
+  }}
+  // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
+  {on}* RH3DM_NonConst() const {{
+    if (!m_ptr) m_ptr = ({on}*){dup}(({dup_arg}*)RH3DM_Const());   // first write: a private copy, as in .NET
+    return m_ptr;
+  }}{override}''' % {'ogen': own['gen'], 'field': pr['Field'], 'oarg': rfn['params'][0]['type'],
+                       'res': pr['Resolver'], 'parent': pr['Parent']}
     elif cls['mode'] == 'pointer' and cls.get('proxy'):
         # RhinoCommon's two CommonObject states: an owned pointer, or a VIEW of
         # (file, id) -- a File3dm proxy (`new Layer(id, file)`) or the const
@@ -345,21 +633,55 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         commit = ('''
   // RenderSettings.Commit: the private copy is written back into the file
   void RH3DM_Commit() const {{ if (m_ptr && m_model) %s(m_ptr, m_model); }}''' % pr['Commit']) if pr.get('Commit') else ''
-        nonconst = ('''  {on}* RH3DM_NonConst() const {{ return m_ptr ? m_ptr : ({on}*){resolver}(%s); }}''' % rargs
+        host = bool(cls.get('comp_host'))
+        comp_c = ('''
+    if (m_comp) {{
+      {on}* c = static_cast<{on}*>(m_comp(m_comp_owner, m_comp_key, false));
+      if (!c) throw std::runtime_error("{cs_full}: the component is no longer in its owner");
+      return c;
+    }}''') if host else ''
+        comp_nc = (('''
+    if (!m_ptr && m_comp && m_comp_cow) {{
+      // a view inside another object (BrepFace.GetMesh; G58): the first write copies, as in .NET
+      m_ptr = ({on}*){dup}(({dup_arg}*)RH3DM_Const());
+      return m_ptr;
+    }}''' if pr.get('Dup') else '') + '''
+    if (!m_ptr && m_comp) {{
+      // a component writes through its owner, or (CurveProxy) not at all
+      {on}* c = static_cast<{on}*>(m_comp(m_comp_owner, m_comp_key, true));
+      if (!c) throw std::runtime_error("{cs_full}: non-const operations are not allowed on this component");
+      return c;
+    }}''') if host else ''
+        nonconst = (('''  {on}* RH3DM_NonConst() const {{''' + comp_nc + '''
+    return m_ptr ? m_ptr : ({on}*){resolver}(%s);
+  }}''') % rargs
                     if pr['NonConst'] == 'resolve' else
-                    '''  {on}* RH3DM_NonConst() const {{
+                    '''  {on}* RH3DM_NonConst() const {{''' + comp_nc + '''
     if (!m_ptr) m_ptr = ({on}*){dup}(({dup_arg}*)RH3DM_Const());   // first write: a private copy, as in .NET
     return m_ptr;
   }}''')
+        comp_state = ('''
+  // a COMPONENT of an owner (BrepFace of a Brep; G43), or a view inside another
+  // object (PolyCurve.SegmentCurve; G58): resolved through the owner on every access
+  mutable ON_Object* (*m_comp)(void*, int, bool) = nullptr;
+  mutable void* m_comp_owner = nullptr;
+  mutable int m_comp_key = 0;
+  mutable bool m_comp_cow = false;   // writes copy (NonConstOperation) instead of going through
+  {gen}(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : m_comp(comp), m_comp_owner(owner), m_comp_key(key), m_comp_cow(cow) {{}}
+  // CommonObject.SetParent (BrepFace.SetMesh; G59): the pointer went to the owner, which
+  // owns it now; this object becomes a view of it
+  void RH3DM_SetParent(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow) const {{
+    m_ptr = nullptr; m_comp = comp; m_comp_owner = owner; m_comp_key = key; m_comp_cow = cow;
+  }}''') if host else ''
         storage = '''  mutable {on}* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
-  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{bridge}{dctor}
+  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{bridge}{dctor}''' + comp_state + '''
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}
   // CommonObject.ConstPointer: a view whose object left the file throws
   {on}* RH3DM_Const() const {{
-    if (m_ptr) return m_ptr;
+    if (m_ptr) return m_ptr;''' + comp_c + '''
     {on}* p = ({on}*){resolver}(%s);
     if (!p) throw std::runtime_error("{cs_full}: the object is no longer in the File3dm");
     return p;
@@ -371,7 +693,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}{override}'''
     else:
-        storage = '''  {on} m_val;{bridge}{override}'''
+        # a value adopted from a native result (G49 valadopt) is copied in
+        storage = '''  {on} m_val;
+  explicit {gen}(const {on}& v) : m_val(v) {{}}{bridge}{override}'''
     return ('class {gen}{inherit}\n{{\npublic:\n' + storage
             + '\n\n{methods}\n}};\n').format(
         gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
@@ -440,6 +764,48 @@ class %s* %sIter::Gen_next()
     return decl, defn
 
 
+def emit_linked_iter(cls):
+    """the iterator class of a linked component list (declaration,
+    definition): RhinoCommon's yield loop over First/Next (G43)"""
+    li = cls['liter']
+    gen, item, owner_on = cls['gen'], li['item']['gen'], cls['on']
+    decl = '''
+// %s's enumerator (RhinoCommon GetEnumerator): %s, then %s, over the
+// owner's components, yielding (owner, id) components
+class %sIter
+{
+public:
+  %s* m_owner = nullptr;
+  %s m_cur = nullptr;
+  unsigned int m_id = 0;
+  bool m_started = false;
+  explicit %sIter(%s* owner) : m_owner(owner) {}
+  class %s* Gen_next();   // nullptr at the end
+};
+''' % (cls['reg'], li['first']['name'], li['next']['name'], gen, owner_on, li['first']['returns'], gen, owner_on, item)
+    defn = '''
+class %s* %sIter::Gen_next()
+{
+  if (!m_started) { m_started = true; m_cur = %s(m_owner, &m_id); }
+  else if (m_cur) m_cur = %s(m_cur, &m_id);
+  return m_cur ? new %s(m_owner, m_id) : nullptr;
+}
+
+%sIter* %s::Gen_iter() const
+{
+  return new %sIter(m_ptr);
+}
+''' % (item, gen, li['first']['name'], li['next']['name'], item, gen, gen, gen)
+    return decl, defn
+
+
+def final_shape(p):
+    """the shape a plan returns through: a forward returns what its target does"""
+    while p['shape'][0] == 'forward':
+        p = p['shape'][2]
+    return p['shape'][0]
+
+
 def js_class_shape(t):
     """how a JS argument for binding type `t` can be recognized at run time:
     (shape key for collapsing indistinguishable overloads, C++ check on
@@ -492,7 +858,8 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             pass               # Python: one name cannot be static AND instance; JS keeps it
         elif p['static']:
             py.append('      .def_static("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
-        elif p['shape'][0] in ('child', 'constview', 'fileview', 'settingsview'):
+        elif p['shape'][0] in ('child', 'constview', 'fileview', 'settingsview') \
+                or (p['shape'][0] in ('construct', 'via') and p['m']['Kind'] == 'property'):
             # a view onto this object: Python owns the view and keeps the parent alive
             # def_property* cannot take keep_alive itself: wrap the getter
             py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))'
@@ -501,14 +868,31 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             continue
         elif p['m']['Kind'] == 'indexer':
             sp = p.get('setter')
-            py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
-            js.append('      .function("get", &%s::%s)' % (cls['gen'], g))
+            if p['shape'][0] in ('construct', 'via'):
+                # a component of this list's owner: it keeps the list (and the owner) alive
+                py.append('      .def("__getitem__", &%s::%s, py::keep_alive<0, 1>())' % (cls['gen'], g))
+                js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
+            else:
+                py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
+                js.append('      .function("get", &%s::%s)' % (cls['gen'], g))
             if sp is not None and id(sp) in live:
                 py.append('      .def("__setitem__", &%s::%s)' % (cls['gen'], sp['cpp']))
                 js.append('      .function("set", &%s::%s)' % (cls['gen'], sp['cpp']))
             cnt = [q for q in plans if q['m']['Name'] == 'Count' and q['m']['Kind'] == 'property']
             if cnt:
                 py.append('      .def("__len__", &%s::%s)' % (cls['gen'], cnt[0]['cpp']))
+            continue
+        elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt'):
+            # a getter returning a NEW object: Python owns it (a property's default
+            # policy, reference_internal, would leak it); JS gets the raw pointer
+            sp = p.get('setter')
+            getter = 'py::cpp_function(&%s::%s, py::return_value_policy::take_ownership)' % (cls['gen'], g)
+            if sp is not None and id(sp) in live:
+                py.append('      .def_property("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
+                js.append('      .property("%s", &%s::%s, &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g, cls['gen'], sp['cpp']))
+            else:
+                py.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                js.append('      .property("%s", &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g))
             continue
         elif p['m']['Kind'] == 'property':
             sp = p.get('setter')
@@ -521,9 +905,14 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 py.append('      .def_property_readonly("%s", &%s::%s)' % (n, cls['gen'], g))
                 js.append('      .property("%s", &%s::%s)' % (camel(n), cls['gen'], g))
             continue
-        elif p['shape'][0] == 'proxywrap':
+        elif final_shape(p) in ('proxywrap', 'construct', 'via', 'subview') or (
+                final_shape(p) == 'wrap' and (BY_CS.get(p['shape'][1]) if p['shape'][0] == 'wrap' else {}) and BY_CS[p['shape'][1]].get('borrowed')):
             # a proxy refers to this table's model: it keeps the table (and the File3dm) alive
             py.append('      .def("%s", &%s::%s, py::keep_alive<0, 1>()%s)' % (n, cls['gen'], g, pyargs))
+        elif p.get('adopt'):
+            # the argument is now a view of this object's mesh: it keeps this object alive
+            pos = [n2 for _, n2 in p['bind_args']].index(p['adopt']['param']) + 2
+            py.append('      .def("%s", &%s::%s, py::keep_alive<%d, 1>()%s)' % (n, cls['gen'], g, pos, pyargs))
         else:
             py.append('      .def("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
         js_methods.setdefault((camel(n), len(p['bind_args']), p['static']), []).append(p)
@@ -539,7 +928,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         ps = list(by_shape.values())
         if len(ps) == 1:
             p = ps[0]
-            rawp = (', allow_raw_pointers()' if p['shape'][0] in ('wrap', 'fill', 'proxywrap')
+            rawp = (', allow_raw_pointers()' if final_shape(p) in ('wrap', 'fill', 'proxywrap', 'construct', 'via', 'newobj', 'valadopt', 'subview')
                     or any(t.endswith('*') for t, _ in p['bind_args']) else '')
             js.append('      .%s("%s", &%s::%s%s)'
                       % ('class_function' if static else 'function', jn, cls['gen'], p['cpp'], rawp))
@@ -624,17 +1013,19 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                      ' allow_raw_pointers())\n'
                      % (', '.join('emscripten::val v%d' % i for i in range(arity)), cls['gen'],
                         '\n        '.join(branches), cls['reg']))
-    tp = cls.get('table')
+    tp = cls.get('table') or cls.get('liter')
     if tp:
         g = cls['gen']
-        py += ['      .def("__len__", &%s::%s)' % (g, tp['count'])]
+        if tp['count']:
+            py += ['      .def("__len__", &%s::%s)' % (g, tp['count'])]
         if tp['find']:
             py += ['      .def("__getitem__", &%s::Gen_getitem, py::keep_alive<0, 1>(), py::arg("index"))' % g]
             js += ['      .function("get", &%s::%s, allow_raw_pointers())' % (g, tp['find'])]
         py += ['      .def("__iter__", &%s::Gen_iter, py::keep_alive<0, 1>())' % g]
         js += ['      .function("iterator", &%s::Gen_iter, allow_raw_pointers())' % g]
     has_bridge = cls.get('bridge', True)
-    if not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static') and not cls.get('proxy'):
+    if (not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static') and not cls.get('proxy')
+            and not cls.get('comp') and not cls.get('noctor')):
         raise SystemExit('%s: bridge-free class needs a generated constructor (or a view)'
                          % cls['reg'])
     py_bridge = ('      .def(py::init<const %s&>(), py::arg("source"))\n'
