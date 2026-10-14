@@ -753,6 +753,7 @@ js  File3dmObjectTableX.addLine [function]
 js  File3dmObjectTableX.addMesh [function]
 js  File3dmObjectTableX.addPoint [function]
 js  File3dmObjectTableX.addPointCloud [function]
+js  File3dmObjectTableX.addPolyline [function]
 js  File3dmObjectTableX.addSphere [function]
 js  File3dmObjectTableX.addSubD [function]
 js  File3dmObjectTableX.addSurface [function]
@@ -1649,6 +1650,40 @@ js  Point2fX.op_Inequality [class_function]
 js  Point2fX.op_LessThan [class_function]
 js  Point2fX.op_LessThanOrEqual [class_function]
 js  Point2fX.op_Multiply [class_function]
+js  Point3dListX.add [function]
+js  Point3dListX.addRange [function]
+js  Point3dListX.binarySearch [function]
+js  Point3dListX.boundingBox [property]
+js  Point3dListX.capacity [property]
+js  Point3dListX.clear [function]
+js  Point3dListX.closestIndex [function]
+js  Point3dListX.closestIndexInList [class_function]
+js  Point3dListX.closestPointInList [class_function]
+js  Point3dListX.constructor<>
+js  Point3dListX.constructor<int>
+js  Point3dListX.contains [function]
+js  Point3dListX.count [property]
+js  Point3dListX.duplicate [function]
+js  Point3dListX.first [property]
+js  Point3dListX.get [function]
+js  Point3dListX.indexOf [function]
+js  Point3dListX.insert [function]
+js  Point3dListX.insertRange [function]
+js  Point3dListX.last [property]
+js  Point3dListX.lastIndexOf [function]
+js  Point3dListX.remapIndex [function]
+js  Point3dListX.remove [function]
+js  Point3dListX.removeAt [function]
+js  Point3dListX.removeRange [function]
+js  Point3dListX.reverse [function]
+js  Point3dListX.set [function]
+js  Point3dListX.setAllX [function]
+js  Point3dListX.setAllY [function]
+js  Point3dListX.setAllZ [function]
+js  Point3dListX.sort [function]
+js  Point3dListX.toArray [function]
+js  Point3dListX.transform [function]
+js  Point3dListX.trimExcess [function]
 js  Point3dX.Add [class_function]
 js  Point3dX.CompareTo [class_function]
 js  Point3dX.Create [class_function]
@@ -1722,6 +1757,7 @@ js  PointCloudItemX.x [property]
 js  PointCloudItemX.y [property]
 js  PointCloudItemX.z [property]
 js  PointCloudX.add [function]
+js  PointCloudX.addRange [function]
 js  PointCloudX.appendNew [function]
 js  PointCloudX.clearColors [function]
 js  PointCloudX.clearHiddenFlags [function]
@@ -1773,6 +1809,33 @@ js  PolylineCurveX.point [function]
 js  PolylineCurveX.pointCount [property]
 js  PolylineCurveX.setArcLengthParameterization [function]
 js  PolylineCurveX.setPoint [function]
+js  PolylineCurveX.toPolyline [function]
+js  PolylineX.centerPoint [function]
+js  PolylineX.closestParameter [function]
+js  PolylineX.closestPoint [function]
+js  PolylineX.collapseShortSegments [function]
+js  PolylineX.constructor<>
+js  PolylineX.constructor<int>
+js  PolylineX.createCircumscribedPolygon [class_function]
+js  PolylineX.createInscribedPolygon [class_function]
+js  PolylineX.createStarPolygon [class_function]
+js  PolylineX.deleteShortSegments [function]
+js  PolylineX.duplicate [function]
+js  PolylineX.getSegments [function]
+js  PolylineX.isClosed [property]
+js  PolylineX.isClosedWithinTolerance [function]
+js  PolylineX.isConvexLoop [function]
+js  PolylineX.isValid [property]
+js  PolylineX.length [property]
+js  PolylineX.pointAt [function]
+js  PolylineX.reduceSegments [function]
+js  PolylineX.segmentAt [function]
+js  PolylineX.segmentCount [property]
+js  PolylineX.smooth [function]
+js  PolylineX.tangentAt [function]
+js  PolylineX.toNurbsCurve [function]
+js  PolylineX.toPolylineCurve [function]
+js  PolylineX.trim [function]
 js  RenderChannelsX.constructor<>
 js  RenderChannelsX.customList [property]
 js  RenderChannelsX.mode [property]
@@ -2445,6 +2508,8 @@ py  BoundingBoxX.Volume [property ro]
 py  BoundingBoxX.__init__()
 py  BoundingBoxX.__init__(BND_Point3dX, BND_Point3dX)
 py  BoundingBoxX.__init__(double, double, double, double, double, double)
+py  BoundingBoxX.__init__(std::vector<BND_Point3dX>)
+py  BoundingBoxX.__init__(std::vector<BND_Point3dX>, BND_TransformX)
 py  BoundingBoxX.__repr__()
 py  BoxX.Area [property ro]
 py  BoxX.BoundingBox [property ro]
@@ -2477,6 +2542,7 @@ py  BoxX.__init__()
 py  BoxX.__init__(BND_BoundingBoxX)
 py  BoxX.__init__(BND_PlaneX, BND_BoundingBoxX)
 py  BoxX.__init__(BND_PlaneX, BND_IntervalX, BND_IntervalX, BND_IntervalX)
+py  BoxX.__init__(BND_PlaneX, std::vector<BND_Point3dX>)
 py  BoxX.__init__(const BND_BoxX&)
 py  BoxX.__repr__()
 py  BrepEdgeListX.Add(curve3dIndex)
@@ -3194,6 +3260,8 @@ py  File3dmObjectTableX.AddLine(line, attributes)
 py  File3dmObjectTableX.AddMesh(mesh, attributes)
 py  File3dmObjectTableX.AddPoint(point, attributes)
 py  File3dmObjectTableX.AddPointCloud(cloud, attributes)
+py  File3dmObjectTableX.AddPointCloud(points, attributes)
+py  File3dmObjectTableX.AddPolyline(points, attributes)
 py  File3dmObjectTableX.AddSphere(sphere, attributes)
 py  File3dmObjectTableX.AddSubD(subd, attributes)
 py  File3dmObjectTableX.AddSurface(surface, attributes)
@@ -4194,6 +4262,48 @@ py  Point2fX.__ne__()
 py  Point2fX.__repr__()
 py  Point2fX.__setitem__()
 py  Point2fX.__truediv__()
+py  Point3dListX.Add(item)
+py  Point3dListX.Add(x, y, z)
+py  Point3dListX.AddRange(collection)
+py  Point3dListX.BinarySearch(item)
+py  Point3dListX.BoundingBox [property ro]
+py  Point3dListX.Capacity [property rw]
+py  Point3dListX.Clear()
+py  Point3dListX.ClosestIndex(testPoint)
+py  Point3dListX.ClosestIndexInList(list, testPoint) [static]
+py  Point3dListX.ClosestPointInList(list, testPoint) [static]
+py  Point3dListX.Contains(item)
+py  Point3dListX.Count [property ro]
+py  Point3dListX.Duplicate()
+py  Point3dListX.First [property rw]
+py  Point3dListX.IndexOf(item)
+py  Point3dListX.IndexOf(item, index)
+py  Point3dListX.IndexOf(item, index, count)
+py  Point3dListX.Insert(index, item)
+py  Point3dListX.InsertRange(index, collection)
+py  Point3dListX.Last [property rw]
+py  Point3dListX.LastIndexOf(item)
+py  Point3dListX.LastIndexOf(item, index)
+py  Point3dListX.LastIndexOf(item, index, count)
+py  Point3dListX.RemapIndex(index)
+py  Point3dListX.Remove(item)
+py  Point3dListX.RemoveAt(index)
+py  Point3dListX.RemoveRange(index, count)
+py  Point3dListX.Reverse()
+py  Point3dListX.Reverse(index, count)
+py  Point3dListX.SetAllX(xValue)
+py  Point3dListX.SetAllY(yValue)
+py  Point3dListX.SetAllZ(zValue)
+py  Point3dListX.Sort()
+py  Point3dListX.ToArray()
+py  Point3dListX.Transform(xform)
+py  Point3dListX.TrimExcess()
+py  Point3dListX.__getitem__()
+py  Point3dListX.__init__()
+py  Point3dListX.__init__(const std::vector<BND_Point3dX>&)
+py  Point3dListX.__init__(int)
+py  Point3dListX.__len__()
+py  Point3dListX.__setitem__()
 py  Point3dX.Add(point, vector) [static]
 py  Point3dX.Add(point1, point2) [static]
 py  Point3dX.Add(vector, point) [static]
@@ -4302,6 +4412,8 @@ py  PointCloudX.Add(point, color)
 py  PointCloudX.Add(point, normal)
 py  PointCloudX.Add(point, normal, color)
 py  PointCloudX.Add(point, normal, color, value)
+py  PointCloudX.AddRange(points)
+py  PointCloudX.AddRange(points, normals)
 py  PointCloudX.AppendNew()
 py  PointCloudX.ClearColors()
 py  PointCloudX.ClearHiddenFlags()
@@ -4358,9 +4470,38 @@ py  PolylineCurveX.Point(index)
 py  PolylineCurveX.PointCount [property ro]
 py  PolylineCurveX.SetArcLengthParameterization(tolerance)
 py  PolylineCurveX.SetPoint(index, point)
+py  PolylineCurveX.ToPolyline()
 py  PolylineCurveX.__init__()
 py  PolylineCurveX.__init__(const BND_PolylineCurve&)
 py  PolylineCurveX.__init__(const BND_PolylineCurveX*)
+py  PolylineCurveX.__init__(const std::vector<BND_Point3dX>&)
+py  PolylineX.CenterPoint()
+py  PolylineX.ClosestParameter(testPoint)
+py  PolylineX.ClosestPoint(testPoint)
+py  PolylineX.CollapseShortSegments(tolerance)
+py  PolylineX.CreateCircumscribedPolygon(circle, sideCount) [static]
+py  PolylineX.CreateInscribedPolygon(circle, sideCount) [static]
+py  PolylineX.CreateStarPolygon(circle, radius, cornerCount) [static]
+py  PolylineX.DeleteShortSegments(tolerance)
+py  PolylineX.Duplicate()
+py  PolylineX.GetSegments()
+py  PolylineX.IsClosed [property ro]
+py  PolylineX.IsClosedWithinTolerance(tolerance)
+py  PolylineX.IsConvexLoop(strictlyConvex)
+py  PolylineX.IsValid [property ro]
+py  PolylineX.Length [property ro]
+py  PolylineX.PointAt(t)
+py  PolylineX.ReduceSegments(tolerance)
+py  PolylineX.SegmentAt(index)
+py  PolylineX.SegmentCount [property ro]
+py  PolylineX.Smooth(amount)
+py  PolylineX.TangentAt(t)
+py  PolylineX.ToNurbsCurve()
+py  PolylineX.ToPolylineCurve()
+py  PolylineX.Trim(domain)
+py  PolylineX.__init__()
+py  PolylineX.__init__(const std::vector<BND_Point3dX>&)
+py  PolylineX.__init__(int)
 py  RenderChannelsX.CustomList [property ro]
 py  RenderChannelsX.Mode [property ro]
 py  RenderChannelsX.__init__()

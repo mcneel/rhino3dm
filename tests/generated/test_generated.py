@@ -10,6 +10,7 @@ found (numbers refer to docs/vnext/pilot-findings.md), so each stays fixed.
 import gc
 import os
 import sys
+import uuid
 
 import pytest
 
@@ -1423,3 +1424,132 @@ def test_translated_string_members(tmp_path):
     # MeshVertexColorList.Add(Color): `SetColor(Count, color); return Count - 1;`
     mx = quad_mesh()
     assert mx.VertexColors.Add((255, 0, 0, 255)) == 0 and mx.VertexColors.Count == 1
+
+
+# --- G80: Point3dList / Polyline -- managed-state classes (option 4) ---
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineX'), reason='G80 not generated')
+def test_point3dlist_is_a_real_list_with_rhinolist_semantics():
+    P = r.Point3dX
+    pl = r.Point3dListX([P(3, 0, 0), P(1, 0, 0), P(2, 0, 0)])
+    assert len(pl) == 3 and pl.Count == 3 and pl[1] == P(1, 0, 0)
+    assert [p.X for p in pl] == [3, 1, 2]                    # iteration through the item protocol
+    pl[0] = P(0, 0, 0)
+    pl.Add(P(5, 0, 0)); pl.Add(6, 0, 0)                      # RhinoList.Add(T), Point3dList.Add(x, y, z)
+    pl.Insert(1, P(9, 0, 0)); pl.RemoveAt(0)
+    assert [p.X for p in pl] == [9, 1, 2, 5, 6]
+    assert pl.IndexOf(P(2, 0, 0)) == 2 and pl.Contains(P(5, 0, 0)) and not pl.Contains(P(7, 0, 0))
+    pl.Reverse()
+    assert [p.X for p in pl] == [6, 5, 2, 1, 9]
+    pl.Sort()                                                  # Point3d.CompareTo: X, then Y, then Z
+    assert [p.X for p in pl] == [1, 2, 5, 6, 9]
+    assert pl.BinarySearch(P(5, 0, 0)) == 2 and pl.BinarySearch(P(3, 0, 0)) == ~2
+    with pytest.raises(IndexError):
+        pl[5]
+    # capacity grows as RhinoList's does: 0 -> 4 -> 8
+    e = r.Point3dListX()
+    assert e.Capacity == 0
+    e.Add(P(0, 0, 0))
+    assert e.Capacity == 4
+    for i in range(4):
+        e.Add(P(i, 0, 0))
+    assert e.Capacity == 8 and e.Count == 5
+    # a copy is a new list; ToArray a plain sequence
+    d = pl.Duplicate()
+    d[0] = P(42, 0, 0)
+    assert pl[0] == P(1, 0, 0) and isinstance(d, r.Point3dListX)
+    assert list(pl.ToArray()) == list(pl)
+    bb = pl.BoundingBox
+    assert bb.Min == P(1, 0, 0) and bb.Max == P(9, 0, 0)
+
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineX'), reason='G80 not generated')
+def test_polyline_geometry_members():
+    P = r.Point3dX
+    poly = r.PolylineX([P(0, 0, 0), P(2, 0, 0), P(2, 2, 0)])
+    assert isinstance(poly, r.Point3dListX)                    # Polyline : Point3dList
+    assert poly.SegmentCount == 2 and abs(poly.Length - 4.0) < 1e-12
+    assert poly.PointAt(1.5) == P(2, 1, 0)
+    assert poly.SegmentAt(1).From == P(2, 0, 0)
+    assert abs(poly.ClosestParameter(P(1, 5, 0)) - 2.0) < 1e-12
+    assert poly.ClosestPoint(P(1, -3, 0)) == P(1, 0, 0)
+    t = poly.Trim(r.IntervalX(0.5, 1.5))
+    assert isinstance(t, r.PolylineX) and list(t) == [P(1, 0, 0), P(2, 0, 0), P(2, 1, 0)]
+    assert [s.Length for s in poly.GetSegments()] == [2.0, 2.0]
+    poly.Add(P(2, 2, 0))                                       # a zero-length segment
+    assert poly.DeleteShortSegments(1e-9) == 1 and poly.Count == 3
+    c = poly.Duplicate()
+    assert isinstance(c, r.PolylineX) and list(c) == list(poly)
+
+
+@pytest.mark.skipif(not hasattr(r.PointCloudX, 'AddRange'), reason='G82 not generated')
+def test_sequence_arguments_where_rhinocommon_takes_ienumerable():
+    # G82: GetConstArray members take any sequence of points -- a list, a tuple,
+    # or a Point3dListX / PolylineX (decision 4 of option 4)
+    P, V = r.Point3dX, r.Vector3dX
+    pc = r.PointCloudX()
+    pc.AddRange([P(0, 0, 0), P(1, 0, 0)])
+    pc.AddRange(r.PolylineX([P(2, 0, 0), P(3, 0, 0)]))
+    assert pc.Count == 4 and [p.X for p in pc.GetPoints()] == [0, 1, 2, 3]
+    # InsertRange's native overruns the heap (pilot-findings #34): refused
+    assert not hasattr(pc, 'InsertRange')
+    n = r.PointCloudX()
+    n.AddRange([P(0, 0, 0)], [V(0, 0, 1)])
+    assert n.Count == 1 and n.ContainsNormals
+    n.AddRange([P(0, 0, 0)], [])                         # no normals: C# returns early
+    assert n.Count == 1
+    with pytest.raises(ValueError):
+        n.AddRange([P(0, 0, 0), P(1, 0, 0)], [V(0, 0, 1)])
+    f = r.File3dmX()
+    pid = f.Objects.AddPolyline([P(0, 0, 0), P(1, 0, 0), P(1, 1, 0)], None)
+    assert f.Objects.Count == 1 and pid != uuid.UUID(int=0)
+    assert f.Objects.AddPolyline([], None) == uuid.UUID(int=0) and f.Objects.Count == 1
+
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineCurveX') or not hasattr(r.PolylineCurveX, 'ToPolyline'),
+                    reason='G82 ToPolyline not generated')
+def test_polylinecurve_to_polyline_through_the_translated_static():
+    # G82: `using (var h = new SimpleArrayPoint3d()) { CopyValues(ptr, h); return
+    # Polyline.PolyLineFromNativeArray(h); }` -- the holder handed to the data
+    # class's translated static; Python owns the new PolylineX
+    crv = r.PolylineCurveX(r.PolylineCurve([r.Point3d(0, 0, 0), r.Point3d(3, 0, 0), r.Point3d(3, 4, 0)]))
+    pl = crv.ToPolyline()
+    assert isinstance(pl, r.PolylineX) and pl.Count == 3
+    assert pl[2] == r.Point3dX(3, 4, 0) and abs(pl.Length - 7.0) < 1e-12
+    pl[0] = r.Point3dX(1, 0, 0)                          # a copy: the curve is unchanged
+    assert crv.ToPolyline()[0] == r.Point3dX(0, 0, 0)
+
+
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineCurveX'), reason='G82')
+def test_polylinecurve_from_points_chooses_its_creation_call():
+    # G82: `if (count < 1) ptr = New(IntPtr.Zero); else ptr = New2(count, pts);`
+    P = r.Point3dX
+    crv = r.PolylineCurveX([P(0, 0, 0), P(3, 0, 0), P(3, 4, 0)])
+    assert crv.PointCount == 3 and crv.PointAtEnd == P(3, 4, 0)
+    assert r.PolylineCurveX(r.PolylineX([P(0, 0, 0), P(1, 0, 0)])).PointCount == 2
+    assert r.PolylineCurveX([]).PointCount == 0                 # the empty arm: ON_PolylineCurve_New
+
+
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineX') or not hasattr(r.PolylineX, 'ToPolylineCurve'), reason='G82')
+def test_polyline_to_polylinecurve_constructs_the_generated_class():
+    # G82: a data class member naming a generated class: `new PolylineCurve(this)`
+    # through class markers the generator resolves against PolylineCurveX(points)
+    P = r.Point3dX
+    poly = r.PolylineX([P(0, 0, 0), P(3, 0, 0), P(3, 4, 0)])
+    crv = poly.ToPolylineCurve()
+    assert isinstance(crv, r.PolylineCurveX) and crv.PointCount == 3 and crv.PointAtEnd == P(3, 4, 0)
+    assert r.PolylineX([P(0, 0, 0)]).ToPolylineCurve() is None        # `if (m_size < 2) return null;`
+    assert list(crv.ToPolyline()) == list(poly)                         # and back (ToPolyline)
+
+
+
+@pytest.mark.skipif(not hasattr(r, 'PolylineX') or not hasattr(r.PolylineX, 'ToNurbsCurve'), reason='G82')
+def test_polyline_to_nurbscurve_through_a_disposed_polylinecurve():
+    # G82: `using (var pc = ToPolylineCurve()) { return pc?.ToNurbsCurve(); }`: the
+    # temporary curve deleted on the way out, the NURBS curve owned by the caller
+    P = r.Point3dX
+    nc = r.PolylineX([P(0, 0, 0), P(3, 0, 0), P(3, 4, 0)]).ToNurbsCurve()
+    assert isinstance(nc, r.NurbsCurveX) and nc.PointAtEnd == P(3, 4, 0) and nc.PointAtStart == P(0, 0, 0)
+    assert r.PolylineX([P(0, 0, 0)]).ToNurbsCurve() is None           # no curve: `pc?.` is null

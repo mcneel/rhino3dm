@@ -74,6 +74,9 @@ def plan(member, cfn, cls):
     call = member['Calls'][0]
     if len(call['Args']) != len(cfn['params']):
         return None, 'arity mismatch manifest vs call'
+    for c in member.get('Calls') or []:
+        if c['Name'] in UNSAFE_NATIVES:
+            return None, 'unsafe native %s (%s)' % (c['Name'], UNSAFE_NATIVES[c['Name']])
     if cfn.get('variant') == 'rhino-only':
         # the C function lives in the rhino repo only (DracoCompression -> draco.cpp)
         return None, 'native not in rhino3dm'
@@ -201,6 +204,12 @@ def plan(member, cfn, cls):
         if holder and pos == holder_arg:
             if ctype != holder['ctype']:
                 return None, 'holder ctype %s vs %s' % (ctype, holder['ctype'])
+            if member.get('HolderStatic') and member['Holder'] == 'SimpleArrayPoint3d':
+                # handed to a translated static afterwards: the points holder the
+                # translated bodies take (RH3DM_Points wraps the ON_3dPointArray; G82)
+                locals_.append('RH3DM_Points holder_out;')
+                call_exprs.append('&holder_out.a')
+                continue
             locals_.append(holder['local'].format(n='holder_out'))
             call_exprs.append('&holder_out')
             continue
@@ -259,6 +268,11 @@ def plan(member, cfn, cls):
             # box.Min: a translated property of a value-type parameter
             pn, _, mem = carg['Text'].partition('.')
             pcs = cs_param_modes.get(pn, ('', ''))[1]
+            if seq_elem(pcs) and mem == 'Count':
+                if ctype not in ('int', 'unsigned int'):
+                    return None, 'sequence count -> %s' % ctype
+                call_exprs.append('(%s)%s.size()' % (ctype, pn))         # G82
+                continue
             if pcs in DATA_CPP and '.' not in mem:
                 # options.Version / options.RenderMeshFlags: a DATA class argument's
                 # translated property or field, cast as the C# call site wrote it (G64)
@@ -427,6 +441,16 @@ def plan(member, cfn, cls):
             if name not in cs_param_modes:
                 return None, 'param %s: not a C# parameter' % name
             cstype = cs_param_modes[name][1]
+            if seq_elem(cstype):
+                # a sequence parameter where C# passed GetConstArray's array (G82):
+                # the vector's contiguous elements, layout-equal to the C struct
+                e = seq_elem(cstype)
+                base = ctype.replace('const ', '').strip()
+                if not ctype.startswith('const ') or not base.endswith('*') or \
+                        (C_VT.get(base) != e if e in VT_CPP else base != e + '*'):
+                    return None, 'sequence %s<%s> -> %s' % (name, e, ctype)
+                call_exprs.append(('RH3DM_Ptr(%s.data())' if e in VT_CPP else '%s.data()') % name)
+                continue
             if cstype in CS_ENUMS:
                 if ctype == CS_ENUMS[cstype]['cpp']:
                     call_exprs.append(name)            # the C layer takes the public type itself
@@ -531,6 +555,8 @@ def plan(member, cfn, cls):
                 bind_args.append(('const %s%s' % (DATA_CPP[cstype], '*' if name in nullable_params else '&'), name))
             elif cstype in VT_CPP and cstype not in CS_ARG:
                 bind_args.append((VT_CPP[cstype], name))
+            elif seq_cpp(cstype):
+                bind_args.append(('const std::vector<%s>&' % seq_cpp(cstype), name))    # G82
             elif cstype not in CS_ARG:
                 return None, 'C# arg type %s' % cstype
             else:
@@ -596,6 +622,16 @@ def plan(member, cfn, cls):
         acc = (('const_cast<%s*>(%s)->' if da['Param'] in nullable_params else 'const_cast<%s&>(%s).')
                % (DATA_CPP[pcs], da['Param']))
         shape = ('dataapply', acc + da['Method'])
+    elif holder and member.get('HolderStatic'):
+        # `using (var h = new SimpleArrayPoint3d()) { F(ptr, h.NonConstPointer());
+        # return Polyline.PolyLineFromNativeArray(h); }` (G82): the data class's own
+        # translated static builds the result from the filled holder
+        t, _, mth = member['HolderStatic'].partition('.')
+        if (ret_outs or sig_ret != t or t not in DATA_CPP or mth not in DATA_INFO[t]['methods']
+                or member['Holder'] != 'SimpleArrayPoint3d'
+                or (cret not in ('void', 'bool') and not member.get('ResultUnused'))):
+            return None, 'holder static %s' % member['HolderStatic']
+        shape = ('holderdata', t, mth)
     elif holder:
         if ret_outs:
             return None, 'holder plus other outs'
@@ -1390,6 +1426,9 @@ def early_return_cpp(g, shape, sig_ret):
         return r if sig_ret in ('int', 'double', 'uint') and kind in ('direct', 'fromout') else None
     if r == 'null':
         return 'nullptr' if kind in ('wrap', 'fill') else None
+    if r == 'Guid.Empty':
+        # `if (points.Count < 1) return Guid.Empty;` (File3dmObjectTable.AddPolyline; G82)
+        return 'ON_UUID_to_Binding(ON_nil_uuid)' if sig_ret == 'Guid' and shape[:2] == ('conv', 'BND_UUID') else None
     if r in ('String.Empty', 'string.Empty', '""'):
         return 'std::wstring()' if sig_ret == 'string' and kind == 'holder' else None
     mm = re.match(r'^(\w+)\.(\w+)$', r)
@@ -1444,6 +1483,14 @@ def arg_ctor_plans(cls, manifest, c_by_name, skipped):
         key = 'ctor: ' + why.split(':')[0]
         skipped[key] = skipped.get(key, 0) + 1
     for x in manifest['members']:
+        if (x['Type'] == cls['type'] and x['Kind'] == 'constructor' and x.get('CtorCond')
+                and x['Variant'] in ('portable', 'rhino3dm-only') and len(x.get('Calls') or []) == 2):
+            p, why = cond_ctor_plan(x, cls, c_by_name)
+            if p is None:
+                skip(why)
+            else:
+                out.append(p)
+            continue
         if not (x['Type'] == cls['type'] and x['Kind'] == 'constructor'
                 and x['Variant'] in ('portable', 'rhino3dm-only')
                 and x.get('Calls') and len(x['Calls']) == 1):
@@ -1467,6 +1514,45 @@ def arg_ctor_plans(cls, manifest, c_by_name, skipped):
         p['ctor_call'] = '%s(%s)' % (fn['name'], ', '.join(p['call_exprs']))
         out.append(p)
     return out
+
+
+def cond_ctor_plan(x, cls, c_by_name):
+    """`IntPtr p; if (COND) p = F1(..); else p = F2(..); ConstructNonConstObject(p);`
+    (PolylineCurve(points); G82): each arm planned as an ordinary constructor,
+    the same binding arguments both ways, the condition translated like a
+    guard over the parameters only -> one plan whose creation is a ternary"""
+    if x['Body'] not in ('trivial', 'pattern') or x.get('Guards'):
+        return None, 'cond ctor body'
+    arms = []
+    for call in x['Calls']:
+        fn = c_by_name.get(call['Name'])
+        if fn is None or fn['returns'] != '%s*' % cls['on']:
+            return None, 'cond ctor creation fn'
+        m2 = dict(x, Kind='method', Static=True, Name='__ctor', Returns=cls['cs'], Calls=[call], CtorCond=None)
+        p, why = plan(m2, fn, cls)
+        if p is None:
+            return None, 'cond ctor arm: %s' % why
+        if p['locals'] or p['shape'][0] != 'wrap':
+            return None, 'cond ctor shape'
+        arms.append((p, fn))
+    if arms[0][0]['bind_args'] != arms[1][0]['bind_args']:
+        return None, 'cond ctor arms bind differently'
+    p = arms[0][0]
+    ptypes = {n: t for _, t, n in (cs_signature(x)[1] or [])}
+    argnames = {n for _, n in p['bind_args']}
+    cond = re.sub(r'\bnull\b', 'nullptr', x['CtorCond']['Cond'])
+    for ident in sorted(x['CtorCond'].get('Ids') or [], key=lambda i: '.' not in i):
+        a, _, b = ident.partition('.')
+        if not b and ident in argnames:
+            continue
+        if b == 'Count' and a in argnames and seq_elem(ptypes.get(a)):
+            cond = re.sub(r'(?<![\w.])%s\b' % re.escape(ident), '((int)%s.size())' % a, cond)
+            continue
+        return None, 'cond ctor id %s' % ident
+    p = dict(p, extra_fns=list(p.get('extra_fns') or []) + [arms[1][1]] + list(arms[1][0].get('extra_fns') or []))
+    p['ctor_call'] = '(%s) ? %s(%s) : %s(%s)' % (cond, arms[0][1]['name'], ', '.join(arms[0][0]['call_exprs']),
+                                                 arms[1][1]['name'], ', '.join(arms[1][0]['call_exprs']))
+    return p, None
 
 
 _C_BODIES = None
@@ -2619,6 +2705,8 @@ def plan_class(cls, manifest, c_by_name, skipped):
                         GUARD_ENUMS.add(a)
                     elif a in argnames and (ptypes.get(a), b) in VT_PROPS:
                         rep = '%s.%s()' % (a, b)                  # xform.IsIdentity
+                    elif a in argnames and seq_elem(ptypes.get(a)) and b == 'Count':
+                        rep = '((int)%s.size())' % a              # points.Count (G82)
                     else:
                         ok = False
                         break
@@ -3060,8 +3148,11 @@ def resolve_markers(text, cls, per_reg, manifest):
                 if not CTORS.get(tcls['reg']):
                     return None, 'new %s' % tname, None
             else:
+                # a sequence is its element, however the namespace is spelled (G82)
+                norm = lambda t: ('seq:' + seq_elem(t)) if seq_elem(t) else t
                 hits = [q for q in ARGCTORS.get(tcls['reg']) or []
-                        if [qq['Type'] for qq in q['m'].get('Params') or []] == want and len(q['bind_args']) == len(want)]
+                        if [norm(qq['Type']) for qq in q['m'].get('Params') or []] == [norm(t) for t in want]
+                        and len(q['bind_args']) == len(want)]
                 if len(hits) != 1:
                     return None, 'new %s(%s)' % (tname, arg), None
             out.append(('%s' if tcls['mode'] == 'value' else 'new %s') % tcls['gen'])

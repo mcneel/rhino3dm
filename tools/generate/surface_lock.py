@@ -23,9 +23,10 @@ PY_CLASS = re.compile(r'py::class_<[^>]*>\(m, "(\w+)"')
 # arguments nest, so match lazily up to `>("` (`[^>]*` missed every derived class)
 JS_CLASS = re.compile(r'\bclass_<.*?>\("(\w+)"\)')
 PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static)\("(\w+)"(.*)')
-PY_INIT = re.compile(r'\.def\(py::init<([^>]*)>\(\)')
+# `py::init<const std::vector<BND_Point3dX>&>()`: template arguments nest (G82)
+PY_INIT = re.compile(r'\.def\(py::init<(.*?)>\(\)')
 JS_DEF = re.compile(r'\.(function|class_function|property)\("(\w+)"')
-JS_CTOR = re.compile(r'\.constructor(<[^>]*>)?\(')
+JS_CTOR = re.compile(r'\.constructor(<.*?>)?\(')
 
 
 def surface(files):

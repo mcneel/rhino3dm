@@ -417,7 +417,7 @@ static class HelperInliner
         return a with
         {
             Calls = calls, Body = h.Body, Native = h.Native, Inlined = a.Delegates,
-            Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, Compare = h.Compare, ResultConv = h.ResultConv,
+            Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, HolderStatic = h.HolderStatic, Compare = h.Compare, ResultConv = h.ResultConv,
             Success = h.Success, Commits = h.Commits || a.Commits,
             Delegates = null, DelegateArgs = null,
         };
@@ -838,7 +838,7 @@ static class HelperInliner
                 {
                     Calls = calls, Body = h.Body, Inlined = m.Delegates, Success = h.Success, Commits = h.Commits || m.Commits,
                     FailThrow = h.FailThrow ?? m.FailThrow,
-                    Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, Compare = h.Compare, ResultConv = h.ResultConv,
+                    Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, HolderStatic = h.HolderStatic, Compare = h.Compare, ResultConv = h.ResultConv,
                     ResultSelect = h.ResultSelect,
                     Delegates = null, DelegateArgs = null, Pure = null,
                     Native = native, Setter = setter,
@@ -918,6 +918,8 @@ record MemberRecord
     public string WrapStatic { get; init; }  // Wrap made by `T.FromIntPtr(p)` (a data class's static bridge; G64), not `new T(p)`
     public WrapTupleInfo WrapTuple { get; init; } // Body=="wraptuple": a tuple of geometry made from native pointers (G72)
     public string HolderEmpty { get; init; }  // Holder: the array is empty when the call's result COMPAREs ("== 0"; G73)
+    public string HolderStatic { get; init; } // Holder: handed to a static of a translated data class, `Polyline.PolyLineFromNativeArray` (G82)
+    public GuardInfo CtorCond { get; init; }  // a constructor choosing its creation call: Calls[0] when Cond, else Calls[1] (G82)
     public Dictionary<string, string> ParamDefaults { get; init; } // `p = p ?? new T();` -- parameter -> T (G64)
     public TempNativeInfo TempNative { get; init; } // `IntPtr L = p.CopyToNative();` then the calls on L (see TempNativeInfo; G65)
     public string ResultFilter { get; init; }   // `if (X is T item && !item.P) return item; return null;`: the bool property P of the result that voids it (G66)
@@ -1025,6 +1027,8 @@ record AccessorInfo
     public string WrapStatic { get; init; }
     public WrapTupleInfo WrapTuple { get; init; }
     public string HolderEmpty { get; init; }
+    public string HolderStatic { get; init; }
+    public GuardInfo CtorCond { get; init; }
     public Dictionary<string, string> ParamDefaults { get; init; }
     public TempNativeInfo TempNative { get; init; }
     public DataApplyInfo DataApply { get; init; }
@@ -3845,6 +3849,7 @@ class Walker : CSharpSyntaxWalker
                                          h + ".m_ptr" };                 // `fi.m_ptr` (BrepEdge.AdjacentFaces; G73)
         string resultLocal = null;                                       // `int rc = UNM(...)`
         _holderEmpty = null;
+        _holderStatic = null;
         var block = us.Statement as BlockSyntax;
         if (block == null) return (null, null, false);
         bool converted = false;
@@ -3923,6 +3928,16 @@ class Walker : CSharpSyntaxWalker
                     continue;
                 case ReturnStatementSyntax { Expression: IdentifierNameSyntax }:
                     continue;
+                // `return Polyline.PolyLineFromNativeArray(H);`: the holder handed to a
+                // type's static (PolylineCurve.ToPolyline; G82) -- the planner accepts
+                // it only as a translated data class's own method
+                case ReturnStatementSyntax { Expression: InvocationExpressionSyntax
+                        { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax hst, Name: IdentifierNameSyntax hsm },
+                          ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax hsa }] } }
+                    when hsa.Identifier.Text == h && hst.Identifier.Text != h && char.IsUpper(hst.Identifier.Text[0]):
+                    _holderStatic = hst.Identifier.Text + "." + hsm.Identifier.Text;
+                    converted = true;
+                    continue;
                 // `return rc == 0 ? new int[0] : fi.ToArray();`: the array, empty when the
                 // call's result says so (BrepVertex.EdgeIndices and the Brep adjacency
                 // members; G73) -- the comparison recorded, never assumed redundant
@@ -3957,6 +3972,7 @@ class Walker : CSharpSyntaxWalker
             return op switch { "<" => ">", ">" => "<", "<=" => ">=", ">=" => "<=", _ => op } + " " + ll.Token.Text;
         return null;
     }
+    [ThreadStatic] static string _holderStatic;              // RecognizeUsing: `return T.M(H);` (G82)
     [ThreadStatic] static string _holderEmpty;               // RecognizeUsing: the holder's array is empty when (result COMPARE) (G73)
 
     // set by RecognizeShape for the body it just recognized (single-threaded walk)
@@ -5603,6 +5619,7 @@ class Walker : CSharpSyntaxWalker
             WrapStatic = wrap != null ? _wrapStatic : null,
             WrapTuple = wrapTuple,
             HolderEmpty = holder != null ? _holderEmpty : null,
+            HolderStatic = holder != null ? _holderStatic : null,
             ParamDefaults = _paramDefaults,
             TempNative = _tempNative,
             ResultFilter = delegates != null ? _resultFilter : null,
@@ -5659,6 +5676,15 @@ class Walker : CSharpSyntaxWalker
         var ptypes = parameters?.Parameters.ToDictionary(q => q.Identifier.Text, q => q.Type?.ToString()) ?? new Dictionary<string, string>();
         var retText = returns?.ToString() ?? "void";
         a = InlinePrivate(body, a, paramNames ?? NoParams, ptypes, retText);
+        var seqBody = Generatable.Contains(a?.Body ?? "") ? null : SeqArrays(body, ptypes);
+        if (seqBody != null)
+        {
+            // G82: the GetConstArray idiom over a sequence parameter, read as the parameter
+            var sa = AnalyzeBody(seqBody, paramNames ?? NoParams);
+            if (Generatable.Contains(sa.Body ?? "")) a = sa;
+        }
+        if (kind == "constructor" && !Generatable.Contains(a?.Body ?? "") && CondCtor(seqBody ?? body, paramNames ?? NoParams) is { } cca)
+            a = cca;
         Dictionary<string, AccessorInfo> specialized = null;
         if (_nullingCtors != null && body != null)
             foreach (var nc in _nullingCtors)
@@ -5717,6 +5743,8 @@ class Walker : CSharpSyntaxWalker
             WrapStatic = a.WrapStatic,
             WrapTuple = a.WrapTuple,
             HolderEmpty = a.HolderEmpty,
+            HolderStatic = a.HolderStatic,
+            CtorCond = a.CtorCond,
             ParamDefaults = a.ParamDefaults,
             TempNative = a.TempNative,
             ResultFilter = a.ResultFilter,
@@ -6414,6 +6442,142 @@ class Walker : CSharpSyntaxWalker
                 node = (ConditionalExpressionSyntax)base.VisitConditionalExpression(node);
                 return Const(node.Condition) is bool d ? (d ? node.WhenTrue : node.WhenFalse).WithTriviaFrom(node) : node;
             }
+        }
+    }
+
+    // G82: `int count; T[] arr = RhinoListHelpers.GetConstArray(points, out count);`
+    // over an IEnumerable<T> parameter. A binding's sequence arrives contiguous
+    // (std::vector) and is never null: `arr` IS the parameter, `count` is
+    // `points.Count`, and `arr == null` is false. Only when every use of `arr`
+    // is a null test or a native call's argument; otherwise null (refused).
+    // G82: `IntPtr ptr; if (COND) ptr = UNM.F1(..); else ptr = UNM.F2(..);
+    // ConstructNonConstObject(ptr);` -- a constructor choosing its creation call
+    // (PolylineCurve(points)). Each arm is analyzed as the ordinary constructor
+    // `ConstructNonConstObject(F(..))`; both must be trivial, the condition a
+    // guard condition. Calls[0] is the COND arm.
+    AccessorInfo CondCtor(SyntaxNode body, ISet<string> paramNames)
+    {
+        if (body is not BlockSyntax { Statements: [LocalDeclarationStatementSyntax pd, IfStatementSyntax { Else: { } el } f, ExpressionStatementSyntax { Expression: InvocationExpressionSyntax cn }] }
+            || pd.Declaration is not { Variables: [var pv] } || pd.Declaration.Type.ToString() != "IntPtr"
+            || pv.Initializer != null && pv.Initializer.Value.ToString() != "IntPtr.Zero"
+            || CalleeName(cn) != "ConstructNonConstObject" || cn.ArgumentList.Arguments is not [var ca] || ca.Expression.ToString() != pv.Identifier.Text)
+            return null;
+        var ptr = pv.Identifier.Text;
+        InvocationExpressionSyntax Arm(StatementSyntax st)
+        {
+            if (st is BlockSyntax { Statements: [var one] }) st = one;
+            return st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Left: IdentifierNameSyntax l, Right: InvocationExpressionSyntax r } }
+                   && l.Identifier.Text == ptr && IsUnmCall(r) ? r : null;
+        }
+        var t = Arm(f.Statement);
+        var e = Arm(el.Statement);
+        var ids = new List<string>();
+        if (t == null || e == null || !GuardCondOk(f.Condition, ids) || _guardCalls.Count > 0) return null;
+        AccessorInfo One(InvocationExpressionSyntax call) =>
+            AnalyzeBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement($"ConstructNonConstObject({call});")), paramNames);
+        var at = One(t);
+        var ae = One(e);
+        if (at.Body != "trivial" || ae.Body != "trivial" || at.Calls is not { Length: 1 } || ae.Calls is not { Length: 1 }
+            || at.Guards != null || ae.Guards != null)
+            return null;
+        return at with
+        {
+            Calls = new[] { at.Calls[0], ae.Calls[0] },
+            Native = at.Calls.Concat(ae.Calls).Select(c => c.Name).Distinct().OrderBy(n => n, StringComparer.Ordinal).ToArray(),
+            CtorCond = new GuardInfo { Cond = f.Condition.ToString(), Ids = ids.Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray() },
+        };
+    }
+
+    static readonly HashSet<string> SeqElems = new() { "Point3d", "Vector3d", "Point2d", "Point3f", "double", "int" };
+
+    static SyntaxNode SeqArrays(SyntaxNode body, Dictionary<string, string> ptypes)
+    {
+        if (body is not BlockSyntax b || !b.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(i => CalleeName(i) == "GetConstArray"))
+            return null;
+        var arrs = new Dictionary<string, string>();     // arr -> parameter
+        var counts = new Dictionary<string, string>();   // count -> parameter
+        var drop = new HashSet<StatementSyntax>();
+        foreach (var st in b.Statements)
+        {
+            if (st is not LocalDeclarationStatementSyntax { Declaration: { Variables: [var v] } decl }
+                || v.Initializer?.Value is not InvocationExpressionSyntax inv || CalleeName(inv) != "GetConstArray")
+                continue;
+            if (inv.ArgumentList.Arguments is not [var a0, var a1] || a0.Expression is not IdentifierNameSyntax pid
+                || !ptypes.TryGetValue(pid.Identifier.Text, out var pt) || pt == null || !a1.RefOrOutKeyword.IsKind(SyntaxKind.OutKeyword))
+                return null;
+            var m = System.Text.RegularExpressions.Regex.Match(pt.Replace(" ", ""), @"^(?:System\.Collections\.Generic\.)?IEnumerable<(\w+)>$");
+            if (!m.Success || !SeqElems.Contains(m.Groups[1].Value)) return null;
+            if (decl.Type.ToString() != "var" && decl.Type.ToString().Replace(" ", "") != m.Groups[1].Value + "[]") return null;
+            var cn = a1.Expression switch
+            {
+                IdentifierNameSyntax ci => ci.Identifier.Text,
+                DeclarationExpressionSyntax { Designation: SingleVariableDesignationSyntax sv } => sv.Identifier.Text,
+                _ => null,
+            };
+            if (cn == null) return null;
+            arrs[v.Identifier.Text] = pid.Identifier.Text;
+            counts[cn] = pid.Identifier.Text;
+            drop.Add(st);
+        }
+        if (arrs.Count == 0) return null;
+        foreach (var st in b.Statements.OfType<LocalDeclarationStatementSyntax>())
+            if (st.Declaration.Variables is [var v] && v.Initializer == null && counts.ContainsKey(v.Identifier.Text))
+                drop.Add(st);
+        // nothing may assign either local, and every use of an array is a null
+        // test or a native argument
+        if (b.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(x => x.Left is IdentifierNameSyntax li
+                && (arrs.ContainsKey(li.Identifier.Text) || counts.ContainsKey(li.Identifier.Text))))
+            return null;
+        foreach (var id in b.DescendantNodes().OfType<IdentifierNameSyntax>().Where(i => arrs.ContainsKey(i.Identifier.Text)))
+        {
+            if (drop.Any(d => d.Span.Contains(id.Span))) continue;
+            var nullTest = id.Parent is BinaryExpressionSyntax be && (be.IsKind(SyntaxKind.EqualsExpression) || be.IsKind(SyntaxKind.NotEqualsExpression))
+                           && (be.Left.IsKind(SyntaxKind.NullLiteralExpression) || be.Right.IsKind(SyntaxKind.NullLiteralExpression));
+            var nativeArg = id.Parent is ArgumentSyntax { RefOrOutKeyword.RawKind: 0, Parent.Parent: InvocationExpressionSyntax ni }
+                            && ni.Expression is MemberAccessExpressionSyntax { Expression: var nr } && nr.ToString().EndsWith("UnsafeNativeMethods");
+            if (!nullTest && !nativeArg) return null;
+        }
+        var kept = b.WithStatements(SyntaxFactory.List(b.Statements.Where(st => !drop.Contains(st))));
+        return new SeqRewriter(arrs, counts).Visit(kept);
+    }
+
+    sealed class SeqRewriter : CSharpSyntaxRewriter
+    {
+        readonly Dictionary<string, string> _arrs, _counts;
+        public SeqRewriter(Dictionary<string, string> arrs, Dictionary<string, string> counts) { _arrs = arrs; _counts = counts; }
+        static ExpressionSyntax Lit(bool v) => SyntaxFactory.LiteralExpression(v ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression);
+        public override SyntaxNode VisitBinaryExpression(BinaryExpressionSyntax node)
+        {
+            bool IsArr(ExpressionSyntax e) => e is IdentifierNameSyntax i && _arrs.ContainsKey(i.Identifier.Text);
+            if ((node.IsKind(SyntaxKind.EqualsExpression) || node.IsKind(SyntaxKind.NotEqualsExpression))
+                && (IsArr(node.Left) || IsArr(node.Right)))
+                return Lit(node.IsKind(SyntaxKind.NotEqualsExpression)).WithTriviaFrom(node);   // never null
+            node = (BinaryExpressionSyntax)base.VisitBinaryExpression(node);
+            // `false || X` -> X, `true && X` -> X
+            if (node.IsKind(SyntaxKind.LogicalOrExpression))
+            {
+                if (node.Left.IsKind(SyntaxKind.FalseLiteralExpression)) return node.Right.WithTriviaFrom(node);
+                if (node.Right.IsKind(SyntaxKind.FalseLiteralExpression)) return node.Left.WithTriviaFrom(node);
+            }
+            if (node.IsKind(SyntaxKind.LogicalAndExpression))
+            {
+                if (node.Left.IsKind(SyntaxKind.TrueLiteralExpression)) return node.Right.WithTriviaFrom(node);
+                if (node.Right.IsKind(SyntaxKind.TrueLiteralExpression)) return node.Left.WithTriviaFrom(node);
+            }
+            return node;
+        }
+        public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            if (_arrs.TryGetValue(node.Identifier.Text, out var p)) return SyntaxFactory.IdentifierName(p).WithTriviaFrom(node);
+            if (_counts.TryGetValue(node.Identifier.Text, out var c))
+                return SyntaxFactory.ParseExpression(c + ".Count").WithTriviaFrom(node);
+            return node;
+        }
+        public override SyntaxNode VisitBlock(BlockSyntax node)
+        {
+            // `if (false) return;` disappears, `if (true) X` is X
+            node = (BlockSyntax)base.VisitBlock(node);
+            return Inliner.Fold(node);
         }
     }
 

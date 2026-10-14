@@ -156,5 +156,33 @@ factory().then(rhino => {
     console.log('  File3dmLayerTableX: for...of after a delete ->', [...t].map(l => l.name));
   }
 
+  // option 4 (G80/G81): Point3dList and Polyline are RhinoCommon's classes,
+  // a C++-owned list with RhinoList members; PolylineX derives Point3dListX
+  if (rhino.PolylineX) {
+    const pl = new rhino.PolylineX();
+    pl.add(0, 0, 0); pl.add(3, 0, 0); pl.add({ X: 3, Y: 4, Z: 0 }); pl.add(0, 0, 0);
+    assert(pl instanceof rhino.Point3dListX);
+    assert.strictEqual(pl.count, 4);
+    assert.strictEqual(pl.segmentCount, 3);
+    assert.strictEqual(pl.length, 12);
+    assert.strictEqual(pl.isClosed, true);
+    const dup = pl.duplicate();                           // a copy: the original is untouched
+    dup.set(1, { X: 6, Y: 0, Z: 0 });
+    assert.deepStrictEqual(pl.get(1), { X: 3, Y: 0, Z: 0 });
+    assert.deepStrictEqual(dup.get(1), { X: 6, Y: 0, Z: 0 });
+    assert.deepStrictEqual(pl.toArray().length, 4);
+    console.log('  PolylineX: count', pl.count, '| length', pl.length, '| isClosed', pl.isClosed);
+    // G82/G83: a sequence argument takes a JS array or a point list
+    if (rhino.PointCloudX && rhino.PointCloudX.prototype.addRange) {
+      const pcl = new rhino.PointCloudX();
+      pcl.addRange([{ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 0, Z: 0 }]);
+      pcl.addRange(pl);
+      assert.strictEqual(pcl.count, 6);
+      console.log('  sequences: PointCloudX.addRange(array | PolylineX) -> count', pcl.count);
+      pcl.delete();
+    }
+    dup.delete(); pl.delete();
+  }
+
   console.log('WASM TIER: PASS');
 }).catch(e => { console.error('SMOKE FAIL:', e); process.exit(1); });

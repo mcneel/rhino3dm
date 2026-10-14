@@ -65,6 +65,40 @@ def _writers_planned(per_class):
     return {(p['m']['Type'], p['m']['Name']) for _, plans in per_class for p in plans}
 
 
+def data_marker_pass(vt, per_class, manifest, skipped):
+    """a data class member naming a generated class (`new PolylineCurve(this)`;
+    G82) carries class-mode markers: resolved against what was generated, or
+    the member is refused -- and so is every member that depends on it"""
+    per_reg = {cls['reg']: plans for cls, plans in per_class}
+    data = {t['Cs'] for t in vt['types'] if t.get('IsData')}
+    dropped = set()
+    for m in vt['members']:
+        if not m.get('Ok') or m['Type'] not in data or '$$' not in (m.get('Decl') or '') + (m.get('Def') or ''):
+            continue
+        d, dwhy, _ = resolve_markers(m['Decl'], None, per_reg, manifest)
+        f, fwhy, _ = resolve_markers(m['Def'], None, per_reg, manifest)
+        rt, rwhy, _ = resolve_markers(m.get('Ret') or '', None, per_reg, manifest)
+        pts = [resolve_markers(q['Type'], None, per_reg, manifest) for q in m.get('Params') or []]
+        if d is None or f is None or rt is None or any(x[0] is None for x in pts):
+            m['Ok'], m['Reason'] = False, 'marker: %s' % (dwhy if d is None else fwhy if f is None else rwhy if rt is None
+                                                          else next(x[1] for x in pts if x[0] is None))
+            dropped.update(m.get('Keys') or [])
+            skipped['data member: marker'] = skipped.get('data member: marker', 0) + 1
+            continue
+        m['Decl'], m['Def'], m['Ret'] = d, f, rt
+        for q, x in zip(m.get('Params') or [], pts):
+            q['Type'] = x[0]
+        m['ClassDeps'] = sorted({g[4:] for g in re.findall(r'\bBND_\w+X\b', f + d)} & {c['reg'] for c in CLASSES})
+    while dropped:
+        more = set()
+        for m in vt['members']:
+            if m.get('Ok') and any(r in dropped for r in m.get('Refs') or []):
+                m['Ok'], m['Reason'] = False, 'depends on a refused member'
+                more.update(m.get('Keys') or [])
+                skipped['data member: marker'] = skipped.get('data member: marker', 0) + 1
+        dropped = more
+
+
 def managed_null_pass(per_class, manifest, c_by_name, skipped):
     """G75: a class whose RhinoCommon type has MANAGED fields (written only by members,
     specgen ManagedFields) re-plans with its members' `(managed-null)` analyses when
@@ -393,7 +427,11 @@ def main():
         changed = True
         while changed:
             changed = False
-            mut = {k for m in vt['members'] if m['Mutates'] for k in m['Keys']}
+            # reading a property calls its getter, not its setter: a getter key
+            # mutates only when the getter does (G81)
+            mut = {k for m in vt['members'] for k in m['Keys']
+                   if (m.get('GetterMutates') if m['Kind'] in ('property', 'indexer') and '.set_' not in k
+                       else m['Mutates'])}
             for m in vt['members']:
                 if not m['Mutates'] and not m['Static'] and any(c in mut for c in m.get('SelfCallsTmp', [])):
                     m['Mutates'] = changed = True
@@ -445,6 +483,9 @@ def main():
         p['fn']['returns'], p['fn']['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in p['fn']['params']))
         for ps in argctors.values() for p in ps}
+    decls |= {'extern "C" %s %s(%s);' % (       # a conditional ctor's other arm (G82)
+        f['returns'], f['name'], ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in f['params']))
+        for ps in argctors.values() for p in ps for f in p.get('extra_fns') or []}
     decls |= {'extern "C" %s %s(%s);' % (
         fn['returns'], fn['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
@@ -535,6 +576,7 @@ def main():
             BRIDGE_CANDIDATES.setdefault(tcs, []).append(x)
     if os.path.exists(vt_path):
         vt_regs = [t['Cs'] + 'X' for t in vt['types'] if not t['IsStaticClass']]
+        data_marker_pass(vt, per_class, manifest, skipped)
         files.update(emit_valuetypes(vt, emit_valuetype_bindings(vt, skipped)))
     else:
         vt_regs = []
@@ -595,12 +637,38 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// a sequence argument (G82/G83): a JS array, or a list object with toArray()
+// (Point3dListX, PolylineX: decision 4 of option 4) -- anything else throws
+inline bool RH3DM_JsIsSeq(const emscripten::val& v) {
+  return v.isArray() || (v.typeOf().as<std::string>() == "object" && !v.isNull()
+                         && v["toArray"].typeOf().as<std::string>() == "function"); }
+template <class T> inline std::vector<T> RH3DM_JsSeq(const emscripten::val& v) {
+  if (v.isArray()) return emscripten::vecFromJSArray<T>(v);
+  if (RH3DM_JsIsSeq(v)) return emscripten::vecFromJSArray<T>(v.call<emscripten::val>("toArray"));
+  throw std::invalid_argument("expected an array or a point list"); }
 // a DateTime result (File3dm.Created; G68): a JS Date (local time, month 0-based)
 typedef emscripten::val RH3DM_DATETIME;
 inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
   return emscripten::val::global("Date").new_(y, mo - 1, d, h, mi, s); }
 inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
 #endif
+// RhinoCommon's SimpleArrayPoint3d in translated data-class bodies (G81): an
+// ON_3dPointArray filled as its C# constructor appends; the pointers it hands a
+// native call are untyped, as an IntPtr is
+struct RH3DM_Points
+{
+  ON_3dPointArray a;
+  RH3DM_Points() {}
+  explicit RH3DM_Points(const std::vector<BND_Point3dX>& v)
+  {
+    a.Reserve((int)v.size());
+    for (const BND_Point3dX& p : v) a.Append(ON_3dPoint(p.m_x, p.m_y, p.m_z));
+  }
+  int Count() const { return a.Count(); }
+  void* ConstPointer() const { return (void*)&a; }
+  void* NonConstPointer() { return (void*)&a; }
+};
+
 // translated string members (G79), with .NET's semantics: Replace replaces every
 // occurrence and refuses an empty pattern; NewLine is the platform's
 inline std::wstring RH3DM_StrReplace(std::wstring s, const std::wstring& a, const std::wstring& b)
@@ -751,7 +819,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                           if m in BY_REG}
                        | arg_classes) - {cls['reg']})
         # data classes (G64): returned by a bridge, or taken as arguments (dereferenced here)
-        data_deps = sorted({p['shape'][1] + 'X' for p in plans if p['shape'][0] in ('datafrom', 'datafill')}
+        data_deps = sorted({p['shape'][1] + 'X' for p in plans if p['shape'][0] in ('datafrom', 'datafill', 'holderdata')}
                            | {cs + 'X' for p in plans for t, _ in p['bind_args'] for cs, cpp in DATA_CPP.items()
                               if t in ('const %s*' % cpp, 'const %s&' % cpp)}
                            | {cs + 'X' for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()

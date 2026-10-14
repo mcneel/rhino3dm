@@ -489,6 +489,22 @@ CS_ARG = {
     # chooses (value.ToArgb()) -- so no default conversion: only a recorded one
     'Color':    ('BND_Color', None),
 }
+def seq_elem(cstype):
+    """`IEnumerable<Point3d>` -> 'Point3d': a sequence parameter's element (G82),
+    bound as a std::vector of the element's binding type; None otherwise"""
+    m = re.match(r'^(?:[\w.]*\.)?IEnumerable<(\w+)>$', (cstype or '').replace(' ', ''))   # any namespace spelling
+    if not m:
+        return None
+    e = m.group(1)
+    return e if e in VT_CPP or e in ('double', 'int') else None
+
+
+def seq_cpp(cstype):
+    """the binding type of a sequence parameter's element (G82)"""
+    e = seq_elem(cstype)
+    return None if e is None else VT_CPP.get(e, e)
+
+
 CS_ARG_CTYPES = {
     'double': {'double'}, 'int': {'int'}, 'bool': {'bool'}, 'uint': {'unsigned int'},
     'string': {'const RHMONO_STRING*'},
@@ -523,7 +539,7 @@ def field_backed(vt, cs):
     for m in vt['members']:
         if m['Type'] != cs or m['Kind'] != 'property' or m.get('Static') or not m.get('Ok', True):
             continue
-        g = re.search(r'::%s\(\)\n\{\n  return (\w+);\n\}' % re.escape(m['Name']), m.get('Def') or '')
+        g = re.search(r'::%s\(\)(?: const)?\n\{\n  return (\w+);\n\}' % re.escape(m['Name']), m.get('Def') or '')
         if g and g.group(1) in fields and g.group(1) not in out:
             out[g.group(1)] = m['Name']
     return out
@@ -615,6 +631,15 @@ HOLDERS = {
     'SimpleArrayCurvePointer': {'ctype': 'ON_SimpleArray<ON_Curve*>*',
                                'local': 'ON_SimpleArray<ON_Curve*> {n};',
                                'cs': 'Curve[]', 'ptr': 'ON_Curve'},
+}
+
+# C functions that corrupt memory for ordinary arguments: every member calling
+# one is refused until the C layer is fixed upstream (the generator never
+# ships a member it knows overruns the heap). Keyed by C function -> finding.
+UNSAFE_NATIVES = {
+    # tail copied to the old end instead of index+count: writes past the
+    # array whenever count < Count - index (PointCloud.InsertRange)
+    'ON_PointCloud_InsertPoints': 'pilot-findings #34',
 }
 
 EXMAP = {

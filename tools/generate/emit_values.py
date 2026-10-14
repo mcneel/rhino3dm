@@ -69,6 +69,45 @@ def emit_valuetypes(vt, blocks):
         '// translated structs mirror RhinoCommon\'s layout (padding included), so',
         '// they convert to the C parameter types; sizes are checked at compile time.',
         '#include <cstring>',
+        '#include <algorithm>',
+        '#include <stdexcept>',
+        '// System.Array\'s statics on a std::vector, with .NET\'s semantics (G80): ranges',
+        '// checked, Copy safe for overlap, LastIndexOf searching back from its start,',
+        '// Sort/BinarySearch by the element\'s CompareTo (the default comparer), a',
+        '// BinarySearch miss the complement of the insertion point',
+        'struct RH3DM_NullComparer { RH3DM_NullComparer(std::nullptr_t = nullptr) {} };',
+        '#include <memory>',
+        'struct RH3DM_Points;   // SimpleArrayPoint3d (G81): defined in gen_common.h, beside opennurbs',
+        '// a data list a call returned, owned here: its items (`new SimpleArrayPoint3d(GetRange(0, Count))`; G81)',
+        'template <class T> inline auto RH3DM_OwnedItems(T* p) -> decltype(p->ToArray()) { std::unique_ptr<T> h(p); return h->ToArray(); }',
+        'template <class T> inline void RH3DM_ArrCopy(const std::vector<T>& src, int si, std::vector<T>& dst, int di, int n) {',
+        '  if (n < 0 || si < 0 || di < 0 || si + n > (int)src.size() || di + n > (int)dst.size()) throw std::out_of_range("Array.Copy");',
+        '  if (&src == &dst && di > si) std::copy_backward(src.begin() + si, src.begin() + si + n, dst.begin() + di + n);',
+        '  else std::copy(src.begin() + si, src.begin() + si + n, dst.begin() + di); }',
+        'template <class T> inline void RH3DM_ArrClear(std::vector<T>& a, int i, int n) {',
+        '  if (i < 0 || n < 0 || i + n > (int)a.size()) throw std::out_of_range("Array.Clear");',
+        '  std::fill(a.begin() + i, a.begin() + i + n, T{}); }',
+        'template <class T> inline int RH3DM_ArrIndexOf(const std::vector<T>& a, const T& x, int i, int n) {',
+        '  if (i < 0 || n < 0 || i + n > (int)a.size()) throw std::out_of_range("Array.IndexOf");',
+        '  for (int k = i; k < i + n; k++) if (a[k] == x) return k;',
+        '  return -1; }',
+        'template <class T> inline int RH3DM_ArrLastIndexOf(const std::vector<T>& a, const T& x, int i, int n) {',
+        '  if (a.empty() || n == 0) return -1;',
+        '  if (i < 0 || n < 0 || i >= (int)a.size() || i - n + 1 < 0) throw std::out_of_range("Array.LastIndexOf");',
+        '  for (int k = i; k > i - n; k--) if (a[k] == x) return k;',
+        '  return -1; }',
+        'template <class T> inline void RH3DM_ArrReverse(std::vector<T>& a, int i, int n) {',
+        '  if (i < 0 || n < 0 || i + n > (int)a.size()) throw std::out_of_range("Array.Reverse");',
+        '  std::reverse(a.begin() + i, a.begin() + i + n); }',
+        'template <class T> inline void RH3DM_ArrSort(std::vector<T>& a, int i, int n, RH3DM_NullComparer = nullptr) {',
+        '  if (i < 0 || n < 0 || i + n > (int)a.size()) throw std::out_of_range("Array.Sort");',
+        '  std::sort(a.begin() + i, a.begin() + i + n, [](T x, T y) { return x.CompareTo(y) < 0; }); }',
+        'template <class T> inline int RH3DM_ArrBinarySearch(const std::vector<T>& a, int i, int n, T x, RH3DM_NullComparer = nullptr) {',
+        '  if (i < 0 || n < 0 || i + n > (int)a.size()) throw std::out_of_range("Array.BinarySearch");',
+        '  int lo = i, hi = i + n - 1;',
+        '  while (lo <= hi) { int mid = lo + ((hi - lo) >> 1); T m = a[mid]; int c = m.CompareTo(x);',
+        '    if (c == 0) return mid; if (c < 0) lo = mid + 1; else hi = mid - 1; }',
+        '  return ~lo; }',
         'template <class T> struct RH3DM_PtrT { T* p;',
         '  template <class U> operator U*() const {',
         '    static_assert(sizeof(U) == sizeof(T), "value-type layout differs from the C struct");',
@@ -110,7 +149,24 @@ def emit_valuetypes(vt, blocks):
         by_cpp = {u['Cpp']: u for u in types}
         h += sorted({'#include "%s.h"' % vt_file(by_cpp[f['Type']]) for f in t['Fields']
                      if f['Type'] in by_cpp and by_cpp[f['Type']] is not t})
-        h += ['', 'struct %s\n{' % t['Cpp']]
+        by_cs_t = {u['Cs']: u for u in types}
+        tbase = by_cs_t.get(t.get('Base'))
+        if tbase:
+            h.append('#include "%s.h"' % vt_file(tbase))
+        # generated classes a data member names (G82): declared here, included by the cpp
+        class_deps = sorted({d for m in mine for d in m.get('ClassDeps') or []})
+        h += ['class BND_%s;' % d for d in class_deps]
+        h += ['', 'struct %s%s\n{' % (t['Cpp'], ' : public %s' % tbase['Cpp'] if tbase else '')]
+        if tbase:
+            # a name declared here hides the base's overloads in C++ (not in C#): bring them in (G80)
+            mine_names = {m['Name'] for m in mine if m['Kind'] == 'method' and m.get('Decl')}
+            b = tbase
+            while b is not None and mine_names:
+                hit = mine_names & {m['Name'] for m in ok if m['Type'] == b['Cs'] and m['Kind'] == 'method' and m.get('Decl')}
+                for nm in sorted(hit):
+                    h.append('  using %s::%s;' % (b['Cpp'], nm))   # the nearest base: it brings in its own bases' too
+                mine_names -= hit
+                b = by_cs_t.get(b.get('Base'))
         for f in t['Fields']:
             # a data class field carries RhinoCommon's initializer (G64)
             init = (' = ' + f['Init']) if f.get('Init') else (' = 0' if not f['Type'].startswith(('BND_', 'RH3DM_', 'std::')) else '')
@@ -131,6 +187,7 @@ def emit_valuetypes(vt, blocks):
         native = any(m.get('Native') for m in mine)
         cpp = [VT_BANNER, all_hdrs + ('#include "gen_common.h"   // C declarations for native calls\n'
                                       if native else '')]
+        cpp += ['#include "gen_%s.h"\n' % d.lower() for d in class_deps]
         cpp += [m['Def'] + '\n' for m in mine if m.get('Def')]
         if t['Cs'] in blocks:
             py_block, js_tag, js_block = blocks[t['Cs']]
@@ -382,7 +439,7 @@ def emit_valuetype_bindings(vt, skipped):
             types2 = []
             for i, t in enumerate(types):
                 if t.startswith('std::vector<'):
-                    conv.append('%s a%d_v = emscripten::vecFromJSArray<%s>(a%d);' % (t, i, t[len('std::vector<'):-1], i))
+                    conv.append('%s a%d_v = RH3DM_JsSeq<%s>(a%d);' % (t, i, t[len('std::vector<'):-1], i))
                     body = re.sub(r'\ba%d\b' % i, 'a%d_v' % i, body)
                     types2.append('emscripten::val')
                 else:
@@ -478,16 +535,57 @@ def emit_valuetype_bindings(vt, skipped):
     return blocks
 
 
+# a generic data base read for one element type (G80) is a C++ base only: its
+# members are bound on the first registered class deriving from it
+MONO_BASES = {'RhinoList'}
+
+
+def data_chain(t, vt):
+    """t and the data classes it derives from, nearest first (G80)"""
+    by = {u['Cs']: u for u in vt['types']}
+    out = []
+    while t is not None:
+        out.append(t)
+        t = by.get(t.get('Base'))
+    return out
+
+
 def emit_data_bindings(t, vt, skipped):
-    """a DATA class (G64: ConstructionPlane, File3dmWriteOptions): a real class in
-    both languages -- constructed, mutated in place, nullable -- never a value
-    object. Members are RhinoCommon's public ones; translated enums cross the
-    boundary as the registered public enum (RH3DM_Pub and its inverse)."""
+    """a DATA class (G64: ConstructionPlane, File3dmWriteOptions; G80: Point3dList,
+    Polyline): a real class in both languages -- constructed, mutated in place,
+    nullable -- never a value object. Members are RhinoCommon's public ones;
+    translated enums cross the boundary as the registered public enum (RH3DM_Pub
+    and its inverse). G80 adds constructors with arguments, statics, the
+    indexer as the language's item protocol (Python __getitem__/__setitem__/__len__,
+    JS get/set), sequences in (a Python sequence / JS array) and out (list /
+    array), data objects out (owned by the caller), and inheritance: a class
+    deriving from a registered data class is registered on it; members of an
+    unregistered generic base (RhinoList) are bound on its first registered
+    subclass."""
     T, cs = t['Cpp'], t['Cs']
     reg = cs + 'X'
-    mine = [m for m in vt['members'] if m['Type'] == cs and m['Ok'] and m['Public']]
-    pyl = ['  py::class_<%s>(m, "%s")' % (T, reg), '      .def(py::init<>())']
-    jsl = ['  class_<%s>("%s")' % (T, reg), '      .constructor<>()']
+    if cs in MONO_BASES:
+        return '', '', ''
+    chain = data_chain(t, vt)
+    base = chain[1] if len(chain) > 1 and chain[1]['Cs'] not in MONO_BASES else None
+    # this class's members, and those of unregistered bases between it and the next registered one
+    own = [t['Cs']] + [u['Cs'] for u in chain[1:] if u['Cs'] in MONO_BASES and (base is None or chain.index(u) < chain.index(base))]
+    mine = [m for m in vt['members'] if m['Type'] in own and m['Ok'] and m['Public']]
+    # a derived declaration hides the base's member of that name and arity
+    seen, ordered = set(), []
+    for c in own:
+        for m in (x for x in mine if x['Type'] == c):
+            key = (m['Kind'], m['Name'], len(m.get('Params') or []))
+            if m['Kind'] == 'ctor' and c != t['Cs']:
+                continue                               # constructors are not inherited
+            if key in seen and m['Kind'] != 'ctor':
+                continue
+            seen.add(key)
+            ordered.append(m)
+    mine = ordered
+    data_cpp = {u['Cpp']: u['Cs'] for u in vt['types'] if u.get('IsData')}
+    class_gens = {c['gen'] for c in CLASSES}           # a generated class a data member returns (G82)
+    registered = lambda cpp: (cpp in data_cpp and data_cpp[cpp] not in MONO_BASES) or cpp in class_gens
 
     def pub_t(ty):
         return VT_ENUMS.get(ty, ty)
@@ -497,10 +595,56 @@ def emit_data_bindings(t, vt, skipped):
 
     def ret(ty, expr):
         return 'RH3DM_Pub(%s)' % expr if ty in VT_ENUMS else expr
+
+    def bindable(m):
+        """the shapes a binding can carry: no out/ref, no comparer (decision 3), data
+        objects only of registered classes"""
+        ps = m.get('Params') or []
+        if any(q.get('Mode') for q in ps) or any(q['Type'] == 'RH3DM_NullComparer' for q in ps):
+            return False
+        # a sequence the body WRITES (CopyTo(array)): the caller's list would be a copy
+        if re.search(r'(?<!const )std::vector<[^>]*>&', m.get('Decl') or ''):
+            return False
+        r = (m.get('Ret') or '')
+        if r.endswith('*') and not registered(r[:-1]):
+            return False
+        return not any(q['Type'].rstrip('*') in data_cpp and not registered(q['Type'].rstrip('*')) for q in ps)
+
+    pyl = ['  py::class_<%s%s>(m, "%s")' % (T, (', ' + base['Cpp']) if base else '', reg)]
+    jsl = ['  class_<%s%s>("%s")' % (T, (', base<%s>' % base['Cpp']) if base else '', reg)]
+    ctors = [m for m in mine if m['Kind'] == 'ctor' and m.get('Decl') and bindable(m)]
+    if not any(not (m.get('Params') or []) for m in ctors):
+        ctors.insert(0, {'Params': []})              # the implicit default constructor
+    js_ctor_arity = set()
+    for m in ctors:
+        ps = m.get('Params') or []
+        pyl.append('      .def(py::init<%s>()%s)' % (', '.join(pub_t(q['Type']) if not q['Type'].startswith('std::vector<') else 'const %s&' % q['Type'] for q in ps),
+                                                    ''.join(', py::arg("%s")' % q['Name'] for q in ps)))
+        if len(ps) in js_ctor_arity:
+            skipped['js data-class ctor (same arity)'] = skipped.get('js data-class ctor (same arity)', 0) + 1
+            continue
+        if not ps:
+            jsl.append('      .constructor<>()')
+        elif any(q['Type'].startswith('std::vector<') for q in ps):
+            # a sequence argument: a JS array, converted (G80)
+            vps = ', '.join(('emscripten::val a%d' if q['Type'].startswith('std::vector<') else pub_t(q['Type']) + ' a%d') % i for i, q in enumerate(ps))
+            args = ', '.join(('RH3DM_JsSeq<%s>(a%d)' % (q['Type'][len('std::vector<'):-1], i)) if q['Type'].startswith('std::vector<') else 'a%d' % i for i, q in enumerate(ps))
+            jsl.append('      .constructor(optional_override([](%s) { return new %s(%s); }), allow_raw_pointers())' % (vps, T, args))
+        else:
+            jsl.append('      .constructor<%s>()' % ', '.join(pub_t(q['Type']) for q in ps))
+        js_ctor_arity.add(len(ps))
+    has_count = any(m['Kind'] == 'property' and m['Name'] == 'Count' and not m.get('Static') for m in mine)
     for m in mine:
         k, n = m['Kind'], m['Name']
+        if k == 'ctor':
+            continue
+        if not bindable(m):
+            skipped['data-class member shape'] = skipped.get('data-class member shape', 0) + 1
+            continue
         if k == 'property' and not m.get('Static'):
             getter = '[](const %s& s) { return %s; }' % (T, ret(m['Ret'], 's.%s()' % m['Getter']))
+            if m['Ret'].startswith('std::vector<'):
+                getter = '[](%s& s) { return s.%s(); }' % (T, m['Getter'])
             if m.get('Setter'):
                 setter = '[](%s& s, %s v) { s.%s(%s); }' % (T, pub_t(m['Ret']), m['Setter'], priv(m['Ret'], 'v'))
                 pyl.append('      .def_property("%s", %s, %s)' % (n, getter, setter))
@@ -510,21 +654,48 @@ def emit_data_bindings(t, vt, skipped):
                     skipped['js data-class enum property'] = skipped.get('js data-class enum property', 0) + 1
             else:
                 pyl.append('      .def_property_readonly("%s", %s)' % (n, getter))
-                if m['Ret'] not in VT_ENUMS:
+                if m['Ret'].startswith('std::vector<'):
+                    jsl.append('      .function("%s", optional_override([](%s& s) { return RH3DM_JsArray(s.%s()); }))' % (camel(n), T, m['Getter']))
+                elif m['Ret'] not in VT_ENUMS:
                     jsl.append('      .property("%s", &%s::%s)' % (camel(n), T, m['Getter']))
                 else:
                     skipped['js data-class enum property'] = skipped.get('js data-class enum property', 0) + 1
-        elif k == 'method' and not m.get('Static'):
-            if any(q.get('Mode') for q in m['Params'] or []) or m['Ret'].endswith('*'):
-                skipped['data-class method shape'] = skipped.get('data-class method shape', 0) + 1
-                continue
+            if n == 'Count' and has_count:
+                pyl.append('      .def("__len__", [](const %s& s) { return s.%s(); })' % (T, m['Getter']))
+        elif k == 'indexer' and len(m.get('Params') or []) == 1:
+            # the item protocol (G80); an out-of-range index throws (IndexError)
+            q = m['Params'][0]
+            pyl.append('      .def("__getitem__", [](%s& s, %s i) { return s.%s(i); })' % (T, q['Type'], m['Getter']))
+            jsl.append('      .function("get", optional_override([](%s& s, %s i) { return s.%s(i); }))' % (T, q['Type'], m['Getter']))
+            if m.get('Setter'):
+                pyl.append('      .def("__setitem__", [](%s& s, %s i, %s v) { s.%s(i, v); })' % (T, q['Type'], m['Ret'], m['Setter']))
+                jsl.append('      .function("set", optional_override([](%s& s, %s i, %s v) { s.%s(i, v); }))' % (T, q['Type'], m['Ret'], m['Setter']))
+        elif k == 'method':
             ps = m['Params'] or []
-            sig = ''.join(', %s %s' % (pub_t(q['Type']), q['Name']) for q in ps)
-            call = 's.%s(%s)' % (n, ', '.join(priv(q['Type'], q['Name']) for q in ps))
-            body = ('%s;' % call) if m['Ret'] == 'void' else ('return %s;' % ret(m['Ret'], call))
-            pyl.append('      .def("%s", [](%s& s%s) { %s }%s)'
-                       % (n, T, sig, body, ''.join(', py::arg("%s")' % q['Name'] for q in ps)))
-            jsl.append('      .function("%s", optional_override([](%s& s%s) { %s }))' % (camel(n), T, sig, body))
+            st = bool(m.get('Static'))
+            sig = ', '.join('%s %s' % (pub_t(q['Type']) if not q['Type'].startswith('std::vector<') else 'const %s&' % q['Type'], q['Name']) for q in ps)
+            call = '%s%s(%s)' % ('%s::' % T if st else 's.', n, ', '.join(priv(q['Type'], q['Name']) for q in ps))
+            r = m['Ret']
+            pybody = ('%s;' % call) if r == 'void' else ('return %s;' % ret(r, call))
+            self_p = '' if st else '%s& s%s' % (T, ', ' if ps else '')
+            pyl.append('      .%s("%s", [](%s%s) { %s }%s%s)'
+                       % ('def_static' if st else 'def', n, self_p, sig, pybody,
+                          ''.join(', py::arg("%s")' % q['Name'] for q in ps),
+                          ', py::return_value_policy::take_ownership' if r.endswith('*') else ''))
+            # JS: sequences in as arrays, out as arrays
+            jps, conv = [], []
+            for q in ps:
+                if q['Type'].startswith('std::vector<'):
+                    jps.append('emscripten::val %s_js' % q['Name'])
+                    conv.append('%s %s = RH3DM_JsSeq<%s>(%s_js);' % (q['Type'], q['Name'], q['Type'][len('std::vector<'):-1], q['Name']))
+                else:
+                    jps.append('%s %s' % (pub_t(q['Type']), q['Name']))
+            jcall = call if not r.startswith('std::vector<') else 'RH3DM_JsArray(%s)' % call
+            jbody = ' '.join(conv + [('%s;' % jcall) if r == 'void' else ('return %s;' % ret(r, jcall))])
+            jself = '' if st else '%s& s%s' % (T, ', ' if jps else '')
+            jsl.append('      .%s("%s", optional_override([](%s%s) { %s })%s)'
+                       % ('class_function' if st else 'function', camel(n), jself, ', '.join(jps), jbody,
+                          ', allow_raw_pointers()' if r.endswith('*') else ''))
         else:
             skipped['data-class member kind %s' % k] = skipped.get('data-class member kind %s' % k, 0) + 1
     pyl[-1] += ';'

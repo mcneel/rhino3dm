@@ -1580,7 +1580,8 @@ def test_js_array_shape_for_vector_parameters():
     # G70: a std::vector parameter arrives in JS as an array (emscripten::val)
     import emit_classes as E
     key, check, conv = E.js_class_shape('emscripten::val')
-    assert key == 'array' and check.format(v='v0') == 'v0.isArray()' and conv.format(v='v0') == 'v0'
+    # G83: or a point list (Point3dListX / PolylineX: anything with toArray())
+    assert key == 'array' and check.format(v='v0') == 'RH3DM_JsIsSeq(v0)' and conv.format(v='v0') == 'v0'
 
 
 def test_table_iteration_through_an_internal_manifest_enumerator():
@@ -1957,3 +1958,103 @@ def test_variant_enum_map_reads_and_writes_as_rhinocommon_compares():
         R.CS_ENUMS.clear(); R.CS_ENUMS.update(saved[0]); R.ENUM_NAMED.clear(); R.ENUM_NAMED.update(saved[1])
         R.WRAPPER.clear(); R.WRAPPER.update(saved[2]); D['ff'] = saved[3]
         R.C_BY_NAME.pop('G', None)
+
+
+def test_sequence_parameter_where_csharp_passed_getconstarray():
+    # G82: `Point3d[] a = GetConstArray(points, out count); F(ptr, count, a, null)`,
+    # read by specgen as `F(ptr, points.Count, points, null)`: the vector's data and size
+    seq = ('', 'IEnumerable<Point3d>', 'points')
+    calls = [SELF, {'Kind': 'parammember', 'Text': 'points.Count'}, {'Kind': 'param', 'Text': 'points'},
+             {'Kind': 'literal', 'Text': 'null'}]
+    p, why = P.plan(member('void', params=[seq], calls=calls),
+                    cfn('void', 'ON_Curve*', 'int', 'const ON_3dPoint*', 'const ON_3dVector*'), CURVE)
+    assert why is None
+    assert p['bind_args'] == [('const std::vector<BND_Point3dX>&', 'points')]
+    assert p['call_exprs'][1:] == ['(int)points.size()', 'RH3DM_Ptr(points.data())', 'nullptr']
+    # a C element type that is not the sequence's is refused, never reinterpreted
+    _, why = P.plan(member('void', params=[seq], calls=calls),
+                    cfn('void', 'ON_Curve*', 'int', 'const ON_Interval*', 'const ON_3dVector*'), CURVE)
+    assert why.startswith('sequence points')
+    # as is a C side that could write through the pointer
+    _, why = P.plan(member('void', params=[seq], calls=calls),
+                    cfn('void', 'ON_Curve*', 'int', 'ON_3dPoint*', 'const ON_3dVector*'), CURVE)
+    assert why.startswith('sequence points')
+    assert R.seq_elem('System.Collections.Generic.IEnumerable<Point3d>') == 'Point3d'
+    assert R.seq_elem('IEnumerable<Color>') is None
+
+
+def test_guid_empty_early_return_and_js_sequence_shape():
+    # G82: `if (points.Count < 1) return Guid.Empty;` (File3dmObjectTable.AddPolyline)
+    g = {'Return': 'Guid.Empty'}
+    assert P.early_return_cpp(g, ('conv', 'BND_UUID', 'ON_UUID_to_Binding({c})'), 'Guid') == 'ON_UUID_to_Binding(ON_nil_uuid)'
+    assert P.early_return_cpp(g, ('direct', 'int'), 'int') is None
+    import emit_classes as E
+    key, check, conv = E.js_class_shape('const std::vector<BND_Point3dX>&')
+    assert key == 'seq:BND_Point3dX' and check.format(v='v1') == 'RH3DM_JsIsSeq(v1)'
+    assert conv.format(v='v1') == 'RH3DM_JsSeq<BND_Point3dX>(v1)'
+
+
+def test_members_calling_an_unsafe_native_are_refused():
+    # G82 / pilot-findings #34: ON_PointCloud_InsertPoints overruns the heap
+    seq = ('', 'IEnumerable<Point3d>', 'points')
+    calls = [SELF, {'Kind': 'param', 'Text': 'index'}, {'Kind': 'parammember', 'Text': 'points.Count'},
+             {'Kind': 'param', 'Text': 'points'}]
+    x = member('void', params=[('', 'int', 'index'), seq], calls=calls)
+    x['Calls'][0]['Name'] = 'ON_PointCloud_InsertPoints'
+    _, why = P.plan(x, cfn('void', 'ON_Curve*', 'int', 'int', 'const ON_3dPoint*'), CURVE)
+    assert why.startswith('unsafe native ON_PointCloud_InsertPoints')
+
+
+def test_constructor_choosing_its_creation_call_is_one_ternary():
+    # G82: PolylineCurve(points): `if (points.Count < 1) ptr = New(IntPtr.Zero); else ptr = New2(..)`
+    PC = R.BY_CS['PolylineCurve']
+    saved = dict(R.C_BY_NAME)
+    try:
+        R.C_BY_NAME['N1'] = {'name': 'N1', 'returns': 'ON_PolylineCurve*', 'params': [{'type': 'ON_PolylineCurve*', 'name': 'o'}]}
+        R.C_BY_NAME['N2'] = {'name': 'N2', 'returns': 'ON_PolylineCurve*', 'params': [{'type': 'int', 'name': 'n'}, {'type': 'const ON_3dPoint*', 'name': 'p'}]}
+        x = {'Type': PC['type'], 'Kind': 'constructor', 'Name': 'PolylineCurve', 'Variant': 'portable', 'Body': 'trivial',
+             'Signature': 'PolylineCurve(System.Collections.Generic.IEnumerable<Point3d> points)',
+             'Params': [{'Name': 'points', 'Type': 'System.Collections.Generic.IEnumerable<Point3d>', 'Mode': ''}],
+             'CtorCond': {'Cond': 'points.Count < 1', 'Ids': ['points.Count']},
+             'Calls': [{'Name': 'N1', 'Args': [{'Kind': 'expr', 'Text': 'IntPtr.Zero'}]},
+                       {'Name': 'N2', 'Args': [{'Kind': 'parammember', 'Text': 'points.Count'}, {'Kind': 'param', 'Text': 'points'}]}]}
+        p, why = P.cond_ctor_plan(x, PC, R.C_BY_NAME)
+        assert why is None and p['bind_args'] == [('const std::vector<BND_Point3dX>&', 'points')]
+        assert p['ctor_call'] == '(((int)points.size()) < 1) ? N1(nullptr) : N2((int)points.size(), RH3DM_Ptr(points.data()))'
+        assert [f['name'] for f in p['extra_fns']][-1] == 'N2'
+        # a condition over anything but the parameters is refused
+        bad = dict(x, CtorCond={'Cond': 'Count < 1', 'Ids': ['Count']})
+        assert P.cond_ctor_plan(bad, PC, R.C_BY_NAME)[1] == 'cond ctor id Count'
+    finally:
+        R.C_BY_NAME.clear(); R.C_BY_NAME.update(saved)
+
+
+def test_data_member_markers_resolve_or_refuse_with_dependents():
+    # G82: Polyline.ToPolylineCurve: `$$new:PolylineCurve:IEnumerable<Point3d>$$((*this).ToArray())`
+    import bnd_gen as B
+    PC = R.BY_CS['PolylineCurve']
+    saved = dict(P.ARGCTORS)
+    def vt():
+        return {'types': [{'Cs': 'Polyline', 'Cpp': 'BND_PolylineX', 'IsData': True, 'Fields': []}],
+                'members': [{'Type': 'Polyline', 'Name': 'ToPolylineCurve', 'Kind': 'method', 'Ok': True,
+                             'Keys': ['Polyline.ToPolylineCurve/0'], 'Ret': '$$class:PolylineCurve$$', 'Params': [],
+                             'Decl': '$$class:PolylineCurve$$ ToPolylineCurve() const;',
+                             'Def': 'return $$new:PolylineCurve:IEnumerable<Point3d>$$((*this).ToArray());'},
+                            {'Type': 'Polyline', 'Name': 'ToNurbs', 'Kind': 'method', 'Ok': True, 'Keys': ['Polyline.ToNurbs/0'],
+                             'Refs': ['Polyline.ToPolylineCurve/0'], 'Ret': 'int', 'Params': [], 'Decl': 'int ToNurbs();', 'Def': ''}]}
+    try:
+        ctor = {'m': {'Params': [{'Type': 'System.Collections.Generic.IEnumerable<Point3d>'}]},
+                'bind_args': [('const std::vector<BND_Point3dX>&', 'points')]}
+        P.ARGCTORS[PC['reg']] = [ctor]
+        v = vt()
+        B.data_marker_pass(v, [(PC, [])], {'members': []}, {})
+        m = v['members'][0]
+        assert m['Ok'] and m['Ret'] == 'BND_PolylineCurveX*' and m['ClassDeps'] == ['PolylineCurveX']
+        assert m['Def'] == 'return new BND_PolylineCurveX((*this).ToArray());'
+        # no such constructor generated: refused, and so is what depends on it
+        P.ARGCTORS[PC['reg']] = []
+        v = vt()
+        B.data_marker_pass(v, [(PC, [])], {'members': []}, {})
+        assert [x['Ok'] for x in v['members']] == [False, False]
+    finally:
+        P.ARGCTORS.clear(); P.ARGCTORS.update(saved)

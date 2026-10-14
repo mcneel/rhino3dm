@@ -25,6 +25,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 static class TranslateCommand
 {
+    // G80: a generic data base read for one element type, or (param null) a class
+    // deriving from one with `RhinoList<Point3d>` written as the plain name
+    static TypeDeclarationSyntax Monomorphize(TypeDeclarationSyntax t, string param, string arg, Dictionary<string, string> generics)
+        => (TypeDeclarationSyntax)new Monomorphizer(param, arg, generics).Visit(t);
+
     public static int Run(string outPath, Sources src)
     {
         // C# type -> C++ type. RhinoMath is a static class: translated (its bodies are
@@ -70,8 +75,17 @@ static class TranslateCommand
             ["ConstructionPlaneGridDefaults"] = "BND_ConstructionPlaneGridDefaultsX",
             ["File3dmWriteOptions"] = "BND_File3dmWriteOptionsX",
             ["PageSettings"] = "BND_PageSettingsX",
+            // managed-state classes (G80; Luis 2026-10-14, option 4): RhinoList<T> read
+            // as RhinoList of Point3d (monomorphized below), its subclasses on it
+            ["RhinoList"] = "BND_RhinoListPoint3dX",
+            ["Point3dList"] = "BND_Point3dListX",
+            ["Polyline"] = "BND_PolylineX",
         };
         foreach (var kv in DataWanted) Wanted[kv.Key] = kv.Value;
+        // generic data bases instantiated for ONE element type: `RhinoList<T>` with
+        // T = Point3d becomes a plain class `RhinoList`, and `RhinoList<Point3d>` in
+        // the classes deriving from it the plain name (G80)
+        var Monomorphic = new Dictionary<string, string> { ["RhinoList"] = "Point3d" };
 
         var decls = new Dictionary<string, List<TypeDeclarationSyntax>>();
         foreach (var f in src.Files)
@@ -89,6 +103,13 @@ static class TranslateCommand
             foreach (var t in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
                 var n = t.Identifier.Text;
+                if (Monomorphic.TryGetValue(n, out var targ) && t is ClassDeclarationSyntax && t.TypeParameterList is { Parameters: [var tp] }
+                    && t.Parent is not TypeDeclarationSyntax)
+                {
+                    decls.TryAdd(n, new());
+                    decls[n].Add(Monomorphize(t, tp.Identifier.Text, targ, Monomorphic));
+                    continue;
+                }
                 if (!Wanted.ContainsKey(n) || t.TypeParameterList != null) continue;
                 if (t is not StructDeclarationSyntax && !(t is ClassDeclarationSyntax c
                         && (c.Modifiers.Any(SyntaxKind.StaticKeyword) || DataWanted.ContainsKey(n)))) continue;
@@ -96,7 +117,7 @@ static class TranslateCommand
                 // name, e.g. some Foo.Interval, are different types)
                 if (t.Parent is TypeDeclarationSyntax) continue;
                 decls.TryAdd(n, new());
-                decls[n].Add(t);
+                decls[n].Add(DataWanted.ContainsKey(n) ? Monomorphize(t, null, null, Monomorphic) : t);
             }
         }
 
@@ -105,6 +126,9 @@ static class TranslateCommand
         foreach (var t in types.Values)
             if (DataWanted.ContainsKey(t.Cs)) { t.IsData = true; t.IsStaticClass = false; }
         foreach (var t in types.Values) t.Collect();
+        // data classes derive from data classes (Polyline : Point3dList : RhinoList; G80)
+        var dataTypes = types.Values.Where(t => t.IsData).ToDictionary(t => t.Cs);
+        foreach (var t in dataTypes.Values) t.LinkBase(dataTypes);
         // field types: primitives, or other translated value types (Plane's
         // Point3d origin); a field of any other type keeps the struct out.
         // A data class also keeps strings and enums; a field of any other type
@@ -116,7 +140,10 @@ static class TranslateCommand
                 t.Fields[kv.Key] = Tx.TypeOrNull(SyntaxFactory.ParseTypeName(kv.Value))
                     ?? (types.TryGetValue(simple, out var ft) && !ft.IsStaticClass ? ft.Cpp : null)
                     ?? (t.IsData && kv.Value == "string" ? "std::wstring" : null)
-                    ?? (t.IsData && Tx.Enums.ContainsKey(simple) ? Tx.UseEnum(simple) : null);
+                    ?? (t.IsData && Tx.Enums.ContainsKey(simple) ? Tx.UseEnum(simple) : null)
+                    // `internal Point3d[] m_items;` (G80): a vector of a translated value type
+                    ?? (t.IsData && kv.Value.EndsWith("[]") && types.TryGetValue(kv.Value[..^2].Split('.').Last(), out var et)
+                        && !et.IsStaticClass && !et.IsData ? $"std::vector<{et.Cpp}>" : null);
                 if (t.IsData && t.Fields[kv.Key] == null)
                 {
                     t.Fields.Remove(kv.Key); t.FieldCs.Remove(kv.Key); t.Dropped.Add(kv.Key);
@@ -147,6 +174,30 @@ static class TranslateCommand
         }
         foreach (var t in types.Values.Where(t => t.LayoutSize == 0 && !t.IsStaticClass && !t.IsData))
             t.LayoutSize = Layout(t, 0).size;          // a data class has no C layout (G64)
+
+        // the classes, known before the value and data types translate: a data class
+        // may construct one (Polyline.ToPolylineCurve; G82)
+        var classDecls = new Dictionary<string, List<TypeDeclarationSyntax>>();
+        var classNs = new Dictionary<string, HashSet<string>>();
+        foreach (var f in src.Files)
+        {
+            var root = src.Root(f, Sources.Portable);
+            foreach (var c in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+            {
+                if (c.Modifiers.Any(SyntaxKind.StaticKeyword) || c.TypeParameterList != null
+                    || c.Parent is TypeDeclarationSyntax || Wanted.ContainsKey(c.Identifier.Text)) continue;
+                var n = c.Identifier.Text;
+                var ns = c.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault()?.Name.ToString() ?? "";
+                classNs.TryAdd(n, new()); classNs[n].Add(ns);
+                classDecls.TryAdd(n, new()); classDecls[n].Add(c);
+            }
+        }
+        // a simple name declared in two namespaces is ambiguous: left out
+        var classes = classDecls.Where(kv => classNs[kv.Key].Count == 1)
+            .ToDictionary(kv => kv.Key, kv => new TypeInfo(kv.Key, null, kv.Value, classNs[kv.Key].First()));
+        foreach (var t in classes.Values) t.Collect();
+        foreach (var t in classes.Values) t.LinkBase(classes);
+        Tx.Classes = classes;                                   // class-typed values (G74)
 
         var results = new List<Member>();
         foreach (var t in types.Values)
@@ -182,9 +233,45 @@ static class TranslateCommand
         for (bool changed = true; changed;)
         {
             changed = false;
-            var mut = results.Where(r => r.Mutates).SelectMany(r => r.Keys).ToHashSet();
-            foreach (var r in results.Where(r => !r.Mutates && !r.Static && r.Kind is "method" or "property"))
-                if (r.SelfCallsTmp.Any(mut.Contains)) { r.Mutates = true; changed = true; }
+            // a property's getter key mutates only when the getter itself does;
+            // its setter key always counts with the member
+            bool Split(Member r) => r.Kind is "property" or "indexer" && r.GetNonConst != null;
+            var mut = results.SelectMany(r => !Split(r) ? (r.Mutates ? r.Keys : Array.Empty<string>())
+                                             : r.Keys.Where(k => k.Contains(".set_") ? r.Mutates : r.GetMutates))
+                             .ToHashSet();
+            foreach (var r in results.Where(r => !r.Static && r.Kind is "method" or "property" or "indexer"))
+            {
+                if (!r.Mutates && r.SelfCallsTmp.Any(mut.Contains)) { r.Mutates = true; changed = true; }
+                if (Split(r) && !r.GetMutates && (r.GetSelfCalls ?? Array.Empty<string>()).Any(mut.Contains))
+                { r.GetMutates = true; r.GetNonConst = true; changed = true; }
+            }
+        }
+        // an instance member of a value or data type that changes nothing is const --
+        // methods, property getters, indexer getters -- so const members, and members
+        // of a const object (a list's items), may call it (G81). Not const: what
+        // mutates, hands `this` to a native by pointer, or calls an own member that
+        // is not const (fixpoint over own-member calls).
+        var plainCs = types.Values.Where(t => !t.ClassMode).Select(t => t.Cs).ToHashSet();
+        var cands = results.Where(r => r.Ok && plainCs.Contains(r.Type) && !r.Static && r.Decl != null && r.Def != null
+                                       && (r.Kind == "method" || (r.Kind is "property" or "indexer" && r.GetNonConst != null))).ToList();
+        bool NonConstSelf(Member r) => r.Kind == "method" ? r.Mutates || r.NativeRefThis.Length > 0 : r.GetNonConst == true;
+        string[] Calls(Member r) => r.Kind == "method" ? r.SelfCallsTmp : r.GetSelfCalls ?? Array.Empty<string>();
+        var nonConst = cands.Where(NonConstSelf).ToHashSet();
+        for (bool changed = true; changed;)
+        {
+            changed = false;
+            var ncKeys = nonConst.SelectMany(r => r.Keys).ToHashSet();
+            foreach (var r in cands.Where(r => !nonConst.Contains(r)))
+                if (Calls(r).Any(ncKeys.Contains)) { nonConst.Add(r); changed = true; }
+        }
+        foreach (var r in cands.Where(r => !nonConst.Contains(r)))
+        {
+            // the getter / method is the FIRST declaration and definition
+            var dEnd = r.Decl.IndexOf('\n'); if (dEnd < 0) dEnd = r.Decl.Length;
+            var semi = r.Decl.LastIndexOf(';', dEnd - 1);
+            if (!r.Decl[..semi].EndsWith(" const")) r.Decl = r.Decl[..semi] + " const" + r.Decl[semi..];
+            var nl = r.Def.IndexOf('\n');
+            if (!r.Def[..nl].EndsWith(" const")) r.Def = r.Def[..nl] + " const" + r.Def[nl..];
         }
 
         // ---- class mode (G63): the PURE members of classes -- bodies built from
@@ -194,27 +281,6 @@ static class TranslateCommand
         //   $$get:N$$()  $$sget:N$$()  $$set:N$$(v)  $$call:N:T1,T2$$(args)
         //   $$scall:N:T1,T2$$(args)  $$enum:Key:Member$$  $$enumtype:Key$$
         // (Key: the enum's simple name, or Owner.Name for a nested enum)
-        var classDecls = new Dictionary<string, List<TypeDeclarationSyntax>>();
-        var classNs = new Dictionary<string, HashSet<string>>();
-        foreach (var f in src.Files)
-        {
-            var root = src.Root(f, Sources.Portable);
-            foreach (var c in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
-            {
-                if (c.Modifiers.Any(SyntaxKind.StaticKeyword) || c.TypeParameterList != null
-                    || c.Parent is TypeDeclarationSyntax || Wanted.ContainsKey(c.Identifier.Text)) continue;
-                var n = c.Identifier.Text;
-                var ns = c.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault()?.Name.ToString() ?? "";
-                classNs.TryAdd(n, new()); classNs[n].Add(ns);
-                classDecls.TryAdd(n, new()); classDecls[n].Add(c);
-            }
-        }
-        // a simple name declared in two namespaces is ambiguous: left out
-        var classes = classDecls.Where(kv => classNs[kv.Key].Count == 1)
-            .ToDictionary(kv => kv.Key, kv => new TypeInfo(kv.Key, null, kv.Value, classNs[kv.Key].First()));
-        foreach (var t in classes.Values) t.Collect();
-        foreach (var t in classes.Values) t.LinkBase(classes);
-        Tx.Classes = classes;                                   // class-typed values (G74)
         var classResults = new List<Member>();
         foreach (var t in classes.Values) classResults.AddRange(t.TranslateClass(types));
         var vtHave = ok();
@@ -234,7 +300,7 @@ static class TranslateCommand
         var json = new StringBuilder("{\n\"types\": [\n");
         json.AppendJoin(",\n", types.Values.Select(t => JsonSerializer.Serialize(new
         {
-            t.Cs, t.Cpp, IsStaticClass = t.IsStaticClass, t.LayoutSize, IsData = t.IsData,
+            t.Cs, t.Cpp, IsStaticClass = t.IsStaticClass, t.LayoutSize, IsData = t.IsData, Base = t.IsData ? t.Base?.Cs : null,
             Fields = t.Fields.Select(kv => new { Name = kv.Key, Type = kv.Value, Init = t.FieldInitCpp.GetValueOrDefault(kv.Key) }).ToArray(),
             Dropped = t.IsData ? t.Dropped.ToArray() : null,
         })));
@@ -309,6 +375,13 @@ class Member
     public string[] SelfCallsTmp { get; set; } = Array.Empty<string>();   // own instance-method calls
     public bool MutatesDirect { get; set; }                               // writes its own fields/this
     public string[] NativeRefThis { get; set; } = Array.Empty<string>();  // C fns given `ref this`
+    // the getter alone (a property's setter mutates by design): its own mutation
+    // facts, so a non-mutating getter can be const (G81)
+    [System.Text.Json.Serialization.JsonIgnore] public bool? GetNonConst { get; set; }
+    [System.Text.Json.Serialization.JsonPropertyName("GetterMutates")]
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public bool GetMutates { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore] public string[] GetSelfCalls { get; set; }
     // class mode (G63); omitted from the value-type records
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string Namespace { get; set; }
@@ -335,6 +408,25 @@ class Param
 
 class NotSupported : Exception { public NotSupported(string m) : base(m) { } }
 
+// `class RhinoList<T>` read as the class for one element type (G80): T -> the argument,
+// `RhinoList<X>` (any arguments) -> `RhinoList`; the type parameter list dropped
+sealed class Monomorphizer : CSharpSyntaxRewriter
+{
+    readonly string _param, _arg;
+    readonly Dictionary<string, string> _generics;
+    public Monomorphizer(string param, string arg, Dictionary<string, string> generics) { _param = param; _arg = arg; _generics = generics; }
+    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax n) =>
+        _param != null && n.Identifier.Text == _param && !(n.Parent is MemberAccessExpressionSyntax pm && pm.Name == n)
+            ? SyntaxFactory.IdentifierName(_arg).WithTriviaFrom(n) : n;
+    public override SyntaxNode VisitGenericName(GenericNameSyntax n) =>
+        _generics.ContainsKey(n.Identifier.Text) ? SyntaxFactory.IdentifierName(n.Identifier.Text).WithTriviaFrom(n) : base.VisitGenericName(n);
+    public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax n)
+    {
+        var v = (ClassDeclarationSyntax)base.VisitClassDeclaration(n);
+        return _param != null && n.TypeParameterList != null ? v.WithTypeParameterList(null).WithConstraintClauses(default) : v;
+    }
+}
+
 class TypeInfo
 {
     public string Cs, Cpp;
@@ -348,6 +440,8 @@ class TypeInfo
     public Dictionary<string, ExpressionSyntax> ConstInit = new();   // const -> its initializer (class mode inlines literals; G79)
     public HashSet<string> StaticFields = new();               // static readonly
     public Dictionary<string, bool> Methods = new();           // name -> static
+    public Dictionary<string, HashSet<int>> MethodArity = new();   // name -> the parameter counts declared here (G80)
+    public List<MethodDeclarationSyntax> MethodDecls = new();
     public Dictionary<string, string> MemberTypes = new();     // field/prop/const/method name -> C# type
     // data classes (G64)
     public bool IsData;
@@ -451,6 +545,8 @@ class TypeInfo
                     break;
                 case MethodDeclarationSyntax md when md.ExplicitInterfaceSpecifier == null:
                     Methods.TryAdd(md.Identifier.Text, st);
+                    (MethodArity.TryGetValue(md.Identifier.Text, out var ar) ? ar : MethodArity[md.Identifier.Text] = new()).Add(md.ParameterList.Parameters.Count);
+                    MethodDecls.Add(md);
                     MemberTypes.TryAdd(md.Identifier.Text + "()", md.ReturnType.ToString()); break;
                 case IndexerDeclarationSyntax ixd:
                     MemberTypes.TryAdd("this[]", ixd.Type.ToString()); break;
@@ -466,11 +562,19 @@ class TypeInfo
                 try { FieldInitCpp[kv.Key] = new Tx(this, all).Expr(kv.Value); }
                 catch (NotSupported) { Fields.Remove(kv.Key); FieldCs.Remove(kv.Key); Dropped.Add(kv.Key); }
             }
+        var outl = new List<Member>();
         foreach (var m in Decls.SelectMany(d => d.Members))
         {
             var r = new Tx(this, all).Member(m);
-            if (r != null) yield return r;
+            if (r != null) outl.Add(r);
         }
+        // two C# constructors with one C++ signature (`Point3dList(params Point3d[])` and
+        // `(IEnumerable<Point3d>)` are both a sequence; G80): the params one goes
+        foreach (var g in outl.Where(r => r.Ok && r.Kind == "ctor" && r.Decl != null)
+                              .GroupBy(r => string.Join(",", (r.Params ?? Array.Empty<Param>()).Select(q => q.Type + q.Mode))).Where(g => g.Count() > 1))
+            foreach (var r in g.Where(r => r.Signature.Contains("params ")))
+            { r.Ok = false; r.Reason = "same C++ signature as another constructor"; r.Decl = r.Def = null; }
+        foreach (var r in outl) yield return r;
     }
 }
 
@@ -496,6 +600,12 @@ class Tx
     bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && Classes.ContainsKey(cs.Split('.').Last())
         && !All.ContainsKey(cs.Split('.').Last()) && !Enums.ContainsKey(cs.Split('.').Last());
     string ClassOf(TypeSyntax t) => IsClass(t.ToString()) ? t.ToString().Split('.').Last() : null;
+    // a data class's members may name a generated class (G82): the same markers
+    // as class mode, resolved -- or the member refused -- by the generator
+    // (never an interop wrapper: StringHolder / SimpleArray* have idioms of their own)
+    string DataClassOf(string cs) => cs != null && Cur != null && Cur.IsData && Classes.TryGetValue(cs.Split('.').Last(), out var dci)
+        && !(dci.Namespace ?? "").EndsWith("InteropWrappers")
+        && !All.ContainsKey(cs.Split('.').Last()) && !Enums.ContainsKey(cs.Split('.').Last()) ? cs.Split('.').Last() : null;
     string Acc(string id) => ParamNames.Contains(id) ? "." : $"$$acc:{Scope[id].Split('.').Last()}$$";
     TypeInfo Lookup(string cs) => cs == null ? null : All.TryGetValue(cs, out var a) ? a
         : Cur.ClassMode && Classes.TryGetValue(cs.Split('.').Last(), out var c) ? c : null;
@@ -520,7 +630,8 @@ class Tx
         if (p is ReturnStatementSyntax or EqualsValueClauseSyntax or ArrowExpressionClauseSyntax) return;
         throw new NotSupported("class temporary");
     }
-    static string Norm(string t) => t is "double" or "float" or "int" or "long" or "uint" or "short" or "byte" ? "num" : ArrayCs(t) ?? t;
+    static string Norm(string t) => t is "double" or "float" or "int" or "long" or "uint" or "short" or "byte" ? "num"
+        : ArrayCs(t) ?? (t != null && !t.Contains('<') ? t.Split('.').Last() : t);   // `Runtime.InteropWrappers.X` is X (G81)
     static string Typed(string owner, string name, IEnumerable<string> types) => $"{owner}.{name}({string.Join(",", types.Select(Norm))})";
     public static string TypedKey(string owner, string name, IEnumerable<string> types) => Typed(owner, name, types);
     public static readonly Dictionary<string, string> OpRet = new();   // typed operator key -> C# return type
@@ -556,6 +667,9 @@ class Tx
     bool IsEnumT(string t) => t != null && (Cur.ClassMode ? EnumKey(t.Split('.').Last()) != null : Enums.ContainsKey(t.Split('.').Last()));
     string EnumCpp(string t) => Cur.ClassMode ? $"$$enumtype:{EnumKey(t.Split('.').Last())}$$" : UseEnum(t.Split('.').Last());
     bool _retDataPtr;                            // the member returns a data class (pointer, nullable)
+    string _retDataCpp;                          // ... of this C++ type
+    readonly HashSet<string> _seqAliases = new();     // `ICollection<T> c = param as ICollection<T>;` (G80)
+    readonly HashSet<string> _eqComparers = new();    // `EqualityComparer<T> c = EqualityComparer<T>.Default;` (G80)
     string _retVector;                           // the member returns a std::vector (C#'s null is the empty one; G70)
 
     public static string TypeOrNull(TypeSyntax t)
@@ -564,6 +678,10 @@ class Tx
     string Type(TypeSyntax t)
     {
         if (t is PredefinedTypeSyntax p && Prim.TryGetValue(p.Keyword.Text, out var c)) return c;
+        // `IComparer<T> comparer` (G80): the bindings never pass one (decision 3) -- the default order
+        if (Cur.IsData && t is GenericNameSyntax { Identifier.Text: "IComparer" }) return "RH3DM_NullComparer";
+        if (Cur.IsData && t.ToString().Split('.').Last() == "SimpleArrayPoint3d") return "RH3DM_Points";   // G81
+        if (Cur.IsData && DataClassOf(t.ToString()) is string dcn) return $"$$class:{dcn}$$";              // G82
         if (Cur.ClassMode)
         {
             if (t is PredefinedTypeSyntax { Keyword.Text: "string" }) return "std::wstring";
@@ -597,8 +715,8 @@ class Tx
     static TypeSyntax ElementOf(TypeSyntax t) => t switch
     {
         ArrayTypeSyntax { RankSpecifiers.Count: 1 } a when a.RankSpecifiers[0].Rank == 1 => a.ElementType,
-        GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList", TypeArgumentList.Arguments: [var ga] } => ga,
-        QualifiedNameSyntax { Right: GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList", TypeArgumentList.Arguments: [var qa] } } => qa,
+        GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList" or "ICollection", TypeArgumentList.Arguments: [var ga] } => ga,
+        QualifiedNameSyntax { Right: GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList" or "ICollection", TypeArgumentList.Arguments: [var qa] } } => qa,
         _ => null,
     };
 
@@ -614,8 +732,75 @@ class Tx
     {
         if (t == null) return null;
         if (t.EndsWith("[]")) return t;
-        var m = System.Text.RegularExpressions.Regex.Match(t, @"^(?:[\w.]+\.)?(?:IEnumerable|List|IList|IReadOnlyList)<([\w.]+)>$");
+        var m = System.Text.RegularExpressions.Regex.Match(t, @"^(?:[\w.]+\.)?(?:IEnumerable|List|IList|IReadOnlyList|ICollection)<([\w.]+)>$");
         return m.Success ? m.Groups[1].Value.Split('.').Last() + "[]" : null;
+    }
+
+    // `ClosestIndexInList(this, p)` where the callee takes IList<Point3d> (G80): `this.ToArray()`
+    InvocationExpressionSyntax ThisAsSequence(InvocationExpressionSyntax inv, TypeInfo owner, string name)
+    {
+        var args = inv.ArgumentList.Arguments;
+        if (!Cur.IsData || !args.Any(a => a.Expression is ThisExpressionSyntax)) return inv;
+        var cands = owner.MethodDecls.Where(m => m.Identifier.Text == name && m.ParameterList.Parameters.Count == args.Count).ToList();
+        if (cands is not [var md]) return inv;
+        var na = args.Select((a, i) => a.Expression is ThisExpressionSyntax && md.ParameterList.Parameters[i].Type is { } pt && ElementOf(pt) != null
+            ? a.WithExpression(SyntaxFactory.ParseExpression("this.ToArray()")) : a);
+        return inv.WithArgumentList(inv.ArgumentList.WithArguments(SyntaxFactory.SeparatedList(na)));
+    }
+
+    // the points a SimpleArrayPoint3d is built from (G81): a sequence as is; a data list's
+    // items; a data list a call returns (`GetRange(0, Count)`) owned, then its items
+    string PointItems(ExpressionSyntax e)
+    {
+        var t = TypeOf(e);
+        if (ArrayCs(t) != null) return Expr(e);
+        if (t != null && All.TryGetValue(t.Split('.').Last(), out var dt) && dt.IsData)
+        {
+            Refs.Add("*.ToArray/0");
+            return DataPtrExpr(e) ? $"RH3DM_OwnedItems({Expr(e)})" : $"({Expr(e)}).ToArray()";
+        }
+        throw new NotSupported("SimpleArrayPoint3d from " + (t ?? "?"));
+    }
+
+    // an expression that IS a new data object or null: a call of a member returning a
+    // data class, or a conditional of those and null (G81)
+    bool DataPtrExpr(ExpressionSyntax e)
+    {
+        while (e is ParenthesizedExpressionSyntax p) e = p.Expression;
+        if (e is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression }) return true;
+        if (e is ConditionalExpressionSyntax c) return DataPtrExpr(c.WhenTrue) && DataPtrExpr(c.WhenFalse)
+            && !(c.WhenTrue is LiteralExpressionSyntax && c.WhenFalse is LiteralExpressionSyntax);
+        if (e is not InvocationExpressionSyntax inv) return false;
+        var t = TypeOf(inv);
+        return t != null && All.TryGetValue(t.Split('.').Last(), out var dt) && dt.IsData;
+    }
+
+    // System.Array's statics on a std::vector, with .NET's semantics (G80; helpers in gen_vt_common)
+    string ArrayStatic(string name, ArgumentListSyntax al)
+    {
+        var a = al.Arguments.Select(x => Expr(x.Expression)).ToList();
+        // the array the call writes: this object's field means the member mutates (G81)
+        int dst = name switch { "Copy" => al.Arguments.Count == 3 ? 1 : 2, "Clear" or "Reverse" or "Sort" => 0, _ => -1 };
+        if (dst >= 0 && dst < al.Arguments.Count && WritesSelf(al.Arguments[dst].Expression)) MutatesSelf = true;
+        string Sz(int i) => $"(int)({a[i]}).size()";
+        return (name, a.Count) switch
+        {
+            ("Copy", 3) => $"RH3DM_ArrCopy({a[0]}, 0, {a[1]}, 0, {a[2]})",
+            ("Copy", 5) => $"RH3DM_ArrCopy({a[0]}, {a[1]}, {a[2]}, {a[3]}, {a[4]})",
+            ("Clear", 3) => $"RH3DM_ArrClear({a[0]}, {a[1]}, {a[2]})",
+            ("IndexOf", 2) => $"RH3DM_ArrIndexOf({a[0]}, {a[1]}, 0, {Sz(0)})",
+            ("IndexOf", 3) => $"RH3DM_ArrIndexOf({a[0]}, {a[1]}, {a[2]}, {Sz(0)} - ({a[2]}))",
+            ("IndexOf", 4) => $"RH3DM_ArrIndexOf({a[0]}, {a[1]}, {a[2]}, {a[3]})",
+            ("LastIndexOf", 4) => $"RH3DM_ArrLastIndexOf({a[0]}, {a[1]}, {a[2]}, {a[3]})",
+            ("Reverse", 1) => $"RH3DM_ArrReverse({a[0]}, 0, {Sz(0)})",
+            ("Reverse", 3) => $"RH3DM_ArrReverse({a[0]}, {a[1]}, {a[2]})",
+            ("Sort", 1) => $"RH3DM_ArrSort({a[0]}, 0, {Sz(0)})",
+            ("Sort", 3) => $"RH3DM_ArrSort({a[0]}, {a[1]}, {a[2]})",
+            ("Sort", 4) when TypeOf(al.Arguments[3].Expression) is null or "IComparer<Point3d>"
+                => $"RH3DM_ArrSort({a[0]}, {a[1]}, {a[2]}, {a[3]})",
+            ("BinarySearch", 5) => $"RH3DM_ArrBinarySearch({a[0]}, {a[1]}, {a[2]}, {a[3]}, {a[4]})",
+            _ => throw new NotSupported($"Array.{name}/{a.Count}"),
+        };
     }
 
     // ---------------------------------------------------- class mode (G63)
@@ -801,7 +986,41 @@ class Tx
             || n is PostfixUnaryExpressionSyntax po && Root(po.Operand) == name
             || n is ArgumentSyntax arg && !arg.RefOrOutKeyword.IsKind(SyntaxKind.None) && arg.Expression.ToString() == name
             || n is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mr, Name.Identifier.Text: "Add" or "AddRange" or "Clear" or "Insert" or "Remove" or "RemoveAt" or "Sort" or "Reverse" } }
-               && mr.Identifier.Text == name);
+               && mr.Identifier.Text == name
+            // a destination of System.Array's statics or of CopyTo (G80)
+            || n is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "Array" }, Name.Identifier.Text: var an } } ai
+               && (an is "Clear" or "Reverse" or "Sort" && ai.ArgumentList.Arguments.FirstOrDefault()?.Expression.ToString() == name
+                   || an == "Copy" && ai.ArgumentList.Arguments.Count is 3 or 5
+                      && ai.ArgumentList.Arguments[ai.ArgumentList.Arguments.Count == 3 ? 1 : 2].Expression.ToString() == name)
+            || n is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "CopyTo" } } ci
+               && ci.ArgumentList.Arguments.FirstOrDefault()?.Expression.ToString() == name);
+    }
+
+    // ... or hands it to a member of this type (chain) that writes it: `CopyTo(array, 0)` (G80)
+    bool WritesParamDeep(SyntaxNode body, string name, int depth)
+    {
+        if (body == null) return false;
+        if (WritesParam(body, name)) return true;
+        if (depth > 3) return false;
+        foreach (var inv in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            var callee = inv.Expression switch
+            {
+                IdentifierNameSyntax i => i.Identifier.Text,
+                MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } tm => tm.Name.Identifier.Text,
+                _ => null,
+            };
+            if (callee == null) continue;
+            var args = inv.ArgumentList.Arguments;
+            for (int i = 0; i < args.Count; i++)
+            {
+                if (args[i].Expression is not IdentifierNameSyntax ai || ai.Identifier.Text != name) continue;
+                foreach (var md in Cur.Chain().SelectMany(t => t.MethodDecls).Where(m => m.Identifier.Text == callee && m.ParameterList.Parameters.Count == args.Count))
+                    if (WritesParamDeep((SyntaxNode)md.Body ?? md.ExpressionBody, md.ParameterList.Parameters[i].Identifier.Text, depth + 1))
+                        return true;
+            }
+        }
+        return false;
     }
 
     (string list, Param[] ps) Params(BaseParameterListSyntax pl, bool allowDefaults = true, SyntaxNode body = null)
@@ -813,6 +1032,7 @@ class Tx
         {
             ParamNames.Add(p.Identifier.Text);
             var mods = p.Modifiers.Select(x => x.Text).ToList();
+            if (mods.Contains("params") && p.Type is ArrayTypeSyntax) mods.Remove("params");   // a sequence like any other (G80)
             if (mods.Contains("params") || mods.Contains("this"))
                 throw new NotSupported("parameter modifier: " + string.Join(" ", mods));
             var mode = mods.Contains("ref") ? "ref" : mods.Contains("out") ? "out" : "";
@@ -825,9 +1045,9 @@ class Tx
             // a sequence: by reference, const unless the body writes it -- then C#'s
             // caller sees the writes too (an array is a reference), and so does the
             // binding's; `ref T[]` that is never written is an input (G70, G72)
-            bool seq = ty.StartsWith("std::vector<"), written = seq && WritesParam(body, p.Identifier.Text);
+            bool seq = ty.StartsWith("std::vector<"), written = seq && WritesParamDeep(body, p.Identifier.Text, 0);
             if (seq && !written) mode = "";
-            var byRef = mode != "" || seq ? "&" : "";
+            var byRef = mode != "" || seq || ty == "RH3DM_Points" ? "&" : "";       // a holder by reference (G81)
             parts.Add($"{(seq && !written ? "const " : "")}{ty}{byRef} {nm}{def}");
             ps.Add(new Param { Type = ty, Name = nm, Mode = mode });
             ParamCs.Add(p.Type.ToString());
@@ -866,13 +1086,14 @@ class Tx
             var init = "";
             if (c.Initializer != null)
             {
-                if (!c.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.ThisKeyword))
-                    throw new NotSupported("base ctor initializer");
+                // `: base(collection)` on a data class (G80): its base's constructor
+                var target = c.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.ThisKeyword) ? Cur
+                    : Cur.IsData && Cur.Base != null ? Cur.Base : throw new NotSupported("base ctor initializer");
                 var a = Args(c.Initializer.ArgumentList);
                 // `: this()` is the struct's implicit default ctor -- always there
                 if (c.Initializer.ArgumentList.Arguments.Count > 0)
-                    RefCall(Cur.Cs, "#ctor", c.Initializer.ArgumentList);
-                init = $"\n  : {Cur.Cpp}({a})";
+                    RefCall(target.Cs, "#ctor", c.Initializer.ArgumentList);
+                init = $"\n  : {target.Cpp}({a})";
             }
             r.Decl = $"{Cur.Cpp}({list});";
             r.Def = $"{Cur.Cpp}::{Cur.Cpp}({StripDefaults(list)}){init}\n" + Body(c.Body, c.ExpressionBody, true);
@@ -893,8 +1114,9 @@ class Tx
         if (Cur.IsData && m.ReturnType is IdentifierNameSyntax drt && All.TryGetValue(drt.Identifier.Text, out var dti) && dti.IsData)
         {
             // `static T FromIntPtr(IntPtr p)`: null or a new object -- a pointer the binding owns
-            ret += "*"; _retDataPtr = true;
+            ret += "*"; _retDataPtr = true; _retDataCpp = dti.Cpp;
         }
+        if (Cur.IsData && ret.StartsWith("$$class:")) _retClass = true;        // a new generated object, or null (G82)
         var (list, ps) = Params(m.ParameterList, body: m.Body ?? (SyntaxNode)m.ExpressionBody);
         r.Ret = ret; r.Params = ps;
         r.Keys = new[] { $"{Cur.Cs}.{r.Name}/{ps.Length}", Typed(Cur.Cs, r.Name, ParamCs) };
@@ -947,12 +1169,12 @@ class Tx
                 r.Decl = decl.ToString(); r.Def = def.ToString(); r.Keys = keys.ToArray();
                 return;
             }
-            var cq = Cur.IsData && !r.Static ? " const" : "";     // a data class getter: const (a JS property needs it)
-            decl.Append($"{st}{ty} {r.Name}(){cq};");
-            def.Append($"{ty} {Cur.Cpp}::{r.Name}(){cq}\n" +
+            decl.Append($"{st}{ty} {r.Name}();");      // const when it changes nothing (G81, after the fixpoint)
+            def.Append($"{ty} {Cur.Cpp}::{r.Name}()\n" +
                        (p.ExpressionBody != null ? Body(null, p.ExpressionBody, false)
                                                  : Body(get.Body, get.ExpressionBody, false)));
             keys.Add($"{Cur.Cs}.{r.Name}");
+            GetterFacts(r);
         }
         if (set != null && (set.Modifiers.Count == 0 || set.Modifiers.Any(SyntaxKind.PublicKeyword)))
         {
@@ -963,6 +1185,13 @@ class Tx
             keys.Add($"{Cur.Cs}.set_{r.Name}");
         }
         r.Decl = decl.ToString(); r.Def = def.ToString(); r.Keys = keys.ToArray();
+    }
+
+    void GetterFacts(Member r)
+    {
+        r.GetNonConst = MutatesSelf || NativeThis.Count > 0;
+        r.GetMutates = MutatesSelf;
+        r.GetSelfCalls = SelfCalls.Distinct().ToArray();
     }
 
     void Indexer(IndexerDeclarationSyntax ix, Member r)
@@ -976,6 +1205,7 @@ class Tx
         var decl = new StringBuilder($"{ty} get_Item({list});");
         var def = new StringBuilder($"{ty} {Cur.Cpp}::get_Item({list})\n" +
             (ix.ExpressionBody != null ? Body(null, ix.ExpressionBody, false) : Body(get.Body, get.ExpressionBody, false)));
+        GetterFacts(r);
         if (set != null)
         {
             Scope["value"] = ix.Type.ToString();
@@ -1040,6 +1270,15 @@ class Tx
             {
                 if (ld.UsingKeyword != default) throw new NotSupported("using declaration");
                 var isConst = ld.IsConst ? "const " : "";
+                // `EqualityComparer<T> comparer = EqualityComparer<T>.Default;`: the type's == (G80)
+                if (ld.Declaration.Variables is [{ Initializer.Value: MemberAccessExpressionSyntax { Name.Identifier.Text: "Default", Expression: GenericNameSyntax { Identifier.Text: "EqualityComparer" } } } eqv])
+                {
+                    _eqComparers.Add(eqv.Identifier.Text);
+                    break;
+                }
+                if (ld.Declaration.Variables is [{ Initializer.Value: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Left: IdentifierNameSyntax asl } } alv]
+                    && (ParamNames.Contains(asl.Identifier.Text) || _seqAliases.Contains(asl.Identifier.Text)))
+                    _seqAliases.Add(alv.Identifier.Text);
                 var t = ld.Declaration.Type.IsVar ? "auto" : Type(ld.Declaration.Type);
                 if (!ld.Declaration.Type.IsVar && ClassOf(ld.Declaration.Type) != null) _nullOk++;   // `T x = null;` (G74)
                 try {
@@ -1094,11 +1333,45 @@ class Tx
             case ReturnStatementSyntax rs:
                 if (_retVector != null && rs.Expression is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression })
                     yield return pad + "return " + _retVector + "();";        // C#'s null: the empty sequence (D35)
+                else if (_retDataPtr && rs.Expression != null && DataPtrExpr(rs.Expression))
+                    // `rc ? Polyline.PolyLineFromNativeArray(pts) : null`: already a new object, or null (G81)
+                    yield return pad + "return " + Expr(rs.Expression) + ";";
                 else if (_retDataPtr && rs.Expression != null && !(rs.Expression is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression }))
-                    yield return pad + "return new " + Cur.Cpp + "(" + Expr(rs.Expression) + ");";
+                    yield return pad + "return new " + (_retDataCpp ?? Cur.Cpp) + "(" + Expr(rs.Expression) + ");";
                 else
                     yield return pad + (rs.Expression == null ? "return;" : "return " + Expr(rs.Expression) + ";");
                 break;
+            case UsingStatementSyntax pus when Cur.IsData && pus.Declaration is { Variables: [var pv] }
+                    && pv.Initializer?.Value is ObjectCreationExpressionSyntax pn && pn.Type.ToString().Split('.').Last() == "SimpleArrayPoint3d":
+            {
+                // `using (var points = new SimpleArrayPoint3d(items)) { ... }` (G81): an
+                // ON_3dPointArray on the stack, filled as the C# constructor appends
+                Scope[pv.Identifier.Text] = "SimpleArrayPoint3d";
+                var pa = pn.ArgumentList?.Arguments.Count > 0 ? PointItems(pn.ArgumentList.Arguments[0].Expression) : "";
+                yield return pad + "{";
+                yield return pad + "  RH3DM_Points " + Rn(pv.Identifier.Text) + (pa == "" ? "" : "(" + pa + ")") + ";";
+                foreach (var x in (pus.Statement is BlockSyntax pb ? pb.Statements : new SyntaxList<StatementSyntax>().Add(pus.Statement)))
+                    foreach (var l in Stmt(x, depth + 1)) yield return l;
+                yield return pad + "}";
+                break;
+            }
+            case UsingStatementSyntax cus when Cur.IsData && cus.Declaration is { Variables: [var cuv] }
+                    && cuv.Initializer != null && DataClassOf(TypeOf(cuv.Initializer.Value)) is string ucn:
+            {
+                // `using (var pc = ToPolylineCurve()) { ... }` (G82): a generated object this
+                // scope owns -- deleted on the way out, as Dispose; never returned itself
+                var un = cuv.Identifier.Text;
+                if (cus.Statement.DescendantNodesAndSelf().OfType<ReturnStatementSyntax>().Any(x => x.Expression is IdentifierNameSyntax xr && xr.Identifier.Text == un))
+                    throw new NotSupported("returning a disposed object");
+                Scope[un] = ucn;
+                yield return pad + "{";
+                yield return pad + $"  $$class:{ucn}$$ {Rn(un)} = {Expr(cuv.Initializer.Value)};";
+                yield return pad + $"  std::unique_ptr<std::remove_pointer<decltype({Rn(un)})>::type> {Rn(un)}_owned({Rn(un)});";
+                foreach (var x in (cus.Statement is BlockSyntax cub ? cub.Statements : new SyntaxList<StatementSyntax>().Add(cus.Statement)))
+                    foreach (var l in Stmt(x, depth + 1)) yield return l;
+                yield return pad + "}";
+                break;
+            }
             case UsingStatementSyntax us when Cur.IsData && us.Declaration is { Variables: [var shv] }
                     && shv.Initializer?.Value is ObjectCreationExpressionSyntax shn && shn.Type.ToString().Split('.').Last() == "StringHolder":
             {
@@ -1116,6 +1389,15 @@ class Tx
                 var icond = Expr(ifs.Condition);
                 foreach (var h in _hoist) yield return pad + h;          // an `out var` in the condition (G70)
                 _hoist.Clear();
+                // a condition C# decides here (a parameter sequence's null test; G80): the branch taken
+                var bare = icond.Trim('(', ')', ' ');
+                if (bare is "true" or "false")
+                {
+                    var taken = bare == "true" ? ifs.Statement : ifs.Else?.Statement;
+                    if (taken != null)
+                        foreach (var l in Stmt(Blockify(taken), depth)) yield return l;
+                    break;
+                }
                 yield return pad + "if (" + icond + ")";
                 foreach (var l in Stmt(Blockify(ifs.Statement), depth)) yield return l;
                 if (ifs.Else != null)
@@ -1381,10 +1663,10 @@ class Tx
         {
             if (!All.TryGetValue(recvType, out var rt) || rt.IsStaticClass)
                 throw new NotSupported($"member .{name} on {recvType}");
-            if (rt.Fields.ContainsKey(name)) return $"{recv}.{name}";
-            if (rt.Props.TryGetValue(name, out var s) && !s)
+            if (rt.Chain().Any(c => c.Fields.ContainsKey(name))) return $"{recv}.{name}";
+            if (rt.Chain().FirstOrDefault(c => c.Props.ContainsKey(name)) is { } prt && !prt.Props[name])
             {
-                Refs.Add($"{rt.Cs}.{name}");
+                Refs.Add($"{prt.Cs}.{name}");
                 return $"{recv}.{name}()";
             }
             throw new NotSupported($"member {recvType}.{name}");
@@ -1434,11 +1716,11 @@ class Tx
             return $"$$set:{cn}$$({crhs})";
         }
         else if (a.Left is IdentifierNameSyntax id && !Scope.ContainsKey(id.Identifier.Text)
-                 && !Cur.Fields.ContainsKey(id.Identifier.Text)
-                 && Cur.Props.TryGetValue(id.Identifier.Text, out var st2) && !st2)
+                 && !Cur.Chain().Any(t => t.Fields.ContainsKey(id.Identifier.Text))
+                 && Cur.Chain().FirstOrDefault(t => t.Props.ContainsKey(id.Identifier.Text)) is { } spt && !spt.Props[id.Identifier.Text])
         {
             recv = ""; name = id.Identifier.Text; MutatesSelf = true;
-            Refs.Add($"{Cur.Cs}.set_{name}");
+            Refs.Add($"{spt.Cs}.set_{name}");
         }
         else return null;
         var rhs = Expr(a.Right);
@@ -1453,8 +1735,12 @@ class Tx
     bool WritesSelf(ExpressionSyntax left) => left switch
     {
         ThisExpressionSyntax => true,
-        IdentifierNameSyntax id => !Scope.ContainsKey(id.Identifier.Text) && Cur.Fields.ContainsKey(id.Identifier.Text),
+        IdentifierNameSyntax id => !Scope.ContainsKey(id.Identifier.Text) && Cur.Chain().Any(t => t.Fields.ContainsKey(id.Identifier.Text)),
         MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } => true,
+        // through a field: `m_min.X -= d`, `m_items[i] = p` write this object (G81)
+        MemberAccessExpressionSyntax ma => WritesSelf(ma.Expression),
+        ElementAccessExpressionSyntax ea => WritesSelf(ea.Expression),
+        ParenthesizedExpressionSyntax pe => WritesSelf(pe.Expression),
         _ => false,
     };
 
@@ -1476,14 +1762,16 @@ class Tx
                 throw new NotSupported("method group " + id);
             return dt != null && dt.Props[id] ? $"$$sget:{id}$$()" : $"$$get:{id}$$()";
         }
-        if (Cur.Fields.ContainsKey(id)) return id;
-        if (Cur.Props.TryGetValue(id, out var st))
+        // this type or a data base it derives from (G80)
+        if (Cur.Chain().Any(t => t.Fields.ContainsKey(id))) return id;
+        if (Cur.Chain().FirstOrDefault(t => t.Props.ContainsKey(id)) is { } pt)
         {
-            Refs.Add($"{Cur.Cs}.{id}");
-            return st ? $"{Cur.Cpp}::{id}()" : $"{id}()";
+            Refs.Add($"{pt.Cs}.{id}");
+            if (!pt.Props[id]) SelfCalls.Add($"{pt.Cs}.{id}");      // own getter read (G81)
+            return pt.Props[id] ? $"{pt.Cpp}::{id}()" : $"{id}()";
         }
-        if (Cur.Consts.Contains(id)) { Refs.Add($"{Cur.Cs}.{id}"); return id; }
-        if (Cur.StaticFields.Contains(id)) { Refs.Add($"{Cur.Cs}.{id}"); return $"{Cur.Cpp}::{id}()"; }
+        if (Cur.Chain().FirstOrDefault(t => t.Consts.Contains(id)) is { } ct) { Refs.Add($"{ct.Cs}.{id}"); return ct == Cur ? id : $"{ct.Cpp}::{id}"; }
+        if (Cur.Chain().FirstOrDefault(t => t.StaticFields.Contains(id)) is { } sft) { Refs.Add($"{sft.Cs}.{id}"); return $"{sft.Cpp}::{id}()"; }
         throw new NotSupported("identifier " + id);
     }
 
@@ -1546,6 +1834,9 @@ class Tx
                         || sb.Right is MemberAccessExpressionSyntax { Expression: PredefinedTypeSyntax { Keyword.Text: "string" }, Name.Identifier.Text: "Empty" }):
                 // `GetKey(i) ?? ""`: a binding's string is never null (G79)
                 return Expr(sb.Left);
+            case BinaryExpressionSyntax sab when sab.IsKind(SyntaxKind.AsExpression) && sab.Right is TypeSyntax sat && ElementOf(sat) != null
+                    && ArrayCs(TypeOf(sab.Left)) != null:
+                return Expr(sab.Left);                         // a sequence IS an ICollection<T> here (G80)
             case BinaryExpressionSyntax b:
                 if (Cur.ClassMode && b.IsKind(SyntaxKind.AsExpression) && b.Right is TypeSyntax ast && ClassOf(ast) is string asn
                     && b.Left is InvocationExpressionSyntax or ObjectCreationExpressionSyntax)
@@ -1579,6 +1870,22 @@ class Tx
                             return b.IsKind(SyntaxKind.EqualsExpression) ? "false" : "true";
                         return $"({Expr(side)} {b.OperatorToken.Text} nullptr)";
                     }
+                    if ((b.IsKind(SyntaxKind.EqualsExpression) || b.IsKind(SyntaxKind.NotEqualsExpression))
+                        && (b.Right.IsKind(SyntaxKind.NullLiteralExpression) || b.Left.IsKind(SyntaxKind.NullLiteralExpression)))
+                    {
+                        var nside = b.Right.IsKind(SyntaxKind.NullLiteralExpression) ? b.Left : b.Right;
+                        var nt = b.Right.IsKind(SyntaxKind.NullLiteralExpression) ? lt2 : rt2;
+                        // a struct is never null (`item == null` on T = Point3d is false in C#),
+                        // and neither is a sequence PARAMETER or its alias: a binding cannot pass null (G80)
+                        if (nt != null && All.TryGetValue(nt.Split('.').Last(), out var nvt) && !nvt.IsStaticClass && !nvt.IsData
+                            || (ArrayCs(nt) != null || nt?.Split('.').Last() == "SimpleArrayPoint3d") && nside is IdentifierNameSyntax nsi && (ParamNames.Contains(nsi.Identifier.Text) || _seqAliases.Contains(nsi.Identifier.Text)))
+                            return b.IsKind(SyntaxKind.EqualsExpression) ? "false" : "true";
+                    }
+                    // `this == is2` (InsertRange inserting itself): a binding's sequence is a copy,
+                    // never this list (G80)
+                    if ((b.IsKind(SyntaxKind.EqualsExpression) || b.IsKind(SyntaxKind.NotEqualsExpression)) && Cur.IsData
+                        && (b.Left is ThisExpressionSyntax && ArrayCs(rt2) != null || b.Right is ThisExpressionSyntax && ArrayCs(lt2) != null))
+                        return b.IsKind(SyntaxKind.EqualsExpression) ? "false" : "true";
                     if ((lt2 != null && All.ContainsKey(lt2)) || (rt2 != null && All.ContainsKey(rt2)))
                     {
                         if (lt2 == null || rt2 == null) throw new NotSupported("operator on unknown operand type");
@@ -1611,6 +1918,12 @@ class Tx
                 return Expr(b.Left) + " " + b.OperatorToken.Text + " " + Expr(b.Right);
             case ConditionalExpressionSyntax c:
                 return "(" + Expr(c.Condition) + " ? " + Expr(c.WhenTrue) + " : " + Expr(c.WhenFalse) + ")";
+            // `return pc?.ToNurbsCurve();` (G82): a generated class's member on a class local,
+            // returning a class -- null stays null
+            case ConditionalAccessExpressionSyntax cae when Cur.IsData && _retClass && cae.Parent is ReturnStatementSyntax
+                    && cae.Expression is IdentifierNameSyntax cid && Scope.TryGetValue(cid.Identifier.Text, out var cst) && DataClassOf(cst) is string cac
+                    && cae.WhenNotNull is InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax mbe } cinv:
+                return $"({Rn(cid.Identifier.Text)} ? ({Rn(cid.Identifier.Text)})$$acc:{cac}$$$$ocall:{cac}:{mbe.Name.Identifier.Text}:{ArgTypes(cinv.ArgumentList)}$$({Args(cinv.ArgumentList)}) : nullptr)";
             case AssignmentExpressionSyntax a:
                 if (a.Left is ElementAccessExpressionSyntax seqIx && ArrayCs(TypeOf(seqIx.Expression)) != null && seqIx.ArgumentList.Arguments.Count == 1)
                 {
@@ -1660,6 +1973,15 @@ class Tx
                 }
                 if (a.IsKind(SyntaxKind.CoalesceAssignmentExpression)) throw new NotSupported("??=");
                 return Expr(a.Left) + " " + a.OperatorToken.Text + " " + Expr(a.Right);
+            case CastExpressionSyntax cce when Cur.IsData && (cce.Expression is ParenthesizedExpressionSyntax { Expression: var cpe } ? cpe : cce.Expression)
+                    is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "Clone",
+                        Expression: ParenthesizedExpressionSyntax { Expression: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Left: ThisExpressionSyntax } } } }
+                    && All.TryGetValue(cce.Type.ToString().Split('.').Last(), out var cct)
+                    && cct.Decls.SelectMany(d => d.Members).OfType<MethodDeclarationSyntax>()
+                        .FirstOrDefault(m => m.Identifier.Text == "Clone" && m.ExplicitInterfaceSpecifier?.Name.ToString() == "ICloneable") is { } clone
+                    && ((clone.Body?.Statements is [ReturnStatementSyntax { Expression: { } cre }] ? cre : clone.ExpressionBody?.Expression) is ObjectCreationExpressionSyntax cr):
+                // `(Polyline)(this as ICloneable).Clone()` (G80): the type's own Clone, `new Polyline(this)`
+                return Expr(cr);
             case CastExpressionSyntax ce:
             {
                 var t = Type(ce.Type);
@@ -1669,6 +1991,17 @@ class Tx
             }
             case DefaultExpressionSyntax de:
                 return Type(de.Type) + "()";
+            case ObjectCreationExpressionSyntax coc when coc.Initializer is { RawKind: (int)SyntaxKind.CollectionInitializerExpression } cin
+                    && coc.Type is IdentifierNameSyntax ctn && All.TryGetValue(ctn.Identifier.Text, out var cdti) && cdti.IsData
+                    && cdti.Chain().FirstOrDefault(c => c.MethodArity.TryGetValue("Add", out var car) && car.Contains(1)) is { } addt:
+            {
+                // `new Polyline { PointAt(t0) }` (G80): construct, then Add each element, in order
+                Refs.Add($"{addt.Cs}.Add/1");
+                var cargs = coc.ArgumentList != null && coc.ArgumentList.Arguments.Count > 0 ? Args(coc.ArgumentList) : "";
+                var cdecl = cargs == "" ? $"{cdti.Cpp} o;" : $"{cdti.Cpp} o({cargs});";
+                var adds = string.Join(" ", cin.Expressions.Select(e => $"o.Add({Expr(e)});"));
+                return $"([&]() {{ {cdecl} {adds} return o; }}())";
+            }
             case ObjectCreationExpressionSyntax oc when oc.Initializer != null:
             {
                 // `new Plane { XAxis = x, ... }`: construct, then apply the
@@ -1719,6 +2052,14 @@ class Tx
                     return $"{Type(oc.Type)}()";                                   // a capacity hint
                 throw new NotSupported("new list from " + la[0]);
             }
+            case ObjectCreationExpressionSyntax toc when Cur.IsData && toc.ArgumentList?.Arguments is [{ Expression: ThisExpressionSyntax }]
+                    && toc.Type is IdentifierNameSyntax ttn && All.TryGetValue(ttn.Identifier.Text, out var tti) && tti.IsData
+                    && tti.Decls.SelectMany(d => d.Members).OfType<ConstructorDeclarationSyntax>()
+                        .Any(cd => cd.ParameterList.Parameters is [{ Type: GenericNameSyntax { Identifier.Text: "IEnumerable" } }]):
+                // `new Polyline(this)` into its IEnumerable<Point3d> constructor (G80): this list's items
+                Refs.Add($"{tti.Cs}.#ctor/1");
+                Refs.Add("*.ToArray/0");
+                return $"{tti.Cpp}((*this).ToArray())";
             case ObjectCreationExpressionSyntax oc:
             {
                 if (oc.Type is IdentifierNameSyntax tn && All.TryGetValue(tn.Identifier.Text, out var ti)
@@ -1727,6 +2068,25 @@ class Tx
                     var n = oc.ArgumentList?.Arguments.Count ?? 0;
                     if (n > 0) RefCall(ti.Cs, "#ctor", oc.ArgumentList);
                     return $"{ti.Cpp}({(oc.ArgumentList != null ? Args(oc.ArgumentList) : "")})";
+                }
+                if (Cur.IsData && DataClassOf(oc.Type.ToString()) is string dncn)
+                {
+                    // `new PolylineCurve(this)` (G82): a list argument is its items, typed as the
+                    // sequence the constructor takes; the generator finds that constructor or refuses
+                    var dts = new List<string>(); var das = new List<string>();
+                    foreach (var a in oc.ArgumentList?.Arguments ?? default)
+                    {
+                        var at = a.Expression is ThisExpressionSyntax ? Cur.Cs : TypeOf(a.Expression);
+                        if (at == null) throw new NotSupported("argument of unknown type");
+                        var lt = All.TryGetValue(at.Split('.').Last(), out var lti) ? lti : null;
+                        if (lt != null && lt.IsData && lt.Chain().Any(c => c.Cs == "RhinoList"))
+                        {
+                            dts.Add("IEnumerable<Point3d>");
+                            das.Add(a.Expression is ThisExpressionSyntax ? "(*this).ToArray()" : $"({Expr(a.Expression)}).ToArray()");
+                        }
+                        else { dts.Add(at); das.Add(Expr(a.Expression)); }
+                    }
+                    return $"$$new:{dncn}:{string.Join(",", dts)}$$({string.Join(", ", das)})";
                 }
                 if (Cur.ClassMode && ClassOf(oc.Type) is string ncn)
                 {
@@ -1791,6 +2151,8 @@ class Tx
                         "E" => "2.7182818284590452354",
                         _ => throw new NotSupported("Math." + name),
                     };
+                if (Cur.IsData && name == "Count" && TypeOf(ma.Expression)?.Split('.').Last() == "SimpleArrayPoint3d")
+                    return $"({Expr(ma.Expression)}).Count()";                   // the holder's points (G81)
                 if (name is "Length" or "Count" && ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _))
                     return $"((int){Expr(ma.Expression)}.size())";                 // a sequence's length (G70)
                 if (IsTypeName(ma.Expression, out var t)) return StaticMember(t, name);
@@ -1801,7 +2163,15 @@ class Tx
                 if (ma.Expression is MemberAccessExpressionSyntax { Name: IdentifierNameSyntax qen } && Enums.TryGetValue(qen.Identifier.Text, out var qed)
                     && qed.Members.Any(x => x.Identifier.Text == name) && !Scope.ContainsKey(qen.Identifier.Text))
                     return $"{UseEnum(qen.Identifier.Text)}::{name}";          // DocObjects.ObjectType.Brep
-                return InstanceMember("(" + Expr(ma.Expression) + ")", name, TypeOf(ma.Expression));
+                {
+                    var imT = TypeOf(ma.Expression);
+                    var im = InstanceMember("(" + Expr(ma.Expression) + ")", name, imT);
+                    // a getter read on this object's field: its constness flows here (G81)
+                    if (imT != null && WritesSelf(ma.Expression) && All.TryGetValue(imT.Split('.').Last(), out var imt)
+                        && imt.Chain().FirstOrDefault(c => c.Props.ContainsKey(name)) is { } impt)
+                        SelfCalls.Add($"{impt.Cs}.{name}");
+                    return im;
+                }
             }
             case InvocationExpressionSyntax inv:
                 return Invocation(inv);
@@ -1849,7 +2219,8 @@ class Tx
                 return pu.IsKind(SyntaxKind.LogicalNotExpression) ? "bool" : TypeOf(pu.Operand);
             case ImplicitObjectCreationExpressionSyntax: return null;
             case PostfixUnaryExpressionSyntax po: return TypeOf(po.Operand);
-            case BinaryExpressionSyntax asb when asb.IsKind(SyntaxKind.AsExpression): return asb.Right.ToString().Split('.').Last();
+            case BinaryExpressionSyntax asb when asb.IsKind(SyntaxKind.AsExpression):
+                return asb.Right is TypeSyntax ats && ElementOf(ats) != null ? asb.Right.ToString() : asb.Right.ToString().Split('.').Last();
             case BinaryExpressionSyntax cob when cob.IsKind(SyntaxKind.CoalesceExpression): return TypeOf(cob.Left) ?? TypeOf(cob.Right);
             case BinaryExpressionSyntax b:
             {
@@ -1872,6 +2243,7 @@ class Tx
                 if (ma.Expression is PredefinedTypeSyntax pt) return pt.Keyword.Text;
                 if (ma.Expression is IdentifierNameSyntax { Identifier.Text: "IntPtr" } && name == "Zero") return "IntPtr";
                 if (name == "NewLine" && ma.Expression.ToString() is "Environment" or "System.Environment") return "string";
+                if (name == "Count" && TypeOf(ma.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return "int";
                 if (name is "Length" or "Count" && ArrayCs(TypeOf(ma.Expression)) != null) return "int";
                 if (ma.Expression is IdentifierNameSyntax ten && Enums.ContainsKey(ten.Identifier.Text) && !Scope.ContainsKey(ten.Identifier.Text)
                     && !All.ContainsKey(ten.Identifier.Text)) return ten.Identifier.Text;
@@ -1888,7 +2260,9 @@ class Tx
                     && All.TryGetValue(tqtn.Identifier.Text, out var tqti))
                     return tqti.MemberTypes.TryGetValue(name, out var tq2) ? tq2 : null;
                 var rt = TypeOf(ma.Expression);
-                return Lookup(rt) is TypeInfo rti && rti.MemberTypes.TryGetValue(name, out var t3) ? t3 : null;
+                // a data object's member may be declared on a base (G81: `list.m_items`)
+                return Lookup(rt?.Split('.').Last()) is TypeInfo rti
+                    ? rti.Chain().Select(c => c.MemberTypes.GetValueOrDefault(name)).FirstOrDefault(x => x != null) : null;
             }
             case ElementAccessExpressionSyntax eax when Cur.ClassMode:
                 return Lookup(eax.Expression is ThisExpressionSyntax ? Cur.Cs : TypeOf(eax.Expression)) is TypeInfo ixt
@@ -1903,6 +2277,7 @@ class Tx
                     var name = m.Name.Identifier.Text;
                     if (name == "ToArray" && ArrayCs(TypeOf(m.Expression)) is string tarr) return tarr;
                     if (TypeOf(m.Expression) == "StringHolder") return name == "ToString" ? "string" : name == "NonConstPointer" ? "IntPtr" : null;
+                    if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : null;
                     if (m.Expression is IdentifierNameSyntax mx && mx.Identifier.Text == "Math" && !Scope.ContainsKey("Math"))
                         return name == "Sign" ? "int" : name is "Max" or "Min" or "Abs" ? TypeOf(inv.ArgumentList.Arguments[0].Expression) : "double";
                     if (m.Expression is PredefinedTypeSyntax) return "bool";
@@ -1913,11 +2288,15 @@ class Tx
                     if (m.Expression is IdentifierNameSyntax csi && !Scope.ContainsKey(csi.Identifier.Text) && IsClass(csi.Identifier.Text))
                         return Classes[csi.Identifier.Text].MemberTypes.TryGetValue(name + "()", out var cs2) ? cs2 : null;   // a class static (G74)
                     var rt = TypeOf(m.Expression);
-                    return Lookup(rt) is TypeInfo rti && rti.MemberTypes.TryGetValue(name + "()", out var t3) ? t3 : null;
+                    return Lookup(rt?.Split('.').Last()) is TypeInfo rti
+                        ? rti.Chain().Select(c => c.MemberTypes.GetValueOrDefault(name + "()")).FirstOrDefault(x => x != null) : null;
                 }
                 return null;
             }
             case ElementAccessExpressionSyntax eax when ArrayCs(TypeOf(eax.Expression)) is string eat: return eat[..^2];
+            case ElementAccessExpressionSyntax tea when tea.Expression is ThisExpressionSyntax
+                    && Cur.Chain().Select(ct => ct.MemberTypes.GetValueOrDefault("this[]")).FirstOrDefault(x => x != null) is string tit:
+                return tit;                                     // the indexer's type (G80)
             case ElementAccessExpressionSyntax: return "double";
             case ArrayCreationExpressionSyntax acx: return acx.Type.ElementType.ToString() + "[]";
             default: return null;
@@ -1966,6 +2345,11 @@ class Tx
                 args.Add(Expr(e));
             else if (Cur.IsData && t == "IntPtr")
                 args.Add($"RH3DM_IP({Expr(e)})");          // a pointer the C side types
+            else if (Cur.IsData && ArrayCs(t) is string at && All.TryGetValue(at[..^2].Split('.').Last(), out var aet) && !aet.IsStaticClass && !aet.IsData)
+            {
+                if (WritesSelf(e)) MutatesSelf = true;          // the native may fill this object's array
+                args.Add($"RH3DM_Ptr(({Expr(e)}).data())");   // `list.m_items` as a T[]: its elements (G81)
+            }
             else if (Cur.IsData && t == "string")
                 args.Add($"RH3DM_S({Expr(e)}).data()");
             else if (Cur.IsData && IsEnumT(t))
@@ -1989,6 +2373,11 @@ class Tx
             if (ma.Expression is IdentifierNameSyntax recvId && !Scope.ContainsKey(recvId.Identifier.Text))
             {
                 var rn = recvId.Identifier.Text;
+                if (rn == "Array" && ma.Name is not GenericNameSyntax && ArrayStatic(name, inv.ArgumentList) is string ast) return ast;
+                if (_eqComparers.Contains(rn) && name == "Equals" && n == 2)
+                    // EqualityComparer<T>.Default.Equals(a, b): the type's == (G80)
+                    return Expr(SyntaxFactory.ParenthesizedExpression(SyntaxFactory.BinaryExpression(SyntaxKind.EqualsExpression,
+                        inv.ArgumentList.Arguments[0].Expression, inv.ArgumentList.Arguments[1].Expression)));
                 if (rn == "Array" && ma.Name is GenericNameSyntax { Identifier.Text: "Empty", TypeArgumentList.Arguments: [var aet] } && n == 0
                     && VectorElement(aet) is string aec)
                     return $"std::vector<{aec}>()";                                 // Array.Empty<T>() (G70)
@@ -2007,6 +2396,7 @@ class Tx
                 {
                     if (!t.Methods.TryGetValue(name, out var st) || !st)
                         throw new NotSupported($"call {rn}.{name}");
+                    inv = ThisAsSequence(inv, t, name);
                     RefCall(t.Cs, name, inv.ArgumentList);
                     return $"{t.Cpp}::{Rn(name)}({Args(inv.ArgumentList)})";
                 }
@@ -2028,10 +2418,25 @@ class Tx
             }
             if (ma.Expression is ThisExpressionSyntax)
                 return Invocation(SyntaxFactory.InvocationExpression(ma.Name, inv.ArgumentList));
+            if (n == 2 && name == "CopyTo" && ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _)
+                && (WritesSelf(inv.ArgumentList.Arguments[0].Expression) ? MutatesSelf = true : true))
+                // ICollection<T>.CopyTo(array, index) on a sequence (G80)
+                return $"RH3DM_ArrCopy({Expr(ma.Expression)}, 0, {Args(inv.ArgumentList)}, (int){Expr(ma.Expression)}.size())";
             if (n == 0 && name == "ToArray" && ArrayCs(TypeOf(ma.Expression)) != null)
                 return Expr(ma.Expression);                                        // a vector already (G70)
+            if (ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _) && TypeOf(ma.Expression)?.StartsWith("List<") == true)
+            {
+                // List<T> edits on a std::vector (G80)
+                var lv = Expr(ma.Expression);
+                var la = inv.ArgumentList.Arguments.Select(x => Expr(x.Expression)).ToList();
+                if (name == "RemoveAt" && n == 1) return $"{lv}.erase({lv}.begin() + ({la[0]}))";
+                if (name == "Insert" && n == 2) return $"{lv}.insert({lv}.begin() + ({la[0]}), {la[1]})";
+                if (name == "Clear" && n == 0) return $"{lv}.clear()";
+            }
             if (n == 1 && name == "Add" && ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _))
                 return $"{Expr(ma.Expression)}.push_back({Args(inv.ArgumentList)})";   // List<T>.Add (G70)
+            if (Cur.IsData && TypeOf(ma.Expression)?.Split('.').Last() == "SimpleArrayPoint3d" && n == 0 && name is "ConstPointer" or "NonConstPointer")
+                return $"({Expr(ma.Expression)}).{name}()";              // an IntPtr the C side types (G81)
             if (Cur.IsData && TypeOf(ma.Expression) == "StringHolder" && n == 0)
             {
                 if (name == "NonConstPointer") return $"((void*)&{Expr(ma.Expression)})";
@@ -2048,10 +2453,15 @@ class Tx
             var recvT = TypeOf(ma.Expression);
             if (recvT != null)
             {
-                if (!All.TryGetValue(recvT, out var rti) || rti.IsStaticClass
-                    || !rti.Methods.TryGetValue(name, out var rs) || rs)
+                // a data object's method may be declared on a base it derives from (G80)
+                var rti = All.TryGetValue(recvT.Split('.').Last(), out var rt0) ? rt0 : null;
+                var dti = rti?.Chain().FirstOrDefault(c => c.MethodArity.TryGetValue(name, out var dar) && dar.Contains(n))
+                          ?? rti?.Chain().FirstOrDefault(c => c.Methods.ContainsKey(name));
+                if (rti == null || rti.IsStaticClass || dti == null || dti.Methods[name])
                     throw new NotSupported($"call {recvT}.{name}");
-                RefCall(rti.Cs, name, inv.ArgumentList);
+                RefCall(dti.Cs, name, inv.ArgumentList);
+                // a call on this object's field: a mutating callee mutates this (G81)
+                if (WritesSelf(ma.Expression)) SelfCalls.Add($"{dti.Cs}.{name}/{n}");
                 return $"({Expr(ma.Expression)}).{Rn(name)}({Args(inv.ArgumentList)})";
             }
             if (All.Values.Any(t => t.Methods.TryGetValue(name, out var s) && !s))
@@ -2071,10 +2481,13 @@ class Tx
                 var dt = Declaring(t => t.Methods.ContainsKey(name));
                 return $"$${(dt != null && dt.Methods[name] ? "scall" : "call")}:{name}:{ArgTypes(inv.ArgumentList)}$$({Args(inv.ArgumentList)})";
             }
-            if (Cur.Methods.ContainsKey(name))
+            if ((Cur.Chain().FirstOrDefault(t => t.MethodArity.TryGetValue(name, out var mar) && mar.Contains(n))
+                 ?? Cur.Chain().FirstOrDefault(t => t.Methods.ContainsKey(name))) is { } mt)
             {
-                RefCall(Cur.Cs, name, inv.ArgumentList);
-                if (!Cur.Methods[name]) SelfCalls.Add($"{Cur.Cs}.{name}/{n}");
+                // `this` handed to a parameter that takes a sequence: this list's items (G80)
+                inv = ThisAsSequence(inv, mt, name);
+                RefCall(mt.Cs, name, inv.ArgumentList);
+                if (!mt.Methods[name]) SelfCalls.Add($"{mt.Cs}.{name}/{n}");
                 return $"{Rn(name)}({Args(inv.ArgumentList)})";
             }
             throw new NotSupported("call " + name);

@@ -64,6 +64,15 @@ def emit(p):
         L += ['    %s' % x for x in p['locals']]
         L.append('    const void* rh3dm_p = %s;' % call)
         L.append('    return rh3dm_p ? %s::%s((void*)rh3dm_p) : nullptr;' % (cpp, shape[2]))
+    elif shape[0] == 'holderdata':
+        # the holder the native filled, handed to the data class's translated
+        # static (PolylineCurve.ToPolyline -> Polyline.PolyLineFromNativeArray; G82)
+        cpp = DATA_CPP[shape[1]]
+        L.append('  %s%s* %s(%s)%s {' % (st, cpp, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    %s;' % call)
+        L.append('    return %s::%s(holder_out);' % (cpp, shape[2]))
     elif shape[0] == 'datafill':
         # a data object assembled from the call's out locals (and the holder) (G65)
         cpp = DATA_CPP[shape[1]]
@@ -1085,7 +1094,7 @@ def js_class_shape(t):
     if t in ('double', 'float', 'int', 'unsigned int', 'long long'):
         return 'number', '{v}.isNumber()', '{v}.as<%s>()' % t
     if t == 'emscripten::val':                                    # a JS array for a std::vector (G70)
-        return 'array', '{v}.isArray()', '{v}'
+        return 'array', 'RH3DM_JsIsSeq({v})', '{v}'          # or a point list (G83)
     if t == 'bool':
         return 'boolean', '({v}.typeOf().as<std::string>() == "boolean")', '{v}.as<bool>()'
     enum_js = {v['cpp']: v.get('js', k) for k, v in CS_ENUMS.items()}
@@ -1102,6 +1111,9 @@ def js_class_shape(t):
         return ('object:' + vt[t],
                 '({v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("%s")%s)' % (vt[t], lacks),
                 '{v}.as<%s>()' % t)
+    m = re.match(r'const std::vector<(\w+)>&$', t)
+    if m:                                  # a sequence (G82): an array or a point list
+        return ('seq:' + m.group(1), 'RH3DM_JsIsSeq({v})', 'RH3DM_JsSeq<%s>({v})' % m.group(1))
     m = re.match(r'const (BND_(\w+))\*$', t)
     if m:                                  # an optional class argument: null or an instance
         reg = m.group(2)
@@ -1146,7 +1158,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 # a component of this list's owner: it keeps the list (and the owner) alive
                 py.append('      .def("__getitem__", &%s::%s, py::keep_alive<0, 1>())' % (cls['gen'], g))
                 js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
-            elif p['shape'][0] in ('datafrom', 'datafill'):
+            elif p['shape'][0] in ('datafrom', 'datafill', 'holderdata'):
                 # a new data object: Python owns it (the default pointer policy)
                 py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
                 js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
@@ -1160,7 +1172,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             if cnt:
                 py.append('      .def("__len__", &%s::%s)' % (cls['gen'], cnt[0]['cpp']))
             continue
-        elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt', 'datafrom', 'datafill'):
+        elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt', 'datafrom', 'datafill', 'holderdata'):
             # a getter returning a NEW object: Python owns it (a property's default
             # policy, reference_internal, would leak it); JS gets the raw pointer
             sp = p.get('setter')
@@ -1204,9 +1216,25 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         for p in ps:
             by_shape.setdefault(tuple(js_class_shape(t)[0] for t, _ in p['bind_args']), p)
         ps = list(by_shape.values())
+        if len(ps) == 1 and any(t.startswith('const std::vector<') for t, _ in ps[0]['bind_args']):
+            # a sequence argument (G82): embind cannot take a JS array as a
+            # std::vector -- a lambda converts it (RH3DM_JsSeq)
+            p = ps[0]
+            d = emit_decl_def(p, cls)[0]
+            rt = d[:d.index(' %s(' % p['cpp'])].replace('static ', '').strip()
+            shapes = [js_class_shape(t) for t, _ in p['bind_args']]
+            vec = [t.startswith('const std::vector<') for t, _ in p['bind_args']]
+            params = ', '.join(('emscripten::val a%d' if v else '%s a%%d' % t) % i for i, ((t, _), v) in enumerate(zip(p['bind_args'], vec)))
+            args = ', '.join(sh[2].format(v='a%d' % i) if v else 'a%d' % i for i, (sh, v) in enumerate(zip(shapes, vec)))
+            selfp = '' if static else '%s& self%s' % (cls['gen'], ', ' if params else '')
+            call = ('%s::%s(%s)' if static else 'self.%s(%s)') % (*(([cls['gen']] if static else [])), p['cpp'], args)
+            js.append('      .%s("%s", optional_override([](%s%s) -> %s { %s%s; }), allow_raw_pointers())'
+                      % ('class_function' if static else 'function', jn, selfp, params, rt,
+                         '' if rt == 'void' else 'return ', call))
+            continue
         if len(ps) == 1:
             p = ps[0]
-            rawp = (', allow_raw_pointers()' if final_shape(p) in ('wrap', 'fill', 'proxywrap', 'construct', 'via', 'newobj', 'valadopt', 'subview', 'datafrom', 'datafill', 'selfcopy')
+            rawp = (', allow_raw_pointers()' if final_shape(p) in ('wrap', 'fill', 'proxywrap', 'construct', 'via', 'newobj', 'valadopt', 'subview', 'datafrom', 'datafill', 'holderdata', 'selfcopy')
                     or (p['shape'][0] == 'translated' and p['shape'][1].endswith('*'))          # a class value (G74)
                     or any(t.endswith('*') for t, _ in p['bind_args']) else '')
             js.append('      .%s("%s", &%s::%s%s)'
@@ -1277,6 +1305,16 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         for p in ps:
             by_shape.setdefault(tuple(js_class_shape(t)[0] for t, _ in p['bind_args']), p)
         ps = list(by_shape.values())
+        if len(ps) == 1 and any(t.startswith('const std::vector<') for t, _ in ps[0]['bind_args']):
+            # a sequence argument (G82): a factory converting the array or point list
+            shapes = [js_class_shape(t) for t, _ in ps[0]['bind_args']]
+            vec = [t.startswith('const std::vector<') for t, _ in ps[0]['bind_args']]
+            params = ', '.join('emscripten::val a%d' % i if v else '%s a%d' % (t, i)
+                               for i, ((t, _), v) in enumerate(zip(ps[0]['bind_args'], vec)))
+            args = ', '.join(sh[2].format(v='a%d' % i) if v else 'a%d' % i for i, (sh, v) in enumerate(zip(shapes, vec)))
+            js_dctor += ('      .constructor(optional_override([](%s) -> %s* { return new %s(%s); }), allow_raw_pointers())\n'
+                         % (params, cls['gen'], cls['gen'], args))
+            continue
         if len(ps) == 1:
             js_dctor += '      .constructor<%s>()\n' % ', '.join(t for t, _ in ps[0]['bind_args'])
             continue
