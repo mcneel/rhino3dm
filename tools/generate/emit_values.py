@@ -53,7 +53,7 @@ def emit_valuetypes(vt, blocks):
     files = {}
     files['gen_vt_common.h'] = '\n'.join([
         VT_BANNER, '#pragma once', '#include <cmath>', '#include <limits>',
-        '#include <stdexcept>', '#include <type_traits>', '',
+        '#include <stdexcept>', '#include <type_traits>', '#include <string>', '#include <vector>', '',
         '// C# semantics helpers: Math.Max/Min promote mixed arguments;',
         '// Math.Sign returns int',
         'template <class A, class B> inline typename std::common_type<A, B>::type',
@@ -79,6 +79,9 @@ def emit_valuetypes(vt, blocks):
         '    static_assert(sizeof(U) == sizeof(T), "value-type layout differs from the C struct");',
         '    U u; std::memcpy(&u, &v, sizeof(U)); return u; } };',
         'template <class T> inline RH3DM_ValT<T> RH3DM_Val(const T& v) { return {v}; }',
+        '// an IntPtr a data class hands a native call (G64): the C side types it',
+        'struct RH3DM_IPT { void* p; template <class U> operator U*() const { return (U*)p; } };',
+        'inline RH3DM_IPT RH3DM_IP(void* p) { return {p}; }',
         '',
         '// RhinoCommon enums the translated bodies use, verbatim (values included)'] + [
         'enum class %s : %s { %s };' % (e['Cpp'], {'int': 'int', 'uint': 'unsigned int', 'byte': 'unsigned char'}.get(e['Underlying'], 'int'),
@@ -109,13 +112,14 @@ def emit_valuetypes(vt, blocks):
                      if f['Type'] in by_cpp and by_cpp[f['Type']] is not t})
         h += ['', 'struct %s\n{' % t['Cpp']]
         for f in t['Fields']:
-            h.append('  %s %s%s;' % (f['Type'], f['Name'],
-                                      ' = 0' if not f['Type'].startswith(('BND_', 'RH3DM_')) else ''))
+            # a data class field carries RhinoCommon's initializer (G64)
+            init = (' = ' + f['Init']) if f.get('Init') else (' = 0' if not f['Type'].startswith(('BND_', 'RH3DM_', 'std::')) else '')
+            h.append('  %s %s%s;' % (f['Type'], f['Name'], init))
         pad = t.get('LayoutSize', 0) - natural_size(t, by_cpp)
         if pad > 0:   # RhinoCommon [StructLayout(Size = N)]: e.g. Plane's room for ON_Plane's equation
             assert pad % 8 == 0, (t['Cs'], pad)
             h.append('  double m_rh3dm_pad[%d] = {};   // StructLayout(Size = %d)' % (pad // 8, t['LayoutSize']))
-        if not t['IsStaticClass']:
+        if not t['IsStaticClass'] and not any(m['Kind'] == 'ctor' and not m.get('Params') and m.get('Decl') for m in mine):
             h.append('  %s() = default;' % t['Cpp'])
         h += ['  ' + c['Decl'] for c in ordered]
         h += ['  ' + m['Decl'] for m in mine
@@ -157,7 +161,11 @@ void initGen{reg}(void)
 def pub(m, expr):
     """a translated member returning a translated enum hands the binding
     the PUBLICLY registered enum (the old bindings own TransformSimilarityType
-    etc. today): RH3DM_Pub casts; every other return passes through"""
+    etc. today): RH3DM_Pub casts; every other return passes through. A
+    std::vector result (G70) is marked: Python takes it as a list (stl.h),
+    JS gets an array (RH3DM_JsArray) -- resolved per side at the end"""
+    if (m.get('Ret') or '').startswith('std::vector<'):
+        return '@@VEC@@(%s)' % expr
     return 'RH3DM_Pub(%s)' % expr if m.get('Ret') in VT_ENUMS else expr
 
 
@@ -183,6 +191,9 @@ def emit_valuetype_bindings(vt, skipped):
             continue
         T, cs = t['Cpp'], t['Cs']
         reg = cs + 'X'
+        if t.get('IsData'):
+            blocks[cs] = emit_data_bindings(t, vt, skipped)
+            continue
         fields = [f['Name'] for f in t['Fields']]
         mine = [m for m in vt['members'] if m['Type'] == cs and m['Ok'] and m['Public']]
         # overloads a binding cannot tell apart (same INPUT parameters; they
@@ -230,6 +241,10 @@ def emit_valuetype_bindings(vt, skipped):
         instance_names = {m['Name'] for m in mine if not m['Static'] and m['Kind'] == 'method'}
         for m in mine:
             k, n = m['Kind'], m['Name']
+            if k != 'ctor' and any(p['Type'] in VT_ENUMS for p in m['Params'] or []):
+                # a translated-enum PARAMETER outside a constructor: not needed yet
+                skipped['value-type enum param'] = skipped.get('value-type enum param', 0) + 1
+                continue
             if k == 'method' and m['Static'] and n in instance_names:
                 # Python cannot overload one name as static AND instance
                 # (BoundingBox.Union(a, b) vs bbox.Union(other)): the instance
@@ -266,7 +281,19 @@ def emit_valuetype_bindings(vt, skipped):
                       % (locs, ('auto r = %s;' % pub(m, jcall)) if has_ret else ('%s;' % jcall),
                          ' '.join('arr.call<void>("push", %s);' % v for v in vals)))
                 continue
-            if k == 'ctor':
+            if k == 'ctor' and m['Decl'] and any(p['Type'] in VT_ENUMS for p in m['Params']):
+                # `ComponentIndex(ComponentIndexType type, int index)`: the binding
+                # takes the PUBLICLY registered enum and casts it to the translated
+                # one, as RH3DM_Pub does for returns
+                ptypes = [VT_ENUMS.get(p['Type'], p['Type']) for p in m['Params']]
+                def priv(p, a):
+                    return '(%s)(int)%s' % (p['Type'], a) if p['Type'] in VT_ENUMS else a
+                pyl.append('      .def(py::init([](%s) { return %s(%s); })%s)'
+                           % (', '.join('%s %s' % (t, p['Name']) for t, p in zip(ptypes, m['Params'])), T,
+                              ', '.join(priv(p, p['Name']) for p in m['Params']), pyargs(m)))
+                js_fn('Create', ptypes, 'return %s(%s);'
+                      % (T, ', '.join(priv(p, 'a%d' % i) for i, p in enumerate(m['Params']))))
+            elif k == 'ctor':
                 if m['Decl']:
                     pyl.append('      .def(py::init<%s>()%s)'
                                % (', '.join(p['Type'] for p in m['Params']), pyargs(m)))
@@ -348,6 +375,20 @@ def emit_valuetype_bindings(vt, skipped):
         def js_shape(t):
             return js_class_shape(t)[0]
 
+        def js_vectors(types, body):
+            """a std::vector parameter arrives as a JS array (emscripten::val),
+            converted first; a vector result goes out as one (G70)"""
+            conv = []
+            types2 = []
+            for i, t in enumerate(types):
+                if t.startswith('std::vector<'):
+                    conv.append('%s a%d_v = emscripten::vecFromJSArray<%s>(a%d);' % (t, i, t[len('std::vector<'):-1], i))
+                    body = re.sub(r'\ba%d\b' % i, 'a%d_v' % i, body)
+                    types2.append('emscripten::val')
+                else:
+                    types2.append(t)
+            return types2, ' '.join(conv) + (' ' if conv else '') + body.replace('@@VEC@@(', 'RH3DM_JsArray(')
+
         for (fname, arity), ents in js_entries.items():
             # overloads JS cannot tell apart (Point3d+Point3d vs Point3d+Vector3d:
             # both {X,Y,Z}) collapse to the first -- a dispatcher could never
@@ -356,6 +397,7 @@ def emit_valuetype_bindings(vt, skipped):
             for e in ents:
                 by_shape.setdefault(tuple(js_shape(t) for t in e[0]), e)
             ents = list(by_shape.values())
+            ents = [js_vectors(types, body) for types, body in ents]
             if len(ents) == 1:
                 types, body = ents[0]
                 params = ', '.join('%s a%d' % (t, i) for i, t in enumerate(types))
@@ -429,7 +471,62 @@ def emit_valuetype_bindings(vt, skipped):
               % (T, reg, '\n'.join('      .field("%s", &%s::%s)' % (field_of.get(f, f), T, f)
                                    for f in fields)))
         tag = 'RH3DM_%sFns' % reg
+        py_block = py_block.replace('@@VEC@@(', '(')
         blocks[cs] = (py_block, 'struct %s {};' % tag,
                       vo + '\n  class_<%s>("%s")\n%s;' % (tag, reg, '\n'.join(jsl)))
 
     return blocks
+
+
+def emit_data_bindings(t, vt, skipped):
+    """a DATA class (G64: ConstructionPlane, File3dmWriteOptions): a real class in
+    both languages -- constructed, mutated in place, nullable -- never a value
+    object. Members are RhinoCommon's public ones; translated enums cross the
+    boundary as the registered public enum (RH3DM_Pub and its inverse)."""
+    T, cs = t['Cpp'], t['Cs']
+    reg = cs + 'X'
+    mine = [m for m in vt['members'] if m['Type'] == cs and m['Ok'] and m['Public']]
+    pyl = ['  py::class_<%s>(m, "%s")' % (T, reg), '      .def(py::init<>())']
+    jsl = ['  class_<%s>("%s")' % (T, reg), '      .constructor<>()']
+
+    def pub_t(ty):
+        return VT_ENUMS.get(ty, ty)
+
+    def priv(ty, expr):
+        return '(%s)(int)%s' % (ty, expr) if ty in VT_ENUMS else expr
+
+    def ret(ty, expr):
+        return 'RH3DM_Pub(%s)' % expr if ty in VT_ENUMS else expr
+    for m in mine:
+        k, n = m['Kind'], m['Name']
+        if k == 'property' and not m.get('Static'):
+            getter = '[](const %s& s) { return %s; }' % (T, ret(m['Ret'], 's.%s()' % m['Getter']))
+            if m.get('Setter'):
+                setter = '[](%s& s, %s v) { s.%s(%s); }' % (T, pub_t(m['Ret']), m['Setter'], priv(m['Ret'], 'v'))
+                pyl.append('      .def_property("%s", %s, %s)' % (n, getter, setter))
+                if m['Ret'] not in VT_ENUMS:
+                    jsl.append('      .property("%s", &%s::%s, &%s::%s)' % (camel(n), T, m['Getter'], T, m['Setter']))
+                else:
+                    skipped['js data-class enum property'] = skipped.get('js data-class enum property', 0) + 1
+            else:
+                pyl.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                if m['Ret'] not in VT_ENUMS:
+                    jsl.append('      .property("%s", &%s::%s)' % (camel(n), T, m['Getter']))
+                else:
+                    skipped['js data-class enum property'] = skipped.get('js data-class enum property', 0) + 1
+        elif k == 'method' and not m.get('Static'):
+            if any(q.get('Mode') for q in m['Params'] or []) or m['Ret'].endswith('*'):
+                skipped['data-class method shape'] = skipped.get('data-class method shape', 0) + 1
+                continue
+            ps = m['Params'] or []
+            sig = ''.join(', %s %s' % (pub_t(q['Type']), q['Name']) for q in ps)
+            call = 's.%s(%s)' % (n, ', '.join(priv(q['Type'], q['Name']) for q in ps))
+            body = ('%s;' % call) if m['Ret'] == 'void' else ('return %s;' % ret(m['Ret'], call))
+            pyl.append('      .def("%s", [](%s& s%s) { %s }%s)'
+                       % (n, T, sig, body, ''.join(', py::arg("%s")' % q['Name'] for q in ps)))
+            jsl.append('      .function("%s", optional_override([](%s& s%s) { %s }))' % (camel(n), T, sig, body))
+        else:
+            skipped['data-class member kind %s' % k] = skipped.get('data-class member kind %s' % k, 0) + 1
+    pyl[-1] += ';'
+    jsl[-1] += ';'
+    return '\n'.join(pyl), '', '\n'.join(jsl)

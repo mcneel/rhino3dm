@@ -397,7 +397,7 @@ def test_render_settings_same_file_result_as_the_old_in_place_bindings(tmp_path)
     back = r.File3dm.Read(po)
     assert back.Settings.RenderSettings.ShadowMapLevel == 2 and back.Settings.RenderSettings.TransparentBackground is True
     if os.path.exists(pn):
-        assert r.File3dm.Read(pn).Settings.RenderSettings.ShadowmapLevel == 2
+        assert r.File3dm.Read(pn).Settings.RenderSettings.ShadowMapLevel == 2   # read back through the OLD binding
 
 
 @needs_rs
@@ -943,3 +943,483 @@ def test_set_mesh_hands_the_mesh_to_the_face():
     m.Vertices.Clear()                                      # a write: m detaches
     assert m.Vertices.Count == 0
     assert face.GetMesh(r.MeshType.Render).Vertices.Count == 4
+
+
+@pytest.mark.skipif(not hasattr(r, 'DecalsX'), reason='G60 not generated')
+def test_decals_iterate_a_snapshot_of_copies():
+    # RhinoCommon's DecalEnumerator: a snapshot of the attributes' decals, each
+    # item its own shared_ptr copy -- it outlives the file it came from
+    import gc
+    f = r.File3dmX.Read(os.path.join(MODELS, 'sphereDecals.3dm'))
+    objs = list(f.Objects)
+    decals = list(objs[0].Attributes.Decals)
+    assert len(decals) == 2
+    assert all(d.Mapping == r.DecalMapping.UV for d in decals)
+    ids = [d.TextureInstanceId for d in decals]
+    assert len(set(ids)) == 2
+    del f, objs
+    gc.collect()
+    assert [d.TextureInstanceId for d in decals] == ids
+
+
+@pytest.mark.skipif(not hasattr(r, 'DecalsX'), reason='G60 not generated')
+def test_decals_of_attributes_are_writable_with_rhinocommons_guards():
+    # `new Decals(this, false, doc_sn)`: not read-only, so the m_read_only guards pass
+    a = r.ObjectAttributesX()
+    assert list(a.Decals) == []
+    a.Decals.RemoveAllDecals()
+    a.Decals.Clear()
+    assert a.Decals.Remove(None) is False          # `if (decal == null) return false;`
+
+
+@pytest.mark.skipif(not hasattr(r, 'ComponentIndexX'), reason='ComponentIndex not generated')
+def test_component_index_value_type():
+    # a translated value struct; its constructor takes the public ComponentIndexType
+    ci = r.ComponentIndexX(r.ComponentIndexType.BrepFace, 3)
+    assert ci.Index == 3 and ci.ComponentIndexType == r.ComponentIndexType.BrepFace and ci.IsSet
+    u = r.ComponentIndexX.Unset                        # `new ComponentIndex(InvalidType, -1)`
+    assert u.IsUnset() and not ci.IsUnset() and u.Index == -1
+    assert ci == r.ComponentIndexX(r.ComponentIndexType.BrepFace, 3) and ci != u and u < ci
+    face = box_brep().Faces[1]
+    assert face.ComponentIndex() == r.ComponentIndexX(r.ComponentIndexType.BrepFace, 1)
+
+
+@pytest.mark.skipif(not hasattr(r, 'RevSurfaceX'), reason='RevSurface not generated')
+def test_rev_surface_from_rhinocommon_shapes():
+    import math
+    s = r.RevSurfaceX.CreateFromSphere(r.SphereX(r.Point3dX(0, 0, 0), 2.0))
+    assert isinstance(s, r.RevSurfaceX) and isinstance(s, r.SurfaceX)
+    assert abs((s.Angle.T1 - s.Angle.T0) - 2 * math.pi) < 1e-9
+    assert s.AxisAndCurveCoplanar() is True
+    assert isinstance(r.SphereX(r.Point3dX(0, 0, 0), 1.0).ToRevSurface(), r.RevSurfaceX)
+
+
+@pytest.mark.skipif(not hasattr(r, 'RenderChannelsX'), reason='RenderChannels not generated')
+def test_render_channels_of_render_settings():
+    rc = r.RenderSettingsX().RenderChannels
+    assert rc.Mode == r.RenderChannelsModes.Automatic   # `(m == 0) ? Modes.Automatic : Modes.Custom`
+    import uuid
+    assert all(isinstance(i, uuid.UUID) for i in rc.CustomList)   # opennurbs' default custom channels
+    assert r.RenderChannelsX().Mode == r.RenderChannelsModes.Automatic
+
+
+@pytest.mark.skipif(not hasattr(r, 'CommonObjectX'), reason='G62 not generated')
+def test_common_object_is_the_root_of_object_classes():
+    # RhinoCommon's CommonObject: IsValid / IsValidWithLog on everything that is one
+    b = box_brep()
+    assert isinstance(b, r.CommonObjectX) and isinstance(r.ObjectAttributesX(), r.CommonObjectX)
+    assert b.IsValid is True
+    ok, log = b.IsValidWithLog()
+    assert ok is True and isinstance(log, str)
+    assert r.CommonObjectX.ComputeMemoryEstimate(b) > 0
+    # ON_TextureCoordinates is no ON_Object: no CommonObject base (pilot-findings #31)
+    if hasattr(r, 'CachedTextureCoordinatesX'):
+        assert not issubclass(r.CachedTextureCoordinatesX, r.CommonObjectX)
+    a = r.ObjectAttributesX()
+    assert a.SetUserString('k', 'v') is True and a.GetUserString('k') == 'v' and a.UserStringCount == 1
+
+
+@pytest.mark.skipif(not hasattr(r.LightX, 'IsPointLight'), reason='G63 not generated')
+def test_translated_members_built_from_generated_members():
+    # RhinoCommon's own C# bodies, translated (G63): `LightStyle == LightStyle.WorldPoint || ...`
+    import math
+    light = r.LightX()
+    light.LightStyle = r.LightStyle.WorldPoint
+    assert light.IsPointLight is True and light.IsSpotLight is False and light.IsLinearLight is False
+    light.LightStyle = r.LightStyle.WorldSpot
+    assert light.IsSpotLight is True and light.IsPointLight is False
+    # RhinoMath.ToDegrees(ModelAngleToleranceRadians), and the setter back through ToRadians
+    f = r.File3dmX()
+    f.Settings.ModelAngleToleranceDegrees = 3.0
+    assert abs(f.Settings.ModelAngleToleranceRadians - math.radians(3.0)) < 1e-12
+    assert abs(f.Settings.ModelAngleToleranceDegrees - 3.0) < 1e-12
+    # `Translate(new Vector3d(x, y, z))`
+    b = box_brep()
+    assert b.Translate(1.0, 2.0, 3.0) is True
+    # a switch over TrimCount (BrepEdge.Valence): a box's edges are interior
+    assert all(b.Edges[i].Valence == r.EdgeAdjacency.Interior for i in range(b.Edges.Count))
+
+
+@pytest.mark.skipif(not hasattr(r, 'File3dmWriteOptionsX'), reason='G64 not generated')
+def test_data_classes_are_rhinocommons_translated_whole(tmp_path):
+    # G64: File3dmWriteOptions, its constructor (`SaveUserData = true`), the [Flags]
+    # arithmetic of EnableRenderMeshes, and `options = options ?? new ...` in Write
+    o = r.File3dmWriteOptionsX()
+    assert o.SaveUserData is True and o.SaveRenderMeshes is True and o.Version == 0
+    o.EnableRenderMeshes(r.ObjectType.AnyObject, False)
+    assert o.SaveRenderMeshes is False
+    o.Version = 7
+    f = r.File3dmX()
+    path = str(tmp_path / 'opts.3dm')
+    assert f.Write(path, o) is True and f.Write(str(tmp_path / 'default.3dm'), None) is True
+    ok, log = f.WriteWithLog(str(tmp_path / 'log.3dm'), None)
+    assert ok is True and isinstance(log, str)
+    assert r.File3dmX.Read(path) is not None
+    # PageSettings: a data class handed to a native setter member by member
+    ps = r.PageSettingsX()
+    ps.PageNumber, ps.WidthMillimeters, ps.PrinterName = 3, 210.0, 'laser'
+    v = r.ViewInfoX(r.ViewInfo())                      # through the hand bridge: no default ctor yet
+    v.SetPageSettings(ps)
+    # ConstructionPlane: RhinoCommon's constructor defaults, and the named-cplane
+    # table of a fresh file (its indexer builds data objects from the native)
+    cp = r.ConstructionPlaneX()
+    assert cp.GridSpacing == 1.0 and cp.GridLineCount == 70 and cp.ThickLineFrequency == 5 and cp.DepthBuffered is True
+    assert cp.Plane.Origin == r.Point3dX(0, 0, 0) and cp.Name == ''
+    cp.Name = 'top'
+    assert cp.Name == 'top'
+    assert len(f.NamedConstructionPlanes) == 0
+
+
+@pytest.mark.skipif(not hasattr(r.ViewInfoX, 'GetPageSettings'), reason='G65 not generated')
+def test_data_objects_cross_the_native_boundary_both_ways(tmp_path):
+    # G65: a data object built from the native (GetPageSettings, GridDefaults, the
+    # named-cplane indexer) and handed to it (SetPageSettings, GridDefaults=, Add)
+    v = r.ViewInfoX(r.ViewInfo())
+    ps = r.PageSettingsX()
+    ps.PageNumber, ps.WidthMillimeters, ps.PrinterName = 3, 210.0, 'laser'
+    v.SetPageSettings(ps)
+    back = v.GetPageSettings()
+    assert (back.PageNumber, back.WidthMillimeters, back.PrinterName) == (3, 210.0, 'laser')
+    f = r.File3dmX()
+    gd = f.Settings.GridDefaults
+    assert gd is not None and gd.GridLineCount == 70
+    gd.GridLineCount = 12
+    f.Settings.GridDefaults = gd
+    assert f.Settings.GridDefaults.GridLineCount == 12
+    cp = r.ConstructionPlaneX()
+    cp.Name, cp.GridSpacing = 'top', 2.5
+    f.NamedConstructionPlanes.Add(cp)
+    assert len(f.NamedConstructionPlanes) == 1
+    got = f.NamedConstructionPlanes[0]
+    assert got.Name == 'top' and got.GridSpacing == 2.5
+    # `Write(path, new File3dmWriteOptions { Version = version })`
+    path = str(tmp_path / 'v.3dm')
+    assert f.Write(path, 7) is True
+    g = r.File3dmX.Read(path)
+    assert g.NamedConstructionPlanes[0].Name == 'top'
+
+
+@pytest.mark.skipif(not hasattr(r.File3dmLayerTableX, 'FindId'), reason='G66 not generated')
+def test_find_id_on_the_tables_skips_deleted_components():
+    # G66: `m_manifest.FindId(id, ComponentType) is T item && !item.IsDeleted`
+    import uuid
+    f = r.File3dmX()
+    layer = r.LayerX()
+    layer.Name = 'walls'
+    f.Layers.Add(layer)                                 # RhinoCommon's ICollection Add: void
+    found = f.Layers.FindIndex(f.Layers.Count - 1)
+    got = f.Layers.FindId(found.Id)
+    assert got is not None and got.Name == 'walls'
+    assert f.Layers.FindId(uuid.uuid4()) is None
+    mat = r.MaterialX()
+    f.Materials.Add(mat)
+    mi = f.Materials.Count - 1
+    mid = f.Materials.FindIndex(mi).Id
+    assert f.Materials.FindId(mid) is not None
+    f.Materials.Delete(mi)                              # ModelComponentTable.Delete(int): void in RhinoCommon
+    assert f.Materials.FindId(mid) is None                  # deleted: no result, as in RhinoCommon
+
+
+@pytest.mark.skipif(not hasattr(r.PointCloudItemX, 'X'), reason='G67 not generated')
+def test_point_cloud_item_coordinates_chain_through_location():
+    # G67: `X => Location.X`; the setter copies Location, sets X, writes it back
+    pc = r.PointCloudX()
+    pc.Add(r.Point3dX(1, 2, 3))
+    item = pc[0]
+    assert (item.X, item.Y, item.Z) == (1.0, 2.0, 3.0)
+    item.X = 7.5
+    assert item.Location == r.Point3dX(7.5, 2, 3) and pc[0].X == 7.5
+
+
+@pytest.mark.skipif(not hasattr(r.File3dmX, 'Created'), reason='G68 not generated')
+def test_file_dates_and_native_guards(tmp_path):
+    # G68: `if (GetDate(...)) return new DateTime(year, month+1, ...); return DateTime.MinValue;`
+    import datetime
+    f = r.File3dmX()
+    assert isinstance(f.Created, datetime.datetime) and isinstance(f.LastEdited, datetime.datetime)
+    path = str(tmp_path / 'dated.3dm')
+    assert f.Write(path, 7) is True
+    g = r.File3dmX.Read(path)
+    assert g.Created >= datetime.datetime(2000, 1, 1) and g.LastEdited >= g.Created
+    # `if (UnsafeNativeMethods.ON_Mesh_GetHiddenValue(p, i)) return;` then the two ops
+    m = quad_mesh()
+    m.Vertices.Hide(1)
+    assert m.Vertices.IsHidden(1) is True and m.Vertices.IsHidden(0) is False
+    m.Vertices.Hide(1)                                  # already hidden: returns at the guard
+    m.Vertices.Show(1)
+    assert m.Vertices.IsHidden(1) is False
+
+
+@pytest.mark.skipif(not hasattr(r, 'Color4fX'), reason='G69 not generated')
+def test_color4f_and_the_members_it_unlocks():
+    # G69: Color4f translated as a value class (D34); PhysicallyBasedMaterial's colours
+    # come and go as Color4fX through ON_4fPoint by layout
+    c = r.Color4fX(0.25, 0.5, 0.75, 1.0)
+    assert (c.R, c.G, c.B, c.A) == (0.25, 0.5, 0.75, 1.0) and c == r.Color4fX(0.25, 0.5, 0.75, 1.0)
+    assert r.Color4fX.White == r.Color4fX(1, 1, 1, 1)
+    m = r.MaterialX()
+    m.ToPhysicallyBased()
+    pbr = m.PhysicallyBased
+    pbr.BaseColor = c
+    assert pbr.BaseColor == c
+    # Sun.Light: `var light = new Light(); UNM.ON_Sun_Light(this, light.NonConstPointer()); return light;`
+    s = r.SunX()
+    assert isinstance(s.Light, r.LightX)
+    # Texture.FileReference: a handle from a const pointer the C side allocated for it
+    t = r.TextureX()
+    fr = t.FileReference
+    assert fr is None or isinstance(fr, r.FileReferenceX)
+
+
+@pytest.mark.skipif(not hasattr(r.GeometryBaseX, 'Duplicate'), reason='G69 Duplicate not generated')
+def test_duplicate_returns_an_owned_most_derived_copy():
+    # G69: GeometryBase.Duplicate -> CreateGeometryHelper(p, null) through RH3DM_Wrap_<root>;
+    # the overrides construct their own class (Brep, Mesh, Curve, PolyCurve via its copy ctor)
+    b = box_brep()
+    d = b.Duplicate()
+    assert isinstance(d, r.BrepX) and d is not b and d.Faces.Count == b.Faces.Count
+    pc = r.PolyCurveX()
+    pc.Append(r.LineCurveX(r.Point3dX(0, 0, 0), r.Point3dX(1, 0, 0)))
+    pd = pc.Duplicate()
+    assert isinstance(pd, r.PolyCurveX) and pd.SegmentCount == 1
+    nc = r.NurbsCurveX.CreateFromLine(r.LineX(r.Point3dX(0, 0, 0), r.Point3dX(0, 1, 0))) if hasattr(r.NurbsCurveX, 'CreateFromLine') else None
+    if nc is not None:
+        cd = r.CurveX.Duplicate(nc)                       # the base's: dispatched on the runtime type
+        assert isinstance(cd, r.NurbsCurveX)
+
+
+@pytest.mark.skipif(not hasattr(r.BoundingBoxX, 'GetCorners'), reason='G70 not generated')
+def test_value_type_arrays_are_sequences():
+    # G70: Point3d[] / IEnumerable<Point3d> are std::vector: lists in Python. C#'s
+    # null result is the empty list (D35)
+    import math
+    bb = r.BoundingBoxX(r.Point3dX(0, 0, 0), r.Point3dX(1, 2, 3))
+    corners = bb.GetCorners()
+    assert len(corners) == 8 and corners[0] == r.Point3dX(0, 0, 0) and corners[6] == r.Point3dX(1, 2, 3)
+    assert r.BoundingBoxX.Unset.GetCorners() == []
+    xf = r.TransformX.Translation(r.Vector3dX(1, 0, 0))
+    moved = xf.TransformList([r.Point3dX(0, 0, 0), r.Point3dX(1, 1, 1)])
+    assert moved == [r.Point3dX(1, 0, 0), r.Point3dX(2, 1, 1)]
+    assert len(xf.ToFloatArray(True)) == 16
+    if hasattr(bb, 'Transform'):
+        assert bb.Transform(xf) is True and bb.Min == r.Point3dX(1, 0, 0)
+    assert bb.ClosestPoint(r.Point3dX(-5, 1, 1)) == r.Point3dX(bb.Min.X, 1, 1)
+    p = r.PlaneX.WorldXY
+    assert p.Rotate(math.pi / 2, r.Vector3dX(0, 0, 1)) is True
+    assert abs(p.XAxis.Y - 1.0) < 1e-12
+    box = r.BoxX(r.BoundingBoxX(r.Point3dX(0, 0, 0), r.Point3dX(1, 1, 1)))
+    assert box.Contains(r.Point3dX(0.5, 0.5, 0.5)) is True and len(box.GetCorners()) == 8
+
+
+@pytest.mark.skipif(not hasattr(r.File3dmX, 'EmbeddedFiles'), reason='G71 not generated')
+def test_embedded_files_add_and_iterate(tmp_path):
+    # G71: File3dmEmbeddedFiles.Add(filename) and its manifest enumerator (no Count in
+    # RhinoCommon, so no len()); File3dmEmbeddedFile is a File3dm proxy
+    data = tmp_path / 'note.txt'
+    data.write_text('hello')
+    f = r.File3dmX()
+    assert f.EmbeddedFiles.Add(str(data)) is True
+    files = list(f.EmbeddedFiles)
+    assert len(files) == 1 and isinstance(files[0], r.File3dmEmbeddedFileX)
+    assert files[0].Filename.endswith('note.txt') and files[0].ComponentType == r.ModelComponentType.EmbeddedFile
+    path = str(tmp_path / 'embedded.3dm')
+    assert f.Write(path, 7) is True
+    g = r.File3dmX.Read(path)
+    assert [e.Filename for e in g.EmbeddedFiles] == [files[0].Filename]
+
+
+# --- G72: tuples of geometry from native pointers; per-element native loops ---
+
+@pytest.mark.skipif(not hasattr(r.CurveX, 'Split'), reason='G72 not generated')
+def test_split_returns_the_halves_or_none():
+    # Curve.Split(double): `bool rc = F(ptr, t, ref left, ref right); Curve[] output = new Curve[2];
+    # if (left != IntPtr.Zero) output[0] = CreateGeometryHelper(left, null) as Curve; ... return rc ? output : null;`
+    c = r.LineCurveX((0, 0, 0), (2, 0, 0))
+    parts = c.Split(1.0)
+    assert len(parts) == 2 and all(isinstance(p, r.CurveX) for p in parts)
+    assert parts[0].PointAtEnd == r.Point3dX(1, 0, 0) and parts[1].PointAtStart == r.Point3dX(1, 0, 0)
+    assert c.Split(5.0) is None                           # outside the domain: the native fails
+    # BezierCurve.Split(t, out left, out right): (success, left, right), the halves None on failure
+    nc = r.NurbsCurveX.CreateFromCircle(r.CircleX(r.Point3dX(0, 0, 0), 1.0))
+    bz = nc.ConvertSpanToBezier(0)
+    ok, left, right = bz.Split(0.5)
+    assert ok is True and isinstance(left, r.BezierCurveX) and isinstance(right, r.BezierCurveX)
+    assert left.PointAt(1.0) == right.PointAt(0.0) == bz.PointAt(0.5)
+    assert bz.Split(2.0) == (False, None, None)
+
+
+@pytest.mark.skipif(not hasattr(r.PolyCurveX, 'Explode'), reason='G72 not generated')
+def test_explode_duplicates_each_segment():
+    # PolyCurve.Explode: the segment pointers read back through a SimpleArrayCurvePointer,
+    # each duplicated (ON_Curve_DuplicateCurve) and wrapped as its own class
+    pc = r.PolyCurveX()
+    pc.Append(r.LineCurveX((0, 0, 0), (1, 0, 0)))
+    pc.Append(r.LineCurveX((1, 0, 0), (1, 1, 0)))
+    segs = pc.Explode()
+    assert len(segs) == 2 and all(isinstance(s, r.LineCurveX) for s in segs)
+    assert segs[1].PointAtEnd == r.Point3dX(1, 1, 0)
+    assert r.PolyCurveX().Explode() == ()
+
+
+@pytest.mark.skipif(not hasattr(r.MeshVertexListX, 'ToPoint3dArray'), reason='G72 not generated')
+def test_vertex_arrays_read_one_vertex_per_call():
+    # MeshVertexList.ToPoint3dArray: `for (i < Count) { var pt = new Point3d(); ON_Mesh_Vertex(ptr, i, ref pt); rc[i] = pt; }`
+    mx = quad_mesh()
+    pts = mx.Vertices.ToPoint3dArray()
+    assert [(p.X, p.Y, p.Z) for p in pts] == [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)]
+    # ToPoint3fArray: the same vertices, `new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z)`
+    pf = mx.Vertices.ToPoint3fArray()
+    assert all(isinstance(p, r.Point3fX) for p in pf) and [(p.X, p.Y) for p in pf] == [(0, 0), (1, 0), (1, 1), (0, 1)]
+    assert r.MeshX(r.Mesh()).Vertices.ToPoint3dArray() == ()
+
+
+# --- G73: holders empty on a status, tuples led by an object, discarded-out forwards,
+#          self-identity guards, GC-hint plumbing in constructors ---
+
+@pytest.mark.skipif(not hasattr(r.BrepVertexX, 'EdgeIndices'), reason='G73 not generated')
+def test_brep_adjacency_holders_are_empty_when_the_native_says_so():
+    # `int rc = ON_BrepVertex_EdgeIndices(brep, index, ei.m_ptr); return rc == 0 ? new int[0] : ei.ToArray();`
+    b = box_brep()
+    v = b.Vertices[0]
+    edges = v.EdgeIndices()
+    assert len(edges) == 3 and all(isinstance(i, int) for i in edges)
+    e = b.Edges[0]
+    assert len(e.AdjacentFaces()) == 2 and len(e.TrimIndices()) == 2
+    f = b.Faces[0]
+    assert len(f.AdjacentEdges()) == 4 and len(f.AdjacentFaces()) == 4
+
+
+@pytest.mark.skipif(not hasattr(r.SurfaceX, 'ToNurbsSurface'), reason='G73 not generated')
+def test_to_nurbs_surface_leads_its_tuple_with_the_object_and_forwards_without_the_out():
+    # ToNurbsSurface(tol, out accuracy) -> (NurbsSurfaceX | None, accuracy);
+    # ToNurbsSurface() -> `int accuracy; return ToNurbsSurface(0.0, out accuracy);` -> NurbsSurfaceX
+    srf = box_brep().Faces[0].UnderlyingSurface()
+    ns, accuracy = srf.ToNurbsSurface(0.0)
+    assert isinstance(ns, r.NurbsSurfaceX) and isinstance(accuracy, int) and accuracy > 0
+    assert isinstance(srf.ToNurbsSurface(), r.NurbsSurfaceX)
+
+
+@pytest.mark.skipif(not hasattr(r.MeshX, 'Append'), reason='G73 not generated')
+def test_mesh_append_skips_null_and_itself_and_default_constructs():
+    # `if (null == other || other.ConstPointer() == ConstPointer()) return;` -- and the
+    # default constructors (`ON_Mesh_New(); ConstructNonConstObject(p); ApplyMemoryPressure();`)
+    m = r.MeshX()
+    assert m.Vertices.Count == 0
+    m.Append(None)
+    m.Append(m)
+    assert m.Vertices.Count == 0
+    q = quad_mesh()
+    m.Append(q)
+    assert m.Vertices.Count == 4 and m.Faces.Count == 1
+    m.Append(q)
+    assert m.Vertices.Count == 8
+    assert r.PointCloudX().Count == 0 and r.BrepX().Faces.Count == 0
+
+
+# --- G74: class-typed values in translated members ---
+
+@pytest.mark.skipif(not hasattr(r.PointCloudX, 'AppendNew'), reason='G74 not generated')
+def test_translated_members_return_and_construct_class_values():
+    # PointCloud.AppendNew: `Add(Point3d.Origin); return this[Count - 1];` -- a sibling call and the indexer
+    pc = r.PointCloudX()
+    item = pc.AppendNew()
+    assert isinstance(item, r.PointCloudItemX) and pc.Count == 1 and item.Location == r.Point3dX(0, 0, 0)
+    pc.Add(r.Point3dX(1, 1, 1))
+    assert pc.InsertNew(1).Index == 1 and pc.Count == 3
+    # NurbsCurve.CreateFromEllipse: `NurbsCurve nc = CreateFromCircle(..); if (nc == null) return null;
+    # nc.Transform(scale); return nc;` -- a class-typed local, null-tested, mutated, returned
+    nc = r.NurbsCurveX.CreateFromEllipse(r.EllipseX(r.PlaneX.WorldXY, 2.0, 1.0))
+    assert isinstance(nc, r.NurbsCurveX) and abs(nc.PointAtStart.X - 2.0) < 1e-9
+    # `Duplicate() as Brep`: the fresh object downcast (RH3DM_As frees it when it is not one)
+    d = box_brep().DuplicateBrep()
+    assert isinstance(d, r.BrepX) and d.Faces.Count == 6
+    assert isinstance(quad_mesh().DuplicateMesh(), r.MeshX)
+    # MeshingParameters: a value-mode class default-constructed; the static presets are
+    # object initializers, translated as setter calls on the fresh value
+    assert isinstance(r.MeshingParametersX(), r.MeshingParametersX)
+    assert isinstance(r.MeshingParametersX.Default(), r.MeshingParametersX)
+    minimal = r.MeshingParametersX.Minimal()
+    assert minimal.GridMinCount == 16 and minimal.JaggedSeams is True
+    assert r.MeshingParametersX.Smooth().SimplePlanes is True and minimal.SimplePlanes is False
+    assert isinstance(r.ViewInfoX(), r.ViewInfoX)
+
+
+# --- G75-G77: managed fields, private-helper inlining, scoped Brep views ---
+
+@pytest.mark.skipif(not hasattr(r.AnnotationBaseX, 'RunReplace'), reason='G75 not generated')
+def test_annotation_members_read_with_the_parent_dimstyle_null():
+    # G75/G76: AnnotationBase.m_parent_dimstyle is written only by ParentDimensionStyle.set
+    # (not generated), so it is null on every generated annotation: ConstParentDimStylePointer()
+    # folds to IntPtr.Zero. No concrete annotation class is generated yet, so the members
+    # are checked on the registered class (their parity is the bodies' one native call each)
+    A = r.AnnotationBaseX
+    for name in ('TextHeight', 'DimensionScale', 'MaskEnabled', 'DimensionStyleId', 'RichText'):
+        assert isinstance(getattr(A, name), property) and getattr(A, name).fset is not None, name
+    for name in ('MaskFrame', 'MaskColorSource', 'DimensionLengthDisplay', 'AlternateDimensionLengthDisplay'):
+        assert isinstance(getattr(A, name), property), name
+    assert callable(A.RunReplace) and callable(A.SetRichText)
+
+
+@pytest.mark.skipif(not hasattr(r.BrepFaceX, 'Loops'), reason='G77 not generated')
+def test_face_and_loop_scoped_lists():
+    # G77: BrepFace.Loops => new BrepLoopList(this): the brep's loop list scoped to the
+    # face (Count = ON_BrepFace_LoopCount, element i = ON_BrepFace_LoopIndex(face, i))
+    b = box_brep()
+    assert len(b.Loops) == 6
+    for fi in range(len(b.Faces)):
+        f = b.Faces[fi]
+        loops = f.Loops
+        assert isinstance(loops, r.BrepLoopListX) and len(loops) == 1
+        outer = f.OuterLoop
+        assert outer.LoopIndex == loops[0].LoopIndex
+        # BrepLoop.Trims: the brep's trims scoped to the loop
+        trims = outer.Trims
+        assert isinstance(trims, r.BrepTrimListX) and len(trims) == 4
+        assert all(t.Loop.LoopIndex == outer.LoopIndex for t in trims)
+        assert all(t.Face.FaceIndex == fi for t in trims)
+        assert all(isinstance(t.Edge, r.BrepEdgeX) for t in trims)
+    # the whole-brep lists are unchanged
+    assert len(b.Trims) == 24 and [l.LoopIndex for l in b.Loops] == list(range(6))
+    with pytest.raises(IndexError):
+        b.Faces[0].Loops[1]
+
+
+# --- G78/G79: RDK Variant floats and enum maps; strings in translated members ---
+
+@pytest.mark.skipif(not hasattr(r.LinearWorkflowX, 'PreProcessGamma'), reason='G78 not generated')
+def test_rdk_float_and_enum_mapped_variant_properties():
+    rs = r.File3dmX().Settings.RenderSettings
+    lw = rs.LinearWorkflow
+    lw.PreProcessGamma = 2.5
+    assert abs(lw.PreProcessGamma - 2.5) < 1e-6
+    lw.PostProcessGamma = 1.75
+    assert abs(lw.PostProcessGamma - 1.75) < 1e-6
+    # Dithering.Method: the RDK stores 0 for SimpleNoise, anything else is FloydSteinberg;
+    # the enum is RhinoCommon's (None = 0, FloydSteinberg = 1, SimpleNoise = 2; D36)
+    d = rs.Dithering
+    M = r.DitheringX.Methods
+    assert int(M.SimpleNoise) == 2 and int(M.FloydSteinberg) == 1
+    d.Method = M.SimpleNoise
+    assert d.Method == M.SimpleNoise
+    d.Method = M.FloydSteinberg
+    assert d.Method == M.FloydSteinberg
+
+
+@pytest.mark.skipif(not hasattr(r.AnnotationBaseX, 'PlainTextToRtf'), reason='G79 not generated')
+def test_translated_string_members(tmp_path):
+    # PlainTextToRtf: `@"{\rtf1{\ltrch " + str.Replace("\n", Ph)...Replace(Ph, @"}\par {") + "}}"`
+    assert r.AnnotationBaseX.PlainTextToRtf('a\nb') == '{\\rtf1{\\ltrch a}\\par {b}}'
+    assert r.AnnotationBaseX.PlainTextToRtf('x{y}\\') == '{\\rtf1{\\ltrch x\\{y\\}\\\\}}'
+    # DocumentUserTextCount: keys containing a backslash (section\entry)
+    # (SetString is not generated: written with the old binding, read back)
+    old = r.File3dm()
+    old.Strings['plain'] = 'v'
+    old.Strings['sec\\key'] = 'v2'
+    path = str(tmp_path / 'strings.3dm')
+    old.Write(path, 8)
+    f = r.File3dmX.Read(path)
+    assert f.Strings.DocumentUserTextCount == 1
+    assert f.Strings.GetValue('sec', 'key') == 'v2' and f.Strings.GetValue('', 'key') == ''
+    # MeshVertexColorList.Add(Color): `SetColor(Count, color); return Count - 1;`
+    mx = quad_mesh()
+    assert mx.VertexColors.Add((255, 0, 0, 255)) == 0 and mx.VertexColors.Count == 1

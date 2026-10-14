@@ -26,16 +26,25 @@ CLASSES = [
     # ViewportInfo is not a GeometryBase in .NET).
     # 'copy' is the expression constructing this class's storage from the
     # hand-written BND source object.
+    # the root (G62): RhinoCommon's CommonObject over every class whose native
+    # object is an ON_Object. An abstract base may itself extend an abstract base:
+    # it answers the base's getters with its own. CachedTextureCoordinates is a
+    # CommonObject in .NET but wraps ON_TextureCoordinates (no ON_Object), so it
+    # does not extend this (pilot-findings #31)
+    {'type': 'Rhino.Runtime.CommonObject', 'cs': 'CommonObject',
+     'on': 'ON_Object',
+     'mode': 'abstract', 'getter': 'RH3DM_ObjPtr',
+     'gen': 'BND_CommonObjectX', 'reg': 'CommonObjectX'},
     {'type': 'Rhino.Geometry.GeometryBase', 'cs': 'GeometryBase',
      'on': 'ON_Geometry',
      'mode': 'abstract', 'getter': 'RH3DM_GeomPtr',
      'self_extra': ['ON_Object'],
-     'gen': 'BND_GeometryBaseX', 'reg': 'GeometryBaseX'},
+     'gen': 'BND_GeometryBaseX', 'reg': 'GeometryBaseX', 'base': 'CommonObjectX'},
     {'type': 'Rhino.DocObjects.ModelComponent', 'cs': 'ModelComponent',
      'on': 'ON_ModelComponent',
      'mode': 'abstract', 'getter': 'RH3DM_McPtr',
      'self_extra': ['ON_Object'],
-     'gen': 'BND_ModelComponentX', 'reg': 'ModelComponentX'},
+     'gen': 'BND_ModelComponentX', 'reg': 'ModelComponentX', 'base': 'CommonObjectX'},
     {'type': 'Rhino.Geometry.Curve', 'cs': 'Curve', 'on': 'ON_Curve',
      'mode': 'pointer', 'hand': 'BND_Curve', 'hand_header': 'bnd_curve.h',
      'copy': 'source.m_curve ? source.m_curve->DuplicateCurve() : nullptr',
@@ -61,7 +70,7 @@ CLASSES = [
      'on': 'ON_Viewport',
      'mode': 'pointer', 'hand': 'BND_Viewport', 'hand_header': 'bnd_viewport.h',
      'copy': 'source.m_viewport ? new ON_Viewport(*source.m_viewport) : nullptr',
-     'gen': 'BND_ViewportX', 'reg': 'ViewportX', 'bridge': False},
+     'gen': 'BND_ViewportX', 'reg': 'ViewportX', 'bridge': False, 'base': 'CommonObjectX'},
     # hand binding file is bnd_beam.h / C layer on_beam.cpp (opennurbs's
     # historical name for ON_Extrusion)
     {'type': 'Rhino.Geometry.Extrusion', 'cs': 'Extrusion', 'on': 'ON_Extrusion',
@@ -131,6 +140,10 @@ CLASSES = [
      'copy': ('source.m_surface'
               ' ? new ON_PlaneSurface(*ON_PlaneSurface::Cast(source.m_surface)) : nullptr'),
      'gen': 'BND_PlaneSurfaceX', 'reg': 'PlaneSurfaceX', 'base': 'SurfaceX'},
+    {'type': 'Rhino.Geometry.RevSurface', 'cs': 'RevSurface', 'on': 'ON_RevSurface',
+     'mode': 'pointer', 'hand': 'BND_RevSurface', 'hand_header': 'bnd_revsurface.h',
+     'copy': 'source.m_revsurface ? new ON_RevSurface(*source.m_revsurface) : nullptr',
+     'gen': 'BND_RevSurfaceX', 'reg': 'RevSurfaceX', 'base': 'SurfaceX'},
     {'type': 'Rhino.DocObjects.Linetype', 'cs': 'Linetype', 'on': 'ON_Linetype',
      'mode': 'pointer', 'hand': 'BND_Linetype', 'hand_header': 'bnd_linetype.h',
      'copy': ('source.m_linetype'
@@ -170,7 +183,7 @@ CLASSES = [
      'on': 'ON_3dmObjectAttributes',
      'mode': 'pointer', 'hand': 'BND_3dmObjectAttributes', 'hand_header': 'bnd_3dm_attributes.h',
      'copy': 'source.m_attributes ? new ON_3dmObjectAttributes(*source.m_attributes) : nullptr',
-     'gen': 'BND_ObjectAttributesX', 'reg': 'ObjectAttributesX'},
+     'gen': 'BND_ObjectAttributesX', 'reg': 'ObjectAttributesX', 'base': 'CommonObjectX'},
     {'type': 'Rhino.Geometry.MeshingParameters', 'cs': 'MeshingParameters',
      'on': 'ON_MeshParameters',
      'mode': 'value', 'hand': 'BND_MeshingParameters', 'hand_header': 'bnd_mesh.h',
@@ -179,11 +192,11 @@ CLASSES = [
     {'type': 'Rhino.DocObjects.Texture', 'cs': 'Texture', 'on': 'ON_Texture',
      'mode': 'pointer', 'hand': 'BND_Texture', 'hand_header': 'bnd_texture.h',
      'copy': 'source.m_texture ? new ON_Texture(*source.m_texture) : nullptr',
-     'gen': 'BND_TextureX', 'reg': 'TextureX'},
+     'gen': 'BND_TextureX', 'reg': 'TextureX', 'base': 'CommonObjectX'},
     {'type': 'Rhino.Render.TextureMapping', 'cs': 'TextureMapping', 'on': 'ON_TextureMapping',
      'mode': 'pointer', 'hand': 'BND_TextureMapping', 'hand_header': 'bnd_texture_mapping.h',
      'copy': 'source.m_mapping ? new ON_TextureMapping(*source.m_mapping) : nullptr',
-     'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX'},
+     'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX', 'base': 'CommonObjectX'},
     {'type': 'Rhino.DocObjects.EarthAnchorPoint', 'cs': 'EarthAnchorPoint',
      'on': 'ON_EarthAnchorPoint',
      'mode': 'value', 'hand': 'BND_EarthAnchorPoint', 'hand_header': 'bnd_3dm_settings.h',
@@ -215,6 +228,15 @@ CLASSES = [
     {'type': 'Rhino.FileIO.FileReference', 'cs': 'FileReference', 'on': 'ON_FileReference',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
      'gen': 'BND_FileReferenceX', 'reg': 'FileReferenceX'},
+    # a decal (G60): a std::shared_ptr<ON_Decal> handle (specgen SharedHandle)
+    {'type': 'Rhino.Render.Decal', 'cs': 'Decal', 'on': 'ON_Decal',
+     'mode': 'pointer', 'hand': 'BND_File3dmDecal', 'bridge': False, 'noctor': True,
+     'gen': 'BND_DecalX', 'reg': 'DecalX'},
+    # an object's decals (G60): a child of its attributes keeping RhinoCommon's
+    # constructor state (read-only flag, document serial number; specgen CtorStore)
+    {'type': 'Rhino.Render.Decals', 'cs': 'Decals', 'on': 'ON_3dmObjectAttributes',
+     'mode': 'child', 'parent': 'ObjectAttributesX', 'hand': 'BND_File3dmDecalTable', 'bridge': False,
+     'gen': 'BND_DecalsX', 'reg': 'DecalsX'},
     # mesh modifiers (G46): children of an object's attributes (old names: Displacement, ...)
     {'type': 'Rhino.FileIO.File3dmMeshModifiers', 'cs': 'File3dmMeshModifiers', 'on': 'ON_3dmObjectAttributes',
      'mode': 'child', 'parent': 'ObjectAttributesX', 'hand': 'BND_File3dmMeshModifiers', 'bridge': False,
@@ -241,7 +263,7 @@ CLASSES = [
     {'type': 'Rhino.DocObjects.Environment', 'cs': 'Environment', 'on': 'ON_Environment',
      'mode': 'pointer', 'hand': 'BND_Environment', 'hand_header': 'bnd_texture.h',
      'copy': 'source.m_env ? new ON_Environment(*source.m_env) : nullptr',
-     'gen': 'BND_EnvironmentX', 'reg': 'EnvironmentX'},
+     'gen': 'BND_EnvironmentX', 'reg': 'EnvironmentX', 'base': 'CommonObjectX'},
     # -- batch 1 (G43): COMPONENTS -- objects RhinoCommon makes as (owner, key) and
     # resolves through the owner on every access (specgen Component). The proxy
     # bases exist for RhinoCommon's inheritance (protected constructors: no init).
@@ -292,7 +314,7 @@ CLASSES = [
     # on write and commit back (RenderSettings.Commit, see G41)
     {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'on': 'ON_3dmRenderSettings',
      'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_RenderSettingsX', 'reg': 'RenderSettingsX'},
+     'gen': 'BND_RenderSettingsX', 'reg': 'RenderSettingsX', 'base': 'CommonObjectX'},
     # the RDK settings inside the render settings (DocumentOrFreeFloatingBase):
     # write-through views of the file (ON_X_FromONX_Model), or free-floating
     # objects with their own New/Delete; every property is the Variant idiom (G42)
@@ -308,6 +330,8 @@ CLASSES = [
      'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_LinearWorkflowX', 'reg': 'LinearWorkflowX'},
     {'type': 'Rhino.Render.Dithering', 'cs': 'Dithering', 'on': 'ON_Dithering',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_DitheringX', 'reg': 'DitheringX'},
+    {'type': 'Rhino.Render.RenderChannels', 'cs': 'RenderChannels', 'on': 'ON_RenderChannels',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_RenderChannelsX', 'reg': 'RenderChannelsX'},
     # -- File3dm: an owning ONX_Model; its tables are views onto it
     {'type': 'Rhino.FileIO.File3dm', 'cs': 'File3dm', 'on': 'ONX_Model',
      'mode': 'pointer', 'hand': None, 'bridge': False,
@@ -360,6 +384,14 @@ CLASSES = [
     {'type': 'Rhino.FileIO.File3dmPlugInDataTable', 'cs': 'File3dmPlugInDataTable', 'on': 'ONX_Model',
      'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmPlugInDataTableX', 'reg': 'File3dmPlugInDataTableX'},
+    # embedded files (G71): a File3dm proxy component and the file's collection of them
+    # (RhinoCommon's File3dmEmbeddedFiles: Add plus a manifest enumerator, no Count)
+    {'type': 'Rhino.FileIO.File3dmEmbeddedFile', 'cs': 'File3dmEmbeddedFile', 'on': 'ON_EmbeddedFile',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
+     'gen': 'BND_File3dmEmbeddedFileX', 'reg': 'File3dmEmbeddedFileX'},
+    {'type': 'Rhino.FileIO.File3dmEmbeddedFiles', 'cs': 'File3dmEmbeddedFiles', 'on': 'ONX_Model',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_File3dmEmbeddedFilesX', 'reg': 'File3dmEmbeddedFilesX'},
     # -- collections: views onto a parent object (mode 'child')
     {'type': 'Rhino.Geometry.Collections.MeshVertexList', 'cs': 'MeshVertexList', 'on': 'ON_Mesh',
      'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
@@ -468,6 +500,7 @@ CS_ARG_CTYPES = {
 # RH3DM_Ptr/RH3DM_Val adapters): they cross the C boundary by their bits,
 # no per-type conversion; register_value_types() fills these.
 VT_CPP = {}          # C# name -> generated struct (Plane -> BND_PlaneX)
+VT_FIELDS = {}       # C# name -> its field names in layout order (m_x, m_y, m_z) (G72)
 # a scratch out local the C# body declares itself (`Plane plane; ...
 # IsPlanar(ptr, true, ref plane, tol)`) is typed by its C pointer type
 C_VT = {'ON_3dPoint*': 'Point3d', 'ON_3DPOINT_STRUCT*': 'Point3d',
@@ -496,7 +529,25 @@ def field_backed(vt, cs):
     return out
 
 
+CLASS_BODIES = {}     # (simple type, Kind, Name, (C# param types)) -> class-mode translation (G63)
+DATA_CPP = {}         # C# data class -> generated class (ConstructionPlane -> BND_ConstructionPlaneX) (G64)
+DATA_INFO = {}        # C# data class -> {'fields': {...}, 'props': {name: has_setter}, 'methods': {...}}
+
+
 def register_value_types(vt):
+    CLASS_BODIES.clear(); DATA_CPP.clear(); DATA_INFO.clear()
+    for t in vt['types']:
+        if t.get('IsData'):
+            DATA_CPP[t['Cs']] = t['Cpp']
+            DATA_INFO[t['Cs']] = {'fields': {f['Name'] for f in t['Fields']}, 'props': {}, 'methods': set()}
+    for m in vt['members']:
+        if m['Type'] in DATA_INFO and m.get('Ok'):
+            if m['Kind'] == 'property' and not m.get('Static'):
+                DATA_INFO[m['Type']]['props'][m['Name']] = bool(m.get('Setter'))
+            elif m['Kind'] == 'method':
+                DATA_INFO[m['Type']]['methods'].add(m['Name'])
+    for r in vt.get('classmembers') or []:
+        CLASS_BODIES[(r['Type'], r['Kind'], r['Name'], tuple(r.get('ParamsCs') or ()))] = r
     for m in vt['members']:
         if m.get('Ok') and m.get('Static') and m['Kind'] in ('property', 'static-field'):
             VT_STATICS.add((m['Type'], m['Name']))
@@ -508,16 +559,19 @@ def register_value_types(vt):
         if m.get('Ok') and m['Kind'] == 'property' and not m.get('Static'):
             VT_PROPS.add((m['Type'], m['Name']))
             VT_PROP_RET[(m['Type'], m['Name'])] = m.get('Ret')
+            if m.get('Setter'):
+                VT_PROP_SET.add((m['Type'], m['Name']))
     for e in vt.get('enums', []):
         pub_t = CS_ENUMS.get(e['Cs'])
         if pub_t is None or pub_t['gen']:
             raise SystemExit('translated enum %s: no registered public type (add it to CS_ENUMS)' % e['Cs'])
         VT_ENUMS[e['Cpp']] = pub_t['cpp']
     for t in vt['types']:
-        if t.get('IsStaticClass') or not t.get('LayoutSize'):
-            continue
+        if t.get('IsStaticClass') or not t.get('LayoutSize') or t.get('IsData'):
+            continue                       # a data class never crosses the C boundary by layout (G64)
         cs, cpp = t['Cs'], t['Cpp']
         VT_CPP[cs] = cpp
+        VT_FIELDS[cs] = [f['Name'] for f in t.get('Fields') or []]
         OUTLOCAL.setdefault('VT:' + cs, ('%s {n};' % cpp, '{n}'))
         CS_RET_CPP.setdefault(cs, cpp)
         CS_RET_EXPR.setdefault(cs, '{n}')
@@ -556,6 +610,11 @@ HOLDERS = {
     'SimpleArrayGuid':   {'ctype': 'ON_SimpleArray<ON_UUID>*',
                           'local': 'ON_SimpleArray<ON_UUID> {n};',
                           'cs': 'Guid[]', 'elem': 'ON_UUID_to_Binding({n}[i])'},
+    # holders of object POINTERS: only the wrap-tuple loop reads them (G72); the
+    # plain holder shape refuses them (an element is a pointer, not a value)
+    'SimpleArrayCurvePointer': {'ctype': 'ON_SimpleArray<ON_Curve*>*',
+                               'local': 'ON_SimpleArray<ON_Curve*> {n};',
+                               'cs': 'Curve[]', 'ptr': 'ON_Curve'},
 }
 
 EXMAP = {
@@ -570,7 +629,14 @@ EXMAP = {
     'ApplicationException': 'std::runtime_error',
     # a File3dm proxy whose component is no longer in the model (CommonObject.ConstPointer)
     'DocumentCollectedException': 'std::runtime_error',
+    # System.Exception itself (Decal.Mapping's `default: throw new Exception(...)`; G60)
+    'Exception': 'std::runtime_error',
 }
+EXMAP_BASE = dict(EXMAP)
+# RhinoCommon's own exception types (specgen Exception; G60): `throw new
+# DecalReadOnlyException()` is its base type with the message its parameterless
+# constructor fixes. index_types extends EXMAP with them; EXMSG holds the messages
+EXMSG = {}
 # C# enum parameter/return types. The C side always takes/returns int (the C#
 # call site casts, `(int)continuityType`). 'cpp' is the binding-side spelling:
 # an enum the HAND bindings already register (reused -- registering the same
@@ -584,6 +650,43 @@ CS_ENUMS = {
     'Continuity':       {'cpp': 'RH3DM_Continuity', 'gen': True},
     'IsoStatus':        {'cpp': 'RH3DM_IsoStatus', 'gen': True},
 }
+
+
+RENUMBERED_ENUMS = {}   # RhinoCommon enum -> (the hand C++ enum not reused, the differing members) (G78)
+_CPP_ENUMS = None
+
+
+def cpp_enum_values(cpp):
+    """the members and values of a C++ enum declared in opennurbs or the hand
+    bindings' headers (`ON_Dithering::Methods` -> {SimpleNoise: 0, ...}), or None"""
+    global _CPP_ENUMS
+    if _CPP_ENUMS is None:
+        _CPP_ENUMS = {}
+        heads = glob.glob(os.path.join(ROOT, 'src', 'lib', 'opennurbs', '*.h')) + glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.h'))
+        for h in heads:
+            t = open(h, errors='replace').read()
+            for mm in re.finditer(r'\benum\s+(?:class\s+|struct\s+)?(\w+)\s*(?::\s*[\w ]+)?\{([^{}]*)\}', t):
+                body = re.sub(r'//[^\n]*|/\*.*?\*/', '', mm.group(2), flags=re.S)
+                vals, cur, ok = {}, -1, True
+                for part in [q.strip() for q in body.split(',') if q.strip()]:
+                    nm = part.split('=')[0].strip()
+                    if '=' in part:
+                        v = part.split('=', 1)[1].strip()
+                        try:
+                            cur = int(v, 0)
+                        except ValueError:
+                            if v in vals:
+                                cur = vals[v]
+                            else:
+                                ok = False
+                                break
+                    else:
+                        cur += 1
+                    vals[nm] = cur
+                if ok:
+                    _CPP_ENUMS.setdefault(mm.group(1), []).append(vals)
+    found = _CPP_ENUMS.get(cpp.split('::')[-1]) or []
+    return found[0] if len(found) == 1 else None
 
 
 def extend_enum_table(manifest):
@@ -616,6 +719,21 @@ def extend_enum_table(manifest):
         return '::' in cpp or cpp.startswith('ON') or cpp in in_headers
     HIDDEN_ENUMS.clear()
     HIDDEN_ENUMS.update(n for n, c in hand.items() if not visible(c))
+    # a hand enum is reused only when it numbers RhinoCommon's members as RhinoCommon
+    # does (G78: ON_Dithering::Methods has SimpleNoise = 0, RhinoCommon 2) -- compared
+    # on the members both name; otherwise the generated enum, with RhinoCommon's values
+    rc_values = {}
+    tnames = {y['Type'] for y in manifest['members'] if y['Kind'] == 'type'}
+    for x in manifest['members']:
+        if x['Kind'] == 'enum' and x['Variant'] == 'portable' and x.get('EnumInts') and x.get('Values'):
+            names = [v.split('=')[0].strip() for v in x['Values']]
+            k = (x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name']) if x['Type'] in tnames else x['Name']
+            rc_values[k] = rc_values[k.replace('.', '')] = dict(zip(names, x['EnumInts']))   # hand keys: either spelling
+    for k in list(hand):
+        cv = cpp_enum_values(hand[k])
+        rv = rc_values.get(k)
+        if cv and rv and any(n in cv and cv[n] != v for n, v in rv.items()):
+            RENUMBERED_ENUMS[k] = (hand.pop(k), {n: (v, cv.get(n)) for n, v in rv.items() if cv.get(n) != v})
     type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
     seen, nested = {}, {}
     for x in manifest['members']:
@@ -652,6 +770,15 @@ def extend_enum_table(manifest):
         else:
             CS_ENUMS[key] = {'cpp': 'RH3DM_' + key.replace('.', '_'), 'gen': True, 'owner': owner,
                              'js': key.replace('.', '')}
+            if key in RENUMBERED_ENUMS or joined in RENUMBERED_ENUMS:
+                # the old bindings register this JS name with their (differently numbered)
+                # enum: the generated one takes its owner's generated name (G78)
+                CS_ENUMS[key]['js'] = owner + 'X' + key.split('.')[-1]
+    # a renumbered enum at module level would take the hand enum's Python name: refused
+    for k in RENUMBERED_ENUMS:
+        if '.' not in k and not any(c.get('owner') for kk, c in CS_ENUMS.items() if kk.replace('.', '') == k):
+            CS_ENUMS.pop(k, None)
+            HIDDEN_ENUMS.add(k)
 
 
 def camel(n):
@@ -763,6 +890,7 @@ VT_STATICS = set()   # (C# type, name) of translated static getters (Plane.World
 VT_CONSTS = set()    # (C# type, name) of translated constants (RhinoMath.UnsetValue)
 VT_PROPS = set()     # (C# type, name) of translated instance properties (Interval.Min)
 VT_PROP_RET = {}     # (C# type, name) -> C++ return type of that property's getter
+VT_PROP_SET = set()  # (C# type, name) of translated instance properties with a setter (G67)
 VT_NUM_CTORS = set() # (C# type, arity) of translated all-numeric constructors (Point3d(x, y, z))
 HIDDEN_ENUMS = set() # Python names of hand enums declared only in a .cpp (see extend_enum_table)
 
@@ -799,6 +927,9 @@ def index_types(manifest):
     for x in manifest['members']:
         if x['Kind'] == 'enum' and x['Variant'] in ('portable', 'rhino3dm-only') and x.get('Values'):
             owners.setdefault(x['Name'], []).append(x)
+            # also by its declaring type (RenderChannels.Modes): a nested enum's
+            # short name can repeat (DataSources.Modes) where this key does not
+            owners.setdefault(x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name'], []).append(x)
     for name, recs in owners.items():
         if len(recs) != 1:
             continue                          # the short name repeats: ambiguous
@@ -866,6 +997,32 @@ def index_types(manifest):
     for rec in TYPE_RECS.values():
         if rec.get('Wrapper'):
             WRAPPER.update(rec['Wrapper'])
+    EXMAP.clear(); EXMAP.update(EXMAP_BASE); EXMSG.clear()
+    excs = {t.replace('+', '.').split('.')[-1]: r['Exception'] for t, r in TYPE_RECS.items() if r.get('Exception')}
+    grew = True
+    while grew:
+        grew = False
+        for n, e in excs.items():
+            if n not in EXMAP and e['Base'] in EXMAP:
+                EXMAP[n] = EXMAP[e['Base']]
+                grew = True
+    for n, e in excs.items():
+        if n in EXMAP and e.get('Message'):
+            EXMSG[n] = e['Message']
+    def fix_messages(v):
+        # every `throw new X()` (a guard, a fail-throw, an enum map's default):
+        # no message of its own -> the one X's constructor fixes
+        if isinstance(v, dict):
+            if v.get('Exception') in EXMSG and not v.get('Message'):
+                v['Message'] = EXMSG[v['Exception']]
+            for w in v.values():
+                fix_messages(w)
+        elif isinstance(v, list):
+            for w in v:
+                fix_messages(w)
+    for x in manifest['members']:
+        if x['Kind'] not in ('type', 'enum'):
+            fix_messages(x)
     for c in CLASSES:
         c.pop('proxy', None); c.pop('ff', None)
         base = BY_REG.get(c.get('base', ''))
@@ -931,6 +1088,31 @@ def index_types(manifest):
             break
     index_components()
     index_ctor_keys()
+    index_scopes()
+    index_child_state()
+
+
+def index_child_state():
+    """a CHILD class whose RhinoCommon type's one constructor only stores its
+    parameters (specgen CtorStore; G60: `Decals(ObjectAttributes parent, bool
+    read_only, uint rhino_doc_sn)`): the first parameter is the parent (the
+    view's pointer), every other one a field the view keeps --
+    c['state'] = [(C++ type, field)], set by the property that makes the view
+    (planner.child_view: constants only). A parameter of another type, or one
+    not stored: no state (the view is refused where it needs it)."""
+    for c in CLASSES:
+        c.pop('state', None)
+        rec = TYPE_RECS.get(c['type']) or {}
+        cs = rec.get('CtorStore')
+        if c['mode'] != 'child' or c.get('key') or c.get('derive') or not cs or len(cs) < 2:
+            continue
+        parent = BY_REG.get(c.get('parent', ''))
+        if (parent is None or cs_unqualify(cs[0]['Type'] or '') != parent['cs']
+                or cs[0]['Field'] not in (rec.get('ParentFields') or [])):
+            continue
+        if any(q['Field'] is None or q['Type'] not in ('bool', 'int', 'uint') for q in cs[1:]):
+            continue
+        c['state'] = [(CS_ARG[q['Type']][0], q['Field']) for q in cs[1:]]
 
 
 def index_ctor_keys():
@@ -956,6 +1138,28 @@ def index_ctor_keys():
             c['ctor_key'] = keys.pop()
 
 
+def index_scopes():
+    """a child class reached through one nulling constructor (index_ctor_keys) whose
+    RhinoCommon type also has a SCOPING constructor taking a component of the same
+    parent (BrepLoopList(BrepFace): m_brepface = face; specgen ScopingCtors; G77):
+    c['scope'] = {key, field, comp}. The generated view keeps `m_scope` (the
+    component's key, -1 for the whole parent); members whose bodies read the field
+    are planned for both and dispatch on it."""
+    for c in CLASSES:
+        c.pop('scope', None)
+        rec = TYPE_RECS.get(c['type']) or {}
+        if c['mode'] != 'child' or not c.get('ctor_key') or not rec.get('ScopingCtors') or c.get('state') or c.get('key'):
+            continue
+        parent = BY_REG.get(c.get('parent', ''))
+        found = []
+        for sc in rec['ScopingCtors']:
+            comp = BY_CS.get(sc['Param'])
+            if comp and comp.get('comp') and comp['comp']['Owner'] is parent and comp['comp'].get('Const') in C_BY_NAME:
+                found.append({'key': sc['Key'], 'field': sc['Field'], 'comp': comp})
+        if len(found) == 1:
+            c['scope'] = found[0]
+
+
 def storage_host(c):
     """the class holding a registry class's storage: itself, or the concrete
     base it extends (planner.storage_owner, for the registry pass)"""
@@ -979,6 +1183,16 @@ def index_components():
     surface, a host that is not view-capable -- grants nothing."""
     for c in CLASSES:
         c.pop('comp', None); c.pop('comp_host', None); c.pop('key', None); c.pop('handle', None); c.pop('borrowed', None)
+        c.pop('shared', None)
+        sh = (TYPE_RECS.get(c['type']) or {}).get('SharedHandle')
+        if (sh and c['mode'] == 'pointer' and all(n in C_BY_NAME and C_BY_NAME[n].get('variant') != 'rhino-only'
+                                                for n in (sh['Raw'], sh['Delete']))
+                and C_BY_NAME[sh['Raw']]['returns'] == '%s*' % c['on']):
+            # a shared_ptr HANDLE (G60: Decal): owns a std::shared_ptr<T>*; its object is Raw(sp)
+            c['shared'] = {'Raw': sh['Raw'], 'Delete': sh['Delete'], 'Copy': sh.get('Copy'),
+                           'sp': C_BY_NAME[sh['Raw']]['params'][0]['type']}
+            c.pop('proxy', None)
+            continue
         if (TYPE_RECS.get(c['type']) or {}).get('Borrowed') and c['mode'] == 'pointer':
             c['borrowed'] = True             # G48: a pointer into another object, never deleted
             c.pop('proxy', None)

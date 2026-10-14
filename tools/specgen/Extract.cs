@@ -84,6 +84,7 @@ static class ExtractCommand
                         if (!assigned.Contains(v.Identifier.Text)
                             && (v.Initializer == null || v.Initializer.Value.ToString() == "false"))
                             Walker.DeadFlags.Add(v.Identifier.Text);
+        Walker.CollectManagedFields(files.Select(f => src.Root(f, Sources.Portable)).ToList());
         foreach (var file in files)
         {
             new Walker(Path.GetFileName(file), portableView, portable: true).Visit(src.Root(file, Sources.Portable));
@@ -114,6 +115,15 @@ static class ExtractCommand
         foreach (var (t, w) in Walker.InternalWrappers)
             members.Add(new MemberRecord { Type = t, Kind = "type", Name = t.Split('.').Last(), Variant = "portable",
                                            Signature = "internal class " + t.Split('.').Last(), Internal = true, Wrapper = w });
+        foreach (var (t, ex) in Walker.InternalExceptions)
+            members.Add(new MemberRecord { Type = t, Kind = "type", Name = t.Split('.').Last(), Variant = "portable",
+                                           Signature = "internal class " + t.Split('.').Last(), Internal = true, Exception = ex });
+        foreach (var (t, se) in Walker.InternalSnapshots)
+            members.Add(new MemberRecord { Type = t, Kind = "type", Name = t.Split('.').Last(), Variant = "portable",
+                                           Signature = "internal class " + t.Split('.').Last(), Internal = true, Snapshot = se });
+        foreach (var (t, me) in Walker.InternalManifestEnums)
+            members.Add(new MemberRecord { Type = t, Kind = "type", Name = t.Split('.').Last(), Variant = "portable",
+                                           Signature = "internal class " + t.Split('.').Last(), Internal = true, ManifestEnumerator = me });
 
         HelperInliner.GuardHelperPass(members);
         HelperInliner.Run(members);
@@ -182,6 +192,27 @@ static class ExtractCommand
             }
             if (m.VariantGet != null || m.VariantSet != null)
                 members[i] = m = m with { VariantGet = Which(m.VariantGet), VariantSet = Which(m.VariantSet) };
+            // an enum's members as integers (G60: `None = (int)UnsafeNativeMethods.ON_DecalMapping.None`
+            // is not C++ -- a generated declaration needs the number)
+            if (m.Kind == "enum" && m.Values != null && Walker.EnumDecls.GetValueOrDefault(m.Name) == 1)
+            {
+                long? EnumInt(string key)
+                {
+                    for (int depth = 0; depth < 5; depth++)
+                    {
+                        if (!Walker.EnumConsts.TryGetValue(key, out var t)) return null;
+                        if (long.TryParse(t, out var n)) return n;
+                        var e = System.Text.RegularExpressions.Regex.Replace(t.Trim(), @"^\((?:int|uint|long)\)\s*", "");
+                        var mm = System.Text.RegularExpressions.Regex.Match(e, @"^(?:UnsafeNativeMethods\.)?(?:\w+\.)*(\w+)\.(\w+)$");
+                        if (!mm.Success) return null;
+                        key = mm.Groups[1].Value + "." + mm.Groups[2].Value;
+                    }
+                    return null;
+                }
+                var ints = m.Values.Select(v => EnumInt(m.Name + "." + v.Split('=')[0].Trim())).ToList();
+                if (ints.All(x => x != null))
+                    members[i] = m = m with { EnumInts = ints.Select(x => x.Value).ToArray() };
+            }
             if (m.Calls == null && m.Setter?.Calls == null && m.DelegateArgs == null && m.Specialized == null)
                 continue;
             Walker.Consts.TryGetValue(m.Type, out var table);
@@ -229,6 +260,33 @@ static class ExtractCommand
                         return a with { Kind = "const", Text = em.Groups[1].Value + "." + em.Groups[2].Value, Value = uv };
                     return a;
             }
+            // Decal.Mapping (G60): both sides of each case, as integers
+            EnumMapInfo ResolveEnumMap(EnumMapInfo em)
+            {
+                if (em == null) return null;
+                long? V(string t)
+                {
+                    // `DecalMapping.None = (int)UnsafeNativeMethods.ON_DecalMapping.None`: a member
+                    // defined by another enum's member resolves through it (bounded)
+                    for (int depth = 0; depth < 4 && t != null; depth++)
+                    {
+                        if (long.TryParse(t, out var n)) return n;
+                        var e = System.Text.RegularExpressions.Regex.Replace(t.Trim(), @"^\((?:int|uint|long)\)\s*", "");
+                        var r = Resolve1(new ArgInfo { Kind = "expr", Text = e });
+                        if (r.Kind == "const") { t = r.Value; continue; }
+                        // an enum member whose value is itself a reference (not a number)
+                        var em2 = System.Text.RegularExpressions.Regex.Match(e, @"^(?:\w+\.)*(\w+)\.(\w+)$");
+                        if (!em2.Success || Walker.EnumDecls.GetValueOrDefault(em2.Groups[1].Value) != 1
+                            || !Walker.EnumConsts.TryGetValue(em2.Groups[1].Value + "." + em2.Groups[2].Value, out var txt))
+                            return null;
+                        t = txt;
+                    }
+                    return null;
+                }
+                var vals = em.Pairs.Select(pr => new[] { V(pr[0]), V(pr[1]) }).ToList();
+                return vals.All(x => x[0] != null && x[1] != null)
+                    ? em with { Values = vals.Select(x => new[] { x[0].Value, x[1].Value }).ToArray() } : em;
+            }
             // an early `return IsoStatus.None;` carries the constant's value
             GuardInfo[] ResolveGuards(GuardInfo[] gs) => gs?.Select(g =>
             {
@@ -250,7 +308,9 @@ static class ExtractCommand
                 // forwards too: `GetTexture(TextureType.Bitmap)`
                 DelegateArgs = m.DelegateArgs?.Select(a => a.Kind == "expr" ? Resolve1(a) : a).ToArray(),
                 Guards = ResolveGuards(m.Guards),
-                Setter = m.Setter == null ? null : m.Setter with { Calls = Resolve(m.Setter.Calls), Guards = ResolveGuards(m.Setter.Guards) },
+                EnumMap = ResolveEnumMap(m.EnumMap),
+                Setter = m.Setter == null ? null : m.Setter with { Calls = Resolve(m.Setter.Calls), Guards = ResolveGuards(m.Setter.Guards),
+                                                                    EnumMap = ResolveEnumMap(m.Setter.EnumMap) },
                 // constructor-specialized analyses resolve exactly the same way (G47)
                 Specialized = m.Specialized?.ToDictionary(kv => kv.Key, kv => kv.Value with { Calls = Resolve(kv.Value.Calls), Guards = ResolveGuards(kv.Value.Guards) }),
             };
@@ -357,7 +417,7 @@ static class HelperInliner
         return a with
         {
             Calls = calls, Body = h.Body, Native = h.Native, Inlined = a.Delegates,
-            Holder = h.Holder, HolderArg = h.HolderArg, Compare = h.Compare, ResultConv = h.ResultConv,
+            Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, Compare = h.Compare, ResultConv = h.ResultConv,
             Success = h.Success, Commits = h.Commits || a.Commits,
             Delegates = null, DelegateArgs = null,
         };
@@ -566,6 +626,11 @@ static class HelperInliner
                 // `mesh.ConstPointer()` where the caller passed `this`: the caller's own pointer
                 : a.Kind == "paramptr" && map.TryGetValue(a.Text, out var pr) && pr.Kind == "expr" && pr.Text == "this"
                     ? new ArgInfo { Kind = "expr", Text = "this", Value = a.Value ?? "ConstPointer" }
+                // `ref type` where the caller passed a constant (`ComponentType`, a type map):
+                // an out local initialized to it, declared by the generator (G66)
+                : a.Kind == "out" && map.TryGetValue(a.Text, out var orf)
+                      && (orf.Kind == "const" || orf.Kind == "expr" && orf.Text != "this" && System.Text.RegularExpressions.Regex.IsMatch(orf.Text, @"^[A-Z]\w*$"))
+                    ? new ArgInfo { Kind = "out", Text = a.Text, Value = orf.Text }
                 : a.Kind == "out" && map.ContainsKey(a.Text) ? null          // `ref type`: a callee parameter by ref
                 : a.Kind == "helpercall" ? ResolveHelperCall(decl, a)
                 : a).ToArray()
@@ -650,6 +715,13 @@ static class HelperInliner
             var native = new List<CallInfo>();
             foreach (var c in g.Calls)
             {
+                // `if (UnsafeNativeMethods.ON_Mesh_GetHiddenValue(p, i)) return;` (MeshVertexList.Hide;
+                // G68): the guard IS a native call -- its own resolution
+                if (c.Name.StartsWith("UnsafeNativeMethods."))
+                {
+                    native.Add(c with { Name = c.Name["UnsafeNativeMethods.".Length..] });
+                    continue;
+                }
                 var dot = c.Name.LastIndexOf('.');
                 var owners = dot < 0 ? new List<string> { type } : FullOf(c.Name[..dot].Split('.').Last(), type);
                 var m = dot < 0 ? c.Name : c.Name[(dot + 1)..];
@@ -735,6 +807,7 @@ static class HelperInliner
                 members[i] = m with
                 {
                     Calls = deep.Calls, Body = deep.Body, Inlined = chain, Wrap = deep.Wrap, WrapArity = deep.WrapArity, WrapChecked = deep.WrapChecked,
+                    WrapStatic = deep.WrapStatic,
                     ResultSelect = deep.ResultSelect,
                     Guards = deep.Guards, Success = deep.Success, FailThrow = deep.FailThrow,
                     Holder = deep.Holder, HolderArg = deep.HolderArg, Compare = deep.Compare,
@@ -765,7 +838,7 @@ static class HelperInliner
                 {
                     Calls = calls, Body = h.Body, Inlined = m.Delegates, Success = h.Success, Commits = h.Commits || m.Commits,
                     FailThrow = h.FailThrow ?? m.FailThrow,
-                    Holder = h.Holder, HolderArg = h.HolderArg, Compare = h.Compare, ResultConv = h.ResultConv,
+                    Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, Compare = h.Compare, ResultConv = h.ResultConv,
                     ResultSelect = h.ResultSelect,
                     Delegates = null, DelegateArgs = null, Pure = null,
                     Native = native, Setter = setter,
@@ -823,9 +896,14 @@ record MemberRecord
     public string ReturnLocal { get; init; } // the body ends in `return <local>;` -- with a newobj argument, the filled object
     public string NewObjFail { get; init; }  // `if (!CALL) { L.Dispose(); L = null; }`: when the call fails, the newobj local L is dropped and null returned
     public NullingCtor[] NullingCtors { get; init; }  // Kind=="type": constructors that set fields to null (BrepLoopList(Brep): m_brepface)
+    public Dictionary<string, string[]> ManagedFields { get; init; }  // Kind=="type": fields only members write -> those writers (G75)
+    public ScopingCtor[] ScopingCtors { get; init; }  // Kind=="type": constructors storing a component in a field another nulls (G77)
     public bool Borrowed { get; init; }      // Kind=="type": `(IntPtr p) { ConstructNonConstObject(p); DoNotDestructOnDispose(); }` -- a pointer into another object
-    public string InternalNew { get; init; } // Kind=="type": a non-public `T() { ConstructNonConstObject(UNM.ON_T_New()); }` -- its native creation call
+    public string InternalNew { get; init; }
+    public string InternalCopy { get; init; }   // Kind=="type": an INTERNAL copy constructor's native (`PolyCurve(PolyCurve other)` -> ON_PolyCurve_New(other)) (G69) // Kind=="type": a non-public `T() { ConstructNonConstObject(UNM.ON_T_New()); }` -- its native creation call
     public string PtrCtor { get; init; }     // Kind=="type": what `T(IntPtr p)` does with p (see DetectPtrCtor)
+    public SharedHandleInfo SharedHandle { get; init; } // Kind=="type": a shared_ptr handle (see DetectSharedHandle)
+    public long[] EnumInts { get; init; }    // Kind=="enum": Values as integers, resolved after the walk (G60)
     public int WrapArity { get; init; }      // the wrap is `new T(p)` (1) or `new T(p, null)` (2); 0: CreateGeometryHelper / not a construction
     public bool WrapChecked { get; init; }   // ... made only after a null check of p
     public string ConvOut { get; init; }     // ResultConv applies to this out local, not to the call's result
@@ -837,6 +915,16 @@ record MemberRecord
     public GuardInfo ResultGuard { get; init; } // `if (COND(rc)) return K; return (E)rc;` after the native call (Ids[0]: the result local)
     public SubViewInfo SubView { get; init; } // the result is a view inside this object (see SubViewInfo)
     public AdoptInfo Adopt { get; init; }    // a parameter handed to this object, then a view of it (see AdoptInfo)
+    public string WrapStatic { get; init; }  // Wrap made by `T.FromIntPtr(p)` (a data class's static bridge; G64), not `new T(p)`
+    public WrapTupleInfo WrapTuple { get; init; } // Body=="wraptuple": a tuple of geometry made from native pointers (G72)
+    public string HolderEmpty { get; init; }  // Holder: the array is empty when the call's result COMPAREs ("== 0"; G73)
+    public Dictionary<string, string> ParamDefaults { get; init; } // `p = p ?? new T();` -- parameter -> T (G64)
+    public TempNativeInfo TempNative { get; init; } // `IntPtr L = p.CopyToNative();` then the calls on L (see TempNativeInfo; G65)
+    public string ResultFilter { get; init; }   // `if (X is T item && !item.P) return item; return null;`: the bool property P of the result that voids it (G66)
+    public string[] DateTime { get; init; }     // `if (CALL) return new DateTime(year, month+1, day, hour, minute, second); return DateTime.MinValue;` (G68)
+    public DataApplyInfo DataApply { get; init; }   // `if (IntPtr.Zero != p) value.SetupNativePointer(p);` after the call (G65)
+    public DataFillInfo DataFill { get; init; }     // `var rc = new T(); CALL(..., ref a, ...); rc.P = a; ... return rc;` (G65)
+    public EnumMapInfo EnumMap { get; init; } // a member-by-member enum switch (see EnumMapInfo)
     public Dictionary<string, AccessorInfo> Specialized { get; init; } // per NullingCtor key ("(Brep)"): the body analyzed with those fields null
     public WrapperInfo Wrapper { get; init; } // Kind=="type": a native value wrapper (Rhino.Render.Variant)
     public bool Internal { get; init; }      // Kind=="type": not public API; recorded for what public members are written in terms of
@@ -845,7 +933,7 @@ record MemberRecord
     public VariantAccessInfo VariantSet { get; init; }  // property setter: `using (var v = new Variant(value)) SetValue(E.M, v);`
     public SettingsViewInfo SettingsView { get; init; } // property: `if (m_file3dm != null) return new T(m_file3dm); ... return new T(UNM.X(cpp));`
     public CommitInfo Commit { get; init; }  // Kind=="type": the internal Commit() -- push the private copy back into the file
-    public string[] ChildArgKinds { get; init; } // Child: per ChildArgs entry, "this" | "file" (a File3dm field) | "other"
+    public string[] ChildArgKinds { get; init; } // Child: per ChildArgs entry, "this" | "file" (a File3dm field) | "const" (a literal) | "other"
     public string[] ExtraComponentTypes { get; init; } // Kind=="type": a multi-type table's extra types ("ModelComponentType.RenderLight")
     public string[] ExtraComponentTypeValues { get; init; } // ... their values
     public string Child { get; init; }       // property getter `return new T(args);` (or `f ?? (f = new T(args))`): T
@@ -859,6 +947,10 @@ record MemberRecord
     public HandleInfo Handle { get; init; }          // Kind=="type": an IDisposable native handle (see DetectHandle)
     public EnumeratorInfo Enumerator { get; init; } // Kind=="type": GetEnumerator walks a linked native list (see DetectLinkedEnumerator)
     public string[] ParentFields { get; init; }     // Kind=="type": fields a constructor stores a class-typed parameter in (a list's owner: m_brep)
+    public CtorStoreInfo[] CtorStore { get; init; } // Kind=="type": the ONE constructor only stores its parameters into fields (Decals: parent, read_only, doc sn)
+    public ExceptionInfo Exception { get; init; }   // Kind=="type": an exception class whose parameterless constructor is `: base("msg")` (G60)
+    public SnapshotEnumInfo Snapshot { get; init; } // Kind=="type" (internal): a snapshot enumerator (see SnapshotEnumInfo)
+    public ManifestEnumInfo ManifestEnumerator { get; init; } // Kind=="type" (internal): walks the file's manifest for one component type (G71)
     public string Const { get; init; }       // property whose getter is `return E.M;` (a constant): "E.M"
     public string ConstValue { get; init; }  // ... its value, when E.M is an enum member or const
     public AccessorInfo Setter { get; init; }// property with a PUBLIC set: its
@@ -868,8 +960,27 @@ record MemberRecord
 
 // One accessor's body, analyzed exactly like a method body. The implicit
 // setter parameter is `value` (args naming it are kind "param").
+// `internal BrepLoopList(BrepFace ownerFace) { m_brep = ownerFace.m_brep; m_brepface = ownerFace; }`:
+// the list SCOPED to a component of its parent, which the (Brep) constructor nulls (G77)
+record ScopingCtor
+{
+    public string Key { get; init; }         // "(BrepFace)": the Specialized key of the members so analyzed
+    public string Param { get; init; }       // the component type
+    public string Field { get; init; }       // the field it is stored in
+}
+
+// the scoped indexer's element key: `int li = i; if (p != IntPtr.Zero) li = UNM.F(p, i);`
+// with p = Field.ConstPointer() -- F(scope pointer, index), or the index itself (G77)
+record KeyMapInfo
+{
+    public string Native { get; init; }
+    public string Field { get; init; }
+    public string Param { get; init; }       // the indexer's parameter
+}
+
 record AccessorInfo
 {
+    public KeyMapInfo KeyMap { get; init; }
     public CallInfo[] Calls { get; init; }
     public string Body { get; init; }
     public GuardInfo[] Guards { get; init; }
@@ -910,6 +1021,42 @@ record AccessorInfo
     public GuardInfo ResultGuard { get; init; }
     public SubViewInfo SubView { get; init; }
     public AdoptInfo Adopt { get; init; }
+    public EnumMapInfo EnumMap { get; init; }
+    public string WrapStatic { get; init; }
+    public WrapTupleInfo WrapTuple { get; init; }
+    public string HolderEmpty { get; init; }
+    public Dictionary<string, string> ParamDefaults { get; init; }
+    public TempNativeInfo TempNative { get; init; }
+    public DataApplyInfo DataApply { get; init; }
+    public DataFillInfo DataFill { get; init; }
+    public string ResultFilter { get; init; }
+    public string[] DateTime { get; init; }
+}
+
+// a temporary native object a data-class argument builds (`IntPtr L = cplane.CopyToNative();`),
+// handed to the member's native calls; Guarded: they ran inside `if (L != IntPtr.Zero)`
+record TempNativeInfo
+{
+    public string Local { get; init; }
+    public string Param { get; init; }
+    public string Method { get; init; }
+    public bool Guarded { get; init; }
+}
+
+// the native result handed to a data-class argument's method: `if (IntPtr.Zero != p) value.M(p);`
+record DataApplyInfo
+{
+    public string Param { get; init; }
+    public string Method { get; init; }
+}
+
+// a data object assembled from the native call's out locals (and the string holder):
+// Assigns: [member, source] with source an out local's name, or "@holder"
+record DataFillInfo
+{
+    public string Local { get; init; }
+    public string Type { get; init; }
+    public string[][] Assigns { get; init; }
 }
 
 // Rhino.Render.Variant: `new Variant()` / Dispose / SetValue(T) overloads / ToX()
@@ -947,6 +1094,13 @@ record VariantAccessInfo
     public string Which { get; init; }       // the setting constant as written (E.M)
     public string WhichValue { get; init; }  // ... resolved
     public string Conv { get; init; }        // getter: the ToX used
+    // an enum mapped through an int (Dithering.Method; G78): getter `(v.ToInt() == MapEq) ? E.MapA : E.MapB`,
+    // setter `new Variant((E.MapA == value) ? MapK1 : MapK2)`
+    public string MapEq { get; init; }
+    public string MapA { get; init; }
+    public string MapB { get; init; }
+    public string MapK1 { get; init; }
+    public string MapK2 { get; init; }
 }
 
 record SettingsViewInfo
@@ -1077,6 +1231,58 @@ record NullingCtor
 // constructor `(IntPtr p)` storing it (optionally refusing zero first), and a
 // dispose path (Dispose / a helper it calls / the finalizer) that hands the field
 // -- or a local copy of it -- to one native `...Delete`. The type owns that pointer.
+// Decal (G60): RhinoCommon holds a pointer to a native std::shared_ptr; the object's
+// pointer is Raw(field); Delete frees the shared_ptr; Copy makes a new one (a snapshot's)
+// one parameter of a store-only constructor (`m_read_only = read_only;`): its
+// declared type and the field it is stored in (null: not stored)
+record CtorStoreInfo
+{
+    public string Param { get; init; }
+    public string Type { get; init; }
+    public string Field { get; init; }
+}
+
+// `internal DecalReadOnlyException() : base("Can't modify read-only decal collection")`:
+// thrown as its base exception type with that message
+record ExceptionInfo
+{
+    public string Base { get; init; }
+    public string Message { get; init; }
+}
+
+record SharedHandleInfo
+{
+    public string Field { get; init; }
+    public string Raw { get; init; }
+    public string Delete { get; init; }
+    public string Copy { get; init; }
+    public int[] CopyArities { get; init; }  // constructors (by arity) storing Copy(their first parameter): the object owns a copy
+}
+
+// RhinoCommon's DecalEnumerator (G60): a SNAPSHOT enumerator. Its constructor
+// fills a SimpleArrayIntPtr with one native call over the owner (`Fill(owner.ConstPointer(),
+// arr.NonConstPointer())`); MoveNext makes the next Item from the next element
+// (`new Decal(arr.ToArray()[i++], ...)`), skipping items whose bool property Skip
+// is false; Dispose frees every element with ElemDelete
+// File3dmEmbeddedFileEnumerator (G71): `_manifest = f.Manifest;` then
+// `_e = _manifest.GetEnumerator(ModelComponentType.X)`, MoveNext yielding
+// `_e.Current as T` -- the manifest's own iteration over component type X
+record ManifestEnumInfo
+{
+    public string Item { get; init; }
+    public string Type { get; init; }       // "ModelComponentType.X"
+}
+
+record SnapshotEnumInfo
+{
+    public string Item { get; init; }
+    public string Fill { get; init; }
+    public int OwnerParam { get; init; }     // the constructor parameter that is the owner
+    public int ItemArity { get; init; }      // the arity of the Item constructor used (the element first)
+    public string Skip { get; init; }        // `while (x != null && !x.Skip) x = Next();`, or null
+    public string ElemDelete { get; init; }
+}
+
 record HandleInfo
 {
     public string Field { get; init; }       // m_const_ptr
@@ -1147,6 +1353,26 @@ record ArrayFillInfo
     public string Empty { get; init; }       // ... and what it returns: "empty" (new T[0]) | "null"
     public string FillForm { get; init; }    // "stmt" | "success" (null when the fill returns false)
     public string ElemConv { get; init; }    // "FromArgb:Color": the result is a second array of converted elements
+    public string Index { get; init; }       // FillForm "loop": the loop index the native takes (G72)
+    public string ElemLocal { get; init; }   // ... and the per-iteration out local it fills (ElemConv "narrow:T": stored as `new T((float)e.X, (float)e.Y, (float)e.Z)`)
+}
+
+// (G72) a tuple of geometry made from native pointers (see WrapTupleShape)
+record WrapTupleInfo
+{
+    public string Form { get; init; }        // "outptr" | "newptr" | "ptrloop"
+    public string Call { get; init; }        // the native whose pointers are wrapped (Calls[] also holds the New/Delete/Count/Get/Dup)
+    public string[] Locals { get; init; }    // outptr/newptr: the pointer locals, in tuple order
+    public string[] Outs { get; init; }      // newptr: the out parameters made from them, in the same order
+    public string Wrap { get; init; }        // the C# class each pointer becomes
+    public string Success { get; init; }     // the bool local deciding (outptr: `rc ? output : null`; newptr: `if (rc)`)
+    public bool Checked { get; init; }       // outptr/ptrloop: a pointer is wrapped only when non-null
+    public string New { get; init; }         // newptr: the native making each pointer ...
+    public string Delete { get; init; }      // ... and freeing it when the call fails
+    public string Holder { get; init; }      // ptrloop: the interop pointer-array holder type
+    public string Count { get; init; }       // ptrloop: the natives counting, reading and duplicating its elements
+    public string Get { get; init; }
+    public string Dup { get; init; }
 }
 
 // `return CreateGeometryHelper(p, this, index) as T;` / `... new MeshHolder(this, meshType)) as T;`
@@ -1167,6 +1393,17 @@ record SubViewInfo
 // BrepFace.SetMesh (G59): the parameter is made a private copy, its pointer
 // handed to the native (which keeps it), then it becomes a view of it through
 // `new H(this, args)` -- the holder a sibling getter hands out (GetMesh)
+// Decal.Mapping (G60): `switch` mapping one enum onto another, member by member
+record EnumMapInfo
+{
+    public string Switched { get; init; }    // the switched identifier (the native result's local, or `value`)
+    public string Local { get; init; }       // setter: the local each case assigns (passed `(int)m`); getter: null
+    public string[][] Pairs { get; init; }   // [case constant, result constant] as written
+    public long[][] Values { get; init; }    // ... resolved after the walk (null when any is not)
+    public string Exception { get; init; }   // the default's throw
+    public string Message { get; init; }
+}
+
 record AdoptInfo
 {
     public string Param { get; init; }
@@ -1200,6 +1437,7 @@ record SuccessInfo
 // The generator decides what each expr means; the extractor does not guess.
 record CallInfo
 {
+    [System.Text.Json.Serialization.JsonIgnore] public int Pos { get; init; }   // the invocation's source position (not emitted; G68)
     public string Name { get; init; }
     public ArgInfo[] Args { get; init; }
 }
@@ -1300,6 +1538,14 @@ class Walker : CSharpSyntaxWalker
                 // record marked internal (ExtractCommand appends it)
                 if (DetectWrapper(node) is WrapperInfo w)
                     InternalWrappers[CurrentType] = w;
+                // an internal exception (DecalReadOnlyException): what a public
+                // member's `throw new X()` means -- its base type and fixed message
+                if (DetectException(node) is ExceptionInfo ex)
+                    InternalExceptions[CurrentType] = ex;
+                if (DetectSnapshotEnumerator(node) is SnapshotEnumInfo se)
+                    InternalSnapshots[CurrentType] = se;
+                if (DetectManifestEnumerator(node) is ManifestEnumInfo me)
+                    InternalManifestEnums[CurrentType] = me;
                 visitBase();
                 _types.Pop();
                 _hidden--;
@@ -1320,15 +1566,23 @@ class Walker : CSharpSyntaxWalker
         var component = _portable ? detected : null;
         var enumerator = _portable ? DetectLinkedEnumerator(node) : null;
         var parentFields = _portable ? DetectParentFields(node) : null;
+        var ctorStore = _portable ? DetectCtorStore(node) : null;
+        var exception = _portable ? DetectException(node) : null;
         var handle = DetectHandle(node);
+        var sharedHandle = handle == null ? DetectSharedHandle(node) : null;
         var nullingCtors = DetectNullingCtors(node);
+        var scopingCtors = DetectScopingCtors(node, nullingCtors);
         var internalNew = DetectInternalNew(node);
+        var internalCopy = DetectInternalCopy(node);
         var ptrCtor = DetectPtrCtor(node);
         // CachedTextureCoordinates: a pointer INTO another object, never deleted
         bool borrowed = node.Members.OfType<ConstructorDeclarationSyntax>().Any(c =>
             c.ParameterList.Parameters is [var bp] && bp.Type?.ToString() == "IntPtr" && c.Body is { } cb
             && cb.Statements.Select(Flat).SequenceEqual(new[] { "ConstructNonConstObject(" + bp.Identifier.Text + ");", "DoNotDestructOnDispose();" }));
         _nullingCtors = nullingCtors;
+        _scopingCtors = _portable ? scopingCtors : null;
+        _typeNode = node;
+        _managed = _portable && ManagedFields.TryGetValue(TypeKey(node), out var mfs) ? mfs : null;
         _handle = handle;
         if (_portable && node.Identifier.Text == "CommonObject") RecordSubobjectNonConst(node);
         // a component's members may name the owner or the key (`Brep.ConstPointer()`,
@@ -1366,11 +1620,18 @@ class Walker : CSharpSyntaxWalker
                 Component = component,
                 Enumerator = enumerator,
                 Handle = _portable ? handle : null,
+                SharedHandle = _portable ? sharedHandle : null,
                 NullingCtors = _portable ? nullingCtors : null,
+                ScopingCtors = _portable ? scopingCtors : null,
+                ManagedFields = _portable && ManagedFields.TryGetValue(TypeKey(node), out var tmf)
+                    ? tmf.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()) : null,
                 Borrowed = _portable && borrowed,
                 InternalNew = _portable ? internalNew : null,
+                InternalCopy = _portable ? internalCopy : null,
                 PtrCtor = _portable ? ptrCtor : null,
                 ParentFields = parentFields,
+                CtorStore = ctorStore,
+                Exception = exception,
                 TypeParams = node.TypeParameterList?.Parameters.Select(tp => tp.Identifier.Text).ToArray(),
                 File = _file,
                 Line = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line + 1,
@@ -1381,9 +1642,18 @@ class Walker : CSharpSyntaxWalker
         _component = null;
         _handle = null;
         _nullingCtors = null;
+        _scopingCtors = null;
+        _typeNode = null;
+        _managed = null;
     }
 
     [ThreadStatic] static NullingCtor[] _nullingCtors;   // the type being walked
+    [ThreadStatic] static ScopingCtor[] _scopingCtors;   // ... and its scoping constructors (G77)
+    [ThreadStatic] static KeyMapInfo _keyMap;            // the body just recognized: its scoped element key (G77)
+    [ThreadStatic] static int _keyMapPos;                // ... and the native computing it (removed from Calls)
+    [ThreadStatic] static TypeDeclarationSyntax _typeNode;
+    [ThreadStatic] static Dictionary<string, SortedSet<string>> _managed;   // its managed fields (G75)
+    [ThreadStatic] static AccessorInfo _managedSetter;   // the property being recorded: its setter so analyzed
 
     // a NON-public parameterless constructor that is only plumbing:
     // `IntPtr p = UNM.ON_X_New(); ConstructNonConstObject(p);` (or the call
@@ -1408,6 +1678,41 @@ class Walker : CSharpSyntaxWalker
             if (call == null || call.ArgumentList.Arguments.Any(a => a.Expression.ToString() != "IntPtr.Zero"))
                 continue;
             return ((MemberAccessExpressionSyntax)call.Expression).Name.Identifier.Text;
+        }
+        return null;
+    }
+
+    // `internal PolyCurve(PolyCurve other) { IntPtr pOther = IntPtr.Zero; if (null != other)
+    // pOther = other.ConstPointer(); IntPtr ptr = UNM.ON_PolyCurve_New(pOther);
+    // ConstructNonConstObject(ptr); }`: an internal COPY constructor -- its native, taking
+    // the other's const pointer (G69). `new T(this)` in a member is that copy.
+    static string DetectInternalCopy(TypeDeclarationSyntax node)
+    {
+        var own = node.Identifier.Text;
+        foreach (var c in node.Members.OfType<ConstructorDeclarationSyntax>())
+        {
+            if (c.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword) || m.IsKind(SyntaxKind.StaticKeyword))
+                || c.ParameterList.Parameters is not [var op] || op.Type?.ToString() != own || c.Initializer != null || c.Body == null)
+                continue;
+            var other = op.Identifier.Text;
+            var sts = c.Body.Statements.Where(st => !(st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+            string pOther = null;
+            int k = 0;
+            // `IntPtr pOther = IntPtr.Zero; if (null != other) pOther = other.ConstPointer();`
+            if (sts.Count >= 2 && sts[0] is LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] } && FlatInit(pv) == "IntPtr.Zero"
+                && sts[1] is IfStatementSyntax { Else: null } pif
+                && (Flat(pif.Condition) == "null!=" + other || Flat(pif.Condition) == other + "!=null")
+                && (pif.Statement is BlockSyntax { Statements: [var ps0] } ? ps0 : pif.Statement) is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax pal, Right: var par } }
+                && pal.Identifier.Text == pv.Identifier.Text && Flat(par) == other + ".ConstPointer()")
+            { pOther = pv.Identifier.Text; k = 2; }
+            if (sts.Count != k + 2
+                || sts[k] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var nv] }
+                || nv.Initializer?.Value is not InvocationExpressionSyntax ni || !IsUnmCall(ni) || ni.ArgumentList.Arguments is not [var na]
+                || !(pOther != null ? na.Expression.ToString() == pOther : Flat(na.Expression) == other + ".ConstPointer()")
+                || sts[k + 1] is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ConstructNonConstObject" }, ArgumentList.Arguments: [var ca] } }
+                || ca.Expression.ToString() != nv.Identifier.Text)
+                continue;
+            return ((MemberAccessExpressionSyntax)ni.Expression).Name.Identifier.Text;
         }
         return null;
     }
@@ -1449,6 +1754,57 @@ class Walker : CSharpSyntaxWalker
         return null;
     }
 
+    static ScopingCtor[] DetectScopingCtors(TypeDeclarationSyntax node, NullingCtor[] nulling)
+    {
+        if (nulling == null) return null;
+        var nulled = nulling.SelectMany(n => n.Nulls).ToHashSet();
+        var outl = new List<ScopingCtor>();
+        foreach (var c in node.Members.OfType<ConstructorDeclarationSyntax>())
+        {
+            if (c.Initializer != null || c.Body == null || c.ParameterList.Parameters is not [var p] || p.Type == null) continue;
+            string field = null;
+            bool ok = c.Body.Statements.Count > 0;
+            foreach (var st in c.Body.Statements)
+            {
+                if (st is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Left: IdentifierNameSyntax l, Right: var r } })
+                { ok = false; break; }
+                if (r is IdentifierNameSyntax ri && ri.Identifier.Text == p.Identifier.Text && nulled.Contains(l.Identifier.Text) && field == null)
+                    field = l.Identifier.Text;                     // the component itself
+                else if (r is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mi } && mi.Identifier.Text == p.Identifier.Text)
+                    continue;                                       // `m_brep = ownerFace.m_brep`: its owner
+                else { ok = false; break; }
+            }
+            if (ok && field != null)
+            {
+                var t = p.Type.ToString().Split('.').Last();
+                outl.Add(new ScopingCtor { Key = "(" + t + ")", Param = t, Field = field });
+            }
+        }
+        return outl.Count > 0 ? outl.ToArray() : null;
+    }
+
+    // a body with a scoping constructor's field known NON-null (G77): the branches it
+    // decides taken, and `IntPtr p = IntPtr.Zero; p = F.ConstPointer();` one declaration
+    static SyntaxNode SpecializeScope(SyntaxNode body, string field)
+    {
+        if (body is not BlockSyntax b) return body;
+        var once = (BlockSyntax)new NullFieldRewriter(Array.Empty<string>(), Array.Empty<string>(), new[] { field }).Visit(b);
+        var sts = once.Statements.ToList();
+        for (int j = 0; j < sts.Count; j++)
+        {
+            if (sts[j] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var zv] } zd || zv.Initializer?.Value.ToString() != "IntPtr.Zero") continue;
+            var name = zv.Identifier.Text;
+            var asg = once.DescendantNodes().OfType<AssignmentExpressionSyntax>().Where(a => a.Left.ToString() == name).ToList();
+            if (asg.Count != 1) continue;
+            var at = sts.FindIndex(x => x is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax xa } && xa == asg[0]);
+            if (at <= j || sts.Skip(j + 1).Take(at - j - 1).Any(x => x.DescendantNodes().OfType<IdentifierNameSyntax>().Any(i => i.Identifier.Text == name))) continue;
+            sts[j] = zd.WithDeclaration(zd.Declaration.WithVariables(SyntaxFactory.SingletonSeparatedList(zv.WithInitializer(SyntaxFactory.EqualsValueClause(asg[0].Right)))));
+            sts.RemoveAt(at);
+        }
+        // the parent's branch after the scope's `return` never runs
+        return Inliner.Fold(once.WithStatements(SyntaxFactory.List(sts)));
+    }
+
     static NullingCtor[] DetectNullingCtors(TypeDeclarationSyntax node)
     {
         var ctors = node.Members.OfType<ConstructorDeclarationSyntax>().Where(c => c.Body != null && c.Initializer == null).ToList();
@@ -1470,8 +1826,9 @@ class Walker : CSharpSyntaxWalker
     // the zero locals' declarations dropped once nothing assigns them
     sealed class NullFieldRewriter : CSharpSyntaxRewriter
     {
-        readonly HashSet<string> _null, _zero;
-        public NullFieldRewriter(IEnumerable<string> nulls, IEnumerable<string> zeros) { _null = nulls.ToHashSet(); _zero = zeros.ToHashSet(); }
+        readonly HashSet<string> _null, _zero, _nonnull;
+        public NullFieldRewriter(IEnumerable<string> nulls, IEnumerable<string> zeros, IEnumerable<string> nonnull = null)
+        { _null = nulls.ToHashSet(); _zero = zeros.ToHashSet(); _nonnull = (nonnull ?? Array.Empty<string>()).ToHashSet(); }
         bool? Decide(ExpressionSyntax c)
         {
             c = c is ParenthesizedExpressionSyntax p ? p.Expression : c;
@@ -1480,6 +1837,7 @@ class Walker : CSharpSyntaxWalker
             bool? eq = null;
             if (_null.Contains(l) && r == "null" || _null.Contains(r) && l == "null") eq = true;
             if (_zero.Contains(l) && r == "IntPtr.Zero" || _zero.Contains(r) && l == "IntPtr.Zero") eq = true;
+            if (_nonnull.Contains(l) && r == "null" || _nonnull.Contains(r) && l == "null") eq = false;
             if (eq == null) return null;
             return b.IsKind(SyntaxKind.EqualsExpression) ? eq : !eq;
         }
@@ -1577,6 +1935,56 @@ class Walker : CSharpSyntaxWalker
                     is IdentifierNameSyntax ai && ai.Identifier.Text == field))
             .Select(m => m.Identifier.Text).ToArray();
         return new HandleInfo { Field = field, Delete = deletes[0], Aliases = aliases.Length > 0 ? aliases : null };
+    }
+
+    // Decal (G60): `ConstPointer()` and `NonConstPointer()` both return a property
+    // whose getter is `var p = UNM.Raw(m_sp); [KeepAlive]; return p;` -- m_sp an
+    // IntPtr field holding a pointer to a native shared_ptr; the dispose path hands
+    // m_sp to one `...Delete`; a constructor takes another object's shared_ptr
+    // through one native copy (`m_sp = UNM.Copy(sp);`).
+    static SharedHandleInfo DetectSharedHandle(TypeDeclarationSyntax node)
+    {
+        var methods = node.Members.OfType<MethodDeclarationSyntax>().ToList();
+        string Returned(MemberDeclarationSyntax m) => m switch
+        {
+            MethodDeclarationSyntax md => (md.ExpressionBody?.Expression ?? (md.Body is { Statements: [ReturnStatementSyntax { Expression: var e }] } ? e : null)) is IdentifierNameSyntax id ? id.Identifier.Text : null,
+            _ => null,
+        };
+        var cp = methods.FirstOrDefault(m => m.Identifier.Text == "ConstPointer" && m.ParameterList.Parameters.Count == 0);
+        var ncp = methods.FirstOrDefault(m => m.Identifier.Text == "NonConstPointer" && m.ParameterList.Parameters.Count == 0);
+        var prop = cp == null ? null : Returned(cp);
+        if (prop == null || ncp == null || Returned(ncp) != prop) return null;
+        var pd = node.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(x => x.Identifier.Text == prop);
+        var getter = pd?.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.Body;
+        if (getter == null) return null;
+        var gs = getter.Statements.Where(x => !(x is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive")).ToList();
+        if (gs is not [LocalDeclarationStatementSyntax { Declaration.Variables: [var rv] }, ReturnStatementSyntax { Expression: IdentifierNameSyntax rr }]
+            || rr.Identifier.Text != rv.Identifier.Text
+            || rv.Initializer?.Value is not InvocationExpressionSyntax { ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax rf }] } ri || !IsUnmCall(ri))
+            return null;
+        var field = rf.Identifier.Text;
+        bool isPtrField = node.Members.OfType<FieldDeclarationSyntax>().Any(f => f.Declaration.Type.ToString() is "IntPtr" or "System.IntPtr"
+            && f.Declaration.Variables.Any(v => v.Identifier.Text == field));
+        if (!isPtrField) return null;
+        string Native(InvocationExpressionSyntax i) => ((MemberAccessExpressionSyntax)i.Expression).Name.Identifier.Text;
+        var del = node.Members.OfType<BaseMethodDeclarationSyntax>().Where(m => m is DestructorDeclarationSyntax || m is MethodDeclarationSyntax { Identifier.Text: "Dispose" })
+            .SelectMany(m => m.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            .Where(i => IsUnmCall(i) && i.ArgumentList.Arguments is [{ Expression: IdentifierNameSyntax da }] && da.Identifier.Text == field)
+            .Select(Native).Distinct().ToList();
+        var copy = node.Members.OfType<ConstructorDeclarationSyntax>()
+            .SelectMany(c => c.Body?.Statements ?? default)
+            .Select(st => st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax cl, Right: InvocationExpressionSyntax ci } }
+                          && cl.Identifier.Text == field && IsUnmCall(ci) && ci.ArgumentList.Arguments.Count == 1 ? Native(ci) : null)
+            .Where(n => n != null).Distinct().ToList();
+        if (del.Count != 1) return null;
+        var copyArities = copy.Count != 1 ? null : node.Members.OfType<ConstructorDeclarationSyntax>()
+            .Where(c => c.ParameterList.Parameters.Count > 0 && c.Body != null && c.Body.Statements.Any(st =>
+                st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax cl, Right: InvocationExpressionSyntax ci } }
+                && cl.Identifier.Text == field && IsUnmCall(ci) && Native(ci) == copy[0]
+                && ci.ArgumentList.Arguments[0].Expression.ToString() == c.ParameterList.Parameters[0].Identifier.Text))
+            .Select(c => c.ParameterList.Parameters.Count).ToArray();
+        return new SharedHandleInfo { Field = field, Raw = Native(ri), Delete = del[0], Copy = copy.Count == 1 ? copy[0] : null,
+                                      CopyArities = copyArities is { Length: > 0 } ? copyArities : null };
     }
 
     static bool IsFile3dmType(string t) => t is "File3dm" or "FileIO.File3dm" or "Rhino.FileIO.File3dm";
@@ -1786,6 +2194,174 @@ class Walker : CSharpSyntaxWalker
         return fields.Count > 0 ? fields.Distinct().ToArray() : null;
     }
 
+    // the type's ONE constructor does nothing but store its parameters into
+    // fields (`internal Decals(ObjectAttributes parent, bool read_only, uint sn)
+    // { m_read_only = read_only; m_parent_attributes = parent; ... }`): per
+    // parameter, its type and the field it lands in (G60). A view constructed
+    // with constants carries those fields as its state
+    static CtorStoreInfo[] DetectCtorStore(TypeDeclarationSyntax node)
+    {
+        var ctors = node.Members.OfType<ConstructorDeclarationSyntax>()
+            .Where(c => !c.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))).ToList();
+        if (ctors is not [{ Body: { } body, Initializer: null } ctor] || ctor.ParameterList.Parameters.Count == 0)
+            return null;
+        var ps = ctor.ParameterList.Parameters;
+        var stored = new Dictionary<string, string>();
+        foreach (var st in body.Statements)
+        {
+            if (st is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: var fl, Right: IdentifierNameSyntax fr } asg }
+                || !asg.IsKind(SyntaxKind.SimpleAssignmentExpression)
+                || !ps.Any(p => p.Identifier.Text == fr.Identifier.Text) || stored.ContainsKey(fr.Identifier.Text))
+                return null;
+            var field = fl switch
+            {
+                IdentifierNameSyntax fi => fi.Identifier.Text,
+                MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax, Name: IdentifierNameSyntax fn } => fn.Identifier.Text,
+                _ => null,
+            };
+            if (field == null) return null;
+            stored[fr.Identifier.Text] = field;
+        }
+        return ps.Select(p => new CtorStoreInfo
+        {
+            Param = p.Identifier.Text, Type = p.Type?.ToString(),
+            Field = stored.GetValueOrDefault(p.Identifier.Text),
+        }).ToArray();
+    }
+
+    // a SNAPSHOT enumerator (SnapshotEnumInfo; G60: DecalEnumerator), recognized
+    // whole -- the constructor, the next-item helper, MoveNext, Dispose -- or not at all
+    static SnapshotEnumInfo DetectSnapshotEnumerator(TypeDeclarationSyntax node)
+    {
+        var ie = node.BaseList?.Types.Select(b => b.Type).OfType<GenericNameSyntax>()
+            .FirstOrDefault(g => g.Identifier.Text == "IEnumerator" && g.TypeArgumentList.Arguments.Count == 1);
+        if (ie == null) return null;
+        var item = ie.TypeArgumentList.Arguments[0].ToString();
+        var arrs = node.Members.OfType<FieldDeclarationSyntax>().Where(f => f.Declaration.Type.ToString() == "SimpleArrayIntPtr")
+            .SelectMany(f => f.Declaration.Variables).ToList();
+        if (arrs is not [var arrv] || arrv.Initializer != null) return null;
+        var a = arrv.Identifier.Text;
+        bool NotKeepAlive(StatementSyntax st) => !(st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive");
+        // the constructor: stores its parameters, makes the array, fills it once
+        if (node.Members.OfType<ConstructorDeclarationSyntax>().ToList() is not [{ Body: { } cb, Initializer: null } ctor]) return null;
+        var ps = ctor.ParameterList.Parameters.Select(q => q.Identifier.Text).ToList();
+        var stored = new Dictionary<string, string>();   // field -> parameter
+        var locals = new Dictionary<string, string>();   // local -> its initializer, flat
+        InvocationExpressionSyntax fill = null;
+        bool made = false;
+        foreach (var st in cb.Statements.Where(NotKeepAlive))
+        {
+            if (st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax l, Right: var r } })
+            {
+                if (r is IdentifierNameSyntax rp && ps.Contains(rp.Identifier.Text)) stored[l.Identifier.Text] = rp.Identifier.Text;
+                else if (l.Identifier.Text == a && Flat(r) == "newSimpleArrayIntPtr()" && !made) made = true;
+                else return null;
+            }
+            else if (st is LocalDeclarationStatementSyntax { Declaration.Variables: [var lv] } && fill == null)
+                locals[lv.Identifier.Text] = FlatInit(lv);
+            else if (st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax fi } && IsUnmCall(fi) && fill == null && made)
+                fill = fi;
+            else return null;
+        }
+        if (fill?.ArgumentList.Arguments is not [var fa0, var fa1]) return null;
+        string Res(ExpressionSyntax e) => e is IdentifierNameSyntax id && locals.TryGetValue(id.Identifier.Text, out var v) ? v : Flat(e);
+        var owner = stored.Keys.FirstOrDefault(f => Res(fa0.Expression) == f + ".ConstPointer()");
+        if (owner == null || Res(fa1.Expression) != a + ".NonConstPointer()") return null;
+        // the next-item helper: `if (i >= a.Count) return null; var x = a.ToArray()[i++]; return new Item(x, ...);`
+        var methods = node.Members.OfType<MethodDeclarationSyntax>().ToList();
+        string next = null; int arity = 0;
+        foreach (var m in methods.Where(m => m.ParameterList.Parameters.Count == 0 && m.ReturnType.ToString() == item && m.Body != null))
+        {
+            if (m.Body.Statements is not [IfStatementSyntax { Else: null } s0, LocalDeclarationStatementSyntax { Declaration.Variables: [var xv] }, ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax nc }])
+                continue;
+            var im = System.Text.RegularExpressions.Regex.Match(Flat(s0), @"^if\((\w+)>=" + a + @"\.Count\)returnnull;$");
+            if (!im.Success || FlatInit(xv) != a + ".ToArray()[" + im.Groups[1].Value + "++]") continue;
+            if (nc.Type.ToString() != item || nc.ArgumentList?.Arguments.FirstOrDefault()?.Expression.ToString() != xv.Identifier.Text) continue;
+            next = m.Identifier.Text; arity = nc.ArgumentList.Arguments.Count;
+        }
+        if (next == null) return null;
+        // MoveNext: `var d = Next(); [while ((d != null) && !d.P) { d = Next(); }] Current = d; return d != null;`
+        var mn = methods.FirstOrDefault(m => m.Identifier.Text == "MoveNext" && m.ParameterList.Parameters.Count == 0);
+        if (mn?.Body?.Statements is not { Count: 3 or 4 } ms || ms[0] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var dv] }
+            || FlatInit(dv) != next + "()")
+            return null;
+        var d = dv.Identifier.Text;
+        string skip = null;
+        if (ms.Count == 4)
+        {
+            var wm = System.Text.RegularExpressions.Regex.Match(Flat(ms[1]),
+                @"^while\(\(" + d + @"!=null\)&&!" + d + @"\.(\w+)\)\{" + d + "=" + next + @"\(\);\}$");
+            if (!wm.Success) return null;
+            skip = wm.Groups[1].Value;
+        }
+        if (Flat(ms[^2]) != "Current=" + d + ";" || Flat(ms[^1]) != "return" + d + "!=null;") return null;
+        // Dispose: `foreach (var e in a.ToArray()) { UNM.Delete(e); }` (the array maybe a local first)
+        string ArrOf(ForEachStatementSyntax fe)
+        {
+            if (fe.Expression is IdentifierNameSyntax li)
+                foreach (var v in fe.Ancestors().OfType<BlockSyntax>().SelectMany(b => b.Statements).OfType<LocalDeclarationStatementSyntax>()
+                                    .SelectMany(ld => ld.Declaration.Variables))
+                    if (v.Identifier.Text == li.Identifier.Text) return FlatInit(v);
+            return Flat(fe.Expression);
+        }
+        var dels = methods.Where(m => m.Identifier.Text == "Dispose").SelectMany(m => m.DescendantNodes().OfType<ForEachStatementSyntax>())
+            .Where(fe => ArrOf(fe) == a + ".ToArray()"
+                         && (fe.Statement is BlockSyntax { Statements: [var b0] } ? b0 : fe.Statement) is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax di }
+                         && IsUnmCall(di) && di.ArgumentList.Arguments is [{ Expression: IdentifierNameSyntax de }] && de.Identifier.Text == fe.Identifier.Text)
+            .Select(fe => CalleeName((InvocationExpressionSyntax)((ExpressionStatementSyntax)(fe.Statement is BlockSyntax bb ? bb.Statements[0] : fe.Statement)).Expression))
+            .Distinct().ToList();
+        if (dels is not [var del]) return null;
+        return new SnapshotEnumInfo
+        {
+            Item = item, Fill = CalleeName(fill), OwnerParam = ps.IndexOf(stored[owner]),
+            ItemArity = arity, Skip = skip, ElemDelete = del,
+        };
+    }
+
+    // a MANIFEST enumerator (ManifestEnumInfo; G71): recognized whole or not at all
+    static ManifestEnumInfo DetectManifestEnumerator(TypeDeclarationSyntax node)
+    {
+        var ie = node.BaseList?.Types.Select(b => b.Type).OfType<GenericNameSyntax>()
+            .FirstOrDefault(g => g.Identifier.Text == "IEnumerator" && g.TypeArgumentList.Arguments.Count == 1);
+        if (ie == null) return null;
+        var item = ie.TypeArgumentList.Arguments[0].ToString();
+        var methods = node.Members.OfType<MethodDeclarationSyntax>().ToList();
+        // the constructor: `_manifest = f.Manifest; Reset();` with f a File3dm
+        if (node.Members.OfType<ConstructorDeclarationSyntax>().ToList() is not [{ Body: { } cb, Initializer: null } ctor]
+            || ctor.ParameterList.Parameters is not [var fp] || !IsFile3dmType(fp.Type?.ToString() ?? "")) return null;
+        var cs = cb.Statements.Select(Flat).ToList();
+        string mf = null;
+        foreach (var st in cb.Statements)
+            if (st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax ml, Right: var mr } } && Flat(mr) == fp.Identifier.Text + ".Manifest")
+                mf = ml.Identifier.Text;
+        if (mf == null || cs.Count != 2 || cs[1] != "Reset();") return null;
+        // Reset: `_e = _manifest.GetEnumerator(ModelComponentType.X);`
+        var reset = methods.FirstOrDefault(m => m.Identifier.Text == "Reset" && m.ParameterList.Parameters.Count == 0);
+        if (reset?.Body?.Statements is not [ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax el, Right: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax em, Name.Identifier.Text: "GetEnumerator" }, ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ModelComponentType" } } eta }] } } }]
+            || em.Identifier.Text != mf) return null;
+        var e = el.Identifier.Text;
+        // MoveNext: `if (!_e.MoveNext()) return false; Current = _e.Current as T; return true;`
+        var mn = methods.FirstOrDefault(m => m.Identifier.Text == "MoveNext" && m.ParameterList.Parameters.Count == 0);
+        if (mn?.Body?.Statements.Select(Flat).ToList() is not [var s0, var s1, "returntrue;"]
+            || s0 != "if(!" + e + ".MoveNext())returnfalse;" || s1 != "Current=" + e + ".Currentas" + item + ";") return null;
+        return new ManifestEnumInfo { Item = item, Type = eta.ToString() };
+    }
+
+    // `class DecalReadOnlyException : InvalidOperationException { DecalReadOnlyException()
+    // : base("Can't modify read-only decal collection") { } }`: an exception type
+    // whose parameterless constructor fixes the message (G60)
+    static ExceptionInfo DetectException(TypeDeclarationSyntax node)
+    {
+        if (node.BaseList?.Types.FirstOrDefault()?.Type.ToString() is not string b
+            || !b.Split('.').Last().EndsWith("Exception"))
+            return null;
+        var c0 = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(c =>
+            c.ParameterList.Parameters.Count == 0 && !c.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)));
+        if (c0?.Initializer is not { ThisOrBaseKeyword.RawKind: (int)SyntaxKind.BaseKeyword, ArgumentList.Arguments: [{ Expression: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.StringLiteralExpression } msg }] })
+            return null;
+        return new ExceptionInfo { Base = b.Split('.').Last(), Message = msg.Token.ValueText };
+    }
+
     // `public IEnumerator<T> GetEnumerator() { return H().GetEnumerator(); }` where
     // `IEnumerable<T> H()` is the First/Next yield loop (EnumeratorInfo)
     static EnumeratorInfo DetectLinkedEnumerator(TypeDeclarationSyntax node)
@@ -1955,6 +2531,17 @@ class Walker : CSharpSyntaxWalker
         if (us?.Declaration is not { Variables: [var v] } || v.Initializer?.Value is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "GetValue" }, ArgumentList.Arguments: [var wa] })
             return null;
         var inner = us.Statement is BlockSyntax { Statements: [var only] } ? only : us.Statement;
+        static ExpressionSyntax Bare(ExpressionSyntax e) { while (e is ParenthesizedExpressionSyntax p) e = p.Expression; return e; }
+        // `return (m.ToInt() == 0) ? Methods.SimpleNoise : Methods.FloydSteinberg;` (G78)
+        if (inner is ReturnStatementSyntax { Expression: var re } && Bare(re) is ConditionalExpressionSyntax mc
+            && Bare(mc.Condition) is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression, Left: var ml, Right: LiteralExpressionSyntax mk }
+            && Bare(ml) is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mv, Name.Identifier.Text: "ToInt" }, ArgumentList.Arguments.Count: 0 }
+            && mv.Identifier.Text == v.Identifier.Text
+            && Bare(mc.WhenTrue) is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mta, Name: IdentifierNameSyntax ma }
+            && Bare(mc.WhenFalse) is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mtb, Name: IdentifierNameSyntax mb }
+            && mta.Identifier.Text == mtb.Identifier.Text)
+            return new VariantAccessInfo { Which = wa.Expression.ToString(), Conv = "ToInt", MapEq = mk.Token.Text,
+                                           MapA = ma.Identifier.Text, MapB = mb.Identifier.Text };
         if (inner is not ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax rv, Name.Identifier.Text: var conv }, ArgumentList.Arguments.Count: 0 } }
             || rv.Identifier.Text != v.Identifier.Text || !conv.StartsWith("To"))
             return null;
@@ -1965,14 +2552,27 @@ class Walker : CSharpSyntaxWalker
     static VariantAccessInfo DetectVariantSet(SyntaxNode body)
     {
         var us = body is BlockSyntax { Statements: [UsingStatementSyntax u] } ? u : null;
-        if (us?.Declaration is not { Variables: [var v] } || v.Initializer?.Value is not ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax { Identifier.Text: "Variant" }, ArgumentList.Arguments: [var va] }
-            || va.Expression.ToString() != "value")
+        if (us?.Declaration is not { Variables: [var v] } || v.Initializer?.Value is not ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax { Identifier.Text: "Variant" }, ArgumentList.Arguments: [var va] })
+            return null;
+        string mapA = null, k1 = null, k2 = null;
+        var vx = va.Expression;
+        while (vx is ParenthesizedExpressionSyntax vp) vx = vp.Expression;
+        // `new Variant((Methods.SimpleNoise == value) ? 0 : 1)` (G78)
+        if (vx is ConditionalExpressionSyntax { Condition: var vc, WhenTrue: LiteralExpressionSyntax vk1, WhenFalse: LiteralExpressionSyntax vk2 })
+        {
+            while (vc is ParenthesizedExpressionSyntax vcp) vc = vcp.Expression;
+            if (vc is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression } vb
+                && (vb.Left.ToString() == "value" ? vb.Right : vb.Right.ToString() == "value" ? vb.Left : null) is MemberAccessExpressionSyntax { Name: IdentifierNameSyntax vn })
+            { mapA = vn.Identifier.Text; k1 = vk1.Token.Text; k2 = vk2.Token.Text; }
+            else return null;
+        }
+        else if (va.Expression.ToString() != "value")
             return null;
         var inner = us.Statement is BlockSyntax { Statements: [var only] } ? only : us.Statement;
         if (inner is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "SetValue" }, ArgumentList.Arguments: [var wa, var sa] } }
             || sa.Expression.ToString() != v.Identifier.Text)
             return null;
-        return new VariantAccessInfo { Which = wa.Expression.ToString() };
+        return new VariantAccessInfo { Which = wa.Expression.ToString(), MapA = mapA, MapK1 = k1, MapK2 = k2 };
     }
 
     // RenderSettings.GroundPlane: `if (m_file3dm != null) return new T(m_file3dm);
@@ -2074,6 +2674,11 @@ class Walker : CSharpSyntaxWalker
                 if (v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression } ae
                     && ae.Left.ToString() == "m__parent" && IsFile3dmType(ae.Right.ToString()))
                     fileVars.Add(v.Identifier.Text);
+            // `if (m__parent is File3dm parent)` (File3dmEmbeddedFile; G71): the pattern variable
+            foreach (var ip in body.DescendantNodes().OfType<IsPatternExpressionSyntax>())
+                if (ip.Expression.ToString() == "m__parent" && ip.Pattern is DeclarationPatternSyntax { Type: var ipt, Designation: SingleVariableDesignationSyntax ipd }
+                    && IsFile3dmType(ipt.ToString()))
+                    fileVars.Add(ipd.Identifier.Text);
             var ptrVars = new HashSet<string>();
             bool FilePtr(ExpressionSyntax e) => e is InvocationExpressionSyntax
                 { Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } pm, ArgumentList.Arguments.Count: 0 }
@@ -2278,7 +2883,7 @@ class Walker : CSharpSyntaxWalker
         // proxy's file): kind "fieldptr", Text the field, Value the accessor
         // (a component names its owner through a property too: `Brep.ConstPointer()`)
         bool IsFieldName(string n) => !paramNames.Contains(n)
-            && (n.StartsWith("m_") || _component != null && _component.OwnerNames.Contains(n));
+            && (n.StartsWith("m_") || n.StartsWith("_") || _component != null && _component.OwnerNames.Contains(n));
         var fieldPtr = new Dictionary<string, (string field, string acc)>();
         foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
             if (v.Initializer?.Value is InvocationExpressionSyntax
@@ -2320,10 +2925,18 @@ class Walker : CSharpSyntaxWalker
         // object the native call fills -- kind "newobj" (Text the local, Value its type)
         var newLocal = new Dictionary<string, string>();
         foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
-            if (v.Initializer?.Value is ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax nt, ArgumentList.Arguments.Count: 0 }
+            if (v.Initializer?.Value is ObjectCreationExpressionSyntax { ArgumentList.Arguments.Count: 0 } noc
+                && (noc.Type is QualifiedNameSyntax nqn ? nqn.Right : noc.Type) is IdentifierNameSyntax nt   // `new Geometry.Light()` too (G69)
                 && !HolderTypes.Contains(nt.Identifier.Text)                       // interop holders: their own idiom
                 && v.Parent?.Parent is not UsingStatementSyntax)
                 newLocal[v.Identifier.Text] = nt.Identifier.Text;
+        // `IntPtr L = cplane.CopyToNative();`: a temporary native a data-class argument builds (G65)
+        var tempLocal = new Dictionary<string, (string param, string method)>();
+        foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+            if (v.Parent?.Parent is LocalDeclarationStatementSyntax { Declaration.Type: var tlt } && tlt.ToString() == "IntPtr"
+                && v.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax tlp, Name.Identifier.Text: var tlm }, ArgumentList.Arguments.Count: 0 }
+                && paramNames.Contains(tlp.Identifier.Text) && tlm is not ("ConstPointer" or "NonConstPointer"))
+                tempLocal[v.Identifier.Text] = (tlp.Identifier.Text, tlm);
         var newAlias = new Dictionary<string, string>();   // pointer local -> the newobj local it points into
         foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
             if (v.Initializer?.Value is InvocationExpressionSyntax
@@ -2371,13 +2984,27 @@ class Walker : CSharpSyntaxWalker
                 foreach (var nm in names.Where(paramNames.Contains))
                     localInit.TryAdd(nm, e0.ToString());
         }
+        // `IntPtr ptr_revhist = UnsafeNativeMethods.ONX_Model_RevisionHistory(ptr_const_this);`
+        // used only as arguments of other native calls (File3dm.Created; G68): the
+        // call becomes a NESTED call argument (kind "nativecall", as a resolved helper
+        // local is), not a call of its own
+        var nativeLocal = new Dictionary<string, InvocationExpressionSyntax>();
+        foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+            if (v.Parent?.Parent is LocalDeclarationStatementSyntax { Declaration.Type: var nlt } && nlt.ToString() == "IntPtr"
+                && v.Initializer?.Value is InvocationExpressionSyntax nli && IsUnmCall(nli)
+                && nli.ArgumentList.Arguments.All(a => a.RefOrOutKeyword.IsKind(SyntaxKind.None))
+                && body.DescendantNodes().OfType<IdentifierNameSyntax>().Where(r => r.Identifier.Text == v.Identifier.Text)
+                       .All(r => r.Parent is ArgumentSyntax { RefOrOutKeyword.RawKind: (int)SyntaxKind.None, Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax ui } } && IsUnmCall(ui) && ui != nli))
+                nativeLocal[v.Identifier.Text] = nli;
         foreach (var inv in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
             if (inv.Expression is not MemberAccessExpressionSyntax m
                 || m.Expression is not IdentifierNameSyntax id
                 || id.Identifier.Text != "UnsafeNativeMethods")
                 continue;
-            var args = inv.ArgumentList.Arguments.Select(a =>
+            if (nativeLocal.ContainsValue(inv))
+                continue;                                     // folded into its user's argument
+            ArgInfo Classify(ArgumentSyntax a)
             {
                 var text = a.Expression.ToString();
                 string kind;
@@ -2417,6 +3044,10 @@ class Walker : CSharpSyntaxWalker
                 else if (a.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax pb }
                          && paramNames.Contains(pb.Identifier.Text))
                     kind = "parammember";
+                // `(uint)options.RenderMeshFlags`: the same, cast as written (G64)
+                else if (a.Expression is CastExpressionSyntax { Type: var pct, Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax pcb } pcm }
+                         && paramNames.Contains(pcb.Identifier.Text))
+                    return new ArgInfo { Kind = "parammember", Text = pcm.ToString(), Value = pct.ToString() };
                 else if (ParamPtr(a.Expression, paramNames) is string direct)
                     return new ArgInfo { Kind = "paramptr", Text = direct, Value = ParamPtrAcc(a.Expression) };
                 else if (a.Expression is IdentifierNameSyntax nl && nullableLocal.TryGetValue(nl.Identifier.Text, out var npn))
@@ -2432,6 +3063,12 @@ class Walker : CSharpSyntaxWalker
                     return new ArgInfo { Kind = "local", Text = text, Value = lv };
                 else if (a.Expression is IdentifierNameSyntax hl && helperLocal.TryGetValue(hl.Identifier.Text, out var hname))
                     return new ArgInfo { Kind = "helpercall", Text = hname };
+                else if (a.Expression is IdentifierNameSyntax tl && tempLocal.TryGetValue(tl.Identifier.Text, out var tlv))
+                    return new ArgInfo { Kind = "tempnative", Text = tlv.param, Value = tlv.method };
+                else if (a.Expression is IdentifierNameSyntax nlu && nativeLocal.TryGetValue(nlu.Identifier.Text, out var nlinv))
+                    return new ArgInfo { Kind = "nativecall", Text = nlu.Identifier.Text,
+                        Call = new CallInfo { Name = ((MemberAccessExpressionSyntax)nlinv.Expression).Name.Identifier.Text,
+                                              Args = nlinv.ArgumentList.Arguments.Select(Classify).ToArray() } };
                 else if (a.Expression is IdentifierNameSyntax fl && fieldPtr.TryGetValue(fl.Identifier.Text, out var fp))
                     return new ArgInfo { Kind = "fieldptr", Text = fp.field, Value = fp.acc };
                 else if (a.Expression is InvocationExpressionSyntax
@@ -2448,8 +3085,9 @@ class Walker : CSharpSyntaxWalker
                 else
                     kind = "expr";
                 return new ArgInfo { Kind = kind, Text = text };
-            }).ToArray();
-            calls.Add(new CallInfo { Name = m.Name.Identifier.Text, Args = args });
+            }
+            var args = inv.ArgumentList.Arguments.Select(Classify).ToArray();
+            calls.Add(new CallInfo { Name = m.Name.Identifier.Text, Args = args, Pos = inv.SpanStart });
         }
         return calls.Count == 0 ? null : calls.ToArray();
     }
@@ -2475,7 +3113,12 @@ class Walker : CSharpSyntaxWalker
     // native creation call and owns the returned pointer.
     static readonly HashSet<string> PlumbingCalls = new()
     { "ConstPointer", "NonConstPointer", "KeepAlive", "ConstPointerOfInputCurves",
-      "ConstructNonConstObject" };
+      "ConstructNonConstObject",
+      // `ApplyMemoryPressure()` after a construction: a GC hint, like KeepAlive (G73)
+      "ApplyMemoryPressure",
+      // a data class's static bridge from a native pointer (G64); the generator
+      // refuses the member when the type is not a translated data class
+      "FromIntPtr" };
 
     // A generated binding reproduces ONLY the native call. If the C# body does
     // anything else -- branches, loops, extra calls, arithmetic around the
@@ -2566,6 +3209,45 @@ class Walker : CSharpSyntaxWalker
         && b.Statements.All(x => x is IfStatementSyntax { Else: null } gi
             && (gi.Statement is BlockSyntax { Statements: [ThrowStatementSyntax] } || gi.Statement is ThrowStatementSyntax));
 
+    static EnumMapInfo EnumMapOf(SwitchStatementSyntax sw, BlockSyntax block)
+    {
+        var on = ((IdentifierNameSyntax)sw.Expression).Identifier.Text;
+        var pairs = new List<string[]>();
+        string ex = null, msg = null, assigned = null;
+        bool getter = false, setter = false;
+        foreach (var sec in sw.Sections)
+        {
+            var body = sec.Statements.ToList();
+            if (sec.Labels is [DefaultSwitchLabelSyntax])
+            {
+                if (body is not [var t0] || ThrowOf(t0) is not (string e1, var m1) || e1 == null) return null;
+                (ex, msg) = (e1, m1);
+                continue;
+            }
+            if (sec.Labels is not [CaseSwitchLabelSyntax { Value: MemberAccessExpressionSyntax from }]) return null;
+            if (body is [ReturnStatementSyntax { Expression: MemberAccessExpressionSyntax to }])
+                getter = true;
+            else if (body is [ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax al, Right: MemberAccessExpressionSyntax to2 } }, BreakStatementSyntax]
+                     && (assigned == null || assigned == al.Identifier.Text))
+            {
+                setter = true;
+                assigned = al.Identifier.Text;
+                to = to2;
+            }
+            else return null;
+            pairs.Add(new[] { from.ToString(), to.ToString() });
+        }
+        if (ex == null || pairs.Count == 0 || getter == setter) return null;
+        if (getter)
+        {
+            // the switched local holds the (cast) native result
+            bool ok = block.Statements.OfType<LocalDeclarationStatementSyntax>().Any(ld => ld.Declaration.Variables is [var v]
+                && v.Identifier.Text == on && v.Initializer?.Value is CastExpressionSyntax { Expression: InvocationExpressionSyntax ci } && IsUnmCall(ci));
+            if (!ok || sw != block.Statements[^1]) return null;
+        }
+        return new EnumMapInfo { Switched = on, Local = assigned, Pairs = pairs.ToArray(), Exception = ex, Message = msg };
+    }
+
     static bool LiteralArm(ExpressionSyntax e) =>
         e is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression or (int)SyntaxKind.TrueLiteralExpression or (int)SyntaxKind.FalseLiteralExpression }
         || e is PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.UnaryMinusExpression, Operand: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } };
@@ -2608,6 +3290,12 @@ class Walker : CSharpSyntaxWalker
                          && (lo.Parent is ReturnStatementSyntax
                              || lo.Ancestors().TakeWhile(x => x is BinaryExpressionSyntax or ParenthesizedExpressionSyntax)
                                   .LastOrDefault()?.Parent is ReturnStatementSyntax):
+                    break;
+                // `F(p, text ?? string.Empty)`: a native's string argument defaulted to empty;
+                // recorded as the argument text, the planner accepts it on a string parameter (G76)
+                case BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax,
+                                              Right: MemberAccessExpressionSyntax { Expression: PredefinedTypeSyntax { Keyword.Text: "string" }, Name.Identifier.Text: "Empty" } } sce
+                    when sce.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax scu } } && IsUnmCall(scu):
                     break;
                 case BinaryExpressionSyntax b
                     when !b.IsKind(SyntaxKind.EqualsExpression)
@@ -2758,7 +3446,7 @@ class Walker : CSharpSyntaxWalker
                 case InvocationExpressionSyntax gi
                     when gi.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax, Name: IdentifierNameSyntax } or IdentifierNameSyntax
                       && gi.ArgumentList.Arguments.All(a => a.Expression is IdentifierNameSyntax && a.RefOrOutKeyword.IsKind(SyntaxKind.None)):
-                    _guardCalls.Add(new CallInfo { Name = gi.Expression.ToString(),
+                    _guardCalls.Add(new CallInfo { Name = gi.Expression.ToString(), Pos = gi.SpanStart,
                         Args = gi.ArgumentList.Arguments.Select(a => new ArgInfo { Kind = "expr", Text = a.Expression.ToString() }).ToArray() });
                     foreach (var a in gi.ArgumentList.Arguments) ids.Add(a.Expression.ToString());
                     foreach (var n2 in gi.DescendantNodes()) skip.Add(n2);
@@ -2920,6 +3608,17 @@ class Walker : CSharpSyntaxWalker
                                                                 && DeadFlags.Contains(dfi.Identifier.Text)))
             body = SyntaxFactory.Block(dfb.Statements.Where(st => !(st is IfStatementSyntax { Else: null, Condition: IdentifierNameSyntax dfi2 }
                                                                     && DeadFlags.Contains(dfi2.Identifier.Text))));
+        // `if (m_manifest.FindId(id, ComponentType) is T item && !item.IsDeleted) return item;
+        // return null;` (CommonComponentTable.FindId; G66): a delegation whose result is
+        // kept only when its bool property is false -- the delegation, plus ResultFilter
+        if (body is BlockSyntax { Statements: [IfStatementSyntax { Else: null, Condition: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalAndExpression, Left: IsPatternExpressionSyntax { Pattern: DeclarationPatternSyntax { Designation: SingleVariableDesignationSyntax rfd } } rfp, Right: PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalNotExpression, Operand: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax rfo, Name: IdentifierNameSyntax rfm } } } } rfif,
+                                                  ReturnStatementSyntax { Expression: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } }] }
+            && (rfif.Statement is BlockSyntax { Statements: [var rfs] } ? rfs : rfif.Statement) is ReturnStatementSyntax { Expression: IdentifierNameSyntax rfr }
+            && rfr.Identifier.Text == rfd.Identifier.Text && rfo.Identifier.Text == rfd.Identifier.Text)
+        {
+            _resultFilter = rfm.Identifier.Text;
+            body = SyntaxFactory.Block(SyntaxFactory.ReturnStatement(rfp.Expression));
+        }
         // `var type = GetModelComponentTypeFromGenericType<T>(); return (T)FindName(name, type, parent);`:
         // a delegation whose argument is a compile-time type map of the method's T
         string typeMapLocal = null, typeMapName = null, typeMapArg = null;
@@ -2940,6 +3639,28 @@ class Walker : CSharpSyntaxWalker
             && b2.Statements[1] is ReturnStatementSyntax { Expression: ExpressionSyntax lr }
             && Uncast(lr) is IdentifierNameSyntax lrid && lrid.Identifier.Text == lv.Identifier.Text)
             body = SyntaxFactory.ArrowExpressionClause(lvInit);
+        // `Point3d pt = Location; pt.X = value; Location = pt;` (PointCloudItem.X's setter;
+        // G67): a chain SET through a value-type sibling, written out -- the same
+        // as `Location.X = value;`
+        if (body is BlockSyntax { Statements: [LocalDeclarationStatementSyntax { Declaration.Variables: [var cvl] },
+                                               ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax cva, Name: IdentifierNameSyntax cvm }, Right: IdentifierNameSyntax cvv } cvas },
+                                               ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax cvs, Right: IdentifierNameSyntax cvr } cvbs }] }
+            && cvl.Initializer?.Value is IdentifierNameSyntax cvsib && !paramNames.Contains(cvsib.Identifier.Text)
+            && cva.Identifier.Text == cvl.Identifier.Text && cvr.Identifier.Text == cvl.Identifier.Text
+            && cvs.Identifier.Text == cvsib.Identifier.Text && paramNames.Contains(cvv.Identifier.Text)
+            && cvas.IsKind(SyntaxKind.SimpleAssignmentExpression) && cvbs.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            body = SyntaxFactory.Block(SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, cvsib, cvm), cvv)));
+        // `int accuracy; return ToNurbsSurface(0.0, out accuracy);`: a forward whose
+        // out argument is a local never read -- the callee's out, discarded (G73)
+        string discarded = null;
+        if (body is BlockSyntax { Statements: [LocalDeclarationStatementSyntax { Declaration.Variables: [{ Initializer: null } dov] }, ReturnStatementSyntax { Expression: InvocationExpressionSyntax doi }] }
+            && doi.ArgumentList.Arguments.Count(a => a.RefOrOutKeyword.IsKind(SyntaxKind.OutKeyword) && a.Expression.ToString() == dov.Identifier.Text) == 1
+            && doi.DescendantNodes().OfType<IdentifierNameSyntax>().Count(i => i.Identifier.Text == dov.Identifier.Text) == 1)
+        {
+            discarded = dov.Identifier.Text;
+            body = SyntaxFactory.Block(SyntaxFactory.ReturnStatement(doi));
+        }
         ExpressionSyntax expr = body switch
         {
             ArrowExpressionClauseSyntax a => Uncast(a.Expression),
@@ -3002,6 +3723,8 @@ class Walker : CSharpSyntaxWalker
                 if (gname != null)
                     callee += "<" + string.Join(",", gname.TypeArgumentList.Arguments.Select(a => a.ToString())) + ">";
                 var dargs = DelegationArgs(inv, paramNames);
+                if (discarded != null)
+                    dargs = dargs.Select(a => a.Kind == "expr" && a.Text == discarded ? new ArgInfo { Kind = "discard", Text = discarded } : a).ToArray();
                 if (typeMapLocal != null)
                     dargs = dargs.Select(a => a.Kind == "expr" && a.Text == typeMapLocal
                         ? new ArgInfo { Kind = "typemap", Text = typeMapName, Value = typeMapArg } : a).ToArray();
@@ -3118,7 +3841,10 @@ class Walker : CSharpSyntaxWalker
         string h = decl.Variables[0].Identifier.Text;
         var refs = new HashSet<string> { h, h + ".NonConstPointer()",
                                          h + ".ConstPointer()",
-                                         h + ".NonConstPointer", h + ".ConstPointer" };
+                                         h + ".NonConstPointer", h + ".ConstPointer",
+                                         h + ".m_ptr" };                 // `fi.m_ptr` (BrepEdge.AdjacentFaces; G73)
+        string resultLocal = null;                                       // `int rc = UNM(...)`
+        _holderEmpty = null;
         var block = us.Statement as BlockSyntax;
         if (block == null) return (null, null, false);
         bool converted = false;
@@ -3164,7 +3890,7 @@ class Walker : CSharpSyntaxWalker
                         { refs.Add(name); continue; }          // IntPtr p = H.X()
                         if (callee is "ConstPointer" or "NonConstPointer")
                             continue;                           // this-ptr local
-                        if (IsUnmCall(li)) continue;            // bool ok = UNM(...)
+                        if (IsUnmCall(li)) { resultLocal = name; continue; }   // bool ok = UNM(...)
                         if (callee is "ToArray" or "ToString"
                             && li.Expression is MemberAccessExpressionSyntax
                                { Expression: IdentifierNameSyntax hb2 }
@@ -3178,11 +3904,14 @@ class Walker : CSharpSyntaxWalker
                     continue;
                 case ExpressionStatementSyntax
                     { Expression: AssignmentExpressionSyntax
-                        { Right: InvocationExpressionSyntax ai } }
+                        { Right: InvocationExpressionSyntax ai } ha }
                     when CalleeName(ai) is "ToArray" or "ToString"
                       && ai.Expression is MemberAccessExpressionSyntax
                          { Expression: IdentifierNameSyntax hb }
                       && hb.Identifier.Text == h:
+                    // `rc.PrinterName = sh.ToString();`: the holder fills a member of a local (G65)
+                    if (ha.Left is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax hal, Name: IdentifierNameSyntax ham })
+                        _holderAssign = (hal.Identifier.Text, ham.Identifier.Text);
                     converted = true;
                     continue;
                 case ReturnStatementSyntax { Expression: InvocationExpressionSyntax ri }
@@ -3194,6 +3923,18 @@ class Walker : CSharpSyntaxWalker
                     continue;
                 case ReturnStatementSyntax { Expression: IdentifierNameSyntax }:
                     continue;
+                // `return rc == 0 ? new int[0] : fi.ToArray();`: the array, empty when the
+                // call's result says so (BrepVertex.EdgeIndices and the Brep adjacency
+                // members; G73) -- the comparison recorded, never assumed redundant
+                case ReturnStatementSyntax { Expression: ConditionalExpressionSyntax { Condition: var hec,
+                        WhenTrue: ArrayCreationExpressionSyntax { Type.RankSpecifiers: [{ Sizes: [LiteralExpressionSyntax { Token.ValueText: "0" }] }], Initializer: null },
+                        WhenFalse: InvocationExpressionSyntax hri } }
+                    when resultLocal != null && CalleeName(hri) == "ToArray"
+                      && hri.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax hrb } && hrb.Identifier.Text == h
+                      && ResultCompareText(hec, resultLocal) is string hcmp:
+                    _holderEmpty = hcmp;
+                    converted = true;
+                    continue;
                 default:
                     return (null, null, false);
             }
@@ -3202,6 +3943,21 @@ class Walker : CSharpSyntaxWalker
             return (null, null, false);          // the if must be followed by its throw
         return (ht.Identifier.Text, refs, converted);
     }
+
+    // `rc == 0` / `0 == rc` / `rc < 1` on the call's result local: the operator and
+    // literal with the result on the left ("== 0", "< 1"), or null
+    static string ResultCompareText(ExpressionSyntax cond, string local)
+    {
+        while (cond is ParenthesizedExpressionSyntax pc) cond = pc.Expression;
+        if (cond is not BinaryExpressionSyntax b) return null;
+        string op = b.OperatorToken.Text;
+        if (b.Left is IdentifierNameSyntax l && l.Identifier.Text == local && b.Right is LiteralExpressionSyntax rl)
+            return op + " " + rl.Token.Text;
+        if (b.Right is IdentifierNameSyntax r && r.Identifier.Text == local && b.Left is LiteralExpressionSyntax ll)
+            return op switch { "<" => ">", ">" => "<", "<=" => ">=", ">=" => "<=", _ => op } + " " + ll.Token.Text;
+        return null;
+    }
+    [ThreadStatic] static string _holderEmpty;               // RecognizeUsing: the holder's array is empty when (result COMPARE) (G73)
 
     // set by RecognizeShape for the body it just recognized (single-threaded walk)
     [ThreadStatic] static FailThrowInfo _failThrow;
@@ -3218,7 +3974,17 @@ class Walker : CSharpSyntaxWalker
     [ThreadStatic] static string _nativeUnless;
     [ThreadStatic] static GuardInfo _resultGuard;
     [ThreadStatic] static SubViewInfo _subView;
-    [ThreadStatic] static AdoptInfo _adopt;                   // `p.EnsurePrivateCopy(); ... p.SetParent(new H(this, ...))`                 // `CreateGeometryHelper(p, this, index) as T`           // `if (rc <= 0 || rc > 3) return E.None;` after the call             // `rc = IsDocumentControlled ? m_id : UNM.F(...)`
+    [ThreadStatic] static AdoptInfo _adopt;
+    [ThreadStatic] static string _wrapStatic;                      // G64
+    [ThreadStatic] static Dictionary<string, string> _paramDefaults; // G64
+    [ThreadStatic] static TempNativeInfo _tempNative;              // G65
+    [ThreadStatic] static string _resultFilter;                    // G66
+    [ThreadStatic] static string[] _dateTime;                      // G68
+    [ThreadStatic] static DataApplyInfo _dataApply;                // G65
+    [ThreadStatic] static DataFillInfo _dataFill;                  // G65
+    [ThreadStatic] static (string local, string member)? _holderAssign; // `rc.P = sh.ToString();` inside the using (G65)
+    [ThreadStatic] static EnumMapInfo _enumMap;
+    [ThreadStatic] static Dictionary<string, string> _outAlias;   // local -> the out parameter it is copied into             // `switch (s) { case N.A: return M.A; ... default: throw }`                   // `p.EnsurePrivateCopy(); ... p.SetParent(new H(this, ...))`                 // `CreateGeometryHelper(p, this, index) as T`           // `if (rc <= 0 || rc > 3) return E.None;` after the call             // `rc = IsDocumentControlled ? m_id : UNM.F(...)`
     [ThreadStatic] static int _wrapArity;      // `new T(p)` (1) or `new T(p, null)` (2) made the wrap
     [ThreadStatic] static bool _wrapChecked;   // ... after (or inside) a null check of p   // `if (!CALL) { rc.Dispose(); rc = null; }`: the new object a factory drops
 
@@ -3311,9 +4077,19 @@ class Walker : CSharpSyntaxWalker
         _resultGuard = null;
         _subView = null;
         _adopt = null;
+        _enumMap = null;
+        _outAlias = null;
         _wrapArity = 0;
         _wrapChecked = false;
         _wrapLocal = null;
+        _wrapStatic = null;
+        _paramDefaults = null;
+        _tempNative = null;
+        _dataApply = null;
+        _dataFill = null;
+        _holderAssign = null;
+        _resultFilter = null;
+        _dateTime = null;
         if (body is not BlockSyntax block)
             return (ClassifyBody(body), null, null, null, null, null);
 
@@ -3397,6 +4173,15 @@ class Walker : CSharpSyntaxWalker
             if (SelfPtrDecl(stmts[i]))
             {
                 selfPtrs.Add(((LocalDeclarationStatementSyntax)stmts[i]).Declaration.Variables[0].Identifier.Text);
+                i++;
+                continue;
+            }
+            // `IntPtr const_ptr_mesh = m_mesh.ConstPointer();` (a view's parent pointer) is
+            // plumbing before the guards too (MeshVertexList.Hide; G68)
+            if (stmts[i] is LocalDeclarationStatementSyntax { Declaration.Variables: [var fpv] }
+                && fpv.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax fpo, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" }, ArgumentList.Arguments.Count: 0 }
+                && fpo.Identifier.Text.StartsWith("m_") && !paramNames.Contains(fpo.Identifier.Text))
+            {
                 i++;
                 continue;
             }
@@ -3498,6 +4283,68 @@ class Walker : CSharpSyntaxWalker
         for (; i < stmts.Count; i++)
         {
             var st = stmts[i];
+            // --- data classes (G65) ---
+            // `IntPtr L = cplane.CopyToNative();`: a temporary native a data argument builds
+            if (_tempNative == null && st is LocalDeclarationStatementSyntax { Declaration: { Type: var tnt, Variables: [var tnv] } }
+                && tnt.ToString() == "IntPtr"
+                && tnv.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax tnp, Name.Identifier.Text: var tnm }, ArgumentList.Arguments.Count: 0 }
+                && paramNames.Contains(tnp.Identifier.Text) && tnm is not ("ConstPointer" or "NonConstPointer"))
+            {
+                _tempNative = new TempNativeInfo { Local = tnv.Identifier.Text, Param = tnp.Identifier.Text, Method = tnm };
+                continue;
+            }
+            // `if (L != IntPtr.Zero) { ...the calls on L... }`: unwrapped; the calls run guarded
+            if (_tempNative is { Guarded: false } && st is IfStatementSyntax { Else: null, Statement: BlockSyntax tnb } tnif
+                && (Flat(tnif.Condition) == _tempNative.Local + "!=IntPtr.Zero" || Flat(tnif.Condition) == "IntPtr.Zero!=" + _tempNative.Local))
+            {
+                _tempNative = _tempNative with { Guarded = true };
+                stmts.RemoveAt(i);
+                stmts.InsertRange(i, tnb.Statements);
+                i--;
+                continue;
+            }
+            // `if (IntPtr.Zero != p) value.SetupNativePointer(p);`: the native result handed to a data argument
+            if (_dataApply == null && ptrLocal != null && st is IfStatementSyntax { Else: null } daif
+                && (Flat(daif.Condition) == "IntPtr.Zero!=" + ptrLocal || Flat(daif.Condition) == ptrLocal + "!=IntPtr.Zero")
+                && (daif.Statement is BlockSyntax { Statements: [var das] } ? das : daif.Statement) is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dap, Name.Identifier.Text: var dam }, ArgumentList.Arguments: [var daa] } }
+                && paramNames.Contains(dap.Identifier.Text) && daa.Expression.ToString() == ptrLocal)
+            {
+                _dataApply = new DataApplyInfo { Param = dap.Identifier.Text, Method = dam };
+                continue;
+            }
+            // `var rc = new T();` ... `rc.P = local;`* ... `return rc;`: a data object assembled
+            // from the call's out locals (the holder's string joins through the using)
+            if (_dataFill == null && st is LocalDeclarationStatementSyntax { Declaration.Variables: [var dfv] }
+                && dfv.Initializer?.Value is ObjectCreationExpressionSyntax { Initializer: null } dfn
+                && (dfn.ArgumentList == null || dfn.ArgumentList.Arguments.Count == 0)
+                && (dfn.Type is QualifiedNameSyntax dfq ? dfq.Right : dfn.Type) is IdentifierNameSyntax dft
+                && !HolderTypes.Contains(dft.Identifier.Text)
+                && stmts.Count > i + 1 && stmts[^1] is ReturnStatementSyntax { Expression: IdentifierNameSyntax dfr } && dfr.Identifier.Text == dfv.Identifier.Text)
+            {
+                var dfl = dfv.Identifier.Text;
+                var assigns = new List<string[]>();
+                bool ok = true;
+                for (int k = i + 1; k < stmts.Count - 1 && ok; k++)
+                {
+                    var sk = stmts[k];
+                    if (sk is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dal, Name: IdentifierNameSyntax dam2 }, Right: IdentifierNameSyntax dar } dasg }
+                        && dasg.IsKind(SyntaxKind.SimpleAssignmentExpression) && dal.Identifier.Text == dfl)
+                        assigns.Add(new[] { dam2.Identifier.Text, dar.Identifier.Text });
+                    else if (sk is not UsingStatementSyntax && sk.DescendantNodes().OfType<IdentifierNameSyntax>().Any(x => x.Identifier.Text == dfl))
+                        ok = false;                       // any other use of the local: not this idiom
+                }
+                if (ok && assigns.Count > 0)
+                {
+                    _dataFill = new DataFillInfo { Local = dfl, Type = dft.Identifier.Text, Assigns = assigns.ToArray() };
+                    continue;
+                }
+            }
+            if (_dataFill != null && st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dfal } } }
+                && dfal.Identifier.Text == _dataFill.Local)
+                continue;
+            if (_dataFill != null && st is ReturnStatementSyntax { Expression: IdentifierNameSyntax dfrr } && dfrr.Identifier.Text == _dataFill.Local)
+                continue;
+            // --- end data classes ---
             if (holder == null && st is UsingStatementSyntax us)
             {
                 var (ht, refs, converted) = RecognizeUsing(us);
@@ -3620,11 +4467,44 @@ class Walker : CSharpSyntaxWalker
                 _wrapLocal = (wl.Identifier.Text, wlt.Identifier.Text);
                 continue;
             }
+            // `T rc = T.FromIntPtr(p); return rc;` / `return T.FromIntPtr(p);`: a DATA
+            // class made from the native pointer by its own static bridge (G64)
+            if (wrap == null && ptrLocal != null && _wrapLocal == null
+                && st is LocalDeclarationStatementSyntax { Declaration.Variables: [var dwl] }
+                && dwl.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dwt, Name.Identifier.Text: var dwm }, ArgumentList.Arguments: [var dwa] }
+                && dwa.Expression.ToString() == ptrLocal
+                && (dwm == "FromIntPtr" || Walker.StaticNullNew.Contains(dwt.Identifier.Text + "|" + dwm)))
+            {
+                _wrapLocal = (dwl.Identifier.Text, dwt.Identifier.Text);
+                if (dwm == "FromIntPtr") _wrapStatic = "FromIntPtr";
+                else _wrapChecked = true;                 // the static's own null check (G69)
+                continue;
+            }
+            if (wrap == null && ptrLocal != null
+                && st is ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax drt, Name.Identifier.Text: var drm }, ArgumentList.Arguments: [var dra] } }
+                && dra.Expression.ToString() == ptrLocal
+                && (drm == "FromIntPtr" || Walker.StaticNullNew.Contains(drt.Identifier.Text + "|" + drm)))
+            {
+                wrap = drt.Identifier.Text;
+                _wrapArity = 1;
+                if (drm == "FromIntPtr") { _wrapStatic = "FromIntPtr"; _wrapChecked = nullChecked; }
+                else _wrapChecked = true;                 // the static's own null check (G69)
+                continue;
+            }
             if (wrap == null && _wrapLocal is var (wln, wlty) && st is ReturnStatementSyntax { Expression: IdentifierNameSyntax wlr } && wlr.Identifier.Text == wln)
             {
                 wrap = wlty;
                 _wrapArity = 1;
-                _wrapChecked = nullChecked;
+                _wrapChecked = _wrapChecked || nullChecked;
+                continue;
+            }
+            // `options = options ?? new File3dmWriteOptions();`: a class parameter
+            // defaulted to a fresh instance when null (G64)
+            if (st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax pdl, Right: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax pdr, Right: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax pdt, Initializer: null } pdn } } }
+                && pdl.Identifier.Text == pdr.Identifier.Text && paramNames.Contains(pdl.Identifier.Text)
+                && (pdn.ArgumentList == null || pdn.ArgumentList.Arguments.Count == 0))
+            {
+                (_paramDefaults ??= new())[pdl.Identifier.Text] = pdt.Identifier.Text;
                 continue;
             }
             // return IntPtr.Zero == x ? null : new T(x, null);  -- part 2, the
@@ -3654,6 +4534,18 @@ class Walker : CSharpSyntaxWalker
                     _wrapChecked = true;                  // the conditional IS the null check
                     continue;
                 }
+                // `IntPtr.Zero == p ? null : T.FromConstPointer(p)`: a data class's static bridge (G65)
+                if (nullSide is LiteralExpressionSyntax nl2 && nl2.IsKind(SyntaxKind.NullLiteralExpression)
+                    && newSide is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var dse, Name.Identifier.Text: var dsm }, ArgumentList.Arguments: [var dsa] }
+                    && (dse is QualifiedNameSyntax dsq ? dsq.Right : dse is MemberAccessExpressionSyntax dsma ? dsma.Name : dse) is IdentifierNameSyntax dst
+                    && dsm.StartsWith("From") && dsa.Expression.ToString() == ptrLocal)
+                {
+                    wrap = dst.Identifier.Text;
+                    _wrapStatic = dsm;
+                    _wrapArity = 1;
+                    _wrapChecked = true;
+                    continue;
+                }
             }
             if (success == null && st is IfStatementSyntax sif && sif.Else == null
                 && IsUnmCall(sif.Condition))
@@ -3664,6 +4556,15 @@ class Walker : CSharpSyntaxWalker
                     && rts.Expression is IdentifierNameSyntax outId)
                 {
                     success = new SuccessInfo { Out = outId.Identifier.Text, Form = "return" };
+                    continue;
+                }
+                // `if (CALL) return new DateTime(year, month+1, day, hour, minute, second);`
+                // (File3dm.Created; G68): a date from the out locals; `return DateTime.MinValue;`
+                // follows as the fallback
+                if (then is ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax { Identifier.Text: "DateTime" }, ArgumentList.Arguments.Count: 6 } dtn })
+                {
+                    _dateTime = dtn.ArgumentList.Arguments.Select(a => a.Expression.ToString().Replace(" ", "")).ToArray();
+                    success = new SuccessInfo { Out = "@datetime", Form = "return" };
                     continue;
                 }
             }
@@ -3705,6 +4606,29 @@ class Walker : CSharpSyntaxWalker
                 && !block.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(a => a.Left.ToString() == rgLocal.Identifier.Text))
             {
                 _resultGuard = new GuardInfo { Cond = rgi.Condition.ToString(), Ids = new[] { rgLocal.Identifier.Text }, Return = rgr.ToString() };
+                continue;
+            }
+            // `double s = 0.0, e = 0.0; UNM.F(p, ref s, ref e); sta = s; end = e;`
+            // (Decal.HorzSweep; G60): the out parameter is the local the native filled,
+            // copied out after the call -- the same as passing the out itself
+            if (st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Left: IdentifierNameSyntax oal, Right: IdentifierNameSyntax oar } }
+                && outParams.Contains(oal.Identifier.Text) && !paramNames.Contains(oar.Identifier.Text)
+                && (_outAlias == null || !_outAlias.ContainsKey(oar.Identifier.Text))
+                && block.DescendantNodes().OfType<IdentifierNameSyntax>().Count(x => x.Identifier.Text == oar.Identifier.Text) == 2
+                && block.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall).SelectMany(u => u.ArgumentList.Arguments)
+                       .Count(a => a.RefOrOutKeyword.IsKind(SyntaxKind.RefKeyword) && a.Expression.ToString() == oar.Identifier.Text) == 1
+                && !block.DescendantNodes().OfType<IdentifierNameSyntax>().Any(x => x.Identifier.Text == oal.Identifier.Text && x != oal))
+            {
+                (_outAlias ??= new())[oar.Identifier.Text] = oal.Identifier.Text;
+                continue;
+            }
+            // Decal.Mapping (G60): one enum mapped onto another member by member, the
+            // default throwing. Getter: `var s = (N)UNM.F(...); switch (s) { case N.A:
+            // return M.A; ... }`. Setter: `N m; switch (value) { case M.A: m = N.A;
+            // break; ... } UNM.F(ptr, (int)m);`. Values resolved after the walk.
+            if (_enumMap == null && st is SwitchStatementSyntax { Expression: IdentifierNameSyntax swv } sw && EnumMapOf(sw, block) is EnumMapInfo emi)
+            {
+                _enumMap = emi;
                 continue;
             }
             // BrepFace.SetMesh (G59): `mesh.EnsurePrivateCopy();` ... the native takes
@@ -3878,12 +4802,13 @@ class Walker : CSharpSyntaxWalker
             // by-ref local the native filled (an id), or a field of this object
             string KindOf(ExpressionSyntax e) => e switch
             {
+                IdentifierNameSyntax { Identifier.Text: "__keymap__" } => "keymap",     // G77
                 ThisExpressionSyntax => "this",
                 LiteralExpressionSyntax => "const",
                 IdentifierNameSyntax id when paramNames.Contains(id.Identifier.Text) => "param",
                 IdentifierNameSyntax id when id.Identifier.Text == ptrLocal || id.Identifier.Text == idxLocal => "result",
                 IdentifierNameSyntax id when refLocals.Contains(id.Identifier.Text) => "out",
-                IdentifierNameSyntax id when id.Identifier.Text.StartsWith("m_") || char.IsUpper(id.Identifier.Text[0]) => "field",
+                IdentifierNameSyntax id when id.Identifier.Text.StartsWith("m_") || id.Identifier.Text.StartsWith("_") || char.IsUpper(id.Identifier.Text[0]) => "field",   // `_file3dm` too (G71)
                 _ => "other",
             };
             void Construct(ObjectCreationExpressionSyntax oc, string via = null, Func<ExpressionSyntax, ExpressionSyntax> map = null)
@@ -3991,26 +4916,60 @@ class Walker : CSharpSyntaxWalker
             // new List<T>(Count); int n = m_x.Count; for (int i = n; i < Count; i++)
             // m_x.Add(new T(i, m_brep)); return m_x[index];` -- the element is
             // `new T(index, m_brep)`
+            // ... and SCOPED (G77): `IntPtr p = m_brepface.ConstPointer();` before the loop,
+            // `int li = i; if (p != IntPtr.Zero) li = UNM.F(p, i); m_x.Add(new T(li, m_brep));`
+            // -- the element key maps through F while the scope pointer is non-null
             if (_construct == null && i + 3 < stmts.Count
                 && st is IfStatementSyntax { Else: null, Condition: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression } cc0 } cif0
                 && cc0.Left is IdentifierNameSyntax cacheId && cc0.Right.IsKind(SyntaxKind.NullLiteralExpression)
                 && (cif0.Statement is BlockSyntax { Statements: [var ca0] } ? ca0 : cif0.Statement) is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax cl0, Right: ObjectCreationExpressionSyntax { Type: GenericNameSyntax { Identifier.Text: "List" } } } }
                 && cl0.Identifier.Text == cacheId.Identifier.Text
-                && stmts[i + 1] is LocalDeclarationStatementSyntax { Declaration.Variables: [var nv] } && FlatInit(nv) == cacheId.Identifier.Text + ".Count"
-                && stmts[i + 2] is ForStatementSyntax { Declaration.Variables: [var fv], Statement: var fbody } fs
-                && FlatInit(fv) == nv.Identifier.Text && Flat(fs.Condition) == fv.Identifier.Text + "<Count"
-                && (fbody is BlockSyntax { Statements: [.., var fs1] } ? fs1 : fbody) is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax addOn, Name.Identifier.Text: "Add" }, ArgumentList.Arguments: [{ Expression: ObjectCreationExpressionSyntax foc }] } }
-                && (fbody is not BlockSyntax fbb || fbb.Statements.Count == 1
-                    || fbb.Statements.Count == 2 && fbb.Statements[0] is LocalDeclarationStatementSyntax { Declaration.Variables: [var lcp] } && FlatInit(lcp) == fv.Identifier.Text)
-                && addOn.Identifier.Text == cacheId.Identifier.Text
-                && stmts[i + 3] is ReturnStatementSyntax { Expression: ElementAccessExpressionSyntax { Expression: IdentifierNameSyntax rl, ArgumentList.Arguments: [var ra] } }
-                && rl.Identifier.Text == cacheId.Identifier.Text && paramNames.Contains(ra.Expression.ToString()))
+                && stmts[i + 1] is LocalDeclarationStatementSyntax { Declaration.Variables: [var nv] } && FlatInit(nv) == cacheId.Identifier.Text + ".Count")
             {
-                var loopVars = new HashSet<string> { fv.Identifier.Text };
-                if (fbody is BlockSyntax { Statements: [LocalDeclarationStatementSyntax { Declaration.Variables: [var lcv] }, _] }) loopVars.Add(lcv.Identifier.Text);
-                Construct(foc, null, e => e is IdentifierNameSyntax lv && loopVars.Contains(lv.Identifier.Text) ? SyntaxFactory.IdentifierName(ra.Expression.ToString()) : e);
-                i += 3;
-                continue;
+                int f0 = i + 2;
+                string scopePtr = null, scopeField = null;
+                if (stmts[f0] is LocalDeclarationStatementSyntax { Declaration: { Type: var spt, Variables: [var spv] } } && spt.ToString() is "IntPtr" or "var"
+                    && spv.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax spf, Name.Identifier.Text: "ConstPointer" }, ArgumentList.Arguments.Count: 0 }
+                    && spf.Identifier.Text.StartsWith("m_"))
+                { scopePtr = spv.Identifier.Text; scopeField = spf.Identifier.Text; f0++; }
+                int r0 = f0 + 1;
+                while (r0 < stmts.Count && stmts[r0] is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax rk } && CalleeName(rk) == "KeepAlive") r0++;
+                if (f0 < stmts.Count && r0 < stmts.Count
+                    && stmts[f0] is ForStatementSyntax { Declaration.Variables: [var fv], Statement: var fbody } fs
+                    && FlatInit(fv) == nv.Identifier.Text && Flat(fs.Condition) == fv.Identifier.Text + "<Count"
+                    && (fbody is BlockSyntax { Statements: [.., var fs1] } ? fs1 : fbody) is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax addOn, Name.Identifier.Text: "Add" }, ArgumentList.Arguments: [{ Expression: ObjectCreationExpressionSyntax foc }] } }
+                    && addOn.Identifier.Text == cacheId.Identifier.Text
+                    && stmts[r0] is ReturnStatementSyntax { Expression: ElementAccessExpressionSyntax { Expression: IdentifierNameSyntax rl, ArgumentList.Arguments: [var ra] } }
+                    && rl.Identifier.Text == cacheId.Identifier.Text && paramNames.Contains(ra.Expression.ToString()))
+                {
+                    var fbs = fbody is BlockSyntax fbb ? fbb.Statements.ToList() : new List<StatementSyntax> { fbody };
+                    var loopVars = new HashSet<string> { fv.Identifier.Text };
+                    string keyVar = null;
+                    bool ok = fbs.Count == 1;
+                    if (fbs.Count == 2 && fbs[0] is LocalDeclarationStatementSyntax { Declaration.Variables: [var lcp] } && FlatInit(lcp) == fv.Identifier.Text)
+                    { loopVars.Add(lcp.Identifier.Text); ok = true; }
+                    if (fbs.Count == 3 && scopePtr != null
+                        && fbs[0] is LocalDeclarationStatementSyntax { Declaration.Variables: [var kv] } && FlatInit(kv) == fv.Identifier.Text
+                        && fbs[1] is IfStatementSyntax { Else: null, Condition: var kc } kif
+                        && (Flat(kc) == scopePtr + "!=IntPtr.Zero" || Flat(kc) == "IntPtr.Zero!=" + scopePtr)
+                        && (kif.Statement is BlockSyntax { Statements: [var ks] } ? ks : kif.Statement) is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax kl, Right: InvocationExpressionSyntax kinv } }
+                        && kl.Identifier.Text == kv.Identifier.Text && IsUnmCall(kinv)
+                        && kinv.ArgumentList.Arguments is [{ Expression: IdentifierNameSyntax ka0 }, { Expression: IdentifierNameSyntax ka1 }]
+                        && ka0.Identifier.Text == scopePtr && ka1.Identifier.Text == fv.Identifier.Text)
+                    {
+                        keyVar = kv.Identifier.Text;
+                        _keyMap = new KeyMapInfo { Native = CalleeName(kinv), Field = scopeField, Param = ra.Expression.ToString() };
+                        _keyMapPos = kinv.SpanStart;
+                        ok = true;
+                    }
+                    if (ok)
+                    {
+                        Construct(foc, null, e => e is IdentifierNameSyntax lv && lv.Identifier.Text == keyVar ? SyntaxFactory.IdentifierName("__keymap__")
+                                                  : e is IdentifierNameSyntax lv2 && loopVars.Contains(lv2.Identifier.Text) ? SyntaxFactory.IdentifierName(ra.Expression.ToString()) : e);
+                        i = r0;
+                        continue;
+                    }
+                }
             }
             residual.Add(st);
         }
@@ -4150,15 +5109,7 @@ class Walker : CSharpSyntaxWalker
     static ArrayFillInfo ArrayFillShape(SyntaxNode body, CallInfo[] calls)
     {
         if (body is not BlockSyntax b || calls is not { Length: 1 or 2 }) return null;
-        // plumbing that may sit anywhere: self-pointer locals, KeepAlive
-        bool Plumbing(StatementSyntax st) =>
-            st is LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] }
-                && pv.Initializer?.Value is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0 } pvi
-                && pvi.Expression is IdentifierNameSyntax { Identifier.Text: "ConstPointer" or "NonConstPointer" }
-                                     or MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" }
-                && (pvi.Expression is IdentifierNameSyntax || ((MemberAccessExpressionSyntax)pvi.Expression).Expression.ToString().StartsWith("m_"))
-            || st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive";
-        var sts = b.Statements.Where(st => !Plumbing(st)).ToList();
+        var sts = b.Statements.Where(st => !ArrayPlumbing(st)).ToList();
         int k = 0;
         // 1. int count = <native call> | <property of this>;
         if (k >= sts.Count || sts[k] is not LocalDeclarationStatementSyntax { Declaration: { Type: var ct, Variables: [var cv] } }
@@ -4257,6 +5208,220 @@ class Walker : CSharpSyntaxWalker
                                    EmptyCond = emptyCond, Empty = empty, FillForm = form, ElemConv = elemConv };
     }
 
+    // plumbing the array shapes may carry anywhere: self-pointer locals, KeepAlive
+    static bool ArrayPlumbing(StatementSyntax st) =>
+        st is LocalDeclarationStatementSyntax { Declaration.Variables: [var pv] }
+            && pv.Initializer?.Value is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0 } pvi
+            && (pvi.Expression is IdentifierNameSyntax { Identifier.Text: "ConstPointer" or "NonConstPointer" }
+                || pvi.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax pme, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" }
+                   && pme.Identifier.Text.StartsWith("m_"))
+        || st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && CalleeName(ki) == "KeepAlive";
+
+    // `int count = Count; var rc = new T[count]; for (int i = 0; i < count; i++)
+    // { var e = new E(); UNM.F(..., i, ref e); rc[i] = e | new T((float)e.X, (float)e.Y, (float)e.Z); }
+    // return rc;` -- one native call per element (MeshVertexList.ToPoint3dArray; G72)
+    static ArrayFillInfo ElemLoopShape(SyntaxNode body, CallInfo[] calls)
+    {
+        if (body is not BlockSyntax b || calls is not { Length: 1 }) return null;
+        var sts = b.Statements.Where(st => !ArrayPlumbing(st)).ToList();
+        if (sts.Count != 4) return null;
+        // 1. int count = <Property>;
+        if (sts[0] is not LocalDeclarationStatementSyntax { Declaration: { Type: var ct, Variables: [var cv] } } || ct.ToString() != "int"
+            || cv.Initializer?.Value is not IdentifierNameSyntax cp || !char.IsUpper(cp.Identifier.Text[0])) return null;
+        string count = cv.Identifier.Text;
+        // 2. var rc = new T[count];
+        if (sts[1] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var av] }
+            || av.Initializer?.Value is not ArrayCreationExpressionSyntax { Type: { RankSpecifiers: [{ Sizes: [IdentifierNameSyntax asz] }] } at, Initializer: null }
+            || asz.Identifier.Text != count) return null;
+        string arr = av.Identifier.Text, elem = at.ElementType.ToString();
+        // 3. for (int i = 0; i < count; i++) { var e = new E(); UNM.F(..., i, ref e); rc[i] = ...; }
+        if (sts[2] is not ForStatementSyntax { Declaration.Variables: [var iv],
+                                               Condition: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LessThanExpression, Left: IdentifierNameSyntax il, Right: IdentifierNameSyntax ir },
+                                               Incrementors: [PostfixUnaryExpressionSyntax { Operand: IdentifierNameSyntax iinc }],
+                                               Statement: BlockSyntax { Statements: [var l0, var l1, var l2] } }
+            || iv.Initializer?.Value is not LiteralExpressionSyntax { Token.ValueText: "0" }
+            || il.Identifier.Text != iv.Identifier.Text || ir.Identifier.Text != count || iinc.Identifier.Text != iv.Identifier.Text) return null;
+        string idx = iv.Identifier.Text;
+        if (l0 is not LocalDeclarationStatementSyntax { Declaration.Variables: [var ev] }
+            || ev.Initializer?.Value is not ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax et, Initializer: null } eoc
+            || eoc.ArgumentList is { Arguments.Count: > 0 }) return null;
+        string el = ev.Identifier.Text, etype = et.Identifier.Text;
+        if (l1 is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax fi } || !IsUnmCall(fi)
+            || !fi.ArgumentList.Arguments.Any(a => !a.RefOrOutKeyword.IsKind(SyntaxKind.None) && a.Expression.ToString() == el)
+            || !fi.ArgumentList.Arguments.Any(a => a.RefOrOutKeyword.IsKind(SyntaxKind.None) && a.Expression.ToString() == idx)) return null;
+        if (l2 is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: ElementAccessExpressionSyntax { Expression: IdentifierNameSyntax la, ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax lai }] }, Right: var rhs } }
+            || la.Identifier.Text != arr || lai.Identifier.Text != idx) return null;
+        string elemConv = null;
+        if (rhs is IdentifierNameSyntax rid && rid.Identifier.Text == el && etype == elem) { }
+        else if (rhs is ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax nt, ArgumentList.Arguments: { Count: 3 } na, Initializer: null } && nt.Identifier.Text == elem
+                 && na.Select((a, j) => a.Expression is CastExpressionSyntax { Type: PredefinedTypeSyntax { Keyword.Text: "float" }, Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax cx, Name.Identifier.Text: var cm } }
+                                        && cx.Identifier.Text == el && cm == "XYZ"[j].ToString()).All(ok => ok))
+            elemConv = "narrow:" + elem;
+        else return null;
+        // 4. return rc;
+        if (sts[3] is not ReturnStatementSyntax { Expression: IdentifierNameSyntax r } || r.Identifier.Text != arr) return null;
+        return new ArrayFillInfo { Local = arr, Elem = etype, Count = count, CountFrom = "prop:" + cp.Identifier.Text,
+                                   FillForm = "loop", Index = idx, ElemLocal = el, ElemConv = elemConv };
+    }
+
+    // (G72) a tuple of geometry made from native pointers. Three forms:
+    //   outptr:  `IntPtr a = IntPtr.Zero; ... bool rc = UNM.F(..., ref a, ref b); T[] o = new T[2];
+    //            if (a != IntPtr.Zero) o[0] = CreateGeometryHelper(a, null) as T; ... return rc ? o : null;` (Curve.Split)
+    //   newptr:  `left = null; ... IntPtr a = UNM.New(); ... bool rc = UNM.F(..., a, b);
+    //            if (rc) { left = new T(a); right = new T(b); } else { UNM.Delete(a); UNM.Delete(b); } return rc;` (BezierCurve.Split)
+    //   ptrloop: `H h = new H(); IntPtr ph = h.NonConstPointer(); UNM.Fill(p, ph); int n = UNM.Count(ph); T[] rc = new T[n];
+    //            for (i < n) { IntPtr q = UNM.Get(ph, i); if (IntPtr.Zero == q) continue; IntPtr d = UNM.Dup(q);
+    //            rc[i] = CreateGeometryHelper(d, null) as T; } h.Dispose(); return rc;` (PolyCurve.Explode)
+    static WrapTupleInfo WrapTupleShape(SyntaxNode body, CallInfo[] calls, ISet<string> paramNames)
+    {
+        if (body is not BlockSyntax b || calls == null) return null;
+        var sts = b.Statements.Where(st => !ArrayPlumbing(st)).ToList();
+        static bool IsZero(ExpressionSyntax e) => e is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "IntPtr" }, Name.Identifier.Text: "Zero" };
+        static string Wrapped(ExpressionSyntax e, string ptr) =>
+            e is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Left: InvocationExpressionSyntax h, Right: IdentifierNameSyntax t }
+            && CalleeName(h) == "CreateGeometryHelper"
+            && h.ArgumentList.Arguments is [{ Expression: IdentifierNameSyntax hp }, { Expression: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } }]
+            && hp.Identifier.Text == ptr ? t.Identifier.Text : null;
+        static bool NonNull(ExpressionSyntax c, string p) => c is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.NotEqualsExpression } ne
+            && (ne.Left.ToString() == p && IsZero(ne.Right) || ne.Right.ToString() == p && IsZero(ne.Left));
+        static bool IsNull(ExpressionSyntax c, string p) => c is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression } eq
+            && (eq.Left.ToString() == p && IsZero(eq.Right) || eq.Right.ToString() == p && IsZero(eq.Left));
+        static string UnmName(ExpressionSyntax e) => e is InvocationExpressionSyntax inv && IsUnmCall(inv) ? CalleeName(inv) : null;
+        static bool BoolCall(StatementSyntax st, out string rc, out InvocationExpressionSyntax inv)
+        {
+            rc = null; inv = null;
+            if (st is not LocalDeclarationStatementSyntax { Declaration: { Type: var bt, Variables: [var bv] } } || bt.ToString() != "bool"
+                || bv.Initializer?.Value is not InvocationExpressionSyntax bi || !IsUnmCall(bi)) return false;
+            rc = bv.Identifier.Text; inv = bi;
+            return true;
+        }
+        int k = 0;
+        // --- outptr ---
+        var zeros = new List<string>();
+        while (k < sts.Count && sts[k] is LocalDeclarationStatementSyntax { Declaration: { Type: var zt, Variables: [var zv] } }
+               && zt.ToString() == "IntPtr" && zv.Initializer != null && IsZero(zv.Initializer.Value))
+        { zeros.Add(zv.Identifier.Text); k++; }
+        if (zeros.Count > 0)
+        {
+            if (calls.Length != 1 || sts.Count != k + 3 + zeros.Count || !BoolCall(sts[k], out var rc, out var inv)) return null;
+            if (zeros.Any(z => !inv.ArgumentList.Arguments.Any(a => !a.RefOrOutKeyword.IsKind(SyntaxKind.None) && a.Expression.ToString() == z))) return null;
+            k++;
+            if (sts[k] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var ov] }
+                || ov.Initializer?.Value is not ArrayCreationExpressionSyntax { Type: { RankSpecifiers: [{ Sizes: [LiteralExpressionSyntax osz] }] } oat, Initializer: null }
+                || osz.Token.ValueText != zeros.Count.ToString()) return null;
+            string outArr = ov.Identifier.Text, wrap = null;
+            bool? isChecked = null;
+            k++;
+            for (int j = 0; j < zeros.Count; j++, k++)
+            {
+                var st = sts[k];
+                bool chk = false;
+                if (st is IfStatementSyntax { Else: null, Condition: var cc } cif && NonNull(cc, zeros[j]))
+                {
+                    st = cif.Statement is BlockSyntax { Statements: [var c1] } ? c1 : cif.Statement;
+                    chk = true;
+                }
+                if (st is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: ElementAccessExpressionSyntax { Expression: IdentifierNameSyntax oa, ArgumentList.Arguments: [{ Expression: LiteralExpressionSyntax oi }] }, Right: var orhs } }
+                    || oa.Identifier.Text != outArr || oi.Token.ValueText != j.ToString()) return null;
+                var w = Wrapped(orhs, zeros[j]);
+                if (w == null || w != oat.ElementType.ToString() || wrap != null && w != wrap || isChecked != null && isChecked != chk) return null;
+                wrap = w; isChecked = chk;
+            }
+            if (sts[k] is not ReturnStatementSyntax { Expression: ConditionalExpressionSyntax { Condition: IdentifierNameSyntax rcc, WhenTrue: IdentifierNameSyntax rt, WhenFalse: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } } }
+                || rcc.Identifier.Text != rc || rt.Identifier.Text != outArr) return null;
+            return new WrapTupleInfo { Form = "outptr", Call = CalleeName(inv), Locals = zeros.ToArray(), Wrap = wrap, Success = rc, Checked = isChecked == true };
+        }
+        // --- newptr ---
+        var nulled = new List<string>();
+        while (k < sts.Count && sts[k] is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax nl, Right: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } } }
+               && paramNames.Contains(nl.Identifier.Text))
+        { nulled.Add(nl.Identifier.Text); k++; }
+        var news = new List<string>();
+        string newFn = null;
+        while (k < sts.Count && sts[k] is LocalDeclarationStatementSyntax { Declaration: { Type: var nt, Variables: [var nv] } } && nt.ToString() == "IntPtr"
+               && nv.Initializer?.Value is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0 } ni && IsUnmCall(ni) && (newFn == null || CalleeName(ni) == newFn))
+        { news.Add(nv.Identifier.Text); newFn = CalleeName(ni); k++; }
+        if (news.Count > 0)
+        {
+            if (sts.Count != k + 3 || !BoolCall(sts[k], out var rc, out var inv)) return null;
+            if (news.Any(n => !inv.ArgumentList.Arguments.Any(a => a.RefOrOutKeyword.IsKind(SyntaxKind.None) && a.Expression.ToString() == n))) return null;
+            k++;
+            if (sts[k] is not IfStatementSyntax { Condition: IdentifierNameSyntax ic, Statement: BlockSyntax okb, Else.Statement: BlockSyntax failb } || ic.Identifier.Text != rc
+                || okb.Statements.Count != news.Count || failb.Statements.Count != news.Count) return null;
+            string wrap = null, delFn = null;
+            var outs = new List<string>();
+            for (int j = 0; j < news.Count; j++)
+            {
+                if (okb.Statements[j] is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax ol, Right: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax wt, ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax wa }], Initializer: null } } }
+                    || !paramNames.Contains(ol.Identifier.Text) || wa.Identifier.Text != news[j] || wrap != null && wt.Identifier.Text != wrap) return null;
+                wrap = wt.Identifier.Text;
+                outs.Add(ol.Identifier.Text);
+                if (failb.Statements[j] is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax di } || !IsUnmCall(di)
+                    || di.ArgumentList.Arguments is not [{ Expression: IdentifierNameSyntax da }] || da.Identifier.Text != news[j]
+                    || delFn != null && CalleeName(di) != delFn) return null;
+                delFn = CalleeName(di);
+            }
+            if (nulled.Count > 0 && !nulled.OrderBy(x => x).SequenceEqual(outs.OrderBy(x => x))) return null;
+            k++;
+            if (sts[k] is not ReturnStatementSyntax { Expression: IdentifierNameSyntax rr } || rr.Identifier.Text != rc) return null;
+            return new WrapTupleInfo { Form = "newptr", Call = CalleeName(inv), Locals = news.ToArray(), Outs = outs.ToArray(), Wrap = wrap, Success = rc, New = newFn, Delete = delFn };
+        }
+        // --- ptrloop ---
+        if (k != 0 || sts.Count < 5 || sts[0] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var hv] }
+            || hv.Initializer?.Value is not ObjectCreationExpressionSyntax { Type: var htype, Initializer: null } hoc || hoc.ArgumentList is { Arguments.Count: > 0 }) return null;
+        string holder = htype is QualifiedNameSyntax hq ? hq.Right.Identifier.Text : htype.ToString();
+        if (!holder.StartsWith("SimpleArray") || !holder.EndsWith("Pointer")) return null;
+        string hl = hv.Identifier.Text, hp = null;
+        k = 1;
+        if (sts[k] is LocalDeclarationStatementSyntax { Declaration: { Type: var hpt, Variables: [var hpv] } } && hpt.ToString() == "IntPtr"
+            && hpv.Initializer?.Value is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax hpo, Name.Identifier.Text: "NonConstPointer" }, ArgumentList.Arguments.Count: 0 }
+            && hpo.Identifier.Text == hl)
+        { hp = hpv.Identifier.Text; k++; }
+        bool HolderRef(ExpressionSyntax e) => e.ToString() == hp || e.ToString() == hl + ".NonConstPointer()";
+        if (sts[k] is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax fill } || !IsUnmCall(fill)
+            || !fill.ArgumentList.Arguments.Any(a => HolderRef(a.Expression))) return null;
+        k++;
+        if (sts[k] is not LocalDeclarationStatementSyntax { Declaration: { Type: var cnt, Variables: [var cnv] } } || cnt.ToString() != "int"
+            || cnv.Initializer?.Value is not InvocationExpressionSyntax { ArgumentList.Arguments: [var cna] } cni || !IsUnmCall(cni) || !HolderRef(cna.Expression)) return null;
+        string count = cnv.Identifier.Text, countFn = CalleeName(cni);
+        k++;
+        if (sts[k] is not LocalDeclarationStatementSyntax { Declaration.Variables: [var rv] }
+            || rv.Initializer?.Value is not ArrayCreationExpressionSyntax { Type: { RankSpecifiers: [{ Sizes: [IdentifierNameSyntax rsz] }] } rat, Initializer: null }
+            || rsz.Identifier.Text != count) return null;
+        string arr = rv.Identifier.Text;
+        k++;
+        if (sts[k] is not ForStatementSyntax { Declaration.Variables: [var iv],
+                                               Condition: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LessThanExpression, Left: IdentifierNameSyntax il, Right: IdentifierNameSyntax ir },
+                                               Incrementors: [PostfixUnaryExpressionSyntax { Operand: IdentifierNameSyntax iinc }],
+                                               Statement: BlockSyntax lb }
+            || iv.Initializer?.Value is not LiteralExpressionSyntax { Token.ValueText: "0" }
+            || il.Identifier.Text != iv.Identifier.Text || ir.Identifier.Text != count || iinc.Identifier.Text != iv.Identifier.Text) return null;
+        string idx = iv.Identifier.Text;
+        var ls = lb.Statements.ToList();
+        int q = 0;
+        if (ls.Count < 2 || ls[q] is not LocalDeclarationStatementSyntax { Declaration: { Type: var gt, Variables: [var gv] } } || gt.ToString() != "IntPtr"
+            || gv.Initializer?.Value is not InvocationExpressionSyntax { ArgumentList.Arguments: [var ga0, var ga1] } gi || !IsUnmCall(gi)
+            || !HolderRef(ga0.Expression) || ga1.Expression.ToString() != idx) return null;
+        string ptr = gv.Identifier.Text, getFn = CalleeName(gi), dupFn = null;
+        bool isChk = false;
+        q++;
+        if (q < ls.Count && ls[q] is IfStatementSyntax { Else: null, Condition: var nc } nif && IsNull(nc, ptr)
+            && (nif.Statement is BlockSyntax { Statements: [var ns] } ? ns : nif.Statement) is ContinueStatementSyntax)
+        { isChk = true; q++; }
+        if (q < ls.Count && ls[q] is LocalDeclarationStatementSyntax { Declaration: { Type: var dt, Variables: [var dv] } } && dt.ToString() == "IntPtr"
+            && dv.Initializer?.Value is InvocationExpressionSyntax { ArgumentList.Arguments: [var dpa] } di2 && IsUnmCall(di2) && dpa.Expression.ToString() == ptr)
+        { dupFn = CalleeName(di2); ptr = dv.Identifier.Text; q++; }
+        if (q != ls.Count - 1 || ls[q] is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: ElementAccessExpressionSyntax { Expression: IdentifierNameSyntax ra, ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax ri }] }, Right: var rrhs } }
+            || ra.Identifier.Text != arr || ri.Identifier.Text != idx) return null;
+        var wrapT = Wrapped(rrhs, ptr);
+        if (wrapT == null || wrapT != rat.ElementType.ToString()) return null;
+        k++;
+        if (k < sts.Count && sts[k] is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dso, Name.Identifier.Text: "Dispose" }, ArgumentList.Arguments.Count: 0 } }
+            && dso.Identifier.Text == hl) k++;
+        if (k != sts.Count - 1 || sts[k] is not ReturnStatementSyntax { Expression: IdentifierNameSyntax fr } || fr.Identifier.Text != arr) return null;
+        return new WrapTupleInfo { Form = "ptrloop", Call = CalleeName(fill), Holder = holder, Count = countFn, Get = getFn, Dup = dupFn, Wrap = wrapT, Checked = isChk };
+    }
+
     static (string ptr, string fail, string wrap) FillShape(SyntaxNode body, CallInfo[] calls)
     {
         if (calls is not { Length: 3 } || calls[2].Name != "ON_Object_Delete"
@@ -4316,10 +5481,30 @@ class Walker : CSharpSyntaxWalker
         _resultGuard = null;
         _subView = null;
         _adopt = null;
+        _enumMap = null;
+        _outAlias = null;
         _wrapArity = 0;
         _wrapChecked = false;
+        _wrapStatic = null;
+        _paramDefaults = null;
+        _tempNative = null;
+        _dataApply = null;
+        _dataFill = null;
+        _holderAssign = null;
+        _resultFilter = null;
+        _dateTime = null;
+        _keyMap = null;
         var (bodyClass, guards, success, wrap, holder, holderRefs) = calls != null
             ? RecognizeShape(body, paramNames) : (null, null, null, null, null, null);
+        // `if (UnsafeNativeMethods.F(p, i)) return;` (MeshVertexList.Hide; G68): the guard's
+        // native call belongs to the guard (GuardInfo.Calls), not to the body's calls
+        if (guards != null && calls != null)
+            foreach (var gc in guards.SelectMany(g => g.Calls ?? Array.Empty<CallInfo>()).Where(c => c.Name.StartsWith("UnsafeNativeMethods.")))
+            {
+                var list = calls.ToList();
+                var hit = list.FindIndex(c => "UnsafeNativeMethods." + c.Name == gc.Name && c.Pos == gc.Pos);
+                if (hit >= 0) { list.RemoveAt(hit); calls = list.Count > 0 ? list.ToArray() : null; }
+            }
         var failThrow = bodyClass == "pattern" ? _failThrow : null;
         var factoryCall = bodyClass == "pattern" ? _factoryCall : null;
         var commits = bodyClass == "pattern" && _commits;
@@ -4332,6 +5517,10 @@ class Walker : CSharpSyntaxWalker
         var resultGuard = _resultGuard;
         var subView = _subView;
         var adopt = _adopt is { Private: true, Holder: not null } ? _adopt : null;
+        var enumMap = _enumMap;
+        if (_outAlias != null && calls != null)
+            calls = calls.Select(c => c with { Args = c.Args.Select(a => a.Kind == "out" && _outAlias.TryGetValue(a.Text, out var op)
+                                                                        ? a with { Text = op } : a).ToArray() }).ToArray();
         if (_adopt != null && adopt == null && bodyClass is "trivial" or "pattern")
             bodyClass = "calls EnsurePrivateCopy";      // half the idiom: never dropped
         var wrapArity = _wrapArity;
@@ -4382,11 +5571,26 @@ class Walker : CSharpSyntaxWalker
             bodyClass = "fill"; wrap = fill.wrap;
             calls = calls.Take(2).ToArray();          // the delete is the failure path
         }
-        var arrayFill = fill.ptr == null ? ArrayFillShape(body, calls) : null;
+        var arrayFill = fill.ptr == null ? ArrayFillShape(body, calls) ?? ElemLoopShape(body, calls) : null;
         if (arrayFill != null)
             bodyClass = "arrayfill";
+        var wrapTuple = fill.ptr == null && arrayFill == null ? WrapTupleShape(body, calls, paramNames) : null;
+        if (wrapTuple != null)
+            bodyClass = "wraptuple";
+        // the scoped element key's native belongs to the key (G77), not to the member's calls
+        if (_keyMap != null && calls != null)
+        {
+            // by name: RecognizeShape may read a re-rooted block (positions differ)
+            if (calls.Count(c => c.Name == _keyMap.Native) != 1) _keyMap = null;
+            else
+            {
+                var kept = calls.Where(c => c.Name != _keyMap.Native).ToArray();
+                calls = kept.Length > 0 ? kept : null;
+            }
+        }
         return new AccessorInfo
         {
+            KeyMap = _keyMap,
             FillPtr = fill.ptr, FillFail = fill.fail,
             ArrayFill = arrayFill,
             ResultSelect = calls is { Length: 1 } ? resultSelect : null,
@@ -4395,11 +5599,25 @@ class Walker : CSharpSyntaxWalker
             ResultGuard = calls is { Length: 1 } ? resultGuard : null,
             SubView = calls is { Length: 1 } ? subView : null,
             Adopt = calls is { Length: 1 } ? adopt : null,
+            EnumMap = calls is { Length: 1 } ? enumMap : null,
+            WrapStatic = wrap != null ? _wrapStatic : null,
+            WrapTuple = wrapTuple,
+            HolderEmpty = holder != null ? _holderEmpty : null,
+            ParamDefaults = _paramDefaults,
+            TempNative = _tempNative,
+            ResultFilter = delegates != null ? _resultFilter : null,
+            DateTime = calls is { Length: 1 } ? _dateTime : null,
+            DataApply = calls is { Length: 1 } ? _dataApply : null,
+            DataFill = _dataFill == null ? null : _holderAssign is var (hl, hm) && hl == _dataFill.Local
+                ? _dataFill with { Assigns = _dataFill.Assigns.Append(new[] { hm, "@holder" }).ToArray() } : _dataFill,
             // `UNM.A(p, ...); UNM.B(p);` -- two or more native calls, each a bare
             // statement, nothing else (MeshVertexList.Clear) (G54)
-            Sequence = bodyClass is "trivial" && calls is { Length: > 1 } && body is BlockSyntax
+            // (a "pattern" body qualifies too: its guards run once, before the first call; G65)
+            Sequence = bodyClass is "trivial" or "pattern" && calls is { Length: > 1 } && body is BlockSyntax
                        && body.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(IsUnmCall)
-                              .All(u => u.Parent is ExpressionStatementSyntax),
+                              .All(u => u.Parent is ExpressionStatementSyntax
+                                        || u.Parent is IfStatementSyntax { Else: null }      // a native guard's own call (G68)
+                                        || u.Parent is PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalNotExpression, Parent: IfStatementSyntax { Else: null } }),
             Compare = calls is { Length: 1 } ? ResultCompare(body) : null,
             ResultConv = calls is { Length: 1 } ? (ResultConversion(body) ?? ResultConvOut(body).conv) : null,
             ConvOut = calls is { Length: 1 } && ResultConversion(body) == null ? ResultConvOut(body).local : null,
@@ -4438,11 +5656,29 @@ class Walker : CSharpSyntaxWalker
         if (owner == null || !IsPublic(mods) || _hidden > 0) return;
         var pos = node.SyntaxTree.GetLineSpan(node.Span);
         var a = AnalyzeBody(body, paramNames ?? NoParams);
+        var ptypes = parameters?.Parameters.ToDictionary(q => q.Identifier.Text, q => q.Type?.ToString()) ?? new Dictionary<string, string>();
+        var retText = returns?.ToString() ?? "void";
+        a = InlinePrivate(body, a, paramNames ?? NoParams, ptypes, retText);
         Dictionary<string, AccessorInfo> specialized = null;
         if (_nullingCtors != null && body != null)
             foreach (var nc in _nullingCtors)
                 if (body.DescendantNodes().OfType<IdentifierNameSyntax>().Any(n => nc.Nulls.Contains(n.Identifier.Text)))
                     (specialized ??= new())[nc.Key] = AnalyzeBody(SpecializeNull(body, nc.Nulls), paramNames ?? NoParams);
+        if (_scopingCtors != null && body != null)
+            foreach (var sc in _scopingCtors)
+                if (body.DescendantNodes().OfType<IdentifierNameSyntax>().Any(n => n.Identifier.Text == sc.Field))
+                    (specialized ??= new())[sc.Key] = AnalyzeBody(SpecializeScope(body, sc.Field), paramNames ?? NoParams);
+        if (_managed != null && body != null
+            && ManagedSpecialize(body, _managed.Keys.ToArray(), _typeNode, _noOps, ptypes, retText) is { } mbody)
+            (specialized ??= new())["(managed-null)"] = AnalyzeBody(mbody, paramNames ?? NoParams);
+        if (_managedSetter != null && setter != null)
+        {
+            // a getter untouched by the managed fields keeps its own analysis
+            specialized ??= new();
+            specialized.TryAdd("(managed-null)", a);
+            specialized["(managed-null):set"] = _managedSetter;
+        }
+        _managedSetter = null;
         // Native: everything the member reaches (portability is a property of
         // the whole member, getter and setter alike)
         var native = (a.Native ?? Array.Empty<string>())
@@ -4477,6 +5713,16 @@ class Walker : CSharpSyntaxWalker
             ResultGuard = a.ResultGuard,
             SubView = a.SubView,
             Adopt = a.Adopt,
+            EnumMap = a.EnumMap,
+            WrapStatic = a.WrapStatic,
+            WrapTuple = a.WrapTuple,
+            HolderEmpty = a.HolderEmpty,
+            ParamDefaults = a.ParamDefaults,
+            TempNative = a.TempNative,
+            ResultFilter = a.ResultFilter,
+            DateTime = a.DateTime,
+            DataApply = a.DataApply,
+            DataFill = a.DataFill,
             Compare = a.Compare,
             ResultConv = a.ResultConv,
             BodyHash = HashBody(hashNode ?? body),
@@ -4532,8 +5778,21 @@ class Walker : CSharpSyntaxWalker
         && h.Guards == null && h.Wrap == null
         && (h.FailThrow == null || h.FailThrow.Cond == null);   // (a trailing Commit() and an unconditional fail-throw travel along)
 
+    // `static T S(IntPtr p) { if (p == IntPtr.Zero) return null; return new T(p); }`
+    // (FileReference.ConstructAndOwnFromConstPtr; G69): a null-checked wrap in
+    // static form, keyed "T|S" by simple type name
+    public static readonly HashSet<string> StaticNullNew = new();
+
     public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
+        if (CurrentType != null && node.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))
+            && node.ParameterList.Parameters is [var snp] && snp.Type?.ToString() == "IntPtr"
+            && node.Body is { Statements: [IfStatementSyntax { Else: null } sni, ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax snt, ArgumentList.Arguments: [var sna], Initializer: null } }] }
+            && (Flat(sni.Condition) == snp.Identifier.Text + "==IntPtr.Zero" || Flat(sni.Condition) == "IntPtr.Zero==" + snp.Identifier.Text)
+            && (sni.Statement is BlockSyntax { Statements: [var sns] } ? sns : sni.Statement) is ReturnStatementSyntax { Expression: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } }
+            && sna.Expression.ToString() == snp.Identifier.Text
+            && snt.Identifier.Text == CurrentType.Replace('+', '.').Split('.').Last())
+            StaticNullNew.Add(snt.Identifier.Text + "|" + node.Identifier.Text);
         if (CurrentType != null && _portable)
         {
             var ps = node.ParameterList.Parameters.Select(x => x.Identifier.Text).ToArray();
@@ -4615,6 +5874,12 @@ class Walker : CSharpSyntaxWalker
         }
         AccessorInfo setter = publicSet && IsPublic(node.Modifiers) && CurrentType != null
             ? AnalyzeBody(Body(set), new HashSet<string> { "value" }) : null;
+        var setTypes = new Dictionary<string, string> { ["value"] = node.Type.ToString() };
+        if (setter != null) setter = InlinePrivate(Body(set), setter, new HashSet<string> { "value" }, setTypes, "void");
+        // the setter with the managed fields null (G75), keyed beside the getter's
+        _managedSetter = setter != null && _managed != null && Body(set) is { } msb
+            && ManagedSpecialize(msb, _managed.Keys.ToArray(), _typeNode, _noOps, setTypes, "void") is { } msp
+            ? AnalyzeBody(msp, new HashSet<string> { "value" }) : null;
         // `get { return ModelComponentType.Layer; }`: a constant (a virtual
         // property a derived type overrides with its own value)
         var constExpr = getBody switch
@@ -4630,12 +5895,28 @@ class Walker : CSharpSyntaxWalker
                    && co.Right is ParenthesizedExpressionSyntax { Expression: AssignmentExpressionSyntax ca }
                    && ca.Left.ToString() == co.Left.ToString()
                 ? ca.Right : constExpr;
-        // the statement form: `if (f == null) { f = new T(args); } return f;`
+        // the statement form: `if (f == null) { f = new T(args); } return f;`, where
+        // args may name locals declared first with a literal (ObjectAttributes.Decals:
+        // `uint doc_sn = 0; m_decals = new Decals(this, false, doc_sn);` -- outside
+        // Rhino nothing else assigns doc_sn): the literal is the argument (G60)
         if (made == null && getBody is BlockSyntax { Statements: [IfStatementSyntax { Else: null } lf, ReturnStatementSyntax { Expression: IdentifierNameSyntax lr }] }
-            && lf.Condition.ToString().Replace(" ", "") == lr.Identifier.Text + "==null"
-            && (lf.Statement is BlockSyntax { Statements: [var ls] } ? ls : lf.Statement) is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax la, Right: ObjectCreationExpressionSyntax lnew } }
-            && la.Identifier.Text == lr.Identifier.Text)
-            made = lnew;
+            && lf.Condition.ToString().Replace(" ", "") == lr.Identifier.Text + "==null")
+        {
+            var lsts = lf.Statement is BlockSyntax lb ? lb.Statements.ToList() : new List<StatementSyntax> { lf.Statement };
+            var lits = new Dictionary<string, LiteralExpressionSyntax>();
+            int k = 0;
+            while (k < lsts.Count - 1 && lsts[k] is LocalDeclarationStatementSyntax { Declaration.Variables: [{ Initializer.Value: LiteralExpressionSyntax lit } lv] })
+            {
+                lits[lv.Identifier.Text] = lit;
+                k++;
+            }
+            if (k == lsts.Count - 1
+                && lsts[k] is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax la, Right: ObjectCreationExpressionSyntax lnew } }
+                && la.Identifier.Text == lr.Identifier.Text)
+                made = lits.Count == 0 ? lnew
+                    : lnew.ReplaceNodes(lnew.DescendantNodes().OfType<IdentifierNameSyntax>().Where(i => lits.ContainsKey(i.Identifier.Text)),
+                                        (o, _) => lits[o.Identifier.Text]);
+        }
         // `return IsPhysicallyBased ? new PhysicallyBasedMaterial(this) : null;`:
         // a child made only while a sibling bool property holds (ChildIf)
         string childIf = null;
@@ -4649,6 +5930,7 @@ class Walker : CSharpSyntaxWalker
             a.Expression is ThisExpressionSyntax ? "this"
             : a.Expression is IdentifierNameSyntax fa && CurrentType != null && FieldTypes.TryGetValue(CurrentType, out var ftm)
               && ftm.TryGetValue(fa.Identifier.Text, out var fty) && IsFile3dmType(fty) ? "file"
+            : a.Expression is LiteralExpressionSyntax ? "const"
             : "other").ToArray();
         var cv = getBody != null ? DetectConstView(getBody) : default;
         var vget = getBody != null ? DetectVariantGet(getBody) : null;
@@ -4760,6 +6042,9 @@ class Walker : CSharpSyntaxWalker
 
     // internal value wrappers found in the portable walk (full type -> info)
     public static readonly Dictionary<string, WrapperInfo> InternalWrappers = new();
+    public static readonly Dictionary<string, ExceptionInfo> InternalExceptions = new();
+    public static readonly Dictionary<string, SnapshotEnumInfo> InternalSnapshots = new();
+    public static readonly Dictionary<string, ManifestEnumInfo> InternalManifestEnums = new();
 
     // types some declaration marks `public partial` (namespace + nesting)
     public static readonly HashSet<string> PublicPartials = new();
@@ -4769,6 +6054,432 @@ class Walker : CSharpSyntaxWalker
 
     // bool fields never assigned in the portable view (constant false)
     public static readonly HashSet<string> DeadFlags = new();
+
+    // MANAGED fields (G75): instance fields of a class type that no constructor or
+    // initializer sets, written only by members (`ParentDimensionStyle.set` stores
+    // a DimensionStyle in m_parent_dimstyle). An object none of whose writers ran
+    // holds null there -- so while the generator produces no writer, every reader
+    // may be analyzed with the field null. type key -> field -> writers ("Type.Member")
+    public static readonly Dictionary<string, Dictionary<string, SortedSet<string>>> ManagedFields = new();
+
+    static string TypeKey(TypeDeclarationSyntax td) =>
+        (td.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault() is { } ns ? ns.Name + "." : "")
+        + string.Join("+", td.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().Reverse().Select(t => t.Identifier.Text));
+
+    public static void CollectManagedFields(List<SyntaxNode> roots)
+    {
+        var plain = new HashSet<string> { "bool", "int", "uint", "long", "ulong", "short", "ushort", "byte", "sbyte", "double", "float",
+                                          "char", "decimal", "IntPtr", "System.IntPtr", "Guid", "System.Guid", "UIntPtr" };
+        var cands = new Dictionary<string, Dictionary<string, SortedSet<string>>>();
+        var owners = new Dictionary<string, List<string>>();          // field name -> the types declaring it as a candidate
+        var spoiled = new HashSet<(string, string)>();
+        foreach (var root in roots)
+            foreach (var td in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+                foreach (var fd in td.Members.OfType<FieldDeclarationSyntax>())
+                {
+                    if (fd.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword) || m.IsKind(SyntaxKind.ConstKeyword))
+                        || plain.Contains(fd.Declaration.Type.ToString()) || fd.Declaration.Type is PredefinedTypeSyntax
+                        || fd.Declaration.Type is NullableTypeSyntax || fd.Declaration.Type is ArrayTypeSyntax)
+                        continue;
+                    var key = TypeKey(td);
+                    foreach (var v in fd.Declaration.Variables)
+                    {
+                        if (v.Initializer != null && !v.Initializer.Value.IsKind(SyntaxKind.NullLiteralExpression)) { spoiled.Add((key, v.Identifier.Text)); continue; }
+                        (cands.TryGetValue(key, out var d) ? d : cands[key] = new())[v.Identifier.Text] = new SortedSet<string>(StringComparer.Ordinal);
+                        (owners.TryGetValue(v.Identifier.Text, out var ol) ? ol : owners[v.Identifier.Text] = new()).Add(key);
+                    }
+                }
+        // every write: an assignment, ++/--, or a ref/out argument naming the field
+        static string FieldOf(ExpressionSyntax e) => e switch
+        {
+            IdentifierNameSyntax i => i.Identifier.Text,
+            MemberAccessExpressionSyntax ma => ma.Name.Identifier.Text,
+            _ => null,
+        };
+        foreach (var root in roots)
+            foreach (var n in root.DescendantNodes())
+            {
+                ExpressionSyntax target = n switch
+                {
+                    AssignmentExpressionSyntax a => a.Left,
+                    PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.PreIncrementExpression or (int)SyntaxKind.PreDecrementExpression } pu => pu.Operand,
+                    PostfixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.PostIncrementExpression or (int)SyntaxKind.PostDecrementExpression } po => po.Operand,
+                    ArgumentSyntax arg when !arg.RefOrOutKeyword.IsKind(SyntaxKind.None) => arg.Expression,
+                    _ => null,
+                };
+                var f = target == null ? null : FieldOf(target);
+                if (f == null || !owners.TryGetValue(f, out var ftypes)) continue;
+                // the member the write sits in; a constructor, an initializer or anything
+                // else makes the field not managed
+                var td = n.Ancestors().OfType<TypeDeclarationSyntax>().FirstOrDefault();
+                var tkey = td == null ? null : TypeKey(td);
+                string member = n.Ancestors().FirstOrDefault(x => x is MethodDeclarationSyntax or PropertyDeclarationSyntax or IndexerDeclarationSyntax
+                                                              or ConstructorDeclarationSyntax or OperatorDeclarationSyntax or FieldDeclarationSyntax
+                                                              or EventDeclarationSyntax or DestructorDeclarationSyntax or ConversionOperatorDeclarationSyntax) switch
+                {
+                    MethodDeclarationSyntax md => md.Identifier.Text,
+                    PropertyDeclarationSyntax pd => pd.Identifier.Text,
+                    IndexerDeclarationSyntax => "this",
+                    _ => null,
+                };
+                foreach (var ft in ftypes)
+                {
+                    // a bare name or `this.f` writes this type's field; `x.f` any type's
+                    bool mine = target is IdentifierNameSyntax || target is MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax };
+                    if (mine && tkey != ft) continue;
+                    if (member == null || tkey == null) spoiled.Add((ft, f));
+                    else cands[ft][f].Add(tkey + "." + member);
+                }
+            }
+        foreach (var (t, d) in cands)
+        {
+            var keep = d.Where(kv => !spoiled.Contains((t, kv.Key))).ToDictionary(kv => kv.Key, kv => kv.Value);
+            if (keep.Count > 0) ManagedFields[t] = keep;
+        }
+    }
+
+    // G76: calls to PRIVATE helpers of the member's own type (non-virtual, a body here),
+    // inlined syntactically: a call statement (`SetRichText(text, p);`), a returned call
+    // (`return GetText(true);`), or a call in an argument / initializer whose helper
+    // ends in its only `return E;` (its statements hoisted before the caller's, E in
+    // place of the call). Parameters become the (side-effect free) arguments, locals
+    // are renamed apart, and conditions the substituted literals decide are folded
+    // (`if (true == false) ...` gone). Overloads are told apart by argument types or
+    // refused. With managed fields (G75) the helper bodies are read with them null.
+    sealed class Inliner
+    {
+        readonly TypeDeclarationSyntax _type;
+        readonly string[] _nulls;
+        readonly HashSet<string> _noOps;
+        readonly Dictionary<string, string> _ptypes;   // the member's parameters -> C# types
+        readonly string _ret;                          // the member's return type ("void" for none)
+        int _uniq;
+        public bool Changed;
+        public Inliner(TypeDeclarationSyntax type, string[] nulls, HashSet<string> noOps, Dictionary<string, string> ptypes, string ret)
+        { _type = type; _nulls = nulls ?? Array.Empty<string>(); _noOps = noOps; _ptypes = ptypes ?? new(); _ret = ret; }
+
+        static string Norm(string t) => t?.Replace("System.", "").Replace(" ", "");
+
+        public SyntaxNode Run(SyntaxNode body)
+        {
+            if (_type == null || body == null) return body;
+            BlockSyntax b = body switch
+            {
+                BlockSyntax bb => bb,
+                ArrowExpressionClauseSyntax ae => SyntaxFactory.Block(_ret == "void"
+                    ? SyntaxFactory.ExpressionStatement(ae.Expression) : SyntaxFactory.ReturnStatement(ae.Expression)),
+                _ => null,
+            };
+            if (b == null) return body;
+            // `T x = H(..); return x;` at the end is `return H(..);`
+            if (b.Statements.Count >= 2 && b.Statements[^2] is LocalDeclarationStatementSyntax { Declaration.Variables: [{ Initializer.Value: InvocationExpressionSyntax lri } lv] }
+                && b.Statements[^1] is ReturnStatementSyntax { Expression: IdentifierNameSyntax lr } && lr.Identifier.Text == lv.Identifier.Text)
+                b = b.WithStatements(SyntaxFactory.List(b.Statements.Take(b.Statements.Count - 2).Append(SyntaxFactory.ReturnStatement(lri))));
+            for (int round = 0; round < 4; round++)
+            {
+                var nb = Once(b);
+                if (nb == null) break;
+                b = nb; Changed = true;
+            }
+            return Changed ? Fold(b) : body;
+        }
+
+        BlockSyntax Once(BlockSyntax b)
+        {
+            var sts = b.Statements.ToList();
+            for (int i = 0; i < sts.Count; i++)
+            {
+                var st = sts[i];
+                foreach (var inv in st.DescendantNodesAndSelf(n => n is not (LambdaExpressionSyntax or AnonymousMethodExpressionSyntax or LocalFunctionStatementSyntax))
+                                      .OfType<InvocationExpressionSyntax>().Reverse())
+                {
+                    var md = Resolve(inv, b);
+                    if (md == null) continue;
+                    var hs = Prepare(md, inv, b);
+                    if (hs == null) continue;
+                    bool returns = hs.SelectMany(x => x.DescendantNodesAndSelf()).OfType<ReturnStatementSyntax>().Any();
+                    List<StatementSyntax> repl = null;
+                    if (st is ExpressionStatementSyntax { Expression: var se } && se == inv && Norm(md.ReturnType.ToString()) == "void")
+                    {
+                        // a call statement: its statements; a trailing `return;` is its end
+                        if (hs.Count > 0 && hs[^1] is ReturnStatementSyntax { Expression: null }) hs.RemoveAt(hs.Count - 1);
+                        if (hs.SelectMany(x => x.DescendantNodesAndSelf()).OfType<ReturnStatementSyntax>().Any() && i != sts.Count - 1) continue;
+                        repl = hs;
+                    }
+                    else if (st is ReturnStatementSyntax { Expression: var re } && re == inv
+                             && Norm(md.ReturnType.ToString()) == Norm(_ret) && _ret != "void")
+                        repl = hs;                                   // the helper's returns are the member's
+                    else if (hs.Count > 0 && hs[^1] is ReturnStatementSyntax { Expression: { } he }
+                             && !hs.Take(hs.Count - 1).SelectMany(x => x.DescendantNodesAndSelf()).OfType<ReturnStatementSyntax>().Any()
+                             && !st.DescendantNodes().OfType<ConditionalExpressionSyntax>().Any(c => c.WhenTrue.Contains(inv) || c.WhenFalse.Contains(inv))
+                             && !st.DescendantNodes().OfType<BinaryExpressionSyntax>().Any(bx => (bx.IsKind(SyntaxKind.LogicalAndExpression) || bx.IsKind(SyntaxKind.LogicalOrExpression) || bx.IsKind(SyntaxKind.CoalesceExpression)) && bx.Right.Contains(inv))
+                             && (st is not (IfStatementSyntax or ForStatementSyntax or WhileStatementSyntax or ForEachStatementSyntax or UsingStatementSyntax or DoStatementSyntax)
+                                 || st is IfStatementSyntax ifs && ifs.Condition.Contains(inv)))
+                    {
+                        // a value: the statements before the caller's, the expression in place
+                        var e = he;
+                        while (e is ParenthesizedExpressionSyntax pe) e = pe.Expression;
+                        var ex = e is IdentifierNameSyntax or LiteralExpressionSyntax or MemberAccessExpressionSyntax or InvocationExpressionSyntax
+                            ? e : SyntaxFactory.ParenthesizedExpression(e);
+                        repl = hs.Take(hs.Count - 1).Append(st.ReplaceNode(inv, ex.WithTriviaFrom(inv))).ToList();
+                    }
+                    if (repl == null) continue;
+                    sts.RemoveAt(i);
+                    sts.InsertRange(i, repl);
+                    return b.WithStatements(SyntaxFactory.List(sts));
+                }
+            }
+            return null;
+        }
+
+        // the caller's names, so the helper's locals can be renamed apart
+        static HashSet<string> Names(SyntaxNode n) => n.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().Select(x => x.Identifier.Text)
+            .Concat(n.DescendantNodesAndSelf().OfType<VariableDeclaratorSyntax>().Select(v => v.Identifier.Text)).ToHashSet();
+
+        MethodDeclarationSyntax Resolve(InvocationExpressionSyntax inv, BlockSyntax caller)
+        {
+            string name = inv.Expression switch
+            {
+                IdentifierNameSyntax id => id.Identifier.Text,
+                MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } tm => tm.Name.Identifier.Text,
+                _ => null,
+            };
+            if (name == null) return null;
+            var args = inv.ArgumentList.Arguments;
+            var all = _type.Members.OfType<MethodDeclarationSyntax>()
+                .Where(m => m.Identifier.Text == name && m.ParameterList.Parameters.Count == args.Count && m.TypeParameterList == null).ToList();
+            var priv = all.Where(m => !m.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword) || x.IsKind(SyntaxKind.ProtectedKeyword)
+                                                          || x.IsKind(SyntaxKind.VirtualKeyword) || x.IsKind(SyntaxKind.OverrideKeyword)
+                                                          || x.IsKind(SyntaxKind.AbstractKeyword) || x.IsKind(SyntaxKind.ExternKeyword))
+                                      && (m.Body != null || m.ExpressionBody != null)
+                                      && m.ParameterList.Parameters.All(q => q.Modifiers.Count == 0)).ToList();
+            if (priv.Count == 0 || args.Any(a => !a.RefOrOutKeyword.IsKind(SyntaxKind.None))) return null;
+            if (all.Count == 1) return priv[0];
+            // overloads: C# picks by argument types -- exactly one must take these
+            var ats = args.Select(a => ArgType(a.Expression, caller)).ToList();
+            if (ats.Any(t => t == null)) return null;
+            bool Takes(MethodDeclarationSyntax m) => m.ParameterList.Parameters.Zip(ats).All(z =>
+                Norm(z.First.Type?.ToString()) == z.Second || z.Second == "null" && Norm(z.First.Type?.ToString()) is not ("int" or "double" or "bool" or "IntPtr")
+                || z.Second == "int" && Norm(z.First.Type?.ToString()) == "double");
+            var hits = all.Where(Takes).ToList();
+            return hits is [var h] && priv.Contains(h) ? h : null;
+        }
+
+        string ArgType(ExpressionSyntax e, BlockSyntax caller)
+        {
+            while (e is ParenthesizedExpressionSyntax pe) e = pe.Expression;
+            switch (e)
+            {
+                case LiteralExpressionSyntax l:
+                    return l.Kind() switch
+                    {
+                        SyntaxKind.TrueLiteralExpression or SyntaxKind.FalseLiteralExpression => "bool",
+                        SyntaxKind.StringLiteralExpression => "string",
+                        SyntaxKind.NullLiteralExpression => "null",
+                        SyntaxKind.NumericLiteralExpression => l.Token.Text.Contains('.') ? "double" : "int",
+                        _ => null,
+                    };
+                case IdentifierNameSyntax id:
+                    if (_ptypes.TryGetValue(id.Identifier.Text, out var pt)) return Norm(pt);
+                    var d = caller.DescendantNodes().OfType<VariableDeclaratorSyntax>().FirstOrDefault(v => v.Identifier.Text == id.Identifier.Text);
+                    if (d?.Parent is VariableDeclarationSyntax vd)
+                    {
+                        if (!vd.Type.IsVar) return Norm(vd.Type.ToString());
+                        return d.Initializer == null ? null : ArgType(d.Initializer.Value, caller);
+                    }
+                    return null;
+                case MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "IntPtr" }, Name.Identifier.Text: "Zero" }:
+                    return "IntPtr";
+                case InvocationExpressionSyntax ci when CalleeName(ci) is "ConstPointer" or "NonConstPointer":
+                    return "IntPtr";
+                case ConditionalExpressionSyntax ce when NullablePtr(ce) != null:
+                    return "IntPtr";
+                default:
+                    return null;
+            }
+        }
+
+        static bool Simple(ExpressionSyntax e) => e is IdentifierNameSyntax or LiteralExpressionSyntax or ThisExpressionSyntax
+            || e is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax or PredefinedTypeSyntax or ThisExpressionSyntax };
+
+        // the helper's statements, ready to splice: parameters substituted, locals renamed,
+        // managed fields null, plumbing dropped, decided conditions folded; null: refused
+        List<StatementSyntax> Prepare(MethodDeclarationSyntax md, InvocationExpressionSyntax inv, BlockSyntax caller)
+        {
+            var ps = md.ParameterList.Parameters;
+            var args = inv.ArgumentList.Arguments;
+            SyntaxNode hb = md.Body;
+            if (hb == null)
+                hb = SyntaxFactory.Block(Norm(md.ReturnType.ToString()) == "void"
+                    ? SyntaxFactory.ExpressionStatement(md.ExpressionBody.Expression) : SyntaxFactory.ReturnStatement(md.ExpressionBody.Expression));
+            // an argument that is not side-effect free may be used once
+            for (int k = 0; k < ps.Count; k++)
+            {
+                var uses = hb.DescendantNodes().OfType<IdentifierNameSyntax>().Count(n => n.Identifier.Text == ps[k].Identifier.Text);
+                if (!Simple(args[k].Expression) && uses > 1) return null;
+                if (hb.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(a => a.Left.ToString() == ps[k].Identifier.Text)) return null;
+            }
+            // rename the helper's locals apart from the caller's names
+            var taken = Names(caller);
+            var locals = hb.DescendantNodes().OfType<VariableDeclaratorSyntax>().Select(v => v.Identifier.Text)
+                .Concat(hb.DescendantNodes().OfType<SingleVariableDesignationSyntax>().Select(v => v.Identifier.Text))
+                .Concat(hb.DescendantNodes().OfType<ForEachStatementSyntax>().Select(f => f.Identifier.Text)).ToHashSet();
+            var ren = new Dictionary<string, string>();
+            _uniq++;
+            foreach (var l in locals) ren[l] = taken.Contains(l) ? l + "__h" + _uniq : l;
+            var map = ps.Zip(args).ToDictionary(z => z.First.Identifier.Text, z => z.Second.Expression);
+            hb = new Rename(map, ren).Visit(hb);
+            if (_nulls.Length > 0) hb = SpecializeNull(hb, _nulls);
+            if (hb is not BlockSyntax blk) return null;
+            blk = Fold(blk);
+            return blk.Statements.Where(st => !(st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ni }
+                && (CalleeName(ni) == "KeepAlive" || ni.Expression is IdentifierNameSyntax nid && ni.ArgumentList.Arguments.Count == 0
+                    && _noOps != null && _noOps.Contains(nid.Identifier.Text)))).ToList();
+        }
+
+        sealed class Rename : CSharpSyntaxRewriter
+        {
+            readonly Dictionary<string, ExpressionSyntax> _args;
+            readonly Dictionary<string, string> _ren;
+            public Rename(Dictionary<string, ExpressionSyntax> args, Dictionary<string, string> ren) { _args = args; _ren = ren; }
+            bool IsMemberName(IdentifierNameSyntax n) => n.Parent is MemberAccessExpressionSyntax pm && pm.Name == n
+                || n.Parent is NameColonSyntax || n.Parent is AssignmentExpressionSyntax { Parent: InitializerExpressionSyntax } ia && ia.Left == n;
+            public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax n)
+            {
+                if (IsMemberName(n)) return n;
+                if (_args.TryGetValue(n.Identifier.Text, out var a)) return a.WithTriviaFrom(n);
+                if (_ren.TryGetValue(n.Identifier.Text, out var r) && r != n.Identifier.Text) return n.WithIdentifier(SyntaxFactory.Identifier(r).WithTriviaFrom(n.Identifier));
+                return n;
+            }
+            public override SyntaxNode VisitVariableDeclarator(VariableDeclaratorSyntax v)
+            {
+                v = (VariableDeclaratorSyntax)base.VisitVariableDeclarator(v);
+                return _ren.TryGetValue(v.Identifier.Text, out var r) ? v.WithIdentifier(SyntaxFactory.Identifier(r).WithTriviaFrom(v.Identifier)) : v;
+            }
+            public override SyntaxNode VisitSingleVariableDesignation(SingleVariableDesignationSyntax v) =>
+                _ren.TryGetValue(v.Identifier.Text, out var r) ? v.WithIdentifier(SyntaxFactory.Identifier(r).WithTriviaFrom(v.Identifier)) : v;
+        }
+
+        // conditions literals decide: `true == false`, `!true`, `(false)`
+        static bool? Const(ExpressionSyntax e)
+        {
+            switch (e)
+            {
+                case ParenthesizedExpressionSyntax p: return Const(p.Expression);
+                case LiteralExpressionSyntax { RawKind: (int)SyntaxKind.TrueLiteralExpression }: return true;
+                case LiteralExpressionSyntax { RawKind: (int)SyntaxKind.FalseLiteralExpression }: return false;
+                case PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalNotExpression } n: return !Const(n.Operand);
+                case BinaryExpressionSyntax b:
+                {
+                    var l = Const(b.Left); var r = Const(b.Right);
+                    return b.Kind() switch
+                    {
+                        SyntaxKind.EqualsExpression when l != null && r != null => l == r,
+                        SyntaxKind.NotEqualsExpression when l != null && r != null => l != r,
+                        SyntaxKind.LogicalAndExpression => l == false || r == false ? false : l == true && r == true ? true : null,
+                        SyntaxKind.LogicalOrExpression => l == true || r == true ? true : l == false && r == false ? false : null,
+                        _ => null,
+                    };
+                }
+                default: return null;
+            }
+        }
+
+        public static BlockSyntax Fold(BlockSyntax b) => (BlockSyntax)new Folder().Visit(b);
+
+        sealed class Folder : CSharpSyntaxRewriter
+        {
+            public override SyntaxNode VisitBlock(BlockSyntax node)
+            {
+                node = (BlockSyntax)base.VisitBlock(node);
+                var outl = new List<StatementSyntax>();
+                foreach (var st in node.Statements)
+                {
+                    if (st is IfStatementSyntax f && Const(f.Condition) is bool d)
+                    {
+                        var run = d ? f.Statement : f.Else?.Statement;
+                        if (run is BlockSyntax rb) outl.AddRange(rb.Statements);
+                        else if (run != null) outl.Add(run);
+                    }
+                    else
+                        outl.Add(st);
+                    // what follows an unconditional return or throw never runs
+                    var cut = outl.FindIndex(x => x is ReturnStatementSyntax or ThrowStatementSyntax);
+                    if (cut >= 0) { outl.RemoveRange(cut + 1, outl.Count - cut - 1); break; }
+                }
+                return node.WithStatements(SyntaxFactory.List(outl));
+            }
+            public override SyntaxNode VisitConditionalExpression(ConditionalExpressionSyntax node)
+            {
+                node = (ConditionalExpressionSyntax)base.VisitConditionalExpression(node);
+                return Const(node.Condition) is bool d ? (d ? node.WhenTrue : node.WhenFalse).WithTriviaFrom(node) : node;
+            }
+        }
+    }
+
+    static readonly HashSet<string> Generatable = new() { "trivial", "pattern", "construct", "arrayfill", "wraptuple", "fill" };
+
+    // G76: a member whose own analysis is not generatable, read with its private
+    // helpers inlined -- kept only when that is (the post-walk inliner keeps the
+    // delegations it resolves: a private helper whose own analysis is generatable)
+    AccessorInfo InlinePrivate(SyntaxNode body, AccessorInfo a, ISet<string> paramNames, Dictionary<string, string> ptypes, string ret)
+    {
+        if (body == null || _typeNode == null || !_portable || a == null || Generatable.Contains(a.Body ?? "")) return a;
+        if (a.Body == "delegates")
+        {
+            var target = a.Delegates;
+            var arity = a.DelegateArgs?.Length ?? 0;
+            var helper = target == null || target.Contains('.') || target.StartsWith("@") ? null
+                : _typeNode.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == target && m.ParameterList.Parameters.Count == arity
+                    && !m.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword) || x.IsKind(SyntaxKind.ProtectedKeyword)));
+            if (helper == null) return a;
+            var hpn = helper.ParameterList.Parameters.Select(q => q.Identifier.Text).ToHashSet();
+            if (Generatable.Contains(AnalyzeBody((SyntaxNode)helper.Body ?? helper.ExpressionBody, hpn).Body ?? "")) return a;
+        }
+        var inl = new Inliner(_typeNode, null, _noOps, ptypes, ret);
+        var ib = inl.Run(body);
+        if (!inl.Changed) return a;
+        var ia = AnalyzeBody(ZeroArgs(ib), paramNames);
+        return Generatable.Contains(ia.Body ?? "") ? ia : a;
+    }
+
+    // `IntPtr styleptr = IntPtr.Zero;` (an inlined helper's value) handed to a native:
+    // the argument is IntPtr.Zero itself while nothing reassigns the local
+    static SyntaxNode ZeroArgs(SyntaxNode b)
+    {
+        var zeroLocals = b.DescendantNodes().OfType<VariableDeclaratorSyntax>()
+            .Where(v => v.Initializer?.Value.ToString() == "IntPtr.Zero"
+                        && !b.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(a => a.Left.ToString() == v.Identifier.Text)
+                        && !b.DescendantNodes().OfType<ArgumentSyntax>().Any(a => !a.RefOrOutKeyword.IsKind(SyntaxKind.None) && a.Expression.ToString() == v.Identifier.Text))
+            .Select(v => v.Identifier.Text).ToHashSet();
+        return zeroLocals.Count == 0 ? b
+            : b.ReplaceNodes(b.DescendantNodes().OfType<ArgumentSyntax>().Where(a => a.Expression is IdentifierNameSyntax ai && zeroLocals.Contains(ai.Identifier.Text)),
+                             (o, _) => o.WithExpression(SyntaxFactory.ParseExpression("IntPtr.Zero").WithTriviaFrom(o.Expression)));
+    }
+
+    static bool Reaches(SyntaxNode body, string[] nulls, TypeDeclarationSyntax type, int depth)
+    {
+        var ids = body.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().Select(i => i.Identifier.Text).ToHashSet();
+        if (ids.Overlaps(nulls)) return true;
+        if (depth > 4 || type == null) return false;
+        return type.Members.OfType<MethodDeclarationSyntax>()
+            .Where(m => ids.Contains(m.Identifier.Text) && !m.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword) || x.IsKind(SyntaxKind.ProtectedKeyword)))
+            .Any(m => ((SyntaxNode)m.Body ?? m.ExpressionBody) is { } hb && Reaches(hb, nulls, type, depth + 1));
+    }
+
+    // a body analyzed with the type's managed fields null (G75): its private helpers
+    // inlined (G76) with them null; null when nothing it reaches reads one
+    static SyntaxNode ManagedSpecialize(SyntaxNode body, string[] nulls, TypeDeclarationSyntax type, HashSet<string> noOps,
+                                        Dictionary<string, string> ptypes, string ret)
+    {
+        // a body that never reads one -- directly or through its type's private helpers -- is left alone
+        if (!Reaches(body, nulls, type, 0)) return null;
+        var inl = new Inliner(type, nulls, noOps, ptypes, ret);
+        var b = inl.Run(body);
+        b = ZeroArgs(b);
+        b = b is BlockSyntax ? SpecializeNull(b, nulls) : new NullFieldRewriter(nulls, Array.Empty<string>()).Visit(b);
+        return b.ToFullString() == body.ToFullString() ? null : b;
+    }
 
     // generic type maps by method name (see RecordTypeMap): T's simple name -> "E.M"
     public static readonly Dictionary<string, Dictionary<string, string>> TypeMaps = new();

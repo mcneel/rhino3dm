@@ -16,12 +16,23 @@ def failthrow_line(ft, call, m):
 
 
 def emit(p):
+    if p.get('scope_plan') is not None:
+        # a scoped view's member (G77): the scope's variant when m_scope >= 0
+        base = emit(dict(p, scope_plan=None)).split('\n')
+        sp = p['scope_plan']
+        if sp is False:
+            inner = ['    if (m_scope >= 0) throw std::runtime_error("%s: not generated for the list of a %s");'
+                     % (p['m']['Name'], p['cls']['scope']['comp']['cs'])]
+        else:
+            body = emit(dict(sp, cpp=p['cpp'], scope_plan=None)).split('\n')
+            inner = ['    if (m_scope >= 0) {'] + ['  ' + l for l in body[1:-1]] + ['    }']
+        return '\n'.join([base[0]] + inner + base[1:])
     m = p['m']
     name = p['cpp']
     sig = ', '.join('%s %s' % (t, n) for t, n in p['bind_args'])
     call = '%s(%s)' % (p['fn']['name'], ', '.join(p['call_exprs'])) if p['fn'] else None
     shape = p['shape']
-    cq = ' const' if not p['static'] and not p.get('setter_of') else ''
+    cq = ' const' if not p['static'] and not p.get('setter_of') and not p.get('nonconst') else ''
     st = 'static ' if p['static'] else ''
     L = []
     guard_lines = [
@@ -45,6 +56,48 @@ def emit(p):
                  % (ad['param'], p['cls']['gen'], ad['tramp'], '(int)' + ad['key'] if ad['key'] else '0',
                     'true' if ad['cow'] else 'false'))
         L.append('    return rc;')
+    elif shape[0] == 'datafrom':
+        # a data class made by its translated static bridge from the native pointer (G64, G65)
+        cpp = DATA_CPP[shape[1]]
+        L.append('  %s%s* %s(%s)%s {' % (st, cpp, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    const void* rh3dm_p = %s;' % call)
+        L.append('    return rh3dm_p ? %s::%s((void*)rh3dm_p) : nullptr;' % (cpp, shape[2]))
+    elif shape[0] == 'datafill':
+        # a data object assembled from the call's out locals (and the holder) (G65)
+        cpp = DATA_CPP[shape[1]]
+        L.append('  %s%s* %s(%s)%s {' % (st, cpp, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    %s;' % call)
+        L.append('    %s rh3dm_rc;' % cpp)
+        L += ['    rh3dm_rc.set_%s(%s);' % (mem, e) for mem, e in shape[2]]
+        L.append('    return new %s(rh3dm_rc);' % cpp)
+    elif shape[0] == 'selfcopy':
+        # `new PolyCurve(this)`: the internal copy constructor's native (G69)
+        L.append('  %sclass %s* %s(%s)%s {' % (st, p['cls']['gen'], name, sig, cq))
+        L += guard_lines
+        L.append('    return new %s(%s(%s));' % (p['cls']['gen'], shape[1]['name'], shape[2]))
+    elif shape[0] == 'datetime':
+        # `if (CALL) return new DateTime(y, m+1, d, h, mi, s); return DateTime.MinValue;` (G68)
+        L.append('  %sRH3DM_DATETIME %s(%s)%s {' % (st, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    if (!(%s)) return RH3DM_DateTimeMin();' % call)
+        L.append('    return RH3DM_DateTime(%s);' % ', '.join(shape[1]))
+    elif shape[0] == 'dataapply':
+        # the native result handed to a data argument's bridge, when there is one (G65)
+        L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    void* rh3dm_p = (void*)(%s);' % call)
+        L.append('    if (rh3dm_p) %s(rh3dm_p);' % shape[1])
+    elif shape[0] == 'translated':
+        # RhinoCommon's own C# body, translated (G63): `{` ... `}` at depth 0
+        ret, body = shape[1], shape[2].split('\n')
+        L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
+        L += ['  ' + l for l in body[1:-1]]
     elif shape[0] == 'direct':
         ret = shape[1]
         L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
@@ -78,6 +131,16 @@ def emit(p):
         else:
             L.append('    %s;' % call)
             L.append('    return %s;' % CS_RET_EXPR[cs].format(n=out))
+    elif shape[0] == 'enummap':
+        # `switch (s) { case N.A: return M.A; ... default: throw }` (G60)
+        cpp, values, exc, msg = shape[1:]
+        L.append('  %s%s %s(%s)%s {' % (st, cpp, name, sig, cq))
+        L += guard_lines
+        L += ['    %s' % x for x in p['locals']]
+        L.append('    switch ((int)(%s)) {' % call)
+        L += ['      case %d: return (%s)%d;' % (a, cpp, b) for a, b in values]
+        L.append('      default: throw %s("%s");' % (exc, msg))
+        L.append('    }')
     elif shape[0] == 'subview':
         # `return CreateGeometryHelper(p, this, index) as Curve;` (G58): a view of the
         # geometry INSIDE this object, re-resolved by this very call on every access
@@ -89,10 +152,76 @@ def emit(p):
                  % (target['reg'], p['cls']['gen'], name, '(int)' + key if key else '0',
                     'true' if write == 'copy' else 'false'))
     elif shape[0] == 'seq':
-        # `UNM.A(p, ...); UNM.B(p);` in order (G54)
+        # `UNM.A(p, ...); UNM.B(p);` in order (G54); inside `if (L != IntPtr.Zero)`
+        # when a temporary native guards them (G65)
         L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
         L += guard_lines
-        L += ['    %s;' % c for c in shape[1]]
+        L += ['    %s' % x for x in p['locals']]
+        guard = shape[2] if len(shape) > 2 else None
+        if guard:
+            L.append('    if (%s) {' % guard)
+            L += ['      %s;' % c for c in shape[1]]
+            L.append('    }')
+        else:
+            L += ['    %s;' % c for c in shape[1]]
+    elif shape[0] == 'arrayfill' and shape[1]['form'] == 'loop':
+        # `int count = Count; for (i < count) { var e = new E(); UNM.F(..., i, ref e);
+        # rc[i] = e; } return rc;` -- one native call per element, as a tuple (G72)
+        af = shape[1]
+        L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+        L += guard_lines
+        L.append('    int %s = %s;' % (af['count'], af['count_expr']))
+        L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%s);' % af['count'])
+        L.append('    for (int rh3dm_i = 0; rh3dm_i < %s; rh3dm_i++) {' % af['count'])
+        L += ['      %s' % x for x in p['locals']]             # the element local, fresh per iteration as in C#
+        L.append('      %s;' % call)
+        L.append('      SetTuple(rh3dm_tuple, rh3dm_i, %s);' % af['item'].format(n=af['elem_local']))
+        L.append('    }')
+        L.append('    return rh3dm_tuple;')
+    elif shape[0] == 'wraptuple':
+        # a tuple of geometry made from native pointers (G72)
+        wt = shape[1]
+        if wt['form'] == 'outptr':
+            # `return rc ? output : null`: None when the call fails -- the pointers it
+            # may still have made are freed (C# leaves them to the collector)
+            L.append('  %sRH3DM_NTUPLE %s(%s)%s {' % (st, name, sig, cq))
+            L += guard_lines
+            L += ['    %s' % x for x in p['locals']]
+            L.append('    bool rh3dm_ok = %s;' % call)
+            L.append('    if (!rh3dm_ok) { %s return RH3DM_NoneTuple(); }' % ' '.join(wt['fail']))
+            L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%d);' % len(wt['items']))
+            for j, n in enumerate(wt['items']):
+                L.append('    SetTuple(rh3dm_tuple, %d, %s);' % (j, wt['item'].format(p=n)))
+            L.append('    return rh3dm_tuple;')
+        elif wt['form'] == 'newptr':
+            # `bool F(out T left, out T right)`: (success, left, right), the objects
+            # None when the call fails, as the out-param tuples do
+            L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+            L += guard_lines
+            L += ['    %s' % x for x in p['locals']]
+            L.append('    bool rh3dm_ok = %s;' % call)
+            if wt['fail']:
+                L.append('    if (!rh3dm_ok) { %s }' % ' '.join(wt['fail']))
+            L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%d);' % (len(wt['items']) + 1))
+            L.append('    SetTuple(rh3dm_tuple, 0, rh3dm_ok);')
+            for j, n in enumerate(wt['items']):
+                L.append('    SetTuple(rh3dm_tuple, %d, %s);' % (j + 1, wt['item'].format(p=n)))
+            L.append('    return rh3dm_tuple;')
+        else:
+            # ptrloop: the holder's elements read back one by one (duplicated when C# does)
+            L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+            L += guard_lines
+            L += ['    %s' % x for x in p['locals']]
+            L.append('    %s;' % call)
+            L.append('    int rh3dm_n = %s(&holder_out);' % wt['count'])
+            L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(rh3dm_n);')
+            L.append('    for (int rh3dm_i = 0; rh3dm_i < rh3dm_n; rh3dm_i++) {')
+            L.append('      %s* rh3dm_p = %s(&holder_out, rh3dm_i);' % (wt['ptr'], wt['get']))
+            if wt.get('dup'):
+                L.append('      if (rh3dm_p) rh3dm_p = %s(rh3dm_p);' % wt['dup'])
+            L.append('      SetTuple(rh3dm_tuple, rh3dm_i, %s);' % wt['item'].format(p='rh3dm_p'))
+            L.append('    }')
+            L.append('    return rh3dm_tuple;')
     elif shape[0] == 'arrayfill':
         # `int count = ...; if (count < 1) return ...; T[] a = new T[count];
         # UNM.Fill(..., a); return a;` -- the vector the native fills, as a tuple (G54)
@@ -134,6 +263,7 @@ def emit(p):
         tdecl = emit_decl_def(target, p['cls'])[0]
         ret = tdecl[:tdecl.index(' %s(' % target['cpp'])].replace('static ', '').strip()
         L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
+        L += ['    %s' % x for x in p['locals']]           # a data object built for the target (G65)
         args = [re.sub(r'@@(\d+)@@', lambda mm: p['sib_refs'][int(mm.group(1))]['cpp'] + '()', a)
                 for a in p['forward_args']]
         L.append('    return %s(%s);' % (target['cpp'], ', '.join(args)))
@@ -150,9 +280,15 @@ def emit(p):
         child = shape[1]
         L.append('  %s* %s()%s {' % (child['gen'], name, cq))
         L += guard_lines
-        if p.get('child_key') is not None:
+        if p.get('child_scope'):
+            # the parent's list scoped to this component (G77)
+            L.append('    return new %s(%s, (int)RH3DM_Key());' % (child['gen'], p['self_ptr']))
+        elif p.get('child_key') is not None:
             # a keyed child (`new NurbsSurfaceKnotList(this, 0)`)
             L.append('    return new %s(%s, %s);' % (child['gen'], p['self_ptr'], p['child_key']))
+        elif p.get('child_state') is not None:
+            # a child with constructor state (`new Decals(this, false, doc_sn)`; G60)
+            L.append('    return new %s(%s, %s);' % (child['gen'], p['self_ptr'], ', '.join(p['child_state'])))
         else:
             L.append('    return new %s(%s);' % (child['gen'], p['self_ptr']))
     elif shape[0] == 'construct':
@@ -261,9 +397,34 @@ def emit(p):
         L.append('  %s%s %s(%s)%s {' % (st, ret, name, sig, cq))
         L.append('    std::unique_ptr<%s> via(%s());' % (sib['shape'][1]['gen'], sib['cpp']))
         L.append('    %svia->%s(%s);' % ('' if is_set else 'return ', mem['cpp'], ', '.join(n for _, n in p['bind_args'])))
+    elif shape[0] == 'chainvt':
+        # `Location.X` through a value-type sibling (G67): read the translated
+        # property of the sibling's value; set it on a copy, written back
+        sib, mem, is_set = shape[1], shape[2], shape[3]
+        vt_cpp = sib['shape'][1] if sib['shape'][0] in ('direct', 'conv') else CS_RET_CPP.get(sib['shape'][1])
+        if is_set:
+            L.append('  void %s(%s) {' % (name, sig))
+            L.append('    %s rh3dm_v = %s();' % (vt_cpp, sib['cpp']))
+            L.append('    rh3dm_v.set_%s(value);' % mem)
+            L.append('    %s(rh3dm_v);' % sib['setter']['cpp'])
+        else:
+            vt_cs = {v: k for k, v in VT_CPP.items()}[vt_cpp]
+            L.append('  %s %s()%s {' % (VT_PROP_RET[(vt_cs, mem)], name, cq))
+            L.append('    return %s().%s();' % (sib['cpp'], mem))
     elif shape[0] == 'vget':
         # Variant: new, GetValue(ptr, which, v), ToX, delete
         v = shape[1]
+        if v.get('map'):
+            # an enum mapped through the int, as RhinoCommon compares it (G78)
+            mp = v['map']
+            L.append('  %s%s %s(%s)%s {' % (st, mp['cpp'], name, sig, cq))
+            L.append('    ON_XMLVariant* v = %s();' % WRAPPER['New'])
+            L.append('    %s(RH3DM_Const(), %s, v);' % (v['get'], v['which']))
+            L.append('    int rh3dm_i = %s(v);' % v['conv']['Native'])
+            L.append('    %s(v);' % WRAPPER['Delete'])
+            L.append('    return (rh3dm_i == %s) ? (%s)%s : (%s)%s;' % (mp['eq'], mp['cpp'], mp['a'], mp['cpp'], mp['b']))
+            L.append('  }')
+            return '\n'.join(L)
         L.append('  %s%s %s(%s)%s {' % (st, VARIANT_BT[v['cs']], name, sig, cq))
         L.append('    ON_XMLVariant* v = %s();' % WRAPPER['New'])
         L.append('    %s(RH3DM_Const(), %s, v);' % (v['get'], v['which']))
@@ -283,6 +444,9 @@ def emit(p):
         L.append('  %svoid %s(%s)%s {' % (st, name, sig, cq))
         L.append('    ON_XMLVariant* v = %s();' % WRAPPER['New'])
         arg = {'Guid': 'Binding_to_ON_UUID(value)'}.get(v['cs'], 'RH3DM_Val(value)' if v['vt'] else 'value')
+        if v.get('map'):
+            mp = v['map']                     # (E.A == value) ? K1 : K2 (G78)
+            arg = '(value == (%s)%s) ? %s : %s' % (mp['cpp'], mp['a'], mp['k1'], mp['k2'])
         L.append('    %s(v, %s);' % (v['set'], arg))
         L.append('    ON_XMLVariant* cur = %s();' % WRAPPER['New'])
         L.append('    %s(RH3DM_Const(), %s, cur);' % (v['get'], v['which']))
@@ -315,16 +479,29 @@ def emit(p):
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    const void* rc = %s;' % call)
-        L.append('    return rc ? new %s(m_ptr, %s) : nullptr;' % (target['gen'], idl))
+        if p.get('result_filter'):
+            # `is T item && !item.IsDeleted` (G66): a deleted component is no result
+            L.append('    if (!rc) return nullptr;')
+            L.append('    %s* rh3dm_item = new %s(m_ptr, %s);' % (target['gen'], target['gen'], idl))
+            L.append('    if (rh3dm_item->%s()) { delete rh3dm_item; return nullptr; }' % p['result_filter'])
+            L.append('    return rh3dm_item;')
+        else:
+            L.append('    return rc ? new %s(m_ptr, %s) : nullptr;' % (target['gen'], idl))
     elif shape[0] == 'wrap':
         target = BY_CS[shape[1]]
         L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
-        L.append('    %s%s* rc = %s;' % ('const ' if target.get('borrowed') else '', target['on'], call))
+        if p.get('wrap_cast'):
+            # the C side returns a base pointer (ON_Object* from ON_Object_Duplicate): the
+            # root's Cast, which is null for anything that is not one (G69)
+            L.append('    %s* rc = %s::Cast(%s);' % (target['on'], target['on'], call))
+        else:
+            L.append('    %s%s* rc = %s;' % ('const ' if target.get('borrowed') or (target.get('handle') and p['fn']['returns'].startswith('const ')) else '', target['on'], call))
         if target.get('handle'):
-            # a handle is not an ON_Object: the class itself owns it
-            L.append('    return rc ? new %s(rc) : nullptr;' % target['gen'])
+            # a handle is not an ON_Object: the class itself owns it (a const pointer
+            # the C side allocated for it is owned just the same)
+            L.append('    return rc ? new %s((%s*)rc) : nullptr;' % (target['gen'], target['on']))
         elif target.get('borrowed'):
             # a view INTO this object (never deleted; the binding keeps the owner alive)
             L.append('    return rc ? new %s((%s*)rc) : nullptr;' % (target['gen'], target['on']))
@@ -347,7 +524,12 @@ def emit(p):
             L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
             L += guard_lines
             L += ['    %s' % x for x in p['locals']]
-            L.append(call_line)
+            if len(shape) > 2:
+                # `return rc == 0 ? new int[0] : h.ToArray();`: empty when the result says so (G73)
+                L.append('    %s rh3dm_rc = %s;' % (p['fn']['returns'], call))
+                L.append('    if (rh3dm_rc %s) return CreateTuple(0);' % shape[2])
+            else:
+                L.append(call_line)
             L.append('    BND_TUPLE rc = CreateTuple(holder_out.Count());')
             L.append('    for (int i = 0; i < holder_out.Count(); i++)')
             L.append('      SetTuple(rc, i, %s);' % hp['elem'].format(n='holder_out'))
@@ -459,7 +641,14 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   virtual bool RH3DM_NoOwnedPtr() const = 0;''' if cls['reg'] in NO_OWNED_ABSTRACT else '') + ('''
   // the key of the derived component (SubDComponent.Id; G46)
   virtual %s RH3DM_Key() const = 0;''' % cls['abstract_key'] if cls.get('abstract_key') else '')
-        return ('class {gen}\n{{\npublic:\n' + storage
+        abase = BY_REG.get(cls.get('base', ''))
+        if abase:
+            # an abstract base of an abstract base (GeometryBase : CommonObject; G62):
+            # the base's accessors are this class's own
+            storage += '''
+  %s* %s() const override {{ return {getter}(); }}
+  %s* %sNC() const override {{ return {getter}NC(); }}''' % (abase['on'], abase['getter'], abase['on'], abase['getter'])
+        return ('class {gen}%s\n{{\npublic:\n' % (' : public %s' % abase['gen'] if abase else '') + storage
                 + '\n\n{methods}\n}};\n').format(
             gen=cls['gen'], on=cls['on'], getter=cls['getter'],
             methods=methods)
@@ -494,10 +683,10 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
             gen=cls['gen'], on=cls['on'], hand=cls['hand'],
             basegen=base['gen'], methods=methods, inherit=inherit,
             dctor=dctor, bridge=bridge)
-    acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') or cls.get('comp') else ('m_ptr', 'm_ptr')
+    acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') or cls.get('comp') or cls.get('shared') else ('m_ptr', 'm_ptr')
     override = ('\n  %s* %s() const override { return %s; }\n  %s* %sNC() const override { return %s; }'
                 % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
-    if base and base['reg'] in NO_OWNED_ABSTRACT:
+    if base and any(a['reg'] in NO_OWNED_ABSTRACT for a in abstract_chain(base)):
         override += ('\n  bool RH3DM_NoOwnedPtr() const override { return true; }' if cls.get('comp') else
                      '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }')
     if cls['mode'] == 'pointer' and cls.get('comp'):
@@ -540,6 +729,20 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # parent's pointer, never deletes it; the binding keeps the parent alive
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* parent) : m_ptr(parent) {{}}'''
+        if cls.get('scope'):
+            # scoped to a component of the parent, or -1: the whole parent (G77)
+            storage += '''
+  int m_scope = -1;
+  {gen}({on}* parent, int scope) : m_ptr(parent), m_scope(scope) {{}}'''
+        if cls.get('state'):
+            # a child WITH STATE (G60: Decals' m_read_only, m_rhino_doc_serial):
+            # the fields RhinoCommon's constructor stores, set by the property
+            # that makes the view and read by its members' guards and calls
+            st = cls['state']
+            storage = ('  {on}* m_ptr = nullptr;\n%s\n  {gen}({on}* parent, %s) : m_ptr(parent), %s {{}}' % (
+                '\n'.join('  %s %s = %s;' % (t, f, 'false' if t == 'bool' else '0') for t, f in st),
+                ', '.join('%s %s_' % (t, f) for t, f in st),
+                ', '.join('%s(%s_)' % (f, f) for _, f in st)))
         if cls.get('key'):
             # a child WITH A KEY (G43: `new PointCloudItem(cloud, index)`): the
             # parent's pointer plus the index/direction RhinoCommon keeps beside it
@@ -566,6 +769,21 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}
   {gen}(const {gen}&) = delete;{override}'''
+    elif cls['mode'] == 'pointer' and cls.get('shared'):
+        # a std::shared_ptr HANDLE (Decal; G60): RhinoCommon's m_decal_sp -- this object
+        # owns one shared_ptr (its own copy); the object is Raw(sp), Const or not
+        sh = cls['shared']
+        storage = '''  %(sp)s m_sp = nullptr;
+  explicit {gen}(%(sp)s sp) : m_sp(sp) {{}}
+  ~{gen}() {{ if (m_sp) %(delete)s(m_sp); }}
+  {gen}(const {gen}&) = delete;
+  {on}* RH3DM_Const() const {{
+    {on}* p = m_sp ? %(raw)s(m_sp) : nullptr;
+    if (!p) throw std::runtime_error("{cs_full}: no object");
+    return p;
+  }}
+  {on}* RH3DM_NonConst() const {{ return RH3DM_Const(); }}   // ConstPointer() == NonConstPointer(){override}''' % {
+            'sp': sh['sp'], 'delete': sh['Delete'], 'raw': sh['Raw']}
     elif cls['mode'] == 'pointer' and cls.get('handle'):
         # an IDisposable HANDLE (FileReference, File3dm): the plain storage, freed
         # with RhinoCommon's own Delete instead of `delete` (it may not be an ON_Object)
@@ -695,7 +913,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     else:
         # a value adopted from a native result (G49 valadopt) is copied in
         storage = '''  {on} m_val;
-  explicit {gen}(const {on}& v) : m_val(v) {{}}{bridge}{override}'''
+  explicit {gen}(const {on}& v) : m_val(v) {{}}{bridge}{dctor}{override}'''
     return ('class {gen}{inherit}\n{{\npublic:\n' + storage
             + '\n\n{methods}\n}};\n').format(
         gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
@@ -709,7 +927,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         nocopy='' if self_copy else '\n  %s(const %s&) = delete;' % (cls['gen'], cls['gen']))
 
 
-VARIANT_BT = {'bool': 'bool', 'double': 'double', 'int': 'int', 'Guid': 'BND_UUID',
+VARIANT_BT = {'bool': 'bool', 'double': 'double', 'int': 'int', 'float': 'float', 'Guid': 'BND_UUID',
               'Vector2d': 'BND_Vector2dX', 'Vector3d': 'BND_Vector3dX'}
 
 
@@ -764,10 +982,64 @@ class %s* %sIter::Gen_next()
     return decl, defn
 
 
+def abstract_chain(c):
+    """c and the abstract bases above it, nearest first (G62: GeometryBase, CommonObject)"""
+    out = []
+    while c is not None and c['mode'] == 'abstract':
+        out.append(c)
+        c = BY_REG.get(c.get('base', ''))
+    return out
+
+
+def emit_snapshot_iter(cls):
+    """the iterator class of a snapshot enumerator (declaration, definition;
+    G60): RhinoCommon's DecalEnumerator -- the fill call's array of handles,
+    each item its own copy, the Skip property's false items passed over"""
+    li = cls['liter']
+    sn = li['snapshot']
+    gen, item, owner_on = cls['gen'], li['item']['gen'], cls['on']
+    decl = """
+// %s's enumerator (RhinoCommon %s): a snapshot of the owner's items
+// (%s), each yielded as its own copy (%s)%s;
+// the snapshot frees its handles (%s)
+class %sIter
+{
+public:
+  ON_SimpleArray<%s> m_snap;
+  int m_index = 0;
+  explicit %sIter(%s* owner) { %s(owner, &m_snap); }
+  ~%sIter() { for (int i = 0; i < m_snap.Count(); i++) %s(m_snap[i]); }
+  %sIter(const %sIter&) = delete;
+  class %s* Gen_next();   // nullptr at the end
+};
+""" % (cls['reg'], 'GetEnumerator', sn['fill']['name'], sn['copy']['name'],
+       (', passing over those whose %s is false' % sn['skip']) if sn['skip'] else '',
+       sn['delete']['name'], gen, sn['sp'], gen, owner_on, sn['fill']['name'],
+       gen, sn['delete']['name'], gen, gen, item)
+    keep = ('    if (item->%s()) return item;\n    delete item;\n' % sn['skip']) if sn['skip'] else '    return item;\n'
+    defn = """
+class %s* %sIter::Gen_next()
+{
+  while (m_index < m_snap.Count()) {
+    class %s* item = new %s(%s(m_snap[m_index++]));
+%s  }
+  return nullptr;
+}
+
+%sIter* %s::Gen_iter() const
+{
+  return new %sIter(m_ptr);
+}
+""" % (item, gen, item, item, sn['copy']['name'], keep, gen, gen, gen)
+    return decl, defn
+
+
 def emit_linked_iter(cls):
     """the iterator class of a linked component list (declaration,
     definition): RhinoCommon's yield loop over First/Next (G43)"""
     li = cls['liter']
+    if li.get('snapshot'):
+        return emit_snapshot_iter(cls)
     gen, item, owner_on = cls['gen'], li['item']['gen'], cls['on']
     decl = '''
 // %s's enumerator (RhinoCommon GetEnumerator): %s, then %s, over the
@@ -812,6 +1084,8 @@ def js_class_shape(t):
     emscripten::val `{v}`, C++ conversion of `{v}` to `t`)"""
     if t in ('double', 'float', 'int', 'unsigned int', 'long long'):
         return 'number', '{v}.isNumber()', '{v}.as<%s>()' % t
+    if t == 'emscripten::val':                                    # a JS array for a std::vector (G70)
+        return 'array', '{v}.isArray()', '{v}'
     if t == 'bool':
         return 'boolean', '({v}.typeOf().as<std::string>() == "boolean")', '{v}.as<bool>()'
     enum_js = {v['cpp']: v.get('js', k) for k, v in CS_ENUMS.items()}
@@ -872,6 +1146,10 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 # a component of this list's owner: it keeps the list (and the owner) alive
                 py.append('      .def("__getitem__", &%s::%s, py::keep_alive<0, 1>())' % (cls['gen'], g))
                 js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
+            elif p['shape'][0] in ('datafrom', 'datafill'):
+                # a new data object: Python owns it (the default pointer policy)
+                py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
+                js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
             else:
                 py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
                 js.append('      .function("get", &%s::%s)' % (cls['gen'], g))
@@ -882,7 +1160,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             if cnt:
                 py.append('      .def("__len__", &%s::%s)' % (cls['gen'], cnt[0]['cpp']))
             continue
-        elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt'):
+        elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt', 'datafrom', 'datafill'):
             # a getter returning a NEW object: Python owns it (a property's default
             # policy, reference_internal, would leak it); JS gets the raw pointer
             sp = p.get('setter')
@@ -928,7 +1206,8 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         ps = list(by_shape.values())
         if len(ps) == 1:
             p = ps[0]
-            rawp = (', allow_raw_pointers()' if final_shape(p) in ('wrap', 'fill', 'proxywrap', 'construct', 'via', 'newobj', 'valadopt', 'subview')
+            rawp = (', allow_raw_pointers()' if final_shape(p) in ('wrap', 'fill', 'proxywrap', 'construct', 'via', 'newobj', 'valadopt', 'subview', 'datafrom', 'datafill', 'selfcopy')
+                    or (p['shape'][0] == 'translated' and p['shape'][1].endswith('*'))          # a class value (G74)
                     or any(t.endswith('*') for t, _ in p['bind_args']) else '')
             js.append('      .%s("%s", &%s::%s%s)'
                       % ('class_function' if static else 'function', jn, cls['gen'], p['cpp'], rawp))
@@ -967,11 +1246,12 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                      '\n        '.join(branches), fallback))
     base = BY_REG.get(cls.get('base', ''))
     if cls['mode'] == 'abstract':
-        # no constructor: instances only exist as derived objects
-        py_block = ('  py::class_<{gen}>(m, "{reg}")\n{defs};').format(
-            gen=cls['gen'], reg=cls['reg'], defs='\n'.join(py))
-        js_block = ('  class_<{gen}>("{reg}")\n{defs};').format(
-            gen=cls['gen'], reg=cls['reg'], defs='\n'.join(js))
+        # no constructor: instances only exist as derived objects; an abstract
+        # base of its own (GeometryBase : CommonObject; G62) is its binding base too
+        py_block = ('  py::class_<{gen}{pb}>(m, "{reg}")\n{defs};').format(
+            gen=cls['gen'], reg=cls['reg'], defs='\n'.join(py), pb=', %s' % base['gen'] if base else '')
+        js_block = ('  class_<{gen}{jb}>("{reg}")\n{defs};').format(
+            gen=cls['gen'], reg=cls['reg'], defs='\n'.join(js), jb=', base<%s>' % base['gen'] if base else '')
         return py_block, js_block
     py_base = ', %s' % base['gen'] if base else ''
     js_base = '<%s, base<%s>>' % (cls['gen'], base['gen']) if base \

@@ -35,6 +35,65 @@ def _derives(d, base):
     return False
 
 
+def scope_pass(per_class, manifest, c_by_name, skipped):
+    """G77: a scoped child view (BrepLoopListX: the brep's loops, or one face's) plans
+    its members a second time from the bodies specialized for the scoping constructor;
+    a member whose body reads the scope field dispatches on m_scope (scope_plan), or
+    refuses at run time on a scoped view when that variant is not generated."""
+    def sig(p):
+        return (p['m']['Kind'], p['m']['Name'], tuple(q['Type'] for q in p['m'].get('Params') or []), bool(p.get('setter_of')))
+    for cls, plans in per_class:
+        sc = cls.get('scope')
+        if not sc:
+            continue
+        scls = dict(cls, ctor_key=sc['key'], scoped=True)
+        sk = {}
+        splans = plan_class(scls, {'members': class_members(scls, manifest)}, c_by_name, sk)
+        by = {sig(q): q for q in splans}
+        for p in plans:
+            if sc['key'] not in (p['m'].get('Specialized') or {}):
+                continue
+            q = by.get(sig(p))
+            if q is not None and q['bind_args'] == p['bind_args'] and q['shape'][0] == p['shape'][0]:
+                p['scope_plan'] = q
+            else:
+                p['scope_plan'] = False
+                skipped['scope: variant not generated'] = skipped.get('scope: variant not generated', 0) + 1
+
+
+def _writers_planned(per_class):
+    return {(p['m']['Type'], p['m']['Name']) for _, plans in per_class for p in plans}
+
+
+def managed_null_pass(per_class, manifest, c_by_name, skipped):
+    """G75: a class whose RhinoCommon type has MANAGED fields (written only by members,
+    specgen ManagedFields) re-plans with its members' `(managed-null)` analyses when
+    no writer of those fields is generated: on every generated object they are null.
+    Checked again after the re-plan; a generated writer would make this unsound."""
+    planned = _writers_planned(per_class)
+    for i, (cls, plans) in enumerate(per_class):
+        mf = (TYPE_RECS.get(cls['type']) or {}).get('ManagedFields') or {}
+        if not mf or cls.get('null_key'):
+            continue
+        writers = {tuple(w.rsplit('.', 1)) for ws in mf.values() for w in ws}
+        if writers & planned:
+            skipped['managed fields: writer generated'] = skipped.get('managed fields: writer generated', 0) + 1
+            continue
+        if not any('(managed-null)' in (x.get('Specialized') or {}) for x in class_members(cls, manifest)):
+            continue
+        cls['null_key'] = '(managed-null)'
+        plans = plan_class(cls, {'members': class_members(cls, manifest)}, c_by_name, skipped)
+        PLANNED[cls['reg']] = plans
+        per_class[i] = (cls, plans)
+    planned = _writers_planned(per_class)
+    for cls, _ in per_class:
+        if cls.get('null_key'):
+            mf = (TYPE_RECS.get(cls['type']) or {}).get('ManagedFields') or {}
+            bad = {tuple(w.rsplit('.', 1)) for ws in mf.values() for w in ws} & planned
+            if bad:
+                raise SystemExit('%s: managed-field writer generated %s -- the (managed-null) analyses are unsound' % (cls['reg'], sorted(bad)))
+
+
 def refuse_overridden(manifest, per_class, skipped):
     """A base member that a derived generated class OVERRIDES in RhinoCommon
     with logic the generator does not produce is refused on the base (G49:
@@ -154,10 +213,21 @@ def main():
         plans = plan_class(cls, {'members': class_members(cls, manifest)}, c_by_name, skipped)
         PLANNED[cls['reg']] = plans
         per_class.append((cls, plans))
+    managed_null_pass(per_class, manifest, c_by_name, skipped)
+    scope_pass(per_class, manifest, c_by_name, skipped)
 
+    # the generated constructors, for a translated `new T(..)` (G74); computed again below
+    import planner as _planner
+    _planner.CTORS = {cls['reg']: bool(default_ctor_call(cls, manifest, c_by_name)
+                                       or (cls.get('ff') and cls['ff']['New'] in c_by_name)) for cls in CLASSES}
+    _planner.ARGCTORS = {cls['reg']: arg_ctor_plans(cls, manifest, c_by_name, {}) for cls in CLASSES}
+    translated_pass(per_class, manifest, skipped)        # G63: translated pure members
     refuse_overridden(manifest, per_class, skipped)
     refuse_overridden_count(per_class, skipped)
+    drop_orphaned_translations(per_class, skipped)
     all_plans = [p for _, plans in per_class for p in plans]
+    # a scoped view's variants call natives of their own (G77): declared, not counted
+    native_plans = all_plans + [p['scope_plan'] for p in all_plans if p.get('scope_plan')]
     check_override_shadowing(manifest, per_class)
     # File3dm table protocols (len / [i] / iteration): a concession granted
     # only where RhinoCommon's own protocols are fully generated
@@ -184,18 +254,20 @@ def main():
     # components): a list of generated components gets len and iteration
     for cls, plans in per_class:
         cls.pop('liter', None)
-        li = linked_iter(cls, plans)
+        # or a snapshot (G60: Decals -- DecalEnumerator's copy of the owner's items)
+        li = linked_iter(cls, plans) or snapshot_iter(cls, plans, manifest)
         if li:
             cls['liter'] = li
     # a base's guard asks the derived storage for IsDocumentControlled: every
     # derived class must resolve it to the same idiom (no portable override)
     for cls in CLASSES:
         b = BY_REG.get(cls.get('base', ''))
-        if b and b['reg'] in NO_OWNED_ABSTRACT and no_owned_pointer_cpp(cls, 'IsDocumentControlled') is None:
+        if b and any(a['reg'] in NO_OWNED_ABSTRACT for a in abstract_chain(b)) \
+                and no_owned_pointer_cpp(cls, 'IsDocumentControlled') is None:
             raise SystemExit('%s overrides IsDocumentControlled; %s asks it through RH3DM_NoOwnedPtr'
                              % (cls['cs'], b['cs']))
     # opaque declarations for C enums appearing in planned signatures
-    enum_decls = sorted({t[5:] for p in all_plans if p['fn'] for t in
+    enum_decls = sorted({t[5:] for p in native_plans if p['fn'] for t in
                          ([p['fn']['returns']] + [q['type'] for q in p['fn']['params']])
                          if t.startswith('enum ')})
     # C enums spelled bare in a signature (TextureMappingGetTransform) and
@@ -205,7 +277,7 @@ def main():
         for cls_kw, ename, under in re.findall(r'\benum\s+(class\s+)?(\w+)\s*:\s*([\w ]+?)\s*\{',
                                                open(f, errors='replace').read()):
             c_enum_defs.setdefault(ename, (bool(cls_kw), under.strip()))
-    bare_enums = sorted({t for p in all_plans if p['fn'] for t in
+    bare_enums = sorted({t for p in native_plans if p['fn'] for t in
                          ([p['fn']['returns']] + [q['type'] for q in p['fn']['params']])
                          if t in c_enum_defs})
 
@@ -233,7 +305,21 @@ def main():
         key = (x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name']
                if x['Type'] in type_names else x['Name'])
         if key in used_enums and key not in enum_values:
-            enum_values[key] = x['Values']
+            vals = x['Values']
+            names = [v.split('=')[0].strip() for v in vals]
+            def verbatim(i, v):     # a literal, or an earlier member of this enum (`RenderMaterial = Material`)
+                if '=' not in v:
+                    return True
+                e = v.split('=', 1)[1].strip()
+                return bool(re.match(r'^-?(\d+|0x[0-9A-Fa-f]+)$', e)) or e in names[:i]
+            if not all(verbatim(i, v) for i, v in enumerate(vals)):
+                # a member defined through another enum (`None = (int)UnsafeNativeMethods...`):
+                # declared with specgen's resolved integers, or not at all (G60)
+                ints = x.get('EnumInts')
+                if not ints or len(ints) != len(vals):
+                    raise SystemExit('enum %s: values specgen could not resolve: %s' % (key, vals))
+                vals = ['%s = %d' % (v.split('=')[0].strip(), n) for v, n in zip(vals, ints)]
+            enum_values[key] = vals
     missing = used_enums - set(enum_values)
     if missing:
         raise SystemExit('no manifest Values for enums: %s' % sorted(missing))
@@ -320,9 +406,9 @@ def main():
         for n in vt_natives} | {'extern "C" %s %s(%s);' % (
         p['fn']['returns'], p['fn']['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in p['fn']['params']))
-        for p in all_plans if p['fn']} | {'extern "C" %s %s(%s);' % (
+        for p in native_plans if p['fn']} | {'extern "C" %s %s(%s);' % (
         f['returns'], f['name'], ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in f['params']))
-        for p in all_plans for f in p.get('extra_fns') or []}
+        for p in native_plans for f in p.get('extra_fns') or []}
 
     ctors = {cls['reg']: default_ctor_call(cls, manifest, c_by_name)
              for cls in CLASSES}
@@ -373,7 +459,8 @@ def main():
         fn['returns'], fn['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
         for c in CLASSES for n in ([c['comp']['Const'], c['comp']['NonConst']] if c.get('comp') else [])
-        + ([c['liter']['first']['name'], c['liter']['next']['name']] if c.get('liter') else [])
+        + ([c['liter']['first']['name'], c['liter']['next']['name']] if c.get('liter') and not c['liter'].get('snapshot') else [])
+        + ([c['liter']['snapshot'][k]['name'] for k in ('fill', 'copy', 'delete')] if (c.get('liter') or {}).get('snapshot') else [])
         if n for fn in [c_by_name[n]]}
     # tripwire: a C function rhino3dm does not ship (variant rhino-only) would only
     # fail at link time; refuse here, naming it
@@ -398,6 +485,11 @@ def main():
         fn['returns'], fn['name'],
         ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
         for c in CLASSES if c.get('handle') for fn in [c_by_name[c['handle']['Delete']]]}
+    decls |= {'extern "C" %s %s(%s);' % (
+        fn['returns'], fn['name'],
+        ', '.join('%s %s' % (q['type'], q['name'] or 'a') for q in fn['params']))
+        for c in CLASSES if c.get('shared') for n in (c['shared']['Raw'], c['shared']['Delete'], c['shared']['Copy'])
+        if n for fn in [c_by_name[n]]}
 
     js_pruned = []
     reg_blocks = {cls['reg']: emit_registrations(cls, plans, js_pruned,
@@ -490,10 +582,52 @@ inline BND_IntervalX RH3DM_I(const ON_Interval& i) { BND_IntervalX r; r.m_t0 = i
 #if defined(ON_PYTHON_COMPILE)
 typedef py::object RH3DM_NTUPLE;
 inline RH3DM_NTUPLE RH3DM_NoneTuple() { return py::none(); }
+// a DateTime result (File3dm.Created; G68): a naive datetime.datetime; DateTime.MinValue is datetime.min
+typedef py::object RH3DM_DATETIME;
+inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
+  return py::module_::import("datetime").attr("datetime")(y, mo, d, h, mi, s); }
+inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
 #else
 typedef emscripten::val RH3DM_NTUPLE;
 inline RH3DM_NTUPLE RH3DM_NoneTuple() { return emscripten::val::null(); }
+// a std::vector result of a translated member (G70): a JS array of its elements
+template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v) {
+  emscripten::val a = emscripten::val::array();
+  for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
+  return a; }
+// a DateTime result (File3dm.Created; G68): a JS Date (local time, month 0-based)
+typedef emscripten::val RH3DM_DATETIME;
+inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
+  return emscripten::val::global("Date").new_(y, mo - 1, d, h, mi, s); }
+inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
 #endif
+// translated string members (G79), with .NET's semantics: Replace replaces every
+// occurrence and refuses an empty pattern; NewLine is the platform's
+inline std::wstring RH3DM_StrReplace(std::wstring s, const std::wstring& a, const std::wstring& b)
+{
+  if (a.empty()) throw std::invalid_argument("String cannot be of zero length.");
+  for (size_t i = s.find(a); i != std::wstring::npos; i = s.find(a, i + b.size()))
+    s.replace(i, a.size(), b);
+  return s;
+}
+inline bool RH3DM_StrContains(const std::wstring& s, const std::wstring& a) { return s.find(a) != std::wstring::npos; }
+inline bool RH3DM_StrStartsWith(const std::wstring& s, const std::wstring& a) { return s.compare(0, a.size(), a) == 0; }
+inline bool RH3DM_StrEndsWith(const std::wstring& s, const std::wstring& a)
+{ return s.size() >= a.size() && s.compare(s.size() - a.size(), a.size(), a) == 0; }
+#if defined(_WIN32)
+inline std::wstring RH3DM_NewLine() { return L"\\r\\n"; }
+#else
+inline std::wstring RH3DM_NewLine() { return L"\\n"; }
+#endif
+
+// `Duplicate() as Brep` (G74): the fresh object downcast; freed when it is not one
+template<class T, class S> T* RH3DM_As(S* p)
+{
+  if (!p) return nullptr;
+  T* t = dynamic_cast<T*>(p);
+  if (!t) delete p;
+  return t;
+}
 
 // `return (1 == rc || 3 == rc);` -- the C# result test, as written (G49)
 template <typename T, typename... V> inline bool RH3DM_In(T v, V... vals) { return ((v == vals) || ...); }
@@ -566,7 +700,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         + '\n'.join('class %s;' % cls['gen'] for cls in CLASSES) + '\n\n' \
         + '// subclass-aware wrapping: the most-derived generated class (gen_wrap.cpp)\n' \
         + '\n'.join('%s* RH3DM_Wrap_%s(%s* p);' % (c['gen'], c['reg'], c['on'])
-                    for c in CLASSES if c['mode'] == 'pointer' and not c.get('comp') and not c.get('handle') and not c.get('borrowed')) + '\n' \
+                    for c in CLASSES if c['mode'] in ('pointer', 'abstract') and not c.get('comp') and not c.get('handle') and not c.get('borrowed') and not c.get('shared')) + '\n' \
         + '// views inside another object (G58): the most-derived generated class (gen_wrap.cpp)\n' \
         + '\n'.join('%s* RH3DM_Sub_%s(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow);'
                     % (t['gen'], t['reg']) for t in sub_targets) + '\n' \
@@ -599,12 +733,30 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'fill'}
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] in ('child', 'construct', 'via', 'newobj', 'valadopt', 'subview')}
                        | {p['via_plan']['shape'][1]['reg'] for p in plans if p['shape'][0] == 'via'}
+                       | {p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'via'}           # the list it builds
                        | ({cls['liter']['item']['reg']} if cls.get('liter') else set())
                        | {p['shape'][1]['reg'] for p in plans if p['shape'][0] in ('constview', 'fileview', 'settingsview')}   # the view it constructs
                        | ({cls['table']['item']['reg']} if cls.get('table') else set())
+                       # objects placed in tuples (SetTuple needs the complete class): a tuple led
+                       # by a wrapped result (G73), a wrap tuple's elements (G72)
+                       | {m for p in plans if p['shape'][0] == 'tuple' and isinstance(p['shape'][1], tuple)
+                          for m in re.findall(r'RH3DM_Wrap_(\w+)\(', p['shape'][1][2])}
+                       | {m for p in plans if p['shape'][0] == 'wraptuple'
+                          for pair in re.findall(r'RH3DM_Wrap_(\w+)\(|new (BND_\w+)\(', p['shape'][1]['item'])
+                          for m in [pair[0] or next((c['reg'] for c in CLASSES if c['gen'] == pair[1]), None)] if m}
                        | ({cls['proxy']['Owner']} if (cls.get('proxy') or {}).get('Origin') == 'parent' else set())
+                       # classes a translated body names (G74)
+                       | {m for p in plans if p['shape'][0] == 'translated'
+                          for m in re.findall(r'\bBND_(\w+X)\b', p['shape'][1] + ' ' + p['shape'][2] + ' ' + ' '.join(t for t, _ in p['bind_args']))
+                          if m in BY_REG}
                        | arg_classes) - {cls['reg']})
-        dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps)
+        # data classes (G64): returned by a bridge, or taken as arguments (dereferenced here)
+        data_deps = sorted({p['shape'][1] + 'X' for p in plans if p['shape'][0] in ('datafrom', 'datafill')}
+                           | {cs + 'X' for p in plans for t, _ in p['bind_args'] for cs, cpp in DATA_CPP.items()
+                              if t in ('const %s*' % cpp, 'const %s&' % cpp)}
+                           | {cs + 'X' for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()
+                              if re.match(r'^%s\b' % re.escape(cpp), l)})
+        dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps)
         defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans) + table_def
         pvp = cls.get('proxy') or {}
         if pvp.get('Origin') == 'parent':
@@ -629,12 +781,15 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
             ctor = ('\n{gen}::{gen}(const {hand}& source)\n  : {member}({copy}) {{}}\n'.format(
                 gen=cls['gen'], hand=cls['hand'], member=member,
                 copy=cls['copy']) if bridged else '')
+            # a value-mode class copies the created object in and frees it (G74)
+            body = ('\n  : {member}({expr}) {{}}\n' if cls['mode'] != 'value'
+                    else '\n{{ {on}* rh3dm_p = {expr}; m_val = *rh3dm_p; delete rh3dm_p; }}\n')
             if ctors[cls['reg']] and not cls.get('ff'):      # a free-floating class declares its own
-                ctor += '\n{gen}::{gen}()\n  : {member}({expr}) {{}}\n'.format(
-                    gen=cls['gen'], member=member, expr=ctors[cls['reg']][0])
+                ctor += ('\n{gen}::{gen}()' + body).format(
+                    gen=cls['gen'], member=member, on=cls['on'], expr=ctors[cls['reg']][0])
             for p in argctors[cls['reg']]:
-                ctor += '\n{gen}::{gen}({sig})\n  : {member}({expr}) {{}}\n'.format(
-                    gen=cls['gen'], member=member, expr=p['ctor_call'],
+                ctor += ('\n{gen}::{gen}({sig})' + body).format(
+                    gen=cls['gen'], member=member, on=cls['on'], expr=p['ctor_call'],
                     sig=', '.join('%s %s' % a for a in p['bind_args']))
         files[fname(cls) + '.cpp'] = BANNER + '''#include "{hdr}.h"
 {dep_includes}{hand_inc}{ctor}
@@ -674,13 +829,19 @@ void initGen{reg}(void)
 
     wrap = []
     # components (G43) are never owned objects: an ON_BrepFace* wraps as its first non-component base
-    for c in [c for c in CLASSES if c['mode'] == 'pointer' and not c.get('comp') and not c.get('handle') and not c.get('borrowed')]:
-        body = ['%s* RH3DM_Wrap_%s(%s* p)\n{' % (c['gen'], c['reg'], c['on'])]
-        for d in sorted((d for d in CLASSES if d['mode'] == 'pointer' and derives(d, c) and not d.get('comp') and not d.get('handle') and not d.get('borrowed')),
+    for c in [c for c in CLASSES if c['mode'] in ('pointer', 'abstract') and not c.get('comp') and not c.get('handle') and not c.get('borrowed') and not c.get('shared')]:
+        body = ['%s* RH3DM_Wrap_%s(%s* p)\n{' % (c['gen'], c['reg'], c['on']),
+                '  if (!p) return nullptr;']                    # a null result is None/null (G73)
+        for d in sorted((d for d in CLASSES if d['mode'] == 'pointer' and derives(d, c) and not d.get('comp') and not d.get('handle') and not d.get('borrowed') and not d.get('shared')),
                         key=lambda d: (-depth(d), d['reg'])):
             body.append('  if (%s* d = %s::Cast(p)) return new %s(d);'
                         % (d['on'], d['on'], d['gen']))
-        body.append('  return new %s(p);\n}' % c['gen'])
+        if c['mode'] == 'abstract':
+            # an abstract root (GeometryBase; G69): a type with no generated class is
+            # no object -- freed, since the caller owns it
+            body.append('  delete p;\n  return nullptr;   // a geometry type with no generated class\n}')
+        else:
+            body.append('  return new %s(p);\n}' % c['gen'])
         wrap.append('\n'.join(body))
     # RH3DM_View_<root>(model, id): CreateGeometryHelper(ptr, fileObject) -- the
     # most-derived VIEW class of the object's geometry (resolved once to choose)
