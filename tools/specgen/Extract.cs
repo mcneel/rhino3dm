@@ -221,6 +221,9 @@ static class ExtractCommand
             {
                 Args = call.Args.Select(a =>
                 {
+                    // `ConstPointerForDimStyle()` as a native's argument (G88): the helper's single
+                    // native call, nested -- as delegations already resolve it
+                    if (a.Kind == "helpercall" && HelperInliner.ResolveHelperCall(m.Type, a) is { } rh) return rh;
                     if (a.Kind != "expr") return a;
                     // (uint)PerViewportSettings.All: the cast changes nothing a
                     // generator needs; resolve the constant underneath
@@ -284,8 +287,9 @@ static class ExtractCommand
                     return null;
                 }
                 var vals = em.Pairs.Select(pr => new[] { V(pr[0]), V(pr[1]) }).ToList();
-                return vals.All(x => x[0] != null && x[1] != null)
-                    ? em with { Values = vals.Select(x => new[] { x[0].Value, x[1].Value }).ToArray() } : em;
+                var dv = em.Default != null ? V(em.Default) : null;
+                return vals.All(x => x[0] != null && x[1] != null) && (em.Default == null || dv != null)
+                    ? em with { Values = vals.Select(x => new[] { x[0].Value, x[1].Value }).ToArray(), DefaultValue = dv } : em;
             }
             // an early `return IsoStatus.None;` carries the constant's value
             GuardInfo[] ResolveGuards(GuardInfo[] gs) => gs?.Select(g =>
@@ -391,9 +395,21 @@ static class HelperInliner
             }
             return null;
         }
-        foreach (var t in Chain(type))
-            if (Walker.Helpers.TryGetValue(t + "|" + callee + "|" + args.Length, out var h))
+        // a delegation passing `null` (G86: FileReference.CreateFromFullPath -> ...(fullPath, null)):
+        // no binding argument can say null, so a PUBLIC target is inlined too -- its single
+        // native call, the null a nullptr; its guards only null checks of passed-through parameters
+        var hs = Chain(type).Select(t => Walker.Helpers.TryGetValue(t + "|" + callee + "|" + args.Length, out var hh) ? hh : default).FirstOrDefault(x => x.Info != null);
+        if (hs.Info == null && args.Any(x => x.Kind == "literal" && x.Text == "null"))
+            foreach (var t in Chain(type))
+                if (Walker.Bodies.TryGetValue(t + "|" + callee + "|" + args.Length, out var pb) && pb.Info is { } pi && pb.PlainParams
+                    && pi.Calls is { Length: 1 } && pi.Body is "trivial" or "pattern" && (pi.Wrap == null || pi.WrapStatic == null && pi.WrapTuple == null)
+                    && (pi.FailThrow == null || pi.FailThrow.Cond == null)
+                    && (pi.Guards ?? Array.Empty<GuardInfo>()).All(g => g.Exception != null && g.NullCheckOf != null
+                        && pb.Params.Zip(args).Any(z => z.First == g.NullCheckOf && z.Second.Kind == "param" && z.Second.Text == g.NullCheckOf)))
+                { hs = (pb.Params, pi); break; }
+        if (hs.Info != null)
             {
+                var h = hs;
                 helper = h.Info;
                 var map = h.Params.Zip(args).ToDictionary(z => z.First, z => z.Second);
                 return h.Info.Calls.Select(c => c with
@@ -418,6 +434,8 @@ static class HelperInliner
         {
             Calls = calls, Body = h.Body, Native = h.Native, Inlined = a.Delegates,
             Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, HolderStatic = h.HolderStatic, Compare = h.Compare, ResultConv = h.ResultConv,
+            Wrap = h.Wrap ?? a.Wrap, WrapArity = h.Wrap != null ? h.WrapArity : a.WrapArity, WrapChecked = h.Wrap != null ? h.WrapChecked : a.WrapChecked,
+            Guards = h.Guards ?? a.Guards,
             Success = h.Success, Commits = h.Commits || a.Commits,
             Delegates = null, DelegateArgs = null,
         };
@@ -677,12 +695,14 @@ static class HelperInliner
     // `IntPtr p = GetConstOnComponentManifestPtr();` -> the helper's single
     // native call (abstract helpers resolve to their one implementation), as a
     // nested call argument; null when it is anything else
-    static ArgInfo ResolveHelperCall(string type, ArgInfo a)
+    internal static ArgInfo ResolveHelperCall(string type, ArgInfo a)
     {
         if (FindBody(type, a.Text, 0) is not var (_, b) || b.Info is not { Calls: [var call] } hi
             || hi.Body != "trivial" || hi.Guards != null || hi.Success != null || hi.Wrap != null || hi.Holder != null
-            || call.Args.Any(x => x.Kind is "param" or "out" or "helpercall"))
+            || call.Args.Any(x => x.Kind is "param" or "out"))
             return null;
+        // a helper argument of its own (`ConstParentDimStylePointer()` inside
+        // ConstPointerForDimStyle; G88) travels nested: the planner resolves it or refuses
         return new ArgInfo { Kind = "nativecall", Text = a.Text, Call = call };
     }
 
@@ -840,6 +860,8 @@ static class HelperInliner
                     FailThrow = h.FailThrow ?? m.FailThrow,
                     Holder = h.Holder, HolderArg = h.HolderArg, HolderEmpty = h.HolderEmpty, HolderStatic = h.HolderStatic, Compare = h.Compare, ResultConv = h.ResultConv,
                     ResultSelect = h.ResultSelect,
+                    Wrap = h.Wrap ?? m.Wrap, WrapArity = h.Wrap != null ? h.WrapArity : m.WrapArity, WrapChecked = h.Wrap != null ? h.WrapChecked : m.WrapChecked,
+                    Guards = h.Guards ?? m.Guards,
                     Delegates = null, DelegateArgs = null, Pure = null,
                     Native = native, Setter = setter,
                 };
@@ -942,6 +964,7 @@ record MemberRecord
     public string[] ChildArgs { get; init; } // ... its constructor arguments as written ("this")
     public string ChildVia { get; init; }    // Body=="construct": `return Owner.Faces[index];` -- the owner's list the component is taken from
     public string ChildCheck { get; init; }  // Body=="construct": the native result's failure test C# made first: "null" (pointer) | "neg" (index < 0)
+    public string ChildCache { get; init; }  // Body=="construct": `F ?? (F = new T(this))` -- the field caching the child (G89)
     public string ChildIf { get; init; }     // Child: made only while this sibling bool property holds (`IsPhysicallyBased ? new T(this) : null`)
     public GuardInfo[] ChildFail { get; init; } // Body=="construct" (ChildCheck "null"): what C# does when the pointer is null --
                                              // `if (COND) throw new E(msg);`* then `throw new E(msg);` (the last entry, Cond null)
@@ -1009,6 +1032,7 @@ record AccessorInfo
     public string[] ChildArgKinds { get; init; }
     public string ChildVia { get; init; }
     public string ChildCheck { get; init; }
+    public string ChildCache { get; init; }
     public GuardInfo[] ChildFail { get; init; }
     public string ReturnLocal { get; init; }
     public string NewObjFail { get; init; }
@@ -1201,6 +1225,8 @@ record FileProxyInfo
     public string NonConst { get; init; }    // resolve | base
     public string IdField { get; init; }     // the field holding the component id (m_id)
     public string FileField { get; init; }   // the field holding the File3dm (m_onx_model / m_parent / m__parent)
+    public string ChildField { get; init; }  // G89: the field a child proxy's `(Guid, <type> parent)` ctor stores its parent in
+    public string ChildType { get; init; }   // ... and that parent's type (the proxy type itself)
 }
 
 // A COMPONENT of an owner object (BrepFace of a Brep, SubDVertex of a SubD,
@@ -1275,6 +1301,9 @@ record ManifestEnumInfo
 {
     public string Item { get; init; }
     public string Type { get; init; }       // "ModelComponentType.X"
+    public bool Filter { get; init; }       // `if (_e.Current is T c)`: only components that ARE the item type (G87)
+    public string TypeParam { get; init; }  // the item is the enumerator's type parameter T (G87)
+    public string FindById { get; init; }   // `static X Find(IEnumerable en, Guid g)`: the first item whose Id is g (G89)
 }
 
 record SnapshotEnumInfo
@@ -1406,6 +1435,8 @@ record EnumMapInfo
     public long[][] Values { get; init; }    // ... resolved after the walk (null when any is not)
     public string Exception { get; init; }   // the default's throw
     public string Message { get; init; }
+    public string Default { get; init; }     // ... or the default's return (G83: `default: return E.Undefined;`)
+    public long? DefaultValue { get; init; }
 }
 
 record AdoptInfo
@@ -2322,6 +2353,29 @@ class Walker : CSharpSyntaxWalker
         };
     }
 
+    // `internal static T Find(IEnumerable en, Guid g) { foreach (var obj in en) { if (obj is T rc)
+    // { if (rc.Id == g) return rc; } } return null; }` (G89): its name, or null
+    static string FindByIdOf(TypeDeclarationSyntax node)
+    {
+        foreach (var m in node.Members.OfType<MethodDeclarationSyntax>())
+        {
+            if (!m.Modifiers.Any(SyntaxKind.StaticKeyword) || m.ParameterList.Parameters is not [var pe, var pg]
+                || pg.Type?.ToString() is not ("Guid" or "System.Guid") || m.Body?.Statements is not [ForEachStatementSyntax fe, var ret]
+                || Flat(ret) != "returnnull;" || fe.Expression.ToString() != pe.Identifier.Text)
+                continue;
+            var inner = fe.Statement is BlockSyntax { Statements: [var only] } ? only : fe.Statement;
+            if (inner is not IfStatementSyntax { Else: null, Condition: IsPatternExpressionSyntax { Expression: IdentifierNameSyntax ie, Pattern: DeclarationPatternSyntax { Designation: SingleVariableDesignationSyntax d } } } i1
+                || ie.Identifier.Text != fe.Identifier.Text)
+                continue;
+            var i2 = i1.Statement is BlockSyntax { Statements: [var o2] } ? o2 : i1.Statement;
+            var rc = d.Identifier.Text;
+            if (i2 is IfStatementSyntax { Else: null } ii && Flat(ii.Condition) == rc + ".Id==" + pg.Identifier.Text
+                && Flat(ii.Statement is BlockSyntax { Statements: [var o3] } ? o3 : ii.Statement) == "return" + rc + ";")
+                return m.Identifier.Text;
+        }
+        return null;
+    }
+
     // a MANIFEST enumerator (ManifestEnumInfo; G71): recognized whole or not at all
     static ManifestEnumInfo DetectManifestEnumerator(TypeDeclarationSyntax node)
     {
@@ -2346,6 +2400,14 @@ class Walker : CSharpSyntaxWalker
         var e = el.Identifier.Text;
         // MoveNext: `if (!_e.MoveNext()) return false; Current = _e.Current as T; return true;`
         var mn = methods.FirstOrDefault(m => m.Identifier.Text == "MoveNext" && m.ParameterList.Parameters.Count == 0);
+        var tp = node.TypeParameterList?.Parameters.Select(x => x.Identifier.Text).FirstOrDefault(x => x == item);
+        // ... or, generic over T (File3dmRenderContentEnumerator<T>; G87): `while (_e.MoveNext())
+        // { if (_e.Current is T c) { Current = c; return true; } } return false;` -- a filter
+        if (mn?.Body?.Statements is [WhileStatementSyntax { Condition: var wc, Statement: BlockSyntax { Statements: [IfStatementSyntax { Else: null, Condition: IsPatternExpressionSyntax { Expression: var ipe, Pattern: DeclarationPatternSyntax { Type: var ipt, Designation: SingleVariableDesignationSyntax ipd } }, Statement: var wthen }] } }, var wret]
+            && Flat(wc) == e + ".MoveNext()" && Flat(ipe) == e + ".Current" && ipt.ToString() == item && Flat(wret) == "returnfalse;"
+            && (wthen is BlockSyntax wb ? wb.Statements.Select(Flat).ToList() : new List<string> { Flat(wthen) }) is [var wcur, "returntrue;"]
+            && wcur == "Current=" + ipd.Identifier.Text + ";")
+            return new ManifestEnumInfo { Item = item, Type = eta.ToString(), Filter = true, TypeParam = tp, FindById = FindByIdOf(node) };
         if (mn?.Body?.Statements.Select(Flat).ToList() is not [var s0, var s1, "returntrue;"]
             || s0 != "if(!" + e + ".MoveNext())returnfalse;" || s1 != "Current=" + e + ".Currentas" + item + ";") return null;
         return new ManifestEnumInfo { Item = item, Type = eta.ToString() };
@@ -2678,6 +2740,14 @@ class Walker : CSharpSyntaxWalker
                 if (v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression } ae
                     && ae.Left.ToString() == "m__parent" && IsFile3dmType(ae.Right.ToString()))
                     fileVars.Add(v.Identifier.Text);
+            // `var file3dm = File3dmParent;` (File3dmRenderContent; G87): this type's own property
+            // whose getter is the `m__parent is File3dm` cast -- the same file
+            var fpProp = node.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(pp => pp.Identifier.Text == "File3dmParent" && IsFile3dmType(pp.Type.ToString()));
+            if (fpProp != null && fpProp.DescendantNodes().OfType<IsPatternExpressionSyntax>().Any(ip => ip.Expression.ToString() == "m__parent"
+                    && ip.Pattern is DeclarationPatternSyntax { Type: var fpt } && IsFile3dmType(fpt.ToString())))
+                foreach (var v in body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+                    if (v.Initializer?.Value is IdentifierNameSyntax { Identifier.Text: "File3dmParent" })
+                        fileVars.Add(v.Identifier.Text);
             // `if (m__parent is File3dm parent)` (File3dmEmbeddedFile; G71): the pattern variable
             foreach (var ip in body.DescendantNodes().OfType<IsPatternExpressionSyntax>())
                 if (ip.Expression.ToString() == "m__parent" && ip.Pattern is DeclarationPatternSyntax { Type: var ipt, Designation: SingleVariableDesignationSyntax ipd }
@@ -2715,13 +2785,43 @@ class Walker : CSharpSyntaxWalker
                    is ReturnStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_InternalGetConstPointer" } } });
             nonConst = viaGcp || ResolverIn(nb) == resolver ? "resolve" : "other";
         }
+        // a CHILD proxy (File3dmRenderContent; G89): a second ctor `(Guid id, <this type> parent)`
+        // storing the parent where the file ctor stores the file, and a `File3dmParent` that
+        // recurses through `Parent.File3dmParent` -- a child resolves in its parent's file
+        string childField = null;
+        var self = node.Identifier.Text;
+        var cctor = withId ? node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(c =>
+            c.ParameterList.Parameters.Count == 2
+            && c.ParameterList.Parameters[0].Type?.ToString() is "Guid" or "System.Guid"
+            && c.ParameterList.Parameters[1].Type?.ToString() == self && c.Body != null && c.Initializer == null) : null;
+        if (cctor != null && cctor.Body.Statements.Count == 2)
+        {
+            string cid = cctor.ParameterList.Parameters[0].Identifier.Text, cpar = cctor.ParameterList.Parameters[1].Identifier.Text;
+            var stores = cctor.Body.Statements.Select(st => st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Right: IdentifierNameSyntax r } ca }
+                    && ca.IsKind(SyntaxKind.SimpleAssignmentExpression)
+                    ? (left: ca.Left is MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } tl ? tl.Name.ToString() : ca.Left.ToString(), right: r.Identifier.Text)
+                    : (left: (string)null, right: (string)null)).ToList();
+            var parentStore = stores.FirstOrDefault(x => x.right == cpar).left;
+            var fpProp = node.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(pp => pp.Identifier.Text == "File3dmParent" && IsFile3dmType(pp.Type.ToString()));
+            bool recurses = fpProp != null && fpProp.DescendantNodes().OfType<MemberAccessExpressionSyntax>()
+                .Any(ma => ma.Name.Identifier.Text == "File3dmParent" && ma.Expression is IdentifierNameSyntax { Identifier.Text: "Parent" });
+            if (stores.Any(x => x.left == idField && x.right == cid) && parentStore != null && fileFields.Contains(parentStore) && recurses)
+                childField = parentStore;
+        }
         return new FileProxyInfo { Resolver = resolver, NonConst = nonConst, IdField = idField,
-                                   FileField = fileFields.OrderBy(f => f == "m__parent" ? 1 : 0).First() };
+                                   FileField = fileFields.OrderBy(f => f == "m__parent" ? 1 : 0).First(),
+                                   ChildField = childField, ChildType = childField != null ? self : null };
     }
 
     // _InternalGetConstPointer / NonConstPointer branches of the form
     //   var v = m__parent as T; if (v != null) return v.Helper();   (either null-test order)
     // (RHINO_SDK branches are disabled trivia in the portable view)
+    // `readonly object m_parent;` declared by the type itself (ViewportInfo; G89): its own
+    // parent link, used exactly like CommonObject's m__parent
+    static bool OwnObjectField(TypeDeclarationSyntax node, string name) =>
+        node.Members.OfType<FieldDeclarationSyntax>().Any(f => f.Declaration.Type.ToString() is "object" or "System.Object"
+            && f.Declaration.Variables.Any(v => v.Identifier.Text == name));
+
     static ParentViewInfo[] DetectParentViews(TypeDeclarationSyntax node)
     {
         // `Material m = m__parent as Material; if (m != null) { IntPtr p = m.ConstPointer();
@@ -2735,7 +2835,8 @@ class Walker : CSharpSyntaxWalker
             if (md?.Body == null) return map;
             var asVars = new Dictionary<string, string>();   // local -> parent type simple name
             foreach (var v in md.Body.DescendantNodes().OfType<VariableDeclaratorSyntax>())
-                if (v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression } ae && ae.Left.ToString() == "m__parent")
+                if (v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression } ae
+                    && (ae.Left.ToString() == "m__parent" || ae.Left.ToString() == "m_parent" && OwnObjectField(node, "m_parent")))
                     asVars[v.Identifier.Text] = ae.Right.ToString().Split('.').Last();
             foreach (var f in md.Body.DescendantNodes().OfType<IfStatementSyntax>())
             {
@@ -3117,6 +3218,8 @@ class Walker : CSharpSyntaxWalker
     // native creation call and owns the returned pointer.
     static readonly HashSet<string> PlumbingCalls = new()
     { "ConstPointer", "NonConstPointer", "KeepAlive", "ConstPointerOfInputCurves",
+      // `Runtime.CommonObject.GcProtect(a, b)`: KeepAlive for several (G86)
+      "GcProtect",
       "ConstructNonConstObject",
       // `ApplyMemoryPressure()` after a construction: a GC hint, like KeepAlive (G73)
       "ApplyMemoryPressure",
@@ -3133,6 +3236,12 @@ class Walker : CSharpSyntaxWalker
     public static string NullablePtr(ExpressionSyntax e)
     {
         while (e is ParenthesizedExpressionSyntax pe) e = pe.Expression;
+        // `attributes?.ConstPointer() ?? IntPtr.Zero`: the same optional argument (G86)
+        if (e is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Right: var cz,
+                Left: ConditionalAccessExpressionSyntax { Expression: IdentifierNameSyntax cid,
+                    WhenNotNull: InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax { Name.Identifier.Text: "ConstPointer" or "NonConstPointer" }, ArgumentList.Arguments.Count: 0 } } }
+            && cz.ToString() == "IntPtr.Zero")
+            return cid.Identifier.Text;
         if (e is not ConditionalExpressionSyntax c) return null;
         var cond = c.Condition is ParenthesizedExpressionSyntax cp ? cp.Expression : c.Condition;
         if (cond is not BinaryExpressionSyntax b) return null;
@@ -3144,6 +3253,18 @@ class Walker : CSharpSyntaxWalker
         if (zero?.ToString() != "IntPtr.Zero") return null;
         return ptr is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax pid, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } } pi
                && pi.ArgumentList.Arguments.Count == 0 && pid.Identifier.Text == p ? p : null;
+    }
+
+    // `return m_viewport ?? (m_viewport = new ViewportInfo(this));` (ViewInfo.Viewport; G89):
+    // the field caching the constructed child, else null
+    static string ChildCacheOf(SyntaxNode body)
+    {
+        var e = body is ArrowExpressionClauseSyntax ar ? ar.Expression
+              : body is BlockSyntax { Statements: [ReturnStatementSyntax { Expression: var re }] } ? re : null;
+        if (e is not BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax f, Right: var r }) return null;
+        while (r is ParenthesizedExpressionSyntax rp) r = rp.Expression;
+        return r is AssignmentExpressionSyntax { Left: IdentifierNameSyntax af, Right: ObjectCreationExpressionSyntax } && af.Identifier.Text == f.Identifier.Text
+            ? f.Identifier.Text : null;
     }
 
     // `bool rc = (UNM.F(p) > 0); ...; return rc;` (PolyCurve.HasGap): the
@@ -3217,18 +3338,23 @@ class Walker : CSharpSyntaxWalker
     {
         var on = ((IdentifierNameSyntax)sw.Expression).Identifier.Text;
         var pairs = new List<string[]>();
-        string ex = null, msg = null, assigned = null;
+        string ex = null, msg = null, assigned = null, def = null;
         bool getter = false, setter = false;
         foreach (var sec in sw.Sections)
         {
             var body = sec.Statements.ToList();
             if (sec.Labels is [DefaultSwitchLabelSyntax])
             {
+                if (body is [ReturnStatementSyntax { Expression: MemberAccessExpressionSyntax dret }]) { def = dret.ToString(); continue; }
                 if (body is not [var t0] || ThrowOf(t0) is not (string e1, var m1) || e1 == null) return null;
                 (ex, msg) = (e1, m1);
                 continue;
             }
-            if (sec.Labels is not [CaseSwitchLabelSyntax { Value: MemberAccessExpressionSyntax from }]) return null;
+            // an enum member, or an integer the native returns (`case -1:`; G83)
+            if (sec.Labels is not [CaseSwitchLabelSyntax { Value: var from }]
+                || from is not (MemberAccessExpressionSyntax or LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression }
+                                or PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.UnaryMinusExpression, Operand: LiteralExpressionSyntax }))
+                return null;
             if (body is [ReturnStatementSyntax { Expression: MemberAccessExpressionSyntax to }])
                 getter = true;
             else if (body is [ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax al, Right: MemberAccessExpressionSyntax to2 } }, BreakStatementSyntax]
@@ -3241,15 +3367,16 @@ class Walker : CSharpSyntaxWalker
             else return null;
             pairs.Add(new[] { from.ToString(), to.ToString() });
         }
-        if (ex == null || pairs.Count == 0 || getter == setter) return null;
+        if ((ex == null && (def == null || !getter)) || pairs.Count == 0 || getter == setter) return null;
         if (getter)
         {
             // the switched local holds the (cast) native result
             bool ok = block.Statements.OfType<LocalDeclarationStatementSyntax>().Any(ld => ld.Declaration.Variables is [var v]
-                && v.Identifier.Text == on && v.Initializer?.Value is CastExpressionSyntax { Expression: InvocationExpressionSyntax ci } && IsUnmCall(ci));
+                && v.Identifier.Text == on && (v.Initializer?.Value is CastExpressionSyntax { Expression: InvocationExpressionSyntax ci } && IsUnmCall(ci)
+                                               || v.Initializer?.Value is InvocationExpressionSyntax di && IsUnmCall(di)));
             if (!ok || sw != block.Statements[^1]) return null;
         }
-        return new EnumMapInfo { Switched = on, Local = assigned, Pairs = pairs.ToArray(), Exception = ex, Message = msg };
+        return new EnumMapInfo { Switched = on, Local = assigned, Pairs = pairs.ToArray(), Exception = ex, Message = msg, Default = def };
     }
 
     static bool LiteralArm(ExpressionSyntax e) =>
@@ -3300,6 +3427,12 @@ class Walker : CSharpSyntaxWalker
                 case BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax,
                                               Right: MemberAccessExpressionSyntax { Expression: PredefinedTypeSyntax { Keyword.Text: "string" }, Name.Identifier.Text: "Empty" } } sce
                     when sce.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax scu } } && IsUnmCall(scu):
+                    break;
+                // `attributes?.ConstPointer() ?? IntPtr.Zero`: an optional argument (G86)
+                case BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression } npc when NullablePtr(npc) != null:
+                    break;
+                case InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax } mbi
+                    when mbi.Parent is ConditionalAccessExpressionSyntax { Parent: BinaryExpressionSyntax mbc } && NullablePtr(mbc) != null:
                     break;
                 case BinaryExpressionSyntax b
                     when !b.IsKind(SyntaxKind.EqualsExpression)
@@ -5644,6 +5777,7 @@ class Walker : CSharpSyntaxWalker
             Commits = commits,
             Child = construct?.type, ChildArgs = construct?.args, ChildArgKinds = construct?.kinds, ChildVia = construct?.via,
             ChildCheck = construct?.check,
+            ChildCache = construct != null ? ChildCacheOf(body) : null,
             ReturnLocal = body is BlockSyntax { Statements: [.., ReturnStatementSyntax { Expression: IdentifierNameSyntax rl }] } ? rl.Identifier.Text : null,
             ChildFail = construct != null ? constructFail : null,
             NewObjFail = newObjFail,
@@ -5685,6 +5819,12 @@ class Walker : CSharpSyntaxWalker
         }
         if (kind == "constructor" && !Generatable.Contains(a?.Body ?? "") && CondCtor(seqBody ?? body, paramNames ?? NoParams) is { } cca)
             a = cca;
+        if (!Generatable.Contains(a?.Body ?? "") && SwitchReturns(body) is { } swb)
+        {
+            // G83: a switch assigning a result local, read as the switch returning it
+            var swa = AnalyzeBody(swb, paramNames ?? NoParams);
+            if (Generatable.Contains(swa.Body ?? "")) a = swa;
+        }
         Dictionary<string, AccessorInfo> specialized = null;
         if (_nullingCtors != null && body != null)
             foreach (var nc in _nullingCtors)
@@ -5720,6 +5860,7 @@ class Walker : CSharpSyntaxWalker
             ChildArgKinds = childArgKinds ?? a.ChildArgKinds,
             ChildVia = a.ChildVia,
             ChildCheck = a.ChildCheck,
+            ChildCache = a.ChildCache,
             ChildFail = a.ChildFail,
             Specialized = specialized,
             ReturnLocal = a.ReturnLocal,
@@ -5803,7 +5944,9 @@ class Walker : CSharpSyntaxWalker
     // with the call: its names are the helper's own locals, never parameters.
     static bool IsInlinable(AccessorInfo h) =>
         h.Calls is { Length: 1 } && h.Body is "trivial" or "pattern"
-        && h.Guards == null && h.Wrap == null
+        && h.Guards == null
+        // a helper wrapping its result travels with its wrap (Curve.TrimExtendHelper; G83)
+        && (h.Wrap == null || h.WrapStatic == null && h.WrapTuple == null)
         && (h.FailThrow == null || h.FailThrow.Cond == null);   // (a trailing Commit() and an unconditional fail-throw travel along)
 
     // `static T S(IntPtr p) { if (p == IntPtr.Zero) return null; return new T(p); }`
@@ -6486,6 +6629,38 @@ class Walker : CSharpSyntaxWalker
             Native = at.Calls.Concat(ae.Calls).Select(c => c.Name).Distinct().OrderBy(n => n, StringComparer.Ordinal).ToArray(),
             CtorCond = new GuardInfo { Cond = f.Condition.ToString(), Ids = ids.Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray() },
         };
+    }
+
+    // G83: `var rc = E.Undefined; switch (r) { case 1: rc = E.A; break; ... } return rc;`
+    // (Curve.ClosedCurveOrientation) is `switch (r) { case 1: return E.A; ...
+    // default: return E.Undefined; }` -- when rc is used nowhere else
+    static SyntaxNode SwitchReturns(SyntaxNode body)
+    {
+        if (body is not BlockSyntax b || b.Statements.Count < 3
+            || b.Statements[^1] is not ReturnStatementSyntax { Expression: IdentifierNameSyntax rr }
+            || b.Statements[^2] is not SwitchStatementSyntax sw
+            || sw.Sections.Any(sc => sc.Labels.Any(l => l is DefaultSwitchLabelSyntax)))
+            return null;
+        var rc = rr.Identifier.Text;
+        var decl = b.Statements.OfType<LocalDeclarationStatementSyntax>().FirstOrDefault(ld => ld.Declaration.Variables is [var v] && v.Identifier.Text == rc);
+        if (decl?.Declaration.Variables[0].Initializer?.Value is not MemberAccessExpressionSyntax init) return null;
+        var sections = new List<SwitchSectionSyntax>();
+        foreach (var sc in sw.Sections)
+        {
+            if (sc.Statements is not [ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax al, Right: MemberAccessExpressionSyntax av } }, BreakStatementSyntax]
+                || al.Identifier.Text != rc)
+                return null;
+            sections.Add(sc.WithStatements(SyntaxFactory.SingletonList<StatementSyntax>(SyntaxFactory.ReturnStatement(av))));
+        }
+        // rc: declared, assigned in the cases, returned -- nothing else
+        var uses = b.DescendantNodes().OfType<IdentifierNameSyntax>().Count(i => i.Identifier.Text == rc);
+        if (uses != sections.Count + 1) return null;
+        sections.Add(SyntaxFactory.SwitchSection(
+            SyntaxFactory.SingletonList<SwitchLabelSyntax>(SyntaxFactory.DefaultSwitchLabel()),
+            SyntaxFactory.SingletonList<StatementSyntax>(SyntaxFactory.ReturnStatement(init))));
+        var nsw = sw.WithSections(SyntaxFactory.List(sections));
+        var sts = b.Statements.Where(x => x != decl && x != b.Statements[^1]).Select(x => x == sw ? (StatementSyntax)nsw : x);
+        return b.WithStatements(SyntaxFactory.List(sts));
     }
 
     static readonly HashSet<string> SeqElems = new() { "Point3d", "Vector3d", "Point2d", "Point3f", "double", "int" };

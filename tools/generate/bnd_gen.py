@@ -109,6 +109,15 @@ def managed_null_pass(per_class, manifest, c_by_name, skipped):
         mf = (TYPE_RECS.get(cls['type']) or {}).get('ManagedFields') or {}
         if not mf or cls.get('null_key'):
             continue
+        if set(mf) <= set(cls.get('modeled') or {}):
+            # every managed field is modeled (G88): the members' own analyses, the
+            # fields resolved to the generated members -- never the null specialization
+            cls['mf_active'] = True
+            plans = plan_class(cls, {'members': class_members(cls, manifest)}, c_by_name, skipped)
+            plans += modeled_plans(cls, plans, manifest)
+            PLANNED[cls['reg']] = plans
+            per_class[i] = (cls, plans)
+            continue
         writers = {tuple(w.rsplit('.', 1)) for ws in mf.values() for w in ws}
         if writers & planned:
             skipped['managed fields: writer generated'] = skipped.get('managed fields: writer generated', 0) + 1
@@ -252,8 +261,14 @@ def main():
 
     # the generated constructors, for a translated `new T(..)` (G74); computed again below
     import planner as _planner
+    def internal_new(cls):
+        # a non-public default ctor (specgen InternalNew) a C# body may still call (G86)
+        n = (TYPE_RECS.get(cls['type']) or {}).get('InternalNew')
+        fn = c_by_name.get(n or '')
+        return cls['mode'] == 'pointer' and not cls.get('ff') and fn is not None and fn['returns'] == '%s*' % cls['on']
     _planner.CTORS = {cls['reg']: bool(default_ctor_call(cls, manifest, c_by_name)
-                                       or (cls.get('ff') and cls['ff']['New'] in c_by_name)) for cls in CLASSES}
+                                       or (cls.get('ff') and cls['ff']['New'] in c_by_name)
+                                       or internal_new(cls)) for cls in CLASSES}
     _planner.ARGCTORS = {cls['reg']: arg_ctor_plans(cls, manifest, c_by_name, {}) for cls in CLASSES}
     translated_pass(per_class, manifest, skipped)        # G63: translated pure members
     refuse_overridden(manifest, per_class, skipped)
@@ -460,6 +475,9 @@ def main():
     # cannot construct T that way either (G49)
     hidden_ctors = set()
     newobj_targets = {p['shape'][1]['reg'] for _, plans in per_class for p in plans if p['shape'][0] == 'newobj'}
+    # ... and a translated body's `new T()` through one (G86)
+    newobj_targets |= {c['reg'] for c in CLASSES for _, plans in per_class for p in plans
+                       if p['shape'][0] in ('translated', 'translatedout') and ('new %s()' % c['gen']) in p['shape'][2]}
     for cls in CLASSES:
         if cls['reg'] not in newobj_targets or ctors.get(cls['reg']) or cls.get('ff') or cls['mode'] != 'pointer':
             continue
@@ -637,6 +655,11 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// a sequence of new class objects (G89: SubDVertex.Edges): the caller owns each
+template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T*>& v) {
+  emscripten::val a = emscripten::val::array();
+  for (size_t i = 0; i < v.size(); i++) a.call<void>("push", v[i] ? emscripten::val(v[i], emscripten::allow_raw_pointers()) : emscripten::val::null());
+  return a; }
 // a sequence argument (G82/G83): a JS array, or a list object with toArray()
 // (Point3dListX, PolylineX: decision 4 of option 4) -- anything else throws
 inline bool RH3DM_JsIsSeq(const emscripten::val& v) {
@@ -667,7 +690,211 @@ struct RH3DM_Points
   int Count() const { return a.Count(); }
   void* ConstPointer() const { return (void*)&a; }
   void* NonConstPointer() { return (void*)&a; }
+  // SimpleArrayPoint3d.ToArray() (G84): the points, as Point3d[]
+  std::vector<BND_Point3dX> ToArray() const
+  {
+    std::vector<BND_Point3dX> v;
+    v.reserve((size_t)a.Count());
+    for (int i = 0; i < a.Count(); i++) { BND_Point3dX p; p.m_x = a[i].x; p.m_y = a[i].y; p.m_z = a[i].z; v.push_back(p); }
+    return v;
+  }
 };
+
+// `RhinoListHelpers.GetConstArray(points, out count)` in a translated class body (G86)
+template <class T> inline const std::vector<T>& RH3DM_ConstArray(const std::vector<T>& v, int& n) { n = (int)v.size(); return v; }
+
+// a byte[] argument (File3dm.FromByteArray; G86): Python any buffer (bytes,
+// bytearray, numpy), JS a Uint8Array or an array of numbers
+struct RH3DM_Bytes { std::vector<unsigned char> v;
+  const unsigned char* data() const { return v.data(); }
+  size_t size() const { return v.size(); } };
+#if defined(ON_PYTHON_COMPILE)
+namespace pybind11 { namespace detail {
+template <> struct type_caster<RH3DM_Bytes> {
+  PYBIND11_TYPE_CASTER(RH3DM_Bytes, const_name("bytes"));
+  bool load(handle src, bool) {
+    if (!PyObject_CheckBuffer(src.ptr())) return false;
+    buffer_info info = reinterpret_borrow<buffer>(src).request();
+    const unsigned char* p = (const unsigned char*)info.ptr;
+    value.v.assign(p, p + info.size * info.itemsize);
+    return true; }
+  static handle cast(const RH3DM_Bytes& b, return_value_policy, handle) {
+    return pybind11::bytes((const char*)b.v.data(), b.v.size()).release(); }
+}; } }
+#else
+inline RH3DM_Bytes RH3DM_JsBytes(const emscripten::val& v) {
+  RH3DM_Bytes b; b.v = emscripten::convertJSArrayToNumberVector<unsigned char>(v); return b; }
+#endif
+
+// System.Drawing.Rectangle in a translated body (G86): the old bindings' tuple
+// (x, y, width, height); FromLTRB as .NET makes it
+inline BND_TUPLE RH3DM_RectLTRB(int l, int t, int r, int b) {
+  BND_TUPLE rc = CreateTuple(4);
+  SetTuple(rc, 0, l); SetTuple(rc, 1, t); SetTuple(rc, 2, r - l); SetTuple(rc, 3, b - t);
+  return rc; }
+
+// a translated member's out object (G86): the tuple's caller owns it
+template <class T> inline void RH3DM_SetTupleOwned(BND_TUPLE& t, int i, T* p) {
+#if defined(ON_PYTHON_COMPILE)
+  t[i] = p ? py::cast(p, py::return_value_policy::take_ownership) : py::none();
+#else
+  t.set(i, p ? emscripten::val(p, emscripten::allow_raw_pointers()) : emscripten::val::null());
+#endif
+}
+// a translated member's out sequence (G86): a list in Python, an array in JS
+#if defined(ON_PYTHON_COMPILE)
+template <class T> inline py::list RH3DM_Seq(const std::vector<T>& v) { py::list l; for (const T& x : v) l.append(py::cast(x)); return l; }
+#else
+template <class T> inline emscripten::val RH3DM_Seq(const std::vector<T>& v) { return RH3DM_JsArray(v); }
+#endif
+
+// a C# cache field holding a view of this object's sub-object (G89: ViewInfo.m_viewport):
+// made on first access, owned here; a copy of the owner starts without one (it views the copy)
+template <class T> struct RH3DM_Cache
+{
+  std::unique_ptr<T> p;
+  RH3DM_Cache() {}
+  RH3DM_Cache(const RH3DM_Cache&) {}
+  RH3DM_Cache& operator=(const RH3DM_Cache&) { p.reset(); return *this; }
+};
+
+// SimpleArrayGuid in a class body (G89: File3dmRenderContent.Children): the uuids on the stack
+struct RH3DM_Guids
+{
+  ON_SimpleArray<ON_UUID> a;
+  void* NonConstPointer() { return &a; }
+  void* ConstPointer() const { return (void*)&a; }
+  int Count() const { return a.Count(); }
+  ON_UUID operator[](int i) const { return a[i]; }
+};
+
+// RhinoCommon's RDK Variant (G89, D40): `IConvertible` out and `object` in as a language
+// value, converted by the variant's runtime type -- scalars native, an id a uuid.UUID (JS
+// a string), 2/3/4 doubles a tuple (JS an array), a color a Color4fX, a matrix a
+// TransformX, a buffer bytes (JS a Uint8Array); a time is refused (no faithful mapping)
+#if defined(ON_PYTHON_COMPILE)
+// a sequence of new class objects (G89: SubDVertex.Edges): Python owns each, and each
+// keeps the object it came from alive (a list cannot be a keep_alive nurse)
+template <class T> inline py::list RH3DM_PyOwnedList(const std::vector<T*>& v, py::handle owner) {
+  py::list l;
+  for (T* e : v) {
+    py::object o = py::cast(e, py::return_value_policy::take_ownership);
+    if (e) py::detail::keep_alive_impl(o, owner);
+    l.append(o);
+  }
+  return l; }
+typedef py::object RH3DM_Value;
+inline RH3DM_Value RH3DM_ValueNone() { return py::none(); }
+#else
+typedef emscripten::val RH3DM_Value;
+inline RH3DM_Value RH3DM_ValueNone() { return emscripten::val::null(); }
+#endif
+struct RH3DM_Variant
+{
+  ON_XMLVariant v;
+  RH3DM_Variant() {}
+  explicit RH3DM_Variant(const RH3DM_Value& x)
+  {
+#if defined(ON_PYTHON_COMPILE)
+    if (x.is_none()) { v.SetNull(); return; }
+    if (py::isinstance<py::bool_>(x)) { v.SetValue(x.cast<bool>()); return; }
+    if (py::isinstance<py::int_>(x)) { v.SetValue(x.cast<int>()); return; }
+    if (py::isinstance<py::float_>(x)) { v.SetValue(x.cast<double>()); return; }
+    if (py::isinstance<py::str>(x)) { v.SetValue(ON_wString(x.cast<std::wstring>().c_str())); return; }
+    if (py::isinstance(x, py::module_::import("uuid").attr("UUID"))) { v.SetValue(Binding_to_ON_UUID(x)); return; }
+    if (py::isinstance<BND_Color4fX>(x)) { BND_Color4fX c = x.cast<BND_Color4fX>(); v.SetValue(ON_4fColor(c.m_r, c.m_g, c.m_b, c.m_a)); return; }
+    if (py::isinstance<BND_TransformX>(x)) { BND_TransformX t = x.cast<BND_TransformX>(); ON_Xform xf = RH3DM_Val(t); v.SetValue(xf); return; }
+    if (py::isinstance<py::bytes>(x) || py::isinstance<py::bytearray>(x)) { std::string b = x.cast<std::string>(); v.SetValue(b.data(), b.size()); return; }
+    if (py::isinstance<py::tuple>(x) || py::isinstance<py::list>(x)) {
+      py::sequence q = x.cast<py::sequence>();
+      size_t n = (size_t)py::len(q);
+      if (n >= 2 && n <= 4) {
+        double d[4] = {0, 0, 0, 0};
+        for (size_t i = 0; i < n; i++) d[i] = q[i].cast<double>();
+        v.SetValue(d, n == 2 ? ON_XMLVariant::ArrayTypes::Array2 : n == 3 ? ON_XMLVariant::ArrayTypes::Array3 : ON_XMLVariant::ArrayTypes::Array4);
+        return;
+      }
+    }
+    throw py::type_error("Variant: unsupported value type");
+#else
+    std::string t = x.typeOf().as<std::string>();
+    if (x.isNull() || x.isUndefined()) { v.SetNull(); return; }
+    if (t == "boolean") { v.SetValue(x.as<bool>()); return; }
+    if (t == "number") {
+      double d = x.as<double>();
+      if (emscripten::val::global("Number").call<bool>("isInteger", x)) v.SetValue((int)d); else v.SetValue(d);
+      return;
+    }
+    if (t == "string") { std::wstring w = x.as<std::wstring>(); v.SetValue(ON_wString(w.c_str())); return; }
+    if (x.isArray()) {
+      unsigned n = x["length"].as<unsigned>();
+      if (n >= 2 && n <= 4) {
+        double d[4] = {0, 0, 0, 0};
+        for (unsigned i = 0; i < n; i++) d[i] = x[i].as<double>();
+        v.SetValue(d, n == 2 ? ON_XMLVariant::ArrayTypes::Array2 : n == 3 ? ON_XMLVariant::ArrayTypes::Array3 : ON_XMLVariant::ArrayTypes::Array4);
+        return;
+      }
+    }
+    throw std::invalid_argument("Variant: unsupported value type");
+#endif
+  }
+  void* NonConstPointer() { return &v; }
+  void* ConstPointer() const { return (void*)&v; }
+  operator RH3DM_Value() const
+  {
+    switch (v.Type())
+    {
+    case ON_XMLVariant::Types::Null: return RH3DM_ValueNone();
+#if defined(ON_PYTHON_COMPILE)
+    case ON_XMLVariant::Types::Bool: return py::bool_(v.AsBool());
+    case ON_XMLVariant::Types::Integer: return py::int_(v.AsInteger());
+    case ON_XMLVariant::Types::Float: return py::float_((double)v.AsFloat());
+    case ON_XMLVariant::Types::Double: return py::float_(v.AsDouble());
+    case ON_XMLVariant::Types::String: return py::cast(std::wstring(static_cast<const wchar_t*>(v.AsString())));
+    case ON_XMLVariant::Types::Uuid: return ON_UUID_to_Binding(v.AsUuid());
+    case ON_XMLVariant::Types::DoubleArray2: { ON_2dPoint p = v.As2dPoint(); return py::make_tuple(p.x, p.y); }
+    case ON_XMLVariant::Types::DoubleArray3: { ON_3dPoint p = v.As3dPoint(); return py::make_tuple(p.x, p.y, p.z); }
+    case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
+    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4fX r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
+    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_TransformX t = RH3DM_Val(xf); return py::cast(t); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
+#else
+    case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
+    case ON_XMLVariant::Types::Integer: return emscripten::val(v.AsInteger());
+    case ON_XMLVariant::Types::Float: return emscripten::val((double)v.AsFloat());
+    case ON_XMLVariant::Types::Double: return emscripten::val(v.AsDouble());
+    case ON_XMLVariant::Types::String: return emscripten::val(std::wstring(static_cast<const wchar_t*>(v.AsString())));
+    case ON_XMLVariant::Types::Uuid: return emscripten::val(ON_UUID_to_Binding(v.AsUuid()));
+    case ON_XMLVariant::Types::DoubleArray2: { ON_2dPoint p = v.As2dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); return a; }
+    case ON_XMLVariant::Types::DoubleArray3: { ON_3dPoint p = v.As3dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); a.call<void>("push", p.z); return a; }
+    case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); a.call<void>("push", p.z); a.call<void>("push", p.w); return a; }
+    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4fX r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return emscripten::val(r); }
+    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_TransformX t = RH3DM_Val(xf); return emscripten::val(t); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::vector<unsigned char> s((size_t)b.Size()); b.SeekFromStart(0); if (!s.empty()) b.Read((ON__UINT64)s.size(), s.data()); return emscripten::val::global("Uint8Array").new_(emscripten::typed_memory_view(s.size(), s.data())); }
+#endif
+    default: break;
+    }
+    throw std::runtime_error("Variant: a time (or an unknown type) has no language value here");
+  }
+};
+
+// a modeled managed field (G88: AnnotationBase.m_parent_dimstyle): a borrowed object or
+// an owned one (a light copy); an owned one replaced stays alive until the owner dies,
+// so a wrapper the getter handed out never dangles
+template <class T> struct RH3DM_MField {
+  T* p = nullptr;
+  bool owned = false;
+  std::vector<T*> old;
+  RH3DM_MField() = default;
+  RH3DM_MField(const RH3DM_MField&) = delete;
+  RH3DM_MField& operator=(const RH3DM_MField&) = delete;
+  ~RH3DM_MField() { if (owned) delete p; for (T* q : old) delete q; }
+  void set(T* q, bool own) { if (owned && p && p != q) old.push_back(p); p = q; owned = own; }
+};
+
+// a native's result in a translated class body (G85): a pointer is C#'s IntPtr
+template <class T> inline T RH3DM_R(T v) { return v; }
+template <class T> inline void* RH3DM_R(T* p) { return (void*)p; }
 
 // translated string members (G79), with .NET's semantics: Replace replaces every
 // occurrence and refuses an empty pattern; NewLine is the platform's
@@ -687,6 +914,9 @@ inline std::wstring RH3DM_NewLine() { return L"\\r\\n"; }
 #else
 inline std::wstring RH3DM_NewLine() { return L"\\n"; }
 #endif
+
+// a File3dm view handed back (G89: TryConvertBrep): a new view of the same object
+template<class T> T* RH3DM_ViewCopyOf(const T* p) { return p->RH3DM_ViewCopy(); }
 
 // `Duplicate() as Brep` (G74): the fresh object downcast; freed when it is not one
 template<class T, class S> T* RH3DM_As(S* p)
@@ -789,6 +1019,11 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                                  emit_linked_iter(cls) if cls.get('liter') else ('', ''))
         files[fname(cls) + '.h'] = (
             BANNER + '#pragma once\n#include "gen_common.h"\n' + base_inc
+            # a modeled field's class (G88): complete here, the field deletes what it owns
+            + ''.join('#include "gen_%s.h"\n' % BY_CS[v['cs']]['reg'].lower()
+                      for v in (cls.get('modeled') or {}).values() if cls.get('mf_active') and v['cs'] in BY_CS)
+            # a cached view's class (G89): complete here, the cache deletes what it holds
+            + ''.join('#include "gen_%s.h"\n' % r.lower() for r in sorted({p['shape'][1]['reg'] for p in plans if p['shape'][0] == 'cachedview'}))
             + '\n' + emit_class(cls, plans, bool(ctors[cls['reg']]), argctors[cls['reg']]) + table_decl)
 
         # cross-class returns need the target's complete type where the
@@ -814,7 +1049,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                           for m in [pair[0] or next((c['reg'] for c in CLASSES if c['gen'] == pair[1]), None)] if m}
                        | ({cls['proxy']['Owner']} if (cls.get('proxy') or {}).get('Origin') == 'parent' else set())
                        # classes a translated body names (G74)
-                       | {m for p in plans if p['shape'][0] == 'translated'
+                       | {m for p in plans if p['shape'][0] in ('translated', 'translatedout')
                           for m in re.findall(r'\bBND_(\w+X)\b', p['shape'][1] + ' ' + p['shape'][2] + ' ' + ' '.join(t for t, _ in p['bind_args']))
                           if m in BY_REG}
                        | arg_classes) - {cls['reg']})
@@ -824,16 +1059,17 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                               if t in ('const %s*' % cpp, 'const %s&' % cpp)}
                            | {cs + 'X' for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()
                               if re.match(r'^%s\b' % re.escape(cpp), l)})
-        dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps)
+        dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps) \
+            + ''.join('#include "../bindings/%s"\n' % h for h in sorted({x['header'] for x in HAND_MEMBERS.get(cls['reg'], [])}))
         defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans) + table_def
         pvp = cls.get('proxy') or {}
         if pvp.get('Origin') == 'parent':
             # the owner's const pointer, where the owner's class is complete (G57)
             own = BY_REG[pvp['Owner']]
             oarg = C_BY_NAME[pvp['Resolver']]['params'][0]['type']
-            defs = ('%s %s::RH3DM_PvOwner(const %s* owner)\n{\n  return (%s)owner->%s;\n}\n\n'
+            defs = ('%s %s::RH3DM_PvOwner(const %s* owner)\n{\n  return (%s)%s;\n}\n\n'
                     % (oarg, cls['gen'], own['gen'], oarg,
-                       'RH3DM_Const()' if own.get('proxy') else 'm_ptr')) + defs
+                       'owner->RH3DM_Const()' if own.get('proxy') else '&owner->m_val' if own['mode'] == 'value' else 'owner->m_ptr')) + defs
 
         py_block, js_block = reg_blocks[cls['reg']]
         if cls['mode'] == 'abstract':
@@ -940,6 +1176,7 @@ void initGen{reg}(void)
     inits_js = '\n'.join('  initGen%s();' % cls['reg'] for cls in CLASSES)
     files['gen_init.cpp'] = BANNER + '''#include "gen_common.h"
 
+{hand_inc}
 #if defined(ON_PYTHON_COMPILE)
 {py_decls}
 {vt_py_decls}
@@ -952,7 +1189,7 @@ void initGeneratedBindings(rh3dmpymodule& m)
   }});
 {enums_py}
 {vt_py}{inits_py}
-{enums_py_nested}
+{hand_py}{enums_py_nested}
 }}
 #endif
 
@@ -964,7 +1201,7 @@ void initGeneratedBindings(void)
 {{
 {enums_js}
 {vt_js}{inits_js}
-{js_iter}}}
+{hand_js}{js_iter}}}
 #endif
 '''.format(
         py_decls='\n'.join('void initGen%s(rh3dmpymodule&);' % cls['reg']
@@ -974,6 +1211,10 @@ void initGeneratedBindings(void)
         enums_py='\n'.join(gen_enum_py), enums_js='\n'.join(gen_enum_js),
         enums_py_nested='\n'.join(gen_enum_py_nested),
         inits_py=inits_py, inits_js=inits_js,
+        # hand-written bindings (G90): after every generated class (they may derive from one)
+        hand_inc=''.join('#include "../bindings/%s"\n' % h['header'] for h in HAND_BINDINGS),
+        hand_py=''.join('  %s(m);\n' % h['init'] for h in HAND_BINDINGS),
+        hand_js=''.join('  %s();\n' % h['init'] for h in HAND_BINDINGS),
         vt_py_decls=''.join('void initGen%s(rh3dmpymodule&);\n' % r for r in vt_regs),
         vt_js_decls=''.join('void initGen%s(void);\n' % r for r in vt_regs),
         vt_py=''.join('  initGen%s(m);\n' % r for r in vt_regs),
@@ -983,7 +1224,8 @@ void initGeneratedBindings(void)
         # Symbol.iterator on the table's prototype
         js_iter=''.join('  { emscripten::val proto = emscripten::val::module_property("%s")["prototype"];\n'
                         '    proto.set(emscripten::val::global("Symbol")["iterator"], proto["iterator"]); }\n'
-                        % c['reg'] for c in CLASSES if c.get('table') or c.get('liter')))
+                        % r for r in [c['reg'] for c in CLASSES if c.get('table') or c.get('liter')]
+                                      + [t for h in HAND_BINDINGS for t in h.get('iter_tables', [])]))
 
     # the C-layer translation units the generated code calls into, from the
     # manifest's defining file per function -- replaces discovering the link

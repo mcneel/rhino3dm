@@ -232,10 +232,16 @@ def plan(member, cfn, cls):
                     iargs.append('nullptr' if ia['Text'] == 'null' else ia['Text'])
                 elif ia['Kind'] == 'expr' and ia['Text'] == 'IntPtr.Zero' and iq['type'].endswith('*'):
                     iargs.append('nullptr')                  # an inlined helper's IntPtr.Zero (G75)
+                elif ia['Kind'] == 'helpercall' and modeled_ptr(cls, ia['Text']) and iq['type'].endswith('*'):
+                    iargs.append('(%s)RH3DM_MfPtr_%s()' % (iq['type'], modeled_ptr(cls, ia['Text'])))   # G88
                 else:
                     return None, 'nested call arg %s' % ia['Text']
             call_exprs.append('%s(%s)' % (inner['Name'], ', '.join(iargs)))
             extra_fns.append(ifn)
+            continue
+        if k == 'helpercall' and modeled_ptr(cls, carg['Text']) and ctype.endswith('*'):
+            # `ConstParentDimStylePointer()` (G88): the modeled field's pointer, or null
+            call_exprs.append('(%s)RH3DM_MfPtr_%s()' % (ctype, modeled_ptr(cls, carg['Text'])))
             continue
         if k == 'fillptr':                    # the object the fill idiom created
             call_exprs.append('fill_ptr')
@@ -268,6 +274,11 @@ def plan(member, cfn, cls):
             # box.Min: a translated property of a value-type parameter
             pn, _, mem = carg['Text'].partition('.')
             pcs = cs_param_modes.get(pn, ('', ''))[1]
+            if pcs == 'byte[]' and mem == 'Length':
+                if ctype not in ('int', 'unsigned int'):
+                    return None, 'bytes length -> %s' % ctype
+                call_exprs.append('(%s)%s.size()' % (ctype, pn))         # G86
+                continue
             if seq_elem(pcs) and mem == 'Count':
                 if ctype not in ('int', 'unsigned int'):
                     return None, 'sequence count -> %s' % ctype
@@ -441,6 +452,12 @@ def plan(member, cfn, cls):
             if name not in cs_param_modes:
                 return None, 'param %s: not a C# parameter' % name
             cstype = cs_param_modes[name][1]
+            if cstype == 'byte[]':
+                # a byte buffer (File3dm.FromByteArray; G86): its bytes, as the C side reads them
+                if ctype.replace(' ', '') not in ('constunsignedchar*', 'constvoid*', 'unsignedchar*'):
+                    return None, 'bytes %s -> %s' % (name, ctype)
+                call_exprs.append('(%s)%s.data()' % (ctype, name))
+                continue
             if seq_elem(cstype):
                 # a sequence parameter where C# passed GetConstArray's array (G82):
                 # the vector's contiguous elements, layout-equal to the C struct
@@ -557,6 +574,8 @@ def plan(member, cfn, cls):
                 bind_args.append((VT_CPP[cstype], name))
             elif seq_cpp(cstype):
                 bind_args.append(('const std::vector<%s>&' % seq_cpp(cstype), name))    # G82
+            elif cstype == 'byte[]':
+                bind_args.append(('const RH3DM_Bytes&', name))                         # G86
             elif cstype not in CS_ARG:
                 return None, 'C# arg type %s' % cstype
             else:
@@ -764,10 +783,16 @@ def plan(member, cfn, cls):
     elif sig_ret in CS_ENUMS and (member.get('EnumMap') or {}).get('Values') and not member['EnumMap'].get('Local'):
         # Decal.Mapping's getter (G60): `switch ((N)F(...)) { case N.A: return M.A; ... }`
         em = member['EnumMap']
-        if cret not in ('int', 'unsigned int') or em.get('Exception') not in EXMAP:
+        if em.get('Default') is not None and em.get('Exception') is None:
+            # `default: return E.Undefined;` (Curve.ClosedCurveOrientation; G83)
+            if cret not in ('int', 'unsigned int') or em.get('DefaultValue') is None:
+                return None, 'enum map default on %s' % cret
+            shape = ('enummap', CS_ENUMS[sig_ret]['cpp'], em['Values'], None, em['DefaultValue'])
+        elif cret not in ('int', 'unsigned int') or em.get('Exception') not in EXMAP:
             return None, 'enum map on %s' % cret
-        shape = ('enummap', CS_ENUMS[sig_ret]['cpp'], em['Values'], EXMAP[em['Exception']],
-                 (em.get('Message') or member['Name']).replace('"', "'"))
+        else:
+            shape = ('enummap', CS_ENUMS[sig_ret]['cpp'], em['Values'], EXMAP[em['Exception']],
+                     (em.get('Message') or member['Name']).replace('"', "'"))
     elif sig_ret in CS_ENUMS and member.get('ResultSelect'):
         # `return value == (int)E.Clamp ? E.Clamp : E.Repeat;` (G55): every constant
         # must be a member of the returned enum (or a plain integer key)
@@ -1056,6 +1081,13 @@ def construct_shape(member, cls, self_expr, argnames, cret, out_by_name):
     (the native returned the key), None (no native call)."""
     kinds, args = member.get('ChildArgKinds') or [], member.get('ChildArgs') or []
     check = member.get('ChildCheck')
+    # `IntPtr p = F(..); if (IntPtr.Zero != p) return new Mesh(p, null); return null;`
+    # (Mesh.CreateFromSubDControlNet; G86): not a component -- the new object, wrapped
+    tgt = BY_CS.get(member.get('Child') or '')
+    if (tgt is not None and tgt['mode'] == 'pointer' and not tgt.get('comp') and (tgt.get('proxy') or {}).get('Origin') != 'parent'
+            and kinds == ['result', 'const'] and args[1:] == ['null'] and check == 'null'
+            and cret == '%s*' % tgt['on'] and cs_unqualify(member.get('Returns') or '') == member['Child']):
+        return ('wrap', member['Child'])
     if member.get('ChildVia'):
         if len(args) != 2 or kinds[1] != 'result' or check != 'neg' or cret not in ('int', 'unsigned int'):
             return 'via form'
@@ -1102,6 +1134,12 @@ def construct_shape(member, cls, self_expr, argnames, cret, out_by_name):
             return ('construct', target, owner, None, 'check', check)   # `if (!F(...)) return null;`
         return 'construct child after a call'
     pv = (target or {}).get('proxy') or {}
+    if pv.get('Origin') == 'parent' and pv.get('NoIndex'):
+        # `m_viewport ?? (m_viewport = new ViewportInfo(this))` (ViewInfo.Viewport; G89): the
+        # view of this object's sub-object, made once and held (the C# cache field)
+        if pv['Owner'] != cls['reg'] or kinds != ['this'] or cret is not None or not member.get('ChildCache'):
+            return 'construct view of %s' % pv['Owner']
+        return ('cachedview', target, member['ChildCache'])
     if pv.get('Origin') == 'parent':
         # `if (index >= 0) return new Texture(index, this); return null;` (Material.GetTexture):
         # a view of (this, index), copy-on-write on its first edit (G57)
@@ -1865,6 +1903,14 @@ def class_members(cls, manifest):
         # with those fields null (G47) -- the record's analysis keys replaced
         own = [dict(x, **x['Specialized'][cls['ctor_key']])
                if (x.get('Specialized') or {}).get(cls['ctor_key']) else x for x in own]
+    if cls.get('mf_active'):
+        # G88: the id property's setter is its (managed-null) analysis plus the
+        # retarget of the modeled field the C# body does after it (MfRetarget)
+        for f, v in (cls.get('modeled') or {}).items():
+            for i, x in enumerate(own):
+                sp = (x.get('Specialized') or {}).get('(managed-null):set')
+                if x['Name'] == v['id_prop'] and x['Kind'] == 'property' and sp:
+                    own[i] = dict(x, Setter=sp, MfRetarget=f)
     if cls.get('null_key'):
         # the type's managed fields are null on every generated object (no writer is
         # generated; bnd_gen checks): bodies as analyzed with them null (G75)
@@ -2892,6 +2938,8 @@ def table_protocol(cls, manifest, plans):
     and the item type T is a proxy-capable registry class, so the iterator
     can construct `new T(id, file)` exactly as Instantiate does.
     Returns {item, type_value, count, find} or None."""
+    filt = False                      # an `is T` enumerator: yields only the item type (G87)
+    find_id = None                    # `Find(Guid g)` through the enumerator's find-by-id (G89)
     if cls['mode'] != 'child' or cls.get('parent') != 'File3dmX' or cls['on'] != 'ONX_Model':
         return None
     item = None
@@ -2912,16 +2960,30 @@ def table_protocol(cls, manifest, plans):
               and x['Kind'] == 'method' and x['Variant'] == 'portable' and x.get('Body') == 'construct' and x.get('Child')]
         rec = TYPE_RECS.get(cls['type']) or {}
         if len(ge) == 1 and ge[0].get('ChildArgs') and ge[0]['ChildArgs'][0] in (rec.get('ParentFields') or []):
-            ens = [TYPE_RECS[t] for t in SIMPLE_TYPES.get(cs_unqualify(ge[0]['Child']), []) if (TYPE_RECS.get(t) or {}).get('ManifestEnumerator')]
+            # `new File3dmRenderContentEnumerator<File3dmRenderMaterial>(_file3dm)` (G87): generic, T bound here
+            gm = re.match(r'^([\w.]+)<(\w+)>$', ge[0]['Child'])
+            child = gm.group(1) if gm else ge[0]['Child']
+            ens = [TYPE_RECS[t] for t in SIMPLE_TYPES.get(cs_unqualify(child), []) if (TYPE_RECS.get(t) or {}).get('ManifestEnumerator')]
             if len(ens) == 1:
                 me = ens[0]['ManifestEnumerator']
-                item = BY_CS.get(cs_unqualify(me['Item']))
+                if me.get('FindById'):
+                    finds = [x for x in manifest['members'] if x['Type'] == cls['type'] and x['Name'] == 'Find'
+                             and x['Kind'] == 'method' and x['Variant'] == 'portable'
+                             and [q['Type'] for q in x.get('Params') or []] in (['Guid'], ['System.Guid'])]
+                    if len(finds) == 1:
+                        find_id = finds[0]
+                if me.get('TypeParam'):
+                    item = BY_CS.get(gm.group(2)) if gm else None
+                else:
+                    item = BY_CS.get(cs_unqualify(me['Item']))
+                filt = bool(me.get('Filter'))
                 mm = re.match(r'^ModelComponentType\.(\w+)$', me['Type'])
                 named = ENUM_NAMED.get('ModelComponentType') or {}
                 if item is not None and mm and mm.group(1) in named:
                     cv = ('ModelComponentType.' + mm.group(1), str(named[mm.group(1)]))
                     enumer = True
-    if item is None or not item.get('proxy') or not enumer:
+    # the item's (file, id) view may be its proxy base's (File3dmRenderMaterial; G87)
+    if item is None or not (item.get('proxy') or (BY_REG.get(item.get('base', '')) or {}).get('proxy')) or not enumer:
         return None
     if cv is None or cv[1] is None:
         return None
@@ -2954,6 +3016,9 @@ def table_protocol(cls, manifest, plans):
         types = types + extras
     # no FindIndex (the object table): len and iteration, no [i]
     return {'item': item, 'type_value': cv[1], 'types': types, 'count': count[0]['cpp'] if count else None, 'find': find[0]['cpp'] if find else None,
+            'filter': filt,
+            # `Find(Guid g)` (G89): the walk's first item whose Id is g -- only when it returns the item
+            'find_id': find_id['Name'] if find_id and cs_unqualify(find_id.get('Returns') or '') == item['cs'] else None,
             'fns': [C_BY_NAME[n] for n in ('ONX_ModelComponentIterator_New',
                                            'ONX_ModelComponentIterator_GetNext',
                                            'ONX_ModelComponentIterator_Delete')]}
@@ -3038,11 +3103,132 @@ def linked_iter(cls, plans):
 # bodies built from the class's own members, value types, RhinoMath and enums.
 # Their references to the class's members are markers resolved here against
 # what was GENERATED -- a member resolving anything less is refused.
-MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as):([^$]*)\$\$')
+MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as|self|fieldptr|deref|optr|wrapptr|childlink|proxyfile|pcast|isview|viewcopy):([^$]*)\$\$')
 VALUE_RETS = {'bool', 'double', 'float', 'int', 'uint', 'long', 'short', 'byte', 'string', 'void'}
 
 
 CTORS, ARGCTORS = {}, {}      # reg -> has a generated default ctor / its argument-ctor plans (bnd_gen; G74)
+
+
+# by-value C types a translated body's native may use (G84): anything else by value
+# (a C# enum name like `TextureProjectionModes`) has no declaration here
+C_SCALARS = {'void', 'bool', 'int', 'unsigned int', 'double', 'float', 'char', 'unsigned char', 'short',
+             'unsigned short', 'long', 'unsigned long', 'long long', 'unsigned long long', 'ON__UINT64',
+             'ON__INT64', 'ON__UINT32', 'ON__INT32', 'ON__UINT16', 'ON__INT16', 'ON__UINT8', 'ON__INT8', 'ON_UUID'}
+
+
+def native_usable(n):
+    """a C function a translated class body may call (G84)"""
+    f = C_BY_NAME.get(n)
+    if f is None or f.get('variant') == 'rhino-only' or n in UNSAFE_NATIVES:
+        return False
+    for t in [f['returns']] + [q['type'] for q in f['params']]:
+        t = (t or '').replace('const ', '').strip()
+        if not (t.endswith('*') or t in C_SCALARS or (t + '*') in C_VT or t.endswith('_STRUCT')):
+            return False
+    return True
+
+
+def child_link(cls):
+    """a File3dm proxy's parent link (G89: File3dmRenderContent's `(Guid, File3dmRenderContent
+    parent)` ctor), on cls or a base: {'Field', 'Type'}, else None"""
+    c = cls
+    while c is not None:
+        ch = (c.get('proxy') or {}).get('Child')
+        if ch:
+            return ch
+        c = BY_REG.get(c.get('base', ''))
+    return None
+
+
+def modeled_ptr(cls, helper):
+    """the modeled field (G88) whose pointer helper this is, on cls or a base"""
+    c = cls
+    while c is not None:
+        for f, v in (c.get('modeled') or {}).items():
+            if v['ptr'] == helper:
+                return f
+        c = BY_REG.get(c.get('base', ''))
+    return None
+
+
+def modeled_plans(cls, plans, manifest):
+    """the modeled field's own property (G88: AnnotationBase.ParentDimensionStyle):
+    the getter returns the stored object; the setter stores it -- a File3dm view as a
+    light copy (a new view of the same file and id), as RhinoCommon does -- and sets
+    the id property through its generated setter"""
+    out = []
+    for f, v in (cls.get('modeled') or {}).items():
+        tgt = BY_CS.get(v['cs'])
+        x = next((x for x in manifest['members'] if x['Type'] == cls['type'] and x['Name'] == v['prop']
+                  and x['Kind'] == 'property'), None)
+        ids = [p for p in plans if p['m']['Name'] == v['id_prop'] and p.get('setter_of')]
+        idg = [q for c, q in _chain_plans(tgt, {c['reg']: PLANNED.get(c['reg'], []) for c in CLASSES})
+               if q['m']['Name'] == 'Id' and q['m']['Kind'] == 'property' and not q.get('setter_of')] if tgt else []
+        if tgt is None or x is None or len(ids) != 1 or not idg or not tgt.get('proxy'):
+            continue
+        g = {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [], 'bind_args': [],
+             'guards': [], 'success': None, 'shape': ('mfget', f, tgt), 'cpp': 'Gen_' + v['prop']}
+        s = {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
+             'bind_args': [('const %s*' % tgt['gen'], 'value')], 'guards': [], 'success': None, 'setter_of': g,
+             'shape': ('mfset', f, tgt, ids[0]['cpp'], idg[0]['cpp']), 'cpp': 'Gen_set_' + v['prop'], 'nonconst': True}
+        g['setter'] = s
+        out += [g, s]
+    return out
+
+
+def out_companion(q):
+    if q['shape'][0] == 'translatedout':
+        return q['shape'][3]                 # a translated member with outs: its `_out` already
+    return _out_companion(q)
+
+
+def _out_companion(q):
+    """the C++ signature parts of a tuple member's companion taking its out
+    arguments by reference and returning its success (G83): [(type, name, is_out)]
+    in C# order, or None when the tuple is not that simple"""
+    if q['shape'][0] != 'tuple' or q.get('static'):
+        return None
+    _, has_success, outs = q['shape']
+    if not (has_success is True or isinstance(has_success, str)):
+        return None
+    if any(g.get('Exception') is None or g.get('assign_cpp') for g in q['guards'] if not g.get('fail')):
+        return None                          # an early return would not be the success flag
+    bind = {n: t for t, n in q['bind_args']}
+    out_t = {}
+    for n, t in outs:
+        if OUTLOCAL.get(t, (None, None))[1] != '{n}':
+            return None                      # converted on the way out: not a plain reference
+        dm = re.match(r'^(\S+) %s\b' % re.escape(n), OUTLOCAL[t][0].format(n=n))
+        if dm is None:
+            return None
+        out_t[n] = dm.group(1)
+    parts = []
+    for qq in q['m'].get('Params') or []:
+        if qq.get('Mode') == 'out':
+            if qq['Name'] not in out_t:
+                return None
+            parts.append((out_t[qq['Name']], qq['Name'], True))
+        elif qq['Name'] in bind:
+            parts.append((bind[qq['Name']], qq['Name'], False))
+        else:
+            return None
+    return parts if len(parts) == len(q['bind_args']) + len(outs) else None
+
+
+def _args_fit(ps, want):
+    """C# parameter types against a call's argument types: equal, numerically
+    alike, or a class argument deriving from the parameter's class (G85:
+    `Create(PolylineCurve pc, ...)` into `Create(Curve, ...)`)"""
+    if ps == want or [_num(t) for t in ps] == [_num(t) for t in want]:
+        return True
+    for p, a in zip(ps, want):
+        if p == a or _num(p) == _num(a):
+            continue
+        pc, ac = BY_CS.get(cs_unqualify(p)), BY_CS.get(cs_unqualify(a))
+        if pc is None or ac is None or not derives_from(ac, pc):
+            return False
+    return True
 
 
 def _value_ret(t):
@@ -3084,6 +3270,26 @@ def _overridden_below(cls, kind, name, ptypes, manifest):
     return any(sig in _DERIVED.get(('m', t), ()) for t in _DERIVED.get(cls['type'], ()) if t != cls['type'])
 
 
+def _virtual_overrides(owner, q, ptypes, per_reg, manifest):
+    """the generated overrides of q (G89: AnnotationBase.GetBoundingBox(Transform) over
+    GeometryBase's) when EVERY RhinoCommon type below owner that declares q's member has a
+    generated class with a plan of the same C++ name and argument types; else None"""
+    _overridden_below(owner, q['m']['Kind'], q['m']['Name'], ptypes, manifest)      # fills _DERIVED
+    sig = (q['m']['Kind'], q['m']['Name'], tuple(ptypes))
+    out = []
+    for t in _DERIVED.get(owner['type'], ()):
+        if t == owner['type'] or sig not in _DERIVED.get(('m', t), ()):
+            continue
+        c = BY_TYPE.get(t)
+        hits = [p for p in per_reg.get(c['reg'], []) if p['cpp'] == q['cpp'] and not p.get('setter_of')
+                and [a for a, _ in p['bind_args']] == [a for a, _ in q['bind_args']]
+                and (p['m']['Kind'], p['m']['Name'], tuple(x['Type'] for x in p['m'].get('Params') or [])) == sig] if c else []
+        if len(hits) != 1:
+            return None
+        out.append(hits[0])
+    return out
+
+
 def _num(t):
     return 'num' if t in ('double', 'float', 'int', 'uint', 'long', 'short', 'byte') else t
 
@@ -3097,6 +3303,52 @@ def resolve_markers(text, cls, per_reg, manifest):
         out.append(text[pos:mm.start()])
         pos = mm.end()
         kind, arg = mm.group(1), mm.group(2)
+        if kind == 'self':
+            # the class's own pointer (G84), as RhinoCommon's ConstPointer/NonConstPointer
+            if cls is None:
+                return None, 'self outside a class', None
+            nc = arg == 'NonConst'
+            out.append('((void*)(%s))' % self_access(cls, self_expr_of(cls), 'NonConstPointer' if nc else 'ConstPointer'))
+            writes = writes or nc
+            continue
+        if kind == 'childlink':
+            # `if (m__parent is File3dmRenderContent parent)` (G89): a child proxy's parent link
+            # (specgen FileProxy ChildField) -- the light copy of the parent it holds, or null
+            field, _, tn = arg.partition(':')
+            ch = child_link(cls)
+            if ch is None or ch['Field'] != field or ch['Type'] != tn:
+                return None, 'childlink %s' % arg, None
+            out.append('m_child_parent.get()')
+            continue
+        if kind in ('pcast', 'isview', 'viewcopy'):
+            # TryConvertBrep (G89): `geometry as Brep` on a parameter (a non-owning cast),
+            # `IsDocumentControlled` (a File3dm view, owning nothing), and the view handed back
+            # as a NEW view of the same object (D-identity: never the caller's own wrapper)
+            c2 = BY_CS.get(arg)
+            if c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract'):
+                return None, '%s %s' % (kind, arg), None
+            if kind == 'pcast':
+                out.append('dynamic_cast<const %s*>' % c2['gen'])
+                continue
+            if not view_copyable(c2):
+                return None, '%s %s' % (kind, arg), None
+            out.append('->RH3DM_IsView()' if kind == 'isview' else 'RH3DM_ViewCopyOf')
+            continue
+        if kind == 'proxyfile':
+            # `parent.File3dmParent` (G89): the file a File3dm proxy resolves in (null when owned)
+            c2 = BY_CS.get(arg)
+            if c2 is None or c2['reg'] not in per_reg or (c2.get('proxy') or {}).get('Origin') != 'file' or (c2.get('proxy') or {}).get('NoId'):
+                return None, 'proxyfile %s' % arg, None
+            out.append('m_model')
+            continue
+        if kind == 'fieldptr':
+            # `m_mesh.NonConstPointer()` in a child view (G85): the parent's pointer is the view's
+            if cls is None or cls['mode'] != 'child':
+                return None, 'fieldptr %s' % arg, None
+            nc = arg.endswith(':NonConst')
+            out.append('((void*)(%s))' % self_access(cls, self_expr_of(cls), 'NonConstPointer' if nc else 'ConstPointer'))
+            writes = writes or nc
+            continue
         if kind == 'enumtype':
             e = CS_ENUMS.get(arg)
             if e is None:
@@ -3115,6 +3367,34 @@ def resolve_markers(text, cls, per_reg, manifest):
             continue
         # class-typed values (G74): another generated class as a type, its construction,
         # and its members on a class-typed parameter (`ocallc`: a const reference) or local
+        if kind == 'wrapptr':
+            # `new Mesh(ptr, null)` / `CreateGeometryHelper(ptr, null)` (G86): the native's new
+            # object, owned, as the most-derived generated class (null stays null)
+            c2 = BY_CS.get(arg)
+            if (c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract') or c2.get('comp')
+                    or c2.get('handle') or c2.get('borrowed') or c2.get('shared')):
+                return None, 'wrapptr %s' % arg, None
+            out.append('RH3DM_Wrap_%s' % c2['reg'])
+            continue
+        if kind == 'optr':
+            # `nc.NonConstPointer()` on a class local/parameter (G86): its pointer, as its
+            # class's own self access spells it (views resolve or copy on write)
+            tn, _, acc = arg.partition(':')
+            c2 = BY_CS.get(tn)
+            if c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract'):
+                return None, 'optr %s' % tn, None
+            sa = self_access(c2, 'o->m_ptr' if c2['mode'] == 'pointer' else None, 'NonConstPointer' if acc == 'NonConst' else 'ConstPointer')
+            sa = re.sub(r'(?<![\w>.])(RH3DM_NonConst|RH3DM_Const|%s)\(' % re.escape(c2.get('getter') or 'RH3DM_none'), r'o->\1(', sa)
+            out.append('([](const %s* o) { return (void*)(%s); })' % (c2['gen'], sa) if acc == 'Const'
+                       else '([](%s* o) { return (void*)(%s); })' % (c2['gen'], sa))
+            continue
+        if kind == 'deref':
+            # a class local passed by reference (G85)
+            c2 = BY_CS.get(arg)
+            if c2 is None or c2['reg'] not in per_reg:
+                return None, 'class %s' % arg, None
+            out.append('' if c2['mode'] == 'value' else '*')
+            continue
         if kind in ('class', 'classarg', 'acc', 'as'):
             c2 = BY_CS.get(arg)
             if c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract', 'child', 'value'):
@@ -3153,12 +3433,20 @@ def resolve_markers(text, cls, per_reg, manifest):
                 hits = [q for q in ARGCTORS.get(tcls['reg']) or []
                         if [norm(qq['Type']) for qq in q['m'].get('Params') or []] == [norm(t) for t in want]
                         and len(q['bind_args']) == len(want)]
+                ch = child_link(tcls)
+                if not hits and ch is not None and len(want) == 2 and want[0] in ('Guid', 'System.Guid') and want[1] == ch['Type']:
+                    hits = ['child']      # `new File3dmRenderMaterial(child_id, parent)` (G89): the child proxy ctor
                 if len(hits) != 1:
                     return None, 'new %s(%s)' % (tname, arg), None
             out.append(('%s' if tcls['mode'] == 'value' else 'new %s') % tcls['gen'])
             byvalue = byvalue or tcls['mode'] == 'value'
             continue
         name, _, types = arg.partition(':') if kind not in ('index', 'oindex') else ('', '', arg)
+        if kind == 'call' and not types and cls is not None and modeled_ptr(cls, name):
+            # `ConstParentDimStylePointer()` in a translated body (G88/G89): the modeled field's
+            # pointer, as an IntPtr (the `()` that follows calls the helper)
+            out.append('(void*)RH3DM_MfPtr_%s' % modeled_ptr(cls, name))
+            continue
         if kind in ('index', 'oindex'):
             name = 'this[]'
         want = [t for t in types.split(',') if t] if kind in ('call', 'scall', 'ocall', 'ocallc', 'oscall', 'index', 'oindex') else []
@@ -3177,7 +3465,13 @@ def resolve_markers(text, cls, per_reg, manifest):
                 ps = [qq['Type'] for qq in m.get('Params') or []]
                 kinds = 'indexer' if kind in ('index', 'oindex') else 'method'
                 ok = (m['Kind'] == kinds and len(ps) == len(want) == len(q['bind_args'])
-                      and (ps == want or [_num(t) for t in ps] == [_num(t) for t in want]))
+                      and _args_fit(ps, want))
+                # `TryGetArc(out arc, tolerance)` (G83): a tuple-returning sibling called with
+                # its out arguments -- through its C++ companion taking them by reference
+                if (not ok and kind == 'call' and m['Kind'] == 'method' and len(ps) == len(want)
+                        and _args_fit(ps, want)
+                        and out_companion(q) is not None):
+                    ok = 'out'
             if ok and kind == 'ocallc' and (q.get('nonconst') or q.get('setter_of')):
                 return None, 'ocallc %s on a const parameter' % name, None
             if ok and (kind in ('set', 'oset') or _value_ret(m.get('Returns')) or _class_ret(m.get('Returns'), per_reg)):
@@ -3186,15 +3480,24 @@ def resolve_markers(text, cls, per_reg, manifest):
         if found is None:
             return None, '%s %s' % (kind, name), None
         owner, q = found
+        if ok == 'out':
+            q['out_companion'] = True
         ptypes = [qq['Type'] for qq in q['m'].get('Params') or []]
         if _overridden_below(owner, q['m']['Kind'], name if name != 'this[]' else q['m']['Name'], ptypes, manifest):
-            return None, '%s %s is overridden below %s' % (kind, name, owner['cs']), None
+            ov = _virtual_overrides(owner, q, ptypes, per_reg, manifest)
+            if ov is None:
+                return None, '%s %s is overridden below %s' % (kind, name, owner['cs']), None
+            # every RhinoCommon override is generated under the same C++ name (G89):
+            # a virtual call reaches it, as C#'s does
+            q['virtual'] = True
+            for o in ov:
+                o['override_of'] = q
         deps.append(q)
         writes = writes or kind == 'set' or (kind in ('call', 'index') and bool(q.get('nonconst') or q.get('setter_of')))
         if kind in ('sget', 'scall', 'osget', 'oscall'):
             out.append('%s::%s' % (owner['gen'], q['cpp']))
         else:
-            out.append(q['cpp'])
+            out.append(q['cpp'] + ('_out' if ok == 'out' else ''))
     out.append(text[pos:])
     res = ''.join(out)
     if '$$' in res:
@@ -3219,16 +3522,39 @@ def translated_pass(per_class, manifest, skipped):
             have = {sig(p['m']) for p in plans if not p.get('setter_of')}
             names = {p['cpp'] for p in plans}
             simple = cls['type'].replace('+', '.').split('.')[-1]
-            for x in manifest['members']:
-                if (x['Type'] != cls['type'] or x['Variant'] != 'portable' or x.get('Body') != 'pure'
+            # non-public helpers the bodies call (G85): unregistered plans, resolvable
+            hidden = [{'Type': cls['type'], 'Kind': r['Kind'], 'Name': r['Name'], 'Variant': 'portable', 'Body': 'hidden',
+                       'Static': bool(r.get('Static')), 'Returns': r.get('RetCs'), 'Hidden': True,
+                       'Params': [{'Type': cs, 'Name': q['Name'], 'Mode': q.get('Mode') or ''}
+                                  for cs, q in zip(r.get('ParamsCs') or [], r.get('Params') or [])]}
+                      for k, r in CLASS_BODIES.items() if r.get('Hidden') and k[0] == simple]
+            for x in [x for x in manifest['members'] if x['Type'] == cls['type']] + hidden:
+                # a delegation the forwarding planner could not express (an argument like
+                # `Transform.Identity`; G83) is its translated body, as a pure member is
+                # G84: and any other body the planner's shapes did not take (branches, switches,
+                # loops around native calls), now that class bodies may call natives
+                if (x['Type'] != cls['type'] or x['Variant'] != 'portable'
                         or x['Kind'] not in ('method', 'property') or sig(x) in have):
                     continue
                 r = CLASS_BODIES.get((simple, x['Kind'], x['Name'], tuple(q['Type'] for q in x.get('Params') or [])))
                 if r is None or bool(r.get('Static')) != bool(x.get('Static')):
                     continue
+                natives = r.get('Native') or []
+                bad = next((n for n in natives if not native_usable(n)), None)
+                if bad is not None:
+                    key = 'translated: native %s' % ('unsafe' if bad in UNSAFE_NATIVES else 'not portable')
+                    skipped[key] = skipped.get(key, 0) + 1
+                    continue
                 body, deps, writes = resolve_markers(r['Body'], cls, per_reg, manifest)
                 ret, _, _ = resolve_markers(r['Ret'], cls, per_reg, manifest)
                 params = [(resolve_markers(q['Type'], cls, per_reg, manifest)[0], q['Name']) for q in r.get('Params') or []]
+                outs = [q.get('Mode') == 'out' for q in r.get('Params') or []]
+                if any(outs) and (ret is None or ret.endswith('*') or x['Kind'] != 'method' or x.get('Static')
+                                  or any(t not in VT_CPP.values() and t[:-1] not in DATA_CPP.values() and not t.startswith('std::vector<')
+                                         and t not in ('int', 'double', 'bool', 'float', 'unsigned int')
+                                         for (t, _), o in zip(params, outs) if o)):
+                    skipped['translated: out parameter'] = skipped.get('translated: out parameter', 0) + 1
+                    continue
                 if body is None or ret is None or any(t is None for t, _ in params):
                     key = 'translated: ' + (deps if body is None else 'signature').split(' ')[0]
                     skipped[key] = skipped.get(key, 0) + 1
@@ -3244,16 +3570,25 @@ def translated_pass(per_class, manifest, skipped):
                     names.add(k)
                     return k
                 p = {'m': x, 'fn': None, 'cls': cls, 'static': bool(x.get('Static')), 'call_exprs': [], 'locals': [],
-                     'bind_args': params, 'guards': [], 'success': None, 'translated': True,
+                     'bind_args': params, 'guards': [], 'success': None, 'translated': True, 'hidden': bool(x.get('Hidden')),
+                     'ret_borrowed': bool(r.get('RetBorrowed')),
                      'shape': ('translated', ret, body), 'deps': deps, 'nonconst': writes,
+                     'extra_fns': [C_BY_NAME[n] for n in natives],
                      'cpp': uniq('Gen_' + x['Name'])}
+                if any(outs):
+                    # `bool TryGetCircle(out Circle circle, double tol)` (G83): the body as
+                    # `_out` (outs by reference), the binding a tuple (success, outs...)
+                    p['bind_args'] = [a for a, o in zip(params, outs) if not o]
+                    p['shape'] = ('translatedout', ret, body, [(t, n, o) for (t, n), o in zip(params, outs)])
                 plans.append(p)
                 if x['Kind'] == 'property' and r.get('SetBody'):
                     sbody, sdeps, _ = resolve_markers(r['SetBody'], cls, per_reg, manifest)
-                    if sbody is not None:
+                    snat = r.get('SetNative') or []
+                    if sbody is not None and all(native_usable(n) for n in snat):
                         sp = {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
                               'bind_args': [(ret, 'value')], 'guards': [], 'success': None, 'translated': True,
                               'shape': ('translated', 'void', sbody), 'deps': sdeps, 'setter_of': p,
+                              'extra_fns': [C_BY_NAME[n] for n in snat],
                               'cpp': uniq('Gen_set_' + x['Name'])}
                         p['setter'] = sp
                         plans.append(sp)

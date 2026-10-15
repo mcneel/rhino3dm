@@ -2058,3 +2058,44 @@ def test_data_member_markers_resolve_or_refuse_with_dependents():
         assert [x['Ok'] for x in v['members']] == [False, False]
     finally:
         P.ARGCTORS.clear(); P.ARGCTORS.update(saved)
+
+
+def test_class_body_markers_self_fieldptr_deref():
+    # G84/G85: the class's own pointer, a child view's parent pointer, a class local by reference
+    per_reg = {c['reg']: [] for c in R.CLASSES}
+    out, deps, writes = P.resolve_markers('F($$self:Const$$)', CURVE, per_reg, {'members': []})
+    assert out.startswith('F(((void*)(') and not writes
+    out, deps, writes = P.resolve_markers('F($$self:NonConst$$)', CURVE, per_reg, {'members': []})
+    assert writes                                         # a non-const pointer: a non-const member
+    # a field's pointer is the view's own only on a child view
+    assert P.resolve_markers('$$fieldptr:m_mesh:NonConst$$', CURVE, per_reg, {'members': []})[0] is None
+    child = next(c for c in R.CLASSES if c['mode'] == 'child')
+    assert P.resolve_markers('$$fieldptr:m_x:Const$$', child, per_reg, {'members': []})[0] is not None
+    assert P.resolve_markers('G($$deref:Curve$$(c))', CURVE, per_reg, {'members': []})[0] == 'G(*(c))'
+
+
+def test_derived_class_arguments_fit_and_native_usability():
+    # G85: `Create(PolylineCurve pc, ..)` into `Create(Curve, ..)`; G84: by-value C types
+    assert P._args_fit(['Curve', 'double'], ['PolylineCurve', 'double'])
+    assert not P._args_fit(['PolylineCurve'], ['Curve'])          # never the other way
+    saved = dict(R.C_BY_NAME)
+    try:
+        R.C_BY_NAME['ok'] = {'name': 'ok', 'returns': 'bool', 'params': [{'type': 'const ON_Curve*'}, {'type': 'double'}]}
+        R.C_BY_NAME['enum'] = {'name': 'enum', 'returns': 'TextureProjectionModes', 'params': [{'type': 'const ON_Texture*'}]}
+        assert P.native_usable('ok') and not P.native_usable('enum') and not P.native_usable('missing')
+        assert not P.native_usable('ON_PointCloud_InsertPoints') or 'ON_PointCloud_InsertPoints' not in R.C_BY_NAME
+    finally:
+        R.C_BY_NAME.clear(); R.C_BY_NAME.update(saved)
+
+
+def test_enum_map_with_a_default_return():
+    # G83: Curve.ClosedCurveOrientation: `switch (r) { case 1: .. case -1: .. }`, else Undefined
+    saved = dict(R.CS_ENUMS)
+    try:
+        R.CS_ENUMS['CurveOrientation'] = {'cpp': 'CurveOrientation'}
+        x = member('CurveOrientation', calls=[SELF],
+                   EnumMap={'Values': [[1, 1], [-1, -1]], 'Default': 'CurveOrientation.Undefined', 'DefaultValue': 0})
+        p, why = P.plan(x, cfn('int', 'const ON_Curve*'), CURVE)
+        assert why is None and p['shape'][0] == 'enummap' and p['shape'][3] is None and p['shape'][4] == 0
+    finally:
+        R.CS_ENUMS.clear(); R.CS_ENUMS.update(saved)

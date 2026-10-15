@@ -1553,3 +1553,304 @@ def test_polyline_to_nurbscurve_through_a_disposed_polylinecurve():
     nc = r.PolylineX([P(0, 0, 0), P(3, 0, 0), P(3, 4, 0)]).ToNurbsCurve()
     assert isinstance(nc, r.NurbsCurveX) and nc.PointAtEnd == P(3, 4, 0) and nc.PointAtStart == P(0, 0, 0)
     assert r.PolylineX([P(0, 0, 0)]).ToNurbsCurve() is None           # no curve: `pc?.` is null
+
+
+@pytest.mark.skipif(not hasattr(r.CurveX, 'ClosedCurveOrientation'), reason='G83')
+def test_curve_gap_members_orientation_trim_circle_derivatives():
+    # G83: a switch onto an enum with a default; a private helper wrapping its result;
+    # an out-argument call to a tuple sibling; G84: managed control flow around natives
+    P = r.Point3dX
+    circle = r.ArcCurveX(r.CircleX(P(0, 0, 0), 2.0))
+    assert circle.ClosedCurveOrientation() == r.CurveOrientation.CounterClockwise
+    assert circle.ClosedCurveOrientation(r.Vector3dX(0, 0, -1)) == r.CurveOrientation.Clockwise
+    line = r.LineCurveX(P(0, 0, 0), P(10, 0, 0))
+    assert line.ClosedCurveOrientation() == r.CurveOrientation.Undefined     # the switch's default
+    piece = line.Trim(2.0, 5.0)
+    assert isinstance(piece, r.CurveX) and piece.PointAtStart == P(2, 0, 0) and piece.PointAtEnd == P(5, 0, 0)
+    assert line.Trim(r.IntervalX(1.0, 3.0)).PointAtEnd == P(3, 0, 0)
+    assert circle.IsCircle() and not line.IsCircle()
+    ok, c = circle.TryGetCircle()
+    assert ok and abs(c.Radius - 2.0) < 1e-12
+    assert line.TryGetCircle()[0] is False
+    d = line.DerivativeAt(4.0, 1, r.CurveEvaluationSide.Default)
+    assert len(d) == 2 and d[0] == r.Vector3dX(4, 0, 0) and d[1] == r.Vector3dX(1, 0, 0)   # domain [0, length]
+    with pytest.raises(RuntimeError):
+        line.DerivativeAt(4.0, -1, r.CurveEvaluationSide.Default)                    # InvalidOperationException in .NET
+
+
+@pytest.mark.skipif(not hasattr(r.NurbsCurveX, 'CreateFromLine'), reason='G85')
+def test_hidden_helpers_child_pointers_and_class_usings():
+    # G85: bodies calling non-public helpers (SetVertex, GetPoint), a child view's
+    # parent pointer (`m_mesh.NonConstPointer()`), `using` over a class local
+    P = r.Point3dX
+    m = r.MeshX()
+    v = m.Vertices
+    v.Add(P(0, 0, 0)); v.Add(1.0, 0.0, 0.0); v.Add(r.Point3fX(0, 1, 0))
+    assert v.Count == 3 and len(v.ToFloatArray()) == 9
+    nc = r.NurbsCurveX.CreateFromLine(r.LineX(P(0, 0, 0), P(3, 0, 0)))
+    assert isinstance(nc, r.NurbsCurveX) and nc.PointAtEnd == P(3, 0, 0)
+    assert r.NurbsCurveX.CreateFromLine(r.LineX(P(1, 1, 1), P(1, 1, 1))) is None   # invalid line
+    box = r.BoxX(r.PlaneX.WorldXY, r.IntervalX(0, 1), r.IntervalX(0, 2), r.IntervalX(0, 3))
+    ext = r.ExtrusionX.CreateBoxExtrusion(box, True)
+    assert isinstance(ext, r.ExtrusionX) and ext.IsSolid and ext.CapCount == 2
+    ns = r.NurbsSurfaceX.Create(3, False, 2, 2, 2, 2)
+    ns.Points.SetPoint(1, 1, 1.0, 1.0, 0.0)
+    cp = ns.Points.GetControlPoint(1, 1)
+    assert cp.Location == P(1, 1, 0) and cp.Weight == 1.0
+
+
+@pytest.mark.skipif(not hasattr(r.NurbsSurfaceX, 'CreateRuledSurface'), reason='G86')
+def test_g86_singles():
+    # G86: optional arguments as `x?.ConstPointer() ?? IntPtr.Zero`; a public target
+    # inlined for a null argument; construct-as-wrap; GcProtect; GetConstArray, an
+    # object's own pointer and internal constructors in class bodies; wrapped natives
+    P = r.Point3dX
+    f = r.File3dmX()
+    iid = f.Objects.AddInstanceObject(0, r.TransformX.Identity, None)
+    assert isinstance(iid, uuid.UUID)
+    fr = r.FileReferenceX.CreateFromFullPath('/tmp/a.png')
+    assert fr.FullPath.endswith('a.png')
+    a = r.LineCurveX(P(0, 0, 0), P(1, 0, 0))
+    b = r.LineCurveX(P(0, 1, 0), P(1, 1, 0))
+    rs = r.NurbsSurfaceX.CreateRuledSurface(a, b)
+    assert isinstance(rs, r.NurbsSurfaceX)
+    pts = [P(0, 0, 0), P(1, 1, 0), P(2, 0, 0), P(3, 1, 0)]
+    nc = r.NurbsCurveX.Create(False, 3, pts)
+    assert isinstance(nc, r.NurbsCurveX) and nc.PointAtEnd == P(3, 1, 0)
+    assert r.NurbsCurveX.Create(False, 3, [P(0, 0, 0)]) is None       # count < 2
+    assert isinstance(r.CurveX.CreateControlPointCurve(pts[:2], 3), r.LineCurveX)   # two points: a line
+    assert isinstance(r.CurveX.CreateControlPointCurve(pts, 1), r.PolylineCurveX)  # degree 1: a polyline
+    assert isinstance(r.CurveX.CreateControlPointCurve(pts, 3), r.NurbsCurveX)
+    tm = r.TextureMappingX.CreatePlaneMapping(r.PlaneX.WorldXY, r.IntervalX(0, 1), r.IntervalX(0, 1), r.IntervalX(0, 1))
+    assert tm.HasId in (True, False)                                    # ModelComponent's, inherited now
+
+
+@pytest.mark.skipif(not hasattr(r.File3dmX, 'FromByteArray'), reason='G86')
+def test_g86_outs_rectangles_and_byte_buffers(tmp_path):
+    # G86: an `out Polyline` held by pointer and owned by the caller; Rectangle as the
+    # old bindings' (x, y, width, height); a byte[] argument from any Python buffer
+    P = r.Point3dX
+    crv = r.PolylineCurveX([P(0, 0, 0), P(1, 0, 0), P(1, 1, 0)])
+    ok, pl = crv.TryGetPolyline()
+    assert ok and isinstance(pl, r.PolylineX) and pl.Count == 3
+    ok, pl = r.ArcCurveX(r.CircleX(P(0, 0, 0), 1.0)).TryGetPolyline()
+    assert not ok and pl is None
+    vp = r.ViewportX()
+    vp.SetScreenPort(0, 640, 480, 0, 0, 0)
+    port = vp.GetScreenPort()
+    assert tuple(port[0] if isinstance(port[0], tuple) else port)[:4] == (0, 0, 640, 480)
+    f = r.File3dmX()
+    f.Objects.AddPoint(P(1, 2, 3), None)
+    path = str(tmp_path / 'b.3dm')
+    assert f.Write(path, 8)
+    data = open(path, 'rb').read()
+    g = r.File3dmX.FromByteArray(data)
+    assert isinstance(g, r.File3dmX) and g.Objects.Count == 1
+    assert r.File3dmX.FromByteArray(bytearray(data)).Objects.Count == 1
+
+
+@pytest.mark.skipif(not hasattr(r, 'File3dmRenderMaterialsX'), reason='G87')
+def test_file3dm_render_content_collections():
+    # G87: File3dmRenderContent proxies of (file, id); RenderMaterials/Environments/Textures
+    # walk the manifest's RenderContent components and keep their own kind (`is T`)
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    f = r.File3dmX.Read(path)
+    old = r.File3dm.Read(path)
+    oldc = sorted((str(c.Id), c.Kind) for c in old.RenderContent)
+    mats, envs, texs = list(f.RenderMaterials), list(f.RenderEnvironments), list(f.RenderTextures)
+    assert all(isinstance(m, r.File3dmRenderMaterialX) for m in mats)
+    assert all(isinstance(e, r.File3dmRenderEnvironmentX) for e in envs)
+    assert all(isinstance(t, r.File3dmRenderTextureX) for t in texs)
+    gen = sorted((str(c.Id), c.Kind) for c in mats + envs + texs)
+    top = [k for k in oldc if any(k[0] == g[0] for g in gen)]
+    assert gen == top and len(gen) >= 1                     # the same contents, the same kinds
+    assert {c.Kind for c in mats} <= {'material'} and {c.Kind for c in envs} <= {'environment'}
+    for m in mats:
+        assert isinstance(m.ToMaterial(), r.MaterialX) and m.IsTopLevel
+        assert m.Name == next(c.Name for c in old.RenderContent if str(c.Id) == str(m.Id))
+
+
+@pytest.mark.skipif(not hasattr(r, 'AnnotationBaseX') or not hasattr(r.AnnotationBaseX, 'ParentDimensionStyle'), reason='G88')
+def test_annotation_parent_dimension_style_is_modeled():
+    # G88: RhinoCommon's managed m_parent_dimstyle -- the setter stores the style (a File3dm
+    # view as a light copy: a new view of the same file and id) and sets DimensionStyleId;
+    # every member that passes the parent style to its native now passes this one
+    f = r.File3dmX.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    ann = next(g for g in (o.Geometry for o in f.Objects) if isinstance(g, r.AnnotationBaseX))
+    assert ann.ParentDimensionStyle is None
+    ds = list(f.AllDimStyles)[0]
+    ann.ParentDimensionStyle = ds
+    p = ann.ParentDimensionStyle
+    assert p is not None and p.Id == ds.Id and ann.DimensionStyleId == ds.Id
+    assert ann.ParentDimensionStyle is p                         # the stored object, every time
+    if not ann.HasPropertyOverrides:
+        assert abs(ann.TextHeight - ds.TextHeight) < 1e-12        # the parent's value, not the default's
+    assert ann.SetBold(True) and ann.IsAllBold()                   # through ConstPointerForDimStyle()
+    ann.ParentDimensionStyle = None
+    assert ann.ParentDimensionStyle is None and ann.DimensionStyleId == uuid.UUID(int=0)
+    assert p.Id == ds.Id                                          # a wrapper handed out stays valid
+
+
+@pytest.mark.skipif(not hasattr(r.AnnotationBaseX, 'GetBoundingBox'), reason='G89')
+def test_annotation_bounding_box_overrides_geometry_base():
+    # G89: AnnotationBase overrides GeometryBase.GetBoundingBox(Transform) (a virtual on the
+    # generated base, so a GeometryBaseX-typed call reaches it) and measures with the
+    # modeled parent dimension style
+    f = r.File3dmX.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    ann = next(g for g in (o.Geometry for o in f.Objects) if isinstance(g, r.AnnotationBaseX))
+    ann.ParentDimensionStyle = list(f.AllDimStyles)[0]
+    bb = ann.GetBoundingBox(r.TransformX.Identity)
+    assert bb.IsValid
+    moved = ann.GetBoundingBox(r.TransformX.Translation(r.Vector3dX(10, 0, 0)))
+    assert abs(moved.Min.X - bb.Min.X - 10) < 1e-9 and abs(moved.Max.X - bb.Max.X - 10) < 1e-9
+    assert r.GeometryBaseX.GetBoundingBox(ann, r.TransformX.Identity).Min.X == bb.Min.X
+
+
+@pytest.mark.skipif(not hasattr(r, 'File3dmRenderContentX') or
+                    not hasattr(r.File3dmRenderContentX, 'GetParameter'), reason='G89')
+def test_render_content_find_and_variant_parameters():
+    # G89: collections Find(Guid) via the manifest; Get/SetParameter carry RhinoCommon's
+    # Variant as a language value by its runtime type (D40)
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    mats = list(f.RenderMaterials)
+    assert mats
+    m = f.RenderMaterials.Find(mats[0].Id)
+    assert m is not None and m.Id == mats[0].Id
+    assert f.RenderMaterials.Find(uuid.uuid4()) is None
+    assert m.GetParameter('rh3dm-no-such-parameter') is None
+    gid = uuid.uuid4()
+    values = {'s': 'hello', 'b': True, 'i': 7, 'd': 0.25, 'u': gid,
+              'p2': (1.0, 2.0), 'p3': (1.0, 2.0, 3.0), 'p4': (1.0, 2.0, 3.0, 4.0)}
+    for k, v in values.items():
+        assert m.SetParameter('rh3dm-' + k, v)
+    for k, v in values.items():
+        got = m.GetParameter('rh3dm-' + k)
+        assert got == v and type(got) is type(v), (k, got)
+    with pytest.raises(TypeError):
+        m.SetParameter('rh3dm-bad', object())
+
+
+@pytest.mark.skipif(not hasattr(r, 'File3dmRenderContentX') or
+                    not hasattr(r.File3dmRenderContentX, 'FindChild'), reason='G89')
+def test_render_content_parent_link_and_children():
+    # G89: RhinoCommon's managed m__parent for a child content -- a light copy of the parent
+    # proxy the child holds (Parent / TopLevel hand it out); Children / FindChild make new
+    # child proxies of the same file. The old FirstChild / NextSibling chain is the oracle.
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    f = r.File3dmX.Read(path)
+    old = r.File3dm.Read(path)
+    tops = [c for c in list(f.RenderMaterials) + list(f.RenderEnvironments) + list(f.RenderTextures)]
+    with_kids = [c for c in tops if list(c.Children)]
+    assert with_kids
+    for top in tops:
+        assert top.Parent is None and top.TopLevel is top              # `return this` (borrowed)
+        o = next(c for c in old.RenderContent if str(c.Id) == str(top.Id))
+        chain, k = [], o.FirstChild
+        while k is not None:
+            chain.append(str(k.Id))
+            k = k.NextSibling
+        kids = list(top.Children)
+        assert [str(c.Id) for c in kids] == chain
+        for c in kids:
+            assert isinstance(c, r.File3dmRenderContentX) and c.IsChild and not c.IsTopLevel
+            assert c.Parent.Id == top.Id and c.Parent is c.Parent      # the copy it holds
+            assert c.TopLevel.Id == top.Id
+            found = top.FindChild(c.ChildSlotName)
+            assert found is not None and found.Id == c.Id
+        assert top.FindChild('rh3dm-no-such-slot') is None
+    kid = list(with_kids[0].Children)[0]
+    pid = kid.Parent.Id
+    del f, tops, with_kids
+    gc.collect()
+    assert kid.Parent.Id == pid and kid.Name is not None            # the file is kept alive
+
+
+@needs_comp
+@pytest.mark.skipif(not hasattr(r.SubDVertexX, 'Edges'), reason='G89')
+def test_subd_vertex_edges_iterator():
+    # G89: `IEnumerable<SubDEdge> Edges { yield return EdgeAt(i); }` -- a list of new edges
+    f, s = subd_from_file()
+    v = next(iter(s.Vertices))
+    edges = v.Edges
+    assert len(edges) == v.EdgeCount > 0
+    assert [e.Id for e in edges] == [v.EdgeAt(i).Id for i in range(v.EdgeCount)]
+    del f, s, v
+    gc.collect()
+    assert all(e.Id > 0 for e in edges)                             # each keeps the SubD alive
+
+
+@pytest.mark.skipif(not hasattr(r.ViewInfoX, 'Viewport'), reason='G89')
+def test_view_info_viewport_is_a_held_view():
+    # G89: `m_viewport ?? (m_viewport = new ViewportInfo(this))` -- a view of the ViewInfo's
+    # own viewport, made once and held; its first write copies (RhinoCommon has no writable
+    # branch), so the ViewInfo itself keeps its camera, and the held view keeps the edit
+    old = r.File3dm.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    ov = old.Views[0]
+    v = r.ViewInfoX(ov)
+    vp = v.Viewport
+    assert vp is v.Viewport                                       # the held object, every time
+    loc = ov.Viewport.CameraLocation
+    assert (vp.CameraLocation.X, vp.CameraLocation.Y, vp.CameraLocation.Z) == (loc.X, loc.Y, loc.Z)
+    assert vp.SetCameraLocation(r.Point3dX(1, 2, 3))
+    again = v.Viewport.CameraLocation
+    assert (again.X, again.Y, again.Z) == (1, 2, 3)               # the edit stays with the held view
+    del v
+    gc.collect()
+    assert vp.CameraLocation.Z == 3                               # the view keeps its ViewInfo alive
+
+
+@pytest.mark.skipif(not hasattr(r.BrepX, 'TryConvertBrep'), reason='G89')
+def test_try_convert_brep_views_and_copies():
+    # G89 (Identity, D42): RhinoCommon returns the argument itself when it is a File3dm view;
+    # here a NEW view of the same file brep -- equal content, its own copy-on-write
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    g = next(o.Geometry for o in f.Objects if isinstance(o.Geometry, r.BrepX))
+    b = r.BrepX.TryConvertBrep(g)
+    assert isinstance(b, r.BrepX) and b is not g and b.Faces.Count == g.Faces.Count
+    x0 = g.GetBoundingBox(r.TransformX.Identity).Min.X
+    assert b.Transform(r.TransformX.Translation(r.Vector3dX(100, 0, 0)))
+    assert abs(b.GetBoundingBox(r.TransformX.Identity).Min.X - x0 - 100) < 1e-6
+    assert g.GetBoundingBox(r.TransformX.Identity).Min.X == x0      # the argument is untouched
+    del f, g
+    gc.collect()
+    assert b.Faces.Count > 0                                         # the view kept the file alive
+    own = box_brep()                                                 # owns its pointer: BrepForm
+    c = r.BrepX.TryConvertBrep(own)
+    assert c is not own and c.Faces.Count == own.Faces.Count
+
+
+@pytest.mark.skipif(not hasattr(r, 'BitmapX'), reason='G90 hand bitmaps')
+def test_hand_bitmaps_add_find_iterate_round_trip(tmp_path):
+    # G90: the kept hand-written bitmap API with the review fixes -- Add works once a path
+    # is set (#38) and reports the index, FindId finds images (#35), iteration survives a
+    # Delete (#24), FindIndex returns None, BitmapX is a ModelComponentX
+    f = r.File3dmX()
+    assert f.Bitmaps.Add(r.BitmapX()) == -1                      # no path: rejected, and said so
+    assert len(f.Bitmaps) == 0
+    paths = ['/tmp/rh3dm_a.png', '/tmp/rh3dm_b.png', '/tmp/rh3dm_c.png']
+    ids = []
+    for p in paths:
+        b = r.BitmapX()
+        b.FileFullPath = p
+        i = f.Bitmaps.Add(b)
+        assert i >= 0
+        found = f.Bitmaps.FindIndex(i)
+        assert found.FileFullPath == p and found.Index == i
+        ids.append(found.Id)
+    assert len(f.Bitmaps) == 3
+    assert f.Bitmaps.FindId(ids[1]).FileFullPath == paths[1]
+    assert f.Bitmaps.FindId(uuid.uuid4()) is None and f.Bitmaps.FindIndex(999) is None
+    with pytest.raises(IndexError):
+        f.Bitmaps[999]
+    with pytest.raises(RuntimeError):
+        f.Bitmaps.FindId(ids[0]).FileFullPath = '/tmp/other.png'  # the file keys images by path
+    assert f.Bitmaps.Delete(ids[0]) and len(f.Bitmaps) == 2
+    assert [b.FileFullPath for b in f.Bitmaps] == paths[1:]        # no IndexError at the hole
+    out = str(tmp_path / 'bitmaps.3dm')
+    assert f.Write(out, None)
+    g = r.File3dmX.Read(out)
+    assert sorted(b.FileFullPath for b in g.Bitmaps) == sorted(paths[1:])
+    bm = next(iter(g.Bitmaps))
+    del g
+    gc.collect()
+    assert bm.FileFullPath in paths                                # the view keeps the file alive

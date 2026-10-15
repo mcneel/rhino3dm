@@ -119,3 +119,28 @@ type = "Rhino.Geometry.PointCloud"
 js = "createFromThreejsJSON"
 kind = "static"
 reason = "three.js interop; inverse of toThreejsJSON"
+
+# -----------------------------------------------------------------------------
+# rhino3dm-only API kept hand-written (D19 decisions: "keep"). A whole class, or
+# the listed members of one. tools/generate/old_coverage.py fills the Decision
+# column of docs/vnext/rhino3dm-only-members.md from these.
+# -----------------------------------------------------------------------------
+
+[[hand_kept]]
+class = "Bitmap"
+decided = "Luis, 2026-10-15"
+vnext = "src/bindings/bnd_bitmapx.* (BitmapX), with the review fixes (G90)"
+reason = "RhinoCommon's BitmapEntry has no working member for a File3dm (its pointer throws NotImplementedException; FileName/Save are RHINO_SDK only: pilot #37); the old ON_Bitmap wrapper is the only bitmap access"
+
+[[hand_kept]]
+class = "File3dmBitmapTable"
+decided = "Luis, 2026-10-15"
+vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTableX), with the review fixes (G90)"
+reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yields BitmapEntry for images (pilot #37)"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["Bitmaps"]
+decided = "Luis, 2026-10-15"
+vnext = "File3dmX.Bitmaps (gen_registry.HAND_MEMBERS)"
+reason = "the accessor of the kept File3dmBitmapTable"

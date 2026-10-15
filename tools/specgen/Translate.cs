@@ -318,10 +318,17 @@ static class TranslateCommand
         json.Append("\n],\n\"members\": [\n");
         json.AppendJoin(",\n", results.Select(r => JsonSerializer.Serialize(r)));
         json.Append("\n],\n\"classmembers\": [\n");
-        json.AppendJoin(",\n", classResults.Where(r => r.Ok).Select(r => JsonSerializer.Serialize(new
+        // Native only where a class body calls one (G84): the other records stay as they were
+        json.AppendJoin(",\n", classResults.Where(r => r.Ok).Select(r =>
         {
-            r.Type, r.Namespace, r.Kind, r.Name, r.Static, r.Ret, r.Params, r.ParamsCs, r.Body, r.SetBody,
-        })));
+            var d = new Dictionary<string, object> { ["Type"] = r.Type, ["Namespace"] = r.Namespace, ["Kind"] = r.Kind, ["Name"] = r.Name,
+                ["Static"] = r.Static, ["Ret"] = r.Ret, ["Params"] = r.Params, ["ParamsCs"] = r.ParamsCs, ["Body"] = r.Body, ["SetBody"] = r.SetBody };
+            if (r.Native.Length > 0) d["Native"] = r.Native;
+            if (!r.Public) { d["Hidden"] = true; d["RetCs"] = r.RetCs; }
+            if (r.RetBorrowed) d["RetBorrowed"] = true;
+            if (r.SetBody != null && r.SetNative.Length > 0) d["SetNative"] = r.SetNative;
+            return JsonSerializer.Serialize(d);
+        }));
         json.Append("\n]\n}\n");
         File.WriteAllText(outPath, json.ToString());
 
@@ -393,6 +400,12 @@ class Member
     public string SetBody { get; set; }      // a property's setter body (value: `value`), or null
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string SetReason { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string[] SetNative { get; set; } = Array.Empty<string>();   // a class setter's natives (G84)
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string RetCs { get; set; }        // a hidden class member's C# return type (G85)
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool RetBorrowed { get; set; }    // its class value is `this` or one this object holds (G89)
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string[] SetRefs { get; set; }
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
@@ -595,10 +608,17 @@ class Tx
     // fresh wrapper would leak ("class temporary").
     public static Dictionary<string, TypeInfo> Classes = new();
     readonly HashSet<string> ParamNames = new();
+    readonly HashSet<string> _ptrOuts = new();    // data-class out parameters, held by pointer (G86)
     int _nullOk;                                  // > 0 where `null` is a null object pointer
     bool _retClass;                               // the member returns a class value
-    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && Classes.ContainsKey(cs.Split('.').Last())
+    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && !IsVariantType(cs) && !IsGuidsType(cs) && Classes.ContainsKey(cs.Split('.').Last())
         && !All.ContainsKey(cs.Split('.').Last()) && !Enums.ContainsKey(cs.Split('.').Last());
+    static bool IsVariantType(string cs) => cs is "Variant" or "Render.Variant" or "Rhino.Render.Variant";
+    // `using (var children = new SimpleArrayGuid())` (G89): an ON_SimpleArray<ON_UUID> on the
+    // stack (Count, [i] an ON_UUID) -- in class mode, like the points holder
+    static bool IsGuidsType(string cs) => cs?.Split('.').Last() == "SimpleArrayGuid";
+    // Rhino.Runtime.InteropWrappers (StringHolder, SimpleArray*): idioms of their own, never generated classes
+    bool IsInterop(string cs) => cs != null && (IsVariantType(cs) || Classes.TryGetValue(cs.Split('.').Last(), out var ii) && (ii.Namespace ?? "").EndsWith("InteropWrappers"));
     string ClassOf(TypeSyntax t) => IsClass(t.ToString()) ? t.ToString().Split('.').Last() : null;
     // a data class's members may name a generated class (G82): the same markers
     // as class mode, resolved -- or the member refused -- by the generator
@@ -626,8 +646,14 @@ class Tx
     {
         if (!IsClass(TypeOf(e))) return;
         SyntaxNode p = e.Parent;
-        while (p is ParenthesizedExpressionSyntax || p is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression }) p = p.Parent;
+        SyntaxNode arm = e;
+        while (p is ParenthesizedExpressionSyntax || p is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression }
+               // `x ? null : new Brep(p, null)` (G89): an arm passes it on -- the other arm null only
+               || p is ConditionalExpressionSyntax pce && (pce.WhenTrue == arm ? pce.WhenFalse : pce.WhenFalse == arm ? pce.WhenTrue : null)
+                      is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression })
+        { arm = p; p = p.Parent; }
         if (p is ReturnStatementSyntax or EqualsValueClauseSyntax or ArrowExpressionClauseSyntax) return;
+        if (p is YieldStatementSyntax && _yieldVec != null) return;   // collected, owned (G89)
         throw new NotSupported("class temporary");
     }
     static string Norm(string t) => t is "double" or "float" or "int" or "long" or "uint" or "short" or "byte" ? "num"
@@ -671,6 +697,13 @@ class Tx
     readonly HashSet<string> _seqAliases = new();     // `ICollection<T> c = param as ICollection<T>;` (G80)
     readonly HashSet<string> _eqComparers = new();    // `EqualityComparer<T> c = EqualityComparer<T>.Default;` (G80)
     string _retVector;                           // the member returns a std::vector (C#'s null is the empty one; G70)
+    bool _hidden;                                // a non-public class member (G85): Guid is an ON_UUID here (G89)
+    string _yieldVec;                            // an iterator member's class sequence (G89: `yield return EdgeAt(i)`)
+    readonly HashSet<string> _borrowedVars = new();   // `if (m__parent is T parent)` (G89): a pointer this object holds
+    readonly HashSet<string> _modelLocals = new();    // `var file3dm = parent.File3dmParent;` (G89): the proxy's ONX_Model*
+    int _retObjs, _retBorrowed;
+    readonly HashSet<string> _paramAliases = new();   // `var brep = geometry as Brep;` (G89): the caller's object, never owned here
+    readonly HashSet<string> _viewGuarded = new();    // ... inside `if (brep != null && brep.IsDocumentControlled)`                  // class-value returns, and those of `this` / a held pointer (G89)
 
     public static string TypeOrNull(TypeSyntax t)
         => t is PredefinedTypeSyntax p && Prim.TryGetValue(p.Keyword.Text, out var c) ? c : null;
@@ -680,7 +713,16 @@ class Tx
         if (t is PredefinedTypeSyntax p && Prim.TryGetValue(p.Keyword.Text, out var c)) return c;
         // `IComparer<T> comparer` (G80): the bindings never pass one (decision 3) -- the default order
         if (Cur.IsData && t is GenericNameSyntax { Identifier.Text: "IComparer" }) return "RH3DM_NullComparer";
-        if (Cur.IsData && t.ToString().Split('.').Last() == "SimpleArrayPoint3d") return "RH3DM_Points";   // G81
+        if ((Cur.IsData || Cur.ClassMode) && t.ToString().Split('.').Last() == "SimpleArrayPoint3d") return "RH3DM_Points";   // G81, G84
+        if (Cur.ClassMode && t is IdentifierNameSyntax { Identifier.Text: "IntPtr" }) return "void*";                         // G84
+        // RhinoCommon's RDK Variant and the values it carries (G89, D40): a language value
+        // (`IConvertible` out, `object` in) converted by the variant's runtime type
+        if (Cur.ClassMode && IsVariantType(t.ToString())) return "RH3DM_Variant";
+        if (Cur.ClassMode && IsGuidsType(t.ToString())) return "RH3DM_Guids";
+        if (Cur.ClassMode && t.ToString() is "IConvertible" or "System.IConvertible" or "object" or "System.Object") return "RH3DM_Value";
+        // a Guid inside a hidden helper (G89: File3dmRenderContent.NewFile3dmRenderContent): the
+        // native's own ON_UUID -- never at a binding boundary, where it is a language uuid
+        if (Cur.ClassMode && _hidden && t.ToString() is "Guid" or "System.Guid") return "ON_UUID";
         if (Cur.IsData && DataClassOf(t.ToString()) is string dcn) return $"$$class:{dcn}$$";              // G82
         if (Cur.ClassMode)
         {
@@ -690,6 +732,9 @@ class Tx
             if (ClassOf(t) is string ccn) return $"$$class:{ccn}$$";
             // System.Drawing.Color passes through to the generated siblings unopened (G79)
             if (t.ToString() is "Color" or "System.Drawing.Color" or "Drawing.Color") return "BND_Color";
+            // System.Drawing.Rectangle (G86): the old bindings' tuple (x, y, width, height),
+            // only made (FromLTRB / Empty) and returned -- anything else on it is refused
+            if (t.ToString() is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle") return "BND_TUPLE";
         }
         if (Cur.IsData)
         {
@@ -706,9 +751,19 @@ class Tx
         }
         // `Point3d[]`, `IEnumerable<Point3d>`, `List<Point3d>` (G70): a std::vector of a
         // translated value type or primitive; the binding reads/writes it as a sequence
-        if (!Cur.ClassMode && ElementOf(t) is TypeSyntax et && VectorElement(et) is string ec)
+        // class mode too (G84): the class bindings convert sequences both ways in JS now
+        if (ElementOf(t) is TypeSyntax et && VectorElement(et) is string ec)
             return $"std::vector<{ec}>";
         throw new NotSupported("type: " + t);
+    }
+
+    // `IEnumerable<SubDEdge> Edges { get { ... yield return EdgeAt(i); } }` (G89): a class
+    // sequence of new objects, collected; null for anything else
+    string IteratorOf(TypeSyntax t, BlockSyntax body)
+    {
+        if (!Cur.ClassMode || body == null || !body.DescendantNodes().OfType<YieldStatementSyntax>().Any()) return null;
+        if (ElementOf(t) is not TypeSyntax et || ClassOf(et) is not string cen || IsInterop(cen)) return null;
+        return _yieldVec = $"std::vector<$$class:{cen}$$>";
     }
 
     // the element type of an array / IEnumerable<T> / List<T>, else null
@@ -833,11 +888,15 @@ class Tx
 
     public Member ClassMember(MemberDeclarationSyntax m)
     {
-        if (m.Modifiers.Any(SyntaxKind.ExternKeyword) || m.Modifiers.Any(SyntaxKind.AbstractKeyword)
-            || !m.Modifiers.Any(SyntaxKind.PublicKeyword))
+        if (m.Modifiers.Any(SyntaxKind.ExternKeyword) || m.Modifiers.Any(SyntaxKind.AbstractKeyword))
             return null;
+        // a non-public member is a helper the public bodies call (G85): translated
+        // too, generated unregistered so the bodies calling it resolve
+        bool pub = m.Modifiers.Any(SyntaxKind.PublicKeyword);
+        if (!pub && m is not (MethodDeclarationSyntax or PropertyDeclarationSyntax)) return null;
         bool st = m.Modifiers.Any(SyntaxKind.StaticKeyword);
-        var r = new Member { Type = Cur.Cs, Namespace = Cur.Namespace, Public = true, Static = st };
+        var r = new Member { Type = Cur.Cs, Namespace = Cur.Namespace, Public = pub, Static = st };
+        _hidden = !pub;
         try
         {
             switch (m)
@@ -845,11 +904,22 @@ class Tx
                 case MethodDeclarationSyntax md:
                     r.Kind = "method"; r.Name = md.Identifier.Text; r.Signature = Sig(md);
                     if (md.Body == null && md.ExpressionBody == null) return null;
+                    r.RetCs = md.ReturnType.ToString();
                     if (md.ExplicitInterfaceSpecifier != null || md.TypeParameterList != null)
                         throw new NotSupported("generic or explicit interface method");
-                    r.Ret = Type(md.ReturnType);
+                    r.Ret = IteratorOf(md.ReturnType, md.Body) ?? Type(md.ReturnType);
+                    if (r.Ret.StartsWith("std::vector<")) _retVector = r.Ret;      // `return null;`: the empty sequence (D35; G84)
+                    if (r.Ret == "RH3DM_Value") _retVector = "RH3DM_ValueNone";   // `return null;`: None / null (G89)
                     r.Params = Params(md.ParameterList, false).ps;
-                    if (r.Params.Any(q => q.Mode != "")) throw new NotSupported("ref/out parameter");
+                    // an `out` of a DATA class (G86: TryGetPolyline's `out Polyline`) is a pointer:
+                    // null or a new object the tuple hands the caller
+                    foreach (var (q, pp) in r.Params.Zip(md.ParameterList.Parameters))
+                        if (q.Mode == "out" && All.TryGetValue(pp.Type.ToString().Split('.').Last(), out var odt) && odt.IsData)
+                        { q.Type = odt.Cpp + "*"; _ptrOuts.Add(pp.Identifier.Text); }
+                    // an `out` of a value type is a reference; the generator returns it in a
+                    // tuple, as every out parameter (TryGetCircle; G83)
+                    if (r.Params.Any(q => q.Mode == "ref" || q.Mode == "out" && (q.Type.StartsWith("$$") || q.Type.StartsWith("std::") && !q.Type.StartsWith("std::vector<"))))
+                        throw new NotSupported("ref/out parameter");
                     r.ParamsCs = ParamCs.ToArray();
                     _retClass = r.Ret.StartsWith("$$class:");
                     r.Body = Body(md.Body, md.ExpressionBody, r.Ret == "void");
@@ -858,11 +928,12 @@ class Tx
                 {
                     r.Kind = "property"; r.Name = pd.Identifier.Text; r.Signature = Sig(pd);
                     if (pd.ExplicitInterfaceSpecifier != null) throw new NotSupported("explicit interface property");
+                    r.RetCs = pd.Type.ToString();
                     var get = pd.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration));
                     var set = pd.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration));
                     if (pd.ExpressionBody == null && get?.Body == null && get?.ExpressionBody == null)
                         return null;                      // an auto-property: no body to translate
-                    r.Ret = Type(pd.Type);
+                    r.Ret = IteratorOf(pd.Type, get?.Body) ?? Type(pd.Type);
                     r.ParamsCs = Array.Empty<string>();
                     _retClass = r.Ret.StartsWith("$$class:");
                     r.Body = pd.ExpressionBody != null ? Body(null, pd.ExpressionBody, false) : Body(get.Body, get.ExpressionBody, false);
@@ -872,7 +943,7 @@ class Tx
                         // the setter on its own: its failure leaves the getter
                         var sx = new Tx(Cur, All);
                         sx.Scope["value"] = pd.Type.ToString();
-                        try { r.SetBody = sx.Body(set.Body, set.ExpressionBody, true); r.SetRefs = sx.Refs.Distinct().ToArray(); }
+                        try { r.SetBody = sx.Body(set.Body, set.ExpressionBody, true); r.SetRefs = sx.Refs.Distinct().ToArray(); r.SetNative = sx.Natives.Distinct().ToArray(); }
                         catch (NotSupported e) { r.SetReason = e.Message; }
                     }
                     break;
@@ -881,7 +952,12 @@ class Tx
             }
         }
         catch (NotSupported e) { r.Ok = false; r.Reason = e.Message; r.Body = r.SetBody = null; }
+        // every class value it returns is `this` or a pointer this object holds (G89: Parent,
+        // TopLevel): borrowed -- the binding hands it out without ownership
+        if (r.Ok && _retObjs > 0 && _retBorrowed == _retObjs) r.RetBorrowed = true;
+        else if (r.Ok && _retBorrowed > 0) { r.Ok = false; r.Reason = "borrowed and owned class returns"; r.Body = r.SetBody = null; }
         r.Refs = Refs.Distinct().ToArray();
+        r.Native = Natives.Distinct().ToArray();          // class-mode natives (G84): declared and checked by the generator
         return r;
     }
 
@@ -1060,6 +1136,9 @@ class Tx
 
     string Body(BlockSyntax block, ArrowExpressionClauseSyntax arrow, bool isVoid)
     {
+        // an iterator (G89): the yielded objects collected, in order, and returned
+        if (block != null && _yieldVec != null)
+            return string.Join("\n", new[] { "{", $"  {_yieldVec} rh3dm_yield;" }.Concat(Stmt(block, 1)).Concat(new[] { "  return rh3dm_yield;", "}" }));
         if (block != null) return string.Join("\n", Stmt(block, 0));
         if (arrow != null)
             return "{\n  " + (isVoid ? "" : "return ") + Expr(arrow.Expression) + ";\n}";
@@ -1284,17 +1363,35 @@ class Tx
                 try {
                 foreach (var v in ld.Declaration.Variables)
                 {
+                    if (Cur.ClassMode && v.Initializer?.Value is MemberAccessExpressionSyntax { Name.Identifier.Text: "File3dmParent" })
+                        _modelLocals.Add(v.Identifier.Text);                     // G89
+                    if (Cur.ClassMode && v.Initializer?.Value is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Left: IdentifierNameSyntax pav }
+                        && ParamNames.Contains(pav.Identifier.Text))
+                        _paramAliases.Add(v.Identifier.Text);                    // G89
                     Scope[v.Identifier.Text] = ld.Declaration.Type.IsVar
                         ? (v.Initializer != null ? TypeOf(v.Initializer.Value) : null)
                         : ld.Declaration.Type.ToString();
+                    // `Vector3d[] rc = null;`: a sequence is never null here -- empty (D35; G84)
+                    var vnull = t.StartsWith("std::vector<") && v.Initializer?.Value is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression };
                     yield return pad + isConst + t + " " + Rn(v.Identifier.Text)
-                        + (v.Initializer != null ? " = " + Expr(v.Initializer.Value) : "") + ";";
+                        + (v.Initializer != null && !vnull ? " = " + Expr(v.Initializer.Value) : "") + ";";
                 }
                 } finally { if (!ld.Declaration.Type.IsVar && ClassOf(ld.Declaration.Type) != null) _nullOk--; }
                 break;
             }
             case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax kai } when kai.Expression.ToString() == "GC.KeepAlive":
                 break;                                   // a marshalling lifetime hint: nothing in C++
+            case ExpressionStatementSyntax { Expression: ConditionalAccessExpressionSyntax { Expression: var vdx, WhenNotNull: InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax { Name.Identifier.Text: "Dispose" } } } }
+                    when Cur.ClassMode && IsVariantType(TypeOf(vdx) ?? ""):
+                break;                                   // a stack variant frees itself (G89)
+            case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var dsx, Name.Identifier.Text: "Dispose" }, ArgumentList.Arguments.Count: 0 } }
+                    when Cur.ClassMode && (TypeOf(dsx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(dsx) ?? "")):
+                break;                                   // the stack holder frees itself (G84)
+            case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dcx, Name.Identifier.Text: "Dispose" }, ArgumentList.Arguments.Count: 0 } }
+                    when Cur.ClassMode && Scope.TryGetValue(dcx.Identifier.Text, out var dct) && IsClass(dct) && !IsInterop(dct) && !ParamNames.Contains(dcx.Identifier.Text):
+                // `nc.Dispose();` on an object this body made (G86): freed, and null as C# leaves it unusable
+                yield return pad + $"delete {Rn(dcx.Identifier.Text)}; {Rn(dcx.Identifier.Text)} = nullptr;";
+                break;
             case ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Right: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression } } chain }:
             {
                 // `f.A = f.B = f.C = f.D = -1;`: the value once, assigned innermost first
@@ -1321,11 +1418,41 @@ class Tx
             case ExpressionStatementSyntax es:
                 yield return pad + Expr(es.Expression) + ";";
                 break;
+            case YieldStatementSyntax ys when _yieldVec != null:
+                if (ys.IsKind(SyntaxKind.YieldBreakStatement)) { yield return pad + "return rh3dm_yield;"; break; }
+                // a new object each (the sequence owns them): never this, a parameter or a held pointer
+                if (ys.Expression is ThisExpressionSyntax || ys.Expression is IdentifierNameSyntax yid
+                    && (ParamNames.Contains(yid.Identifier.Text) || _borrowedVars.Contains(yid.Identifier.Text)))
+                    throw new NotSupported("yielding a borrowed object");
+                _nullOk++;
+                try { yield return pad + "rh3dm_yield.push_back(" + Expr(ys.Expression) + ");"; }
+                finally { _nullOk--; }
+                break;
             case ReturnStatementSyntax rs when _retClass && rs.Expression != null:
                 // a class value returned (G74): null, a local (owned here), or a fresh object --
                 // never a parameter, which the caller owns
                 if (rs.Expression is IdentifierNameSyntax rpid && ParamNames.Contains(rpid.Identifier.Text))
                     throw new NotSupported("returning a class parameter");
+                if (rs.Expression is not LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression })
+                {
+                    _retObjs++;
+                    if (rs.Expression is ThisExpressionSyntax)
+                    {
+                        // `return this;` (G89: TopLevel): this object, borrowed
+                        _retBorrowed++;
+                        yield return pad + $"return (($$class:{Cur.Cs}$$)this);";
+                        break;
+                    }
+                    if (rs.Expression is IdentifierNameSyntax rbid && _borrowedVars.Contains(rbid.Identifier.Text)) _retBorrowed++;
+                    if (rs.Expression is IdentifierNameSyntax raid && _paramAliases.Contains(raid.Identifier.Text))
+                    {
+                        // RhinoCommon hands the caller's view back (G89, D-identity): a new view of
+                        // the same object -- the binding never returns an argument it does not own
+                        if (!_viewGuarded.Contains(raid.Identifier.Text)) throw new NotSupported("returning a class parameter");
+                        yield return pad + $"return $$viewcopy:{Scope[raid.Identifier.Text].Split('.').Last()}$$({Rn(raid.Identifier.Text)});";
+                        break;
+                    }
+                }
                 _nullOk++;
                 try { yield return pad + "return " + Expr(rs.Expression) + ";"; }
                 finally { _nullOk--; }
@@ -1355,8 +1482,8 @@ class Tx
                 yield return pad + "}";
                 break;
             }
-            case UsingStatementSyntax cus when Cur.IsData && cus.Declaration is { Variables: [var cuv] }
-                    && cuv.Initializer != null && DataClassOf(TypeOf(cuv.Initializer.Value)) is string ucn:
+            case UsingStatementSyntax cus when (Cur.IsData || Cur.ClassMode) && cus.Declaration is { Variables: [var cuv] }
+                    && cuv.Initializer != null && (Cur.IsData ? DataClassOf(TypeOf(cuv.Initializer.Value)) : IsClass(TypeOf(cuv.Initializer.Value)) ? TypeOf(cuv.Initializer.Value).Split('.').Last() : null) is string ucn:
             {
                 // `using (var pc = ToPolylineCurve()) { ... }` (G82): a generated object this
                 // scope owns -- deleted on the way out, as Dispose; never returned itself
@@ -1368,6 +1495,20 @@ class Tx
                 yield return pad + $"  $$class:{ucn}$$ {Rn(un)} = {Expr(cuv.Initializer.Value)};";
                 yield return pad + $"  std::unique_ptr<std::remove_pointer<decltype({Rn(un)})>::type> {Rn(un)}_owned({Rn(un)});";
                 foreach (var x in (cus.Statement is BlockSyntax cub ? cub.Statements : new SyntaxList<StatementSyntax>().Add(cus.Statement)))
+                    foreach (var l in Stmt(x, depth + 1)) yield return l;
+                yield return pad + "}";
+                break;
+            }
+            case UsingStatementSyntax vus when Cur.ClassMode && vus.Declaration is { Variables: [var vuv] }
+                    && vuv.Initializer?.Value is ObjectCreationExpressionSyntax vun && (IsVariantType(vun.Type.ToString()) || IsGuidsType(vun.Type.ToString())):
+            {
+                // `using (var v = new Variant(value)) { ... }` (G89): a variant on the stack
+                // (`new SimpleArrayGuid()`: the uuid holder, the same way)
+                var guids = IsGuidsType(vun.Type.ToString());
+                Scope[vuv.Identifier.Text] = guids ? "SimpleArrayGuid" : "Variant";
+                yield return pad + "{";
+                yield return pad + (guids ? "  RH3DM_Guids " : "  RH3DM_Variant ") + Rn(vuv.Identifier.Text) + " = " + Expr(vun) + ";";
+                foreach (var x in (vus.Statement is BlockSyntax vub ? vub.Statements : new SyntaxList<StatementSyntax>().Add(vus.Statement)))
                     foreach (var l in Stmt(x, depth + 1)) yield return l;
                 yield return pad + "}";
                 break;
@@ -1384,22 +1525,52 @@ class Tx
                 yield return pad + "}";
                 break;
             }
+            case IfStatementSyntax ifs when Cur.ClassMode && ifs.Condition is IsPatternExpressionSyntax
+                { Expression: IdentifierNameSyntax pf, Pattern: DeclarationPatternSyntax { Type: var ppt, Designation: SingleVariableDesignationSyntax ppd } }
+                && !Scope.ContainsKey(pf.Identifier.Text) && !ParamNames.Contains(pf.Identifier.Text) && ClassOf(ppt) is string pcn:
+            {
+                // `if (m__parent is File3dmRenderContent parent)` (G89): a managed field the
+                // generator models (a child proxy's parent link), or the member is refused there
+                Scope[ppd.Identifier.Text] = ppt.ToString();
+                _borrowedVars.Add(ppd.Identifier.Text);
+                yield return pad + $"if ($$class:{pcn}$$ {Rn(ppd.Identifier.Text)} = $$childlink:{pf.Identifier.Text}:{pcn}$$)";
+                foreach (var l in Stmt(Blockify(ifs.Statement), depth)) yield return l;
+                if (ifs.Else != null)
+                {
+                    yield return pad + "else";
+                    foreach (var l in Stmt(Blockify(ifs.Else.Statement), depth)) yield return l;
+                }
+                break;
+            }
             case IfStatementSyntax ifs:
             {
                 var icond = Expr(ifs.Condition);
+                // `if (brep != null && brep.IsDocumentControlled) return brep;` (G89): the caller's view
+                var guarded = new List<string>();
+                for (ExpressionSyntax c = ifs.Condition; c != null; )
+                {
+                    var conj = c is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalAndExpression } la ? la.Right : c;
+                    if (conj is MemberAccessExpressionSyntax { Name.Identifier.Text: "IsDocumentControlled", Expression: IdentifierNameSyntax gv }
+                        && _paramAliases.Contains(gv.Identifier.Text) && _viewGuarded.Add(gv.Identifier.Text))
+                        guarded.Add(gv.Identifier.Text);
+                    c = c is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalAndExpression } la2 ? la2.Left : null;
+                }
                 foreach (var h in _hoist) yield return pad + h;          // an `out var` in the condition (G70)
                 _hoist.Clear();
                 // a condition C# decides here (a parameter sequence's null test; G80): the branch taken
                 var bare = icond.Trim('(', ')', ' ');
                 if (bare is "true" or "false")
                 {
+                    if (bare == "false") foreach (var g in guarded) _viewGuarded.Remove(g);
                     var taken = bare == "true" ? ifs.Statement : ifs.Else?.Statement;
                     if (taken != null)
                         foreach (var l in Stmt(Blockify(taken), depth)) yield return l;
+                    foreach (var g in guarded) _viewGuarded.Remove(g);
                     break;
                 }
                 yield return pad + "if (" + icond + ")";
                 foreach (var l in Stmt(Blockify(ifs.Statement), depth)) yield return l;
+                foreach (var g in guarded) _viewGuarded.Remove(g);
                 if (ifs.Else != null)
                 {
                     yield return pad + "else";
@@ -1598,6 +1769,14 @@ class Tx
                 Scope[ov.Identifier.Text] = csType;
                 _hoist.Add($"{cppType} {Rn(ov.Identifier.Text)};");
                 parts.Add(Rn(ov.Identifier.Text));
+                continue;
+            }
+            // a class local (a pointer this body owns) into a sibling taking the class by
+            // reference (G85): dereferenced -- `$$deref$$` is `*`, or nothing for a value class
+            if (Cur.ClassMode && a.Expression is IdentifierNameSyntax cla && Scope.TryGetValue(cla.Identifier.Text, out var clt)
+                && !ParamNames.Contains(cla.Identifier.Text) && IsClass(clt) && !IsInterop(clt))
+            {
+                parts.Add($"$$deref:{clt.Split('.').Last()}$$({Rn(cla.Identifier.Text)})");
                 continue;
             }
             parts.Add(Expr(a.Expression));
@@ -1814,6 +1993,8 @@ class Tx
                 }
             case IdentifierNameSyntax id:
                 return Ident(id.Identifier.Text);
+            case ThisExpressionSyntax when Cur.ClassMode && e.Parent is ArgumentSyntax:
+                return "(*this)";                    // an argument (G89): a class parameter is a const reference
             case ThisExpressionSyntax:
                 if (Cur.ClassMode) throw new NotSupported("this as a value");
                 return "(*this)";
@@ -1845,6 +2026,11 @@ class Tx
                     ClassValue(b);
                     return $"$$as:{asn}$$({Expr(b.Left)})";
                 }
+                if (Cur.ClassMode && b.IsKind(SyntaxKind.AsExpression) && b.Right is TypeSyntax pat && ClassOf(pat) is string pan
+                    && b.Left is IdentifierNameSyntax pal && ParamNames.Contains(pal.Identifier.Text) && IsClass(TypeOf(pal))
+                    && b.Parent is EqualsValueClauseSyntax)
+                    // `geometry as Brep` on a class parameter (G89): the caller's object, not owned
+                    return $"$$pcast:{pan}$$(&{Rn(pal.Identifier.Text)})";
                 if (b.IsKind(SyntaxKind.CoalesceExpression) || b.IsKind(SyntaxKind.IsExpression)
                     || b.IsKind(SyntaxKind.AsExpression))
                     throw new NotSupported("operator " + b.OperatorToken.Text);
@@ -1864,6 +2050,8 @@ class Tx
                     {
                         // `mp == null` on a class value (G74): a parameter is a reference, never null
                         var side = b.Right.IsKind(SyntaxKind.NullLiteralExpression) ? b.Left : b.Right;
+                        if (side is IdentifierNameSyntax mls && _modelLocals.Contains(mls.Identifier.Text))
+                            return $"({Rn(mls.Identifier.Text)} {b.OperatorToken.Text} nullptr)";   // a proxy's file (G89)
                         if (side is IdentifierNameSyntax nid && ParamNames.Contains(nid.Identifier.Text))
                             // the binding boundary rejects None for a reference argument (as it does
                             // for the elided null-check guards): the null arm is unreachable
@@ -1918,6 +2106,16 @@ class Tx
                 return Expr(b.Left) + " " + b.OperatorToken.Text + " " + Expr(b.Right);
             case ConditionalExpressionSyntax c:
                 return "(" + Expr(c.Condition) + " ? " + Expr(c.WhenTrue) + " : " + Expr(c.WhenFalse) + ")";
+            // `parameters = null;` on a sequence (G86): empty -- a sequence is never null (D35)
+            case AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Left: IdentifierNameSyntax vnl, Right: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression } }
+                    when Cur.ClassMode && ArrayCs(TypeOf(vnl)) != null:
+                return $"{Rn(vnl.Identifier.Text)}.clear()";
+            // a data-class out pointer (G86): null, or the new object a data static made
+            case AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Left: IdentifierNameSyntax pol } poa
+                    when Cur.ClassMode && _ptrOuts.Contains(pol.Identifier.Text):
+                if (poa.Right.IsKind(SyntaxKind.NullLiteralExpression)) return $"{Rn(pol.Identifier.Text)} = nullptr";
+                if (poa.Right is InvocationExpressionSyntax) return $"{Rn(pol.Identifier.Text)} = {Expr(poa.Right)}";
+                throw new NotSupported("data out assignment");
             // `return pc?.ToNurbsCurve();` (G82): a generated class's member on a class local,
             // returning a class -- null stays null
             case ConditionalAccessExpressionSyntax cae when Cur.IsData && _retClass && cae.Parent is ReturnStatementSyntax
@@ -2062,6 +2260,12 @@ class Tx
                 return $"{tti.Cpp}((*this).ToArray())";
             case ObjectCreationExpressionSyntax oc:
             {
+                if (Cur.ClassMode && oc.Type.ToString().Split('.').Last() == "SimpleArrayPoint3d" && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
+                    return "RH3DM_Points()";                                       // the stack holder (G84)
+                if (Cur.ClassMode && IsGuidsType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
+                    return "RH3DM_Guids()";                                        // G89
+                if (Cur.ClassMode && IsVariantType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) <= 1)
+                    return oc.ArgumentList?.Arguments.Count == 1 ? $"RH3DM_Variant({Expr(oc.ArgumentList.Arguments[0].Expression)})" : "RH3DM_Variant()";   // G89
                 if (oc.Type is IdentifierNameSyntax tn && All.TryGetValue(tn.Identifier.Text, out var ti)
                     && !ti.IsStaticClass)
                 {
@@ -2088,6 +2292,14 @@ class Tx
                     }
                     return $"$$new:{dncn}:{string.Join(",", dts)}$$({string.Join(", ", das)})";
                 }
+                if (Cur.ClassMode && ClassOf(oc.Type) is string wcn && !IsInterop(wcn) && oc.ArgumentList?.Arguments is { Count: 2 or 3 } wargs
+                    && TypeOf(wargs[0].Expression) == "IntPtr" && wargs[1].Expression.IsKind(SyntaxKind.NullLiteralExpression)
+                    && (wargs.Count == 2 || wargs[2].Expression.ToString() == "-1"))
+                {
+                    // `new Mesh(ptr, null)` (G86): the native's new object, owned
+                    ClassValue(oc);
+                    return $"$$wrapptr:{wcn}$$(RH3DM_IP({Expr(wargs[0].Expression)}))";
+                }
                 if (Cur.ClassMode && ClassOf(oc.Type) is string ncn)
                 {
                     ClassValue(oc);                                                 // G74
@@ -2098,6 +2310,8 @@ class Tx
             case ArrayCreationExpressionSyntax ac when ac.Initializer == null && ac.Type.RankSpecifiers is [{ Sizes: [var sz] }]:
                 // `new Point3d[8]` (G70): a vector of that many default elements
                 return $"{Type(ac.Type)}({Expr(sz)})";
+            case ElementAccessExpressionSyntax gea when Cur.ClassMode && IsGuidsType(TypeOf(gea.Expression)) && gea.ArgumentList.Arguments.Count == 1:
+                return $"({Expr(gea.Expression)})[{Expr(gea.ArgumentList.Arguments[0].Expression)}]";   // G89
             case ElementAccessExpressionSyntax ea when ArrayCs(TypeOf(ea.Expression)) != null && ea.ArgumentList.Arguments.Count == 1:
                 // `corners[i]` on a sequence (G70): the element, an lvalue
                 return $"{Expr(ea.Expression)}[{Expr(ea.ArgumentList.Arguments[0].Expression)}]";
@@ -2114,6 +2328,15 @@ class Tx
             {
                 var name = ma.Name.Identifier.Text;
                 if (ma.Expression is ThisExpressionSyntax) return Ident(name);
+                if (Cur.ClassMode && name == "IsDocumentControlled" && ma.Expression is IdentifierNameSyntax dcv && Scope.ContainsKey(dcv.Identifier.Text)
+                    && IsClass(Scope[dcv.Identifier.Text]))
+                    // CommonObject.IsDocumentControlled (`m_ptr == 0`; G89): a view, owning nothing
+                    return $"({Rn(dcv.Identifier.Text)})$$isview:{Scope[dcv.Identifier.Text].Split('.').Last()}$$";
+                if (Cur.ClassMode && name == "Count" && IsGuidsType(TypeOf(ma.Expression)))
+                    return $"({Expr(ma.Expression)}).Count()";                    // G89
+                if (Cur.ClassMode && name == "File3dmParent" && ma.Expression is IdentifierNameSyntax fpv && Scope.ContainsKey(fpv.Identifier.Text) && IsClass(Scope[fpv.Identifier.Text]))
+                    // a File3dm proxy's file (G89): the ONX_Model it resolves in, or null
+                    return $"({Rn(fpv.Identifier.Text)}){Acc(fpv.Identifier.Text)}$$proxyfile:{Scope[fpv.Identifier.Text].Split('.').Last()}$$";
                 if (Cur.ClassMode && ma.Expression is IdentifierNameSyntax cvr && Scope.ContainsKey(cvr.Identifier.Text) && IsClass(Scope[cvr.Identifier.Text]))
                 {
                     ClassValue(ma);                                                 // G74
@@ -2132,8 +2355,10 @@ class Tx
                     return "std::wstring()";
                 if (Cur.ClassMode && name == "NewLine" && ma.Expression.ToString() is "Environment" or "System.Environment" && !Scope.ContainsKey("Environment"))
                     return "RH3DM_NewLine()";                      // "\r\n" on Windows, "\n" elsewhere -- .NET's (G79)
-                if (Cur.IsData && ma.Expression is IdentifierNameSyntax { Identifier.Text: "IntPtr" } && name == "Zero" && !Scope.ContainsKey("IntPtr"))
+                if ((Cur.IsData || Cur.ClassMode) && ma.Expression is IdentifierNameSyntax { Identifier.Text: "IntPtr" } && name == "Zero" && !Scope.ContainsKey("IntPtr"))
                     return "nullptr";
+                if (Cur.ClassMode && name == "Empty" && ma.Expression.ToString() is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle")
+                    return "RH3DM_RectLTRB(0, 0, 0, 0)";                                  // G86
                 if (ma.Expression is IdentifierNameSyntax en && Enums.TryGetValue(en.Identifier.Text, out var ed)
                     && !Scope.ContainsKey(en.Identifier.Text) && !All.ContainsKey(en.Identifier.Text)
                     && ed.Members.Any(x => x.Identifier.Text == name))
@@ -2244,6 +2469,7 @@ class Tx
                 if (ma.Expression is IdentifierNameSyntax { Identifier.Text: "IntPtr" } && name == "Zero") return "IntPtr";
                 if (name == "NewLine" && ma.Expression.ToString() is "Environment" or "System.Environment") return "string";
                 if (name == "Count" && TypeOf(ma.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return "int";
+                if (name == "Count" && Cur.ClassMode && IsGuidsType(TypeOf(ma.Expression))) return "int";   // G89
                 if (name is "Length" or "Count" && ArrayCs(TypeOf(ma.Expression)) != null) return "int";
                 if (ma.Expression is IdentifierNameSyntax ten && Enums.ContainsKey(ten.Identifier.Text) && !Scope.ContainsKey(ten.Identifier.Text)
                     && !All.ContainsKey(ten.Identifier.Text)) return ten.Identifier.Text;
@@ -2264,12 +2490,22 @@ class Tx
                 return Lookup(rt?.Split('.').Last()) is TypeInfo rti
                     ? rti.Chain().Select(c => c.MemberTypes.GetValueOrDefault(name)).FirstOrDefault(x => x != null) : null;
             }
+            case ElementAccessExpressionSyntax gax when Cur.ClassMode && IsGuidsType(TypeOf(gax.Expression)):
+                return "Guid";                                                       // an ON_UUID (G89)
+            case ElementAccessExpressionSyntax eax0 when Cur.ClassMode && ArrayCs(TypeOf(eax0.Expression)) is string eat0:
+                return eat0[..^2];                                                   // a sequence's element (G84)
             case ElementAccessExpressionSyntax eax when Cur.ClassMode:
                 return Lookup(eax.Expression is ThisExpressionSyntax ? Cur.Cs : TypeOf(eax.Expression)) is TypeInfo ixt
                     && ixt.MemberTypes.TryGetValue("this[]", out var ixr) ? ixr : null;      // G74
             case InvocationExpressionSyntax inv0:
             {
                 var inv = Unqualify(inv0);
+                if (inv.Expression is IdentifierNameSyntax { Identifier.Text: "ConstPointer" or "NonConstPointer" } && inv.ArgumentList.Arguments.Count == 0)
+                    return "IntPtr";                                                // G84
+                if (Cur.ClassMode && CalleeName0(inv) == "CreateGeometryHelper" && inv.ArgumentList.Arguments.Count == 2)
+                    return "GeometryBase";                                          // G86
+                if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } && inv.ArgumentList.Arguments.Count == 0)
+                    return "IntPtr";                                                // G85
                 if (inv.Expression is IdentifierNameSyntax f)
                     return Cur.Chain().Select(ct => ct.MemberTypes.GetValueOrDefault(f.Identifier.Text + "()")).FirstOrDefault(x => x != null);
                 if (inv.Expression is MemberAccessExpressionSyntax m)
@@ -2277,7 +2513,8 @@ class Tx
                     var name = m.Name.Identifier.Text;
                     if (name == "ToArray" && ArrayCs(TypeOf(m.Expression)) is string tarr) return tarr;
                     if (TypeOf(m.Expression) == "StringHolder") return name == "ToString" ? "string" : name == "NonConstPointer" ? "IntPtr" : null;
-                    if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : null;
+                    if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "Point3d[]" : null;
+                    if (IsVariantType(TypeOf(m.Expression) ?? "") || IsGuidsType(TypeOf(m.Expression))) return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : null;   // G89
                     if (m.Expression is IdentifierNameSyntax mx && mx.Identifier.Text == "Math" && !Scope.ContainsKey("Math"))
                         return name == "Sign" ? "int" : name is "Max" or "Min" or "Abs" ? TypeOf(inv.ArgumentList.Arguments[0].Expression) : "double";
                     if (m.Expression is PredefinedTypeSyntax) return "bool";
@@ -2322,7 +2559,8 @@ class Tx
     // types (declared by bnd_gen from the manifest) and static_assert sizes.
     string NativeCall(InvocationExpressionSyntax inv, string fn)
     {
-        if (Cur.ClassMode) throw new NotSupported("native call in a class body");
+        // class mode (G84): the class's own pointer is `$$self:..$$` (the generator's
+        // self access), everything else marshalled as the data mode marshals it
         Natives.Add(fn);
         var args = new List<string>();
         foreach (var a in inv.ArgumentList.Arguments)
@@ -2343,26 +2581,88 @@ class Tx
                 args.Add($"RH3DM_Val({Expr(e)})");
             else if (t is "double" or "float" or "int" or "bool" or "uint")
                 args.Add(Expr(e));
-            else if (Cur.IsData && t == "IntPtr")
+            else if ((Cur.IsData || Cur.ClassMode) && t == "IntPtr")
                 args.Add($"RH3DM_IP({Expr(e)})");          // a pointer the C side types
-            else if (Cur.IsData && ArrayCs(t) is string at && All.TryGetValue(at[..^2].Split('.').Last(), out var aet) && !aet.IsStaticClass && !aet.IsData)
+            else if ((Cur.IsData || Cur.ClassMode) && ArrayCs(t) is string at && All.TryGetValue(at[..^2].Split('.').Last(), out var aet) && !aet.IsStaticClass && !aet.IsData)
             {
                 if (WritesSelf(e)) MutatesSelf = true;          // the native may fill this object's array
                 args.Add($"RH3DM_Ptr(({Expr(e)}).data())");   // `list.m_items` as a T[]: its elements (G81)
             }
-            else if (Cur.IsData && t == "string")
+            else if ((Cur.IsData || Cur.ClassMode) && t == "string")
                 args.Add($"RH3DM_S({Expr(e)}).data()");
+            else if (Cur.ClassMode && _hidden && t is "Guid" or "System.Guid")
+                args.Add(Expr(e));                             // an ON_UUID by value (G89)
+            else if (Cur.ClassMode && e is CastExpressionSyntax { Type: PredefinedTypeSyntax { Keyword.Text: "int" } } ce0 && IsEnumT(TypeOf(ce0.Expression)))
+                args.Add($"(int)({Expr(ce0.Expression)})");   // `(int)side` (G84)
             else if (Cur.IsData && IsEnumT(t))
                 args.Add($"(int)({Expr(e)})");
             else
                 throw new NotSupported("native arg " + e);
         }
-        return $"{fn}({string.Join(", ", args)})";
+        // class mode (G85): a native's pointer result is an IntPtr in C# -- `void*`
+        // whatever the C side's constness (RH3DM_R); any other result passes through
+        var used = !(inv.Parent is ExpressionStatementSyntax || inv.Parent is ParenthesizedExpressionSyntax { Parent: ExpressionStatementSyntax });
+        return Cur.ClassMode && used ? $"RH3DM_R({fn}({string.Join(", ", args)}))" : $"{fn}({string.Join(", ", args)})";
     }
+
+    static string CalleeName0(InvocationExpressionSyntax inv) => inv.Expression switch
+    {
+        MemberAccessExpressionSyntax m => m.Name.Identifier.Text,
+        IdentifierNameSyntax i => i.Identifier.Text,
+        _ => null,
+    };
 
     string Invocation(InvocationExpressionSyntax inv)
     {
         inv = Unqualify(inv);
+        if (Cur.ClassMode && inv.ArgumentList.Arguments.Count == 0
+            && inv.Expression is IdentifierNameSyntax { Identifier.Text: "ConstPointer" or "NonConstPointer" } sp0)
+            return sp0.Identifier.Text == "ConstPointer" ? "$$self:Const$$" : "$$self:NonConst$$";       // G84
+        // `file3dm.ConstPointer()` on a proxy's file (G89): the ONX_Model pointer itself
+        if (Cur.ClassMode && inv.ArgumentList.Arguments.Count == 0
+            && inv.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax mlx, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" }
+            && _modelLocals.Contains(mlx.Identifier.Text))
+            return $"((void*){Rn(mlx.Identifier.Text)})";
+        // `nc.NonConstPointer()` on a class local or parameter (G86): that object's own
+        // pointer, as the generator's self access spells it for its class
+        if (Cur.ClassMode && inv.ArgumentList.Arguments.Count == 0
+            && inv.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax opx, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } opm
+            && Scope.TryGetValue(opx.Identifier.Text, out var opt) && IsClass(opt) && !IsInterop(opt))
+        {
+            if (opm.Name.Identifier.Text == "NonConstPointer" && ParamNames.Contains(opx.Identifier.Text))
+                throw new NotSupported("write through a class parameter");
+            // a class parameter is a const reference, a local a pointer
+            var opa = ParamNames.Contains(opx.Identifier.Text) ? $"&{Rn(opx.Identifier.Text)}" : Rn(opx.Identifier.Text);
+            return $"$$optr:{opt.Split('.').Last()}:{(opm.Name.Identifier.Text == "ConstPointer" ? "Const" : "NonConst")}$$({opa})";
+        }
+        if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "FromLTRB" } rma
+            && rma.Expression.ToString() is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle" && inv.ArgumentList.Arguments.Count == 4)
+            return $"RH3DM_RectLTRB({Args(inv.ArgumentList)})";                       // G86
+        // `GeometryBase.CreateGeometryHelper(ptr, null)` (G86): a new object of the runtime
+        // type the native pointer has, owned -- the generator's RH3DM_Wrap of the root
+        if (Cur.ClassMode && CalleeName0(inv) == "CreateGeometryHelper" && inv.ArgumentList.Arguments is [var cgh0, var cgh1]
+            && cgh1.Expression.IsKind(SyntaxKind.NullLiteralExpression) && TypeOf(cgh0.Expression) == "IntPtr")
+            return $"$$wrapptr:GeometryBase$$(RH3DM_IP({Expr(cgh0.Expression)}))";
+        // `RhinoListHelpers.GetConstArray(points, out count)` on a sequence parameter (G86):
+        // the vector itself, its size in count
+        if (Cur.ClassMode && CalleeName0(inv) == "GetConstArray" && inv.ArgumentList.Arguments is [var gca0, var gca1]
+            && gca0.Expression is IdentifierNameSyntax gcp && ParamNames.Contains(gcp.Identifier.Text) && ArrayCs(TypeOf(gcp)) != null
+            && gca1.RefKindKeyword.IsKind(SyntaxKind.OutKeyword) && gca1.Expression is IdentifierNameSyntax gcc)
+            return $"RH3DM_ConstArray({Rn(gcp.Identifier.Text)}, {Rn(gcc.Identifier.Text)})";
+        // `m_mesh.NonConstPointer()` on a field (G85): a child view's pointer is its
+        // parent's -- the generator resolves it on child views only, else refuses
+        if (Cur.ClassMode && inv.ArgumentList.Arguments.Count == 0
+            && inv.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax fpf, Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } fpm
+            && !Scope.ContainsKey(fpf.Identifier.Text) && Cur.Chain().Any(c => c.FieldCs.ContainsKey(fpf.Identifier.Text)))
+            return $"$$fieldptr:{fpf.Identifier.Text}:{(fpm.Name.Identifier.Text == "ConstPointer" ? "Const" : "NonConst")}$$";
+        if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Expression: var hx, Name.Identifier.Text: var hn }
+            && (TypeOf(hx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(hx) ?? "") || IsGuidsType(TypeOf(hx))))
+        {
+            // the points holder on the stack (G84)
+            if (hn is "ConstPointer" or "NonConstPointer" or "ToArray" && inv.ArgumentList.Arguments.Count == 0)
+                return $"({Expr(hx)}).{hn}()";
+            throw new NotSupported("SimpleArrayPoint3d." + hn);
+        }
         if (inv.Expression is MemberAccessExpressionSyntax um
             && um.Expression is IdentifierNameSyntax uid && uid.Identifier.Text == "UnsafeNativeMethods")
             return NativeCall(inv, um.Name.Identifier.Text);
@@ -2396,6 +2696,11 @@ class Tx
                 {
                     if (!t.Methods.TryGetValue(name, out var st) || !st)
                         throw new NotSupported($"call {rn}.{name}");
+                    // a data class's static making a new object (`ConstructionPlane.FromIntPtr`) is a
+                    // pointer the caller owns -- a class body holds data objects by value (G84)
+                    if (Cur.ClassMode && t.IsData && TypeOf(inv) is string dsr && All.TryGetValue(dsr.Split('.').Last(), out var dst) && dst.IsData
+                        && !(inv.Parent is AssignmentExpressionSyntax { Left: IdentifierNameSyntax dol } && _ptrOuts.Contains(dol.Identifier.Text)))
+                        throw new NotSupported($"data object from {rn}.{name}");
                     inv = ThisAsSequence(inv, t, name);
                     RefCall(t.Cs, name, inv.ArgumentList);
                     return $"{t.Cpp}::{Rn(name)}({Args(inv.ArgumentList)})";

@@ -10,6 +10,7 @@ js  AnnotationBaseX.dimensionScale [property]
 js  AnnotationBaseX.dimensionStyleId [property]
 js  AnnotationBaseX.drawForward [property]
 js  AnnotationBaseX.formatWidth [property]
+js  AnnotationBaseX.getBoundingBox [function]
 js  AnnotationBaseX.getDimensionStyle [function]
 js  AnnotationBaseX.hasPropertyOverrides [property]
 js  AnnotationBaseX.isAllBold [function]
@@ -22,13 +23,18 @@ js  AnnotationBaseX.maskColorSource [property]
 js  AnnotationBaseX.maskEnabled [property]
 js  AnnotationBaseX.maskFrame [property]
 js  AnnotationBaseX.maskOffset [property]
+js  AnnotationBaseX.parentDimensionStyle [property]
 js  AnnotationBaseX.plainTextToRtf [class_function]
 js  AnnotationBaseX.plainTextWithFields [property]
 js  AnnotationBaseX.plane [property]
 js  AnnotationBaseX.richText [property]
 js  AnnotationBaseX.runReplace [function]
+js  AnnotationBaseX.setBold [function]
+js  AnnotationBaseX.setFacename [function]
+js  AnnotationBaseX.setItalic [function]
 js  AnnotationBaseX.setOverrideDimStyle [function]
 js  AnnotationBaseX.setRichText [function]
+js  AnnotationBaseX.setUnderline [function]
 js  AnnotationBaseX.textHeight [property]
 js  AnnotationBaseX.textIsWrapped [property]
 js  AnnotationBaseX.textRotationDegrees [property]
@@ -149,9 +155,12 @@ js  BrepEdgeX.trimCount [property]
 js  BrepEdgeX.trimIndices [function]
 js  BrepEdgeX.valence [property]
 js  BrepFaceListX.add [function]
+js  BrepFaceListX.addConeFace [function]
+js  BrepFaceListX.addRuledFace [function]
 js  BrepFaceListX.clearPerFaceColors [function]
 js  BrepFaceListX.count [property]
 js  BrepFaceListX.extractFace [function]
+js  BrepFaceListX.flip [function]
 js  BrepFaceListX.get [function]
 js  BrepFaceListX.hasPerFaceColors [property]
 js  BrepFaceListX.removeAt [function]
@@ -191,6 +200,8 @@ js  BrepLoopX.to3dCurve [function]
 js  BrepLoopX.trims [property]
 js  BrepSurfaceListX.count [property]
 js  BrepTrimListX.add [function]
+js  BrepTrimListX.addCurveOnFace [function]
+js  BrepTrimListX.addSingularTrim [function]
 js  BrepTrimListX.count [property]
 js  BrepTrimListX.get [function]
 js  BrepTrimListX.matchEnds [function]
@@ -258,9 +269,13 @@ js  BrepX.solidOrientation [property]
 js  BrepX.standardize [function]
 js  BrepX.surfaces [property]
 js  BrepX.trims [property]
+js  BrepX.tryConvertBrep [class_function]
 js  BrepX.vertices [property]
+js  CachedTextureCoordinatesX.contains [function]
+js  CachedTextureCoordinatesX.copyTo [function]
 js  CachedTextureCoordinatesX.count [property]
 js  CachedTextureCoordinatesX.dim [property]
+js  CachedTextureCoordinatesX.indexOf [function]
 js  CachedTextureCoordinatesX.isReadOnly [property]
 js  CachedTextureCoordinatesX.mappingId [property]
 js  CachedTextureCoordinatesX.tryGetAt [function]
@@ -295,6 +310,7 @@ js  Color4fX.White [class_function]
 js  Color4fX.op_Equality [class_function]
 js  Color4fX.op_Inequality [class_function]
 js  CommonObjectX.computeMemoryEstimate [class_function]
+js  CommonObjectX.hasUserData [property]
 js  CommonObjectX.isValid [property]
 js  CommonObjectX.isValidWithLog [function]
 js  ComponentIndexX.CompareTo [class_function]
@@ -353,18 +369,23 @@ js  ControlPointX.Z [class_function]
 js  CurveProxyX.proxyCurveIsReversed [property]
 js  CurveX.changeClosedCurveSeam [function]
 js  CurveX.changeDimension [function]
+js  CurveX.closedCurveOrientation [function]
 js  CurveX.constructor<const BND_Curve&>
+js  CurveX.createControlPointCurve [class_function]
 js  CurveX.curvatureAt [function]
 js  CurveX.degree [property]
+js  CurveX.derivativeAt [function]
 js  CurveX.dimension [property]
 js  CurveX.domain [property]
 js  CurveX.duplicate [function]
+js  CurveX.duplicateCurve [function]
 js  CurveX.frameAt [function]
 js  CurveX.getCurveParameterFromNurbsFormParameter [function]
 js  CurveX.getNextDiscontinuity [function]
 js  CurveX.getNurbsFormParameterFromCurveParameter [function]
 js  CurveX.hasNurbsForm [function]
 js  CurveX.isArc [function]
+js  CurveX.isCircle [function]
 js  CurveX.isClosable [function]
 js  CurveX.isClosed [property]
 js  CurveX.isContinuous [function]
@@ -389,10 +410,13 @@ js  CurveX.tangentAtEnd [property]
 js  CurveX.tangentAtStart [property]
 js  CurveX.toNurbsCurve [function]
 js  CurveX.torsionAt [function]
+js  CurveX.trim [function]
 js  CurveX.trimInterval [function]
 js  CurveX.tryGetArc [function]
+js  CurveX.tryGetCircle [function]
 js  CurveX.tryGetEllipse [function]
 js  CurveX.tryGetPlane [function]
+js  CurveX.tryGetPolyline [function]
 js  CylinderX.Axis [class_function]
 js  CylinderX.BasePlane [class_function]
 js  CylinderX.Center [class_function]
@@ -467,6 +491,7 @@ js  DimensionStyleX.clippingArrowType1 [property]
 js  DimensionStyleX.clippingArrowType2 [property]
 js  DimensionStyleX.componentType [property]
 js  DimensionStyleX.constructor<>
+js  DimensionStyleX.copyFrom [function]
 js  DimensionStyleX.deleteAllUserStrings [function]
 js  DimensionStyleX.dimRadialTextAngleType [property]
 js  DimensionStyleX.dimRadialTextLocation [property]
@@ -559,6 +584,7 @@ js  EarthAnchorPointX.earthBasepointElevationZero [property]
 js  EarthAnchorPointX.earthBasepointLatitude [property]
 js  EarthAnchorPointX.earthBasepointLongitude [property]
 js  EarthAnchorPointX.earthLocationIsSet [function]
+js  EarthAnchorPointX.getEarthAnchorPlane [function]
 js  EarthAnchorPointX.getModelCompass [function]
 js  EarthAnchorPointX.getModelToEarthTransform [function]
 js  EarthAnchorPointX.kMLOrientationHeadingAngleDegrees [property]
@@ -585,6 +611,7 @@ js  ExtrusionX.capCount [property]
 js  ExtrusionX.constructor<>
 js  ExtrusionX.constructor<const BND_Extrusion&>
 js  ExtrusionX.create [class_function]
+js  ExtrusionX.createBoxExtrusion [class_function]
 js  ExtrusionX.createCylinderExtrusion [class_function]
 js  ExtrusionX.createPipeExtrusion [class_function]
 js  ExtrusionX.getBrepFormComponentIndex [function]
@@ -665,8 +692,10 @@ js  File3dmEdgeSofteningX.forceSoftening [property]
 js  File3dmEdgeSofteningX.on [property]
 js  File3dmEdgeSofteningX.softening [property]
 js  File3dmEmbeddedFileX.componentType [property]
+js  File3dmEmbeddedFileX.compressedLength [property]
 js  File3dmEmbeddedFileX.constructor<>
 js  File3dmEmbeddedFileX.filename [property]
+js  File3dmEmbeddedFileX.saveToFile [function]
 js  File3dmEmbeddedFilesX.add [function]
 js  File3dmEmbeddedFilesX.iterator [function]
 js  File3dmEmbeddedFilesXIter.next [function]
@@ -749,6 +778,7 @@ js  File3dmObjectTableX.addCurve [function]
 js  File3dmObjectTableX.addEllipse [function]
 js  File3dmObjectTableX.addExtrusion [function]
 js  File3dmObjectTableX.addHatch [function]
+js  File3dmObjectTableX.addInstanceObject [function]
 js  File3dmObjectTableX.addLine [function]
 js  File3dmObjectTableX.addMesh [function]
 js  File3dmObjectTableX.addPoint [function]
@@ -774,6 +804,43 @@ js  File3dmObjectX.name [property]
 js  File3dmPlugInDataTableX.clear [function]
 js  File3dmPlugInDataTableX.count [property]
 js  File3dmPlugInDataTableX.dump [function]
+js  File3dmRenderContentX.autoDelete [property]
+js  File3dmRenderContentX.childSlotName [property]
+js  File3dmRenderContentX.childSlotOn [function]
+js  File3dmRenderContentX.children [property]
+js  File3dmRenderContentX.componentType [property]
+js  File3dmRenderContentX.deleteChild [function]
+js  File3dmRenderContentX.findChild [function]
+js  File3dmRenderContentX.getParameter [function]
+js  File3dmRenderContentX.groupId [property]
+js  File3dmRenderContentX.hidden [property]
+js  File3dmRenderContentX.isChild [property]
+js  File3dmRenderContentX.isTopLevel [property]
+js  File3dmRenderContentX.kind [property]
+js  File3dmRenderContentX.notes [property]
+js  File3dmRenderContentX.parent [property]
+js  File3dmRenderContentX.plugInId [property]
+js  File3dmRenderContentX.reference [property]
+js  File3dmRenderContentX.renderEngineId [property]
+js  File3dmRenderContentX.setParameter [function]
+js  File3dmRenderContentX.tags [property]
+js  File3dmRenderContentX.topLevel [property]
+js  File3dmRenderContentX.typeId [property]
+js  File3dmRenderContentX.typeName [property]
+js  File3dmRenderContentX.xML [function]
+js  File3dmRenderEnvironmentX.toEnvironment [function]
+js  File3dmRenderEnvironmentsX.find [function]
+js  File3dmRenderEnvironmentsX.iterator [function]
+js  File3dmRenderEnvironmentsXIter.next [function]
+js  File3dmRenderMaterialX.toMaterial [function]
+js  File3dmRenderMaterialsX.find [function]
+js  File3dmRenderMaterialsX.iterator [function]
+js  File3dmRenderMaterialsXIter.next [function]
+js  File3dmRenderTextureX.filename [property]
+js  File3dmRenderTextureX.toTexture [function]
+js  File3dmRenderTexturesX.find [function]
+js  File3dmRenderTexturesX.iterator [function]
+js  File3dmRenderTexturesXIter.next [function]
 js  File3dmSettingsX.activeViewId [property]
 js  File3dmSettingsX.currentColor [property]
 js  File3dmSettingsX.currentDimensionStyleId [property]
@@ -825,6 +892,7 @@ js  File3dmStringTableX.delete [function]
 js  File3dmStringTableX.documentUserTextCount [property]
 js  File3dmStringTableX.getKey [function]
 js  File3dmStringTableX.getValue [function]
+js  File3dmStringTableX.setString [function]
 js  File3dmThickeningX.bothSides [property]
 js  File3dmThickeningX.distance [property]
 js  File3dmThickeningX.offsetOnly [property]
@@ -853,6 +921,7 @@ js  File3dmX.applicationDetails [property]
 js  File3dmX.applicationName [property]
 js  File3dmX.applicationUrl [property]
 js  File3dmX.archiveVersion [property]
+js  File3dmX.bitmaps [property]
 js  File3dmX.constructor<>
 js  File3dmX.created [property]
 js  File3dmX.createdBy [property]
@@ -860,6 +929,7 @@ js  File3dmX.dimStyles [property]
 js  File3dmX.dump [function]
 js  File3dmX.dumpSummary [function]
 js  File3dmX.embeddedFiles [property]
+js  File3dmX.fromByteArray [class_function]
 js  File3dmX.hatchPatterns [property]
 js  File3dmX.instanceDefinitions [property]
 js  File3dmX.lastEdited [property]
@@ -877,14 +947,19 @@ js  File3dmX.read [class_function]
 js  File3dmX.readArchiveVersion [class_function]
 js  File3dmX.readNotes [class_function]
 js  File3dmX.readSettings [class_function]
+js  File3dmX.renderEnvironments [property]
+js  File3dmX.renderMaterials [property]
+js  File3dmX.renderTextures [property]
 js  File3dmX.revision [property]
 js  File3dmX.settings [property]
 js  File3dmX.startSectionComments [property]
 js  File3dmX.strings [property]
 js  File3dmX.views [property]
 js  File3dmX.write [function]
+js  File3dmX.writeOneObject [class_function]
 js  File3dmX.writeWithLog [function]
 js  FileReferenceX.createFromFullAndRelativePaths [class_function]
+js  FileReferenceX.createFromFullPath [class_function]
 js  FileReferenceX.fullPath [property]
 js  FileReferenceX.fullPathStatus [property]
 js  FileReferenceX.isSet [property]
@@ -921,6 +996,7 @@ js  GeometryBaseX.componentIndex [function]
 js  GeometryBaseX.dataCRC [function]
 js  GeometryBaseX.deleteAllUserStrings [function]
 js  GeometryBaseX.duplicate [function]
+js  GeometryBaseX.getBoundingBox [function]
 js  GeometryBaseX.getUserString [function]
 js  GeometryBaseX.hasBrepForm [property]
 js  GeometryBaseX.isDeformable [property]
@@ -968,6 +1044,7 @@ js  InstanceDefinitionGeometryX.description [property]
 js  InstanceDefinitionGeometryX.getObjectIds [function]
 js  InstanceDefinitionGeometryX.getUserString [function]
 js  InstanceDefinitionGeometryX.isLinkedType [property]
+js  InstanceDefinitionGeometryX.layerStyle [property]
 js  InstanceDefinitionGeometryX.setUserString [function]
 js  InstanceDefinitionGeometryX.skipNestedLinkedDefinitions [property]
 js  InstanceDefinitionGeometryX.sourceArchive [property]
@@ -1032,6 +1109,7 @@ js  LayerX.constructor<>
 js  LayerX.constructor<const BND_Layer&>
 js  LayerX.copyAttributesFrom [function]
 js  LayerX.default [function]
+js  LayerX.deleteAllUserStrings [function]
 js  LayerX.deleteModelVisible [function]
 js  LayerX.deletePerViewportColor [function]
 js  LayerX.deletePerViewportPlotColor [function]
@@ -1040,6 +1118,7 @@ js  LayerX.deletePerViewportSettings [function]
 js  LayerX.deletePerViewportVisible [function]
 js  LayerX.deletePlotColor [function]
 js  LayerX.description [property]
+js  LayerX.equals [function]
 js  LayerX.getPersistentLocking [function]
 js  LayerX.getPersistentVisibility [function]
 js  LayerX.getUserString [function]
@@ -1071,6 +1150,7 @@ js  LayerX.setPerViewportPlotWeight [function]
 js  LayerX.setPerViewportVisible [function]
 js  LayerX.setPersistentLocking [function]
 js  LayerX.setPersistentVisibility [function]
+js  LayerX.setUserString [function]
 js  LayerX.sortIndex [property]
 js  LayerX.unsetModelPersistentVisibility [function]
 js  LayerX.unsetPerViewportPersistentVisibility [function]
@@ -1230,6 +1310,7 @@ js  MaterialX.transparency [property]
 js  MaterialX.transparentColor [property]
 js  MaterialX.userStringCount [property]
 js  MeshFaceListX.addFace [function]
+js  MeshFaceListX.addFaces [function]
 js  MeshFaceListX.capacity [property]
 js  MeshFaceListX.clear [function]
 js  MeshFaceListX.convertNonPlanarQuadsToTriangles [function]
@@ -1242,6 +1323,7 @@ js  MeshFaceListX.getFace [function]
 js  MeshFaceListX.getFaceCenter [function]
 js  MeshFaceListX.getFaceVertices [function]
 js  MeshFaceListX.hasNakedEdges [function]
+js  MeshFaceListX.insert [function]
 js  MeshFaceListX.isHidden [function]
 js  MeshFaceListX.quadCount [property]
 js  MeshFaceListX.setFace [function]
@@ -1260,13 +1342,17 @@ js  MeshFaceX.Set [class_function]
 js  MeshFaceX.Unset [class_function]
 js  MeshFaceX.op_Equality [class_function]
 js  MeshFaceX.op_Inequality [class_function]
+js  MeshTextureCoordinateListX.add [function]
+js  MeshTextureCoordinateListX.addRange [function]
 js  MeshTextureCoordinateListX.capacity [property]
 js  MeshTextureCoordinateListX.clear [function]
 js  MeshTextureCoordinateListX.count [property]
 js  MeshTextureCoordinateListX.destroy [function]
 js  MeshTextureCoordinateListX.normalizeTextureCoordinates [function]
 js  MeshTextureCoordinateListX.reverseTextureCoordinates [function]
+js  MeshTextureCoordinateListX.setTextureCoordinate [function]
 js  MeshTextureCoordinateListX.setTextureCoordinates [function]
+js  MeshTextureCoordinateListX.toFloatArray [function]
 js  MeshTextureCoordinateListX.transposeTextureCoordinates [function]
 js  MeshTopologyEdgeListX.collapseEdge [function]
 js  MeshTopologyEdgeListX.count [property]
@@ -1283,6 +1369,8 @@ js  MeshVertexColorListX.count [property]
 js  MeshVertexColorListX.destroy [function]
 js  MeshVertexColorListX.setColor [function]
 js  MeshVertexColorListX.toARGBArray [function]
+js  MeshVertexListX.add [function]
+js  MeshVertexListX.addVertices [function]
 js  MeshVertexListX.capacity [property]
 js  MeshVertexListX.clear [function]
 js  MeshVertexListX.combineIdentical [function]
@@ -1296,10 +1384,12 @@ js  MeshVertexListX.point3dAt [function]
 js  MeshVertexListX.setVertex [function]
 js  MeshVertexListX.show [function]
 js  MeshVertexListX.showAll [function]
+js  MeshVertexListX.toFloatArray [function]
 js  MeshVertexListX.toPoint3dArray [function]
 js  MeshVertexListX.toPoint3fArray [function]
 js  MeshVertexListX.useDoublePrecisionVertices [property]
 js  MeshVertexNormalListX.add [function]
+js  MeshVertexNormalListX.addRange [function]
 js  MeshVertexNormalListX.capacity [property]
 js  MeshVertexNormalListX.clear [function]
 js  MeshVertexNormalListX.computeNormals [function]
@@ -1309,6 +1399,8 @@ js  MeshVertexNormalListX.flip [function]
 js  MeshVertexNormalListX.get [function]
 js  MeshVertexNormalListX.set [function]
 js  MeshVertexNormalListX.setNormal [function]
+js  MeshVertexNormalListX.setNormals [function]
+js  MeshVertexNormalListX.toFloatArray [function]
 js  MeshVertexNormalListX.unitizeNormals [function]
 js  MeshX.append [function]
 js  MeshX.clearSurfaceData [function]
@@ -1316,7 +1408,12 @@ js  MeshX.clearTextureData [function]
 js  MeshX.compact [function]
 js  MeshX.constructor<>
 js  MeshX.constructor<const BND_Mesh&>
+js  MeshX.copyFrom [function]
+js  MeshX.createFromSubDControlNet [class_function]
+js  MeshX.createFromSubDControlNetWithTextureCoordinates [class_function]
+js  MeshX.createFromSurfaceControlNet [class_function]
 js  MeshX.createPartitions [function]
+js  MeshX.createQuickHull3D [class_function]
 js  MeshX.destroyPartition [function]
 js  MeshX.destroyTopology [function]
 js  MeshX.destroyTree [function]
@@ -1418,11 +1515,14 @@ js  NurbsCurvePointListX.makeRational [function]
 js  NurbsCurvePointListX.pointSize [property]
 js  NurbsCurvePointListX.setPoint [function]
 js  NurbsCurvePointListX.setWeight [function]
+js  NurbsCurveX.append [function]
 js  NurbsCurveX.constructor<const BND_NurbsCurve&>
 js  NurbsCurveX.convertSpanToBezier [function]
+js  NurbsCurveX.create [class_function]
 js  NurbsCurveX.createFromArc [class_function]
 js  NurbsCurveX.createFromCircle [class_function]
 js  NurbsCurveX.createFromEllipse [class_function]
+js  NurbsCurveX.createFromLine [class_function]
 js  NurbsCurveX.grevilleParameter [function]
 js  NurbsCurveX.grevillePoint [function]
 js  NurbsCurveX.hasBezierSpans [property]
@@ -1446,19 +1546,23 @@ js  NurbsSurfaceKnotListX.set [function]
 js  NurbsSurfaceKnotListX.superfluousKnot [function]
 js  NurbsSurfacePointListX.countU [property]
 js  NurbsSurfacePointListX.countV [property]
+js  NurbsSurfacePointListX.getControlPoint [function]
 js  NurbsSurfacePointListX.getGrevillePoint [function]
 js  NurbsSurfacePointListX.getPoint [function]
 js  NurbsSurfacePointListX.getWeight [function]
 js  NurbsSurfacePointListX.pointSize [property]
+js  NurbsSurfacePointListX.setControlPoint [function]
 js  NurbsSurfacePointListX.setPoint [function]
 js  NurbsSurfacePointListX.setWeight [function]
 js  NurbsSurfaceX.constructor<const BND_NurbsSurface&>
 js  NurbsSurfaceX.constructor<int, bool, int, int, int, int>
+js  NurbsSurfaceX.copyFrom [function]
 js  NurbsSurfaceX.create [class_function]
 js  NurbsSurfaceX.createFromCone [class_function]
 js  NurbsSurfaceX.createFromCylinder [class_function]
 js  NurbsSurfaceX.createFromSphere [class_function]
 js  NurbsSurfaceX.createFromTorus [class_function]
+js  NurbsSurfaceX.createRuledSurface [class_function]
 js  NurbsSurfaceX.increaseDegreeU [function]
 js  NurbsSurfaceX.increaseDegreeV [function]
 js  NurbsSurfaceX.isRational [property]
@@ -1516,6 +1620,7 @@ js  ObjectAttributesX.name [property]
 js  ObjectAttributesX.oCSMappingChannelId [class_function]
 js  ObjectAttributesX.objectColor [property]
 js  ObjectAttributesX.objectDecoration [property]
+js  ObjectAttributesX.objectFrame [function]
 js  ObjectAttributesX.objectId [property]
 js  ObjectAttributesX.plotColor [property]
 js  ObjectAttributesX.plotColorSource [property]
@@ -1530,6 +1635,7 @@ js  ObjectAttributesX.removeFromAllGroups [function]
 js  ObjectAttributesX.removeFromGroup [function]
 js  ObjectAttributesX.removeHideInDetailOverride [function]
 js  ObjectAttributesX.sectionAttributesSource [property]
+js  ObjectAttributesX.setCustomLinetype [function]
 js  ObjectAttributesX.setObjectFrame [function]
 js  ObjectAttributesX.setUserString [function]
 js  ObjectAttributesX.space [property]
@@ -1579,6 +1685,7 @@ js  PlaneSurfaceX.createThroughBox [class_function]
 js  PlaneSurfaceX.getExtents [function]
 js  PlaneSurfaceX.plane [property]
 js  PlaneSurfaceX.setExtents [function]
+js  PlaneSurfaceX.toMesh [function]
 js  PlaneX.Clone [class_function]
 js  PlaneX.ClosestParameter [class_function]
 js  PlaneX.ClosestPoint [class_function]
@@ -1808,6 +1915,7 @@ js  PolylineCurveX.parameter [function]
 js  PolylineCurveX.point [function]
 js  PolylineCurveX.pointCount [property]
 js  PolylineCurveX.setArcLengthParameterization [function]
+js  PolylineCurveX.setParameter [function]
 js  PolylineCurveX.setPoint [function]
 js  PolylineCurveX.toPolyline [function]
 js  PolylineX.centerPoint [function]
@@ -1972,10 +2080,12 @@ js  SubDVertexX.componentIndex [function]
 js  SubDVertexX.controlNetPoint [property]
 js  SubDVertexX.edgeAt [function]
 js  SubDVertexX.edgeCount [property]
+js  SubDVertexX.edges [property]
 js  SubDVertexX.faceAt [function]
 js  SubDVertexX.faceCount [property]
 js  SubDVertexX.next [property]
 js  SubDVertexX.previous [property]
+js  SubDVertexX.setControlNetPoint [function]
 js  SubDVertexX.surfacePoint [function]
 js  SubDVertexX.tag [property]
 js  SubDX.clearEvaluationCache [function]
@@ -2276,21 +2386,25 @@ js  ViewInfoX.displayModeId [property]
 js  ViewInfoX.focalBlurAperture [property]
 js  ViewInfoX.focalBlurDistance [property]
 js  ViewInfoX.focalBlurJitter [property]
+js  ViewInfoX.focalBlurMode [property]
 js  ViewInfoX.focalBlurSampleCount [property]
 js  ViewInfoX.getPageSettings [function]
 js  ViewInfoX.getWindowPosition [function]
 js  ViewInfoX.lockedProjection [property]
+js  ViewInfoX.maximized [property]
 js  ViewInfoX.name [property]
 js  ViewInfoX.namedViewId [property]
 js  ViewInfoX.sectionBehavior [property]
 js  ViewInfoX.setConstructionPlane [function]
 js  ViewInfoX.setPageSettings [function]
+js  ViewInfoX.setWindowPosition [function]
 js  ViewInfoX.showConstructionAxes [property]
 js  ViewInfoX.showConstructionGrid [property]
 js  ViewInfoX.showConstructionZAxis [property]
 js  ViewInfoX.showWallpaperInGrayScale [property]
 js  ViewInfoX.showWorldAxes [property]
 js  ViewInfoX.viewType [property]
+js  ViewInfoX.viewport [property]
 js  ViewInfoX.wallpaperFilename [property]
 js  ViewInfoX.wallpaperHidden [property]
 js  ViewportX.camera35mmLensLength [property]
@@ -2310,11 +2424,13 @@ js  ViewportX.constructor<>
 js  ViewportX.constructor<const BND_ViewportX&>
 js  ViewportX.defaultCameraDirection [class_function]
 js  ViewportX.dollyCamera [function]
+js  ViewportX.dollyExtents [function]
 js  ViewportX.dollyFrustum [function]
 js  ViewportX.extents [function]
 js  ViewportX.frustumAspect [property]
 js  ViewportX.frustumBottom [property]
 js  ViewportX.frustumBottomPlane [property]
+js  ViewportX.frustumCenter [property]
 js  ViewportX.frustumCenterPoint [function]
 js  ViewportX.frustumFar [property]
 js  ViewportX.frustumFarPlane [property]
@@ -2333,9 +2449,11 @@ js  ViewportX.frustumWidth [property]
 js  ViewportX.getBoundingBoxDepth [function]
 js  ViewportX.getCameraAngles [function]
 js  ViewportX.getCameraFrame [function]
+js  ViewportX.getDollyCameraVector [function]
 js  ViewportX.getFrustum [function]
 js  ViewportX.getFrustumLine [function]
 js  ViewportX.getPointDepth [function]
+js  ViewportX.getScreenPort [function]
 js  ViewportX.getSphereDepth [function]
 js  ViewportX.getWorldToScreenScale [function]
 js  ViewportX.getXform [function]
@@ -2375,6 +2493,7 @@ py  AnnotationBaseX.DimensionScale [property rw]
 py  AnnotationBaseX.DimensionStyleId [property rw]
 py  AnnotationBaseX.DrawForward [property rw]
 py  AnnotationBaseX.FormatWidth [property rw]
+py  AnnotationBaseX.GetBoundingBox(xform)
 py  AnnotationBaseX.GetDimensionStyle(parentDimStyle)
 py  AnnotationBaseX.HasPropertyOverrides [property ro]
 py  AnnotationBaseX.IsAllBold()
@@ -2387,13 +2506,18 @@ py  AnnotationBaseX.MaskColorSource [property ro]
 py  AnnotationBaseX.MaskEnabled [property rw]
 py  AnnotationBaseX.MaskFrame [property ro]
 py  AnnotationBaseX.MaskOffset [property rw]
+py  AnnotationBaseX.ParentDimensionStyle [property rw]
 py  AnnotationBaseX.PlainTextToRtf(str) [static]
 py  AnnotationBaseX.PlainTextWithFields [property ro]
 py  AnnotationBaseX.Plane [property rw]
 py  AnnotationBaseX.RichText [property rw]
 py  AnnotationBaseX.RunReplace(replaceString, startRunIndex, startRunPosition, endRunIndex, endRunPosition)
+py  AnnotationBaseX.SetBold(set_on)
+py  AnnotationBaseX.SetFacename(set_on, facename)
+py  AnnotationBaseX.SetItalic(set_on)
 py  AnnotationBaseX.SetOverrideDimStyle(OverrideStyle)
 py  AnnotationBaseX.SetRichText(rtfText, dimstyle)
+py  AnnotationBaseX.SetUnderline(set_on)
 py  AnnotationBaseX.TextHeight [property rw]
 py  AnnotationBaseX.TextIsWrapped [property rw]
 py  AnnotationBaseX.TextRotationDegrees [property rw]
@@ -2546,6 +2670,8 @@ py  BoxX.__init__(BND_PlaneX, std::vector<BND_Point3dX>)
 py  BoxX.__init__(const BND_BoxX&)
 py  BoxX.__repr__()
 py  BrepEdgeListX.Add(curve3dIndex)
+py  BrepEdgeListX.Add(startVertex, endVertex, curve3dIndex, edgeTolerance)
+py  BrepEdgeListX.Add(startVertex, endVertex, curve3dIndex, subDomain, edgeTolerance)
 py  BrepEdgeListX.Add(startVertexIndex, endVertexIndex, curve3dIndex, edgeTolerance)
 py  BrepEdgeListX.Add(startVertexIndex, endVertexIndex, curve3dIndex, subDomain, edgeTolerance)
 py  BrepEdgeListX.Count [property ro]
@@ -2563,9 +2689,12 @@ py  BrepEdgeX.TrimIndices()
 py  BrepEdgeX.Valence [property ro]
 py  BrepFaceListX.Add(surface)
 py  BrepFaceListX.Add(surfaceIndex)
+py  BrepFaceListX.AddConeFace(vertex, edge, revEdge)
+py  BrepFaceListX.AddRuledFace(edgeA, revEdgeA, edgeB, revEdgeB)
 py  BrepFaceListX.ClearPerFaceColors()
 py  BrepFaceListX.Count [property ro]
 py  BrepFaceListX.ExtractFace(faceIndex)
+py  BrepFaceListX.Flip(onlyReversedFaces)
 py  BrepFaceListX.HasPerFaceColors [property ro]
 py  BrepFaceListX.RemoveAt(faceIndex)
 py  BrepFaceListX.RemoveSlits()
@@ -2594,6 +2723,7 @@ py  BrepFaceX.ShrinkFace(disableSide)
 py  BrepFaceX.SurfaceIndex [property ro]
 py  BrepFaceX.UnderlyingSurface()
 py  BrepLoopListX.Add(loopType)
+py  BrepLoopListX.Add(loopType, face)
 py  BrepLoopListX.AddOuterLoop(faceIndex)
 py  BrepLoopListX.Count [property ro]
 py  BrepLoopListX.__getitem__()
@@ -2607,6 +2737,11 @@ py  BrepLoopX.To3dCurve()
 py  BrepLoopX.Trims [property ro]
 py  BrepSurfaceListX.Count [property ro]
 py  BrepTrimListX.Add(curve2dIndex)
+py  BrepTrimListX.Add(edge, rev3d, loop, curve2dIndex)
+py  BrepTrimListX.Add(rev3d, edge, curve2dIndex)
+py  BrepTrimListX.Add(rev3d, loop, curve2dIndex)
+py  BrepTrimListX.AddCurveOnFace(face, edge, rev3d, curve2dIndex)
+py  BrepTrimListX.AddSingularTrim(vertex, loop, iso, curve2dIndex)
 py  BrepTrimListX.Count [property ro]
 py  BrepTrimListX.MatchEnds()
 py  BrepTrimListX.__getitem__()
@@ -2637,6 +2772,7 @@ py  BrepX.AddTrimCurve(curve)
 py  BrepX.Append(other)
 py  BrepX.Compact()
 py  BrepX.CreateFromBox(box) [static]
+py  BrepX.CreateFromBox(corners) [static]
 py  BrepX.CreateFromCone(cone, capBottom) [static]
 py  BrepX.CreateFromCylinder(cylinder, capBottom, capTop) [static]
 py  BrepX.CreateFromMesh(mesh, trimmedTriangles) [static]
@@ -2676,11 +2812,15 @@ py  BrepX.SolidOrientation [property ro]
 py  BrepX.Standardize()
 py  BrepX.Surfaces [property ro]
 py  BrepX.Trims [property ro]
+py  BrepX.TryConvertBrep(geometry) [static]
 py  BrepX.Vertices [property ro]
 py  BrepX.__init__()
 py  BrepX.__init__(const BND_Brep&)
+py  CachedTextureCoordinatesX.Contains(item)
+py  CachedTextureCoordinatesX.CopyTo(array, arrayIndex)
 py  CachedTextureCoordinatesX.Count [property ro]
 py  CachedTextureCoordinatesX.Dim [property ro]
+py  CachedTextureCoordinatesX.IndexOf(item)
 py  CachedTextureCoordinatesX.IsReadOnly [property ro]
 py  CachedTextureCoordinatesX.MappingId [property ro]
 py  CachedTextureCoordinatesX.TryGetAt(index)
@@ -2737,6 +2877,7 @@ py  Color4fX.__init__(int)
 py  Color4fX.__ne__()
 py  Color4fX.__repr__()
 py  CommonObjectX.ComputeMemoryEstimate(obj) [static]
+py  CommonObjectX.HasUserData [property ro]
 py  CommonObjectX.IsValid [property ro]
 py  CommonObjectX.IsValidWithLog()
 py  ComponentIndexX.CompareTo(other)
@@ -2808,11 +2949,19 @@ py  ControlPointX.__repr__()
 py  CurveProxyX.ProxyCurveIsReversed [property ro]
 py  CurveX.ChangeClosedCurveSeam(t)
 py  CurveX.ChangeDimension(desiredDimension)
+py  CurveX.ClosedCurveOrientation()
+py  CurveX.ClosedCurveOrientation(plane)
+py  CurveX.ClosedCurveOrientation(upDirection)
+py  CurveX.ClosedCurveOrientation(xform)
+py  CurveX.CreateControlPointCurve(points) [static]
+py  CurveX.CreateControlPointCurve(points, degree) [static]
 py  CurveX.CurvatureAt(t)
 py  CurveX.Degree [property ro]
+py  CurveX.DerivativeAt(t, derivativeCount, side)
 py  CurveX.Dimension [property ro]
 py  CurveX.Domain [property rw]
 py  CurveX.Duplicate()
+py  CurveX.DuplicateCurve()
 py  CurveX.FrameAt(t)
 py  CurveX.GetCurveParameterFromNurbsFormParameter(nurbsParameter)
 py  CurveX.GetNextDiscontinuity(continuityType, t0, t1)
@@ -2821,6 +2970,8 @@ py  CurveX.GetNurbsFormParameterFromCurveParameter(curveParameter)
 py  CurveX.HasNurbsForm()
 py  CurveX.IsArc()
 py  CurveX.IsArc(tolerance)
+py  CurveX.IsCircle()
+py  CurveX.IsCircle(tolerance)
 py  CurveX.IsClosable(tolerance)
 py  CurveX.IsClosable(tolerance, minimumAbsoluteSize, minimumRelativeSize)
 py  CurveX.IsClosed [property ro]
@@ -2851,18 +3002,23 @@ py  CurveX.TangentAtStart [property ro]
 py  CurveX.ToNurbsCurve()
 py  CurveX.ToNurbsCurve(subdomain)
 py  CurveX.TorsionAt(t)
+py  CurveX.Trim(domain)
+py  CurveX.Trim(t0, t1)
 py  CurveX.TrimInterval(domain)
 py  CurveX.TrimInterval(t0, t1)
 py  CurveX.TryGetArc()
 py  CurveX.TryGetArc(plane)
 py  CurveX.TryGetArc(plane, tolerance)
 py  CurveX.TryGetArc(tolerance)
+py  CurveX.TryGetCircle()
+py  CurveX.TryGetCircle(tolerance)
 py  CurveX.TryGetEllipse()
 py  CurveX.TryGetEllipse(plane)
 py  CurveX.TryGetEllipse(plane, tolerance)
 py  CurveX.TryGetEllipse(tolerance)
 py  CurveX.TryGetPlane()
 py  CurveX.TryGetPlane(tolerance)
+py  CurveX.TryGetPolyline()
 py  CurveX.__init__(const BND_Curve&)
 py  CylinderX.Axis [property ro]
 py  CylinderX.BasePlane [property rw]
@@ -2943,6 +3099,7 @@ py  DimensionStyleX.ClippingArrowLength [property rw]
 py  DimensionStyleX.ClippingArrowType1 [property rw]
 py  DimensionStyleX.ClippingArrowType2 [property rw]
 py  DimensionStyleX.ComponentType [property ro]
+py  DimensionStyleX.CopyFrom(source)
 py  DimensionStyleX.DeleteAllUserStrings()
 py  DimensionStyleX.DimRadialTextAngleType [property rw]
 py  DimensionStyleX.DimRadialTextLocation [property rw]
@@ -3034,6 +3191,7 @@ py  EarthAnchorPointX.EarthBasepointElevationZero [property rw]
 py  EarthAnchorPointX.EarthBasepointLatitude [property rw]
 py  EarthAnchorPointX.EarthBasepointLongitude [property rw]
 py  EarthAnchorPointX.EarthLocationIsSet()
+py  EarthAnchorPointX.GetEarthAnchorPlane()
 py  EarthAnchorPointX.GetModelCompass()
 py  EarthAnchorPointX.GetModelToEarthTransform(modelUnitSystem)
 py  EarthAnchorPointX.KMLOrientationHeadingAngleDegrees [property ro]
@@ -3067,6 +3225,7 @@ py  ExtrusionX.AddInnerProfile(innerProfile)
 py  ExtrusionX.CapCount [property ro]
 py  ExtrusionX.Create(curve, plane, height, cap) [static]
 py  ExtrusionX.Create(planarCurve, height, cap) [static]
+py  ExtrusionX.CreateBoxExtrusion(box, cap) [static]
 py  ExtrusionX.CreateCylinderExtrusion(cylinder, capBottom, capTop) [static]
 py  ExtrusionX.CreatePipeExtrusion(cylinder, otherRadius, capTop, capBottom) [static]
 py  ExtrusionX.GetBrepFormComponentIndex(extrusionComponentIndex)
@@ -3153,7 +3312,9 @@ py  File3dmEdgeSofteningX.ForceSoftening [property rw]
 py  File3dmEdgeSofteningX.On [property rw]
 py  File3dmEdgeSofteningX.Softening [property rw]
 py  File3dmEmbeddedFileX.ComponentType [property ro]
+py  File3dmEmbeddedFileX.CompressedLength [property ro]
 py  File3dmEmbeddedFileX.Filename [property ro]
+py  File3dmEmbeddedFileX.SaveToFile(filename)
 py  File3dmEmbeddedFileX.__init__()
 py  File3dmEmbeddedFilesX.Add(filename)
 py  File3dmEmbeddedFilesX.__iter__()
@@ -3255,6 +3416,7 @@ py  File3dmObjectTableX.AddCurve(curve, attributes)
 py  File3dmObjectTableX.AddEllipse(ellipse, attributes)
 py  File3dmObjectTableX.AddExtrusion(extrusion, attributes)
 py  File3dmObjectTableX.AddHatch(hatch, attributes)
+py  File3dmObjectTableX.AddInstanceObject(instanceDefinitionIndex, instanceXform, attributes)
 py  File3dmObjectTableX.AddLine(from, to, attributes)
 py  File3dmObjectTableX.AddLine(line, attributes)
 py  File3dmObjectTableX.AddMesh(mesh, attributes)
@@ -3286,6 +3448,46 @@ py  File3dmObjectX.Name [property rw]
 py  File3dmPlugInDataTableX.Clear()
 py  File3dmPlugInDataTableX.Count [property ro]
 py  File3dmPlugInDataTableX.Dump()
+py  File3dmRenderContentX.AutoDelete [property ro]
+py  File3dmRenderContentX.ChildSlotName [property ro]
+py  File3dmRenderContentX.ChildSlotOn(child_slot_name)
+py  File3dmRenderContentX.Children [property ro]
+py  File3dmRenderContentX.ComponentType [property ro]
+py  File3dmRenderContentX.DeleteChild(child_slot_name)
+py  File3dmRenderContentX.FindChild(child_slot_name)
+py  File3dmRenderContentX.GetParameter(param)
+py  File3dmRenderContentX.GroupId [property ro]
+py  File3dmRenderContentX.Hidden [property ro]
+py  File3dmRenderContentX.IsChild [property ro]
+py  File3dmRenderContentX.IsTopLevel [property ro]
+py  File3dmRenderContentX.Kind [property ro]
+py  File3dmRenderContentX.Notes [property ro]
+py  File3dmRenderContentX.Parent [property ro]
+py  File3dmRenderContentX.PlugInId [property ro]
+py  File3dmRenderContentX.Reference [property ro]
+py  File3dmRenderContentX.RenderEngineId [property ro]
+py  File3dmRenderContentX.SetParameter(param, value)
+py  File3dmRenderContentX.Tags [property ro]
+py  File3dmRenderContentX.TopLevel [property ro]
+py  File3dmRenderContentX.TypeId [property ro]
+py  File3dmRenderContentX.TypeName [property ro]
+py  File3dmRenderContentX.XML(recursive)
+py  File3dmRenderEnvironmentX.ToEnvironment()
+py  File3dmRenderEnvironmentsX.Find(g)
+py  File3dmRenderEnvironmentsX.__iter__()
+py  File3dmRenderEnvironmentsXIter.__iter__()
+py  File3dmRenderEnvironmentsXIter.__next__()
+py  File3dmRenderMaterialX.ToMaterial()
+py  File3dmRenderMaterialsX.Find(g)
+py  File3dmRenderMaterialsX.__iter__()
+py  File3dmRenderMaterialsXIter.__iter__()
+py  File3dmRenderMaterialsXIter.__next__()
+py  File3dmRenderTextureX.Filename [property ro]
+py  File3dmRenderTextureX.ToTexture()
+py  File3dmRenderTexturesX.Find(g)
+py  File3dmRenderTexturesX.__iter__()
+py  File3dmRenderTexturesXIter.__iter__()
+py  File3dmRenderTexturesXIter.__next__()
 py  File3dmSettingsX.ActiveViewId [property rw]
 py  File3dmSettingsX.CurrentColor [property rw]
 py  File3dmSettingsX.CurrentDimensionStyleId [property rw]
@@ -3339,6 +3541,8 @@ py  File3dmStringTableX.GetKey(i)
 py  File3dmStringTableX.GetValue(i)
 py  File3dmStringTableX.GetValue(key)
 py  File3dmStringTableX.GetValue(section, entry)
+py  File3dmStringTableX.SetString(key, value)
+py  File3dmStringTableX.SetString(section, entry, value)
 py  File3dmThickeningX.BothSides [property rw]
 py  File3dmThickeningX.Distance [property rw]
 py  File3dmThickeningX.OffsetOnly [property rw]
@@ -3367,12 +3571,14 @@ py  File3dmX.ApplicationDetails [property rw]
 py  File3dmX.ApplicationName [property rw]
 py  File3dmX.ApplicationUrl [property rw]
 py  File3dmX.ArchiveVersion [property ro]
+py  File3dmX.Bitmaps [property ro]
 py  File3dmX.Created [property ro]
 py  File3dmX.CreatedBy [property ro]
 py  File3dmX.DimStyles [property ro]
 py  File3dmX.Dump()
 py  File3dmX.DumpSummary()
 py  File3dmX.EmbeddedFiles [property ro]
+py  File3dmX.FromByteArray(bytes) [static]
 py  File3dmX.HatchPatterns [property ro]
 py  File3dmX.InstanceDefinitions [property ro]
 py  File3dmX.LastEdited [property ro]
@@ -3390,6 +3596,9 @@ py  File3dmX.Read(path) [static]
 py  File3dmX.ReadArchiveVersion(path) [static]
 py  File3dmX.ReadNotes(path) [static]
 py  File3dmX.ReadSettings(path) [static]
+py  File3dmX.RenderEnvironments [property ro]
+py  File3dmX.RenderMaterials [property ro]
+py  File3dmX.RenderTextures [property ro]
 py  File3dmX.Revision [property rw]
 py  File3dmX.Settings [property ro]
 py  File3dmX.StartSectionComments [property rw]
@@ -3397,10 +3606,12 @@ py  File3dmX.Strings [property ro]
 py  File3dmX.Views [property ro]
 py  File3dmX.Write(path, options)
 py  File3dmX.Write(path, version)
+py  File3dmX.WriteOneObject(path, geometry) [static]
 py  File3dmX.WriteWithLog(path, options)
 py  File3dmX.WriteWithLog(path, version)
 py  File3dmX.__init__()
 py  FileReferenceX.CreateFromFullAndRelativePaths(fullPath, relativePath) [static]
+py  FileReferenceX.CreateFromFullPath(fullPath) [static]
 py  FileReferenceX.FullPath [property ro]
 py  FileReferenceX.FullPathStatus [property ro]
 py  FileReferenceX.IsSet [property ro]
@@ -3437,6 +3648,8 @@ py  GeometryBaseX.ComponentIndex()
 py  GeometryBaseX.DataCRC(currentRemainder)
 py  GeometryBaseX.DeleteAllUserStrings()
 py  GeometryBaseX.Duplicate()
+py  GeometryBaseX.GetBoundingBox(plane)
+py  GeometryBaseX.GetBoundingBox(xform)
 py  GeometryBaseX.GetUserString(key)
 py  GeometryBaseX.HasBrepForm [property ro]
 py  GeometryBaseX.IsDeformable [property ro]
@@ -3483,6 +3696,7 @@ py  InstanceDefinitionGeometryX.Description [property rw]
 py  InstanceDefinitionGeometryX.GetObjectIds()
 py  InstanceDefinitionGeometryX.GetUserString(key)
 py  InstanceDefinitionGeometryX.IsLinkedType [property ro]
+py  InstanceDefinitionGeometryX.LayerStyle [property ro]
 py  InstanceDefinitionGeometryX.SetUserString(key, value)
 py  InstanceDefinitionGeometryX.SkipNestedLinkedDefinitions [property ro]
 py  InstanceDefinitionGeometryX.SourceArchive [property ro]
@@ -3558,6 +3772,7 @@ py  LayerX.CommitChanges()
 py  LayerX.ComponentType [property ro]
 py  LayerX.CopyAttributesFrom(otherLayer)
 py  LayerX.Default()
+py  LayerX.DeleteAllUserStrings()
 py  LayerX.DeleteModelVisible()
 py  LayerX.DeletePerViewportColor(viewportId)
 py  LayerX.DeletePerViewportPlotColor(viewportId)
@@ -3566,6 +3781,7 @@ py  LayerX.DeletePerViewportSettings(viewportId)
 py  LayerX.DeletePerViewportVisible(viewportId)
 py  LayerX.DeletePlotColor()
 py  LayerX.Description [property rw]
+py  LayerX.Equals(other)
 py  LayerX.GetPersistentLocking()
 py  LayerX.GetPersistentVisibility()
 py  LayerX.GetUserString(key)
@@ -3597,6 +3813,7 @@ py  LayerX.SetPerViewportPlotWeight(viewportId, plotWeight)
 py  LayerX.SetPerViewportVisible(viewportId, visible)
 py  LayerX.SetPersistentLocking(persistentLocking)
 py  LayerX.SetPersistentVisibility(persistentVisibility)
+py  LayerX.SetUserString(key, value)
 py  LayerX.SortIndex [property ro]
 py  LayerX.UnsetModelPersistentVisibility()
 py  LayerX.UnsetPerViewportPersistentVisibility(viewportId)
@@ -3757,10 +3974,14 @@ py  MaterialX.ReflectionGlossiness [property rw]
 py  MaterialX.Reflectivity [property rw]
 py  MaterialX.RefractionGlossiness [property rw]
 py  MaterialX.RenderPlugInId [property rw]
+py  MaterialX.SetBitmapTexture(filename)
 py  MaterialX.SetBitmapTexture(texture)
+py  MaterialX.SetBumpTexture(filename)
 py  MaterialX.SetBumpTexture(texture)
+py  MaterialX.SetEnvironmentTexture(filename)
 py  MaterialX.SetEnvironmentTexture(texture)
 py  MaterialX.SetTexture(texture, which)
+py  MaterialX.SetTransparencyTexture(filename)
 py  MaterialX.SetTransparencyTexture(texture)
 py  MaterialX.SetUserString(key, value)
 py  MaterialX.Shine [property rw]
@@ -3772,8 +3993,10 @@ py  MaterialX.UserStringCount [property ro]
 py  MaterialX.__init__()
 py  MaterialX.__init__(const BND_Material&)
 py  MaterialX.__init__(const BND_MaterialX&)
+py  MeshFaceListX.AddFace(face)
 py  MeshFaceListX.AddFace(vertex1, vertex2, vertex3)
 py  MeshFaceListX.AddFace(vertex1, vertex2, vertex3, vertex4)
+py  MeshFaceListX.AddFaces(faces)
 py  MeshFaceListX.Capacity [property rw]
 py  MeshFaceListX.Clear()
 py  MeshFaceListX.ConvertNonPlanarQuadsToTriangles(planarTolerance, angleToleranceRadians, splitMethod)
@@ -3786,8 +4009,10 @@ py  MeshFaceListX.GetFace(index)
 py  MeshFaceListX.GetFaceCenter(faceIndex)
 py  MeshFaceListX.GetFaceVertices(faceIndex)
 py  MeshFaceListX.HasNakedEdges(faceIndex)
+py  MeshFaceListX.Insert(index, face)
 py  MeshFaceListX.IsHidden(faceIndex)
 py  MeshFaceListX.QuadCount [property ro]
+py  MeshFaceListX.SetFace(index, face)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3, vertex4)
 py  MeshFaceListX.TriangleCount [property ro]
@@ -3817,13 +4042,20 @@ py  MeshFaceX.__init__(int, int, int, int)
 py  MeshFaceX.__ne__()
 py  MeshFaceX.__repr__()
 py  MeshFaceX.__setitem__()
+py  MeshTextureCoordinateListX.Add(s, t)
+py  MeshTextureCoordinateListX.Add(tc)
+py  MeshTextureCoordinateListX.AddRange(textureCoordinates)
 py  MeshTextureCoordinateListX.Capacity [property rw]
 py  MeshTextureCoordinateListX.Clear()
 py  MeshTextureCoordinateListX.Count [property rw]
 py  MeshTextureCoordinateListX.Destroy()
 py  MeshTextureCoordinateListX.NormalizeTextureCoordinates()
 py  MeshTextureCoordinateListX.ReverseTextureCoordinates(direction)
+py  MeshTextureCoordinateListX.SetTextureCoordinate(index, s, t)
+py  MeshTextureCoordinateListX.SetTextureCoordinate(index, tc)
 py  MeshTextureCoordinateListX.SetTextureCoordinates(mapping)
+py  MeshTextureCoordinateListX.SetTextureCoordinates(textureCoordinates)
+py  MeshTextureCoordinateListX.ToFloatArray()
 py  MeshTextureCoordinateListX.TransposeTextureCoordinates()
 py  MeshTopologyEdgeListX.CollapseEdge(topologyEdgeIndex)
 py  MeshTopologyEdgeListX.Count [property ro]
@@ -3841,6 +4073,9 @@ py  MeshVertexColorListX.Destroy()
 py  MeshVertexColorListX.SetColor(face, color)
 py  MeshVertexColorListX.SetColor(index, color)
 py  MeshVertexColorListX.ToARGBArray()
+py  MeshVertexListX.Add(vertex)
+py  MeshVertexListX.Add(x, y, z)
+py  MeshVertexListX.AddVertices(vertices)
 py  MeshVertexListX.Capacity [property rw]
 py  MeshVertexListX.Clear()
 py  MeshVertexListX.CombineIdentical(ignoreNormals, ignoreAdditional)
@@ -3856,10 +4091,13 @@ py  MeshVertexListX.SetVertex(index, x, y, z)
 py  MeshVertexListX.SetVertex(index, x, y, z, updateNormals)
 py  MeshVertexListX.Show(vertexIndex)
 py  MeshVertexListX.ShowAll()
+py  MeshVertexListX.ToFloatArray()
 py  MeshVertexListX.ToPoint3dArray()
 py  MeshVertexListX.ToPoint3fArray()
 py  MeshVertexListX.UseDoublePrecisionVertices [property rw]
 py  MeshVertexNormalListX.Add(normal)
+py  MeshVertexNormalListX.Add(x, y, z)
+py  MeshVertexNormalListX.AddRange(normals)
 py  MeshVertexNormalListX.Capacity [property rw]
 py  MeshVertexNormalListX.Clear()
 py  MeshVertexNormalListX.ComputeNormals()
@@ -3867,6 +4105,9 @@ py  MeshVertexNormalListX.Count [property rw]
 py  MeshVertexNormalListX.Destroy()
 py  MeshVertexNormalListX.Flip()
 py  MeshVertexNormalListX.SetNormal(index, normal)
+py  MeshVertexNormalListX.SetNormal(index, x, y, z)
+py  MeshVertexNormalListX.SetNormals(normals)
+py  MeshVertexNormalListX.ToFloatArray()
 py  MeshVertexNormalListX.UnitizeNormals()
 py  MeshVertexNormalListX.__getitem__()
 py  MeshVertexNormalListX.__len__()
@@ -3875,7 +4116,13 @@ py  MeshX.Append(other)
 py  MeshX.ClearSurfaceData()
 py  MeshX.ClearTextureData()
 py  MeshX.Compact()
+py  MeshX.CopyFrom(other)
+py  MeshX.CreateFromSubDControlNet(subd) [static]
+py  MeshX.CreateFromSubDControlNetWithTextureCoordinates(subd) [static]
+py  MeshX.CreateFromSurfaceControlNet(surface) [static]
 py  MeshX.CreatePartitions(maximumVertexCount, maximumTriangleCount)
+py  MeshX.CreateQuickHull3D(pointCloud) [static]
+py  MeshX.CreateQuickHull3D(points) [static]
 py  MeshX.DestroyPartition()
 py  MeshX.DestroyTopology()
 py  MeshX.DestroyTree()
@@ -3984,11 +4231,16 @@ py  NurbsCurvePointListX.MakeRational()
 py  NurbsCurvePointListX.PointSize [property ro]
 py  NurbsCurvePointListX.SetPoint(index, point)
 py  NurbsCurvePointListX.SetPoint(index, point, weight)
+py  NurbsCurvePointListX.SetPoint(index, x, y, z)
+py  NurbsCurvePointListX.SetPoint(index, x, y, z, weight)
 py  NurbsCurvePointListX.SetWeight(index, weight)
+py  NurbsCurveX.Append(nurbsCurve)
 py  NurbsCurveX.ConvertSpanToBezier(spanIndex)
+py  NurbsCurveX.Create(periodic, degree, points) [static]
 py  NurbsCurveX.CreateFromArc(arc) [static]
 py  NurbsCurveX.CreateFromCircle(circle) [static]
 py  NurbsCurveX.CreateFromEllipse(ellipse) [static]
+py  NurbsCurveX.CreateFromLine(line) [static]
 py  NurbsCurveX.GrevilleParameter(index)
 py  NurbsCurveX.GrevillePoint(index)
 py  NurbsCurveX.HasBezierSpans [property ro]
@@ -4016,18 +4268,24 @@ py  NurbsSurfaceKnotListX.__len__()
 py  NurbsSurfaceKnotListX.__setitem__()
 py  NurbsSurfacePointListX.CountU [property ro]
 py  NurbsSurfacePointListX.CountV [property ro]
+py  NurbsSurfacePointListX.GetControlPoint(u, v)
 py  NurbsSurfacePointListX.GetGrevillePoint(u, v)
 py  NurbsSurfacePointListX.GetPoint(u, v)
 py  NurbsSurfacePointListX.GetWeight(u, v)
 py  NurbsSurfacePointListX.PointSize [property ro]
+py  NurbsSurfacePointListX.SetControlPoint(u, v, cp)
 py  NurbsSurfacePointListX.SetPoint(u, v, point)
 py  NurbsSurfacePointListX.SetPoint(u, v, point, weight)
+py  NurbsSurfacePointListX.SetPoint(u, v, x, y, z)
+py  NurbsSurfacePointListX.SetPoint(u, v, x, y, z, weight)
 py  NurbsSurfacePointListX.SetWeight(u, v, weight)
+py  NurbsSurfaceX.CopyFrom(other)
 py  NurbsSurfaceX.Create(dimension, isRational, order0, order1, controlPointCount0, controlPointCount1) [static]
 py  NurbsSurfaceX.CreateFromCone(cone) [static]
 py  NurbsSurfaceX.CreateFromCylinder(cylinder) [static]
 py  NurbsSurfaceX.CreateFromSphere(sphere) [static]
 py  NurbsSurfaceX.CreateFromTorus(torus) [static]
+py  NurbsSurfaceX.CreateRuledSurface(curveA, curveB) [static]
 py  NurbsSurfaceX.IncreaseDegreeU(desiredDegree)
 py  NurbsSurfaceX.IncreaseDegreeV(desiredDegree)
 py  NurbsSurfaceX.IsRational [property ro]
@@ -4086,6 +4344,7 @@ py  ObjectAttributesX.Name [property rw]
 py  ObjectAttributesX.OCSMappingChannelId() [static]
 py  ObjectAttributesX.ObjectColor [property rw]
 py  ObjectAttributesX.ObjectDecoration [property rw]
+py  ObjectAttributesX.ObjectFrame()
 py  ObjectAttributesX.ObjectId [property rw]
 py  ObjectAttributesX.PlotColor [property rw]
 py  ObjectAttributesX.PlotColorSource [property rw]
@@ -4100,6 +4359,7 @@ py  ObjectAttributesX.RemoveFromAllGroups()
 py  ObjectAttributesX.RemoveFromGroup(groupIndex)
 py  ObjectAttributesX.RemoveHideInDetailOverride(detailId)
 py  ObjectAttributesX.SectionAttributesSource [property rw]
+py  ObjectAttributesX.SetCustomLinetype(linetype)
 py  ObjectAttributesX.SetObjectFrame(plane)
 py  ObjectAttributesX.SetObjectFrame(xform)
 py  ObjectAttributesX.SetUserString(key, value)
@@ -4150,6 +4410,7 @@ py  PlaneSurfaceX.CreateThroughBox(plane, box) [static]
 py  PlaneSurfaceX.GetExtents(direction)
 py  PlaneSurfaceX.Plane [property rw]
 py  PlaneSurfaceX.SetExtents(direction, extents, syncDomain)
+py  PlaneSurfaceX.ToMesh()
 py  PlaneSurfaceX.__init__()
 py  PlaneSurfaceX.__init__(BND_PlaneX)
 py  PlaneSurfaceX.__init__(BND_PlaneX, BND_IntervalX, BND_IntervalX)
@@ -4469,6 +4730,7 @@ py  PolylineCurveX.Parameter(index)
 py  PolylineCurveX.Point(index)
 py  PolylineCurveX.PointCount [property ro]
 py  PolylineCurveX.SetArcLengthParameterization(tolerance)
+py  PolylineCurveX.SetParameter(index, parameter)
 py  PolylineCurveX.SetPoint(index, point)
 py  PolylineCurveX.ToPolyline()
 py  PolylineCurveX.__init__()
@@ -4544,7 +4806,10 @@ py  RenderSettingsX.__init__(const BND_RenderSettingsX*)
 py  RevSurfaceX.Angle [property ro]
 py  RevSurfaceX.Axis [property ro]
 py  RevSurfaceX.AxisAndCurveCoplanar()
+py  RevSurfaceX.Create(revoluteCurve, axisOfRevolution) [static]
 py  RevSurfaceX.Create(revoluteCurve, axisOfRevolution, startAngleRadians, endAngleRadians) [static]
+py  RevSurfaceX.Create(revoluteLine, axisOfRevolution) [static]
+py  RevSurfaceX.Create(revoluteLine, axisOfRevolution, startAngleRadians, endAngleRadians) [static]
 py  RevSurfaceX.CreateFromCone(cone) [static]
 py  RevSurfaceX.CreateFromCylinder(cylinder) [static]
 py  RevSurfaceX.CreateFromSphere(sphere) [static]
@@ -4652,10 +4917,12 @@ py  SubDVertexX.ComponentIndex()
 py  SubDVertexX.ControlNetPoint [property rw]
 py  SubDVertexX.EdgeAt(index)
 py  SubDVertexX.EdgeCount [property ro]
+py  SubDVertexX.Edges [property ro]
 py  SubDVertexX.FaceAt(index)
 py  SubDVertexX.FaceCount [property ro]
 py  SubDVertexX.Next [property ro]
 py  SubDVertexX.Previous [property ro]
+py  SubDVertexX.SetControlNetPoint(position, bClearNeighborhoodCache)
 py  SubDVertexX.SurfacePoint()
 py  SubDVertexX.Tag [property ro]
 py  SubDX.ClearEvaluationCache()
@@ -5047,21 +5314,25 @@ py  ViewInfoX.DisplayModeId [property rw]
 py  ViewInfoX.FocalBlurAperture [property rw]
 py  ViewInfoX.FocalBlurDistance [property rw]
 py  ViewInfoX.FocalBlurJitter [property rw]
+py  ViewInfoX.FocalBlurMode [property rw]
 py  ViewInfoX.FocalBlurSampleCount [property rw]
 py  ViewInfoX.GetPageSettings()
 py  ViewInfoX.GetWindowPosition()
 py  ViewInfoX.LockedProjection [property rw]
+py  ViewInfoX.Maximized [property ro]
 py  ViewInfoX.Name [property rw]
 py  ViewInfoX.NamedViewId [property rw]
 py  ViewInfoX.SectionBehavior [property rw]
 py  ViewInfoX.SetConstructionPlane(constructionPlane)
 py  ViewInfoX.SetPageSettings(pageSettings)
+py  ViewInfoX.SetWindowPosition(left, right, top, bottom)
 py  ViewInfoX.ShowConstructionAxes [property rw]
 py  ViewInfoX.ShowConstructionGrid [property rw]
 py  ViewInfoX.ShowConstructionZAxis [property rw]
 py  ViewInfoX.ShowWallpaperInGrayScale [property ro]
 py  ViewInfoX.ShowWorldAxes [property rw]
 py  ViewInfoX.ViewType [property rw]
+py  ViewInfoX.Viewport [property ro]
 py  ViewInfoX.WallpaperFilename [property ro]
 py  ViewInfoX.WallpaperHidden [property ro]
 py  ViewInfoX.__init__()
@@ -5081,12 +5352,14 @@ py  ViewportX.ChangeToSymmetricFrustum(isLeftRightSymmetric, isTopBottomSymmetri
 py  ViewportX.ChangeToTwoPointPerspectiveProjection(targetDistance, up, lensLength)
 py  ViewportX.DefaultCameraDirection() [static]
 py  ViewportX.DollyCamera(dollyVector)
+py  ViewportX.DollyExtents(cameraCoordinateBoundingBox, border)
 py  ViewportX.DollyFrustum(dollyDistance)
 py  ViewportX.Extents(halfViewAngleRadians, bbox)
 py  ViewportX.Extents(halfViewAngleRadians, sphere)
 py  ViewportX.FrustumAspect [property rw]
 py  ViewportX.FrustumBottom [property ro]
 py  ViewportX.FrustumBottomPlane [property ro]
+py  ViewportX.FrustumCenter [property ro]
 py  ViewportX.FrustumCenterPoint(targetDistance)
 py  ViewportX.FrustumFar [property ro]
 py  ViewportX.FrustumFarPlane [property ro]
@@ -5105,9 +5378,11 @@ py  ViewportX.FrustumWidth [property ro]
 py  ViewportX.GetBoundingBoxDepth(bbox)
 py  ViewportX.GetCameraAngles()
 py  ViewportX.GetCameraFrame()
+py  ViewportX.GetDollyCameraVector(screenX0, screenY0, screenX1, screenY1, projectionPlaneDistance)
 py  ViewportX.GetFrustum()
 py  ViewportX.GetFrustumLine(screenX, screenY)
 py  ViewportX.GetPointDepth(point)
+py  ViewportX.GetScreenPort()
 py  ViewportX.GetSphereDepth(sphere)
 py  ViewportX.GetWorldToScreenScale(pointInFrustum)
 py  ViewportX.GetXform(sourceSystem, destinationSystem)

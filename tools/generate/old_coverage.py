@@ -56,8 +56,9 @@ def main(argv):
     import logic_match
     old_cpp2py = logic_match.LogicIndex(root).old_cpp2py
     for c in bnd_gen.CLASSES:
-        if c.get('hand') and old_cpp2py.get(c['hand']):
-            gen_of.setdefault(old_cpp2py[c['hand']], c['reg'])
+        old = c.get('old') or c.get('hand')          # 'old': a replaced hand class, no bridge
+        if old and old_cpp2py.get(old):
+            gen_of.setdefault(old_cpp2py[old], c['reg'])
     gen_names = set(gen_of.values())
 
     # RhinoCommon member names per SIMPLE type name, by variant. Several
@@ -145,8 +146,12 @@ def main(argv):
                 b['rhinoonly'].add(n)
             else:
                 b['notrc'].add(n)
-        rows.append((hname, gname if g is not None else None, hname in rc_types, b))
-        review.append((hname, h, hname in rc_types, set(spec) | set(rhino_only), hn,
+        # the RhinoCommon type this class stands for: its own name, or the type of the
+        # generated class it is paired with (File3dmEmbeddedFileTable -> File3dmEmbeddedFiles)
+        paired_h = bnd_gen.BY_REG.get(gen_of.get(hname, ''))
+        rc_name = hname if hname in rc_types else (paired_h['cs'] if paired_h and paired_h['cs'] in rc_types else None)
+        rows.append((hname, gname if g is not None else None, rc_name is not None, b))
+        review.append((hname, h, rc_name or False, set(spec) | set(rhino_only), hn,
                        sorted(b['notrc']), sorted(b['rhinoonly'])))
 
     tot = {k: sum(len(row[3][k]) for row in rows) for k in rows[0][3]}
@@ -253,6 +258,10 @@ def hint(name, rc_names, declared):
             return 'RhinoCommon has `%s`' % cand
     if name[:3] in ('Get', 'Set') and name[3:] in rc_names:
         return 'RhinoCommon property `%s` (as a %s method here)' % (name[3:], name[:3].lower())
+    # `Length` vs `CompressedLength`: a RhinoCommon name that qualifies this one
+    longer = sorted(c for c in rc_names if c.endswith(name) and c != name and c[len(c) - len(name) - 1].islower())
+    if len(longer) == 1:
+        return 'RhinoCommon has `%s`' % longer[0]
     close = difflib.get_close_matches(name, sorted(rc_names), n=2, cutoff=0.75)
     if close:
         return 'closest RhinoCommon: ' + ', '.join('`%s`' % c for c in close)
@@ -273,6 +282,20 @@ def load_retired(root, r):
                    if not hasattr(getattr(r, b.split('.')[0], None), b.split('.', 1)[1])]
         for m in e.get('members') or [e['member']]:
             out[(e['class'], m)] = dict(e, missing=missing)
+    return out
+
+
+def load_kept(root):
+    """api/exceptions.toml [[hand_kept]] -> {(old class, member or None): entry}: the
+    rhino3dm-only API Luis decided to keep hand-written (None: the whole class)"""
+    path = os.path.join(root, 'api', 'exceptions.toml')
+    if not root or not os.path.exists(path):
+        return {}
+    import tomllib
+    out = {}
+    for e in tomllib.load(open(path, 'rb')).get('hand_kept', []):
+        for m in e.get('members') or [None]:
+            out[(e['class'], m)] = e
     return out
 
 
@@ -365,15 +388,23 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
           '| close: generated does more (by code) | %d |' % sum(t.startswith('**close') for t in tags),
           '| partial (by code) | %d |' % sum(t.startswith('**partial') for t in tags),
           '| replacement missing | %d |' % sum(t.startswith('**replacement missing') for t in tags), '']
+    kept = load_kept(root)
+    def decision(c, n):
+        e = kept.get((c, n)) or kept.get((c, None))
+        return '**keep** (hand-written; %s)' % e['decided'] if e else ''
+    L += ['Kept hand-written (`api/exceptions.toml` `[[hand_kept]]`): %d members.'
+          % sum(1 for c, _, _, _, _, n in notrc if decision(c, n)), '']
     by_class = {}
     for c, h, inrc, rcn, decl, n in notrc:
         hh = hint(n, rcn, decl) if inrc else ''
         by_class.setdefault((c, inrc), []).append((n, kind(h, n), hh, generated(c, n, hh)))
     L += ['## By class', '']
     for (c, inrc), items in sorted(by_class.items(), key=lambda kv: (not kv[0][1], kv[0][0])):
-        L += ['### %s%s' % (c, '' if inrc else ' -- class not in RhinoCommon'), '',
+        heading = (' -- class not in RhinoCommon' if not inrc else
+                   '' if inrc == c else ' -- RhinoCommon `%s`' % inrc)      # paired under another name
+        L += ['### %s%s' % (c, heading), '',
               '| Member | Kind | Hint | Generated | Decision |', '|---|---|---|---|---|']
-        L += ['| `%s` | %s | %s | %s | |' % (n, k, hh, gt) for n, k, hh, gt in items]
+        L += ['| `%s` | %s | %s | %s | %s |' % (n, k, hh, gt, decision(c, n)) for n, k, hh, gt in items]
         L.append('')
     L += ['## In RhinoCommon, but Rhino-only there', '',
           'These ARE RhinoCommon members, but compiled out of the portable build (they need',
@@ -383,6 +414,11 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
     # an entry of api/retired.toml that matches no row is stale (the member was
     # renamed, or turned out to be RhinoCommon): say so rather than drop it silently
     rows = {(c, n) for c, _, _, _, _, n in notrc}
+    stale_kept = sorted('%s.`%s`' % (c, n) if n else '%s (class)' % c for c, n in kept
+                        if (n is None and not any(rc == c for rc, _ in rows)) or (n is not None and (c, n) not in rows))
+    if stale_kept:
+        L += ['', '## api/exceptions.toml [[hand_kept]] entries that match no row', '']
+        L += ['- %s' % k for k in stale_kept]
     stale = sorted(k for k in retired if k not in rows)
     if stale:
         L += ['', '## api/retired.toml entries that match no row', '']

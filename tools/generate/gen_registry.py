@@ -196,7 +196,7 @@ CLASSES = [
     {'type': 'Rhino.Render.TextureMapping', 'cs': 'TextureMapping', 'on': 'ON_TextureMapping',
      'mode': 'pointer', 'hand': 'BND_TextureMapping', 'hand_header': 'bnd_texture_mapping.h',
      'copy': 'source.m_mapping ? new ON_TextureMapping(*source.m_mapping) : nullptr',
-     'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX', 'base': 'CommonObjectX'},
+     'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX', 'base': 'ModelComponentX'},
     {'type': 'Rhino.DocObjects.EarthAnchorPoint', 'cs': 'EarthAnchorPoint',
      'on': 'ON_EarthAnchorPoint',
      'mode': 'value', 'hand': 'BND_EarthAnchorPoint', 'hand_header': 'bnd_3dm_settings.h',
@@ -305,7 +305,13 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_AnnotationBase', 'hand_header': 'bnd_annotationbase.h',
      'copy': ('ON_Annotation::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
      'gen': 'BND_AnnotationBaseX', 'reg': 'AnnotationBaseX', 'base': 'GeometryBaseX',
-     'delete_as_object': True},
+     'delete_as_object': True,
+     # G88: RhinoCommon's managed `m_parent_dimstyle`, modeled: the object (or, for a
+     # File3dm view, a light copy -- a new view of the same file and id) the
+     # ParentDimensionStyle setter stores; ConstParentDimStylePointer() is its pointer
+     # (null when unset); the DimensionStyleId setter retargets its id
+     'modeled': {'m_parent_dimstyle': {'cs': 'DimensionStyle', 'ptr': 'ConstParentDimStylePointer',
+                                       'prop': 'ParentDimensionStyle', 'id_prop': 'DimensionStyleId'}}},
     # -- static classes: no instances, static members only
     {'type': 'Rhino.Geometry.Intersect.Intersection', 'cs': 'Intersection', 'on': None,
      'mode': 'static', 'hand': None, 'bridge': False,
@@ -386,12 +392,38 @@ CLASSES = [
      'gen': 'BND_File3dmPlugInDataTableX', 'reg': 'File3dmPlugInDataTableX'},
     # embedded files (G71): a File3dm proxy component and the file's collection of them
     # (RhinoCommon's File3dmEmbeddedFiles: Add plus a manifest enumerator, no Count)
+    # 'old': the hand class it replaces, for old-coverage only (no bridge): the old
+    # bindings register these as "EmbeddedFile" / "File3dmEmbeddedFileTable"
     {'type': 'Rhino.FileIO.File3dmEmbeddedFile', 'cs': 'File3dmEmbeddedFile', 'on': 'ON_EmbeddedFile',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmEmbeddedFile', 'bridge': False, 'base': 'ModelComponentX',
      'gen': 'BND_File3dmEmbeddedFileX', 'reg': 'File3dmEmbeddedFileX'},
     {'type': 'Rhino.FileIO.File3dmEmbeddedFiles', 'cs': 'File3dmEmbeddedFiles', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'old': 'BND_File3dmEmbeddedFileTable', 'bridge': False,
      'gen': 'BND_File3dmEmbeddedFilesX', 'reg': 'File3dmEmbeddedFilesX'},
+    # render content (G87): File3dm proxies of (file, id) resolved by
+    # ONX_Model_FindRenderContentFromId -- read-only, as in RhinoCommon (every member
+    # goes through ConstPointer); the three collections walk the manifest by kind
+    {'type': 'Rhino.FileIO.File3dmRenderContent', 'cs': 'File3dmRenderContent', 'on': 'ON_RenderContent',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderContent', 'bridge': False, 'base': 'ModelComponentX',
+     'proxy_nonconst': 'none', 'gen': 'BND_File3dmRenderContentX', 'reg': 'File3dmRenderContentX'},
+    {'type': 'Rhino.FileIO.File3dmRenderMaterial', 'cs': 'File3dmRenderMaterial', 'on': 'ON_RenderMaterial',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderMaterial', 'bridge': False, 'base': 'File3dmRenderContentX',
+     'gen': 'BND_File3dmRenderMaterialX', 'reg': 'File3dmRenderMaterialX'},
+    {'type': 'Rhino.FileIO.File3dmRenderEnvironment', 'cs': 'File3dmRenderEnvironment', 'on': 'ON_RenderEnvironment',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderEnvironment', 'bridge': False, 'base': 'File3dmRenderContentX',
+     'gen': 'BND_File3dmRenderEnvironmentX', 'reg': 'File3dmRenderEnvironmentX'},
+    {'type': 'Rhino.FileIO.File3dmRenderTexture', 'cs': 'File3dmRenderTexture', 'on': 'ON_RenderTexture',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderTexture', 'bridge': False, 'base': 'File3dmRenderContentX',
+     'gen': 'BND_File3dmRenderTextureX', 'reg': 'File3dmRenderTextureX'},
+    {'type': 'Rhino.FileIO.File3dmRenderMaterials', 'cs': 'File3dmRenderMaterials', 'on': 'ONX_Model',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_File3dmRenderMaterialsX', 'reg': 'File3dmRenderMaterialsX'},
+    {'type': 'Rhino.FileIO.File3dmRenderEnvironments', 'cs': 'File3dmRenderEnvironments', 'on': 'ONX_Model',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_File3dmRenderEnvironmentsX', 'reg': 'File3dmRenderEnvironmentsX'},
+    {'type': 'Rhino.FileIO.File3dmRenderTextures', 'cs': 'File3dmRenderTextures', 'on': 'ONX_Model',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_File3dmRenderTexturesX', 'reg': 'File3dmRenderTexturesX'},
     # -- collections: views onto a parent object (mode 'child')
     {'type': 'Rhino.Geometry.Collections.MeshVertexList', 'cs': 'MeshVertexList', 'on': 'ON_Mesh',
      'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
@@ -1068,6 +1100,13 @@ def index_types(manifest):
                 c['proxy'] = {'Resolver': fp['Resolver'], 'NonConst': 'resolve', 'Dup': None, 'Origin': 'file'}
             elif fp['NonConst'] == 'base' and dup:
                 c['proxy'] = {'Resolver': fp['Resolver'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'file'}
+            elif fp['NonConst'] == 'base' and c.get('proxy_nonconst') == 'none':
+                # nothing to copy on write with (no Duplicate): writes refused (G87)
+                c['proxy'] = {'Resolver': fp['Resolver'], 'NonConst': 'none', 'Dup': None, 'Origin': 'file'}
+            if c.get('proxy') and fp.get('ChildField'):
+                # a child proxy (G89): `(Guid id, <type> parent)` stores the parent where the file
+                # goes; the generated class holds a light copy of it (Parent / TopLevel)
+                c['proxy']['Child'] = {'Field': fp['ChildField'], 'Type': fp['ChildType']}
             if c.get('proxy') and fp.get('IdField') is None:
                 # a view of the file itself (RenderSettings): no id, and a write
                 # back (`Commit()`) when the type's commit targets the same file field
@@ -1092,6 +1131,21 @@ def index_types(manifest):
                     and len(fn['params']) == 2 and fn['params'][1]['type'] == 'int'):
                 c['proxy'] = {'Resolver': pv['IndexNative'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'parent',
                               'Parent': pv['ParentType'], 'Owner': owner['reg'], 'Field': pv['IndexField']}
+                continue
+        # `new ViewportInfo(viewInfo)` (G89): a view of the owner's sub-object -- the type's
+        # const resolver is one native on the owner's own const pointer (ViewInfo's
+        # ConstViewportPointer), no NonConstPointer branch, so writes copy
+        own_sub = [pv for pv in (TYPE_RECS.get(c['type']) or {}).get('ParentViews') or []
+                   if not pv.get('IndexNative') and pv.get('ConstNative') and not pv.get('NonConst')]
+        if own_sub and dup and len(own_sub) == 1:
+            pv = own_sub[0]
+            owner = BY_CS.get(pv['ParentType'])
+            fn = C_BY_NAME.get(pv['ConstNative']['Name'])
+            if (owner and owner['mode'] in ('pointer', 'value') and not owner.get('proxy') and fn and fn.get('variant') != 'rhino-only'
+                    and len(fn['params']) == 1 and [a.get('Value') for a in pv['ConstNative']['Args']] == ['ConstPointer']
+                    and fn['params'][0]['type'].replace('const ', '').rstrip('*').strip() == owner['on']):
+                c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'parent',
+                              'Parent': pv['ParentType'], 'Owner': owner['reg'], 'Field': None, 'NoIndex': True}
                 continue
         for pv in all_pvs:
             parent = proxies.get(pv['ParentType'])
@@ -1305,3 +1359,25 @@ def class_const(full_type, name):
         if (bt, name) in CONST_PROPS:
             return CONST_PROPS[(bt, name)]
     return None
+
+
+def view_copyable(c):
+    """a class whose File3dm views can be copied as views (G89: RH3DM_ViewCopy): it holds
+    the view state itself and has no parent link to carry"""
+    pr = c.get('proxy') or {}
+    return (c['mode'] == 'pointer' and pr.get('Origin') in ('file', 'object') and not pr.get('Child')
+            and not c.get('comp') and BY_REG.get(c.get('base', ''), {}).get('mode') in (None, 'abstract'))
+
+
+# Hand-written bindings the generated surface calls into (G90): rhino3dm-only API kept
+# by hand (api/exceptions.toml [[hand_kept]]) that has no RhinoCommon body to
+# generate from. gen_init calls each `init` after every generated class exists (its
+# classes may derive from generated ones), and aliases `for...of` on its tables.
+HAND_BINDINGS = [
+    {'init': 'initBitmapXBindings', 'header': 'bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX']},
+]
+# members a generated class registers from hand-written free functions taking it
+# (`const BND_<reg>&`): Python `keep_alive<0, 1>` (the result refers to the object)
+HAND_MEMBERS = {
+    'File3dmX': [{'name': 'Bitmaps', 'kind': 'property', 'fn': 'RH3DM_Hand_File3dmX_Bitmaps', 'header': 'bnd_bitmapx.h'}],
+}

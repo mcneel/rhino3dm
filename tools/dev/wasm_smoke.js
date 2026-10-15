@@ -156,6 +156,26 @@ factory().then(rhino => {
     console.log('  File3dmLayerTableX: for...of after a delete ->', [...t].map(l => l.name));
   }
 
+  // G90: the hand-kept bitmaps (BitmapX / File3dmBitmapTableX) with the review fixes
+  if (rhino.BitmapX && rhino.File3dmX) {
+    const f = new rhino.File3dmX();
+    const bt = f.bitmaps;
+    assert.strictEqual(bt.add(new rhino.BitmapX()), -1);      // no path: rejected, and said so
+    const ids = [];
+    for (const p of ['/tmp/a.png', '/tmp/b.png', '/tmp/c.png']) {
+      const b = new rhino.BitmapX();
+      b.fileFullPath = p;
+      const i = bt.add(b);
+      assert.ok(i >= 0);
+      ids.push(bt.findIndex(i).id);
+    }
+    assert.strictEqual(bt.findId(ids[1]).fileFullPath, '/tmp/b.png');
+    assert.strictEqual(bt.findIndex(999), null);
+    assert.strictEqual(bt.delete(ids[0]), true);
+    assert.deepStrictEqual([...bt].map(b => b.fileFullPath), ['/tmp/b.png', '/tmp/c.png']);
+    console.log('  BitmapX: add/findId/for...of after a delete ->', [...bt].map(b => b.fileFullPath));
+  }
+
   // option 4 (G80/G81): Point3dList and Polyline are RhinoCommon's classes,
   // a C++-owned list with RhinoList members; PolylineX derives Point3dListX
   if (rhino.PolylineX) {
