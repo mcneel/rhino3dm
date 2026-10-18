@@ -8,7 +8,7 @@ def failthrow_line(ft, call, m):
     """`if (!CALL) throw E(msg);`, `if (!CALL) { if (COND) throw E(msg); }`, or
     several conditional throws in order (G49: PointCloud.PointAt)"""
     def throw(g):
-        return 'throw %s("%s");' % (EXMAP[g['Exception']], (g.get('Message') or m['Name']).replace('"', "'"))
+        return 'throw %s("%s");' % (EXMAP[g['Exception']], net_message(g['Exception'], g.get('Message')))
     if not ft.get('Cond'):
         return '    if (!(%s)) %s' % (call, throw(ft))
     inner = ' '.join('if (%s) %s' % (g['cond_cpp'], throw(g)) for g in [ft] + list(ft.get('More') or []))
@@ -41,7 +41,7 @@ def emit(p):
         if g.get('Exception') is None else
         '    if (%s) throw %s("%s");'
         % (g['cond_cpp'], EXMAP[g['Exception']],
-           (g['Message'] or m['Name']).replace('"', "'"))
+           net_message(g['Exception'], g['Message']))
         for g in p['guards'] if not g.get('fail')]
     commit_line = ['    RH3DM_Commit();'] if p.get('commits') else []
     if shape[0] == 'direct' and p.get('adopt'):
@@ -363,9 +363,9 @@ def emit(p):
             for g in p['guards']:
                 if g.get('fail'):
                     L.append('    if (%s) throw %s("%s");' % (g['cond_cpp'], EXMAP[g['Exception']],
-                                                            (g['Message'] or m['Name']).replace('"', "'")))
+                                                            net_message(g['Exception'], g['Message'])))
             ff = p['fail_final']
-            L.append('    throw %s("%s");' % (EXMAP[ff['Exception']], (ff['Message'] or m['Name']).replace('"', "'")))
+            L.append('    throw %s("%s");' % (EXMAP[ff['Exception']], net_message(ff['Exception'], ff['Message'])))
         elif mode == 'ptr':
             L.append('    const void* rc = %s;' % call)
             L.append('    return rc ? new %s(%s, %s) : nullptr;' % (target['gen'], owner, key))
@@ -564,7 +564,7 @@ def emit(p):
     elif shape[0] == 'holder':
         hp = HOLDERS[shape[1]]
         ft = p.get('failthrow')
-        call_line = (('    if (!(%s)) throw %s("%s");' % (call, EXMAP[ft['Exception']], (ft.get('Message') or m['Name']).replace('"', "'")))
+        call_line = (('    if (!(%s)) throw %s("%s");' % (call, EXMAP[ft['Exception']], net_message(ft['Exception'], ft.get('Message'))))
                      if ft else '    %s;' % call)
         if 'conv' in hp:                      # string
             L.append('  %sstd::wstring %s(%s)%s {' % (st, name, sig, cq))
@@ -649,7 +649,7 @@ def emit_guard_lines(p):
     """a member's throwing guards, at function-body indent (G83 companions:
     out_companion refuses members with early returns)"""
     return ['  if (%s) throw %s("%s");' % (g['cond_cpp'], EXMAP[g['Exception']],
-                                            (g['Message'] or p['m']['Name']).replace('"', "'"))
+                                            net_message(g['Exception'], g['Message']))
             for g in p['guards'] if not g.get('fail') and g.get('Exception') is not None]
 
 
@@ -698,6 +698,28 @@ def emit_decl_def(p, cls):
         body += tbody[1:-1]
         body.append('}')
         return decl, '\n'.join(body)
+    if p.get('vec_companion'):
+        # a translated body reads this array (G92: `obj.Attributes.GetGroupList().Contains(i)`):
+        # the same fill as a C++ vector; C#'s null array is the empty one (D35)
+        af = p['shape'][1]
+        sig = ', '.join('%s %s' % (t, n) for t, n in p['bind_args'])
+        cq = '' if p.get('nonconst') else ' const'
+        call = '%s(%s)' % (p['fn']['name'], ', '.join(p['call_exprs']))
+        L = ['std::vector<%s> %s::%s_vec(%s)%s {' % (af['elem'], cls['gen'], p['cpp'], sig, cq)]
+        L += emit_guard_lines(p)
+        L += ['  %s' % x for x in p['locals']]
+        L.append('  int %s = %s;' % (af['count'], af['count_expr']))
+        if af['empty_cond']:
+            L.append('  if (%s) return std::vector<%s>();' % (af['empty_cond'], af['elem']))
+        L.append('  std::vector<%s> %s(%s);' % (af['elem'], af['local'], af['count']))
+        if af['form'] == 'success':
+            L.append('  if (!(%s)) return std::vector<%s>();' % (call, af['elem']))
+        else:
+            L.append('  %s;' % call)
+        L.append('  return %s;' % af['local'])
+        L.append('}')
+        decl += '\n  std::vector<%s> %s_vec(%s)%s;' % (af['elem'], p['cpp'], sig, cq)
+        body = body + ['', '\n'.join(L)]
     if p.get('out_companion'):
         # a translated sibling calls this with its outs (G83): the same call, the
         # outs by reference, the success returned
@@ -820,7 +842,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         oon, kt, on = cp['Owner']['on'], cp['Key'], cls['on']
         lines = [
             '  %s* m_owner = nullptr;   // RhinoCommon `new %s(owner, key)`: the owner ...' % (oon, cls['cs']),
-            '  %s m_key = 0;             // ... and the key it resolves' % kt,
+            '  %s m_key = %s;             // ... and the key it resolves' % (kt, 'ON_nil_uuid' if kt == 'ON_UUID' else '0'),
             '  %s(%s* owner, %s key) : m_owner(owner), m_key(key) {}' % (cls['gen'], oon, kt),
             '  %s(const %s&) = delete;' % (cls['gen'], cls['gen']),
             '  %s* RH3DM_Const() const {' % on,
@@ -864,7 +886,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
             # that makes the view and read by its members' guards and calls
             st = cls['state']
             storage = ('  {on}* m_ptr = nullptr;\n%s\n  {gen}({on}* parent, %s) : m_ptr(parent), %s {{}}' % (
-                '\n'.join('  %s %s = %s;' % (t, f, 'false' if t == 'bool' else '0') for t, f in st),
+                '\n'.join('  %s %s = %s;' % (t, f, 'false' if t == 'bool' else 'ON_nil_uuid' if t == 'ON_UUID' else '0') for t, f in st),
                 ', '.join('%s %s_' % (t, f) for t, f in st),
                 ', '.join('%s(%s_)' % (f, f) for _, f in st)))
         if cls.get('key'):
@@ -894,8 +916,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     elif cls['mode'] == 'pointer' and cls.get('borrowed'):
         # a BORROWED pointer into another object (CachedTextureCoordinates in a mesh):
         # never deleted; whatever hands it out keeps the owner alive
+        # (a MANAGED class -- G99 Font -- is borrowed too, and may be constructed: bridge / arg ctors)
         storage = '''  {on}* m_ptr = nullptr;
-  explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}
+  explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}{bridge}{dctor}
   {gen}(const {gen}&) = delete;{override}'''
     elif cls['mode'] == 'pointer' and cls.get('shared'):
         # a std::shared_ptr HANDLE (Decal; G60): RhinoCommon's m_decal_sp -- this object
@@ -1048,10 +1071,30 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         storage = '''  {on}* m_ptr = nullptr;
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}{override}'''
+    elif cls.get('fileview'):
+        # a value OR a live view into a file's table (G104: ViewInfo from File3dm.Views): the view
+        # resolves on every access, and throws once its object left the file
+        fv = cls['fileview']
+        storage = '''  {on} m_val;
+  ONX_Model* m_model = nullptr;      // a file view: the file ...
+  ON_UUID m_id = ON_nil_uuid;        // ... the id (a nil id: matched by pointer value)
+  const {on}* m_vptr = nullptr;
+  bool m_named = false;
+  explicit {gen}(const {on}& v) : m_val(v) {{}}
+  {gen}(ONX_Model* model, ON_UUID id, void* ptr, bool named) : m_model(model), m_id(id), m_vptr((const {on}*)ptr), m_named(named) {{}}{bridge}{dctor}
+  bool RH3DM_IsView() const {{ return m_model != nullptr; }}
+  {on}* RH3DM_Val() const {{
+    if (!m_model) return const_cast<{on}*>(&m_val);
+    {on}* p = %s(m_model, m_id, m_vptr, m_named);
+    if (!p) throw std::runtime_error("%s: the view is no longer in the File3dm");
+    return p;
+  }}{override}''' % (fv['resolver'], cls['type'])
     else:
         # a value adopted from a native result (G49 valadopt) is copied in
         storage = '''  {on} m_val;
   explicit {gen}(const {on}& v) : m_val(v) {{}}{bridge}{dctor}{override}'''
+    if cls['mode'] != 'child' and (cls.get('liter') or {}).get('index'):
+        methods += '\n  class %sIter* Gen_iter() const;   // foreach (G98)' % cls['gen']
     return ('class {gen}{inherit}\n{{\npublic:\n' + storage
             + '\n\n{methods}\n}};\n').format(
         gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
@@ -1118,17 +1161,21 @@ public:
   ONX_Model* m_model = nullptr;
   ONX_ModelComponentIterator* m_it = nullptr;
   unsigned m_k = 0;                 // which type is being iterated
+  int m_only = -1;                  // GetEnumerator(type): that type alone (G91)
   explicit %sIter(ONX_Model* model) : m_model(model) {}
+  %sIter(ONX_Model* model, int only) : m_model(model), m_only(only) {}
   ~%sIter() { if (m_it) ONX_ModelComponentIterator_Delete(m_it); }
   %sIter(const %sIter&) = delete;
   class %s* Gen_next();   // nullptr at the end
 };
-''' % (cls['reg'], gen, gen, gen, gen, gen, item)
+''' % (cls['reg'], gen, gen, gen, gen, gen, gen, item)
     defn = '''
 class %s* %sIter::Gen_next()
 {
-  static const ON_ModelComponent::Type types[] = { %s };
-  while (m_k < %d) {
+  static const ON_ModelComponent::Type all_types[] = { %s };
+  const ON_ModelComponent::Type only[] = { (ON_ModelComponent::Type)(m_only < 0 ? 0 : m_only) };
+  const ON_ModelComponent::Type* types = m_only < 0 ? all_types : only;
+  while (m_k < (m_only < 0 ? %du : 1u)) {
     if (!m_it) m_it = ONX_ModelComponentIterator_New(m_model, types[m_k]);
     int index = 0;
     ON_ModelComponent::Type outType = (ON_ModelComponent::Type)0;
@@ -1136,7 +1183,7 @@ class %s* %sIter::Gen_next()
     ON_ModelComponent* p = m_it ? ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id) : nullptr;
     if (p) {
       if (outType != types[m_k]) throw std::out_of_range("type");%s
-      return new %s(m_model, id);
+      return %s;
     }
     if (m_it) ONX_ModelComponentIterator_Delete(m_it);
     m_it = nullptr;
@@ -1152,7 +1199,10 @@ class %s* %sIter::Gen_next()
 ''' % (item, gen, ', '.join('(ON_ModelComponent::Type)%s' % v for v in types), len(types),
        # `if (_e.Current is T c)` (G87): a component of another kind is passed over
        ('\n      if (!dynamic_cast<const %s*>(p)) continue;' % tp['item']['on']) if tp.get('filter') else '',
-       item, gen, gen, gen)
+       # ManifestTable (G91): RhinoCommon's Instantiate(file, type, id, index) makes each one
+       ('%s::%s(m_model, (RH3DM_ModelComponentType)outType, id, index)' % (gen, tp['dispatch'])) if tp.get('dispatch')
+       else 'new %s(m_model, id)' % item,
+       gen, gen, gen)
     if tp.get('find_id'):
         # `foreach (var obj in en) if (obj is T rc && rc.Id == g) return rc; return null;` (G89)
         defn += '''
@@ -1222,12 +1272,50 @@ class %s* %sIter::Gen_next()
     return decl, defn
 
 
+def emit_index_iter(cls):
+    """the iterator class of an index enumerator (declaration, definition; G98): RhinoCommon's
+    PostEffectDataEnumerator -- At(owner, i) until null, each item (owner, Key(item))"""
+    ix = cls['liter']['index']
+    gen, item, owner_on = cls['gen'], cls['liter']['item']['gen'], cls['on']
+    decl = """
+// %s's enumerator (RhinoCommon GetEnumerator): %s(owner, i) for i = 0, 1, .. until null,
+// each yielded as (owner, %s) -- a view of the owner's item by id
+class %sIter
+{
+public:
+  %s* m_owner = nullptr;
+  int m_index = 0;
+  explicit %sIter(%s* owner) : m_owner(owner) {}
+  class %s* Gen_next();   // nullptr at the end
+};
+""" % (cls['reg'], ix['at']['name'], ix['key']['name'], gen, owner_on, gen, owner_on, item)
+    defn = """
+class %s* %sIter::Gen_next()
+{
+  const %s* p = (const %s*)%s(m_owner, m_index);
+  if (!p) return nullptr;
+  ON_UUID id = ON_nil_uuid;
+  %s(p, &id);
+  m_index++;
+  return new %s(m_owner, id);
+}
+
+%sIter* %s::Gen_iter() const
+{
+  return new %sIter(RH3DM_NonConst());
+}
+""" % (item, gen, cls['liter']['item']['on'], cls['liter']['item']['on'], ix['at']['name'], ix['key']['name'], item, gen, gen, gen)
+    return decl, defn
+
+
 def emit_linked_iter(cls):
     """the iterator class of a linked component list (declaration,
     definition): RhinoCommon's yield loop over First/Next (G43)"""
     li = cls['liter']
     if li.get('snapshot'):
         return emit_snapshot_iter(cls)
+    if li.get('index'):
+        return emit_index_iter(cls)
     gen, item, owner_on = cls['gen'], li['item']['gen'], cls['on']
     decl = '''
 // %s's enumerator (RhinoCommon GetEnumerator): %s, then %s, over the
@@ -1285,15 +1373,38 @@ def js_class_shape(t):
     # JS shape policy: {X,Y,Z} objects key on Z (so a 3D value never passes
     # the {X,Y} test below); everything else keys on its first field
     vt = dict(VT_JS_KEY, **{'BND_Point3dX': 'Z', 'BND_Vector3dX': 'Z', 'BND_IntervalX': 'T0'})
+    if t in VT_JS_FIELDS and len(VT_JS_FIELDS[t]) > 1 and t not in ('BND_Point3dX', 'BND_Vector3dX', 'BND_Point2dX', 'BND_IntervalX'):
+        # a value object is checked on EVERY field (G100: ArcX {Plane, Radius, AngleDomain} and
+        # CircleX {Plane, Radius} share a first field -- a circle reached the Arc conversion);
+        # the shape key is the field set: a subset accepts a superset (js_shadowed)
+        fs = VT_JS_FIELDS[t]
+        return ('object:' + ','.join(sorted(fs)),
+                '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && %s)' % ' && '.join('{v}.hasOwnProperty("%s")' % f for f in fs),
+                '{v}.as<%s>()' % t)
     if t in vt:
         lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2dX' else ''
+        # a point / vector's Z is a NUMBER: a Box value object has a Z too (an interval), and
+        # BoxX.Contains(box, otherBox) took the point branch
+        if t in ('BND_Point3dX', 'BND_Vector3dX', 'BND_Point3fX', 'BND_Vector3fX'):
+            lacks += ' && {v}["Z"].isNumber()'
+        # `typeof null` is "object": checked first (PolyCurveX.append(null) called hasOwnProperty on null)
         return ('object:' + vt[t],
-                '({v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("%s")%s)' % (vt[t], lacks),
+                '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("%s")%s)' % (vt[t], lacks),
                 '{v}.as<%s>()' % t)
+    # a string (and a uuid, a string in JS) and a color ({r, g, b, a} -- lowercase, so no point or
+    # vector passes): checked, never `true` -- an unchecked argument let its overload take every
+    # call of that arity (PointCloud.add(point, normal) reached add(point, color))
+    if t in ('std::wstring', 'BND_UUID', 'std::string', 'const std::wstring&'):
+        return 'string', '({v}.typeOf().as<std::string>() == "string")', '{v}.as<%s>()' % t.replace('const ', '').rstrip('&')
+    if t in ('BND_Color', 'BND_Color4f'):
+        return ('color', '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("r"))', '{v}.as<%s>()' % t)
     if t == 'const RH3DM_Bytes&':          # a byte buffer (G86): a Uint8Array or an array of numbers
         return ('bytes', '({v}.isArray() || {v}.instanceof(emscripten::val::global("Uint8Array")))', 'RH3DM_JsBytes({v})')
-    m = re.match(r'const std::vector<(\w+)>&$', t)
-    if m:                                  # a sequence (G82): an array or a point list
+    m = re.match(r'(?:const )?std::vector<const (BND_\w+)\*>&?$', t)
+    if m:                                  # a sequence of class objects (G95): an array of instances
+        return ('seqptr:' + m.group(1), 'RH3DM_JsIsSeq({v})', 'RH3DM_JsSeqPtr<%s>({v})' % m.group(1))
+    m = re.match(r'(?:const )?std::vector<(\w+)>&?$', t)
+    if m:                                  # a sequence (G82; by value too, G94): an array or a point list
         return ('seq:' + m.group(1), 'RH3DM_JsIsSeq({v})', 'RH3DM_JsSeq<%s>({v})' % m.group(1))
     m = re.match(r'const (BND_(\w+))\*$', t)
     if m:                                  # an optional class argument: null or an instance
@@ -1310,7 +1421,54 @@ def js_class_shape(t):
     return 'any:' + t, 'true', '{v}.as<%s>()' % t
 
 
+def js_seq_arg(t):
+    """a parameter JS passes as an array (converted through emscripten::val): a std::vector by value
+    or const reference, of values or of class pointers, or a byte buffer -- embind has no binding
+    type for any of them (unbound-type errors before: NurbsCurveX.create, writeMultipleObjects)"""
+    return bool(re.match(r'^(?:const )?std::vector<.*>&?$', t)) or t == 'const RH3DM_Bytes&'
+
+
+def js_branch_order(p, types=None):
+    """dispatch order: overloads with an unchecked (`any`) argument last; among the rest, more
+    value-object fields first, so a specific type (ArcX) is tried before a general one (CircleX)"""
+    ts = types if types is not None else [t for t, _ in p['bind_args']]
+    shapes = [js_class_shape(t)[0] for t in ts]
+    return (any(sh.startswith('any:') for sh in shapes),
+            -sum(len(sh[7:].split(',')) for sh in shapes if sh.startswith('object:')))
+
+
+def js_shadowed(shape_lists):
+    """overloads a JS dispatcher could never reach: branch i is shadowed when an EARLIER branch's
+    checks accept every argument branch i accepts (an unchecked `any` accepts all; a class check
+    accepts its derived classes) -- the generator refuses to emit such a dispatcher"""
+    def accepts(a, b):
+        if a == b or a.startswith('any:'):
+            return True
+        if a.startswith('object:') and b.startswith('object:') and ',' in a + b:
+            return set(a[7:].split(',')) <= set(b[7:].split(','))    # fewer fields accept more
+        if a.startswith('class:') and b.startswith('class:'):
+            d, base = BY_REG.get(b[6:]), a[6:]
+            while d is not None:
+                if d['reg'] == base:
+                    return True
+                d = BY_REG.get(d.get('base', ''))
+        return False
+    out = []
+    for i, si in enumerate(shape_lists):
+        for j in range(i):
+            sj = shape_lists[j]
+            if len(sj) == len(si) and all(accepts(a, b) for a, b in zip(sj, si)):
+                out.append((i, j))
+                break
+    return out
+
+
+JS_STATICS = {}                 # reg -> [(JS name, registration)] of its class functions (inherited in JS)
+
+
 def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=()):
+    if cls.get('internal'):
+        return '', ''          # G96: an internal class is C++ only (bodies use it; no binding)
     plans = [p for p in plans if not p.get('hidden') and not (p.get('setter_of') or {}).get('hidden')]   # G85
     py, js = [], []
     js_methods = {}            # (camel name, arity, static) -> plans, in order
@@ -1337,7 +1495,22 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             # a view of an argument's object handed back (G89: TryConvertBrep's RH3DM_ViewCopyOf):
             # the argument -- and through it the file -- stays alive while the view does
             ka = ', py::keep_alive<0, 1>()' if p['shape'][0] == 'translated' and 'RH3DM_ViewCopyOf(' in p['shape'][2] else ''
-            py.append('      .def_static("%s", &%s::%s%s%s)' % (n, cls['gen'], g, ka, pyargs))
+            if p['m']['Kind'] == 'property':
+                # a static PROPERTY is one in Python, as the value types register theirs (Luis,
+                # 2026-10-16): `MeshingParametersX.Default`, not `MeshingParametersX.Default()`
+                sp = p.get('setter')
+                if sp is not None and id(sp) in live:
+                    py.append('      .def_property_static("%s", [](py::object) { return %s::%s(); }, [](py::object, %s v) { %s::%s(v); })'
+                              % (n, cls['gen'], g, sp['bind_args'][0][0], cls['gen'], sp['cpp']))
+                elif _ret_cpp(p, cls).endswith('*'):
+                    # a NEW object (SubDX.Empty): Python owns it -- a property getter's default
+                    # policy (reference_internal) would leak it
+                    py.append('      .def_property_readonly_static("%s", py::cpp_function([](py::object) { return %s::%s(); }, py::return_value_policy::take_ownership))'
+                              % (n, cls['gen'], g))
+                else:
+                    py.append('      .def_property_readonly_static("%s", [](py::object) { return %s::%s(); })' % (n, cls['gen'], g))
+            else:
+                py.append('      .def_static("%s", &%s::%s%s%s)' % (n, cls['gen'], g, ka, pyargs))
         elif p['shape'][0] in ('child', 'constview', 'fileview', 'settingsview') \
                 or (p['shape'][0] in ('construct', 'via') and p['m']['Kind'] == 'property'):
             # a view onto this object: Python owns the view and keeps the parent alive
@@ -1348,13 +1521,22 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             continue
         elif p['m']['Kind'] == 'indexer':
             sp = p.get('setter')
-            if p['shape'][0] in ('construct', 'via'):
-                # a component of this list's owner: it keeps the list (and the owner) alive
+            if p['shape'][0] in ('construct', 'via', 'subview'):
+                # a component of this list's owner -- or a view re-resolved through this list (G103:
+                # BrepSurfaceList, the list is the view's owner): it keeps the list (and the owner) alive
                 py.append('      .def("__getitem__", &%s::%s, py::keep_alive<0, 1>())' % (cls['gen'], g))
                 js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
             elif p['shape'][0] in ('datafrom', 'datafill', 'holderdata'):
                 # a new data object: Python owns it (the default pointer policy)
                 py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
+                js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
+            elif p['shape'][0] == 'translated' and p['shape'][1].endswith('*'):
+                # a translated getter's new object (G104): Python owns it; a FILE VIEW (ViewInfo from
+                # File3dm.Views) or a child of the file (File3dmPlugInData) keeps the list -- and
+                # through it the file -- alive
+                rc = next((c for c in CLASSES if p['shape'][1].rstrip('*').strip() == c['gen']), None)
+                ka = ', py::keep_alive<0, 1>()' if rc is not None and (rc.get('fileview') or rc['mode'] == 'child') else ''
+                py.append('      .def("__getitem__", &%s::%s%s)' % (cls['gen'], g, ka))
                 js.append('      .function("get", &%s::%s, allow_raw_pointers())' % (cls['gen'], g))
             else:
                 py.append('      .def("__getitem__", &%s::%s)' % (cls['gen'], g))
@@ -1433,7 +1615,10 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             ps_ = ', '.join('%s %s' % (t, nm) for t, nm in p['bind_args'])
             py.append('      .def("%s", [](%s& self%s) { return RH3DM_PyOwnedList(self.%s(%s), py::cast(&self)); }%s)'
                       % (n, cls['gen'], (', ' + ps_) if ps_ else '', g, ', '.join(nm for _, nm in p['bind_args']), pyargs))
-        elif p['shape'][0] == 'translated' and p['shape'][1].endswith('*') and (p.get('ret_borrowed') or (BY_GEN_PTR(p['shape'][1]) or {}).get('proxy')):
+        elif p['shape'][0] == 'translated' and p['shape'][1].endswith('*') and (
+                p.get('ret_borrowed') or (BY_GEN_PTR(p['shape'][1]) or {}).get('proxy')
+                # a File3dm table's result is a proxy of its file (G91: ManifestTable.FindId)
+                or (cls['mode'] == 'child' and cls.get('parent') == 'File3dmX')):
             # a class value from a translated body (G89): borrowed (reference_internal), or a
             # new File3dm proxy (FindChild) that keeps this one -- and so the file -- alive
             py.append('      .def("%s", &%s::%s, %s%s)' % (n, cls['gen'], g, 'py::return_value_policy::reference_internal' if p.get('ret_borrowed')
@@ -1455,21 +1640,23 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         for p in ps:
             by_shape.setdefault(tuple(js_class_shape(t)[0] for t, _ in p['bind_args']), p)
         ps = list(by_shape.values())
-        if len(ps) == 1 and (any(t.startswith('const std::vector<') or t == 'const RH3DM_Bytes&' for t, _ in ps[0]['bind_args'])
-                             or _ret_cpp(ps[0], cls).startswith('std::vector<')):
+        if len(ps) == 1 and (any(js_seq_arg(t) for t, _ in ps[0]['bind_args'])
+                             or _ret_cpp(ps[0], cls).startswith('std::vector<') or _ret_cpp(ps[0], cls) == 'RH3DM_Bytes'):
             # a sequence argument (G82): embind cannot take a JS array as a
             # std::vector -- a lambda converts it (RH3DM_JsSeq)
             p = ps[0]
             d = emit_decl_def(p, cls)[0]
             rt = d[:d.index(' %s(' % p['cpp'])].replace('static ', '').strip()
             shapes = [js_class_shape(t) for t, _ in p['bind_args']]
-            vec = [t.startswith('const std::vector<') or t == 'const RH3DM_Bytes&' for t, _ in p['bind_args']]
+            vec = [js_seq_arg(t) for t, _ in p['bind_args']]
             params = ', '.join(('emscripten::val a%d' if v else '%s a%%d' % t) % i for i, ((t, _), v) in enumerate(zip(p['bind_args'], vec)))
             args = ', '.join(sh[2].format(v='a%d' % i) if v else 'a%d' % i for i, (sh, v) in enumerate(zip(shapes, vec)))
             selfp = '' if static else '%s& self%s' % (cls['gen'], ', ' if params else '')
             call = ('%s::%s(%s)' if static else 'self.%s(%s)') % (*(([cls['gen']] if static else [])), p['cpp'], args)
             if rt.startswith('std::vector<'):         # a sequence result: a JS array (G84)
                 call, rt = 'RH3DM_JsArray(%s)' % call, 'emscripten::val'
+            elif rt == 'RH3DM_Bytes':                  # a byte[] result: a Uint8Array (G101)
+                call, rt = 'RH3DM_JsBytesOut(%s)' % call, 'emscripten::val'
             js.append('      .%s("%s", optional_override([](%s%s) -> %s { %s%s; }), allow_raw_pointers())'
                       % ('class_function' if static else 'function', jn, selfp, params, rt,
                          '' if rt == 'void' else 'return ', call))
@@ -1497,6 +1684,13 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if common is not None and common.startswith('std::vector<'):
             common = None                         # a sequence: a JS array through val (G84)
         branches = []
+        # overloads with an argument JS cannot check (`any`) go last: they must not shadow one that
+        # checks every argument (stable within each group)
+        ps = sorted(ps, key=js_branch_order)
+        sh = js_shadowed([[js_class_shape(t)[0] for t, _ in p['bind_args']] for p in ps])
+        if sh:
+            raise SystemExit('%s.%s/%d: JS dispatcher branch unreachable: %s' % (cls['reg'], jn, arity, '; '.join(
+                '%s shadowed by %s' % (ps[i]['cpp'], ps[j]['cpp']) for i, j in sh)))
         for p in ps:
             shapes = [js_class_shape(t) for t, _ in p['bind_args']]
             cond = ' && '.join(s[1].format(v='v%d' % i) for i, s in enumerate(shapes)) or 'true'
@@ -1504,24 +1698,75 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             call = ('%s::%s(%s)' if static else 'self.%s(%s)') % (
                 *(([cls['gen']] if static else [])), p['cpp'], args)
             if common is not None:
-                branches.append('if (%s) %s%s;' % (cond, '' if common == 'void' else 'return ', call)
-                                + (' return;' if common == 'void' else ''))
+                # braced: an unbraced `if (c) call; return;` returned after the FIRST test whatever it
+                # found (ObjectAttributes.setObjectFrame(plane), PointCloud.add(point, normal) unreachable)
+                branches.append('if (%s) { %s; return; }' % (cond, call) if common == 'void'
+                                else 'if (%s) return %s;' % (cond, call))
             elif (p['shape'][0] == 'direct' and p['shape'][1] == 'void') or p['shape'][0] == 'failthrow':
                 branches.append('if (%s) { %s; return emscripten::val::undefined(); }' % (cond, call))
             elif _ret_cpp(p, cls).startswith('std::vector<'):
                 branches.append('if (%s) return RH3DM_JsArray(%s);' % (cond, call))
+            elif _ret_cpp(p, cls) == 'RH3DM_Bytes':
+                branches.append('if (%s) return RH3DM_JsBytesOut(%s);' % (cond, call))
             elif _ret_cpp(p, cls).endswith('*'):        # a class pointer: the val needs the policy (G85)
                 branches.append('if (%s) return emscripten::val(%s, emscripten::allow_raw_pointers());' % (cond, call))
             else:
                 branches.append('if (%s) return emscripten::val(%s);' % (cond, call))
         rtype = common if common is not None else 'emscripten::val'
-        fallback = ('return emscripten::val::undefined();' if common is None else
-                    'return;' if common == 'void' else
-                    'return nullptr;' if common.endswith('*') else 'return %s{};' % common)
+        # no overload matches: an error, as Python's TypeError -- never a silent undefined / default
+        fallback = 'throw std::invalid_argument("%s.%s: no overload matches the arguments");' % (cls['reg'], jn)
         js.append('      .%s("%s", optional_override([](%s%s) -> %s {\n'
                   '        %s\n        %s }), allow_raw_pointers())'
                   % ('class_function' if static else 'function', jn, selfp, vparams, rtype,
                      '\n        '.join(branches), fallback))
+    # a grid enumerator (G102, GRID_ENUMS): Python __iter__ / JS for...of in RhinoCommon's order
+    grid = GRID_ENUMS.get(cls['cs'].replace('+', '.').split('.')[-1])
+    if grid:
+        def gplan(name, kind, nparams):
+            return next((q for q in plans if q['m']['Name'] == name and q['m']['Kind'] == kind and not q.get('setter_of')
+                         and len(q['m'].get('Params') or []) == nparams), None)
+        cu, cv, gp = gplan(grid[0], 'property', 0), gplan(grid[1], 'property', 0), gplan(grid[2], 'method', 2)
+        if cu and cv and gp:
+            py.append('      .def("__iter__", [](%s& s) { py::list l; int nu = s.%s(), nv = s.%s();\n'
+                      '        for (int u = 0; u < nu; u++) for (int v = 0; v < nv; v++) l.append(py::cast(s.%s(u, v)));\n'
+                      '        return py::iter(l); })' % (cls['gen'], cu['cpp'], cv['cpp'], gp['cpp']))
+            JS_POST['grid'].append((cls['reg'], camel(grid[0]), camel(grid[1]), camel(grid[2])))
+    # G101: the JS post-script's facts for this class (gen_registry.JS_POST) -- read off the Python
+    # registrations, the reference for what is a view (keep_alive / reference_internal) and what
+    # is a static property
+    pyname = lambda e: (re.search(r'\.def\w*\("(\w+)"', e) or [None, None])[1]
+    jsnames = {(re.search(r'\.\w+\("(\w+)"', e) or [None, None])[1] for e in js}
+    for e in py:
+        n = pyname(e)
+        if not n:
+            continue
+        if ('keep_alive<0, 1>' in e or 'reference_internal' in e) and '_static' not in e:
+            jn = {'__getitem__': 'get', '__iter__': 'iterator'}.get(n, camel(n))
+            JS_POST['keep'].append((cls['reg'], jn))
+        if '.def_property_readonly_static(' in e:
+            jn = camel(n) if camel(n) in jsnames else n
+            JS_POST['static_props'].append((cls['reg'], jn))
+    if cls.get('table') or cls.get('liter'):
+        JS_POST['iters'].append(cls['reg'] + 'Iter')
+    if cs_enumerable(cls['cs']):
+        JS_POST['enumerable'].append(cls['reg'])       # filtered by bnd_gen against the final registrations
+    # embind does not inherit class functions (statics): a derived class re-registers its bases'
+    # (LayerX.namePathSeparator is ModelComponentX's, as Layer.NamePathSeparator in C#/Python);
+    # bases are emitted first (CLASSES order), their statics recorded in JS_STATICS
+    def js_reg_name(entry):
+        m = re.match(r'\s*\.class_function\("(\w+)"', entry)
+        return m.group(1) if m else None
+    mine = {js_reg_name(e) for e in js} | {re.match(r'\s*\.\w+\("(\w+)"', e).group(1) for e in js if re.match(r'\s*\.\w+\("(\w+)"', e)}
+    JS_STATICS[cls['reg']] = [(js_reg_name(e), e) for e in js if js_reg_name(e)]
+    b0 = BY_REG.get(cls.get('base', ''))
+    while b0 is not None:
+        for n, e in JS_STATICS.get(b0['reg'], []):
+            if n not in mine:
+                js.append(e)
+                mine.add(n)
+                if (b0['reg'], n) in JS_POST['static_props']:
+                    JS_POST['static_props'].append((cls['reg'], n))
+        b0 = BY_REG.get(b0.get('base', ''))
     base = BY_REG.get(cls.get('base', ''))
     if cls['mode'] == 'abstract':
         # no constructor: instances only exist as derived objects; an abstract
@@ -1536,10 +1781,13 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         else '<%s>' % cls['gen']
     py_dctor = '      .def(py::init<>())\n' if has_default_ctor else ''
     js_dctor = '      .constructor<>()\n' if has_default_ctor else ''
-    # embind constructors dispatch on arity only: default (0) and bridge (1)
-    # keep their slots; a same-arity argument ctor is pruned in JS, counted
-    js_arity = ({0} if has_default_ctor else set()) | ({1} if cls.get('bridge', True) else set())
+    # embind constructors dispatch on arity only: the default (0) keeps its slot; the bridge (1,
+    # the old binding's object) joins the one-argument constructors' shape dispatcher -- before,
+    # a one-argument argument ctor was pruned (ArcCurveX(arc), FontX("Arial"), Point3dListX(points))
+    js_arity = {0} if has_default_ctor else set()
     js_ctors = {}                         # arity -> plans, in order
+    if cls.get('bridge', True) and cls.get('hand') and any(len(p['bind_args']) == 1 for p in arg_ctors):
+        js_ctors[1] = [{'bind_args': [('const %s&' % cls['hand'], 'source')], 'bridge': True}]
     for p in arg_ctors:
         types = ', '.join(t for t, _ in p['bind_args'])
         py_dctor += '      .def(py::init<%s>()%s)\n' % (
@@ -1555,10 +1803,10 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         for p in ps:
             by_shape.setdefault(tuple(js_class_shape(t)[0] for t, _ in p['bind_args']), p)
         ps = list(by_shape.values())
-        if len(ps) == 1 and any(t.startswith('const std::vector<') for t, _ in ps[0]['bind_args']):
+        if len(ps) == 1 and any(js_seq_arg(t) for t, _ in ps[0]['bind_args']):
             # a sequence argument (G82): a factory converting the array or point list
             shapes = [js_class_shape(t) for t, _ in ps[0]['bind_args']]
-            vec = [t.startswith('const std::vector<') for t, _ in ps[0]['bind_args']]
+            vec = [js_seq_arg(t) for t, _ in ps[0]['bind_args']]
             params = ', '.join('emscripten::val a%d' % i if v else '%s a%d' % (t, i)
                                for i, ((t, _), v) in enumerate(zip(ps[0]['bind_args'], vec)))
             args = ', '.join(sh[2].format(v='a%d' % i) if v else 'a%d' % i for i, (sh, v) in enumerate(zip(shapes, vec)))
@@ -1570,6 +1818,11 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             continue
         js_pruned.append('%s.constructor/%d (dispatched)' % (cls['reg'], arity))
         branches = []
+        ps = sorted(ps, key=js_branch_order)
+        shd = js_shadowed([[js_class_shape(t)[0] for t, _ in p['bind_args']] for p in ps])
+        if shd:
+            raise SystemExit('%s constructor/%d: JS dispatcher branch unreachable: %s' % (cls['reg'], arity, '; '.join(
+                'overload %d shadowed by %d' % (i, j) for i, j in shd)))
         for p in ps:
             shapes = [js_class_shape(t) for t, _ in p['bind_args']]
             cond = ' && '.join(sh[1].format(v='v%d' % i) for i, sh in enumerate(shapes))
@@ -1591,6 +1844,12 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             js += ['      .function("get", &%s::%s, allow_raw_pointers())' % (g, tp['find'])]
         py += ['      .def("__iter__", &%s::Gen_iter, py::keep_alive<0, 1>())' % g]
         js += ['      .function("iterator", &%s::Gen_iter, allow_raw_pointers())' % g]
+        if tp.get('per_type'):
+            # ManifestTable.GetEnumerator(type) (G91): the same enumerator over one type
+            py += ['      .def("GetEnumerator", [](const %s& t, RH3DM_ModelComponentType type) { return new %sIter(t.m_ptr, (int)type); },'
+                   ' py::keep_alive<0, 1>(), py::arg("type"))' % (g, g)]
+            js += ['      .function("getEnumerator", optional_override([](const %s& t, RH3DM_ModelComponentType type) { return new %sIter(t.m_ptr, (int)type); }),'
+                   ' allow_raw_pointers())' % (g, g)]
         if tp.get('find_id'):
             py += ['      .def("%s", &%s::Gen_FindId, py::keep_alive<0, 1>(), py::arg("g"))' % (tp['find_id'], g)]
             js += ['      .function("%s", &%s::Gen_FindId, allow_raw_pointers())' % (camel(tp['find_id']), g)]
@@ -1603,7 +1862,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     py_bridge = ('      .def(py::init<const %s&>(), py::arg("source"))\n'
                  % cls['hand']) if has_bridge else ''
     js_bridge = ('      .constructor<const %s&>()\n' % cls['hand']
-                 ) if has_bridge else ''
+                 ) if has_bridge and not any(q.get('bridge') for q in js_ctors.get(1, [])) else ''
     py_buf, py_bufdef = '', ''
     if cls.get('buffer'):
         py_buf = ', py::buffer_protocol()'

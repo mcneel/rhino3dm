@@ -676,7 +676,7 @@ def test_cached_texture_coordinates_are_a_view_into_the_mesh():
 def test_literal_constant_properties():
     lt = r.LinetypeX()
     assert lt.IsModified is False and lt.IsPatternLocked is False    # RhinoCommon's portable `return false;`
-    assert r.MaterialX.MaxShine() == 255.0
+    assert r.MaterialX.MaxShine == 255.0
 
 
 # --- G49: category N idioms (native call plus a little logic around it) -----
@@ -760,9 +760,9 @@ def test_guard_message_after_nameof():
 @pytest.mark.skipif(not hasattr(r.MeshingParametersX, 'FastRenderMesh'), reason='G51 not generated')
 def test_value_classes_adopt_native_results():
     # `var p = UNM.F(); var mp = new MeshingParameters(p); return mp;`: copied in, released
-    fast, quality = r.MeshingParametersX.FastRenderMesh(), r.MeshingParametersX.QualityRenderMesh()
+    fast, quality = r.MeshingParametersX.FastRenderMesh, r.MeshingParametersX.QualityRenderMesh
     assert isinstance(fast, r.MeshingParametersX) and isinstance(quality, r.MeshingParametersX)
-    assert isinstance(r.MeshingParametersX.DefaultAnalysisMesh().RelativeTolerance, float)
+    assert isinstance(r.MeshingParametersX.DefaultAnalysisMesh.RelativeTolerance, float)
     # `if (IntPtr.Zero == p) return null;` -> None
     attrs = r.ObjectAttributesX()
     assert attrs.CustomMeshingParameters is None
@@ -1338,10 +1338,10 @@ def test_translated_members_return_and_construct_class_values():
     # MeshingParameters: a value-mode class default-constructed; the static presets are
     # object initializers, translated as setter calls on the fresh value
     assert isinstance(r.MeshingParametersX(), r.MeshingParametersX)
-    assert isinstance(r.MeshingParametersX.Default(), r.MeshingParametersX)
-    minimal = r.MeshingParametersX.Minimal()
+    assert isinstance(r.MeshingParametersX.Default, r.MeshingParametersX)
+    minimal = r.MeshingParametersX.Minimal
     assert minimal.GridMinCount == 16 and minimal.JaggedSeams is True
-    assert r.MeshingParametersX.Smooth().SimplePlanes is True and minimal.SimplePlanes is False
+    assert r.MeshingParametersX.Smooth.SimplePlanes is True and minimal.SimplePlanes is False
     assert isinstance(r.ViewInfoX(), r.ViewInfoX)
 
 
@@ -1821,23 +1821,22 @@ def test_try_convert_brep_views_and_copies():
 
 @pytest.mark.skipif(not hasattr(r, 'BitmapX'), reason='G90 hand bitmaps')
 def test_hand_bitmaps_add_find_iterate_round_trip(tmp_path):
-    # G90: the kept hand-written bitmap API with the review fixes -- Add works once a path
-    # is set (#38) and reports the index, FindId finds images (#35), iteration survives a
-    # Delete (#24), FindIndex returns None, BitmapX is a ModelComponentX
+    # G90: the kept hand-written bitmap API with the review fixes -- a BitmapX can be added
+    # (the old Bitmap() was an ON_Bitmap, which ONX_Model cannot copy: #38) and Add returns
+    # the file's copy; FindId finds images (#35); iteration survives a Delete (#24);
+    # FindIndex is positional (images carry no model index) and returns None past the end
     f = r.File3dmX()
-    assert f.Bitmaps.Add(r.BitmapX()) == -1                      # no path: rejected, and said so
-    assert len(f.Bitmaps) == 0
     paths = ['/tmp/rh3dm_a.png', '/tmp/rh3dm_b.png', '/tmp/rh3dm_c.png']
     ids = []
     for p in paths:
         b = r.BitmapX()
         b.FileFullPath = p
-        i = f.Bitmaps.Add(b)
-        assert i >= 0
-        found = f.Bitmaps.FindIndex(i)
-        assert found.FileFullPath == p and found.Index == i
-        ids.append(found.Id)
-    assert len(f.Bitmaps) == 3
+        added = f.Bitmaps.Add(b)
+        assert added is not None and added.FileFullPath == p
+        ids.append(added.Id)
+    assert len(f.Bitmaps) == 3 and len(set(map(str, ids))) == 3
+    assert [f.Bitmaps.FindIndex(i).FileFullPath for i in range(3)] == paths
+    assert f.Bitmaps[1].FileFullPath == paths[1]
     assert f.Bitmaps.FindId(ids[1]).FileFullPath == paths[1]
     assert f.Bitmaps.FindId(uuid.uuid4()) is None and f.Bitmaps.FindIndex(999) is None
     with pytest.raises(IndexError):
@@ -1854,3 +1853,497 @@ def test_hand_bitmaps_add_find_iterate_round_trip(tmp_path):
     del g
     gc.collect()
     assert bm.FileFullPath in paths                                # the view keeps the file alive
+
+
+@pytest.mark.skipif(not hasattr(r, 'ManifestTableX'), reason='G91')
+def test_manifest_table_find_count_enumerate():
+    # G91: File3dm.Manifest, generated from RhinoCommon's File3dmManifestTable -- Find* make
+    # the proxy Instantiate makes for each type; GetEnumerator(type) walks one type
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    m = f.Manifest
+    T = r.ModelComponentType
+    assert m.Count == len(m) and m.LongCount == m.Count and m.ComponentType == T.Mixed
+    layers = list(f.AllLayers)
+    assert layers and m.ActiveObjectCount(T.Layer) == f.AllLayers.Count
+    viaenum = list(m.GetEnumerator(T.Layer))
+    assert all(isinstance(x, r.LayerX) for x in viaenum)
+    assert [str(x.Id) for x in viaenum] == [str(l.Id) for l in layers]
+    l0 = layers[0]
+    for found in (m.FindId(l0.Id), m.FindId(l0.Id, T.Layer), m.FindIndex(l0.Index, T.Layer),
+                  m.FindName(l0.Name, T.Layer, uuid.UUID(int=0))):
+        assert isinstance(found, r.LayerX) and found.Id == l0.Id and found.Name == l0.Name
+    assert m.FindId(uuid.uuid4()) is None
+    mats = list(m.GetEnumerator(T.RenderMaterial))
+    assert all(isinstance(x, r.MaterialX) for x in mats)
+    objs = list(m.GetEnumerator(T.ModelGeometry))
+    assert all(isinstance(x, r.File3dmObjectX) for x in objs) and len(objs) == len(list(f.Objects))
+    with pytest.raises(IndexError):
+        m.FindIndex(0, T.Unset)                                      # ArgumentOutOfRangeException
+    # the whole manifest: Instantiate throws for a type it cannot make (TextureMapping,
+    # HistoryRecord, ...), exactly as RhinoCommon's foreach does (pilot #39)
+    unmade = [t for t in (T.TextureMapping, T.HistoryRecord, T.TextStyle, T.SectionStyle) if m.ActiveObjectCount(t)]
+    if unmade:
+        with pytest.raises(RuntimeError):
+            list(m)
+    else:
+        assert all(isinstance(x, r.ModelComponentX) for x in m)
+    del f
+    gc.collect()
+    assert viaenum[0].Name == l0.Name                               # items keep the file alive
+
+
+@pytest.mark.skipif(not hasattr(r, 'ManifestTableX') or not hasattr(r, 'BitmapX'), reason='G91')
+def test_manifest_images_are_bitmapx():
+    # G91, D44: RhinoCommon's Instantiate makes a BitmapEntry for an image (no working member
+    # outside Rhino: pilot #37); here the kept BitmapX stands in, made from the image's id
+    f = r.File3dmX()
+    b = r.BitmapX()
+    b.FileFullPath = '/tmp/rh3dm_manifest.png'
+    added = f.Bitmaps.Add(b)
+    imgs = list(f.Manifest.GetEnumerator(r.ModelComponentType.Image))
+    assert len(imgs) == 1 and isinstance(imgs[0], r.BitmapX)
+    assert imgs[0].FileFullPath == '/tmp/rh3dm_manifest.png' and imgs[0].Id == added.Id
+    assert f.Manifest.FindId(added.Id).FileFullPath == '/tmp/rh3dm_manifest.png'
+
+
+@pytest.mark.skipif(not hasattr(r.LayerX, 'FullPath'), reason='G92')
+def test_layer_full_path_and_name_override():
+    # G92: Layer.FullPath walks the file's layer table through parents (RhinoCommon's
+    # File3dm_GetLayerPathName); Layer.Name is RhinoCommon's override (base.Name) and stays
+    # writable; ToString is FullPath
+    f = r.File3dmX()
+    t = f.AllLayers
+    black = (0, 0, 0, 255)
+    t.AddLayer('top', black)
+    top = list(t)[0]
+    t.AddLayer('mid', black, top.Id)
+    mid = next(l for l in t if l.Name == 'mid')
+    t.AddLayer('leaf', black, mid.Id)
+    leaf = next(l for l in t if l.Name == 'leaf')
+    sep = r.ModelComponentX.NamePathSeparator
+    assert top.FullPath == 'top'
+    assert leaf.FullPath == sep.join(['top', 'mid', 'leaf'])
+    assert leaf.ToString() == leaf.FullPath
+    leaf.Name = 'leaf2'                                    # the override keeps the base setter
+    assert next(l for l in t if l.Id == leaf.Id).FullPath.endswith(sep + 'leaf2')
+    assert r.LayerX().FullPath == r.LayerX().Name           # not in a file: its name
+
+
+@pytest.mark.skipif(not hasattr(r.File3dmGroupTableX, 'GroupMembers'), reason='G92')
+def test_group_members_and_find_by_group():
+    # G92: File3dmGroupTable.GroupMembers / File3dmObjectTable.FindByGroup -- RhinoCommon's
+    # loop over the objects; an object in no group has no group list (null in .NET, which
+    # makes RhinoCommon's own loop throw: pilot #40) and is skipped here (D35)
+    f = r.File3dmX()
+    g0 = f.AllGroups.AddGroup()
+    g1 = f.AllGroups.AddGroup()
+    def add(groups):
+        a = r.ObjectAttributesX()
+        for g in groups:
+            a.AddToGroup(g)
+        return f.Objects.AddPoint(r.Point3dX(len(groups), 0, 0), a)
+    ids = {'none': add([]), 'g0': add([g0]), 'both': add([g0, g1])}
+    m0 = f.AllGroups.GroupMembers(g0)
+    assert sorted(str(o.Id) for o in m0) == sorted(str(ids[k]) for k in ('g0', 'both'))
+    assert [str(o.Id) for o in f.AllGroups.GroupMembers(g1)] == [str(ids['both'])]
+    assert f.AllGroups.GroupMembers(99) == []
+    grp = f.AllGroups.FindIndex(g1)
+    assert [str(o.Id) for o in f.Objects.FindByGroup(grp)] == [str(ids['both'])]
+    del f
+    gc.collect()
+    assert m0[0].Geometry is not None                       # the items keep the file alive
+
+
+def test_class_static_properties_are_properties():
+    # Luis, 2026-10-16: a generated class's static PROPERTY is a Python property, as the value
+    # types' are (BoundingBoxX.Empty) -- not a method
+    assert isinstance(r.MeshingParametersX.Default, r.MeshingParametersX)
+    assert r.MaterialX.MaxShine == 255.0
+    assert isinstance(r.ModelComponentX.NamePathSeparator, str)
+    assert isinstance(r.ObjectAttributesX.OCSMappingChannelId, int)
+    assert isinstance(r.SubDX.Empty, r.SubDX)
+    assert not callable(r.MeshingParametersX.Default)
+
+
+def test_retired_arc_arccurve_brep_members():
+    # Luis, 2026-10-16 (api/retired.toml): rhino3dm-only members and their RhinoCommon forms,
+    # compared on the same input
+    oa = r.Arc(r.Point3d(0, 0, 0), r.Point3d(1, 1, 0), r.Point3d(2, 0, 0))
+    na = r.ArcX(r.Point3dX(0, 0, 0), r.Point3dX(1, 1, 0), r.Point3dX(2, 0, 0))
+    assert abs(oa.AngleRadians - na.Angle) < 1e-12                      # Arc.AngleRadians -> Arc.Angle
+    def same(oc, nc):
+        assert abs(oc.Domain.T0 - nc.Domain.T0) < 1e-12 and abs(oc.Domain.T1 - nc.Domain.T1) < 1e-12
+        a, b = oc.PointAtEnd, nc.PointAtEnd
+        assert abs(a.X - b.X) < 1e-9 and abs(a.Y - b.Y) < 1e-9 and abs(a.Z - b.Z) < 1e-9
+    same(r.ArcCurve.CreateFromArc(oa), r.ArcCurveX(na))                 # -> ArcCurve(arc)
+    same(r.ArcCurve.CreateFromArcParams(oa, 2.0, 5.0), r.ArcCurveX(na, 2.0, 5.0))
+    same(r.ArcCurve.CreateFromCircle(r.Circle(3.0)), r.ArcCurveX(r.CircleX(3.0)))
+    same(r.ArcCurve.CreateFromCircleParams(r.Circle(3.0), 1.0, 4.0), r.ArcCurveX(r.CircleX(3.0), 1.0, 4.0))
+    # Brep.CreateFromBoundingBox -> Brep.CreateFromBox(BoundingBox) / CreateFromBox(Box)
+    ob = r.Brep.CreateFromBoundingBox(r.BoundingBox(r.Point3d(0, 0, 0), r.Point3d(1, 2, 3)))
+    bb = r.BoundingBoxX(r.Point3dX(0, 0, 0), r.Point3dX(1, 2, 3))
+    nb = r.BrepX.CreateFromBox(bb)
+    assert len(ob.Faces) == nb.Faces.Count == r.BrepX.CreateFromBox(r.BoxX(bb)).Faces.Count == 6
+    # BrepTrim.EdgeIndex / StartVertexIndex / EndVertexIndex -> trim.Edge.EdgeIndex, trim.StartVertex.VertexIndex, ...
+    old_trims = sorted((t.EdgeIndex, t.StartVertexIndex, t.EndVertexIndex)
+                       for f in ob.Faces for lp in f.Loops for t in lp.Trims)
+    new_trims = sorted((t.Edge.EdgeIndex if t.Edge else -1, t.StartVertex.VertexIndex, t.EndVertex.VertexIndex)
+                       for t in (nb.Trims[i] for i in range(len(nb.Trims))))
+    assert old_trims == new_trims
+    # BrepVertex.EdgeCount -> len(vertex.EdgeIndices())
+    assert [v.EdgeCount for v in ob.Vertices] == [len(nb.Vertices[i].EdgeIndices()) for i in range(len(nb.Vertices))]
+
+
+def test_retired_viewinfo_vector_sun_shutlining_members(tmp_path):
+    # Luis, 2026-10-16 (api/retired.toml)
+    old = r.File3dm.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    ov = old.Views[0]
+    assert r.ViewInfoX(ov).WallpaperFilename == ov.WallpaperName           # ViewInfo.WallpaperName
+    a, b = r.Vector3d(1, 2, 3), r.Vector3d(-4, 5, 0.5)
+    assert r.Vector3d.DotProduct(a, b) == r.Vector3dX(1, 2, 3) * r.Vector3dX(-4, 5, 0.5)   # the * operator
+    for alt in (-10.0, 0.0, 5.0, 12.5, 30.0, 60.0, 89.0):
+        oc, nc = r.Sun.SunColorFromAltitude(alt), r.SunX.ColorFromAltitude(alt)
+        # RhinoCommon rounds 255*c to the nearest integer; the old binding truncated 255.5*c (D45)
+        assert all(abs(x - y) <= 1 for x, y in zip(oc[:3], nc[:3])), (alt, oc, nc)
+    # ShutLining.Curves (a table of curve objects) -> GetCurves() ids + the id-keyed accessors.
+    # RhinoCommon cannot create a shut-lining outside Rhino (File3dmMeshModifiers.ShutLining is
+    # null until one exists), so the old binding writes it and the generated one reads it back
+    # (the old CreateShutLining is registered with a trailing space: pilot #42)
+    cid = uuid.uuid4()
+    of = r.File3dm()
+    oa = r.ObjectAttributes()
+    getattr(oa.MeshModifiers, 'CreateShutLining ')()
+    osl = oa.MeshModifiers.ShutLining
+    osl.Curves.Add(cid)
+    c = osl.Curves.FindIndex(0)
+    c.Radius, c.Profile, c.Pull, c.IsBump, c.Enabled = 2.5, 3, True, True, False
+    of.Objects.AddPoint(r.Point3d(0, 0, 0), oa)
+    out = str(tmp_path / 'shutlining.3dm')
+    assert of.Write(out, 0)
+    f2 = r.File3dmX.Read(out)
+    g = next(iter(f2.Objects))
+    sl = g.Attributes.File3dmMeshModifiers.ShutLining
+    if sl is None:
+        # no mesh modifier made through rhino3dm survives a write and read -- the old binding's
+        # own read loses it too (pilot-findings #43); the checks below run once that is fixed
+        pytest.xfail('pilot-findings #43: mesh modifiers are lost on write/read')
+    assert [str(x) for x in sl.GetCurves()] == [str(cid)]
+    assert (sl.CurveRadius(cid), sl.CurveProfile(cid), sl.CurvePull(cid), sl.CurveIsBump(cid), sl.CurveEnabled(cid)) \
+        == (2.5, 3, True, True, False)
+
+
+@pytest.mark.skipif(not hasattr(r.BrepX, 'CreateTrimmedPlane'), reason='G95')
+def test_class_sequence_parameters(tmp_path):
+    # G95: `IEnumerable<Curve>` / `IEnumerable<GeometryBase>` parameters -- the caller's objects,
+    # passed as a native pointer array (SimpleArray*Pointer); `new[] { curve }` likewise
+    circle = r.ArcCurveX(r.CircleX(2.0))
+    one = r.BrepX.CreateTrimmedPlane(r.PlaneX.WorldXY, circle)
+    many = r.BrepX.CreateTrimmedPlane(r.PlaneX.WorldXY, [circle])
+    old = r.Brep.CreateTrimmedPlane(r.Plane.WorldXY(), r.ArcCurve.CreateFromCircle(r.Circle(2.0)))
+    assert one.Faces.Count == many.Faces.Count == len(old.Faces) == 1
+    assert len(one.Edges) == len(old.Edges)
+    # File3dm.WriteMultipleObjects(path, geometry)
+    out = str(tmp_path / 'multi.3dm')
+    assert r.File3dmX.WriteMultipleObjects(out, [circle, one])
+    assert len(list(r.File3dmX.Read(out).Objects)) == 2
+    # File3dmInstanceDefinitionTable.Add(name, description, basePoint, geometry, attributes)
+    f = r.File3dmX()
+    n0 = len(f.AllInstanceDefinitions)
+    idx = f.AllInstanceDefinitions.Add('blk', 'desc', r.Point3dX(0, 0, 0), [circle], [r.ObjectAttributesX()])
+    assert idx >= 0 and len(f.AllInstanceDefinitions) == n0 + 1
+
+
+@pytest.mark.skipif(not hasattr(r.AnnotationBaseX, 'TextHasRtfFormatting'), reason='G96 not generated')
+def test_annotation_text_from_text_runs():
+    # G96: RhinoCommon 9 reads an annotation's plain text from its text runs (LINQ over the
+    # internal TextRun objects GetTextRuns makes and the pass frees): Text and PlainText are the
+    # text runs joined (a newline or paragraph run as \r\n); TextHasRtfFormatting is "more than
+    # one text run" (the old binding tests RichText for an {\rtf prefix -- the V8 rule)
+    f = r.File3dmX.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    old = r.File3dm.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    old_text = {str(o.Attributes.Id): o.Geometry.PlainText for o in old.Objects if isinstance(o.Geometry, r.Text)}
+    seen = 0
+    for o in f.Objects:
+        g = o.Geometry
+        if not isinstance(g, r.AnnotationBaseX):
+            continue
+        assert g.Text == g.PlainText and isinstance(g.TextHasRtfFormatting, bool)
+        oid = str(o.Attributes.ObjectId)
+        if oid in old_text:
+            # a text entity: opennurbs' own plain text, newline for newline
+            assert g.PlainText.replace('\r\n', '\n') == old_text[oid].replace('\r\n', '\n'), (g.PlainText, old_text[oid])
+            seen += 1
+    assert seen > 0
+    # the setter (SetRichText through PlainTextToRtf), read back through the runs
+    ann = next(o.Geometry for o in f.Objects if str(o.Attributes.ObjectId) in old_text)
+    ann.PlainText = 'one\ntwo'
+    assert ann.PlainText == 'one\r\ntwo' and ann.TextHasRtfFormatting       # two text runs
+    ann.Text = 'single'
+    assert ann.PlainText == 'single' and not ann.TextHasRtfFormatting
+
+
+@pytest.mark.skipif(not hasattr(r.TextureX, 'ProjectionMode'), reason='G96 not generated')
+def test_texture_projection_mode_c_layer_enum():
+    # G96: ON_Texture_GetProjectionMode returns the C layer's own enum (P/Invoke declares the C#
+    # enum itself): the result converts to the binding's enum, the setter's argument back
+    t = r.TextureX()
+    m = r.TextureProjectionModes
+    assert t.ProjectionMode == m.MappingChannel
+    t.ProjectionMode = m.Wcs
+    assert t.ProjectionMode == m.Wcs
+
+
+@pytest.mark.skipif(not hasattr(r.SunX, 'GetDateTime'), reason='G97 not generated')
+def test_sun_date_time():
+    # G97: a DateTime is the binding's date -- Python a datetime (naive = the machine's local
+    # time, .NET's Local), JS a Date -- through RhinoCommon's Variant time_t, both ways
+    import datetime
+    s = r.SunX()
+    K = r.DateTimeKind
+    when = datetime.datetime(2024, 6, 21, 14, 30, 15)
+    s.SetDateTime(when, K.Local)
+    assert s.GetDateTime(K.Local) == when
+    assert isinstance(s.GetDateTime(K.Utc), datetime.datetime)
+    with pytest.raises(ValueError):
+        s.GetDateTime(K.Unspecified)                       # ArgumentException
+    aware = datetime.datetime(2024, 1, 2, 3, 4, 5, tzinfo=datetime.timezone.utc)
+    s.SetDateTime(aware, K.Local)                          # an aware datetime: its instant
+    assert s.GetDateTime(K.Local) == aware.astimezone().replace(tzinfo=None)
+    s.SetPosition(when, 40.0, -3.5)                        # the obsolete overload: SetDateTime(Local)
+    assert (s.Latitude, s.Longitude, s.GetDateTime(K.Local)) == (40.0, -3.5, when)
+    with pytest.raises(TypeError):
+        s.SetDateTime('2024-06-21', K.Local)
+    a = r.SunX.AltitudeFromValues(40.0, -3.5, 1.0, 60, when, 14.5, False)
+    assert -90.0 <= a <= 90.0
+
+
+@pytest.mark.skipif(not hasattr(r.SunX, 'GetDateTime'), reason='G97 not generated')
+def test_retired_sun_date_members(tmp_path):
+    # G97: the old Sun.Year/Month/Day/Hours are SunX.GetDateTime(DateTimeKind.Local)'s fields --
+    # the same ON_Sun::LocalDateTime through the C layer's mktime / localtime (Hours to the second)
+    of = r.File3dm()
+    osun = of.Settings.RenderSettings.Sun
+    osun.Year, osun.Month, osun.Day, osun.Hours = 2023, 11, 5, 9.75
+    out = str(tmp_path / 'sun.3dm')
+    assert of.Write(out, 0)
+    f = r.File3dmX.Read(out)
+    d = f.Settings.RenderSettings.Sun.GetDateTime(r.DateTimeKind.Local)
+    assert (d.year, d.month, d.day) == (osun.Year, osun.Month, osun.Day)
+    assert abs(d.hour + d.minute / 60 + d.second / 3600 - osun.Hours) < 1 / 3600
+
+
+@pytest.mark.skipif(not hasattr(r.TextureMappingX, 'MappingType'), reason='G97 not generated')
+def test_retired_texturemapping_members():
+    # G97: TextureMapping.MappingType (a switch over the C layer's enum) -- the old IsPeriodic is
+    # MappingType in (Sphere, Cylinder); Reverse/Swap/TileTextureCoordinate left-multiply
+    # UvwTransform (opennurbs ON_TextureMapping), composed here on the generated object
+    T = r.TextureMappingType
+    I = r.Interval(0, 1)
+    olds = [r.TextureMapping.CreateSurfaceParameterMapping(),
+            r.TextureMapping.CreatePlaneMapping(r.Plane.WorldXY(), I, I, I),
+            r.TextureMapping.CreateCylinderMapping(r.Cylinder(r.Circle(1.0), 2.0), True),
+            r.TextureMapping.CreateCylinderMapping(r.Cylinder(r.Circle(1.0), 2.0), False),
+            r.TextureMapping.CreateSphereMapping(r.Sphere(r.Point3d(0, 0, 0), 2.0)),
+            r.TextureMapping.CreateBoxMapping(r.Plane.WorldXY(), I, I, I, True)]
+    kinds = [r.TextureMappingX(o).MappingType for o in olds]
+    assert kinds == [T.SurfaceParameters, T.PlaneMapping, T.CylinderMapping, T.CylinderMapping, T.SphereMapping, T.BoxMapping]
+    for o, k in zip(olds, kinds):
+        assert o.IsPeriodic == (k in (T.SphereMapping, T.CylinderMapping))
+        # RequiresVertexNormals (D49): RhinoCommon's properties, as ON_TextureMapping decides it
+        n = r.TextureMappingX(o)
+        derived = k != T.SurfaceParameters and (n.Projection == r.Projection.Ray or k == T.BoxMapping
+                                                or (k == T.CylinderMapping and n.Capped))
+        assert o.RequiresVertexNormals == derived, k
+    def composed(x):
+        n = r.TextureMappingX(r.TextureMapping.CreatePlaneMapping(r.Plane.WorldXY(), I, I, I))
+        n.UvwTransform = x * n.UvwTransform
+        return n.UvwTransform
+    def matrix(t):
+        return [getattr(t, 'M%d%d' % (i, j)) for i in range(4) for j in range(4)]
+    for name, args, build in (
+            ('ReverseTextureCoordinate', (1,), lambda x: (setattr(x, 'M11', -1.0), setattr(x, 'M13', 1.0))),
+            ('SwapTextureCoordinate', (0, 2), lambda x: (setattr(x, 'M00', 0.0), setattr(x, 'M22', 0.0), setattr(x, 'M02', 1.0), setattr(x, 'M20', 1.0))),
+            ('TileTextureCoordinate', (0, 3.0, 0.25), lambda x: (setattr(x, 'M00', 3.0), setattr(x, 'M03', 0.25)))):
+        o = r.TextureMapping.CreatePlaneMapping(r.Plane.WorldXY(), I, I, I)
+        assert getattr(o, name)(*args)
+        x = r.TransformX(1.0)
+        build(x)
+        assert matrix(r.TextureMappingX(o).UvwTransform) == matrix(composed(x)), name
+
+
+def test_retired_rhino_only_pairings():
+    # Luis 2026-10-16: old members matched by name to RHINO_SDK-only RhinoCommon members, whose
+    # portable equivalents are generated -- Layer.PathSeparator is RhinoCommon's
+    # ModelComponent.NamePathSeparator; the old AnnotationBase.GetDimensionScale(parentStyle) is
+    # DimensionScale with that parent (D39), not RhinoCommon's view-dependent GetDimensionScale
+    # (the old Layer.PathSeparator itself raises TypeError: a static property bound to a
+    # zero-argument getter -- pilot #45; the value is opennurbs' ON_ModelComponent::NamePathSeparator)
+    assert r.ModelComponentX.NamePathSeparator == '::'
+    assert r.LayerX.NamePathSeparator == '::'
+    path = os.path.join(MODELS, 'textEntities_r8.3dm')
+    old, f = r.File3dm.Read(path), r.File3dmX.Read(path)
+    ds = list(f.AllDimStyles)[0]
+    ods = next(s for s in old.DimStyles if str(s.Id) == str(ds.Id))
+    oann = {str(o.Attributes.Id): o.Geometry for o in old.Objects if isinstance(o.Geometry, r.AnnotationBase)}
+    n = 0
+    for o in f.Objects:
+        g = o.Geometry
+        if isinstance(g, r.AnnotationBaseX) and str(o.Attributes.ObjectId) in oann:
+            g.ParentDimensionStyle = ds
+            assert g.DimensionScale == oann[str(o.Attributes.ObjectId)].GetDimensionScale(ods)
+            n += 1
+    assert n > 0
+
+
+@pytest.mark.skipif(not hasattr(r, 'PostEffectCollectionX'), reason='G98 not generated')
+def test_post_effect_collection_and_data():
+    # G98: RenderSettings.PostEffects -- RhinoCommon's portable PostEffectCollection (free-
+    # floating: the file's ON_PostEffects) and its PostEffectData items, components of
+    # (collection, id) resolved through ON_PostEffects_PostEffectFromId; foreach is the internal
+    # PostEffectDataEnumerator (GetAt by position). The old PostEffect table is the oracle.
+    seen = 0
+    for name in ('file3dm_stuff.3dm', 'textEntities_r8.3dm', 'sphereDecals.3dm'):
+        path = os.path.join(MODELS, name)
+        # Type (D50): opennurbs numbers Unset 0, Early 1, ToneMapping 2, Late 3; RhinoCommon's
+        # PostEffectType Early 0, ToneMapping 1, Late 2 (an unset type reads as Early)
+        old = [(str(p.Id), p.LocalName, p.On, p.Shown, max(int(p.Type) - 1, 0)) for p in r.File3dm.Read(path).Settings.RenderSettings.PostEffects]
+        f = r.File3dmX.Read(path)
+        coll = f.Settings.RenderSettings.PostEffects
+        new = [(str(p.Id), p.LocalName, p.On, p.Shown, int(p.Type)) for p in coll]
+        assert new == old, name
+        seen += len(new)
+        ghost = coll.PostEffectDataFromId(uuid.uuid4())
+        with pytest.raises(RuntimeError):
+            ghost.LocalName                                  # "PostEffectData.CppPointer failed"
+        if new:
+            d = coll.PostEffectDataFromId(uuid.UUID(new[0][0]))
+            assert str(d.Id) == new[0][0]
+            on = d.On
+            d.On = not on                                   # writes go into the file's object
+            assert next(p for p in coll if str(p.Id) == new[0][0]).On == (not on)
+    assert list(r.PostEffectCollectionX()) == []             # free-floating: an empty ON_PostEffects
+    if seen == 0:
+        # no test model carries post effects, and neither API can add one outside Rhino:
+        # the per-item comparison waits for a fixture saved by Rhino (tests/models)
+        pytest.skip('no model with post effects in tests/models: per-item parity needs a Rhino-saved fixture')
+
+
+@pytest.mark.skipif(not hasattr(r.DimensionStyleX, 'Font'), reason='G99 not generated')
+def test_font_is_managed_and_dimension_style_font():
+    # G99 (Luis: option A): RhinoCommon's Font is a MANAGED font -- an entry of opennurbs' process-
+    # wide list, shared, immutable, never freed -- and so is FontX (a borrowed pointer, never
+    # deleted). DimensionStyle.Font hands out the style's managed font; the constructors and the
+    # finders return managed fonts too (`Font(familyName)` delegates with RhinoCommon's defaults)
+    a, b = r.FontX('Arial'), r.FontX('Arial')
+    assert a.FamilyName == b.FamilyName and a.Description == b.Description
+    del a
+    gc.collect()                                             # dropping one frees nothing shared
+    assert b.FamilyName and r.FontX('Arial').Description == b.Description
+    f = r.File3dmX.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    old = r.File3dm.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    for ds in f.AllDimStyles:
+        ods = next(s for s in old.DimStyles if str(s.Id) == str(ds.Id))
+        assert ds.Font.FaceName == ods.Font.FaceName         # the same managed font
+    s = r.DimensionStyleX()
+    s.Font = r.FontX('Courier New')
+    got = s.Font
+    del s
+    gc.collect()
+    assert got.FamilyName                                     # managed: outlives the style
+    for name in ('FromQuartetProperties',):
+        q = r.FontX.FromQuartetProperties('Arial', False, False)
+        assert q is None or q.FamilyName
+    # G99 side effect: setters whose C argument is an opennurbs scoped enum (P/Invoke passes the value)
+    s2 = r.DimensionStyleX()
+    s2.FitText = s2.FitText
+    s2.FitArrow = s2.FitArrow
+
+
+def test_translated_list_indexers_g101():
+    # class-mode indexers (G101): a list's `this[int]` gives __getitem__ / __setitem__ / __len__,
+    # so the list iterates (Python's item protocol stops at IndexError: IndexOutOfRangeException)
+    P = r.Point3dX
+    m = quad_mesh()
+    vs = m.Vertices
+    assert len(vs) == 4
+    assert [(p.X, p.Y) for p in vs] == [(0, 0), (1, 0), (1, 1), (0, 1)]
+    vs[2] = r.Point3fX(5, 6, 7)
+    assert (vs[2].X, vs[2].Z) == (5, 7)
+    with pytest.raises(IndexError):
+        vs[4]
+    assert len(m.Faces) == 1 and [f.D for f in m.Faces] == [3]
+    nc = r.NurbsCurveX.Create(False, 3, [P(0, 0, 0), P(1, 1, 0), P(2, 0, 0), P(3, 1, 0)])
+    cps = nc.Points
+    assert len(cps) == 4 and [c.Location.X for c in cps] == [0, 1, 2, 3]
+    with pytest.raises(IndexError, match='greater than or equal to zero'):
+        cps[-1]
+
+
+def test_color_list_and_surface_point_grid_iterate_g102():
+    # MeshVertexColorList's indexer (Color.FromArgb / ToArgb through the C layer's ARGB conversions)
+    m = quad_mesh()
+    vc = m.VertexColors
+    for i in range(4):
+        vc.Add((10 * i, 20, 30, 255))
+    assert len(vc) == 4
+    assert vc[2] == (20, 20, 30, 255)                       # (r, g, b, a): .NET alpha, 255 opaque
+    vc[1] = (1, 2, 3, 128)
+    assert vc[1] == (1, 2, 3, 128)
+    assert [c[0] for c in vc] == [0, 1, 20, 30]
+    with pytest.raises(IndexError):
+        vc[4]
+    # NurbsSurfacePointList: RhinoCommon's NurbsSrfEnum order, u outermost
+    ns = r.NurbsSurfaceX.Create(3, False, 2, 2, 3, 2)
+    pts = ns.Points
+    ns.Points.SetPoint(2, 1, 5.0, 6.0, 7.0)
+    cps = list(pts)
+    assert len(cps) == pts.CountU * pts.CountV == 6
+    assert cps[2 * pts.CountV + 1].Location == r.Point3dX(5, 6, 7)
+
+
+def test_brep_surfaces_and_view_table_g103():
+    # BrepSurfaceList: RhinoCommon's lazily filled wrapper cache is analyzed as its per-item view
+    # (SurfaceHolder(brep, index)); a view per access, keeping the brep alive
+    import gc
+    b = box_brep()
+    srfs = b.Surfaces
+    assert len(srfs) == 6
+    items = list(srfs)
+    assert len(items) == 6 and all(isinstance(s, r.SurfaceX) and s.IsPlanar() for s in items)
+    with pytest.raises(IndexError):
+        srfs[6]
+    s0 = srfs[0]
+    del b, srfs, items
+    gc.collect()
+    assert s0.IsPlanar()                                   # the view keeps its brep
+    # File3dmViewTable: the stored m_named_views flag (registry state) reaches translated bodies
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    n = f.Views.Count
+    assert n > 0 and f.NamedViews.Count >= 0
+    assert f.Views.Delete(0) is True and f.Views.Count == n - 1
+    with pytest.raises(IndexError):
+        f.Views.Delete(99)
+
+
+def test_view_table_items_are_live_views_and_plugin_data_g104():
+    # File3dmViewTable[i] (Luis: as RhinoCommon): a LIVE ViewInfo into the file's table --
+    # writes reach the file, and the view keeps the file alive
+    import gc
+    import uuid
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    views = list(f.Views)
+    assert len(views) == f.Views.Count > 0 and all(isinstance(v, r.ViewInfoX) for v in views)
+    v = f.Views[0]
+    v.Name = 'rh3dm-live'
+    assert f.Views[0].Name == 'rh3dm-live'                 # write-through, not a copy
+    del f, views
+    gc.collect()
+    assert v.Name == 'rh3dm-live'                          # the view keeps its file
+    assert r.ViewInfoX().Name == ''                        # a free-standing ViewInfo still owns its own
+    with pytest.raises(IndexError):
+        r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm')).Views[99]
+    # File3dmPlugInDataTable[i] (Luis: generate it): a (file, plug-in id) record
+    g = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    pd = list(g.PlugInData)
+    assert len(pd) == g.PlugInData.Count
+    assert all(isinstance(p, r.File3dmPlugInDataX) and isinstance(p.PlugInId, uuid.UUID) for p in pd)

@@ -36,6 +36,10 @@ test_() {
   $NODE /src/tools/dev/wasm_smoke.js $B/rhino3dm.js 2>&1 | grep -v "^    at " | tail -6
   $NODE /src/tests/parity/parity_js.js $B/rhino3dm.js 2>&1 | tail -20
   $NODE /src/tools/dev/js_points_bench.js $B/rhino3dm.js 2>&1 | tail -5
+  # the JS port of tests/generated (same contracts, compiled module)
+  $NODE --expose-gc /src/tests/generated/js/run.js $B/rhino3dm.js 2>&1 | grep -E "^(FAIL|SKIP|JS TESTS|FAILED)" | tail -40
+  # the JS surface for old_coverage.py (JS-only old members; round.sh reruns the report)
+  $NODE /src/tools/dev/dump_js_members.js $B/rhino3dm.js /work/js_members.json 2>&1 | tail -1
 }
 
 case "${1:-all}" in

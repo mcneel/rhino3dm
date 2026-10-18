@@ -4,6 +4,7 @@
 js  AnnotationBaseX.alternateDimensionLengthDisplay [property]
 js  AnnotationBaseX.annotationType [property]
 js  AnnotationBaseX.clearPropertyOverrides [function]
+js  AnnotationBaseX.computeMemoryEstimate [class_function]
 js  AnnotationBaseX.constructor<const BND_AnnotationBase&>
 js  AnnotationBaseX.dimensionLengthDisplay [property]
 js  AnnotationBaseX.dimensionScale [property]
@@ -24,6 +25,7 @@ js  AnnotationBaseX.maskEnabled [property]
 js  AnnotationBaseX.maskFrame [property]
 js  AnnotationBaseX.maskOffset [property]
 js  AnnotationBaseX.parentDimensionStyle [property]
+js  AnnotationBaseX.plainText [property]
 js  AnnotationBaseX.plainTextToRtf [class_function]
 js  AnnotationBaseX.plainTextWithFields [property]
 js  AnnotationBaseX.plane [property]
@@ -35,6 +37,8 @@ js  AnnotationBaseX.setItalic [function]
 js  AnnotationBaseX.setOverrideDimStyle [function]
 js  AnnotationBaseX.setRichText [function]
 js  AnnotationBaseX.setUnderline [function]
+js  AnnotationBaseX.text [property]
+js  AnnotationBaseX.textHasRtfFormatting [property]
 js  AnnotationBaseX.textHeight [property]
 js  AnnotationBaseX.textIsWrapped [property]
 js  AnnotationBaseX.textRotationDegrees [property]
@@ -44,9 +48,10 @@ js  AnnotationBaseX.wrapText [function]
 js  ArcCurveX.angleDegrees [property]
 js  ArcCurveX.angleRadians [property]
 js  ArcCurveX.arc [property]
+js  ArcCurveX.computeMemoryEstimate [class_function]
+js  ArcCurveX.constructor(dispatched)
 js  ArcCurveX.constructor<>
-js  ArcCurveX.constructor<BND_ArcX, double, double>
-js  ArcCurveX.constructor<const BND_ArcCurve&>
+js  ArcCurveX.createControlPointCurve [class_function]
 js  ArcCurveX.isCompleteCircle [property]
 js  ArcCurveX.radius [property]
 js  ArcX.Angle [class_function]
@@ -145,6 +150,8 @@ js  BrepEdgeListX.add [function]
 js  BrepEdgeListX.count [property]
 js  BrepEdgeListX.get [function]
 js  BrepEdgeX.adjacentFaces [function]
+js  BrepEdgeX.computeMemoryEstimate [class_function]
+js  BrepEdgeX.createControlPointCurve [class_function]
 js  BrepEdgeX.edgeCurveIndex [property]
 js  BrepEdgeX.edgeIndex [property]
 js  BrepEdgeX.endVertex [property]
@@ -171,6 +178,7 @@ js  BrepFaceListX.standardizeFaceSurfaces [function]
 js  BrepFaceX.adjacentEdges [function]
 js  BrepFaceX.adjacentFaces [function]
 js  BrepFaceX.clearMaterialChannelIndex [function]
+js  BrepFaceX.computeMemoryEstimate [class_function]
 js  BrepFaceX.createExtrusion [function]
 js  BrepFaceX.duplicateFace [function]
 js  BrepFaceX.duplicateSurface [function]
@@ -189,8 +197,10 @@ js  BrepFaceX.surfaceIndex [property]
 js  BrepFaceX.underlyingSurface [function]
 js  BrepLoopListX.add [function]
 js  BrepLoopListX.addOuterLoop [function]
+js  BrepLoopListX.addPlanarFaceLoop [function]
 js  BrepLoopListX.count [property]
 js  BrepLoopListX.get [function]
+js  BrepLoopX.computeMemoryEstimate [class_function]
 js  BrepLoopX.face [property]
 js  BrepLoopX.isSurfaceBoundary [property]
 js  BrepLoopX.loopIndex [property]
@@ -199,12 +209,15 @@ js  BrepLoopX.to2dCurve [function]
 js  BrepLoopX.to3dCurve [function]
 js  BrepLoopX.trims [property]
 js  BrepSurfaceListX.count [property]
+js  BrepSurfaceListX.get [function]
 js  BrepTrimListX.add [function]
 js  BrepTrimListX.addCurveOnFace [function]
 js  BrepTrimListX.addSingularTrim [function]
 js  BrepTrimListX.count [property]
 js  BrepTrimListX.get [function]
 js  BrepTrimListX.matchEnds [function]
+js  BrepTrimX.computeMemoryEstimate [class_function]
+js  BrepTrimX.createControlPointCurve [class_function]
 js  BrepTrimX.edge [property]
 js  BrepTrimX.endVertex [property]
 js  BrepTrimX.face [property]
@@ -220,6 +233,7 @@ js  BrepTrimX.trimType [property]
 js  BrepVertexListX.add [function]
 js  BrepVertexListX.count [property]
 js  BrepVertexListX.get [function]
+js  BrepVertexX.computeMemoryEstimate [class_function]
 js  BrepVertexX.edgeIndices [function]
 js  BrepVertexX.tolerance [property]
 js  BrepVertexX.vertexIndex [property]
@@ -228,6 +242,7 @@ js  BrepX.addSurface [function]
 js  BrepX.addTrimCurve [function]
 js  BrepX.append [function]
 js  BrepX.compact [function]
+js  BrepX.computeMemoryEstimate [class_function]
 js  BrepX.constructor<>
 js  BrepX.constructor<const BND_Brep&>
 js  BrepX.createFromBox [class_function]
@@ -239,6 +254,7 @@ js  BrepX.createFromSphere [class_function]
 js  BrepX.createFromSurface [class_function]
 js  BrepX.createFromTorus [class_function]
 js  BrepX.createQuadSphere [class_function]
+js  BrepX.createTrimmedPlane [class_function]
 js  BrepX.cullUnused2dCurves [function]
 js  BrepX.cullUnused3dCurves [function]
 js  BrepX.cullUnusedEdges [function]
@@ -275,6 +291,7 @@ js  CachedTextureCoordinatesX.contains [function]
 js  CachedTextureCoordinatesX.copyTo [function]
 js  CachedTextureCoordinatesX.count [property]
 js  CachedTextureCoordinatesX.dim [property]
+js  CachedTextureCoordinatesX.get [function]
 js  CachedTextureCoordinatesX.indexOf [function]
 js  CachedTextureCoordinatesX.isReadOnly [property]
 js  CachedTextureCoordinatesX.mappingId [property]
@@ -366,10 +383,13 @@ js  ControlPointX.Weight [class_function]
 js  ControlPointX.X [class_function]
 js  ControlPointX.Y [class_function]
 js  ControlPointX.Z [class_function]
+js  CurveProxyX.computeMemoryEstimate [class_function]
+js  CurveProxyX.createControlPointCurve [class_function]
 js  CurveProxyX.proxyCurveIsReversed [property]
 js  CurveX.changeClosedCurveSeam [function]
 js  CurveX.changeDimension [function]
 js  CurveX.closedCurveOrientation [function]
+js  CurveX.computeMemoryEstimate [class_function]
 js  CurveX.constructor<const BND_Curve&>
 js  CurveX.createControlPointCurve [class_function]
 js  CurveX.curvatureAt [function]
@@ -490,6 +510,7 @@ js  DimensionStyleX.clippingArrowLength [property]
 js  DimensionStyleX.clippingArrowType1 [property]
 js  DimensionStyleX.clippingArrowType2 [property]
 js  DimensionStyleX.componentType [property]
+js  DimensionStyleX.computeMemoryEstimate [class_function]
 js  DimensionStyleX.constructor<>
 js  DimensionStyleX.copyFrom [function]
 js  DimensionStyleX.deleteAllUserStrings [function]
@@ -512,12 +533,16 @@ js  DimensionStyleX.fitArrow [property]
 js  DimensionStyleX.fitText [property]
 js  DimensionStyleX.fixedExtensionLength [property]
 js  DimensionStyleX.fixedExtensionOn [property]
+js  DimensionStyleX.font [property]
 js  DimensionStyleX.forceDimensionLineBetweenExtensionLines [property]
 js  DimensionStyleX.getUserString [function]
 js  DimensionStyleX.hasFieldOverrides [property]
 js  DimensionStyleX.isChild [property]
 js  DimensionStyleX.isChildOf [function]
+js  DimensionStyleX.isDeleted [property]
 js  DimensionStyleX.isFieldOverriden [function]
+js  DimensionStyleX.isReference [property]
+js  DimensionStyleX.isValidComponentName [class_function]
 js  DimensionStyleX.leaderArrowBlockId [property]
 js  DimensionStyleX.leaderArrowLength [property]
 js  DimensionStyleX.leaderArrowType [property]
@@ -536,6 +561,10 @@ js  DimensionStyleX.maskColor [property]
 js  DimensionStyleX.maskColorSource [property]
 js  DimensionStyleX.maskFrameType [property]
 js  DimensionStyleX.maskOffset [property]
+js  DimensionStyleX.modelComponentTypeIgnoresCase [class_function]
+js  DimensionStyleX.modelComponentTypeIncludesParent [class_function]
+js  DimensionStyleX.modelComponentTypeRequiresUniqueName [class_function]
+js  DimensionStyleX.namePathSeparator [class_function]
 js  DimensionStyleX.parentId [property]
 js  DimensionStyleX.prefix [property]
 js  DimensionStyleX.roundoff [property]
@@ -604,10 +633,12 @@ js  EllipseX.EpsilonEquals [class_function]
 js  EnvironmentX.backgroundColor [property]
 js  EnvironmentX.backgroundImage [property]
 js  EnvironmentX.backgroundProjection [property]
+js  EnvironmentX.computeMemoryEstimate [class_function]
 js  EnvironmentX.constructor<>
 js  EnvironmentX.constructor<const BND_Environment&>
 js  ExtrusionX.addInnerProfile [function]
 js  ExtrusionX.capCount [property]
+js  ExtrusionX.computeMemoryEstimate [class_function]
 js  ExtrusionX.constructor<>
 js  ExtrusionX.constructor<const BND_Extrusion&>
 js  ExtrusionX.create [class_function]
@@ -693,8 +724,14 @@ js  File3dmEdgeSofteningX.on [property]
 js  File3dmEdgeSofteningX.softening [property]
 js  File3dmEmbeddedFileX.componentType [property]
 js  File3dmEmbeddedFileX.compressedLength [property]
+js  File3dmEmbeddedFileX.computeMemoryEstimate [class_function]
 js  File3dmEmbeddedFileX.constructor<>
 js  File3dmEmbeddedFileX.filename [property]
+js  File3dmEmbeddedFileX.isValidComponentName [class_function]
+js  File3dmEmbeddedFileX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmEmbeddedFileX.modelComponentTypeIncludesParent [class_function]
+js  File3dmEmbeddedFileX.modelComponentTypeRequiresUniqueName [class_function]
+js  File3dmEmbeddedFileX.namePathSeparator [class_function]
 js  File3dmEmbeddedFileX.saveToFile [function]
 js  File3dmEmbeddedFilesX.add [function]
 js  File3dmEmbeddedFilesX.iterator [function]
@@ -709,12 +746,20 @@ js  File3dmGroupTableX.findId [function]
 js  File3dmGroupTableX.findIndex [function]
 js  File3dmGroupTableX.findName [function]
 js  File3dmGroupTableX.get [function]
+js  File3dmGroupTableX.groupMembers [function]
 js  File3dmGroupTableX.iterator [function]
 js  File3dmGroupTableXIter.next [function]
+js  File3dmHatchPatternTableX.add [function]
 js  File3dmHatchPatternTableX.componentType [property]
 js  File3dmHatchPatternTableX.count [property]
 js  File3dmHatchPatternTableX.delete [function]
 js  File3dmHatchPatternTableX.dump [function]
+js  File3dmHatchPatternTableX.findId [function]
+js  File3dmHatchPatternTableX.findIndex [function]
+js  File3dmHatchPatternTableX.findName [function]
+js  File3dmHatchPatternTableX.get [function]
+js  File3dmHatchPatternTableX.iterator [function]
+js  File3dmHatchPatternTableXIter.next [function]
 js  File3dmInstanceDefinitionTableX.add [function]
 js  File3dmInstanceDefinitionTableX.addLinked [function]
 js  File3dmInstanceDefinitionTableX.componentType [property]
@@ -787,28 +832,39 @@ js  File3dmObjectTableX.addPolyline [function]
 js  File3dmObjectTableX.addSphere [function]
 js  File3dmObjectTableX.addSubD [function]
 js  File3dmObjectTableX.addSurface [function]
+js  File3dmObjectTableX.addText [function]
 js  File3dmObjectTableX.addTextDot [function]
 js  File3dmObjectTableX.componentType [property]
 js  File3dmObjectTableX.count [property]
 js  File3dmObjectTableX.delete [function]
 js  File3dmObjectTableX.dump [function]
+js  File3dmObjectTableX.findByGroup [function]
 js  File3dmObjectTableX.findId [function]
 js  File3dmObjectTableX.getBoundingBox [function]
 js  File3dmObjectTableX.iterator [function]
 js  File3dmObjectTableXIter.next [function]
 js  File3dmObjectX.attributes [property]
 js  File3dmObjectX.componentType [property]
+js  File3dmObjectX.computeMemoryEstimate [class_function]
 js  File3dmObjectX.geometry [property]
 js  File3dmObjectX.getTextureMapping [function]
+js  File3dmObjectX.isValidComponentName [class_function]
+js  File3dmObjectX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmObjectX.modelComponentTypeIncludesParent [class_function]
+js  File3dmObjectX.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmObjectX.name [property]
+js  File3dmObjectX.namePathSeparator [class_function]
 js  File3dmPlugInDataTableX.clear [function]
 js  File3dmPlugInDataTableX.count [property]
 js  File3dmPlugInDataTableX.dump [function]
+js  File3dmPlugInDataTableX.get [function]
+js  File3dmPlugInDataX.plugInId [property]
 js  File3dmRenderContentX.autoDelete [property]
 js  File3dmRenderContentX.childSlotName [property]
 js  File3dmRenderContentX.childSlotOn [function]
 js  File3dmRenderContentX.children [property]
 js  File3dmRenderContentX.componentType [property]
+js  File3dmRenderContentX.computeMemoryEstimate [class_function]
 js  File3dmRenderContentX.deleteChild [function]
 js  File3dmRenderContentX.findChild [function]
 js  File3dmRenderContentX.getParameter [function]
@@ -816,7 +872,12 @@ js  File3dmRenderContentX.groupId [property]
 js  File3dmRenderContentX.hidden [property]
 js  File3dmRenderContentX.isChild [property]
 js  File3dmRenderContentX.isTopLevel [property]
+js  File3dmRenderContentX.isValidComponentName [class_function]
 js  File3dmRenderContentX.kind [property]
+js  File3dmRenderContentX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmRenderContentX.modelComponentTypeIncludesParent [class_function]
+js  File3dmRenderContentX.modelComponentTypeRequiresUniqueName [class_function]
+js  File3dmRenderContentX.namePathSeparator [class_function]
 js  File3dmRenderContentX.notes [property]
 js  File3dmRenderContentX.parent [property]
 js  File3dmRenderContentX.plugInId [property]
@@ -828,15 +889,33 @@ js  File3dmRenderContentX.topLevel [property]
 js  File3dmRenderContentX.typeId [property]
 js  File3dmRenderContentX.typeName [property]
 js  File3dmRenderContentX.xML [function]
+js  File3dmRenderEnvironmentX.computeMemoryEstimate [class_function]
+js  File3dmRenderEnvironmentX.isValidComponentName [class_function]
+js  File3dmRenderEnvironmentX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmRenderEnvironmentX.modelComponentTypeIncludesParent [class_function]
+js  File3dmRenderEnvironmentX.modelComponentTypeRequiresUniqueName [class_function]
+js  File3dmRenderEnvironmentX.namePathSeparator [class_function]
 js  File3dmRenderEnvironmentX.toEnvironment [function]
 js  File3dmRenderEnvironmentsX.find [function]
 js  File3dmRenderEnvironmentsX.iterator [function]
 js  File3dmRenderEnvironmentsXIter.next [function]
+js  File3dmRenderMaterialX.computeMemoryEstimate [class_function]
+js  File3dmRenderMaterialX.isValidComponentName [class_function]
+js  File3dmRenderMaterialX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmRenderMaterialX.modelComponentTypeIncludesParent [class_function]
+js  File3dmRenderMaterialX.modelComponentTypeRequiresUniqueName [class_function]
+js  File3dmRenderMaterialX.namePathSeparator [class_function]
 js  File3dmRenderMaterialX.toMaterial [function]
 js  File3dmRenderMaterialsX.find [function]
 js  File3dmRenderMaterialsX.iterator [function]
 js  File3dmRenderMaterialsXIter.next [function]
+js  File3dmRenderTextureX.computeMemoryEstimate [class_function]
 js  File3dmRenderTextureX.filename [property]
+js  File3dmRenderTextureX.isValidComponentName [class_function]
+js  File3dmRenderTextureX.modelComponentTypeIgnoresCase [class_function]
+js  File3dmRenderTextureX.modelComponentTypeIncludesParent [class_function]
+js  File3dmRenderTextureX.modelComponentTypeRequiresUniqueName [class_function]
+js  File3dmRenderTextureX.namePathSeparator [class_function]
 js  File3dmRenderTextureX.toTexture [function]
 js  File3dmRenderTexturesX.find [function]
 js  File3dmRenderTexturesX.iterator [function]
@@ -900,6 +979,9 @@ js  File3dmThickeningX.on [property]
 js  File3dmThickeningX.solid [property]
 js  File3dmViewTableX.add [function]
 js  File3dmViewTableX.clear [function]
+js  File3dmViewTableX.count [property]
+js  File3dmViewTableX.delete [function]
+js  File3dmViewTableX.get [function]
 js  File3dmWriteOptionsX.constructor<>
 js  File3dmWriteOptionsX.enableAnalysisMeshes [function]
 js  File3dmWriteOptionsX.enableRenderMeshes [function]
@@ -936,6 +1018,7 @@ js  File3dmX.lastEdited [property]
 js  File3dmX.lastEditedBy [property]
 js  File3dmX.layers [property]
 js  File3dmX.linetypes [property]
+js  File3dmX.manifest [property]
 js  File3dmX.materials [property]
 js  File3dmX.namedConstructionPlanes [property]
 js  File3dmX.namedViews [property]
@@ -954,8 +1037,10 @@ js  File3dmX.revision [property]
 js  File3dmX.settings [property]
 js  File3dmX.startSectionComments [property]
 js  File3dmX.strings [property]
+js  File3dmX.toByteArray [function]
 js  File3dmX.views [property]
 js  File3dmX.write [function]
+js  File3dmX.writeMultipleObjects [class_function]
 js  File3dmX.writeOneObject [class_function]
 js  File3dmX.writeWithLog [function]
 js  FileReferenceX.createFromFullAndRelativePaths [class_function]
@@ -966,7 +1051,9 @@ js  FileReferenceX.isSet [property]
 js  FileReferenceX.relativePath [property]
 js  FontX.ascentOfCapital [property]
 js  FontX.bold [property]
-js  FontX.constructor<const BND_Font&>
+js  FontX.constructor(dispatched)
+js  FontX.constructor<std::wstring, RH3DM_Font_FontWeight, RH3DM_Font_FontStyle, RH3DM_Font_FontStretch, bool, bool>
+js  FontX.constructor<std::wstring, RH3DM_Font_FontWeight, RH3DM_Font_FontStyle, bool, bool>
 js  FontX.description [property]
 js  FontX.englishFaceName [property]
 js  FontX.englishFamilyName [property]
@@ -974,6 +1061,9 @@ js  FontX.englishQuartetName [property]
 js  FontX.faceName [property]
 js  FontX.familyName [property]
 js  FontX.familyPlusFaceName [property]
+js  FontX.fromQuartetProperties [class_function]
+js  FontX.fromRichTextProperties [class_function]
+js  FontX.getSubstituteFont [function]
 js  FontX.isEngravingFont [property]
 js  FontX.isGeometricToleranceFont [property]
 js  FontX.isInstalled [property]
@@ -993,6 +1083,7 @@ js  FontX.underlined [property]
 js  FontX.unitsPerEm [property]
 js  FontX.weight [property]
 js  GeometryBaseX.componentIndex [function]
+js  GeometryBaseX.computeMemoryEstimate [class_function]
 js  GeometryBaseX.dataCRC [function]
 js  GeometryBaseX.deleteAllUserStrings [function]
 js  GeometryBaseX.duplicate [function]
@@ -1022,12 +1113,40 @@ js  GroundPlaneX.textureRotation [property]
 js  GroundPlaneX.textureSize [property]
 js  GroundPlaneX.textureSizeLocked [property]
 js  GroupX.componentType [property]
+js  GroupX.computeMemoryEstimate [class_function]
 js  GroupX.constructor<const BND_Group&>
 js  GroupX.deleteAllUserStrings [function]
 js  GroupX.getUserString [function]
+js  GroupX.isValidComponentName [class_function]
+js  GroupX.modelComponentTypeIgnoresCase [class_function]
+js  GroupX.modelComponentTypeIncludesParent [class_function]
+js  GroupX.modelComponentTypeRequiresUniqueName [class_function]
+js  GroupX.namePathSeparator [class_function]
 js  GroupX.setUserString [function]
 js  GroupX.userStringCount [property]
+js  HatchPatternX.alwaysModelDistances [property]
+js  HatchPatternX.componentType [property]
+js  HatchPatternX.computeMemoryEstimate [class_function]
+js  HatchPatternX.constructor<>
+js  HatchPatternX.constructor<const BND_HatchPatternX&>
+js  HatchPatternX.deleteAllUserStrings [function]
+js  HatchPatternX.description [property]
+js  HatchPatternX.fillType [property]
+js  HatchPatternX.getUserString [function]
+js  HatchPatternX.hatchLineCount [property]
+js  HatchPatternX.index [property]
+js  HatchPatternX.isValidComponentName [class_function]
+js  HatchPatternX.modelComponentTypeIgnoresCase [class_function]
+js  HatchPatternX.modelComponentTypeIncludesParent [class_function]
+js  HatchPatternX.modelComponentTypeRequiresUniqueName [class_function]
+js  HatchPatternX.namePathSeparator [class_function]
+js  HatchPatternX.patternUnitSystem [property]
+js  HatchPatternX.removeAllHatchLines [function]
+js  HatchPatternX.removeHatchLine [function]
+js  HatchPatternX.setUserString [function]
+js  HatchPatternX.userStringCount [property]
 js  HatchX.basePoint [property]
+js  HatchX.computeMemoryEstimate [class_function]
 js  HatchX.constructor<const BND_Hatch&>
 js  HatchX.createFromBrep [class_function]
 js  HatchX.patternIndex [property]
@@ -1037,6 +1156,7 @@ js  HatchX.plane [property]
 js  HatchX.scalePattern [function]
 js  HatchX.toBrep [function]
 js  InstanceDefinitionGeometryX.componentType [property]
+js  InstanceDefinitionGeometryX.computeMemoryEstimate [class_function]
 js  InstanceDefinitionGeometryX.constructor<>
 js  InstanceDefinitionGeometryX.constructor<const BND_InstanceDefinitionGeometry&>
 js  InstanceDefinitionGeometryX.deleteAllUserStrings [function]
@@ -1044,7 +1164,12 @@ js  InstanceDefinitionGeometryX.description [property]
 js  InstanceDefinitionGeometryX.getObjectIds [function]
 js  InstanceDefinitionGeometryX.getUserString [function]
 js  InstanceDefinitionGeometryX.isLinkedType [property]
+js  InstanceDefinitionGeometryX.isValidComponentName [class_function]
 js  InstanceDefinitionGeometryX.layerStyle [property]
+js  InstanceDefinitionGeometryX.modelComponentTypeIgnoresCase [class_function]
+js  InstanceDefinitionGeometryX.modelComponentTypeIncludesParent [class_function]
+js  InstanceDefinitionGeometryX.modelComponentTypeRequiresUniqueName [class_function]
+js  InstanceDefinitionGeometryX.namePathSeparator [class_function]
 js  InstanceDefinitionGeometryX.setUserString [function]
 js  InstanceDefinitionGeometryX.skipNestedLinkedDefinitions [property]
 js  InstanceDefinitionGeometryX.sourceArchive [property]
@@ -1105,6 +1230,7 @@ js  IntervalX.op_Subtraction [class_function]
 js  LayerX.color [property]
 js  LayerX.commitChanges [function]
 js  LayerX.componentType [property]
+js  LayerX.computeMemoryEstimate [class_function]
 js  LayerX.constructor<>
 js  LayerX.constructor<const BND_Layer&>
 js  LayerX.copyAttributesFrom [function]
@@ -1119,18 +1245,28 @@ js  LayerX.deletePerViewportVisible [function]
 js  LayerX.deletePlotColor [function]
 js  LayerX.description [property]
 js  LayerX.equals [function]
+js  LayerX.fullPath [property]
 js  LayerX.getPersistentLocking [function]
 js  LayerX.getPersistentVisibility [function]
 js  LayerX.getUserString [function]
 js  LayerX.hasPerViewportSettings [function]
 js  LayerX.id [property]
 js  LayerX.igesLevel [property]
+js  LayerX.isDeleted [property]
 js  LayerX.isExpanded [property]
 js  LayerX.isLocked [property]
+js  LayerX.isReference [property]
+js  LayerX.isValidComponentName [class_function]
 js  LayerX.isVisible [property]
+js  LayerX.layerIndex [property]
 js  LayerX.linetypeIndex [property]
+js  LayerX.modelComponentTypeIgnoresCase [class_function]
+js  LayerX.modelComponentTypeIncludesParent [class_function]
+js  LayerX.modelComponentTypeRequiresUniqueName [class_function]
 js  LayerX.modelIsVisible [property]
 js  LayerX.modelPersistentVisibility [property]
+js  LayerX.name [property]
+js  LayerX.namePathSeparator [class_function]
 js  LayerX.parentLayerId [property]
 js  LayerX.perViewportColor [function]
 js  LayerX.perViewportIsVisible [function]
@@ -1152,6 +1288,7 @@ js  LayerX.setPersistentLocking [function]
 js  LayerX.setPersistentVisibility [function]
 js  LayerX.setUserString [function]
 js  LayerX.sortIndex [property]
+js  LayerX.toString [function]
 js  LayerX.unsetModelPersistentVisibility [function]
 js  LayerX.unsetPerViewportPersistentVisibility [function]
 js  LayerX.unsetPersistentLocking [function]
@@ -1159,6 +1296,7 @@ js  LayerX.unsetPersistentVisibility [function]
 js  LayerX.userStringCount [property]
 js  LightX.ambient [property]
 js  LightX.attenuationVector [property]
+js  LightX.computeMemoryEstimate [class_function]
 js  LightX.constructor<>
 js  LightX.constructor<const BND_Light&>
 js  LightX.coordinateSystem [property]
@@ -1191,10 +1329,11 @@ js  LightX.spotAngleRadians [property]
 js  LightX.spotExponent [property]
 js  LightX.spotLightShadowIntensity [property]
 js  LightX.width [property]
+js  LineCurveX.computeMemoryEstimate [class_function]
 js  LineCurveX.constructor(dispatched)
 js  LineCurveX.constructor<>
 js  LineCurveX.constructor<BND_LineX, double, double>
-js  LineCurveX.constructor<const BND_LineCurve&>
+js  LineCurveX.createControlPointCurve [class_function]
 js  LineCurveX.line [property]
 js  LineX.BoundingBox [class_function]
 js  LineX.ClosestParameter [class_function]
@@ -1240,6 +1379,7 @@ js  LinetypeX.alwaysModelDistances [property]
 js  LinetypeX.appendSegment [function]
 js  LinetypeX.commitChanges [function]
 js  LinetypeX.componentType [property]
+js  LinetypeX.computeMemoryEstimate [class_function]
 js  LinetypeX.constructor<>
 js  LinetypeX.constructor<const BND_LinetypeX&>
 js  LinetypeX.default [function]
@@ -1247,11 +1387,19 @@ js  LinetypeX.deleteAllUserStrings [function]
 js  LinetypeX.getSegment [function]
 js  LinetypeX.getUserString [function]
 js  LinetypeX.hasShapes [property]
+js  LinetypeX.isDeleted [property]
 js  LinetypeX.isModified [property]
 js  LinetypeX.isPatternLocked [property]
+js  LinetypeX.isReference [property]
+js  LinetypeX.isValidComponentName [class_function]
 js  LinetypeX.lineCapStyle [property]
 js  LinetypeX.lineJoinStyle [property]
+js  LinetypeX.linetypeIndex [property]
+js  LinetypeX.modelComponentTypeIgnoresCase [class_function]
+js  LinetypeX.modelComponentTypeIncludesParent [class_function]
+js  LinetypeX.modelComponentTypeRequiresUniqueName [class_function]
 js  LinetypeX.name [property]
+js  LinetypeX.namePathSeparator [class_function]
 js  LinetypeX.patternLength [property]
 js  LinetypeX.removeAllShapes [function]
 js  LinetypeX.removeSegment [function]
@@ -1267,12 +1415,23 @@ js  LinetypeX.shapeSpacing [property]
 js  LinetypeX.userStringCount [property]
 js  LinetypeX.width [property]
 js  LinetypeX.widthUnits [property]
+js  ManifestTableX.activeObjectCount [function]
+js  ManifestTableX.componentType [property]
+js  ManifestTableX.count [property]
+js  ManifestTableX.findId [function]
+js  ManifestTableX.findIndex [function]
+js  ManifestTableX.findName [function]
+js  ManifestTableX.getEnumerator [function]
+js  ManifestTableX.iterator [function]
+js  ManifestTableX.longCount [property]
+js  ManifestTableXIter.next [function]
 js  MaterialX.alphaTransparency [property]
 js  MaterialX.ambientColor [property]
 js  MaterialX.commitChanges [function]
 js  MaterialX.componentType [property]
+js  MaterialX.computeMemoryEstimate [class_function]
+js  MaterialX.constructor(dispatched)
 js  MaterialX.constructor<>
-js  MaterialX.constructor<const BND_Material&>
 js  MaterialX.copyFrom [function]
 js  MaterialX.default [function]
 js  MaterialX.diffuseColor [property]
@@ -1287,9 +1446,17 @@ js  MaterialX.getTexture [function]
 js  MaterialX.getTransparencyTexture [function]
 js  MaterialX.getUserString [function]
 js  MaterialX.indexOfRefraction [property]
+js  MaterialX.isDeleted [property]
 js  MaterialX.isPhysicallyBased [property]
+js  MaterialX.isReference [property]
+js  MaterialX.isValidComponentName [class_function]
+js  MaterialX.materialIndex [property]
 js  MaterialX.maxShine [class_function]
+js  MaterialX.modelComponentTypeIgnoresCase [class_function]
+js  MaterialX.modelComponentTypeIncludesParent [class_function]
+js  MaterialX.modelComponentTypeRequiresUniqueName [class_function]
 js  MaterialX.name [property]
+js  MaterialX.namePathSeparator [class_function]
 js  MaterialX.physicallyBased [property]
 js  MaterialX.previewColor [property]
 js  MaterialX.reflectionColor [property]
@@ -1319,6 +1486,7 @@ js  MeshFaceListX.convertTrianglesToQuads [function]
 js  MeshFaceListX.count [property]
 js  MeshFaceListX.cullDegenerateFaces [function]
 js  MeshFaceListX.destroy [function]
+js  MeshFaceListX.get [function]
 js  MeshFaceListX.getFace [function]
 js  MeshFaceListX.getFaceCenter [function]
 js  MeshFaceListX.getFaceVertices [function]
@@ -1326,6 +1494,7 @@ js  MeshFaceListX.hasNakedEdges [function]
 js  MeshFaceListX.insert [function]
 js  MeshFaceListX.isHidden [function]
 js  MeshFaceListX.quadCount [property]
+js  MeshFaceListX.set [function]
 js  MeshFaceListX.setFace [function]
 js  MeshFaceListX.triangleCount [property]
 js  MeshFaceX.CompareTo [class_function]
@@ -1348,8 +1517,10 @@ js  MeshTextureCoordinateListX.capacity [property]
 js  MeshTextureCoordinateListX.clear [function]
 js  MeshTextureCoordinateListX.count [property]
 js  MeshTextureCoordinateListX.destroy [function]
+js  MeshTextureCoordinateListX.get [function]
 js  MeshTextureCoordinateListX.normalizeTextureCoordinates [function]
 js  MeshTextureCoordinateListX.reverseTextureCoordinates [function]
+js  MeshTextureCoordinateListX.set [function]
 js  MeshTextureCoordinateListX.setTextureCoordinate [function]
 js  MeshTextureCoordinateListX.setTextureCoordinates [function]
 js  MeshTextureCoordinateListX.toFloatArray [function]
@@ -1367,6 +1538,8 @@ js  MeshVertexColorListX.capacity [property]
 js  MeshVertexColorListX.clear [function]
 js  MeshVertexColorListX.count [property]
 js  MeshVertexColorListX.destroy [function]
+js  MeshVertexColorListX.get [function]
+js  MeshVertexColorListX.set [function]
 js  MeshVertexColorListX.setColor [function]
 js  MeshVertexColorListX.toARGBArray [function]
 js  MeshVertexListX.add [function]
@@ -1377,10 +1550,12 @@ js  MeshVertexListX.combineIdentical [function]
 js  MeshVertexListX.count [property]
 js  MeshVertexListX.cullUnused [function]
 js  MeshVertexListX.destroy [function]
+js  MeshVertexListX.get [function]
 js  MeshVertexListX.hide [function]
 js  MeshVertexListX.hideAll [function]
 js  MeshVertexListX.isHidden [function]
 js  MeshVertexListX.point3dAt [function]
+js  MeshVertexListX.set [function]
 js  MeshVertexListX.setVertex [function]
 js  MeshVertexListX.show [function]
 js  MeshVertexListX.showAll [function]
@@ -1406,6 +1581,7 @@ js  MeshX.append [function]
 js  MeshX.clearSurfaceData [function]
 js  MeshX.clearTextureData [function]
 js  MeshX.compact [function]
+js  MeshX.computeMemoryEstimate [class_function]
 js  MeshX.constructor<>
 js  MeshX.constructor<const BND_Mesh&>
 js  MeshX.copyFrom [function]
@@ -1472,6 +1648,7 @@ js  MeshingParametersX.tolerance [property]
 js  ModelComponentX.clearId [function]
 js  ModelComponentX.clearIndex [function]
 js  ModelComponentX.clearName [function]
+js  ModelComponentX.computeMemoryEstimate [class_function]
 js  ModelComponentX.dataCRC [function]
 js  ModelComponentX.deletedName [property]
 js  ModelComponentX.hasId [property]
@@ -1490,10 +1667,15 @@ js  ModelComponentX.isValidComponentName [class_function]
 js  ModelComponentX.lockId [function]
 js  ModelComponentX.lockIndex [function]
 js  ModelComponentX.lockName [function]
+js  ModelComponentX.modelComponentTypeIgnoresCase [class_function]
+js  ModelComponentX.modelComponentTypeIncludesParent [class_function]
+js  ModelComponentX.modelComponentTypeRequiresUniqueName [class_function]
 js  ModelComponentX.modelSerialNumber [property]
 js  ModelComponentX.name [property]
 js  ModelComponentX.nameIsLocked [property]
+js  ModelComponentX.namePathSeparator [class_function]
 js  ModelComponentX.referenceModelSerialNumber [property]
+js  NurbsCurveKnotListX.clampEnd [function]
 js  NurbsCurveKnotListX.count [property]
 js  NurbsCurveKnotListX.createPeriodicKnots [function]
 js  NurbsCurveKnotListX.createUniformKnots [function]
@@ -1508,17 +1690,21 @@ js  NurbsCurveKnotListX.superfluousKnot [function]
 js  NurbsCurvePointListX.changeEndWeights [function]
 js  NurbsCurvePointListX.controlPolygonLength [property]
 js  NurbsCurvePointListX.count [property]
+js  NurbsCurvePointListX.get [function]
 js  NurbsCurvePointListX.getPoint [function]
 js  NurbsCurvePointListX.getWeight [function]
 js  NurbsCurvePointListX.makeNonRational [function]
 js  NurbsCurvePointListX.makeRational [function]
 js  NurbsCurvePointListX.pointSize [property]
+js  NurbsCurvePointListX.set [function]
 js  NurbsCurvePointListX.setPoint [function]
 js  NurbsCurvePointListX.setWeight [function]
 js  NurbsCurveX.append [function]
-js  NurbsCurveX.constructor<const BND_NurbsCurve&>
+js  NurbsCurveX.computeMemoryEstimate [class_function]
+js  NurbsCurveX.constructor(dispatched)
 js  NurbsCurveX.convertSpanToBezier [function]
 js  NurbsCurveX.create [class_function]
+js  NurbsCurveX.createControlPointCurve [class_function]
 js  NurbsCurveX.createFromArc [class_function]
 js  NurbsCurveX.createFromCircle [class_function]
 js  NurbsCurveX.createFromEllipse [class_function]
@@ -1554,7 +1740,8 @@ js  NurbsSurfacePointListX.pointSize [property]
 js  NurbsSurfacePointListX.setControlPoint [function]
 js  NurbsSurfacePointListX.setPoint [function]
 js  NurbsSurfacePointListX.setWeight [function]
-js  NurbsSurfaceX.constructor<const BND_NurbsSurface&>
+js  NurbsSurfaceX.computeMemoryEstimate [class_function]
+js  NurbsSurfaceX.constructor(dispatched)
 js  NurbsSurfaceX.constructor<int, bool, int, int, int, int>
 js  NurbsSurfaceX.copyFrom [function]
 js  NurbsSurfaceX.create [class_function]
@@ -1580,6 +1767,7 @@ js  ObjectAttributesX.castsShadows [property]
 js  ObjectAttributesX.clearRenderingAttributes [function]
 js  ObjectAttributesX.clippingPlaneLabelStyle [property]
 js  ObjectAttributesX.colorSource [property]
+js  ObjectAttributesX.computeMemoryEstimate [class_function]
 js  ObjectAttributesX.constructor<>
 js  ObjectAttributesX.constructor<const BND_3dmObjectAttributes&>
 js  ObjectAttributesX.customMeshingParameters [property]
@@ -1678,9 +1866,10 @@ js  PhysicallyBasedMaterialX.subsurfaceScatteringColor [property]
 js  PhysicallyBasedMaterialX.subsurfaceScatteringRadius [property]
 js  PhysicallyBasedMaterialX.synchronizeLegacyMaterial [function]
 js  PhysicallyBasedMaterialX.useBaseColorTextureAlphaForObjectAlphaTransparencyTexture [property]
+js  PlaneSurfaceX.computeMemoryEstimate [class_function]
+js  PlaneSurfaceX.constructor(dispatched)
 js  PlaneSurfaceX.constructor<>
 js  PlaneSurfaceX.constructor<BND_PlaneX, BND_IntervalX, BND_IntervalX>
-js  PlaneSurfaceX.constructor<const BND_PlaneSurface&>
 js  PlaneSurfaceX.createThroughBox [class_function]
 js  PlaneSurfaceX.getExtents [function]
 js  PlaneSurfaceX.plane [property]
@@ -1766,8 +1955,8 @@ js  Point3dListX.clear [function]
 js  Point3dListX.closestIndex [function]
 js  Point3dListX.closestIndexInList [class_function]
 js  Point3dListX.closestPointInList [class_function]
+js  Point3dListX.constructor(dispatched)
 js  Point3dListX.constructor<>
-js  Point3dListX.constructor<int>
 js  Point3dListX.contains [function]
 js  Point3dListX.count [property]
 js  Point3dListX.duplicate [function]
@@ -1871,6 +2060,7 @@ js  PointCloudX.clearHiddenFlags [function]
 js  PointCloudX.clearNormals [function]
 js  PointCloudX.clearPointValues [function]
 js  PointCloudX.closestPoint [function]
+js  PointCloudX.computeMemoryEstimate [class_function]
 js  PointCloudX.constructor<>
 js  PointCloudX.constructor<const BND_PointCloud&>
 js  PointCloudX.containsColors [property]
@@ -1890,12 +2080,15 @@ js  PointCloudX.insertNew [function]
 js  PointCloudX.merge [function]
 js  PointCloudX.pointAt [function]
 js  PointCloudX.removeAt [function]
-js  PointX.constructor<const BND_Point&>
+js  PointX.computeMemoryEstimate [class_function]
+js  PointX.constructor(dispatched)
 js  PointX.location [property]
 js  PolyCurveX.append [function]
 js  PolyCurveX.appendSegment [function]
+js  PolyCurveX.computeMemoryEstimate [class_function]
 js  PolyCurveX.constructor<>
 js  PolyCurveX.constructor<const BND_PolyCurve&>
+js  PolyCurveX.createControlPointCurve [class_function]
 js  PolyCurveX.duplicate [function]
 js  PolyCurveX.duplicatePolyCurve [function]
 js  PolyCurveX.explode [function]
@@ -1909,8 +2102,10 @@ js  PolyCurveX.segmentCurveParameter [function]
 js  PolyCurveX.segmentDomain [function]
 js  PolyCurveX.segmentIndex [function]
 js  PolyCurveX.segmentIndexes [function]
+js  PolylineCurveX.computeMemoryEstimate [class_function]
+js  PolylineCurveX.constructor(dispatched)
 js  PolylineCurveX.constructor<>
-js  PolylineCurveX.constructor<const BND_PolylineCurve&>
+js  PolylineCurveX.createControlPointCurve [class_function]
 js  PolylineCurveX.parameter [function]
 js  PolylineCurveX.point [function]
 js  PolylineCurveX.pointCount [property]
@@ -1922,8 +2117,8 @@ js  PolylineX.centerPoint [function]
 js  PolylineX.closestParameter [function]
 js  PolylineX.closestPoint [function]
 js  PolylineX.collapseShortSegments [function]
+js  PolylineX.constructor(dispatched)
 js  PolylineX.constructor<>
-js  PolylineX.constructor<int>
 js  PolylineX.createCircumscribedPolygon [class_function]
 js  PolylineX.createInscribedPolygon [class_function]
 js  PolylineX.createStarPolygon [class_function]
@@ -1944,6 +2139,21 @@ js  PolylineX.tangentAt [function]
 js  PolylineX.toNurbsCurve [function]
 js  PolylineX.toPolylineCurve [function]
 js  PolylineX.trim [function]
+js  PostEffectCollectionX.constructor<>
+js  PostEffectCollectionX.getSelectedPostEffect [function]
+js  PostEffectCollectionX.iterator [function]
+js  PostEffectCollectionX.movePostEffectBefore [function]
+js  PostEffectCollectionX.postEffectDataFromId [function]
+js  PostEffectCollectionX.setSelectedPostEffect [function]
+js  PostEffectCollectionXIter.next [function]
+js  PostEffectDataX.dataCRC [function]
+js  PostEffectDataX.getParameter [function]
+js  PostEffectDataX.id [property]
+js  PostEffectDataX.localName [property]
+js  PostEffectDataX.on [property]
+js  PostEffectDataX.setParameter [function]
+js  PostEffectDataX.shown [property]
+js  PostEffectDataX.type [property]
 js  RenderChannelsX.constructor<>
 js  RenderChannelsX.customList [property]
 js  RenderChannelsX.mode [property]
@@ -1952,6 +2162,7 @@ js  RenderSettingsX.antialiasLevel [property]
 js  RenderSettingsX.backgroundColorBottom [property]
 js  RenderSettingsX.backgroundColorTop [property]
 js  RenderSettingsX.backgroundStyle [property]
+js  RenderSettingsX.computeMemoryEstimate [class_function]
 js  RenderSettingsX.constructor<>
 js  RenderSettingsX.constructor<const BND_RenderSettingsX*>
 js  RenderSettingsX.depthCue [property]
@@ -1962,6 +2173,7 @@ js  RenderSettingsX.imageDpi [property]
 js  RenderSettingsX.imageUnitSystem [property]
 js  RenderSettingsX.linearWorkflow [property]
 js  RenderSettingsX.namedView [property]
+js  RenderSettingsX.postEffects [property]
 js  RenderSettingsX.renderAnnotations [property]
 js  RenderSettingsX.renderBackfaces [property]
 js  RenderSettingsX.renderChannels [property]
@@ -1986,6 +2198,7 @@ js  RenderSettingsX.useViewportSize [property]
 js  RevSurfaceX.angle [property]
 js  RevSurfaceX.axis [property]
 js  RevSurfaceX.axisAndCurveCoplanar [function]
+js  RevSurfaceX.computeMemoryEstimate [class_function]
 js  RevSurfaceX.constructor<const BND_RevSurface&>
 js  RevSurfaceX.create [class_function]
 js  RevSurfaceX.createFromCone [class_function]
@@ -2089,6 +2302,7 @@ js  SubDVertexX.setControlNetPoint [function]
 js  SubDVertexX.surfacePoint [function]
 js  SubDVertexX.tag [property]
 js  SubDX.clearEvaluationCache [function]
+js  SubDX.computeMemoryEstimate [class_function]
 js  SubDX.constructor<const BND_SubD&>
 js  SubDX.edges [property]
 js  SubDX.empty [class_function]
@@ -2099,6 +2313,7 @@ js  SubDX.subdivide [function]
 js  SubDX.updateAllTagsAndSectorCoefficients [function]
 js  SubDX.vertices [property]
 js  SunX.altitude [property]
+js  SunX.altitudeFromValues [class_function]
 js  SunX.azimuth [property]
 js  SunX.colorFromAltitude [class_function]
 js  SunX.constructor<>
@@ -2106,6 +2321,7 @@ js  SunX.daylightSaving [property]
 js  SunX.daylightSavingMinutes [property]
 js  SunX.daylightSavingOn [property]
 js  SunX.enabled [property]
+js  SunX.getDateTime [function]
 js  SunX.hash [property]
 js  SunX.intensity [property]
 js  SunX.latitude [property]
@@ -2114,9 +2330,12 @@ js  SunX.longitude [property]
 js  SunX.manualControl [property]
 js  SunX.manualControlOn [property]
 js  SunX.north [property]
+js  SunX.setDateTime [function]
 js  SunX.setPosition [function]
 js  SunX.timeZone [property]
 js  SunX.vector [property]
+js  SurfaceProxyX.computeMemoryEstimate [class_function]
+js  SurfaceX.computeMemoryEstimate [class_function]
 js  SurfaceX.constructor<const BND_Surface&>
 js  SurfaceX.degree [function]
 js  SurfaceX.domain [function]
@@ -2156,6 +2375,7 @@ js  SurfaceX.tryGetFiniteCylinder [function]
 js  SurfaceX.tryGetPlane [function]
 js  SurfaceX.tryGetSphere [function]
 js  SurfaceX.tryGetTorus [function]
+js  TextDotX.computeMemoryEstimate [class_function]
 js  TextDotX.constructor<const BND_TextDot&>
 js  TextDotX.constructor<std::wstring, BND_Point3dX>
 js  TextDotX.fontFace [property]
@@ -2164,6 +2384,8 @@ js  TextDotX.point [property]
 js  TextDotX.secondaryText [property]
 js  TextDotX.text [property]
 js  TextureMappingX.capped [property]
+js  TextureMappingX.componentType [property]
+js  TextureMappingX.computeMemoryEstimate [class_function]
 js  TextureMappingX.constructor<const BND_TextureMapping&>
 js  TextureMappingX.createBoxMapping [class_function]
 js  TextureMappingX.createCustomMeshMapping [class_function]
@@ -2174,7 +2396,14 @@ js  TextureMappingX.createSphereMapping [class_function]
 js  TextureMappingX.createSurfaceParameterMapping [class_function]
 js  TextureMappingX.evaluate [function]
 js  TextureMappingX.id [property]
+js  TextureMappingX.isValidComponentName [class_function]
+js  TextureMappingX.mappingType [property]
+js  TextureMappingX.modelComponentTypeIgnoresCase [class_function]
+js  TextureMappingX.modelComponentTypeIncludesParent [class_function]
+js  TextureMappingX.modelComponentTypeRequiresUniqueName [class_function]
+js  TextureMappingX.namePathSeparator [class_function]
 js  TextureMappingX.normalTransform [property]
+js  TextureMappingX.primativeTransform [property]
 js  TextureMappingX.primitiveTransform [property]
 js  TextureMappingX.projection [property]
 js  TextureMappingX.textureSpace [property]
@@ -2184,6 +2413,7 @@ js  TextureMappingX.tryGetMappingPlane [function]
 js  TextureMappingX.tryGetMappingSphere [function]
 js  TextureMappingX.uvwTransform [property]
 js  TextureX.applyUvwTransform [property]
+js  TextureX.computeMemoryEstimate [class_function]
 js  TextureX.constructor<>
 js  TextureX.constructor<const BND_Texture&>
 js  TextureX.enabled [property]
@@ -2195,9 +2425,11 @@ js  TextureX.magFilter [property]
 js  TextureX.mappingChannelId [property]
 js  TextureX.minFilter [property]
 js  TextureX.offset [property]
+js  TextureX.projectionMode [property]
 js  TextureX.repeat [property]
 js  TextureX.rotation [property]
 js  TextureX.setAlphaBlendValues [function]
+js  TextureX.setRGBBlendValues [function]
 js  TextureX.textureCombineMode [property]
 js  TextureX.textureType [property]
 js  TextureX.treatAsLinear [property]
@@ -2420,6 +2652,7 @@ js  ViewportX.changeToParallelReflectedProjection [function]
 js  ViewportX.changeToPerspectiveProjection [function]
 js  ViewportX.changeToSymmetricFrustum [function]
 js  ViewportX.changeToTwoPointPerspectiveProjection [function]
+js  ViewportX.computeMemoryEstimate [class_function]
 js  ViewportX.constructor<>
 js  ViewportX.constructor<const BND_ViewportX&>
 js  ViewportX.defaultCameraDirection [class_function]
@@ -2485,10 +2718,10 @@ js  ViewportX.transformCamera [function]
 js  ViewportX.unlockCamera [function]
 js  ViewportX.unlockFrustumSymmetry [function]
 js  ViewportX.zoomToScreenRect [function]
-py  AnnotationBaseX.AlternateDimensionLengthDisplay [property ro]
+py  AnnotationBaseX.AlternateDimensionLengthDisplay [property rw]
 py  AnnotationBaseX.AnnotationType [property ro]
 py  AnnotationBaseX.ClearPropertyOverrides()
-py  AnnotationBaseX.DimensionLengthDisplay [property ro]
+py  AnnotationBaseX.DimensionLengthDisplay [property rw]
 py  AnnotationBaseX.DimensionScale [property rw]
 py  AnnotationBaseX.DimensionStyleId [property rw]
 py  AnnotationBaseX.DrawForward [property rw]
@@ -2502,11 +2735,12 @@ py  AnnotationBaseX.IsAllUnderlined()
 py  AnnotationBaseX.IsPropertyOverridden(field)
 py  AnnotationBaseX.LineSpaceScale [property rw]
 py  AnnotationBaseX.MaskColor [property rw]
-py  AnnotationBaseX.MaskColorSource [property ro]
+py  AnnotationBaseX.MaskColorSource [property rw]
 py  AnnotationBaseX.MaskEnabled [property rw]
-py  AnnotationBaseX.MaskFrame [property ro]
+py  AnnotationBaseX.MaskFrame [property rw]
 py  AnnotationBaseX.MaskOffset [property rw]
 py  AnnotationBaseX.ParentDimensionStyle [property rw]
+py  AnnotationBaseX.PlainText [property rw]
 py  AnnotationBaseX.PlainTextToRtf(str) [static]
 py  AnnotationBaseX.PlainTextWithFields [property ro]
 py  AnnotationBaseX.Plane [property rw]
@@ -2518,6 +2752,8 @@ py  AnnotationBaseX.SetItalic(set_on)
 py  AnnotationBaseX.SetOverrideDimStyle(OverrideStyle)
 py  AnnotationBaseX.SetRichText(rtfText, dimstyle)
 py  AnnotationBaseX.SetUnderline(set_on)
+py  AnnotationBaseX.Text [property rw]
+py  AnnotationBaseX.TextHasRtfFormatting [property ro]
 py  AnnotationBaseX.TextHeight [property rw]
 py  AnnotationBaseX.TextIsWrapped [property rw]
 py  AnnotationBaseX.TextRotationDegrees [property rw]
@@ -2725,6 +2961,7 @@ py  BrepFaceX.UnderlyingSurface()
 py  BrepLoopListX.Add(loopType)
 py  BrepLoopListX.Add(loopType, face)
 py  BrepLoopListX.AddOuterLoop(faceIndex)
+py  BrepLoopListX.AddPlanarFaceLoop(faceIndex, loopType, boundaryCurves)
 py  BrepLoopListX.Count [property ro]
 py  BrepLoopListX.__getitem__()
 py  BrepLoopListX.__len__()
@@ -2736,6 +2973,8 @@ py  BrepLoopX.To2dCurve()
 py  BrepLoopX.To3dCurve()
 py  BrepLoopX.Trims [property ro]
 py  BrepSurfaceListX.Count [property ro]
+py  BrepSurfaceListX.__getitem__()
+py  BrepSurfaceListX.__len__()
 py  BrepTrimListX.Add(curve2dIndex)
 py  BrepTrimListX.Add(edge, rev3d, loop, curve2dIndex)
 py  BrepTrimListX.Add(rev3d, edge, curve2dIndex)
@@ -2781,6 +3020,8 @@ py  BrepX.CreateFromSphere(sphere) [static]
 py  BrepX.CreateFromSurface(surface) [static]
 py  BrepX.CreateFromTorus(torus) [static]
 py  BrepX.CreateQuadSphere(sphere) [static]
+py  BrepX.CreateTrimmedPlane(plane, curve) [static]
+py  BrepX.CreateTrimmedPlane(plane, curves) [static]
 py  BrepX.CullUnused2dCurves()
 py  BrepX.CullUnused3dCurves()
 py  BrepX.CullUnusedEdges()
@@ -2824,6 +3065,8 @@ py  CachedTextureCoordinatesX.IndexOf(item)
 py  CachedTextureCoordinatesX.IsReadOnly [property ro]
 py  CachedTextureCoordinatesX.MappingId [property ro]
 py  CachedTextureCoordinatesX.TryGetAt(index)
+py  CachedTextureCoordinatesX.__getitem__()
+py  CachedTextureCoordinatesX.__len__()
 py  CircleX.BoundingBox [property ro]
 py  CircleX.Center [property rw]
 py  CircleX.Circumference [property rw]
@@ -3116,16 +3359,19 @@ py  DimensionStyleX.DrawTextMask [property rw]
 py  DimensionStyleX.Duplicate()
 py  DimensionStyleX.ExtensionLineExtension [property rw]
 py  DimensionStyleX.ExtensionLineOffset [property rw]
-py  DimensionStyleX.FitArrow [property ro]
-py  DimensionStyleX.FitText [property ro]
+py  DimensionStyleX.FitArrow [property rw]
+py  DimensionStyleX.FitText [property rw]
 py  DimensionStyleX.FixedExtensionLength [property rw]
 py  DimensionStyleX.FixedExtensionOn [property rw]
+py  DimensionStyleX.Font [property rw]
 py  DimensionStyleX.ForceDimensionLineBetweenExtensionLines [property rw]
 py  DimensionStyleX.GetUserString(key)
 py  DimensionStyleX.HasFieldOverrides [property ro]
 py  DimensionStyleX.IsChild [property ro]
 py  DimensionStyleX.IsChildOf(parentId)
+py  DimensionStyleX.IsDeleted [property ro]
 py  DimensionStyleX.IsFieldOverriden(field)
+py  DimensionStyleX.IsReference [property ro]
 py  DimensionStyleX.LeaderArrowBlockId [property rw]
 py  DimensionStyleX.LeaderArrowLength [property rw]
 py  DimensionStyleX.LeaderArrowType [property rw]
@@ -3330,16 +3576,29 @@ py  File3dmGroupTableX.Dump()
 py  File3dmGroupTableX.FindId(id)
 py  File3dmGroupTableX.FindIndex(groupIndex)
 py  File3dmGroupTableX.FindName(name)
+py  File3dmGroupTableX.GroupMembers(groupIndex)
 py  File3dmGroupTableX.__getitem__(index)
 py  File3dmGroupTableX.__iter__()
 py  File3dmGroupTableX.__len__()
 py  File3dmGroupTableXIter.__iter__()
 py  File3dmGroupTableXIter.__next__()
+py  File3dmHatchPatternTableX.Add(item)
 py  File3dmHatchPatternTableX.ComponentType [property ro]
 py  File3dmHatchPatternTableX.Count [property ro]
 py  File3dmHatchPatternTableX.Delete(index)
+py  File3dmHatchPatternTableX.Delete(item)
 py  File3dmHatchPatternTableX.Dump()
+py  File3dmHatchPatternTableX.FindId(id)
+py  File3dmHatchPatternTableX.FindIndex(index)
+py  File3dmHatchPatternTableX.FindName(name)
+py  File3dmHatchPatternTableX.__getitem__(index)
+py  File3dmHatchPatternTableX.__iter__()
+py  File3dmHatchPatternTableX.__len__()
+py  File3dmHatchPatternTableXIter.__iter__()
+py  File3dmHatchPatternTableXIter.__next__()
 py  File3dmInstanceDefinitionTableX.Add(item)
+py  File3dmInstanceDefinitionTableX.Add(name, description, basePoint, geometry, attributes)
+py  File3dmInstanceDefinitionTableX.Add(name, description, url, urlTag, basePoint, geometry, attributes)
 py  File3dmInstanceDefinitionTableX.AddLinked(filename, name, description)
 py  File3dmInstanceDefinitionTableX.ComponentType [property ro]
 py  File3dmInstanceDefinitionTableX.Count [property ro]
@@ -3409,31 +3668,55 @@ py  File3dmNamedConstructionPlanesX.Delete(index)
 py  File3dmNamedConstructionPlanesX.__getitem__()
 py  File3dmNamedConstructionPlanesX.__len__()
 py  File3dmObjectTableX.Add(item)
+py  File3dmObjectTableX.AddArc(arc)
 py  File3dmObjectTableX.AddArc(arc, attributes)
+py  File3dmObjectTableX.AddBrep(brep)
 py  File3dmObjectTableX.AddBrep(brep, attributes)
+py  File3dmObjectTableX.AddCircle(circle)
 py  File3dmObjectTableX.AddCircle(circle, attributes)
+py  File3dmObjectTableX.AddCurve(curve)
 py  File3dmObjectTableX.AddCurve(curve, attributes)
+py  File3dmObjectTableX.AddEllipse(ellipse)
 py  File3dmObjectTableX.AddEllipse(ellipse, attributes)
+py  File3dmObjectTableX.AddExtrusion(extrusion)
 py  File3dmObjectTableX.AddExtrusion(extrusion, attributes)
+py  File3dmObjectTableX.AddHatch(hatch)
 py  File3dmObjectTableX.AddHatch(hatch, attributes)
+py  File3dmObjectTableX.AddInstanceObject(instanceDefinitionIndex, instanceXform)
 py  File3dmObjectTableX.AddInstanceObject(instanceDefinitionIndex, instanceXform, attributes)
+py  File3dmObjectTableX.AddLine(from, to)
 py  File3dmObjectTableX.AddLine(from, to, attributes)
+py  File3dmObjectTableX.AddLine(line)
 py  File3dmObjectTableX.AddLine(line, attributes)
+py  File3dmObjectTableX.AddMesh(mesh)
 py  File3dmObjectTableX.AddMesh(mesh, attributes)
+py  File3dmObjectTableX.AddPoint(point)
 py  File3dmObjectTableX.AddPoint(point, attributes)
+py  File3dmObjectTableX.AddPoint(x, y, z)
+py  File3dmObjectTableX.AddPointCloud(cloud)
 py  File3dmObjectTableX.AddPointCloud(cloud, attributes)
+py  File3dmObjectTableX.AddPointCloud(points)
 py  File3dmObjectTableX.AddPointCloud(points, attributes)
+py  File3dmObjectTableX.AddPolyline(points)
 py  File3dmObjectTableX.AddPolyline(points, attributes)
+py  File3dmObjectTableX.AddSphere(sphere)
 py  File3dmObjectTableX.AddSphere(sphere, attributes)
+py  File3dmObjectTableX.AddSubD(subd)
 py  File3dmObjectTableX.AddSubD(subd, attributes)
+py  File3dmObjectTableX.AddSurface(surface)
 py  File3dmObjectTableX.AddSurface(surface, attributes)
+py  File3dmObjectTableX.AddText(text, plane, height, fontName, bold, italic, justification, attributes)
+py  File3dmObjectTableX.AddTextDot(dot)
 py  File3dmObjectTableX.AddTextDot(dot, attributes)
+py  File3dmObjectTableX.AddTextDot(text, location)
+py  File3dmObjectTableX.AddTextDot(text, location, attributes)
 py  File3dmObjectTableX.ComponentType [property ro]
 py  File3dmObjectTableX.Count [property ro]
 py  File3dmObjectTableX.Delete(index)
 py  File3dmObjectTableX.Delete(item)
 py  File3dmObjectTableX.Delete(objectId)
 py  File3dmObjectTableX.Dump()
+py  File3dmObjectTableX.FindByGroup(group)
 py  File3dmObjectTableX.FindId(id)
 py  File3dmObjectTableX.GetBoundingBox()
 py  File3dmObjectTableX.__iter__()
@@ -3448,6 +3731,9 @@ py  File3dmObjectX.Name [property rw]
 py  File3dmPlugInDataTableX.Clear()
 py  File3dmPlugInDataTableX.Count [property ro]
 py  File3dmPlugInDataTableX.Dump()
+py  File3dmPlugInDataTableX.__getitem__()
+py  File3dmPlugInDataTableX.__len__()
+py  File3dmPlugInDataX.PlugInId [property ro]
 py  File3dmRenderContentX.AutoDelete [property ro]
 py  File3dmRenderContentX.ChildSlotName [property ro]
 py  File3dmRenderContentX.ChildSlotOn(child_slot_name)
@@ -3550,6 +3836,10 @@ py  File3dmThickeningX.On [property rw]
 py  File3dmThickeningX.Solid [property rw]
 py  File3dmViewTableX.Add(item)
 py  File3dmViewTableX.Clear()
+py  File3dmViewTableX.Count [property ro]
+py  File3dmViewTableX.Delete(index)
+py  File3dmViewTableX.__getitem__()
+py  File3dmViewTableX.__len__()
 py  File3dmWriteOptionsX.EnableAnalysisMeshes(objectType, enable)
 py  File3dmWriteOptionsX.EnableRenderMeshes(objectType, enable)
 py  File3dmWriteOptionsX.SaveAnalysisMeshes [property rw]
@@ -3585,6 +3875,7 @@ py  File3dmX.LastEdited [property ro]
 py  File3dmX.LastEditedBy [property ro]
 py  File3dmX.Layers [property ro]
 py  File3dmX.Linetypes [property ro]
+py  File3dmX.Manifest [property ro]
 py  File3dmX.Materials [property ro]
 py  File3dmX.NamedConstructionPlanes [property ro]
 py  File3dmX.NamedViews [property ro]
@@ -3603,9 +3894,11 @@ py  File3dmX.Revision [property rw]
 py  File3dmX.Settings [property ro]
 py  File3dmX.StartSectionComments [property rw]
 py  File3dmX.Strings [property ro]
+py  File3dmX.ToByteArray(options)
 py  File3dmX.Views [property ro]
 py  File3dmX.Write(path, options)
 py  File3dmX.Write(path, version)
+py  File3dmX.WriteMultipleObjects(path, geometry) [static]
 py  File3dmX.WriteOneObject(path, geometry) [static]
 py  File3dmX.WriteWithLog(path, options)
 py  File3dmX.WriteWithLog(path, version)
@@ -3625,6 +3918,9 @@ py  FontX.EnglishQuartetName [property ro]
 py  FontX.FaceName [property ro]
 py  FontX.FamilyName [property ro]
 py  FontX.FamilyPlusFaceName [property ro]
+py  FontX.FromQuartetProperties(quartetName, bold, italic) [static]
+py  FontX.FromRichTextProperties(richTextFontName, bold, italic, underlined, strikethrough) [static]
+py  FontX.GetSubstituteFont()
 py  FontX.IsEngravingFont [property ro]
 py  FontX.IsGeometricToleranceFont [property ro]
 py  FontX.IsInstalled [property ro]
@@ -3644,6 +3940,9 @@ py  FontX.Underlined [property ro]
 py  FontX.UnitsPerEm [property ro]
 py  FontX.Weight [property ro]
 py  FontX.__init__(const BND_Font&)
+py  FontX.__init__(std::wstring)
+py  FontX.__init__(std::wstring, RH3DM_Font_FontWeight, RH3DM_Font_FontStyle, RH3DM_Font_FontStretch, bool, bool)
+py  FontX.__init__(std::wstring, RH3DM_Font_FontWeight, RH3DM_Font_FontStyle, bool, bool)
 py  GeometryBaseX.ComponentIndex()
 py  GeometryBaseX.DataCRC(currentRemainder)
 py  GeometryBaseX.DeleteAllUserStrings()
@@ -3681,6 +3980,21 @@ py  GroupX.GetUserString(key)
 py  GroupX.SetUserString(key, value)
 py  GroupX.UserStringCount [property ro]
 py  GroupX.__init__(const BND_Group&)
+py  HatchPatternX.AlwaysModelDistances [property rw]
+py  HatchPatternX.ComponentType [property ro]
+py  HatchPatternX.DeleteAllUserStrings()
+py  HatchPatternX.Description [property rw]
+py  HatchPatternX.FillType [property rw]
+py  HatchPatternX.GetUserString(key)
+py  HatchPatternX.HatchLineCount [property ro]
+py  HatchPatternX.Index [property rw]
+py  HatchPatternX.PatternUnitSystem [property rw]
+py  HatchPatternX.RemoveAllHatchLines()
+py  HatchPatternX.RemoveHatchLine(hatchLineIndex)
+py  HatchPatternX.SetUserString(key, value)
+py  HatchPatternX.UserStringCount [property ro]
+py  HatchPatternX.__init__()
+py  HatchPatternX.__init__(const BND_HatchPatternX&)
 py  HatchX.BasePoint [property rw]
 py  HatchX.CreateFromBrep(brep, brepFaceIndex, hatchPatternIndex, rotationRadians, scale, basePoint) [static]
 py  HatchX.PatternIndex [property rw]
@@ -3782,18 +4096,23 @@ py  LayerX.DeletePerViewportVisible(viewportId)
 py  LayerX.DeletePlotColor()
 py  LayerX.Description [property rw]
 py  LayerX.Equals(other)
+py  LayerX.FullPath [property ro]
 py  LayerX.GetPersistentLocking()
 py  LayerX.GetPersistentVisibility()
 py  LayerX.GetUserString(key)
 py  LayerX.HasPerViewportSettings(viewportId)
 py  LayerX.Id [property rw]
 py  LayerX.IgesLevel [property rw]
+py  LayerX.IsDeleted [property ro]
 py  LayerX.IsExpanded [property rw]
 py  LayerX.IsLocked [property rw]
+py  LayerX.IsReference [property ro]
 py  LayerX.IsVisible [property rw]
+py  LayerX.LayerIndex [property rw]
 py  LayerX.LinetypeIndex [property rw]
 py  LayerX.ModelIsVisible [property rw]
 py  LayerX.ModelPersistentVisibility [property rw]
+py  LayerX.Name [property rw]
 py  LayerX.ParentLayerId [property rw]
 py  LayerX.PerViewportColor(viewportId)
 py  LayerX.PerViewportIsVisible(viewportId)
@@ -3815,6 +4134,7 @@ py  LayerX.SetPersistentLocking(persistentLocking)
 py  LayerX.SetPersistentVisibility(persistentVisibility)
 py  LayerX.SetUserString(key, value)
 py  LayerX.SortIndex [property ro]
+py  LayerX.ToString()
 py  LayerX.UnsetModelPersistentVisibility()
 py  LayerX.UnsetPerViewportPersistentVisibility(viewportId)
 py  LayerX.UnsetPersistentLocking()
@@ -3923,10 +4243,13 @@ py  LinetypeX.DeleteAllUserStrings()
 py  LinetypeX.GetSegment(index)
 py  LinetypeX.GetUserString(key)
 py  LinetypeX.HasShapes [property ro]
+py  LinetypeX.IsDeleted [property ro]
 py  LinetypeX.IsModified [property ro]
 py  LinetypeX.IsPatternLocked [property ro]
+py  LinetypeX.IsReference [property ro]
 py  LinetypeX.LineCapStyle [property rw]
 py  LinetypeX.LineJoinStyle [property rw]
+py  LinetypeX.LinetypeIndex [property rw]
 py  LinetypeX.Name [property rw]
 py  LinetypeX.PatternLength [property ro]
 py  LinetypeX.RemoveAllShapes()
@@ -3946,6 +4269,19 @@ py  LinetypeX.Width [property rw]
 py  LinetypeX.WidthUnits [property rw]
 py  LinetypeX.__init__()
 py  LinetypeX.__init__(const BND_LinetypeX&)
+py  ManifestTableX.ActiveObjectCount(type)
+py  ManifestTableX.ComponentType [property ro]
+py  ManifestTableX.Count [property ro]
+py  ManifestTableX.FindId(id)
+py  ManifestTableX.FindId(id, type)
+py  ManifestTableX.FindIndex(index, type)
+py  ManifestTableX.FindName(name, type, parentId)
+py  ManifestTableX.GetEnumerator(type)
+py  ManifestTableX.LongCount [property ro]
+py  ManifestTableX.__iter__()
+py  ManifestTableX.__len__()
+py  ManifestTableXIter.__iter__()
+py  ManifestTableXIter.__next__()
 py  MaterialX.AlphaTransparency [property rw]
 py  MaterialX.AmbientColor [property rw]
 py  MaterialX.CommitChanges()
@@ -3964,8 +4300,11 @@ py  MaterialX.GetTexture(which)
 py  MaterialX.GetTransparencyTexture()
 py  MaterialX.GetUserString(key)
 py  MaterialX.IndexOfRefraction [property rw]
+py  MaterialX.IsDeleted [property ro]
 py  MaterialX.IsPhysicallyBased [property ro]
-py  MaterialX.MaxShine() [static]
+py  MaterialX.IsReference [property ro]
+py  MaterialX.MaterialIndex [property ro]
+py  MaterialX.MaxShine [property ro static]
 py  MaterialX.Name [property rw]
 py  MaterialX.PhysicallyBased [property ro]
 py  MaterialX.PreviewColor [property ro]
@@ -4016,6 +4355,9 @@ py  MeshFaceListX.SetFace(index, face)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3, vertex4)
 py  MeshFaceListX.TriangleCount [property ro]
+py  MeshFaceListX.__getitem__()
+py  MeshFaceListX.__len__()
+py  MeshFaceListX.__setitem__()
 py  MeshFaceX.A [property rw]
 py  MeshFaceX.B [property rw]
 py  MeshFaceX.C [property rw]
@@ -4057,6 +4399,9 @@ py  MeshTextureCoordinateListX.SetTextureCoordinates(mapping)
 py  MeshTextureCoordinateListX.SetTextureCoordinates(textureCoordinates)
 py  MeshTextureCoordinateListX.ToFloatArray()
 py  MeshTextureCoordinateListX.TransposeTextureCoordinates()
+py  MeshTextureCoordinateListX.__getitem__()
+py  MeshTextureCoordinateListX.__len__()
+py  MeshTextureCoordinateListX.__setitem__()
 py  MeshTopologyEdgeListX.CollapseEdge(topologyEdgeIndex)
 py  MeshTopologyEdgeListX.Count [property ro]
 py  MeshTopologyEdgeListX.EdgeLine(topologyEdgeIndex)
@@ -4073,6 +4418,9 @@ py  MeshVertexColorListX.Destroy()
 py  MeshVertexColorListX.SetColor(face, color)
 py  MeshVertexColorListX.SetColor(index, color)
 py  MeshVertexColorListX.ToARGBArray()
+py  MeshVertexColorListX.__getitem__()
+py  MeshVertexColorListX.__len__()
+py  MeshVertexColorListX.__setitem__()
 py  MeshVertexListX.Add(vertex)
 py  MeshVertexListX.Add(x, y, z)
 py  MeshVertexListX.AddVertices(vertices)
@@ -4095,6 +4443,9 @@ py  MeshVertexListX.ToFloatArray()
 py  MeshVertexListX.ToPoint3dArray()
 py  MeshVertexListX.ToPoint3fArray()
 py  MeshVertexListX.UseDoublePrecisionVertices [property rw]
+py  MeshVertexListX.__getitem__()
+py  MeshVertexListX.__len__()
+py  MeshVertexListX.__setitem__()
 py  MeshVertexNormalListX.Add(normal)
 py  MeshVertexNormalListX.Add(x, y, z)
 py  MeshVertexNormalListX.AddRange(normals)
@@ -4156,12 +4507,12 @@ py  MeshX.Vertices [property ro]
 py  MeshX.__init__()
 py  MeshX.__init__(const BND_Mesh&)
 py  MeshingParametersX.ClosedObjectPostProcess [property rw]
-py  MeshingParametersX.Coarse() [static]
+py  MeshingParametersX.Coarse [property ro static]
 py  MeshingParametersX.ComputeCurvature [property rw]
-py  MeshingParametersX.Default() [static]
-py  MeshingParametersX.DefaultAnalysisMesh() [static]
+py  MeshingParametersX.Default [property ro static]
+py  MeshingParametersX.DefaultAnalysisMesh [property ro static]
 py  MeshingParametersX.DoublePrecision [property rw]
-py  MeshingParametersX.FastRenderMesh() [static]
+py  MeshingParametersX.FastRenderMesh [property ro static]
 py  MeshingParametersX.GridAmplification [property rw]
 py  MeshingParametersX.GridAngle [property rw]
 py  MeshingParametersX.GridAspectRatio [property rw]
@@ -4169,16 +4520,16 @@ py  MeshingParametersX.GridMaxCount [property rw]
 py  MeshingParametersX.GridMinCount [property rw]
 py  MeshingParametersX.JaggedSeams [property rw]
 py  MeshingParametersX.MaximumEdgeLength [property rw]
-py  MeshingParametersX.Minimal() [static]
+py  MeshingParametersX.Minimal [property ro static]
 py  MeshingParametersX.MinimumEdgeLength [property rw]
 py  MeshingParametersX.MinimumTolerance [property rw]
-py  MeshingParametersX.QualityRenderMesh() [static]
+py  MeshingParametersX.QualityRenderMesh [property ro static]
 py  MeshingParametersX.RefineAngle [property rw]
 py  MeshingParametersX.RefineAngleInDegrees [property rw]
 py  MeshingParametersX.RefineGrid [property rw]
 py  MeshingParametersX.RelativeTolerance [property rw]
 py  MeshingParametersX.SimplePlanes [property rw]
-py  MeshingParametersX.Smooth() [static]
+py  MeshingParametersX.Smooth [property ro static]
 py  MeshingParametersX.TextureRange [property rw]
 py  MeshingParametersX.Tolerance [property rw]
 py  MeshingParametersX.__init__()
@@ -4204,10 +4555,15 @@ py  ModelComponentX.IsValidComponentName(name) [static]
 py  ModelComponentX.LockId()
 py  ModelComponentX.LockIndex()
 py  ModelComponentX.LockName()
+py  ModelComponentX.ModelComponentTypeIgnoresCase(type) [static]
+py  ModelComponentX.ModelComponentTypeIncludesParent(type) [static]
+py  ModelComponentX.ModelComponentTypeRequiresUniqueName(type) [static]
 py  ModelComponentX.ModelSerialNumber [property ro]
 py  ModelComponentX.Name [property rw]
 py  ModelComponentX.NameIsLocked [property ro]
+py  ModelComponentX.NamePathSeparator [property ro static]
 py  ModelComponentX.ReferenceModelSerialNumber [property ro]
+py  NurbsCurveKnotListX.ClampEnd(end)
 py  NurbsCurveKnotListX.Count [property ro]
 py  NurbsCurveKnotListX.CreatePeriodicKnots(knotSpacing)
 py  NurbsCurveKnotListX.CreateUniformKnots(knotSpacing)
@@ -4234,6 +4590,9 @@ py  NurbsCurvePointListX.SetPoint(index, point, weight)
 py  NurbsCurvePointListX.SetPoint(index, x, y, z)
 py  NurbsCurvePointListX.SetPoint(index, x, y, z, weight)
 py  NurbsCurvePointListX.SetWeight(index, weight)
+py  NurbsCurvePointListX.__getitem__()
+py  NurbsCurvePointListX.__len__()
+py  NurbsCurvePointListX.__setitem__()
 py  NurbsCurveX.Append(nurbsCurve)
 py  NurbsCurveX.ConvertSpanToBezier(spanIndex)
 py  NurbsCurveX.Create(periodic, degree, points) [static]
@@ -4279,6 +4638,7 @@ py  NurbsSurfacePointListX.SetPoint(u, v, point, weight)
 py  NurbsSurfacePointListX.SetPoint(u, v, x, y, z)
 py  NurbsSurfacePointListX.SetPoint(u, v, x, y, z, weight)
 py  NurbsSurfacePointListX.SetWeight(u, v, weight)
+py  NurbsSurfacePointListX.__iter__()
 py  NurbsSurfaceX.CopyFrom(other)
 py  NurbsSurfaceX.Create(dimension, isRational, order0, order1, controlPointCount0, controlPointCount1) [static]
 py  NurbsSurfaceX.CreateFromCone(cone) [static]
@@ -4341,7 +4701,7 @@ py  ObjectAttributesX.MaterialIndex [property rw]
 py  ObjectAttributesX.MaterialSource [property rw]
 py  ObjectAttributesX.Mode [property rw]
 py  ObjectAttributesX.Name [property rw]
-py  ObjectAttributesX.OCSMappingChannelId() [static]
+py  ObjectAttributesX.OCSMappingChannelId [property ro static]
 py  ObjectAttributesX.ObjectColor [property rw]
 py  ObjectAttributesX.ObjectDecoration [property rw]
 py  ObjectAttributesX.ObjectFrame()
@@ -4764,6 +5124,22 @@ py  PolylineX.Trim(domain)
 py  PolylineX.__init__()
 py  PolylineX.__init__(const std::vector<BND_Point3dX>&)
 py  PolylineX.__init__(int)
+py  PostEffectCollectionX.GetSelectedPostEffect(type)
+py  PostEffectCollectionX.MovePostEffectBefore(id_move, id_before)
+py  PostEffectCollectionX.PostEffectDataFromId(id)
+py  PostEffectCollectionX.SetSelectedPostEffect(type, id)
+py  PostEffectCollectionX.__init__()
+py  PostEffectCollectionX.__iter__()
+py  PostEffectCollectionXIter.__iter__()
+py  PostEffectCollectionXIter.__next__()
+py  PostEffectDataX.DataCRC(current_remainder)
+py  PostEffectDataX.GetParameter(param_name)
+py  PostEffectDataX.Id [property ro]
+py  PostEffectDataX.LocalName [property ro]
+py  PostEffectDataX.On [property rw]
+py  PostEffectDataX.SetParameter(param_name, param_value)
+py  PostEffectDataX.Shown [property rw]
+py  PostEffectDataX.Type [property ro]
 py  RenderChannelsX.CustomList [property ro]
 py  RenderChannelsX.Mode [property ro]
 py  RenderChannelsX.__init__()
@@ -4780,6 +5156,7 @@ py  RenderSettingsX.ImageDpi [property rw]
 py  RenderSettingsX.ImageUnitSystem [property rw]
 py  RenderSettingsX.LinearWorkflow [property ro]
 py  RenderSettingsX.NamedView [property ro]
+py  RenderSettingsX.PostEffects [property ro]
 py  RenderSettingsX.RenderAnnotations [property rw]
 py  RenderSettingsX.RenderBackfaces [property rw]
 py  RenderSettingsX.RenderChannels [property ro]
@@ -4927,7 +5304,7 @@ py  SubDVertexX.SurfacePoint()
 py  SubDVertexX.Tag [property ro]
 py  SubDX.ClearEvaluationCache()
 py  SubDX.Edges [property ro]
-py  SubDX.Empty() [static]
+py  SubDX.Empty [property ro static]
 py  SubDX.Faces [property ro]
 py  SubDX.Flip()
 py  SubDX.IsSolid [property ro]
@@ -4937,12 +5314,14 @@ py  SubDX.UpdateAllTagsAndSectorCoefficients()
 py  SubDX.Vertices [property ro]
 py  SubDX.__init__(const BND_SubD&)
 py  SunX.Altitude [property rw]
+py  SunX.AltitudeFromValues(latitude, longitude, timezoneHours, daylightMinutes, when, hours, fast) [static]
 py  SunX.Azimuth [property rw]
 py  SunX.ColorFromAltitude(altitudeDegrees) [static]
 py  SunX.DaylightSaving [property rw]
 py  SunX.DaylightSavingMinutes [property rw]
 py  SunX.DaylightSavingOn [property rw]
 py  SunX.Enabled [property rw]
+py  SunX.GetDateTime(kind)
 py  SunX.Hash [property ro]
 py  SunX.Intensity [property rw]
 py  SunX.Latitude [property rw]
@@ -4951,7 +5330,9 @@ py  SunX.Longitude [property rw]
 py  SunX.ManualControl [property rw]
 py  SunX.ManualControlOn [property rw]
 py  SunX.North [property rw]
+py  SunX.SetDateTime(time, kind)
 py  SunX.SetPosition(azimuthDegrees, altitudeDegrees)
+py  SunX.SetPosition(when, latitudeDegrees, longitudeDegrees)
 py  SunX.TimeZone [property rw]
 py  SunX.Vector [property rw]
 py  SunX.__init__()
@@ -5019,6 +5400,7 @@ py  TextDotX.Text [property rw]
 py  TextDotX.__init__(const BND_TextDot&)
 py  TextDotX.__init__(std::wstring, BND_Point3dX)
 py  TextureMappingX.Capped [property rw]
+py  TextureMappingX.ComponentType [property ro]
 py  TextureMappingX.CreateBoxMapping(plane, dx, dy, dz, capped) [static]
 py  TextureMappingX.CreateCustomMeshMapping(mesh) [static]
 py  TextureMappingX.CreateCylinderMapping(cylinder, capped) [static]
@@ -5030,7 +5412,9 @@ py  TextureMappingX.CreateSurfaceParameterMapping() [static]
 py  TextureMappingX.Evaluate(p, n)
 py  TextureMappingX.Evaluate(p, n, pXform, nXform)
 py  TextureMappingX.Id [property ro]
+py  TextureMappingX.MappingType [property ro]
 py  TextureMappingX.NormalTransform [property rw]
+py  TextureMappingX.PrimativeTransform [property rw]
 py  TextureMappingX.PrimitiveTransform [property rw]
 py  TextureMappingX.Projection [property rw]
 py  TextureMappingX.TextureSpace [property rw]
@@ -5050,9 +5434,11 @@ py  TextureX.MagFilter [property rw]
 py  TextureX.MappingChannelId [property ro]
 py  TextureX.MinFilter [property rw]
 py  TextureX.Offset [property rw]
+py  TextureX.ProjectionMode [property rw]
 py  TextureX.Repeat [property rw]
 py  TextureX.Rotation [property rw]
 py  TextureX.SetAlphaBlendValues(constant, a0, a1, a2, a3)
+py  TextureX.SetRGBBlendValues(color, a0, a1, a2, a3)
 py  TextureX.TextureCombineMode [property rw]
 py  TextureX.TextureType [property rw]
 py  TextureX.TreatAsLinear [property rw]
@@ -5350,9 +5736,10 @@ py  ViewportX.ChangeToParallelReflectedProjection()
 py  ViewportX.ChangeToPerspectiveProjection(targetDistance, symmetricFrustum, lensLength)
 py  ViewportX.ChangeToSymmetricFrustum(isLeftRightSymmetric, isTopBottomSymmetric, targetDistance)
 py  ViewportX.ChangeToTwoPointPerspectiveProjection(targetDistance, up, lensLength)
-py  ViewportX.DefaultCameraDirection() [static]
+py  ViewportX.DefaultCameraDirection [property ro static]
 py  ViewportX.DollyCamera(dollyVector)
 py  ViewportX.DollyExtents(cameraCoordinateBoundingBox, border)
+py  ViewportX.DollyExtents(geometry, border)
 py  ViewportX.DollyFrustum(dollyDistance)
 py  ViewportX.Extents(halfViewAngleRadians, bbox)
 py  ViewportX.Extents(halfViewAngleRadians, sphere)

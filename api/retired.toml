@@ -212,3 +212,246 @@ member = "Faces"
 status = "replaced"
 by = ["SubDEdgeX.FaceCount", "SubDEdgeX.FaceAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
+
+# ---- Luis, 2026-10-16: rhino3dm-only members with a RhinoCommon form (docs/vnext/rhino3dm-only-proposals.md)
+
+[[retired]]
+class = "Arc"
+member = "AngleRadians"
+status = "replaced"
+by = ["ArcX.Angle"]
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "ArcCurve"
+members = ["CreateFromArc", "CreateFromArcParams", "CreateFromCircle", "CreateFromCircleParams"]
+status = "replaced"
+by = ["ArcCurveX.__init__"]
+note = "the constructors ArcCurve(arc), ArcCurve(arc, t0, t1), ArcCurve(circle), ArcCurve(circle, t0, t1)"
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "Brep"
+member = "CreateFromBoundingBox"
+status = "replaced"
+by = ["BrepX.CreateFromBox"]
+note = "CreateFromBox(BoundingBox) and CreateFromBox(Box)"
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "BrepTrim"
+members = ["EdgeIndex", "StartVertexIndex", "EndVertexIndex"]
+status = "replaced"
+by = ["BrepTrimX.Edge", "BrepTrimX.StartVertex", "BrepTrimX.EndVertex"]
+note = "trim.Edge.EdgeIndex, trim.StartVertex.VertexIndex, trim.EndVertex.VertexIndex"
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "BrepVertex"
+member = "EdgeCount"
+status = "replaced"
+by = ["BrepVertexX.EdgeIndices"]
+note = "len(vertex.EdgeIndices())"
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "ViewInfo"
+member = "WallpaperName"
+status = "replaced"
+by = ["ViewInfoX.WallpaperFilename"]
+test = "test_retired_viewinfo_vector_sun_shutlining_members"
+
+[[retired]]
+class = "Vector3d"
+member = "DotProduct"
+status = "replaced"
+by = ["Vector3dX.__mul__"]
+note = "the * operator: a * b"
+test = "test_retired_viewinfo_vector_sun_shutlining_members"
+
+[[retired]]
+class = "Sun"
+member = "SunColorFromAltitude"
+status = "replaced"
+by = ["SunX.ColorFromAltitude"]
+note = "rounds to the nearest integer per channel; the old binding truncated 255.5*c (D45)"
+test = "test_retired_viewinfo_vector_sun_shutlining_members"
+
+[[retired]]
+class = "ShutLining"
+member = "Curves"
+status = "replaced"
+by = ["File3dmShutLiningX.GetCurves", "File3dmShutLiningX.CurveRadius", "File3dmShutLiningX.AddCurve"]
+note = "GetCurves() ids, then CurveEnabled/CurveRadius/CurveProfile/CurvePull/CurveIsBump(id) and their setters; AddCurve()"
+test = "test_retired_viewinfo_vector_sun_shutlining_members"
+
+
+# ---- G97: Sun dates through GetDateTime / SetDateTime (DateTime support)
+
+[[retired]]
+class = "Sun"
+member = "Year"
+status = "replaced"
+by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+note = "GetDateTime(DateTimeKind.Local).year; set: SetDateTime(d.replace(year=...), Local) -- the same ON_Sun::LocalDateTime"
+test = "test_retired_sun_date_members"
+
+[[retired]]
+class = "Sun"
+member = "Month"
+status = "replaced"
+by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+note = "GetDateTime(DateTimeKind.Local).month"
+test = "test_retired_sun_date_members"
+
+[[retired]]
+class = "Sun"
+member = "Day"
+status = "replaced"
+by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+note = "GetDateTime(DateTimeKind.Local).day"
+test = "test_retired_sun_date_members"
+
+# ---- G97: TextureMapping through MappingType / UvwTransform
+
+[[retired]]
+class = "TextureMapping"
+member = "IsPeriodic"
+status = "replaced"
+by = ["TextureMappingX.MappingType"]
+note = "MappingType in (SphereMapping, CylinderMapping) -- opennurbs' own test"
+test = "test_retired_texturemapping_members"
+
+[[retired]]
+class = "TextureMapping"
+member = "ReverseTextureCoordinate"
+status = "replaced"
+by = ["TextureMappingX.UvwTransform"]
+note = "UvwTransform = R * UvwTransform, R the identity with R[dir][dir] = -1, R[dir][3] = 1 (ON_TextureMapping's matrix)"
+test = "test_retired_texturemapping_members"
+
+[[retired]]
+class = "TextureMapping"
+member = "SwapTextureCoordinate"
+status = "replaced"
+by = ["TextureMappingX.UvwTransform"]
+note = "UvwTransform = S * UvwTransform, S the identity with rows i and j swapped"
+test = "test_retired_texturemapping_members"
+
+[[retired]]
+class = "TextureMapping"
+member = "TileTextureCoordinate"
+status = "replaced"
+by = ["TextureMappingX.UvwTransform"]
+note = "UvwTransform = T * UvwTransform, T the identity with T[dir][dir] = count, T[dir][3] = offset"
+test = "test_retired_texturemapping_members"
+
+# ---- G97 (Luis 2026-10-16: "whatever RhinoCommon does, record if deviation")
+
+[[retired]]
+class = "Sun"
+member = "Hours"
+status = "replaced"
+by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+note = "hour + minute/60 + second/3600 of GetDateTime(DateTimeKind.Local): RhinoCommon's DateTime holds whole seconds (D48)"
+test = "test_retired_sun_date_members"
+
+[[retired]]
+class = "TextureMapping"
+member = "RequiresVertexNormals"
+status = "replaced"
+by = ["TextureMappingX.MappingType", "TextureMappingX.Projection", "TextureMappingX.Capped"]
+note = "not SurfaceParameters and (Projection == Ray, BoxMapping, or a capped CylinderMapping); a WCS-box projection makes MappingType throw, as RhinoCommon's (D49)"
+test = "test_retired_texturemapping_members"
+
+# ---- Rhino-only RhinoCommon pairings with a portable equivalent (Luis 2026-10-16)
+
+[[retired]]
+class = "Layer"
+member = "PathSeparator"
+status = "replaced"
+by = ["ModelComponentX.NamePathSeparator"]
+note = "RhinoCommon's Layer.PathSeparator (RHINO_SDK) is `=> ModelComponent.NamePathSeparator`; the old binding returns the same ON_ModelComponent constant"
+test = "test_retired_rhino_only_pairings"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetDimensionScale"
+status = "replaced"
+by = ["AnnotationBaseX.DimensionScale", "AnnotationBaseX.ParentDimensionStyle"]
+note = "the old GetDimensionScale(parentStyle) is ON_Annotation::DimScale(style): DimensionScale with ParentDimensionStyle set (D39); RhinoCommon's GetDimensionScale(RhinoDoc, style, viewport) is a different, view-dependent call"
+test = "test_retired_rhino_only_pairings"
+
+[[retired]]
+class = "RenderContent"
+member = "FirstChild"
+status = "replaced"
+by = ["File3dmRenderContentX.Children"]
+note = "the portable File3dmRenderContent (not RHINO_SDK RenderContent): Children enumerates the same FirstChild / NextSibling chain"
+test = "test_render_content_parent_link_and_children"
+
+[[retired]]
+class = "RenderContent"
+member = "NextSibling"
+status = "replaced"
+by = ["File3dmRenderContentX.Children"]
+note = "see FirstChild"
+test = "test_render_content_parent_link_and_children"
+
+# ---- G98: PostEffect -> the portable PostEffectData (Luis 2026-10-16)
+
+[[retired]]
+class = "PostEffect"
+member = "Id"
+status = "replaced"
+by = ["PostEffectDataX.Id"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "LocalName"
+status = "replaced"
+by = ["PostEffectDataX.LocalName"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "On"
+status = "replaced"
+by = ["PostEffectDataX.On"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "Shown"
+status = "replaced"
+by = ["PostEffectDataX.Shown"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "Type"
+status = "replaced"
+by = ["PostEffectDataX.Type"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "GetParameter"
+status = "replaced"
+by = ["PostEffectDataX.GetParameter"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"
+
+[[retired]]
+class = "PostEffect"
+member = "SetParameter"
+status = "replaced"
+by = ["PostEffectDataX.SetParameter"]
+note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
+test = "test_post_effect_collection_and_data"

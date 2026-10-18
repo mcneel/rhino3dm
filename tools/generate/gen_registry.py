@@ -88,10 +88,13 @@ CLASSES = [
      # bulk tier: Python buffer protocol over the contiguous ON_3dPoint storage
      # (3 doubles each) -> numpy.asarray(cloud) is an (N, 3) zero-copy view
      'buffer': 'm_ptr->m_P'},
+    # G99 (Luis 2026-10-16, option A): RhinoCommon's Font holds a MANAGED font -- an entry of
+    # opennurbs' process-wide list (ON_Font::GetManagedFont): shared, immutable, never freed. FontX
+    # does the same (`managed`: a borrowed pointer, never deleted); the bridge passes the old
+    # BND_Font's managed font through
     {'type': 'Rhino.DocObjects.Font', 'cs': 'Font', 'on': 'ON_Font',
-     'mode': 'pointer', 'hand': 'BND_Font', 'hand_header': 'bnd_font.h',
-     'copy': ('source.m_managed_font'
-              ' ? new ON_Font(*source.m_managed_font) : nullptr'),
+     'mode': 'pointer', 'hand': 'BND_Font', 'hand_header': 'bnd_font.h', 'managed': True,
+     'copy': 'const_cast<ON_Font*>(source.m_managed_font)',
      'gen': 'BND_FontX', 'reg': 'FontX'},
     # hand class holds ON_BezierCurve BY VALUE (private; public ONBezier()
     # accessor added for this) -- second value-mode class
@@ -160,6 +163,11 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_Group', 'hand_header': 'bnd_group.h',
      'copy': 'source.m_group ? new ON_Group(*source.m_group) : nullptr',
      'gen': 'BND_GroupX', 'reg': 'GroupX', 'base': 'ModelComponentX'},
+    # G91: what ManifestTable.Instantiate makes for ModelComponentType.HatchPattern (and the
+    # File3dmHatchPatternTable's items); no old binding
+    {'type': 'Rhino.DocObjects.HatchPattern', 'cs': 'HatchPattern', 'on': 'ON_HatchPattern',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
+     'gen': 'BND_HatchPatternX', 'reg': 'HatchPatternX'},
     {'type': 'Rhino.Geometry.InstanceDefinitionGeometry', 'cs': 'InstanceDefinitionGeometry',
      'on': 'ON_InstanceDefinition',
      'mode': 'pointer', 'hand': 'BND_InstanceDefinitionGeometry', 'hand_header': 'bnd_instance.h',
@@ -205,6 +213,11 @@ CLASSES = [
     {'type': 'Rhino.DocObjects.ViewInfo', 'cs': 'ViewInfo', 'on': 'ON_3dmView',
      'mode': 'value', 'hand': 'BND_ViewInfo', 'hand_header': 'bnd_3dm_settings.h',
      'copy': 'source.m_view',
+     # G104: RhinoCommon's `internal ViewInfo(File3dm parent, Guid id, IntPtr ptr, bool namedViewTable)` -- a
+     # LIVE view into the file's (named) view table. ConstPointer/NonConstPointer resolve it with
+     # ONX_Model_ViewPointer(file, id, ptr, named); the generated view resolves on every access (RhinoCommon
+     # returns its cached ptr while non-zero, which dangles once the table reallocates)
+     'fileview': {'resolver': 'ONX_Model_ViewPointer', 'ctor': ['File3dm', 'Guid', 'IntPtr', 'bool']},
      'gen': 'BND_ViewInfoX', 'reg': 'ViewInfoX'},
     # -- more geometry: bridge copies go through Duplicate() (works for any ON_Geometry)
     {'type': 'Rhino.Geometry.Point', 'cs': 'Point', 'on': 'ON_Point',
@@ -228,6 +241,12 @@ CLASSES = [
     {'type': 'Rhino.FileIO.FileReference', 'cs': 'FileReference', 'on': 'ON_FileReference',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
      'gen': 'BND_FileReferenceX', 'reg': 'FileReferenceX'},
+    # G96: an INTERNAL handle (never registered): AnnotationBase.GetTextRuns's elements, which
+    # PlainText / TextHasRtfFormatting read through LINQ -- a pooled ON_TextRun the object
+    # gives back with ON_TextRun_ReturnManagedTextRun (specgen InternalHandles)
+    {'type': 'Rhino.Geometry.TextRun', 'cs': 'TextRun', 'on': 'ON_TextRun',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True, 'internal': True,
+     'gen': 'BND_TextRunX', 'reg': 'TextRunX'},
     # a decal (G60): a std::shared_ptr<ON_Decal> handle (specgen SharedHandle)
     {'type': 'Rhino.Render.Decal', 'cs': 'Decal', 'on': 'ON_Decal',
      'mode': 'pointer', 'hand': 'BND_File3dmDecal', 'bridge': False, 'noctor': True,
@@ -330,6 +349,15 @@ CLASSES = [
      'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SafeFrameX', 'reg': 'SafeFrameX'},
     {'type': 'Rhino.Render.Sun', 'cs': 'Sun', 'on': 'ON_Sun',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SunX', 'reg': 'SunX'},
+    # Luis 2026-10-16: RenderSettings.PostEffects -- the portable PostEffectCollection (free-floating,
+    # ON_PostEffects) and its PostEffectData items (the old PostEffect's portable counterpart)
+    {'type': 'Rhino.Render.PostEffects.PostEffectCollection', 'cs': 'PostEffectCollection', 'on': 'ON_PostEffects',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_PostEffectCollectionX', 'reg': 'PostEffectCollectionX'},
+    # a component of (collection, id) (G98: specgen DetectGuidComponent) -- the old PostEffect's
+    # portable counterpart
+    {'type': 'Rhino.Render.PostEffects.PostEffectData', 'cs': 'PostEffectData', 'on': 'ON_PostEffect',
+     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmPostEffect', 'bridge': False, 'noctor': True,
+     'gen': 'BND_PostEffectDataX', 'reg': 'PostEffectDataX'},
     {'type': 'Rhino.Render.Skylight', 'cs': 'Skylight', 'on': 'ON_Skylight',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SkylightX', 'reg': 'SkylightX'},
     {'type': 'Rhino.Render.LinearWorkflow', 'cs': 'LinearWorkflow', 'on': 'ON_LinearWorkflow',
@@ -372,6 +400,11 @@ CLASSES = [
     {'type': 'Rhino.FileIO.File3dmGroupTable', 'cs': 'File3dmGroupTable', 'on': 'ONX_Model',
      'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmGroupTableX', 'reg': 'File3dmGroupTableX'},
+    # G91 (Luis 2026-10-15): File3dm.Manifest -- the public abstract ManifestTable, its bodies
+    # from the internal File3dmManifestTable (`impl`) that File3dm constructs
+    {'type': 'Rhino.FileIO.ManifestTable', 'cs': 'ManifestTable', 'on': 'ONX_Model', 'impl': 'File3dmManifestTable',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_ManifestTableX', 'reg': 'ManifestTableX'},
     {'type': 'Rhino.FileIO.File3dmDimStyleTable', 'cs': 'File3dmDimStyleTable', 'on': 'ONX_Model',
      'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmDimStyleTableX', 'reg': 'File3dmDimStyleTableX'},
@@ -390,6 +423,11 @@ CLASSES = [
     {'type': 'Rhino.FileIO.File3dmPlugInDataTable', 'cs': 'File3dmPlugInDataTable', 'on': 'ONX_Model',
      'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
      'gen': 'BND_File3dmPlugInDataTableX', 'reg': 'File3dmPlugInDataTableX'},
+    # G104 (Luis: generate it): the table's item -- RhinoCommon's `internal File3dmPlugInData(File3dm parent,
+    # Guid id)` stores the file and a plug-in id (registry state from CtorStore); PlugInId reads the id
+    {'type': 'Rhino.FileIO.File3dmPlugInData', 'cs': 'File3dmPlugInData', 'on': 'ONX_Model',
+     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'gen': 'BND_File3dmPlugInDataX', 'reg': 'File3dmPlugInDataX'},
     # embedded files (G71): a File3dm proxy component and the file's collection of them
     # (RhinoCommon's File3dmEmbeddedFiles: Add plus a manifest enumerator, no Count)
     # 'old': the hand class it replaces, for old-coverage only (no bridge): the old
@@ -495,6 +533,10 @@ CLASSES = [
      'gen': 'BND_PhysicallyBasedMaterialX', 'reg': 'PhysicallyBasedMaterialX'},
 ]
 BY_CS = {c['cs']: c for c in CLASSES}
+# an internal implementation type is its public class (G91: File3dmManifestTable -> ManifestTableX)
+for _c in CLASSES:
+    if _c.get('impl'):
+        BY_CS.setdefault(_c['impl'], _c)
 BY_TYPE = {c['type']: c for c in CLASSES}
 BY_REG = {c['reg']: c for c in CLASSES}
 
@@ -560,6 +602,7 @@ C_VT = {'ON_3dPoint*': 'Point3d', 'ON_3DPOINT_STRUCT*': 'Point3d',
         # sizes static_assert'ed where they cross (RH3DM_Ptr)
         'ON_Cone*': 'Cone', 'ON_Cylinder*': 'Cylinder', 'ON_Torus*': 'Torus', 'ON_Ellipse*': 'Ellipse'}
 VT_JS_KEY = {}       # generated struct -> JS shape-test property
+VT_JS_FIELDS = {}    # generated struct -> every JS field of its value object (G100: Arc vs Circle)
 
 
 def field_backed(vt, cs):
@@ -629,6 +672,10 @@ def register_value_types(vt):
         key = field_backed(vt, cs).get(first)
         if key:
             VT_JS_KEY.setdefault(cpp, key)
+        fb = field_backed(vt, cs)
+        jf = [fb[f['Name']] for f in t.get('Fields') or [] if fb.get(f['Name'])]
+        if jf:
+            VT_JS_FIELDS.setdefault(cpp, jf)
 
 
 CS_RET_DIRECT = {'bool': 'bool', 'int': 'int', 'double': 'double', 'uint': 'unsigned int'}
@@ -673,6 +720,30 @@ UNSAFE_NATIVES = {
     # array whenever count < Count - index (PointCloud.InsertRange)
     'ON_PointCloud_InsertPoints': 'pilot-findings #34',
 }
+
+NET_DEFAULT_MESSAGES = {
+    'ArgumentOutOfRangeException': 'Specified argument was out of the range of valid values.',
+    'ArgumentNullException': 'Value cannot be null.',
+    'IndexOutOfRangeException': 'Index was outside the bounds of the array.',
+    'ArgumentException': 'Value does not fall within the expected range.',
+}
+
+
+def net_message(exc, msg):
+    """the text .NET reports for `throw new <exc>(<msg>)` (G101), C-string escaped. The manifest
+    keeps a literal or `nameof(p)` argument as Message: a ONE-word message of ArgumentOutOfRange /
+    ArgumentNull is the parameter name their one-argument constructors take (a (paramName, message)
+    pair records the message sentence); no message is the parameterless constructor's default text"""
+    exc = (exc or '').split('.')[-1]
+    dflt = NET_DEFAULT_MESSAGES.get(exc, exc)
+    if not msg:
+        text = dflt
+    elif exc in ('ArgumentOutOfRangeException', 'ArgumentNullException') and re.match(r'^[A-Za-z_]\w*$', msg):
+        text = "%s (Parameter '%s')" % (dflt, msg)
+    else:
+        text = msg
+    return text.replace('\\', '\\\\').replace('"', "'")
+
 
 EXMAP = {
     'IndexOutOfRangeException': 'std::out_of_range',
@@ -838,6 +909,56 @@ def extend_enum_table(manifest):
             HIDDEN_ENUMS.add(k)
 
 
+# what the JS post-script (src/generated/gen_post.js, linked with --post-js) installs on the
+# embind classes after the module initializes (G101): `keep` -- (class, member) whose result is a
+# view of `this` (Python's keep_alive<0,1> / reference_internal): the result holds its parent;
+# `iters` -- iterator classes whose next().value holds the iterator; `static_props` -- (class,
+# name) of RhinoCommon static properties, registered as zero-argument class functions, made
+# getters; `enumerable` -- classes whose RhinoCommon type is IEnumerable: for...of
+JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': []}
+
+# IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
+# (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry
+# cites the enumerator it reproduces; its members must be generated, else nothing is emitted.
+GRID_ENUMS = {
+    # NurbsSurfacePointList.NurbsSrfEnum: position p -> GetControlPoint(p / CountV, p % CountV)
+    'NurbsSurfacePointList': ('CountU', 'CountV', 'GetControlPoint'),
+}
+
+
+# JS value objects (G101; Luis 2026-10-17 "leaking fields"): a struct field no RhinoCommon property
+# reads directly (field_backed) was a JS field under its C++ name (CylinderX.m_basecircle). Here the
+# RhinoCommon properties that DECOMPOSE it -- together exactly its content, each with a getter and
+# a setter -- become the value object's fields instead (getter/setter fields; set in this order).
+# A property without a setter (readonly struct) names `('ctor', other field)`: set through the
+# struct's constructor (type, other) as RhinoCommon builds it. The generator checks every name.
+VALUE_FIELD_PROPS = {
+    'Cylinder': {'m_basecircle': ['BasePlane', 'Radius']},          # the circle = its plane + radius
+    'ControlPoint': {'m_vertex': ['X', 'Y', 'Z', 'Weight']},        # the homogeneous components, raw
+    'ComponentIndex': {'m_type': [('ComponentIndexType', 'm_index')]},
+}
+
+
+def cs_enumerable(cs):
+    """whether RhinoCommon type `cs` (simple name) or a base implements IEnumerable (JS for...of; G101)"""
+    seen, todo = set(), [t for t in SIMPLE_TYPES.get(cs, [])]
+    while todo:
+        t = todo.pop()
+        if t in seen:
+            continue
+        seen.add(t)
+        for b in (TYPE_RECS.get(t) or {}).get('Bases') or []:
+            if re.match(r'^(System\.Collections\.Generic\.)?(IEnumerable|IList|IReadOnlyList|ICollection)\b', b):
+                return True
+            todo += SIMPLE_TYPES.get(b.split('<')[0].split('.')[-1], [])
+    return False
+
+
+def value_self(cls):
+    """a value-mode class's object (G104: a `fileview` class resolves its file view first)"""
+    return 'RH3DM_Val()' if cls.get('fileview') else 'const_cast<%s*>(&m_val)' % cls['on']
+
+
 def camel(n):
     return n[0].lower() + n[1:]
 
@@ -974,6 +1095,21 @@ PROPS_BY_TYPE = {}   # full type -> its portable property records (nearest-decla
 NO_OWNED_ABSTRACT = set()  # abstract bases whose guards ask RH3DM_NoOwnedPtr() (derived classes answer)
 
 
+# .NET's own enums a translated body names (G97: Sun.GetDateTime(DateTimeKind)): manifest-shaped
+# records, as the runtime declares them -- specgen's translator declares the same (Translate.cs)
+SYSTEM_ENUMS = [
+    {'Kind': 'enum', 'Type': 'System', 'Name': 'DateTimeKind', 'Variant': 'portable',
+     'Values': ['Unspecified = 0', 'Utc = 1', 'Local = 2'], 'EnumInts': [0, 1, 2]},
+]
+
+
+def with_system_enums(manifest):
+    """the manifest with SYSTEM_ENUMS appended (once)"""
+    have = {(x['Type'], x['Name']) for x in manifest['members'] if x['Kind'] == 'enum'}
+    manifest['members'] += [e for e in SYSTEM_ENUMS if (e['Type'], e['Name']) not in have]
+    return manifest
+
+
 def index_types(manifest):
     TYPE_RECS.clear(); SIMPLE_TYPES.clear(); CONST_PROPS.clear(); PLANNED.clear(); ENUM_VALUES.clear()
     PROPS_BY_TYPE.clear(); NO_OWNED_ABSTRACT.clear()
@@ -1008,6 +1144,12 @@ def index_types(manifest):
             named[n] = val
             vals.append(val)
             nxt = val + 1
+        # members valued by the C layer's constants (`Text = UnsafeNativeMethods.TextRunTypeConsts.Text`;
+        # G96): the extractor's resolved values, one per member, in order
+        ints = recs[0].get('EnumInts')
+        if vals is None and ints and len(ints) == len(recs[0]['Values']):
+            named = {v.partition('=')[0].strip(): iv for v, iv in zip(recs[0]['Values'], ints)}
+            vals = list(ints)
         if vals:
             ENUM_VALUES[name] = sorted(set(vals))
             ENUM_NAMED[name] = dict(named)
@@ -1189,9 +1331,10 @@ def index_child_state():
         if (parent is None or cs_unqualify(cs[0]['Type'] or '') != parent['cs']
                 or cs[0]['Field'] not in (rec.get('ParentFields') or [])):
             continue
-        if any(q['Field'] is None or q['Type'] not in ('bool', 'int', 'uint') for q in cs[1:]):
+        if any(q['Field'] is None or q['Type'] not in ('bool', 'int', 'uint', 'Guid') for q in cs[1:]):
             continue
-        c['state'] = [(CS_ARG[q['Type']][0], q['Field']) for q in cs[1:]]
+        # a Guid field is kept as opennurbs' ON_UUID (G104: File3dmPlugInData.m_id)
+        c['state'] = [('ON_UUID' if q['Type'] == 'Guid' else CS_ARG[q['Type']][0], q['Field']) for q in cs[1:]]
 
 
 def index_ctor_keys():
@@ -1272,7 +1415,7 @@ def index_components():
                            'sp': C_BY_NAME[sh['Raw']]['params'][0]['type']}
             c.pop('proxy', None)
             continue
-        if (TYPE_RECS.get(c['type']) or {}).get('Borrowed') and c['mode'] == 'pointer':
+        if ((TYPE_RECS.get(c['type']) or {}).get('Borrowed') or c.get('managed')) and c['mode'] == 'pointer':
             c['borrowed'] = True             # G48: a pointer into another object, never deleted
             c.pop('proxy', None)
         hd = (TYPE_RECS.get(c['type']) or {}).get('Handle')
@@ -1300,8 +1443,9 @@ def index_components():
         host = storage_host(c)
         if host is not c and (not host.get('proxy') or rec['KeyType'] != 'int'):
             continue
+        # a Guid key (G98: PostEffectData) is stored as the native's ON_UUID
         c['comp'] = {'Owner': owner, 'Const': rec['Const'], 'NonConst': rec.get('NonConst'),
-                     'Key': CS_ARG[rec['KeyType']][0], 'KeyNames': rec['KeyNames'],
+                     'Key': 'ON_UUID' if rec['KeyType'] == 'Guid' else CS_ARG[rec['KeyType']][0], 'KeyNames': rec['KeyNames'],
                      'OwnerNames': rec['OwnerNames'], 'Ctor': rec['Ctor']}
         if host is c:
             c.pop('proxy', None)          # a component is never a File3dm view
@@ -1374,10 +1518,21 @@ def view_copyable(c):
 # generate from. gen_init calls each `init` after every generated class exists (its
 # classes may derive from generated ones), and aliases `for...of` on its tables.
 HAND_BINDINGS = [
-    {'init': 'initBitmapXBindings', 'header': 'bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX']},
+    {'init': 'initBitmapXBindings', 'header': 'bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX'],
+     'classes': ['BitmapX', 'File3dmBitmapTableX', 'File3dmBitmapTableXIter']},
 ]
 # members a generated class registers from hand-written free functions taking it
 # (`const BND_<reg>&`): Python `keep_alive<0, 1>` (the result refers to the object)
 HAND_MEMBERS = {
     'File3dmX': [{'name': 'Bitmaps', 'kind': 'property', 'fn': 'RH3DM_Hand_File3dmX_Bitmaps', 'header': 'bnd_bitmapx.h'}],
+}
+# a hand class standing in for a RhinoCommon class nothing generates (G91): RhinoCommon's
+# BitmapEntry has no working member outside Rhino (pilot #37), so where a body constructs
+# one (`new BitmapEntry(index, file)`: ManifestTable.Instantiate) the kept BitmapX is made
+# from the same arguments. A deviation, recorded as D44.
+HAND_STANDINS = {
+    # the index RhinoCommon passes is the manifest's, always unset for an image (images carry
+    # no model index: ON_ModelComponent::IndexRequired(Image) is false) -- so the stand-in is
+    # made from Instantiate's `id` instead: (file, index) -> (file, id)
+    'BitmapEntry': {'gen': 'BND_BitmapX', 'args': ['int'], 'header': 'bnd_bitmapx.h', 'rebind': ('index', 'id')},
 }

@@ -382,6 +382,7 @@ def emit_valuetype_bindings(vt, skipped):
                 pyl.append('      .def_property_readonly_static("%s", [](py::object) { return %s::%s(); })'
                            % (n, T, m['Getter']))
                 js_fn(n, [], 'return %s::%s();' % (T, m['Getter']))
+                JS_POST['static_props'].append((reg, n))      # a getter in JS (G101), as in C#/Python
             elif k == 'property':
                 get = '[](%s& s) { return %s; }' % (T, pub(m, 's.%s()' % m['Getter']))
                 if m.get('Setter'):
@@ -472,8 +473,8 @@ def emit_valuetype_bindings(vt, skipped):
                 branches.append('if (%s) { %s return emscripten::val([&]() { %s }()); }'
                                 % (cond, conv, body))
             jsl.append('      .class_function("%s", optional_override([](%s) -> emscripten::val {\n'
-                       '        %s\n        return emscripten::val::undefined(); }))'
-                       % (fname, vparams, '\n        '.join(branches)))
+                       '        %s\n        throw std::invalid_argument("%s.%s: no overload matches the arguments"); }))'
+                       % (fname, vparams, '\n        '.join(branches), reg, fname))
             skipped['js value-type dispatcher'] = skipped.get('js value-type dispatcher', 0) + 1
 
         # value type -> class conversions (Sphere.ToBrep() =>
@@ -524,9 +525,27 @@ def emit_valuetype_bindings(vt, skipped):
             pyl[-1] = pyl[-1]     # struct-of-structs: constructed from its C# constructors only
         py_block = '\n'.join(pyl)
 
-        vo = ('  value_object<%s>("%sValue")\n%s;'
-              % (T, reg, '\n'.join('      .field("%s", &%s::%s)' % (field_of.get(f, f), T, f)
-                                   for f in fields)))
+        vfields = []
+        for f in fields:
+            if f in field_of or f not in VALUE_FIELD_PROPS.get(cs, {}):
+                if f not in field_of:
+                    raise SystemExit('%s.%s: a JS value-object field with no RhinoCommon name -- add it to '
+                                     'VALUE_FIELD_PROPS (gen_registry)' % (cs, f))
+                vfields.append('      .field("%s", &%s::%s)' % (field_of[f], T, f))
+                continue
+            for pp in VALUE_FIELD_PROPS[cs][f]:
+                name, other = (pp if isinstance(pp, tuple) else (pp, None))
+                pm = next((m for m in mine if m['Kind'] == 'property' and m['Name'] == name and not m['Static']), None)
+                if pm is None or (other is None and not pm.get('Setter')) or (other is not None and other not in fields):
+                    raise SystemExit('%s.%s: VALUE_FIELD_PROPS names %s, not a get/set property here' % (cs, f, name))
+                rt = pm['Ret']
+                # a translated enum crosses as the PUBLIC enum JS registers (RH3DM_Pub / its cast back)
+                pt, back = (VT_ENUMS[rt], '(%s)(int)v' % rt) if rt in VT_ENUMS else (rt, 'v')
+                setter = ('[](%s& s, %s v) { s.%s(%s); }' % (T, pt, pm['Setter'], back) if other is None
+                          else '[](%s& s, %s v) { s = %s(%s, s.%s); }' % (T, pt, T, back, other))
+                vfields.append('      .field("%s", +[](const %s& s) { return %s; }, +%s)'
+                               % (name, T, pub(pm, 's.%s()' % pm['Getter']), setter))
+        vo = ('  value_object<%s>("%sValue")\n%s;' % (T, reg, '\n'.join(vfields)))
         tag = 'RH3DM_%sFns' % reg
         py_block = py_block.replace('@@VEC@@(', '(')
         blocks[cs] = (py_block, 'struct %s {};' % tag,
@@ -612,16 +631,43 @@ def emit_data_bindings(t, vt, skipped):
 
     pyl = ['  py::class_<%s%s>(m, "%s")' % (T, (', ' + base['Cpp']) if base else '', reg)]
     jsl = ['  class_<%s%s>("%s")' % (T, (', base<%s>' % base['Cpp']) if base else '', reg)]
+    if cs_enumerable(t['Cs']):
+        JS_POST['enumerable'].append(reg)                 # a RhinoList: for...of in JS (G101)
     ctors = [m for m in mine if m['Kind'] == 'ctor' and m.get('Decl') and bindable(m)]
     if not any(not (m.get('Params') or []) for m in ctors):
         ctors.insert(0, {'Params': []})              # the implicit default constructor
     js_ctor_arity = set()
+    # same-arity constructors (Point3dList(int capacity) / (IEnumerable<Point3d> points)): one JS
+    # constructor dispatching on argument shape -- before, all but the first were dropped, and
+    # `new Point3dListX([p, p, p])` silently took the capacity constructor (an empty list)
+    from emit_classes import js_class_shape, js_shadowed, js_branch_order
+    by_arity = {}
+    for m in ctors:
+        by_arity.setdefault(len(m.get('Params') or []), []).append(m)
+    def jt(q):
+        return 'const %s&' % q['Type'] if q['Type'].startswith('std::vector<') else pub_t(q['Type'])
     for m in ctors:
         ps = m.get('Params') or []
-        pyl.append('      .def(py::init<%s>()%s)' % (', '.join(pub_t(q['Type']) if not q['Type'].startswith('std::vector<') else 'const %s&' % q['Type'] for q in ps),
+        pyl.append('      .def(py::init<%s>()%s)' % (', '.join(jt(q) for q in ps),
                                                     ''.join(', py::arg("%s")' % q['Name'] for q in ps)))
         if len(ps) in js_ctor_arity:
-            skipped['js data-class ctor (same arity)'] = skipped.get('js data-class ctor (same arity)', 0) + 1
+            continue
+        group = by_arity[len(ps)]
+        if len(group) > 1:
+            group = sorted(group, key=lambda g: js_branch_order(None, [jt(q) for q in g.get('Params') or []]))
+            shd = js_shadowed([[js_class_shape(jt(q))[0] for q in g.get('Params') or []] for g in group])
+            if shd:
+                raise SystemExit('%s constructor/%d: JS dispatcher branch unreachable: %s' % (reg, len(ps), shd))
+            branches = []
+            for g in group:
+                shapes = [js_class_shape(jt(q)) for q in g['Params']]
+                cond = ' && '.join(sh[1].format(v='v%d' % i) for i, sh in enumerate(shapes))
+                args = ', '.join(sh[2].format(v='v%d' % i) for i, sh in enumerate(shapes))
+                branches.append('if (%s) return new %s(%s);' % (cond, T, args))
+            jsl.append('      .constructor(optional_override([](%s) -> %s* {\n        %s\n'
+                       '        throw std::invalid_argument("%s: no constructor matches the arguments"); }), allow_raw_pointers())'
+                       % (', '.join('emscripten::val v%d' % i for i in range(len(ps))), T, '\n        '.join(branches), reg))
+            js_ctor_arity.add(len(ps))
             continue
         if not ps:
             jsl.append('      .constructor<>()')

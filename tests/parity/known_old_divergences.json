@@ -6,5 +6,6 @@
   "construct.controlpointcurve": "old CreateControlPointCurve builds a uniform clamped NURBS; RhinoCommon uses the 2023 CurveThroughPolyline-style construction -- a different curve (pilot-findings #18)",
   "vector3d.unitize": "old Unitize discards opennurbs' bool and returns None (pilot-findings #19)",
   "vector3d.unitize.zero": "same as vector3d.unitize",
-  "nurbssurface.create.invalid": "old Create skips RhinoCommon's argument check (dimension < 1, order < 2, count < order) and returns an invalid surface instead of null (pilot-findings #23)"
+  "nurbssurface.create.invalid": "old Create skips RhinoCommon's argument check (dimension < 1, order < 2, count < order) and returns an invalid surface instead of null (pilot-findings #23)",
+  "annotation.hello.texthasrtfformatting": "old tests RichText for an {\\rtf prefix (RhinoCommon 8); RhinoCommon 9 counts text runs (more than one) -- a one-line plain text is not RTF there (deviations D46)"
 }

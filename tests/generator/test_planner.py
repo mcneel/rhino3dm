@@ -2081,8 +2081,14 @@ def test_derived_class_arguments_fit_and_native_usability():
     saved = dict(R.C_BY_NAME)
     try:
         R.C_BY_NAME['ok'] = {'name': 'ok', 'returns': 'bool', 'params': [{'type': 'const ON_Curve*'}, {'type': 'double'}]}
+        # G96: a C-layer enum (defined in on_material.cpp) is usable -- RH3DM_R converts the result,
+        # RH3DM_EnumArg the argument; any other by-value C type is still refused
         R.C_BY_NAME['enum'] = {'name': 'enum', 'returns': 'TextureProjectionModes', 'params': [{'type': 'const ON_Texture*'}]}
-        assert P.native_usable('ok') and not P.native_usable('enum') and not P.native_usable('missing')
+        R.C_BY_NAME['cenum'] = {'name': 'cenum', 'returns': 'bool', 'params': [{'type': 'const ON_TextRun*'}, {'type': 'enum TextRunBool'}]}
+        R.C_BY_NAME['byval'] = {'name': 'byval', 'returns': 'ON_SomethingByValue', 'params': [{'type': 'const ON_Texture*'}]}
+        assert 'TextureProjectionModes' in P.c_layer_enums() and 'TextRunTypeConsts' in P.c_layer_enums()
+        assert P.native_usable('ok') and P.native_usable('enum') and P.native_usable('cenum')
+        assert not P.native_usable('byval') and not P.native_usable('missing')
         assert not P.native_usable('ON_PointCloud_InsertPoints') or 'ON_PointCloud_InsertPoints' not in R.C_BY_NAME
     finally:
         R.C_BY_NAME.clear(); R.C_BY_NAME.update(saved)
@@ -2099,3 +2105,96 @@ def test_enum_map_with_a_default_return():
         assert why is None and p['shape'][0] == 'enummap' and p['shape'][3] is None and p['shape'][4] == 0
     finally:
         R.CS_ENUMS.clear(); R.CS_ENUMS.update(saved)
+
+
+def test_internal_handle_adopt_linq_sources_and_native_enums():
+    # G96: AnnotationBase.PlainText / TextHasRtfFormatting -- LINQ over GetTextRuns()'s TextRun
+    # objects (an INTERNAL handle class, adopted with `new TextRun(p)`)
+    TR = R.BY_CS['TextRun']
+    assert TR.get('internal') and TR['mode'] == 'pointer'
+    import emit_classes as E
+    assert E.emit_registrations(TR, [], set()) == ('', '')           # C++ only, never bound
+    per_reg = {c['reg']: [] for c in R.CLASSES}
+    saved = TR.get('handle')
+    try:
+        TR['handle'] = {'Delete': 'ON_TextRun_ReturnManagedTextRun', 'Field': 'm_pManagedTextRun'}
+        out = P.resolve_markers('$$adopt:TextRun$$(RH3DM_IP(p))', CURVE, per_reg, {'members': []})[0]
+        assert out == 'RH3DM_Adopt<BND_TextRunX, ON_TextRun>(RH3DM_IP(p))'
+        TR.pop('handle')
+        # not a handle: the constructor's ownership is unknown -- refused
+        assert P.resolve_markers('$$adopt:TextRun$$(RH3DM_IP(p))', CURVE, per_reg, {'members': []})[0] is None
+        assert P.resolve_markers('$$adopt:Curve$$(RH3DM_IP(p))', CURVE, per_reg, {'members': []})[0] is None
+    finally:
+        if saved is not None:
+            TR['handle'] = saved
+    # a class sequence's element (a tagged call returning one is a LINQ source)
+    assert P.cs_array_elem('TextRun[]') == 'TextRun'
+    assert P.cs_array_elem('IEnumerable<Rhino.Geometry.Curve>') == 'Curve'
+    assert P.cs_array_elem('List<File3dmObject>') == 'File3dmObject'
+    assert P.cs_array_elem('int') is None and P.cs_array_elem(None) is None
+
+
+def test_enum_values_from_resolved_ints():
+    # G96: `Text = UnsafeNativeMethods.TextRunTypeConsts.Text` -- not a literal; the extractor's
+    # resolved EnumInts value the members (in declaration order), literal enums are unchanged
+    m = {'members': [
+        {'Kind': 'enum', 'Type': 'Rhino.Geometry', 'Name': 'TextRunTypeX', 'Variant': 'portable',
+         'Values': ['None = UnsafeNativeMethods.C.None', 'Text = UnsafeNativeMethods.C.Text', 'Paragraph = UnsafeNativeMethods.C.Paragraph'],
+         'EnumInts': [0, 1, 4]},
+        {'Kind': 'enum', 'Type': 'Rhino.Geometry', 'Name': 'LiteralX', 'Variant': 'portable',
+         'Values': ['A = 2', 'B'], 'EnumInts': [7, 7]},
+        {'Kind': 'enum', 'Type': 'Rhino.Geometry', 'Name': 'BadX', 'Variant': 'portable',
+         'Values': ['A = Foo.Bar', 'B'], 'EnumInts': [1]},              # count mismatch: unvalued
+    ]}
+    try:
+        R.index_types(m)
+        assert R.ENUM_NAMED['TextRunTypeX'] == {'None': 0, 'Text': 1, 'Paragraph': 4}
+        assert R.ENUM_NAMED['LiteralX'] == {'A': 2, 'B': 3}
+        assert 'BadX' not in R.ENUM_NAMED
+    finally:
+        R.index_types({'members': []})
+
+
+def test_free_floating_cpp_pointer_and_system_enums():
+    # G97: DocumentOrFreeFloatingBase.CppPointer in a translated body is the class's own accessor;
+    # .NET's DateTimeKind joins the manifest's enums (as specgen declares it)
+    per_reg = {c['reg']: [] for c in R.CLASSES}
+    SUN = R.BY_CS['Sun']
+    saved = SUN.get('ff')
+    try:
+        SUN['ff'] = saved or {'New': 'ON_Sun_New'}
+        assert P.resolve_markers('F($$get:CppPointer$$())', SUN, per_reg, {'members': []})[0] == 'F((void*)RH3DM_Const())'
+    finally:
+        if saved is None:
+            SUN.pop('ff')
+    assert P.resolve_markers('F($$get:CppPointer$$())', CURVE, per_reg, {'members': []})[0] is None   # not free-floating
+    m = R.with_system_enums({'members': []})
+    assert [x['Name'] for x in m['members']] == ['DateTimeKind']
+    assert len(R.with_system_enums(m)['members']) == 1                     # once
+    try:
+        R.index_types(m)
+        assert R.ENUM_NAMED['DateTimeKind'] == {'Unspecified': 0, 'Utc': 1, 'Local': 2}
+    finally:
+        R.index_types({'members': []})
+
+
+def test_js_dispatcher_shadowing_is_refused():
+    # Luis 2026-10-16: PointCloud.add(point, color) checked the color as `true`, so add(point,
+    # normal) was unreachable in JS -- the generator now refuses any shadowed branch
+    import emit_classes as E
+    assert E.js_shadowed([['object:Z', 'any:BND_Color'], ['object:Z', 'object:Z']]) == [(1, 0)]
+    assert E.js_shadowed([['object:Z', 'color'], ['object:Z', 'object:Z']]) == []
+    assert E.js_shadowed([['number'], ['string']]) == []
+    assert E.js_shadowed([['class:CurveX'], ['class:NurbsCurveX']]) == [(1, 0)]     # a base check takes derived
+    assert E.js_shadowed([['class:NurbsCurveX'], ['class:CurveX']]) == []
+    color = E.js_class_shape('BND_Color')
+    assert color[0] == 'color' and 'hasOwnProperty("r")' in color[1]
+    assert E.js_class_shape('std::wstring')[0] == E.js_class_shape('BND_UUID')[0] == 'string'
+
+
+def test_js_value_objects_are_checked_on_every_field():
+    # G100: ArcX {Plane, Radius, AngleDomain} and CircleX {Plane, Radius} share their first field;
+    # keyed on it, ArcCurveX(circle) reached the Arc conversion ("Missing field: AngleDomain")
+    import emit_classes as E
+    assert E.js_shadowed([['object:Plane,Radius'], ['object:AngleDomain,Plane,Radius']]) == [(1, 0)]
+    assert E.js_shadowed([['object:AngleDomain,Plane,Radius'], ['object:Plane,Radius']]) == []

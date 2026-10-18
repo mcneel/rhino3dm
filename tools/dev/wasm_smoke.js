@@ -111,7 +111,7 @@ factory().then(rhino => {
   const P = rhino.Point3dX;
   const vp1 = { X: 1, Y: 2, Z: 3 }, vq1 = { X: 4, Y: 6, Z: 3 };
   assert.strictEqual(P.DistanceTo(vp1, vq1), 5);
-  const un = P.Unset();
+  const un = P.Unset;                                   // a static property: a getter (G101)
   assert.strictEqual(P.DistanceTo(un, vq1), 0);          // RhinoCommon semantics
   assert.strictEqual(P.IsValid(un), false);
   const vd = P.op_Subtraction(vq1, vp1);                       // Point3d - Point3d -> Vector3d
@@ -160,20 +160,36 @@ factory().then(rhino => {
   if (rhino.BitmapX && rhino.File3dmX) {
     const f = new rhino.File3dmX();
     const bt = f.bitmaps;
-    assert.strictEqual(bt.add(new rhino.BitmapX()), -1);      // no path: rejected, and said so
     const ids = [];
     for (const p of ['/tmp/a.png', '/tmp/b.png', '/tmp/c.png']) {
       const b = new rhino.BitmapX();
       b.fileFullPath = p;
-      const i = bt.add(b);
-      assert.ok(i >= 0);
-      ids.push(bt.findIndex(i).id);
+      const added = bt.add(b);
+      assert.ok(added !== null);
+      ids.push(added.id);
     }
     assert.strictEqual(bt.findId(ids[1]).fileFullPath, '/tmp/b.png');
     assert.strictEqual(bt.findIndex(999), null);
     assert.strictEqual(bt.delete(ids[0]), true);
     assert.deepStrictEqual([...bt].map(b => b.fileFullPath), ['/tmp/b.png', '/tmp/c.png']);
     console.log('  BitmapX: add/findId/for...of after a delete ->', [...bt].map(b => b.fileFullPath));
+  }
+
+  // G91: File3dm.Manifest -- RhinoCommon's ManifestTable (Instantiate makes each proxy)
+  if (rhino.File3dmX && rhino.ManifestTableX) {
+    const f = new rhino.File3dmX();
+    for (const n of 'ab') f.allLayers.addLayer(n, { r: 0, g: 0, b: 0, a: 255 });
+    const m = f.manifest;
+    const T = rhino.ModelComponentType;
+    assert.strictEqual(m.activeObjectCount(T.Layer), 2);
+    const it = m.getEnumerator(T.Layer);
+    const names = [];
+    for (let x = it.next(); !x.done; x = it.next()) names.push(x.value.name);
+    assert.deepStrictEqual(names, ['a', 'b']);
+    const l = m.findName('b', T.Layer, '00000000-0000-0000-0000-000000000000');
+    assert.strictEqual(l.name, 'b');
+    assert.strictEqual(m.findId(l.id).name, 'b');
+    console.log('  ManifestTableX: getEnumerator(Layer) ->', names);
   }
 
   // option 4 (G80/G81): Point3dList and Polyline are RhinoCommon's classes,

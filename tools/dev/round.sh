@@ -54,6 +54,7 @@ case "${1:-}" in
   build)  both all all ;;
   oracle) oracle ;;
   test)   both test test ;;
-  all)    echo "== oracle"; oracle; both all all ;;
+  # the report again once both are done: it reads the JS surface the wasm run just dumped
+  all)    echo "== oracle"; oracle; both all all; py report | sed 's/^/report: /' ;;
   *) sed -n '2,17p' "$0"; exit 2 ;;
 esac

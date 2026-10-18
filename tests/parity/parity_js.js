@@ -35,7 +35,8 @@ function decode(rhino, v) {
     if (k === 'static') {
       const [tn, mn] = x.split('.');
       if (tn === 'RhinoMath' && mn === 'UnsetValue') return UNSET;
-      return rhino[tn + 'X'][mn]();
+      const sv = rhino[tn + 'X'][mn];            // a static property is a getter (G101)
+      return typeof sv === 'function' ? sv() : sv;
     }
     const o = {};
     FIELDS[k].forEach((f, i) => { o[f] = decode(rhino, x[i]); });
@@ -184,7 +185,7 @@ function evaluate(rhino, c, prebuilt) {
       ? Object.fromEntries(FIELDS[c.type].map((f, i) => [f, decode(rhino, c.self[i])]))
       : c.self.new
         ? rhino[c.self.new + 'X'].Create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
-        : NS[c.self.static]();
+        : (typeof NS[c.self.static] === 'function' ? NS[c.self.static]() : NS[c.self.static]);
   if (c.op) {
     const a = c.args.map(x => decode(rhino, x));
     const name = a.length === 1 ? 'op_UnaryNegation' : OPS[c.op];
@@ -201,7 +202,8 @@ function evaluate(rhino, c, prebuilt) {
     // field-backed properties are plain fields of the value object
     if (self && typeof self === 'object' && c.member in self) return self[c.member];
     const fn = NS[c.member];
-    if (!fn) throw new Error('missing ' + c.member);
+    if (fn === undefined) throw new Error('missing ' + c.member);
+    if (typeof fn !== 'function') return fn;            // a static property: a getter (G101)
     return self ? fn(self) : fn();
   }
   const fn = NS[c.member];

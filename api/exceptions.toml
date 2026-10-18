@@ -139,8 +139,80 @@ vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTableX), with the review fixes
 reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yields BitmapEntry for images (pilot #37)"
 
 [[hand_kept]]
-class = "File3dm"
-members = ["Bitmaps"]
-decided = "Luis, 2026-10-15"
-vnext = "File3dmX.Bitmaps (gen_registry.HAND_MEMBERS)"
-reason = "the accessor of the kept File3dmBitmapTable"
+class = "Centermark"
+members = ["GetDisplayLines"]
+decided = "Luis, 2026-10-16"
+reason = "RhinoCommon's Centermark.GetDisplayLines is commented out (pilot #41); kept until the upstream fix"
+upstream = "loop to 6 (not 9) and uncomment Centermark.GetDisplayLines (pilot #41)"
+
+[[hand_kept]]
+class = "Sun"
+members = ["MinYear", "MaxYear"]
+decided = "Luis, 2026-10-16"
+reason = "ON_Sun::MinYear/MaxYear: the valid year range; RhinoCommon has no counterpart"
+upstream = "add Sun.MinYear / Sun.MaxYear (static) to RhinoCommon"
+
+[[hand_kept]]
+class = "Sun"
+members = ["IsValid"]
+decided = "Luis, 2026-10-16"
+reason = "ON_Sun::IsValid; RhinoCommon has no counterpart"
+upstream = "add Sun.IsValid to RhinoCommon"
+
+[[hand_kept]]
+class = "Sun"
+members = ["EnableAllowed"]
+decided = "Luis, 2026-10-16"
+reason = "ON_Sun::EnableAllowed (whether the sun may be enabled -- not Enabled); RhinoCommon has no counterpart"
+upstream = "add Sun.EnableAllowed to RhinoCommon"
+
+[[hand_kept]]
+class = "Sun"
+members = ["ManualControlAllowed"]
+decided = "Luis, 2026-10-16 (proposed: not equivalent to ManualControlOn)"
+reason = "ON_Sun::ManualControlAllowed (whether manual control is permitted) is a separate setting from ManualControlOn (whether it is active); RhinoCommon has only ManualControlOn"
+upstream = "add Sun.ManualControlAllowed to RhinoCommon"
+
+
+# ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
+
+[[hand_kept]]
+class = "Material"
+members = ["RenderMaterialInstanceId"]
+decided = "Luis, 2026-10-16"
+reason = "RhinoCommon's Material.RenderMaterialInstanceId is under #if RHINO_SDK (rhinosdkmaterial.cs:668) although its C functions (Rdk_RenderContent_MaterialInstanceId / SetMaterialInstanceId, rdk_content.cpp) only call ON_Material::RdkMaterialInstanceId -- no Rhino needed"
+upstream = "move Material.RenderMaterialInstanceId out of #if RHINO_SDK (rhinocommon/dotnet/rhino/rhinosdkmaterial.cs)"
+
+[[hand_kept]]
+class = "SubD"
+members = ["SharpEdgeCount"]
+decided = "Luis, 2026-10-16"
+reason = "RhinoCommon's SubD.SharpEdgeCount() / SharpEdgeCount(out SubDEdgeSharpness) sit inside the #if RHINO_SDK block at opennurbs_subd.cs:428-1291 although ON_SubD_SharpEdgeCount (on_subd.cpp) is portable; the old binding is a property, RhinoCommon a method (a deviation once generated)"
+upstream = "move SubD.SharpEdgeCount (both overloads) out of the #if RHINO_SDK block (rhinocommon/dotnet/opennurbs/opennurbs_subd.cs)"
+
+[[hand_kept]]
+class = "SubDFace"
+members = ["ControlNetCenterPoint", "ControlNetCenterNormal", "ControlNetCenterFrame"]
+decided = "Luis, 2026-10-16"
+reason = "one-line opennurbs calls (ON_SubDFace::ControlNetCenter*) guarded twice: #if RHINO_SDK in opennurbs_subd.cs:3169 and #if !defined(RHINO3DM_BUILD) in on_subd.cpp:1202"
+upstream = "move SubDFace.ControlNetCenterPoint/Normal/Frame out of #if RHINO_SDK (opennurbs_subd.cs) and ON_SubDFace_ControlNetCenterPoint/Normal/Frame out of #if !defined(RHINO3DM_BUILD) (rhinocommon/c/on_subd.cpp)"
+
+[[hand_kept]]
+class = "RenderContent"
+members = ["ChildSlotAmount", "SetChild", "SetChildSlotAmount", "SetChildSlotOn"]
+decided = "Luis, 2026-10-16"
+reason = "the portable File3dmRenderContent (RhinoCommon) has ChildSlotOn / FindChild / DeleteChild but no amount or set members; opennurbs ON_RenderContent has all four (the old binding calls them; its ChildSlotAmount passes a fixed default of 100.0)"
+upstream = "add ChildSlotAmount(name, default), SetChildSlotAmount(amount, name), SetChildSlotOn(on, name) and SetChild(child, name) to File3dmRenderContent (rhinocommon/dotnet/opennurbs/opennurbs_render_content.cs) over ON_RenderContent, with C functions in the portable C layer"
+
+[[hand_kept]]
+class = "ObjectAttributes"
+members = ["DrawColor"]
+decided = "Luis, 2026-10-16"
+reason = "a rhino3dm extension: DrawColor(File3dm) resolves the color source against the file (layer / object / material); RhinoCommon's DrawColor(RhinoDoc[, viewportId]) asks Rhino (CRhinoObjectAttributes_DrawColor) -- same name, different contract"
+
+[[hand_kept]]
+class = "Mesh"
+members = ["SetCachedTextureCoordinatesFromMaterial"]
+decided = "Luis, 2026-10-16"
+reason = "a rhino3dm extension: (File3dm, objectId, Material) calls opennurbs ON_Mesh::SetCachedTextureCoordinatesFromMaterial(ONX_Model, material, mapping ref); RhinoCommon's takes a RhinoObject (RHINO_SDK)"
+upstream = "optional: a File3dm overload of Mesh.SetCachedTextureCoordinatesFromMaterial in RhinoCommon over the ONX_Model one"

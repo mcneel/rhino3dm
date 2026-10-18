@@ -109,6 +109,8 @@ def main(argv):
         h = getattr(r, hname)
         if not isinstance(h, type) or hname.startswith('_') or hname in gen_names:
             continue
+        if hname in {c for hb in bnd_gen.HAND_BINDINGS for c in hb.get('classes', [])}:
+            continue                             # vNext hand bindings (G90), not the old ones
         if hasattr(h, '__members__'):           # enums: values, not API members
             continue
         if hname.endswith('Iterator'):           # Python-protocol helpers
@@ -154,6 +156,7 @@ def main(argv):
         review.append((hname, h, rc_name or False, set(spec) | set(rhino_only), hn,
                        sorted(b['notrc']), sorted(b['rhinoonly'])))
 
+    js = js_only_members(root, r, rows, gen_of, names, portable, rc_chain)
     tot = {k: sum(len(row[3][k]) for row in rows) for k in rows[0][3]}
     total = sum(tot.values())
     begun = [row for row in rows if row[1]]
@@ -202,6 +205,7 @@ def main(argv):
         '',
         'Hand classes: %d, of which %d have a generated counterpart.' % (len(rows), len(begun)),
         '',
+    ] + js_summary(js) + [
         '## Classes with a generated counterpart',
         '',
         'Sorted by what is still missing. "Missing" lists every member the old',
@@ -237,12 +241,90 @@ def main(argv):
         with open(out_path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(text)
         write_review(os.path.join(os.path.dirname(out_path), 'rhino3dm-only-members.md'),
-                     review, stamp, commit, load_retired(root, r), r, gen_of, root, bnd_gen)
+                     review, stamp, commit, load_retired(root, r), r, gen_of, root, bnd_gen, js)
     return 0
 
 
 SERIALIZATION = {'Encode', 'Decode', 'ToJSON', 'FromJSON', 'RdkXml', 'ToThreejsJSON',
                  'ToThreejsJSONRotate', 'FromThreejsJSON', 'ToNurbsSurfaceThreejsJSON'}
+
+
+# ---- members registered only in JS (the Python introspection above cannot see them)
+JS_EQ = {'count': '__len__', 'get': '__getitem__', 'iterator': '__iter__', 'set': '__setitem__', 'equals': '__eq__'}
+EMBIND = {'delete', 'clone', 'isAliasOf', 'isDeleted', 'deleteLater'}
+
+
+def js_only_members(root, r, rows, gen_of, names, portable, rc_chain):
+    """the old classes' JS members with no Python counterpart (tools/dev/dump_js_members.js output,
+    written by the round's wasm phase): per old class, a JS name matching none of the class's
+    Python names -- case aside, `count`/`get`/`iterator`/`set`/`equals` as Python's protocol
+    dunders, and a `getX` / `setX` accessor of Python's `X`. Each is covered when the generated JS
+    class registers it (api/generated-surface.lock), else a row for review. None when no dump."""
+    path = os.environ.get('RH3DM_JS_MEMBERS') or os.path.join(root, 'build', 'dev', 'js_members.json')
+    if not os.path.exists(path):
+        return None
+    jsm = json.load(open(path))
+    gen_js = {}
+    for l in open(os.path.join(root, 'api', 'generated-surface.lock'), encoding='utf-8'):
+        m = re.match(r'^js  (\w+)\.(\w+)', l)
+        if m:
+            gen_js.setdefault(m.group(1), set()).add(m.group(2).lower())
+    old = {row[0] for row in rows}
+    out = {'path': path, 'stamp': datetime.datetime.fromtimestamp(os.path.getmtime(path), datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC'),
+           'covered': [], 'rows': []}
+    for c in sorted(jsm):
+        h = getattr(r, c, None)
+        if c not in old or h is None:
+            continue                      # generated, enums, embind vectors, classes named otherwise in Python
+        pyn = {n.lower() for n in names(h)} | {n for n in dir(h) if n.startswith('__')}
+        gname = gen_of.get(c)
+        gj = set()
+        g = gname
+        while g:                          # the generated class and its generated bases
+            gj |= gen_js.get(g, set())
+            import bnd_gen
+            b = bnd_gen.BY_REG.get(g)
+            g = b.get('base') if b else None
+        chain = set()
+        for k in h.__mro__:
+            if k.__name__ not in ('object', 'pybind11_object'):
+                rc_chain(k.__name__, chain)
+        rcn = set().union(*(portable.get(k, set()) for k in chain))
+        for n in jsm[c]:
+            if n in EMBIND or n.startswith('_') or n == 'values':
+                continue
+            l = n.lower()
+            if l in pyn or JS_EQ.get(n, '-') in pyn or (l[:3] in ('get', 'set') and l[3:] in pyn):
+                continue                  # the Python member's JS spelling: reviewed with it
+            if l in gj:
+                out['covered'].append((c, n, gname))
+            else:
+                out['rows'].append((c, n, gname, js_hint(n, rcn)))
+    return out
+
+
+def js_hint(name, rc_names):
+    """a mechanical suggestion for a JS-only member -- never a verdict"""
+    if name in SERIALIZATION or 'hreejs' in name or name in ('toJSON', 'toByteArray', 'toByteArrayOptions', 'encodeOptions'):
+        return 'serialization / interop helper'
+    rl = {c.lower(): c for c in rc_names}
+    pre = sorted((c for k, c in rl.items() if name.lower().startswith(k) and len(name) > len(c)), key=len, reverse=True)
+    if pre:
+        return 'JS split of RhinoCommon `%s` (an overload by name)' % pre[0]
+    import difflib
+    close = difflib.get_close_matches(name.lower(), sorted(rl), n=1, cutoff=0.8)
+    return ('closest RhinoCommon: `%s`' % rl[close[0]]) if close else ''
+
+
+def js_summary(js):
+    if js is None:
+        return ['**JS-only members: not measured** -- no `build/dev/js_members.json` (the wasm round phase',
+                'writes it with tools/dev/dump_js_members.js).', '']
+    return ['**JS-only old members** (registered in JS, not in Python -- this report is otherwise',
+            'Python-based): **%d**, of which %d are covered by the generated JS surface and %d are'
+            % (len(js['covered']) + len(js['rows']), len(js['covered']), len(js['rows'])),
+            'rhino3dm-only (reviewed in `rhino3dm-only-members.md`, "JS-only members"). JS surface',
+            'dumped %s.' % js['stamp'], '']
 
 
 def hint(name, rc_names, declared):
@@ -268,20 +350,65 @@ def hint(name, rc_names, declared):
     return ''
 
 
+# a Python protocol member's JS spelling (the generated and old JS surfaces)
+JS_DUNDER = {'__getitem__': 'get', '__setitem__': 'set', '__len__': 'count', '__iter__': 'iterator', '__eq__': 'equals'}
+
+
+def js_spellings(member):
+    """the JS names a Python member may be registered under, lowercased: camelCase / PascalCase
+    alike, the protocol dunders' JS names, and an old `getX` / `setX` accessor of `X`"""
+    l = member.lower()
+    return {l, 'get' + l, 'set' + l} | ({JS_DUNDER[member]} if member in JS_DUNDER else set())
+
+
+def js_has(jsm, cls, member):
+    """`cls` registers `member` in the built JS module (its embind bases included); None when
+    the class is not registered in JS at all"""
+    if cls not in jsm and cls.startswith('BND_') and cls[4:] in jsm:
+        cls = cls[4:]                     # registered in JS by its plain name (SubDFaceIteratorFromSubD)
+    if cls not in jsm:
+        return None
+    if member == '__init__':
+        return True                       # a JS class is constructed with `new`: its constructor
+    want, seen = js_spellings(member), set()
+    while cls and cls not in seen:
+        seen.add(cls)
+        if want & {n.lower() for n in jsm.get(cls, ())}:
+            return True
+        cls = jsm.get('$bases', {}).get(cls)
+    return False
+
+
+def load_js_members(root):
+    path = os.environ.get('RH3DM_JS_MEMBERS') or os.path.join(root, 'build', 'dev', 'js_members.json')
+    return json.load(open(path)) if os.path.exists(path) else None
+
+
 def load_retired(root, r):
     """api/retired.toml -> {(old class, member): entry}, each `by` checked
     against the built generated module: a missing replacement is flagged,
-    never reported as replaced"""
+    never reported as replaced. JS too (the round's JS surface dump): where
+    the OLD member is registered in JS, every replacement must be as well
+    (`missing_js`); an old member that was Python-only needs none. No dump:
+    `js_checked` False, reported as unchecked"""
     path = os.path.join(root, 'api', 'retired.toml')
     if not os.path.exists(path):
         return {}
     import tomllib
+    jsm = load_js_members(root)
     out = {}
     for e in tomllib.load(open(path, 'rb')).get('retired', []):
         missing = [b for b in e.get('by', [])
                    if not hasattr(getattr(r, b.split('.')[0], None), b.split('.', 1)[1])]
         for m in e.get('members') or [e['member']]:
-            out[(e['class'], m)] = dict(e, missing=missing)
+            missing_js, in_js = [], None
+            if jsm is not None:
+                in_js = bool(js_has(jsm, e['class'], m))
+                if in_js:
+                    missing_js = [b for b in e.get('by', [])
+                                  if not js_has(jsm, b.split('.')[0], b.split('.', 1)[1])]
+            out[(e['class'], m)] = dict(e, missing=missing, missing_js=missing_js,
+                                        js_checked=jsm is not None, old_in_js=in_js)
     return out
 
 
@@ -303,13 +430,15 @@ def retired_tag(e):
     if e['status'] == 'replaced':
         if e['missing']:
             return '**replacement missing**: %s' % ', '.join('`%s`' % b for b in e['missing'])
+        if e.get('missing_js'):
+            return '**JS replacement missing**: %s' % ', '.join('`%s`' % b for b in e['missing_js'])
         tag = '**replaced** by %s' % ', '.join('`%s`' % b for b in e['by'])
     else:
         tag = '**proposed drop**'
     return tag + (' (%s)' % e['note'] if e.get('note') else '')
 
 
-def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None, root=None, bnd_gen=None):
+def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None, root=None, bnd_gen=None, js=None):
     """every old-binding member that is NOT a portable RhinoCommon member, one
     row each, with a mechanical hint -- the list Luis classifies (keep by hand
     / rename to the RhinoCommon name / drop)"""
@@ -340,7 +469,9 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
          'The **Generated** column says what the generated surface already offers:',
          '- **replaced** -- an equivalent is generated and tested (`api/retired.toml`;',
          '  rationale in `retired-members.md`); **proposed drop** -- no RhinoCommon',
-         '  equivalent, awaiting a decision.',
+         '  equivalent, awaiting a decision. Checked in BOTH languages: where the old member',
+         '  is registered in JS, each replacement must be too (**JS replacement missing**',
+         '  otherwise).',
          '- **same logic** / **close** / **partial** -- found by comparing CODE, not names',
          '  (`tools/generate/logic_match.py`): the opennurbs operations the old binding',
          '  performs vs those the generated member reaches through its C function, with',
@@ -351,7 +482,20 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
          '  match, the rest have no generated counterpart. Evidence for review, not a',
          '  decision: argument handling is not compared.',
          '',
-         '| Category (by hint) | Members |', '|---|---|']
+         ]
+    if retired:
+        vals = list(retired.values())
+        if not any(e.get('js_checked') for e in vals):
+            L += ['**Retirements: JS not checked** -- no `build/dev/js_members.json` (the wasm round', 'phase writes it).', '']
+        else:
+            injs = sum(1 for e in vals if e.get('old_in_js'))
+            bad = sorted('%s.%s -> %s' % (c, m, ', '.join(e['missing_js'])) for (c, m), e in retired.items() if e.get('missing_js'))
+            L += ['**Retirements checked in JS**: %d of %d retired members are registered in the old JS'
+                  ' surface; %s.' % (injs, len(vals), ('%d lack a JS replacement: ' % len(bad)) + '; '.join('`%s`' % x for x in bad)
+                                     if bad else 'every one has its replacement in JS'), '']
+            for x in bad:
+                print('RETIRED: JS replacement missing: ' + x)
+    L += ['| Category (by hint) | Members |', '|---|---|']
     for k, v in sorted(cats.items(), key=lambda kv: -len(kv[1])):
         L.append('| %s | %d |' % (k, len(v)))
     L += ['| **Total** | **%d** |' % len(notrc), '']
@@ -391,7 +535,9 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
     kept = load_kept(root)
     def decision(c, n):
         e = kept.get((c, n)) or kept.get((c, None))
-        return '**keep** (hand-written; %s)' % e['decided'] if e else ''
+        if not e:
+            return ''
+        return '**keep** (hand-written; %s)%s' % (e['decided'], ('; upstream: ' + e['upstream']) if e.get('upstream') else '')
     L += ['Kept hand-written (`api/exceptions.toml` `[[hand_kept]]`): %d members.'
           % sum(1 for c, _, _, _, _, n in notrc if decision(c, n)), '']
     by_class = {}
@@ -406,6 +552,21 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
               '| Member | Kind | Hint | Generated | Decision |', '|---|---|---|---|---|']
         L += ['| `%s` | %s | %s | %s | %s |' % (n, k, hh, gt, decision(c, n)) for n, k, hh, gt in items]
         L.append('')
+    if js:
+        jrows = [(c, n, gname, hh, retired_tag(retired[(c, n)]) if (c, n) in retired else '') for c, n, gname, hh in js['rows']]
+        L += ['## JS-only members', '',
+              'Registered by the old bindings in JS only (the Python introspection above cannot see them),',
+              'with no match in the generated JS surface. Same decisions as above (keep / rename / drop);',
+              '`api/retired.toml` and `[[hand_kept]]` entries use the JS name. %d covered by the generated'
+              % len(js['covered']),
+              'JS surface already: %s.' % (', '.join('%s.`%s`' % (c, n) for c, n, _ in js['covered']) or '-'), '']
+        by = {}
+        for c, n, gname, hh, gt in jrows:
+            by.setdefault(c, []).append((n, hh, gt))
+        for c in sorted(by):
+            L += ['### %s (JS only)' % c, '', '| Member | Kind | Hint | Generated | Decision |', '|---|---|---|---|---|']
+            L += ['| `%s` | js | %s | %s | %s |' % (n, hh, gt, decision(c, n)) for n, hh, gt in by[c]]
+            L.append('')
     L += ['## In RhinoCommon, but Rhino-only there', '',
           'These ARE RhinoCommon members, but compiled out of the portable build (they need',
           'a running Rhino in .NET). rhino3dm ships them today; they need review too.', '',
