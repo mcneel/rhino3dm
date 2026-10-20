@@ -3281,6 +3281,15 @@ def out_companion(q):
     return _out_companion(q)
 
 
+def companion_result(has_success):
+    """the C++ type an out companion returns for a tuple led by an unconverted C# result
+    (G109), else None"""
+    if isinstance(has_success, tuple) and len(has_success) == 3 and has_success[0] == 'result' \
+            and has_success[2] == '{c}':
+        return has_success[1]
+    return None
+
+
 def _out_companion(q):
     """the C++ signature parts of a tuple member's companion taking its out
     arguments by reference and returning its success (G83): [(type, name, is_out)]
@@ -3288,7 +3297,9 @@ def _out_companion(q):
     if q['shape'][0] != 'tuple' or q.get('static'):
         return None
     _, has_success, outs = q['shape']
-    if not (has_success is True or isinstance(has_success, str)):
+    # a bool status, or a C# result passed through unconverted (G109: `uint SharpEdgeCount(out
+    # SubDEdgeSharpness)`, ('result', 'unsigned int', '{c}')): the companion returns it as is
+    if not (has_success is True or isinstance(has_success, str) or companion_result(has_success)):
         return None
     if any(g.get('Exception') is None or g.get('assign_cpp') for g in q['guards'] if not g.get('fail')):
         return None                          # an early return would not be the success flag

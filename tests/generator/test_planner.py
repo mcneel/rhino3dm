@@ -1995,14 +1995,19 @@ def test_guid_empty_early_return_and_js_sequence_shape():
 
 
 def test_members_calling_an_unsafe_native_are_refused():
-    # G82 / pilot-findings #34: ON_PointCloud_InsertPoints overruns the heap
+    # G82: a member calling a native known to overrun the heap is refused. The first entry,
+    # ON_PointCloud_InsertPoints (pilot-findings #34), was fixed upstream (U11): a stand-in here
     seq = ('', 'IEnumerable<Point3d>', 'points')
     calls = [SELF, {'Kind': 'param', 'Text': 'index'}, {'Kind': 'parammember', 'Text': 'points.Count'},
              {'Kind': 'param', 'Text': 'points'}]
     x = member('void', params=[('', 'int', 'index'), seq], calls=calls)
-    x['Calls'][0]['Name'] = 'ON_PointCloud_InsertPoints'
-    _, why = P.plan(x, cfn('void', 'ON_Curve*', 'int', 'int', 'const ON_3dPoint*'), CURVE)
-    assert why.startswith('unsafe native ON_PointCloud_InsertPoints')
+    x['Calls'][0]['Name'] = 'RH3DM_TestUnsafe_InsertPoints'
+    R.UNSAFE_NATIVES['RH3DM_TestUnsafe_InsertPoints'] = 'a test finding'
+    try:
+        _, why = P.plan(x, cfn('void', 'ON_Curve*', 'int', 'int', 'const ON_3dPoint*'), CURVE)
+    finally:
+        del R.UNSAFE_NATIVES['RH3DM_TestUnsafe_InsertPoints']
+    assert why.startswith('unsafe native RH3DM_TestUnsafe_InsertPoints')
 
 
 def test_constructor_choosing_its_creation_call_is_one_ternary():
@@ -2089,9 +2094,12 @@ def test_derived_class_arguments_fit_and_native_usability():
         assert 'TextureProjectionModes' in P.c_layer_enums() and 'TextRunTypeConsts' in P.c_layer_enums()
         assert P.native_usable('ok') and P.native_usable('enum') and P.native_usable('cenum')
         assert not P.native_usable('byval') and not P.native_usable('missing')
-        assert not P.native_usable('ON_PointCloud_InsertPoints') or 'ON_PointCloud_InsertPoints' not in R.C_BY_NAME
+        R.C_BY_NAME['unsafe'] = dict(R.C_BY_NAME['ok'], name='unsafe')
+        R.UNSAFE_NATIVES['unsafe'] = 'a test finding'
+        assert not P.native_usable('unsafe')               # usable but for the finding
     finally:
         R.C_BY_NAME.clear(); R.C_BY_NAME.update(saved)
+        R.UNSAFE_NATIVES.pop('unsafe', None)
 
 
 def test_enum_map_with_a_default_return():
@@ -2198,3 +2206,12 @@ def test_js_value_objects_are_checked_on_every_field():
     import emit_classes as E
     assert E.js_shadowed([['object:Plane,Radius'], ['object:AngleDomain,Plane,Radius']]) == [(1, 0)]
     assert E.js_shadowed([['object:AngleDomain,Plane,Radius'], ['object:Plane,Radius']]) == []
+
+
+def test_out_companion_returns_an_unconverted_csharp_result():
+    # G109: `uint SharpEdgeCount() { var r = default(SubDEdgeSharpness); return SharpEdgeCount(out r); }`
+    # calls a tuple sibling led by its C# result, not a bool status; the companion returns that
+    # result. A converted result (an enum cast, a wrapped object) is still not a plain return.
+    assert P.companion_result(('result', 'unsigned int', '{c}')) == 'unsigned int'
+    assert P.companion_result(('result', 'RH3DM_Foo', '(RH3DM_Foo){c}')) is None
+    assert P.companion_result(True) is None and P.companion_result(' != 0') is None

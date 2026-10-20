@@ -539,6 +539,17 @@ def emit_valuetype_bindings(vt, skipped):
                                      'VALUE_FIELD_PROPS (gen_registry)' % (cs, f))
                 vfields.append('      .field("%s", &%s::%s)' % (field_of[f], T, f))
                 continue
+            if isinstance(VALUE_FIELD_PROPS[cs][f], str):
+                # the raw field under a RhinoCommon constructor parameter's name (G109): that
+                # name must be the parameter at the field's position in a translated constructor
+                # taking exactly the fields
+                name, pos = VALUE_FIELD_PROPS[cs][f], fields.index(f)
+                if not any(m['Kind'] == 'ctor' and len(m.get('Params') or []) == len(fields)
+                           and m['Params'][pos]['Name'] == name for m in mine):
+                    raise SystemExit('%s.%s: VALUE_FIELD_PROPS names %s, not constructor parameter %d'
+                                     % (cs, f, name, pos))
+                vfields.append('      .field("%s", &%s::%s)' % (name, T, f))
+                continue
             for pp in VALUE_FIELD_PROPS[cs][f]:
                 name, other = (pp if isinstance(pp, tuple) else (pp, None))
                 pm = next((m for m in mine if m['Kind'] == 'property' and m['Name'] == name and not m['Static']), None)

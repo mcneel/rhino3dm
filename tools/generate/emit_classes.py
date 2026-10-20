@@ -723,12 +723,13 @@ def emit_decl_def(p, cls):
     if p.get('out_companion'):
         # a translated sibling calls this with its outs (G83): the same call, the
         # outs by reference, the success returned
-        from planner import out_companion
+        from planner import out_companion, companion_result
         parts = out_companion(p)
         _, has_success, outs = p['shape']
+        ret = companion_result(has_success) or 'bool'       # the C# result itself (G109), else the status
         sig = ', '.join('%s%s %s' % (t, '&' if o else '', n) for t, n, o in parts)
         call = '%s(%s)' % (p['fn']['name'], ', '.join(p['call_exprs']))
-        L = ['bool %s::%s_out(%s) const {' % (cls['gen'], p['cpp'], sig)]
+        L = ['%s %s::%s_out(%s) const {' % (ret, cls['gen'], p['cpp'], sig)]
         L += emit_guard_lines(p)
         out_names = {n for n, _ in outs}
         for x in p['locals']:
@@ -741,7 +742,7 @@ def emit_decl_def(p, cls):
             L.append('  %s' % x)
         L.append('  return (%s)%s;' % (call, (' ' + has_success) if isinstance(has_success, str) else ''))
         L.append('}')
-        decl += '\n  bool %s_out(%s) const;' % (p['cpp'], sig)
+        decl += '\n  %s %s_out(%s) const;' % (ret, p['cpp'], sig)
         body.append('\n' + '\n'.join(L))
     return decl, '\n'.join(body)
 

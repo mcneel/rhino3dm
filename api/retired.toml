@@ -525,3 +525,33 @@ status = "replaced"
 by = ["SubDFaceX.ControlNetCenterFrame"]
 note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
 test = "test_subd_face_control_net_center_u3"
+
+# ---- Material.RenderMaterialInstanceId (U1 upstream, 2026-10-20): a portable C pair, the property out of RHINO_SDK
+
+[[retired]]
+class = "Material"
+member = "RenderMaterialInstanceId"
+status = "replaced"
+by = ["MaterialX.RenderMaterialInstanceId"]
+note = "U1: ON_Material_Get/SetRdkMaterialInstanceId in c/on_material.cpp over public opennurbs; the setter sets the universal render engine plug-in id, as the RDK native did"
+test = "test_material_render_material_instance_id_u1"
+
+# ---- SubD.SharpEdgeCount (U2 upstream, 2026-10-20): moved out of RHINO_SDK with five other portable SubD members
+
+[[retired]]
+class = "SubD"
+member = "SharpEdgeCount"
+status = "replaced"
+by = ["SubDX.SharpEdgeCount"]
+note = "U2: RhinoCommon's SharpEdgeCount() is a METHOD (the old one a read-only property): subd.SharpEdgeCount() / subd.sharpEdgeCount() (D60); the out overload's (count, range) tuple is shadowed by it (G105) and not registered"
+test = "test_subd_sharp_edge_count_u2"
+
+# ---- PointCloud.InsertRange (U11 upstream RH-99686, 2026-10-20): the native no longer overruns the heap
+
+[[retired]]
+class = "PointCloud"
+member = "InsertRange"
+status = "replaced"
+by = ["PointCloudX.InsertRange"]
+note = "U11: the old binding's InsertRangePoints is a copy of the broken ON_PointCloud_InsertPoints (pilot-findings #34) and overruns the heap in 8.x; the generated member is RhinoCommon's over the fixed native. An index out of range now raises (IndexError / a JS exception) where the old one did nothing"
+test = "test_point_cloud_insert_range_u11"

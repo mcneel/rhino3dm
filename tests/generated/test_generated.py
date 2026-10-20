@@ -1491,8 +1491,7 @@ def test_sequence_arguments_where_rhinocommon_takes_ienumerable():
     pc.AddRange([P(0, 0, 0), P(1, 0, 0)])
     pc.AddRange(r.PolylineX([P(2, 0, 0), P(3, 0, 0)]))
     assert pc.Count == 4 and [p.X for p in pc.GetPoints()] == [0, 1, 2, 3]
-    # InsertRange's native overruns the heap (pilot-findings #34): refused
-    assert not hasattr(pc, 'InsertRange')
+    # InsertRange: generated since U11 fixed its native (test_point_cloud_insert_range_u11)
     n = r.PointCloudX()
     n.AddRange([P(0, 0, 0)], [V(0, 0, 1)])
     assert n.Count == 1 and n.ContainsNormals
@@ -2423,3 +2422,80 @@ def test_subd_face_control_net_center_u3():
         fr = face.ControlNetCenterFrame
         assert (fr.Origin.X, fr.Origin.Y, fr.Origin.Z) == (c.X, c.Y, c.Z)
         assert all(abs(a - b) < 1e-12 for a, b in zip((fr.ZAxis.X, fr.ZAxis.Y, fr.ZAxis.Z), (v.X, v.Y, v.Z)))
+
+
+def test_subd_sharp_edge_count_u2():
+    # U2 (upstream, 2026-10-20): RhinoCommon's SubD.SharpEdgeCount() / ClearEdgeSharpness() / ErrorCount,
+    # moved out of its RHINO_SDK block. SharpEdgeCount is RhinoCommon's METHOD (D60; the old binding's
+    # read-only property), checked against RhinoCommon's definition: the edges whose IsSharp is true
+    total = 0
+    for name in ('subd.3dm', 'subdBox.3dm', 'subd_creases.3dm'):
+        path = os.path.join(MODELS, name)
+        subds = [o.Geometry for o in r.File3dmX.Read(path).Objects if isinstance(o.Geometry, r.SubDX)]
+        olds = [o.Geometry for o in r.File3dm.Read(path).Objects if isinstance(o.Geometry, r.SubD)]
+        assert len(subds) == len(olds)
+        for s, old in zip(subds, olds):
+            n = s.SharpEdgeCount()
+            assert n == sum(1 for e in s.Edges if e.IsSharp)
+            assert n == old.SharpEdgeCount
+            assert all(isinstance(e.Sharpness, r.SubDEdgeSharpnessX) for e in s.Edges)
+            errors = r.SubDX.ErrorCount
+            assert s.ClearEdgeSharpness() == n             # the number of edges changed
+            assert s.SharpEdgeCount() == 0
+            assert r.SubDX.ErrorCount == errors            # a process-wide counter: no new errors
+            total += n
+    print('sharp edges in the SubD fixtures:', total)
+
+
+def test_subd_edge_sharpness_value_type_g109():
+    # G109: SubDEdgeSharpness as a translated value type (two floats, as ON_SUBD_EDGE_SHARPNESS_STRUCT)
+    S = r.SubDEdgeSharpnessX
+    s = S(1.0, 2.0)
+    assert (s[0], s[1], s.EndSharpness(1)) == (1.0, 2.0, 2.0)
+    assert s.IsIncreasing and s.IsVariable and not s.IsConstant
+    assert (s.Reversed()[0], s.Reversed()[1]) == (2.0, 1.0)
+    assert S(3.0).IsConstant and S(3.0) == S(3.0, 3.0)
+    crease = 5.0                       # SubDEdgeSharpness.CreaseValue (value-type constants are not bound)
+    assert S.Crease.IsCrease and S(crease, crease) == S.Crease
+    # FromInterval couples the ends: one crease end alone is not valid (why D61's JS fields are raw)
+    assert S(crease, 0.0).IsNotValid
+    assert S.Smooth.IsZero and S.Smooth == S()
+
+
+def test_point_cloud_insert_range_u11():
+    # U11 (upstream RH-99686, 2026-10-20): ON_PointCloud_InsertPoints moved the tail to the old end
+    # instead of index + count -- a heap overrun when count < Count - index, the points out of order
+    # otherwise (pilot-findings #34). Each shape below, including the ones the old copy got wrong;
+    # the normals (tagged z = j + 1) must stay with their points, the inserted ones zero
+    P, V = r.Point3dX, r.Vector3dX
+    for n, i, k in ((4, 1, 1), (4, 0, 2), (4, 3, 1), (2, 0, 5), (5, 2, 3), (6, 1, 2), (3, 3, 2)):
+        pc = r.PointCloudX()
+        pc.AddRange([P(j, 0, 0) for j in range(n)], [V(0, 0, j + 1) for j in range(n)])
+        pc.InsertRange(i, [P(90 + j, 0, 0) for j in range(k)])
+        assert [p.X for p in pc.GetPoints()] == list(range(i)) + [90 + j for j in range(k)] + list(range(i, n)), (n, i, k)
+        assert [v.Z for v in pc.GetNormals()] == [j + 1 for j in range(i)] + [0] * k + [j + 1 for j in range(i, n)], (n, i, k)
+        assert pc.Count == n + k
+    pc = r.PointCloudX()
+    pc.AddRange([P(0, 0, 0), P(1, 0, 0)])
+    pc.InsertRange(1, [])                                  # nothing to insert: unchanged
+    assert [p.X for p in pc.GetPoints()] == [0, 1]
+    with pytest.raises(IndexError, match='larger than or equal to zero'):
+        pc.InsertRange(-1, [P(9, 9, 9)])
+    with pytest.raises(IndexError, match='smaller than or equal to Count'):
+        pc.InsertRange(3, [P(9, 9, 9)])
+
+
+def test_material_render_material_instance_id_u1():
+    # U1 (upstream, 2026-10-20): RhinoCommon's Material.RenderMaterialInstanceId over portable natives;
+    # setting it also sets the universal render engine as the plug-in id (ON_Material's contract)
+    import uuid
+    m = r.MaterialX()
+    assert m.RenderMaterialInstanceId == uuid.UUID(int=0)
+    uid = uuid.uuid4()
+    m.RenderMaterialInstanceId = uid
+    assert m.RenderMaterialInstanceId == uid
+    assert str(m.RenderPlugInId) == '99999999-9999-9999-9999-999999999999'
+    old = r.Material()                      # the old binding (hand-bound): the same contract
+    old.RenderMaterialInstanceId = uid
+    assert old.RenderMaterialInstanceId == m.RenderMaterialInstanceId
+    assert str(old.RenderPlugInId) == str(m.RenderPlugInId)

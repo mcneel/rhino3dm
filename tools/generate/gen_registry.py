@@ -606,7 +606,9 @@ C_VT = {'ON_3dPoint*': 'Point3d', 'ON_3DPOINT_STRUCT*': 'Point3d',
         'ON_Arc*': 'Arc', 'ON_Circle*': 'Circle', 'ON_Sphere*': 'Sphere',
         'ON_2DPOINT_STRUCT*': 'Point2d', 'ON_2dVector*': 'Vector2d', 'ON_2DVECTOR_STRUCT*': 'Vector2d',
         # sizes static_assert'ed where they cross (RH3DM_Ptr)
-        'ON_Cone*': 'Cone', 'ON_Cylinder*': 'Cylinder', 'ON_Torus*': 'Torus', 'ON_Ellipse*': 'Ellipse'}
+        'ON_Cone*': 'Cone', 'ON_Cylinder*': 'Cylinder', 'ON_Torus*': 'Torus', 'ON_Ellipse*': 'Ellipse',
+        # rhcommon_c.h's mirror of ON_SubDEdgeSharpness (two floats; G109)
+        'ON_SUBD_EDGE_SHARPNESS_STRUCT*': 'SubDEdgeSharpness'}
 VT_JS_KEY = {}       # generated struct -> JS shape-test property
 VT_JS_FIELDS = {}    # generated struct -> every JS field of its value object (G100: Arc vs Circle)
 
@@ -729,9 +731,8 @@ HOLDERS = {
 # one is refused until the C layer is fixed upstream (the generator never
 # ships a member it knows overruns the heap). Keyed by C function -> finding.
 UNSAFE_NATIVES = {
-    # tail copied to the old end instead of index+count: writes past the
-    # array whenever count < Count - index (PointCloud.InsertRange)
-    'ON_PointCloud_InsertPoints': 'pilot-findings #34',
+    # none open. ON_PointCloud_InsertPoints (pilot-findings #34: the tail copied to the
+    # old end instead of index+count) was fixed upstream as U11 (RH-99686, 2026-10-20)
 }
 
 NET_DEFAULT_MESSAGES = {
@@ -949,6 +950,12 @@ VALUE_FIELD_PROPS = {
     'Cylinder': {'m_basecircle': ['BasePlane', 'Radius']},          # the circle = its plane + radius
     'ControlPoint': {'m_vertex': ['X', 'Y', 'Z', 'Weight']},        # the homogeneous components, raw
     'ComponentIndex': {'m_type': [('ComponentIndexType', 'm_index')]},
+    # G109 (Luis 2026-10-20): no property reads either end (only this[i] / EndSharpness(i)), so a
+    # plain string names the RAW field after the RhinoCommon constructor parameter at its position,
+    # SubDEdgeSharpness(double sharpness0, double sharpness1) -- never through that constructor:
+    # FromInterval couples the ends (Crease needs both at 5), so a field-by-field rebuild through it
+    # would turn {5, 5} into NaN. The generator checks the constructor and position.
+    'SubDEdgeSharpness': {'m_sharpness0': 'sharpness0', 'm_sharpness1': 'sharpness1'},
 }
 
 

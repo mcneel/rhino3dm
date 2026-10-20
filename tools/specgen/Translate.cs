@@ -65,6 +65,9 @@ static class TranslateCommand
             ["ComponentIndex"] = "BND_ComponentIndexX",
             // an RGBA float colour (PhysicallyBasedMaterial.BaseColor; G69)
             ["Color4f"]     = "BND_Color4fX",
+            // a SubD edge's end sharpness pair (two floats; SubD.SharpEdgeCount's out
+            // range, SubDEdge.Sharpness; G109)
+            ["SubDEdgeSharpness"] = "BND_SubDEdgeSharpnessX",
         };
         // DATA classes (G64; Luis 2026-10-13, option 2): classes whose state is
         // plain fields -- translated whole, emitted as C++ classes with fields,

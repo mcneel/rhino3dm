@@ -178,6 +178,15 @@ module.exports = (t, ctx) => {
     assert(!c.isAliasOf(own) && c.faces.count === own.faces.count);
   });
 
+  t('test_material_render_material_instance_id_u1', () => {
+    const m = new r.MaterialX();
+    assert.strictEqual(m.renderMaterialInstanceId, '00000000-0000-0000-0000-000000000000');
+    const uid = '3f2504e0-4f89-11d3-9a0c-0305e82c3301';
+    m.renderMaterialInstanceId = uid;
+    assert.strictEqual(m.renderMaterialInstanceId, uid);
+    assert.strictEqual(m.renderPlugInId, '99999999-9999-9999-9999-999999999999');
+  });
+
   t('test_subd_face_control_net_center_u3', () => {
     const [, s] = subdFromFile();
     const faces = [...s.faces];
@@ -193,6 +202,67 @@ module.exports = (t, ctx) => {
       assert.deepStrictEqual([fr.Origin.X, fr.Origin.Y, fr.Origin.Z], [c.X, c.Y, c.Z]);
       ['X', 'Y', 'Z'].forEach(k => ctx.approx(fr.ZAxis[k], v[k], 1e-12, 'frame normal ' + k));
     }
+  });
+
+  t('test_subd_sharp_edge_count_u2', () => {
+    // U2: RhinoCommon's SharpEdgeCount() is a method (D60; the old binding a property)
+    let total = 0;
+    for (const name of ['subd.3dm', 'subdBox.3dm', 'subd_creases.3dm']) {
+      const subds = objs(ctx.readModel(name)).map(o => o.geometry).filter(g => g instanceof r.SubDX);
+      const ot = ctx.readOld(name).objects();
+      const olds = [];
+      for (let i = 0; i < ot.count; i++) {
+        const g = ot.get(i).geometry();
+        if (g instanceof r.SubD) olds.push(g);
+      }
+      assert.strictEqual(subds.length, olds.length);
+      subds.forEach((s, k) => {
+        const n = s.sharpEdgeCount();
+        const edges = [...s.edges];
+        assert.strictEqual(n, edges.filter(e => e.isSharp).length);
+        assert.strictEqual(n, olds[k].sharpEdgeCount);
+        for (const e of edges) assert.deepStrictEqual(Object.keys(e.sharpness).sort(), ['sharpness0', 'sharpness1']);
+        const errors = r.SubDX.errorCount;
+        assert.strictEqual(s.clearEdgeSharpness(), n);
+        assert.strictEqual(s.sharpEdgeCount(), 0);
+        assert.strictEqual(r.SubDX.errorCount, errors);
+        total += n;
+      });
+    }
+    ctx.log && ctx.log('sharp edges in the SubD fixtures: ' + total);
+  });
+
+  t('test_subd_edge_sharpness_value_type_g109', () => {
+    // D61: a plain object {sharpness0, sharpness1} (raw ends); create() is RhinoCommon's construction
+    const S = r.SubDEdgeSharpnessX;
+    const s = S.create(1, 2);
+    assert.deepStrictEqual(s, { sharpness0: 1, sharpness1: 2 });
+    assert.strictEqual(S.endSharpness(s, 1), 2);
+    assert.strictEqual(S.isIncreasing(s), true);
+    assert.deepStrictEqual(S.reversed(s), { sharpness0: 2, sharpness1: 1 });
+    assert.strictEqual(S.isCrease(S.crease), true);
+    assert.deepStrictEqual(S.create(5, 5), S.crease);
+    assert.strictEqual(S.isNotValid(S.create(5, 0)), true);    // FromInterval couples the ends
+    assert.deepStrictEqual(S.reversed({ sharpness0: 0.5, sharpness1: 1.5 }), { sharpness0: 1.5, sharpness1: 0.5 });
+  });
+
+  t('test_point_cloud_insert_range_u11', () => {
+    // U11: the tail moves to index + count (pilot-findings #34); normals stay with their points
+    const P = (x) => ({ X: x, Y: 0, Z: 0 });
+    const range = (a, b) => Array.from({ length: b - a }, (_, j) => a + j);
+    for (const [n, i, k] of [[4, 1, 1], [4, 0, 2], [4, 3, 1], [2, 0, 5], [5, 2, 3], [6, 1, 2], [3, 3, 2]]) {
+      const pc = new r.PointCloudX();
+      pc.addRange(range(0, n).map(P), range(0, n).map(j => ({ X: 0, Y: 0, Z: j + 1 })));
+      pc.insertRange(i, range(0, k).map(j => P(90 + j)));
+      assert.deepStrictEqual(Array.from(pc.getPoints()).map(p => p.X), [...range(0, i), ...range(0, k).map(j => 90 + j), ...range(i, n)]);
+      assert.deepStrictEqual(Array.from(pc.getNormals()).map(v => v.Z), [...range(0, i).map(j => j + 1), ...range(0, k).map(() => 0), ...range(i, n).map(j => j + 1)]);
+      pc.delete();
+    }
+    const pc = new r.PointCloudX();
+    pc.addRange([P(0), P(1)]);
+    ctx.raises(() => pc.insertRange(-1, [P(9)]), /larger than or equal to zero/);
+    ctx.raises(() => pc.insertRange(3, [P(9)]), /smaller than or equal to Count/);
+    pc.delete();
   });
 
   t('test_viewport_screen_port_g105', () => {

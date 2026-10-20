@@ -1464,6 +1464,7 @@ js  MaterialX.reflectionColor [property]
 js  MaterialX.reflectionGlossiness [property]
 js  MaterialX.reflectivity [property]
 js  MaterialX.refractionGlossiness [property]
+js  MaterialX.renderMaterialInstanceId [property]
 js  MaterialX.renderPlugInId [property]
 js  MaterialX.setBitmapTexture [function]
 js  MaterialX.setBumpTexture [function]
@@ -2038,6 +2039,7 @@ js  PointCloudX.getRandomSubsample [function]
 js  PointCloudX.hiddenPointCount [property]
 js  PointCloudX.insert [function]
 js  PointCloudX.insertNew [function]
+js  PointCloudX.insertRange [function]
 js  PointCloudX.merge [function]
 js  PointCloudX.pointAt [function]
 js  PointCloudX.removeAt [function]
@@ -2220,12 +2222,52 @@ js  SubDEdgeListX.count [property]
 js  SubDEdgeListX.find [function]
 js  SubDEdgeListX.iterator [function]
 js  SubDEdgeListXIter.next [function]
+js  SubDEdgeSharpnessX.average [class_function]
+js  SubDEdgeSharpnessX.crease [class_function]
+js  SubDEdgeSharpnessX.create [class_function]
+js  SubDEdgeSharpnessX.delta [class_function]
+js  SubDEdgeSharpnessX.endSharpness [class_function]
+js  SubDEdgeSharpnessX.equalDelta [class_function]
+js  SubDEdgeSharpnessX.equalEndSharpness [class_function]
+js  SubDEdgeSharpnessX.equalTrend [class_function]
+js  SubDEdgeSharpnessX.equals [class_function]
+js  SubDEdgeSharpnessX.fromConstantPercentage [class_function]
+js  SubDEdgeSharpnessX.fromIntervalPercentage [class_function]
+js  SubDEdgeSharpnessX.isConstant [class_function]
+js  SubDEdgeSharpnessX.isConstantOrCrease [class_function]
+js  SubDEdgeSharpnessX.isCrease [class_function]
+js  SubDEdgeSharpnessX.isCreaseOrSharp [class_function]
+js  SubDEdgeSharpnessX.isDecreasing [class_function]
+js  SubDEdgeSharpnessX.isIncreasing [class_function]
+js  SubDEdgeSharpnessX.isNotValid [class_function]
+js  SubDEdgeSharpnessX.isNotValidNorCrease [class_function]
+js  SubDEdgeSharpnessX.isSharp [class_function]
+js  SubDEdgeSharpnessX.isValid [class_function]
+js  SubDEdgeSharpnessX.isValidOrCrease [class_function]
+js  SubDEdgeSharpnessX.isValidValue [class_function]
+js  SubDEdgeSharpnessX.isVariable [class_function]
+js  SubDEdgeSharpnessX.isZero [class_function]
+js  SubDEdgeSharpnessX.maximum [class_function]
+js  SubDEdgeSharpnessX.maximumEndSharpness [class_function]
+js  SubDEdgeSharpnessX.minimumEndSharpness [class_function]
+js  SubDEdgeSharpnessX.nan [class_function]
+js  SubDEdgeSharpnessX.reversed [class_function]
+js  SubDEdgeSharpnessX.sanitize [class_function]
+js  SubDEdgeSharpnessX.sharpnessFromNormalizedValue [class_function]
+js  SubDEdgeSharpnessX.sharpnessFromSliderValue [class_function]
+js  SubDEdgeSharpnessX.smooth [class_function]
+js  SubDEdgeSharpnessX.subdivided [class_function]
+js  SubDEdgeSharpnessX.toPercentage [class_function]
+js  SubDEdgeSharpnessX.trend [class_function]
+js  SubDEdgeSharpnessX.union [class_function]
 js  SubDEdgeX.clearSavedSubdivisionPoints [function]
 js  SubDEdgeX.componentIndex [function]
 js  SubDEdgeX.endSharpness [function]
 js  SubDEdgeX.faceAt [function]
 js  SubDEdgeX.faceCount [property]
+js  SubDEdgeX.getSharpness [function]
 js  SubDEdgeX.isSharp [property]
+js  SubDEdgeX.sharpness [property]
 js  SubDEdgeX.tag [property]
 js  SubDEdgeX.vertexFrom [property]
 js  SubDEdgeX.vertexTo [property]
@@ -2264,14 +2306,17 @@ js  SubDVertexX.previous [property]
 js  SubDVertexX.setControlNetPoint [function]
 js  SubDVertexX.surfacePoint [function]
 js  SubDVertexX.tag [property]
+js  SubDX.clearEdgeSharpness [function]
 js  SubDX.clearEvaluationCache [function]
 js  SubDX.computeMemoryEstimate [class_function]
 js  SubDX.constructor<const BND_SubD&>
 js  SubDX.edges [property]
 js  SubDX.empty [class_function]
+js  SubDX.errorCount [class_function]
 js  SubDX.faces [property]
 js  SubDX.flip [function]
 js  SubDX.isSolid [property]
+js  SubDX.sharpEdgeCount [function]
 js  SubDX.subdivide [function]
 js  SubDX.updateAllTagsAndSectorCoefficients [function]
 js  SubDX.vertices [property]
@@ -4261,6 +4306,7 @@ py  MaterialX.ReflectionColor [property rw]
 py  MaterialX.ReflectionGlossiness [property rw]
 py  MaterialX.Reflectivity [property rw]
 py  MaterialX.RefractionGlossiness [property rw]
+py  MaterialX.RenderMaterialInstanceId [property rw]
 py  MaterialX.RenderPlugInId [property rw]
 py  MaterialX.SetBitmapTexture(filename)
 py  MaterialX.SetBitmapTexture(texture)
@@ -5027,6 +5073,7 @@ py  PointCloudX.Insert(index, point, normal)
 py  PointCloudX.Insert(index, point, normal, color)
 py  PointCloudX.Insert(index, point, normal, color, value)
 py  PointCloudX.InsertNew(index)
+py  PointCloudX.InsertRange(index, points)
 py  PointCloudX.Merge(other)
 py  PointCloudX.PointAt(index)
 py  PointCloudX.RemoveAt(index)
@@ -5226,12 +5273,62 @@ py  SubDEdgeListX.__iter__()
 py  SubDEdgeListX.__len__()
 py  SubDEdgeListXIter.__iter__()
 py  SubDEdgeListXIter.__next__()
+py  SubDEdgeSharpnessX.Average [property ro]
+py  SubDEdgeSharpnessX.Crease [property ro static]
+py  SubDEdgeSharpnessX.Delta [property ro]
+py  SubDEdgeSharpnessX.EndSharpness(endIndex)
+py  SubDEdgeSharpnessX.EqualDelta(s0, s1) [static]
+py  SubDEdgeSharpnessX.EqualEndSharpness(s0, s1) [static]
+py  SubDEdgeSharpnessX.EqualTrend(s0, s1) [static]
+py  SubDEdgeSharpnessX.Equals(other)
+py  SubDEdgeSharpnessX.FromConstantPercentage(percentage) [static]
+py  SubDEdgeSharpnessX.FromIntervalPercentage(percentage0, percentage1) [static]
+py  SubDEdgeSharpnessX.FromIntervalPercentage(percentageInterval) [static]
+py  SubDEdgeSharpnessX.IsConstant [property ro]
+py  SubDEdgeSharpnessX.IsConstantOrCrease [property ro]
+py  SubDEdgeSharpnessX.IsCrease [property ro]
+py  SubDEdgeSharpnessX.IsCreaseOrSharp [property ro]
+py  SubDEdgeSharpnessX.IsDecreasing [property ro]
+py  SubDEdgeSharpnessX.IsIncreasing [property ro]
+py  SubDEdgeSharpnessX.IsNotValid [property ro]
+py  SubDEdgeSharpnessX.IsNotValidNorCrease [property ro]
+py  SubDEdgeSharpnessX.IsSharp [property ro]
+py  SubDEdgeSharpnessX.IsValid [property ro]
+py  SubDEdgeSharpnessX.IsValidOrCrease [property ro]
+py  SubDEdgeSharpnessX.IsValidValue(candidateValue, creaseResult) [static]
+py  SubDEdgeSharpnessX.IsVariable [property ro]
+py  SubDEdgeSharpnessX.IsZero [property ro]
+py  SubDEdgeSharpnessX.Maximum [property ro static]
+py  SubDEdgeSharpnessX.MaximumEndSharpness [property ro]
+py  SubDEdgeSharpnessX.MinimumEndSharpness [property ro]
+py  SubDEdgeSharpnessX.Nan [property ro static]
+py  SubDEdgeSharpnessX.Reversed()
+py  SubDEdgeSharpnessX.Sanitize(sharpness) [static]
+py  SubDEdgeSharpnessX.Sanitize(sharpness, invalidInputResult) [static]
+py  SubDEdgeSharpnessX.SharpnessFromNormalizedValue(normalizedSliderValue) [static]
+py  SubDEdgeSharpnessX.SharpnessFromSliderValue(sliderDomain, sliderValue, invalidInputResult) [static]
+py  SubDEdgeSharpnessX.Smooth [property ro static]
+py  SubDEdgeSharpnessX.Subdivided(endIndex)
+py  SubDEdgeSharpnessX.ToPercentage(sharpness, creasePercentage) [static]
+py  SubDEdgeSharpnessX.Trend [property ro]
+py  SubDEdgeSharpnessX.Union(sharpness0, sharpness1) [static]
+py  SubDEdgeSharpnessX.__eq__()
+py  SubDEdgeSharpnessX.__getitem__()
+py  SubDEdgeSharpnessX.__init__()
+py  SubDEdgeSharpnessX.__init__(BND_IntervalX)
+py  SubDEdgeSharpnessX.__init__(double)
+py  SubDEdgeSharpnessX.__init__(double, double)
+py  SubDEdgeSharpnessX.__ne__()
+py  SubDEdgeSharpnessX.__repr__()
 py  SubDEdgeX.ClearSavedSubdivisionPoints(clearNeighborhood)
 py  SubDEdgeX.ComponentIndex()
 py  SubDEdgeX.EndSharpness(endIndex, useCreaseSharpness)
 py  SubDEdgeX.FaceAt(index)
 py  SubDEdgeX.FaceCount [property ro]
+py  SubDEdgeX.GetSharpness()
+py  SubDEdgeX.GetSharpness(useCreaseSharpness)
 py  SubDEdgeX.IsSharp [property ro]
+py  SubDEdgeX.Sharpness [property ro]
 py  SubDEdgeX.Tag [property ro]
 py  SubDEdgeX.VertexFrom [property ro]
 py  SubDEdgeX.VertexTo [property ro]
@@ -5274,12 +5371,15 @@ py  SubDVertexX.Previous [property ro]
 py  SubDVertexX.SetControlNetPoint(position, bClearNeighborhoodCache)
 py  SubDVertexX.SurfacePoint()
 py  SubDVertexX.Tag [property ro]
+py  SubDX.ClearEdgeSharpness()
 py  SubDX.ClearEvaluationCache()
 py  SubDX.Edges [property ro]
 py  SubDX.Empty [property ro static]
+py  SubDX.ErrorCount [property ro static]
 py  SubDX.Faces [property ro]
 py  SubDX.Flip()
 py  SubDX.IsSolid [property ro]
+py  SubDX.SharpEdgeCount()
 py  SubDX.Subdivide()
 py  SubDX.Subdivide(count)
 py  SubDX.UpdateAllTagsAndSectorCoefficients()

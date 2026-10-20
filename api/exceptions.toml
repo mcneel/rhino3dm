@@ -177,20 +177,6 @@ upstream = "add Sun.ManualControlAllowed to RhinoCommon"
 # ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
 
 [[hand_kept]]
-class = "Material"
-members = ["RenderMaterialInstanceId"]
-decided = "Luis, 2026-10-16"
-reason = "RhinoCommon's Material.RenderMaterialInstanceId is under #if RHINO_SDK (rhinosdkmaterial.cs:668) although its C functions (Rdk_RenderContent_MaterialInstanceId / SetMaterialInstanceId, rdk_content.cpp) only call ON_Material::RdkMaterialInstanceId -- no Rhino needed"
-upstream = "move Material.RenderMaterialInstanceId out of #if RHINO_SDK (rhinocommon/dotnet/rhino/rhinosdkmaterial.cs)"
-
-[[hand_kept]]
-class = "SubD"
-members = ["SharpEdgeCount"]
-decided = "Luis, 2026-10-16"
-reason = "RhinoCommon's SubD.SharpEdgeCount() / SharpEdgeCount(out SubDEdgeSharpness) sit inside the #if RHINO_SDK block at opennurbs_subd.cs:428-1291 although ON_SubD_SharpEdgeCount (on_subd.cpp) is portable; the old binding is a property, RhinoCommon a method (a deviation once generated)"
-upstream = "move SubD.SharpEdgeCount (both overloads) out of the #if RHINO_SDK block (rhinocommon/dotnet/opennurbs/opennurbs_subd.cs)"
-
-[[hand_kept]]
 class = "RenderContent"
 members = ["ChildSlotAmount", "SetChild", "SetChildSlotAmount", "SetChildSlotOn"]
 decided = "Luis, 2026-10-16"
