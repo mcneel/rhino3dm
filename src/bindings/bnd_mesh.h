@@ -95,6 +95,7 @@ public:
   void SetUseDoublePrecisionVertices(bool b);
   void Clear();
   void Destroy();
+  // Rounds x, y, z to float even when double precision vertices are on; AddPoint3d keeps doubles.
   int Add(float x, float y, float z);
   int AddPoint3d(double x, double y, double z);
   //    public int Add(Point3f vertex)
