@@ -2237,6 +2237,9 @@ js  SubDFaceListX.iterator [function]
 js  SubDFaceListXIter.next [function]
 js  SubDFaceX.clearSavedSubdivisionPoints [function]
 js  SubDFaceX.componentIndex [function]
+js  SubDFaceX.controlNetCenterFrame [property]
+js  SubDFaceX.controlNetCenterNormal [property]
+js  SubDFaceX.controlNetCenterPoint [property]
 js  SubDFaceX.edgeAt [function]
 js  SubDFaceX.edgeCount [property]
 js  SubDFaceX.edgeDirectionMatchesFaceOrientation [function]
@@ -5242,6 +5245,9 @@ py  SubDFaceListXIter.__iter__()
 py  SubDFaceListXIter.__next__()
 py  SubDFaceX.ClearSavedSubdivisionPoints(clearNeighborhood)
 py  SubDFaceX.ComponentIndex()
+py  SubDFaceX.ControlNetCenterFrame [property ro]
+py  SubDFaceX.ControlNetCenterNormal [property ro]
+py  SubDFaceX.ControlNetCenterPoint [property ro]
 py  SubDFaceX.EdgeAt(index)
 py  SubDFaceX.EdgeCount [property ro]
 py  SubDFaceX.EdgeDirectionMatchesFaceOrientation(index)

@@ -499,3 +499,29 @@ status = "replaced"
 by = ["ViewportX.ScreenPort"]
 note = "JS only; the same (x, y, width, height) set; the read differs for a y-up or degenerate port (D58)"
 test = "test_viewport_screen_port_g105"
+
+# ---- SubDFace control-net center (U3 upstream, 2026-10-20): RhinoCommon's own members, now portable
+
+[[retired]]
+class = "SubDFace"
+member = "ControlNetCenterPoint"
+status = "replaced"
+by = ["SubDFaceX.ControlNetCenterPoint"]
+note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
+test = "test_subd_face_control_net_center_u3"
+
+[[retired]]
+class = "SubDFace"
+member = "ControlNetCenterNormal"
+status = "replaced"
+by = ["SubDFaceX.ControlNetCenterNormal"]
+note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
+test = "test_subd_face_control_net_center_u3"
+
+[[retired]]
+class = "SubDFace"
+member = "ControlNetCenterFrame"
+status = "replaced"
+by = ["SubDFaceX.ControlNetCenterFrame"]
+note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
+test = "test_subd_face_control_net_center_u3"

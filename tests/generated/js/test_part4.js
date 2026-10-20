@@ -178,6 +178,23 @@ module.exports = (t, ctx) => {
     assert(!c.isAliasOf(own) && c.faces.count === own.faces.count);
   });
 
+  t('test_subd_face_control_net_center_u3', () => {
+    const [, s] = subdFromFile();
+    const faces = [...s.faces];
+    assert(faces.length > 0);
+    for (const face of faces) {
+      const n = face.vertexCount;
+      const pts = Array.from({ length: n }, (_, i) => face.vertexAt(i).controlNetPoint);
+      const c = face.controlNetCenterPoint;
+      ['X', 'Y', 'Z'].forEach(k => ctx.approx(c[k], pts.reduce((a, p) => a + p[k], 0) / n, 1e-12, 'center ' + k));
+      const v = face.controlNetCenterNormal;
+      ctx.approx(Math.hypot(v.X, v.Y, v.Z), 1.0, 1e-12, 'unit normal');
+      const fr = face.controlNetCenterFrame;
+      assert.deepStrictEqual([fr.Origin.X, fr.Origin.Y, fr.Origin.Z], [c.X, c.Y, c.Z]);
+      ['X', 'Y', 'Z'].forEach(k => ctx.approx(fr.ZAxis[k], v[k], 1e-12, 'frame normal ' + k));
+    }
+  });
+
   t('test_viewport_screen_port_g105', () => {
     const v = new r.ViewportX();
     v.screenPort = [10, 20, 640, 480];

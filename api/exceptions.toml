@@ -191,13 +191,6 @@ reason = "RhinoCommon's SubD.SharpEdgeCount() / SharpEdgeCount(out SubDEdgeSharp
 upstream = "move SubD.SharpEdgeCount (both overloads) out of the #if RHINO_SDK block (rhinocommon/dotnet/opennurbs/opennurbs_subd.cs)"
 
 [[hand_kept]]
-class = "SubDFace"
-members = ["ControlNetCenterPoint", "ControlNetCenterNormal", "ControlNetCenterFrame"]
-decided = "Luis, 2026-10-16"
-reason = "one-line opennurbs calls (ON_SubDFace::ControlNetCenter*) guarded twice: #if RHINO_SDK in opennurbs_subd.cs:3169 and #if !defined(RHINO3DM_BUILD) in on_subd.cpp:1202"
-upstream = "move SubDFace.ControlNetCenterPoint/Normal/Frame out of #if RHINO_SDK (opennurbs_subd.cs) and ON_SubDFace_ControlNetCenterPoint/Normal/Frame out of #if !defined(RHINO3DM_BUILD) (rhinocommon/c/on_subd.cpp)"
-
-[[hand_kept]]
 class = "RenderContent"
 members = ["ChildSlotAmount", "SetChild", "SetChildSlotAmount", "SetChildSlotOn"]
 decided = "Luis, 2026-10-16"
