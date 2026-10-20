@@ -292,12 +292,18 @@ def emit_valuetype_bindings(vt, skipped):
         # first one silently winning (generator-log G5). Bodies use a0..aN.
         js_entries = {}
 
+        obsolete_now = [False]            # the member being registered is [Obsolete] (G106): not in JS
+
         def js_fn(name, types, body):
-            js_entries.setdefault((name, len(types)), []).append((types, body))
+            # G106: RhinoCommon's name in JS spelling (camelCase, operators as methods); None: not in JS
+            jn = js_vt_name(name)
+            if jn is not None and not obsolete_now[0]:
+                js_entries.setdefault((jn, len(types)), []).append((types, body))
 
         instance_names = {m['Name'] for m in mine if not m['Static'] and m['Kind'] == 'method'}
         for m in mine:
             k, n = m['Kind'], m['Name']
+            obsolete_now[0] = (cs.split('.')[-1], n, len(m['Params'] or [])) in OBSOLETE
             if k != 'ctor' and any(p['Type'] in VT_ENUMS for p in m['Params'] or []):
                 # a translated-enum PARAMETER outside a constructor: not needed yet
                 skipped['value-type enum param'] = skipped.get('value-type enum param', 0) + 1
@@ -382,7 +388,7 @@ def emit_valuetype_bindings(vt, skipped):
                 pyl.append('      .def_property_readonly_static("%s", [](py::object) { return %s::%s(); })'
                            % (n, T, m['Getter']))
                 js_fn(n, [], 'return %s::%s();' % (T, m['Getter']))
-                JS_POST['static_props'].append((reg, n))      # a getter in JS (G101), as in C#/Python
+                JS_POST['static_props'].append((reg, js_vt_name(n)))      # a getter in JS (G101), as in C#/Python
             elif k == 'property':
                 get = '[](%s& s) { return %s; }' % (T, pub(m, 's.%s()' % m['Getter']))
                 if m.get('Setter'):
@@ -502,7 +508,7 @@ def emit_valuetype_bindings(vt, skipped):
             pyl.append('      .def("%s", [](%s& self%s) { return %s; }%s)'
                        % (x['Name'], T, sig_rest, call, ''.join(', py::arg("%s")' % n for n in pnames)))
             jsl.append('      .class_function("%s", optional_override([](%s a0%s) { return %s::%s(%s); }), allow_raw_pointers())'
-                       % (x['Name'], T, ''.join(', %s a%d' % (t, i + 1) for i, t in enumerate(want[1:])),
+                       % (js_vt_name(x['Name']), T, ''.join(', %s a%d' % (t, i + 1) for i, t in enumerate(want[1:])),
                           target['gen'], q['cpp'], ', '.join('a%d' % i for i in range(len(want)))))
             BRIDGE_INCLUDES.setdefault(cs, set()).add('gen_%s.h' % target['reg'].lower())
             have.add(x['Name'])
@@ -567,6 +573,15 @@ def data_chain(t, vt):
         out.append(t)
         t = by.get(t.get('Base'))
     return out
+
+
+def fields_ok(m):
+    """a data-class field bindable as is: a number / bool, or a generated enum the values header
+    defines (its type IS the registered one; G107)"""
+    rt = m['Ret']
+    if rt in ('bool', 'int', 'double', 'float', 'unsigned int'):
+        return True
+    return rt in VT_ENUMS and VT_ENUMS[rt] == rt
 
 
 def emit_data_bindings(t, vt, skipped):
@@ -683,6 +698,11 @@ def emit_data_bindings(t, vt, skipped):
     for m in mine:
         k, n = m['Kind'], m['Name']
         if k == 'ctor':
+            continue
+        if k == 'field' and not m.get('Static') and m.get('Ret') and fields_ok(m):
+            # a public FIELD of a data class (G107: DracoCompressionOptions.IncludeNormals): read/write as is
+            pyl.append('      .def_readwrite("%s", &%s::%s)' % (n, T, n))
+            jsl.append('      .property("%s", &%s::%s)' % (camel(n), T, n))
             continue
         if not bindable(m):
             skipped['data-class member shape'] = skipped.get('data-class member shape', 0) + 1

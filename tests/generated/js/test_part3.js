@@ -19,7 +19,7 @@ module.exports = (t, ctx) => {
     m.faces().addQuadFace(0, 1, 2, 3);
     return new r.MeshX(m);
   };
-  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.Create(0, 0, 0, 1, 2, 3));
+  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.create(0, 0, 0, 1, 2, 3));
   // a RhinoCommon list (count + indexer) as an array: Python iterates these through the item protocol
   const seq = coll => {
     if (coll && typeof coll[Symbol.iterator] === 'function') return [...coll];
@@ -53,10 +53,10 @@ module.exports = (t, ctx) => {
   });
 
   t('test_color4f_and_the_members_it_unlocks', () => {
-    const c = r.Color4fX.Create(0.25, 0.5, 0.75, 1.0);
+    const c = r.Color4fX.create(0.25, 0.5, 0.75, 1.0);
     assert.deepStrictEqual([c.R, c.G, c.B, c.A], [0.25, 0.5, 0.75, 1.0]);
-    assert.strictEqual(r.Color4fX.op_Equality(c, r.Color4fX.Create(0.25, 0.5, 0.75, 1.0)), true);
-    assert.strictEqual(r.Color4fX.op_Equality(r.Color4fX.White, r.Color4fX.Create(1, 1, 1, 1)), true);
+    assert.strictEqual(r.Color4fX.equals(c, r.Color4fX.create(0.25, 0.5, 0.75, 1.0)), true);
+    assert.strictEqual(r.Color4fX.equals(r.Color4fX.white, r.Color4fX.create(1, 1, 1, 1)), true);
     const m = new r.MaterialX();
     m.toPhysicallyBased();
     const pbr = m.physicallyBased;
@@ -77,7 +77,7 @@ module.exports = (t, ctx) => {
     pc.append(new r.LineCurveX(P(0, 0, 0), P(1, 0, 0)));
     const pd = pc.duplicate();
     assert(pd instanceof r.PolyCurveX && pd.segmentCount === 1);
-    const nc = r.NurbsCurveX.createFromLine(r.LineX.Create(P(0, 0, 0), P(0, 1, 0)));
+    const nc = r.NurbsCurveX.createFromLine(r.LineX.create(P(0, 0, 0), P(0, 1, 0)));
     // Python calls the base's unbound CurveX.Duplicate(nc): the same dispatch through the prototype
     const cd = r.CurveX.prototype.duplicate.call(nc);
     assert(cd instanceof r.NurbsCurveX, 'CurveX.duplicate on a NurbsCurveX is ' + (cd && cd.constructor.name));
@@ -85,27 +85,27 @@ module.exports = (t, ctx) => {
 
   t('test_value_type_arrays_are_sequences', () => {
     const B = r.BoundingBoxX;
-    let bb = B.Create(P(0, 0, 0), P(1, 2, 3));
-    const corners = B.GetCorners(bb);
+    let bb = B.create(P(0, 0, 0), P(1, 2, 3));
+    const corners = B.getCorners(bb);
     assert(Array.isArray(corners) && corners.length === 8);
     assert.deepStrictEqual(corners[0], P(0, 0, 0));
     assert.deepStrictEqual(corners[6], P(1, 2, 3));
-    assert.deepStrictEqual(B.GetCorners(B.Unset), []);
-    const xf = r.TransformX.Translation(V(1, 0, 0));
-    const moved = r.TransformX.TransformList(xf, [P(0, 0, 0), P(1, 1, 1)]);
+    assert.deepStrictEqual(B.getCorners(B.unset), []);
+    const xf = r.TransformX.translation(V(1, 0, 0));
+    const moved = r.TransformX.transformList(xf, [P(0, 0, 0), P(1, 1, 1)]);
     assert.deepStrictEqual(moved, [P(1, 0, 0), P(2, 1, 1)]);
-    assert.strictEqual(r.TransformX.ToFloatArray(xf, true).length, 16);
-    const tr = B.Transform(bb, xf);                       // a mutating value member: {self, returns}
+    assert.strictEqual(r.TransformX.toFloatArray(xf, true).length, 16);
+    const tr = B.transform(bb, xf);                       // a mutating value member: {self, returns}
     assert.strictEqual(tr.returns, true);
     bb = tr.self;
     assert.deepStrictEqual(bb.Min, P(1, 0, 0));
-    assert.deepStrictEqual(B.ClosestPoint(bb, P(-5, 1, 1)), P(bb.Min.X, 1, 1));
-    const rot = r.PlaneX.Rotate(r.PlaneX.WorldXY, Math.PI / 2, V(0, 0, 1));
+    assert.deepStrictEqual(B.closestPoint(bb, P(-5, 1, 1)), P(bb.Min.X, 1, 1));
+    const rot = r.PlaneX.rotate(r.PlaneX.worldXY, Math.PI / 2, V(0, 0, 1));
     assert.strictEqual(rot.returns, true);
     assert(Math.abs(rot.self.XAxis.Y - 1.0) < 1e-12);
-    const box = r.BoxX.Create(B.Create(P(0, 0, 0), P(1, 1, 1)));
-    assert.strictEqual(r.BoxX.Contains(box, P(0.5, 0.5, 0.5)), true);
-    assert.strictEqual(r.BoxX.GetCorners(box).length, 8);
+    const box = r.BoxX.create(B.create(P(0, 0, 0), P(1, 1, 1)));
+    assert.strictEqual(r.BoxX.contains(box, P(0.5, 0.5, 0.5)), true);
+    assert.strictEqual(r.BoxX.getCorners(box).length, 8);
   });
 
   t('test_embedded_files_add_and_iterate', () => {
@@ -131,7 +131,7 @@ module.exports = (t, ctx) => {
     assert.deepStrictEqual(parts[0].pointAtEnd, P(1, 0, 0));
     assert.deepStrictEqual(parts[1].pointAtStart, P(1, 0, 0));
     assert(c.split(5.0) == null, 'split outside the domain: ' + c.split(5.0));
-    const nc = r.NurbsCurveX.createFromCircle(r.CircleX.Create(P(0, 0, 0), 1.0));
+    const nc = r.NurbsCurveX.createFromCircle(r.CircleX.create(P(0, 0, 0), 1.0));
     const bz = nc.convertSpanToBezier(0);
     const [ok, left, right] = bz.split(0.5);
     assert(ok === true && left instanceof r.BezierCurveX && right instanceof r.BezierCurveX);
@@ -208,7 +208,7 @@ module.exports = (t, ctx) => {
     pc.add(P(1, 1, 1));
     assert.strictEqual(pc.insertNew(1).index, 1);
     assert.strictEqual(pc.count, 3);
-    const nc = r.NurbsCurveX.createFromEllipse(r.EllipseX.Create(r.PlaneX.WorldXY, 2.0, 1.0));
+    const nc = r.NurbsCurveX.createFromEllipse(r.EllipseX.create(r.PlaneX.worldXY, 2.0, 1.0));
     assert(nc instanceof r.NurbsCurveX && Math.abs(nc.pointAtStart.X - 2.0) < 1e-9);
     const d = boxBrep().duplicateBrep();
     assert(d instanceof r.BrepX && d.faces.count === 6);
@@ -456,14 +456,14 @@ module.exports = (t, ctx) => {
   t('test_hidden_helpers_child_pointers_and_class_usings', () => {
     const m = new r.MeshX();
     const v = m.vertices;
-    v.add(P(0, 0, 0)); v.add(1.0, 0.0, 0.0); v.add(r.Point3fX.Create(0, 1, 0));
+    v.add(P(0, 0, 0)); v.add(1.0, 0.0, 0.0); v.add(r.Point3fX.create(0, 1, 0));
     assert.strictEqual(v.count, 3);
     assert.strictEqual(v.toFloatArray().length, 9);
-    const nc = r.NurbsCurveX.createFromLine(r.LineX.Create(P(0, 0, 0), P(3, 0, 0)));
+    const nc = r.NurbsCurveX.createFromLine(r.LineX.create(P(0, 0, 0), P(3, 0, 0)));
     assert(nc instanceof r.NurbsCurveX);
     assert.deepStrictEqual(nc.pointAtEnd, P(3, 0, 0));
-    assert(r.NurbsCurveX.createFromLine(r.LineX.Create(P(1, 1, 1), P(1, 1, 1))) == null);   // invalid line
-    const box = r.BoxX.Create(r.PlaneX.WorldXY, I(0, 1), I(0, 2), I(0, 3));
+    assert(r.NurbsCurveX.createFromLine(r.LineX.create(P(1, 1, 1), P(1, 1, 1))) == null);   // invalid line
+    const box = r.BoxX.create(r.PlaneX.worldXY, I(0, 1), I(0, 2), I(0, 3));
     const ext = r.ExtrusionX.createBoxExtrusion(box, true);
     assert(ext instanceof r.ExtrusionX);
     assert.strictEqual(ext.isSolid, true);
@@ -471,20 +471,20 @@ module.exports = (t, ctx) => {
     const ns = r.NurbsSurfaceX.create(3, false, 2, 2, 2, 2);
     ns.points.setPoint(1, 1, 1.0, 1.0, 0.0);
     const cp = ns.points.getControlPoint(1, 1);
-    assert.deepStrictEqual(r.ControlPointX.Location(cp), P(1, 1, 0));
-    assert.strictEqual(r.ControlPointX.Weight(cp), 1.0);
+    assert.deepStrictEqual(r.ControlPointX.location(cp), P(1, 1, 0));
+    assert.strictEqual(r.ControlPointX.weight(cp), 1.0);
   });
 
   t('test_g86_singles', () => {
     const f = new r.File3dmX();
-    const iid = f.objects.addInstanceObject(0, r.TransformX.Identity, null);
+    const iid = f.objects.addInstanceObject(0, r.TransformX.identity, null);
     assert(isUuid(iid), String(iid));
     const fr = r.FileReferenceX.createFromFullPath('/tmp/a.png');
     assert(fr.fullPath.endsWith('a.png'));
     const a = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
     const b = new r.LineCurveX(P(0, 1, 0), P(1, 1, 0));
     assert(r.NurbsSurfaceX.createRuledSurface(a, b) instanceof r.NurbsSurfaceX);
-    const tm = r.TextureMappingX.createPlaneMapping(r.PlaneX.WorldXY, I(0, 1), I(0, 1), I(0, 1));
+    const tm = r.TextureMappingX.createPlaneMapping(r.PlaneX.worldXY, I(0, 1), I(0, 1), I(0, 1));
     assert.strictEqual(typeof tm.hasId, 'boolean');                         // ModelComponent's, inherited
     // (checked before the point-sequence statics below, which are unbound in JS)
     const pts = [P(0, 0, 0), P(1, 1, 0), P(2, 0, 0), P(3, 1, 0)];
@@ -591,6 +591,33 @@ module.exports = (t, ctx) => {
     assert.strictEqual(cps.count, 4);
     assert.deepStrictEqual([...cps].map(c => c.X), [0, 1, 2, 3]);
     ctx.raises(() => cps.get(-1), /greater than or equal to zero/);
+  });
+
+  t('test_draco_compression_g107', () => {
+    const D = r.DracoCompressionX;
+    const m = quadMesh();
+    const d = D.compress(m);
+    const b = d.toByteArray();
+    assert(b instanceof Uint8Array && b.length > 0);
+    const g = D.decompressByteArray(b);
+    assert(g instanceof r.MeshX && g.vertices.count === 4);
+    assert.strictEqual(D.decompressBase64String(d.toBase64String()).vertices.count, 4);
+    const o = new r.DracoCompressionOptionsX();
+    assert.deepStrictEqual([o.compressionLevel, o.positionQuantizationBits, o.includeNormals], [7, 14, true]);
+    o.includeNormals = false;
+    o.vertexColorFormat = r.DracoColorFormat.RGBA;
+    assert.strictEqual(D.compress(m, o).normalAttributePosition, -1);
+    const pc = new r.PointCloud();
+    for (let i = 0; i < 5; i++) pc.add([i, 2 * i, 0]);
+    const gp = D.decompressByteArray(D.compress(new r.PointCloudX(pc)).toByteArray());
+    assert(gp instanceof r.PointCloudX && gp.count === 5);
+    // the module's in-memory file system (no host FS in WASM)
+    assert.strictEqual(d.write('/tmp/rh3dm_quad.drc'), true);
+    assert.strictEqual(D.decompressFile('/tmp/rh3dm_quad.drc').vertices.count, 4);
+    ctx.raises(() => D.decompressFile('/tmp/rh3dm_missing.drc'), /FileNotFound|File/);
+    ctx.raises(() => D.compress({}), /no overload matches/);
+    // the old binding decodes the generated bytes
+    assert.strictEqual(r.DracoCompression.decompressByteArray(b).vertices().count, 4);
   });
 
   t('test_color_list_and_surface_point_grid_iterate_g102', () => {

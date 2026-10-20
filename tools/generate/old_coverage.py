@@ -235,6 +235,26 @@ def main(argv):
         L.append('| %s | %s | %d | %d | %d | %d | %s |' % (
             hname, 'yes' if inrc else '**no**', size(b), len(b['notbegun']), len(b['rhinoonly']), len(nr),
             ', '.join(nr[:12]) + (' ... (+%d)' % (len(nr) - 12) if len(nr) > 12 else '') or '-'))
+    # the members RhinoCommon has only in Rhino builds (RHINO_SDK / rhino-only natives): listed by name,
+    # with the decision and upstream entry recorded for them (api/exceptions.toml hand_kept)
+    kept = load_kept(root)
+    ro = sorted((row[0], n) for row in rows for n in row[3]['rhinoonly'])
+    L += ['', '## RhinoCommon members that are Rhino-only there (%d)' % len(ro), '',
+          'The old binding has them; RhinoCommon declares them only for Rhino builds (RHINO_SDK, or a',
+          'native outside the portable C layer), so the generator cannot produce them. Each is kept by',
+          'hand (`api/exceptions.toml`) until RhinoCommon makes it portable (`upstream-fixes.md`).', '',
+          '| Old class | Member | Decision | Upstream |', '|---|---|---|---|']
+    retired = load_retired(root, r)
+    for c, n in ro:
+        e = kept.get((c, n)) or kept.get((c, None))
+        rt = retired.get((c, n))
+        if e:
+            dec = 'kept (%s)' % e.get('decided', '')
+        elif rt:
+            dec = ('retired: replaced by %s' % ', '.join('`%s`' % x for x in rt.get('by', []))) if rt['status'] == 'replaced' else 'retired: proposed drop'
+        else:
+            dec = '**undecided**'
+        L.append('| %s | %s | %s | %s |' % (c, n, dec, (e.get('upstream') or '-').replace('|', '/') if e else '-'))
     text = '\n'.join(L) + '\n'
     print(text)
     if out_path:

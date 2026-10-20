@@ -408,6 +408,7 @@ def main():
     refuse_overridden(manifest, per_class, skipped)
     refuse_overridden_count(per_class, skipped)
     drop_setterless_overrides(per_class, skipped)       # G92: never hide a base setter
+    hide_shadowed_out_overloads(per_class, skipped)     # G105: GetScreenPort() over GetScreenPort(out, out)
     drop_orphaned_translations(per_class, skipped)
     all_plans = [p for _, plans in per_class for p in plans]
     # a scoped view's variants call natives of their own (G77): declared, not counted
@@ -499,6 +500,7 @@ def main():
         if p['shape'][0] == 'tuple' and isinstance(p['shape'][1], tuple) and p['shape'][1][1] in cpp_to_enum:
             used_enums.add(cpp_to_enum[p['shape'][1][1]])
     used_enums |= {e for e in GUARD_ENUMS if CS_ENUMS[e]['gen']}
+    used_enums |= VT_DEFINED_ENUMS          # registered here, defined by the values header (G107)
     enum_values = {}
     type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
     for x in manifest['members']:
@@ -537,8 +539,9 @@ def main():
         # verbatim: C++ enum classes number implicit enumerators exactly as
         # C# does (first 0, then previous + 1)
         pairs = [(v.split('=')[0].strip(), v) for v in enum_values[ename]]
-        gen_enum_defs.append('enum class %s : int { %s };'
-                             % (cpp, ', '.join(v for _, v in pairs)))
+        if ename not in VT_DEFINED_ENUMS:      # else the values header defines it (G107)
+            gen_enum_defs.append('enum class %s : int { %s };'
+                                 % (cpp, ', '.join(v for _, v in pairs)))
         vals = '\n'.join('      .value("%s", %s::%s)' % (n, cpp, n)
                          for n, _ in pairs)
         owner = CS_ENUMS[ename].get('owner')
@@ -879,6 +882,12 @@ struct RH3DM_Bytes { std::vector<unsigned char> v;
   explicit RH3DM_Bytes(size_t n) : v(n) {}       // `new byte[n]` (G101)
   const unsigned char* data() const { return v.data(); }
   size_t size() const { return v.size(); } };
+// `using (var w = new StdVectorByte())` in a translated body (G107): the std::vector<unsigned char> a
+// native fills (Draco_ToByteArray), handed out as bytes
+struct RH3DM_ByteVec { std::vector<unsigned char> v;
+  std::vector<unsigned char>* NonConstPointer() { return &v; }
+  const std::vector<unsigned char>* ConstPointer() const { return &v; }
+  RH3DM_Bytes ToArray() const { RH3DM_Bytes b; b.v = v; return b; } };
 #if defined(ON_PYTHON_COMPILE)
 namespace pybind11 { namespace detail {
 template <> struct type_caster<RH3DM_Bytes> {
@@ -906,6 +915,26 @@ inline BND_TUPLE RH3DM_RectLTRB(int l, int t, int r, int b) {
   BND_TUPLE rc = CreateTuple(4);
   SetTuple(rc, 0, l); SetTuple(rc, 1, t); SetTuple(rc, 2, r - l); SetTuple(rc, 3, b - t);
   return rc; }
+
+// a Rectangle ARGUMENT (G105: SetScreenPort(Rectangle), ScreenPort's setter): the same tuple
+// (x, y, width, height); its sides as System.Drawing.Rectangle defines them
+inline int RH3DM_RectAt(const BND_TUPLE& t, int i) {
+#if defined(ON_PYTHON_COMPILE)
+  if (py::len(t) != 4) throw std::invalid_argument("a rectangle is (x, y, width, height)");
+  return py::cast<int>(t[i]);
+#else
+  if (t["length"].as<int>() != 4) throw std::invalid_argument("a rectangle is [x, y, width, height]");
+  return t[i].as<int>();
+#endif
+}
+inline int RH3DM_RectX(const BND_TUPLE& t) { return RH3DM_RectAt(t, 0); }
+inline int RH3DM_RectY(const BND_TUPLE& t) { return RH3DM_RectAt(t, 1); }
+inline int RH3DM_RectWidth(const BND_TUPLE& t) { return RH3DM_RectAt(t, 2); }
+inline int RH3DM_RectHeight(const BND_TUPLE& t) { return RH3DM_RectAt(t, 3); }
+inline int RH3DM_RectLeft(const BND_TUPLE& t) { return RH3DM_RectX(t); }
+inline int RH3DM_RectTop(const BND_TUPLE& t) { return RH3DM_RectY(t); }
+inline int RH3DM_RectRight(const BND_TUPLE& t) { return RH3DM_RectX(t) + RH3DM_RectWidth(t); }
+inline int RH3DM_RectBottom(const BND_TUPLE& t) { return RH3DM_RectY(t) + RH3DM_RectHeight(t); }
 
 // a translated member's out object (G86): the tuple's caller owns it
 template <class T> inline void RH3DM_SetTupleOwned(BND_TUPLE& t, int i, T* p) {
@@ -1313,6 +1342,23 @@ template <typename T, typename... V> inline bool RH3DM_In(T v, V... vals) { retu
 // a guard's File.Exists(path) / FileNotFoundException (File3dm.Read)
 struct RH3DM_FileNotFound : std::runtime_error { using std::runtime_error::runtime_error; };
 inline bool RH3DM_FileExists(const std::wstring& path) { return ON_FileSystem::IsFile(path.c_str()); }
+
+// `File.ReadAllBytes(path)` in a translated body (G107): the file's bytes, FileNotFoundException if absent
+inline RH3DM_Bytes RH3DM_ReadAllBytes(const std::wstring& path) {
+  if (!ON_FileSystem::IsFile(path.c_str())) throw RH3DM_FileNotFound(ON_String(path.c_str()).Array());
+  FILE* fp = ON_FileStream::Open(path.c_str(), L"rb");
+  if (!fp) throw RH3DM_FileNotFound(ON_String(path.c_str()).Array());
+  // straight into the heap vector: no stack buffer (a 64 KB one overflowed WASM's 64 KB stack, G107)
+  RH3DM_Bytes b;
+  if (fseek(fp, 0, SEEK_END) == 0) {
+    long size = ftell(fp);
+    if (size > 0 && fseek(fp, 0, SEEK_SET) == 0) {
+      b.v.resize((size_t)size);
+      b.v.resize(fread(b.v.data(), 1, (size_t)size, fp));
+    }
+  }
+  ON_FileStream::Close(fp);
+  return b; }
 
 // System.Drawing.Color across the C layer, exactly as the C# call sites do
 // it. BND_Color's alpha is OPACITY (the old bindings' convention, = .NET's

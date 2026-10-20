@@ -18,7 +18,7 @@ module.exports = (t, ctx) => {
     }
     return ctx.list(c);
   };
-  const I = () => r.TransformX.Identity;
+  const I = () => r.TransformX.identity;
   // an old-binding member registered as a function or as a property
   const call = (obj, name, ...a) => (typeof obj[name] === 'function' ? obj[name](...a) : obj[name]);
   // an old-binding table (count / get(i)) as an array
@@ -26,7 +26,7 @@ module.exports = (t, ctx) => {
   const bytesOf = name => new Uint8Array(fs.readFileSync(path.join(ctx.MODELS, name)));
   const objs = f => list(f.objects);
 
-  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.Create(0, 0, 0, 1, 2, 3));
+  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.create(0, 0, 0, 1, 2, 3));
   const subdFromFile = () => {
     const f = ctx.readModel('subdBox.3dm');
     for (const o of objs(f)) {
@@ -45,7 +45,7 @@ module.exports = (t, ctx) => {
     const bb = ann.getBoundingBox(I());
     // the base's member reaches the override (a virtual on the generated base)
     assert.deepStrictEqual(r.GeometryBaseX.prototype.getBoundingBox.call(ann, I()), bb);
-    if (!r.BoundingBoxX.IsValid(bb)) {
+    if (!r.BoundingBoxX.isValid(bb)) {
       // WASM has no font glyph metrics: a text's box is empty -- in the old binding too
       const old = ctx.readOld('textEntities_r8.3dm');
       const ot = old.objects();
@@ -56,8 +56,8 @@ module.exports = (t, ctx) => {
       }
       if (oldBoxes.length && oldBoxes.every(b => !b.isValid)) ctx.skip('WASM: text bounding boxes are empty without font metrics (the old binding\'s too); the virtual-dispatch part passed');
     }
-    assert.strictEqual(r.BoundingBoxX.IsValid(bb), true);
-    const moved = ann.getBoundingBox(r.TransformX.Translation({ X: 10, Y: 0, Z: 0 }));
+    assert.strictEqual(r.BoundingBoxX.isValid(bb), true);
+    const moved = ann.getBoundingBox(r.TransformX.translation({ X: 10, Y: 0, Z: 0 }));
     approx(moved.Min.X - bb.Min.X, 10, 1e-9, 'min.x');
     approx(moved.Max.X - bb.Max.X, 10, 1e-9, 'max.x');
   });
@@ -168,7 +168,7 @@ module.exports = (t, ctx) => {
     const b = r.BrepX.tryConvertBrep(g);
     assert(b instanceof r.BrepX && !b.isAliasOf(g) && b.faces.count === g.faces.count);
     const x0 = g.getBoundingBox(I()).Min.X;
-    assert.strictEqual(b.transform(r.TransformX.Translation({ X: 100, Y: 0, Z: 0 })), true);
+    assert.strictEqual(b.transform(r.TransformX.translation({ X: 100, Y: 0, Z: 0 })), true);
     approx(b.getBoundingBox(I()).Min.X - x0, 100, 1e-6);
     assert.strictEqual(g.getBoundingBox(I()).Min.X, x0);        // the argument is untouched
     g.delete(); f.delete();
@@ -176,6 +176,26 @@ module.exports = (t, ctx) => {
     const own = boxBrep();                                      // owns its pointer: BrepForm
     const c = r.BrepX.tryConvertBrep(own);
     assert(!c.isAliasOf(own) && c.faces.count === own.faces.count);
+  });
+
+  t('test_viewport_screen_port_g105', () => {
+    const v = new r.ViewportX();
+    v.screenPort = [10, 20, 640, 480];
+    assert.deepStrictEqual(v.screenPort, [10, 20, 640, 480]);
+    assert.deepStrictEqual(v.getScreenPort(), [10, 20, 640, 480]);
+    assert.deepStrictEqual(v.getScreenPortLocation(), [10, 20, 650, 500]);
+    assert.strictEqual(v.setScreenPort([0, 0, 100, 50], 1, 2), true);
+    assert.deepStrictEqual(v.screenPort, [0, 0, 100, 50]);
+    assert.strictEqual(v.setScreenPort(0, 640, 0, 480, 0, 0), true);   // y-up
+    assert.deepStrictEqual(v.screenPort, [0, 0, 640, 480]);
+    assert.strictEqual(v.setScreenPort(0, 640, 100, 100, 0, 0), false); // opennurbs refuses top == bottom
+    assert.deepStrictEqual(v.screenPort, [0, 0, 640, 480]);
+    ctx.raises(() => { v.screenPort = [1, 2, 3]; }, /rectangle/);
+    // the old JS screenPort (retired for ScreenPort, Luis 2026-10-18): the same set, the same read
+    const o = new r.ViewportInfo();
+    o.screenPort = [10, 20, 640, 480];
+    v.screenPort = [10, 20, 640, 480];
+    assert.deepStrictEqual(Array.from(o.screenPort), v.screenPort);
   });
 
   t('test_view_table_items_are_live_views_and_plugin_data_g104', async () => {
@@ -326,28 +346,28 @@ module.exports = (t, ctx) => {
 
   t('test_class_static_properties_are_properties', () => {
     // "a static PROPERTY is a property, not a method": G101 installs JS static getters
-    // (class and value type alike: r.Point3dX.Unset), so nothing here is callable.
+    // (class and value type alike: r.Point3dX.unset), so nothing here is callable.
     assert(r.MeshingParametersX.default instanceof r.MeshingParametersX);
     assert.strictEqual(r.MaterialX.maxShine, 255.0);
     assert.strictEqual(typeof r.ModelComponentX.namePathSeparator, 'string');
     assert.notStrictEqual(r.ObjectAttributesX.oCSMappingChannelId, undefined);
     assert(r.SubDX.empty instanceof r.SubDX);
-    assert(typeof r.Point3dX.Unset === 'object' && r.Point3dX.Unset.X < -1e300);
-    assert(typeof r.PlaneX.WorldXY === 'object' && r.PlaneX.WorldXY.ZAxis.Z === 1);
+    assert(typeof r.Point3dX.unset === 'object' && r.Point3dX.unset.X < -1e300);
+    assert(typeof r.PlaneX.worldXY === 'object' && r.PlaneX.worldXY.ZAxis.Z === 1);
   });
 
   t('test_retired_arc_arccurve_brep_members', () => {
     const oa = r.Arc.createFromPoints([0, 0, 0], [1, 1, 0], [2, 0, 0]);
-    const na = r.ArcX.Create({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 1, Z: 0 }, { X: 2, Y: 0, Z: 0 });
-    approx(oa.angle, r.ArcX.Angle(na), 1e-12, 'Arc.AngleRadians -> Arc.Angle');
+    const na = r.ArcX.create({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 1, Z: 0 }, { X: 2, Y: 0, Z: 0 });
+    approx(oa.angle, r.ArcX.angle(na), 1e-12, 'Arc.AngleRadians -> Arc.Angle');
     // Brep.CreateFromBoundingBox -> Brep.CreateFromBox(BoundingBox) / CreateFromBox(Box)
     const ob = r.Brep.createFromBoundingBox(new r.BoundingBox([0, 0, 0], [1, 2, 3]));
-    const bb = r.BoundingBoxX.Create({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 2, Z: 3 });
+    const bb = r.BoundingBoxX.create({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 2, Z: 3 });
     const nb = r.BrepX.createFromBox(bb);
     const obFaces = ob.faces();
     assert.strictEqual(obFaces.count, 6);
     assert.strictEqual(nb.faces.count, 6);
-    assert.strictEqual(r.BrepX.createFromBox(r.BoxX.Create(bb)).faces.count, 6);
+    assert.strictEqual(r.BrepX.createFromBox(r.BoxX.create(bb)).faces.count, 6);
     // BrepTrim.EdgeIndex / StartVertexIndex / EndVertexIndex -> trim.Edge.EdgeIndex, ...
     const key = a => a.join(',');
     const oldTrims = [];
@@ -381,7 +401,7 @@ module.exports = (t, ctx) => {
       const a = oc.pointAtEnd, b = nc.pointAtEnd;
       approx(a[0], b.X, 1e-9); approx(a[1], b.Y, 1e-9); approx(a[2], b.Z, 1e-9);
     };
-    const circ = r.CircleX.Create(3.0);
+    const circ = r.CircleX.create(3.0);
     same(r.ArcCurve.createFromArcParams(oa, 2.0, 5.0), new r.ArcCurveX(na, 2.0, 5.0));
     same(r.ArcCurve.createFromArc(oa), new r.ArcCurveX(na));                          // ArcCurve(Arc)
     same(r.ArcCurve.createFromCircle(new r.Circle(3.0)), new r.ArcCurveX(circ));          // ArcCurve(Circle)
@@ -394,7 +414,7 @@ module.exports = (t, ctx) => {
     assert.strictEqual(new r.ViewInfoX(ov).wallpaperFilename, ov.wallpaperName);   // ViewInfo.WallpaperName
     // Vector3d.DotProduct -> the * operator (old JS has no Vector3d class: the dot by hand)
     const dot = 1 * -4 + 2 * 5 + 3 * 0.5;
-    assert.strictEqual(r.Vector3dX.op_Multiply({ X: 1, Y: 2, Z: 3 }, { X: -4, Y: 5, Z: 0.5 }), dot);
+    assert.strictEqual(r.Vector3dX.multiply({ X: 1, Y: 2, Z: 3 }, { X: -4, Y: 5, Z: 0.5 }), dot);
     const rgb = c => (Array.isArray(c) ? c.slice(0, 3) : [c.r !== undefined ? c.r : c.R, c.g !== undefined ? c.g : c.G, c.b !== undefined ? c.b : c.B]);
     for (const alt of [-10.0, 0.0, 5.0, 12.5, 30.0, 60.0, 89.0]) {
       const oc = rgb(r.Sun.sunColorFromAltitude(alt)), nc = rgb(r.SunX.colorFromAltitude(alt));
@@ -402,13 +422,15 @@ module.exports = (t, ctx) => {
       assert(oc.every((x, i) => Math.abs(x - nc[i]) <= 1), JSON.stringify([alt, oc, nc]));
     }
     // ShutLining.Curves -> GetCurves() ids + the id-keyed accessors, written by the old binding
-    // (its CreateShutLining is registered with a trailing space: pilot #42; JS reaches it by
-    // the trimmed name)
+    // (CreateShutLining / CreateThickening: kept by Luis, their trailing space fixed -- pilot #42)
     const cid = uuid4();
     const of = new r.File3dm();
     const oa = new r.ObjectAttributes();
     const mm = call(oa, 'meshModifiers');
-    mm.createShutLining();                                      // embind drops the trailing space of 'createShutLining '
+    assert(call(mm, 'thickening') == null);
+    mm.createThickening();
+    assert(call(mm, 'thickening') != null);
+    mm.createShutLining();
     const osl = call(mm, 'shutLining');
     const curves = call(osl, 'curves');
     curves.add(cid);
@@ -432,7 +454,7 @@ module.exports = (t, ctx) => {
     // the circle curve through the bridge constructor: ArcCurveX(CircleX) is not registered in
     // JS (test_retired_arc_arccurve_brep_members covers that)
     const circle = new r.ArcCurveX(r.ArcCurve.createFromCircle(new r.Circle(2.0)));
-    const W = r.PlaneX.WorldXY;
+    const W = r.PlaneX.worldXY;
     const one = r.BrepX.createTrimmedPlane(W, circle);
     const many = r.BrepX.createTrimmedPlane(W, [circle]);
     const old = r.Brep.createTrimmedPlane(r.Plane.worldXY(), r.ArcCurve.createFromCircle(new r.Circle(2.0)));
@@ -554,7 +576,7 @@ module.exports = (t, ctx) => {
     });
     const composed = x => {
       const n = new r.TextureMappingX(TM.createPlaneMapping(r.Plane.worldXY(), Iv, Iv, Iv));
-      n.uvwTransform = r.TransformX.op_Multiply(x, n.uvwTransform);
+      n.uvwTransform = r.TransformX.multiply(x, n.uvwTransform);
       return n.uvwTransform;
     };
     const matrix = m => { const a = []; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) a.push(m['M' + i + j]); return a; };
@@ -564,7 +586,7 @@ module.exports = (t, ctx) => {
       ['tileTextureCoordinate', [0, 3.0, 0.25], x => { x.M00 = 3.0; x.M03 = 0.25; }]]) {
       const o = TM.createPlaneMapping(r.Plane.worldXY(), Iv, Iv, Iv);
       assert(o[name](...args), name);
-      const x = r.TransformX.Create(1.0);
+      const x = r.TransformX.create(1.0);
       build(x);
       assert.deepStrictEqual(matrix(new r.TextureMappingX(o).uvwTransform), matrix(composed(x)), name);
     }

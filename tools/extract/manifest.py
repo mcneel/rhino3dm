@@ -29,7 +29,12 @@ import sys
 
 from scan import scan_dir, ARRAY_MARKER
 
-PORTABLE_DEFINES = {'RHINO3DM_BUILD'}
+PORTABLE_DEFINES = {'RHINO3DM_BUILD', 'ON_INCLUDE_DRACO'}   # rhino3dm builds define both (src/CMakeLists.txt)
+
+# C-layer files beyond the on_* families that rhino3dm syncs verbatim (save for include paths) into
+# librhino3dm_native: their exports are portable too. draco.cpp (Luis, 2026-10-19; U24): Draco mesh /
+# point-cloud compression over the Draco subset rhino3dm compiles (src/draco_sources.cmake).
+SYNCED_EXTRA = {'draco.cpp'}
 C_SUBDIR = os.path.join('src4', 'DotNetSDK', 'rhinocommon', 'c')
 SCHEMA = 1
 
@@ -114,7 +119,7 @@ def build(rhino_root):
         base = os.path.basename(d.path)
         # The portable layer is the on_* families plus rhcommon_c.h, the
         # header rhino3dm ships. rh_* files are Rhino-only wholesale.
-        portable = (base.startswith('on_') or base == 'rhcommon_c.h') and d.portable
+        portable = (base.startswith('on_') or base == 'rhcommon_c.h' or base in SYNCED_EXTRA) and d.portable
         rec = {
             'name': d.name,
             'returns': d.ret,

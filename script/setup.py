@@ -517,33 +517,13 @@ def setup_js():
     if not overwrite_check(item_to_check):
         return False
     
-    # setup draco static lib makefiles
-    draco_path = check_or_create_path(os.path.join(target_path, "draco_wasm"))
-    os.chdir(draco_path)
-    try:
-        # For a WASM64 build, draco's objects must also be memory64 or they
-        # won't link against the wasm64 rhino3dm objects.
-        draco_flags = ' -DCMAKE_C_FLAGS=-sMEMORY64=1 -DCMAKE_CXX_FLAGS=-sMEMORY64=1' if wasm64 else ''
-        # Match draco's optimization level to the rhino3dm build: a -d (debug)
-        # build skips draco's default Release full-opt so iteration compiles
-        # faster. Release/published builds leave it optimized.
-        draco_flags += ' -DCMAKE_BUILD_TYPE=Debug' if debug else ''
-        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco") + draco_flags
-        environment = os.environ
-        emcmake_path = shutil.which("emcmake")
-        emscripten_path = emcmake_path[:-len("emcmake")]
-        environment["EMSCRIPTEN"] = emscripten_path
-        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode, env=environment)
-        output, err = p.communicate()
-        output = output.decode('utf-8')
-        err = err.decode('utf-8')
-        if output:
-            if verbose: print(output)
-        elif err:
-            print_error_message(err)
-    except OSError:
+    # Draco is no longer configured here: rhino3dm's CMake compiles the encode/decode subset
+    # itself (src/draco_sources.cmake), with rhino3dm's own flags (memory64, debug).
+    emcmake_path = shutil.which("emcmake")
+    if not emcmake_path:
         print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
         return False
+    os.environ["EMSCRIPTEN"] = emcmake_path[:-len("emcmake")]
 
 
     os.chdir(target_path)

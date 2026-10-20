@@ -1028,6 +1028,8 @@ record MemberRecord
     public ComponentInfo Component { get; init; }   // Kind=="type": a component of an owner (see DetectComponent)
     public HandleInfo Handle { get; init; }          // Kind=="type": an IDisposable native handle (see DetectHandle)
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string Obsolete { get; init; }            // G106: the member's [Obsolete] message ("" with none); absent when not obsolete
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public IndexEnumInfo IndexEnum { get; init; }    // Kind=="type": an internal index enumerator (G98; DetectIndexEnumerator)
     public EnumeratorInfo Enumerator { get; init; } // Kind=="type": GetEnumerator walks a linked native list (see DetectLinkedEnumerator)
     public string[] ParentFields { get; init; }     // Kind=="type": fields a constructor stores a class-typed parameter in (a list's owner: m_brep)
@@ -6038,8 +6040,15 @@ class Walker : CSharpSyntaxWalker
         var native = (a.Native ?? Array.Empty<string>())
             .Concat(setter?.Native ?? Array.Empty<string>()).Distinct()
             .OrderBy(n => n, StringComparer.Ordinal).ToArray();
+        // `[Obsolete("...")]` on the member (G106): recorded, so a binding can leave it out
+        var obsAttr = (node as MemberDeclarationSyntax)?.AttributeLists.SelectMany(al => al.Attributes)
+            .FirstOrDefault(at => at.Name.ToString() is "Obsolete" or "System.Obsolete" or "ObsoleteAttribute");
+        string obsolete = obsAttr == null ? null
+            : obsAttr.ArgumentList?.Arguments.FirstOrDefault()?.Expression is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.StringLiteralExpression } obl
+              ? obl.Token.ValueText : "";
         _out.Add(new MemberRecord
         {
+            Obsolete = obsolete,
             Const = constant,
             // a property's `new T(this)` (the caller's), else a body that constructs
             // a component (RecognizeShape: Body "construct")

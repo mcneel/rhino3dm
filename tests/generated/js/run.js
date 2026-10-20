@@ -76,7 +76,7 @@ factory().then(async r => {
   // the post-script's facts all resolved (G101): views keep their parent, static getters, for...of
   tests.unshift({ name: 'test_js_post_script_resolved', fn: () => assert.deepStrictEqual(r.rh3dmPostUnresolved, []) });
   for (const { name, fn } of tests) {
-    if (filter && !name.includes(filter)) continue;
+    if (filter && !filter.split('|').some(f => name.includes(f))) continue;   // 'a|b': any of the names
     try { await fn(); passed++; }
     catch (e) {
       if (e instanceof Skip) { skipped++; console.log('SKIP ' + name + ': ' + e.message); }

@@ -455,3 +455,47 @@ status = "replaced"
 by = ["PostEffectDataX.SetParameter"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
+
+# ---- MeshFaceList (JS only): the old binding's arity split of AddFace / SetFace (Luis, 2026-10-18)
+
+[[retired]]
+class = "MeshFaceList"
+member = "addTriFace"
+status = "replaced"
+by = ["MeshFaceListX.AddFace"]
+note = "JS only; the generated JS addFace dispatches RhinoCommon's overloads by arity"
+test = "test_js_mesh_face_list_old_names_are_addface_setface"
+
+[[retired]]
+class = "MeshFaceList"
+member = "addQuadFace"
+status = "replaced"
+by = ["MeshFaceListX.AddFace"]
+note = "JS only; the generated JS addFace dispatches RhinoCommon's overloads by arity"
+test = "test_js_mesh_face_list_old_names_are_addface_setface"
+
+[[retired]]
+class = "MeshFaceList"
+member = "setTriFace"
+status = "replaced"
+by = ["MeshFaceListX.SetFace"]
+note = "JS only; the generated JS setFace dispatches RhinoCommon's overloads by arity"
+test = "test_js_mesh_face_list_old_names_are_addface_setface"
+
+[[retired]]
+class = "MeshFaceList"
+member = "setQuadFace"
+status = "replaced"
+by = ["MeshFaceListX.SetFace"]
+note = "JS only; the generated JS setFace dispatches RhinoCommon's overloads by arity"
+test = "test_js_mesh_face_list_old_names_are_addface_setface"
+
+# ---- ViewportInfo (JS only): screenPort is RhinoCommon's ScreenPort (Luis, 2026-10-18)
+
+[[retired]]
+class = "ViewportInfo"
+member = "screenPort"
+status = "replaced"
+by = ["ViewportX.ScreenPort"]
+note = "JS only; the same (x, y, width, height) set; the read differs for a y-up or degenerate port (D58)"
+test = "test_viewport_screen_port_g105"

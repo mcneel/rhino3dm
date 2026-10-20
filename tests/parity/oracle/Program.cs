@@ -171,7 +171,7 @@ static bool Fits(ParameterInfo[] ps, object[] args)
     {
         var pt = ps[i].ParameterType;
         var a = args[i];
-        if (a is double && (pt == typeof(double) || pt == typeof(int))) continue;
+        if (a is double && (pt == typeof(double) || pt == typeof(int) || pt == typeof(float))) continue;   // float: Point3f & co.
         if (a is bool && pt == typeof(bool)) continue;
         if (a != null && pt == a.GetType()) continue;
         if (a != null && !pt.IsByRef && pt.IsAssignableFrom(a.GetType())) continue;   // Point3d[] -> IEnumerable<Point3d>, NurbsCurve -> Curve
@@ -184,7 +184,8 @@ static bool FitsIn(ParameterInfo[] ps, object[] args)
     => Fits(ps.Where(p => !p.IsOut).ToArray(), args);
 
 static object[] Coerce(ParameterInfo[] ps, object[] args)
-    => args.Select((a, i) => ps[i].ParameterType == typeof(int) && a is double d ? (object)(int)d : a).ToArray();
+    => args.Select((a, i) => ps[i].ParameterType == typeof(int) && a is double d ? (object)(int)d
+                           : ps[i].ParameterType == typeof(float) && a is double f ? (object)(float)f : a).ToArray();
 
 object MakeSelf(Type type, JsonElement s)
 {
@@ -263,8 +264,14 @@ object Decode(JsonElement e)
                     .Select(p => new Point3d(p[0].GetDouble(), p[1].GetDouble(), p[2].GetDouble())).ToArray();
             var raw = prop.Value.EnumerateArray().Select(Decode).ToArray();
             if (raw.All(x => x is double))
-                return T(prop.Name).GetConstructors().First(k => k.GetParameters().Length == raw.Length
-                    && k.GetParameters().All(p => p.ParameterType == typeof(double))).Invoke(raw);
+            {
+                // an all-number value: its double constructor, or its float one (Point3f, Vector3f, Point2f)
+                var nk = T(prop.Name).GetConstructors().FirstOrDefault(k => k.GetParameters().Length == raw.Length
+                    && k.GetParameters().All(p => p.ParameterType == typeof(double)))
+                    ?? T(prop.Name).GetConstructors().First(k => k.GetParameters().Length == raw.Length
+                    && k.GetParameters().All(p => p.ParameterType == typeof(float)));
+                return nk.Invoke(Coerce(nk.GetParameters(), raw));
+            }
             // nested values ({"Line": [{"Point3d": ..}, {"Point3d": ..}]}): the
             // constructor whose parameter types fit the decoded arguments
             var vk = T(prop.Name).GetConstructors().First(k => Fits(k.GetParameters(), raw));
@@ -283,11 +290,16 @@ static string Encode(object v) => v switch
     double d => Num(d),
     int i => i.ToString(),
     System.Drawing.Color col => $"{{\"Color\": [{col.R}, {col.G}, {col.B}, {col.A}]}}",
+    // a System.Drawing.Rectangle is the bindings' (x, y, width, height) tuple (D38, G105)
+    System.Drawing.Rectangle rr => $"[{rr.X}, {rr.Y}, {rr.Width}, {rr.Height}]",
     string str => System.Text.Json.JsonSerializer.Serialize(str),
     Point3d p => $"{{\"Point3d\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
     Vector3d p => $"{{\"Vector3d\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
     Interval p => $"{{\"Interval\": [{Num(p.T0)}, {Num(p.T1)}]}}",
     Point2d p => $"{{\"Point2d\": [{Num(p.X)}, {Num(p.Y)}]}}",
+    Point3f p => $"{{\"Point3f\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
+    Vector3f p => $"{{\"Vector3f\": [{Num(p.X)}, {Num(p.Y)}, {Num(p.Z)}]}}",
+    Point2f p => $"{{\"Point2f\": [{Num(p.X)}, {Num(p.Y)}]}}",
     Line l => $"{{\"Line\": [{Num(l.FromX)}, {Num(l.FromY)}, {Num(l.FromZ)}, {Num(l.ToX)}, {Num(l.ToY)}, {Num(l.ToZ)}]}}",
     BoundingBox b => $"{{\"BoundingBox\": [{Num(b.Min.X)}, {Num(b.Min.Y)}, {Num(b.Min.Z)}, {Num(b.Max.X)}, {Num(b.Max.Y)}, {Num(b.Max.Z)}]}}",
     Dictionary<string, object> m => "{" + string.Join(", ", m.Select(kv => $"\"{kv.Key}\": {Encode(kv.Value)}")) + "}",

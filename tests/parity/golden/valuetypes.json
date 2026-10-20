@@ -44,5 +44,18 @@
   "interval.grow": {"self": {"Interval": [2, 9]}, "returns": null},
   "interval.isvalid.unset": false,
   "interval.op.add": {"Interval": [3.5, 5.5]},
-  "interval.op.compare": true
+  "interval.op.compare": true,
+  "point3f.add.vector": {"Point3f": [1.5, 2.25, 2]},
+  "point3f.add.points": {"Point3f": [5, 7, 9]},
+  "point3f.op.add_vector_left": {"Point3f": [1.5, 2.25, 2]},
+  "point3f.op.sub_vector": {"Point3f": [0.5, 1.75, 4]},
+  "point3f.op.divide": {"Point3f": [0.25, 0.5, 0.75]},
+  "point3f.op.negate": {"Point3f": [-1, 2, -3]},
+  "point3f.multiply.left": {"Point3f": [2.5, 5, 7.5]},
+  "point3f.negate": {"Point3f": [-1, 2, -3]},
+  "point2f.op.negate": {"Point2f": [-1, 2]},
+  "point2f.multiply.right": {"Point2f": [2.5, 5]},
+  "point2f.divide": {"Point2f": [0.25, 0.5]},
+  "point2d.op.negate": {"Point2d": [-1, 2]},
+  "point3d.negate": {"Point3d": [-1, 2, -3]}
 }

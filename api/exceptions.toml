@@ -216,3 +216,22 @@ members = ["SetCachedTextureCoordinatesFromMaterial"]
 decided = "Luis, 2026-10-16"
 reason = "a rhino3dm extension: (File3dm, objectId, Material) calls opennurbs ON_Mesh::SetCachedTextureCoordinatesFromMaterial(ONX_Model, material, mapping ref); RhinoCommon's takes a RhinoObject (RHINO_SDK)"
 upstream = "optional: a File3dm overload of Mesh.SetCachedTextureCoordinatesFromMaterial in RhinoCommon over the ONX_Model one"
+
+[[hand_kept]]
+class = "File3dmMeshModifiers"
+members = ["CreateThickening", "CreateShutLining"]
+decided = "Luis, 2026-10-18"
+reason = "RhinoCommon cannot create these modifiers outside Rhino (File3dmMeshModifiers.Thickening / ShutLining stay null until Rhino adds one); the old binding's creators are kept in Python and JS. Their registrations had a trailing space (pilot #42), fixed"
+
+[[hand_kept]]
+class = "EmbeddedFile"
+members = ["fromByteArray"]
+decided = "Luis, 2026-10-18"
+reason = "JS only: builds an embedded file from bytes (WASM has no host file system to read the file from); RhinoCommon's File3dmEmbeddedFile has no such factory"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["destroy", "getEmbeddedFileAsBase64Strict"]
+decided = "Luis, 2026-10-18"
+reason = "JS only: destroy() frees the model's contents explicitly (embind objects are not collected promptly); getEmbeddedFileAsBase64Strict returns an embedded file's bytes as base64 (no host file system in WASM). No RhinoCommon counterparts"
+

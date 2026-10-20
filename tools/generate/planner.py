@@ -3154,7 +3154,7 @@ def linked_iter(cls, plans):
 # bodies built from the class's own members, value types, RhinoMath and enums.
 # Their references to the class's members are markers resolved here against
 # what was GENERATED -- a member resolving anything less is refused.
-MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as|self|fieldptr|deref|optr|wrapptr|adopt|childlink|proxyfile|pcast|isview|viewcopy|fnew|filefield|ftable|owned|bget|bset|bcall|iter|ptrsof|state):([^$]*)\$\$')
+MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as|self|fieldptr|deref|optr|wrapptr|adopt|childlink|proxyfile|pcast|isview|viewcopy|fnew|filefield|ftable|owned|bget|bset|bcall|iter|ptrsof|state|hfield):([^$]*)\$\$')
 VALUE_RETS = {'bool', 'double', 'float', 'int', 'uint', 'long', 'short', 'byte', 'string', 'void'}
 
 
@@ -3424,6 +3424,12 @@ def resolve_markers(text, cls, per_reg, manifest):
             # `std::unique_ptr<T> x_owned($$owned:k$$ ? x : nullptr)` (G92): the temporary is the
             # body's to free when its callee returned a NEW object; a borrowed one is not
             out.append('\x00OWN%s\x00' % arg)      # decided after the loop: the tag may come later (G92)
+            continue
+        if kind == 'hfield':
+            # a handle class's pointer field (G107: DracoCompression.m_ptrDraco): its own m_ptr
+            if cls is None or (cls.get('handle') or {}).get('Field') != arg:
+                return None, 'handle field %s' % arg, None
+            out.append('((void*)(m_ptr))')
             continue
         if kind == 'state':
             # a field RhinoCommon's constructor stores (G103: File3dmViewTable.m_named_views): the
@@ -3721,7 +3727,10 @@ def resolve_markers(text, cls, per_reg, manifest):
                        # hidden helper (G97: Sun.SunSettingFromDateTimeKind / GetValue)
                        or (q.get('hidden') and re.match(r'^UnsafeNativeMethods\.\w+$', m.get('Returns') or ''))
                        or (q.get('hidden') and cs_unqualify(m.get('Returns') or '') == 'Variant')
-                       or cs_unqualify(m.get('Returns') or '') == 'Guid'):
+                       or cs_unqualify(m.get('Returns') or '') == 'Guid'
+                       # System.Drawing.Rectangle (G105: GetScreenPort() => GetScreenPort(out near, out far)):
+                       # the (x, y, width, height) tuple, a plain value
+                       or cs_unqualify(m.get('Returns') or '') == 'Rectangle'):
                 found = (owner, q)
                 break
         if found is None:
@@ -3863,20 +3872,51 @@ def translated_pass(per_class, manifest, skipped):
                     p['shape'] = ('translatedout', ret, body, [(t, n, o) for (t, n), o in zip(params, outs)])
                 plans.append(p)
                 if x['Kind'] in ('property', 'indexer') and r.get('SetBody'):
-                    sbody, sdeps, _ = resolve_markers(r['SetBody'], cls, per_reg, manifest)
-                    snat = r.get('SetNative') or []
-                    if sbody is not None and all(native_usable(n) for n in snat):
-                        sp = {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
-                              # an indexer's setter takes its index first (G101): set(index, value)
-                              'bind_args': (params if x['Kind'] == 'indexer' else []) + [(ret, 'value')],
-                              'guards': [], 'success': None, 'translated': True,
-                              'shape': ('translated', 'void', sbody), 'deps': sdeps, 'setter_of': p,
-                              'extra_fns': [C_BY_NAME[n] for n in snat],
-                              'cpp': uniq('Gen_set_' + x['Name'])}
-                        p['setter'] = sp
-                        plans.append(sp)
+                    p['pending_set'] = (r, ret, params)       # tried now, and again each round (G105)
                 have.add(sig(x))
                 changed = True
+            # a translated property's setter (G105: ScreenPort => SetScreenPort(value)): resolved once the
+            # members it calls are planned -- possibly in a later round of this fixpoint than its getter
+            for p in [q for q in plans if q.get('pending_set') and not q.get('setter')]:
+                r, ret, params = p['pending_set']
+                x = p['m']
+                sbody, sdeps, _ = resolve_markers(r['SetBody'], cls, per_reg, manifest)
+                snat = r.get('SetNative') or []
+                if sbody is None or not all(native_usable(n) for n in snat):
+                    continue
+                sp = {'m': x, 'fn': None, 'cls': cls, 'static': False, 'call_exprs': [], 'locals': [],
+                      # an indexer's setter takes its index first (G101): set(index, value)
+                      'bind_args': (params if x['Kind'] == 'indexer' else []) + [(ret, 'value')],
+                      'guards': [], 'success': None, 'translated': True,
+                      'shape': ('translated', 'void', sbody), 'deps': sdeps, 'setter_of': p,
+                      'extra_fns': [C_BY_NAME[n] for n in snat],
+                      'cpp': uniq('Gen_set_' + x['Name'])}
+                p['setter'] = sp
+                plans.append(sp)
+                changed = True
+
+
+def hide_shadowed_out_overloads(per_class, skipped):
+    """two overloads with one bound signature where one returns its out parameters as a tuple (G83)
+    and the other is RhinoCommon's plain form (G105: GetScreenPort() vs GetScreenPort(out near, out
+    far), both `GetScreenPort()` in Python/JS): the plain one is registered, the out one kept as an
+    unregistered helper -- the plain one usually calls it"""
+    def is_out(q):
+        return q['shape'][0] == 'translatedout' or any((pp.get('Mode') == 'out') for pp in q['m'].get('Params') or [])
+    for cls, plans in per_class:
+        groups = {}
+        for q in plans:
+            if q.get('setter_of') or q.get('hidden') or q['m']['Kind'] != 'method':
+                continue
+            key = (q['m']['Name'], bool(q.get('static')), tuple(t for t, _ in q['bind_args']))
+            groups.setdefault(key, []).append(q)
+        for qs in groups.values():
+            plain = [q for q in qs if not is_out(q)]
+            if len(qs) > 1 and plain:
+                for q in qs:
+                    if is_out(q):
+                        q['hidden'] = True
+                        skipped['hidden: out overload shadowed by its plain form'] = skipped.get('hidden: out overload shadowed by its plain form', 0) + 1
 
 
 def drop_setterless_overrides(per_class, skipped):

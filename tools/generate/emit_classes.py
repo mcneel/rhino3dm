@@ -1398,7 +1398,7 @@ def js_class_shape(t):
         return 'string', '({v}.typeOf().as<std::string>() == "string")', '{v}.as<%s>()' % t.replace('const ', '').rstrip('&')
     if t in ('BND_Color', 'BND_Color4f'):
         return ('color', '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("r"))', '{v}.as<%s>()' % t)
-    if t == 'const RH3DM_Bytes&':          # a byte buffer (G86): a Uint8Array or an array of numbers
+    if t in ('const RH3DM_Bytes&', 'RH3DM_Bytes'):   # a byte buffer (G86; by value: G107): a Uint8Array or an array of numbers
         return ('bytes', '({v}.isArray() || {v}.instanceof(emscripten::val::global("Uint8Array")))', 'RH3DM_JsBytes({v})')
     m = re.match(r'(?:const )?std::vector<const (BND_\w+)\*>&?$', t)
     if m:                                  # a sequence of class objects (G95): an array of instances
@@ -1425,7 +1425,7 @@ def js_seq_arg(t):
     """a parameter JS passes as an array (converted through emscripten::val): a std::vector by value
     or const reference, of values or of class pointers, or a byte buffer -- embind has no binding
     type for any of them (unbound-type errors before: NurbsCurveX.create, writeMultipleObjects)"""
-    return bool(re.match(r'^(?:const )?std::vector<.*>&?$', t)) or t == 'const RH3DM_Bytes&'
+    return bool(re.match(r'^(?:const )?std::vector<.*>&?$', t)) or t in ('const RH3DM_Bytes&', 'RH3DM_Bytes')
 
 
 def js_branch_order(p, types=None):

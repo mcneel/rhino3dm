@@ -22,7 +22,7 @@ PY_CLASS = re.compile(r'py::class_<[^>]*>\(m, "(\w+)"')
 # `class_<BND_SurfaceX, base<BND_GeometryBaseX>>("SurfaceX")`: the template
 # arguments nest, so match lazily up to `>("` (`[^>]*` missed every derived class)
 JS_CLASS = re.compile(r'\bclass_<.*?>\("(\w+)"\)')
-PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static)\("(\w+)"(.*)')
+PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static|def_readwrite)\("(\w+)"(.*)')
 # `py::init<const std::vector<BND_Point3dX>&>()`: template arguments nest (G82)
 PY_INIT = re.compile(r'\.def\(py::init<(.*?)>\(\)')
 JS_DEF = re.compile(r'\.(function|class_function|property)\("(\w+)"')
@@ -52,8 +52,8 @@ def surface(files):
                 md = PY_DEF.match(line)
                 if md:
                     kind, member, rest = md.groups()
-                    if kind.startswith('def_property'):
-                        rw = 'rw' if kind == 'def_property' else 'ro'
+                    if kind.startswith('def_property') or kind == 'def_readwrite':   # a field: rw (G107)
+                        rw = 'rw' if kind in ('def_property', 'def_readwrite') else 'ro'
                         out.add('py  %s.%s [property %s%s]'
                                 % (py_cls, member, rw, ' static' if kind.endswith('static') else ''))
                     else:

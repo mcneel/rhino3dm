@@ -106,14 +106,14 @@ module.exports = (t, ctx) => {
 
   t('test_ref_of_by_value_transform_uses_the_argument', () => {
     const c = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
-    const xf = r.TransformX.Translation({ X: 0, Y: 0, Z: 5 });
+    const xf = r.TransformX.translation({ X: 0, Y: 0, Z: 5 });
     assert.strictEqual(c.transform(xf), true);
     assert.deepStrictEqual(c.pointAtStart, P(0, 0, 5));
   });
 
   t('test_finding_14_rhinocommon_value_semantics', () => {
     const q = P(4, 6, 3);
-    assert.strictEqual(r.Point3dX.DistanceTo(r.Point3dX.Unset, q), 0.0);
+    assert.strictEqual(r.Point3dX.distanceTo(r.Point3dX.unset, q), 0.0);
   });
 
   t('test_same_arity_constructor_overloads_both_reachable', () => {
@@ -180,7 +180,7 @@ module.exports = (t, ctx) => {
     });
     check('transform(Identity) is true', () => {
       const c = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
-      assert.strictEqual(c.transform(r.TransformX.Identity), true);   // `if (xform.IsIdentity) return true;`
+      assert.strictEqual(c.transform(r.TransformX.identity), true);   // `if (xform.IsIdentity) return true;`
     });
     assert.strictEqual(bad.length, 0, bad.join(' ; '));
   });
@@ -313,7 +313,7 @@ module.exports = (t, ctx) => {
     const obj = first(f.objects);
     const g = obj.geometry;
     assert.strictEqual(g.pointAtStart.X, 0.0);
-    assert.strictEqual(g.transform(r.TransformX.Translation({ X: 10, Y: 0, Z: 0 })), true);
+    assert.strictEqual(g.transform(r.TransformX.translation({ X: 10, Y: 0, Z: 0 })), true);
     assert.strictEqual(g.pointAtStart.X, 10.0);        // the private copy moved ...
     assert.strictEqual(obj.geometry.pointAtStart.X, 0.0);   // ... the file did not
     f.objects.delete(obj.id);
@@ -416,7 +416,7 @@ module.exports = (t, ctx) => {
 
   // --- G43: components ------------------------------------------------------
 
-  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.Create(0, 0, 0, 1, 2, 3));
+  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.create(0, 0, 0, 1, 2, 3));
 
   t('test_brep_faces_are_components_of_the_brep', () => {
     const b = boxBrep();
@@ -506,7 +506,7 @@ module.exports = (t, ctx) => {
     item.location = P(9, 9, 9);
     assert.strictEqual(cloud.get(2).location.Z, 9);
     ctx.raises(() => cloud.get(4), /out_of_range,index must be smaller than the Number of points/);
-    const ns = r.NurbsSurfaceX.createFromSphere(r.SphereX.Create(P(0, 0, 0), 2.0));
+    const ns = r.NurbsSurfaceX.createFromSphere(r.SphereX.create(P(0, 0, 0), 2.0));
     const ku = ns.knotsU;
     assert(ku.count > 0 && typeof ku.clampedAtStart === 'boolean');
     assert(ns.knotsV.count > 0);

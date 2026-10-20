@@ -475,17 +475,10 @@ def build_js():
 
     
 
-    # build draco_wasm static lib
+    # Draco is compiled inside the rhino3dm build (src/draco_sources.cmake): no separate step.
     # Parallelize the make across all available cores; the compile phase is the
     # bottleneck (hundreds of TUs) and make defaults to a single job.
-    # Build only the draco_static target (libdraco.a) rather than the default
-    # 'all': rhino3dm links libdraco.a alone, so the draco_decoder/draco_encoder
-    # command-line tools 'all' also builds are dead weight under Emscripten
-    # (two extra executable links per fresh build).
     jobs = os.cpu_count() or 4
-    draco_path = os.path.join(target_path, "draco_wasm")
-    os.chdir(draco_path)
-    run_command("emmake make -j" + str(jobs) + " draco_static", True)
 
     os.chdir(target_path)
 

@@ -16,7 +16,7 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-VALUE_TYPES = {'Point2d', 'Point3d', 'Vector3d', 'Interval', 'Line', 'BoundingBox',
+VALUE_TYPES = {'Point2d', 'Point3d', 'Vector3d', 'Point3f', 'Vector3f', 'Point2f', 'Interval', 'Line', 'BoundingBox',
                'Plane', 'Circle', 'Arc', 'Sphere', 'Transform'}
 UNSET = -1.23432101234321e+308             # RhinoMath.UnsetValue
 
@@ -54,6 +54,8 @@ class Surface:
                 return getattr(getattr(self.r, tn), vn)
             if k == 'Color':
                 return tuple(int(c) for c in x)          # the bindings' (r, g, b, a)
+            if k == 'Point3dList' and getattr(self, 'own', False):
+                return [self.cls('Point3d')(*[float(c) for c in p]) for p in x]   # own (G108): generated points
             if k == 'Point3dList':
                 pl = self.r.Point3dList(0)
                 for p in x:
@@ -84,7 +86,7 @@ class Surface:
         if 'on' in v:
             return getattr(self.decode(v['on']), v['call'])(*args)
         tn, mn = v['call'].rsplit('.', 1)
-        owner = self.cls(tn) if tn in VALUE_TYPES else getattr(self.r, tn)
+        owner = self.cls(tn) if tn in VALUE_TYPES or getattr(self, 'own', False) else getattr(self.r, tn)
         return getattr(owner, mn)(*args)
 
     def from_fixture(self, fx):
@@ -97,6 +99,7 @@ class Surface:
         return self.r.CommonObject.Decode(fx)
 
     def make_self(self, case):
+        self.own = bool(case.get('own'))      # G108: each surface builds the recipe with its own classes
         s = case.get('self')
         if s is None:
             return None
@@ -106,6 +109,8 @@ class Surface:
             # a value type from a class-case recipe (Transform.Rotation):
             # the fixture's numbers, or (construct) each binding's own API
             self.construct = bool(case.get('construct'))
+            return self.recipe(s)
+        if self.own and (isinstance(s, str) or (isinstance(s, dict) and ('new' in s or 'call' in s))):
             return self.recipe(s)
         if isinstance(s, str) or (isinstance(s, dict) and ('new' in s or 'call' in s)):
             if self.old is None:
@@ -177,9 +182,9 @@ def encode(v):
         return 'NaN' if math.isnan(v) else 'Inf' if v == math.inf else '-Inf' if v == -math.inf else v
     name = type(v).__name__
     base = name[:-1] if name.endswith('X') else name
-    if base in ('Point3d', 'Vector3d'):
+    if base in ('Point3d', 'Vector3d', 'Point3f', 'Vector3f'):
         return {base: [encode(v.X), encode(v.Y), encode(v.Z)]}
-    if base == 'Point2d':
+    if base in ('Point2d', 'Point2f'):
         return {base: [encode(v.X), encode(v.Y)]}
     if base == 'Line':
         return {base: [encode(c) for p in (v.From, v.To) for c in (p.X, p.Y, p.Z)]}

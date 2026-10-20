@@ -3,7 +3,7 @@
 //   node tests/parity/parity_js.js <path/to/rhino3dm.js>
 //
 // Generated value types are plain {X, Y, Z} objects; behavior is
-// rhino.Point3dX.DistanceTo(p, q), mutators return the new value. Cases that
+// rhino.Point3dX.distanceTo(p, q) (camelCase: G106), mutators return the new value. Cases that
 // expect an exception are skipped: the wasm build has C++ exceptions off
 // (a tracked JS policy question), so a throw would abort the module. The old
 // JS bindings are not compared -- their Point3d is a bare array with no
@@ -14,19 +14,32 @@ const path = require('path');
 
 const UNSET = -1.23432101234321e+308;
 const FIELDS = { Point3d: ['X', 'Y', 'Z'], Vector3d: ['X', 'Y', 'Z'], Interval: ['T0', 'T1'], Point2d: ['X', 'Y'],
+                 Point3f: ['X', 'Y', 'Z'], Vector3f: ['X', 'Y', 'Z'], Point2f: ['X', 'Y'],
                  Line: ['From', 'To'], Plane: ['Origin', 'XAxis', 'YAxis'] };
-const VALUE_TYPES = new Set(['Point2d', 'Point3d', 'Vector3d', 'Interval', 'Line', 'BoundingBox', 'Plane', 'Circle', 'Arc', 'Sphere', 'Transform']);
+const VALUE_TYPES = new Set(['Point2d', 'Point3d', 'Vector3d', 'Point3f', 'Vector3f', 'Point2f', 'Interval', 'Line', 'BoundingBox', 'Plane', 'Circle', 'Arc', 'Sphere', 'Transform']);
 const OPS = { '+': 'op_Addition', '-': 'op_Subtraction', '*': 'op_Multiply', '/': 'op_Division',
               '==': 'op_Equality', '!=': 'op_Inequality', '<': 'op_LessThan', '>': 'op_GreaterThan',
               '<=': 'op_LessThanOrEqual', '>=': 'op_GreaterThanOrEqual' };
 
 const SPECIAL = { NaN: NaN, Inf: Infinity, '-Inf': -Infinity };
 
+// a value type's members in JS (G106): RhinoCommon's names in camelCase, operators by the
+// RhinoCommon method that names them; != and the orderings through equals / compareTo
+const JS_VT_OPS = { op_Addition: 'add', op_Subtraction: 'subtract', op_Multiply: 'multiply',
+                    op_Division: 'divide', op_UnaryNegation: 'negate', op_Equality: 'equals' };
+const JS_FN_OWN = new Set(['length', 'name', 'prototype', 'caller', 'arguments', 'apply', 'call', 'bind', 'toString']);
+const jsVt = n => { const j = JS_VT_OPS[n] || (n[0].toLowerCase() + n.slice(1)); return JS_FN_OWN.has(j) ? n : j; };
+const DERIVED_OPS = {
+  op_Inequality: (T, a, b) => !T.equals(a, b),
+  op_LessThan: (T, a, b) => T.compareTo(a, b) < 0, op_GreaterThan: (T, a, b) => T.compareTo(a, b) > 0,
+  op_LessThanOrEqual: (T, a, b) => T.compareTo(a, b) <= 0, op_GreaterThanOrEqual: (T, a, b) => T.compareTo(a, b) >= 0,
+};
+
 function decode(rhino, v) {
   if (typeof v === 'string') return v in SPECIAL ? SPECIAL[v] : v;
   if (v !== null && typeof v === 'object' && 'new' in v) {
     // {"new": T, "args": [...]}: a value type through its RhinoCommon constructor
-    return rhino[v.new + 'X'].Create(...v.args.map(a => decode(rhino, a)));
+    return rhino[v.new + 'X'].create(...v.args.map(a => decode(rhino, a)));
   }
   if (v !== null && typeof v === 'object') {
     const [[k, x]] = Object.entries(v);
@@ -35,7 +48,7 @@ function decode(rhino, v) {
     if (k === 'static') {
       const [tn, mn] = x.split('.');
       if (tn === 'RhinoMath' && mn === 'UnsetValue') return UNSET;
-      const sv = rhino[tn + 'X'][mn];            // a static property is a getter (G101)
+      const sv = rhino[tn + 'X'][jsVt(mn)];      // a static property is a getter (G101); camelCase (G106)
       return typeof sv === 'function' ? sv() : sv;
     }
     const o = {};
@@ -130,7 +143,29 @@ function fixtureObject(rhino, c, fixtures) {
   try { return new Gen(hand); } catch (e) { return new Gen(); }
 }
 
-function evaluateClass(rhino, c, fixtures) {
+// `"own": true` (G108): the case's object is built with the GENERATED classes from its recipe -- a class
+// with no old-binding bridge or serializable fixture (DracoCompression) -- RhinoCommon names, camelCase
+function ownRecipe(rhino, v, recipes) {
+  if (typeof v === 'string') v = recipes[v];
+  const arg = a => (a && typeof a === 'object' && !Array.isArray(a) && ('call' in a || 'new' in a)) ? ownRecipe(rhino, a, recipes)
+    : (a && typeof a === 'object' && 'Point3dList' in a) ? a.Point3dList.map(p => ({ X: p[0], Y: p[1], Z: p[2] }))
+    : decode(rhino, a);
+  const args = (v.args || []).map(arg);
+  if ('new' in v) return new rhino[v.new + 'X'](...args);
+  if ('on' in v) return ownRecipe(rhino, v.on, recipes)[camel(v.call)](...args);
+  const dot = v.call.lastIndexOf('.');
+  const T = rhino[v.call.slice(0, dot) + 'X'];
+  return T[camel(v.call.slice(dot + 1))](...args);
+}
+
+function evaluateClass(rhino, c, fixtures, recipes) {
+  if (c.own) {
+    const self = ownRecipe(rhino, c.self, recipes);
+    const own = a => (a && typeof a === 'object' && !Array.isArray(a) && ('call' in a || 'new' in a)) ? ownRecipe(rhino, a, recipes) : decode(rhino, a);
+    const mem = self[camel(c.member)];
+    if (mem === undefined) throw new Error('missing ' + c.member);
+    return typeof mem === 'function' ? mem.apply(self, (c.args || []).map(own)) : mem;
+  }
   if (c.self === undefined) {
     // a static member (Intersection.LineLine): call it on the class
     const cls = rhino[(ALIAS[c.type + 'X'] || (c.type + 'X'))];
@@ -184,15 +219,19 @@ function evaluate(rhino, c, prebuilt) {
     self = Array.isArray(c.self)
       ? Object.fromEntries(FIELDS[c.type].map((f, i) => [f, decode(rhino, c.self[i])]))
       : c.self.new
-        ? rhino[c.self.new + 'X'].Create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
-        : (typeof NS[c.self.static] === 'function' ? NS[c.self.static]() : NS[c.self.static]);
+        ? rhino[c.self.new + 'X'].create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
+        : (typeof NS[jsVt(c.self.static)] === 'function' ? NS[jsVt(c.self.static)]() : NS[jsVt(c.self.static)]);
   if (c.op) {
     const a = c.args.map(x => decode(rhino, x));
     const name = a.length === 1 ? 'op_UnaryNegation' : OPS[c.op];
     // the operator lives on the C# type that declares it: try every operand type
     const owners = [c.type, ...c.args.map(x => (x && typeof x === 'object') ? Object.keys(x)[0] : null)];
     for (const t of owners) {
-      const fn = t && rhino[t + 'X'] && rhino[t + 'X'][name];
+      const T = t && rhino[t + 'X'];
+      if (T && DERIVED_OPS[name] && typeof T.compareTo === 'function') {
+        try { return DERIVED_OPS[name](T, ...a); } catch (e) { if (!/argument|parameter|expected/i.test(String(e))) throw e; }
+      }
+      const fn = T && T[jsVt(name)];
       if (fn) { try { return fn(...a); } catch (e) { if (!/argument|parameter|expected/i.test(String(e))) throw e; } }
     }
     throw new Error('missing operator ' + name);
@@ -201,12 +240,12 @@ function evaluate(rhino, c, prebuilt) {
   if (!('args' in c)) {
     // field-backed properties are plain fields of the value object
     if (self && typeof self === 'object' && c.member in self) return self[c.member];
-    const fn = NS[c.member];
+    const fn = NS[jsVt(c.member)];
     if (fn === undefined) throw new Error('missing ' + c.member);
     if (typeof fn !== 'function') return fn;            // a static property: a getter (G101)
     return self ? fn(self) : fn();
   }
-  const fn = NS[c.member];
+  const fn = NS[jsVt(c.member)];
   if (!fn) throw new Error('missing ' + c.member);
   const args = c.args.map(x => decode(rhino, x));
   const ret = self ? fn(self, ...args) : fn(...args);
@@ -232,7 +271,7 @@ async function main() {
       if (want && want.throws) { skipped++; continue; }
       if (c.construct) { skipped++; continue; }     // construction tests the old API: python only
       let got;
-      try { got = encodeLike(want, doc.recipes ? evaluateClass(rhino, c, fixtures) : evaluate(rhino, c), rhino); }
+      try { got = encodeLike(want, doc.recipes ? evaluateClass(rhino, c, fixtures, doc.recipes) : evaluate(rhino, c), rhino); }
       catch (e) {
         if (/^Error: missing/.test(String(e))) { missing.push(c.id + ' (' + String(e).slice(7) + ')'); continue; }
         got = { error: String(e) };

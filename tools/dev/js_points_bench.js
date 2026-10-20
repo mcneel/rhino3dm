@@ -18,9 +18,9 @@ factory().then(rhino => {
   // pure marshalling cost: value type through a trivial generated function
   const P = rhino.Point3dX;
   const q = { X: 1, Y: 2, Z: 3 };
-  const o = best(() => { for (let i = 0; i < N; i++) { s += P.op_Addition(q, q).X; } });
+  const o = best(() => { for (let i = 0; i < N; i++) { s += P.add(q, q).X; } });
   console.log('| pointAt returning [x,y,z] (hand, value_array)  | %s ns |', h.toFixed(0));
   console.log('| pointAt returning {X,Y,Z} (generated, value_object) | %s ns | ratio %sx |', g.toFixed(0), (g / h).toFixed(2));
-  console.log('| Point3dX.op_Addition({X,Y,Z}, {X,Y,Z}) round trip | %s ns |', o.toFixed(0));
+  console.log('| Point3dX.add({X,Y,Z}, {X,Y,Z}) round trip | %s ns |', o.toFixed(0));
   if (s === 42) console.log('');
 });

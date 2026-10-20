@@ -110,16 +110,16 @@ factory().then(rhino => {
   // value types: plain GC'd {X,Y,Z} objects + functions from the C# bodies
   const P = rhino.Point3dX;
   const vp1 = { X: 1, Y: 2, Z: 3 }, vq1 = { X: 4, Y: 6, Z: 3 };
-  assert.strictEqual(P.DistanceTo(vp1, vq1), 5);
-  const un = P.Unset;                                   // a static property: a getter (G101)
-  assert.strictEqual(P.DistanceTo(un, vq1), 0);          // RhinoCommon semantics
-  assert.strictEqual(P.IsValid(un), false);
-  const vd = P.op_Subtraction(vq1, vp1);                       // Point3d - Point3d -> Vector3d
+  assert.strictEqual(P.distanceTo(vp1, vq1), 5);
+  const un = P.unset;                                   // a static property: a getter (G101)
+  assert.strictEqual(P.distanceTo(un, vq1), 0);          // RhinoCommon semantics
+  assert.strictEqual(P.isValid(un), false);
+  const vd = P.subtract(vq1, vp1);                       // Point3d - Point3d -> Vector3d
   assert.deepStrictEqual(vd, { X: 3, Y: 4, Z: 0 });
   assert.strictEqual(rhino.Vector3dX.Length(vd), 5);
   const viv = { T0: 2, T1: 10 };
-  assert.strictEqual(rhino.IntervalX.ParameterAt(viv, 0.25), 4);
-  console.log('  value types: plain objects', JSON.stringify(vd), '| Unset.DistanceTo ->', P.DistanceTo(un, vq1));
+  assert.strictEqual(rhino.IntervalX.parameterAt(viv, 0.25), 4);
+  console.log('  value types: plain objects', JSON.stringify(vd), '| Unset.DistanceTo ->', P.distanceTo(un, vq1));
 
   // classes as arguments: populate a bridge-free PolyCurveX with generated curves
   const pcx3 = new rhino.PolyCurveX();

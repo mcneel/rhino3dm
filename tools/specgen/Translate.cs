@@ -74,6 +74,7 @@ static class TranslateCommand
             ["ConstructionPlane"] = "BND_ConstructionPlaneX",
             ["ConstructionPlaneGridDefaults"] = "BND_ConstructionPlaneGridDefaultsX",
             ["File3dmWriteOptions"] = "BND_File3dmWriteOptionsX",
+            ["DracoCompressionOptions"] = "BND_DracoCompressionOptionsX",   // G107
             ["PageSettings"] = "BND_PageSettingsX",
             // managed-state classes (G80; Luis 2026-10-14, option 4): RhinoList<T> read
             // as RhinoList of Point3d (monomorphized below), its subclasses on it
@@ -666,12 +667,14 @@ class Tx
     readonly HashSet<string> _ptrOuts = new();    // data-class out parameters, held by pointer (G86)
     int _nullOk;                                  // > 0 where `null` is a null object pointer
     bool _retClass;                               // the member returns a class value
-    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && !IsVariantType(cs) && !IsGuidsType(cs) && Classes.ContainsKey(cs.Split('.').Last())
+    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && !IsVariantType(cs) && !IsGuidsType(cs) && !IsByteVecType(cs) && Classes.ContainsKey(cs.Split('.').Last())
         && !All.ContainsKey(cs.Split('.').Last()) && !Enums.ContainsKey(cs.Split('.').Last());
     static bool IsVariantType(string cs) => cs is "Variant" or "Render.Variant" or "Rhino.Render.Variant";
     // `using (var children = new SimpleArrayGuid())` (G89): an ON_SimpleArray<ON_UUID> on the
     // stack (Count, [i] an ON_UUID) -- in class mode, like the points holder
     static bool IsGuidsType(string cs) => cs?.Split('.').Last() == "SimpleArrayGuid";
+    // `using (var w = new StdVectorByte())` (G107: DracoCompression.ToByteArray): a byte vector on the stack
+    static bool IsByteVecType(string cs) => cs?.Split('.').Last() == "StdVectorByte";
     static bool IsFile3dmT(string cs) => cs is "File3dm" or "FileIO.File3dm" or "Rhino.FileIO.File3dm";
     // a File3dm the body hands on (G91: File3dmManifestTable's m_parent / Instantiate's
     // parent): the file's ONX_Model -- a hidden helper's parameter, or this table's field
@@ -884,6 +887,7 @@ class Tx
         // (`IConvertible` out, `object` in) converted by the variant's runtime type
         if (Cur.ClassMode && IsVariantType(t.ToString())) return "RH3DM_Variant";
         if (Cur.ClassMode && IsGuidsType(t.ToString())) return "RH3DM_Guids";
+        if (Cur.ClassMode && IsByteVecType(t.ToString())) return "RH3DM_ByteVec";    // G107
         if (Cur.ClassMode && t.ToString() is "IConvertible" or "System.IConvertible" or "object" or "System.Object") return "RH3DM_Value";
         // a Guid in a class body (G89 hidden helpers; G91 everywhere): the native's own
         // ON_UUID -- a public signature's Guid is the binding's uuid (BND_UUID), converted
@@ -1389,9 +1393,8 @@ class Tx
                 _guidParams.Add(p.Identifier.Text);
             }
             // `p = p ?? new T();` in the body (G101): p is optional -- null is the default object
-            if (Cur.ClassMode && mode == "" && !ty.EndsWith("*") && body != null && body.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(x =>
-                    x.Left is IdentifierNameSyntax { Identifier.Text: var pl } && pl == p.Identifier.Text
-                    && x.Right is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax { Identifier.Text: var pr }, Right: ObjectCreationExpressionSyntax } && pr == pl))
+            if (Cur.ClassMode && mode == "" && !ty.EndsWith("*") && body != null && body.DescendantNodes().OfType<StatementSyntax>().Any(x =>
+                    DefaultObjectStatement(x) is { } dos && dos.p == p.Identifier.Text))
                 ty = "const " + ty + "*";
             if (Cur.ClassMode && ty == "RH3DM_Time" && !_hidden)
             {
@@ -1719,16 +1722,13 @@ class Tx
                 break;
             // `options = options ?? new File3dmWriteOptions();` (G101): an optional parameter given its
             // default object -- a reference to the argument, or to a default-constructed one
-            case ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression,
-                     Left: IdentifierNameSyntax pdl, Right: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax pdr,
-                     Right: ObjectCreationExpressionSyntax { ArgumentList.Arguments.Count: 0 } pdn } } }
-                when Cur.ClassMode && pdl.Identifier.Text == pdr.Identifier.Text && ParamNames.Contains(pdl.Identifier.Text)
-                     && !_paramDefaults.ContainsKey(pdl.Identifier.Text) && pdn.Type.ToString().Split('.').Last() == Scope[pdl.Identifier.Text].Split('.').Last():
+            case StatementSyntax pds when Cur.ClassMode && DefaultObjectStatement(pds) is { } pdo && ParamNames.Contains(pdo.p)
+                     && !_paramDefaults.ContainsKey(pdo.p) && pdo.made.Type.ToString().Split('.').Last() == Scope[pdo.p].Split('.').Last():
             {
-                var pdt = Type(SyntaxFactory.ParseTypeName(Scope[pdl.Identifier.Text]));
-                var nm = "rh3dm_" + pdl.Identifier.Text;
-                yield return pad + $"const {pdt}& {nm} = {Rn(pdl.Identifier.Text)} ? *{Rn(pdl.Identifier.Text)} : {pdt}();";
-                _paramDefaults[pdl.Identifier.Text] = nm;
+                var pdt = Type(SyntaxFactory.ParseTypeName(Scope[pdo.p]));
+                var nm = "rh3dm_" + pdo.p;
+                yield return pad + $"const {pdt}& {nm} = {Rn(pdo.p)} ? *{Rn(pdo.p)} : {pdt}();";
+                _paramDefaults[pdo.p] = nm;
                 break;
             }
             case ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression, Right: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression } } chain }:
@@ -1861,16 +1861,17 @@ class Tx
             }
             case UsingStatementSyntax vus when Cur.ClassMode && vus.Declaration is { Variables: [var vuv] }
                     && vuv.Initializer?.Value is ExpressionSyntax vun
-                    && (vun is ObjectCreationExpressionSyntax vnc && (IsVariantType(vnc.Type.ToString()) || IsGuidsType(vnc.Type.ToString()))
+                    && (vun is ObjectCreationExpressionSyntax vnc && (IsVariantType(vnc.Type.ToString()) || IsGuidsType(vnc.Type.ToString()) || IsByteVecType(vnc.Type.ToString()))
                         // `using (var v = GetValue(s))` (G97): a variant a member returned, on the stack too
                         || vun is InvocationExpressionSyntax && IsVariantType(TypeOf(vun) ?? "")):
             {
                 // `using (var v = new Variant(value)) { ... }` (G89): a variant on the stack
                 // (`new SimpleArrayGuid()`: the uuid holder, the same way)
                 var guids = vun is ObjectCreationExpressionSyntax vgc && IsGuidsType(vgc.Type.ToString());
-                Scope[vuv.Identifier.Text] = guids ? "SimpleArrayGuid" : "Variant";
+                var bytev = vun is ObjectCreationExpressionSyntax vbc && IsByteVecType(vbc.Type.ToString());   // G107
+                Scope[vuv.Identifier.Text] = guids ? "SimpleArrayGuid" : bytev ? "StdVectorByte" : "Variant";
                 yield return pad + "{";
-                yield return pad + (guids ? "  RH3DM_Guids " : "  RH3DM_Variant ") + Rn(vuv.Identifier.Text) + " = " + Expr(vun) + ";";
+                yield return pad + (guids ? "  RH3DM_Guids " : bytev ? "  RH3DM_ByteVec " : "  RH3DM_Variant ") + Rn(vuv.Identifier.Text) + " = " + Expr(vun) + ";";
                 foreach (var x in (vus.Statement is BlockSyntax vub ? vub.Statements : new SyntaxList<StatementSyntax>().Add(vus.Statement)))
                     foreach (var l in Stmt(x, depth + 1)) yield return l;
                 yield return pad + "}";
@@ -2389,6 +2390,27 @@ class Tx
     };
 
     readonly Dictionary<string, string> _paramDefaults = new();   // `p = p ?? new T();` (G101): p is now this local
+
+    // `p = p ?? new T();` (G101) or `if (p == null) p = new T();` (G107: DracoCompression.Compress): an
+    // optional parameter given its default object -- (p, the creation), else null
+    static (string p, ObjectCreationExpressionSyntax made)? DefaultObjectStatement(StatementSyntax st)
+    {
+        if (st is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression,
+                Left: IdentifierNameSyntax l, Right: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.CoalesceExpression, Left: IdentifierNameSyntax r,
+                Right: ObjectCreationExpressionSyntax { ArgumentList.Arguments.Count: 0 } n } } } && l.Identifier.Text == r.Identifier.Text)
+            return (l.Identifier.Text, n);
+        if (st is IfStatementSyntax { Else: null, Condition: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression } c } fi
+            && (c.Left is IdentifierNameSyntax ci && c.Right.IsKind(SyntaxKind.NullLiteralExpression)
+                || c.Right is IdentifierNameSyntax && c.Left.IsKind(SyntaxKind.NullLiteralExpression)))
+        {
+            var pn = (c.Left as IdentifierNameSyntax ?? (IdentifierNameSyntax)c.Right).Identifier.Text;
+            var body = fi.Statement is BlockSyntax { Statements.Count: 1 } bb ? bb.Statements[0] : fi.Statement;
+            if (body is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression,
+                    Left: IdentifierNameSyntax al, Right: ObjectCreationExpressionSyntax { ArgumentList.Arguments.Count: 0 } an } } && al.Identifier.Text == pn)
+                return (pn, an);
+        }
+        return null;
+    }
     string Ident(string id)
     {
         if (_paramDefaults.TryGetValue(id, out var pdn)) return pdn;
@@ -2408,6 +2430,10 @@ class Tx
             if (Declaring(t => t.FieldCs.ContainsKey(id)) is { } stft && stft.FieldCs[id] is "bool" or "int" or "uint" or "double" or "Guid" or "System.Guid"
                 && !Cur.IsData)
                 return $"$$state:{id}$$";                // a Guid field: the generated class's ON_UUID (G104)
+            // an IntPtr field (G107: DracoCompression.m_ptrDraco): a HANDLE class's own pointer -- resolved by
+            // the generator for a registry handle whose field it is, refused otherwise
+            if (Declaring(t => t.FieldCs.ContainsKey(id)) is { } hft && hft.FieldCs[id] is "IntPtr" or "System.IntPtr" && !Cur.IsData)
+                return $"$$hfield:{id}$$";
             if (Declaring(t => t.FieldCs.ContainsKey(id) || t.Consts.Contains(id) || t.StaticFields.Contains(id)) != null)
                 throw new NotSupported("class field " + id);
             var dt = Declaring(t => t.Props.ContainsKey(id));
@@ -2938,6 +2964,8 @@ class Tx
                     return "RH3DM_Points()";                                       // the stack holder (G84)
                 if (Cur.ClassMode && IsGuidsType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
                     return "RH3DM_Guids()";                                        // G89
+                if (Cur.ClassMode && IsByteVecType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
+                    return "RH3DM_ByteVec()";                                      // G107
                 if (Cur.ClassMode && IsVariantType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) <= 1)
                     return oc.ArgumentList?.Arguments.Count == 1 ? $"RH3DM_Variant({Expr(oc.ArgumentList.Arguments[0].Expression)})" : "RH3DM_Variant()";   // G89
                 if (oc.Type is IdentifierNameSyntax tn && All.TryGetValue(tn.Identifier.Text, out var ti)
@@ -3085,6 +3113,10 @@ class Tx
                     return "nullptr";
                 if (Cur.ClassMode && name == "Empty" && ma.Expression.ToString() is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle")
                     return "RH3DM_RectLTRB(0, 0, 0, 0)";                                  // G86
+                // a Rectangle value's sides (G105: SetScreenPort(Rectangle)): the tuple (x, y, width, height)
+                if (Cur.ClassMode && name is "Left" or "Top" or "Right" or "Bottom" or "Width" or "Height" or "X" or "Y"
+                    && TypeOf(ma.Expression) is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle")
+                    return $"RH3DM_Rect{name}({Expr(ma.Expression)})";
                 if (ma.Expression is IdentifierNameSyntax en && Enums.TryGetValue(en.Identifier.Text, out var ed)
                     && !Scope.ContainsKey(en.Identifier.Text) && !All.ContainsKey(en.Identifier.Text)
                     && ed.Members.Any(x => x.Identifier.Text == name))
@@ -3200,6 +3232,8 @@ class Tx
                 if (Cur.ClassMode && NativeEnumOf(ma.Expression.ToString()) != null) return ma.Expression.ToString();   // G96
                 if (Cur.ClassMode && name is "Year" or "Month" or "Day" or "Hour" or "Minute" or "Second"
                     && TypeOf(ma.Expression) is "DateTime" or "System.DateTime") return "int";   // G97
+                if (Cur.ClassMode && name is "Left" or "Top" or "Right" or "Bottom" or "Width" or "Height" or "X" or "Y"
+                    && TypeOf(ma.Expression) is "Rectangle" or "System.Drawing.Rectangle" or "Drawing.Rectangle") return "int";   // G105
                 if (name == "Count" && TypeOf(ma.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return "int";
                 if (name == "Count" && Cur.ClassMode && IsGuidsType(TypeOf(ma.Expression))) return "int";   // G89
                 if (name is "Length" or "Count" && ArrayCs(TypeOf(ma.Expression)) != null) return "int";
@@ -3236,6 +3270,9 @@ class Tx
                     return "IntPtr";                                                // G84
                 if (Cur.ClassMode && CalleeName0(inv) == "CreateGeometryHelper" && inv.ArgumentList.Arguments.Count == 2)
                     return "GeometryBase";                                          // G86
+                if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ReadAllBytes", Expression: var rbt }
+                    && rbt.ToString() is "File" or "System.IO.File" or "IO.File")
+                    return "byte[]";                                                // G107
                 // System.Drawing.Color's ARGB conversions (G101: MeshVertexColorList)
                 if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ToArgb" } tma
                     && inv.ArgumentList.Arguments.Count == 0 && TypeOf(tma.Expression) is "Color" or "System.Drawing.Color" or "Drawing.Color")
@@ -3256,6 +3293,7 @@ class Tx
                     if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "Point3d[]" : null;
                     if (IsVariantType(TypeOf(m.Expression) ?? "") && name == "ToDateTime" && inv.ArgumentList.Arguments.Count == 0) return "DateTime";   // G97
                     if (IsVariantType(TypeOf(m.Expression) ?? "") || IsGuidsType(TypeOf(m.Expression))) return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : null;   // G89
+                    if (IsByteVecType(TypeOf(m.Expression))) return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "byte[]" : null;   // G107
                     if (m.Expression is IdentifierNameSyntax { Identifier.Text: "Enum" } && name == "IsDefined") return "bool";   // G91
                     if (m.Expression is IdentifierNameSyntax mx && mx.Identifier.Text == "Math" && !Scope.ContainsKey("Math"))
                         return name == "Sign" ? "int" : name is "Max" or "Min" or "Abs" ? TypeOf(inv.ArgumentList.Arguments[0].Expression) : "double";
@@ -3340,6 +3378,8 @@ class Tx
             }
             else if ((Cur.IsData || Cur.ClassMode) && t == "string")
                 args.Add($"RH3DM_S({Expr(e)}).data()");
+            else if (Cur.ClassMode && t is "byte[]")
+                args.Add($"RH3DM_IP((void*)({Expr(e)}).data())");   // its bytes, as the pointer the native takes (G107)
             else if (Cur.ClassMode && t is "Guid" or "System.Guid")
                 args.Add(Expr(e));                             // an ON_UUID by value (G89, G91)
             else if (Cur.ClassMode && e is CastExpressionSyntax { Type: PredefinedTypeSyntax { Keyword.Text: "int" } } ce0 && IsEnumT(TypeOf(ce0.Expression)))
@@ -3373,6 +3413,11 @@ class Tx
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "Copy", Expression: var mce } && mce.ToString().EndsWith("Marshal")
             && inv.ArgumentList.Arguments is [var mc0, var mc1, var mc2, var mc3] && TypeOf(mc0.Expression) == "IntPtr" && TypeOf(mc1.Expression) is "byte[]")
             return $"std::memcpy(({Expr(mc1.Expression)}).v.data() + ({Expr(mc2.Expression)}), (const void*)({Expr(mc0.Expression)}), (size_t)({Expr(mc3.Expression)}))";
+        // `File.ReadAllBytes(path)` (G107: DracoCompression.DecompressFile): the file's bytes; a missing
+        // file throws FileNotFoundException, as .NET does
+        if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ReadAllBytes", Expression: var rbe }
+            && rbe.ToString() is "File" or "System.IO.File" or "IO.File" && inv.ArgumentList.Arguments is [var rb0] && TypeOf(rb0.Expression) == "string")
+            return $"RH3DM_ReadAllBytes({Expr(rb0.Expression)})";
         // System.Drawing.Color <-> a .NET ARGB int (G102: MeshVertexColorList's indexer): the helpers the
         // manifest planner already uses (gen_common.h; .NET alpha = opacity)
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "FromArgb", Expression: var fae }
@@ -3446,7 +3491,7 @@ class Tx
             && !Scope.ContainsKey(fpf.Identifier.Text) && Cur.Chain().Any(c => c.FieldCs.ContainsKey(fpf.Identifier.Text)))
             return $"$$fieldptr:{fpf.Identifier.Text}:{(fpm.Name.Identifier.Text == "ConstPointer" ? "Const" : "NonConst")}$$";
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Expression: var hx, Name.Identifier.Text: var hn }
-            && (TypeOf(hx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(hx) ?? "") || IsGuidsType(TypeOf(hx))))
+            && (TypeOf(hx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(hx) ?? "") || IsGuidsType(TypeOf(hx)) || IsByteVecType(TypeOf(hx))))
         {
             // the points holder on the stack (G84)
             if (hn is "ConstPointer" or "NonConstPointer" or "ToArray" && inv.ArgumentList.Arguments.Count == 0)

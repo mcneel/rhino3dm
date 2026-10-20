@@ -241,6 +241,12 @@ CLASSES = [
     {'type': 'Rhino.FileIO.FileReference', 'cs': 'FileReference', 'on': 'ON_FileReference',
      'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
      'gen': 'BND_FileReferenceX', 'reg': 'FileReferenceX'},
+    # G107: Draco compression (Luis 2026-10-19: sync c/draco.cpp, U24) -- the handle RhinoCommon's
+    # DracoCompression owns (Draco_Compress / Draco_Delete); its pointee is draco.cpp's own class,
+    # opaque here (compiled renamed, src/CMakeLists.txt)
+    {'type': 'Rhino.FileIO.DracoCompression', 'cs': 'DracoCompression', 'on': 'BND_Draco',
+     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
+     'gen': 'BND_DracoCompressionX', 'reg': 'DracoCompressionX'},
     # G96: an INTERNAL handle (never registered): AnnotationBase.GetTextRuns's elements, which
     # PlainText / TextHasRtfFormatting read through LINQ -- a pooled ON_TextRun the object
     # gives back with ON_TextRun_ReturnManagedTextRun (specgen InternalHandles)
@@ -652,8 +658,15 @@ def register_value_types(vt):
             VT_PROP_RET[(m['Type'], m['Name'])] = m.get('Ret')
             if m.get('Setter'):
                 VT_PROP_SET.add((m['Type'], m['Name']))
+    VT_DEFINED_ENUMS.clear()
     for e in vt.get('enums', []):
         pub_t = CS_ENUMS.get(e['Cs'])
+        if pub_t is not None and pub_t['gen'] and pub_t['cpp'] == e['Cpp']:
+            # a GENERATED public enum the translated bodies define verbatim (G107: DracoColorFormat,
+            # a data class's field): one type -- the values header defines it, the generator registers it
+            VT_ENUMS[e['Cpp']] = pub_t['cpp']
+            VT_DEFINED_ENUMS.add(e['Cs'])
+            continue
         if pub_t is None or pub_t['gen']:
             raise SystemExit('translated enum %s: no registered public type (add it to CS_ENUMS)' % e['Cs'])
         VT_ENUMS[e['Cpp']] = pub_t['cpp']
@@ -1063,7 +1076,31 @@ CS_OP_NAMES = {('+', 2): 'op_Addition', ('-', 2): 'op_Subtraction',
 
 
 
+# G106 (Luis: option A for every value type): the JS name of a value-type member -- camelCase like the
+# generated classes; an operator by RhinoCommon's method name for it (Point3d.Add, Vector3d.Negate,
+# Transform.Multiply); None: not registered in JS (.NET plumbing, operators with no method name)
+JS_VT_OPS = {'op_Addition': 'add', 'op_Subtraction': 'subtract', 'op_Multiply': 'multiply',
+             'op_Division': 'divide', 'op_UnaryNegation': 'negate', 'op_Equality': 'equals'}
+# CompareTo stays (compareTo): RhinoCommon's public ordering, the only one JS has without the operators
+JS_VT_DROP = {'GetHashCode', 'Clone', 'op_Inequality', 'op_UnaryPlus', 'op_Modulus',
+              'op_LessThan', 'op_GreaterThan', 'op_LessThanOrEqual', 'op_GreaterThanOrEqual'}
+OBSOLETE = set()     # (C# simple type, member name, parameter count) marked [Obsolete] (manifest; G106)
+
+
+# a JS function (the value type's namespace is a constructor) already owns these: `Vector3dX.length` would
+# collide with Function.length -- RhinoCommon's spelling is kept (Vector3dX.Length(v); G106)
+JS_FN_OWN = {'length', 'name', 'prototype', 'caller', 'arguments', 'apply', 'call', 'bind', 'toString'}
+
+
+def js_vt_name(name):
+    if name in JS_VT_DROP:
+        return None
+    jn = JS_VT_OPS.get(name) or camel(name)
+    return name if jn in JS_FN_OWN else jn
+
+
 VT_ENUMS = {}        # RH3DM_<Name> -> the C++ type the bindings register under <Name>
+VT_DEFINED_ENUMS = set()   # generated public enums the translated values header defines (G107)
 VT_STATICS = set()   # (C# type, name) of translated static getters (Plane.WorldXY)
 VT_CONSTS = set()    # (C# type, name) of translated constants (RhinoMath.UnsetValue)
 VT_PROPS = set()     # (C# type, name) of translated instance properties (Interval.Min)
@@ -1112,6 +1149,9 @@ def with_system_enums(manifest):
 
 def index_types(manifest):
     TYPE_RECS.clear(); SIMPLE_TYPES.clear(); CONST_PROPS.clear(); PLANNED.clear(); ENUM_VALUES.clear()
+    OBSOLETE.clear()
+    OBSOLETE.update((x['Type'].replace('+', '.').split('.')[-1], x['Name'], len(x.get('Params') or []))
+                    for x in manifest['members'] if 'Obsolete' in x)
     PROPS_BY_TYPE.clear(); NO_OWNED_ABSTRACT.clear()
     for x in manifest['members']:
         if x['Kind'] == 'property' and x['Variant'] in ('portable', 'rhino3dm-only'):

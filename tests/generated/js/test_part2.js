@@ -10,7 +10,7 @@ module.exports = (t, ctx) => {
   const isUuid = v => typeof v === 'string' && UUID_RE.test(v);
 
   // --- helpers ported from test_generated.py --------------------------------
-  const box_brep = () => r.BrepX.createFromBox(r.BoundingBoxX.Create(0, 0, 0, 1, 2, 3));
+  const box_brep = () => r.BrepX.createFromBox(r.BoundingBoxX.create(0, 0, 0, 1, 2, 3));
   // a list type registered with count/get but no iterator (BrepLoopListX, BrepTrimListX ...)
   const items = coll => {
     if (coll && typeof coll.iterator === 'function') return list(coll);
@@ -37,8 +37,8 @@ module.exports = (t, ctx) => {
     for (const p of pts) pc.add(p);
     return new r.PointCloudX(pc);
   };
-  const sphereX = (c, rad) => r.SphereX.Create(c, rad);
-  const circleX = (c, rad) => r.CircleX.Create(c, rad);
+  const sphereX = (c, rad) => r.SphereX.create(c, rad);
+  const circleX = (c, rad) => r.CircleX.create(c, rad);
 
   // --- components --------------------------------------------------------------
 
@@ -154,16 +154,16 @@ module.exports = (t, ctx) => {
 
   t('test_texture_mapping_factories_return_none_on_failure', () => {
     const i = { T0: 0, T1: 1 };
-    const tm = r.TextureMappingX.createPlaneMapping(r.PlaneX.WorldXY, i, i, i, true);
+    const tm = r.TextureMappingX.createPlaneMapping(r.PlaneX.worldXY, i, i, i, true);
     assert(tm instanceof r.TextureMappingX && tm.capped === true);
-    assert(r.TextureMappingX.createPlaneMapping(r.PlaneX.WorldXY, i, i, i) instanceof r.TextureMappingX);
-    assert.strictEqual(r.TextureMappingX.createPlaneMapping(r.PlaneX.Unset, i, i, i, false), null);   // origin unset
+    assert(r.TextureMappingX.createPlaneMapping(r.PlaneX.worldXY, i, i, i) instanceof r.TextureMappingX);
+    assert.strictEqual(r.TextureMappingX.createPlaneMapping(r.PlaneX.unset, i, i, i, false), null);   // origin unset
     assert(r.TextureMappingX.createSurfaceParameterMapping() instanceof r.TextureMappingX);
     assert(r.TextureMappingX.createSphereMapping(sphereX(P(0, 0, 0), 2)) instanceof r.TextureMappingX);
   });
 
   t('test_extrusion_caps_decode_the_native_flags', () => {
-    const cyl = r.CylinderX.Create(circleX(P(0, 0, 0), 1.0), 4.0);
+    const cyl = r.CylinderX.create(circleX(P(0, 0, 0), 1.0), 4.0);
     for (const [bottom, top] of [[false, false], [true, false], [false, true], [true, true]]) {
       const e = r.ExtrusionX.createCylinderExtrusion(cyl, bottom, top);
       assert.deepStrictEqual([e.isCappedAtBottom, e.isCappedAtTop], [bottom, top]);
@@ -383,16 +383,16 @@ module.exports = (t, ctx) => {
 
   t('test_component_index_value_type', () => {
     const CI = r.ComponentIndexX;
-    const ci = CI.Create(r.ComponentIndexType.BrepFace, 3);
+    const ci = CI.create(r.ComponentIndexType.BrepFace, 3);
     assert.strictEqual(ci.Index, 3);
-    assert.strictEqual(CI.ComponentIndexType(ci), r.ComponentIndexType.BrepFace);
-    assert.strictEqual(CI.IsSet(ci), true);
-    const u = CI.Unset;                                          // `new ComponentIndex(InvalidType, -1)`
-    assert(CI.IsUnset(u) && !CI.IsUnset(ci) && u.Index === -1);
-    assert(CI.op_Equality(ci, CI.Create(r.ComponentIndexType.BrepFace, 3)));
-    assert(CI.op_Inequality(ci, u) && CI.op_LessThan(u, ci));
+    assert.strictEqual(CI.componentIndexType(ci), r.ComponentIndexType.BrepFace);
+    assert.strictEqual(CI.isSet(ci), true);
+    const u = CI.unset;                                          // `new ComponentIndex(InvalidType, -1)`
+    assert(CI.isUnset(u) && !CI.isUnset(ci) && u.Index === -1);
+    assert(CI.equals(ci, CI.create(r.ComponentIndexType.BrepFace, 3)));
+    assert(!CI.equals(ci, u) && CI.compareTo(u, ci) < 0);   // != and < : no JS operators (G106)
     const face = box_brep().faces.get(1);
-    assert(CI.op_Equality(face.componentIndex(), CI.Create(r.ComponentIndexType.BrepFace, 1)));
+    assert(CI.equals(face.componentIndex(), CI.create(r.ComponentIndexType.BrepFace, 1)));
   });
 
   t('test_rev_surface_from_rhinocommon_shapes', () => {
@@ -400,7 +400,7 @@ module.exports = (t, ctx) => {
     assert(s instanceof r.RevSurfaceX && s instanceof r.SurfaceX);
     approx(s.angle.T1 - s.angle.T0, 2 * Math.PI, 1e-9);
     assert.strictEqual(s.axisAndCurveCoplanar(), true);
-    assert(r.SphereX.ToRevSurface(sphereX(P(0, 0, 0), 1.0)) instanceof r.RevSurfaceX);
+    assert(r.SphereX.toRevSurface(sphereX(P(0, 0, 0), 1.0)) instanceof r.RevSurfaceX);
   });
 
   t('test_render_channels_of_render_settings', () => {

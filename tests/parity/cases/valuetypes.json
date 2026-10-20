@@ -48,6 +48,19 @@
     {"id": "interval.grow",                 "type": "Interval", "self": [2, 4], "member": "Grow", "args": [9], "mutates": true},
     {"id": "interval.isvalid.unset",        "type": "Interval", "self": {"static": "Unset"}, "member": "IsValid"},
     {"id": "interval.op.add",               "type": "Interval", "op": "+", "args": [{"Interval": [2, 4]}, 1.5]},
-    {"id": "interval.op.compare",           "type": "Interval", "op": "<", "args": [{"Interval": [2, 4]}, {"Interval": [2, 5]}]}
+    {"id": "interval.op.compare",           "type": "Interval", "op": "<", "args": [{"Interval": [2, 4]}, {"Interval": [2, 5]}]},
+    {"id": "point3f.add.vector",           "type": "Point3f", "member": "Add", "args": [{"Point3f": [1, 2, 3]}, {"Vector3f": [0.5, 0.25, -1]}], "note": "G108: RhinoCommon 9.x value-type arithmetic"},
+    {"id": "point3f.add.points",           "type": "Point3f", "member": "Add", "args": [{"Point3f": [1, 2, 3]}, {"Point3f": [4, 5, 6]}]},
+    {"id": "point3f.op.add_vector_left",   "type": "Point3f", "op": "+", "args": [{"Vector3f": [0.5, 0.25, -1]}, {"Point3f": [1, 2, 3]}]},
+    {"id": "point3f.op.sub_vector",        "type": "Point3f", "op": "-", "args": [{"Point3f": [1, 2, 3]}, {"Vector3f": [0.5, 0.25, -1]}]},
+    {"id": "point3f.op.divide",            "type": "Point3f", "op": "/", "args": [{"Point3f": [1, 2, 3]}, 4]},
+    {"id": "point3f.op.negate",            "type": "Point3f", "op": "-", "args": [{"Point3f": [1, -2, 3]}]},
+    {"id": "point3f.multiply.left",        "type": "Point3f", "member": "Multiply", "args": [2.5, {"Point3f": [1, 2, 3]}]},
+    {"id": "point3f.negate",               "type": "Point3f", "member": "Negate", "args": [{"Point3f": [1, -2, 3]}]},
+    {"id": "point2f.op.negate",            "type": "Point2f", "op": "-", "args": [{"Point2f": [1, -2]}]},
+    {"id": "point2f.multiply.right",       "type": "Point2f", "member": "Multiply", "args": [{"Point2f": [1, 2]}, 2.5]},
+    {"id": "point2f.divide",               "type": "Point2f", "member": "Divide", "args": [{"Point2f": [1, 2]}, 4]},
+    {"id": "point2d.op.negate",            "type": "Point2d", "op": "-", "args": [{"Point2d": [1, -2]}]},
+    {"id": "point3d.negate",               "type": "Point3d", "member": "Negate", "args": [{"Point3d": [1, -2, 3]}]}
   ]
 }
