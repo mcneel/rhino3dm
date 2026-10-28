@@ -271,6 +271,8 @@ def js_post_script():
   var STATIC_PROPS = %s;
   var ENUMERABLE = %s;
   var GRID = %s;
+  var KEEP_ARGS = %s;
+  var KEEP_SET = %s;
   function install() {
     var M = Module, missing = [];
     M.rh3dmPostUnresolved = missing;
@@ -308,6 +310,29 @@ def js_post_script():
         if (f.overloadTable) w.overloadTable = f.overloadTable;
         proto[km[1]] = w;
       } else missing.push('keep ' + km[0] + '.' + km[1]);
+    });
+    // G112: a result that keeps an ARGUMENT alive (a static Create storing its style in a modeled
+    // field) and a borrowing setter's value, held as JS references (GC-safe)
+    function keep(o, key, v) {
+      if (o !== null && typeof o === 'object' && v !== null && typeof v === 'object') {
+        try { Object.defineProperty(o, key, { value: v, configurable: true }); } catch (e) {}
+      }
+    }
+    KEEP_ARGS.forEach(function (ka) {
+      var C = M[ka[0]], target = ka[3] ? C : (C && C.prototype), f = target && target[ka[1]];
+      if (typeof f !== 'function') { missing.push('keep arg ' + ka[0] + '.' + ka[1]); return; }
+      var w = function () { var r = f.apply(this, arguments); keep(r, '__rh3dm_arg' + ka[2], arguments[ka[2]]); return r; };
+      if (f.overloadTable) w.overloadTable = f.overloadTable;
+      if (f.argCount !== undefined) w.argCount = f.argCount;
+      target[ka[1]] = w;
+    });
+    KEEP_SET.forEach(function (ks) {
+      var C = M[ks[0]], proto = C && C.prototype;
+      var d = proto && Object.getOwnPropertyDescriptor(proto, ks[1]);
+      if (!d || !d.set) { missing.push('keep set ' + ks[0] + '.' + ks[1]); return; }
+      var s = d.set, g = Object.getOwnPropertyDescriptor(proto, ks[1]).get;
+      Object.defineProperty(proto, ks[1], { get: g, set: function (v) { s.call(this, v); keep(this, '__rh3dm_set_' + ks[1], v); },
+                                            enumerable: d.enumerable, configurable: true });
     });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
@@ -358,7 +383,9 @@ def js_post_script():
   else Module.postRun = [].concat(Module.postRun || [], [install]);
 })();
 ''' % (j(JS_POST['keep']), j(JS_POST['iters']), j(JS_POST['static_props']), j(JS_POST['enumerable']),
-       json.dumps(sorted(set(map(tuple, JS_POST['grid']))), separators=(',', ':')))
+       json.dumps(sorted(set(map(tuple, JS_POST['grid']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')))
 
 
 def main():
@@ -881,6 +908,34 @@ struct RH3DM_Bytes { std::vector<unsigned char> v;
   RH3DM_Bytes() {}
   explicit RH3DM_Bytes(size_t n) : v(n) {}       // `new byte[n]` (G101)
   const unsigned char* data() const { return v.data(); }
+  size_t size() const { return v.size(); } };
+// GetUserStrings() as rhino3dm returns it (D62; RhinoCommon's NameValueCollection is generated nowhere):
+// a tuple of (key, value) pairs, Python and JS alike
+inline BND_TUPLE RH3DM_UserStrings(const ON_Object* o) {
+  ON_ClassArray<ON_wString> keys;
+  if (o) o->GetUserStringKeys(keys);
+  BND_TUPLE rc = CreateTuple(keys.Count());
+  for (int i = 0; i < keys.Count(); i++) {
+    ON_wString v; o->GetUserString(keys[i].Array(), v);
+    BND_TUPLE kv = CreateTuple(2);
+    SetTuple(kv, 0, std::wstring(keys[i].Array()));
+    SetTuple(kv, 1, std::wstring(v.Array()));
+    SetTuple(rc, i, kv); }
+  return rc; }
+// a class argument for a pointer-taking setter in a translated body (G112: `rc.ParentDimensionStyle =
+// dimStyle`, a const& parameter): its address; a pointer or null passes through
+template <class T> inline const T* RH3DM_AddrOf(const T& v) { return &v; }
+template <class T> inline const T* RH3DM_AddrOf(const T* p) { return p; }
+template <class T> inline const T* RH3DM_AddrOf(T* p) { return p; }
+inline std::nullptr_t RH3DM_AddrOf(std::nullptr_t) { return nullptr; }
+// a bool[] local in a translated class body (G111: `bool[] isline = { false, false, false, false };`
+// filled by ON_V6_DimLinear_GetDisplayLines): std::vector<bool> has no data(), so bytes viewed as bool
+struct RH3DM_BoolVec { std::vector<unsigned char> v;
+  RH3DM_BoolVec() {}
+  explicit RH3DM_BoolVec(size_t n) : v(n, 0) {}  // `new bool[n]`
+  RH3DM_BoolVec(std::initializer_list<bool> l) { for (bool b : l) v.push_back(b ? 1 : 0); }
+  bool* data() { static_assert(sizeof(bool) == 1, "bool is not one byte"); return reinterpret_cast<bool*>(v.data()); }
+  bool& operator[](size_t i) { return data()[i]; }
   size_t size() const { return v.size(); } };
 // `using (var w = new StdVectorByte())` in a translated body (G107): the std::vector<unsigned char> a
 // native fills (Draco_ToByteArray), handed out as bytes

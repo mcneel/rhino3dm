@@ -369,7 +369,7 @@ module.exports = (t, ctx) => {
     pc.addRange(polyline([P(2, 0, 0), P(3, 0, 0)]));
     assert.strictEqual(pc.count, 4);
     assert.deepStrictEqual(pc.getPoints().map(p => p.X), [0, 1, 2, 3]);
-    assert(!('insertRange' in pc), 'PointCloudX.insertRange is registered (pilot-findings #34)');
+    // insertRange: generated since U11 fixed its native (test_point_cloud_insert_range_u11)
     const n = new r.PointCloudX();
     n.addRange([P(0, 0, 0)], [V(0, 0, 1)]);
     assert.strictEqual(n.count, 1);

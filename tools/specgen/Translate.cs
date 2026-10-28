@@ -704,6 +704,33 @@ class Tx
     int _tmpOk;                                  // a class temporary is being emitted as a receiver (G92)
     readonly HashSet<string> _guarded = new();   // class locals freed by a guard (`x_owned`): List.Add releases them (G92)
     readonly HashSet<string> _ownedLists = new();   // `var list = new List<C>()` of a class (G92): an RH3DM_OwnedVec
+    // G111: `var list = new List<T>(); outParam = list;` -- C# aliases the two (one list object), so
+    // later list.Add(..) is seen through the out parameter; a C++ vector assignment would copy the
+    // empty list. The local becomes a reference to the out parameter and the assignment is dropped.
+    readonly HashSet<StatementSyntax> _outListAssigns = new();
+    string OutListAlias(LocalDeclarationStatementSyntax ld, VariableDeclaratorSyntax v)
+    {
+        var method = ld.Ancestors().OfType<BaseMethodDeclarationSyntax>().FirstOrDefault();
+        if (method?.ParameterList == null || ld.Parent is not BlockSyntax block) return null;
+        var outs = method.ParameterList.Parameters.Where(q => q.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword)))
+            .Select(q => q.Identifier.Text).ToHashSet();
+        var name = v.Identifier.Text;
+        for (int j = block.Statements.IndexOf(ld) + 1; j < block.Statements.Count; j++)
+        {
+            var s = block.Statements[j];
+            if (s is LocalDeclarationStatementSyntax) continue;          // only declarations in between
+            if (s is ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.SimpleAssignmentExpression,
+                    Left: IdentifierNameSyntax { Identifier.Text: var op }, Right: IdentifierNameSyntax { Identifier.Text: var src } } }
+                && src == name && outs.Contains(op)
+                && method.DescendantNodes().OfType<AssignmentExpressionSyntax>().Count(a => a.Left is IdentifierNameSyntax { Identifier.Text: var l2 } && l2 == op) == 1)
+            {
+                _outListAssigns.Add(s);
+                return op;
+            }
+            return null;
+        }
+        return null;
+    }
     // `#k` on the call marker in `s` that produced the value (G92): the generator decides its ownership
     string TagCall(string s, string callee, int tag)
     {
@@ -1655,6 +1682,8 @@ class Tx
                     && (ParamNames.Contains(asl.Identifier.Text) || _seqAliases.Contains(asl.Identifier.Text)))
                     _seqAliases.Add(alv.Identifier.Text);
                 var t = ld.Declaration.Type.IsVar ? "auto" : Type(ld.Declaration.Type);
+                // a bool[] local (G111): bytes the natives can take as bool* (std::vector<bool> has no data())
+                if (Cur.ClassMode && ld.Declaration.Type.ToString() is "bool[]" or "Boolean[]" or "System.Boolean[]") t = "RH3DM_BoolVec";
                 if (!ld.Declaration.Type.IsVar && ClassOf(ld.Declaration.Type) != null) _nullOk++;   // `T x = null;` (G74)
                 try {
                 foreach (var v in ld.Declaration.Variables)
@@ -1704,12 +1733,35 @@ class Tx
                         _guarded.Add(v.Identifier.Text);
                         continue;
                     }
+                    // `var list = new List<T>(); out = list;` (G111): the local IS the out parameter
+                    if (Cur.ClassMode && t.StartsWith("std::vector<") && v.Initializer?.Value is ObjectCreationExpressionSyntax { Initializer: null } noc
+                        && (noc.ArgumentList == null || noc.ArgumentList.Arguments.Count == 0) && OutListAlias(ld, v) is string aliasOut)
+                    {
+                        yield return pad + $"auto& {Rn(v.Identifier.Text)} = {Rn(aliasOut)};";
+                        yield return pad + $"{Rn(v.Identifier.Text)}.clear();";
+                        continue;
+                    }
+                    // `T[] x = { a, b };` (G111): the array initializer as the declared type's element list
+                    if (v.Initializer?.Value is InitializerExpressionSyntax { RawKind: (int)SyntaxKind.ArrayInitializerExpression } aie
+                        && (t.StartsWith("std::vector<") || t == "RH3DM_BoolVec"))
+                    {
+                        yield return pad + isConst + t + " " + Rn(v.Identifier.Text) + " = " + t + "{ " + string.Join(", ", aie.Expressions.Select(Expr)) + " };";
+                        continue;
+                    }
+                    // `bool[] x = new bool[n];` (G111)
+                    if (t == "RH3DM_BoolVec" && v.Initializer?.Value is ArrayCreationExpressionSyntax { Initializer: null, Type.RankSpecifiers: [{ Sizes: [var bsz0] }] })
+                    {
+                        yield return pad + t + " " + Rn(v.Identifier.Text) + "((size_t)(" + Expr(bsz0) + "));";
+                        continue;
+                    }
                     yield return pad + isConst + t + " " + Rn(v.Identifier.Text)
                         + (v.Initializer != null && !vnull ? " = " + Expr(v.Initializer.Value) : "") + ";";
                 }
                 } finally { if (!ld.Declaration.Type.IsVar && ClassOf(ld.Declaration.Type) != null) _nullOk--; }
                 break;
             }
+            case ExpressionStatementSyntax oas when _outListAssigns.Contains(oas):
+                break;                                   // `out = list;` aliased at the declaration (G111)
             case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax kai } when kai.Expression.ToString() == "GC.KeepAlive":
                 break;                                   // a marshalling lifetime hint: nothing in C++
             case ExpressionStatementSyntax { Expression: ConditionalAccessExpressionSyntax { Expression: var vdx, WhenNotNull: InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax { Name.Identifier.Text: "Dispose" } } } }
@@ -2790,6 +2842,14 @@ class Tx
                         var seq = ArrayCs(lt2) != null ? Expr(b.Left) : Expr(b.Right);
                         return b.IsKind(SyntaxKind.EqualsExpression) ? $"{seq}.empty()" : $"!{seq}.empty()";
                     }
+                    // Guid equality (G114): Python's BND_UUID is a py::object, whose == / != compare
+                    // object identity -- compare the ON_UUIDs (RH3DM_ToUuid takes either form)
+                    if (Cur.ClassMode && (b.IsKind(SyntaxKind.EqualsExpression) || b.IsKind(SyntaxKind.NotEqualsExpression))
+                        && (lt2 is "Guid" or "System.Guid" || rt2 is "Guid" or "System.Guid"))
+                    {
+                        string U(ExpressionSyntax x) { var s = Expr(x); return s.StartsWith("RH3DM_ToUuid(") ? s : $"RH3DM_ToUuid({s})"; }
+                        return $"({U(b.Left)} {b.OperatorToken.Text} {U(b.Right)})";
+                    }
                     // C# arithmetic on enums (a [Flags] enum: `a | b`, `x != 0`) goes through
                     // the underlying int; C++ enum classes need that spelled out
                     bool le = IsEnumT(lt2), re = IsEnumT(rt2);
@@ -3177,6 +3237,9 @@ class Tx
         {
             case InvocationExpressionSyntax or ConditionalAccessExpressionSyntax when Cur != null && LinqChain(e) is { } lq:
                 return LinqType(lq);                                                // G96
+            // `Guid.Empty` (G113: `DrawColor(file, Guid.Empty)`): a Guid (Expr writes ON_nil_uuid; G92)
+            case MemberAccessExpressionSyntax { Name.Identifier.Text: "Empty" } gem when gem.Expression.ToString() is "Guid" or "System.Guid":
+                return "Guid";
             case LiteralExpressionSyntax lit when lit.IsKind(SyntaxKind.NumericLiteralExpression):
             {
                 var t = lit.Token.Text;
@@ -3383,6 +3446,8 @@ class Tx
                 args.Add($"RH3DM_S({Expr(e)}).data()");
             else if (Cur.ClassMode && t is "byte[]")
                 args.Add($"RH3DM_IP((void*)({Expr(e)}).data())");   // its bytes, as the pointer the native takes (G107)
+            else if (Cur.ClassMode && t is "bool[]" or "Boolean[]" or "System.Boolean[]")
+                args.Add($"({Expr(e)}).data()");                // an RH3DM_BoolVec local's bool* (G111)
             else if (Cur.ClassMode && t is "Guid" or "System.Guid")
                 args.Add(Expr(e));                             // an ON_UUID by value (G89, G91)
             else if (Cur.ClassMode && e is CastExpressionSyntax { Type: PredefinedTypeSyntax { Keyword.Text: "int" } } ce0 && IsEnumT(TypeOf(ce0.Expression)))

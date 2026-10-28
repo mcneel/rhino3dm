@@ -66,7 +66,7 @@ CLASSES = [
      'gen': 'BND_MeshX', 'reg': 'MeshX', 'base': 'GeometryBaseX'},
     # the manifest's richest class (46 candidates): camera/frustum math is
     # all doubles, bools, points and vectors -- exactly the marshalled set
-    {'type': 'Rhino.DocObjects.ViewportInfo', 'cs': 'ViewportInfo',
+    {'type': 'Rhino.DocObjects.ViewportInfo', 'cs': 'ViewportInfo', 'user_strings': True,
      'on': 'ON_Viewport',
      'mode': 'pointer', 'hand': 'BND_Viewport', 'hand_header': 'bnd_viewport.h',
      'copy': 'source.m_viewport ? new ON_Viewport(*source.m_viewport) : nullptr',
@@ -201,7 +201,7 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_Texture', 'hand_header': 'bnd_texture.h',
      'copy': 'source.m_texture ? new ON_Texture(*source.m_texture) : nullptr',
      'gen': 'BND_TextureX', 'reg': 'TextureX', 'base': 'CommonObjectX'},
-    {'type': 'Rhino.Render.TextureMapping', 'cs': 'TextureMapping', 'on': 'ON_TextureMapping',
+    {'type': 'Rhino.Render.TextureMapping', 'cs': 'TextureMapping', 'user_strings': True, 'on': 'ON_TextureMapping',
      'mode': 'pointer', 'hand': 'BND_TextureMapping', 'hand_header': 'bnd_texture_mapping.h',
      'copy': 'source.m_mapping ? new ON_TextureMapping(*source.m_mapping) : nullptr',
      'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX', 'base': 'ModelComponentX'},
@@ -337,13 +337,40 @@ CLASSES = [
      # (null when unset); the DimensionStyleId setter retargets its id
      'modeled': {'m_parent_dimstyle': {'cs': 'DimensionStyle', 'ptr': 'ConstParentDimStylePointer',
                                        'prop': 'ParentDimensionStyle', 'id_prop': 'DimensionStyleId'}}},
+    # the dimension classes and instance references (2026-10-20, triage batch B): portable in
+    # RhinoCommon; the old bindings register them as DimLinear / DimAngular / DimRadial /
+    # DimOrdinate / InstanceReference (paired through 'hand')
+    {'type': 'Rhino.Geometry.Dimension', 'cs': 'Dimension', 'on': 'ON_Dimension',
+     'mode': 'pointer', 'hand': 'BND_Dimension', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_Dimension::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_DimensionX', 'reg': 'DimensionX', 'base': 'AnnotationBaseX'},
+    {'type': 'Rhino.Geometry.LinearDimension', 'cs': 'LinearDimension', 'on': 'ON_DimLinear',
+     'mode': 'pointer', 'hand': 'BND_DimLinear', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_DimLinear::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_LinearDimensionX', 'reg': 'LinearDimensionX', 'base': 'DimensionX'},
+    {'type': 'Rhino.Geometry.AngularDimension', 'cs': 'AngularDimension', 'on': 'ON_DimAngular',
+     'mode': 'pointer', 'hand': 'BND_DimAngular', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_DimAngular::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_AngularDimensionX', 'reg': 'AngularDimensionX', 'base': 'DimensionX'},
+    {'type': 'Rhino.Geometry.RadialDimension', 'cs': 'RadialDimension', 'on': 'ON_DimRadial',
+     'mode': 'pointer', 'hand': 'BND_DimRadial', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_DimRadial::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_RadialDimensionX', 'reg': 'RadialDimensionX', 'base': 'DimensionX'},
+    {'type': 'Rhino.Geometry.OrdinateDimension', 'cs': 'OrdinateDimension', 'on': 'ON_DimOrdinate',
+     'mode': 'pointer', 'hand': 'BND_DimOrdinate', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_DimOrdinate::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_OrdinateDimensionX', 'reg': 'OrdinateDimensionX', 'base': 'DimensionX'},
+    {'type': 'Rhino.Geometry.InstanceReferenceGeometry', 'cs': 'InstanceReferenceGeometry', 'on': 'ON_InstanceRef',
+     'mode': 'pointer', 'hand': 'BND_InstanceReferenceGeometry', 'hand_header': 'bnd_instance.h',
+     'copy': ('ON_InstanceRef::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_InstanceReferenceGeometryX', 'reg': 'InstanceReferenceGeometryX', 'base': 'GeometryBaseX'},
     # -- static classes: no instances, static members only
     {'type': 'Rhino.Geometry.Intersect.Intersection', 'cs': 'Intersection', 'on': None,
      'mode': 'static', 'hand': None, 'bridge': False,
      'gen': 'BND_IntersectionX', 'reg': 'IntersectionX'},
     # the file's render settings: a VIEW of the file (no id) whose setters copy
     # on write and commit back (RenderSettings.Commit, see G41)
-    {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'on': 'ON_3dmRenderSettings',
+    {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'user_strings': True, 'on': 'ON_3dmRenderSettings',
      'mode': 'pointer', 'hand': None, 'bridge': False,
      'gen': 'BND_RenderSettingsX', 'reg': 'RenderSettingsX', 'base': 'CommonObjectX'},
     # the RDK settings inside the render settings (DocumentOrFreeFloatingBase):
@@ -475,8 +502,9 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Collections.MeshFaceList', 'cs': 'MeshFaceList', 'on': 'ON_Mesh',
      'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
      'gen': 'BND_MeshFaceListX', 'reg': 'MeshFaceListX'},
+    # 'old': the old bindings register this list as "MeshNormalList" (same members, m_N)
     {'type': 'Rhino.Geometry.Collections.MeshVertexNormalList', 'cs': 'MeshVertexNormalList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
+     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'old': 'BND_MeshNormalList', 'bridge': False,
      'gen': 'BND_MeshVertexNormalListX', 'reg': 'MeshVertexNormalListX'},
     {'type': 'Rhino.Geometry.Collections.MeshVertexColorList', 'cs': 'MeshVertexColorList', 'on': 'ON_Mesh',
      'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
@@ -929,7 +957,13 @@ def extend_enum_table(manifest):
 # `iters` -- iterator classes whose next().value holds the iterator; `static_props` -- (class,
 # name) of RhinoCommon static properties, registered as zero-argument class functions, made
 # getters; `enumerable` -- classes whose RhinoCommon type is IEnumerable: for...of
-JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': []}
+# G112: `keep_args` -- (class, member, argument index, static): the result holds that argument (Python
+# keep_alive<0, N>); `keep_set` -- (class, property): the object holds the value its setter took
+# (Python keep_alive<1, 2>, a borrowing modeled-field setter)
+# 'user_strings' (D62, Luis 2026-10-20): a class registering RhinoCommon's internal CommonObject
+# user-string members under their public names, where rhino3dm has them and RhinoCommon does not
+JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': [],
+           'keep_args': [], 'keep_set': []}
 
 # IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
 # (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry

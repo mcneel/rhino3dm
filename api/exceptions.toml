@@ -177,26 +177,6 @@ upstream = "add Sun.ManualControlAllowed to RhinoCommon"
 # ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
 
 [[hand_kept]]
-class = "RenderContent"
-members = ["ChildSlotAmount", "SetChild", "SetChildSlotAmount", "SetChildSlotOn"]
-decided = "Luis, 2026-10-16"
-reason = "the portable File3dmRenderContent (RhinoCommon) has ChildSlotOn / FindChild / DeleteChild but no amount or set members; opennurbs ON_RenderContent has all four (the old binding calls them; its ChildSlotAmount passes a fixed default of 100.0)"
-upstream = "add ChildSlotAmount(name, default), SetChildSlotAmount(amount, name), SetChildSlotOn(on, name) and SetChild(child, name) to File3dmRenderContent (rhinocommon/dotnet/opennurbs/opennurbs_render_content.cs) over ON_RenderContent, with C functions in the portable C layer"
-
-[[hand_kept]]
-class = "ObjectAttributes"
-members = ["DrawColor"]
-decided = "Luis, 2026-10-16"
-reason = "a rhino3dm extension: DrawColor(File3dm) resolves the color source against the file (layer / object / material); RhinoCommon's DrawColor(RhinoDoc[, viewportId]) asks Rhino (CRhinoObjectAttributes_DrawColor) -- same name, different contract"
-
-[[hand_kept]]
-class = "Mesh"
-members = ["SetCachedTextureCoordinatesFromMaterial"]
-decided = "Luis, 2026-10-16"
-reason = "a rhino3dm extension: (File3dm, objectId, Material) calls opennurbs ON_Mesh::SetCachedTextureCoordinatesFromMaterial(ONX_Model, material, mapping ref); RhinoCommon's takes a RhinoObject (RHINO_SDK)"
-upstream = "optional: a File3dm overload of Mesh.SetCachedTextureCoordinatesFromMaterial in RhinoCommon over the ONX_Model one"
-
-[[hand_kept]]
 class = "File3dmMeshModifiers"
 members = ["CreateThickening", "CreateShutLining"]
 decided = "Luis, 2026-10-18"

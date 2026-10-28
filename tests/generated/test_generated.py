@@ -2485,6 +2485,352 @@ def test_point_cloud_insert_range_u11():
         pc.InsertRange(3, [P(9, 9, 9)])
 
 
+def test_mesh_normal_list_is_mesh_vertex_normal_list():
+    # the old MeshNormalList is RhinoCommon's MeshVertexNormalList (registry 'old' pairing):
+    # the same operations on the same mesh give the same normals, step by step
+    def folded():
+        m = r.Mesh()
+        for xyz in [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (2, 0, 1), (2, 1, 1)]:
+            m.Vertices.Add(*xyz)
+        m.Faces.AddFace(0, 1, 2, 3)
+        m.Faces.AddFace(1, 4, 5, 2)
+        return m
+    xyz = lambda v: tuple(v) if isinstance(v, tuple) else (v.X, v.Y, v.Z)
+    vals = lambda l: [xyz(l[i]) for i in range(len(l))]
+    old, new = folded().Normals, r.MeshX(folded()).Normals
+    assert old.ComputeNormals() and new.ComputeNormals()
+    assert len(old) == len(new) == 6 and vals(old) == vals(new)
+    assert len(set(vals(new))) > 1                       # the fold: not all one normal
+    old.Flip(); new.Flip()
+    assert vals(old) == vals(new)
+    # D66: the old Add went through ON_Mesh::SetVertexNormal, which unitizes; RhinoCommon's appends
+    # the vector as given (UnitizeNormals then refuses: 7 normals, 6 vertices -- on both)
+    assert old.Add(0, 0, 2) == new.Add(0.0, 0.0, 2.0) == 6
+    assert xyz(old[6]) == (0, 0, 1) and xyz(new[6]) == (0, 0, 2)
+    assert old.UnitizeNormals() == new.UnitizeNormals() == False
+    assert vals(old)[:6] == vals(new)[:6]
+    old.Clear(); new.Clear()
+    assert len(old) == len(new) == 0
+    old, new = folded().Normals, r.MeshX(folded()).Normals
+    old.ComputeNormals(); new.ComputeNormals()
+    old.Destroy(); new.Destroy()
+    assert len(old) == len(new) == 0
+
+
+def test_instance_reference_geometry_matches_old_instance_reference():
+    # triage batch B: RhinoCommon's InstanceReferenceGeometry is the old InstanceReference
+    for name in ('blocks.3dm', 'file3dm_stuff.3dm'):
+        path = os.path.join(MODELS, name)
+        new = [o.Geometry for o in r.File3dmX.Read(path).Objects if isinstance(o.Geometry, r.InstanceReferenceGeometryX)]
+        old = [o.Geometry for o in r.File3dm.Read(path).Objects if isinstance(o.Geometry, r.InstanceReference)]
+        assert len(new) == len(old) == 2
+        for n, o in zip(new, old):
+            assert n.ParentIdefId == o.ParentIdefId
+            cells = ['M%d%d' % (i, j) for i in range(4) for j in range(4)]
+            assert [getattr(n.Xform, c) for c in cells] == [getattr(o.Xform, c) for c in cells]
+
+
+def test_dimension_classes_and_display_lines_g111():
+    # triage batch B: the dimension classes are generated, files hand them out as their own class,
+    # and GetDisplayLines returns (rc, lines) -- lines in the dimension's plane (parity: dim.*.displaylines)
+    P, S = r.Point3dX, r.DimensionStyleX()
+    od = r.OrdinateDimensionX.Create(S, r.PlaneX.WorldXY, r.OrdinateDimensionX.MeasuredDirection.Xaxis,
+                                     P(0, 0, 0), P(5, 3, 0), P(5, 8, 0), 1.0, 1.0)
+    ld = r.LinearDimensionX.Create(r.AnnotationType.Aligned, S, r.PlaneX.WorldXY, r.Vector3dX(1, 0, 0),
+                                   P(0, 0, 0), P(4, 1, 0), P(2, 3, 0), 0.0)
+    for d in (od, ld):
+        d.UpdateDimensionText(S, r.UnitSystem.Millimeters)      # the text rect needs formatted text
+    rc, lines = ld.GetDisplayLines(S, 1.0)
+    assert rc and len(lines) > 0 and all(isinstance(l, r.LineX) for l in lines)
+    orc, olines = od.GetDisplayLines(S, 1.0)                    # (rc, lines): values by parity, not here
+    assert isinstance(orc, bool) and isinstance(olines, (list, tuple))
+    f = r.File3dmX()
+    ids = [f.Objects.AddOrdinateDimension(od), f.Objects.AddLinearDimension(ld)]
+    back = r.File3dmX.FromByteArray(f.ToByteArray(None))
+    kinds = {o.Attributes.ObjectId: type(o.Geometry).__name__ for o in back.Objects}
+    assert [kinds[i] for i in ids] == ['OrdinateDimensionX', 'LinearDimensionX']
+
+
+def test_create_keeps_its_style_alive_g112():
+    # G112: Create stores dimStyle in the modeled ParentDimensionStyle (borrowed, D39): the result
+    # keeps the argument alive -- a temporary style must survive the call and a collection
+    import gc
+    P = r.Point3dX
+    ld = r.LinearDimensionX.Create(r.AnnotationType.Aligned, r.DimensionStyleX(), r.PlaneX.WorldXY,
+                                   r.Vector3dX(1, 0, 0), P(0, 0, 0), P(4, 1, 0), P(2, 3, 0), 0.0)
+    gc.collect()
+    s = ld.ParentDimensionStyle
+    assert s is not None and s.TextHeight > 0
+    ann = ld
+    ann.ParentDimensionStyle = r.DimensionStyleX()
+    gc.collect()
+    assert ann.ParentDimensionStyle.TextHeight > 0
+
+
+def test_draw_color_from_a_file_u5():
+    # #5 (upstream RH-99693): ObjectAttributes.DrawColor(File3dm[, viewportId]) -- Rhino's rules over
+    # the model: by layer, by object, by material (the material the attributes SELECT, its PBR base
+    # color if physically based). The old extension used m_material_index and Diffuse only (D63).
+    f = r.File3dmX()
+    for c in ((200, 0, 0, 255), (0, 0, 200, 255)):
+        m = r.MaterialX(); m.DiffuseColor = c; f.Materials.Add(m)
+    layer = r.LayerX(); layer.Name = 'L'; layer.Color = (10, 20, 30, 255); layer.RenderMaterialIndex = 1
+    f.Layers.Add(layer)
+    pbr = r.MaterialX(); pbr.DiffuseColor = (9, 9, 9, 255); pbr.ToPhysicallyBased()
+    pbr.PhysicallyBased.BaseColor = r.Color4fX(1.0, 0.5, 0.0, 1.0)
+    f.Materials.Add(pbr)
+    rgb = lambda c: tuple(c)[:3]
+    a = r.ObjectAttributesX(); a.LayerIndex = 0
+    a.ColorSource = r.ObjectColorSource.ColorFromLayer
+    assert rgb(a.DrawColor(f)) == rgb(f.Layers.FindIndex(0).Color) == (10, 20, 30)
+    a.ColorSource = r.ObjectColorSource.ColorFromObject; a.ObjectColor = (1, 2, 3, 255)
+    assert rgb(a.DrawColor(f)) == (1, 2, 3)
+    a.ColorSource = r.ObjectColorSource.ColorFromMaterial
+    a.MaterialSource = r.ObjectMaterialSource.MaterialFromObject; a.MaterialIndex = 0
+    assert rgb(a.DrawColor(f)) == (200, 0, 0)
+    a.MaterialSource = r.ObjectMaterialSource.MaterialFromLayer          # the layer's render material (1)
+    assert rgb(a.DrawColor(f)) == (0, 0, 200)
+    a.MaterialSource = r.ObjectMaterialSource.MaterialFromObject; a.MaterialIndex = 2
+    assert rgb(a.DrawColor(f)) == (255, 127, 0) or rgb(a.DrawColor(f)) == (255, 128, 0)   # PBR base color
+    assert a.DrawColor(f) == a.DrawColor(f, __import__('uuid').UUID(int=0))
+
+
+def test_mesh_texture_coordinates_from_a_file_u9():
+    # #6 (U9, upstream RH-99691): Mesh.SetCachedTextureCoordinatesFromMaterial(File3dm, objectId,
+    # Material) and GetCachedTextureCoordinates(File3dm, objectId, Texture) -- the old extensions'
+    # opennurbs calls, now RhinoCommon's (the old getter was GetCachedTextureCoordinatesFromTexture)
+    path = os.path.join(MODELS, 'meshWithTexture.3dm')
+    f, old = r.File3dmX.Read(path), r.File3dm.Read(path)
+    pairs = [(o, oo) for o, oo in zip(f.Objects, old.Objects) if isinstance(o.Geometry, r.MeshX)]
+    assert pairs
+    seen = 0
+    for o, oo in pairs:
+        mat = f.Materials.FindIndex(o.Attributes.MaterialIndex)
+        omat = old.Materials[oo.Attributes.MaterialIndex]
+        if mat is None or mat.GetBitmapTexture() is None:
+            continue
+        mesh, omesh = o.Geometry, oo.Geometry
+        assert mesh.SetCachedTextureCoordinatesFromMaterial(f, o.Attributes.ObjectId, mat) is None   # void
+        assert omesh.SetCachedTextureCoordinatesFromMaterial(old, oo.Attributes.Id, omat)
+        tc = mesh.GetCachedTextureCoordinates(f, o.Attributes.ObjectId, mat.GetBitmapTexture())
+        otc = omesh.GetCachedTextureCoordinatesFromTexture(old, oo.Attributes.Id, omat.GetBitmapTexture())
+        assert (tc is None) == (otc is None)
+        if tc is not None:
+            assert tc.Count == len(otc) if hasattr(otc, '__len__') else tc.Count >= 0
+            seen += 1
+    assert seen >= 1
+
+
+def test_render_content_child_slots_u4():
+    # #7 (U4, upstream RH-99692): File3dmRenderContent.SetChildSlotOn / ChildSlotAmount /
+    # SetChildSlotAmount / SetChild -- RhinoCommon's RenderContent shape (slot name first, D64);
+    # a slot with no amount reads 0.0 as RenderContent does (the old binding read 100.0)
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    f, old = r.File3dmX.Read(path), r.File3dm.Read(path)
+    tops = list(f.RenderMaterials) + list(f.RenderEnvironments) + list(f.RenderTextures)
+    top = next(c for c in tops if list(c.Children))
+    o = next(c for c in old.RenderContent if str(c.Id) == str(top.Id))
+    slot = list(top.Children)[0].ChildSlotName
+    assert top.ChildSlotOn(slot) == o.ChildSlotOn(slot)
+    on = top.ChildSlotOn(slot)
+    assert top.SetChildSlotOn(slot, not on) and top.ChildSlotOn(slot) == (not on)
+    assert top.SetChildSlotAmount(slot, 42.0) and top.ChildSlotAmount(slot) == 42.0
+    assert top.ChildSlotAmount('rh3dm-no-such-slot') == 0.0 and o.ChildSlotAmount('rh3dm-no-such-slot') == 100.0
+    n = len(list(top.Children))
+    other = next(c for c in tops if c.Id != top.Id)
+    assert top.SetChild(other, 'rh3dm-slot')
+    assert len(list(top.Children)) == n + 1 and top.FindChild('rh3dm-slot') is not None
+    back = r.File3dmX.FromByteArray(f.ToByteArray(None))
+    btop = next(c for c in list(back.RenderMaterials) + list(back.RenderEnvironments) + list(back.RenderTextures) if c.Id == top.Id)
+    assert btop.ChildSlotAmount(slot) == 42.0 and btop.FindChild('rh3dm-slot') is not None
+
+
+@pytest.mark.xfail(reason='pilot-findings #50: SetChild copies the child WITH its id (ON_RenderContent copies through XML), '
+                          'so a child set from a file content duplicates that id; FindChild then resolves the top-level one',
+                   strict=True)
+def test_render_content_set_child_gives_the_copy_its_own_id_u4():
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    tops = list(f.RenderMaterials) + list(f.RenderEnvironments) + list(f.RenderTextures)
+    top = next(c for c in tops if list(c.Children))
+    other = next(c for c in tops if c.Id != top.Id)
+    assert top.SetChild(other, 'rh3dm-slot')
+    kid = top.FindChild('rh3dm-slot')
+    assert kid.Id != other.Id and kid.IsChild and kid.ChildSlotName == 'rh3dm-slot'
+
+
+def test_user_strings_kept_where_rhino3dm_had_them_d62():
+    # D62 (Luis 2026-10-20): TextureMapping / Viewport / RenderSettings / Bitmap keep the user strings
+    # the old CommonObject gave them (RhinoCommon's own internal members); RenderSettings works (the
+    # old one segfaulted, pilot #49); GetUserStrings() is rhino3dm's tuple of (key, value) pairs
+    f = r.File3dmX()
+    objs = [r.ViewportX(), f.Settings.RenderSettings, r.BitmapX(),
+            r.TextureMappingX.CreatePlaneMapping(r.PlaneX.WorldXY, r.IntervalX(0, 1), r.IntervalX(0, 1), r.IntervalX(0, 1))]
+    for o in objs:
+        assert o.UserStringCount == 0 and o.GetUserStrings() == ()
+        assert o.SetUserString('k', 'v') and o.GetUserString('k') == 'v'
+        assert o.UserStringCount == 1 and o.GetUserStrings() == (('k', 'v'),)
+    layer = r.LayerX(); layer.SetUserString('a', '1'); layer.SetUserString('b', '2')
+    assert sorted(layer.GetUserStrings()) == [('a', '1'), ('b', '2')]
+    f.Layers.Add(layer)
+    back = r.File3dmX.FromByteArray(f.ToByteArray(None))
+    assert sorted(back.Layers.FindIndex(0).GetUserStrings()) == [('a', '1'), ('b', '2')]
+
+
+# ---- retirement batch 1 (triage C, E, G1, L1, M1; Luis 2026-10-28): every old member against its
+# RhinoCommon replacement on the same fixture
+
+def _num(v):
+    """pybind enums (old and generated) compare by value; tuples (colors) as tuples"""
+    if isinstance(v, (bool, int, float, str)) or v is None:
+        return v
+    if isinstance(v, tuple):
+        return tuple(v)
+    return int(v)
+
+
+def test_retired_annotation_explicit_parent_accessors_c():
+    # C (Luis: drop): GetX(parentStyle) / SetX(parentStyle, v) -> ParentDimensionStyle = style; X (D39)
+    p = os.path.join(MODELS, 'textEntities_r8.3dm')
+    old, new = r.File3dm.Read(p), r.File3dmX.Read(p)
+    oann = next(o.Geometry for o in old.Objects if isinstance(o.Geometry, r.AnnotationBase))
+    nann = next(o.Geometry for o in new.Objects if isinstance(o.Geometry, r.AnnotationBaseX))
+    # the annotation's OWN style (D67): assigning a different ParentDimensionStyle changes the
+    # annotation's style and drops its overrides (RhinoCommon); the old form evaluated any style
+    ostyle = next(old.DimStyles[i] for i in range(len(old.DimStyles)) if old.DimStyles[i].Id == oann.DimensionStyleId)
+    nstyle = new.DimStyles.FindId(ostyle.Id)
+    nann.ParentDimensionStyle = nstyle
+    assert nann.TextHeight == oann.GetTextHeight(ostyle) == 10.0      # the override survives
+    props = ['TextHeight', 'MaskColor', 'MaskColorSource', 'MaskEnabled', 'MaskFrame', 'MaskOffset',
+             'DimensionLengthDisplay', 'AlternateDimensionLengthDisplay']
+    for n in props:
+        assert _num(getattr(oann, 'Get' + n)(ostyle)) == _num(getattr(nann, n)), n
+    for n, v in (('TextHeight', 7.5), ('MaskOffset', 0.25), ('MaskEnabled', True), ('MaskColor', (10, 20, 30, 255))):
+        getattr(oann, 'Set' + n)(ostyle, v)
+        setattr(nann, n, v)
+        assert _num(getattr(oann, 'Get' + n)(ostyle)) == _num(getattr(nann, n)), n
+    for n in ('MaskColorSource', 'MaskFrame', 'DimensionLengthDisplay', 'AlternateDimensionLengthDisplay'):
+        cur = getattr(oann, 'Get' + n)(ostyle)
+        other = next(e for e in type(cur).__members__.values() if int(e) != int(cur))
+        getattr(oann, 'Set' + n)(ostyle, other)
+        setattr(nann, n, type(getattr(nann, n))(int(other)))
+        assert _num(getattr(oann, 'Get' + n)(ostyle)) == _num(getattr(nann, n)), n
+    oann.SetDimensionScale(ostyle, 2.0)
+    nann.DimensionScale = 2.0
+    assert nann.DimensionScale == 2.0
+
+
+def test_retired_numbered_list_duplicates_e():
+    # E (Luis: drop): the Python-only `...2` list variants -> the generated originals (lists, D35)
+    P, V = r.Point3d, r.Vector3d
+    opc = r.PointCloud()
+    for i in range(4):
+        opc.Add(P(i, 0, 0), V(0, 0, 1), (10 * i, 0, 0, 255))
+    npc = r.PointCloudX(opc)
+    xyz = lambda q: (q.X, q.Y, q.Z)
+    assert [xyz(q) for q in opc.GetPoints2()] == [xyz(q) for q in npc.GetPoints()]
+    assert [xyz(q) for q in opc.GetNormals2()] == [xyz(q) for q in npc.GetNormals()]
+    assert [tuple(c) for c in opc.GetColors2()] == [tuple(c) for c in npc.GetColors()]
+    assert list(opc.GetValues2()) == list(npc.GetPointValues())
+    ocrv = r.NurbsCurve.Create(False, 3, [P(0, 0, 0), P(1, 2, 0), P(3, 1, 0), P(4, 3, 0), P(6, 0, 0)])
+    ncrv = r.NurbsCurveX(ocrv)
+    assert list(ocrv.Knots.ToList2()) == list(ncrv.Knots)
+    osrf = r.NurbsSurface.CreateFromSphere(r.Sphere(P(0, 0, 0), 2))
+    assert list(osrf.KnotsU.ToList2()) == list(r.NurbsSurfaceX(osrf).KnotsU)
+    obox = r.Brep.CreateFromBox(r.Box(r.BoundingBox(0, 0, 0, 1, 2, 3)))
+    nbox = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
+    assert list(obox.Faces[0].GetSpanVector2(0)) == list(nbox.Faces[0].GetSpanVector(0))
+    x = r.Transform.Translation(1, 2, 3)
+    assert list(x.ToFloatArray2(True)) == list(r.TransformX.Translation(1, 2, 3).ToFloatArray(True))
+    pts = [P(0, 0, 0), P(1, 0, 0), P(1, 1, 0)]
+    opl, npl = r.Polyline.CreateFromPoints(pts), r.PolylineX([r.Point3dX(q.X, q.Y, q.Z) for q in pts])
+    assert [(s.PointAtStart.X, s.PointAtEnd.Y) for s in opl.GetSegments2()] == \
+           [(s.From.X, s.To.Y) for s in npl.GetSegments()]
+    opc2 = r.PolyCurve(); opc2.Append(r.Line(P(0, 0, 0), P(1, 0, 0))); opc2.Append(r.Line(P(1, 0, 0), P(1, 1, 0)))
+    npc2 = r.PolyCurveX(opc2)
+    assert len(opc2.Explode2()) == len(npc2.Explode()) == 2
+    p = os.path.join(MODELS, 'object_UserStrings.3dm')
+    og = next(o.Geometry for o in r.File3dm.Read(p).Objects)
+    ng = next(o.Geometry for o in r.File3dmX.Read(p).Objects)
+    assert sorted(tuple(kv) for kv in og.GetUserStrings2()) == sorted(ng.GetUserStrings())
+    p = os.path.join(MODELS, 'groups.3dm')
+    of, nf = r.File3dm.Read(p), r.File3dmX.Read(p)
+    assert len(of.Groups) > 0
+    members = sorted(str(o.Attributes.Id) for o in of.Groups.GroupMembers2(0))
+    assert members and members == sorted(str(o.Attributes.ObjectId) for o in nf.AllGroups.GroupMembers(0))
+
+
+def test_retired_subd_counts_and_ids_g1():
+    # G1 (Luis: map): SubD.Edge/Face/VertexCount -> Edges/Faces/Vertices.Count; component Index -> Id
+    p = os.path.join(MODELS, 'subdBox.3dm')
+    o = next(x.Geometry for x in r.File3dm.Read(p).Objects if isinstance(x.Geometry, r.SubD))
+    n = next(x.Geometry for x in r.File3dmX.Read(p).Objects if isinstance(x.Geometry, r.SubDX))
+    assert (o.EdgeCount, o.FaceCount, o.VertexCount) == (n.Edges.Count, n.Faces.Count, n.Vertices.Count)
+    assert sorted(f.Index for f in o.Faces) == sorted(f.Id for f in n.Faces)
+    assert sorted(e.Index for e in o.Edges) == sorted(e.Id for e in n.Edges)
+    assert sorted(v.Index for v in o.Vertices) == sorted(v.Id for v in n.Vertices)
+
+
+@pytest.mark.xfail(strict=True, reason="GetBoundingBox(bool) not generated yet: `this as AnnotationBase` (generator gap)")
+def test_retired_tight_bounding_box_l1():
+    # L1 (Luis: map): GeometryBase.GetTightBoundingBox -> GetBoundingBox(true)
+    obox = r.Brep.CreateFromBox(r.Box(r.BoundingBox(0, 0, 0, 1, 2, 3)))
+    nbox = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
+    ob, nb = obox.GetTightBoundingBox(), nbox.GetBoundingBox(True)
+    assert (ob.Min.X, ob.Max.Z) == (nb.Min.X, nb.Max.Z)
+
+
+def test_retired_likely_renames_l1_and_other_maps_m1():
+    # L1 / M1 (Luis: map): each old member against its RhinoCommon member
+    P = r.Point3d
+    obox = r.Brep.CreateFromBox(r.Box(r.BoundingBox(0, 0, 0, 1, 2, 3)))
+    nbox = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
+    assert obox.Faces[0].OuterLoop.TrimCount == nbox.Faces[0].OuterLoop.Trims.Count == 4
+    pts = [P(0, 0, 0), P(4, 0, 0), P(4, 4, 0)]
+    opl, npl = r.Polyline.CreateFromPoints(pts), r.PolylineX([r.Point3dX(q.X, q.Y, q.Z) for q in pts])
+    oc, nc = opl.ClosesPoint(P(5, 1, 0)), npl.ClosestPoint(r.Point3dX(5, 1, 0))
+    assert (oc.X, oc.Y) == (nc.X, nc.Y)
+    ol, nl = r.Point3dList(), r.Point3dListX()
+    ol.Append([P(1, 2, 3)]); nl.Add(1.0, 2.0, 3.0)
+    assert (ol[0].X, ol[0].Z) == (nl[0].X, nl[0].Z)
+    opc = r.PointCloud(); opc.Add(P(0, 0, 0))
+    assert opc.ContainsValues == r.PointCloudX(opc).ContainsPointValues == False
+    with pytest.raises(TypeError):
+        opc.GetValues()                                   # pilot #29: the old NullTuple() raises
+    assert list(r.PointCloudX(opc).GetPointValues()) == []
+    opc = r.PointCloud(); opc.Add(P(0, 0, 0), 2.5); opc.Add(P(1, 0, 0), -1.0); npc = r.PointCloudX(opc)
+    assert opc.ContainsValues == npc.ContainsPointValues == True
+    assert list(opc.GetValues()) == list(npc.GetPointValues()) == [2.5, -1.0]
+    srf_old = r.NurbsSurface.CreateFromSphere(r.Sphere(P(0, 0, 0), 2))
+    srf_new = r.NurbsSurfaceX(srf_old)
+    assert (srf_old.KnotsU.IsClampedStart, srf_old.KnotsU.IsClampedEnd) == (srf_new.KnotsU.ClampedAtStart, srf_new.KnotsU.ClampedAtEnd)
+    assert list(srf_old.KnotsU.ToList()) == list(srf_new.KnotsU)
+    assert srf_old.Points.MakeNonRational() == srf_new.MakeNonRational()
+    m = r.Material(); m.ToPhysicallyBased(); nm = r.MaterialX(); nm.ToPhysicallyBased()
+    assert m.PhysicallyBased.Supported == nm.IsPhysicallyBased
+    m.PhysicallyBased.EmissionColor = (1.0, 0.5, 0.25, 1.0); nm.PhysicallyBased.Emission = r.Color4fX(1.0, 0.5, 0.25, 1.0)
+    e = nm.PhysicallyBased.Emission
+    assert tuple(round(c, 6) for c in m.PhysicallyBased.EmissionColor)[:3] == (round(e.R, 6), round(e.G, 6), round(e.B, 6))
+    line = r.LineCurve(P(0, 0, 0), P(2, 0, 0))
+    oe = r.Extrusion.CreateWithPlane(r.Circle(2).ToNurbsCurve(), r.Plane.WorldXY(), 3.0, True)
+    ne = r.ExtrusionX.Create(r.CircleX(2).ToNurbsCurve(), r.PlaneX.WorldXY, 3.0, True)
+    assert (oe is None) == (ne is None)
+    if oe is not None:
+        ob, nb = oe.GetBoundingBox(), ne.GetBoundingBox(r.TransformX.Identity)
+        assert abs(ob.Max.Z - nb.Max.Z) < 1e-9
+    mesh = r.Mesh(); i = mesh.Vertices.AddPoint3d(0.1, 0.2, 0.3)
+    nmesh = r.MeshX(); j = nmesh.Vertices.Add(0.1, 0.2, 0.3)
+    assert i == j == 0
+    assert nmesh.Vertices.Point3dAt(0).X == 0.1                # double precision kept, as AddPoint3d did
+    p = os.path.join(MODELS, 'sphereDecals.3dm')
+    od = [d for o in r.File3dm.Read(p).Objects for d in (o.Attributes.Decals or [])]
+    nd = [d for o in r.File3dmX.Read(p).Objects for d in o.Attributes.Decals]
+    assert len(od) == len(nd) > 0
+    for a, b in zip(od, nd):
+        assert (a.HorzSweepStart, a.HorzSweepEnd) == tuple(b.HorzSweep())
+        assert (a.VertSweepStart, a.VertSweepEnd) == tuple(b.VertSweep())
+        assert (a.BoundsMinU, a.BoundsMinV, a.BoundsMaxU, a.BoundsMaxV) == tuple(b.GetUVBounds())
+
+
 def test_material_render_material_instance_id_u1():
     # U1 (upstream, 2026-10-20): RhinoCommon's Material.RenderMaterialInstanceId over portable natives;
     # setting it also sets the universal render engine as the plug-in id (ON_Material's contract)

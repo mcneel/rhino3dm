@@ -555,3 +555,587 @@ status = "replaced"
 by = ["PointCloudX.InsertRange"]
 note = "U11: the old binding's InsertRangePoints is a copy of the broken ON_PointCloud_InsertPoints (pilot-findings #34) and overruns the heap in 8.x; the generated member is RhinoCommon's over the fixed native. An index out of range now raises (IndexError / a JS exception) where the old one did nothing"
 test = "test_point_cloud_insert_range_u11"
+
+# ---- #5-#7 upstream (RH-99691/2/3, merged 2026-10-20): portable RhinoCommon members over new portable natives
+
+[[retired]]
+class = "ObjectAttributes"
+member = "DrawColor"
+status = "replaced"
+by = ["ObjectAttributesX.DrawColor"]
+note = "#5: Rhino's rules over the file; by-material now follows the material source and PBR base color (D63)"
+test = "test_draw_color_from_a_file_u5"
+
+[[retired]]
+class = "Mesh"
+member = "SetCachedTextureCoordinatesFromMaterial"
+status = "replaced"
+by = ["MeshX.SetCachedTextureCoordinatesFromMaterial"]
+note = "#6 (U9): RhinoCommon returns nothing where the old returned bool (D65)"
+test = "test_mesh_texture_coordinates_from_a_file_u9"
+
+[[retired]]
+class = "Mesh"
+member = "GetCachedTextureCoordinatesFromTexture"
+status = "replaced"
+by = ["MeshX.GetCachedTextureCoordinates"]
+note = "#6 (U9): RhinoCommon's name, an overload of GetCachedTextureCoordinates (D65)"
+test = "test_mesh_texture_coordinates_from_a_file_u9"
+
+[[retired]]
+class = "RenderContent"
+member = "ChildSlotAmount"
+status = "replaced"
+by = ["File3dmRenderContentX.ChildSlotAmount"]
+note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
+test = "test_render_content_child_slots_u4"
+
+[[retired]]
+class = "RenderContent"
+member = "SetChild"
+status = "replaced"
+by = ["File3dmRenderContentX.SetChild"]
+note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
+test = "test_render_content_child_slots_u4"
+
+[[retired]]
+class = "RenderContent"
+member = "SetChildSlotAmount"
+status = "replaced"
+by = ["File3dmRenderContentX.SetChildSlotAmount"]
+note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
+test = "test_render_content_child_slots_u4"
+
+[[retired]]
+class = "RenderContent"
+member = "SetChildSlotOn"
+status = "replaced"
+by = ["File3dmRenderContentX.SetChildSlotOn"]
+note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
+test = "test_render_content_child_slots_u4"
+
+# ---- D62 (Luis 2026-10-20, triage K): user strings kept on every old class that had them
+
+[[retired]]
+class = "CommonObject"
+member = "GetUserString"
+status = "replaced"
+by = ["GeometryBaseX.GetUserString", "ObjectAttributesX.GetUserString", "LayerX.GetUserString", "MaterialX.GetUserString", "LinetypeX.GetUserString", "GroupX.GetUserString", "HatchPatternX.GetUserString", "DimensionStyleX.GetUserString", "InstanceDefinitionGeometryX.GetUserString", "TextureMappingX.GetUserString", "ViewportX.GetUserString", "RenderSettingsX.GetUserString", "BitmapX.GetUserString"]
+note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
+test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
+
+[[retired]]
+class = "CommonObject"
+member = "SetUserString"
+status = "replaced"
+by = ["GeometryBaseX.SetUserString", "ObjectAttributesX.SetUserString", "LayerX.SetUserString", "MaterialX.SetUserString", "LinetypeX.SetUserString", "GroupX.SetUserString", "HatchPatternX.SetUserString", "DimensionStyleX.SetUserString", "InstanceDefinitionGeometryX.SetUserString", "TextureMappingX.SetUserString", "ViewportX.SetUserString", "RenderSettingsX.SetUserString", "BitmapX.SetUserString"]
+note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
+test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
+
+[[retired]]
+class = "CommonObject"
+member = "UserStringCount"
+status = "replaced"
+by = ["GeometryBaseX.UserStringCount", "ObjectAttributesX.UserStringCount", "LayerX.UserStringCount", "MaterialX.UserStringCount", "LinetypeX.UserStringCount", "GroupX.UserStringCount", "HatchPatternX.UserStringCount", "DimensionStyleX.UserStringCount", "InstanceDefinitionGeometryX.UserStringCount", "TextureMappingX.UserStringCount", "ViewportX.UserStringCount", "RenderSettingsX.UserStringCount", "BitmapX.UserStringCount"]
+note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
+test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
+
+[[retired]]
+class = "CommonObject"
+member = "GetUserStrings"
+status = "replaced"
+by = ["GeometryBaseX.GetUserStrings", "ObjectAttributesX.GetUserStrings", "LayerX.GetUserStrings", "MaterialX.GetUserStrings", "LinetypeX.GetUserStrings", "GroupX.GetUserStrings", "HatchPatternX.GetUserStrings", "DimensionStyleX.GetUserStrings", "InstanceDefinitionGeometryX.GetUserStrings", "TextureMappingX.GetUserStrings", "ViewportX.GetUserStrings", "RenderSettingsX.GetUserStrings", "BitmapX.GetUserStrings"]
+note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
+test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
+
+# ==== Retirement batch 1 (Luis 2026-10-28; docs/vnext/rhino3dm-only-triage.md) ====
+
+# ---- AnnotationBase explicit-parent accessors (triage C, RH3DM-204): RhinoCommon's ParentDimensionStyle form (D39, D67)
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetAlternateDimensionLengthDisplay"
+status = "replaced"
+by = ["AnnotationBaseX.AlternateDimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetAlternateDimensionLengthDisplay"
+status = "replaced"
+by = ["AnnotationBaseX.AlternateDimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetDimensionLengthDisplay"
+status = "replaced"
+by = ["AnnotationBaseX.DimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetDimensionLengthDisplay"
+status = "replaced"
+by = ["AnnotationBaseX.DimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetMaskColor"
+status = "replaced"
+by = ["AnnotationBaseX.MaskColor", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetMaskColor"
+status = "replaced"
+by = ["AnnotationBaseX.MaskColor", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetMaskColorSource"
+status = "replaced"
+by = ["AnnotationBaseX.MaskColorSource", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetMaskColorSource"
+status = "replaced"
+by = ["AnnotationBaseX.MaskColorSource", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetMaskEnabled"
+status = "replaced"
+by = ["AnnotationBaseX.MaskEnabled", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetMaskEnabled"
+status = "replaced"
+by = ["AnnotationBaseX.MaskEnabled", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetMaskFrame"
+status = "replaced"
+by = ["AnnotationBaseX.MaskFrame", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetMaskFrame"
+status = "replaced"
+by = ["AnnotationBaseX.MaskFrame", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetMaskOffset"
+status = "replaced"
+by = ["AnnotationBaseX.MaskOffset", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetMaskOffset"
+status = "replaced"
+by = ["AnnotationBaseX.MaskOffset", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetTextHeight"
+status = "replaced"
+by = ["AnnotationBaseX.TextHeight", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetTextHeight"
+status = "replaced"
+by = ["AnnotationBaseX.TextHeight", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetDimensionScale"
+status = "replaced"
+by = ["AnnotationBaseX.DimensionScale", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
+test = "test_retired_annotation_explicit_parent_accessors_c"
+
+# ---- Python-only `...2` list duplicates (triage E): the generated originals return lists
+
+[[retired]]
+class = "CommonObject"
+member = "GetUserStrings2"
+status = "replaced"
+by = ["GeometryBaseX.GetUserStrings", "ObjectAttributesX.GetUserStrings"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "File3dmGroupTable"
+member = "GroupMembers2"
+status = "replaced"
+by = ["File3dmGroupTableX.GroupMembers"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "NurbsCurveKnotList"
+member = "ToList2"
+status = "replaced"
+by = ["NurbsCurveKnotListX.__getitem__"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "NurbsSurfaceKnotList"
+member = "ToList2"
+status = "replaced"
+by = ["NurbsSurfaceKnotListX.__getitem__"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "PointCloud"
+member = "GetColors2"
+status = "replaced"
+by = ["PointCloudX.GetColors"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "PointCloud"
+member = "GetNormals2"
+status = "replaced"
+by = ["PointCloudX.GetNormals"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "PointCloud"
+member = "GetPoints2"
+status = "replaced"
+by = ["PointCloudX.GetPoints"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "PointCloud"
+member = "GetValues2"
+status = "replaced"
+by = ["PointCloudX.GetPointValues"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "PolyCurve"
+member = "Explode2"
+status = "replaced"
+by = ["PolyCurveX.Explode"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "Polyline"
+member = "GetSegments2"
+status = "replaced"
+by = ["PolylineX.GetSegments"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "Surface"
+member = "GetSpanVector2"
+status = "replaced"
+by = ["SurfaceX.GetSpanVector"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+[[retired]]
+class = "Transform"
+member = "ToFloatArray2"
+status = "replaced"
+by = ["TransformX.ToFloatArray"]
+note = "triage E (Luis: drop): the generated original returns a list (D35)"
+test = "test_retired_numbered_list_duplicates_e"
+
+# ---- SubD counts and component ids (triage G1)
+
+[[retired]]
+class = "SubD"
+member = "EdgeCount"
+status = "replaced"
+by = ["SubDX.Edges"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+[[retired]]
+class = "SubD"
+member = "FaceCount"
+status = "replaced"
+by = ["SubDX.Faces"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+[[retired]]
+class = "SubD"
+member = "VertexCount"
+status = "replaced"
+by = ["SubDX.Vertices"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+[[retired]]
+class = "SubDEdge"
+member = "Index"
+status = "replaced"
+by = ["SubDEdgeX.Id"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+[[retired]]
+class = "SubDFace"
+member = "Index"
+status = "replaced"
+by = ["SubDFaceX.Id"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+[[retired]]
+class = "SubDVertex"
+member = "Index"
+status = "replaced"
+by = ["SubDVertexX.Id"]
+note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
+test = "test_retired_subd_counts_and_ids_g1"
+
+# ---- Likely renames (triage L1) and opennurbs features RhinoCommon has another way (M1)
+
+[[retired]]
+class = "BrepLoop"
+member = "TrimCount"
+status = "replaced"
+by = ["BrepLoopX.Trims"]
+note = "triage L1 (Luis: map); `loop.Trims.Count`"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "HorzSweepStart"
+status = "replaced"
+by = ["DecalX.HorzSweep"]
+note = "triage L1 (Luis: map); HorzSweep() -> (start, end)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "HorzSweepEnd"
+status = "replaced"
+by = ["DecalX.HorzSweep"]
+note = "triage L1 (Luis: map); HorzSweep() -> (start, end)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "VertSweepStart"
+status = "replaced"
+by = ["DecalX.VertSweep"]
+note = "triage L1 (Luis: map); VertSweep() -> (start, end)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "VertSweepEnd"
+status = "replaced"
+by = ["DecalX.VertSweep"]
+note = "triage L1 (Luis: map); VertSweep() -> (start, end)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "NurbsCurveKnotList"
+member = "ToList"
+status = "replaced"
+by = ["NurbsCurveKnotListX.__getitem__"]
+note = "triage L1 (Luis: map); iterate the list"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "NurbsSurfaceKnotList"
+member = "ToList"
+status = "replaced"
+by = ["NurbsSurfaceKnotListX.__getitem__"]
+note = "triage L1 (Luis: map); iterate the list"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "NurbsSurfaceKnotList"
+member = "IsClampedStart"
+status = "replaced"
+by = ["NurbsSurfaceKnotListX.ClampedAtStart"]
+note = "triage L1 (Luis: map)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "NurbsSurfaceKnotList"
+member = "IsClampedEnd"
+status = "replaced"
+by = ["NurbsSurfaceKnotListX.ClampedAtEnd"]
+note = "triage L1 (Luis: map)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "PhysicallyBasedMaterial"
+member = "EmissionColor"
+status = "replaced"
+by = ["PhysicallyBasedMaterialX.Emission"]
+note = "triage L1 (Luis: map); a Color4f"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Point3dList"
+member = "Append"
+status = "replaced"
+by = ["Point3dListX.Add"]
+note = "triage L1 (Luis: map)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "PointCloud"
+member = "ContainsValues"
+status = "replaced"
+by = ["PointCloudX.ContainsPointValues"]
+note = "triage L1 (Luis: map)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "PointCloud"
+member = "GetValues"
+status = "replaced"
+by = ["PointCloudX.GetPointValues"]
+note = "triage L1 (Luis: map); empty where the old one raised TypeError (pilot #29)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Polyline"
+member = "ClosesPoint"
+status = "replaced"
+by = ["PolylineX.ClosestPoint"]
+note = "triage L1 (Luis: map); the old name was a typo"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Polyline"
+member = "CreateFromPoints"
+status = "replaced"
+by = ["PolylineX.__init__"]
+note = "triage L1 (Luis: map); Polyline(points)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "BoundsMinU"
+status = "replaced"
+by = ["DecalX.GetUVBounds"]
+note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "BoundsMinV"
+status = "replaced"
+by = ["DecalX.GetUVBounds"]
+note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "BoundsMaxU"
+status = "replaced"
+by = ["DecalX.GetUVBounds"]
+note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Decal"
+member = "BoundsMaxV"
+status = "replaced"
+by = ["DecalX.GetUVBounds"]
+note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "Extrusion"
+member = "CreateWithPlane"
+status = "replaced"
+by = ["ExtrusionX.Create"]
+note = "triage M1 (Luis: map); Create(curve, plane, height, cap)"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "MeshVertexList"
+member = "AddPoint3d"
+status = "replaced"
+by = ["MeshVertexListX.Add"]
+note = "triage M1 (Luis: map); Add(x, y, z) with doubles keeps double precision"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "NurbsSurfacePointList"
+member = "MakeNonRational"
+status = "replaced"
+by = ["NurbsSurfaceX.MakeNonRational"]
+note = "triage M1 (Luis: map); on the surface"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+[[retired]]
+class = "PhysicallyBasedMaterial"
+member = "Supported"
+status = "replaced"
+by = ["MaterialX.IsPhysicallyBased"]
+note = "triage M1 (Luis: map); on the material"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
+# ---- JS-only misc (triage JS3)
+
+[[retired]]
+class = "Arc"
+member = "createFromPoints"
+status = "replaced"
+by = ["ArcX.__init__"]
+note = "triage JS3 (Luis: map): JS only; ArcX.create(p1, p2, p3)"
+test = "test_retired_arc_arccurve_brep_members"
+
+[[retired]]
+class = "File3dm"
+member = "toByteArrayOptions"
+status = "replaced"
+by = ["File3dmX.ToByteArray"]
+note = "triage JS3 (Luis: map): JS only; toByteArray(options) (D54)"
+test = "test_retired_file3dm_to_byte_array_options_js3"

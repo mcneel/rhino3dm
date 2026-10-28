@@ -265,6 +265,112 @@ module.exports = (t, ctx) => {
     pc.delete();
   });
 
+  t('test_mesh_normal_list_is_mesh_vertex_normal_list', () => {
+    // the old MeshNormalList is RhinoCommon's MeshVertexNormalList (registry 'old' pairing)
+    const folded = () => {
+      const m = new r.Mesh();
+      for (const [x, y, z] of [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [2, 0, 1], [2, 1, 1]]) m.vertices().add(x, y, z);
+      m.faces().addQuadFace(0, 1, 2, 3);
+      m.faces().addQuadFace(1, 4, 5, 2);
+      return m;
+    };
+    const xyz = v => Array.isArray(v) ? Array.from(v) : [v.X ?? v.x, v.Y ?? v.y, v.Z ?? v.z];
+    const vals = l => Array.from({ length: l.count }, (_, i) => xyz(l.get(i)));
+    let old = folded().normals(), neu = new r.MeshX(folded()).normals;
+    assert(old.computeNormals() && neu.computeNormals());
+    assert.strictEqual(old.count, 6);
+    assert.deepStrictEqual(vals(old), vals(neu));
+    old.flip(); neu.flip();
+    assert.deepStrictEqual(vals(old), vals(neu));
+    // D66: the old add unitized (ON_Mesh::SetVertexNormal); RhinoCommon's stores the vector as given
+    assert.strictEqual(old.add(0, 0, 2), 6);
+    assert.strictEqual(neu.add(0, 0, 2), 6);
+    assert.deepStrictEqual(xyz(old.get(6)), [0, 0, 1]);
+    assert.deepStrictEqual(xyz(neu.get(6)), [0, 0, 2]);
+    assert.deepStrictEqual(vals(old).slice(0, 6), vals(neu).slice(0, 6));
+    old.clear(); neu.clear();
+    assert.strictEqual(old.count, 0); assert.strictEqual(neu.count, 0);
+  });
+
+  t('test_dimension_classes_and_display_lines_g111', () => {
+    // triage batch B: generated dimension classes, handed out by files as their own class;
+    // GetDisplayLines -> [rc, lines] (values by parity against .NET)
+    const S = new r.DimensionStyleX();
+    const P = (x, y) => ({ X: x, Y: y, Z: 0 });
+    const od = r.OrdinateDimensionX.create(S, r.PlaneX.worldXY, r.OrdinateDimensionMeasuredDirection.Xaxis, P(0, 0), P(5, 3), P(5, 8), 1.0, 1.0);
+    const ld = r.LinearDimensionX.create(r.AnnotationType.Aligned, S, r.PlaneX.worldXY, { X: 1, Y: 0, Z: 0 }, P(0, 0), P(4, 1), P(2, 3), 0.0);
+    const f = new r.File3dmX();
+    const ids = [f.objects.addOrdinateDimension(od), f.objects.addLinearDimension(ld)];
+    const back = r.File3dmX.fromByteArray(f.toByteArray(null));
+    const geom = {};
+    for (const o of objs(back)) geom[String(o.attributes.objectId)] = o.geometry;
+    assert(geom[String(ids[0])] instanceof r.OrdinateDimensionX, 'ordinate: ' + Object.keys(geom).join(',') + ' vs ' + ids);
+    assert(geom[String(ids[1])] instanceof r.LinearDimensionX);
+    for (const d of [od, ld]) d.updateDimensionText(S, r.UnitSystem.Millimeters);
+    const [orc] = od.getDisplayLines(S, 1.0);
+    assert.strictEqual(typeof orc, 'boolean');
+    const [trc] = ld.getTextRectangle();
+    if (!trc) ctx.skip('WASM: no font metrics, so no text rectangle and no display lines (as for text bounding boxes); the class and file parts passed');
+    const [rc, lines] = ld.getDisplayLines(S, 1.0);
+    assert.strictEqual(rc, true);
+    assert(lines.length > 0);
+  });
+
+  t('test_create_keeps_its_style_alive_g112', async () => {
+    // G112: the result holds the style its Create stored, and the setter holds its value (GC-safe)
+    const P = (x, y) => ({ X: x, Y: y, Z: 0 });
+    let ld = r.LinearDimensionX.create(r.AnnotationType.Aligned, new r.DimensionStyleX(), r.PlaneX.worldXY, { X: 1, Y: 0, Z: 0 }, P(0, 0), P(4, 1), P(2, 3), 0.0);
+    await ctx.gcSettle();
+    assert(ld.parentDimensionStyle.textHeight > 0);
+    ld.parentDimensionStyle = new r.DimensionStyleX();
+    await ctx.gcSettle();
+    assert(ld.parentDimensionStyle.textHeight > 0);
+    assert.deepStrictEqual(r.rh3dmPostUnresolved, []);
+  });
+
+  t('test_user_strings_kept_where_rhino3dm_had_them_d62', () => {
+    // D62: user strings on Viewport / RenderSettings / Bitmap / TextureMapping; getUserStrings pairs
+    const f = new r.File3dmX();
+    const I = (a, b) => ({ T0: a, T1: b });
+    for (const o of [new r.ViewportX(), f.settings.renderSettings, new r.BitmapX(),
+                     r.TextureMappingX.createPlaneMapping(r.PlaneX.worldXY, I(0, 1), I(0, 1), I(0, 1))]) {
+      assert.strictEqual(o.userStringCount, 0);
+      assert.strictEqual(o.setUserString('k', 'v'), true);
+      assert.strictEqual(o.getUserString('k'), 'v');
+      assert.deepStrictEqual(Array.from(o.getUserStrings(), p => Array.from(p)), [['k', 'v']]);
+    }
+  });
+
+  t('test_render_content_child_slots_u4', () => {
+    // #7 (U4): RenderContent's shape (slot name first); an unset slot's amount is 0.0 (D64)
+    const f = ctx.readModel('file3dm_stuff.3dm');
+    const tops = [...f.renderMaterials, ...f.renderEnvironments, ...f.renderTextures];
+    const top = tops.find(c => [...c.children].length > 0);
+    const slot = [...top.children][0].childSlotName;
+    const n = [...top.children].length;
+    const on = top.childSlotOn(slot);
+    assert.strictEqual(top.setChildSlotOn(slot, !on), true);
+    assert.strictEqual(top.childSlotOn(slot), !on);
+    assert.strictEqual(top.setChildSlotAmount(slot, 42.0), true);
+    assert.strictEqual(top.childSlotAmount(slot), 42.0);
+    assert.strictEqual(top.childSlotAmount('rh3dm-no-such-slot'), 0.0);
+    const other = tops.find(c => c.id !== top.id);
+    assert.strictEqual(top.setChild(other, 'rh3dm-slot'), true);
+    assert.strictEqual([...top.children].length, n + 1);       // ids: pilot #50
+    assert(top.findChild('rh3dm-slot') !== null);
+  });
+
+  t('test_draw_color_from_a_file_u5', () => {
+    // #5: by object and by material (the material the attributes select; D63)
+    const f = new r.File3dmX();
+    const m = new r.MaterialX(); m.diffuseColor = { r: 200, g: 0, b: 0, a: 255 }; f.materials.add(m);
+    const a = new r.ObjectAttributesX();
+    a.colorSource = r.ObjectColorSource.ColorFromMaterial;
+    a.materialSource = r.ObjectMaterialSource.MaterialFromObject; a.materialIndex = 0;
+    const c = a.drawColor(f);
+    assert.deepStrictEqual([c.r, c.g, c.b], [200, 0, 0]);
+  });
+
   t('test_viewport_screen_port_g105', () => {
     const v = new r.ViewportX();
     v.screenPort = [10, 20, 640, 480];
@@ -766,5 +872,109 @@ module.exports = (t, ctx) => {
     const got = s.font;
     s.delete();
     assert(got.familyName);                                       // managed: outlives the style
+  });
+
+  // ---- retirement batch 1 (Luis 2026-10-28): the JS halves of the Python tests of the same names
+  const oldGeoms = name => { const ot = ctx.readOld(name).objects(); const out = []; for (let i = 0; i < ot.count; i++) out.push(ot.get(i).geometry()); return out; };
+  const ev = v => (v && typeof v === 'object' && 'value' in v ? v.value : v);
+
+  t('test_retired_annotation_explicit_parent_accessors_c', () => {
+    // C (drop): getX(parentStyle) / setX(parentStyle, v) -> ann.parentDimensionStyle = style; ann.x (D39, D67)
+    const f = ctx.readModel('textEntities_r8.3dm');
+    const old = ctx.readOld('textEntities_r8.3dm');
+    const nann = objs(f).map(o => o.geometry).find(g => g instanceof r.AnnotationBaseX);
+    const ot = old.objects();
+    let oann = null;
+    for (let i = 0; i < ot.count && !oann; i++) { const g = ot.get(i).geometry(); if (g instanceof r.AnnotationBase) oann = g; }
+    assert(nann && oann);
+    const ostyle = oldList(call(old, 'dimstyles')).find(s => String(s.id) === String(oann.dimensionStyleId));
+    const nstyle = list(f.allDimStyles).find(s => s.id === nann.dimensionStyleId);
+    assert(ostyle && nstyle);
+    nann.parentDimensionStyle = nstyle;
+    assert.strictEqual(nann.textHeight, oann.getTextHeight(ostyle));
+    assert.strictEqual(nann.textHeight, 10.0);                       // the override survives (G114)
+    for (const n of ['TextHeight', 'MaskOffset', 'MaskEnabled', 'MaskColorSource', 'MaskFrame',
+                     'DimensionLengthDisplay', 'AlternateDimensionLengthDisplay']) {
+      const p = n[0].toLowerCase() + n.slice(1);
+      assert.strictEqual(ev(nann[p]), ev(oann['get' + n](ostyle)), n);
+    }
+    for (const [n, v] of [['TextHeight', 7.5], ['MaskOffset', 0.25], ['MaskEnabled', true]]) {
+      const p = n[0].toLowerCase() + n.slice(1);
+      oann['set' + n](ostyle, v);
+      nann[p] = v;
+      assert.strictEqual(nann[p], oann['get' + n](ostyle), n);
+    }
+    oann.setDimensionScale(ostyle, 2.0);
+    nann.dimensionScale = 2.0;
+    assert.strictEqual(nann.dimensionScale, oann.getDimensionScale(ostyle));
+  });
+
+  t('test_retired_subd_counts_and_ids_g1', () => {
+    // G1 (map): subd.edgeCount / faceCount / vertexCount -> edges / faces / vertices .count; index -> id
+    const [, n] = subdFromFile();
+    const o = oldGeoms('subdBox.3dm').find(g => g instanceof r.SubD);
+    assert.deepStrictEqual([o.edgeCount, o.faceCount, o.vertexCount], [n.edges.count, n.faces.count, n.vertices.count]);
+    // the old JS iterator's get(i) looks a component up by ID (FaceFromId): walk it with first/next
+    const ids = it => { const out = []; for (let c = it.first(), i = 0; i < it.count; c = it.next(), i++) out.push(c.index); return out.sort((a, b) => a - b); };
+    assert.deepStrictEqual(ids(call(o, 'faces')), [...n.faces].map(c => c.id).sort((a, b) => a - b));
+    assert.deepStrictEqual(ids(call(o, 'edges')), [...n.edges].map(c => c.id).sort((a, b) => a - b));
+    assert.deepStrictEqual(ids(call(o, 'vertices')), [...n.vertices].map(c => c.id).sort((a, b) => a - b));
+  });
+
+  t('test_retired_likely_renames_l1_and_other_maps_m1', () => {
+    // L1 / M1 (map): each old member against its RhinoCommon member
+    const obox = r.Brep.createFromBoundingBox(new r.BoundingBox([0, 0, 0], [1, 2, 3]));
+    const nbox = boxBrep();
+    assert.strictEqual(call(call(obox, 'faces').get(0), 'outerLoop').trimCount, nbox.faces.get(0).outerLoop.trims.count);
+    const pts = [[0, 0, 0], [4, 0, 0], [4, 4, 0]];
+    const opl = r.Polyline.createFromPoints(pts);
+    const npl = new r.PolylineX(pts.map(([X, Y, Z]) => ({ X, Y, Z })));
+    assert.strictEqual(npl.count, opl.count);
+    const oc = opl.closesPoint([5, 1, 0]), nc = npl.closestPoint({ X: 5, Y: 1, Z: 0 });
+    assert.deepStrictEqual([oc[0], oc[1]], [nc.X, nc.Y]);
+    const ol = new r.Point3dList(), nl = new r.Point3dListX();
+    ol.append([[1, 2, 3]]); nl.add(1.0, 2.0, 3.0);
+    assert.deepStrictEqual([ol.get(0)[0], ol.get(0)[2]], [nl.get(0).X, nl.get(0).Z]);
+    const opc = new r.PointCloud(); opc.addPointValue([0, 0, 0], 2.5); opc.addPointValue([1, 0, 0], -1.0);
+    const npc = new r.PointCloudX(opc);              // RhinoCommon adds a value only with a normal and a color
+    assert.strictEqual(opc.containsValues, npc.containsPointValues);
+    assert.deepStrictEqual(Array.from(opc.getValues()), Array.from(npc.getPointValues()));
+    const osrf = r.NurbsSurface.createFromSphere(new r.Sphere([0, 0, 0], 2));
+    const nsrf = r.NurbsSurfaceX.createFromSphere(r.SphereX.create({ X: 0, Y: 0, Z: 0 }, 2));
+    assert.deepStrictEqual([call(osrf.knotsU(), 'isClampedStart'), call(osrf.knotsU(), 'isClampedEnd')],
+                           [nsrf.knotsU.clampedAtStart, nsrf.knotsU.clampedAtEnd]);
+    assert.deepStrictEqual(Array.from(osrf.knotsU().toList()), [...nsrf.knotsU]);
+    assert.strictEqual(osrf.points().makeNonRational(), nsrf.makeNonRational());
+    const m = new r.Material(); m.toPhysicallyBased(); const nm = new r.MaterialX(); nm.toPhysicallyBased();
+    assert.strictEqual(call(m, 'physicallyBased').supported, nm.isPhysicallyBased);
+    const oe = r.Extrusion.createWithPlane(new r.Circle(2).toNurbsCurve(), r.Plane.worldXY(), 3.0, true);
+    const ne = r.ExtrusionX.create(r.CircleX.toNurbsCurve(r.CircleX.create(2)), r.PlaneX.worldXY, 3.0, true);
+    approx(oe.getBoundingBox().max[2], ne.getBoundingBox(I()).Max.Z, 1e-9, 'extrusion height');
+    const mesh = new r.Mesh(), nmesh = new r.MeshX();
+    assert.strictEqual(mesh.vertices().addPoint3d(0.1, 0.2, 0.3), nmesh.vertices.add(0.1, 0.2, 0.3));
+    assert.strictEqual(nmesh.vertices.point3dAt(0).X, 0.1);         // double precision kept, as addPoint3d did
+    const od = [], nd = [];
+    const ot = ctx.readOld('sphereDecals.3dm').objects();
+    for (let i = 0; i < ot.count; i++) { const ds = ot.get(i).attributes().decals(); for (let k = 0; k < ds.count; k++) od.push(ds.get(k)); }
+    for (const o of objs(ctx.readModel('sphereDecals.3dm'))) nd.push(...list(o.attributes.decals));
+    assert(od.length > 0 && od.length === nd.length);
+    od.forEach((a, k) => {
+      const b = nd[k];
+      assert.deepStrictEqual([a.horzSweepStart, a.horzSweepEnd], Array.from(b.horzSweep()));
+      assert.deepStrictEqual([a.vertSweepStart, a.vertSweepEnd], Array.from(b.vertSweep()));
+      assert.deepStrictEqual([a.boundsMinU, a.boundsMinV, a.boundsMaxU, a.boundsMaxV], Array.from(b.getUVBounds()));
+    });
+  });
+
+  t('test_retired_file3dm_to_byte_array_options_js3', () => {
+    // JS3 (map): File3dm.toByteArrayOptions(options) -> File3dmX.toByteArray(options) (D54)
+    const old = ctx.readOld('file3dm_stuff.3dm');
+    const f = ctx.readModel('file3dm_stuff.3dm');
+    const oo = new r.File3dmWriteOptions(); oo.version = 7;
+    const no = new r.File3dmWriteOptionsX(); no.version = 7;
+    const ob = r.File3dmX.fromByteArray(old.toByteArrayOptions(oo));
+    const nb = r.File3dmX.fromByteArray(f.toByteArray(no));
+    assert.strictEqual(ob.archiveVersion, nb.archiveVersion);
+    assert.strictEqual(list(ob.objects).length, list(nb.objects).length);
   });
 };

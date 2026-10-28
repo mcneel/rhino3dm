@@ -303,6 +303,8 @@ static string Encode(object v) => v switch
     Line l => $"{{\"Line\": [{Num(l.FromX)}, {Num(l.FromY)}, {Num(l.FromZ)}, {Num(l.ToX)}, {Num(l.ToY)}, {Num(l.ToZ)}]}}",
     BoundingBox b => $"{{\"BoundingBox\": [{Num(b.Min.X)}, {Num(b.Min.Y)}, {Num(b.Min.Z)}, {Num(b.Max.X)}, {Num(b.Max.Y)}, {Num(b.Max.Z)}]}}",
     Dictionary<string, object> m => "{" + string.Join(", ", m.Select(kv => $"\"{kv.Key}\": {Encode(kv.Value)}")) + "}",
+    // an Arc (G113: AngularDimension.GetDisplayLines' arcs): plane, radius, angle domain
+    Arc a => $"{{\"Arc\": [{Num(a.Plane.OriginX)}, {Num(a.Plane.OriginY)}, {Num(a.Plane.OriginZ)}, {Num(a.Plane.XAxis.X)}, {Num(a.Plane.XAxis.Y)}, {Num(a.Plane.XAxis.Z)}, {Num(a.Plane.YAxis.X)}, {Num(a.Plane.YAxis.Y)}, {Num(a.Plane.YAxis.Z)}, {Num(a.Radius)}, {Num(a.AngleDomain.T0)}, {Num(a.AngleDomain.T1)}]}}",
     Plane p => $"{{\"Plane\": [{Num(p.OriginX)}, {Num(p.OriginY)}, {Num(p.OriginZ)}, {Num(p.XAxis.X)}, {Num(p.XAxis.Y)}, {Num(p.XAxis.Z)}, {Num(p.YAxis.X)}, {Num(p.YAxis.Y)}, {Num(p.YAxis.Z)}]}}",
     Transform x => "{\"Transform\": [" + string.Join(", ", Enumerable.Range(0, 16).Select(i => Num(x[i / 4, i % 4]))) + "]}",
     Enum en => $"{{\"enum\": \"{en}\"}}",

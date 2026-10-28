@@ -474,7 +474,7 @@ def plan(member, cfn, cls):
                 if ctype == CS_ENUMS[cstype]['cpp']:
                     call_exprs.append(name)            # the C layer takes the public type itself
                     continue
-                if re.match(r'^ON_\w+::\w+$', ctype):
+                if re.match(r'^ON(?:_\w+)?::\w+$', ctype):
                     # an opennurbs scoped enum (G99: Font(.., FontWeight weight, ..) -> ON_Font::Weight):
                     # P/Invoke passes the value -- the same cast (the G91 rule for translated bodies)
                     call_exprs.append('(%s)(int)(%s)' % (ctype, name))
@@ -1314,6 +1314,19 @@ def no_owned_pointer_cpp(cls, ident):
                 return '(m_ptr == nullptr)'
             return 'false'
     return None
+
+
+def guid_operands(cond, ptypes, guid_calls):
+    """a guard's Guid operands read through RH3DM_ToUuid (G114): Python's BND_UUID is a
+    py::object, whose == / != compare object identity, so `DimensionStyleId != value`
+    was always true. ptypes: parameter name -> C# type; guid_calls: the zero-argument
+    Guid getters the condition calls (`Gen_DimensionStyleId`)."""
+    for c in sorted(guid_calls, key=len, reverse=True):
+        cond = re.sub(r'(?<![\w.])%s\(\)' % re.escape(c), 'RH3DM_ToUuid(%s())' % c, cond)
+    for n, t in ptypes.items():
+        if (t or '').split('.')[-1] == 'Guid':
+            cond = re.sub(r'(?<![\w.])%s\b(?!\s*\()' % re.escape(n), 'RH3DM_ToUuid(%s)' % n, cond)
+    return cond
 
 
 def guard_calls_cpp(g, cond, cls, argnames, ptypes, p):
@@ -2690,6 +2703,10 @@ def plan_class(cls, manifest, c_by_name, skipped):
     for p in plans:
         if not p['bind_args'] and p['m']['Name'] not in zero_arg:
             zero_arg[p['m']['Name']] = p['cpp']
+    # Guid operands of a guard (G114): Python's BND_UUID is a py::object, whose == / !=
+    # compare object identity -- every Guid reads through RH3DM_ToUuid (either form)
+    guid_calls = {c for n, c in zero_arg.items()
+                  if any(q['cpp'] == c and (cs_signature(q['m'])[0] or '').split('.')[-1] == 'Guid' for q in plans)}
     resolved = []
     for p in plans:
         if p.get('adopt'):
@@ -2797,7 +2814,7 @@ def plan_class(cls, manifest, c_by_name, skipped):
                     break
             if not ok:
                 break
-            g['cond_cpp'] = cond
+            g['cond_cpp'] = guid_operands(cond, dict(ptypes, **{n: t for t, n in p['bind_args'] if n not in ptypes}), guid_calls)
         fts = p['shape'][1] if p['shape'][0] == 'failthrow' else p.get('failthrow')
         if ok and fts and fts.get('Cond'):
             # `if (!CALL) { if (index < 0 || index >= Count) throw ...; }`:
@@ -3200,7 +3217,8 @@ def native_usable(n):
         t = (t or '').replace('const ', '').strip()
         # an opennurbs scoped enum PARAMETER (`ON_ModelComponent::Type`; G91): the translator
         # passes every enum argument as RH3DM_EnumArg, which converts to it
-        if i > 0 and re.match(r'^ON_\w+::\w+$', t):
+        # ... and an opennurbs namespace enum (`ON::AnnotationType`; G111: LinearDimension.Create)
+        if i > 0 and re.match(r'^ON(?:_\w+)?::\w+$', t):
             continue
         # a C-layer enum (`enum TextRunBool`, `TextRunTypeConsts`; G96): a parameter RH3DM_EnumArg
         # converts to; a result the translator casts to the C# enum it stands for
@@ -3418,6 +3436,34 @@ def _virtual_overrides(owner, q, ptypes, per_reg, manifest):
 
 def _num(t):
     return 'num' if t in ('double', 'float', 'int', 'uint', 'long', 'short', 'byte') else t
+
+
+# G112: the arguments the last resolve_markers() passed to a BORROWING setter (a modeled field's,
+# shape mfget: the object stores the pointer), as their C++ text; translated_pass reads it at once
+RESOLVE_BORROWS = []
+
+
+def _addr_args(res):
+    """`NAME\\x00ADDR?(arg)` -> `NAME(RH3DM_AddrOf(arg))`: a pointer-taking class setter's argument (G112);
+    borrowed arguments are recorded; None when the call has no plain argument list"""
+    while '\x00ADDR' in res:
+        i = res.index('\x00ADDR')
+        flag, j = res[i + 5], i + 6
+        if j >= len(res) or res[j] != '(':
+            return None
+        depth, k = 0, j
+        while k < len(res):
+            depth += {'(': 1, ')': -1}.get(res[k], 0)
+            if depth == 0:
+                break
+            k += 1
+        if k >= len(res):
+            return None
+        inner = res[j + 1:k]
+        if flag == 'B':
+            RESOLVE_BORROWS.append(inner.strip())
+        res = res[:i] + '(RH3DM_AddrOf(' + inner + '))' + res[k + 1:]
+    return res
 
 
 def resolve_markers(text, cls, per_reg, manifest):
@@ -3741,7 +3787,10 @@ def resolve_markers(text, cls, per_reg, manifest):
                        or cs_unqualify(m.get('Returns') or '') == 'Guid'
                        # System.Drawing.Rectangle (G105: GetScreenPort() => GetScreenPort(out near, out far)):
                        # the (x, y, width, height) tuple, a plain value
-                       or cs_unqualify(m.get('Returns') or '') == 'Rectangle'):
+                       or cs_unqualify(m.get('Returns') or '') == 'Rectangle'
+                       # System.Drawing.Color (G113: DrawColor(file) => DrawColor(file, Guid.Empty)): BND_Color,
+                       # passed through unopened (G79)
+                       or cs_unqualify(m.get('Returns') or '') == 'Color'):
                 found = (owner, q)
                 break
         if found is None:
@@ -3785,8 +3834,18 @@ def resolve_markers(text, cls, per_reg, manifest):
             out.append('%s::%s' % (owner['gen'], q['cpp']))
         else:
             out.append(q['cpp'] + ('_out' if ok == 'out' else '_vec' if ok == 'vec' else ''))
+        # a setter taking a class POINTER (a nullable class property; G112): the translator wrote the
+        # argument as C# has it (a const& parameter, a local, null) -- pass its address; a modeled
+        # field's setter (mfget) also keeps the pointer, so its argument is recorded
+        if kind in ('set', 'oset') and q['bind_args'] and re.match(r'^const BND_\w+\s*\*$', q['bind_args'][0][0].strip()):
+            borrows = (q.get('setter_of') or {}).get('shape', ('',))[0] == 'mfget'
+            out.append('\x00ADDR' + ('B' if borrows else 'N'))
     out.append(text[pos:])
     res = ''.join(out)
+    del RESOLVE_BORROWS[:]
+    res = _addr_args(res)
+    if res is None:
+        return None, 'pointer setter call', None
     for k in re.findall(r'\x00OWN(\d+)\x00', res):
         q = tags.get(k)
         own = returns_new(q) if q is not None else None
@@ -3843,6 +3902,7 @@ def translated_pass(per_class, manifest, skipped):
                     skipped[key] = skipped.get(key, 0) + 1
                     continue
                 body, deps, writes = resolve_markers(r['Body'], cls, per_reg, manifest)
+                borrowed = list(RESOLVE_BORROWS)
                 ret, _, _ = resolve_markers(r['Ret'], cls, per_reg, manifest)
                 params = [(resolve_markers(q['Type'], cls, per_reg, manifest)[0], q['Name']) for q in r.get('Params') or []]
                 # a hidden helper's `ref` parameter (G92: `ref string fullName`): by reference
@@ -3855,6 +3915,13 @@ def translated_pass(per_class, manifest, skipped):
                                          and t not in ('int', 'double', 'bool', 'float', 'unsigned int')
                                          for (t, _), o in zip(params, outs) if o)):
                     skipped['translated: out parameter'] = skipped.get('translated: out parameter', 0) + 1
+                    continue
+                # G112: a parameter stored by a borrowing setter must outlive the result -- the binding
+                # keeps it alive (keep_args); any other borrowed argument's lifetime cannot be said
+                pnames = [n for _, n in params]
+                keep_args = sorted({pnames.index(b) for b in borrowed if b in pnames})
+                if body is not None and any(b not in pnames for b in borrowed):
+                    skipped['translated: borrowed argument'] = skipped.get('translated: borrowed argument', 0) + 1
                     continue
                 if body is None or ret is None or any(t is None for t, _ in params):
                     key = 'translated: ' + (deps if body is None else 'signature').split(' ')[0]
@@ -3876,6 +3943,8 @@ def translated_pass(per_class, manifest, skipped):
                      'shape': ('translated', ret, body), 'deps': deps, 'nonconst': writes,
                      'extra_fns': [C_BY_NAME[n] for n in natives],
                      'cpp': uniq('Gen_' + x['Name'])}
+                if keep_args:
+                    p['keep_args'] = keep_args
                 if any(outs):
                     # `bool TryGetCircle(out Circle circle, double tol)` (G83): the body as
                     # `_out` (outs by reference), the binding a tuple (success, outs...)

@@ -8,7 +8,7 @@ using Rhino.Geometry;
 
 // RH3DM-170: headless (ONX_Model based) cached texture coordinates.
 //   Mesh.SetCachedTextureCoordinatesFromMaterial(File3dm, Guid objectId, Material)
-//   Mesh.GetCachedTextureCoordinatesFromTexture(File3dm, Guid objectId, Texture)
+//   Mesh.GetCachedTextureCoordinates(File3dm, Guid objectId, Texture)
 // The RhinoCommon overloads take a RhinoObject/RhinoDoc (RHINO_SDK only); these
 // rhino3dm variants resolve the object's texture mappings from the File3dm.
 public class MeshCachedTextureCoordinates_Tests
@@ -73,7 +73,7 @@ public class MeshCachedTextureCoordinates_Tests
 
         // Without object-level texture mappings there is nothing to cache -> null.
         // If something was cached it must be a well-formed set over all vertices.
-        var tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, objectId, texture);
+        var tc = mesh.GetCachedTextureCoordinates(file3dm, objectId, texture);
         if (tc != null)
             Assert.That(tc.Count, Is.EqualTo(mesh.Vertices.Count));
     }
@@ -86,7 +86,7 @@ public class MeshCachedTextureCoordinates_Tests
         var objectId = file3dm.Objects.AddMesh(mesh, new ObjectAttributes());
 
         var unrelated = new Texture { FileName = "unrelated.png" };
-        var tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, objectId, unrelated);
+        var tc = mesh.GetCachedTextureCoordinates(file3dm, objectId, unrelated);
         Assert.That(tc, Is.Null);
     }
 
@@ -113,7 +113,7 @@ public class MeshCachedTextureCoordinates_Tests
 
             var objectId = obj.Attributes.ObjectId;
             mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, objectId, material);
-            var tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, objectId, texture);
+            var tc = mesh.GetCachedTextureCoordinates(file3dm, objectId, texture);
             if (tc != null)
             {
                 found = true;

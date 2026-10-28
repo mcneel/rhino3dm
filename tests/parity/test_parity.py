@@ -195,6 +195,10 @@ def encode(v):
     if base == 'Plane':
         o, x, y = v.Origin, v.XAxis, v.YAxis
         return {base: [encode(c) for c in (o.X, o.Y, o.Z, x.X, x.Y, x.Z, y.X, y.Y, y.Z)]}
+    if base == 'Arc':                    # plane, radius, angle domain (G113)
+        pl, d = v.Plane, v.AngleDomain
+        o, x, y = pl.Origin, pl.XAxis, pl.YAxis
+        return {base: [encode(c) for c in (o.X, o.Y, o.Z, x.X, x.Y, x.Z, y.X, y.Y, y.Z, v.Radius, d.T0, d.T1)]}
     if base == 'Transform':
         return {base: [encode(getattr(v, 'M%d%d' % (i // 4, i % 4))) for i in range(16)]}
     return {'class': base}      # a geometry/class instance: compare its (most-derived) type

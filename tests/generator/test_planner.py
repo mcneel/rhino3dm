@@ -2215,3 +2215,12 @@ def test_out_companion_returns_an_unconverted_csharp_result():
     assert P.companion_result(('result', 'unsigned int', '{c}')) == 'unsigned int'
     assert P.companion_result(('result', 'RH3DM_Foo', '(RH3DM_Foo){c}')) is None
     assert P.companion_result(True) is None and P.companion_result(' != 0') is None
+
+
+def test_guid_guard_operands_compare_values():
+    # G114: Python's BND_UUID is a py::object; `DimensionStyleId != value` compared object
+    # identity, so the guarded setter always ran SetDimstyleId and dropped the overrides
+    cond = P.guid_operands('Gen_DimensionStyleId() != value', {'value': 'Guid'}, {'Gen_DimensionStyleId'})
+    assert cond == 'RH3DM_ToUuid(Gen_DimensionStyleId()) != RH3DM_ToUuid(value)'
+    assert P.guid_operands('count != value', {'value': 'int'}, set()) == 'count != value'
+    assert P.guid_operands('x.Gen_Id() == id', {'id': 'System.Guid'}, {'Gen_Id'}) == 'x.Gen_Id() == RH3DM_ToUuid(id)'

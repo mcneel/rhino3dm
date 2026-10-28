@@ -168,6 +168,11 @@ def main(argv):
     def size(b):
         return sum(len(v) for v in b.values())
 
+    # a rhino-only member with a tested replacement (api/retired.toml, every `by` present) is closed
+    _ret = load_retired(root, r)
+    ro_retired = sum(1 for row in rows for n in row[3]['rhinoonly']
+                     if (row[0], n) in _ret and not _ret[(row[0], n)]['missing'])
+    closed = tot['covered'] + ro_retired
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
     commit = manifest.get('source', {}).get('commit', '?')[:10]
     L = [
@@ -198,10 +203,11 @@ def main(argv):
         '| **Total old-binding members** | **%d** | | |' % total,
         '',
         '**Generator target: %d / %d (%s)** -- the old members that have a RhinoCommon'
-        % (tot['covered'], total - tot['notrc'], pct(tot['covered'], total - tot['notrc'])),
+        % (closed, total - tot['notrc'], pct(closed, total - tot['notrc'])),
         'counterpart (everything but the rhino3dm-only bucket, which is decided per member,',
-        'not generated). %d to go: %d gap + %d not begun + %d rhino-only.'
-        % (total - tot['notrc'] - tot['covered'], tot['gap'], tot['notbegun'], tot['rhinoonly']),
+        'not generated): %d generated + %d rhino-only retired for a tested replacement. %d to go:'
+        % (tot['covered'], ro_retired, total - tot['notrc'] - closed),
+        '%d gap + %d not begun + %d rhino-only.' % (tot['gap'], tot['notbegun'], tot['rhinoonly'] - ro_retired),
         '',
         'Hand classes: %d, of which %d have a generated counterpart.' % (len(rows), len(begun)),
         '',

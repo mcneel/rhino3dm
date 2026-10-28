@@ -800,10 +800,16 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # concrete base owns the pointer (and the abstract getter override);
         # this class only adds members and a forwarding constructor
         storage = '''  explicit {gen}({on}* owned) : {basegen}(owned) {{}}{bridge}{dctor}'''
-        if base.get('proxy'):
+        # the nearest ancestor's file proxy (G112: LinearDimension : Dimension : AnnotationBase -- only
+        # AnnotationBase declares it; every class below forwards its (model, id) constructor)
+        anc, bproxy = base, None
+        while anc is not None and anc['mode'] != 'abstract' and bproxy is None:
+            bproxy = anc.get('proxy')
+            anc = BY_REG.get(anc.get('base', ''))
+        if bproxy:
             storage += '''
   {gen}(ONX_Model* model, ON_UUID id) : {basegen}(model, id) {{}}'''
-            if base['proxy'].get('Child'):
+            if bproxy.get('Child'):
                 # a child of a parent content (G89), and its light copy as this kind
                 storage += '''
   {gen}(ON_UUID id, const %s& parent) : {basegen}(id, parent) {{}}
@@ -1490,6 +1496,9 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             continue           # registered with its getter below
         n, g = p['m']['Name'], p['cpp']
         pyargs = ''.join(', py::arg("%s")' % a for _, a in p['bind_args'])
+        # G112: arguments a borrowing setter stored (keep_args): the result keeps each alive --
+        # pybind11 numbers a static function's arguments from 1, a method's from 2 (1 is self)
+        pyargs = ''.join(', py::keep_alive<0, %d>()' % (i + (1 if p['static'] else 2)) for i in p.get('keep_args') or []) + pyargs
         if p['static'] and n in instance_names:
             pass               # Python: one name cannot be static AND instance; JS keeps it
         elif p['static']:
@@ -1732,6 +1741,20 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                       '        for (int u = 0; u < nu; u++) for (int v = 0; v < nv; v++) l.append(py::cast(s.%s(u, v)));\n'
                       '        return py::iter(l); })' % (cls['gen'], cu['cpp'], cv['cpp'], gp['cpp']))
             JS_POST['grid'].append((cls['reg'], camel(grid[0]), camel(grid[1]), camel(grid[2])))
+    # D62 (Luis 2026-10-20): user strings where rhino3dm has them and RhinoCommon keeps them internal --
+    # CommonObject's own _SetUserString / _GetUserString / _UserStringCount (generated, unregistered)
+    # under their public names; and GetUserStrings() in rhino3dm's form wherever GetUserString is
+    if cls.get('user_strings'):
+        g = cls['gen']
+        py += ['      .def("SetUserString", &%s::Gen__SetUserString, py::arg("key"), py::arg("value"))' % g,
+               '      .def("GetUserString", &%s::Gen__GetUserString, py::arg("key"))' % g,
+               '      .def_property_readonly("UserStringCount", &%s::Gen__UserStringCount)' % g]
+        js += ['      .function("setUserString", &%s::Gen__SetUserString)' % g,
+               '      .function("getUserString", &%s::Gen__GetUserString)' % g,
+               '      .property("userStringCount", &%s::Gen__UserStringCount)' % g]
+    if any(re.search(r'\.def\("GetUserString"', e) for e in py) and not any('"GetUserStrings"' in e for e in py):
+        py.append('      .def("GetUserStrings", [](const %s& s) { return RH3DM_UserStrings(s.RH3DM_ObjPtr()); })' % cls['gen'])
+        js.append('      .function("getUserStrings", optional_override([](const %s& s) { return RH3DM_UserStrings(s.RH3DM_ObjPtr()); }))' % cls['gen'])
     # G101: the JS post-script's facts for this class (gen_registry.JS_POST) -- read off the Python
     # registrations, the reference for what is a view (keep_alive / reference_internal) and what
     # is a static property
@@ -1747,6 +1770,15 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if '.def_property_readonly_static(' in e:
             jn = camel(n) if camel(n) in jsnames else n
             JS_POST['static_props'].append((cls['reg'], jn))
+        # G112: a result keeping an ARGUMENT alive (keep_alive<0, N>, N past self), and a borrowing
+        # setter (keep_alive<1, 2> on a property: the object holds the value)
+        static_e = '.def_static(' in e
+        for kn in re.findall(r'keep_alive<0, (\d+)>', e):
+            ai = int(kn) - (1 if static_e else 2)
+            if ai >= 0:
+                JS_POST['keep_args'].append((cls['reg'], camel(n), ai, static_e))
+        if e.lstrip().startswith('.def_property(') and 'keep_alive<1, 2>' in e:
+            JS_POST['keep_set'].append((cls['reg'], camel(n)))
     if cls.get('table') or cls.get('liter'):
         JS_POST['iters'].append(cls['reg'] + 'Iter')
     if cs_enumerable(cls['cs']):

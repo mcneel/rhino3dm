@@ -38,8 +38,10 @@ const DERIVED_OPS = {
 function decode(rhino, v) {
   if (typeof v === 'string') return v in SPECIAL ? SPECIAL[v] : v;
   if (v !== null && typeof v === 'object' && 'new' in v) {
-    // {"new": T, "args": [...]}: a value type through its RhinoCommon constructor
-    return rhino[v.new + 'X'].create(...v.args.map(a => decode(rhino, a)));
+    // {"new": T, "args": [...]}: a value type through its RhinoCommon constructor (`create`), a
+    // class (G113: a DimensionStyle argument) through `new`
+    const C = rhino[v.new + 'X'], a = v.args.map(x => decode(rhino, x));
+    return typeof C.create === 'function' ? C.create(...a) : new C(...a);
   }
   if (v !== null && typeof v === 'object') {
     const [[k, x]] = Object.entries(v);
@@ -92,6 +94,10 @@ function encodeLike(want, got, rhino) {
       : { Plane: [...got.origin, ...got.xAxis, ...got.yAxis] };
   if (want && typeof want === 'object' && 'Color' in want)
     return { Color: [got.r, got.g, got.b, got.a] };
+  if (want && typeof want === 'object' && 'Arc' in want) {   // plane, radius, angle domain (G113)
+    const pl = got.Plane, d = got.AngleDomain;
+    return { Arc: [pl.Origin.X, pl.Origin.Y, pl.Origin.Z, pl.XAxis.X, pl.XAxis.Y, pl.XAxis.Z, pl.YAxis.X, pl.YAxis.Y, pl.YAxis.Z, got.Radius, d.T0, d.T1] };
+  }
   if (want && typeof want === 'object' && 'Line' in want)
     return { Line: [got.From.X, got.From.Y, got.From.Z, got.To.X, got.To.Y, got.To.Z] };
   if (want && typeof want === 'object' && 'BoundingBox' in want)
