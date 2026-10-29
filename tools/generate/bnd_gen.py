@@ -899,6 +899,22 @@ struct RH3DM_Points
   }
 };
 
+// SimpleArrayPoint2d on the stack (G116: Leader.Points2D): the native fills it, ToArray() reads it
+struct RH3DM_Points2d
+{
+  ON_2dPointArray a;
+  int Count() const { return a.Count(); }
+  void* ConstPointer() const { return (void*)&a; }
+  void* NonConstPointer() { return (void*)&a; }
+  std::vector<BND_Point2dX> ToArray() const
+  {
+    std::vector<BND_Point2dX> v;
+    v.reserve((size_t)a.Count());
+    for (int i = 0; i < a.Count(); i++) { BND_Point2dX p; p.m_x = a[i].x; p.m_y = a[i].y; v.push_back(p); }
+    return v;
+  }
+};
+
 // `RhinoListHelpers.GetConstArray(points, out count)` in a translated class body (G86)
 template <class T> inline const std::vector<T>& RH3DM_ConstArray(const std::vector<T>& v, int& n) { n = (int)v.size(); return v; }
 
@@ -1332,6 +1348,21 @@ template<class V> struct RH3DM_SeqGuard
 
 // `new TextRun(ptr)` (G96): a handle class adopting the native's object (null stays null)
 template<class B, class O> inline B* RH3DM_Adopt(void* p) { return p ? new B((O*)p) : nullptr; }
+// `(Brep)item` on a class argument (G117): the object as the derived class, or C#'s InvalidCastException
+template<class T> inline T& RH3DM_CastChecked(T* p) { if (!p) throw std::runtime_error("Specified cast is not valid."); return *p; }
+// a native's new object adopted into a class stored BY VALUE (G115: `new EarthAnchorPoint(ptr)`):
+// copied in, then released with the type's own Delete; C# would wrap a null pointer -- an error here
+// `x.ConstPointer()` on a class stored BY VALUE (G115): its stored object, by reference or by
+// pointer (a null one throws, as C#'s NullReferenceException)
+template<class G> inline void* RH3DM_ValPtr(const G& o) { return (void*)&o.m_val; }
+template<class G> inline void* RH3DM_ValPtr(const G* o) { if (!o) throw std::runtime_error("null reference"); return (void*)&o->m_val; }
+template<class B, class O, void (*D)(O*)> inline B RH3DM_ValAdopt(void* p)
+{
+  if (!p) throw std::runtime_error("null native object");
+  B rc(*(O*)p);
+  D((O*)p);
+  return rc;
+}
 
 // a class parameter (a const reference) into a generated member taking it by reference or
 // as an optional pointer (G91)
@@ -1549,6 +1580,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                               if re.match(r'^%s\b' % re.escape(cpp), l)})
         dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps) \
             + ''.join('#include "../bindings/%s"\n' % h for h in sorted({x['header'] for x in HAND_MEMBERS.get(cls['reg'], [])}
+                                                                       | {x['header'] for x in HAND_FALLBACKS.get(cls['reg'], [])}
                 | {st['header'] for st in HAND_STANDINS.values()
                    if any('new %s(' % st['gen'] in (p['shape'][2] if p['shape'][0] == 'translated' else '') for p in plans)}))
         defs = '\n\n'.join(emit_decl_def(p, cls)[1] for p in plans) + table_def

@@ -360,6 +360,16 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_DimOrdinate', 'hand_header': 'bnd_annotationbase.h',
      'copy': ('ON_DimOrdinate::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
      'gen': 'BND_OrdinateDimensionX', 'reg': 'OrdinateDimensionX', 'base': 'DimensionX'},
+    # G116 (2026-10-28, batch 2 J1): the two remaining portable annotation classes; the old
+    # bindings register them as Leader / Text
+    {'type': 'Rhino.Geometry.Leader', 'cs': 'Leader', 'on': 'ON_Leader',
+     'mode': 'pointer', 'hand': 'BND_Leader', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_Leader::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_LeaderX', 'reg': 'LeaderX', 'base': 'AnnotationBaseX'},
+    {'type': 'Rhino.Geometry.TextEntity', 'cs': 'TextEntity', 'on': 'ON_Text',
+     'mode': 'pointer', 'hand': 'BND_Text', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_Text::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_TextEntityX', 'reg': 'TextEntityX', 'base': 'AnnotationBaseX'},
     {'type': 'Rhino.Geometry.InstanceReferenceGeometry', 'cs': 'InstanceReferenceGeometry', 'on': 'ON_InstanceRef',
      'mode': 'pointer', 'hand': 'BND_InstanceReferenceGeometry', 'hand_header': 'bnd_instance.h',
      'copy': ('ON_InstanceRef::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
@@ -1606,6 +1616,17 @@ HAND_BINDINGS = [
 # (`const BND_<reg>&`): Python `keep_alive<0, 1>` (the result refers to the object)
 HAND_MEMBERS = {
     'File3dmX': [{'name': 'Bitmaps', 'kind': 'property', 'fn': 'RH3DM_Hand_File3dmX_Bitmaps', 'header': 'bnd_bitmapx.h'}],
+}
+# a hand path BEHIND a generated member (G119): where RhinoCommon's body gives up with
+# `throw new NotSupportedException(..)`, the generated body calls the hand function instead.
+# File3dmObjectTable.Add(GeometryBase, ObjectAttributes): RhinoCommon adds only linear/angular
+# dimensions among annotations (a Leader, TextEntity, radial or ordinate dimension -- and
+# anything else its switch lacks -- throws); rhino3dm 8.x's Add took any geometry. Luis
+# 2026-10-28: keep that hand path; the RhinoCommon fix is upstream U30 (D71).
+HAND_FALLBACKS = {
+    'File3dmObjectTableX': [{'member': 'Add', 'params': ['GeometryBase', 'ObjectAttributes'],
+                             'throws': 'NotSupportedException', 'header': 'bnd_objecttablex.h',
+                             'call': 'RH3DM_Hand_File3dmObjectTable_AddAny(m_ptr, item, attributes)'}],
 }
 # a hand class standing in for a RhinoCommon class nothing generates (G91): RhinoCommon's
 # BitmapEntry has no working member outside Rhino (pilot #37), so where a body constructs

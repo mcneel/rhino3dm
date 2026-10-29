@@ -2770,13 +2770,20 @@ def test_retired_subd_counts_and_ids_g1():
     assert sorted(v.Index for v in o.Vertices) == sorted(v.Id for v in n.Vertices)
 
 
-@pytest.mark.xfail(strict=True, reason="GetBoundingBox(bool) not generated yet: `this as AnnotationBase` (generator gap)")
 def test_retired_tight_bounding_box_l1():
     # L1 (Luis: map): GeometryBase.GetTightBoundingBox -> GetBoundingBox(true)
     obox = r.Brep.CreateFromBox(r.Box(r.BoundingBox(0, 0, 0, 1, 2, 3)))
     nbox = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
     ob, nb = obox.GetTightBoundingBox(), nbox.GetBoundingBox(True)
-    assert (ob.Min.X, ob.Max.Z) == (nb.Min.X, nb.Max.Z)
+    assert (ob.Min.X, ob.Min.Y, ob.Max.Y, ob.Max.Z) == (nb.Min.X, nb.Min.Y, nb.Max.Y, nb.Max.Z) == (0, 0, 2, 3)
+    # G115: the body's `this as AnnotationBase` -- an annotation answers with its own box
+    p = os.path.join(MODELS, 'textEntities_r8.3dm')
+    f = r.File3dmX.Read(p)
+    ann = next(o.Geometry for o in f.Objects if isinstance(o.Geometry, r.AnnotationBaseX))
+    ann.ParentDimensionStyle = f.DimStyles.FindId(ann.DimensionStyleId)
+    a, b = ann.GetBoundingBox(True), ann.GetBoundingBox(r.TransformX.Identity)
+    assert (a.Min.X, a.Max.X, a.Max.Y) == (b.Min.X, b.Max.X, b.Max.Y)
+    assert ann.TextModelWidth == a.Max.X - a.Min.X
 
 
 def test_retired_likely_renames_l1_and_other_maps_m1():
@@ -2829,6 +2836,353 @@ def test_retired_likely_renames_l1_and_other_maps_m1():
         assert (a.HorzSweepStart, a.HorzSweepEnd) == tuple(b.HorzSweep())
         assert (a.VertSweepStart, a.VertSweepEnd) == tuple(b.VertSweep())
         assert (a.BoundsMinU, a.BoundsMinV, a.BoundsMaxU, a.BoundsMaxV) == tuple(b.GetUVBounds())
+
+
+def test_annotation_font_and_held_back_c_members_g115():
+    # G115: AnnotationBase.Font (a managed font adopted from the native's pointer, never owned);
+    # with it the last two C members retire: GetFont / SetFont(style, font) -> Font
+    p = os.path.join(MODELS, 'textEntities_r8.3dm')
+    old, new = r.File3dm.Read(p), r.File3dmX.Read(p)
+    oann = next(o.Geometry for o in old.Objects if isinstance(o.Geometry, r.AnnotationBase))
+    nann = next(o.Geometry for o in new.Objects if isinstance(o.Geometry, r.AnnotationBaseX))
+    ostyle = next(old.DimStyles[i] for i in range(len(old.DimStyles)) if old.DimStyles[i].Id == oann.DimensionStyleId)
+    nann.ParentDimensionStyle = new.DimStyles.FindId(ostyle.Id)
+    of, nf = oann.GetFont(ostyle), nann.Font
+    assert (of.FamilyName, of.FaceName, of.Bold) == (nf.FamilyName, nf.FaceName, nf.Bold)
+    assert nann.FirstCharFont.FamilyName
+    oann.SetFont(ostyle, r.Font('Courier New'))
+    nann.Font = r.FontX('Courier New')
+    assert oann.GetFont(ostyle).FamilyName == nann.Font.FamilyName
+    del nf; gc.collect()                                   # a managed font: dropping it frees nothing
+    assert nann.Font.FamilyName
+    with pytest.raises(RuntimeError):
+        nann.Font = None                                   # C#: NullReferenceException
+
+
+def test_file3dm_earth_anchor_point_g115():
+    # G115: File3dm.EarthAnchorPoint => new EarthAnchorPoint(this) (an internal constructor inlined:
+    # the model's anchor COPIED out); the setter copies one in. The old Settings.EarthAnchorPoint agrees
+    p = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    old, f = r.File3dm.Read(p), r.File3dmX.Read(p)
+    a, o = f.EarthAnchorPoint, old.Settings.EarthAnchorPoint
+    assert (a.EarthBasepointLatitude, a.EarthBasepointLongitude, a.EarthBasepointElevation) == \
+           (o.EarthBasepointLatitude, o.EarthBasepointLongitude, o.EarthBasepointElevation)
+    a.EarthBasepointLatitude = 12.5
+    assert f.EarthAnchorPoint.EarthBasepointLatitude == o.EarthBasepointLatitude   # a copy
+    f.EarthAnchorPoint = a
+    assert f.EarthAnchorPoint.EarthBasepointLatitude == 12.5
+    back = r.File3dmX.FromByteArray(f.ToByteArray(None))
+    assert back.EarthAnchorPoint.EarthBasepointLatitude == 12.5
+
+
+def test_translated_setters_beside_planned_getters_g115():
+    # G115: a getter another shape planned keeps RhinoCommon's setter when only the translated body
+    # can express it (MeshVertexList.Count: guarded, two calls) -- D1's SetCount -> Count
+    m, om = r.MeshX(), r.Mesh()
+    for i in range(4):
+        m.Vertices.Add(float(i), 0.0, 0.0); om.Vertices.Add(float(i), 0.0, 0.0)
+    m.Vertices.Count = 2; om.Vertices.SetCount(2)
+    assert m.Vertices.Count == len(om.Vertices) == 2
+    m.Vertices.Count = -1                                  # C#: ignored
+    assert m.Vertices.Count == 2
+    v = r.ViewportX()
+    v.IsPerspectiveProjection = True
+    assert v.IsPerspectiveProjection and not v.IsParallelProjection
+    v.IsPerspectiveProjection = False
+    assert v.IsParallelProjection
+    import uuid
+    at, vid = r.ObjectAttributesX(), uuid.uuid4()
+    at.ViewportId = vid
+    assert at.ViewportId == vid
+    mp = r.MeshingParametersX(); mp.CopyFrom(r.MeshingParametersX.QualityRenderMesh)
+    assert mp.GridAngle == r.MeshingParametersX.QualityRenderMesh.GridAngle
+
+
+def test_retired_file3dm_tables_and_settings_h1():
+    # H1 (Luis: map): the old File3dm table/settings helpers -> RhinoCommon's members
+    import uuid
+    p = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    old, f = r.File3dm.Read(p), r.File3dmX.Read(p)
+    # RenderContent table -> RenderMaterials / RenderEnvironments / RenderTextures; FindId -> Find
+    oids = sorted(str(old.RenderContent[i].Id) for i in range(len(old.RenderContent)))
+    kinds = (f.RenderMaterials, f.RenderEnvironments, f.RenderTextures)
+    assert oids and oids == sorted(str(c.Id) for k in kinds for c in k)
+    for i in range(len(old.RenderContent)):
+        oc = old.RenderContent.FindId(old.RenderContent[i].Id)
+        hit = [k.Find(oc.Id) for k in kinds if k.Find(oc.Id) is not None]
+        assert len(hit) == 1 and str(hit[0].Id) == str(oc.Id)
+    # FindIndex(i) -> Manifest.FindIndex(i, RenderContent): the same ComponentFromIndex, the right kind
+    for i in range(len(old.RenderContent)):
+        nc = f.Manifest.FindIndex(i, r.ModelComponentType.RenderContent)
+        assert isinstance(nc, r.File3dmRenderContentX) and str(nc.Id) == str(old.RenderContent.FindIndex(i).Id)
+    # linetype Current / Scale -> Settings.CurrentLinePatternId / LinetypeDisplayScale
+    cur = old.Linetypes.Current
+    assert (str(cur.Id) if cur is not None else str(uuid.UUID(int=0))) == str(f.Settings.CurrentLinePatternId)
+    assert old.Linetypes.Scale == f.Settings.LinetypeDisplayScale
+    # Settings.ModelBasePoint / EarthAnchorPoint -> Settings.ModelBasepoint / File3dm.EarthAnchorPoint (G115)
+    ob, nb = old.Settings.ModelBasePoint, f.Settings.ModelBasepoint
+    assert (ob.X, ob.Y, ob.Z) == (nb.X, nb.Y, nb.Z)
+    assert old.Settings.EarthAnchorPoint.EarthBasepointLongitude == f.EarthAnchorPoint.EarthBasepointLongitude
+    # RenderSettings.RenderEnvironments.<Usage>Id / Override -> RenderEnvironmentId(usage, Standard),
+    # SetRenderEnvironmentId (G116: commits into the file), RenderEnvironmentOverride(usage)
+    U, Pp = r.RenderSettingsX.EnvironmentUsage, r.RenderSettingsX.EnvironmentPurpose
+    oe, rs = old.Settings.RenderSettings.RenderEnvironments, f.Settings.RenderSettings
+    for name, u in (('Background', U.Background), ('Reflection', U.Reflection), ('Skylighting', U.Skylighting)):
+        assert str(getattr(oe, name + 'Id')) == str(rs.RenderEnvironmentId(u, Pp.Standard)), name
+    for name, u in (('Reflection', U.Reflection), ('Skylighting', U.Skylighting)):
+        assert getattr(oe, name + 'Override') == rs.RenderEnvironmentOverride(u), name
+    eid = uuid.uuid4()
+    oe.SkylightingId = eid; oe.SkylightingOverride = True
+    rs.SetRenderEnvironmentId(U.Skylighting, eid); rs.SetRenderEnvironmentOverride(U.Skylighting, True)
+    back = r.File3dmX.FromByteArray(f.ToByteArray())                 # the no-argument form (G116)
+    brs = back.Settings.RenderSettings
+    assert str(brs.RenderEnvironmentId(U.Skylighting, Pp.Standard)) == str(eid) == str(oe.SkylightingId)
+    assert brs.RenderEnvironmentOverride(U.Skylighting) is True is oe.SkylightingOverride
+    # ObjectTable.AddObject(obj) -> Objects.Add(File3dmObject); and Add(geometry, attributes) (G117),
+    # attributes optional as in C# (None)
+    oo, no = old.Objects[0], list(f.Objects)[0]
+    n0, m0 = len(old.Objects), len(list(f.Objects))
+    old.Objects.AddObject(oo)
+    f.Objects.Add(no)
+    assert len(old.Objects) == n0 + 1 and len(list(f.Objects)) == m0 + 1
+    nid = f.Objects.Add(no.Geometry, None)
+    oid = old.Objects.Add(oo.Geometry, None)
+    assert type(old.Objects.FindId(oid).Geometry).__name__ + 'X' == type(f.Objects.FindId(nid).Geometry).__name__
+    # RhinoCommon's Add throws NotSupportedException for a leader, text, radial or ordinate dimension;
+    # rhino3dm keeps 8.x's hand path behind it (G119, D71; upstream U30)
+    S = r.DimensionStyleX()
+    P = r.Point3dX
+    extra = [r.LeaderX.Create('x', r.PlaneX.WorldXY, S, [P(0, 0, 0), P(1, 0, 0)]),
+             r.TextEntityX.Create('t', r.PlaneX.WorldXY, S, False, 0.0, 0.0),
+             r.RadialDimensionX.Create(S, r.AnnotationType.Radius, r.PlaneX.WorldXY, P(0, 0, 0), P(2, 0, 0), P(3, 1, 0)),
+             r.OrdinateDimensionX.Create(S, r.PlaneX.WorldXY, r.OrdinateDimensionX.MeasuredDirection.Xaxis,
+                                         P(0, 0, 0), P(5, 3, 0), P(5, 8, 0), 1.0, 1.0)]
+    ids = [f.Objects.Add(g, None) for g in extra]
+    back = r.File3dmX.FromByteArray(f.ToByteArray())
+    kinds = {str(o.Attributes.ObjectId): type(o.Geometry).__name__ for o in back.Objects}
+    assert [kinds.get(str(i)) for i in ids] == ['LeaderX', 'TextEntityX', 'RadialDimensionX', 'OrdinateDimensionX']
+
+
+def test_retired_mesh_modifiers_i1_and_shut_lining_i3():
+    # I1: ObjectAttributes.MeshModifiers -> File3dmMeshModifiers; I3: the ShutLiningCurve table and
+    # its curves -> File3dmShutLining's id-based members (GetCurves, Curve*(id), SetCurve*(id, v))
+    import uuid
+    oa = r.ObjectAttributes()
+    sl = oa.MeshModifiers.CreateShutLining()
+    sl.On = True
+    cid = uuid.uuid4()
+    sl.Curves.Add(cid)
+    c = sl.Curves.FindId(cid)
+    c.Radius, c.Profile, c.Enabled, c.Pull, c.IsBump = 0.75, 2, True, True, True
+    na = r.ObjectAttributesX(oa)
+    nsl = na.File3dmMeshModifiers.ShutLining
+    assert nsl.On is True
+    ids = list(nsl.GetCurves())
+    assert ids == [uuid.UUID(str(sl.Curves.FindIndex(0).Id))] == [cid]
+    assert (nsl.CurveRadius(cid), nsl.CurveProfile(cid), nsl.CurveEnabled(cid), nsl.CurvePull(cid), nsl.CurveIsBump(cid)) == \
+           (c.Radius, c.Profile, c.Enabled, c.Pull, c.IsBump)
+    nsl.SetCurveRadius(cid, 1.25); nsl.SetCurveProfile(cid, 1); nsl.SetCurveEnabled(cid, False)
+    nsl.SetCurvePull(cid, False); nsl.SetCurveIsBump(cid, False)
+    assert (nsl.CurveRadius(cid), nsl.CurveProfile(cid), nsl.CurveEnabled(cid), nsl.CurvePull(cid), nsl.CurveIsBump(cid)) == \
+           (1.25, 1, False, False, False)
+
+
+def _annotation_file():
+    """a file with one of each dimension and a leader, made by the generated API"""
+    P, S = r.Point3dX, r.DimensionStyleX()
+    f = r.File3dmX()
+    f.AllDimStyles.Add(S)
+    style = list(f.AllDimStyles)[0]
+    ld = r.LinearDimensionX.Create(r.AnnotationType.Aligned, style, r.PlaneX.WorldXY, r.Vector3dX(1, 0, 0),
+                                   P(0, 0, 0), P(4, 1, 0), P(2, 3, 0), 0.0)
+    ad = r.AngularDimensionX.Create(style.Id, r.PlaneX.WorldXY, P(4, 0, 0), P(0, 4, 0), P(1, 0, 0), P(0, 1, 0), P(3, 3, 0))
+    rd = r.RadialDimensionX.Create(style, r.AnnotationType.Radius, r.PlaneX.WorldXY, P(0, 0, 0), P(2, 0, 0), P(3, 1, 0))
+    od = r.OrdinateDimensionX.Create(style, r.PlaneX.WorldXY, r.OrdinateDimensionX.MeasuredDirection.Xaxis,
+                                     P(0, 0, 0), P(5, 3, 0), P(5, 8, 0), 1.0, 1.0)
+    le = r.LeaderX.Create('note', r.PlaneX.WorldXY, style, [P(0, 0, 0), P(2, 1, 0), P(4, 1, 0)])
+    for g in (ld, ad, rd, od, le):
+        assert g is not None
+    f.Objects.Add(ld, None)                    # RhinoCommon's Add(geometry, attributes) takes these two (G117)
+    f.Objects.Add(ad, None)
+    f.Objects.AddRadialDimension(rd)           # ... and throws NotSupportedException for the rest
+    f.Objects.AddOrdinateDimension(od)
+    f.Objects.AddLeader('note', r.PlaneX.WorldXY, [r.Point2dX(0, 0), r.Point2dX(2, 1), r.Point2dX(4, 1)], None)
+    assert le.Points3D[2].X == 4.0             # Create's own points too
+    return f.ToByteArray()
+
+
+def test_retired_annotation_geometry_j1():
+    # J1 (Luis: map): Leader.Points -> Points3D (and Points2D); Dim*.Points (a dict) -> Get3dPoints()
+    # (a tuple led by the success flag: D68); DimAngular.Angle -> NumericValue
+    data = _annotation_file()
+    olds = [o.Geometry for o in r.File3dm.FromByteArray(data).Objects]
+    news = [o.Geometry for o in r.File3dmX.FromByteArray(data).Objects]
+    xyz = lambda q: (round(q.X, 9), round(q.Y, 9), round(q.Z, 9))
+    pairs = {type(n).__name__: (o, n) for o, n in zip(olds, news)}
+    assert set(pairs) == {'LinearDimensionX', 'AngularDimensionX', 'RadialDimensionX', 'OrdinateDimensionX', 'LeaderX'}
+    o, n = pairs['LeaderX']
+    assert [xyz(q) for q in o.Points] == [xyz(q) for q in n.Points3D] == [(0, 0, 0), (2, 1, 0), (4, 1, 0)]
+    assert [(round(q.X, 9), round(q.Y, 9)) for q in n.Points2D] == [(0, 0), (2, 1), (4, 1)]
+    keys = {'LinearDimensionX': ['defpt1', 'defpt2', 'arrowpt1', 'arrowpt2', 'dimline', 'textpt'],
+            'AngularDimensionX': ['centerpt', 'defpt1', 'defpt2', 'arrowpt1', 'arrowpt2', 'dimlinept', 'textpt'],
+            'RadialDimensionX': ['centerpt', 'radiuspt', 'dimlinept', 'kneept']}
+    for name, ks in keys.items():
+        o, n = pairs[name]
+        rc = n.Get3dPoints()
+        assert rc[0] is True and [xyz(o.Points[k]) for k in ks] == [xyz(q) for q in rc[1:]], name
+    o, n = pairs['OrdinateDimensionX']
+    rc = n.Get3dPoints()
+    assert rc[0] is True and sorted(xyz(q) for q in o.Points.values()) == sorted(xyz(q) for q in rc[1:])
+    o, n = pairs['AngularDimensionX']
+    assert abs(o.Angle - n.NumericValue) < 1e-12
+
+
+def test_retired_set_point3d_at_d2():
+    # D2 (Luis: rename to SetVertex): MeshVertexList.SetPoint3dAt(i, p) -> SetVertex(i, Point3d)
+    om, nm = r.Mesh(), r.MeshX()
+    for i in range(3):
+        om.Vertices.Add(float(i), 0.0, 0.0); nm.Vertices.Add(float(i), 0.0, 0.0)
+    om.Vertices.SetPoint3dAt(1, r.Point3d(0.1, 0.2, 0.3))
+    assert nm.Vertices.SetVertex(1, r.Point3dX(0.1, 0.2, 0.3))
+    o, n = om.Vertices.Point3dAt(1), nm.Vertices.Point3dAt(1)
+    assert (o.X, o.Y, o.Z) == (n.X, n.Y, n.Z) == (0.1, 0.2, 0.3)
+
+
+def test_embedded_file_paths_vs_embedded_files_h1():
+    # H1 / E (Luis: map): File3dm.EmbeddedFilePaths (and ...2) -> EmbeddedFiles: the old ones read the
+    # RDK's embedded-file paths, the new ones the file's ON_EmbeddedFile components -- equal here?
+    for name in ('file3dm_stuff.3dm', 'sphereDecals.3dm', 'subd.3dm'):
+        p = os.path.join(MODELS, name)
+        old, f = r.File3dm.Read(p), r.File3dmX.Read(p)
+        # the same files, in the same order; a path saved on Windows reads in this platform's form
+        # (ON_EmbeddedFile cleans it, as RhinoCommon on Mac does; D69): compare the file names
+        base = lambda s: s.replace('\\', '/').split('/')[-1]
+        assert list(old.EmbeddedFilePaths()) == list(old.EmbeddedFilePaths2())
+        assert [base(s) for s in old.EmbeddedFilePaths()] == [base(e.Filename) for e in f.EmbeddedFiles], name
+        assert [e.Filename for e in old.EmbeddedFiles] == [e.Filename for e in f.EmbeddedFiles], name
+
+
+def test_retired_rhino3dm_only_overloads_from_the_audit():
+    # the overload audit (2026-10-29): old overloads counted covered by name; Luis accepted these
+    # maps where the functionality is the same (WrapText(width) is not: upstream U31)
+    P, PX = r.Point3d, r.Point3dX
+    # AnnotationBase.RunReplace(dimstyle, str, ...) -> ParentDimensionStyle = dimstyle; RunReplace(str, ...)
+    p = os.path.join(MODELS, 'textEntities_r8.3dm')
+    old, new = r.File3dm.Read(p), r.File3dmX.Read(p)
+    oann = next(o.Geometry for o in old.Objects if isinstance(o.Geometry, r.AnnotationBase))
+    nann = next(o.Geometry for o in new.Objects if isinstance(o.Geometry, r.AnnotationBaseX))
+    ostyle = next(old.DimStyles[i] for i in range(len(old.DimStyles)) if old.DimStyles[i].Id == oann.DimensionStyleId)
+    nann.ParentDimensionStyle = new.DimStyles.FindId(ostyle.Id)
+    assert oann.RunReplace(ostyle, 'ZZ', 0, 0, 0, 1) == nann.RunReplace('ZZ', 0, 0, 0, 1)
+    assert oann.PlainText == nann.PlainText
+    # GeometryBase.GetBoundingBox() -> GetBoundingBox(False) (ON_Geometry::BoundingBox)
+    ob = r.Brep.CreateFromBox(r.Box(r.BoundingBox(0, 0, 0, 1, 2, 3)))
+    nbx = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
+    o, n = ob.GetBoundingBox(), nbx.GetBoundingBox(False)
+    assert (o.Min.X, o.Min.Y, o.Max.Y, o.Max.Z) == (n.Min.X, n.Min.Y, n.Max.Y, n.Max.Z)
+    # File3dmObjectTable.AddPoint(x, y, z, attributes) -> AddPoint(Point3d, attributes)
+    of, nf = r.File3dm(), r.File3dmX()
+    oa, na = r.ObjectAttributes(), r.ObjectAttributesX()
+    oa.Name = na.Name = 'pt'
+    oid, nid = of.Objects.AddPoint(1.0, 2.0, 3.0, oa), nf.Objects.AddPoint(PX(1.0, 2.0, 3.0), na)
+    og, ng = of.Objects.FindId(oid), nf.Objects.FindId(nid)
+    assert (og.Geometry.Location.Z, og.Attributes.Name) == (ng.Geometry.Location.Z, ng.Attributes.Name)
+    # Material.SetTexture(texture) -> SetTexture(texture, texture.TextureType) (the old one returned
+    # AddTexture's index as a bool: False for index 0)
+    om, nm = r.Material(), r.MaterialX()
+    otex, ntex = r.Texture(), r.TextureX()
+    otex.FileName = ntex.FileName = '/tmp/bump.png'
+    otex.TextureType = r.TextureType.Bump
+    ntex.TextureType = r.TextureType.Bump
+    om.SetTexture(otex)
+    assert nm.SetTexture(ntex, ntex.TextureType) is True
+    assert om.GetTexture(r.TextureType.Bump).FileName == nm.GetTexture(r.TextureType.Bump).FileName
+    # SubDEdge.EndSharpness(i) -> EndSharpness(i, False) (opennurbs' own one-argument form)
+    p = os.path.join(MODELS, 'subd_creases.3dm')
+    os_ = next(x.Geometry for x in r.File3dm.Read(p).Objects if isinstance(x.Geometry, r.SubD))
+    ns_ = next(x.Geometry for x in r.File3dmX.Read(p).Objects if isinstance(x.Geometry, r.SubDX))
+    oe = sorted(os_.Edges, key=lambda e: e.Index)
+    ne = sorted(ns_.Edges, key=lambda e: e.Id)
+    assert [(e.EndSharpness(0), e.EndSharpness(1)) for e in oe] == [(e.EndSharpness(0, False), e.EndSharpness(1, False)) for e in ne]
+    # CachedTextureCoordinates.IndexOf(x, y, z) / Contains(x, y, z) -> IndexOf(Point3d) / Contains(Point3d)
+    path = os.path.join(MODELS, 'meshWithTexture.3dm')
+    f, old = r.File3dmX.Read(path), r.File3dm.Read(path)
+    checked = 0
+    for o, oo in zip(f.Objects, old.Objects):
+        if not isinstance(o.Geometry, r.MeshX):
+            continue
+        mat = f.Materials.FindIndex(o.Attributes.MaterialIndex)
+        omat = old.Materials[oo.Attributes.MaterialIndex]
+        if mat is None or mat.GetBitmapTexture() is None:
+            continue
+        m, om_ = o.Geometry, oo.Geometry          # one reference: each .Geometry is a new view (#22)
+        m.SetCachedTextureCoordinatesFromMaterial(f, o.Attributes.ObjectId, mat)
+        om_.SetCachedTextureCoordinatesFromMaterial(old, oo.Attributes.Id, omat)
+        tc = m.GetCachedTextureCoordinates(f, o.Attributes.ObjectId, mat.GetBitmapTexture())
+        otc = om_.GetCachedTextureCoordinatesFromTexture(old, oo.Attributes.Id, omat.GetBitmapTexture())
+        if tc is None or otc is None or tc.Count == 0:
+            continue
+        q = tc[min(3, tc.Count - 1)]
+        assert otc.IndexOf(q.X, q.Y, q.Z) == tc.IndexOf(q)
+        assert otc.Contains(q.X, q.Y, q.Z) == tc.Contains(q) == True
+        assert otc.Contains(9e9, 0, 0) == tc.Contains(PX(9e9, 0, 0)) == False
+        checked += 1
+    assert checked >= 1
+
+
+def test_mesh_set_cached_texture_coordinates_takes_the_transform_g120():
+    # G120: SetCachedTextureCoordinates(tm, ref Transform xf) took only tm -- a zero transform reached
+    # the native; now the caller's transform goes in (and comes back, as C#'s ref)
+    mesh = r.MeshX()
+    for x, y in ((0, 0), (1, 0), (1, 1), (0, 1)):
+        mesh.Vertices.Add(float(x), float(y), 0.0)
+    mesh.Faces.AddFace(0, 1, 2, 3)
+    tm = r.TextureMappingX.CreatePlaneMapping(r.PlaneX.WorldXY, r.IntervalX(0, 1), r.IntervalX(0, 1), r.IntervalX(0, 1))
+    xf = r.TransformX.Translation(r.Vector3dX(0.5, 0, 0))
+    (back,) = mesh.SetCachedTextureCoordinates(tm, xf)
+    assert r.TransformX.Equals(back, xf)
+    xs = [c.X for c in mesh.GetCachedTextureCoordinates(tm.Id)]
+    assert len(xs) > 0
+
+
+def test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854():
+    # RH-99854 (rhino 9.x 3255f409fa6): File3dmMeshModifiers.Create*() and File3dmShutLining.AddCurve(Guid)
+    # -- the old creators (I2) and ShutLiningCurveTable.Add(id) (I3) retire. Round-tripping through a
+    # file needs U29 in rhino3dm's opennurbs (pilot #43): in memory here
+    import uuid
+    oa, na = r.ObjectAttributes(), r.ObjectAttributesX()
+    omm, nmm = oa.MeshModifiers, na.File3dmMeshModifiers
+    assert nmm.ShutLining is None                               # none until created
+    for name in ('Displacement', 'EdgeSoftening', 'Thickening', 'CurvePiping', 'ShutLining'):
+        o, n = getattr(omm, 'Create' + name)(), getattr(nmm, 'Create' + name)()
+        assert n is not None and getattr(nmm, name) is not None, name
+        n.On = True; o.On = True
+        assert getattr(nmm, 'Create' + name)().On is True, name     # an existing one is kept
+    cid, cid2 = uuid.uuid4(), uuid.uuid4()
+    osl, nsl = omm.ShutLining, nmm.ShutLining
+    osl.Curves.Add(cid); osl.Curves.Add(cid2)
+    assert nsl.AddCurve(cid) == cid and nsl.AddCurve(cid2) == cid2
+    assert nsl.AddCurve(cid) == cid                             # no second curve for an id
+    assert list(nsl.GetCurves()) == [cid, cid2] == [uuid.UUID(str(osl.Curves[i].Id)) for i in range(len(osl.Curves))]
+    nsl.SetCurveRadius(cid, 2.0)
+    assert (nsl.CurveRadius(cid), nsl.CurveRadius(cid2)) == (2.0, 1.0)   # each its own (pilot #51)
+
+
+def test_retired_create_from_subd_control_net_flag():
+    # Luis 2026-10-29: Mesh.CreateFromSubDControlNet(subd, includeTextureCoordinates) -> RhinoCommon's two
+    # methods, one per value of the flag (both ON_SubD_GetControlNetMesh(subd, flag))
+    for name in ('subd.3dm', 'subdBox.3dm', 'subd_creases.3dm'):
+        p = os.path.join(MODELS, name)
+        os_ = next(x.Geometry for x in r.File3dm.Read(p).Objects if isinstance(x.Geometry, r.SubD))
+        ns_ = next(x.Geometry for x in r.File3dmX.Read(p).Objects if isinstance(x.Geometry, r.SubDX))
+        for flag, new in ((False, r.MeshX.CreateFromSubDControlNet), (True, r.MeshX.CreateFromSubDControlNetWithTextureCoordinates)):
+            o, n = r.Mesh.CreateFromSubDControlNet(os_, flag), new(ns_)
+            assert (len(o.Vertices), len(o.Faces), len(o.TextureCoordinates)) == \
+                   (n.Vertices.Count, n.Faces.Count, n.TextureCoordinates.Count), (name, flag)
+    # the flag matters: subdBox's control net is 47 vertices, 96 (with as many texture coordinates) with it
+    box = next(x.Geometry for x in r.File3dmX.Read(os.path.join(MODELS, 'subdBox.3dm')).Objects if isinstance(x.Geometry, r.SubDX))
+    assert r.MeshX.CreateFromSubDControlNetWithTextureCoordinates(box).TextureCoordinates.Count == 96
+    assert r.MeshX.CreateFromSubDControlNet(box).TextureCoordinates.Count == 0
 
 
 def test_material_render_material_instance_id_u1():

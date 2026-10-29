@@ -356,6 +356,9 @@ def emit(p):
             L.append('    return new %s(%s);' % (target['gen'], args_))
         elif key is None and mode is None:
             L.append('    return new %s(%s);' % (target['gen'], args_))
+        elif key is None and mode == 'call':
+            L.append('    %s;' % call)                                   # its result unused, as in C# (G121)
+            L.append('    return new %s(%s);' % (target['gen'], args_))
         elif mode == 'ptr' and p.get('fail_final'):
             # C#'s failure tail instead of null
             L.append('    const void* rc = %s;' % call)
@@ -1440,8 +1443,16 @@ def js_branch_order(p, types=None):
     value-object fields first, so a specific type (ArcX) is tried before a general one (CircleX)"""
     ts = types if types is not None else [t for t, _ in p['bind_args']]
     shapes = [js_class_shape(t)[0] for t in ts]
+    # a float twin (Point3f, Vector3f, ...) after its double twin (G118): JS cannot tell
+    # {X, Y, Z} apart and a JS number is a double -- MeshVertexList.setVertex(i, {X, Y, Z})
+    # reached SetVertex(int, Point3f) and stored floats
     return (any(sh.startswith('any:') for sh in shapes),
+            sum(1 for t in ts if t in JS_FLOAT_TWINS),
             -sum(len(sh[7:].split(',')) for sh in shapes if sh.startswith('object:')))
+
+
+# value types JS cannot tell from their double-precision twin (G118)
+JS_FLOAT_TWINS = {'BND_Point3fX', 'BND_Vector3fX', 'BND_Point2fX', 'BND_Vector2fX'}
 
 
 def js_shadowed(shape_lists):
@@ -1494,6 +1505,12 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     for p in plans:
         if p.get('setter_of'):
             continue           # registered with its getter below
+        if p.get('override_of') and not p['override_of'].get('hidden') and p['m']['Kind'] == 'method':
+            # a virtual override (G115/G116): the base's registration reaches it through the virtual
+            # call; registering it again hides the base's other overloads -- embind keeps the derived
+            # name only, and pybind11 does not chain a derived def to the base's overloads
+            # (AnnotationBaseX.GetBoundingBox(True) / getBoundingBox(plane) were unreachable)
+            continue
         n, g = p['m']['Name'], p['cpp']
         pyargs = ''.join(', py::arg("%s")' % a for _, a in p['bind_args'])
         # G112: arguments a borrowing setter stored (keep_args): the result keeps each alive --
@@ -1595,15 +1612,39 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             py.append('      .def_property_readonly("%s", [](const %s& self) { return RH3DM_PyOwnedList(self.%s(), py::cast(&self)); })' % (n, cls['gen'], g))
             js.append('      .property("%s", optional_override([](const %s& self) { return RH3DM_JsArray(self.%s()); }))' % (camel(n), cls['gen'], g))
             continue
-        elif p['m']['Kind'] == 'property' and p['shape'][0] == 'translated' and p['shape'][1].endswith('*') and not p.get('setter'):
+        elif p['m']['Kind'] == 'property' and p['shape'][0] == 'translated' and p['shape'][1].endswith('*'):
             # a class value from a translated body (G89): one this object holds (Parent,
-            # TopLevel: borrowed, the holder kept alive), else a new one the caller owns
+            # TopLevel: borrowed, the holder kept alive), else a new one the caller owns;
+            # with a translated setter (G115: AnnotationBase.Font) registered beside it
+            sp = p.get('setter')
+            sp = sp if sp is not None and id(sp) in live else None
             if p.get('ret_borrowed'):
-                py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::reference_internal))' % (n, cls['gen'], g))
-                js.append('      .property("%s", &%s::%s, allow_raw_pointers(), return_value_policy::reference())' % (camel(n), cls['gen'], g))
+                getter = 'py::cpp_function(&%s::%s, py::return_value_policy::reference_internal)' % (cls['gen'], g)
+                jpol = ', allow_raw_pointers(), return_value_policy::reference()'
             else:
-                py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))' % (n, cls['gen'], g))
-                js.append('      .property("%s", &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g))
+                getter = 'py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>())' % (cls['gen'], g)
+                jpol = ', allow_raw_pointers()'
+            if sp is not None:
+                py.append('      .def_property("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
+                js.append('      .property("%s", &%s::%s, &%s::%s%s)' % (camel(n), cls['gen'], g, cls['gen'], sp['cpp'], jpol))
+            else:
+                py.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                js.append('      .property("%s", &%s::%s%s)' % (camel(n), cls['gen'], g, jpol))
+            continue
+        elif p['m']['Kind'] == 'property' and re.match(r'^std::vector<[^*]*>$', _ret_cpp(p, cls)):
+            # a sequence of values (G118: Leader.Points2D / Points3D): Python converts the vector;
+            # embind has no binding for it -- a JS array out, any JS sequence in (as methods do)
+            elem = _ret_cpp(p, cls)[len('std::vector<'):-1].strip()
+            sp = p.get('setter')
+            sp = sp if sp is not None and id(sp) in live else None
+            jget = 'optional_override([](const %s& s) { return RH3DM_JsArray(s.%s()); })' % (cls['gen'], g)
+            if sp is not None:
+                py.append('      .def_property("%s", &%s::%s, &%s::%s)' % (n, cls['gen'], g, cls['gen'], sp['cpp']))
+                js.append('      .property("%s", %s, optional_override([](%s& s, emscripten::val v) { s.%s(RH3DM_JsSeq<%s>(v)); }))'
+                          % (camel(n), jget, cls['gen'], sp['cpp'], elem))
+            else:
+                py.append('      .def_property_readonly("%s", &%s::%s)' % (n, cls['gen'], g))
+                js.append('      .property("%s", %s)' % (camel(n), jget))
             continue
         elif p['m']['Kind'] == 'property':
             sp = p.get('setter')
@@ -1697,6 +1738,18 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         # overloads with an argument JS cannot check (`any`) go last: they must not shadow one that
         # checks every argument (stable within each group)
         ps = sorted(ps, key=js_branch_order)
+        # an overload that differs from another only by float twins (G118: SetVertex(int, Point3f)
+        # beside SetVertex(int, Point3d)) is unreachable from JS: dropped there, the double one kept
+        twin = {'BND_Point3fX': 'BND_Point3dX', 'BND_Vector3fX': 'BND_Vector3dX', 'BND_Point2fX': 'BND_Point2dX', 'BND_Vector2fX': 'BND_Vector2dX'}
+        sigs_ = [[t for t, _ in q['bind_args']] for q in ps]
+        keep_ = []
+        for q, s in zip(ps, sigs_):
+            d = [twin.get(t, t) for t in s]
+            if d != s and d in sigs_:
+                js_pruned.append('%s.%s/%d: %s (float twin of a double overload; JS numbers are doubles)' % (cls['reg'], jn, arity, q['cpp']))
+                continue
+            keep_.append(q)
+        ps = keep_
         sh = js_shadowed([[js_class_shape(t)[0] for t, _ in p['bind_args']] for p in ps])
         if sh:
             raise SystemExit('%s.%s/%d: JS dispatcher branch unreachable: %s' % (cls['reg'], jn, arity, '; '.join(

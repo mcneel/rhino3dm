@@ -855,7 +855,11 @@ def test_child_construction_after_a_bool_check(tables):
     try:
         p, why = P.plan(x, cfn('bool', 'const ON_3dmObjectAttributes*'), MM)
         assert why is None and p['shape'][0] == 'construct' and p['shape'][4] == 'check' and p['shape'][2] == 'm_ptr'
-        assert P.plan(dict(x, ChildCheck=None), cfn('bool', 'const ON_3dmObjectAttributes*'), MM)[0] is None
+        # G121: an unchecked result (`F(..); return m ?? (m = new X(m_attr));`: File3dmMeshModifiers.Create*)
+        # calls the native for its effect, then makes the child -- the extractor records `construct`
+        # only for bodies whose every statement it recognized, so no condition went unseen
+        q, why = P.plan(dict(x, ChildCheck=None), cfn('bool', 'const ON_3dmObjectAttributes*'), MM)
+        assert why is None and q['shape'][0] == 'construct' and q['shape'][4] == 'call'
         assert P.plan(dict(x, ChildArgs=['m_other']), cfn('bool', 'const ON_3dmObjectAttributes*'), MM)[0] is None
     finally:
         R.TYPE_RECS.pop(MM['type'], None)

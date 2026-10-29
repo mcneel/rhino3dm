@@ -1139,3 +1139,417 @@ status = "replaced"
 by = ["File3dmX.ToByteArray"]
 note = "triage JS3 (Luis: map): JS only; toByteArray(options) (D54)"
 test = "test_retired_file3dm_to_byte_array_options_js3"
+
+# ---- Unblocked by G115 (2026-10-28): the batch-1 hold-backs and D1
+
+[[retired]]
+class = "AnnotationBase"
+member = "GetFont"
+status = "replaced"
+by = ["AnnotationBaseX.Font", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then Font (D39, D67); a managed font (G115)"
+test = "test_annotation_font_and_held_back_c_members_g115"
+
+[[retired]]
+class = "AnnotationBase"
+member = "SetFont"
+status = "replaced"
+by = ["AnnotationBaseX.Font", "AnnotationBaseX.ParentDimensionStyle"]
+note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style; ann.Font = font` (D39, D67); None raises, as C#'s NullReferenceException"
+test = "test_annotation_font_and_held_back_c_members_g115"
+
+[[retired]]
+class = "GeometryBase"
+member = "GetTightBoundingBox"
+status = "replaced"
+by = ["GeometryBaseX.GetBoundingBox"]
+note = "triage L1 (Luis: map): GetBoundingBox(true); an annotation answers with its own box (G115)"
+test = "test_retired_tight_bounding_box_l1"
+
+[[retired]]
+class = "MeshVertexList"
+member = "SetCount"
+status = "replaced"
+by = ["MeshVertexListX.Count"]
+note = "triage D1 (Luis: Count setter): RhinoCommon's settable Count (G115); a negative count is ignored, as in C#"
+test = "test_translated_setters_beside_planned_getters_g115"
+
+# ==== Retirement batch 2 (Luis 2026-10-28; docs/vnext/rhino3dm-only-triage.md) ====
+
+# ---- File3dm table and settings helpers (triage H1)
+
+[[retired]]
+class = "File3dm"
+member = "RenderContent"
+status = "replaced"
+by = ["File3dmX.RenderMaterials", "File3dmX.RenderEnvironments", "File3dmX.RenderTextures"]
+note = "triage H1 (Luis: map): one collection per kind of render content"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmRenderContentTable"
+member = "FindId"
+status = "replaced"
+by = ["File3dmRenderMaterialsX.Find", "File3dmRenderEnvironmentsX.Find", "File3dmRenderTexturesX.Find"]
+note = "triage H1 (Luis: map): Find(id) on the kind's collection"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmRenderContentTable"
+member = "FindIndex"
+status = "replaced"
+by = ["ManifestTableX.FindIndex"]
+note = "triage H1 (Luis: map): File3dm.Manifest.FindIndex(i, ModelComponentType.RenderContent) -- the same ONX_Model::ComponentFromIndex"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmLinetypeTable"
+member = "Current"
+status = "replaced"
+by = ["File3dmSettingsX.CurrentLinePatternId"]
+note = "triage H1 (Luis: map): the id; AllLinetypes.FindId(id) for the linetype"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmLinetypeTable"
+member = "Scale"
+status = "replaced"
+by = ["File3dmSettingsX.LinetypeDisplayScale"]
+note = "triage H1 (Luis: map)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmObjectTable"
+member = "AddObject"
+status = "replaced"
+by = ["File3dmObjectTableX.Add"]
+note = "triage H1 (Luis: map): Add(File3dmObject); Add(geometry, attributes) also takes any geometry (G117, G119, D71)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmSettings"
+member = "EarthAnchorPoint"
+status = "replaced"
+by = ["File3dmX.EarthAnchorPoint"]
+note = "triage H1 (Luis: map): on File3dm, a copy out and in (G115)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dmSettings"
+member = "ModelBasePoint"
+status = "replaced"
+by = ["File3dmSettingsX.ModelBasepoint"]
+note = "triage H1 (Luis: map): RhinoCommon spells it ModelBasepoint"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderSettings"
+member = "RenderEnvironments"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.RenderEnvironmentOverride"]
+note = "triage H1 (Luis: map): per usage"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderEnvironments"
+member = "BackgroundId"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Background, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderEnvironments"
+member = "ReflectionId"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Reflection, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderEnvironments"
+member = "SkylightingId"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Skylighting, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderEnvironments"
+member = "ReflectionOverride"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentOverride", "RenderSettingsX.SetRenderEnvironmentOverride"]
+note = "triage H1 (Luis: map): per usage, EnvironmentUsage.Reflection"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "RenderEnvironments"
+member = "SkylightingOverride"
+status = "replaced"
+by = ["RenderSettingsX.RenderEnvironmentOverride", "RenderSettingsX.SetRenderEnvironmentOverride"]
+note = "triage H1 (Luis: map): per usage, EnvironmentUsage.Skylighting"
+test = "test_retired_file3dm_tables_and_settings_h1"
+
+[[retired]]
+class = "File3dm"
+member = "EmbeddedFilePaths"
+status = "replaced"
+by = ["File3dmX.EmbeddedFiles"]
+note = "triage H1 (Luis: map): [f.Filename for f in file.EmbeddedFiles]; a Windows path reads in this platform's form (D69)"
+test = "test_embedded_file_paths_vs_embedded_files_h1"
+
+[[retired]]
+class = "File3dm"
+member = "EmbeddedFilePaths2"
+status = "replaced"
+by = ["File3dmX.EmbeddedFiles"]
+note = "triage E (Luis: drop) / H1: as EmbeddedFilePaths (D69)"
+test = "test_embedded_file_paths_vs_embedded_files_h1"
+
+# ---- Mesh modifiers (triage I1) and the shut-lining curve table (I3)
+
+[[retired]]
+class = "ObjectAttributes"
+member = "MeshModifiers"
+status = "replaced"
+by = ["ObjectAttributesX.File3dmMeshModifiers"]
+note = "triage I1 (Luis: map): RhinoCommon's name"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "File3dmShutLiningCurveTable"
+member = "FindId"
+status = "replaced"
+by = ["File3dmShutLiningX.GetCurves"]
+note = "triage I3 (Luis: map): curves are addressed by id (Curve*(id) / SetCurve*(id, v))"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "File3dmShutLiningCurveTable"
+member = "FindIndex"
+status = "replaced"
+by = ["File3dmShutLiningX.GetCurves"]
+note = "triage I3 (Luis: map): GetCurves()[i] is the id"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "Enabled"
+status = "replaced"
+by = ["File3dmShutLiningX.CurveEnabled", "File3dmShutLiningX.SetCurveEnabled"]
+note = "triage I3 (Luis: map): CurveEnabled(id) / SetCurveEnabled(id, v)"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "IsBump"
+status = "replaced"
+by = ["File3dmShutLiningX.CurveIsBump", "File3dmShutLiningX.SetCurveIsBump"]
+note = "triage I3 (Luis: map): CurveIsBump(id) / SetCurveIsBump(id, v)"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "Profile"
+status = "replaced"
+by = ["File3dmShutLiningX.CurveProfile", "File3dmShutLiningX.SetCurveProfile"]
+note = "triage I3 (Luis: map): CurveProfile(id) / SetCurveProfile(id, v)"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "Pull"
+status = "replaced"
+by = ["File3dmShutLiningX.CurvePull", "File3dmShutLiningX.SetCurvePull"]
+note = "triage I3 (Luis: map): CurvePull(id) / SetCurvePull(id, v)"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "Radius"
+status = "replaced"
+by = ["File3dmShutLiningX.CurveRadius", "File3dmShutLiningX.SetCurveRadius"]
+note = "triage I3 (Luis: map): CurveRadius(id) / SetCurveRadius(id, v)"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+[[retired]]
+class = "ShutLiningCurve"
+member = "Id"
+status = "replaced"
+by = ["File3dmShutLiningX.GetCurves"]
+note = "triage I3 (Luis: map; the class is not kept -- RhinoCommon addresses curves by id): the getter is GetCurves()[i]; the SETTER (retarget) has no RhinoCommon counterpart (Luis 2026-10-28: drop) -- DeleteAllCurves() + AddCurve(newId) (RH-99854) + the settings"
+test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
+
+# ---- Annotation geometry (triage J1); MeshVertexList.SetPoint3dAt (D2)
+
+[[retired]]
+class = "Leader"
+member = "Points"
+status = "replaced"
+by = ["LeaderX.Points3D"]
+note = "triage J1 (Luis: map): Points3D (and Points2D, in the leader plane)"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "DimLinear"
+member = "Points"
+status = "replaced"
+by = ["LinearDimensionX.Get3dPoints"]
+note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "DimAngular"
+member = "Points"
+status = "replaced"
+by = ["AngularDimensionX.Get3dPoints"]
+note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "DimRadial"
+member = "Points"
+status = "replaced"
+by = ["RadialDimensionX.Get3dPoints"]
+note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "DimOrdinate"
+member = "Points"
+status = "replaced"
+by = ["OrdinateDimensionX.Get3dPoints"]
+note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "DimAngular"
+member = "Angle"
+status = "replaced"
+by = ["DimensionX.NumericValue"]
+note = "triage J1 (Luis: map): the same Measurement()"
+test = "test_retired_annotation_geometry_j1"
+
+[[retired]]
+class = "MeshVertexList"
+member = "SetPoint3dAt"
+status = "replaced"
+by = ["MeshVertexListX.SetVertex"]
+note = "triage D2 (Luis: rename to SetVertex): SetVertex(index, Point3d)"
+test = "test_retired_set_point3d_at_d2"
+
+# ---- rhino3dm-only overloads found by the overload audit (Luis 2026-10-29)
+
+[[retired]]
+class = "AnnotationBase"
+member = "RunReplace"
+status = "replaced"
+by = ["AnnotationBaseX.RunReplace", "AnnotationBaseX.ParentDimensionStyle"]
+note = "audit (Luis 2026-10-29: map): ParentDimensionStyle = dimstyle; RunReplace(str, ...) -- RhinoCommon passes the parent style (D39)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "CachedTextureCoordinates"
+member = "IndexOf"
+status = "replaced"
+by = ["CachedTextureCoordinatesX.IndexOf"]
+note = "audit (Luis: map): IndexOf(Point3d)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "CachedTextureCoordinates"
+member = "Contains"
+status = "replaced"
+by = ["CachedTextureCoordinatesX.Contains"]
+note = "audit (Luis: map): Contains(Point3d)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "File3dmObjectTable"
+member = "AddPoint"
+status = "replaced"
+by = ["File3dmObjectTableX.AddPoint"]
+note = "audit (Luis: map): the (x, y, z, attributes) overload -> AddPoint(Point3d, attributes)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "GeometryBase"
+member = "GetBoundingBox"
+status = "replaced"
+by = ["GeometryBaseX.GetBoundingBox"]
+note = "audit (Luis: map): GetBoundingBox() -> GetBoundingBox(False) (ON_Geometry::BoundingBox)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "Material"
+member = "SetTexture"
+status = "replaced"
+by = ["MaterialX.SetTexture"]
+note = "audit (Luis: map): SetTexture(texture) -> SetTexture(texture, texture.TextureType); the old one returned the texture index as a bool (False at index 0)"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+[[retired]]
+class = "SubDEdge"
+member = "EndSharpness"
+status = "replaced"
+by = ["SubDEdgeX.EndSharpness"]
+note = "audit (Luis: map): EndSharpness(i) -> EndSharpness(i, False), the opennurbs one-argument form"
+test = "test_retired_rhino3dm_only_overloads_from_the_audit"
+
+# ---- Mesh-modifier creators (triage I2) and shut-lining Add(id) (I3): RhinoCommon RH-99854 (rhino 3255f409fa6)
+
+[[retired]]
+class = "File3dmMeshModifiers"
+member = "CreateDisplacement"
+status = "replaced"
+by = ["File3dmMeshModifiersX.CreateDisplacement"]
+note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "File3dmMeshModifiers"
+member = "CreateEdgeSoftening"
+status = "replaced"
+by = ["File3dmMeshModifiersX.CreateEdgeSoftening"]
+note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "File3dmMeshModifiers"
+member = "CreateThickening"
+status = "replaced"
+by = ["File3dmMeshModifiersX.CreateThickening"]
+note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "File3dmMeshModifiers"
+member = "CreateCurvePiping"
+status = "replaced"
+by = ["File3dmMeshModifiersX.CreateCurvePiping"]
+note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "File3dmMeshModifiers"
+member = "CreateShutLining"
+status = "replaced"
+by = ["File3dmMeshModifiersX.CreateShutLining"]
+note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "File3dmShutLiningCurveTable"
+member = "Add"
+status = "replaced"
+by = ["File3dmShutLiningX.AddCurve"]
+note = "triage I3: RH-99854 AddCurve(Guid curveId) -- a curve following the curve object curveId (no duplicate id)"
+test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
+
+[[retired]]
+class = "Mesh"
+member = "CreateFromSubDControlNet"
+status = "replaced"
+by = ["MeshX.CreateFromSubDControlNet", "MeshX.CreateFromSubDControlNetWithTextureCoordinates"]
+note = "audit (Luis 2026-10-29: use the RhinoCommon methods): (subd, False) -> CreateFromSubDControlNet(subd); (subd, True) -> CreateFromSubDControlNetWithTextureCoordinates(subd); both ON_SubD_GetControlNetMesh(subd, flag)"
+test = "test_retired_create_from_subd_control_net_flag"

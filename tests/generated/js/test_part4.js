@@ -966,6 +966,238 @@ module.exports = (t, ctx) => {
     });
   });
 
+  t('test_retired_tight_bounding_box_l1', () => {
+    // L1 (map): getTightBoundingBox -> getBoundingBox(true); G115: a virtual override's JS
+    // registration no longer hides the base's overloads
+    const ob = r.Brep.createFromBoundingBox(new r.BoundingBox([0, 0, 0], [1, 2, 3])).getTightBoundingBox();
+    const nb = boxBrep().getBoundingBox(true);
+    assert.deepStrictEqual([ob.min[0], ob.max[1], ob.max[2]], [nb.Min.X, nb.Max.Y, nb.Max.Z]);
+    const f = ctx.readModel('textEntities_r8.3dm');
+    const ann = objs(f).map(o => o.geometry).find(g => g instanceof r.AnnotationBaseX);
+    ann.parentDimensionStyle = list(f.allDimStyles).find(s => s.id === ann.dimensionStyleId);
+    assert.deepStrictEqual(ann.getBoundingBox(true), ann.getBoundingBox(I()));       // both reach the annotation's box
+    assert(ann.getBoundingBox(r.PlaneX.worldXY));                                      // the plane overload too
+    const pc = new r.PolyCurveX();
+    pc.append(new r.LineCurveX({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 0, Z: 0 }));
+    const d = pc.duplicate();
+    assert(d instanceof r.PolyCurveX && d.segmentCount === 1);                         // through CurveX's registration
+  });
+
+  t('test_annotation_font_and_held_back_c_members_g115', () => {
+    // G115: AnnotationBase.font (a managed font); C's getFont / setFont(style, font) -> font
+    const f = ctx.readModel('textEntities_r8.3dm');
+    const old = ctx.readOld('textEntities_r8.3dm');
+    const nann = objs(f).map(o => o.geometry).find(g => g instanceof r.AnnotationBaseX);
+    const oann = oldGeoms('textEntities_r8.3dm').find(g => g instanceof r.AnnotationBase);
+    const ostyle = oldList(call(old, 'dimstyles')).find(s => String(s.id) === String(oann.dimensionStyleId));
+    nann.parentDimensionStyle = list(f.allDimStyles).find(s => s.id === nann.dimensionStyleId);
+    const of = oann.getFont(ostyle), nf = nann.font;
+    assert.deepStrictEqual([of.familyName, of.faceName, of.bold], [nf.familyName, nf.faceName, nf.bold]);
+    assert(nann.firstCharFont.familyName);
+    oann.setFont(ostyle, new r.Font('Courier New'));
+    nann.font = new r.FontX('Courier New');
+    assert.strictEqual(nann.font.familyName, oann.getFont(ostyle).familyName);
+    ctx.raises(() => { nann.font = null; });
+  });
+
+  t('test_file3dm_earth_anchor_point_g115', () => {
+    // G115: File3dm.earthAnchorPoint, a copy out and a copy in; the old settings.earthAnchorPoint agrees
+    const f = ctx.readModel('file3dm_stuff.3dm');
+    const o = call(call(ctx.readOld('file3dm_stuff.3dm'), 'settings'), 'earthAnchorPoint');
+    const a = f.earthAnchorPoint;
+    assert.deepStrictEqual([a.earthBasepointLatitude, a.earthBasepointLongitude], [o.earthBasepointLatitude, o.earthBasepointLongitude]);
+    a.earthBasepointLatitude = 12.5;
+    assert.strictEqual(f.earthAnchorPoint.earthBasepointLatitude, o.earthBasepointLatitude);   // a copy
+    f.earthAnchorPoint = a;
+    assert.strictEqual(r.File3dmX.fromByteArray(f.toByteArray(null)).earthAnchorPoint.earthBasepointLatitude, 12.5);
+  });
+
+  t('test_translated_setters_beside_planned_getters_g115', () => {
+    // G115: MeshVertexList.count is settable (D1: setCount -> count)
+    const m = new r.MeshX(), om = new r.Mesh();
+    for (let i = 0; i < 4; i++) { m.vertices.add(i, 0, 0); om.vertices().add(i, 0, 0); }
+    m.vertices.count = 2; om.vertices().setCount(2);
+    assert.strictEqual(m.vertices.count, om.vertices().count);
+    m.vertices.count = -1;
+    assert.strictEqual(m.vertices.count, 2);
+    const v = new r.ViewportX();
+    v.isPerspectiveProjection = false;
+    assert.strictEqual(v.isParallelProjection, true);
+  });
+
+  t('test_retired_file3dm_tables_and_settings_h1', () => {
+    // H1 (map): renderContent table -> renderMaterials / Environments / Textures (+ find); settings
+    // modelBasePoint / earthAnchorPoint; renderEnvironments.* -> RenderSettings members; addObject -> add
+    const old = ctx.readOld('file3dm_stuff.3dm'), f = ctx.readModel('file3dm_stuff.3dm');
+    const rc = call(old, 'renderContent');
+    const oids = []; for (let i = 0; i < rc.count; i++) oids.push(String(rc.get(i).id));
+    const kinds = [f.renderMaterials, f.renderEnvironments, f.renderTextures];
+    assert(oids.length > 0);
+    assert.deepStrictEqual(oids.sort(), kinds.flatMap(k => list(k).map(c => c.id)).sort());
+    for (const id of oids) {
+      const hit = kinds.map(k => k.find(id)).filter(x => x !== null && x !== undefined);
+      assert(hit.length === 1 && hit[0].id === String(rc.findId(id).id));
+    }
+    for (let i = 0; i < rc.count; i++) {
+      const nc = f.manifest.findIndex(i, r.ModelComponentType.RenderContent);   // FindIndex -> the manifest's
+      assert(nc instanceof r.File3dmRenderContentX && nc.id === String(rc.get(i).id));
+    }
+    const os = call(old, 'settings');
+    const ob = os.modelBasePoint, nb = f.settings.modelBasepoint;
+    assert.deepStrictEqual([ob[0], ob[1], ob[2]], [nb.X, nb.Y, nb.Z]);
+    assert.strictEqual(os.earthAnchorPoint.earthBasepointLongitude, f.earthAnchorPoint.earthBasepointLongitude);
+    const U = r.RenderSettingsEnvironmentUsage, Pp = r.RenderSettingsEnvironmentPurpose;
+    const oe = call(call(os, 'renderSettings'), 'renderEnvironments'), rs = f.settings.renderSettings;
+    for (const [n, u] of [['background', U.Background], ['reflection', U.Reflection], ['skylighting', U.Skylighting]])
+      assert.strictEqual(String(oe[n + 'Id']), rs.renderEnvironmentId(u, Pp.Standard), n);
+    for (const [n, u] of [['reflection', U.Reflection], ['skylighting', U.Skylighting]])
+      assert.strictEqual(oe[n + 'Override'], rs.renderEnvironmentOverride(u), n);
+    const eid = uuid4();
+    rs.setRenderEnvironmentId(U.Skylighting, eid); rs.setRenderEnvironmentOverride(U.Skylighting, true);
+    const brs = r.File3dmX.fromByteArray(f.toByteArray()).settings.renderSettings;
+    assert.strictEqual(brs.renderEnvironmentId(U.Skylighting, Pp.Standard), eid);
+    assert.strictEqual(brs.renderEnvironmentOverride(U.Skylighting), true);
+    const ot = old.objects(), n0 = ot.count, m0 = list(f.objects).length;
+    ot.addObject(ot.get(0));                          // AddObject(obj) -> add(File3dmObject)
+    const no = list(f.objects)[0];
+    f.objects.add(no);
+    assert.strictEqual(old.objects().count, n0 + 1);
+    assert.strictEqual(list(f.objects).length, m0 + 1);
+    const nid = f.objects.add(no.geometry, null);     // Add(geometry, attributes) (G117), attributes optional
+    assert(f.objects.findId(nid).geometry instanceof r.GeometryBaseX);
+    // a leader too: RhinoCommon's Add throws for it, rhino3dm keeps 8.x's hand path (G119, D71)
+    const S = new r.DimensionStyleX();
+    const le = r.LeaderX.create('x', r.PlaneX.worldXY, S, [{ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 0, Z: 0 }]);
+    const lid = f.objects.add(le, null);
+    assert(f.objects.findId(lid).geometry instanceof r.LeaderX);
+  });
+
+  t('test_retired_mesh_modifiers_i1_and_shut_lining_i3', () => {
+    // I1: attributes.meshModifiers -> file3dmMeshModifiers; I3: the shut-lining curve table -> id-based members
+    const oa = new r.ObjectAttributes();
+    const sl = call(oa, 'meshModifiers').createShutLining();
+    sl.on = true;
+    const cid = uuid4();
+    call(sl, 'curves').add(cid);
+    const c = call(sl, 'curves').findId(cid);
+    c.radius = 0.75; c.profile = 2; c.enabled = true; c.pull = true; c.isBump = true;
+    const nsl = new r.ObjectAttributesX(oa).file3dmMeshModifiers.shutLining;
+    assert.strictEqual(nsl.on, true);
+    assert.deepStrictEqual(list(nsl.getCurves()), [cid]);
+    assert.strictEqual(String(call(sl, 'curves').findIndex(0).id), cid);
+    assert.deepStrictEqual([nsl.curveRadius(cid), nsl.curveProfile(cid), nsl.curveEnabled(cid), nsl.curvePull(cid), nsl.curveIsBump(cid)],
+                           [c.radius, c.profile, c.enabled, c.pull, c.isBump]);
+    nsl.setCurveRadius(cid, 1.25);
+    assert.strictEqual(nsl.curveRadius(cid), 1.25);
+  });
+
+  t('test_retired_annotation_geometry_j1', () => {
+    // J1 (map): leader.points -> points3D; dim.points (an object of named points) -> get3dPoints()
+    // (an array led by the success flag: D68); DimAngular.angle -> numericValue
+    const P = (X, Y, Z) => ({ X, Y, Z });
+    const f = new r.File3dmX();
+    f.allDimStyles.add(new r.DimensionStyleX());
+    const style = list(f.allDimStyles)[0];
+    const W = r.PlaneX.worldXY;
+    const geos = [
+      r.LinearDimensionX.create(r.AnnotationType.Aligned, style, W, P(1, 0, 0), P(0, 0, 0), P(4, 1, 0), P(2, 3, 0), 0.0),
+      r.AngularDimensionX.create(style.id, W, P(4, 0, 0), P(0, 4, 0), P(1, 0, 0), P(0, 1, 0), P(3, 3, 0)),
+      r.RadialDimensionX.create(style, r.AnnotationType.Radius, W, P(0, 0, 0), P(2, 0, 0), P(3, 1, 0)),
+      r.LeaderX.create('note', W, style, [P(0, 0, 0), P(2, 1, 0), P(4, 1, 0)])];
+    f.objects.add(geos[0], null);                      // RhinoCommon's add(geometry, attributes) takes these two (G117)
+    f.objects.add(geos[1], null);
+    f.objects.addRadialDimension(geos[2]);
+    f.objects.addLeader('note', W, [{ X: 0, Y: 0 }, { X: 2, Y: 1 }, { X: 4, Y: 1 }], null);
+    assert.strictEqual(list(geos[3].points3D)[2].X, 4);   // Create's own points
+    const data = f.toByteArray();
+    const olds = []; const ot = r.File3dm.fromByteArray(data).objects();
+    for (let i = 0; i < ot.count; i++) olds.push(ot.get(i).geometry());
+    const news = list(r.File3dmX.fromByteArray(data).objects).map(o => o.geometry);
+    const rnd = v => Math.round(v * 1e9) / 1e9;
+    const xyz = q => (Array.isArray(q) ? q.map(rnd) : [rnd(q.X), rnd(q.Y), rnd(q.Z)]);
+    const ld = news.find(g => g instanceof r.LeaderX), old = olds.find(g => g instanceof r.Leader);
+    assert.deepStrictEqual(Array.from(old.points).map(xyz), list(ld.points3D).map(xyz));
+    const keys = [[r.LinearDimensionX, r.DimLinear, ['defpt1', 'defpt2', 'arrowpt1', 'arrowpt2']],
+                  [r.AngularDimensionX, r.DimAngular, ['centerpt', 'defpt1', 'defpt2', 'arrowpt1', 'arrowpt2', 'dimlinept', 'textpt']]];
+    for (const [N, O, ks] of keys) {
+      const n = news.find(g => g instanceof N), o = olds.find(g => g instanceof O);
+      const rc = n.get3dPoints(), op = o.points;
+      assert.strictEqual(rc[0], true);
+      ks.forEach((k, i) => assert.deepStrictEqual(xyz([op[k].X, op[k].Y, op[k].Z]), xyz(rc[i + 1]), k));
+    }
+    const an = news.find(g => g instanceof r.AngularDimensionX), ao = olds.find(g => g instanceof r.DimAngular);
+    approx(ao.angle, an.numericValue, 1e-12, 'angle');
+  });
+
+  t('test_retired_set_point3d_at_d2', () => {
+    // D2 (rename): vertices.setPoint3dAt(i, p) -> setVertex(i, Point3d)
+    const om = new r.Mesh(), nm = new r.MeshX();
+    // a coordinate float cannot hold picks Add(double, ..), as C# does for a double: the mesh keeps
+    // double precision, as the Python test's Add(float(i), ..) does (whole numbers pick Add(float, ..))
+    for (let i = 0; i < 3; i++) { om.vertices().add(i + 0.1, 0, 0); nm.vertices.add(i + 0.1, 0, 0); }
+    om.vertices().setPoint3dAt(1, [0.1, 0.2, 0.3]);
+    nm.vertices.setVertex(1, { X: 0.1, Y: 0.2, Z: 0.3 });
+    const o = om.vertices().point3dAt(1), n = nm.vertices.point3dAt(1);
+    assert.deepStrictEqual([o[0], o[1], o[2]], [n.X, n.Y, n.Z]);
+  });
+
+  t('test_retired_rhino3dm_only_overloads_from_the_audit', () => {
+    // Luis-accepted maps from the overload audit (the JS halves; AddPoint(x, y, z, attrs) was Python-only)
+    const f = ctx.readModel('textEntities_r8.3dm'), old = ctx.readOld('textEntities_r8.3dm');
+    const nann = objs(f).map(o => o.geometry).find(g => g instanceof r.AnnotationBaseX);
+    const oann = oldGeoms('textEntities_r8.3dm').find(g => g instanceof r.AnnotationBase);
+    const ostyle = oldList(call(old, 'dimstyles')).find(s => String(s.id) === String(oann.dimensionStyleId));
+    nann.parentDimensionStyle = list(f.allDimStyles).find(s => s.id === nann.dimensionStyleId);
+    assert.strictEqual(oann.runReplace(ostyle, 'ZZ', 0, 0, 0, 1), nann.runReplace('ZZ', 0, 0, 0, 1));
+    assert.strictEqual(oann.plainText, nann.plainText);
+    const ob = r.Brep.createFromBoundingBox(new r.BoundingBox([0, 0, 0], [1, 2, 3])).getBoundingBox();
+    const nb = boxBrep().getBoundingBox(false);                     // getBoundingBox() -> (false)
+    assert.deepStrictEqual([ob.min[0], ob.max[1], ob.max[2]], [nb.Min.X, nb.Max.Y, nb.Max.Z]);
+    const om = new r.Material(), nm = new r.MaterialX();
+    const ot = new r.Texture(), nt = new r.TextureX();
+    ot.fileName = nt.fileName = '/tmp/bump.png';
+    // the old setter takes an int (pilot #52: the enum object itself silently sets None in 8.x JS)
+    ot.textureType = r.TextureType.Bump.value; nt.textureType = r.TextureType.Bump;
+    om.setTexture(ot);
+    assert.strictEqual(nm.setTexture(nt, nt.textureType), true);  // setTexture(t) -> (t, t.textureType)
+    assert.strictEqual(om.getTexture(r.TextureType.Bump).fileName, nm.getTexture(r.TextureType.Bump).fileName);
+    const [, ns] = [null, objs(ctx.readModel('subd_creases.3dm')).map(o => o.geometry).find(g => g instanceof r.SubDX)];
+    const os = oldGeoms('subd_creases.3dm').find(g => g instanceof r.SubD);
+    const oes = []; const it = os.edges(); for (let c = it.first(), i = 0; i < it.count; c = it.next(), i++) oes.push(c);
+    oes.sort((a, b) => a.index - b.index);
+    const nes = [...ns.edges].sort((a, b) => a.id - b.id);
+    assert.deepStrictEqual(oes.map(e => [e.endSharpness(0), e.endSharpness(1)]), nes.map(e => [e.endSharpness(0, false), e.endSharpness(1, false)]));
+  });
+
+  t('test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854', () => {
+    // RH-99854: File3dmMeshModifiers.create*() and File3dmShutLining.addCurve(id) (in memory: pilot #43)
+    const na = new r.ObjectAttributesX(), nmm = na.file3dmMeshModifiers;
+    assert(nmm.shutLining === null || nmm.shutLining === undefined);
+    for (const n of ['Displacement', 'EdgeSoftening', 'Thickening', 'CurvePiping', 'ShutLining']) {
+      const m = nmm['create' + n]();
+      m.on = true;
+      assert.strictEqual(nmm['create' + n]().on, true, n);       // an existing one is kept
+    }
+    const a = uuid4(), b = uuid4(), sl = nmm.shutLining;
+    assert.strictEqual(sl.addCurve(a), a); assert.strictEqual(sl.addCurve(b), b); assert.strictEqual(sl.addCurve(a), a);
+    assert.deepStrictEqual(list(sl.getCurves()), [a, b]);
+    sl.setCurveRadius(a, 2.0);
+    assert.deepStrictEqual([sl.curveRadius(a), sl.curveRadius(b)], [2.0, 1.0]);
+  });
+
+  t('test_retired_create_from_subd_control_net_flag', () => {
+    // createFromSubDControlNet(subd, flag) -> createFromSubDControlNet / ...WithTextureCoordinates (Luis 2026-10-29)
+    for (const name of ['subd.3dm', 'subdBox.3dm', 'subd_creases.3dm']) {
+      const ns = objs(ctx.readModel(name)).map(o => o.geometry).find(g => g instanceof r.SubDX);
+      const os = oldGeoms(name).find(g => g instanceof r.SubD);
+      for (const [flag, make] of [[false, s => r.MeshX.createFromSubDControlNet(s)], [true, s => r.MeshX.createFromSubDControlNetWithTextureCoordinates(s)]]) {
+        const o = r.Mesh.createFromSubDControlNet(os, flag), n = make(ns);
+        assert.deepStrictEqual([call(o, 'vertices').count, call(o, 'faces').count, call(o, 'textureCoordinates').count],
+                               [n.vertices.count, n.faces.count, n.textureCoordinates.count], name + ' ' + flag);
+      }
+    }
+  });
+
   t('test_retired_file3dm_to_byte_array_options_js3', () => {
     // JS3 (map): File3dm.toByteArrayOptions(options) -> File3dmX.toByteArray(options) (D54)
     const old = ctx.readOld('file3dm_stuff.3dm');

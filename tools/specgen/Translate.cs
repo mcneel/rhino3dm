@@ -670,7 +670,9 @@ class Tx
     readonly HashSet<string> _ptrOuts = new();    // data-class out parameters, held by pointer (G86)
     int _nullOk;                                  // > 0 where `null` is a null object pointer
     bool _retClass;                               // the member returns a class value
-    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && !IsVariantType(cs) && !IsGuidsType(cs) && !IsByteVecType(cs) && Classes.ContainsKey(cs.Split('.').Last())
+    bool IsClass(string cs) => cs != null && Cur != null && Cur.ClassMode && !IsVariantType(cs) && !IsGuidsType(cs) && !IsByteVecType(cs)
+        && cs.Split('.').Last() != "SimpleArrayPoint2d"                    // a stack holder (G116)
+        && Classes.ContainsKey(cs.Split('.').Last())
         && !All.ContainsKey(cs.Split('.').Last()) && !Enums.ContainsKey(cs.Split('.').Last());
     static bool IsVariantType(string cs) => cs is "Variant" or "Render.Variant" or "Rhino.Render.Variant";
     // `using (var children = new SimpleArrayGuid())` (G89): an ON_SimpleArray<ON_UUID> on the
@@ -912,6 +914,7 @@ class Tx
         // `IComparer<T> comparer` (G80): the bindings never pass one (decision 3) -- the default order
         if (Cur.IsData && t is GenericNameSyntax { Identifier.Text: "IComparer" }) return "RH3DM_NullComparer";
         if ((Cur.IsData || Cur.ClassMode) && t.ToString().Split('.').Last() == "SimpleArrayPoint3d") return "RH3DM_Points";   // G81, G84
+        if (Cur.ClassMode && t.ToString().Split('.').Last() == "SimpleArrayPoint2d") return "RH3DM_Points2d";                  // G116
         if (Cur.ClassMode && t is IdentifierNameSyntax { Identifier.Text: "IntPtr" }) return "void*";                         // G84
         // RhinoCommon's RDK Variant and the values it carries (G89, D40): a language value
         // (`IConvertible` out, `object` in) converted by the variant's runtime type
@@ -984,6 +987,10 @@ class Tx
         ArrayTypeSyntax { RankSpecifiers.Count: 1 } a when a.RankSpecifiers[0].Rank == 1 => a.ElementType,
         GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList" or "ICollection", TypeArgumentList.Arguments: [var ga] } => ga,
         QualifiedNameSyntax { Right: GenericNameSyntax { Identifier.Text: "IEnumerable" or "List" or "IList" or "IReadOnlyList" or "ICollection", TypeArgumentList.Arguments: [var qa] } } => qa,
+        // a `RhinoList<Point2d>` local in a class body (G117: File3dmObjectTable.AddLeader): a List<T>;
+        // data classes never see the generic form (G80 monomorphizes it)
+        GenericNameSyntax { Identifier.Text: "RhinoList", TypeArgumentList.Arguments: [var rga] } => rga,
+        QualifiedNameSyntax { Right: GenericNameSyntax { Identifier.Text: "RhinoList", TypeArgumentList.Arguments: [var rqa] } } => rqa,
         _ => null,
     };
 
@@ -999,7 +1006,7 @@ class Tx
     {
         if (t == null) return null;
         if (t.EndsWith("[]")) return t;
-        var m = System.Text.RegularExpressions.Regex.Match(t, @"^(?:[\w.]+\.)?(?:IEnumerable|List|IList|IReadOnlyList|ICollection)<([\w.]+)>$");
+        var m = System.Text.RegularExpressions.Regex.Match(t, @"^(?:[\w.]+\.)?(?:IEnumerable|List|IList|IReadOnlyList|ICollection|RhinoList)<([\w.]+)>$");
         return m.Success ? m.Groups[1].Value.Split('.').Last() + "[]" : null;
     }
 
@@ -1682,6 +1689,9 @@ class Tx
                     && (ParamNames.Contains(asl.Identifier.Text) || _seqAliases.Contains(asl.Identifier.Text)))
                     _seqAliases.Add(alv.Identifier.Text);
                 var t = ld.Declaration.Type.IsVar ? "auto" : Type(ld.Declaration.Type);
+                // `AnnotationBase ann = this as AnnotationBase;` (G115): the const derived pointer
+                if (Cur.ClassMode && ld.Declaration.Variables is [{ Initializer.Value: BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Left: ThisExpressionSyntax } }])
+                    t = "auto";
                 // a bool[] local (G111): bytes the natives can take as bool* (std::vector<bool> has no data())
                 if (Cur.ClassMode && ld.Declaration.Type.ToString() is "bool[]" or "Boolean[]" or "System.Boolean[]") t = "RH3DM_BoolVec";
                 if (!ld.Declaration.Type.IsVar && ClassOf(ld.Declaration.Type) != null) _nullOk++;   // `T x = null;` (G74)
@@ -1768,7 +1778,7 @@ class Tx
                     when Cur.ClassMode && IsVariantType(TypeOf(vdx) ?? ""):
                 break;                                   // a stack variant frees itself (G89)
             case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var dsx, Name.Identifier.Text: "Dispose" }, ArgumentList.Arguments.Count: 0 } }
-                    when Cur.ClassMode && (TypeOf(dsx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(dsx) ?? "")):
+                    when Cur.ClassMode && (TypeOf(dsx)?.Split('.').Last() is "SimpleArrayPoint3d" or "SimpleArrayPoint2d" || IsVariantType(TypeOf(dsx) ?? "")):
                 break;                                   // the stack holder frees itself (G84)
             case ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax dcx, Name.Identifier.Text: "Dispose" }, ArgumentList.Arguments.Count: 0 } }
                     when Cur.ClassMode && Scope.TryGetValue(dcx.Identifier.Text, out var dct) && IsClass(dct) && !IsInterop(dct) && !ParamNames.Contains(dcx.Identifier.Text):
@@ -1914,6 +1924,20 @@ class Tx
                 yield return pad + "}";
                 break;
             }
+            case UsingStatementSyntax p2us when Cur.ClassMode && p2us.Declaration is { Variables: [var p2v] }
+                    && p2v.Initializer?.Value is ObjectCreationExpressionSyntax p2n && p2n.Type.ToString().Split('.').Last() == "SimpleArrayPoint2d"
+                    && (p2n.ArgumentList?.Arguments.Count ?? 0) == 0:
+            {
+                // `using (var pointsarray = new SimpleArrayPoint2d()) { ... }` (G116: Leader.Points2D):
+                // an ON_2dPointArray on the stack the native fills
+                Scope[p2v.Identifier.Text] = "SimpleArrayPoint2d";
+                yield return pad + "{";
+                yield return pad + "  RH3DM_Points2d " + Rn(p2v.Identifier.Text) + ";";
+                foreach (var x in (p2us.Statement is BlockSyntax p2b ? p2b.Statements : new SyntaxList<StatementSyntax>().Add(p2us.Statement)))
+                    foreach (var l in Stmt(x, depth + 1)) yield return l;
+                yield return pad + "}";
+                break;
+            }
             case UsingStatementSyntax vus when Cur.ClassMode && vus.Declaration is { Variables: [var vuv] }
                     && vuv.Initializer?.Value is ExpressionSyntax vun
                     && (vun is ObjectCreationExpressionSyntax vnc && (IsVariantType(vnc.Type.ToString()) || IsGuidsType(vnc.Type.ToString()) || IsByteVecType(vnc.Type.ToString()))
@@ -1986,6 +2010,24 @@ class Tx
                 {
                     yield return pad + "else";
                     foreach (var l in Stmt(Blockify(ifs.Else.Statement), depth)) yield return l;
+                }
+                break;
+            }
+            case IfStatementSyntax pifs when Cur.ClassMode && pifs.Condition is IsPatternExpressionSyntax
+                { Expression: IdentifierNameSyntax pif, Pattern: DeclarationPatternSyntax { Type: var pit, Designation: SingleVariableDesignationSyntax pid } }
+                && (ParamNames.Contains(pif.Identifier.Text) || _paramAliases.Contains(pif.Identifier.Text)) && IsClass(TypeOf(pif)) && ClassOf(pit) is string picn:
+            {
+                // `if (item is AngularDimension ad)` on a class parameter (G117: File3dmObjectTable.Add):
+                // the caller's object as the derived class, not owned; the branch runs when it is one
+                Scope[pid.Identifier.Text] = pit.ToString();
+                _paramAliases.Add(pid.Identifier.Text);
+                var src = ParamNames.Contains(pif.Identifier.Text) ? $"&{Rn(pif.Identifier.Text)}" : Rn(pif.Identifier.Text);
+                yield return pad + $"if (auto {Rn(pid.Identifier.Text)} = $$pcast:{picn}$$({src}))";
+                foreach (var l in Stmt(Blockify(pifs.Statement), depth)) yield return l;
+                if (pifs.Else != null)
+                {
+                    yield return pad + "else";
+                    foreach (var l in Stmt(Blockify(pifs.Else.Statement), depth)) yield return l;
                 }
                 break;
             }
@@ -2509,6 +2551,40 @@ class Tx
         throw new NotSupported("identifier " + id);
     }
 
+    // `new T(args)` into T's non-public constructor whose body is only `m_xxx = E;` (and
+    // GC.KeepAlive): E with the arguments substituted -- `p.ConstPointer()` on a `this` argument
+    // is this object's own -- translated here; null when no single such constructor (G115)
+    string InternalPtrCtor(ObjectCreationExpressionSyntax oc)
+    {
+        if (oc.ArgumentList?.Arguments is not { Count: > 0 } args
+            || !Classes.TryGetValue(oc.Type.ToString().Split('.').Last(), out var ti)) return null;
+        string Last(string t) => t?.Split('.').Last();
+        var argTypes = args.Select(a => a.Expression is ThisExpressionSyntax ? Cur.Cs : TypeOf(a.Expression)).ToList();
+        var hits = ti.Decls.SelectMany(d => d.Members).OfType<ConstructorDeclarationSyntax>()
+            .Where(c => !c.Modifiers.Any(SyntaxKind.PublicKeyword) && !c.Modifiers.Any(SyntaxKind.StaticKeyword)
+                        && c.ParameterList.Parameters.Count == args.Count
+                        && c.ParameterList.Parameters.Select(p => Last(p.Type?.ToString())).SequenceEqual(argTypes.Select(Last)))
+            .ToList();
+        if (hits.Count != 1 || hits[0].Body is not { } body || body.Statements.Count == 0) return null;
+        if (body.Statements[0] is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax fld, Right: var rhs } }
+            || !fld.Identifier.Text.StartsWith("m_")
+            || !body.Statements.Skip(1).All(s => s is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki } && ki.Expression.ToString() is "GC.KeepAlive"))
+            return null;
+        var text = rhs.ToString();
+        foreach (var (p, a) in hits[0].ParameterList.Parameters.Zip(args))
+        {
+            var pn = System.Text.RegularExpressions.Regex.Escape(p.Identifier.Text);
+            text = a.Expression is ThisExpressionSyntax
+                ? System.Text.RegularExpressions.Regex.Replace(text, $@"\b{pn}\.", "")
+                : System.Text.RegularExpressions.Regex.Replace(text, $@"\b{pn}\b", $"({a.Expression})");
+            if (a.Expression is ThisExpressionSyntax && System.Text.RegularExpressions.Regex.IsMatch(text, $@"\b{pn}\b")) return null;
+        }
+        // the constructor is inlined, not called: no reference to it; a body the translator cannot
+        // take leaves `new T(..)` to the generator's constructor lookup
+        try { return Expr(SyntaxFactory.ParseExpression(text)); }
+        catch (NotSupported) { return null; }
+    }
+
     public string Expr(ExpressionSyntax e)
     {
         var s = ExprCore(e);
@@ -2784,6 +2860,11 @@ class Tx
                     && b.Parent is EqualsValueClauseSyntax)
                     // `geometry as Brep` on a class parameter (G89): the caller's object, not owned
                     return $"$$pcast:{pan}$$(&{Rn(pal.Identifier.Text)})";
+                if (Cur.ClassMode && b.IsKind(SyntaxKind.AsExpression) && b.Right is TypeSyntax tat && ClassOf(tat) is string tan
+                    && b.Left is ThisExpressionSyntax && b.Parent is EqualsValueClauseSyntax)
+                    // `this as AnnotationBase` in a base's body (G115): this object as the derived
+                    // class, not owned; null when it is not one
+                    return $"$$pcast:{tan}$$(this)";
                 if (b.IsKind(SyntaxKind.CoalesceExpression) || b.IsKind(SyntaxKind.IsExpression)
                     || b.IsKind(SyntaxKind.AsExpression))
                     throw new NotSupported("operator " + b.OperatorToken.Text);
@@ -2943,6 +3024,15 @@ class Tx
                     && ((clone.Body?.Statements is [ReturnStatementSyntax { Expression: { } cre }] ? cre : clone.ExpressionBody?.Expression) is ObjectCreationExpressionSyntax cr):
                 // `(Polyline)(this as ICloneable).Clone()` (G80): the type's own Clone, `new Polyline(this)`
                 return Expr(cr);
+            case CastExpressionSyntax cce2 when Cur.ClassMode && ClassOf(cce2.Type) is string ccn
+                    && (cce2.Expression is ParenthesizedExpressionSyntax { Expression: var cpx } ? cpx : cce2.Expression) is IdentifierNameSyntax cpi
+                    && (ParamNames.Contains(cpi.Identifier.Text) || _paramAliases.Contains(cpi.Identifier.Text)) && IsClass(TypeOf(cpi)):
+            {
+                // `(Brep)item` on a class parameter (G117): the caller's object as the derived class;
+                // not one -> C#'s InvalidCastException
+                var src = ParamNames.Contains(cpi.Identifier.Text) ? $"&{Rn(cpi.Identifier.Text)}" : Rn(cpi.Identifier.Text);
+                return $"RH3DM_CastChecked($$pcast:{ccn}$$({src}))";
+            }
             case CastExpressionSyntax ce:
             {
                 var t = Type(ce.Type);
@@ -3023,6 +3113,8 @@ class Tx
                 return $"{tti.Cpp}((*this).ToArray())";
             case ObjectCreationExpressionSyntax oc:
             {
+                if (Cur.ClassMode && oc.Type.ToString().Split('.').Last() == "SimpleArrayPoint2d" && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
+                    return "RH3DM_Points2d()";                                     // the 2d holder (G116)
                 if (Cur.ClassMode && oc.Type.ToString().Split('.').Last() == "SimpleArrayPoint3d" && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
                     return "RH3DM_Points()";                                       // the stack holder (G84)
                 if (Cur.ClassMode && IsGuidsType(oc.Type.ToString()) && (oc.ArgumentList?.Arguments.Count ?? 0) == 0)
@@ -3080,6 +3172,13 @@ class Tx
                     // proxy of (file, id) -- or a hand class standing in (BitmapEntry)
                     ClassValue(oc);
                     return $"$$fnew:{fcn}:{TypeOf(fa0.Expression)}$$({ffh}, {Expr(fa0.Expression)})";
+                }
+                if (Cur.ClassMode && ClassOf(oc.Type) is string icn2 && InternalPtrCtor(oc) is string inl)
+                {
+                    // `new EarthAnchorPoint(this)` (G115): an internal constructor whose body is
+                    // `m_ptr = UNM.F(file3dm.ConstPointer());` -- the native's new object, adopted
+                    ClassValue(oc);
+                    return $"$$adopt:{icn2}$$(RH3DM_IP({inl}))";
                 }
                 if (Cur.ClassMode && ClassOf(oc.Type) is string ncn)
                 {
@@ -3150,6 +3249,16 @@ class Tx
                 if (Cur.ClassMode && name == "File3dmParent" && ma.Expression is IdentifierNameSyntax fpv && Scope.ContainsKey(fpv.Identifier.Text) && IsClass(Scope[fpv.Identifier.Text]))
                     // a File3dm proxy's file (G89): the ONX_Model it resolves in, or null
                     return $"({Rn(fpv.Identifier.Text)}){Acc(fpv.Identifier.Text)}$$proxyfile:{Scope[fpv.Identifier.Text].Split('.').Last()}$$";
+                // `pts.m_items` on a RhinoList<T> local (G117): the vector itself (its elements)
+                if (Cur.ClassMode && name == "m_items" && TypeOf(ma.Expression)?.Contains("RhinoList<") == true)
+                    return Expr(ma.Expression);
+                // `((Point)item).Location` (G117): a member of a class parameter cast to its derived class
+                if (Cur.ClassMode && (ma.Expression is ParenthesizedExpressionSyntax { Expression: CastExpressionSyntax mce } ? mce : null) is { } mcx
+                    && ClassOf(mcx.Type) is string mcn)
+                {
+                    ClassValue(ma);
+                    return $"({Expr(mcx)}).$$oget:{mcn}:{name}$$()";
+                }
                 if (Cur.ClassMode && ma.Expression is IdentifierNameSyntax cvr && Scope.ContainsKey(cvr.Identifier.Text) && IsClass(Scope[cvr.Identifier.Text]))
                 {
                     ClassValue(ma);                                                 // G74
@@ -3291,6 +3400,8 @@ class Tx
             }
             case MemberAccessExpressionSyntax ma:
             {
+                if (ma.Name.Identifier.Text == "m_items" && TypeOf(ma.Expression)?.Contains("RhinoList<") == true)
+                    return ArrayCs(TypeOf(ma.Expression));                               // G117
                 var name = ma.Name.Identifier.Text;
                 if (ma.Expression is PredefinedTypeSyntax pt) return pt.Keyword.Text;
                 if (ma.Expression is IdentifierNameSyntax { Identifier.Text: "IntPtr" } && name == "Zero") return "IntPtr";
@@ -3357,6 +3468,7 @@ class Tx
                     if (name == "Contains" && ArrayCs(TypeOf(m.Expression)) != null) return "bool";   // G92
                     if (TypeOf(m.Expression) == "StringHolder") return name == "ToString" ? "string" : name == "NonConstPointer" ? "IntPtr" : null;
                     if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint3d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "Point3d[]" : null;
+                    if (TypeOf(m.Expression)?.Split('.').Last() == "SimpleArrayPoint2d") return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "Point2d[]" : null;   // G116
                     if (IsVariantType(TypeOf(m.Expression) ?? "") && name == "ToDateTime" && inv.ArgumentList.Arguments.Count == 0) return "DateTime";   // G97
                     if (IsVariantType(TypeOf(m.Expression) ?? "") || IsGuidsType(TypeOf(m.Expression))) return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : null;   // G89
                     if (IsByteVecType(TypeOf(m.Expression))) return name is "ConstPointer" or "NonConstPointer" ? "IntPtr" : name == "ToArray" ? "byte[]" : null;   // G107
@@ -3559,7 +3671,7 @@ class Tx
             && !Scope.ContainsKey(fpf.Identifier.Text) && Cur.Chain().Any(c => c.FieldCs.ContainsKey(fpf.Identifier.Text)))
             return $"$$fieldptr:{fpf.Identifier.Text}:{(fpm.Name.Identifier.Text == "ConstPointer" ? "Const" : "NonConst")}$$";
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Expression: var hx, Name.Identifier.Text: var hn }
-            && (TypeOf(hx)?.Split('.').Last() == "SimpleArrayPoint3d" || IsVariantType(TypeOf(hx) ?? "") || IsGuidsType(TypeOf(hx)) || IsByteVecType(TypeOf(hx))))
+            && (TypeOf(hx)?.Split('.').Last() is "SimpleArrayPoint3d" or "SimpleArrayPoint2d" || IsVariantType(TypeOf(hx) ?? "") || IsGuidsType(TypeOf(hx)) || IsByteVecType(TypeOf(hx))))
         {
             // the points holder on the stack (G84)
             if (hn is "ConstPointer" or "NonConstPointer" or "ToArray" && inv.ArgumentList.Arguments.Count == 0)
@@ -3636,7 +3748,8 @@ class Tx
                 return $"RH3DM_ArrCopy({Expr(ma.Expression)}, 0, {Args(inv.ArgumentList)}, (int){Expr(ma.Expression)}.size())";
             if (n == 0 && name == "ToArray" && ArrayCs(TypeOf(ma.Expression)) != null)
                 return Expr(ma.Expression);                                        // a vector already (G70)
-            if (ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _) && TypeOf(ma.Expression)?.StartsWith("List<") == true)
+            if (ArrayCs(TypeOf(ma.Expression)) != null && !IsTypeName(ma.Expression, out _)
+                && (TypeOf(ma.Expression)?.StartsWith("List<") == true || TypeOf(ma.Expression)?.Contains("RhinoList<") == true))
             {
                 // List<T> edits on a std::vector (G80)
                 var lv = Expr(ma.Expression);

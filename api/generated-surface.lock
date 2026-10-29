@@ -31,8 +31,9 @@ js  AnnotationBaseX.dimensionLengthDisplay [property]
 js  AnnotationBaseX.dimensionScale [property]
 js  AnnotationBaseX.dimensionStyleId [property]
 js  AnnotationBaseX.drawForward [property]
+js  AnnotationBaseX.firstCharFont [property]
+js  AnnotationBaseX.font [property]
 js  AnnotationBaseX.formatWidth [property]
-js  AnnotationBaseX.getBoundingBox [function]
 js  AnnotationBaseX.getDimensionStyle [function]
 js  AnnotationBaseX.hasPropertyOverrides [property]
 js  AnnotationBaseX.isAllBold [function]
@@ -62,6 +63,7 @@ js  AnnotationBaseX.text [property]
 js  AnnotationBaseX.textHasRtfFormatting [property]
 js  AnnotationBaseX.textHeight [property]
 js  AnnotationBaseX.textIsWrapped [property]
+js  AnnotationBaseX.textModelWidth [property]
 js  AnnotationBaseX.textRotationDegrees [property]
 js  AnnotationBaseX.textRotationRadians [property]
 js  AnnotationBaseX.useKerning [property]
@@ -893,6 +895,11 @@ js  File3dmMaterialTableX.findIndex [function]
 js  File3dmMaterialTableX.get [function]
 js  File3dmMaterialTableX.iterator [function]
 js  File3dmMaterialTableXIter.next [function]
+js  File3dmMeshModifiersX.createCurvePiping [function]
+js  File3dmMeshModifiersX.createDisplacement [function]
+js  File3dmMeshModifiersX.createEdgeSoftening [function]
+js  File3dmMeshModifiersX.createShutLining [function]
+js  File3dmMeshModifiersX.createThickening [function]
 js  File3dmMeshModifiersX.curvePiping [property]
 js  File3dmMeshModifiersX.displacement [property]
 js  File3dmMeshModifiersX.edgeSoftening [property]
@@ -913,6 +920,7 @@ js  File3dmObjectTableX.addEllipse [function]
 js  File3dmObjectTableX.addExtrusion [function]
 js  File3dmObjectTableX.addHatch [function]
 js  File3dmObjectTableX.addInstanceObject [function]
+js  File3dmObjectTableX.addLeader [function]
 js  File3dmObjectTableX.addLine [function]
 js  File3dmObjectTableX.addLinearDimension [function]
 js  File3dmObjectTableX.addMesh [function]
@@ -1106,6 +1114,7 @@ js  File3dmX.createdBy [property]
 js  File3dmX.dimStyles [property]
 js  File3dmX.dump [function]
 js  File3dmX.dumpSummary [function]
+js  File3dmX.earthAnchorPoint [property]
 js  File3dmX.embeddedFiles [property]
 js  File3dmX.fromByteArray [class_function]
 js  File3dmX.hatchPatterns [property]
@@ -1394,6 +1403,23 @@ js  LayerX.unsetPerViewportPersistentVisibility [function]
 js  LayerX.unsetPersistentLocking [function]
 js  LayerX.unsetPersistentVisibility [function]
 js  LayerX.userStringCount [property]
+js  LeaderX.computeMemoryEstimate [class_function]
+js  LeaderX.constructor<>
+js  LeaderX.constructor<const BND_Leader&>
+js  LeaderX.create [class_function]
+js  LeaderX.createWithRichText [class_function]
+js  LeaderX.leaderArrowBlockId [property]
+js  LeaderX.leaderArrowSize [property]
+js  LeaderX.leaderArrowType [property]
+js  LeaderX.leaderContentAngleStyle [property]
+js  LeaderX.leaderCurveStyle [property]
+js  LeaderX.leaderHasLanding [property]
+js  LeaderX.leaderLandingLength [property]
+js  LeaderX.leaderTextHorizontalAlignment [property]
+js  LeaderX.leaderTextVerticalAlignment [property]
+js  LeaderX.plainTextToRtf [class_function]
+js  LeaderX.points2D [property]
+js  LeaderX.points3D [property]
 js  LightX.ambient [property]
 js  LightX.attenuationVector [property]
 js  LightX.computeMemoryEstimate [class_function]
@@ -1501,6 +1527,7 @@ js  LinetypeX.constructor<const BND_LinetypeX&>
 js  LinetypeX.default [function]
 js  LinetypeX.deleteAllUserStrings [function]
 js  LinetypeX.getSegment [function]
+js  LinetypeX.getTaperPoints [function]
 js  LinetypeX.getUserString [function]
 js  LinetypeX.getUserStrings [function]
 js  LinetypeX.hasShapes [property]
@@ -1739,6 +1766,7 @@ js  MeshingParametersX.coarse [class_function]
 js  MeshingParametersX.computeCurvature [property]
 js  MeshingParametersX.constructor<>
 js  MeshingParametersX.constructor<const BND_MeshingParameters&>
+js  MeshingParametersX.copyFrom [function]
 js  MeshingParametersX.default [class_function]
 js  MeshingParametersX.defaultAnalysisMesh [class_function]
 js  MeshingParametersX.doublePrecision [property]
@@ -2189,7 +2217,6 @@ js  PolyCurveX.computeMemoryEstimate [class_function]
 js  PolyCurveX.constructor<>
 js  PolyCurveX.constructor<const BND_PolyCurve&>
 js  PolyCurveX.createControlPointCurve [class_function]
-js  PolyCurveX.duplicate [function]
 js  PolyCurveX.duplicatePolyCurve [function]
 js  PolyCurveX.explode [function]
 js  PolyCurveX.hasGap [property]
@@ -2312,6 +2339,7 @@ js  RenderSettingsX.renderPoints [property]
 js  RenderSettingsX.renderSource [property]
 js  RenderSettingsX.safeFrame [property]
 js  RenderSettingsX.scaleBackgroundToFit [property]
+js  RenderSettingsX.setRenderEnvironmentId [function]
 js  RenderSettingsX.setRenderEnvironmentOverride [function]
 js  RenderSettingsX.setUserString [function]
 js  RenderSettingsX.shadowmapLevel [property]
@@ -2556,6 +2584,17 @@ js  TextDotX.fontHeight [property]
 js  TextDotX.point [property]
 js  TextDotX.secondaryText [property]
 js  TextDotX.text [property]
+js  TextEntityX.computeMemoryEstimate [class_function]
+js  TextEntityX.constructor<>
+js  TextEntityX.constructor<const BND_Text&>
+js  TextEntityX.create [class_function]
+js  TextEntityX.createWithRichText [class_function]
+js  TextEntityX.getTextTransform [function]
+js  TextEntityX.plainTextToRtf [class_function]
+js  TextEntityX.textHorizontalAlignment [property]
+js  TextEntityX.textOrientation [property]
+js  TextEntityX.textVerticalAlignment [property]
+js  TextEntityX.transform [function]
 js  TextureMappingX.capped [property]
 js  TextureMappingX.componentType [property]
 js  TextureMappingX.computeMemoryEstimate [class_function]
@@ -2889,8 +2928,9 @@ py  AnnotationBaseX.DimensionLengthDisplay [property rw]
 py  AnnotationBaseX.DimensionScale [property rw]
 py  AnnotationBaseX.DimensionStyleId [property rw]
 py  AnnotationBaseX.DrawForward [property rw]
+py  AnnotationBaseX.FirstCharFont [property ro]
+py  AnnotationBaseX.Font [property rw]
 py  AnnotationBaseX.FormatWidth [property rw]
-py  AnnotationBaseX.GetBoundingBox(xform)
 py  AnnotationBaseX.GetDimensionStyle(parentDimStyle)
 py  AnnotationBaseX.HasPropertyOverrides [property ro]
 py  AnnotationBaseX.IsAllBold()
@@ -2920,6 +2960,7 @@ py  AnnotationBaseX.Text [property rw]
 py  AnnotationBaseX.TextHasRtfFormatting [property ro]
 py  AnnotationBaseX.TextHeight [property rw]
 py  AnnotationBaseX.TextIsWrapped [property rw]
+py  AnnotationBaseX.TextModelWidth [property ro]
 py  AnnotationBaseX.TextRotationDegrees [property rw]
 py  AnnotationBaseX.TextRotationRadians [property rw]
 py  AnnotationBaseX.UseKerning [property rw]
@@ -3364,6 +3405,7 @@ py  CurveX.CreateControlPointCurve(points) [static]
 py  CurveX.CreateControlPointCurve(points, degree) [static]
 py  CurveX.CurvatureAt(t)
 py  CurveX.Degree [property ro]
+py  CurveX.DerivativeAt(t, derivativeCount)
 py  CurveX.DerivativeAt(t, derivativeCount, side)
 py  CurveX.Dimension [property ro]
 py  CurveX.Domain [property rw]
@@ -3609,7 +3651,7 @@ py  DimensionX.BaselineSpacing [property rw]
 py  DimensionX.CentermarkSize [property rw]
 py  DimensionX.CentermarkStyle [property rw]
 py  DimensionX.DetailMeasured [property rw]
-py  DimensionX.DimensionLineExtension [property ro]
+py  DimensionX.DimensionLineExtension [property rw]
 py  DimensionX.DistanceScale [property rw]
 py  DimensionX.ExtensionLineExtension [property rw]
 py  DimensionX.ExtensionLineOffset [property rw]
@@ -3899,6 +3941,11 @@ py  File3dmMaterialTableX.__iter__()
 py  File3dmMaterialTableX.__len__()
 py  File3dmMaterialTableXIter.__iter__()
 py  File3dmMaterialTableXIter.__next__()
+py  File3dmMeshModifiersX.CreateCurvePiping()
+py  File3dmMeshModifiersX.CreateDisplacement()
+py  File3dmMeshModifiersX.CreateEdgeSoftening()
+py  File3dmMeshModifiersX.CreateShutLining()
+py  File3dmMeshModifiersX.CreateThickening()
 py  File3dmMeshModifiersX.CurvePiping [property ro]
 py  File3dmMeshModifiersX.Displacement [property ro]
 py  File3dmMeshModifiersX.EdgeSoftening [property ro]
@@ -3911,6 +3958,7 @@ py  File3dmNamedConstructionPlanesX.Delete(index)
 py  File3dmNamedConstructionPlanesX.__getitem__()
 py  File3dmNamedConstructionPlanesX.__len__()
 py  File3dmObjectTableX.Add(item)
+py  File3dmObjectTableX.Add(item, attributes)
 py  File3dmObjectTableX.AddAngularDimension(dimension)
 py  File3dmObjectTableX.AddAngularDimension(dimension, attributes)
 py  File3dmObjectTableX.AddArc(arc)
@@ -3931,6 +3979,8 @@ py  File3dmObjectTableX.AddInstanceObject(instanceDefinitionIndex, instanceXform
 py  File3dmObjectTableX.AddInstanceObject(instanceDefinitionIndex, instanceXform, attributes)
 py  File3dmObjectTableX.AddInstanceObject(instanceReference)
 py  File3dmObjectTableX.AddInstanceObject(instanceReference, attributes)
+py  File3dmObjectTableX.AddLeader(text, plane, points)
+py  File3dmObjectTableX.AddLeader(text, plane, points, attributes)
 py  File3dmObjectTableX.AddLine(from, to)
 py  File3dmObjectTableX.AddLine(from, to, attributes)
 py  File3dmObjectTableX.AddLine(line)
@@ -3958,6 +4008,7 @@ py  File3dmObjectTableX.AddSubD(subd)
 py  File3dmObjectTableX.AddSubD(subd, attributes)
 py  File3dmObjectTableX.AddSurface(surface)
 py  File3dmObjectTableX.AddSurface(surface, attributes)
+py  File3dmObjectTableX.AddText(text, plane, height, fontName, bold, italic, justification)
 py  File3dmObjectTableX.AddText(text, plane, height, fontName, bold, italic, justification, attributes)
 py  File3dmObjectTableX.AddTextDot(dot)
 py  File3dmObjectTableX.AddTextDot(dot, attributes)
@@ -4061,6 +4112,7 @@ py  File3dmSettingsX.PageUnitSystem [property ro]
 py  File3dmSettingsX.RenderSettings [property ro]
 py  File3dmSettingsX.SaveTextureBitmapsInFile [property rw]
 py  File3dmShutLiningX.AddCurve()
+py  File3dmShutLiningX.AddCurve(curveId)
 py  File3dmShutLiningX.AutoUpdate [property rw]
 py  File3dmShutLiningX.CurveEnabled(curve_id)
 py  File3dmShutLiningX.CurveIsBump(curve_id)
@@ -4124,6 +4176,7 @@ py  File3dmX.CreatedBy [property ro]
 py  File3dmX.DimStyles [property ro]
 py  File3dmX.Dump()
 py  File3dmX.DumpSummary()
+py  File3dmX.EarthAnchorPoint [property rw]
 py  File3dmX.EmbeddedFiles [property ro]
 py  File3dmX.FromByteArray(bytes) [static]
 py  File3dmX.HatchPatterns [property ro]
@@ -4151,6 +4204,7 @@ py  File3dmX.Revision [property rw]
 py  File3dmX.Settings [property ro]
 py  File3dmX.StartSectionComments [property rw]
 py  File3dmX.Strings [property ro]
+py  File3dmX.ToByteArray()
 py  File3dmX.ToByteArray(options)
 py  File3dmX.Views [property ro]
 py  File3dmX.Write(path, options)
@@ -4204,6 +4258,7 @@ py  GeometryBaseX.ComponentIndex()
 py  GeometryBaseX.DataCRC(currentRemainder)
 py  GeometryBaseX.DeleteAllUserStrings()
 py  GeometryBaseX.Duplicate()
+py  GeometryBaseX.GetBoundingBox(accurate)
 py  GeometryBaseX.GetBoundingBox(plane)
 py  GeometryBaseX.GetBoundingBox(xform)
 py  GeometryBaseX.GetUserString(key)
@@ -4408,8 +4463,23 @@ py  LayerX.UnsetPersistentVisibility()
 py  LayerX.UserStringCount [property ro]
 py  LayerX.__init__()
 py  LayerX.__init__(const BND_Layer&)
+py  LeaderX.Create(text, plane, dimstyle, points) [static]
+py  LeaderX.CreateWithRichText(richText, plane, dimstyle, points) [static]
+py  LeaderX.LeaderArrowBlockId [property rw]
+py  LeaderX.LeaderArrowSize [property rw]
+py  LeaderX.LeaderArrowType [property rw]
+py  LeaderX.LeaderContentAngleStyle [property rw]
+py  LeaderX.LeaderCurveStyle [property rw]
+py  LeaderX.LeaderHasLanding [property rw]
+py  LeaderX.LeaderLandingLength [property rw]
+py  LeaderX.LeaderTextHorizontalAlignment [property rw]
+py  LeaderX.LeaderTextVerticalAlignment [property rw]
+py  LeaderX.Points2D [property rw]
+py  LeaderX.Points3D [property rw]
+py  LeaderX.__init__()
+py  LeaderX.__init__(const BND_Leader&)
 py  LightX.Ambient [property rw]
-py  LightX.AttenuationVector [property ro]
+py  LightX.AttenuationVector [property rw]
 py  LightX.CoordinateSystem [property ro]
 py  LightX.Diffuse [property rw]
 py  LightX.Direction [property rw]
@@ -4516,6 +4586,7 @@ py  LinearWorkflowX.PreProcessGamma [property rw]
 py  LinearWorkflowX.PreProcessTextures [property rw]
 py  LinearWorkflowX.__init__()
 py  LinetypeX.AddShape(shapeCurve, offset)
+py  LinetypeX.AddShape(text, offset)
 py  LinetypeX.AlwaysModelDistances [property rw]
 py  LinetypeX.AppendSegment(length, isSolid)
 py  LinetypeX.CommitChanges()
@@ -4523,6 +4594,7 @@ py  LinetypeX.ComponentType [property ro]
 py  LinetypeX.Default()
 py  LinetypeX.DeleteAllUserStrings()
 py  LinetypeX.GetSegment(index)
+py  LinetypeX.GetTaperPoints()
 py  LinetypeX.GetUserString(key)
 py  LinetypeX.GetUserStrings()
 py  LinetypeX.HasShapes [property ro]
@@ -4712,7 +4784,7 @@ py  MeshVertexListX.AddVertices(vertices)
 py  MeshVertexListX.Capacity [property rw]
 py  MeshVertexListX.Clear()
 py  MeshVertexListX.CombineIdentical(ignoreNormals, ignoreAdditional)
-py  MeshVertexListX.Count [property ro]
+py  MeshVertexListX.Count [property rw]
 py  MeshVertexListX.CullUnused()
 py  MeshVertexListX.Destroy()
 py  MeshVertexListX.Hide(vertexIndex)
@@ -4781,7 +4853,7 @@ py  MeshX.IsOriented [property ro]
 py  MeshX.IsSolid [property ro]
 py  MeshX.Normals [property ro]
 py  MeshX.PartitionCount [property ro]
-py  MeshX.SetCachedTextureCoordinates(tm)
+py  MeshX.SetCachedTextureCoordinates(tm, xf)
 py  MeshX.SetCachedTextureCoordinatesFromMaterial(file, objectId, material)
 py  MeshX.SetSurfaceParametersFromTextureCoordinates()
 py  MeshX.SetTextureCoordinates(tm, xf, lazy)
@@ -4796,6 +4868,7 @@ py  MeshX.__init__(const BND_Mesh&)
 py  MeshingParametersX.ClosedObjectPostProcess [property rw]
 py  MeshingParametersX.Coarse [property ro static]
 py  MeshingParametersX.ComputeCurvature [property rw]
+py  MeshingParametersX.CopyFrom(source)
 py  MeshingParametersX.Default [property ro static]
 py  MeshingParametersX.DefaultAnalysisMesh [property ro static]
 py  MeshingParametersX.DoublePrecision [property rw]
@@ -5018,7 +5091,7 @@ py  ObjectAttributesX.Space [property rw]
 py  ObjectAttributesX.Transform(xform)
 py  ObjectAttributesX.Url [property rw]
 py  ObjectAttributesX.UserStringCount [property ro]
-py  ObjectAttributesX.ViewportId [property ro]
+py  ObjectAttributesX.ViewportId [property rw]
 py  ObjectAttributesX.Visible [property rw]
 py  ObjectAttributesX.WireDensity [property rw]
 py  ObjectAttributesX.__init__()
@@ -5398,7 +5471,6 @@ py  PointX.__init__(const BND_Point&)
 py  PolyCurveX.Append(arc)
 py  PolyCurveX.Append(curve)
 py  PolyCurveX.AppendSegment(curve)
-py  PolyCurveX.Duplicate()
 py  PolyCurveX.DuplicatePolyCurve()
 py  PolyCurveX.Explode()
 py  PolyCurveX.HasGap [property ro]
@@ -5490,7 +5562,7 @@ py  RadialDimensionX.TextOrientation [property rw]
 py  RadialDimensionX.__init__()
 py  RadialDimensionX.__init__(const BND_DimRadial&)
 py  RenderChannelsX.CustomList [property ro]
-py  RenderChannelsX.Mode [property ro]
+py  RenderChannelsX.Mode [property rw]
 py  RenderChannelsX.__init__()
 py  RenderSettingsX.AmbientLight [property rw]
 py  RenderSettingsX.AntialiasLevel [property rw]
@@ -5517,9 +5589,10 @@ py  RenderSettingsX.RenderEnvironmentOverride(usage)
 py  RenderSettingsX.RenderIsoparams [property rw]
 py  RenderSettingsX.RenderMeshEdges [property rw]
 py  RenderSettingsX.RenderPoints [property rw]
-py  RenderSettingsX.RenderSource [property ro]
+py  RenderSettingsX.RenderSource [property rw]
 py  RenderSettingsX.SafeFrame [property ro]
 py  RenderSettingsX.ScaleBackgroundToFit [property rw]
+py  RenderSettingsX.SetRenderEnvironmentId(usage, guid)
 py  RenderSettingsX.SetRenderEnvironmentOverride(usage, on)
 py  RenderSettingsX.SetUserString(key, value)
 py  RenderSettingsX.ShadowmapLevel [property rw]
@@ -5808,6 +5881,16 @@ py  TextDotX.SecondaryText [property rw]
 py  TextDotX.Text [property rw]
 py  TextDotX.__init__(const BND_TextDot&)
 py  TextDotX.__init__(std::wstring, BND_Point3dX)
+py  TextEntityX.Create(text, plane, style, wrapped, rectWidth, rotationRadians) [static]
+py  TextEntityX.CreateWithRichText(richTextString, plane, style, wrapped, rectWidth, rotationRadians) [static]
+py  TextEntityX.GetTextTransform(textscale, dimstyle)
+py  TextEntityX.GetTextTransform(viewport, textscale, dimstyle)
+py  TextEntityX.TextHorizontalAlignment [property rw]
+py  TextEntityX.TextOrientation [property rw]
+py  TextEntityX.TextVerticalAlignment [property rw]
+py  TextEntityX.Transform(transform, style)
+py  TextEntityX.__init__()
+py  TextEntityX.__init__(const BND_Text&)
 py  TextureMappingX.Capped [property rw]
 py  TextureMappingX.ComponentType [property ro]
 py  TextureMappingX.CreateBoxMapping(plane, dx, dy, dz, capped) [static]
@@ -5840,7 +5923,7 @@ py  TextureMappingX.__init__(const BND_TextureMapping&)
 py  TextureX.ApplyUvwTransform [property rw]
 py  TextureX.Enabled [property rw]
 py  TextureX.FileName [property rw]
-py  TextureX.FileReference [property ro]
+py  TextureX.FileReference [property rw]
 py  TextureX.GetAlphaBlendValues()
 py  TextureX.Id [property ro]
 py  TextureX.MagFilter [property rw]
@@ -6196,7 +6279,7 @@ py  ViewportX.IsCameraUpLocked [property rw]
 py  ViewportX.IsFrustumLeftRightSymmetric [property rw]
 py  ViewportX.IsFrustumTopBottomSymmetric [property rw]
 py  ViewportX.IsParallelProjection [property rw]
-py  ViewportX.IsPerspectiveProjection [property ro]
+py  ViewportX.IsPerspectiveProjection [property rw]
 py  ViewportX.IsTwoPointPerspectiveProjection [property ro]
 py  ViewportX.IsValidCamera [property ro]
 py  ViewportX.IsValidFrustum [property ro]

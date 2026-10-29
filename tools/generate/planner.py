@@ -122,6 +122,7 @@ def plan(member, cfn, cls):
     # a class argument null-checked by an early return is optional (None/null)
     nullable_params = {n for n in retnull if cs_param_modes.get(n, ('', ''))[1] in BY_CS or cs_param_modes.get(n, ('', ''))[1] in DATA_CPP}
     call_exprs, locals_, out_by_name, extra_fns, typearg_pos = [], [], {}, [], []
+    ref_inputs = set()                 # C# `ref T` value parameters: bound and returned (G120)
     out_const = {}        # out locals initialized to a class constant (G66)
     newobj = None
     # `options = options ?? new File3dmWriteOptions();` (G64): a data-class argument
@@ -430,10 +431,12 @@ def plan(member, cfn, cls):
             acc = '->' if nullable else '.'
             if argcls['mode'] == 'abstract':
                 ptr = '%s%s%s()' % (name, acc, argcls['getter'])
-            elif argcls.get('proxy'):
+            elif storage_owner(argcls).get('proxy'):
                 # item.ConstPointer(): a proxy resolves; item.NonConstPointer() on a
-                # copy-on-write view copies first (BrepFace.SetMesh's mesh; G59)
-                cow_nc = carg.get('Value') == 'NonConstPointer' and argcls['proxy'].get('NonConst') == 'cow'
+                # copy-on-write view copies first (BrepFace.SetMesh's mesh; G59). A derived
+                # class's proxy is its base's (G118: AddExtrusion(file.Objects[0].Geometry)
+                # passed the view's m_ptr -- null -- and added nothing)
+                cow_nc = carg.get('Value') == 'NonConstPointer' and storage_owner(argcls)['proxy'].get('NonConst') == 'cow'
                 ptr = '%s%s%s' % (name, acc, 'RH3DM_NonConst()' if cow_nc else 'RH3DM_Const()')
             elif argcls.get('shared'):
                 # a shared_ptr handle (Decal; G60): its object is Raw(sp), no m_ptr
@@ -510,6 +513,17 @@ def plan(member, cfn, cls):
                 return None, 'ref of by-value param %s (%s)' % (name, ctype)
             locals_.append(('%s %s_copy = *%s.RH3DM_Val();' if argcls.get('fileview') else '%s %s_copy = %s.m_val;') % (argcls['on'], name, name))
             call_exprs.append('&%s_copy' % name)
+        elif k == 'out' and carg['Text'] in cs_param_modes and cs_param_modes[carg['Text']][0] == 'ref' \
+                and cs_param_modes[carg['Text']][1] in VT_CPP and ctype.endswith('*') \
+                and C_VT.get(ctype.replace('const ', '').strip()) == cs_param_modes[carg['Text']][1]:
+            # a C# `ref T` parameter of a value type (G120: Mesh.SetCachedTextureCoordinates(tm, ref xf)):
+            # in AND out -- the binding takes the caller's value (its own copy), the native reads and may
+            # write it there, and the updated value is returned; before, a default-constructed local was
+            # passed (the zero transform) and the caller's never reached the native (G4's case, one level up)
+            name = carg['Text']
+            call_exprs.append('RH3DM_Ptr(&%s)' % name)
+            out_by_name[name] = 'VT:' + cs_param_modes[name][1]
+            ref_inputs.add(name)
         elif k == 'out':
             name = carg['Text']
             # the C# type of the out local: a declared out-param, else (a
@@ -558,6 +572,10 @@ def plan(member, cfn, cls):
     bind_args, ret_outs = [], []
     holder_is_sigout = False
     for mode, cstype, name in sig_params:
+        if mode == 'ref' and name in ref_inputs:
+            bind_args.append((VT_CPP[cstype], name))       # in (G120) ...
+            ret_outs.append((name, out_by_name[name]))     # ... and out
+            continue
         if mode in ('out', 'ref'):
             if (holder and not holder_is_sigout
                     and cstype == holder['cs'].rstrip('[]')
@@ -1142,6 +1160,10 @@ def construct_shape(member, cls, self_expr, argnames, cret, out_by_name):
             return ('construct', target, owner, None, None, check)
         if check == 'true' and cret == 'bool':
             return ('construct', target, owner, None, 'check', check)   # `if (!F(...)) return null;`
+        if check is None:
+            # `F(...); return m_x ?? (m_x = new X(m_attr));` (G121: File3dmMeshModifiers.CreateShutLining):
+            # the native's result unused, as C# leaves it -- call, then the child
+            return ('construct', target, owner, None, 'call', check)
         return 'construct child after a call'
     if (target and target.get('managed') and kinds == ['result'] and check == 'null' and cret
             and cret.replace('const ', '').strip() == '%s*' % target['on']
@@ -1316,6 +1338,56 @@ def no_owned_pointer_cpp(cls, ident):
     return None
 
 
+def _optional_idiom(name):
+    """G27's optional class argument as the translator writes it for a reference parameter:
+    `attributes == null ? IntPtr.Zero : attributes.ConstPointer()` -> `((false) ? nullptr : LAMBDA(&name))`"""
+    return re.compile(r'\(\(false\) \? nullptr : (\(\[\]\(const BND_\w+\* o\) \{[^{}]*\}\))\(&%s\)\)' % re.escape(name))
+
+
+def hand_fallback(cls, member, body):
+    """G119: a registry HAND_FALLBACKS entry for this member replaces the body's terminal
+    `throw` of the named exception with the hand call; the throw must be there exactly once
+    (a body that changed upstream stops generation rather than losing the hand path)"""
+    for fb in HAND_FALLBACKS.get(cls['reg'], []):
+        if fb['member'] != member['Name'] or [cs_unqualify(q['Type']) for q in member.get('Params') or []] != fb['params']:
+            continue
+        thr = re.findall(r'throw std::\w+\("%s"\);' % re.escape(fb['throws']), body)
+        if len(thr) != 1:
+            raise SystemExit('HAND_FALLBACKS %s.%s: expected one `throw %s` in the body, found %d'
+                             % (cls['reg'], fb['member'], fb['throws'], len(thr)))
+        cls.setdefault('hand_headers', set()).add(fb['header'])
+        return body.replace(thr[0], 'return %s;' % fb['call'])
+    return body
+
+
+def nullable_class_param(tp, name, body, arg_uses):
+    """(type, body): `const BND_X& name` -> `const BND_X* name` when every use of the name in the body
+    is `RH3DM_ClassArg(name)` passed to a pointer parameter, or G27's optional idiom, whose null
+    test is then restored (G117: File3dmObjectTable.Add(item, attributes) / AddLeader -- C# passes
+    null on; G27 made the pattern-planned Add* take None the same way)"""
+    if tp is None or not re.match(r'^const BND_\w+\s*&$', tp.strip()):
+        return tp, body
+    uses = len(re.findall(r'(?<![\w.>])%s\b' % re.escape(name), body))
+    fwd = 'RH3DM_ClassArg(%s)' % name
+    ptr = sum(1 for a, isptr in arg_uses if a == fwd and isptr)
+    idiom = len(_optional_idiom(name).findall(body))
+    if uses == 0 or uses != ptr + idiom or any(a == fwd and not isptr for a, isptr in arg_uses):
+        return tp, body
+    body = _optional_idiom(name).sub(lambda m: '((%s == nullptr) ? nullptr : %s(%s))' % (name, m.group(1), name), body)
+    return tp.strip()[:-1].strip() + '*', body
+
+
+def namespace_enum_named(key):
+    """ENUM_NAMED for a namespace-level enum the manifest records under its namespace
+    (G117: `ObjectType` is `DocObjects.ObjectType` there); a type-nested enum of the same
+    short name (`FileFbxWriteOptions.ObjectType`) never matches. None unless exactly one."""
+    if '.' in key:
+        return None
+    hits = [k for k in ENUM_NAMED if k.endswith('.' + key)
+            and k.split('.')[-2] not in SIMPLE_TYPES and k.split('.')[-2] not in BY_CS]
+    return ENUM_NAMED[hits[0]] if len(hits) == 1 else None
+
+
 def guid_operands(cond, ptypes, guid_calls):
     """a guard's Guid operands read through RH3DM_ToUuid (G114): Python's BND_UUID is a
     py::object, whose == / != compare object identity, so `DimensionStyleId != value`
@@ -1381,8 +1453,8 @@ def self_identity_cpp(g, cond, cls, argnames, ptypes):
     # the argument's native pointer, as plan() hands it to a C function (paramptr)
     if argcls['mode'] == 'abstract':
         ptr = '%s->%s()' % (name, argcls['getter'])
-    elif argcls.get('proxy'):
-        ptr = '%s->RH3DM_Const()' % name
+    elif storage_owner(argcls).get('proxy'):
+        ptr = '%s->RH3DM_Const()' % name                       # a derived class's proxy is its base's (G118)
     elif argcls['mode'] in ('pointer', 'child'):
         ptr = '%s->m_ptr' % name
     else:
@@ -3441,6 +3513,12 @@ def _num(t):
 # G112: the arguments the last resolve_markers() passed to a BORROWING setter (a modeled field's,
 # shape mfget: the object stores the pointer), as their C++ text; translated_pass reads it at once
 RESOLVE_BORROWS = []
+# G115: C functions the last resolve_markers() needs declared beyond the body's own natives (a value
+# adopted from a native object is released with its type's Delete); translated_pass reads it at once
+RESOLVE_FNS = []
+# G117: (argument text, callee takes a pointer) for each argument the last resolve_markers() passed to a
+# planned call -- a class parameter only ever forwarded to pointer parameters is nullable itself
+RESOLVE_ARGUSE = []
 
 
 def _addr_args(res):
@@ -3466,10 +3544,83 @@ def _addr_args(res):
     return res
 
 
+def _split_args(s):
+    """a C++ argument list's top-level arguments"""
+    out, depth, cur = [], 0, ''
+    for ch in s:
+        if ch in '(<[{':
+            depth += 1
+        elif ch in ')>]}':
+            depth -= 1
+        if ch == ',' and depth == 0:
+            out.append(cur.strip()); cur = ''
+        else:
+            cur += ch
+    if cur.strip():
+        out.append(cur.strip())
+    return out
+
+
+def _arg_uses(res):
+    """`NAME\\x00ARGSPR\\x00(args)` -> `NAME(args)`, recording each argument with whether the
+    callee's parameter at its position is a pointer (G117); the flags may be followed by a
+    `\\x00KEEP..\\x00` marker, kept for _keep_args"""
+    while '\x00ARGS' in res:
+        i = res.index('\x00ARGS')
+        e = res.index('\x00', i + 1)
+        flags = res[i + 5:e]
+        j = e + 1
+        if res.startswith('\x00KEEP', j):
+            j = res.index('\x00', j + 1) + 1
+        if j < len(res) and res[j] == '(':
+            depth, k = 0, j
+            while k < len(res):
+                depth += {'(': 1, ')': -1}.get(res[k], 0)
+                if depth == 0:
+                    break
+                k += 1
+            for a, f in zip(_split_args(res[j + 1:k]), flags):
+                RESOLVE_ARGUSE.append((a, f == 'P'))
+        res = res[:i] + res[e + 1:]
+    return res
+
+
+def _keep_args(res):
+    """`NAME\\x00KEEP1,2\\x00(args)` -> `NAME(args)`, recording the arguments at those positions as
+    borrowed (G116), unwrapped to the name the body passed (`RH3DM_ClassArg(dimstyle)` -> dimstyle);
+    None when the call has no plain argument list"""
+    while '\x00KEEP' in res:
+        i = res.index('\x00KEEP')
+        e = res.index('\x00', i + 1)
+        pos = [int(x) for x in res[i + 5:e].split(',') if x]
+        j = e + 1
+        if j >= len(res) or res[j] != '(':
+            return None
+        depth, k = 0, j
+        while k < len(res):
+            depth += {'(': 1, ')': -1}.get(res[k], 0)
+            if depth == 0:
+                break
+            k += 1
+        if k >= len(res):
+            return None
+        args = _split_args(res[j + 1:k])
+        for p in pos:
+            if p >= len(args):
+                return None
+            a = args[p]
+            m = re.match(r'^(?:RH3DM_ClassArg|RH3DM_AddrOf)\((.*)\)$', a)
+            a = (m.group(1) if m else a).strip().lstrip('&*').strip('() ')
+            RESOLVE_BORROWS.append(a)
+        res = res[:i] + res[e + 1:]
+    return res
+
+
 def resolve_markers(text, cls, per_reg, manifest):
     """the C++ text with every marker resolved, the plans it calls, and whether
     it writes (a setter call); or (None, reason, None)"""
     deps, writes, byvalue = [], False, False
+    del RESOLVE_FNS[:]
     tags = {}                       # G92: `#k` on a call marker -> the plan it resolved to
     out, pos = [], 0
     for mm in MARKER.finditer(text):
@@ -3606,7 +3757,7 @@ def resolve_markers(text, cls, per_reg, manifest):
         if kind == 'enum':
             key, member = arg.split(':', 1)
             e = CS_ENUMS.get(key)
-            named = ENUM_NAMED.get(key) or ENUM_NAMED.get(key.split('.')[-1]) or {}
+            named = ENUM_NAMED.get(key) or ENUM_NAMED.get(key.split('.')[-1]) or namespace_enum_named(key) or {}
             if e is None or member not in named:
                 return None, 'enum %s.%s' % (key, member), None
             GUARD_ENUMS.add(key)
@@ -3627,7 +3778,19 @@ def resolve_markers(text, cls, per_reg, manifest):
             # `new TextRun(ptr)` (G96): a handle class adopting the native's object (its
             # constructor stores the pointer; its Delete releases it) -- null stays null
             c2 = BY_CS.get(arg)
-            if c2 is None or c2['reg'] not in per_reg or c2['mode'] != 'pointer' or not c2.get('handle'):
+            # `new Font(ptr)` (G115): a managed class wraps the native's object without owning it
+            # (a managed font lives as long as the process: RhinoCommon's Font(IntPtr) contract)
+            rec = TYPE_RECS.get(c2['type']) or {} if c2 is not None else {}
+            h = rec.get('Handle') or {}
+            if (c2 is not None and c2['reg'] in per_reg and c2['mode'] == 'value' and h.get('Delete') in C_BY_NAME
+                    and rec.get('PtrCtor') == 'field:%s' % h.get('Field')):
+                # `new EarthAnchorPoint(ptr)` on a class stored BY VALUE (G115, as G49's valadopt):
+                # copy the native's new object in, then release it with the type's own Delete
+                RESOLVE_FNS.append(C_BY_NAME[h['Delete']])
+                out.append('RH3DM_ValAdopt<%s, %s, %s>' % (c2['gen'], c2['on'], h['Delete']))
+                byvalue = True
+                continue
+            if c2 is None or c2['reg'] not in per_reg or c2['mode'] != 'pointer' or not (c2.get('handle') or c2.get('managed')):
                 return None, 'adopt %s' % arg, None
             out.append('RH3DM_Adopt<%s, %s>' % (c2['gen'], c2['on']))
             continue
@@ -3646,12 +3809,21 @@ def resolve_markers(text, cls, per_reg, manifest):
             # class's own self access spells it (views resolve or copy on write)
             tn, _, acc = arg.partition(':')
             c2 = BY_CS.get(tn)
+            if c2 is not None and c2['reg'] in per_reg and c2['mode'] == 'value' and acc == 'Const' and not c2.get('fileview'):
+                # `value.ConstPointer()` on a class stored BY VALUE (G115: File3dm.EarthAnchorPoint's
+                # setter): its stored object, read only -- a NonConstPointer() write into a by-value
+                # copy would be lost, so that stays refused
+                out.append('RH3DM_ValPtr')
+                continue
             if c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract'):
                 return None, 'optr %s' % tn, None
             sa = self_access(c2, 'o->m_ptr' if c2['mode'] == 'pointer' else None, 'NonConstPointer' if acc == 'NonConst' else 'ConstPointer')
             sa = re.sub(r'(?<![\w>.])(RH3DM_NonConst|RH3DM_Const|%s)\(' % re.escape(c2.get('getter') or 'RH3DM_none'), r'o->\1(', sa)
-            out.append('([](const %s* o) { return (void*)(%s); })' % (c2['gen'], sa) if acc == 'Const'
-                       else '([](%s* o) { return (void*)(%s); })' % (c2['gen'], sa))
+            # a null object throws, as C#'s `x.ConstPointer()` does (G115: `font.ConstPointer()` in
+            # AnnotationBase.Font's setter, which Python could pass None)
+            nul = 'if (!o) throw std::runtime_error("null reference"); '
+            out.append('([](const %s* o) { %sreturn (void*)(%s); })' % (c2['gen'], nul, sa) if acc == 'Const'
+                       else '([](%s* o) { %sreturn (void*)(%s); })' % (c2['gen'], nul, sa))
             continue
         if kind == 'deref':
             # a class local passed by reference (G85)
@@ -3732,6 +3904,12 @@ def resolve_markers(text, cls, per_reg, manifest):
             # the file's, as the class's own accessor resolves it each time (the `()` that follows calls it)
             out.append('(void*)RH3DM_Const')
             continue
+        if kind == 'call' and name == 'Commit' and not types and cls is not None and (storage_owner(cls).get('proxy') or {}).get('Commit'):
+            # `Commit()` in a translated body (G116: RenderSettings.SetRenderEnvironmentId): the private
+            # copy written back into the file, as the pattern planner's `commits` does
+            out.append('RH3DM_Commit')
+            writes = True
+            continue
         if kind == 'call' and not types and cls is not None and modeled_ptr(cls, name):
             # `ConstParentDimStylePointer()` in a translated body (G88/G89): the modeled field's
             # pointer, as an IntPtr (the `()` that follows calls the helper)
@@ -3790,7 +3968,10 @@ def resolve_markers(text, cls, per_reg, manifest):
                        or cs_unqualify(m.get('Returns') or '') == 'Rectangle'
                        # System.Drawing.Color (G113: DrawColor(file) => DrawColor(file, Guid.Empty)): BND_Color,
                        # passed through unopened (G79)
-                       or cs_unqualify(m.get('Returns') or '') == 'Color'):
+                       or cs_unqualify(m.get('Returns') or '') == 'Color'
+                       # an array of a value type (G116: `var p2d = Points2D;` in Leader.Points3D): the
+                       # member's std::vector, as the translated body reads a C# array
+                       or (cs_array_elem(m.get('Returns')) and _value_ret(cs_array_elem(m.get('Returns'))))):
                 found = (owner, q)
                 break
         if found is None:
@@ -3840,10 +4021,19 @@ def resolve_markers(text, cls, per_reg, manifest):
         if kind in ('set', 'oset') and q['bind_args'] and re.match(r'^const BND_\w+\s*\*$', q['bind_args'][0][0].strip()):
             borrows = (q.get('setter_of') or {}).get('shape', ('',))[0] == 'mfget'
             out.append('\x00ADDR' + ('B' if borrows else 'N'))
+        # a callee that borrows arguments (G116: Leader.Create => CreateWithRichText, whose
+        # ParentDimensionStyle keeps the style): the caller borrows what it passes there too
+        elif kind in ('call', 'scall', 'ocall', 'ocallc', 'oscall') and q.get('keep_args'):
+            out.append('\x00KEEP%s\x00' % ','.join(str(i) for i in q['keep_args']))
+        if kind in ('call', 'scall', 'ocall', 'ocallc', 'oscall') and q.get('bind_args'):
+            out.append('\x00ARGS%s\x00' % ''.join('P' if t.strip().endswith('*') else 'R' for t, _ in q['bind_args']))
     out.append(text[pos:])
     res = ''.join(out)
     del RESOLVE_BORROWS[:]
-    res = _addr_args(res)
+    del RESOLVE_ARGUSE[:]
+    res = _arg_uses(res)
+    res = _keep_args(res) if res is not None else None
+    res = _addr_args(res) if res is not None else None
     if res is None:
         return None, 'pointer setter call', None
     for k in re.findall(r'\x00OWN(\d+)\x00', res):
@@ -3888,11 +4078,23 @@ def translated_pass(per_class, manifest, skipped):
                 # G84: and any other body the planner's shapes did not take (branches, switches,
                 # loops around native calls), now that class bodies may call natives
                 if (x['Type'] != cls['type'] or x['Variant'] != 'portable'
-                        or x['Kind'] not in ('method', 'property', 'indexer') or sig(x) in have):
+                        or x['Kind'] not in ('method', 'property', 'indexer')):
                     continue
                 bkey = (x['Kind'], x['Name'], tuple(q['Type'] for q in x.get('Params') or []))
                 # an abstract member's body is its internal implementation's override (G91)
                 r = CLASS_BODIES.get((simple,) + bkey) or (CLASS_BODIES.get((cls['impl'],) + bkey) if cls.get('impl') else None)
+                if sig(x) in have:
+                    # a getter another shape planned, its setter refused there (G115: MeshVertexList.Count's
+                    # guarded two-call setter): the translated setter, tried below like any other
+                    if (x['Kind'] == 'property' and r is not None and r.get('SetBody') and not x.get('Static')
+                            and not x.get('Hidden') and not _overridden_below(cls, 'property', x['Name'], [], manifest)):
+                        g = [q for q in plans if q['m']['Kind'] == 'property' and q['m']['Name'] == x['Name']
+                             and not q.get('setter_of') and not q.get('hidden')]
+                        if len(g) == 1 and not g[0].get('setter') and not g[0].get('pending_set') and not g[0]['bind_args']:
+                            gret = resolve_markers(r['Ret'], cls, per_reg, manifest)[0]
+                            if gret is not None:
+                                g[0]['pending_set'] = (r, gret, [])
+                    continue
                 if r is None or bool(r.get('Static')) != bool(x.get('Static')):
                     continue
                 natives = r.get('Native') or []
@@ -3903,6 +4105,8 @@ def translated_pass(per_class, manifest, skipped):
                     continue
                 body, deps, writes = resolve_markers(r['Body'], cls, per_reg, manifest)
                 borrowed = list(RESOLVE_BORROWS)
+                marker_fns = list(RESOLVE_FNS)
+                arg_uses = list(RESOLVE_ARGUSE)
                 ret, _, _ = resolve_markers(r['Ret'], cls, per_reg, manifest)
                 params = [(resolve_markers(q['Type'], cls, per_reg, manifest)[0], q['Name']) for q in r.get('Params') or []]
                 # a hidden helper's `ref` parameter (G92: `ref string fullName`): by reference
@@ -3923,6 +4127,16 @@ def translated_pass(per_class, manifest, skipped):
                 if body is not None and any(b not in pnames for b in borrowed):
                     skipped['translated: borrowed argument'] = skipped.get('translated: borrowed argument', 0) + 1
                     continue
+                if body is not None and params:
+                    # `Add(item, attributes)` => `AddBrep(brep, attributes)` (G117): a class parameter whose
+                    # every use is an argument to a callee's POINTER parameter takes None, as C# passes null on
+                    np_ = []
+                    for tp, n in params:
+                        tp, body = nullable_class_param(tp, n, body, arg_uses)
+                        np_.append((tp, n))
+                    params = np_
+                if body is not None:
+                    body = hand_fallback(cls, x, body)
                 if body is None or ret is None or any(t is None for t, _ in params):
                     key = 'translated: ' + (deps if body is None else 'signature').split(' ')[0]
                     skipped[key] = skipped.get(key, 0) + 1
@@ -3941,7 +4155,7 @@ def translated_pass(per_class, manifest, skipped):
                      'bind_args': params, 'guards': [], 'success': None, 'translated': True, 'hidden': bool(x.get('Hidden')),
                      'ret_borrowed': bool(r.get('RetBorrowed')),
                      'shape': ('translated', ret, body), 'deps': deps, 'nonconst': writes,
-                     'extra_fns': [C_BY_NAME[n] for n in natives],
+                     'extra_fns': [C_BY_NAME[n] for n in natives] + marker_fns,
                      'cpp': uniq('Gen_' + x['Name'])}
                 if keep_args:
                     p['keep_args'] = keep_args
