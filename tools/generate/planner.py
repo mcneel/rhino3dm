@@ -1,6 +1,8 @@
 """Planning: one RhinoCommon member -> a plan (C call, argument
 marshalling, return shape) or a refusal reason."""
 
+import os
+import sys
 from gen_registry import *
 
 
@@ -867,12 +869,18 @@ def plan(member, cfn, cls):
                # (ON_Texture_GetFileReference: `new ON_FileReference(...)`; G69)
                or BY_CS[wrap_cs].get('handle') and cret == 'const %s*' % BY_CS[wrap_cs]['on'] and member.get('WrapArity') == 1)):
         sig_ret = wrap_cs
-        if member.get('WrapArity') == 1:
+        if member.get('WrapStatic') == '(IntPtr, true)':
+            # `new T(native(), true)`: T's (IntPtr, bool) constructor adopts p when the flag is
+            # set (specgen PtrCtor "|own-if-true"; G122) -- the binding owns the result likewise
+            pc = (TYPE_RECS.get(BY_CS[sig_ret]['type']) or {}).get('PtrCtor') or ''
+            if not pc.endswith('|own-if-true'):
+                return None, 'wrap through %s(IntPtr, true): %s' % (sig_ret, pc or 'unknown')
+        elif member.get('WrapArity') == 1:
             # `new T(p)`: only T's (IntPtr) constructor says whether p is ADOPTED;
             # TextureMapping's copies (NewFromPointer), Font's keeps a managed
             # pointer it never deletes (G49)
             target = BY_CS[sig_ret]
-            pc = (TYPE_RECS.get(target['type']) or {}).get('PtrCtor') or ''
+            pc = ((TYPE_RECS.get(target['type']) or {}).get('PtrCtor') or '').split('|')[0]
             if pc.endswith('+nullthrow'):
                 # the constructor throws on a null p; the binding returns None
                 # instead -- the same only where the member checked p first
@@ -3243,7 +3251,7 @@ def linked_iter(cls, plans):
 # bodies built from the class's own members, value types, RhinoMath and enums.
 # Their references to the class's members are markers resolved here against
 # what was GENERATED -- a member resolving anything less is refused.
-MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as|self|fieldptr|deref|optr|wrapptr|adopt|childlink|proxyfile|pcast|isview|viewcopy|fnew|filefield|ftable|owned|bget|bset|bcall|iter|ptrsof|state|hfield):([^$]*)\$\$')
+MARKER = re.compile(r'\$\$(get|sget|set|call|scall|enum|enumtype|class|classarg|new|index|oget|ocall|ocallc|oset|oindex|osget|oscall|acc|as|self|fieldptr|deref|optr|wrapptr|adopt|ocast|childlink|proxyfile|pcast|isview|viewcopy|fnew|filefield|ftable|owned|bget|bset|bcall|iter|ptrsof|state|hfield):([^$]*)\$\$')
 VALUE_RETS = {'bool', 'double', 'float', 'int', 'uint', 'long', 'short', 'byte', 'string', 'void'}
 
 
@@ -3718,6 +3726,14 @@ def resolve_markers(text, cls, per_reg, manifest):
                 return None, 'fnew %s' % arg, None
             out.append('new %s' % c2['gen'])
             continue
+        if kind == 'ocast':
+            # `(T)manifest.FindIndex(i, type)` / `... as T` (G122): the owned result as the derived
+            # class -- the wrong class is deleted, then (T) throws and `as T` gives null
+            c2 = BY_CS.get(arg)
+            if c2 is None or c2['reg'] not in per_reg or c2['mode'] not in ('pointer', 'abstract'):
+                return None, 'ocast %s' % arg, None
+            out.append('RH3DM_OwnedCast<%s>' % c2['gen'])
+            continue
         if kind in ('pcast', 'isview', 'viewcopy'):
             # TryConvertBrep (G89): `geometry as Brep` on a parameter (a non-owning cast),
             # `IsDocumentControlled` (a File3dm view, owning nothing), and the view handed back
@@ -3789,6 +3805,13 @@ def resolve_markers(text, cls, per_reg, manifest):
                 RESOLVE_FNS.append(C_BY_NAME[h['Delete']])
                 out.append('RH3DM_ValAdopt<%s, %s, %s>' % (c2['gen'], c2['on'], h['Delete']))
                 byvalue = True
+                continue
+            if (c2 is not None and c2['reg'] in per_reg and c2['mode'] == 'pointer'
+                    and not (c2.get('handle') or c2.get('managed') or c2.get('comp') or c2.get('borrowed') or c2.get('shared'))
+                    and (rec.get('PtrCtor') or '').split('|')[0] == 'own'):
+                # `new Material(ptr)` (G122): T(IntPtr) takes ownership (ConstructNonConstObject) --
+                # the generated class owns the native's new object the same way
+                out.append('RH3DM_Wrap_%s' % c2['reg'])
                 continue
             if c2 is None or c2['reg'] not in per_reg or c2['mode'] != 'pointer' or not (c2.get('handle') or c2.get('managed')):
                 return None, 'adopt %s' % arg, None
@@ -4049,6 +4072,12 @@ def resolve_markers(text, cls, per_reg, manifest):
     return res, deps, writes
 
 
+def _ttrace(x, why):
+    # RH3DM_TRACE_TRANSLATED=1: name the member each translated-pass refusal is for (G122)
+    if os.environ.get('RH3DM_TRACE_TRANSLATED'):
+        print('translated refused: %s.%s: %s' % (x['Type'], x['Name'], why), file=sys.stderr)
+
+
 def translated_pass(per_class, manifest, skipped):
     """add the translated pure members of every generated class (fixpoint:
     one may call another)"""
@@ -4059,7 +4088,7 @@ def translated_pass(per_class, manifest, skipped):
     while changed:
         changed = False
         for cls, plans in per_class:
-            if cls['mode'] not in ('pointer', 'abstract', 'child', 'value'):    # value: MeshingParameters (G74)
+            if cls['mode'] not in ('pointer', 'abstract', 'child', 'value', 'static'):    # value: MeshingParameters (G74)
                 continue
             have = {sig(p['m']) for p in plans if not p.get('setter_of')}
             names = {p['cpp'] for p in plans}
@@ -4078,7 +4107,8 @@ def translated_pass(per_class, manifest, skipped):
                 # G84: and any other body the planner's shapes did not take (branches, switches,
                 # loops around native calls), now that class bodies may call natives
                 if (x['Type'] != cls['type'] or x['Variant'] != 'portable'
-                        or x['Kind'] not in ('method', 'property', 'indexer')):
+                        or x['Kind'] not in ('method', 'property', 'indexer')
+                        or (cls['mode'] == 'static' and not x.get('Static'))):    # static mode: statics only (G122: Arrowhead)
                     continue
                 bkey = (x['Kind'], x['Name'], tuple(q['Type'] for q in x.get('Params') or []))
                 # an abstract member's body is its internal implementation's override (G91)
@@ -4101,6 +4131,7 @@ def translated_pass(per_class, manifest, skipped):
                 bad = next((n for n in natives if not native_usable(n)), None)
                 if bad is not None:
                     key = 'translated: native %s' % ('unsafe' if bad in UNSAFE_NATIVES else 'not portable')
+                    _ttrace(x, key)
                     skipped[key] = skipped.get(key, 0) + 1
                     continue
                 body, deps, writes = resolve_markers(r['Body'], cls, per_reg, manifest)
@@ -4119,6 +4150,7 @@ def translated_pass(per_class, manifest, skipped):
                                          and t not in ('int', 'double', 'bool', 'float', 'unsigned int')
                                          for (t, _), o in zip(params, outs) if o)):
                     skipped['translated: out parameter'] = skipped.get('translated: out parameter', 0) + 1
+                    _ttrace(x, 'translated: out parameter')
                     continue
                 # G112: a parameter stored by a borrowing setter must outlive the result -- the binding
                 # keeps it alive (keep_args); any other borrowed argument's lifetime cannot be said
@@ -4126,6 +4158,7 @@ def translated_pass(per_class, manifest, skipped):
                 keep_args = sorted({pnames.index(b) for b in borrowed if b in pnames})
                 if body is not None and any(b not in pnames for b in borrowed):
                     skipped['translated: borrowed argument'] = skipped.get('translated: borrowed argument', 0) + 1
+                    _ttrace(x, 'translated: borrowed argument')
                     continue
                 if body is not None and params:
                     # `Add(item, attributes)` => `AddBrep(brep, attributes)` (G117): a class parameter whose
@@ -4139,10 +4172,12 @@ def translated_pass(per_class, manifest, skipped):
                     body = hand_fallback(cls, x, body)
                 if body is None or ret is None or any(t is None for t, _ in params):
                     key = 'translated: ' + (deps if body is None else 'signature').split(' ')[0]
+                    _ttrace(x, deps if body is None else 'signature: ret=%s params=%s' % (ret, params))
                     skipped[key] = skipped.get(key, 0) + 1
                     continue
                 if _overridden_below(cls, x['Kind'], x['Name'], [q['Type'] for q in x.get('Params') or []], manifest):
                     skipped['translated: overridden below'] = skipped.get('translated: overridden below', 0) + 1
+                    _ttrace(x, 'translated: overridden below')
                     continue
                 def uniq(n):
                     k, c = n, 1

@@ -980,7 +980,7 @@ record MemberRecord
     public bool Borrowed { get; init; }      // Kind=="type": `(IntPtr p) { ConstructNonConstObject(p); DoNotDestructOnDispose(); }` -- a pointer into another object
     public string InternalNew { get; init; }
     public string InternalCopy { get; init; }   // Kind=="type": an INTERNAL copy constructor's native (`PolyCurve(PolyCurve other)` -> ON_PolyCurve_New(other)) (G69) // Kind=="type": a non-public `T() { ConstructNonConstObject(UNM.ON_T_New()); }` -- its native creation call
-    public string PtrCtor { get; init; }     // Kind=="type": what `T(IntPtr p)` does with p (see DetectPtrCtor)
+    public string PtrCtor { get; init; }     // Kind=="type": what `T(IntPtr p)` does with p (see DetectPtrCtor); "|own-if-true": T(IntPtr p, bool f) adopts p when f (G122)
     public SharedHandleInfo SharedHandle { get; init; } // Kind=="type": a shared_ptr handle (see DetectSharedHandle)
     public long[] EnumInts { get; init; }    // Kind=="enum": Values as integers, resolved after the walk (G60)
     public int WrapArity { get; init; }      // the wrap is `new T(p)` (1) or `new T(p, null)` (2); 0: CreateGeometryHelper / not a construction
@@ -1688,6 +1688,7 @@ class Walker : CSharpSyntaxWalker
         var internalNew = DetectInternalNew(node);
         var internalCopy = DetectInternalCopy(node);
         var ptrCtor = DetectPtrCtor(node);
+        if (DetectFlagPtrCtor(node)) ptrCtor = (ptrCtor ?? "") + "|own-if-true";
         // CachedTextureCoordinates: a pointer INTO another object, never deleted
         bool borrowed = node.Members.OfType<ConstructorDeclarationSyntax>().Any(c =>
             c.ParameterList.Parameters is [var bp] && bp.Type?.ToString() == "IntPtr" && c.Body is { } cb
@@ -1865,6 +1866,30 @@ class Walker : CSharpSyntaxWalker
             return "other";
         }
         return null;
+    }
+
+    // `T(IntPtr p, bool f) { IntPtr ptr = p; if (!f) ptr = Copy(p); ConstructNonConstObject(ptr); }`
+    // (ViewportInfo's controlPointer): p is adopted when f is true, copied otherwise (G122)
+    static bool DetectFlagPtrCtor(TypeDeclarationSyntax node)
+    {
+        foreach (var c in node.Members.OfType<ConstructorDeclarationSyntax>())
+        {
+            bool plainInit = c.Initializer == null
+                || c.Initializer is { RawKind: (int)SyntaxKind.BaseConstructorInitializer, ArgumentList.Arguments.Count: 0 };
+            if (!plainInit || c.Body == null || c.ParameterList.Parameters is not [var p, var f]
+                || p.Type?.ToString() != "IntPtr" || f.Type?.ToString() != "bool")
+                continue;
+            if (c.Body.Statements is [LocalDeclarationStatementSyntax { Declaration.Variables: [var lv] },
+                                      IfStatementSyntax { Else: null, Condition: PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalNotExpression, Operand: IdentifierNameSyntax fc } } cif,
+                                      var last]
+                && lv.Initializer?.Value is IdentifierNameSyntax li && li.Identifier.Text == p.Identifier.Text
+                && fc.Identifier.Text == f.Identifier.Text
+                && (cif.Statement is BlockSyntax { Statements: [var cs] } ? cs : cif.Statement) is ExpressionStatementSyntax
+                   { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax ca } } && ca.Identifier.Text == lv.Identifier.Text
+                && Flat(last) == "ConstructNonConstObject(" + lv.Identifier.Text + ");")
+                return true;
+        }
+        return false;
     }
 
     static ScopingCtor[] DetectScopingCtors(TypeDeclarationSyntax node, NullingCtor[] nulling)
@@ -3876,6 +3901,8 @@ class Walker : CSharpSyntaxWalker
             string kind = a.Expression switch
             {
                 LiteralExpressionSyntax => "literal",
+                // `NewBuiltIn(-1)`: a negative literal, as Classify treats it (G122)
+                PrefixUnaryExpressionSyntax { Operand: LiteralExpressionSyntax } => "literal",
                 IdentifierNameSyntax id when paramNames.Contains(id.Identifier.Text)
                     => "param",
                 // motion.X -- a member read on a parameter; the forwarding
@@ -4757,6 +4784,20 @@ class Walker : CSharpSyntaxWalker
                     wrap = svt.Identifier.Text;
                     continue;
                 }
+            }
+            // return new T(UnsafeNativeMethods.F(..), true);  -- the native result handed to T's
+            // (IntPtr, bool) constructor with the flag set: adopted when T says so (PtrCtor
+            // "|own-if-true"; the planner checks). WrapArity 2 as `new T(p, null)`; WrapStatic
+            // "(IntPtr, true)" tells them apart (G122: ViewportInfo.DefaultTop)
+            if (wrap == null && ptrLocal == null
+                && st is ReturnStatementSyntax { Expression: ObjectCreationExpressionSyntax { Type: IdentifierNameSyntax fnt, Initializer: null, ArgumentList.Arguments: [var fa0, var fa1] } }
+                && fa0.Expression is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "UnsafeNativeMethods" } } }
+                && fa1.Expression is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.TrueLiteralExpression })
+            {
+                wrap = fnt.Identifier.Text;
+                _wrapArity = 2;
+                _wrapStatic = "(IntPtr, true)";
+                continue;
             }
             // return GeometryBase.CreateGeometryHelper(x, null);  -- no `as T`: the
             // member's own return type (GeometryBase) is what it constructs

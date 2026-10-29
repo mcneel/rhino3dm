@@ -378,6 +378,12 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Intersect.Intersection', 'cs': 'Intersection', 'on': None,
      'mode': 'static', 'hand': None, 'bridge': False,
      'gen': 'BND_IntersectionX', 'reg': 'IntersectionX'},
+    # G122: a managed C# class (BlockId, ArrowType: no native object) with one static over the C
+    # layer -- bound for its statics only, as the old binding did (Arrowhead.GetPoints); its
+    # instance members need data-class Guid / nested-enum fields (deviations D73)
+    {'type': 'Rhino.Geometry.Arrowhead', 'cs': 'Arrowhead', 'on': None,
+     'mode': 'static', 'hand': None, 'bridge': False,
+     'gen': 'BND_ArrowheadX', 'reg': 'ArrowheadX'},
     # the file's render settings: a VIEW of the file (no id) whose setters copy
     # on write and commit back (RenderSettings.Commit, see G41)
     {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'user_strings': True, 'on': 'ON_3dmRenderSettings',

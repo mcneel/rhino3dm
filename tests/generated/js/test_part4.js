@@ -816,7 +816,7 @@ module.exports = (t, ctx) => {
   t('test_post_effect_collection_and_data', () => {
     if (!r.PostEffectCollectionX) ctx.skip('G98 not generated');
     let seen = 0;
-    for (const name of ['file3dm_stuff.3dm', 'textEntities_r8.3dm', 'sphereDecals.3dm']) {
+    for (const name of ['posteffects.3dm', 'file3dm_stuff.3dm', 'textEntities_r8.3dm', 'sphereDecals.3dm']) {
       // Type (D50): opennurbs Unset 0, Early 1, ToneMapping 2, Late 3; RhinoCommon Early 0, ...
       const oldFile = ctx.readOld(name);
       const ope = call(call(call(oldFile, 'settings'), 'renderSettings'), 'postEffects');
@@ -826,6 +826,13 @@ module.exports = (t, ctx) => {
       const nw = list(coll).map(p => [String(p.id), p.localName, p.on, p.shown, p.type.value]);
       assert.deepStrictEqual(nw, old, name);
       seen += nw.length;
+      // the old table's findId / findIndex (triage H1: map) -> postEffectDataFromId / the i-th item
+      const items = list(coll);
+      for (let i = 0; i < ope.count; i++) {
+        const oi = ope.findIndex(i);
+        assert.strictEqual(String(oi.id), String(items[i].id), name + ' ' + i);
+        assert.strictEqual(coll.postEffectDataFromId(String(oi.id)).localName, ope.findId(oi.id).localName);
+      }
       const ghost = coll.postEffectDataFromId(uuid4());
       assert(ghost !== undefined);
       ctx.raises(() => ghost.localName, /runtime_error,.*no longer in its owner/);
@@ -838,7 +845,7 @@ module.exports = (t, ctx) => {
       }
     }
     assert.deepStrictEqual(list(new r.PostEffectCollectionX()), []);   // free-floating: empty
-    if (seen === 0) ctx.skip('no model with post effects in tests/models: per-item parity needs a Rhino-saved fixture');
+    assert(seen > 0);       // tests/models/posteffects.3dm (Luis 2026-10-29) carries post effects
   });
 
   t('test_font_is_managed_and_dimension_style_font', () => {
@@ -1208,5 +1215,142 @@ module.exports = (t, ctx) => {
     const nb = r.File3dmX.fromByteArray(f.toByteArray(no));
     assert.strictEqual(ob.archiveVersion, nb.archiveVersion);
     assert.strictEqual(list(ob.objects).length, list(nb.objects).length);
+  });
+  // --- RH-99868 / RH-99870 (rhino 9.x da1b2185e6c) ---
+  const stat = (C, n) => (typeof C[n] === 'function' ? C[n]() : C[n]);   // a class static: getter (post-js) or function (old)
+  const oldIter = (it) => { const out = []; for (let c = it.first(), i = 0; i < it.count; c = it.next(), i++) out.push(c); return out; };
+  const p3 = (p) => (Array.isArray(p) ? [p[0], p[1], p[2]] : [p.X, p.Y, p.Z]);
+
+  t('test_subd_component_queries_rh99868', () => {
+    let checked = 0;
+    for (const name of ['subd.3dm', 'subdBox.3dm', 'subd_creases.3dm']) {
+      const ns = objs(ctx.readModel(name)).map(o => o.geometry).find(g => g instanceof r.SubDX);
+      const os = oldGeoms(name).find(g => g instanceof r.SubD);
+      const byIndex = (a) => a.sort((x, y) => x.index - y.index);
+      const byId = (a) => a.sort((x, y) => x.id - y.id);
+      const of = byIndex(oldIter(os.faces())), nf = byId([...ns.faces]);
+      assert.strictEqual(of.length, nf.length);
+      of.forEach((o, i) => {
+        const n = nf[i];
+        assert.deepStrictEqual([n.hasEdges, n.hasSharpEdges, n.sharpEdgeCount, n.maximumEdgeSharpness, n.isConvex, n.isPlanar(1e-8),
+                                n.materialChannelIndex, n.texturePointsAreSet, n.texturePointsCapacity, p3(n.subdivisionPoint)],
+                               [call(o, 'hasEdges'), call(o, 'hasSharpEdges'), call(o, 'sharpEdgeCount'), call(o, 'maximumEdgeSharpness'),
+                                call(o, 'isConvex'), o.isPlanar(1e-8), call(o, 'materialChannelIndex'), call(o, 'texturePointsAreSet'),
+                                call(o, 'texturePointsCapacity'), p3(call(o, 'subdivisionPoint'))]);
+      });
+      const ov = byIndex(oldIter(os.vertices())), nv = byId([...ns.vertices]);
+      ov.forEach((o, i) => {
+        const n = nv[i];
+        assert.deepStrictEqual([n.isSmooth, n.isCrease, n.isCorner, n.isDart, n.isSharp(true), n.vertexSharpness],
+                               [call(o, 'isSmooth'), call(o, 'isCrease'), call(o, 'isCorner'), call(o, 'isDart'), o.isSharp(true), call(o, 'vertexSharpness')]);
+      });
+      const oe = byIndex(oldIter(os.edges())), ne = byId([...ns.edges]);
+      oe.forEach((o, i) => {
+        const n = ne[i];
+        assert.deepStrictEqual([n.isSmooth, n.isCrease, n.isHardCrease, n.isDartCrease, n.dartCount, p3(n.subdivisionPoint), p3(n.controlNetCenterPoint)],
+                               [call(o, 'isSmooth'), call(o, 'isCrease'), call(o, 'isHardCrease'), call(o, 'isDartCrease'), call(o, 'dartCount'),
+                                p3(call(o, 'subdivisionPoint')), p3(call(o, 'controlNetCenterPoint'))]);
+      });
+      checked += of.length + ov.length + oe.length;
+    }
+    assert(checked > 100);
+  });
+
+  t('test_linetype_builtins_and_clear_pattern_rh99870', () => {
+    const names = ['Continuous', 'ByLayer', 'ByParent', 'Hidden', 'Dashed', 'DashDot', 'Center', 'Border', 'Dots'];
+    names.forEach((name, i) => {
+      const js = name[0].toLowerCase() + name.slice(1);
+      const n = stat(r.LinetypeX, js), o = stat(r.Linetype, js === 'dashDot' ? 'dashdot' : js);   // 8.x JS: `dashdot`
+      assert(n instanceof r.LinetypeX, name);
+      assert.deepStrictEqual([n.name, n.index, n.segmentCount], [call(o, 'name'), call(o, 'index'), call(o, 'segmentCount')], name);
+      assert.strictEqual(n.index, -(i + 1));
+    });
+    const lt = new r.LinetypeX();
+    lt.appendSegment(1.0, true); lt.appendSegment(0.5, false);
+    assert.strictEqual(lt.clearPattern(), true); assert.strictEqual(lt.segmentCount, 0);
+  });
+
+  t('test_material_instance_settings_sun_rh99870', () => {
+    const a = new r.MaterialX(), b = new r.MaterialX();
+    a.name = 'one'; b.name = 'two';
+    assert.strictEqual(r.MaterialX.compareAppearance(a, b), 0);
+    const f = new r.File3dmX();
+    const circle = new r.ArcCurveX(r.ArcCurve.createFromCircle(new r.Circle(1.0)));
+    const idx = f.allInstanceDefinitions.add('blk', 'desc', { X: 0, Y: 0, Z: 0 }, [circle], [new r.ObjectAttributesX()]);
+    const idef = f.allInstanceDefinitions.findIndex(idx);
+    assert(idef instanceof r.InstanceDefinitionGeometryX);
+    const ids = list(idef.getObjectIds());
+    assert.strictEqual(ids.length, 1);
+    assert.strictEqual(idef.isInstanceGeometryId(ids[0]), true);
+    assert.strictEqual(idef.isInstanceGeometryId('00000000-0000-0000-0000-000000000000'), false);   // U33 (pilot #54)
+    const S = r.ObjectLinetypeSource;
+    assert.strictEqual(f.settings.currentLinetypeSource, S.LinetypeFromLayer);
+    f.settings.currentLinetypeSource = S.LinetypeFromObject;
+    assert.strictEqual(f.settings.currentLinetypeSource, S.LinetypeFromObject);
+    const sun = f.settings.renderSettings.sun;
+    assert.deepStrictEqual([stat(r.SunX, 'minYear'), stat(r.SunX, 'maxYear')], [1971, 2199]);
+    assert.strictEqual(sun.isValid, true);
+    const ea = sun.enableAllowed; sun.enableAllowed = !ea; assert.strictEqual(sun.enableAllowed, !ea);
+    const lw = f.settings.renderSettings.linearWorkflow;
+    const on = lw.preProcessGammaOn; lw.preProcessGammaOn = !on; assert.strictEqual(lw.preProcessGammaOn, !on);
+    assert.strictEqual(new r.ViewportX().isValidCameraFrame, true);
+  });
+  t('test_resolvers_viewport_defaults_arrowhead_g122', () => {
+    const f = new r.File3dmX();
+    const a = new r.ObjectAttributesX();
+    const lt = f.allLinetypes.fromAttributes(a);
+    assert(lt instanceof r.LinetypeX);
+    assert.deepStrictEqual([lt.name, lt.index], ['Continuous', -1]);
+    assert.strictEqual(f.allLinetypes.fromLayerIndex(0).name, 'Continuous');
+    const m = f.allMaterials.findFromAttributes(a);
+    assert(m instanceof r.MaterialX);
+    assert.strictEqual(String(m.id).toLowerCase(), 'cf2be1de-b81c-4d69-9418-dde91d266086');
+    const mat = new r.MaterialX(); mat.name = 'red';
+    const mi = f.allMaterials.addMaterial(mat);
+    a.materialSource = r.ObjectMaterialSource.MaterialFromObject; a.materialIndex = mi;
+    assert.strictEqual(f.allMaterials.findFromAttributes(a).name, 'red');
+    const xy = (p) => (Array.isArray(p) ? [p[0], p[1]] : [p.X, p.Y]);
+    const top = stat(r.ViewportX, 'defaultTop'), persp = stat(r.ViewportX, 'defaultPerspective');
+    assert.deepStrictEqual(p3(top.cameraDirection), p3(call(r.ViewportInfo.defaultTop(), 'cameraDirection')));
+    assert.deepStrictEqual(p3(persp.cameraDirection), p3(call(r.ViewportInfo.defaultPerspective(), 'cameraDirection')));
+    const pts = list(r.ArrowheadX.getPoints(r.DimensionStyleArrowType.SolidTriangle)).map(xy);
+    assert.deepStrictEqual(pts, [[0, 0], [-1, 0.25], [-1, -0.25]]);
+    assert.deepStrictEqual(list(r.Arrowhead.getPoints(r.ArrowheadTypes.SolidTriangle, 1.0)).map(xy), pts);
+  });
+  t('test_embedded_files_find_index_u35', () => {
+    // U35 (pin 5b68aa2623e): File3dmEmbeddedFiles.findIndex -- .NET threw for every index before (pilot #56)
+    const f = new r.File3dmX();
+    // no host file in WASM: a file in the module's own file system to embed (any bytes do)
+    const path = '/tmp/part4_u35_note.3dm';
+    assert.strictEqual(new r.File3dmX().write(path, 7), true);
+    assert.strictEqual(f.embeddedFiles.add(path), true);
+    assert.strictEqual(f.embeddedFiles.count, 1);
+    const ef = f.embeddedFiles.findIndex(0);
+    assert(ef instanceof r.File3dmEmbeddedFileX);
+    assert.strictEqual(ef.filename, ctx.list(f.embeddedFiles)[0].filename);
+    assert(ef.length > 0);
+    assert(f.embeddedFiles.findIndex(5) === null || f.embeddedFiles.findIndex(5) === undefined);
+  });
+  t('test_retired_subd_control_net_g3', () => {
+    // triage G3 (map): edge controlNetPoint(i) / controlNetDirection / vertexId(i) -> vertexFrom / vertexTo / controlNetLine
+    for (const name of ['subd.3dm', 'subdBox.3dm', 'subd_creases.3dm']) {
+      const ns = objs(ctx.readModel(name)).map(o => o.geometry).find(g => g instanceof r.SubDX);
+      const os = oldGeoms(name).find(g => g instanceof r.SubD);
+      const oe = oldIter(os.edges()).sort((x, y) => x.index - y.index), ne = [...ns.edges].sort((x, y) => x.id - y.id);
+      oe.forEach((o, i) => {
+        const n = ne[i], line = n.controlNetLine;
+        assert.deepStrictEqual([p3(line.From), p3(line.To)], [p3(o.controlNetPoint(0)), p3(o.controlNetPoint(1))]);
+        assert.deepStrictEqual([n.vertexFrom.id, n.vertexTo.id], [o.vertexId(0), o.vertexId(1)]);
+        assert.deepStrictEqual(p3(n.vertexTo.controlNetPoint), p3(o.controlNetPoint(1)));
+      });
+    }
+  });
+  t('test_retired_decal_table_find_index_follows_rhinocommon', () => {
+    // Luis: follow RhinoCommon -- count / get(i) / findIndex(i) by iterating attributes.decals (visible decals)
+    const nd = [...objs(ctx.readModel('sphereDecals.3dm'))[0].attributes.decals];
+    const oo = ctx.readOld('sphereDecals.3dm').objects();
+    const od = call(oo.get(0), 'attributes').decals();
+    assert.strictEqual(nd.length, od.count);
+    nd.forEach((d, i) => assert.strictEqual(String(d.textureInstanceId), String(call(od.findIndex(i), 'textureInstanceId'))));
   });
 };

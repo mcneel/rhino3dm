@@ -1350,6 +1350,8 @@ template<class V> struct RH3DM_SeqGuard
 template<class B, class O> inline B* RH3DM_Adopt(void* p) { return p ? new B((O*)p) : nullptr; }
 // `(Brep)item` on a class argument (G117): the object as the derived class, or C#'s InvalidCastException
 template<class T> inline T& RH3DM_CastChecked(T* p) { if (!p) throw std::runtime_error("Specified cast is not valid."); return *p; }
+// G122: an OWNED generated object as a derived generated class: (T) throws, `as T` is null (the object is freed)
+template<class T, class B> inline T* RH3DM_OwnedCast(B* p, bool must) { if (!p) return nullptr; T* r = dynamic_cast<T*>(p); if (!r) { delete p; if (must) throw std::runtime_error("Specified cast is not valid."); } return r; }
 // a native's new object adopted into a class stored BY VALUE (G115: `new EarthAnchorPoint(ptr)`):
 // copied in, then released with the type's own Delete; C# would wrap a null pointer -- an error here
 // `x.ConstPointer()` on a class stored BY VALUE (G115): its stored object, by reference or by

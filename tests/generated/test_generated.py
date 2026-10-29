@@ -2204,7 +2204,7 @@ def test_post_effect_collection_and_data():
     # (collection, id) resolved through ON_PostEffects_PostEffectFromId; foreach is the internal
     # PostEffectDataEnumerator (GetAt by position). The old PostEffect table is the oracle.
     seen = 0
-    for name in ('file3dm_stuff.3dm', 'textEntities_r8.3dm', 'sphereDecals.3dm'):
+    for name in ('posteffects.3dm', 'file3dm_stuff.3dm', 'textEntities_r8.3dm', 'sphereDecals.3dm'):
         path = os.path.join(MODELS, name)
         # Type (D50): opennurbs numbers Unset 0, Early 1, ToneMapping 2, Late 3; RhinoCommon's
         # PostEffectType Early 0, ToneMapping 1, Late 2 (an unset type reads as Early)
@@ -2214,6 +2214,13 @@ def test_post_effect_collection_and_data():
         new = [(str(p.Id), p.LocalName, p.On, p.Shown, int(p.Type)) for p in coll]
         assert new == old, name
         seen += len(new)
+        # the old table's FindId / FindIndex (triage H1: map) -> PostEffectDataFromId / the i-th item
+        otab = r.File3dm.Read(path).Settings.RenderSettings.PostEffects
+        items = list(coll)
+        for i in range(len(otab)):
+            oi = otab.FindIndex(i)
+            assert str(oi.Id) == str(items[i].Id) and oi.LocalName == items[i].LocalName, (name, i)
+            assert coll.PostEffectDataFromId(uuid.UUID(str(oi.Id))).LocalName == otab.FindId(oi.Id).LocalName
         ghost = coll.PostEffectDataFromId(uuid.uuid4())
         with pytest.raises(RuntimeError):
             ghost.LocalName                                  # "PostEffectData.CppPointer failed"
@@ -2224,10 +2231,7 @@ def test_post_effect_collection_and_data():
             d.On = not on                                   # writes go into the file's object
             assert next(p for p in coll if str(p.Id) == new[0][0]).On == (not on)
     assert list(r.PostEffectCollectionX()) == []             # free-floating: an empty ON_PostEffects
-    if seen == 0:
-        # no test model carries post effects, and neither API can add one outside Rhino:
-        # the per-item comparison waits for a fixture saved by Rhino (tests/models)
-        pytest.skip('no model with post effects in tests/models: per-item parity needs a Rhino-saved fixture')
+    assert seen > 0          # tests/models/posteffects.3dm (Luis 2026-10-29) carries post effects
 
 
 @pytest.mark.skipif(not hasattr(r.DimensionStyleX, 'Font'), reason='G99 not generated')
@@ -3199,3 +3203,302 @@ def test_material_render_material_instance_id_u1():
     old.RenderMaterialInstanceId = uid
     assert old.RenderMaterialInstanceId == m.RenderMaterialInstanceId
     assert str(old.RenderPlugInId) == str(m.RenderPlugInId)
+
+
+# --- RH-99868 (rhino 9.x da1b2185e6c): 26 SubD component queries, old binding as the oracle ---
+
+def _p3(p):
+    # NaN-aware (an unset texture point is NaN), so tuples compare equal when both are unset
+    return tuple('nan' if v != v else v for v in (p.X, p.Y, p.Z))
+
+
+def test_subd_component_queries_rh99868():
+    # The old binding called the same opennurbs queries directly; the generated members reach
+    # them through RhinoCommon's new C functions. Compared component by component (same order, same ids)
+    checked = 0
+    for name in ('subd.3dm', 'subdBox.3dm', 'subd_creases.3dm'):
+        path = os.path.join(MODELS, name)
+        news = [o.Geometry for o in r.File3dmX.Read(path).Objects if isinstance(o.Geometry, r.SubDX)]
+        olds = [o.Geometry for o in r.File3dm.Read(path).Objects if isinstance(o.Geometry, r.SubD)]
+        assert news and len(news) == len(olds)
+        for s, old in zip(news, olds):
+            nf, of = list(s.Faces), list(old.Faces)
+            assert [f.Id for f in nf] == [f.Id for f in of]
+            for n, o in zip(nf, of):
+                assert (n.HasEdges, n.HasSharpEdges, n.SharpEdgeCount, n.MaximumEdgeSharpness, n.IsConvex,
+                        n.IsPlanar(1e-8), n.IsPlanar(1.0), n.MaterialChannelIndex, n.TexturePointsAreSet,
+                        n.TexturePointsCapacity) == \
+                       (o.HasEdges, o.HasSharpEdges, o.SharpEdgeCount, o.MaximumEdgeSharpness, o.IsConvex,
+                        o.IsPlanar(1e-8), o.IsPlanar(1.0), o.MaterialChannelIndex, o.TexturePointsAreSet,
+                        o.TexturePointsCapacity)
+                assert _p3(n.SubdivisionPoint) == _p3(o.SubdivisionPoint)
+                assert _p3(n.TextureCenterPoint) == _p3(o.TextureCenterPoint)
+                for i in range(n.TexturePointsCapacity):
+                    assert _p3(n.TexturePoint(i)) == _p3(o.TexturePoint(i))
+            nv, ov = list(s.Vertices), list(old.Vertices)
+            assert [v.Id for v in nv] == [v.Id for v in ov]
+            for n, o in zip(nv, ov):
+                assert (n.IsSmooth, n.IsCrease, n.IsCorner, n.IsDart, n.IsSharp(True), n.IsSharp(False), n.VertexSharpness) == \
+                       (o.IsSmooth, o.IsCrease, o.IsCorner, o.IsDart, o.IsSharp(True), o.IsSharp(False), o.VertexSharpness)
+            ne, oe = list(s.Edges), list(old.Edges)
+            assert [e.Id for e in ne] == [e.Id for e in oe]
+            for n, o in zip(ne, oe):
+                assert (n.IsSmooth, n.IsCrease, n.IsHardCrease, n.IsDartCrease, n.DartCount) == \
+                       (o.IsSmooth, o.IsCrease, o.IsHardCrease, o.IsDartCrease, o.DartCount)
+                assert _p3(n.SubdivisionPoint) == _p3(o.SubdivisionPoint)
+                assert _p3(n.ControlNetCenterPoint) == _p3(o.ControlNetCenterPoint)
+                for i in range(n.FaceCount):
+                    assert _p3(n.ControlNetCenterNormal(i)) == _p3(o.ControlNetCenterNormal(i))
+            checked += len(nf) + len(nv) + len(ne)
+    assert checked > 100
+    # the crease fixture has creases and corners, so the predicates are not all False
+    path = os.path.join(MODELS, 'subd_creases.3dm')
+    s = next(o.Geometry for o in r.File3dmX.Read(path).Objects if isinstance(o.Geometry, r.SubDX))
+    assert any(e.IsCrease for e in s.Edges) and any(e.IsSmooth for e in s.Edges)
+
+
+# --- RH-99870 (rhino 9.x da1b2185e6c): small additions (upstream-fixes U32) ---
+
+def test_linetype_builtins_and_clear_pattern_rh99870():
+    names = ('Continuous', 'ByLayer', 'ByParent', 'Hidden', 'Dashed', 'DashDot', 'Center', 'Border', 'Dots')
+    for i, name in enumerate(names):
+        n, o = getattr(r.LinetypeX, name), getattr(r.Linetype, name)
+        assert isinstance(n, r.LinetypeX) and n.Index == -(i + 1)
+        assert (n.Name, n.Index, str(n.Id), n.SegmentCount, n.PatternLength) == (o.Name, o.Index, str(o.Id), o.SegmentCount, o.PatternLength)
+    assert r.LinetypeX.Border is not r.LinetypeX.Border            # a copy per access
+    b = r.LinetypeX.Border
+    b.Name = 'mine'
+    assert r.LinetypeX.Border.Name == 'Border'
+    # ClearPattern: true when no pattern is set afterwards; a built-in's pattern is locked (unchanged)
+    lt = r.LinetypeX()
+    lt.AppendSegment(1.0, True)
+    lt.AppendSegment(0.5, False)
+    assert lt.ClearPattern() is True and lt.SegmentCount == 0
+    border = r.LinetypeX.Border
+    assert border.ClearPattern() is True and border.SegmentCount == r.Linetype.Border.SegmentCount > 0
+
+
+def test_material_compare_appearance_rh99870():
+    a, b = r.MaterialX(), r.MaterialX()
+    a.Name, b.Name = 'one', 'two'
+    assert r.MaterialX.CompareAppearance(a, b) == 0            # names do not affect the appearance
+    b.DiffuseColor = r.ColorX.FromArgb(255, 255, 0, 0) if hasattr(r, 'ColorX') else (255, 0, 0, 255)
+    c = r.MaterialX.CompareAppearance(a, b)
+    assert c != 0 and r.MaterialX.CompareAppearance(b, a) == -c
+    oa, ob = r.Material(), r.Material()
+    ob.DiffuseColor = b.DiffuseColor
+    assert (r.Material.CompareAppearance(oa, ob) > 0) == (c > 0)
+
+
+def test_instance_definitions_find_index_and_geometry_ids_rh99870():
+    f = r.File3dmX()
+    circle = r.ArcCurveX(r.CircleX(r.PlaneX.WorldXY, 1.0))
+    idx = f.AllInstanceDefinitions.Add('blk', 'desc', r.Point3dX(0, 0, 0), [circle], [r.ObjectAttributesX()])
+    idef = f.AllInstanceDefinitions.FindIndex(idx)
+    assert isinstance(idef, r.InstanceDefinitionGeometryX) and idef.Name == 'blk'
+    assert f.AllInstanceDefinitions.FindIndex(idx + 1) is None
+    ids = idef.GetObjectIds()
+    assert len(ids) == 1 and idef.IsInstanceGeometryId(ids[0])
+    # U33 (opennurbs, in this pin): nil and unknown ids are not geometry ids (pilot #54)
+    assert not idef.IsInstanceGeometryId(uuid.UUID(int=0)) and not idef.IsInstanceGeometryId(uuid.uuid4())
+    assert not r.InstanceDefinitionGeometryX().IsInstanceGeometryId(uuid.uuid4())   # an empty definition
+    assert not r.InstanceDefinition().IsInstanceGeometryId(str(uuid.uuid4()))       # the old binding, same opennurbs
+
+
+def test_embedded_files_count_length_clear_rh99870(tmp_path):
+    data = tmp_path / 'note.txt'
+    data.write_text('hello world')
+    f = r.File3dmX()
+    assert f.EmbeddedFiles.Count == 0
+    assert f.EmbeddedFiles.Add(str(data)) is True
+    assert f.EmbeddedFiles.Count == 1
+    ef = list(f.EmbeddedFiles)[0]
+    assert ef.Length == len('hello world')
+    # FindIndex (U35, pin 5b68aa2623e: it threw NotSupportedException in .NET before, pilot #56)
+    found = f.EmbeddedFiles.FindIndex(0)
+    assert isinstance(found, r.File3dmEmbeddedFileX) and found.Filename == ef.Filename
+    assert f.EmbeddedFiles.FindIndex(5) is None
+    assert ef.Clear() is True and ef.Length == 0
+    path = str(tmp_path / 'embedded.3dm')
+    g = r.File3dmX()
+    g.EmbeddedFiles.Add(str(data))
+    assert g.Write(path, 7)
+    h = r.File3dmX.Read(path)
+    assert h.EmbeddedFiles.Count == 1 and list(h.EmbeddedFiles)[0].Length == len('hello world')
+    old = r.File3dm.Read(path)
+    assert len(old.EmbeddedFiles) == 1 and old.EmbeddedFiles[0].Length == len('hello world')
+
+
+def test_settings_current_linetype_source_rh99870(tmp_path):
+    S = r.ObjectLinetypeSource
+    f = r.File3dmX()
+    assert f.Settings.CurrentLinetypeSource == S.LinetypeFromLayer      # opennurbs' default
+    f.Settings.CurrentLinetypeSource = S.LinetypeFromObject
+    assert f.Settings.CurrentLinetypeSource == S.LinetypeFromObject
+    path = str(tmp_path / 'source.3dm')
+    assert f.Write(path, 8)
+    assert r.File3dmX.Read(path).Settings.CurrentLinetypeSource == S.LinetypeFromObject
+    assert r.File3dm.Read(path).Linetypes.CurrentSource == S.LinetypeFromObject   # the old table property
+
+
+def test_render_content_set_xml_rh99870():
+    f = r.File3dmX.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
+    mats = list(f.RenderMaterials)
+    assert mats
+    a = mats[0]
+    xml = a.XML(False)
+    import xml.etree.ElementTree as ET
+
+    def canon(x):
+        # opennurbs writes attributes back in another order: compare the parsed trees
+        def walk(e):
+            return (e.tag, sorted(e.attrib.items()), (e.text or '').strip(), [walk(c) for c in e])
+        return walk(ET.fromstring(x))
+    assert a.SetXML(xml) is True and canon(a.XML(False)) == canon(xml)     # its own state round-trips
+    assert a.SetXML('<not xml') is False
+
+
+def test_annotation_additions_rh99870():
+    P = r.Point3dX
+    f = r.File3dmX()
+    f.AllDimStyles.Add(r.DimensionStyleX())
+    style = list(f.AllDimStyles)[0]
+    ad = r.AngularDimensionX.Create(style.Id, r.PlaneX.WorldXY, P(4, 0, 0), P(0, 4, 0), P(1, 0, 0), P(0, 1, 0), P(3, 3, 0))
+    d = ad.DimlinePoint
+    assert abs(ad.Radius - (d.X * d.X + d.Y * d.Y) ** 0.5) < 1e-12     # |dimension line point| in the plane
+    le = r.LeaderX.Create('note', r.PlaneX.WorldXY, style, [P(0, 0, 0), P(10, 5, 0)])
+    tp = le.GetTextPoint2d(style, 1.0)
+    assert tp.IsValid and (tp.X, tp.Y) != (0.0, 0.0)
+    # WrapText(width) wraps only text already marked wrapped (ON_TextContent::WrapText), as the old binding
+    t = r.TextEntityX.Create('one two three four five six seven', r.PlaneX.WorldXY, style, False, 0.0, 0.0)
+    t.TextIsWrapped = True
+    t.WrapText(3.0)
+    assert t.TextIsWrapped
+
+
+def test_arrowhead_and_viewport_and_render_settings_rh99870():
+    vp = r.ViewportX()
+    assert vp.IsValidCameraFrame is True and vp.IsValidCameraFrame == r.ViewportInfo().IsValidCameraFrame
+    lw = r.File3dmX().Settings.RenderSettings.LinearWorkflow
+    on = lw.PreProcessGammaOn
+    lw.PreProcessGammaOn = not on
+    assert lw.PreProcessGammaOn is (not on)
+    sun = r.File3dmX().Settings.RenderSettings.Sun
+    old = r.File3dm().Settings.RenderSettings.Sun
+    assert (r.SunX.MinYear, r.SunX.MaxYear) == (old.MinYear, old.MaxYear) == (1971, 2199)
+    assert sun.IsValid is old.IsValid is True
+    for prop in ('EnableAllowed', 'ManualControlAllowed'):
+        v = getattr(sun, prop)
+        setattr(sun, prop, not v)
+        assert getattr(sun, prop) is (not v)
+    T = r.TextureMappingType
+    assert (int(T.WcsProjection), int(T.WcsBoxProjection)) == (11, 12)
+
+
+# --- G122: the RH-99870 members that needed generator work ---
+
+def test_linetype_and_material_resolvers_g122():
+    f = r.File3dmX()
+    # a default object: its layer is missing, so opennurbs resolves to Continuous / the default material.
+    # The old binding returns None here (pilot #53: opennurbs' LinePatternFrom* fall back to an empty reference)
+    a = r.ObjectAttributesX()
+    lt = f.AllLinetypes.FromAttributes(a)
+    assert isinstance(lt, r.LinetypeX) and (lt.Name, lt.Index) == ('Continuous', -1)
+    assert r.File3dm().Linetypes.FromAttributes(r.ObjectAttributes()) is None
+    assert f.AllLinetypes.FromLayerIndex(0).Name == 'Continuous'
+    m = f.AllMaterials.FindFromAttributes(a)
+    assert isinstance(m, r.MaterialX) and m.Index == -1
+    assert str(m.Id).lower() == 'cf2be1de-b81c-4d69-9418-dde91d266086'      # ON_Material::Default
+    # a model linetype through the object, then through its layer
+    mine = r.LinetypeX()
+    mine.Name = 'mine'
+    mine.AppendSegment(1.0, True)
+    mine.AppendSegment(0.5, False)
+    f.AllLinetypes.Add(mine)
+    li = next(x.Index for x in f.AllLinetypes if x.Name == 'mine')
+    a.LinetypeSource = r.ObjectLinetypeSource.LinetypeFromObject
+    a.LinetypeIndex = li
+    got = f.AllLinetypes.FromAttributes(a)
+    assert (got.Name, got.Index) == ('mine', li)
+    layer = r.LayerX()
+    layer.Name = 'L'
+    layer.LinetypeIndex = li
+    f.AllLayers.Add(layer)
+    lyr = next(x.Index for x in f.AllLayers if x.Name == 'L')
+    assert f.AllLinetypes.FromLayerIndex(lyr).Name == 'mine'
+    # a model material through the object
+    mat = r.MaterialX()
+    mat.Name = 'red'
+    mi = f.AllMaterials.AddMaterial(mat)
+    a.MaterialSource = r.ObjectMaterialSource.MaterialFromObject
+    a.MaterialIndex = mi
+    assert f.AllMaterials.FindFromAttributes(a).Name == 'red'
+
+
+def test_viewport_defaults_and_arrowhead_points_g122():
+    for new, old in ((r.ViewportX.DefaultTop, r.ViewportInfo.DefaultTop()),
+                     (r.ViewportX.DefaultPerspective, r.ViewportInfo.DefaultPerspective())):
+        assert _p3(new.CameraDirection) == _p3(old.CameraDirection)
+        assert _p3(new.CameraLocation) == _p3(old.CameraLocation)
+        assert new.IsParallelProjection           # opennurbs' DefaultPerspectiveViewZUp too (pilot #55)
+    top = r.ViewportX.DefaultTop.CameraDirection
+    assert (top.X, top.Y, top.Z) == (0.0, 0.0, -1.0)
+    assert r.ViewportX.DefaultTop is not r.ViewportX.DefaultTop      # a new viewport per access
+    T = r.DimensionStyleX.ArrowType
+    pts = r.ArrowheadX.GetPoints(T.SolidTriangle)
+    assert [(p.X, p.Y) for p in pts] == [(0.0, 0.0), (-1.0, 0.25), (-1.0, -0.25)]
+    old = r.Arrowhead.GetPoints(r.ArrowheadTypes.SolidTriangle, 1.0)
+    assert [(p.X, p.Y) for p in old] == [(p.X, p.Y) for p in pts]
+    assert list(r.ArrowheadX.GetPoints(T.UserBlock)) == []
+    # DuplicateLinetype (now generated through the owned-pointer adopt): the pattern, with the name,
+    # id and locked bits cleared (RhinoCommon's contract) -- so a built-in's copy can be cleared
+    d = r.LinetypeX.Dashed
+    lt = d.DuplicateLinetype()
+    assert isinstance(lt, r.LinetypeX) and lt.Name == '' and str(lt.Id) == str(uuid.UUID(int=0))
+    assert (lt.SegmentCount, lt.PatternLength) == (d.SegmentCount, d.PatternLength) and lt.SegmentCount > 0
+    assert lt.ClearPattern() and lt.SegmentCount == 0
+
+
+def test_retired_subd_control_net_g3_and_table_moves():
+    # triage G3 (Luis 2026-10-28: map), against the old binding on every SubD fixture
+    checked = 0
+    for name in ('subd.3dm', 'subdBox.3dm', 'subd_creases.3dm'):
+        path = os.path.join(MODELS, name)
+        s = next(o.Geometry for o in r.File3dmX.Read(path).Objects if isinstance(o.Geometry, r.SubDX))
+        old = next(o.Geometry for o in r.File3dm.Read(path).Objects if isinstance(o.Geometry, r.SubD))
+        for n, o in zip(list(s.Edges), list(old.Edges)):
+            a, b = n.VertexFrom, n.VertexTo
+            assert (_p3(a.ControlNetPoint), _p3(b.ControlNetPoint)) == (_p3(o.ControlNetPoint(0)), _p3(o.ControlNetPoint(1)))
+            line = n.ControlNetLine
+            assert (_p3(line.From), _p3(line.To)) == (_p3(o.ControlNetPoint(0)), _p3(o.ControlNetPoint(1)))
+            assert _p3(line.Direction) == _p3(o.ControlNetDirection)
+            assert (a.Id, b.Id) == (o.VertexId(0), o.VertexId(1))
+            checked += 1
+        for n, o in zip(list(s.Faces), list(old.Faces)):
+            assert [_p3(n.VertexAt(i).ControlNetPoint) for i in range(n.VertexCount)] == \
+                   [_p3(o.ControlNetPoint(i)) for i in range(n.VertexCount)]
+            checked += 1
+    assert checked > 100
+    # AddInstanceDefinition(idef) -> the table's Add(item) (both ONX_Model::AddModelComponent)
+    f = r.File3dmX()
+    idef = r.InstanceDefinitionGeometryX()
+    idef.Name = 'blk'
+    n0 = len(f.AllInstanceDefinitions)
+    f.AllInstanceDefinitions.Add(idef)
+    assert len(f.AllInstanceDefinitions) == n0 + 1 and f.AllInstanceDefinitions.FindIndex(n0).Name == 'blk'
+    of = r.File3dm()
+    oi = r.InstanceDefinition()                 # the old Name is read-only
+    of.InstanceDefinitions.AddInstanceDefinition(oi)
+    assert len(of.InstanceDefinitions) == 1
+
+
+def test_retired_decal_table_find_index_follows_rhinocommon():
+    # Luis 2026-10-29: follow RhinoCommon -- index / count by iterating Attributes.Decals (visible decals;
+    # the old table counted hidden ones too: the fixture has none hidden, so both agree here)
+    path = os.path.join(MODELS, 'sphereDecals.3dm')
+    new = list(next(iter(r.File3dmX.Read(path).Objects)).Attributes.Decals)
+    old = next(iter(r.File3dm.Read(path).Objects)).Attributes.Decals
+    assert len(new) == len(old) == 2
+    assert all(d.IsVisible for d in new)
+    assert [str(d.TextureInstanceId) for d in new] == [str(old.FindIndex(i).TextureInstanceId) for i in range(len(old))]
+    assert [str(d.TextureInstanceId) for d in new] == [str(old[i].TextureInstanceId) for i in range(len(old))]

@@ -760,9 +760,11 @@ class Tx
     // freed after the full expression when its callee returned a new object
     string TempReceiver(ExpressionSyntax e)
     {
-        if (!Cur.ClassMode || e is not (InvocationExpressionSyntax or MemberAccessExpressionSyntax) || HandleTable(e, out _) != null) return null;
+        // `VertexFrom.ControlNetPoint` (G122): this object's own class-typed property, read as a temporary
+        bool ownProp = e is IdentifierNameSyntax op && !Scope.ContainsKey(op.Identifier.Text) && !ParamNames.Contains(op.Identifier.Text);
+        if (!Cur.ClassMode || !(ownProp || e is InvocationExpressionSyntax or MemberAccessExpressionSyntax) || HandleTable(e, out _) != null) return null;
         var t = TypeOf(e);
-        if (t == null || !IsClass(t) || IsInterop(t) || CalleeOf(e) is not string callee) return null;
+        if (t == null || !IsClass(t) || IsInterop(t) || (ownProp ? ((IdentifierNameSyntax)e).Identifier.Text : CalleeOf(e)) is not string callee) return null;
         _tmpOk++;
         string inner;
         try { inner = Expr(e); } finally { _tmpOk--; }
@@ -825,7 +827,10 @@ class Tx
         while (p is ParenthesizedExpressionSyntax || p is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression }
                // `x ? null : new Brep(p, null)` (G89): an arm passes it on -- the other arm null only
                || p is ConditionalExpressionSyntax pce && (pce.WhenTrue == arm ? pce.WhenFalse : pce.WhenFalse == arm ? pce.WhenTrue : null)
-                      is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression })
+                      is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression }
+               // `return i >= 0 ? FindIndex(i) : Linetype.NewBuiltIn(i);` (G122): either arm, when the
+               // conditional itself is passed on -- only the chosen arm is made, and it is returned
+               || p is ConditionalExpressionSyntax pce2 && (pce2.WhenTrue == arm || pce2.WhenFalse == arm) && IsClass(TypeOf(pce2.WhenTrue)) && IsClass(TypeOf(pce2.WhenFalse)))
         { arm = p; p = p.Parent; }
         if (p is ReturnStatementSyntax or EqualsValueClauseSyntax or ArrowExpressionClauseSyntax) return;
         if (p is YieldStatementSyntax && _yieldVec != null) return;   // collected, owned (G89)
@@ -886,8 +891,8 @@ class Tx
     public static string UseEnum(string name) { UsedEnums.Add(name); return "RH3DM_" + name; }
     // an enum operand's type: in class mode a MARKER (the generator names the
     // registered enum), else the translated enum
-    bool IsEnumT(string t) => t != null && (Cur.ClassMode ? EnumKey(t.Split('.').Last()) != null : Enums.ContainsKey(t.Split('.').Last()));
-    string EnumCpp(string t) => Cur.ClassMode ? $"$$enumtype:{EnumKey(t.Split('.').Last())}$$" : UseEnum(t.Split('.').Last());
+    bool IsEnumT(string t) => t != null && (Cur.ClassMode ? (EnumKey(t) ?? EnumKey(t.Split('.').Last())) != null : Enums.ContainsKey(t.Split('.').Last()));
+    string EnumCpp(string t) => Cur.ClassMode ? $"$$enumtype:{EnumKey(t) ?? EnumKey(t.Split('.').Last())}$$" : UseEnum(t.Split('.').Last());
     bool _retDataPtr;                            // the member returns a data class (pointer, nullable)
     string _retDataCpp;                          // ... of this C++ type
     readonly HashSet<string> _seqAliases = new();     // `ICollection<T> c = param as ICollection<T>;` (G80)
@@ -940,6 +945,8 @@ class Tx
             if (t is PredefinedTypeSyntax { Keyword.Text: "string" }) return "std::wstring";
             if (t is IdentifierNameSyntax cen && !All.ContainsKey(cen.Identifier.Text) && EnumKey(cen.Identifier.Text) is string ek)
                 return $"$$enumtype:{ek}$$";
+            if (t is QualifiedNameSyntax qen && EnumKey(qen.ToString()) is string qek && qek.Contains('.'))
+                return $"$$enumtype:{qek}$$";                                   // `DimensionStyle.ArrowType` (G122)
             if (ClassOf(t) is string ccn) return $"$$class:{ccn}$$";
             // System.Drawing.Color passes through to the generated siblings unopened (G79)
             if (t.ToString() is "Color" or "System.Drawing.Color" or "Drawing.Color") return "BND_Color";
@@ -1077,11 +1084,80 @@ class Tx
         };
     }
 
+    // G122: RhinoCommon's ModelComponentType for a ModelComponent class, as
+    // ManifestTable.GetModelComponentTypeFromGenericType<T>() spells it in the portable view
+    // (`if (typeof(T) == typeof(X)) return ModelComponentType.Y;`); null -- .NET throws
+    static Dictionary<string, string> _genericComponentTypes;
+    string GenericComponentType(string t)
+    {
+        if (_genericComponentTypes == null)
+        {
+            _genericComponentTypes = new();
+            var mt = Classes.GetValueOrDefault("ManifestTable");
+            var gm = mt?.Decls.SelectMany(d => d.Members).OfType<MethodDeclarationSyntax>()
+                       .FirstOrDefault(m => m.Identifier.Text == "GetModelComponentTypeFromGenericType");
+            foreach (var st in gm?.Body?.Statements.OfType<IfStatementSyntax>() ?? Enumerable.Empty<IfStatementSyntax>())
+                if (st.Condition is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.EqualsExpression, Right: TypeOfExpressionSyntax rt }
+                    && (st.Statement is BlockSyntax { Statements: [ReturnStatementSyntax r1] } ? r1 : st.Statement as ReturnStatementSyntax)
+                       is { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "ModelComponentType" }, Name: var rv } })
+                    _genericComponentTypes.TryAdd(rt.Type.ToString().Split('.').Last(), rv.Identifier.Text);
+        }
+        return _genericComponentTypes.GetValueOrDefault(t.Split('.').Last());
+    }
+
+    string GenericComponentCall(MemberAccessExpressionSyntax ma, GenericNameSyntax gnm, TypeSyntax gta, InvocationExpressionSyntax inv)
+    {
+        var rcs = TypeOf(ma.Expression)?.Split('.').Last();
+        if (rcs == null || !Classes.TryGetValue(rcs, out var rti)) return null;
+        var gm = rti.Chain().SelectMany(t => t.Decls).SelectMany(d => d.Members).OfType<MethodDeclarationSyntax>()
+                   .FirstOrDefault(m => m.Identifier.Text == gnm.Identifier.Text && m.TypeParameterList?.Parameters.Count == 1
+                                        && m.ParameterList.Parameters.Count == inv.ArgumentList.Arguments.Count);
+        if (gm?.Body?.Statements is not [LocalDeclarationStatementSyntax { Declaration.Variables: [var tv] }, ReturnStatementSyntax { Expression: var rex }]
+            || tv.Initializer?.Value is not InvocationExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "GetModelComponentTypeFromGenericType" } })
+            return null;
+        var tp = gm.TypeParameterList.Parameters[0].Identifier.Text;
+        bool must;
+        InvocationExpressionSyntax inner;
+        if (rex is CastExpressionSyntax { Type: IdentifierNameSyntax ct } ce && ct.Identifier.Text == tp && ce.Expression is InvocationExpressionSyntax i1) { must = true; inner = i1; }
+        else if (rex is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AsExpression, Right: IdentifierNameSyntax at, Left: InvocationExpressionSyntax i2 } && at.Identifier.Text == tp) { must = false; inner = i2; }
+        else return null;
+        if (inner.Expression is not IdentifierNameSyntax iname) return null;
+        var ctype = GenericComponentType(gta.ToString()) ?? throw new NotSupported("generic component type " + gta);
+        var cls = ClassOf(gta) ?? throw new NotSupported("generic component class " + gta);
+        var pnames = gm.ParameterList.Parameters.Select(q => q.Identifier.Text).ToList();
+        var types = new List<string>(); var args = new List<string>();
+        foreach (var a in inner.ArgumentList.Arguments)
+        {
+            if (a.Expression is IdentifierNameSyntax ai && ai.Identifier.Text == tv.Identifier.Text)
+            { types.Add("ModelComponentType"); args.Add($"$$enum:ModelComponentType:{ctype}$$"); continue; }
+            var k = a.Expression is IdentifierNameSyntax ap ? pnames.IndexOf(ap.Identifier.Text) : -1;
+            if (k < 0) return null;
+            var ce2 = inv.ArgumentList.Arguments[k].Expression;
+            types.Add(TypeOf(ce2) ?? throw new NotSupported("argument of unknown type"));
+            args.Add(Expr(ce2));
+        }
+        string recv;
+        if (HandleTable(ma.Expression, out var htc) is string htcs) recv = $"({htcs}).";
+        else if (TempReceiver(ma.Expression) is string tri) recv = tri;
+        else return null;
+        ClassValue(inv);
+        var call = $"{recv}$$ocall:{rcs}:{iname.Identifier.Text}:{string.Join(",", types)}$$({string.Join(", ", args)})";
+        return $"$$ocast:{cls}$$({call}, {(must ? "true" : "false")})";
+    }
+
     // ---------------------------------------------------- class mode (G63)
     // an enum the current class can name: nested in it or a base (Owner.Name),
     // else a namespace-level one (Name)
     string EnumKey(string name)
     {
+        // `DimensionStyle.ArrowType` from another class (G122): the owner named, any class
+        var dot = name.LastIndexOf('.');
+        if (dot > 0)
+        {
+            var owner = name[..dot].Split('.').Last(); var en = name[(dot + 1)..];
+            if (Classes.TryGetValue(owner, out var oti) && oti.NestedEnums.ContainsKey(en)) return owner + "." + en;
+            name = en;
+        }
         foreach (var t in Cur.Chain())
             if (t.NestedEnums.ContainsKey(name)) return t.Cs + "." + name;
         return Enums.ContainsKey(name) ? name : null;
@@ -1092,7 +1168,7 @@ class Tx
         var i = key.LastIndexOf('.');
         if (i < 0) return Enums.GetValueOrDefault(key);
         var owner = key[..i]; var name = key[(i + 1)..];
-        return Cur.Chain().FirstOrDefault(t => t.Cs == owner)?.NestedEnums.GetValueOrDefault(name);
+        return (Cur.Chain().FirstOrDefault(t => t.Cs == owner) ?? Classes.GetValueOrDefault(owner))?.NestedEnums.GetValueOrDefault(name);
     }
 
     // a member of the class or a base, as the chain declares it (null: not declared here)
@@ -3776,6 +3852,12 @@ class Tx
                 return $"$$bcall:{name}:{ArgTypes(inv.ArgumentList)}$$({Args(inv.ArgumentList)})";   // `base.M(..)` (G92)
             if (Cur.ClassMode && name == "Contains" && n == 1 && ArrayCs(TypeOf(ma.Expression)) != null)
                 return $"RH3DM_Contains({Expr(ma.Expression)}, {Expr(inv.ArgumentList.Arguments[0].Expression)})";   // G92
+            // `file.Manifest.FindIndex<File3dmEmbeddedFile>(i)` (G122): a ManifestTable generic -- the
+            // non-generic overload with GetModelComponentTypeFromGenericType<T>() evaluated here,
+            // the result downcast as the generic body does ((T) throws, `as T` is null)
+            if (Cur.ClassMode && ma.Name is GenericNameSyntax { TypeArgumentList.Arguments: [var gta] } gnm
+                && GenericComponentCall(ma, gnm, gta, inv) is string gcall)
+                return gcall;
             if (TempReceiver(ma.Expression) is string tri)
             {
                 ClassValue(inv);

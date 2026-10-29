@@ -127,13 +127,6 @@ reason = "three.js interop; inverse of toThreejsJSON"
 # -----------------------------------------------------------------------------
 
 [[hand_kept]]
-class = "AnnotationBase"
-members = ["WrapText"]
-decided = "Luis, 2026-10-29"
-vnext = "PENDING: a hand member on AnnotationBaseX (WrapText(width) over ON_TextContent::WrapText) before the switch-over, unless U31 lands first"
-reason = "RhinoCommon's WrapText() wraps to the stored FormattingRectangleWidth; setting FormatWidth first changes what the file stores -- not the same as wrapping to a width given per call (upstream U31)"
-
-[[hand_kept]]
 class = "Bitmap"
 decided = "Luis, 2026-10-15"
 vnext = "src/bindings/bnd_bitmapx.* (BitmapX), with the review fixes (G90)"
@@ -151,35 +144,6 @@ members = ["GetDisplayLines"]
 decided = "Luis, 2026-10-16"
 reason = "RhinoCommon's Centermark.GetDisplayLines is commented out (pilot #41); kept until the upstream fix"
 upstream = "loop to 6 (not 9) and uncomment Centermark.GetDisplayLines (pilot #41)"
-
-[[hand_kept]]
-class = "Sun"
-members = ["MinYear", "MaxYear"]
-decided = "Luis, 2026-10-16"
-reason = "ON_Sun::MinYear/MaxYear: the valid year range; RhinoCommon has no counterpart"
-upstream = "add Sun.MinYear / Sun.MaxYear (static) to RhinoCommon"
-
-[[hand_kept]]
-class = "Sun"
-members = ["IsValid"]
-decided = "Luis, 2026-10-16"
-reason = "ON_Sun::IsValid; RhinoCommon has no counterpart"
-upstream = "add Sun.IsValid to RhinoCommon"
-
-[[hand_kept]]
-class = "Sun"
-members = ["EnableAllowed"]
-decided = "Luis, 2026-10-16"
-reason = "ON_Sun::EnableAllowed (whether the sun may be enabled -- not Enabled); RhinoCommon has no counterpart"
-upstream = "add Sun.EnableAllowed to RhinoCommon"
-
-[[hand_kept]]
-class = "Sun"
-members = ["ManualControlAllowed"]
-decided = "Luis, 2026-10-16 (proposed: not equivalent to ManualControlOn)"
-reason = "ON_Sun::ManualControlAllowed (whether manual control is permitted) is a separate setting from ManualControlOn (whether it is active); RhinoCommon has only ManualControlOn"
-upstream = "add Sun.ManualControlAllowed to RhinoCommon"
-
 
 # ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
 
